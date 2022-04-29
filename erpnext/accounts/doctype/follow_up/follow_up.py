@@ -111,7 +111,7 @@ class FollowUp(Document):
 				new_log.age = i["age"]
 				new_log.level_called = follow_up
 				new_log.follow_up_date = add_to_date(utils.now(), days= to_add_to_date, as_string=True, as_datetime=True)
-				new_log.save()
+				new_log.save(ignore_permissions=True)
 				log_name = new_log.name
 
 
@@ -137,7 +137,7 @@ class FollowUp(Document):
 			comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
 			comm.content = """<div class="ql-editor read-mode"><p>Follow Up Conducted for Following Transcations</p>
 							<p>{0}</p> </div>	""".format(comm_voucher_no)
-			comm.save()		
+			comm.save(ignore_permissions=True)		
 
 			#Creating new dict for args for email Template ,comment and ToDo
 			args = {}
@@ -190,7 +190,7 @@ class FollowUp(Document):
 				todo.reference_type = "Customer"
 				todo.reference_name = customer
 				todo.assigned_by = frappe.session.user
-				todo.save()
+				todo.save(ignore_permissions=True)
 
 			message = frappe.render_template(email_template.response, args)
 			new_comm = frappe.new_doc("Communication")
@@ -209,7 +209,7 @@ class FollowUp(Document):
 			new_comm.reference_doctype = "Sales Invoice"
 			new_comm.reference_name = i["voucher_no"]
 			new_comm.reference_owner = customer
-			new_comm.save()	
+			new_comm.save(ignore_permissions=True)	
 
 			
 			return True
@@ -265,7 +265,7 @@ class FollowUp(Document):
 				prc.age = i["age"]
 				prc.commitment_status = "Active"
 				prc.follow_up_level = i["follow_up"]
-				prc.save()
+				prc.save(ignore_permissions=True)
 				
 				commit_name = prc.name
 				commit_link= site+"/app/payment-receivable-commitment/"+ prc.name
@@ -284,7 +284,7 @@ class FollowUp(Document):
 				comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
 				comm.content = """<div class="ql-editor read-mode">
 								<p>{0}</p><br> <a href="{1}">Click here to view Commitment information. </a>  </div>	""".format(comment_v, commit_link)
-				comm.save()	
+				comm.save(ignore_permissions=True)	
 				content = "Dear <b>{2}</b><br><br>Commitment given the following Transcation <br>Commitment given on <b>{0}</b> for Sales Invoice <b>{1}</b><br>".format(str(utils.today()), i["voucher_no"], full_name)
 				content += "Invoice Amount <b>{4} {0}</b> and Outstanding Amount <b>{4} {1}</b> <br>You have given commitment of Amount <b>{4} {2} </b> on <b>{3}</b><br><br>".format(str(i["invoice_amount"]), str(i['outstanding_amount']), str(i["commited_amount"]), str(i["commited_date"]), currency)
 					
@@ -298,7 +298,7 @@ class FollowUp(Document):
 				comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
 				comm.content = """<div class="ql-editor read-mode"><p> Commitment given the following  Transcation </p>
 								<p> {0} </p> <br> <a href="{1}">Click here to view Commitment information. </a>  </div>	""".format(content, commit_link)
-				comm.save()		
+				comm.save(ignore_permissions=True)		
 
 				if not email_id:
 						frappe.throw("Please set Email Id for Customer {0}".format(customer))
@@ -334,7 +334,7 @@ class FollowUp(Document):
 				new_comm.reference_doctype = "Sales Invoice"
 				new_comm.reference_name = i["voucher_no"]
 				new_comm.reference_owner = customer
-				new_comm.save()
+				new_comm.save(ignore_permissions=True)
 
 				# frappe.db.set_value("Communication", new_comm.name, 'recipients', comm_email)
 				# new_comm.receipents = comm_email
