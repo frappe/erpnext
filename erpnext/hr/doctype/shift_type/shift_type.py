@@ -134,7 +134,17 @@ class ShiftType(Document):
 			shift_details = get_employee_shift(employee, timestamp, True)
 
 			if shift_details and shift_details.shift_type.name == self.name:
-				mark_attendance(employee, date, "Absent", self.name)
+				attendance = mark_attendance(employee, date, "Absent", self.name)
+				if attendance:
+					frappe.get_doc(
+						{
+							"doctype": "Comment",
+							"comment_type": "Comment",
+							"reference_doctype": "Attendance",
+							"reference_name": attendance,
+							"content": frappe._("Employee was marked Absent due to missing Employee Checkins."),
+						}
+					).insert(ignore_permissions=True)
 
 	def get_start_and_end_dates(self, employee):
 		"""Returns start and end dates for checking attendance and marking absent
