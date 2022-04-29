@@ -43,13 +43,9 @@ class PickList(Document):
 		for item in self.locations:
 			# if the user has not entered any picked qty, set it to stock_qty, before submit
 			if item.picked_qty < item.stock_qty:
-				frappe.msgprint(
-					_("Row {0} is short by {1} {2}").format(
-						item.idx, item.stock_qty - item.picked_qty, item.stock_uom
-					),
-					_("Warning: Pick List Incomplete"),
-					indicator="yellow",
-				)
+				frappe.throw(_("Row {0} is short by {1} {2}").format(
+					item.idx, item.stock_qty - item.picked_qty, item.stock_uom
+				), title=_("Pick List Incomplete"))
 
 			if item.sales_order_item:
 				# update the picked_qty in SO Item
