@@ -24,6 +24,7 @@
   "invoice_limit",
   "payment_limit",
   "bank_cash_account",
+  "cost_center",
   "sec_break1",
   "invoices",
   "column_break_15",
@@ -178,13 +179,19 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
  "issingle": 1,
  "links": [],
- "modified": "2021-10-04 20:27:11.114194",
+ "modified": "2022-04-29 15:37:10.246831",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
@@ -209,5 +216,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
