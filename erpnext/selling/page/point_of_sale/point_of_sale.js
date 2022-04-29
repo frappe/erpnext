@@ -1827,6 +1827,7 @@ class Payment {
 	}
 
 	set_title() {
+		debugger;
 		let title = __('Total Amount {0}',
 			[format_currency(this.frm.doc.rounded_total || this.frm.doc.grand_total,
 			this.frm.doc.currency)]);
@@ -2113,7 +2114,19 @@ class Payment {
 			if (doc.round_off_discount === 1){
 				var total = Math.floor(this.frm.doc.grand_total)
 				var out_amount = 0
+				var me = this;
 				$.each(this.frm.doc.payments, function(i, data) {
+					debugger;
+					if(out_amount === 0){
+						me.frm.doc.payments[0].amount = total;
+						me.frm.doc.payments[0].base_amount = total;
+						me.dialog.set_value(data.mode_of_payment, total);
+					}
+					else{
+						me.dialog.set_value(data.amount, 0);
+						me.dialog.set_value(data.base_amount, 0);
+						me.dialog.set_value(data.mode_of_payment, data.amount);
+					}
 					out_amount += data.amount;
 				});				
 
@@ -2123,6 +2136,13 @@ class Payment {
 				this.dialog.set_value("total_with_discount", total);
 				this.dialog.set_value("paid_amount", total);
 				this.dialog.set_value("grand_total", total);
+				this.dialog.set_value("rounded_total", total);
+				this.frm.doc.additional_discount_percentage = this.frm.doc.additional_discount_percentage;
+				this.frm.doc.change_amount = this.frm.doc.change_amount;
+				this.frm.doc.total_with_discount = total;
+				this.frm.doc.paid_amount = total;
+				this.frm.doc.grand_total = total;
+				this.frm.doc.rounded_total = total;
 			}
 			else{
 				debugger
@@ -2148,8 +2168,23 @@ class Payment {
 
 
 	show_paid_amount() {
-		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
+		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);			
 	}
+
+	// show_paid_amount() {
+	// 	var out_amount = 0
+	// 	$.each(this.frm.doc.payments, function(i, data) {
+	// 		out_amount += data.amount;
+	// 	});	
+	// 	debugger;
+	// 	if (this.frm.doc.total_with_discount === out_amount){
+	// 		this.dialog.set_value("outstanding_amount", 0);
+	// 	}
+	// 	else{
+	// 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
+	// 	}
+			
+	// }
 
 	update_payment_amount() {
 		var me = this;

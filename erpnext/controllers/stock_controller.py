@@ -106,17 +106,19 @@ class StockController(AccountsController):
 
 					account_currency = get_account_currency(pos.income_account)
 
+					company = frappe.get_doc("Company", self.company)
+
 					gl_list.append(self.get_gl_dict({
 						"account": pos.income_account,
 						"against": pos.income_account,
-						"cost_center": self.cost_center,
+						"cost_center": company.cost_center,
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
 						"credit": self.discount_amount,
 						"credit_in_account_currency": self.discount_amount
 					}, account_currency))
 				else:
 					company = frappe.get_doc("Company", self.company)
-					
+
 					if company.default_account_for_credit_discounts == None:
 						frappe.throw(_("You must assign a default account for credit discounts in the company."))
 
@@ -125,7 +127,7 @@ class StockController(AccountsController):
 					gl_list.append(self.get_gl_dict({
 						"account": company.default_account_for_credit_discounts,
 						"against": company.default_account_for_credit_discounts,
-						"cost_center": self.cost_center,
+						"cost_center": company.cost_center,
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
 						"credit": self.discount_amount,
 						"credit_in_account_currency": self.discount_amount
