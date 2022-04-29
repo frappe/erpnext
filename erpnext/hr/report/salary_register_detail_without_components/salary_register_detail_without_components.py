@@ -120,7 +120,7 @@ def execute(filters=None):
 						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
 						for assigment in assigments:
-							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
+							employees = frappe.get_all("Employee Detail Salary Component Confidential", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
 
 							for employee in employees:
 								value_component += employee.moneda						
@@ -137,7 +137,7 @@ def execute(filters=None):
 						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
 						for assigment in assigments:
-							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
+							employees = frappe.get_all("Employee Detail Salary Component Confidential", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
 
 							for employee in employees:
 								value_component += employee.moneda
