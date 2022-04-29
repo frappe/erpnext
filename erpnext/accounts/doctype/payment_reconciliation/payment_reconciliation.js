@@ -38,7 +38,20 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				]
 			};
 		});
+<<<<<<< HEAD
 	},
+=======
+
+		this.frm.set_query("cost_center", () => {
+			return {
+				"filters": {
+					"company": this.frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
+	}
+>>>>>>> ab94b73e93 (fix: Cost center filter on payment reconciliation)
 
 	refresh: function() {
 		this.frm.disable_save();
