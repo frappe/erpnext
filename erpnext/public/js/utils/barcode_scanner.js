@@ -197,7 +197,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	get_row_to_modify_on_scan(item_code) {
 		// get an existing item row to increment or blank row to modify
 		const existing_item_row = this.items_table.filter((d) => {
-			const [qty, max_qty] = [d[this.qty_field], d[this.max_qty_field] || null]
+			const [qty, max_qty] = [d[this.qty_field], d[this.max_qty_field] || null];
 			return d.item_code === item_code && ((max_qty === null) || (qty < max_qty));
 		}).splice(0, 1).pop();
 
