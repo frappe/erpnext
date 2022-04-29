@@ -24,7 +24,7 @@
    "reqd": 1
   }
  ],
- "modified": "2021-12-20 16:57:30.177149",
+ "modified": "2022-04-29 12:33:33.358649",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Confidential Payroll Employee",
@@ -39,6 +39,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Planilla Confidencial",
    "share": 1,
    "write": 1
   }
