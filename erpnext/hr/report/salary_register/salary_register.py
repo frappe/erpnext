@@ -52,7 +52,7 @@ def execute(filters=None):
 		# 	row.append(e.)
 		split = ss.name.split("/")
 		name = split[1]
-		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": name})
+		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": ss.employee})
 		
 		row = [ss.employee_name, ss.payment_days]
 
