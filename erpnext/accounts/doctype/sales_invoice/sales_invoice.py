@@ -1341,6 +1341,8 @@ class SalesInvoice(SellingController):
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 
+			company = frappe.get_doc("Company", self.company)
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -1353,7 +1355,7 @@ class SalesInvoice(SellingController):
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.cost_center
 				}, self.party_account_currency)
 			)
 	
@@ -1374,7 +1376,7 @@ class SalesInvoice(SellingController):
 		# 		"cost_center": self.cost_center
 		# 	}, account_currency)
 		# )
-
+		company = frappe.get_doc("Company", self.company)
 		gl_entries.append(
 				self.get_gl_dict({
 					"account": account[0].default_account,
@@ -1386,7 +1388,7 @@ class SalesInvoice(SellingController):
 					"debit_in_account_currency": self.discount_amount,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.round_off_cost_center
 			}, account_currency)
 		)
 
@@ -1487,6 +1489,7 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
+		company = frappe.get_doc("Company", self.company)
 		if cint(self.redeem_loyalty_points):
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1497,13 +1500,13 @@ class SalesInvoice(SellingController):
 					"credit": self.loyalty_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.cost_center
 				})
 			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.loyalty_redemption_account,
-					"cost_center": self.cost_center or self.loyalty_redemption_cost_center,
+					"cost_center": company.cost_center or self.loyalty_redemption_cost_center,
 					"against": self.customer,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
@@ -1519,7 +1522,9 @@ class SalesInvoice(SellingController):
 						amount = payment_mode.base_amount - self.change_amount
 					else:
 						amount = payment_mode.base_amount
-						
+					
+					company = frappe.get_doc("Company", self.company)
+					
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,
@@ -1532,7 +1537,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount,
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
-							"cost_center": self.cost_center
+							"cost_center": company.cost_center
 						}, self.party_account_currency)
 					)
 
@@ -1545,12 +1550,13 @@ class SalesInvoice(SellingController):
 							"debit_in_account_currency": amount \
 								if payment_mode_account_currency==self.company_currency \
 								else payment_mode.amount,
-							"cost_center": self.cost_center
+							"cost_center": company.cost_center
 						}, payment_mode_account_currency)
 					)
 
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
+			company = frappe.get_doc("Company", self.company)
 			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({
@@ -1563,7 +1569,7 @@ class SalesInvoice(SellingController):
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
-						"cost_center": self.cost_center
+						"cost_center": company.cost_center
 					}, self.party_account_currency)
 				)
 
@@ -1572,7 +1578,7 @@ class SalesInvoice(SellingController):
 						"account": self.account_for_change_amount,
 						"against": self.customer,
 						"credit": self.base_change_amount,
-						"cost_center": self.cost_center
+						"cost_center": company.cost_center
 					})
 				)
 			else:
@@ -1583,6 +1589,8 @@ class SalesInvoice(SellingController):
 		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
 			write_off_account_currency = get_account_currency(self.write_off_account)
 			default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
+
+			company = frappe.get_doc("Company", self.company)
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1596,7 +1604,7 @@ class SalesInvoice(SellingController):
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.cost_center
 				}, self.party_account_currency)
 			)
 			gl_entries.append(
@@ -1607,7 +1615,7 @@ class SalesInvoice(SellingController):
 					"debit_in_account_currency": (flt(self.base_write_off_amount,
 						self.precision("base_write_off_amount")) if write_off_account_currency==self.company_currency
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
-					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
+					"cost_center": company.cost_center or self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
 
@@ -1615,6 +1623,8 @@ class SalesInvoice(SellingController):
 		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
+
+			company = frappe.get_doc("Company", self.company)
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1624,7 +1634,7 @@ class SalesInvoice(SellingController):
 						self.precision("rounding_adjustment")),
 					"credit": flt(self.base_rounding_adjustment,
 						self.precision("base_rounding_adjustment")),
-					"cost_center": self.cost_center or round_off_cost_center,
+					"cost_center": company.cost_center or round_off_cost_center,
 				}
 			))
 
