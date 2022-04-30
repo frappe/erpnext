@@ -365,4 +365,5 @@ erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
 erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
 erpnext.patches.v13_0.create_gst_custom_fields_in_quotation
 erpnext.patches.v13_0.copy_custom_field_filters_to_website_item
+erpnext.patches.v14_0.discount_accounting_separation
 erpnext.patches.v14_0.delete_employee_transfer_property_doctype

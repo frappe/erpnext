@@ -669,7 +669,7 @@ class PurchaseInvoice(BuyingController):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
 		)
 		provisional_accounting_for_non_stock_items = cint(
 			frappe.db.get_value(
@@ -1159,7 +1159,7 @@ class PurchaseInvoice(BuyingController):
 		# tax table gl entries
 		valuation_tax = {}
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
 		)
 
 		for tax in self.get("taxes"):
@@ -1252,7 +1252,7 @@ class PurchaseInvoice(BuyingController):
 	def enable_discount_accounting(self):
 		if not hasattr(self, "_enable_discount_accounting"):
 			self._enable_discount_accounting = cint(
-				frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
 			)
 
 		return self._enable_discount_accounting
@@ -1369,7 +1369,9 @@ class PurchaseInvoice(BuyingController):
 		if (
 			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(self.company)
+			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+				self.company, "Purchase Invoice", self.name
+			)
 
 			gl_entries.append(
 				self.get_gl_dict(
