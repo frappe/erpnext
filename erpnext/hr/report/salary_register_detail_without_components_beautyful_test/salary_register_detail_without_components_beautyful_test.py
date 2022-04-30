@@ -100,6 +100,9 @@ def execute(filters=None):
 
 		row += [ss.gross_pay]
 
+		net_pay = ss.net_pay
+		total_deduction = ss.total_deduction
+
 		for coldata in salary_components_deduction:			
 			salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":coldata.name})
 			if len(salarydetail) > 0:
@@ -114,7 +117,12 @@ def execute(filters=None):
 							employees = frappe.get_all("Employee Detail Salary Component", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
 
 							for employee in employees:
-								value_component += employee.moneda	
+								value_component += employee.moneda
+								if assigment.type == "Earning":
+									net_pay += employee.moneda
+								else:
+									net_pay -= employee.moneda	
+									total_deduction += employee.moneda
 
 						#Confidentials
 						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
@@ -123,7 +131,12 @@ def execute(filters=None):
 							employees = frappe.get_all("Employee Detail Salary Component Confidential", ["*"], filters = {"parent": assigment.name, "employee": ss.employee})
 
 							for employee in employees:
-								value_component += employee.moneda						
+								value_component += employee.moneda
+								if assigment.type == "Earning":
+									net_pay += employee.moneda
+								else:
+									net_pay -= employee.moneda
+									total_deduction += employee.moneda
 					else:
 						assigments = frappe.get_all("Assignment Salary Component", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
 
@@ -132,6 +145,11 @@ def execute(filters=None):
 
 							for employee in employees:
 								value_component += employee.moneda
+								if assigment.type == "Earning":
+									net_pay += employee.moneda
+								else:
+									net_pay -= employee.moneda
+									total_deduction += employee.moneda
 						
 						#Confidentials
 						assigments = frappe.get_all("Assignment Salary Component Confidential", ["name"], filters = {"payroll_entry": ss.payroll_entry, "salary_component": coldata.name, "docstatus": 0})
@@ -141,6 +159,11 @@ def execute(filters=None):
 
 							for employee in employees:
 								value_component += employee.moneda
+								if assigment.type == "Earning":
+									net_pay += employee.moneda
+								else:
+									net_pay -= employee.moneda
+									total_deduction += employee.moneda
 					
 					if value_component > 0:
 						break
@@ -149,7 +172,7 @@ def execute(filters=None):
 			# else:
 			# 	row += [0]	
 
-		row += [ss.total_deduction, ss.net_pay]
+		row += [total_deduction, net_pay]
 
 		if ss.employee in confidential_list:
 			if confidential_payroll[0].rol in roles_arr:
