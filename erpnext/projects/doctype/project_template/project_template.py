@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
+from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_updated_checklist
 from six import string_types
 import json
 
@@ -14,12 +14,11 @@ import json
 class ProjectTemplate(Document):
 	def onload(self):
 		self.set_onload('default_customer_request_checklist_items', get_default_vehicle_checklist_items('customer_request_checklist'))
-		self.set_missing_checklist()
+		self.set_updated_checklist()
 
 	def validate(self):
 		self.validate_duplicate_items()
 		self.validate_duplicate_applicable_item_groups()
-		self.set_missing_checklist()
 
 	def validate_duplicate_items(self):
 		visited = set()
@@ -39,9 +38,9 @@ class ProjectTemplate(Document):
 
 			visited.add(d.applicable_item_group)
 
-	def set_missing_checklist(self):
+	def set_updated_checklist(self):
 		if self.meta.has_field('customer_request_checklist'):
-			set_missing_checklist(self, 'customer_request_checklist')
+			set_updated_checklist(self, 'customer_request_checklist')
 
 
 @frappe.whitelist()

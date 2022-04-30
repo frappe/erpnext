@@ -5,16 +5,13 @@
 from __future__ import unicode_literals
 # import frappe
 from frappe.model.document import Document
-from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
+from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_updated_checklist
 
 class ProjectTemplateCategory(Document):
 	def onload(self):
 		self.set_onload('default_customer_request_checklist_items', get_default_vehicle_checklist_items('customer_request_checklist'))
-		self.set_missing_checklist()
+		self.set_updated_checklist()
 
-	def validate(self):
-		self.set_missing_checklist()
-
-	def set_missing_checklist(self):
+	def set_updated_checklist(self):
 		if self.meta.has_field('customer_request_checklist'):
-			set_missing_checklist(self, 'customer_request_checklist')
+			set_updated_checklist(self, 'customer_request_checklist')
