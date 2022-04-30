@@ -3,8 +3,11 @@
 
 frappe.ui.form.on('Follow Up', {
 	refresh: function (frm) {
+
 		frm.fields_dict.get_follow_up_details.$input.addClass("btn-primary");
 		frm.disable_save();
+		frm.set_value("report_date", frappe.datetime.get_today())
+		frm.refresh_field("report_date")
 		// console.log("one 123",frm.fields_dict['items'].grid.meta.fields[17])
 	},
 
