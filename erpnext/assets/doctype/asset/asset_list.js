@@ -36,7 +36,7 @@ frappe.listview_settings['Asset'] = {
 		me.page.add_action_item('Make Asset Movement', function() {
 			const assets = me.get_checked_items();
 			frappe.call({
-				method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
+				method: "erpnext.controllers.base_asset.make_asset_movement",
 				freeze: true,
 				args:{
 					"assets": assets
