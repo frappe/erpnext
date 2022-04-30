@@ -1523,6 +1523,7 @@
    "fieldname": "per_picked",
    "fieldtype": "Percent",
    "label": "% Picked",
+   "no_copy": 1,
    "read_only": 1
   },
   {
