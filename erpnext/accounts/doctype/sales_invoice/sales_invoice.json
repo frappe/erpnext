@@ -2209,13 +2209,14 @@
    "default": "0",
    "fieldname": "bill_multiple_projects",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Bill Multiple Projects"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-04-16 16:58:01.857054",
+ "modified": "2022-04-30 14:26:58.687513",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
