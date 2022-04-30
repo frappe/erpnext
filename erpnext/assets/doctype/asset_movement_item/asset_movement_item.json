@@ -4,76 +4,89 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "company",
-  "asset",
-  "source_location",
-  "from_employee",
-  "column_break_2",
-  "asset_name",
-  "target_location",
-  "to_employee"
- ],
- "fields": [
-  {
-   "fieldname": "asset",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Asset",
-   "options": "Asset",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "asset.asset_name",
-   "fieldname": "asset_name",
-   "fieldtype": "Data",
-   "label": "Asset Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "source_location",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Source Location",
-   "options": "Location"
-  },
-  {
-   "fieldname": "target_location",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Target Location",
-   "options": "Location"
-  },
-  {
-   "fieldname": "from_employee",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_list_view": 1,
-   "label": "From Employee",
-   "options": "Employee"
-  },
-  {
-   "fieldname": "to_employee",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_list_view": 1,
-   "label": "To Employee",
-   "options": "Employee"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Company",
-   "options": "Company",
-   "read_only": 1
-  }
- ],
+    "company",
+    "asset",
+    "source_location",
+    "from_employee",
+    "serial_no",
+    "num_of_assets",
+    "column_break_2",
+    "asset_name",
+    "target_location",
+    "to_employee"
+],
+"fields": [
+    {
+     "fieldname": "asset",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Asset",
+     "options": "Asset",
+     "reqd": 1
+    },
+    {
+     "fetch_from": "asset.asset_name",
+     "fieldname": "asset_name",
+     "fieldtype": "Data",
+     "label": "Asset Name",
+     "read_only": 1
+    },
+    {
+     "fieldname": "source_location",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Source Location",
+     "options": "Location_"
+    },
+    {
+     "fieldname": "target_location",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Target Location",
+     "options": "Location_"
+    },
+    {
+     "fieldname": "from_employee",
+     "fieldtype": "Link",
+     "ignore_user_permissions": 1,
+     "in_list_view": 1,
+     "label": "From Employee",
+     "options": "Employee"
+    },
+    {
+     "fieldname": "to_employee",
+     "fieldtype": "Link",
+     "ignore_user_permissions": 1,
+     "in_list_view": 1,
+     "label": "To Employee",
+     "options": "Employee"
+    },
+    {
+     "fieldname": "column_break_2",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "company",
+     "fieldtype": "Link",
+     "hidden": 1,
+     "label": "Company",
+     "options": "Company",
+     "read_only": 1
+    },
+    {
+     "fieldname": "serial_no",
+     "fieldtype": "Link",
+     "label": "Serial No",
+     "options": "Asset Serial No"
+    },
+    {
+     "fieldname": "num_of_assets",
+     "fieldtype": "Int",
+     "label": "Number of Assets"
+    }
+],
  "istable": 1,
- "modified": "2019-10-09 15:59:08.265141",
+ "modified": "2022-04-30 15:59:08.265141",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement Item",
