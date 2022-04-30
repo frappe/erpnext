@@ -425,13 +425,13 @@ class TestAssetSerialNo(unittest.TestCase):
 
 def get_asset_serial_no_doc(asset_name):
 	asset_serial_no = get_linked_asset_serial_nos(asset_name)[0]
-	asset_serial_no_doc = frappe.get_doc("Asset Serial No_", asset_serial_no.name)
+	asset_serial_no_doc = frappe.get_doc("Asset Serial No", asset_serial_no.name)
 
 	return asset_serial_no_doc
 
 def get_linked_asset_serial_nos(asset_name, fields=["name"]):
 	return frappe.get_all(
-		"Asset Serial No_",
+		"Asset Serial No",
 		filters = {
 			"asset": asset_name
 		},

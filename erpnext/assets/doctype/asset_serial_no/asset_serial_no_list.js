@@ -1,4 +1,4 @@
-frappe.listview_settings["Asset Serial No_"] = {
+frappe.listview_settings["Asset Serial No"] = {
 	add_fields: ["status"],
 	get_indicator: function (doc) {
 		if (doc.status === "Fully Depreciated") {

@@ -35,7 +35,7 @@ def create_asset_serial_no_docs(asset, num_of_assets=None):
 	created_serial_nos = []
 	for i in range(start, total_num_of_assets):
 		serial_no = frappe.get_doc({
-			"doctype": "Asset Serial No_",
+			"doctype": "Asset Serial No",
 			"asset": asset.name,
 			"serial_no": get_serial_no(asset.name, i),
 			"asset_value": asset_value,

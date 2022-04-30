@@ -1119,7 +1119,7 @@ def has_maintenance_task_due_today(parent):
 
 def get_linked_serial_nos(asset):
 	return frappe.get_all(
-		"Asset Serial No_",
+		"Asset Serial No",
 		filters = {
 			"asset": asset.name,
 			"docstatus": 1,
@@ -1163,7 +1163,7 @@ def get_serial_nos_that_need_to_be_booked_today(asset_categories):
 	assets = get_serialized_assets_that_need_cwip_booking(asset_categories)
 
 	return frappe.get_all(
-		"Asset Serial No_",
+		"Asset Serial No",
 		filters = {
 			"asset": ["in", assets],
 			"available_for_use_date": nowdate(),
