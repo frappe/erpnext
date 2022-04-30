@@ -244,7 +244,7 @@ def make_custom_fields():
 		"Supplier Quotation Item": invoice_item_fields,
 	}
 
-	create_custom_fields(custom_fields)
+	create_custom_fields(custom_fields, ignore_validate=True)
 
 
 def add_print_formats():
