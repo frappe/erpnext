@@ -652,6 +652,42 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	project_template: function (doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		this.get_project_template_details(row);
+	},
+
+	get_project_template_details: function (row) {
+		var me = this;
+
+		if (row && row.project_template) {
+			frappe.call({
+				method: "erpnext.projects.doctype.project_template.project_template.get_project_template_details",
+				args: {
+					project_template: row.project_template
+				},
+				callback: function (r) {
+					if (r.message) {
+						var customer_request_checklist = r.message.customer_request_checklist;
+						delete r.message['customer_request_checklist'];
+
+						frappe.model.set_value(row.doctype, row.name, r.message);
+
+						if (customer_request_checklist && customer_request_checklist.length && me.frm.get_field('customer_request_checklist')) {
+							$.each(me.frm.doc.customer_request_checklist || [], function (i, d) {
+								if (d.checklist_item && customer_request_checklist.includes(d.checklist_item)) {
+									d.checklist_item_checked = 1;
+								}
+							});
+
+							me.refresh_customer_request_checklist();
+						}
+					}
+				}
+			});
+		}
+	},
+
 	make_vehicle_checklist: function () {
 		if (this.frm.fields_dict.vehicle_checklist_html) {
 			var is_read_only = cint(this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields && this.frm.doc.__onload.cant_change_fields.vehicle_checklist);
@@ -678,15 +714,9 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	refresh_vehicle_checklist: function () {
-		if (this.frm.vehicle_checklist_editor) {
-			this.frm.vehicle_checklist_editor.render_checklist();
-		}
-	},
-
 	refresh_customer_request_checklist: function () {
 		if (this.frm.customer_request_checklist_editor) {
-			this.frm.customer_request_checklist_editor.render_checklist();
+			this.frm.customer_request_checklist_editor.refresh();
 		}
 	},
 

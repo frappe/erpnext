@@ -6,14 +6,20 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
 from six import string_types
 import json
 
 
 class ProjectTemplate(Document):
+	def onload(self):
+		self.set_onload('default_customer_request_checklist_items', get_default_vehicle_checklist_items('customer_request_checklist'))
+		self.set_missing_checklist()
+
 	def validate(self):
 		self.validate_duplicate_items()
 		self.validate_duplicate_applicable_item_groups()
+		self.set_missing_checklist()
 
 	def validate_duplicate_items(self):
 		visited = set()
@@ -32,6 +38,32 @@ class ProjectTemplate(Document):
 					.format(d.idx, frappe.bold(d.applicable_item_group)))
 
 			visited.add(d.applicable_item_group)
+
+	def set_missing_checklist(self):
+		if self.meta.has_field('customer_request_checklist'):
+			set_missing_checklist(self, 'customer_request_checklist')
+
+
+@frappe.whitelist()
+def get_project_template_details(project_template):
+	out = frappe._dict()
+	if not project_template:
+		return out
+
+	template_doc = frappe.get_cached_doc("Project Template", project_template)
+	category_doc = frappe.get_cached_doc("Project Template Category", template_doc.project_template_category) \
+		if template_doc.project_template_category else frappe._dict()
+
+	out.project_template_name = template_doc.project_template_name
+
+	if template_doc.meta.has_field('customer_request_checklist'):
+		checked = [d for d in template_doc.get('customer_request_checklist') if d.checklist_item_checked]
+		if not checked and category_doc:
+			checked = [d for d in category_doc.get('customer_request_checklist') if d.checklist_item_checked]
+
+		out.customer_request_checklist = [d.checklist_item for d in checked]
+
+	return out
 
 
 @frappe.whitelist()

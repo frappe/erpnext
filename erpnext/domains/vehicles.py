@@ -204,6 +204,23 @@ project_type_fields = [
 		"insert_after": "is_general_repair"},
 ]
 
+# Project Template Fields
+project_template_fields = [
+	{"label": "Checklist", "fieldname": "sec_vehicle_checklist", "fieldtype": "Section Break",
+		"insert_after": "tasks"},
+
+	{"label": "Customer Request Checklist", "fieldname": "customer_request_checklist_html", "fieldtype": "HTML",
+		"insert_after": "sec_vehicle_checklist"},
+	{"label": "Customer Request Checklist", "fieldname": "customer_request_checklist", "fieldtype": "Table", "options": "Vehicle Checklist Item",
+		"insert_after": "customer_request_checklist_html", "hidden": 1},
+
+	{"label": "", "fieldname": "cb_vehicle_checklist_1", "fieldtype": "Column Break",
+		"insert_after": "customer_request_checklist"},
+]
+
+project_template_category_fields = deepcopy(project_template_fields)
+[d for d in project_template_category_fields if d['fieldname'] == 'sec_vehicle_checklist'][0]['insert_after'] = 'description'
+
 # Accounting Dimensions
 accounting_dimension_fields = [
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
@@ -268,6 +285,10 @@ for d in project_fields:
 for d in project_type_fields:
 	d['translatable'] = 0
 for d in project_change_vehicle_details_fields:
+	d['translatable'] = 0
+for d in project_template_fields:
+	d['translatable'] = 0
+for d in project_template_category_fields:
 	d['translatable'] = 0
 
 common_properties = [
@@ -343,6 +364,8 @@ data = {
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
 		"Project Type": project_type_fields,
+		"Project Template": project_template_fields,
+		"Project Template Category": project_template_category_fields,
 	},
 	'default_portal_role': 'Customer'
 }
