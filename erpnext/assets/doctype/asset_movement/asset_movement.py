@@ -22,23 +22,46 @@ class AssetMovement_(Document):
 
 	def validate_asset(self):
 		for asset in self.assets:
-			status, company, is_serialized_asset = frappe.db.get_value(
+			status, company, is_serialized_asset, num_of_assets = frappe.db.get_value(
 				"Asset",
 				asset.asset,
-				["status", "company", "is_serialized_asset"]
+				["status", "company", "is_serialized_asset", "num_of_assets"]
 			)
 
-			if self.purpose == "Transfer" and status in ("Draft", "Scrapped", "Sold"):
-				frappe.throw(_("Row {0}: {1} asset cannot be transferred.").format(asset.idx, status))
+			self.validate_movement_fields(asset)
+			self.validate_asset_status(asset, status)
+			self.validate_company(asset, company)
 
-			if company != self.company:
-				frappe.throw(_("{0} does not belong to company {1}.").format(asset.asset, self.company))
+			if is_serialized_asset:
+				self.validate_serial_no(asset)
+			else:
+				self.validate_num_of_assets(asset, num_of_assets)
 
-			if not (asset.source_location or asset.target_location or asset.from_employee or asset.to_employee):
-				frappe.throw(_("Either location or employee must be entered."))
+	def validate_movement_fields(self, asset):
+		if not (asset.source_location or asset.target_location or asset.from_employee or asset.to_employee):
+			frappe.throw(_("Either location or employee must be entered."))
 
-			if is_serialized_asset and not asset.serial_no:
-				frappe.throw(_("Row {0}: Enter Serial No for Asset {1}").format(asset.idx, asset.asset))
+	def validate_asset_status(self, asset, status):
+		if self.purpose == "Transfer" and status in ("Draft", "Scrapped", "Sold"):
+			frappe.throw(_("Row {0}: {1} asset cannot be transferred.").format(asset.idx, status))
+
+	def validate_company(self, asset, company):
+		if company != self.company:
+			frappe.throw(_("Row {0}: {1} does not belong to company {2}.")
+				.format(asset.idx, asset.asset, self.company))
+
+	def validate_serial_no(self, asset):
+		if not asset.serial_no:
+			frappe.throw(_("Row {0}: Enter Serial No for Asset {1}").format(asset.idx, asset.asset))
+
+	def validate_num_of_assets(self, asset, num_of_assets):
+		if asset.num_of_assets > num_of_assets:
+			frappe.throw(_("Row {0}: Number of Assets cannot be greater than {1}")
+				.format(asset.idx, frappe.bold(num_of_assets)), title=_("Number Exceeded Limit"))
+
+		if asset.num_of_assets < 1:
+			frappe.throw(_("Row {0}: Number of Assets needs to be between <b>1</b> and {1}")
+				.format(asset.idx, frappe.bold(num_of_assets)), title=_("Invalid Number"))
 
 	def validate_movement(self):
 		for asset in self.assets:
