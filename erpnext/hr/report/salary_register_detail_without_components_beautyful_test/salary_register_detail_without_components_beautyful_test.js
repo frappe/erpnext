@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Salary Register Detail Without Components Pruebitas BOnitas"] = {
+frappe.query_reports["Salary Register Detail Without Components Beautyful Test"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
