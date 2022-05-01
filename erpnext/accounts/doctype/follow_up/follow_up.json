@@ -90,6 +90,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Due Date",
    "fieldname": "ageing_based_on",
    "fieldtype": "Select",
    "label": "Ageing Base On",
@@ -167,7 +168,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-26 10:21:59.084258",
+ "modified": "2022-04-30 11:13:41.183524",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up",
