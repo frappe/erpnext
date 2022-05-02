@@ -209,7 +209,7 @@ frappe.ui.form.on("Asset", {
 			primary_action: function() {
 				var data = dialog.get_values();
 				frappe.call({
-					method: "assets.asset.doctype.asset_serial_no.asset_serial_no.create_asset_serial_no_docs",
+					method: "erpnext.assets.doctype.asset_serial_no.asset_serial_no.create_asset_serial_no_docs",
 					args: {
 						asset: frm.doc.name,
 						num_of_assets: data.additional_num_of_assets
