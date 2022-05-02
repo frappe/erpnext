@@ -22,7 +22,7 @@ def create_stripe_subscription(gateway_controller, data):
 		return create_subscription_on_stripe(stripe_settings)
 
 	except Exception:
-		frappe.log_error(frappe.get_traceback())
+		stripe_settings.log_error("Unable to create Stripe subscription")
 		return {
 			"redirect_to": frappe.redirect_to_message(
 				_("Server Error"),
@@ -55,9 +55,9 @@ def create_subscription_on_stripe(stripe_settings):
 
 		else:
 			stripe_settings.integration_request.db_set("status", "Failed", update_modified=False)
-			frappe.log_error("Subscription N°: " + subscription.id, "Stripe Payment not completed")
+			frappe.log_error(f"Stripe Subscription ID {subscription.id}: Payment failed")
 	except Exception:
 		stripe_settings.integration_request.db_set("status", "Failed", update_modified=False)
-		frappe.log_error(frappe.get_traceback())
+		stripe_settings.log_error("Unable to create Stripe subscription")
 
 	return stripe_settings.finalize_request()

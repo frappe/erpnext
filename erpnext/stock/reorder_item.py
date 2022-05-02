@@ -136,14 +136,14 @@ def create_material_request(material_requests):
 	mr_list = []
 	exceptions_list = []
 
-	def _log_exception():
+	def _log_exception(mr):
 		if frappe.local.message_log:
 			exceptions_list.extend(frappe.local.message_log)
 			frappe.local.message_log = []
 		else:
 			exceptions_list.append(frappe.get_traceback())
 
-		frappe.log_error(frappe.get_traceback())
+		mr.log_error("Unable to create material request")
 
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
@@ -207,7 +207,7 @@ def create_material_request(material_requests):
 				mr_list.append(mr)
 
 			except Exception:
-				_log_exception()
+				_log_exception(mr)
 
 	if mr_list:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:

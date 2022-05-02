@@ -18,7 +18,7 @@ class Topic(Document):
 				for topic_content in topic_content_list
 			]
 		except Exception as e:
-			frappe.log_error(frappe.get_traceback())
+			frappe.log_error("Unable to get topic content")
 			return None
 		return content_data
 
