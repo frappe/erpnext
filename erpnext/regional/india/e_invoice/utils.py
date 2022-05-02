@@ -125,7 +125,9 @@ def read_json(name):
 
 def get_transaction_details(invoice):
 	supply_type = ""
-	if invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition":
+	if (
+		invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition"
+	):
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
 		supply_type = "SEZWOP"
