@@ -3,12 +3,12 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, time_diff_in_hours, get_link_to_form
+from frappe.utils import flt, get_link_to_form, getdate, time_diff_in_hours
 
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.assets.doctype.asset.asset import split_asset
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.controllers.base_asset import get_asset_account
-from erpnext.assets.doctype.asset.asset import split_asset
-from erpnext.accounts.general_ledger import make_gl_entries
 
 
 class AssetRepair_(AccountsController):
@@ -155,20 +155,21 @@ class AssetRepair_(AccountsController):
 			return frappe.db.get_value("Asset", self.asset_doc.asset, "calculate_depreciation")
 
 	def decrease_stock_quantity(self):
-		stock_entry = frappe.get_doc({
-			"doctype": "Stock Entry",
-			"stock_entry_type": "Material Issue",
-			"company": self.company
-		})
+		stock_entry = frappe.get_doc(
+			{"doctype": "Stock Entry", "stock_entry_type": "Material Issue", "company": self.company}
+		)
 
 		for item in self.get("items"):
-			stock_entry.append("items", {
-				"s_warehouse": self.warehouse,
-				"item_code": item.item_code,
-				"qty": item.qty,
-				"basic_rate": item.rate,
-				"serial_no": item.serial_no
-			})
+			stock_entry.append(
+				"items",
+				{
+					"s_warehouse": self.warehouse,
+					"item_code": item.item_code,
+					"qty": item.qty,
+					"basic_rate": item.rate,
+					"serial_no": item.serial_no,
+				},
+			)
 
 		stock_entry.insert()
 		stock_entry.submit()
@@ -187,22 +188,31 @@ class AssetRepair_(AccountsController):
 
 	def get_gl_entries(self):
 		gl_entries = []
-		repair_and_maintenance_account = frappe.db.get_value("Company", self.company, "repair_and_maintenance_account")
-		fixed_asset_account = get_asset_account("fixed_asset_account", asset=self.asset, company=self.company)
-		expense_account = frappe.get_doc("Purchase Invoice", self.purchase_invoice).items[0].expense_account
+		repair_and_maintenance_account = frappe.db.get_value(
+			"Company", self.company, "repair_and_maintenance_account"
+		)
+		fixed_asset_account = get_asset_account(
+			"fixed_asset_account", asset=self.asset, company=self.company
+		)
+		expense_account = (
+			frappe.get_doc("Purchase Invoice", self.purchase_invoice).items[0].expense_account
+		)
 
 		gl_entries.append(
-			self.get_gl_dict({
-				"account": expense_account,
-				"credit": self.repair_cost,
-				"credit_in_account_currency": self.repair_cost,
-				"against": repair_and_maintenance_account,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"cost_center": self.cost_center,
-				"posting_date": getdate(),
-				"company": self.company
-			}, item=self)
+			self.get_gl_dict(
+				{
+					"account": expense_account,
+					"credit": self.repair_cost,
+					"credit_in_account_currency": self.repair_cost,
+					"against": repair_and_maintenance_account,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"cost_center": self.cost_center,
+					"posting_date": getdate(),
+					"company": self.company,
+				},
+				item=self,
+			)
 		)
 
 		if self.get("stock_consumption"):
@@ -210,33 +220,39 @@ class AssetRepair_(AccountsController):
 			stock_entry = frappe.get_doc("Stock Entry", self.stock_entry)
 			for item in stock_entry.items:
 				gl_entries.append(
-					self.get_gl_dict({
-						"account": item.expense_account,
-						"credit": item.amount,
-						"credit_in_account_currency": item.amount,
-						"against": repair_and_maintenance_account,
-						"voucher_type": self.doctype,
-						"voucher_no": self.name,
-						"cost_center": self.cost_center,
-						"posting_date": getdate(),
-						"company": self.company
-					}, item=self)
+					self.get_gl_dict(
+						{
+							"account": item.expense_account,
+							"credit": item.amount,
+							"credit_in_account_currency": item.amount,
+							"against": repair_and_maintenance_account,
+							"voucher_type": self.doctype,
+							"voucher_no": self.name,
+							"cost_center": self.cost_center,
+							"posting_date": getdate(),
+							"company": self.company,
+						},
+						item=self,
+					)
 				)
 
 		gl_entries.append(
-			self.get_gl_dict({
-				"account": fixed_asset_account,
-				"debit": self.total_repair_cost,
-				"debit_in_account_currency": self.total_repair_cost,
-				"against": expense_account,
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"cost_center": self.cost_center,
-				"posting_date": getdate(),
-				"against_voucher_type": "Purchase Invoice",
-				"against_voucher": self.purchase_invoice,
-				"company": self.company
-			}, item=self)
+			self.get_gl_dict(
+				{
+					"account": fixed_asset_account,
+					"debit": self.total_repair_cost,
+					"debit_in_account_currency": self.total_repair_cost,
+					"against": expense_account,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"cost_center": self.cost_center,
+					"posting_date": getdate(),
+					"against_voucher_type": "Purchase Invoice",
+					"against_voucher": self.purchase_invoice,
+					"company": self.company,
+				},
+				item=self,
+			)
 		)
 
 		return gl_entries
@@ -247,11 +263,12 @@ class AssetRepair_(AccountsController):
 
 		self.update_asset_life_in_asset_doc()
 		self.asset_doc.create_schedules_if_depr_details_have_been_updated()
-		self.asset_doc.submit_depreciation_schedules(notes =
-			_("This schedule was cancelled because {0} underwent a repair({1}) that extended its life.")
-			.format(
+		self.asset_doc.submit_depreciation_schedules(
+			notes=_(
+				"This schedule was cancelled because {0} underwent a repair({1}) that extended its life."
+			).format(
 				get_link_to_form(self.asset_doc.doctype, self.asset_doc.name),
-				get_link_to_form(self.doctype, self.name)
+				get_link_to_form(self.doctype, self.name),
 			)
 		)
 		self.asset_doc.save()
@@ -269,11 +286,12 @@ class AssetRepair_(AccountsController):
 
 		self.reset_asset_life_in_asset_doc()
 		self.asset_doc.create_schedules_if_depr_details_have_been_updated()
-		self.asset_doc.submit_depreciation_schedules(notes =
-			_("This schedule was cancelled because the repair that extended {0}'s life({1}) was cancelled.")
-			.format(
+		self.asset_doc.submit_depreciation_schedules(
+			notes=_(
+				"This schedule was cancelled because the repair that extended {0}'s life({1}) was cancelled."
+			).format(
 				get_link_to_form(self.asset_doc.doctype, self.asset_doc.name),
-				get_link_to_form(self.doctype, self.name)
+				get_link_to_form(self.doctype, self.name),
 			)
 		)
 		self.asset_doc.save()
@@ -289,35 +307,47 @@ class AssetRepair_(AccountsController):
 		return frappe.db.get_single_value("Accounts Settings", "enable_finance_books")
 
 	def record_asset_repair(self):
+		from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
+			get_asset_and_serial_no,
+		)
+
 		from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
-		from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import get_asset_and_serial_no
 
 		asset, serial_no = get_asset_and_serial_no(self.asset_doc)
 
 		create_asset_activity(
-			asset = asset,
-			asset_serial_no = serial_no,
-			activity_type = "Repair",
-			activity_date = self.completion_date,
-			reference_doctype = self.doctype,
-			reference_docname = self.name
+			asset=asset,
+			asset_serial_no=serial_no,
+			activity_type="Repair",
+			activity_date=self.completion_date,
+			reference_doctype=self.doctype,
+			reference_docname=self.name,
 		)
+
 
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
 	return round(downtime, 2)
 
+
 def validate_serial_no(doc):
 	if not doc.serial_no:
-		frappe.throw(_("Please enter Serial No as {0} is a Serialized Asset")
-			.format(frappe.bold(doc.asset)), title=_("Missing Serial No"))
+		frappe.throw(
+			_("Please enter Serial No as {0} is a Serialized Asset").format(frappe.bold(doc.asset)),
+			title=_("Missing Serial No"),
+		)
+
 
 def validate_num_of_assets(doc, num_of_assets):
 	if doc.num_of_assets > num_of_assets:
-		frappe.throw(_("Number of Assets cannot be greater than {0}")
-			.format(frappe.bold(num_of_assets)), title=_("Number Exceeded Limit"))
+		frappe.throw(
+			_("Number of Assets cannot be greater than {0}").format(frappe.bold(num_of_assets)),
+			title=_("Number Exceeded Limit"),
+		)
 
 	if doc.num_of_assets < 1:
-		frappe.throw(_("Number of Assets needs to be between <b>1</b> and {0}")
-			.format(frappe.bold(num_of_assets)), title=_("Invalid Number"))
+		frappe.throw(
+			_("Number of Assets needs to be between <b>1</b> and {0}").format(frappe.bold(num_of_assets)),
+			title=_("Invalid Number"),
+		)

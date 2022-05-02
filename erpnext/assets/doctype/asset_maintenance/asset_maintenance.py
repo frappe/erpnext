@@ -5,10 +5,14 @@ import frappe
 from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
-from frappe.utils import getdate, add_days, add_months, add_years
+from frappe.utils import add_days, add_months, add_years, getdate
 
 from erpnext.assets.doctype.asset.asset import split_asset
-from erpnext.assets.doctype.asset_repair.asset_repair import validate_serial_no, validate_num_of_assets
+from erpnext.assets.doctype.asset_repair.asset_repair import (
+	validate_num_of_assets,
+	validate_serial_no,
+)
+
 
 class AssetMaintenance(Document):
 	def validate(self):
@@ -29,8 +33,11 @@ class AssetMaintenance(Document):
 
 	def validate_start_date(self, task):
 		if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
-			frappe.throw(_("Row #{0}: Start Date should be before End Date for task {1}")
-				.format(task.idx, task.maintenance_task))
+			frappe.throw(
+				_("Row #{0}: Start Date should be before End Date for task {1}").format(
+					task.idx, task.maintenance_task
+				)
+			)
 
 	def check_if_task_is_overdue(self, task):
 		if getdate(task.next_due_date) < getdate():
@@ -38,19 +45,23 @@ class AssetMaintenance(Document):
 
 	def validate_assignee(self, task):
 		if not task.assign_to and self.docstatus == 0:
-			frappe.throw(_("Row #{0}: Please asign task {1} to a team member.")
-				.format(task.idx, task.maintenance_task))
+			frappe.throw(
+				_("Row #{0}: Please asign task {1} to a team member.").format(task.idx, task.maintenance_task)
+			)
 
 	def validate_asset(self):
 		is_serialized_asset, num_of_assets, maintenance_required = frappe.get_value(
-			"Asset",
-			self.asset,
-			["is_serialized_asset", "num_of_assets", "maintenance_required"]
+			"Asset", self.asset, ["is_serialized_asset", "num_of_assets", "maintenance_required"]
 		)
 
 		if not maintenance_required:
-			frappe.throw(_("Maintenance records can only be created for Assets with \
-				Maintenance Required enabled."), title=_("Invalid Asset"))
+			frappe.throw(
+				_(
+					"Maintenance records can only be created for Assets with \
+				Maintenance Required enabled."
+				),
+				title=_("Invalid Asset"),
+			)
 
 		if is_serialized_asset:
 			validate_serial_no(self)
@@ -80,11 +91,11 @@ class AssetMaintenance(Document):
 		team_member = frappe.db.get_value("User", task.assign_to, "email")
 
 		args = {
-			"doctype" : "Asset Maintenance",
-			"assign_to" : [team_member],
-			"name" : self.name,
-			"description" : task.maintenance_task,
-			"date" : task.next_due_date
+			"doctype": "Asset Maintenance",
+			"assign_to": [team_member],
+			"name": self.name,
+			"description": task.maintenance_task,
+			"date": task.next_due_date,
 		}
 
 		if not self.have_todos_already_been_created(args):
@@ -93,12 +104,12 @@ class AssetMaintenance(Document):
 	def have_todos_already_been_created(self, args):
 		todos = frappe.get_all(
 			"ToDo",
-			filters = {
+			filters={
 				"reference_type": args["doctype"],
 				"reference_name": args["name"],
 				"status": "Open",
-				"allocated_to": args["assign_to"][0]
-			}
+				"allocated_to": args["assign_to"][0],
+			},
 		)
 
 		if todos:
@@ -135,23 +146,25 @@ class AssetMaintenance(Document):
 			{
 				"asset_maintenance": self.name,
 				"task": task.name,
-				"maintenance_status": ("in",["Planned","Overdue"])
-			}
+				"maintenance_status": ("in", ["Planned", "Overdue"]),
+			},
 		)
 
 	def create_new_maintenance_log(self, task):
-		asset_maintenance_log = frappe.get_doc({
-			"doctype": "Asset Maintenance Log",
-			"asset_maintenance": self.name,
-			"asset_name": self.asset,
-			"task": task.name,
-			"has_certificate": task.certificate_required,
-			"description": task.description,
-			"assign_to_name": task.assign_to_name,
-			"periodicity": str(task.periodicity),
-			"maintenance_type": task.maintenance_type,
-			"due_date": task.next_due_date
-		})
+		asset_maintenance_log = frappe.get_doc(
+			{
+				"doctype": "Asset Maintenance Log",
+				"asset_maintenance": self.name,
+				"asset_name": self.asset,
+				"task": task.name,
+				"has_certificate": task.certificate_required,
+				"description": task.description,
+				"assign_to_name": task.assign_to_name,
+				"periodicity": str(task.periodicity),
+				"maintenance_type": task.maintenance_type,
+				"due_date": task.next_due_date,
+			}
+		)
 		asset_maintenance_log.insert()
 
 	def cancel_maintenance_logs_for_removed_tasks(self, tasks_names):
@@ -159,20 +172,22 @@ class AssetMaintenance(Document):
 
 		if asset_maintenance_logs:
 			for asset_maintenance_log in asset_maintenance_logs:
-				frappe.db.set_value("Asset Maintenance Log", asset_maintenance_log.name, "maintenance_status", "Cancelled")
+				frappe.db.set_value(
+					"Asset Maintenance Log", asset_maintenance_log.name, "maintenance_status", "Cancelled"
+				)
 
 	def get_maintenance_logs_for_removed_tasks(self, tasks_names):
 		return frappe.get_all(
 			"Asset Maintenance Log",
-			fields = ["name"],
-			filters = {
-				"asset_maintenance": self.name,
-				"task": ("not in", tasks_names)
-			}
+			fields=["name"],
+			filters={"asset_maintenance": self.name, "task": ("not in", tasks_names)},
 		)
 
+
 @frappe.whitelist()
-def calculate_next_due_date(periodicity, start_date = None, end_date = None, last_completion_date = None, next_due_date = None):
+def calculate_next_due_date(
+	periodicity, start_date=None, end_date=None, last_completion_date=None, next_due_date=None
+):
 	start_date = get_start_date(start_date, last_completion_date)
 
 	if periodicity == "Daily":
@@ -188,28 +203,34 @@ def calculate_next_due_date(periodicity, start_date = None, end_date = None, las
 	elif periodicity == "Quarterly":
 		next_due_date = add_months(start_date, 3)
 
-	if end_date and ((start_date and start_date >= end_date) or (last_completion_date and last_completion_date >= end_date) or next_due_date):
+	if end_date and (
+		(start_date and start_date >= end_date)
+		or (last_completion_date and last_completion_date >= end_date)
+		or next_due_date
+	):
 		next_due_date = ""
 
 	return next_due_date
 
+
 def get_start_date(start_date, last_completion_date):
 	if not start_date and not last_completion_date:
 		return frappe.utils.now()
-	elif last_completion_date and ((start_date and last_completion_date > start_date) or not start_date):
+	elif last_completion_date and (
+		(start_date and last_completion_date > start_date) or not start_date
+	):
 		return last_completion_date
 
 	return start_date
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_team_members(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.get_values(
-		"Maintenance Team Member", {
-			"parent": filters.get("maintenance_team")
-		},
-		"team_member"
+		"Maintenance Team Member", {"parent": filters.get("maintenance_team")}, "team_member"
 	)
+
 
 @frappe.whitelist()
 def get_maintenance_log(asset_name):
@@ -220,5 +241,5 @@ def get_maintenance_log(asset_name):
 			where asset_name=%s group by maintenance_status
 		""",
 		(asset_name),
-		as_dict = 1
+		as_dict=1,
 	)

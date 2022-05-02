@@ -2,11 +2,13 @@
 # For license information, please see license.txt
 
 import frappe
+from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
+	create_depreciation_schedules,
+)
 from frappe import _
-from frappe.utils import cint, get_link_to_form, flt
+from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
-from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import create_depreciation_schedules
 from erpnext.controllers.base_asset import BaseAsset, get_purchase_details
 
 
@@ -36,8 +38,9 @@ class Asset(BaseAsset):
 	def validate_purchase_document(self):
 		if self.is_existing_asset:
 			if self.purchase_invoice:
-				frappe.throw(_("Purchase Invoice cannot be made against an existing asset {0}")
-					.format(self.name))
+				frappe.throw(
+					_("Purchase Invoice cannot be made against an existing asset {0}").format(self.name)
+				)
 
 		else:
 			purchase_doc = "Purchase Invoice" if self.purchase_invoice else "Purchase Receipt"
@@ -45,21 +48,26 @@ class Asset(BaseAsset):
 			purchase_doc = frappe.get_doc(purchase_doc, purchase_docname)
 
 			if purchase_doc.get("company") != self.company:
-				frappe.throw(_("Company of asset {0} and purchase document {1} doesn't match.")
-					.format(self.name, purchase_doc.get("name")))
+				frappe.throw(
+					_("Company of asset {0} and purchase document {1} doesn't match.").format(
+						self.name, purchase_doc.get("name")
+					)
+				)
 
-			if (is_cwip_accounting_enabled(self.asset_category)
+			if (
+				is_cwip_accounting_enabled(self.asset_category)
 				and not self.purchase_receipt
 				and self.purchase_invoice
-				and not frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "update_stock")):
-				frappe.throw(_("Update stock must be enable for the purchase invoice {0}")
-					.format(self.purchase_invoice))
+				and not frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "update_stock")
+			):
+				frappe.throw(
+					_("Update stock must be enable for the purchase invoice {0}").format(self.purchase_invoice)
+				)
 
 	def validate_item(self):
-		item = frappe.get_cached_value("Item",
-			self.item_code,
-			["is_fixed_asset", "is_stock_item", "disabled"],
-			as_dict=1)
+		item = frappe.get_cached_value(
+			"Item", self.item_code, ["is_fixed_asset", "is_stock_item", "disabled"], as_dict=1
+		)
 
 		if not item:
 			frappe.throw(_("Item {0} does not exist").format(self.item_code))
@@ -79,11 +87,8 @@ class Asset(BaseAsset):
 		if purchase_docname:
 			base_net_rate, item_tax_amount = frappe.get_value(
 				purchase_doctype + " Item",
-				filters = {
-					"parent": purchase_docname,
-					"item_code": self.item_code
-				},
-				fields = ["base_net_rate", "item_tax_amount"]
+				filters={"parent": purchase_docname, "item_code": self.item_code},
+				fields=["base_net_rate", "item_tax_amount"],
 			)
 
 			if self.gross_purchase_amount != (base_net_rate + item_tax_amount):
@@ -102,8 +107,10 @@ class Asset(BaseAsset):
 				title=_("Invalid Cost Center"),
 			)
 
+
 def is_cwip_accounting_enabled(asset_category):
 	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
+
 
 @frappe.whitelist()
 def split_asset(asset, num_of_assets_to_be_separated):
@@ -125,10 +132,16 @@ def split_asset(asset, num_of_assets_to_be_separated):
 	record_asset_split(asset, new_asset, num_of_assets_to_be_separated)
 	display_message_on_successfully_splitting_asset(asset, new_asset)
 
+
 def validate_num_of_assets_to_be_separated(asset, num_of_assets_to_be_separated):
 	if num_of_assets_to_be_separated >= asset.num_of_assets:
-		frappe.throw(_("Number of Assets to be Separated should be less than the total Number of Assets, which is {0}.")
-			.format(frappe.bold(asset.num_of_assets)), title=_("Invalid Number"))
+		frappe.throw(
+			_(
+				"Number of Assets to be Separated should be less than the total Number of Assets, which is {0}."
+			).format(frappe.bold(asset.num_of_assets)),
+			title=_("Invalid Number"),
+		)
+
 
 def create_new_asset(asset, num_of_assets_to_be_separated):
 	new_asset = frappe.copy_doc(asset)
@@ -139,13 +152,10 @@ def create_new_asset(asset, num_of_assets_to_be_separated):
 
 	return new_asset
 
+
 def submit_copies_of_depreciation_schedules(new_asset, original_asset):
 	new_schedules = frappe.get_all(
-		"Depreciation Schedule",
-		filters = {
-			"asset": new_asset
-		},
-		fields = ["name", "finance_book"]
+		"Depreciation Schedule", filters={"asset": new_asset}, fields=["name", "finance_book"]
 	)
 
 	map_to_original_schedules = get_map_to_original_schedules(original_asset, new_schedules)
@@ -156,61 +166,63 @@ def submit_copies_of_depreciation_schedules(new_asset, original_asset):
 		ds.notes = _("This is a copy of {0} created when Asset {1} was split to form Asset {2}.").format(
 			get_link_to_form("Depreciation Schedule", map_to_original_schedules[ds.name]),
 			get_link_to_form("Asset", original_asset),
-			get_link_to_form("Asset", new_asset)
+			get_link_to_form("Asset", new_asset),
 		)
 		ds.submit()
 
+
 def get_map_to_original_schedules(original_asset, new_schedules):
 	"""
-		Returns dictionary in the form {new_ds1: original_ds1, new_ds2: original_ds2...}
+	Returns dictionary in the form {new_ds1: original_ds1, new_ds2: original_ds2...}
 	"""
 	original_schedules = frappe.get_all(
-		"Depreciation Schedule",
-		filters = {
-			"asset": original_asset
-		},
-		fields = ["name", "finance_book"]
+		"Depreciation Schedule", filters={"asset": original_asset}, fields=["name", "finance_book"]
 	)
 
 	new_schedules_dict = turn_list_of_dicts_to_dicts(new_schedules)
 	original_schedules_dict = turn_list_of_dicts_to_dicts(original_schedules)
-	map_to_original_schedules = merge_dictionaries(new_schedules_dict, original_schedules_dict, new_schedules)
+	map_to_original_schedules = merge_dictionaries(
+		new_schedules_dict, original_schedules_dict, new_schedules
+	)
 
 	return map_to_original_schedules
 
+
 def turn_list_of_dicts_to_dicts(schedules):
 	"""
-		Converts [{"name": name1, "finance_book": fb1}, ...] into {fb1: name1, ...}
+	Converts [{"name": name1, "finance_book": fb1}, ...] into {fb1: name1, ...}
 	"""
 	schedules_dict = {}
 	for schedule in schedules:
-		schedules_dict.update({
-			schedule["finance_book"]: schedule["name"]
-		})
+		schedules_dict.update({schedule["finance_book"]: schedule["name"]})
 
 	return schedules_dict
 
+
 def merge_dictionaries(new_schedules_dict, original_schedules_dict, new_schedules):
 	"""
-		Converts {fb1: name1, fb2: name2...} and {fb1: name3, fb2: name4...} into {name1: name3, name2: name4...}
+	Converts {fb1: name1, fb2: name2...} and {fb1: name3, fb2: name4...} into {name1: name3, name2: name4...}
 	"""
 	finance_books = get_finance_books(new_schedules)
 
 	map_to_original_schedules = {}
 	for finance_book in finance_books:
-		map_to_original_schedules.update({
-			new_schedules_dict[finance_book]: original_schedules_dict[finance_book]
-		})
+		map_to_original_schedules.update(
+			{new_schedules_dict[finance_book]: original_schedules_dict[finance_book]}
+		)
 
 	return map_to_original_schedules
 
+
 def get_finance_books(new_schedules):
 	return [schedule["finance_book"] for schedule in new_schedules]
+
 
 def update_existing_asset(asset, num_of_assets_to_be_separated):
 	asset.flags.ignore_validate_update_after_submit = True
 	asset.num_of_assets -= num_of_assets_to_be_separated
 	asset.save()
+
 
 def record_asset_split(asset, new_asset, num_of_assets_to_be_separated):
 	split_assets = [asset.name, new_asset.name]
@@ -218,13 +230,15 @@ def record_asset_split(asset, new_asset, num_of_assets_to_be_separated):
 
 	for split_asset in split_assets:
 		create_asset_activity(
-			asset = split_asset,
-			activity_type = "Split",
-			reference_doctype = asset.doctype,
-			reference_docname = asset.name,
-			notes = _("{0} asset{1} separated from {2} into {3}.")
-				.format(num_of_assets_to_be_separated, is_plural, asset.name, new_asset.name)
+			asset=split_asset,
+			activity_type="Split",
+			reference_doctype=asset.doctype,
+			reference_docname=asset.name,
+			notes=_("{0} asset{1} separated from {2} into {3}.").format(
+				num_of_assets_to_be_separated, is_plural, asset.name, new_asset.name
+			),
 		)
+
 
 def display_message_on_successfully_splitting_asset(asset, new_asset):
 	new_asset_link = frappe.bold(get_link_to_form("Asset", new_asset.name))

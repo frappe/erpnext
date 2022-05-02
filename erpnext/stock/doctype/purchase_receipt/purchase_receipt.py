@@ -13,8 +13,8 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.controllers.buying_controller import BuyingController
 from erpnext.controllers.base_asset import get_asset_account
+from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}

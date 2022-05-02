@@ -8,6 +8,7 @@ from frappe.utils import getdate
 
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
+
 class AssetMaintenanceLog_(Document):
 	def validate(self):
 		self.check_if_maintenance_is_overdue()
@@ -18,7 +19,10 @@ class AssetMaintenanceLog_(Document):
 		self.update_maintenance_task()
 
 	def check_if_maintenance_is_overdue(self):
-		if getdate(self.due_date) < getdate() and self.maintenance_status not in ["Completed", "Cancelled"]:
+		if getdate(self.due_date) < getdate() and self.maintenance_status not in [
+			"Completed",
+			"Cancelled",
+		]:
 			self.maintenance_status = "Overdue"
 
 	def validate_completion_date(self):
@@ -45,8 +49,7 @@ class AssetMaintenanceLog_(Document):
 
 	def set_next_due_date(self, maintenance_task):
 		next_due_date = calculate_next_due_date(
-			periodicity = self.periodicity,
-			last_completion_date = self.completion_date
+			periodicity=self.periodicity, last_completion_date=self.completion_date
 		)
 
 		maintenance_task.last_completion_date = self.completion_date
