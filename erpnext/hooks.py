@@ -528,6 +528,9 @@ accounting_dimension_doctypes = [
 	"Subscription Plan",
 	"POS Invoice",
 	"POS Invoice Item",
+	"Purchase Order",
+	"Purchase Receipt",
+	"Sales Order",
 ]
 
 regional_overrides = {
