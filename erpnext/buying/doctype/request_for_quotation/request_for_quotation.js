@@ -92,17 +92,19 @@ frappe.ui.form.on("Request for Quotation",{
 		var dialog = new frappe.ui.Dialog({
 			title: __("Create Supplier Quotation"),
 			fields: [
-				{	"fieldtype": "Select", "label": __("Supplier"),
+				{	"fieldtype": "Link",
+					"label": __("Supplier"),
 					"fieldname": "supplier",
-					"options": doc.suppliers.map(d => {
-						if (d.supplier !== d.supplier_name){
-							return `${d.supplier_name} [${d.supplier}]`
-						}else {
-							return d.supplier
-						}
-					}),
+					"options": 'Supplier',
 					"reqd": 1,
-					"default": doc.suppliers.length === 1 ? doc.suppliers[0].supplier_name : "" },
+					get_query: () => {
+						return {
+							filters: [
+								["Supplier", "name", "in", frm.doc.suppliers.map((row) => {return row.supplier;})]
+							]
+						}
+					}
+				}
 			],
 			primary_action_label: __("Create"),
 			primary_action: (args) => {
