@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import now
 
 
@@ -131,3 +132,35 @@ def mark_original_as_is_cancelled(payment_ledger_entry):
 			)
 			.run()
 		)
+
+
+def get_amount_against_voucher(voucher_type=None, voucher_no=None):
+	"""
+	Helper functions to calculate total amount linked against a voucher.
+	If a voucher has link, it calculates without the link amount
+	"""
+	if voucher_type and voucher_no:
+		ple = qb.DocType("Payment Ledger Entry")
+		pl_query = (
+			qb.from_(ple)
+			.select(Sum(ple.amount))
+			.where(
+				(ple.is_cancelled == 0)
+				& ((ple.against_voucher_type == voucher_type) & (ple.against_voucher_no == voucher_no))
+			)
+		)
+		amount = pl_query.run(as_list=True)[0][0] or 0.0
+		if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+			link_vouchers = (
+				qb.from_(ple)
+				.select(Sum(ple.amount))
+				.where(
+					(ple.is_cancelled == 0)
+					& ((ple.voucher_type == voucher_type) & (ple.voucher_no == voucher_no))
+				)
+			)
+			link_balance = link_vouchers.run(as_list=True)[0][0] or 0.0
+		amount = amount - link_balance
+
+		return amount
+	return None
