@@ -127,7 +127,10 @@ def get_transaction_details(invoice):
 	if invoice.gst_category == "Registered Regular":
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
-		supply_type = "SEZWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "SEZWOP"
+		else:
+			supply_type = "SEZWP"
 	elif invoice.gst_category == "Overseas":
 		if invoice.export_type == "Without Payment of Tax":
 			supply_type = "EXPWOP"
