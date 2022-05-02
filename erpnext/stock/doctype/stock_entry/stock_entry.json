@@ -394,7 +394,7 @@
   {
    "fieldname": "value_difference",
    "fieldtype": "Currency",
-   "label": "Total Value Difference (In - Out)",
+   "label": "Total Value Difference (Incoming - Outgoing)",
    "options": "Company:company:default_currency",
    "print_hide_if_no_value": 1,
    "read_only": 1
