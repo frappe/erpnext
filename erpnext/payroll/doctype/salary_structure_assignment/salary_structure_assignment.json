@@ -22,7 +22,9 @@
   "base",
   "column_break_9",
   "variable",
-  "amended_from"
+  "amended_from",
+  "section_break_17",
+  "payroll_cost_centers"
  ],
  "fields": [
   {
@@ -90,7 +92,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Base & Variable"
   },
   {
    "fieldname": "base",
@@ -141,14 +144,29 @@
    "fieldtype": "Link",
    "label": "Payroll Payable Account",
    "options": "Account"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "employee",
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break",
+   "label": "Payroll Cost Centers"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payroll_cost_centers",
+   "fieldtype": "Table",
+   "label": "Cost Centers",
+   "options": "Employee Cost Center"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:46.267974",
+ "modified": "2022-01-19 12:43:54.439073",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -191,8 +209,10 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name, salary_structure",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "employee_name",
  "track_changes": 1
 }

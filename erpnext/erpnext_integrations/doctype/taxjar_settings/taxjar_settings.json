@@ -20,7 +20,6 @@
   "configuration_cb",
   "shipping_account_head",
   "section_break_12",
-  "nexus_address",
   "nexus"
  ],
  "fields": [
@@ -87,14 +86,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "nexus",
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
    "label": "Nexus List"
-  },
-  {
-   "fieldname": "nexus_address",
-   "fieldtype": "HTML",
-   "label": "Nexus Address"
   },
   {
    "fieldname": "nexus",
@@ -108,19 +103,19 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-11-08 18:02:29.232090",
+ "modified": "2021-11-30 12:17:24.647979",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",

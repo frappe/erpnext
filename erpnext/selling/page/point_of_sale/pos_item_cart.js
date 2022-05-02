@@ -100,6 +100,10 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount-wrapper">
 				${this.get_discount_icon()} ${__('Add Discount')}
 			</div>
+			<div class="item-qty-total-container">
+				<div class="item-qty-total-label">${__('Total Items')}</div>
+				<div class="item-qty-total-value">0.00</div>
+			</div>
 			<div class="net-total-container">
 				<div class="net-total-label">${__("Net Total")}</div>
 				<div class="net-total-value">0.00</div>
@@ -126,10 +130,10 @@ erpnext.PointOfSale.ItemCart = class {
 			},
 			cols: 5,
 			keys: [
-				[ 1, 2, 3, __('Quantity') ],
-				[ 4, 5, 6, __('Discount') ],
-				[ 7, 8, 9, __('Rate') ],
-				[ '.', 0, __('Delete'), __('Remove') ]
+				[ 1, 2, 3, 'Quantity' ],
+				[ 4, 5, 6, 'Discount' ],
+				[ 7, 8, 9, 'Rate' ],
+				[ '.', 0, 'Delete', 'Remove' ]
 			],
 			css_classes: [
 				[ '', '', '', 'col-span-2' ],
@@ -142,6 +146,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.prepend(
 			`<div class="numpad-totals">
+			<span class="numpad-item-qty-total"></span>
 				<span class="numpad-net-total"></span>
 				<span class="numpad-grand-total"></span>
 			</div>`
@@ -186,10 +191,10 @@ erpnext.PointOfSale.ItemCart = class {
 			this.numpad_value = '';
 		});
 
-		this.$component.on('click', '.checkout-btn', function() {
+		this.$component.on('click', '.checkout-btn', async function() {
 			if ($(this).attr('style').indexOf('--blue-500') == -1) return;
 
-			me.events.checkout();
+			await me.events.checkout();
 			me.toggle_checkout_btn(false);
 
 			me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
@@ -470,6 +475,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (!frm) frm = this.events.get_frm();
 
 		this.render_net_total(frm.doc.net_total);
+		this.render_total_item_qty(frm.doc.items);
 		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
 		this.render_grand_total(grand_total);
 
@@ -484,6 +490,21 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.find('.numpad-net-total').html(
 			`<div>${__('Net Total')}: <span>${format_currency(value, currency)}</span></div>`
+		);
+	}
+
+	render_total_item_qty(items) {
+		var total_item_qty = 0;
+		items.map((item) => {
+			total_item_qty = total_item_qty + item.qty;
+		});
+
+		this.$totals_section.find('.item-qty-total-container').html(
+			`<div>${__('Total Quantity')}</div><div>${total_item_qty}</div>`
+		);
+
+		this.$numpad_section.find('.numpad-item-qty-total').html(
+			`<div>${__('Total Quantity')}: <span>${total_item_qty}</span></div>`
 		);
 	}
 
@@ -964,6 +985,7 @@ erpnext.PointOfSale.ItemCart = class {
 		$(frm.wrapper).off('refresh-fields');
 		$(frm.wrapper).on('refresh-fields', () => {
 			if (frm.doc.items.length) {
+				this.$cart_items_wrapper.html('');
 				frm.doc.items.forEach(item => {
 					this.update_item_html(item);
 				});

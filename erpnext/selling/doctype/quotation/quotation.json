@@ -31,6 +31,8 @@
   "col_break98",
   "shipping_address_name",
   "shipping_address",
+  "company_address",
+  "company_address_display",
   "customer_group",
   "territory",
   "currency_and_price_list",
@@ -41,6 +43,8 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
+  "section_break_33",
+  "scan_barcode",
   "items_section",
   "items",
   "bundle_items_section",
@@ -953,17 +957,36 @@
    "fieldname": "competitors",
    "fieldtype": "Table MultiSelect",
    "label": "Competitors",
-   "options": "Competitor Detail",
+   "options": "Competitor Detail"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address Name",
+   "options": "Address"
+  },
+  {
+   "fieldname": "company_address_display",
+   "fieldtype": "Small Text",
+   "label": "Company Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "max_attachments": 1,
- "migration_hash": "75a86a19f062c2257bcbc8e6e31c7f1e",
- "modified": "2021-10-21 12:58:55.514512",
+ "modified": "2022-04-07 11:01:31.157084",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1058,6 +1081,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "party_name",
  "title_field": "title"
 }

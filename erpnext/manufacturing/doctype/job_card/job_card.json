@@ -19,6 +19,7 @@
   "serial_no",
   "column_break_12",
   "wip_warehouse",
+  "quality_inspection_template",
   "quality_inspection",
   "project",
   "batch_no",
@@ -408,11 +409,18 @@
    "no_copy": 1,
    "options": "Job Card Scrap Item",
    "print_hide": 1
+  },
+  {
+   "fetch_from": "operation.quality_inspection_template",
+   "fieldname": "quality_inspection_template",
+   "fieldtype": "Link",
+   "label": "Quality Inspection Template",
+   "options": "Quality Inspection Template"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-12 10:15:03.572401",
+ "modified": "2021-11-24 19:17:40.879235",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

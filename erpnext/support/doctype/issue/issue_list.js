@@ -18,7 +18,6 @@ frappe.listview_settings['Issue'] = {
 	},
 	get_indicator: function(doc) {
 		if (doc.status === 'Open') {
-			if (!doc.priority) doc.priority = 'Medium';
 			const color = {
 				'Low': 'yellow',
 				'Medium': 'orange',

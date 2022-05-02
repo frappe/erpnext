@@ -11,11 +11,6 @@
   "customer_group",
   "column_break_4",
   "territory",
-  "crm_settings_section",
-  "campaign_naming_by",
-  "default_valid_till",
-  "column_break_9",
-  "close_opportunity_after_days",
   "item_price_settings_section",
   "selling_price_list",
   "maintain_same_rate_action",
@@ -32,7 +27,8 @@
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "hide_tax_id"
+  "hide_tax_id",
+  "enable_discount_accounting"
  ],
  "fields": [
   {
@@ -42,13 +38,6 @@
    "in_list_view": 1,
    "label": "Customer Naming By",
    "options": "Customer Name\nNaming Series\nAuto Name"
-  },
-  {
-   "fieldname": "campaign_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "customer_group",
@@ -72,18 +61,6 @@
    "options": "Price List"
   },
   {
-   "default": "15",
-   "description": "Auto close Opportunity after the no. of days mentioned above",
-   "fieldname": "close_opportunity_after_days",
-   "fieldtype": "Int",
-   "label": "Close Opportunity After Days"
-  },
-  {
-   "fieldname": "default_valid_till",
-   "fieldtype": "Data",
-   "label": "Default Quotation Validity Days"
-  },
-  {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
@@ -104,7 +81,7 @@
    "description": "How often should Project and Company be updated based on Sales Transactions?",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
-   "label": "Sales Update Frequency",
+   "label": "Sales Update Frequency in Company and Project",
    "options": "Each Transaction\nDaily\nMonthly",
    "reqd": 1
   },
@@ -170,15 +147,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "crm_settings_section",
-   "fieldtype": "Section Break",
-   "label": "CRM Settings"
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "item_price_settings_section",
    "fieldtype": "Section Break",
    "label": "Item Price Settings"
@@ -197,6 +165,13 @@
    "fieldname": "editable_bundle_item_rates",
    "fieldtype": "Check",
    "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Selling"
   }
  ],
  "icon": "fa fa-cog",
@@ -204,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:38:10.175989",
+ "modified": "2022-04-14 16:01:29.405642",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -222,5 +197,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

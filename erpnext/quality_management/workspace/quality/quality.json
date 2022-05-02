@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\": \"header\", \"data\": {\"text\": \"Your Shortcuts\", \"level\": 4, \"col\": 12}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Goal\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Procedure\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Inspection\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Review\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Quality Action\", \"col\": 4}}, {\"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Non Conformance\", \"col\": 4}}, {\"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"type\": \"header\", \"data\": {\"text\": \"Reports & Masters\", \"level\": 4, \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Goal and Procedure\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Feedback\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Meeting\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Review and Action\", \"col\": 4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quality Goal\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quality Procedure\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quality Inspection\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quality Review\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quality Action\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Non Conformance\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Goal and Procedure\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Feedback\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Meeting\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Review and Action\",\"col\":4}}]",
  "creation": "2020-03-02 15:49:28.632014",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -142,7 +142,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-08-05 12:16:01.699913",
+ "modified": "2022-01-13 17:42:20.105187",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -151,7 +151,7 @@
  "public": 1,
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 21,
+ "sequence_id": 21.0,
  "shortcuts": [
   {
    "color": "Grey",

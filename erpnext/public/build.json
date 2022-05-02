@@ -7,7 +7,8 @@
 	],
 	"js/erpnext-web.min.js": [
 		"public/js/website_utils.js",
-		"public/js/shopping_cart.js"
+		"public/js/shopping_cart.js",
+		"public/js/wishlist.js"
 	],
 	"css/erpnext-web.css": [
 		"public/scss/website.scss",
@@ -38,7 +39,8 @@
 		"public/js/utils/dimension_tree_filter.js",
 		"public/js/telephony.js",
 		"public/js/templates/call_link.html",
-		"public/js/templates/node_card.html"
+		"public/js/templates/node_card.html",
+		"public/js/bulk_transaction_processing.js"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
@@ -65,5 +67,11 @@
 	"js/hierarchy-chart.min.js": [
 		"public/js/hierarchy_chart/hierarchy_chart_desktop.js",
 		"public/js/hierarchy_chart/hierarchy_chart_mobile.js"
+	],
+	"js/e-commerce.min.js": [
+		"e_commerce/product_ui/views.js",
+		"e_commerce/product_ui/grid.js",
+		"e_commerce/product_ui/list.js",
+		"e_commerce/product_ui/search.js"
 	]
 }
