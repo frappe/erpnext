@@ -133,7 +133,7 @@ def set_account_currency(filters):
 			else:
 				account_currency = (
 					None
-					if filters.party_type in ["Employee", "Student", "Shareholder", "Member"]
+					if filters.party_type in ["Employee", "Shareholder", "Member"]
 					else frappe.db.get_value(filters.party_type, filters.party[0], "default_currency")
 				)
 
