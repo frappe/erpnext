@@ -190,13 +190,15 @@ class AccountsController(TransactionBase):
 
 		validate_regional(self)
 
-		validate_einvoice_fields(self)
+		if not frappe.db.get_single_value("E Invoice Settings", "automate_irns"):
+			validate_einvoice_fields(self)
 
 		if self.doctype != "Material Request":
 			apply_pricing_rule_on_transaction(self)
 
 	def before_cancel(self):
-		validate_einvoice_fields(self)
+		if not frappe.db.get_single_value("E Invoice Settings", "automate_irns"):
+			validate_einvoice_fields(self)
 
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction

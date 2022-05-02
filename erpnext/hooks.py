@@ -337,11 +337,13 @@ doc_events = {
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 			"erpnext.regional.saudi_arabia.utils.create_qr_code",
 			"erpnext.erpnext_integrations.taxjar_integration.create_transaction",
+			"erpnext.regional.india.e_invoice.utils.generate_irn_on_submit",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
 			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction",
 			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file",
+			"erpnext.regional.india.e_invoice.utils.cancel_irn_on_cancel",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 		"validate": [

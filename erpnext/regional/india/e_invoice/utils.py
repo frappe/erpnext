@@ -852,7 +852,10 @@ class GSPConnector:
 			}
 		)
 		request_log.save(ignore_permissions=True)
-		frappe.db.commit()
+
+		if (self.invoice.doctype, self.invoice.name) not in frappe.flags.currently_saving:
+			# prevent commit if triggered from hooks on submit/cancel
+			frappe.db.commit()
 
 	def get_client_credentials(self):
 		if self.e_invoice_settings.client_id and self.e_invoice_settings.client_secret:
@@ -1251,13 +1254,16 @@ class GSPConnector:
 			}
 		)
 		_file.save()
-		frappe.db.commit()
 		return _file
 
 	def update_invoice(self):
-		self.invoice.flags.ignore_validate_update_after_submit = True
-		self.invoice.flags.ignore_validate = True
-		self.invoice.save()
+		if (self.invoice.doctype, self.invoice.name) in frappe.flags.currently_saving:
+			# if triggered from hooks on submit/cancel
+			self.invoice.db_update()
+		else:
+			self.invoice.flags.ignore_validate_update_after_submit = True
+			self.invoice.flags.ignore_validate = True
+			self.invoice.save()
 
 	def set_failed_status(self, errors=None):
 		frappe.db.rollback()
@@ -1426,3 +1432,24 @@ def job_already_enqueued(job_name):
 	enqueued_jobs = [d.get("job_name") for d in get_info()]
 	if job_name in enqueued_jobs:
 		return True
+
+
+def generate_irn_on_submit(doc, method):
+	if doc.irn:
+		return
+
+	eligible = validate_eligibility(doc)
+
+	if not eligible:
+		return
+
+	generate_irn(doc.doctype, doc.name)
+
+
+def cancel_irn_on_cancel(doc, method):
+	eligible = validate_eligibility(doc)
+
+	if not eligible:
+		return
+
+	cancel_irn(doc.doctype, doc.name, doc.irn, "3", "Cancelled by user")
