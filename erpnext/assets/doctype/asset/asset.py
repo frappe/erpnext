@@ -2,13 +2,13 @@
 # For license information, please see license.txt
 
 import frappe
-from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
-	create_depreciation_schedules,
-)
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form
 
 from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
+from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
+	create_depreciation_schedules,
+)
 from erpnext.controllers.base_asset import BaseAsset, get_purchase_details
 
 

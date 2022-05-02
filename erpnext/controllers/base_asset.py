@@ -4,11 +4,6 @@
 import json
 
 import frappe
-from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
-	create_a_single_depreciation_schedule,
-	create_depreciation_schedules,
-	delete_existing_schedules,
-)
 from frappe import _
 from frappe.utils import add_months, cint, flt, format_date, get_datetime, getdate, nowdate
 from frappe.utils.data import get_last_day, get_link_to_form
@@ -16,6 +11,11 @@ from frappe.utils.data import get_last_day, get_link_to_form
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
+	create_a_single_depreciation_schedule,
+	create_depreciation_schedules,
+	delete_existing_schedules,
+)
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -271,7 +271,7 @@ class BaseAsset(AccountsController):
 				self.check_if_depr_posting_start_date_is_too_late(row.frequency_of_depreciation, row.idx)
 
 	def check_if_depr_posting_start_date_is_too_late(self, frequency_of_depreciation, row=None):
-		from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
+		from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
 			get_frequency_of_depreciation_in_months,
 		)
 
@@ -1092,7 +1092,7 @@ def create_asset_revaluation(asset, asset_category, company):
 
 @frappe.whitelist()
 def create_depreciation_entry(asset_name, serial_no=None):
-	from assets.asset.doctype.depreciation_schedule_.depreciation_posting import (
+	from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
 		get_depreciation_accounts,
 		get_depreciation_details,
 	)

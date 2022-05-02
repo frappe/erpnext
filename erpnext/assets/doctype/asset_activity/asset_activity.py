@@ -9,7 +9,7 @@ from frappe.utils import getdate
 
 class AssetActivity(Document):
 	def validate(self):
-		from assets.controllers.base_asset import validate_serial_no
+		from erpnext.controllers.base_asset import validate_serial_no
 
 		self.validate_activity_date()
 		validate_serial_no(self)
