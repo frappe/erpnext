@@ -4,19 +4,19 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, get_datetime, add_months, format_date, nowdate
+from frappe.utils.data import get_link_to_form, get_last_day
 import json
 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
+from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
-from assets.asset.doctype.asset_activity.asset_activity import create_asset_activity
-from assets.asset.doctype.asset_category_.asset_category_ import get_asset_category_account
 from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import (
 	create_depreciation_schedules,
 	create_a_single_depreciation_schedule,
 	delete_existing_schedules
 )
-from frappe.utils.data import get_link_to_form, get_last_day
 
 
 class BaseAsset(AccountsController):

@@ -289,7 +289,7 @@ class AssetRepair_(AccountsController):
 		return frappe.db.get_single_value("Accounts Settings", "enable_finance_books")
 
 	def record_asset_repair(self):
-		from assets.asset.doctype.asset_activity.asset_activity import create_asset_activity
+		from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
 		from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import get_asset_and_serial_no
 
 		asset, serial_no = get_asset_and_serial_no(self.asset_doc)

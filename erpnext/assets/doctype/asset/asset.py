@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, get_link_to_form, flt
 
-from assets.asset.doctype.asset_activity.asset_activity import create_asset_activity
+from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
 from assets.asset.doctype.depreciation_schedule_.depreciation_schedule_ import create_depreciation_schedules
 from erpnext.controllers.base_asset import BaseAsset, get_purchase_details
 
