@@ -1004,6 +1004,9 @@ class GSPConnector:
 		if qrcode:
 			qrcode_file = self.create_qr_code_file(qrcode)
 			frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", qrcode_file.file_url)
+			frappe.msgprint(_("QR Code attached to the invoice"), alert=True)
+		else:
+			frappe.msgprint(_("QR Code not found for the IRN"), alert=True)
 
 	def get_qrcode_from_irn(self, irn):
 		import requests
@@ -1014,8 +1017,15 @@ class GSPConnector:
 		try:
 			# using requests.get instead of make_request to avoid parsing the response
 			res = requests.get(self.get_qrcode_url, headers=headers)
+			self.log_request(self.get_qrcode_url, headers, None, None)
 			if res.status_code == 200:
 				return res.content
+			else:
+				raise RequestFailed(str(res.content, "utf-8"))
+
+		except RequestFailed as e:
+			self.raise_error(errors=str(e))
+
 		except Exception:
 			log_error()
 			self.raise_error()
@@ -1220,8 +1230,6 @@ class GSPConnector:
 		return errors
 
 	def raise_error(self, raise_exception=False, errors=None):
-		if errors is None:
-			errors = []
 		title = _("E Invoice Request Failed")
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
@@ -1457,3 +1465,31 @@ def job_already_enqueued(job_name):
 	enqueued_jobs = [d.get("job_name") for d in get_info()]
 	if job_name in enqueued_jobs:
 		return True
+
+
+def generate_irn_on_submit(doc, method):
+	if doc.get("irn"):
+		return
+
+	eligible = validate_eligibility(doc)
+
+	if not eligible:
+		return
+
+	generate_irn(doc.doctype, doc.name)
+
+	frappe.msgprint(_("IRN generated successfully."), alert=True)
+
+
+def cancel_irn_on_cancel(doc, method):
+	if doc.get("irn_cancelled"):
+		return
+
+	eligible = validate_eligibility(doc)
+
+	if not eligible:
+		return
+
+	cancel_irn(doc.doctype, doc.name, doc.irn, "3", "Cancelled by user")
+
+	frappe.msgprint(_("IRN cancelled successfully."), alert=True)

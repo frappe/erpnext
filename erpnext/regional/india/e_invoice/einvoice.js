@@ -216,13 +216,14 @@ erpnext.setup_einvoice_actions = (doctype) => {
 									method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
 									args: { doctype, docname: name },
 									freeze: true,
-									callback: () => frm.reload_doc() || dialog.hide()
+									callback: () => frm.reload_doc() || dialog.hide(),
+									error: () => dialog.hide()
 								});
 							}
 						},
 						primary_action_label: __('Yes')
 					});
-					d.show();
+					dialog.show();
 				};
 				add_custom_button(__("Generate QRCode"), action);
 			}
