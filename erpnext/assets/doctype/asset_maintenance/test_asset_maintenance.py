@@ -4,146 +4,224 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, get_last_day, nowdate
+from frappe.utils import nowdate, add_days
 
+from assets.asset.doctype.asset_.test_asset_ import (
+	create_asset,
+	create_company,
+	create_asset_data,
+)
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
-
-class TestAssetMaintenance(unittest.TestCase):
-	def setUp(self):
-		set_depreciation_settings_in_company()
+class TestAssetMaintenance_(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		create_company()
 		create_asset_data()
-		create_maintenance_team()
+		create_maintenance_personnel()
 
-	def test_create_asset_maintenance(self):
-		pr = make_purchase_receipt(
-			item_code="Photocopier", qty=1, rate=100000.0, location="Test Location"
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.rollback()
+
+	def test_start_date_is_before_end_date(self):
+		asset = create_asset(maintenance_required = 1, submit = 1)
+
+		asset_maintenance = create_asset_maintenance(asset.name)
+		asset_maintenance.asset_maintenance_tasks[0].start_date = nowdate()
+		asset_maintenance.asset_maintenance_tasks[0].end_date = add_days(nowdate(), -1)
+
+		self.assertRaises(frappe.ValidationError, asset_maintenance.save)
+
+	def test_next_due_date_calculation(self):
+		asset = create_asset(maintenance_required = 1, submit = 1)
+
+		asset_maintenance = create_asset_maintenance(asset.name)
+
+		start_date = asset_maintenance.asset_maintenance_tasks[0].start_date
+		periodicity = asset_maintenance.asset_maintenance_tasks[0].periodicity
+
+		ideal_next_due_date = calculate_next_due_date(periodicity, start_date)
+		actual_next_due_date = asset_maintenance.asset_maintenance_tasks[0].next_due_date
+
+		self.assertEqual(ideal_next_due_date, actual_next_due_date)
+
+	def test_maintenance_status_is_overdue(self):
+		"""Tests if maintenance_status is set to Overdue after next_due_date has passed."""
+
+		asset = create_asset(maintenance_required = 1, submit = 1)
+
+		asset_maintenance = create_asset_maintenance(asset.name)
+		asset_maintenance.asset_maintenance_tasks[0].next_due_date = add_days(nowdate(), -1)
+		asset_maintenance.save()
+
+		maintenance_status = asset_maintenance.asset_maintenance_tasks[0].maintenance_status
+		self.assertEqual(maintenance_status, "Overdue")
+
+	def test_assignee_is_mandatory(self):
+		asset = create_asset(maintenance_required = 1, submit = 1)
+
+		asset_maintenance = create_asset_maintenance(asset.name)
+		asset_maintenance.asset_maintenance_tasks[0].assign_to = None
+
+		self.assertRaises(frappe.ValidationError, asset_maintenance.save)
+
+	def test_maintenance_required_is_enabled(self):
+		asset = create_asset(maintenance_required = 0, submit = 1)
+		asset_maintenance = create_asset_maintenance(
+			asset_name = asset.name,
+			do_not_save = 1
 		)
 
-		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
-		asset_doc = frappe.get_doc("Asset", asset_name)
-		month_end_date = get_last_day(nowdate())
+		self.assertRaises(frappe.ValidationError, asset_maintenance.save)
 
-		purchase_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
-
-		asset_doc.available_for_use_date = purchase_date
-		asset_doc.purchase_date = purchase_date
-
-		asset_doc.calculate_depreciation = 1
-		asset_doc.append(
-			"finance_books",
-			{
-				"expected_value_after_useful_life": 200,
-				"depreciation_method": "Straight Line",
-				"total_number_of_depreciations": 3,
-				"frequency_of_depreciation": 10,
-				"depreciation_start_date": month_end_date,
-			},
+	def test_serial_no_is_entered_when_the_asset_is_serialized(self):
+		asset = create_asset(
+			maintenance_required = 1,
+			is_serialized_asset = 1,
+			submit = 1
+		)
+		asset_maintenance = create_asset_maintenance(
+			asset_name = asset.name,
+			do_not_save = 1
 		)
 
-		asset_doc.save()
+		self.assertRaises(frappe.ValidationError, asset_maintenance.save)
 
-		if not frappe.db.exists("Asset Maintenance", "Photocopier"):
-			asset_maintenance = frappe.get_doc(
-				{
-					"doctype": "Asset Maintenance",
-					"asset_name": "Photocopier",
-					"maintenance_team": "Team Awesome",
-					"company": "_Test Company",
-					"asset_maintenance_tasks": get_maintenance_tasks(),
-				}
-			).insert()
+	def test_num_of_assets_is_entered_when_the_asset_is_non_serialized(self):
+		asset = create_asset(
+			maintenance_required = 1,
+			is_serialized_asset = 0,
+			submit = 1
+		)
+		asset_maintenance = create_asset_maintenance(
+			asset_name = asset.name,
+			do_not_save = 1
+		)
+		asset_maintenance.num_of_assets = 0
 
-			next_due_date = calculate_next_due_date(nowdate(), "Monthly")
-			self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
+		self.assertRaises(frappe.ValidationError, asset_maintenance.save)
 
-	def test_create_asset_maintenance_log(self):
-		if not frappe.db.exists("Asset Maintenance Log", "Photocopier"):
-			asset_maintenance_log = frappe.get_doc(
-				{
-					"doctype": "Asset Maintenance Log",
-					"asset_maintenance": "Photocopier",
-					"task": "Change Oil",
-					"completion_date": add_days(nowdate(), 2),
-					"maintenance_status": "Completed",
-				}
-			).insert()
-		asset_maintenance = frappe.get_doc("Asset Maintenance", "Photocopier")
-		next_due_date = calculate_next_due_date(asset_maintenance_log.completion_date, "Monthly")
-		self.assertEqual(asset_maintenance.asset_maintenance_tasks[0].next_due_date, next_due_date)
+	def test_asset_split(self):
+		"""Tests if Asset gets split on creating Asset Maintenance with num_of_assets < the Asset's num_of_assets."""
 
+		asset = create_asset(
+			maintenance_required = 1,
+			is_serialized_asset = 0,
+			num_of_assets = 3,
+			submit = 1
+		)
+		create_asset_maintenance(
+			asset_name = asset.name,
+			num_of_assets = 1
+		)
 
-def create_asset_data():
-	if not frappe.db.exists("Asset Category", "Equipment"):
-		create_asset_category()
+		asset.reload()
+		self.assertEqual(asset.num_of_assets, 1)
 
-	if not frappe.db.exists("Location", "Test Location"):
-		frappe.get_doc({"doctype": "Location", "location_name": "Test Location"}).insert()
+	def test_assign_tasks(self):
+		"""Test if ToDos are created for assignees."""
 
-	if not frappe.db.exists("Item", "Photocopier"):
-		meta = frappe.get_meta("Asset")
-		naming_series = meta.get_field("naming_series").options
-		frappe.get_doc(
-			{
-				"doctype": "Item",
-				"item_code": "Photocopier",
-				"item_name": "Photocopier",
-				"item_group": "All Item Groups",
-				"company": "_Test Company",
-				"is_fixed_asset": 1,
-				"is_stock_item": 0,
-				"asset_category": "Equipment",
-				"auto_create_assets": 1,
-				"asset_naming_series": naming_series,
+		asset = create_asset(maintenance_required = 1, submit = 1)
+		asset_maintenance = create_asset_maintenance(asset.name)
+
+		todos = frappe.get_all(
+			"ToDo",
+			filters = {
+				"reference_type":asset_maintenance.doctype,
+				"reference_name": asset_maintenance.name,
+				"status": "Open",
+				"allocated_to": asset_maintenance.asset_maintenance_tasks[0].assign_to
 			}
-		).insert()
+		)
 
+		self.assertTrue(todos)
 
-def create_maintenance_team():
-	user_list = ["marcus@abc.com", "thalia@abc.com", "mathias@abc.com"]
+	def test_maintenance_logs_are_created(self):
+		asset = create_asset(maintenance_required = 1, submit = 1)
+		asset_maintenance = create_asset_maintenance(asset.name)
+
+		for task in asset_maintenance.asset_maintenance_tasks:
+			maintenance_log = asset_maintenance.get_maintenance_log(task)
+			self.assertTrue(maintenance_log)
+
+def create_maintenance_personnel():
+	user_list = ["dwight@dm.com", "jim@dm.com", "pam@dm.com"]
+
 	if not frappe.db.exists("Role", "Technician"):
-		frappe.get_doc({"doctype": "Role", "role_name": "Technician"}).insert()
+		create_role("Technician")
+
 	for user in user_list:
 		if not frappe.db.get_value("User", user):
-			frappe.get_doc(
-				{
-					"doctype": "User",
-					"email": user,
-					"first_name": user,
-					"new_password": "password",
-					"roles": [{"doctype": "Has Role", "role": "Technician"}],
-				}
-			).insert()
+			create_user(user)
 
-	if not frappe.db.exists("Asset Maintenance Team", "Team Awesome"):
-		frappe.get_doc(
-			{
-				"doctype": "Asset Maintenance Team",
-				"maintenance_manager": "marcus@abc.com",
-				"maintenance_team_name": "Team Awesome",
-				"company": "_Test Company",
-				"maintenance_team_members": get_maintenance_team(user_list),
-			}
-		).insert()
+	if not frappe.db.exists("Asset Maintenance Team", "Team Dunder Mifflin"):
+		create_maintenance_team(user_list)
 
+def create_role(role_name):
+	frappe.get_doc({
+		"doctype": "Role",
+		"role_name": role_name
+	}).insert()
 
-def get_maintenance_team(user_list):
-	return [
-		{"team_member": user, "full_name": user, "maintenance_role": "Technician"}
-		for user in user_list[1:]
-	]
+def create_user(user):
+	frappe.get_doc({
+		"doctype": "User",
+		"email": user,
+		"first_name": user,
+		"new_password": "password",
+		"roles": [{"doctype": "Has Role", "role": "Technician"}]
+	}).insert()
 
+def create_maintenance_team(user_list):
+	frappe.get_doc({
+		"doctype": "Asset Maintenance Team",
+		"maintenance_manager": "dwight@dm.com",
+		"maintenance_team_name": "Team Dunder Mifflin",
+		"company": "_Test Company",
+		"maintenance_team_members": get_maintenance_team_members(user_list)
+	}).insert()
+
+def get_maintenance_team_members(user_list):
+	maintenance_team_members = []
+
+	for user in user_list[1:]:
+		maintenance_team_members.append({
+			"team_member": user,
+			"full_name": user,
+			"maintenance_role": "Technician"
+		})
+
+	return maintenance_team_members
+
+def create_asset_maintenance(asset_name, num_of_assets=0, serial_no=None, do_not_save=False):
+	asset_maintenance =	frappe.get_doc({
+		"doctype": "Asset Maintenance",
+		"asset": asset_name,
+		"num_of_assets": num_of_assets or (0 if serial_no else 1),
+		"serial_no": serial_no,
+		"maintenance_team": "Team Dunder Mifflin",
+		"company": "_Test Company",
+		"asset_maintenance_tasks": get_maintenance_tasks()
+	})
+
+	if not do_not_save:
+		try:
+			asset_maintenance.insert(ignore_if_duplicate=True)
+		except frappe.DuplicateEntryError:
+			pass
+
+	return asset_maintenance
 
 def get_maintenance_tasks():
 	return [
 		{
-			"maintenance_task": "Change Oil",
+			"maintenance_task": "Antivirus Scan",
 			"start_date": nowdate(),
 			"periodicity": "Monthly",
 			"maintenance_type": "Preventive Maintenance",
 			"maintenance_status": "Planned",
-			"assign_to": "marcus@abc.com",
+			"assign_to": "jim@dm.com"
 		},
 		{
 			"maintenance_task": "Check Gears",
@@ -151,35 +229,6 @@ def get_maintenance_tasks():
 			"periodicity": "Yearly",
 			"maintenance_type": "Calibration",
 			"maintenance_status": "Planned",
-			"assign_to": "thalia@abc.com",
-		},
+			"assign_to": "pam@dm.com"
+		}
 	]
-
-
-def create_asset_category():
-	asset_category = frappe.new_doc("Asset Category")
-	asset_category.asset_category_name = "Equipment"
-	asset_category.total_number_of_depreciations = 3
-	asset_category.frequency_of_depreciation = 3
-	asset_category.append(
-		"accounts",
-		{
-			"company_name": "_Test Company",
-			"fixed_asset_account": "_Test Fixed Asset - _TC",
-			"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
-			"depreciation_expense_account": "_Test Depreciations - _TC",
-		},
-	)
-	asset_category.insert()
-
-
-def set_depreciation_settings_in_company():
-	company = frappe.get_doc("Company", "_Test Company")
-	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - _TC"
-	company.depreciation_expense_account = "_Test Depreciations - _TC"
-	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"
-	company.depreciation_cost_center = "_Test Cost Center - _TC"
-	company.save()
-
-	# Enable booking asset depreciation entry automatically
-	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
