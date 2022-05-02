@@ -13,7 +13,6 @@ def execute():
 		"Employee": "Payable",
 		"Member": "Receivable",
 		"Shareholder": "Payable",
-		"Student": "Receivable",
 	}
 
 	for party_type, account_type in party_types.items():
