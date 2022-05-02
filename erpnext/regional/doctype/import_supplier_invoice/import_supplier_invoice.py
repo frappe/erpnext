@@ -160,7 +160,7 @@ def get_file_content(file_name, zip_file_object):
 		try:
 			content = encoded_content.decode("utf-16")
 		except UnicodeDecodeError as e:
-			frappe.log_error(message=e, title="UTF-16 encoding error for File Name: " + file_name)
+			frappe.log_error("UTF-16 encoding error for File Name: " + file_name)
 
 	return content
 
@@ -390,9 +390,7 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 		return pi.name
 	except Exception as e:
 		frappe.db.set_value("Import Supplier Invoice", name, "status", "Error")
-		frappe.log_error(
-			message=e, title="Create Purchase Invoice: " + args.get("bill_no") + "File Name: " + file_name
-		)
+		pi.log_error("Unable to create Puchase Invoice")
 		return None
 
 

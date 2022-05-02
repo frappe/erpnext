@@ -45,7 +45,6 @@ class Subscription(Document):
 		"""
 		Subscription period is the period to be billed. This method updates the
 		beginning of the billing period and end of the billing period.
-
 		The beginning of the billing period is represented in the doctype as
 		`current_invoice_start` and the end of the billing period is represented
 		as `current_invoice_end`.
@@ -89,10 +88,8 @@ class Subscription(Document):
 	) -> Union[datetime.date, str]:
 		"""
 		This returns the date of the end of the current billing period.
-
 		If the subscription is in trial period, it will be set as the end of the
 		trial period.
-
 		If is not in a trial period, it will be `x` days from the beginning of the
 		current billing period where `x` is the billing interval from the
 		`Subscription Plan` in the `Subscription`.
@@ -143,7 +140,6 @@ class Subscription(Document):
 	def get_billing_cycle_and_interval(self) -> List[Dict[str, str]]:
 		"""
 		Returns a dict representing the billing interval and cycle for this `Subscription`.
-
 		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
 		"""
 		plan_names = [plan.plan for plan in self.plans]
@@ -158,7 +154,6 @@ class Subscription(Document):
 	def get_billing_cycle_data(self) -> Dict[str, int]:
 		"""
 		Returns dict contain the billing cycle data.
-
 		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
 		"""
 		billing_info = self.get_billing_cycle_and_interval()
@@ -326,7 +321,6 @@ class Subscription(Document):
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
 		saves the `Subscription`.
-
 		Backwards compatibility
 		"""
 		return self.create_invoice(from_date=from_date, to_date=to_date)
