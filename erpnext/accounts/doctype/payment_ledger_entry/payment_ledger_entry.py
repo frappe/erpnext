@@ -54,9 +54,13 @@ def get_payment_ledger_entries(gl_map, cancel=0):
 					}
 				)
 				# identify transaction type
-				if frappe.db.get_value("Account", entry.account, "root_type") == "Asset":
+				if frappe.db.get_value("Account", entry.account, "root_type") in ["Asset", "Income"]:
 					dr_or_cr = entry.debit - entry.credit
-				elif frappe.db.get_value("Account", entry.account, "root_type") == "Liability":
+				elif frappe.db.get_value("Account", entry.account, "root_type") in [
+					"Liability",
+					"Expense",
+					"Equity",
+				]:
 					dr_or_cr = entry.credit - entry.debit
 
 				if dr_or_cr > 0:
