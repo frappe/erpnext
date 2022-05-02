@@ -1547,11 +1547,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-04-21 08:16:48.316074",
-=======
  "modified": "2022-04-26 14:38:18.350207",
->>>>>>> 82a0635c66 (fix: Consistent accounting dimensions across Sales and Purchase docs)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
