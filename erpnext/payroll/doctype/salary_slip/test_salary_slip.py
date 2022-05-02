@@ -128,8 +128,6 @@ class TestSalarySlip(unittest.TestCase):
 		},
 	)
 	def test_payment_days_for_mid_joinee_including_holidays(self):
-		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
-
 		no_of_days = self.get_no_of_days()
 		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
 
@@ -141,14 +139,9 @@ class TestSalarySlip(unittest.TestCase):
 			{"date_of_joining": joining_date, "relieving_date": relieving_date, "status": "Left"},
 		)
 
-		holidays = 0
-
 		for days in range(date_diff(relieving_date, joining_date) + 1):
 			date = add_days(joining_date, days)
-			if not is_holiday("Salary Slip Test Holiday List", date):
-				mark_attendance(new_emp_id, date, "Present", ignore_validate=True)
-			else:
-				holidays += 1
+			mark_attendance(new_emp_id, date, "Present", ignore_validate=True)
 
 		new_ss = make_employee_salary_slip(
 			"test_payment_days_based_on_joining_date@salary.com",
@@ -157,7 +150,7 @@ class TestSalarySlip(unittest.TestCase):
 		)
 
 		self.assertEqual(new_ss.total_working_days, no_of_days[0])
-		self.assertEqual(new_ss.payment_days, no_of_days[0] - holidays - 8)
+		self.assertEqual(new_ss.payment_days, no_of_days[0] - 8)
 
 	@change_settings(
 		"Payroll Settings",
