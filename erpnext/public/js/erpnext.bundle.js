@@ -16,7 +16,6 @@ import "./templates/item_quick_entry.html";
 import "./utils/item_quick_entry";
 import "./utils/customer_quick_entry";
 import "./utils/supplier_quick_entry";
-import "./education/assessment_result_tool.html";
 import "./call_popup/call_popup";
 import "./utils/dimension_tree_filter";
 import "./utils/barcode_scanner";

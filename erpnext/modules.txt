@@ -12,7 +12,6 @@ Utilities
 Assets
 Portal
 Maintenance
-Education
 Regional
 ERPNext Integrations
 Quality Management
