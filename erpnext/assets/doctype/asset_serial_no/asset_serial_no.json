@@ -244,7 +244,7 @@
     ],
     "modified": "2022-04-28 21:26:38.394732",
     "modified_by": "Administrator",
-    "module": "Asset",
+    "module": "Assets",
     "name": "Asset Serial No",
     "naming_rule": "By fieldname",
     "owner": "Administrator",
