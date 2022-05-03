@@ -33,10 +33,8 @@ def before_tests():
 				"email": "test@erpnext.com",
 				"password": "test",
 				"chart_of_accounts": "Standard",
-				"domains": ["Manufacturing"],
 			}
 		)
-		_enable_all_domains()
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
 	frappe.db.sql("delete from `tabLeave Application`")
@@ -112,7 +110,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 			cache.setex(name=key, time=21600, value=flt(value))
 		return flt(value)
 	except Exception:
-		frappe.log_error(title="Get Exchange Rate")
+		frappe.log_error("Unable to fetch exchange rate")
 		frappe.msgprint(
 			_(
 				"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -131,15 +129,7 @@ def format_ces_api(data, param):
 
 def enable_all_roles_and_domains():
 	"""enable all roles and domain for testing"""
-	_enable_all_domains()
 	_enable_all_roles_for_admin()
-
-
-def _enable_all_domains():
-	domains = frappe.get_all("Domain", pluck="name")
-	if not domains:
-		return
-	frappe.get_single("Domain Settings").set_active_domains(domains)
 
 
 def _enable_all_roles_for_admin():

@@ -128,6 +128,72 @@ class TestSalarySlip(unittest.TestCase):
 		},
 	)
 	def test_payment_days_for_mid_joinee_including_holidays(self):
+		no_of_days = self.get_no_of_days()
+		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
+
+		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
+		joining_date, relieving_date = add_days(month_start_date, 3), add_days(month_end_date, -5)
+
+		for days in range(date_diff(month_end_date, month_start_date) + 1):
+			date = add_days(month_start_date, days)
+			mark_attendance(new_emp_id, date, "Present", ignore_validate=True)
+
+		# Case 1: relieving in mid month
+		frappe.db.set_value(
+			"Employee",
+			new_emp_id,
+			{"date_of_joining": month_start_date, "relieving_date": relieving_date, "status": "Active"},
+		)
+
+		new_ss = make_employee_salary_slip(
+			"test_payment_days_based_on_joining_date@salary.com",
+			"Monthly",
+			"Test Payment Based On Attendence",
+		)
+		self.assertEqual(new_ss.payment_days, no_of_days[0] - 5)
+
+		# Case 2: joining in mid month
+		frappe.db.set_value(
+			"Employee",
+			new_emp_id,
+			{"date_of_joining": joining_date, "relieving_date": month_end_date, "status": "Active"},
+		)
+
+		frappe.delete_doc("Salary Slip", new_ss.name, force=True)
+		new_ss = make_employee_salary_slip(
+			"test_payment_days_based_on_joining_date@salary.com",
+			"Monthly",
+			"Test Payment Based On Attendence",
+		)
+		self.assertEqual(new_ss.payment_days, no_of_days[0] - 3)
+
+		# Case 3: joining and relieving in mid-month
+		frappe.db.set_value(
+			"Employee",
+			new_emp_id,
+			{"date_of_joining": joining_date, "relieving_date": relieving_date, "status": "Left"},
+		)
+
+		frappe.delete_doc("Salary Slip", new_ss.name, force=True)
+		new_ss = make_employee_salary_slip(
+			"test_payment_days_based_on_joining_date@salary.com",
+			"Monthly",
+			"Test Payment Based On Attendence",
+		)
+
+		self.assertEqual(new_ss.total_working_days, no_of_days[0])
+		self.assertEqual(new_ss.payment_days, no_of_days[0] - 8)
+
+	@change_settings(
+		"Payroll Settings",
+		{
+			"payroll_based_on": "Attendance",
+			"consider_unmarked_attendance_as": "Absent",
+			"include_holidays_in_total_working_days": True,
+		},
+	)
+	def test_payment_days_for_mid_joinee_including_holidays_and_unmarked_days(self):
+		# tests mid month joining and relieving along with unmarked days
 		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
 		no_of_days = self.get_no_of_days()
@@ -135,12 +201,6 @@ class TestSalarySlip(unittest.TestCase):
 
 		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
 		joining_date, relieving_date = add_days(month_start_date, 3), add_days(month_end_date, -5)
-		frappe.db.set_value(
-			"Employee",
-			new_emp_id,
-			{"date_of_joining": joining_date, "relieving_date": relieving_date, "status": "Left"},
-		)
-
 		holidays = 0
 
 		for days in range(date_diff(relieving_date, joining_date) + 1):
@@ -149,6 +209,12 @@ class TestSalarySlip(unittest.TestCase):
 				mark_attendance(new_emp_id, date, "Present", ignore_validate=True)
 			else:
 				holidays += 1
+
+		frappe.db.set_value(
+			"Employee",
+			new_emp_id,
+			{"date_of_joining": joining_date, "relieving_date": relieving_date, "status": "Left"},
+		)
 
 		new_ss = make_employee_salary_slip(
 			"test_payment_days_based_on_joining_date@salary.com",

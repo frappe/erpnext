@@ -869,8 +869,9 @@
   },
   {
    "fieldname": "default_item_manufacturer",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Default Item Manufacturer",
+   "options": "Manufacturer",
    "read_only": 1
   },
   {
@@ -918,7 +919,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-03-25 06:38:55.942304",
+ "modified": "2022-04-28 04:52:10.272256",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -96,5 +96,5 @@ def check_mandate(data, reference_doctype, reference_docname):
 		return {"redirect_to": redirect_flow.redirect_url}
 
 	except Exception as e:
-		frappe.log_error(e, "GoCardless Payment Error")
+		frappe.log_error("GoCardless Payment Error")
 		return {"redirect_to": "/integrations/payment-failed"}
