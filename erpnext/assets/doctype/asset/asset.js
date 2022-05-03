@@ -157,14 +157,14 @@ frappe.ui.form.on("Asset", {
 		if (frm.doc.is_serialized_asset) {
 			if (!frm.doc.is_existing_asset) {
 				frappe.call({
-					method: "assets.controllers.base_asset.get_purchase_details",
+					method: "erpnext.controllers.base_asset.get_purchase_details",
 					args: {
 						asset: frm.doc
 					},
 					callback: function (r) {
 						if (r.message) {
 							frappe.call({
-								method: "assets.controllers.base_asset.get_num_of_items_in_purchase_doc",
+								method: "erpnext.controllers.base_asset.get_num_of_items_in_purchase_doc",
 								args: {
 									asset: frm.doc,
 									purchase_doctype: r.message[0],
@@ -246,7 +246,7 @@ frappe.ui.form.on("Asset", {
 			primary_action: function () {
 				var data = dialog.get_values();
 				frappe.call({
-					method: "assets.asset.doctype.asset_.asset_.split_asset",
+					method: "erpnext.assets.doctype.asset.asset.split_asset",
 					args: {
 						asset: frm.doc.name,
 						num_of_assets_to_be_separated: data.num_of_assets_to_be_separated
@@ -264,7 +264,7 @@ frappe.ui.form.on("Asset", {
 
 	transfer_asset: function (frm) {
 		frappe.call({
-			method: "assets.controllers.base_asset.transfer_asset",
+			method: "erpnext.controllers.base_asset.transfer_asset",
 			freeze: true,
 			args: {
 				"asset": frm.doc.name,
@@ -288,7 +288,7 @@ frappe.ui.form.on("Asset", {
 				"item_code": frm.doc.item_code,
 				"company": frm.doc.company
 			},
-			method: "assets.controllers.base_asset.make_sales_invoice",
+			method: "erpnext.controllers.base_asset.make_sales_invoice",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -305,7 +305,7 @@ frappe.ui.form.on("Asset", {
 				"asset_category": frm.doc.asset_category,
 				"company": frm.doc.company
 			},
-			method: "assets.controllers.base_asset.create_asset_maintenance",
+			method: "erpnext.controllers.base_asset.create_asset_maintenance",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -319,7 +319,7 @@ frappe.ui.form.on("Asset", {
 				"asset": frm.doc.name,
 				"asset_name": frm.doc.asset_name
 			},
-			method: "assets.controllers.base_asset.create_asset_repair",
+			method: "erpnext.controllers.base_asset.create_asset_repair",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -334,7 +334,7 @@ frappe.ui.form.on("Asset", {
 				"asset_category": frm.doc.asset_category,
 				"company": frm.doc.company
 			},
-			method: "assets.controllers.base_asset.create_asset_revaluation",
+			method: "erpnext.controllers.base_asset.create_asset_revaluation",
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
@@ -344,7 +344,7 @@ frappe.ui.form.on("Asset", {
 
 	create_depreciation_entry: function (frm) {
 		frappe.call({
-			method: "assets.controllers.base_asset.create_depreciation_entry",
+			method: "erpnext.controllers.base_asset.create_depreciation_entry",
 			args: {
 				asset_name: frm.doc.name
 			},
@@ -416,7 +416,7 @@ frappe.ui.form.on("Asset", {
 
 	set_finance_book: function (frm) {
 		frappe.call({
-			method: "assets.controllers.base_asset.get_finance_books",
+			method: "erpnext.controllers.base_asset.get_finance_books",
 			args: {
 				asset_category: frm.doc.asset_category
 			},
