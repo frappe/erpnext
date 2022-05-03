@@ -203,7 +203,7 @@ def get_loan_entries(filters):
 			posting_date = (loan_doc.posting_date).as_("posting_date")
 			account = loan_doc.payment_account
 
-		entries = (
+		query = (
 			frappe.qb.from_(loan_doc)
 			.select(
 				ConstantColumn(doctype).as_("payment_document"),
@@ -217,9 +217,12 @@ def get_loan_entries(filters):
 			.where(account == filters.get("account"))
 			.where(posting_date <= getdate(filters.get("report_date")))
 			.where(ifnull(loan_doc.clearance_date, "4000-01-01") > getdate(filters.get("report_date")))
-			.run(as_dict=1)
 		)
 
+		if doctype == "Loan Repayment":
+			query.where(loan_doc.repay_from_salary == 0)
+
+		entries = query.run(as_dict=1)
 		loan_docs.extend(entries)
 
 	return loan_docs
