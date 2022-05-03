@@ -411,6 +411,8 @@ class TestPickList(FrappeTestCase):
 			}
 		)
 		pick_list.set_item_locations()
+		for location in pick_list.locations:
+			location.picked_qty = location.stock_qty
 		pick_list.submit()
 
 		delivery_note = create_delivery_note(pick_list.name)
@@ -527,6 +529,8 @@ class TestPickList(FrappeTestCase):
 			}
 		)
 		pick_list.set_item_locations()
+		for location in pick_list.locations:
+			location.picked_qty = location.stock_qty
 		pick_list.submit()
 		create_delivery_note(pick_list.name)
 		for dn in frappe.get_all(
@@ -571,6 +575,8 @@ class TestPickList(FrappeTestCase):
 			}
 		)
 		pick_list_1.set_item_locations()
+		for location in pick_list_1.locations:
+			location.picked_qty = location.stock_qty
 		pick_list_1.submit()
 		create_delivery_note(pick_list_1.name)
 		for dn in frappe.get_all(
@@ -591,7 +597,8 @@ class TestPickList(FrappeTestCase):
 		pl = create_pick_list(so.name)
 		# pick half the qty
 		for loc in pl.locations:
-			loc.picked_qty = loc.stock_qty / 2
+			loc.stock_qty = loc.stock_qty /2
+			loc.picked_qty = loc.stock_qty
 		pl.save()
 		pl.submit()
 
@@ -611,6 +618,7 @@ class TestPickList(FrappeTestCase):
 		pl.save()
 		self.assertEqual(len(pl.locations), 2)
 		for item in pl.locations:
+			item.picked_qty = item.stock_qty
 			self.assertEqual(item.stock_qty, bundle_items[item.item_code] * 3)
 
 		# check picking status on sales order
@@ -636,7 +644,8 @@ class TestPickList(FrappeTestCase):
 
 		pl = create_pick_list(so.name)
 		for loc in pl.locations:
-			loc.picked_qty = loc.qty / 2
+			loc.stock_qty = loc.stock_qty / 2
+			loc.picked_qty = loc.stock_qty
 
 		pl.save().submit()
 		so.reload()
@@ -649,6 +658,8 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(so.per_delivered, 50)
 
 		pl = create_pick_list(so.name)
+		for loc in pl.locations:
+			loc.picked_qty = loc.stock_qty
 		pl.save().submit()
 		so.reload()
 		self.assertEqual(so.per_picked, 100)
