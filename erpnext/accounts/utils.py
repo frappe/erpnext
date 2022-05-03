@@ -830,10 +830,8 @@ def get_outstanding_invoices(
 
 	if party_account_type == "Receivable":
 		dr_or_cr = gle.debit_in_account_currency - gle.credit_in_account_currency
-		payment_dr_or_cr = gle.credit_in_account_currency - gle.debit_in_account_currency
 	else:
 		dr_or_cr = gle.credit_in_account_currency - gle.debit_in_account_currency
-		payment_dr_or_cr = gle.debit_in_account_currency - gle.credit_in_account_currency
 
 	if filter_criterion is None:
 		filter_criterion = []
