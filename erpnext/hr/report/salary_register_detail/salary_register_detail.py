@@ -42,10 +42,16 @@ def execute(filters=None):
 
 		salary_detail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"parent":ss.name})
 
+		gross_pay = 0
+
+		incomes = 0
+
 		row = [ss.employee_name, ss.payment_days]
 
 		if len(Employee) > 0:		
 			row += [Employee[0].base]
+			gross_pay = Employee[0].base
+			incomes = ss.gross_pay - Employee[0].base
 		else:
 			row += [0]
 
@@ -61,7 +67,9 @@ def execute(filters=None):
 			# else:
 			# 	row += [0]
 
-		row += [ss.gross_pay]
+		row += [gross_pay]
+
+		row += [incomes]
 
 		for coldata in salary_components_deduction:			
 			salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":coldata.name})
@@ -79,9 +87,19 @@ def execute(filters=None):
 
 		if ss.employee in confidential_list:
 			if confidential_payroll[0].rol in roles_arr:
-				data.append(row)
+				if filters.get("department"):
+					employee_data = frappe.get_doc("Employee", ss.employee)
+					if employee_data.department == filters.get("department"):
+						data.append(row)
+				else:
+					data.append(row)
 		else:
-			data.append(row)
+			if filters.get("department"):
+				employee_data = frappe.get_doc("Employee", ss.employee)
+				if employee_data.department == filters.get("department"):
+					data.append(row)
+			else:
+				data.append(row)
 	
 	row = ["ELABORADO POR:"]
 
@@ -113,6 +131,7 @@ def get_columns():
 			column.append(_(component) + ":Currency:120")
 	
 	column.append(_("Gross Pay") + ":Currency:120")
+	column.append(_("Extra Income") + ":Currency:120")
 
 	salary_components_deduction = frappe.get_all("Salary Component", ["name"], filters = {"type": "Deduction"})
 

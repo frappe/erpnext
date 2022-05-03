@@ -36,6 +36,12 @@ frappe.query_reports["Salary Register"] = {
 			"fieldtype":"Select",
 			"options":["Draft", "Submitted", "Cancelled"],
 			"default":"Submitted"
+		},
+		{
+			"fieldname":"department",
+			"label": __("Department"),
+			"fieldtype": "Link",
+			"options": "Department"
 		}
 	]
 }

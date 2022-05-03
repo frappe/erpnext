@@ -58,6 +58,8 @@ class SalesForUser(Document):
 
 		values_conditions = []
 
+		total_cont = 0
+
 		conditions_terms = frappe.get_all("Terms and Conditions", ["*"])
 
 		for condtions_term in conditions_terms:
@@ -131,6 +133,9 @@ class SalesForUser(Document):
 					for cond in conditions_arr:
 						if salary_slip.tc_name == cond:
 							values_conditions[conta] += salary_slip.grand_total
+
+							if cond == "Contado":
+								total_cont += salary_slip.grand_total
 						
 						conta += 1
 
@@ -201,7 +206,7 @@ class SalesForUser(Document):
 		self.actual_cash = change_amount
 		self.total_cards = cards
 		self.total_advances_applied = advances
-		total_income = cash + cards + total_monetary
+		total_income = total_cont + payment_entry
 
 		self.total_income = total_income
 		self.total_credit = outstanding_amount
