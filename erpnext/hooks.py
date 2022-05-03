@@ -80,14 +80,7 @@ calendars = [
 	"Holiday List",
 ]
 
-website_generators = [
-	"Item Group",
-	"Website Item",
-	"BOM",
-	"Sales Partner",
-	"Job Opening",
-	"Student Admission",
-]
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner", "Job Opening"]
 
 website_context = {
 	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
