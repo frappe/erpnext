@@ -4,14 +4,14 @@
 import unittest
 
 import frappe
-from assets.asset.doctype.asset_.test_asset_ import (
+from frappe.utils import nowdate
+
+from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
 	create_company,
 	create_location,
 )
-from frappe.utils import nowdate
-
 from erpnext.hr.doctype.employee.test_employee import make_employee
 
 

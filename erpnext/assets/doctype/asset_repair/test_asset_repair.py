@@ -4,14 +4,14 @@
 import unittest
 
 import frappe
-from assets.asset.doctype.asset_.test_asset_ import (
+from frappe.utils import flt, nowdate
+
+from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
 	create_company,
 	enable_finance_books,
 )
-from frappe.utils import flt, nowdate
-
 from erpnext.assets.doctype.asset_serial_no.test_asset_serial_no import get_asset_serial_no_doc
 from erpnext.stock.doctype.item.test_item import create_item
 

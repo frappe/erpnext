@@ -4,7 +4,9 @@
 import unittest
 
 import frappe
-from assets.asset.doctype.asset_.test_asset_ import (
+from frappe.utils import getdate
+
+from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
 	create_company,
@@ -13,7 +15,6 @@ from assets.asset.doctype.asset_.test_asset_ import (
 	enable_finance_books,
 	get_linked_depreciation_schedules,
 )
-from frappe.utils import getdate
 
 
 class TestDepreciationSchedule_(unittest.TestCase):

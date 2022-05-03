@@ -4,9 +4,9 @@
 import unittest
 
 import frappe
-from assets.asset.doctype.asset_.test_asset_ import create_asset, create_asset_data, create_company
 from frappe.utils import add_days, nowdate
 
+from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data, create_company
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
 
