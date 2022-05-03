@@ -19,7 +19,6 @@ def execute():
 			"Training Event Employee",
 			"Payroll Employee Detail",
 		],
-		"education": ["Instructor"],
 		"projects": ["Activity Cost", "Timesheet"],
 		"setup": ["Sales Person"],
 	}
