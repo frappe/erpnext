@@ -38,6 +38,15 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				]
 			};
 		});
+		
+		this.frm.set_query("cost_center", () => {
+			return {
+				"filters": {
+					"company": this.frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
 	},
 
 	refresh: function() {
