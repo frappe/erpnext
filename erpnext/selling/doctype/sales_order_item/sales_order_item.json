@@ -803,13 +803,15 @@
   {
    "fieldname": "picked_qty",
    "fieldtype": "Float",
-   "label": "Picked Qty"
+   "label": "Picked Qty (in Stock UOM)",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-03-15 20:17:33.984799",
+ "modified": "2022-04-27 03:15:34.366563",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

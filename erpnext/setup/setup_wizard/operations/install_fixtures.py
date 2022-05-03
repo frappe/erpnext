@@ -368,7 +368,6 @@ def install(country=None):
 		{"doctype": "Party Type", "party_type": "Supplier", "account_type": "Payable"},
 		{"doctype": "Party Type", "party_type": "Employee", "account_type": "Payable"},
 		{"doctype": "Party Type", "party_type": "Shareholder", "account_type": "Payable"},
-		{"doctype": "Party Type", "party_type": "Student", "account_type": "Receivable"},
 		{"doctype": "Opportunity Type", "name": _("Sales")},
 		{"doctype": "Opportunity Type", "name": _("Support")},
 		{"doctype": "Opportunity Type", "name": _("Maintenance")},
@@ -389,13 +388,6 @@ def install(country=None):
 		{"doctype": "Offer Term", "offer_term": _("Incentives")},
 		{"doctype": "Print Heading", "print_heading": _("Credit Note")},
 		{"doctype": "Print Heading", "print_heading": _("Debit Note")},
-		# Assessment Group
-		{
-			"doctype": "Assessment Group",
-			"assessment_group_name": _("All Assessment Groups"),
-			"is_group": 1,
-			"parent_assessment_group": "",
-		},
 		# Share Management
 		{"doctype": "Share Type", "title": _("Equity")},
 		{"doctype": "Share Type", "title": _("Preference")},

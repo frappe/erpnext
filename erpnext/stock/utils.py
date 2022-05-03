@@ -7,6 +7,7 @@ from typing import Dict, Optional
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
@@ -143,12 +144,10 @@ def get_stock_balance(
 
 
 def get_serial_nos_data_after_transactions(args):
-	from pypika import CustomFunction
 
 	serial_nos = set()
 	args = frappe._dict(args)
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	Timestamp = CustomFunction("timestamp", ["date", "time"])
 
 	stock_ledger_entries = (
 		frappe.qb.from_(sle)
@@ -157,7 +156,8 @@ def get_serial_nos_data_after_transactions(args):
 			(sle.item_code == args.item_code)
 			& (sle.warehouse == args.warehouse)
 			& (
-				Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time)
+				CombineDatetime(sle.posting_date, sle.posting_time)
+				< CombineDatetime(args.posting_date, args.posting_time)
 			)
 			& (sle.is_cancelled == 0)
 		)

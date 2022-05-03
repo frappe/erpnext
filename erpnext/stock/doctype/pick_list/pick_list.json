@@ -114,6 +114,7 @@
    "set_only_once": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "print_settings_section",
    "fieldtype": "Section Break",
    "label": "Print Settings"
@@ -129,7 +130,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-05 15:08:40.369957",
+ "modified": "2022-04-21 07:56:40.646473",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
@@ -199,5 +200,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

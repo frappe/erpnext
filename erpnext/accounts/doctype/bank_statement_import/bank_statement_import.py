@@ -136,7 +136,7 @@ def start_import(
 	except Exception:
 		frappe.db.rollback()
 		data_import.db_set("status", "Error")
-		frappe.log_error(title=data_import.name)
+		data_import.log_error("Bank Statement Import failed")
 	finally:
 		frappe.flags.in_import = False
 

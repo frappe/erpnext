@@ -5,7 +5,10 @@
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
-from frappe.utils import flt, fmt_money, getdate, nowdate
+from frappe.query_builder.custom import ConstantColumn
+from frappe.utils import flt, fmt_money, getdate
+
+import erpnext
 
 form_grid_templates = {"journal_entries": "templates/form_grid/bank_reconciliation_grid.html"}
 
@@ -76,6 +79,52 @@ class BankClearance(Document):
 			as_dict=1,
 		)
 
+		loan_disbursement = frappe.qb.DocType("Loan Disbursement")
+
+		loan_disbursements = (
+			frappe.qb.from_(loan_disbursement)
+			.select(
+				ConstantColumn("Loan Disbursement").as_("payment_document"),
+				loan_disbursement.name.as_("payment_entry"),
+				loan_disbursement.disbursed_amount.as_("credit"),
+				ConstantColumn(0).as_("debit"),
+				loan_disbursement.reference_number.as_("cheque_number"),
+				loan_disbursement.reference_date.as_("cheque_date"),
+				loan_disbursement.disbursement_date.as_("posting_date"),
+				loan_disbursement.applicant.as_("against_account"),
+			)
+			.where(loan_disbursement.docstatus == 1)
+			.where(loan_disbursement.disbursement_date >= self.from_date)
+			.where(loan_disbursement.disbursement_date <= self.to_date)
+			.where(loan_disbursement.clearance_date.isnull())
+			.where(loan_disbursement.disbursement_account.isin([self.bank_account, self.account]))
+			.orderby(loan_disbursement.disbursement_date)
+			.orderby(loan_disbursement.name, frappe.qb.desc)
+		).run(as_dict=1)
+
+		loan_repayment = frappe.qb.DocType("Loan Repayment")
+
+		loan_repayments = (
+			frappe.qb.from_(loan_repayment)
+			.select(
+				ConstantColumn("Loan Repayment").as_("payment_document"),
+				loan_repayment.name.as_("payment_entry"),
+				loan_repayment.amount_paid.as_("debit"),
+				ConstantColumn(0).as_("credit"),
+				loan_repayment.reference_number.as_("cheque_number"),
+				loan_repayment.reference_date.as_("cheque_date"),
+				loan_repayment.applicant.as_("against_account"),
+				loan_repayment.posting_date,
+			)
+			.where(loan_repayment.docstatus == 1)
+			.where(loan_repayment.clearance_date.isnull())
+			.where(loan_repayment.posting_date >= self.from_date)
+			.where(loan_repayment.posting_date <= self.to_date)
+			.where(loan_repayment.payment_account.isin([self.bank_account, self.account]))
+			.orderby(loan_repayment.posting_date)
+			.orderby(loan_repayment.name, frappe.qb.desc)
+		).run(as_dict=1)
+
 		pos_sales_invoices, pos_purchase_invoices = [], []
 		if self.include_pos_transactions:
 			pos_sales_invoices = frappe.db.sql(
@@ -114,20 +163,29 @@ class BankClearance(Document):
 
 		entries = sorted(
 			list(payment_entries)
-			+ list(journal_entries + list(pos_sales_invoices) + list(pos_purchase_invoices)),
-			key=lambda k: k["posting_date"] or getdate(nowdate()),
+			+ list(journal_entries)
+			+ list(pos_sales_invoices)
+			+ list(pos_purchase_invoices)
+			+ list(loan_disbursements)
+			+ list(loan_repayments),
+			key=lambda k: getdate(k["posting_date"]),
 		)
 
 		self.set("payment_entries", [])
 		self.total_amount = 0.0
+		default_currency = erpnext.get_default_currency()
 
 		for d in entries:
 			row = self.append("payment_entries", {})
 
 			amount = flt(d.get("debit", 0)) - flt(d.get("credit", 0))
 
+			if not d.get("account_currency"):
+				d.account_currency = default_currency
+
 			formatted_amount = fmt_money(abs(amount), 2, d.account_currency)
 			d.amount = formatted_amount + " " + (_("Dr") if amount > 0 else _("Cr"))
+			d.posting_date = getdate(d.posting_date)
 
 			d.pop("credit")
 			d.pop("debit")

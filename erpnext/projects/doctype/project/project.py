@@ -9,9 +9,9 @@ from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 
+from erpnext import get_default_company
 from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
-from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
@@ -86,6 +86,7 @@ class Project(Document):
 				type=task_details.type,
 				issue=task_details.issue,
 				is_group=task_details.is_group,
+				color=task_details.color,
 			)
 		).insert()
 
@@ -665,3 +666,17 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
+
+def get_holiday_list(company=None):
+	if not company:
+		company = get_default_company() or frappe.get_all("Company")[0].name
+
+	holiday_list = frappe.get_cached_value("Company", company, "default_holiday_list")
+	if not holiday_list:
+		frappe.throw(
+			_("Please set a default Holiday List for Company {0}").format(
+				frappe.bold(get_default_company())
+			)
+		)
+	return holiday_list
