@@ -175,7 +175,7 @@
             "in_list_view": 1,
             "label": "Location",
             "mandatory_depends_on": "eval:!(doc.is_serialized_asset)",
-            "options": "Location_"
+            "options": "Location"
         },
         {
             "depends_on": "eval:!(doc.is_serialized_asset)",
@@ -531,12 +531,12 @@
     "links": [
         {
             "group": "Maintenance",
-            "link_doctype": "Asset Maintenance_",
+            "link_doctype": "Asset Maintenance",
             "link_fieldname": "asset"
         },
         {
             "group": "Repair",
-            "link_doctype": "Asset Repair_",
+            "link_doctype": "Asset Repair",
             "link_fieldname": "asset"
         },
         {
@@ -546,7 +546,7 @@
         },
         {
             "group": "Depreciation",
-            "link_doctype": "Depreciation Schedule_",
+            "link_doctype": "Depreciation Schedule",
             "link_fieldname": "asset"
         },
         {

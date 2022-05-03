@@ -1,96 +1,96 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "field:template_name",
- "creation": "2022-05-02 17:39:25.128166",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-    "template_name",
-    "depreciation_method",
-    "frequency_of_depreciation",
-    "asset_life",
-    "asset_life_unit",
-    "rate_of_depreciation",
-    "amended_from"
-],
-"fields": [
-    {
-     "fieldname": "depreciation_method",
-     "fieldtype": "Select",
-     "in_list_view": 1,
-     "label": "Depreciation Method",
-     "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual",
-     "reqd": 1
-    },
-    {
-     "fieldname": "frequency_of_depreciation",
-     "fieldtype": "Select",
-     "in_list_view": 1,
-     "label": "Frequency of Depreciation",
-     "options": "\nMonthly\nEvery 2 months\nQuarterly\nEvery 4 months\nEvery 5 months\nHalf-Yearly\nEvery 7 months\nEvery 8 months\nEvery 9 months\nEvery 10 months\nEvery 11 months\nYearly",
-     "reqd": 1
-    },
-    {
-     "depends_on": "eval:doc.depreciation_method == 'Written Down Value'",
-     "description": "In Percentage",
-     "fieldname": "rate_of_depreciation",
-     "fieldtype": "Percent",
-     "label": "Rate of Depreciation"
-    },
-    {
-     "fieldname": "template_name",
-     "fieldtype": "Data",
-     "label": "Template Name",
-     "unique": 1
-    },
-    {
-     "fieldname": "asset_life",
-     "fieldtype": "Int",
-     "in_list_view": 1,
-     "label": "Asset Life",
-     "reqd": 1
-    },
-    {
-     "fieldname": "asset_life_unit",
-     "fieldtype": "Select",
-     "label": "Asset Life Unit",
-     "options": "Months\nYears",
-     "reqd": 1
-    },
-    {
-     "fieldname": "amended_from",
-     "fieldtype": "Link",
-     "label": "Amended From",
-     "no_copy": 1,
-     "options": "Depreciation Template",
-     "print_hide": 1,
-     "read_only": 1
-    }
-],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2022-05-02 17:39:25.128166",
- "modified_by": "Administrator",
- "module": "Assets",
- "name": "Depreciation Template",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "field:template_name",
+    "creation": "2022-05-02 17:39:25.128166",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "template_name",
+        "depreciation_method",
+        "frequency_of_depreciation",
+        "asset_life",
+        "asset_life_unit",
+        "rate_of_depreciation",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "depreciation_method",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Depreciation Method",
+            "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual",
+            "reqd": 1
+        },
+        {
+            "fieldname": "frequency_of_depreciation",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Frequency of Depreciation",
+            "options": "\nMonthly\nEvery 2 months\nQuarterly\nEvery 4 months\nEvery 5 months\nHalf-Yearly\nEvery 7 months\nEvery 8 months\nEvery 9 months\nEvery 10 months\nEvery 11 months\nYearly",
+            "reqd": 1
+        },
+        {
+            "depends_on": "eval:doc.depreciation_method == 'Written Down Value'",
+            "description": "In Percentage",
+            "fieldname": "rate_of_depreciation",
+            "fieldtype": "Percent",
+            "label": "Rate of Depreciation"
+        },
+        {
+            "fieldname": "template_name",
+            "fieldtype": "Data",
+            "label": "Template Name",
+            "unique": 1
+        },
+        {
+            "fieldname": "asset_life",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Asset Life",
+            "reqd": 1
+        },
+        {
+            "fieldname": "asset_life_unit",
+            "fieldtype": "Select",
+            "label": "Asset Life Unit",
+            "options": "Months\nYears",
+            "reqd": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Depreciation Template",
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2022-05-02 17:39:25.128166",
+    "modified_by": "Administrator",
+    "module": "Assets",
+    "name": "Depreciation Template",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
 }

@@ -44,7 +44,7 @@
             "fieldtype": "Link",
             "in_list_view": 1,
             "label": "Asset",
-            "options": "Asset_",
+            "options": "Asset",
             "reqd": 1
         },
         {
@@ -77,7 +77,7 @@
             "in_list_view": 1,
             "label": "Location",
             "mandatory_depends_on": "eval:!doc.__islocal",
-            "options": "Location_"
+            "options": "Location"
         },
         {
             "fieldname": "disposal_date",
@@ -238,7 +238,7 @@
     "is_submittable": 1,
     "links": [
         {
-            "link_doctype": "Depreciation Schedule_",
+            "link_doctype": "Depreciation Schedule",
             "link_fieldname": "serial_no"
         }
     ],

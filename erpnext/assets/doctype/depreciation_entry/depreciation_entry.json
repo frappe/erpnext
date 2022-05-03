@@ -6,172 +6,172 @@
     "editable_grid": 1,
     "engine": "InnoDB",
     "field_order": [
-     "posting_date",
-     "naming_series",
-     "column_break_3",
-     "company",
-     "asset_details_section",
-     "asset",
-     "finance_book",
-     "column_break_8",
-     "serial_no",
-     "accounting_details",
-     "credit_account",
-     "depreciation_amount",
-     "column_break_15",
-     "debit_account",
-     "accounting_dimensions_section",
-     "cost_center",
-     "reference_section",
-     "reference_doctype",
-     "depr_schedule_row",
-     "column_break_19",
-     "reference_docname",
-     "amended_from"
+        "posting_date",
+        "naming_series",
+        "column_break_3",
+        "company",
+        "asset_details_section",
+        "asset",
+        "finance_book",
+        "column_break_8",
+        "serial_no",
+        "accounting_details",
+        "credit_account",
+        "depreciation_amount",
+        "column_break_15",
+        "debit_account",
+        "accounting_dimensions_section",
+        "cost_center",
+        "reference_section",
+        "reference_doctype",
+        "depr_schedule_row",
+        "column_break_19",
+        "reference_docname",
+        "amended_from"
     ],
     "fields": [
-     {
-      "fieldname": "company",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Company",
-      "options": "Company",
-      "reqd": 1
-     },
-     {
-      "fieldname": "amended_from",
-      "fieldtype": "Link",
-      "label": "Amended From",
-      "no_copy": 1,
-      "options": "Depreciation Entry",
-      "print_hide": 1,
-      "read_only": 1
-     },
-     {
-      "fieldname": "posting_date",
-      "fieldtype": "Date",
-      "in_list_view": 1,
-      "label": "Posting Date",
-      "reqd": 1
-     },
-     {
-      "fieldname": "naming_series",
-      "fieldtype": "Select",
-      "in_list_view": 1,
-      "label": "Naming Series",
-      "options": "ACC-DE-.YYYY.-",
-      "reqd": 1
-     },
-     {
-      "fieldname": "asset",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Asset",
-      "options": "Asset",
-      "reqd": 1
-     },
-     {
-      "fieldname": "serial_no",
-      "fieldtype": "Link",
-      "label": "Serial No",
-      "options": "Asset Serial No"
-     },
-     {
-      "fieldname": "finance_book",
-      "fieldtype": "Link",
-      "label": "Finance Book",
-      "options": "Finance Book"
-     },
-     {
-      "fieldname": "cost_center",
-      "fieldtype": "Link",
-      "label": "Cost Center",
-      "options": "Cost Center"
-     },
-     {
-      "fieldname": "credit_account",
-      "fieldtype": "Link",
-      "label": "Credit Account",
-      "options": "Account",
-      "reqd": 1
-     },
-     {
-      "fieldname": "debit_account",
-      "fieldtype": "Link",
-      "label": "Debit Account",
-      "options": "Account",
-      "reqd": 1
-     },
-     {
-      "fieldname": "depreciation_amount",
-      "fieldtype": "Currency",
-      "label": "Depreciation Amount",
-      "reqd": 1
-     },
-     {
-      "fieldname": "column_break_3",
-      "fieldtype": "Column Break"
-     },
-     {
-      "fieldname": "asset_details_section",
-      "fieldtype": "Section Break",
-      "label": "Asset Details"
-     },
-     {
-      "fieldname": "column_break_8",
-      "fieldtype": "Column Break"
-     },
-     {
-      "collapsible": 1,
-      "fieldname": "accounting_dimensions_section",
-      "fieldtype": "Section Break",
-      "label": "Accounting Dimensions"
-     },
-     {
-      "fieldname": "accounting_details",
-      "fieldtype": "Section Break",
-      "label": "Accounting Details"
-     },
-     {
-      "fieldname": "column_break_15",
-      "fieldtype": "Column Break"
-     },
-     {
-      "collapsible": 1,
-      "fieldname": "reference_section",
-      "fieldtype": "Section Break",
-      "label": "Reference"
-     },
-     {
-      "fieldname": "depr_schedule_row",
-      "fieldtype": "Data",
-      "hidden": 1,
-      "label": "Depreciation Schedule Row",
-      "mandatory_depends_on": "eval:doc.reference_doctype == \"Depreciation Schedule_\"",
-      "no_copy": 1,
-      "print_hide": 1,
-      "read_only": 1
-     },
-     {
-      "fieldname": "column_break_19",
-      "fieldtype": "Column Break"
-     },
-     {
-      "fieldname": "reference_doctype",
-      "fieldtype": "Link",
-      "label": "Reference Document Type",
-      "no_copy": 1,
-      "options": "DocType",
-      "print_hide": 1,
-      "reqd": 1
-     },
-     {
-      "fieldname": "reference_docname",
-      "fieldtype": "Dynamic Link",
-      "label": "Reference Document Name",
-      "options": "reference_doctype",
-      "reqd": 1
-     }
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Depreciation Entry",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Posting Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Naming Series",
+            "options": "ACC-DE-.YYYY.-",
+            "reqd": 1
+        },
+        {
+            "fieldname": "asset",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Asset",
+            "options": "Asset",
+            "reqd": 1
+        },
+        {
+            "fieldname": "serial_no",
+            "fieldtype": "Link",
+            "label": "Serial No",
+            "options": "Asset Serial No"
+        },
+        {
+            "fieldname": "finance_book",
+            "fieldtype": "Link",
+            "label": "Finance Book",
+            "options": "Finance Book"
+        },
+        {
+            "fieldname": "cost_center",
+            "fieldtype": "Link",
+            "label": "Cost Center",
+            "options": "Cost Center"
+        },
+        {
+            "fieldname": "credit_account",
+            "fieldtype": "Link",
+            "label": "Credit Account",
+            "options": "Account",
+            "reqd": 1
+        },
+        {
+            "fieldname": "debit_account",
+            "fieldtype": "Link",
+            "label": "Debit Account",
+            "options": "Account",
+            "reqd": 1
+        },
+        {
+            "fieldname": "depreciation_amount",
+            "fieldtype": "Currency",
+            "label": "Depreciation Amount",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_3",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "asset_details_section",
+            "fieldtype": "Section Break",
+            "label": "Asset Details"
+        },
+        {
+            "fieldname": "column_break_8",
+            "fieldtype": "Column Break"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "accounting_dimensions_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting Dimensions"
+        },
+        {
+            "fieldname": "accounting_details",
+            "fieldtype": "Section Break",
+            "label": "Accounting Details"
+        },
+        {
+            "fieldname": "column_break_15",
+            "fieldtype": "Column Break"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "reference_section",
+            "fieldtype": "Section Break",
+            "label": "Reference"
+        },
+        {
+            "fieldname": "depr_schedule_row",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Depreciation Schedule Row",
+            "mandatory_depends_on": "eval:doc.reference_doctype == \"Depreciation Schedule_\"",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_19",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "reference_doctype",
+            "fieldtype": "Link",
+            "label": "Reference Document Type",
+            "no_copy": 1,
+            "options": "DocType",
+            "print_hide": 1,
+            "reqd": 1
+        },
+        {
+            "fieldname": "reference_docname",
+            "fieldtype": "Dynamic Link",
+            "label": "Reference Document Name",
+            "options": "reference_doctype",
+            "reqd": 1
+        }
     ],
     "index_web_pages_for_search": 1,
     "is_submittable": 1,
@@ -183,41 +183,41 @@
     "naming_rule": "By \"Naming Series\" field",
     "owner": "Administrator",
     "permissions": [
-     {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Accounts User",
-      "share": 1,
-      "submit": 1,
-      "write": 1
-     },
-     {
-      "create": 1,
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Accounts Manager",
-      "share": 1,
-      "submit": 1,
-      "write": 1
-     },
-     {
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "Auditor",
-      "share": 1
-     }
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Accounts User",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Accounts Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Auditor",
+            "share": 1
+        }
     ],
     "sort_field": "modified",
     "sort_order": "DESC",

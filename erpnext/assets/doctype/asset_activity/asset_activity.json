@@ -1,126 +1,126 @@
 {
- "actions": [],
- "allow_rename": 1,
- "autoname": "format:{asset}-{###}",
- "creation": "2022-05-02 17:06:15.316245",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-    "asset",
-    "activity_type",
-    "column_break_3",
-    "serial_no",
-    "activity_date",
-    "reference_section",
-    "reference_doctype",
-    "column_break_7",
-    "reference_docname",
-    "details_section",
-    "notes",
-    "amended_from"
-],
-"fields": [
-    {
-     "fieldname": "activity_date",
-     "fieldtype": "Date",
-     "in_list_view": 1,
-     "label": "Activity Date",
-     "reqd": 1
-    },
-    {
-     "fieldname": "activity_type",
-     "fieldtype": "Select",
-     "in_list_view": 1,
-     "label": "Activity Type",
-     "options": "\nPurchase\nCreation\nSplit\nDepreciation\nRepair\nMaintenance\nMovement\nRevaluation\nCancellation\nSale\nDisposal",
-     "reqd": 1
-    },
-    {
-     "fieldname": "notes",
-     "fieldtype": "Small Text",
-     "label": "Notes"
-    },
-    {
-     "fieldname": "asset",
-     "fieldtype": "Link",
-     "in_list_view": 1,
-     "label": "Asset",
-     "options": "Asset",
-     "reqd": 1
-    },
-    {
-     "fieldname": "amended_from",
-     "fieldtype": "Link",
-     "label": "Amended From",
-     "no_copy": 1,
-     "options": "Asset Activity",
-     "print_hide": 1,
-     "read_only": 1
-    },
-    {
-     "fieldname": "reference_doctype",
-     "fieldtype": "Link",
-     "label": "Reference Document Type",
-     "options": "DocType",
-     "reqd": 1
-    },
-    {
-     "fieldname": "reference_docname",
-     "fieldtype": "Dynamic Link",
-     "label": "Reference Document Name",
-     "options": "reference_doctype",
-     "reqd": 1
-    },
-    {
-     "collapsible": 1,
-     "fieldname": "reference_section",
-     "fieldtype": "Section Break",
-     "label": "Reference"
-    },
-    {
-     "collapsible": 1,
-     "fieldname": "details_section",
-     "fieldtype": "Section Break",
-     "label": "Details"
-    },
-    {
-     "fieldname": "column_break_3",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "column_break_7",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "serial_no",
-     "fieldtype": "Link",
-     "label": "Serial No",
-     "options": "Asset Serial No"
-    }
-],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2022-05-02 17:06:15.316245",
- "modified_by": "Administrator",
- "module": "Assets",
- "name": "Asset Activity",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+    "actions": [],
+    "allow_rename": 1,
+    "autoname": "format:{asset}-{###}",
+    "creation": "2022-05-02 17:06:15.316245",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "asset",
+        "activity_type",
+        "column_break_3",
+        "serial_no",
+        "activity_date",
+        "reference_section",
+        "reference_doctype",
+        "column_break_7",
+        "reference_docname",
+        "details_section",
+        "notes",
+        "amended_from"
+    ],
+    "fields": [
+        {
+            "fieldname": "activity_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Activity Date",
+            "reqd": 1
+        },
+        {
+            "fieldname": "activity_type",
+            "fieldtype": "Select",
+            "in_list_view": 1,
+            "label": "Activity Type",
+            "options": "\nPurchase\nCreation\nSplit\nDepreciation\nRepair\nMaintenance\nMovement\nRevaluation\nCancellation\nSale\nDisposal",
+            "reqd": 1
+        },
+        {
+            "fieldname": "notes",
+            "fieldtype": "Small Text",
+            "label": "Notes"
+        },
+        {
+            "fieldname": "asset",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Asset",
+            "options": "Asset",
+            "reqd": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Asset Activity",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "reference_doctype",
+            "fieldtype": "Link",
+            "label": "Reference Document Type",
+            "options": "DocType",
+            "reqd": 1
+        },
+        {
+            "fieldname": "reference_docname",
+            "fieldtype": "Dynamic Link",
+            "label": "Reference Document Name",
+            "options": "reference_doctype",
+            "reqd": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "reference_section",
+            "fieldtype": "Section Break",
+            "label": "Reference"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "details_section",
+            "fieldtype": "Section Break",
+            "label": "Details"
+        },
+        {
+            "fieldname": "column_break_3",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_7",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "serial_no",
+            "fieldtype": "Link",
+            "label": "Serial No",
+            "options": "Asset Serial No"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "links": [],
+    "modified": "2022-05-02 17:06:15.316245",
+    "modified_by": "Administrator",
+    "module": "Assets",
+    "name": "Asset Activity",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
+    ],
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
 }

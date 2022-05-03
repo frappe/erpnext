@@ -1,104 +1,104 @@
 {
- "actions": [],
- "creation": "2018-05-08 14:44:37.095570",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-    "finance_book",
-    "column_break_2",
-    "depreciation_template",
-    "template_details_section",
-    "depreciation_method",
-    "frequency_of_depreciation",
-    "column_break_7",
-    "asset_life_in_months",
-    "rate_of_depreciation",
-    "asset_value"
-],
-"fields": [
-    {
-     "fieldname": "finance_book",
-     "fieldtype": "Link",
-     "in_list_view": 1,
-     "label": "Finance Book",
-     "options": "Finance Book"
-    },
-    {
-     "fieldname": "depreciation_template",
-     "fieldtype": "Link",
-     "in_list_view": 1,
-     "label": "Depreciation Template",
-     "options": "Depreciation Template"
-    },
-    {
-     "fieldname": "asset_value",
-     "fieldtype": "Currency",
-     "hidden": 1,
-     "label": "Asset Value",
-     "no_copy": 1,
-     "options": "Company:company:default_currency",
-     "print_hide": 1,
-     "read_only": 1
-    },
-    {
-     "fetch_from": "depreciation_template.depreciation_method",
-     "fieldname": "depreciation_method",
-     "fieldtype": "Data",
-     "in_list_view": 1,
-     "label": "Depreciation Method",
-     "read_only": 1
-    },
-    {
-     "fetch_from": "depreciation_template.frequency_of_depreciation",
-     "fieldname": "frequency_of_depreciation",
-     "fieldtype": "Data",
-     "in_list_view": 1,
-     "label": "Frequency of Depreciation",
-     "read_only": 1
-    },
-    {
-     "fieldname": "asset_life_in_months",
-     "fieldtype": "Int",
-     "in_list_view": 1,
-     "label": "Asset Life (In Months)",
-     "read_only": 1
-    },
-    {
-     "depends_on": "rate_of_depreciation",
-     "fetch_from": "depreciation_template.rate_of_depreciation",
-     "fieldname": "rate_of_depreciation",
-     "fieldtype": "Percent",
-     "in_standard_filter": 1,
-     "label": "Rate of Depreciation",
-     "read_only": 1
-    },
-    {
-     "fieldname": "column_break_2",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "column_break_7",
-     "fieldtype": "Column Break"
-    },
-    {
-     "description": "Note: These values might differ from the values specified in the Depreciation Template. The values are fetched from the template when the template is selected, but might undergo changes later. Additionally, changes made to the template won't be reflected here.",
-     "fieldname": "template_details_section",
-     "fieldtype": "Section Break",
-     "label": "Template Details"
-    }
-],
- "index_web_pages_for_search": 1,
- "istable": 1,
- "links": [],
- "modified": "2022-05-02 20:59:05.743683",
- "modified_by": "Administrator",
- "module": "Assets",
- "name": "Asset Finance Book",
- "owner": "Administrator",
- "permissions": [],
- "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "DESC",
- "track_changes": 1
+    "actions": [],
+    "creation": "2018-05-08 14:44:37.095570",
+    "doctype": "DocType",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "finance_book",
+        "column_break_2",
+        "depreciation_template",
+        "template_details_section",
+        "depreciation_method",
+        "frequency_of_depreciation",
+        "column_break_7",
+        "asset_life_in_months",
+        "rate_of_depreciation",
+        "asset_value"
+    ],
+    "fields": [
+        {
+            "fieldname": "finance_book",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Finance Book",
+            "options": "Finance Book"
+        },
+        {
+            "fieldname": "depreciation_template",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Depreciation Template",
+            "options": "Depreciation Template"
+        },
+        {
+            "fieldname": "asset_value",
+            "fieldtype": "Currency",
+            "hidden": 1,
+            "label": "Asset Value",
+            "no_copy": 1,
+            "options": "Company:company:default_currency",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fetch_from": "depreciation_template.depreciation_method",
+            "fieldname": "depreciation_method",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Depreciation Method",
+            "read_only": 1
+        },
+        {
+            "fetch_from": "depreciation_template.frequency_of_depreciation",
+            "fieldname": "frequency_of_depreciation",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Frequency of Depreciation",
+            "read_only": 1
+        },
+        {
+            "fieldname": "asset_life_in_months",
+            "fieldtype": "Int",
+            "in_list_view": 1,
+            "label": "Asset Life (In Months)",
+            "read_only": 1
+        },
+        {
+            "depends_on": "rate_of_depreciation",
+            "fetch_from": "depreciation_template.rate_of_depreciation",
+            "fieldname": "rate_of_depreciation",
+            "fieldtype": "Percent",
+            "in_standard_filter": 1,
+            "label": "Rate of Depreciation",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "column_break_7",
+            "fieldtype": "Column Break"
+        },
+        {
+            "description": "Note: These values might differ from the values specified in the Depreciation Template. The values are fetched from the template when the template is selected, but might undergo changes later. Additionally, changes made to the template won't be reflected here.",
+            "fieldname": "template_details_section",
+            "fieldtype": "Section Break",
+            "label": "Template Details"
+        }
+    ],
+    "index_web_pages_for_search": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2022-05-02 20:59:05.743683",
+    "modified_by": "Administrator",
+    "module": "Assets",
+    "name": "Asset Finance Book",
+    "owner": "Administrator",
+    "permissions": [],
+    "quick_entry": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "track_changes": 1
 }
