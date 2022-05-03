@@ -792,7 +792,7 @@ class GSPConnector:
 		self.irn_details_url = self.base_url + "/enriched/ei/api/invoice/irn"
 		self.generate_irn_url = self.base_url + "/enriched/ei/api/invoice"
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
-		self.cancel_ewaybill_url = self.base_url + "/enriched/ei/api/ewayapi" # adaequare eway bill cancel api is now enabled.
+		self.cancel_ewaybill_url = self.base_url + "/enriched/ei/api/ewayapi"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
 
 	def set_invoice(self):
