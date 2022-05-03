@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Repair', {
-	setup: function(frm) {
-		frm.fields_dict.cost_center.get_query = function(doc) {
+	setup: function (frm) {
+		frm.fields_dict.cost_center.get_query = function (doc) {
 			return {
 				filters: {
 					'is_group': 0,
@@ -12,7 +12,7 @@ frappe.ui.form.on('Asset Repair', {
 			};
 		};
 
-		frm.fields_dict.project.get_query = function(doc) {
+		frm.fields_dict.project.get_query = function (doc) {
 			return {
 				filters: {
 					'company': doc.company
@@ -20,7 +20,7 @@ frappe.ui.form.on('Asset Repair', {
 			};
 		};
 
-		frm.fields_dict.warehouse.get_query = function(doc) {
+		frm.fields_dict.warehouse.get_query = function (doc) {
 			return {
 				filters: {
 					'is_group': 0,
@@ -29,7 +29,7 @@ frappe.ui.form.on('Asset Repair', {
 			};
 		};
 
-		frm.fields_dict.serial_no.get_query = function(doc) {
+		frm.fields_dict.serial_no.get_query = function (doc) {
 			return {
 				filters: {
 					'asset': doc.asset
@@ -38,11 +38,11 @@ frappe.ui.form.on('Asset Repair', {
 		};
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
 		frm.trigger('toggle_serial_no_and_num_of_assets');
 
 		if (frm.doc.docstatus) {
-			frm.add_custom_button('View General Ledger', function() {
+			frm.add_custom_button('View General Ledger', function () {
 				frappe.route_options = {
 					'voucher_no': frm.doc.name
 				};
@@ -53,14 +53,14 @@ frappe.ui.form.on('Asset Repair', {
 
 	repair_status: (frm) => {
 		if (frm.doc.completion_date && frm.doc.repair_status == 'Completed') {
-			frappe.call ({
+			frappe.call({
 				method: 'erpnext.assets.doctype.asset_repair.asset_repair.get_downtime',
 				args: {
-					'failure_date':frm.doc.failure_date,
-					'completion_date':frm.doc.completion_date
+					'failure_date': frm.doc.failure_date,
+					'completion_date': frm.doc.completion_date
 				},
-				callback: function(r) {
-					if(r.message) {
+				callback: function (r) {
+					if (r.message) {
 						frm.set_value('downtime', r.message + ' Hrs');
 					}
 				}
@@ -124,12 +124,12 @@ frappe.ui.form.on('Asset Repair', {
 					});
 				}
 			}
-		})
+		});
 	}
 });
 
 frappe.ui.form.on('Asset Repair Consumed Item', {
-	item_code: function(frm, cdt, cdn) {
+	item_code: function (frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 
 		let item_args = {
@@ -145,13 +145,13 @@ frappe.ui.form.on('Asset Repair Consumed Item', {
 			args: {
 				args: item_args
 			},
-			callback: function(r) {
+			callback: function (r) {
 				frappe.model.set_value(cdt, cdn, 'rate', r.message);
 			}
 		});
 	},
 
-	qty: function(frm, cdt, cdn) {
+	qty: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'amount', row.qty * row.rate);
 	},

@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Serial No_', {
-	onload: function(frm) {
-		frm.set_query('asset', function() {
+	onload: function (frm) {
+		frm.set_query('asset', function () {
 			return {
 				'filters': {
 					'is_serialized_asset': 1
@@ -12,7 +12,7 @@ frappe.ui.form.on('Asset Serial No_', {
 		});
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
 		frm.trigger('toggle_depreciation_fields');
 	},
 
@@ -39,23 +39,22 @@ frappe.ui.form.on('Asset Serial No_', {
 					}
 
 					frappe.db.get_single_value('Accounts Settings', 'enable_finance_books')
-					.then((value) => {
-						if (value) {
-							frm.set_df_property('finance_books', 'hidden', 0);
-							frm.set_df_property('finance_books', 'reqd', 1);
+						.then((value) => {
+							if (value) {
+								frm.set_df_property('finance_books', 'hidden', 0);
+								frm.set_df_property('finance_books', 'reqd', 1);
 
-							frm.set_df_property('depreciation_template', 'hidden', 1);
-							frm.set_df_property('depreciation_template', 'reqd', 0);
-						} else {
-							frm.set_df_property('finance_books', 'hidden', 1);
-							frm.set_df_property('finance_books', 'reqd', 0);
+								frm.set_df_property('depreciation_template', 'hidden', 1);
+								frm.set_df_property('depreciation_template', 'reqd', 0);
+							} else {
+								frm.set_df_property('finance_books', 'hidden', 1);
+								frm.set_df_property('finance_books', 'reqd', 0);
 
-							frm.set_df_property('depreciation_template', 'hidden', 0);
-							frm.set_df_property('depreciation_template', 'reqd', 1);
-						}
-					});
-				}
-				else {
+								frm.set_df_property('depreciation_template', 'hidden', 0);
+								frm.set_df_property('depreciation_template', 'reqd', 1);
+							}
+						});
+				} else {
 					frm.set_df_property('available_for_use_date', 'hidden', 1);
 					frm.set_df_property('depreciation_posting_start_date', 'hidden', 1);
 					frm.set_df_property('opening_accumulated_depreciation', 'hidden', 1);
@@ -86,7 +85,7 @@ frappe.ui.form.on('Asset Serial No_', {
 		}
 	},
 
-	depreciation_template: function(frm) {
+	depreciation_template: function (frm) {
 		if (frm.doc.depreciation_template) {
 			frappe.db.get_value('Depreciation Template', frm.doc.depreciation_template, ['asset_life', 'asset_life_unit'], (r) => {
 				if (r) {
@@ -94,11 +93,11 @@ frappe.ui.form.on('Asset Serial No_', {
 						frm.set_value('asset_life_in_months', (r.asset_life * 12));
 					}
 				}
-			})
+			});
 		}
 	},
 
-	depreciation_posting_start_date: function(frm) {
+	depreciation_posting_start_date: function (frm) {
 		if (frm.doc.available_for_use_date && frm.doc.depreciation_posting_start_date == frm.doc.available_for_use_date) {
 			frappe.msgprint(__('Depreciation Posting Date should not be equal to Available for Use Date.'));
 
@@ -109,7 +108,7 @@ frappe.ui.form.on('Asset Serial No_', {
 });
 
 frappe.ui.form.on('Asset Finance Book', {
-	depreciation_template: function(frm, cdt, cdn) {
+	depreciation_template: function (frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 
 		frappe.db.get_value('Depreciation Template', row.depreciation_template, ['asset_life', 'asset_life_unit'], (r) => {
@@ -119,6 +118,6 @@ frappe.ui.form.on('Asset Finance Book', {
 					frm.refresh_field('finance_books');
 				}
 			}
-		})
+		});
 	},
 });

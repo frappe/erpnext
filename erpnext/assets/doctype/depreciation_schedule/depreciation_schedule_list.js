@@ -13,4 +13,4 @@ frappe.listview_settings['Depreciation Schedule'] = {
 			return [__("Draft"), "red", "status,=,Draft"];
 		}
 	}
-}
+};

@@ -33,13 +33,13 @@ frappe.listview_settings["Asset Serial No"] = {
 		}
 	},
 
-	onload: function(me) {
-		me.page.add_action_item("Make Asset Movement", function() {
+	onload: function (me) {
+		me.page.add_action_item("Make Asset Movement", function () {
 			const assets = me.get_checked_items();
 			frappe.call({
 				method: "erpnext.controllers.base_asset.make_asset_movement",
 				freeze: true,
-				args:{
+				args: {
 					"assets": assets
 				},
 				callback: function (r) {
@@ -51,4 +51,4 @@ frappe.listview_settings["Asset Serial No"] = {
 			});
 		});
 	},
-}
+};

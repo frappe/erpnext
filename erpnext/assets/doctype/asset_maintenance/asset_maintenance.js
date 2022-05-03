@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Asset Maintenance', {
 	setup: (frm) => {
-		frm.set_query('assign_to', 'asset_maintenance_tasks', function(doc) {
+		frm.set_query('assign_to', 'asset_maintenance_tasks', function (doc) {
 			return {
 				query: 'erpnext.assets.doctype.asset_maintenance.asset_maintenance.get_team_members',
 				filters: {
@@ -12,7 +12,7 @@ frappe.ui.form.on('Asset Maintenance', {
 			};
 		});
 
-		frm.fields_dict.asset.get_query = function(doc) {
+		frm.fields_dict.asset.get_query = function () {
 			return {
 				filters: {
 					'maintenance_required': 1
@@ -20,7 +20,7 @@ frappe.ui.form.on('Asset Maintenance', {
 			};
 		};
 
-		frm.fields_dict.serial_no.get_query = function(doc) {
+		frm.fields_dict.serial_no.get_query = function (doc) {
 			return {
 				filters: {
 					'asset': doc.asset
@@ -29,7 +29,7 @@ frappe.ui.form.on('Asset Maintenance', {
 		};
 
 		frm.set_indicator_formatter('maintenance_status',
-			function(doc) {
+			function (doc) {
 				let indicator = 'blue';
 
 				if (doc.maintenance_status == 'Overdue') {
@@ -97,11 +97,11 @@ frappe.ui.form.on('Asset Maintenance', {
 					asset_name: frm.doc.asset
 				},
 				callback: (r) => {
-					if(r.message) {
+					if (r.message) {
 						const section = frm.dashboard.add_section('', __("Maintenance Log"));
 						var rows = $('<div></div>').appendTo(section);
 
-						(r.message || []).forEach(function(d) {
+						(r.message || []).forEach(function (d) {
 							$(`<div class='row' style='margin-bottom: 10px;'>
 								<div class='col-sm-3 small'>
 									<a onclick="frappe.set_route('List', 'Asset Maintenance Log_',
@@ -129,21 +129,21 @@ frappe.ui.form.on('Asset Maintenance', {
 					});
 				}
 			}
-		})
+		});
 	}
 });
 
 frappe.ui.form.on('Asset Maintenance Task', {
-	start_date: (frm, cdt, cdn)  => {
+	start_date: (frm, cdt, cdn) => {
 		get_next_due_date(frm, cdt, cdn);
 	},
-	periodicity: (frm, cdt, cdn)  => {
+	periodicity: (frm, cdt, cdn) => {
 		get_next_due_date(frm, cdt, cdn);
 	},
-	last_completion_date: (frm, cdt, cdn)  => {
+	last_completion_date: (frm, cdt, cdn) => {
 		get_next_due_date(frm, cdt, cdn);
 	},
-	end_date: (frm, cdt, cdn)  => {
+	end_date: (frm, cdt, cdn) => {
 		get_next_due_date(frm, cdt, cdn);
 	}
 });
@@ -161,7 +161,7 @@ var get_next_due_date = function (frm, cdt, cdn) {
 				last_completion_date: d.last_completion_date,
 				next_due_date: d.next_due_date
 			},
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
 					frappe.model.set_value(cdt, cdn, 'next_due_date', r.message);
 				}

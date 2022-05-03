@@ -2,8 +2,8 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Depreciation Schedule_', {
-	setup: function(frm) {
-		frm.fields_dict.serial_no.get_query = function(doc) {
+	setup: function (frm) {
+		frm.fields_dict.serial_no.get_query = function (doc) {
 			return {
 				filters: {
 					'asset': doc.asset
@@ -12,11 +12,11 @@ frappe.ui.form.on('Depreciation Schedule_', {
 		};
 	},
 
-	refresh: function(frm) {
+	refresh: function (frm) {
 		frm.trigger("make_schedules_editable");
 
 		if (frm.doc.status == "Active") {
-			frm.add_custom_button(__("Post Depreciation Entries"), function() {
+			frm.add_custom_button(__("Post Depreciation Entries"), function () {
 				frm.trigger("post_depreciation_entries");
 			});
 		}
@@ -26,7 +26,7 @@ frappe.ui.form.on('Depreciation Schedule_', {
 		}
 	},
 
-	make_schedules_editable: function(frm) {
+	make_schedules_editable: function () {
 		// if (frm.doc.finance_books) {
 		// 	var is_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
 		// 		? true : false;
@@ -37,17 +37,17 @@ frappe.ui.form.on('Depreciation Schedule_', {
 		// }
 	},
 
-	post_depreciation_entries: function(frm) {
+	post_depreciation_entries: function (frm) {
 		frappe.call({
 			method: "assets.asset.doctype.depreciation_schedule_.depreciation_posting.post_depreciation_entries",
 			args: {
 				"schedule_name": frm.doc.name
 			},
-			callback: function(r) {
+			callback: function (r) {
 				frappe.model.sync(r.message);
 				frm.refresh();
 			}
-		})
+		});
 	},
 
 	set_depr_posting_failure_alert: function (frm) {

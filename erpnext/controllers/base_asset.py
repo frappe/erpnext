@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import add_months, cint, flt, format_date, get_datetime, getdate, nowdate
 from frappe.utils.data import get_last_day, get_link_to_form
 
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
@@ -766,7 +767,7 @@ class BaseAsset(AccountsController):
 		_, company = self.get_asset_details()
 
 		if not self.get("default_finance_book") and company:
-			self.default_finance_book = get_default_finance_book(company)
+			self.default_finance_book = erpnext.get_default_finance_book(company)
 
 		if self.get("default_finance_book"):
 			for finance_book in self.get("finance_books"):
@@ -845,23 +846,6 @@ class BaseAsset(AccountsController):
 		for entry in linked_entries:
 			entry = frappe.get_doc("Depreciation Entry", entry.name)
 			entry.cancel()
-
-
-def get_default_finance_book(company=None):
-	from erpnext import get_default_company
-
-	if not company:
-		company = get_default_company()
-
-	if not hasattr(frappe.local, "default_finance_book"):
-		frappe.local.default_finance_book = {}
-
-	if not company in frappe.local.default_finance_book:
-		frappe.local.default_finance_book[company] = frappe.get_cached_value(
-			"Company", company, "default_finance_book"
-		)
-
-	return frappe.local.default_finance_book[company]
 
 
 def is_cwip_accounting_enabled(asset_category):
