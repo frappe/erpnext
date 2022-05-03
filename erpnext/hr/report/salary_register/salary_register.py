@@ -54,27 +54,45 @@ def execute(filters=None):
 		name = split[1]
 		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": ss.employee})
 		
-		row = [ss.employee_name, ss.payment_days]
+		gross_pay = 0
 
+		incomes = 0
+
+		row = [ss.employee_name, ss.payment_days]
+		
 		if len(Employee) > 0:
 			row += [Employee[0].base]
+			gross_pay = Employee[0].base
+			incomes = ss.gross_pay - Employee[0].base
 		else:
 			row += [0]
 		
-		row += [ss.gross_pay]
+		row += [gross_pay]
+
+		row += [incomes]
 
 		row += [ss.total_deduction, ss.net_pay]
 
 		if ss.employee in confidential_list:
 			if confidential_payroll[0].rol in roles_arr:
-				data.append(row)
+				if filters.get("department"):
+					employee_data = frappe.get_doc("Employee", ss.employee)
+					if employee_data.department == filters.get("department"):
+						data.append(row)
+				else:
+					data.append(row)
 		else:
-			data.append(row)
+			if filters.get("department"):
+				employee_data = frappe.get_doc("Employee", ss.employee)
+				if employee_data.department == filters.get("department"):
+					data.append(row)
+			else:
+				data.append(row)
 	
-	row = ["ELABORADO POR:", "","","","",""]
+	row = ["ELABORADO POR:", "","","","","",""]
 	data.append(row)
 
-	row = ["REVISADO POR:", "","","","",""]
+	row = ["REVISADO POR:", "","","","","",""]
 	data.append(row)
 
 	return columns, data
@@ -90,7 +108,7 @@ def get_columns(salary_slips):
 	"""
 	columns = [
 		_("Employee Name") + "::140", _("Payment Days") + "::140", _("Salary Base") + ":Currency:120",
-		_("Gross Pay") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"
+		_("Gross Pay") + ":Currency:120", _("Extra Income") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"
 	]
 
 	# columns = [
