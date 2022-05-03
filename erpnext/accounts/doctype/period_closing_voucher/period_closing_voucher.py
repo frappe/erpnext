@@ -166,7 +166,7 @@ class PeriodClosingVoucher(AccountsController):
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as bal_in_account_currency,
 				sum(t1.debit) - sum(t1.credit) as bal_in_company_currency
 			from `tabGL Entry` t1, `tabAccount` t2
-			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
+			where t1.is_cancelled = 0 and t1.account = t2.name and t2.report_type = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
 			group by t1.account, {dimension_fields}
