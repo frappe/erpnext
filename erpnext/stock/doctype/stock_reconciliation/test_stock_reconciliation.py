@@ -288,17 +288,13 @@ class TestStockReconciliation(FrappeTestCase):
 			stock_doc.cancel()
 
 	def test_stock_reco_for_serial_and_batch_item(self):
-		item = frappe.db.exists("Item", {"item_name": "Batched and Serialised Item"})
-		if not item:
-			item = create_item("Batched and Serialised Item")
-			item.has_batch_no = 1
-			item.create_new_batch = 1
-			item.has_serial_no = 1
-			item.batch_number_series = "B-BATCH-.##"
-			item.serial_no_series = "S-.####"
-			item.save()
-		else:
-			item = frappe.get_doc("Item", {"item_name": "Batched and Serialised Item"})
+		item = create_item("_TestBatchSerialItemReco")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.has_serial_no = 1
+		item.batch_number_series = "TBS-BATCH-.##"
+		item.serial_no_series = "TBS-.####"
+		item.save()
 
 		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
 
@@ -315,35 +311,25 @@ class TestStockReconciliation(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Inactive")
 		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
 
-		if frappe.db.exists("Serial No", serial_nos[0]):
-			frappe.delete_doc("Serial No", serial_nos[0])
-
 	def test_stock_reco_for_serial_and_batch_item_with_future_dependent_entry(self):
 		"""
 		Behaviour: 1) Create Stock Reconciliation, which will be the origin document
-		        of a new batch having a serial no
-		        2) Create a Stock Entry that adds a serial no to the same batch following this
+		                of a new batch having a serial no
+		                2) Create a Stock Entry that adds a serial no to the same batch following this
 		                Stock Reconciliation
-		        3) Cancel Stock Reconciliation
-		        4) Cancel Stock Entry
-		Expected Result: 3) Cancelling the Stock Reco throws a LinkExistsError since
-		        Stock Entry is dependent on the batch involved
-		        4) Serial No only in the Stock Entry is Inactive and Batch qty decreases
+		                3) Cancel Stock Entry
+		Expected Result: 3) Serial No only in the Stock Entry is Inactive and Batch qty decreases
 		"""
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
-		item = frappe.db.exists("Item", {"item_name": "Batched and Serialised Item"})
-		if not item:
-			item = create_item("Batched and Serialised Item")
-			item.has_batch_no = 1
-			item.create_new_batch = 1
-			item.has_serial_no = 1
-			item.batch_number_series = "B-BATCH-.##"
-			item.serial_no_series = "S-.####"
-			item.save()
-		else:
-			item = frappe.get_doc("Item", {"item_name": "Batched and Serialised Item"})
+		item = create_item("_TestBatchSerialItemDependentReco")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.has_serial_no = 1
+		item.batch_number_series = "TBSD-BATCH-.##"
+		item.serial_no_series = "TBSD-.####"
+		item.save()
 
 		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
 
@@ -351,7 +337,7 @@ class TestStockReconciliation(FrappeTestCase):
 			item_code=item.item_code, warehouse=warehouse, qty=1, rate=100
 		)
 		batch_no = stock_reco.items[0].batch_no
-		serial_no = get_serial_nos(stock_reco.items[0].serial_no)[0]
+		reco_serial_no = get_serial_nos(stock_reco.items[0].serial_no)[0]
 
 		stock_entry = make_stock_entry(
 			item_code=item.item_code, target=warehouse, qty=1, basic_rate=100, batch_no=batch_no
@@ -361,12 +347,8 @@ class TestStockReconciliation(FrappeTestCase):
 		# Check Batch qty after 2 transactions
 		batch_qty = get_batch_qty(batch_no, warehouse, item.item_code)
 		self.assertEqual(batch_qty, 2)
-		frappe.db.commit()
 
-		# Cancelling Origin Document of Batch
-		self.assertRaises(frappe.LinkExistsError, stock_reco.cancel)
-		frappe.db.rollback()
-
+		# Cancel latest stock document
 		stock_entry.cancel()
 
 		# Check Batch qty after cancellation
@@ -374,19 +356,14 @@ class TestStockReconciliation(FrappeTestCase):
 		self.assertEqual(batch_qty, 1)
 
 		# Check if Serial No from Stock Reconcilation is intact
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "batch_no"), batch_no)
-		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Active")
+		self.assertEqual(frappe.db.get_value("Serial No", reco_serial_no, "batch_no"), batch_no)
+		self.assertEqual(frappe.db.get_value("Serial No", reco_serial_no, "status"), "Active")
 
 		# Check if Serial No from Stock Entry is Unlinked and Inactive
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no_2, "batch_no"), None)
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no_2, "status"), "Inactive")
 
-		stock_reco.load_from_db()
 		stock_reco.cancel()
-
-		for sn in (serial_no, serial_no_2):
-			if frappe.db.exists("Serial No", sn):
-				frappe.delete_doc("Serial No", sn)
 
 	def test_customer_provided_items(self):
 		item_code = "Stock-Reco-customer-Item-100"

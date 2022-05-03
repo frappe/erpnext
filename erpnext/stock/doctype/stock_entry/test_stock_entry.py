@@ -656,9 +656,9 @@ class TestStockEntry(FrappeTestCase):
 	def test_serial_batch_item_stock_entry(self):
 		"""
 		Behaviour: 1) Submit Stock Entry (Receipt) with Serial & Batched Item
-		        2) Cancel same Stock Entry
+		                        2) Cancel same Stock Entry
 		Expected Result: 1) Batch is created with Reference in Serial No
-		        2) Batch is deleted and Serial No is Inactive
+		                        2) Batch is deleted and Serial No is Inactive
 		"""
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
@@ -697,10 +697,10 @@ class TestStockEntry(FrappeTestCase):
 	def test_serial_batch_item_qty_deduction(self):
 		"""
 		Behaviour: Create 2 Stock Entries, both adding Serial Nos to same batch
-		Expected Result: 1) Cancelling first Stock Entry (origin transaction of created batch)
-		        should throw a LinkExistsError
-		        2) Cancelling second Stock Entry should make Serial Nos that are, linked to mentioned batch
-		        and in that transaction only, Inactive.
+		Expected: 1) Cancelling first Stock Entry (origin transaction of created batch)
+		                should throw a LinkExistsError
+		                2) Cancelling second Stock Entry should make Serial Nos that are, linked to mentioned batch
+		                and in that transaction only, Inactive.
 		"""
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
 
