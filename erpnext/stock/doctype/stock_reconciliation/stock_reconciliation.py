@@ -457,7 +457,7 @@ class StockReconciliation(StockController):
 
 			key = (d.item_code, d.warehouse)
 			if key not in merge_similar_entries:
-				d.total_amount = d.actual_qty * d.valuation_rate
+				d.total_amount = flt(d.actual_qty) * d.valuation_rate
 				merge_similar_entries[key] = d
 			elif d.serial_no:
 				data = merge_similar_entries[key]
