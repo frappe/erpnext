@@ -29,7 +29,7 @@ class TestAssetMovement_(unittest.TestCase):
 
 	def test_movement_is_created_on_asset_submission(self):
 		asset = create_asset(submit=1)
-		asset_movement = frappe.get_last_doc("Asset Movement_")
+		asset_movement = frappe.get_last_doc("Asset Movement")
 
 		self.assertEqual(asset_movement.purpose, "Receipt")
 		self.assertEqual(asset_movement.assets[0].asset, asset.name)

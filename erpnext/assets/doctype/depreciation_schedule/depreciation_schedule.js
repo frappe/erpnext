@@ -1,7 +1,7 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Depreciation Schedule_', {
+frappe.ui.form.on('Depreciation Schedule', {
 	setup: function (frm) {
 		frm.fields_dict.serial_no.get_query = function (doc) {
 			return {
@@ -66,7 +66,7 @@ frappe.ui.form.on('Depreciation Schedule_', {
 	},
 
 	asset: (frm) => {
-		frappe.db.get_value('Asset_', frm.doc.asset, 'is_serialized_asset', (r) => {
+		frappe.db.get_value('Asset', frm.doc.asset, 'is_serialized_asset', (r) => {
 			if (r && r.is_serialized_asset) {
 				frm.set_df_property('serial_no', 'read_only', 0);
 				frm.set_df_property('serial_no', 'reqd', 1);
