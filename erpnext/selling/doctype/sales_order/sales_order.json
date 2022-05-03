@@ -25,6 +25,10 @@
   "po_no",
   "po_date",
   "tax_id",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "contact_info",
   "customer_address",
   "address_display",
@@ -113,7 +117,6 @@
   "is_internal_customer",
   "represents_company",
   "inter_company_order_reference",
-  "project",
   "party_account_currency",
   "column_break_77",
   "source",
@@ -1522,13 +1525,29 @@
    "label": "% Picked",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-21 08:16:48.316074",
+ "modified": "2022-04-26 14:38:18.350207",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

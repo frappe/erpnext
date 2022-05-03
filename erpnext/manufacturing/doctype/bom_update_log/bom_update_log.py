@@ -154,7 +154,7 @@ def run_bom_job(
 
 	except Exception:
 		frappe.db.rollback()
-		error_log = frappe.log_error(message=frappe.get_traceback(), title=_("BOM Update Tool Error"))
+		error_log = doc.log_error("BOM Update Tool Error")
 
 		doc.db_set("status", "Failed")
 		doc.db_set("error_log", error_log.name)
