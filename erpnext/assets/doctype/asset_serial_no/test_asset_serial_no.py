@@ -95,7 +95,7 @@ class TestAssetSerialNo(unittest.TestCase):
 	def test_if_depreciation_details_are_fetched_from_asset_category(self):
 		enable_finance_books()
 
-		asset_category = frappe.get_doc("Asset Category_", "Computers")
+		asset_category = frappe.get_doc("Asset Category", "Computers")
 		asset_category.append(
 			"finance_books", {"depreciation_template": "Straight Line Method Annually for 5 Years"}
 		)

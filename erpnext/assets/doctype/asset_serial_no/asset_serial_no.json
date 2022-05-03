@@ -7,240 +7,240 @@
     "editable_grid": 1,
     "engine": "InnoDB",
     "field_order": [
-     "asset",
-     "serial_no",
-     "column_break_2",
-     "asset_value",
-     "tracking_details_section",
-     "location",
-     "custodian",
-     "column_break_10",
-     "department",
-     "depreciation_details_section",
-     "available_for_use_date",
-     "salvage_value",
-     "column_break_13",
-     "depreciation_posting_start_date",
-     "depreciation_template",
-     "opening_accumulated_depreciation",
-     "finance_books_section",
-     "finance_books",
-     "template_details_section",
-     "depreciation_method",
-     "asset_life_in_months",
-     "column_break_22",
-     "frequency_of_depreciation",
-     "rate_of_depreciation",
-     "section_break_6",
-     "disposal_date",
-     "journal_entry_for_scrap",
-     "status",
-     "booked_fixed_asset",
-     "amended_from"
+        "asset",
+        "serial_no",
+        "column_break_2",
+        "asset_value",
+        "tracking_details_section",
+        "location",
+        "custodian",
+        "column_break_10",
+        "department",
+        "depreciation_details_section",
+        "available_for_use_date",
+        "salvage_value",
+        "column_break_13",
+        "depreciation_posting_start_date",
+        "depreciation_template",
+        "opening_accumulated_depreciation",
+        "finance_books_section",
+        "finance_books",
+        "template_details_section",
+        "depreciation_method",
+        "asset_life_in_months",
+        "column_break_22",
+        "frequency_of_depreciation",
+        "rate_of_depreciation",
+        "section_break_6",
+        "disposal_date",
+        "journal_entry_for_scrap",
+        "status",
+        "booked_fixed_asset",
+        "amended_from"
     ],
     "fields": [
-     {
-      "fieldname": "asset",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Asset",
-      "options": "Asset_",
-      "reqd": 1
-     },
-     {
-      "fieldname": "serial_no",
-      "fieldtype": "Data",
-      "in_list_view": 1,
-      "label": "Serial No",
-      "read_only": 1,
-      "reqd": 1,
-      "unique": 1
-     },
-     {
-      "fieldname": "amended_from",
-      "fieldtype": "Link",
-      "label": "Amended From",
-      "no_copy": 1,
-      "options": "Asset Serial No",
-      "print_hide": 1,
-      "read_only": 1
-     },
-     {
-      "fieldname": "finance_books",
-      "fieldtype": "Table",
-      "label": "FInance Books",
-      "options": "Asset Finance Book_"
-     },
-     {
-      "fieldname": "location",
-      "fieldtype": "Link",
-      "in_list_view": 1,
-      "label": "Location",
-      "mandatory_depends_on": "eval:!doc.__islocal",
-      "options": "Location_"
-     },
-     {
-      "fieldname": "disposal_date",
-      "fieldtype": "Date",
-      "label": "Disposal Date",
-      "read_only": 1
-     },
-     {
-      "fieldname": "journal_entry_for_scrap",
-      "fieldtype": "Link",
-      "label": "Journal Entry for Scrap",
-      "options": "Journal Entry",
-      "read_only": 1
-     },
-     {
-      "fieldname": "column_break_2",
-      "fieldtype": "Column Break"
-     },
-     {
-      "fieldname": "finance_books_section",
-      "fieldtype": "Section Break",
-      "label": "Template Details"
-     },
-     {
-      "fieldname": "section_break_6",
-      "fieldtype": "Section Break"
-     },
-     {
-      "fieldname": "available_for_use_date",
-      "fieldtype": "Date",
-      "label": "Available-for-use Date"
-     },
-     {
-      "fieldname": "asset_value",
-      "fieldtype": "Currency",
-      "label": "Asset Value",
-      "read_only": 1
-     },
-     {
-      "fieldname": "custodian",
-      "fieldtype": "Link",
-      "label": "Custodian",
-      "options": "Employee"
-     },
-     {
-      "fieldname": "department",
-      "fieldtype": "Link",
-      "label": "Department",
-      "options": "Department"
-     },
-     {
-      "collapsible": 1,
-      "fieldname": "tracking_details_section",
-      "fieldtype": "Section Break",
-      "label": "Tracking Details"
-     },
-     {
-      "fieldname": "column_break_10",
-      "fieldtype": "Column Break"
-     },
-     {
-      "allow_on_submit": 1,
-      "default": "Draft",
-      "fieldname": "status",
-      "fieldtype": "Select",
-      "hidden": 1,
-      "in_list_view": 1,
-      "in_standard_filter": 1,
-      "label": "Status",
-      "no_copy": 1,
-      "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt",
-      "read_only": 1
-     },
-     {
-      "collapsible": 1,
-      "fieldname": "depreciation_details_section",
-      "fieldtype": "Section Break",
-      "label": "Depreciation Details"
-     },
-     {
-      "fieldname": "salvage_value",
-      "fieldtype": "Currency",
-      "label": "Salvage Value",
-      "options": "Company:company:default_currency"
-     },
-     {
-      "fieldname": "column_break_13",
-      "fieldtype": "Column Break"
-     },
-     {
-      "fieldname": "depreciation_posting_start_date",
-      "fieldtype": "Date",
-      "label": "Depreciation Posting Start Date"
-     },
-     {
-      "fieldname": "opening_accumulated_depreciation",
-      "fieldtype": "Currency",
-      "label": "Opening Accumulated Depreciation",
-      "no_copy": 1,
-      "options": "Company:company:default_currency"
-     },
-     {
-      "fieldname": "depreciation_template",
-      "fieldtype": "Link",
-      "label": "Depreciation Template",
-      "options": "Depreciation Template"
-     },
-     {
-      "fieldname": "template_details_section",
-      "fieldtype": "Section Break",
-      "label": "Template Details"
-     },
-     {
-      "fetch_from": "depreciation_template.depreciation_method",
-      "fieldname": "depreciation_method",
-      "fieldtype": "Data",
-      "label": "Depreciation Method",
-      "read_only": 1
-     },
-     {
-      "depends_on": "asset_life_in_months",
-      "fieldname": "asset_life_in_months",
-      "fieldtype": "Int",
-      "label": "Asset Life (In Months)",
-      "read_only": 1
-     },
-     {
-      "fieldname": "column_break_22",
-      "fieldtype": "Column Break"
-     },
-     {
-      "fetch_from": "depreciation_template.frequency_of_depreciation",
-      "fieldname": "frequency_of_depreciation",
-      "fieldtype": "Data",
-      "label": "Frequency of Depreciation",
-      "read_only": 1
-     },
-     {
-      "depends_on": "rate_of_depreciation",
-      "fetch_from": "depreciation_template.rate_of_depreciation",
-      "fieldname": "rate_of_depreciation",
-      "fieldtype": "Percent",
-      "label": "Rate of Depreciation",
-      "read_only": 1
-     },
-     {
-        "default": "0",
-        "description": "To check if CWIP entries have been made or not (since they need to be posted on an Asset's available-for-use date and not its date of submission)",
-        "fieldname": "booked_fixed_asset",
-        "fieldtype": "Check",
-        "label": "Booked Fixed Asset",
-        "no_copy": 1,
-        "read_only": 1
-    }
+        {
+            "fieldname": "asset",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Asset",
+            "options": "Asset_",
+            "reqd": 1
+        },
+        {
+            "fieldname": "serial_no",
+            "fieldtype": "Data",
+            "in_list_view": 1,
+            "label": "Serial No",
+            "read_only": 1,
+            "reqd": 1,
+            "unique": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Asset Serial No",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "finance_books",
+            "fieldtype": "Table",
+            "label": "Finance Books",
+            "options": "Asset Finance Book"
+        },
+        {
+            "fieldname": "location",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Location",
+            "mandatory_depends_on": "eval:!doc.__islocal",
+            "options": "Location_"
+        },
+        {
+            "fieldname": "disposal_date",
+            "fieldtype": "Date",
+            "label": "Disposal Date",
+            "read_only": 1
+        },
+        {
+            "fieldname": "journal_entry_for_scrap",
+            "fieldtype": "Link",
+            "label": "Journal Entry for Scrap",
+            "options": "Journal Entry",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "finance_books_section",
+            "fieldtype": "Section Break",
+            "label": "Template Details"
+        },
+        {
+            "fieldname": "section_break_6",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "available_for_use_date",
+            "fieldtype": "Date",
+            "label": "Available-for-use Date"
+        },
+        {
+            "fieldname": "asset_value",
+            "fieldtype": "Currency",
+            "label": "Asset Value",
+            "read_only": 1
+        },
+        {
+            "fieldname": "custodian",
+            "fieldtype": "Link",
+            "label": "Custodian",
+            "options": "Employee"
+        },
+        {
+            "fieldname": "department",
+            "fieldtype": "Link",
+            "label": "Department",
+            "options": "Department"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "tracking_details_section",
+            "fieldtype": "Section Break",
+            "label": "Tracking Details"
+        },
+        {
+            "fieldname": "column_break_10",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "default": "Draft",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "hidden": 1,
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Status",
+            "no_copy": 1,
+            "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt",
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "depreciation_details_section",
+            "fieldtype": "Section Break",
+            "label": "Depreciation Details"
+        },
+        {
+            "fieldname": "salvage_value",
+            "fieldtype": "Currency",
+            "label": "Salvage Value",
+            "options": "Company:company:default_currency"
+        },
+        {
+            "fieldname": "column_break_13",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "depreciation_posting_start_date",
+            "fieldtype": "Date",
+            "label": "Depreciation Posting Start Date"
+        },
+        {
+            "fieldname": "opening_accumulated_depreciation",
+            "fieldtype": "Currency",
+            "label": "Opening Accumulated Depreciation",
+            "no_copy": 1,
+            "options": "Company:company:default_currency"
+        },
+        {
+            "fieldname": "depreciation_template",
+            "fieldtype": "Link",
+            "label": "Depreciation Template",
+            "options": "Depreciation Template"
+        },
+        {
+            "fieldname": "template_details_section",
+            "fieldtype": "Section Break",
+            "label": "Template Details"
+        },
+        {
+            "fetch_from": "depreciation_template.depreciation_method",
+            "fieldname": "depreciation_method",
+            "fieldtype": "Data",
+            "label": "Depreciation Method",
+            "read_only": 1
+        },
+        {
+            "depends_on": "asset_life_in_months",
+            "fieldname": "asset_life_in_months",
+            "fieldtype": "Int",
+            "label": "Asset Life (In Months)",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_22",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fetch_from": "depreciation_template.frequency_of_depreciation",
+            "fieldname": "frequency_of_depreciation",
+            "fieldtype": "Data",
+            "label": "Frequency of Depreciation",
+            "read_only": 1
+        },
+        {
+            "depends_on": "rate_of_depreciation",
+            "fetch_from": "depreciation_template.rate_of_depreciation",
+            "fieldname": "rate_of_depreciation",
+            "fieldtype": "Percent",
+            "label": "Rate of Depreciation",
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "description": "To check if CWIP entries have been made or not (since they need to be posted on an Asset's available-for-use date and not its date of submission)",
+            "fieldname": "booked_fixed_asset",
+            "fieldtype": "Check",
+            "label": "Booked Fixed Asset",
+            "no_copy": 1,
+            "read_only": 1
+        }
     ],
     "in_create": 1,
     "index_web_pages_for_search": 1,
     "is_submittable": 1,
     "links": [
-     {
-      "link_doctype": "Depreciation Schedule_",
-      "link_fieldname": "serial_no"
-     }
+        {
+            "link_doctype": "Depreciation Schedule_",
+            "link_fieldname": "serial_no"
+        }
     ],
     "modified": "2022-04-28 21:26:38.394732",
     "modified_by": "Administrator",
@@ -249,17 +249,17 @@
     "naming_rule": "By fieldname",
     "owner": "Administrator",
     "permissions": [
-     {
-      "delete": 1,
-      "email": 1,
-      "export": 1,
-      "print": 1,
-      "read": 1,
-      "report": 1,
-      "role": "System Manager",
-      "share": 1,
-      "write": 1
-     }
+        {
+            "delete": 1,
+            "email": 1,
+            "export": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "System Manager",
+            "share": 1,
+            "write": 1
+        }
     ],
     "sort_field": "modified",
     "sort_order": "DESC",
