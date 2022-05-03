@@ -13,7 +13,7 @@ from erpnext.assets.doctype.asset.asset import split_asset
 # )
 
 
-class TestAsset_(unittest.TestCase):
+class TestAsset(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_company()

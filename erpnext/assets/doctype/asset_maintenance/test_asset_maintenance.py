@@ -10,7 +10,7 @@ from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_d
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
 
-class TestAssetMaintenance_(unittest.TestCase):
+class TestAssetMaintenance(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_company()

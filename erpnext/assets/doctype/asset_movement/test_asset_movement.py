@@ -15,7 +15,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 from erpnext.hr.doctype.employee.test_employee import make_employee
 
 
-class TestAssetMovement_(unittest.TestCase):
+class TestAssetMovement(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_company()

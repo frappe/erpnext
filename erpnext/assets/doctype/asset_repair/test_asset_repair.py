@@ -16,7 +16,7 @@ from erpnext.assets.doctype.asset_serial_no.test_asset_serial_no import get_asse
 from erpnext.stock.doctype.item.test_item import create_item
 
 
-class TestAssetRepair_(unittest.TestCase):
+class TestAssetRepair(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_company()

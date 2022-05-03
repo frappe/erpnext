@@ -17,7 +17,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 )
 
 
-class TestDepreciationSchedule_(unittest.TestCase):
+class TestDepreciationSchedule(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		create_company()
