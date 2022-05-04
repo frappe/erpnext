@@ -33,10 +33,8 @@ def before_tests():
 				"email": "test@erpnext.com",
 				"password": "test",
 				"chart_of_accounts": "Standard",
-				"domains": ["Manufacturing"],
 			}
 		)
-		_enable_all_domains()
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
 	frappe.db.sql("delete from `tabLeave Application`")
@@ -131,15 +129,7 @@ def format_ces_api(data, param):
 
 def enable_all_roles_and_domains():
 	"""enable all roles and domain for testing"""
-	_enable_all_domains()
 	_enable_all_roles_for_admin()
-
-
-def _enable_all_domains():
-	domains = frappe.get_all("Domain", pluck="name")
-	if not domains:
-		return
-	frappe.get_single("Domain Settings").set_active_domains(domains)
 
 
 def _enable_all_roles_for_admin():
