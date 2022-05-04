@@ -12,6 +12,7 @@ import traceback
 
 import frappe
 import jwt
+import requests
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
@@ -56,6 +57,7 @@ def validate_eligibility(doc):
 	invalid_company = not frappe.db.get_value("E Invoice User", {"company": doc.get("company")})
 	invalid_supply_type = doc.get("gst_category") not in [
 		"Registered Regular",
+		"Registered Composition",
 		"SEZ",
 		"Overseas",
 		"Deemed Export",
@@ -123,24 +125,33 @@ def read_json(name):
 
 def get_transaction_details(invoice):
 	supply_type = ""
-	if invoice.gst_category == "Registered Regular":
+	if (
+		invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition"
+	):
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
-		supply_type = "SEZWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "SEZWOP"
+		else:
+			supply_type = "SEZWP"
 	elif invoice.gst_category == "Overseas":
-		supply_type = "EXPWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "EXPWOP"
+		else:
+			supply_type = "EXPWP"
 	elif invoice.gst_category == "Deemed Export":
 		supply_type = "DEXP"
 
 	if not supply_type:
-		rr, sez, overseas, export = (
+		rr, rc, sez, overseas, export = (
 			bold("Registered Regular"),
+			bold("Registered Composition"),
 			bold("SEZ"),
 			bold("Overseas"),
 			bold("Deemed Export"),
 		)
 		frappe.throw(
-			_("GST category should be one of {}, {}, {}, {}").format(rr, sez, overseas, export),
+			_("GST category should be one of {}, {}, {}, {}, {}").format(rr, rc, sez, overseas, export),
 			title=_("Invalid Supply Type"),
 		)
 
@@ -552,6 +563,7 @@ def validate_totals(einvoice):
 		+ flt(value_details["CgstVal"])
 		+ flt(value_details["SgstVal"])
 		+ flt(value_details["IgstVal"])
+		+ flt(value_details["CesVal"])
 		+ flt(value_details["OthChrg"])
 		+ flt(value_details["RndOffAmt"])
 		- flt(value_details["Discount"])
@@ -829,13 +841,24 @@ class GSPConnector:
 		return self.e_invoice_settings.auth_token
 
 	def make_request(self, request_type, url, headers=None, data=None):
-		if request_type == "post":
-			res = make_post_request(url, headers=headers, data=data)
-		else:
-			res = make_get_request(url, headers=headers, data=data)
+		try:
+			if request_type == "post":
+				res = make_post_request(url, headers=headers, data=data)
+			else:
+				res = make_get_request(url, headers=headers, data=data)
+
+		except requests.exceptions.HTTPError as e:
+			if e.response.status_code in [401, 403] and not hasattr(self, "token_auto_refreshed"):
+				self.auto_refresh_token()
+				headers = self.get_headers()
+				return self.make_request(request_type, url, headers, data)
 
 		self.log_request(url, headers, data, res)
 		return res
+
+	def auto_refresh_token(self):
+		self.fetch_auth_token()
+		self.token_auto_refreshed = True
 
 	def log_request(self, url, headers, data, res):
 		headers.update({"password": self.credentials.password})
@@ -1074,7 +1097,7 @@ class GSPConnector:
 				"Distance": cint(eway_bill_details.distance),
 				"TransMode": eway_bill_details.mode_of_transport,
 				"TransId": eway_bill_details.gstin,
-				"TransName": eway_bill_details.transporter,
+				"TransName": eway_bill_details.name,
 				"TrnDocDt": eway_bill_details.document_date,
 				"TrnDocNo": eway_bill_details.document_name,
 				"VehNo": eway_bill_details.vehicle_no,

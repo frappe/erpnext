@@ -245,8 +245,7 @@ def get_fields_indexed():
 
 def raise_redisearch_error():
 	"Create an Error Log and raise error."
-	traceback = frappe.get_traceback()
-	log = frappe.log_error(traceback, frappe._("Redisearch Error"))
+	log = frappe.log_error("Redisearch Error")
 	log_link = frappe.utils.get_link_to_form("Error Log", log.name)
 
 	frappe.throw(

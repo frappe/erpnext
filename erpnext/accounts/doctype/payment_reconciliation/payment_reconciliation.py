@@ -399,6 +399,9 @@ class PaymentReconciliation(Document):
 
 		condition = " and company = '{0}' ".format(self.company)
 
+		if self.get("cost_center") and (get_invoices or get_payments or get_return_invoices):
+			condition = " and cost_center = '{0}' ".format(self.cost_center)
+
 		if get_invoices:
 			dr_or_cr = (
 				gle.debit_in_account_currency
