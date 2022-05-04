@@ -1303,9 +1303,6 @@ def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
 	gsp_connector = GSPConnector(doctype, docname)
 	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
 
-	frappe.db.set_value(doctype, docname, "ewaybill", "")
-	frappe.db.set_value(doctype, docname, "eway_bill_cancelled", 1)
-
 
 @frappe.whitelist()
 def generate_einvoices(docnames):
