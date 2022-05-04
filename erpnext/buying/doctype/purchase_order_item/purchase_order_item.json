@@ -574,7 +574,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
@@ -584,7 +583,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "hidden": 1,
