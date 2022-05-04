@@ -64,7 +64,7 @@ class StockController(AccountsController):
 			if self.docstatus == 1:
 				if not gl_entries:
 					gl_entries = self.get_gl_entries(warehouse_account)
-				make_gl_entries(gl_entries, from_repost=from_repost)
+				make_gl_entries(gl_entries, merge_entries=False, from_repost=from_repost)
 
 		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus == 1:
 			gl_entries = []
@@ -185,7 +185,7 @@ class StockController(AccountsController):
 						).format(wh, self.company)
 					)
 
-		return process_gl_map(gl_list, precision=precision)
+		return process_gl_map(gl_list, merge_entries=False, precision=precision)
 
 	def get_debit_field_precision(self):
 		if not frappe.flags.debit_field_precision:
