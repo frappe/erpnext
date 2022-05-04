@@ -42,16 +42,10 @@ def execute(filters=None):
 
 		salary_detail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"parent":ss.name})
 
-		gross_pay = 0
-
-		incomes = 0
-
 		row = [ss.employee_name, ss.payment_days]
 
 		if len(Employee) > 0:		
 			row += [Employee[0].base]
-			gross_pay = Employee[0].base
-			incomes = ss.gross_pay - Employee[0].base
 		else:
 			row += [0]
 
@@ -104,9 +98,19 @@ def execute(filters=None):
 			# else:
 			# 	row += [0]
 
-		row += [gross_pay]
+		incomes = 0
 
-		row += [incomes]
+		income_list = frappe.get_all("Salary Detail", ["*"], filters = {"parent": ss.name})
+
+		for inc in income_list:
+			component = frappe.get_doc("Salary Component", inc.salary_component)
+
+			if component.type == "Earning" and component.name != "Base":
+				incomes += inc.amount
+
+		# row += [incomes]
+
+		row += [ss.gross_pay]
 
 		net_pay = ss.net_pay
 		total_deduction = ss.total_deduction
@@ -227,8 +231,8 @@ def get_columns():
 			component = str(sc.name)
 			column.append(_(component) + ":Currency:120")
 	
+	# column.append(_("Extra Income") + ":Currency:120")
 	column.append(_("Gross Pay") + ":Currency:120")
-	column.append(_("Extra Income") + ":Currency:120")
 
 	salary_components_deduction = frappe.get_all("Salary Component", ["name"], filters = {"type": "Deduction"})
 
