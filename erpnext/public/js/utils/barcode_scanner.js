@@ -11,10 +11,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.batch_no_field = opts.batch_no_field || "batch_no";
 		this.qty_field = opts.qty_field || "qty";
 		this.max_qty_field = opts.max_qty_field || null;
-		this.allow_new_row = opts.allow_new_row;
-		if (this.allow_new_row === undefined || this.allow_new_row === null) {
-			this.allow_new_row = true;
-		}
+		this.dont_allow_new_row = opts.dont_allow_new_row;
 
 		this.items_table_name = opts.items_table_name || "items";
 		this.items_table = this.frm.doc[this.items_table_name];
@@ -77,7 +74,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 
 		if (!row) {
-			if (!this.allow_new_row) {
+			if (this.dont_allow_new_row) {
 				frappe.show_alert({
 					message: __("Maximum quantity scanned for item {0}.", [item_code]),
 					indicator: "red"
