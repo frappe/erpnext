@@ -53,23 +53,28 @@ def execute(filters=None):
 		split = ss.name.split("/")
 		name = split[1]
 		Employee = frappe.get_all("Salary Structure Assignment", ["name", "employee","employee_name", "base"], filters = {"employee": ss.employee})
-		
-		gross_pay = 0
 
-		incomes = 0
 
 		row = [ss.employee_name, ss.payment_days]
 		
 		if len(Employee) > 0:
 			row += [Employee[0].base]
-			gross_pay = Employee[0].base
-			incomes = ss.gross_pay - Employee[0].base
 		else:
 			row += [0]
-		
-		row += [gross_pay]
+
+		incomes = 0
+
+		income_list = frappe.get_all("Salary Detail", ["*"], filters = {"parent": ss.name})
+
+		for inc in income_list:
+			component = frappe.get_doc("Salary Component", inc.salary_component)
+
+			if component.type == "Earning" and component.name != "Base":
+				incomes += inc.amount
 
 		row += [incomes]
+
+		row += [ss.gross_pay]
 
 		row += [ss.total_deduction, ss.net_pay]
 
@@ -108,7 +113,7 @@ def get_columns(salary_slips):
 	"""
 	columns = [
 		_("Employee Name") + "::140", _("Payment Days") + "::140", _("Salary Base") + ":Currency:120",
-		_("Gross Pay") + ":Currency:120", _("Extra Income") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"
+		_("Extra Income") + ":Currency:120", _("Gross Pay") + ":Currency:120",_("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"
 	]
 
 	# columns = [
