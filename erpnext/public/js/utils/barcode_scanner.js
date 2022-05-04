@@ -79,7 +79,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		if (!row) {
 			if (!this.allow_new_row) {
 				frappe.show_alert({
-					message: __("Maximum quantity scanned for this barcode."),
+					message: __("Maximum quantity scanned for item {0}.", [item_code]),
 					indicator: "red"
 				});
 				this.clean_up();
