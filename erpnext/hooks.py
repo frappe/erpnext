@@ -80,13 +80,6 @@ calendars = [
 	"Holiday List",
 ]
 
-domains = {
-	"Distribution": "erpnext.domains.distribution",
-	"Manufacturing": "erpnext.domains.manufacturing",
-	"Retail": "erpnext.domains.retail",
-	"Services": "erpnext.domains.services",
-}
-
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner", "Job Opening"]
 
 website_context = {
