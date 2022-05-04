@@ -735,11 +735,6 @@ class TestStockEntry(FrappeTestCase):
 
 		batch_qty = get_batch_qty(batch_no, "_Test Warehouse - _TC", item.item_code)
 		self.assertEqual(batch_qty, 2)
-		frappe.db.commit()
-
-		# Cancelling Origin Document of Batch
-		self.assertRaises(frappe.LinkExistsError, se1.cancel)
-		frappe.db.rollback()
 
 		se2.cancel()
 
