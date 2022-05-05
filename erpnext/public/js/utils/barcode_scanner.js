@@ -122,7 +122,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return new Promise(resolve => {
 			const increment = (value = 1) => {
 				const item_data = {item_code: item_code};
-				item_data[this.qty_field] = (row[this.qty_field] || 0) + value;
+				item_data[this.qty_field] = Number((row[this.qty_field] || 0)) + Number(value);
 				frappe.model.set_value(row.doctype, row.name, item_data);
 			};
 
