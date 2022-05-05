@@ -999,13 +999,15 @@ def validate_serial_no(doc):
 
 
 @frappe.whitelist()
-def transfer_asset(asset, purpose, source_location, company):
+def transfer_asset(asset, num_of_assets, purpose, source_location, company):
 	movement_entry = frappe.new_doc("Asset Movement")
 	movement_entry.company = company
 	movement_entry.purpose = purpose
 	movement_entry.transaction_date = get_datetime()
 
-	movement_entry.append("assets", {"asset": asset, "source_location": source_location})
+	movement_entry.append(
+		"assets", {"asset": asset, "source_location": source_location, "num_of_assets": num_of_assets}
+	)
 
 	return movement_entry
 

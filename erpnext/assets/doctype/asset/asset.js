@@ -268,6 +268,7 @@ frappe.ui.form.on("Asset", {
 			freeze: true,
 			args: {
 				"asset": frm.doc.name,
+				"num_of_assets": frm.doc.num_of_assets,
 				"purpose": "Transfer",
 				"source_location": frm.doc.location,
 				"company": frm.doc.company
