@@ -1118,10 +1118,10 @@ class GSPConnector:
 					# when we have more features (responses) in eway bill, we can add them using below forloop.
 					for msg in info:
 						if msg.get("InfCd") == "EWBPPD":
-							pin_to_pin_distance = int(re.search(r'\d+', msg.get("Desc")).group())
+							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
 							frappe.msgprint(
     									msg="Auto Calculated Distance is " + str(pin_to_pin_distance) + " KM.",
-    									title='Notification',
+    									title="Notification",
 									)
 							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
