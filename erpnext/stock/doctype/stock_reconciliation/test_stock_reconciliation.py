@@ -315,10 +315,10 @@ class TestStockReconciliation(FrappeTestCase):
 	def test_stock_reco_for_serial_and_batch_item_with_future_dependent_entry(self):
 		"""
 		Behaviour: 1) Create Stock Reconciliation, which will be the origin document
-		                of a new batch having a serial no
-		                2) Create a Stock Entry that adds a serial no to the same batch following this
-		                Stock Reconciliation
-		                3) Cancel Stock Entry
+		of a new batch having a serial no
+		2) Create a Stock Entry that adds a serial no to the same batch following this
+		Stock Reconciliation
+		3) Cancel Stock Entry
 		Expected Result: 3) Serial No only in the Stock Entry is Inactive and Batch qty decreases
 		"""
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
