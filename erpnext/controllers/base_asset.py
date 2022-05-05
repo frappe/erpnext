@@ -522,8 +522,9 @@ class BaseAsset(AccountsController):
 	def record_asset_receipt(self):
 		reference_doctype, reference_docname = get_purchase_details(self)
 		transaction_date = getdate(self.get_purchase_date())
-		serial_no = self.get_serial_no()
 		asset = self.get_asset()
+		serial_no = self.get_serial_no()
+		num_of_assets = self.get_num_of_assets()
 		asset_name, company = self.get_asset_details()
 
 		if reference_docname:
@@ -537,6 +538,7 @@ class BaseAsset(AccountsController):
 				"asset": asset,
 				"asset_name": asset_name,
 				"serial_no": serial_no,
+				"num_of_assets": num_of_assets,
 				"target_location": self.location,
 				"to_employee": self.custodian,
 			}
@@ -566,6 +568,12 @@ class BaseAsset(AccountsController):
 			return self.name
 		else:
 			return self.asset
+
+	def get_num_of_assets(self):
+		if self.doctype == "Asset":
+			return self.num_of_assets
+		else:
+			return 0
 
 	def get_asset_details(self):
 		if self.doctype == "Asset":
