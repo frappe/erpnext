@@ -803,10 +803,7 @@ class BuyingController(StockController, Subcontracting):
 		if self.doctype == "Material Request":
 			return
 
-		if hasattr(self, "is_subcontracted") and self.is_subcontracted == "Yes":
-			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
-		else:
-			validate_item_type(self, "is_purchase_item", "purchase")
+		validate_item_type(self, "is_purchase_item", "purchase")
 
 
 def get_asset_item_details(asset_items):

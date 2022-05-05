@@ -43,20 +43,19 @@ class Bin(Document):
 	def update_reserved_qty_for_sub_contracting(self):
 		# reserved qty
 
-		po = frappe.qb.DocType("Purchase Order")
-		supplied_item = frappe.qb.DocType("Purchase Order Item Supplied")
+		sco = frappe.qb.DocType("Subcontracting Order")
+		supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
 
 		reserved_qty_for_sub_contract = (
-			frappe.qb.from_(po)
+			frappe.qb.from_(sco)
 			.from_(supplied_item)
 			.select(Sum(Coalesce(supplied_item.required_qty, 0)))
 			.where(
 				(supplied_item.rm_item_code == self.item_code)
-				& (po.name == supplied_item.parent)
-				& (po.docstatus == 1)
-				& (po.is_subcontracted == "Yes")
-				& (po.status != "Closed")
-				& (po.per_received < 100)
+				& (sco.name == supplied_item.parent)
+				& (sco.docstatus == 1)
+				& (sco.status != "Closed")
+				& (sco.per_received < 100)
 				& (supplied_item.reserve_warehouse == self.warehouse)
 			)
 		).run()[0][0] or 0.0
@@ -67,21 +66,20 @@ class Bin(Document):
 		materials_transferred = (
 			frappe.qb.from_(se)
 			.from_(se_item)
-			.from_(po)
+			.from_(sco)
 			.select(
 				Sum(Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty))
 			)
 			.where(
 				(se.docstatus == 1)
 				& (se.purpose == "Send to Subcontractor")
-				& (Coalesce(se.purchase_order, "") != "")
+				& (Coalesce(se.subcontracting_order, "") != "")
 				& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
 				& (se.name == se_item.parent)
-				& (po.name == se.purchase_order)
-				& (po.docstatus == 1)
-				& (po.is_subcontracted == "Yes")
-				& (po.status != "Closed")
-				& (po.per_received < 100)
+				& (sco.name == se.subcontracting_order)
+				& (sco.docstatus == 1)
+				& (sco.status != "Closed")
+				& (sco.per_received < 100)
 			)
 		).run()[0][0] or 0.0
 

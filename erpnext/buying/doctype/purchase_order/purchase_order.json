@@ -16,6 +16,8 @@
   "supplier_name",
   "apply_tds",
   "tax_withholding_category",
+  "is_subcontracted",
+  "supplier_warehouse",
   "column_break1",
   "company",
   "transaction_date",
@@ -51,10 +53,7 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
-  "sec_warehouse",
-  "is_subcontracted",
-  "col_break_warehouse",
-  "supplier_warehouse",
+  "section_break_45",
   "before_items_section",
   "scan_barcode",
   "items_col_break",
@@ -154,7 +153,8 @@
    "hidden": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "naming_series",
@@ -440,11 +440,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break",
-   "label": "Subcontracting"
-  },
-  {
    "description": "Sets 'Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
@@ -453,14 +448,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "col_break_warehouse",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "No",
    "fieldname": "is_subcontracted",
    "fieldtype": "Select",
-   "in_standard_filter": 1,
    "label": "Supply Raw Materials",
    "options": "No\nYes",
    "print_hide": 1
@@ -1138,16 +1128,21 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "section_break_45",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 13:10:47.955401",
+ "modified": "2022-04-26 18:46:58.863174",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1194,6 +1189,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1

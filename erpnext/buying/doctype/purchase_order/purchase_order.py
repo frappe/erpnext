@@ -69,7 +69,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
-		self.validate_bom_for_subcontracting_items()
+		self.validate_fg_item_for_subcontracting()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
 		validate_inter_company_party(
@@ -193,12 +193,25 @@ class PurchaseOrder(BuyingController):
 					).format(item_code, qty, itemwise_min_order_qty.get(item_code))
 				)
 
-	def validate_bom_for_subcontracting_items(self):
-		if self.is_subcontracted == "Yes":
+	def validate_fg_item_for_subcontracting(self):
+		if self.is_subcontracted:
 			for item in self.items:
-				if not item.bom:
+				if not item.fg_item:
 					frappe.throw(
-						_("BOM is not specified for subcontracting item {0} at row {1}").format(
+						_("Finished Good Item is not specified for service item {0} at row {1}").format(
+							item.item_code, item.idx
+						)
+					)
+				else:
+					if not frappe.get_value("Item", item.fg_item, "is_sub_contracted_item"):
+						frappe.throw(
+							_(
+								"Finished Good Item {0} must be a sub-contracted item for service item {1} at row {2}"
+							).format(item.fg_item, item.item_code, item.idx)
+						)
+				if not item.fg_item_qty:
+					frappe.throw(
+						_("Finished Good Item Qty is not specified for service item {0} at row {1}").format(
 							item.item_code, item.idx
 						)
 					)
@@ -746,3 +759,43 @@ def add_items_in_ste(ste_doc, row, qty, po_details, batch_no=None):
 			"serial_no": "\n".join(row.serial_no) if row.serial_no else "",
 		}
 	)
+
+
+@frappe.whitelist()
+def make_subcontracting_order(source_name, target_doc=None):
+	return get_mapped_subcontracting_order(source_name, target_doc)
+
+
+def get_mapped_subcontracting_order(source_name, target_doc=None):
+
+	if target_doc and isinstance(target_doc, str):
+		target_doc = json.loads(target_doc)
+		for key in ["service_items", "items", "supplied_items"]:
+			if key in target_doc:
+				del target_doc[key]
+		target_doc = json.dumps(target_doc)
+
+	target_doc = get_mapped_doc(
+		"Purchase Order",
+		source_name,
+		{
+			"Purchase Order": {
+				"doctype": "Subcontracting Order",
+				"field_map": {},
+				"field_no_map": ["total_qty", "total", "net_total"],
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Purchase Order Item": {
+				"doctype": "Subcontracting Order Service Item",
+				"field_map": {},
+				"field_no_map": [],
+			},
+		},
+		target_doc,
+	)
+
+	target_doc.populate_items_table()
+
+	return target_doc

@@ -28,6 +28,11 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 
+		frm.set_query("fg_item", "items", function() {
+			return {
+				filters: {'is_sub_contracted_item': 1}
+			}
+		});
 	},
 
 	company: function(frm) {
@@ -109,6 +114,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			'Purchase Invoice': 'Purchase Invoice',
 			'Stock Entry': 'Material to Supplier',
 			'Payment Entry': 'Payment',
+			'Subcontracting Order': 'Subcontracting Order'
 		}
 
 		super.setup();
@@ -182,6 +188,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
 								function() { me.make_stock_entry(); }, __("Transfer"));
+						}
+						if (doc.is_subcontracted) {
+							cur_frm.add_custom_button(__('Subcontracting Order'), this.make_subcontracting_order, __('Create'));
 						}
 					}
 					if(flt(doc.per_billed) < 100)
@@ -404,6 +413,14 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 			frm: cur_frm
+		})
+	}
+
+	make_subcontracting_order() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order",
+			frm: cur_frm,
+			freeze_message: __("Creating Subcontracting Order ...")
 		})
 	}
 
