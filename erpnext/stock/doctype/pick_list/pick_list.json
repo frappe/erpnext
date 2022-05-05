@@ -20,6 +20,7 @@
   "scan_barcode",
   "column_break_13",
   "scan_mode",
+  "prompt_qty",
   "section_break_15",
   "locations",
   "amended_from",
@@ -151,11 +152,17 @@
    "fieldname": "scan_mode",
    "fieldtype": "Check",
    "label": "Scan Mode"
+  },
+  {
+   "default": "0",
+   "fieldname": "prompt_qty",
+   "fieldtype": "Check",
+   "label": "Prompt Qty"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-04 11:12:48.044239",
+ "modified": "2022-05-05 09:50:36.252445",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

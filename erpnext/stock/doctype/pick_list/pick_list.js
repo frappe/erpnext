@@ -165,7 +165,8 @@ frappe.ui.form.on('Pick List', {
 			items_table_name: 'locations',
 			qty_field: 'picked_qty',
 			max_qty_field: 'qty',
-			dont_allow_new_row: true
+			dont_allow_new_row: true,
+			prompt_qty: frm.doc.prompt_qty
 		};
 		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
 		barcode_scanner.process_scan();
