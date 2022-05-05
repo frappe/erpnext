@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from erpnext.assets.doctype.asset_activity.asset_activity import create_asset_activity
 
 
-class AssetMovement_(Document):
+class AssetMovement(Document):
 	def validate(self):
 		self.validate_asset()
 		self.validate_movement()
