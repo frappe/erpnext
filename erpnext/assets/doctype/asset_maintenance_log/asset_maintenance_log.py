@@ -9,7 +9,7 @@ from frappe.utils import getdate
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
 
-class AssetMaintenanceLog_(Document):
+class AssetMaintenanceLog(Document):
 	def validate(self):
 		self.check_if_maintenance_is_overdue()
 		self.validate_completion_date()

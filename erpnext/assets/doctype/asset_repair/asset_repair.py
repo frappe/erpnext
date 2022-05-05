@@ -11,7 +11,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.controllers.base_asset import get_asset_account
 
 
-class AssetRepair_(AccountsController):
+class AssetRepair(AccountsController):
 	def validate(self):
 		self.get_asset_doc()
 		self.validate_asset()
