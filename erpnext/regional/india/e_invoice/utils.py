@@ -1120,9 +1120,9 @@ class GSPConnector:
 						if msg.get("InfCd") == "EWBPPD":
 							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
 							frappe.msgprint(
-    									msg="Auto Calculated Distance is " + str(pin_to_pin_distance) + " KM.",
-    									title="Notification",
-									)
+								msg="Auto Calculated Distance is " + str(pin_to_pin_distance) + " KM.",
+								title="Notification",
+							)
 							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
 					"doctype": self.invoice.doctype,
