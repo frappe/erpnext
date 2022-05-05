@@ -12,6 +12,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.qty_field = opts.qty_field || "qty";
 		this.max_qty_field = opts.max_qty_field || null;
 		this.dont_allow_new_row = opts.dont_allow_new_row;
+		this.prompt_qty = opts.prompt_qty;
 
 		this.items_table_name = opts.items_table_name || "items";
 		this.items_table = this.frm.doc[this.items_table_name];
@@ -94,9 +95,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			return;
 		}
 
-		this.show_scan_message(row.idx, row.item_code);
 		this.set_selector_trigger_flag(row, data);
-		this.set_item(row, item_code);
+		this.set_item(row, item_code).then(qty => {
+			this.show_scan_message(row.idx, row.item_code, qty);
+		});
 		this.set_serial_no(row, serial_no);
 		this.set_batch_no(row, batch_no);
 		this.set_barcode(row, barcode);
@@ -117,9 +119,23 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	set_item(row, item_code) {
-		const item_data = { item_code: item_code };
-		item_data[this.qty_field] = (row[this.qty_field] || 0) + 1;
-		frappe.model.set_value(row.doctype, row.name, item_data);
+		return new Promise(resolve => {
+			const increment = (value = 1) => {
+				const item_data = {item_code: item_code};
+				item_data[this.qty_field] = (row[this.qty_field] || 0) + value;
+				frappe.model.set_value(row.doctype, row.name, item_data);
+			};
+
+			if (this.prompt_qty) {
+				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({value}) => {
+					increment(value);
+					resolve(value);
+				});
+			} else {
+				increment();
+				resolve();
+			}
+		});
 	}
 
 	set_serial_no(row, serial_no) {
@@ -148,12 +164,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
-	show_scan_message(idx, exist = null) {
+	show_scan_message(idx, exist = null, qty = 1) {
 		// show new row or qty increase toast
 		if (exist) {
 			frappe.show_alert(
 				{
-					message: __("Row #{0}: Qty increased by 1", [idx]),
+					message: __("Row #{0}: Qty increased by {1}", [idx, qty]),
 					indicator: "green",
 				},
 				5
