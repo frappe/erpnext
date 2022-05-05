@@ -34,6 +34,7 @@
   "set_posting_time",
   "due_date",
   "issuance_deadline",
+  "project",
   "reason_for_sale",
   "patient_statement",
   "cai_info_section",
@@ -47,7 +48,6 @@
   "column_numeration",
   "accounting_dimensions_section",
   "deadline_for_authorization",
-  "project",
   "dimension_col_break",
   "customer_po_details",
   "po_no",
@@ -519,13 +519,13 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
-   "hidden": 1,
    "in_global_search": 1,
    "label": "Project",
    "oldfieldname": "project_name",
    "oldfieldtype": "Link",
    "options": "Project",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "dimension_col_break",
@@ -2033,7 +2033,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2022-02-11 13:45:47.498610",
+ "modified": "2022-05-05 14:26:12.228763",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cancellation Of Invoices",

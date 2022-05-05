@@ -115,55 +115,12 @@ class InventoryDownload(Document):
 		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
 
 		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
-		now = datetime.now()
-		# doc = frappe.new_doc("Stock Ledger Entry")
-		# doc.item_code = item.item_code
-		# doc.batch_no = item.batch_no
-		# doc.warehouse = self.warehouse
-		# doc.serial_no = item.serial_no
-		# doc.posting_date = now.date()
-		# doc.posting_time = now.time()
-		# doc.voucher_type =  self.doctype
-		# doc.voucher_no = self.name
-		# doc.voucher_detail_no = self.name
-		# doc.actual_qty = qty_item
-		# doc.incoming_rate = 0
-		# doc.outgoing_rate = 0
-		# doc.stock_uom = item.stock_uom
-		# doc.qty_after_transaction = qty
-		# doc.valuation_rate = item.basic_rate
-		# doc.stock_value = qty * item.basic_rate
-		# doc.stock_value_difference = qty_item * item.basic_rate
-		# doc.company = self.company
-		# doc.fiscal_year = fiscal_year[0].name
-		# doc.insert()
-
-		# "item_code": item.item_code,
-		# "batch_no": item.batch_no
-		# "warehouse": self.warehouse
-		# "serial_no": item.serial_no
-		# "posting_date": now.date()
-		# "posting_time": now.time()
-		# "voucher_type":  self.doctype
-		# "voucher_no": self.name
-		# "voucher_detail_no": self.name
-		# "actual_qty": qty_item
-		# "incoming_rate": 0
-		# "outgoing_rate": 0
-		# "stock_uom": item.stock_uom
-		# "qty_after_transaction": qty
-		# "valuation_rate": item.basic_rate
-		# "stock_value": qty * item.basic_rate
-		# "stock_value_difference": qty_item * item.basic_rate
-		# "company": self.company
-		# "fiscal_year":" fiscal_year[0].name
-
 		
 		sle = ({
 			"item_code": item.item_code,
 			"warehouse": self.warehouse,
-			"posting_date": now.date(),
-			"posting_time": now.time(),
+			"posting_date": self.creation_date,
+			"posting_time": self.posting_time,
 			'fiscal_year': fiscal_year[0].name,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
