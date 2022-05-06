@@ -164,6 +164,15 @@ frappe.ui.form.on('Salary Structure', {
 			primary_action_label: __('Assign')
 		});
 
+		d.fields_dict.grade.df.onchange = function() {
+			const grade = d.fields_dict.grade.value;
+			if (grade) {
+				frappe.db.get_value('Employee Grade', grade, 'default_base_pay')
+					.then(({ message }) => {
+						d.set_value('base', message.default_base_pay);
+					});
+			}
+		};
 
 		d.show();
 	},
