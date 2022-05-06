@@ -29,7 +29,6 @@
   "is_fixed_asset",
   "is_serialized_asset",
   "auto_create_assets",
-  "is_grouped_asset",
   "asset_category",
   "asset_naming_series",
   "over_delivery_receipt_allowance",
@@ -902,13 +901,6 @@
   },
   {
    "default": "0",
-   "depends_on": "auto_create_assets",
-   "fieldname": "is_grouped_asset",
-   "fieldtype": "Check",
-   "label": "Create Grouped Asset"
-  },
-  {
-   "default": "0",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
@@ -927,7 +919,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-06 14:59:17.862301",
+ "modified": "2022-05-06 15:19:19.845913",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
