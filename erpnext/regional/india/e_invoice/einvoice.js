@@ -203,7 +203,7 @@ const get_ewaybill_fields = (frm) => {
 			'label': 'Distance (in km)',
 			'fieldtype': 'Float',
 			'default': frm.doc.distance,
-			'description': 'By Default, It will be calculated automatically using Pincodes.<br> (You can also enter it Manually)',
+			'description': 'Set as zero to auto calculate distance using pin codes',
 		},
 		{
 			'fieldname': 'transporter_col_break',
