@@ -10,6 +10,7 @@ from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.installer import install_app
 from frappe.utils import cint, formatdate, get_timestamp, today
 from frappe.utils.nestedset import NestedSet
 
@@ -146,6 +147,7 @@ class Company(NestedSet):
 			self.create_default_cost_center()
 
 		if frappe.flags.country_change:
+			self.install_regional_app()
 			install_country_fixtures(self.name, self.country)
 			self.create_default_tax_template()
 
@@ -174,6 +176,13 @@ class Company(NestedSet):
 			rebuild_tree("Company", "parent_company")
 
 		frappe.clear_cache()
+
+	def install_regional_app(self):
+		country_mapper = {"United Arab Emirates": "erpnext_uae"}
+		try:
+			install_app(country_mapper[self.country])
+		except KeyError:
+			pass
 
 	def create_default_warehouses(self):
 		for wh_detail in [
