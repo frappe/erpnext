@@ -27,6 +27,7 @@
   "valuation_rate",
   "standard_rate",
   "is_fixed_asset",
+  "is_serialized_asset",
   "auto_create_assets",
   "is_grouped_asset",
   "asset_category",
@@ -911,6 +912,14 @@
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_fixed_asset",
+   "fieldname": "is_serialized_asset",
+   "fieldtype": "Check",
+   "label": "Is Serialized Asset",
+   "mandatory_depends_on": "auto_create_assets"
   }
  ],
  "icon": "fa fa-tag",
@@ -918,7 +927,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-03-25 06:38:55.942304",
+ "modified": "2022-05-06 14:59:17.862301",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

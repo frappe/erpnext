@@ -79,6 +79,7 @@
   "is_fixed_asset",
   "asset_location",
   "asset_category",
+  "is_serialized_asset",
   "deferred_expense_section",
   "deferred_expense_account",
   "service_stop_date",
@@ -866,12 +867,20 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "is_fixed_asset",
+   "fetch_from": "item_code.is_serialized_asset",
+   "fieldname": "is_serialized_asset",
+   "fieldtype": "Check",
+   "label": "Is Serialized Asset"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-15 17:04:07.191013",
+ "modified": "2022-05-06 15:01:34.431670",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
@@ -879,5 +888,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }
