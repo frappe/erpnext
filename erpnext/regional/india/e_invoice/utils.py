@@ -443,7 +443,7 @@ def get_eway_bill_details(invoice):
 		dict(
 			gstin=invoice.gst_transporter_id,
 			name=invoice.transporter_name,
-			mode_of_transport=mode_of_transport[invoice.mode_of_transport],
+			mode_of_transport=mode_of_transport[invoice.mode_of_transport or ""] or None,
 			distance=invoice.distance or 0,
 			document_name=invoice.lr_no,
 			document_date=format_date(invoice.lr_date, "dd/mm/yyyy"),
