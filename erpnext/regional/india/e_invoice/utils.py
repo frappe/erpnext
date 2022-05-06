@@ -1123,6 +1123,7 @@ class GSPConnector:
 								_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
 								title="Notification",
 								indicator="green",
+								alert=True,
 							)
 							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
