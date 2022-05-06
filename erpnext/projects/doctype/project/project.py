@@ -84,6 +84,7 @@ class Project(Document):
 				type=task_details.type,
 				issue=task_details.issue,
 				is_group=task_details.is_group,
+				color=task_details.color,
 			)
 		).insert()
 

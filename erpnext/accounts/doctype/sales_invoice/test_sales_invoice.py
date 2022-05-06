@@ -1466,6 +1466,31 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(debit_amount, 10.0)
 		self.assertEqual(incoming_rate, 10.0)
 
+	def test_incoming_rate_for_stand_alone_credit_note(self):
+		return_si = create_sales_invoice(
+			is_return=1,
+			update_stock=1,
+			qty=-1,
+			rate=90000,
+			incoming_rate=10,
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+		)
+
+		incoming_rate = frappe.db.get_value(
+			"Stock Ledger Entry", {"voucher_no": return_si.name}, "incoming_rate"
+		)
+		debit_amount = frappe.db.get_value(
+			"GL Entry", {"voucher_no": return_si.name, "account": "Stock In Hand - TCP1"}, "debit"
+		)
+
+		self.assertEqual(debit_amount, 10.0)
+		self.assertEqual(incoming_rate, 10.0)
+
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
 		si.apply_discount_on = "Net Total"
@@ -1982,6 +2007,13 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_rounding_adjustment_3(self):
+		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+			create_dimension,
+			disable_dimension,
+		)
+
+		create_dimension()
+
 		si = create_sales_invoice(do_not_save=True)
 		si.items = []
 		for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
@@ -2009,6 +2041,10 @@ class TestSalesInvoice(unittest.TestCase):
 					"included_in_print_rate": 1,
 				},
 			)
+
+		si.cost_center = "_Test Cost Center 2 - _TC"
+		si.location = "Block 1"
+
 		si.save()
 		si.submit()
 		self.assertEqual(si.net_total, 4007.16)
@@ -2043,6 +2079,18 @@ class TestSalesInvoice(unittest.TestCase):
 			debit_credit_diff += gle.debit - gle.credit
 
 		self.assertEqual(debit_credit_diff, 0)
+
+		round_off_gle = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_type": "Sales Invoice", "voucher_no": si.name, "account": "Round Off - _TC"},
+			["cost_center", "location"],
+			as_dict=1,
+		)
+
+		self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
+		self.assertEqual(round_off_gle.location, "Block 1")
+
+		disable_dimension()
 
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
