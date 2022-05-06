@@ -118,6 +118,7 @@ class BankClearance(Document):
 			)
 			.where(loan_repayment.docstatus == 1)
 			.where(loan_repayment.clearance_date.isnull())
+			.where(loan_repayment.repay_from_salary == 0)
 			.where(loan_repayment.posting_date >= self.from_date)
 			.where(loan_repayment.posting_date <= self.to_date)
 			.where(loan_repayment.payment_account.isin([self.bank_account, self.account]))
