@@ -87,8 +87,8 @@ class Asset(BaseAsset):
 		if purchase_docname:
 			base_net_rate, item_tax_amount = frappe.get_value(
 				purchase_doctype + " Item",
-				filters={"parent": purchase_docname, "item_code": self.item_code},
-				fields=["base_net_rate", "item_tax_amount"],
+				{"parent": purchase_docname, "item_code": self.item_code},
+				["base_net_rate", "item_tax_amount"],
 			)
 
 			if self.gross_purchase_amount != (base_net_rate + item_tax_amount):
