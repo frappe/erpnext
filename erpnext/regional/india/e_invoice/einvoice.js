@@ -99,7 +99,14 @@ erpnext.setup_einvoice_actions = (doctype) => {
 									...data
 								},
 								freeze: true,
-								callback: () => frappe.show_alert({ message:__('E-Way Bill Generated successfully'), indicator:'green'}, 7) && frm.reload_doc() && d.hide(),
+								callback: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill Generated successfully'),
+										indicator: 'green'
+									}, 7);
+									frm.reload_doc();
+									d.hide();
+								},
 								error: () => frappe.show_alert({ message:__('E-Way Bill was not Generated'), indicator:'red'}, 7)
 							});
 						},
