@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Cast_
 from frappe.utils import getdate
 
 
@@ -13,7 +15,6 @@ class ItemPriceDuplicateItem(frappe.ValidationError):
 
 
 class ItemPrice(Document):
-
 	def validate(self):
 		self.validate_item()
 		self.validate_dates()
@@ -32,45 +33,81 @@ class ItemPrice(Document):
 
 	def update_price_list_details(self):
 		if self.price_list:
-			price_list_details = frappe.db.get_value("Price List",
-				{"name": self.price_list, "enabled": 1},
-				["buying", "selling", "currency"])
+			price_list_details = frappe.db.get_value(
+				"Price List", {"name": self.price_list, "enabled": 1}, ["buying", "selling", "currency"]
+			)
 
 			if not price_list_details:
-				link = frappe.utils.get_link_to_form('Price List', self.price_list)
+				link = frappe.utils.get_link_to_form("Price List", self.price_list)
 				frappe.throw("The price list {0} does not exist or is disabled".format(link))
 
 			self.buying, self.selling, self.currency = price_list_details
 
 	def update_item_details(self):
 		if self.item_code:
-			self.item_name, self.item_description = frappe.db.get_value("Item", self.item_code,["item_name", "description"])
+			self.item_name, self.item_description = frappe.db.get_value(
+				"Item", self.item_code, ["item_name", "description"]
+			)
 
 	def check_duplicates(self):
-		conditions = """where item_code = %(item_code)s and price_list = %(price_list)s and name != %(name)s"""
 
-		for field in [
+		item_price = frappe.qb.DocType("Item Price")
+
+		query = (
+			frappe.qb.from_(item_price)
+			.select(item_price.price_list_rate)
+			.where(
+				(item_price.item_code == self.item_code)
+				& (item_price.price_list == self.price_list)
+				& (item_price.name != self.name)
+			)
+		)
+		data_fields = (
 			"uom",
 			"valid_from",
 			"valid_upto",
-			"packing_unit",
 			"customer",
 			"supplier",
-			"batch_no"]:
-			if self.get(field):
-				conditions += " and {0} = %({0})s ".format(field)
-			else:
-				conditions += "and (isnull({0}) or {0} = '')".format(field)
+			"batch_no",
+		)
 
-		price_list_rate = frappe.db.sql("""
-				select price_list_rate
-				from `tabItem Price`
-				{conditions}
-			""".format(conditions=conditions),
-			self.as_dict(),)
+		number_fields = ["packing_unit"]
+
+		for field in data_fields:
+			if self.get(field):
+				query = query.where(item_price[field] == self.get(field))
+			else:
+				query = query.where(
+					Criterion.any(
+						[
+							item_price[field].isnull(),
+							Cast_(item_price[field], "varchar") == "",
+						]
+					)
+				)
+
+		for field in number_fields:
+			if self.get(field):
+				query = query.where(item_price[field] == self.get(field))
+			else:
+				query = query.where(
+					Criterion.any(
+						[
+							item_price[field].isnull(),
+							item_price[field] == 0,
+						]
+					)
+				)
+
+		price_list_rate = query.run(as_dict=True)
 
 		if price_list_rate:
-			frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."), ItemPriceDuplicateItem,)
+			frappe.throw(
+				_(
+					"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
+				),
+				ItemPriceDuplicateItem,
+			)
 
 	def before_save(self):
 		if self.selling:

@@ -18,7 +18,6 @@
   "automatically_fetch_payment_terms",
   "column_break_17",
   "enable_common_party_accounting",
-  "enable_discount_accounting",
   "report_setting_section",
   "use_custom_cash_flow",
   "deferred_accounting_settings_section",
@@ -274,13 +273,6 @@
   },
   {
    "default": "0",
-   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
-   "fieldname": "enable_discount_accounting",
-   "fieldtype": "Check",
-   "label": "Enable Discount Accounting"
-  },
-  {
-   "default": "0",
    "description": "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>",
    "fieldname": "enable_common_party_accounting",
    "fieldtype": "Check",
@@ -354,7 +346,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-04 12:32:36.805652",
+ "modified": "2022-04-08 14:45:06.796418",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

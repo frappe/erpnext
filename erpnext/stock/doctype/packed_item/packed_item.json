@@ -29,6 +29,7 @@
   "ordered_qty",
   "column_break_16",
   "incoming_rate",
+  "picked_qty",
   "page_break",
   "prevdoc_doctype",
   "parent_detail_docname"
@@ -223,6 +224,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -233,13 +235,20 @@
    "label": "Ordered Qty",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "picked_qty",
+   "fieldtype": "Float",
+   "label": "Picked Qty",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-22 12:57:45.325488",
+ "modified": "2022-04-27 05:23:08.683245",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packed Item",

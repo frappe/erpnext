@@ -65,7 +65,11 @@ frappe.ui.form.on("Sales Order", {
 			frm.set_value('transaction_date', frappe.datetime.get_today())
 		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
-			return erpnext.queries.warehouse(frm.doc);
+			return {
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+				]
+			};
 		});
 
 		frm.set_query('project', function(doc, cdt, cdn) {
@@ -77,7 +81,19 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 
-		erpnext.queries.setup_warehouse_query(frm);
+		frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
+			let row  = locals[cdt][cdn];
+			let query = {
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+				]
+			};
+			if (row.item_code) {
+				query.query = "erpnext.controllers.queries.warehouse_query";
+				query.filters.push(["Bin", "item_code", "=", row.item_code]);
+			}
+			return query;
+		});
 
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
@@ -152,7 +168,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						}
 					}
 
-					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+					if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
+						this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+					}
 
 					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
 					const order_is_maintenance = ["Maintenance"].indexOf(doc.order_type) !== -1;
@@ -693,12 +711,12 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 	get_ordered_qty(item, so) {
 		let ordered_qty = item.ordered_qty;
-		if (so.packed_items) {
+		if (so.packed_items && so.packed_items.length) {
 			// calculate ordered qty based on packed items in case of product bundle
 			let packed_items = so.packed_items.filter(
 				(pi) => pi.parent_detail_docname == item.name
 			);
-			if (packed_items) {
+			if (packed_items && packed_items.length) {
 				ordered_qty = packed_items.reduce(
 					(sum, pi) => sum + flt(pi.ordered_qty),
 					0
@@ -727,7 +745,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __('Reason for hold: ')+data.reason_for_hold,
+						content: __('Reason for hold:') + ' ' + data.reason_for_hold,
 						comment_email: frappe.session.user,
 						comment_by: frappe.session.user_fullname
 					},
