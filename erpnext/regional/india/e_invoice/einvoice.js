@@ -168,8 +168,21 @@ erpnext.setup_einvoice_actions = (doctype) => {
 									remark: data.remark
 								},
 								freeze: true,
-								callback: () => frappe.show_alert({ message:__('E-Way Bill Cancelled successfully'), indicator:'green'}, 7) && frm.reload_doc() && d.hide(),
-								error: () => frappe.show_alert({ message:__('E-Way Bill was not Cancelled '), indicator:'red'}, 7) && d.hide()
+								callback: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill Cancelled successfully'),
+										indicator: 'green'
+									}, 7);
+									frm.reload_doc();
+									d.hide();
+								},
+								error: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill was not Cancelled '),
+										indicator: 'red'
+									}, 7);
+									d.hide();
+								}
 							});
 						},
 						primary_action_label: __('Submit')
