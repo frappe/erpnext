@@ -85,6 +85,7 @@ class BaseAsset(AccountsController):
 				"purchase_date",
 				"asset_name",
 				"company",
+				"item_code",
 				"cost_center",
 				"purchase_receipt",
 				"purchase_invoice",
@@ -118,22 +119,24 @@ class BaseAsset(AccountsController):
 		purchase_doctype, purchase_docname = get_purchase_details(self)
 
 		if purchase_docname:
+			item_code = self.get_item_code()
+
 			num_of_items_in_purchase_doc = get_num_of_items_in_purchase_doc(
 				self, purchase_doctype, purchase_docname
 			)
 			num_of_assets_already_created = self.get_num_of_assets_already_created(
-				purchase_doctype, purchase_docname
+				purchase_doctype, purchase_docname, item_code
 			)
 			num_of_assets = self.get_num_of_assets_in_this_group()
 
 			self.validate_num_of_assets_purchased(
-				num_of_assets, num_of_items_in_purchase_doc, purchase_docname
+				num_of_assets, num_of_items_in_purchase_doc, purchase_docname, item_code
 			)
 			self.validate_total_num_of_assets(
 				num_of_assets, num_of_assets_already_created, num_of_items_in_purchase_doc, purchase_docname
 			)
 
-	def get_num_of_assets_already_created(self, purchase_doctype, purchase_docname):
+	def get_num_of_assets_already_created(self, purchase_doctype, purchase_docname, item_code):
 		purchase_doctype = (
 			"purchase_receipt" if purchase_doctype == "Purchase Receipt" else "purchase_invoice"
 		)
@@ -141,12 +144,22 @@ class BaseAsset(AccountsController):
 
 		num_of_assets_already_created = frappe.db.get_all(
 			"Asset",
-			filters={purchase_doctype: purchase_docname, "name": ["!=", asset_name]},
+			filters={
+				purchase_doctype: purchase_docname,
+				"name": ["!=", asset_name],
+				"item_code": item_code,
+			},
 			pluck="num_of_assets",
 		)
 		num_of_assets_already_created = sum(num_of_assets_already_created)
 
 		return num_of_assets_already_created
+
+	def get_item_code(self):
+		if self.doctype == "Asset":
+			return self.item_code
+		else:
+			return self.asset_values["item_code"]
 
 	def get_num_of_assets_in_this_group(self):
 		if self.doctype == "Asset":
@@ -155,15 +168,14 @@ class BaseAsset(AccountsController):
 			return self.asset_values["num_of_assets"]
 
 	def validate_num_of_assets_purchased(
-		self, num_of_assets, num_of_items_in_purchase_doc, purchase_docname
+		self, num_of_assets, num_of_items_in_purchase_doc, purchase_docname, item_code
 	):
 		if num_of_assets > num_of_items_in_purchase_doc:
 			frappe.throw(
 				_(
-					"Number of Assets cannot be greater than the qty of {0} purchased in {1}, \
-				which is {2}."
+					"Number of Assets cannot be greater than the qty of {0} purchased in {1}, which is {2}."
 				).format(
-					frappe.bold(self.item_code),
+					frappe.bold(item_code),
 					frappe.bold(purchase_docname),
 					frappe.bold(int(num_of_items_in_purchase_doc)),
 				)
