@@ -333,6 +333,7 @@ erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.non_profit_deprecation_warning
 erpnext.patches.v13_0.enable_ksa_vat_docs #1
+erpnext.patches.v14_0.delete_education_doctypes
 
 [post_model_sync]
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
@@ -365,5 +366,7 @@ erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
 erpnext.patches.v13_0.update_expense_claim_status_for_paid_advances
 erpnext.patches.v13_0.create_gst_custom_fields_in_quotation
 erpnext.patches.v13_0.copy_custom_field_filters_to_website_item
+erpnext.patches.v13_0.change_default_item_manufacturer_fieldtype
 erpnext.patches.v14_0.discount_accounting_separation
 erpnext.patches.v14_0.delete_employee_transfer_property_doctype
+erpnext.patches.v13_0.create_accounting_dimensions_in_orders

@@ -385,6 +385,16 @@ class SalesOrder(SellingController):
 		if tot_qty != 0:
 			self.db_set("per_delivered", flt(delivered_qty / tot_qty) * 100, update_modified=False)
 
+	def update_picking_status(self):
+		total_picked_qty = 0.0
+		total_qty = 0.0
+		for so_item in self.items:
+			total_picked_qty += flt(so_item.picked_qty)
+			total_qty += flt(so_item.stock_qty)
+		per_picked = total_picked_qty / total_qty * 100
+
+		self.db_set("per_picked", flt(per_picked), update_modified=False)
+
 	def set_indicator(self):
 		"""Set indicator for portal"""
 		if self.per_billed < 100 and self.per_delivered < 100:
@@ -1232,9 +1242,30 @@ def make_inter_company_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
-	def update_item_quantity(source, target, source_parent):
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
-		target.stock_qty = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.conversion_factor)
+	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+
+	def update_item_quantity(source, target, source_parent) -> None:
+		picked_qty = flt(source.picked_qty) / (flt(source.conversion_factor) or 1)
+		qty_to_be_picked = flt(source.qty) - max(picked_qty, flt(source.delivered_qty))
+
+		target.qty = qty_to_be_picked
+		target.stock_qty = qty_to_be_picked * flt(source.conversion_factor)
+
+	def update_packed_item_qty(source, target, source_parent) -> None:
+		qty = flt(source.qty)
+		for item in source_parent.items:
+			if source.parent_detail_docname == item.name:
+				picked_qty = flt(item.picked_qty) / (flt(item.conversion_factor) or 1)
+				pending_percent = (item.qty - max(picked_qty, item.delivered_qty)) / item.qty
+				target.qty = target.stock_qty = qty * pending_percent
+				return
+
+	def should_pick_order_item(item) -> bool:
+		return (
+			abs(item.delivered_qty) < abs(item.qty)
+			and item.delivered_by_supplier != 1
+			and not is_product_bundle(item.item_code)
+		)
 
 	doc = get_mapped_doc(
 		"Sales Order",
@@ -1245,8 +1276,17 @@ def create_pick_list(source_name, target_doc=None):
 				"doctype": "Pick List Item",
 				"field_map": {"parent": "sales_order", "name": "sales_order_item"},
 				"postprocess": update_item_quantity,
-				"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-				and doc.delivered_by_supplier != 1,
+				"condition": should_pick_order_item,
+			},
+			"Packed Item": {
+				"doctype": "Pick List Item",
+				"field_map": {
+					"parent": "sales_order",
+					"name": "sales_order_item",
+					"parent_detail_docname": "product_bundle_item",
+				},
+				"field_no_map": ["picked_qty"],
+				"postprocess": update_packed_item_qty,
 			},
 		},
 		target_doc,
