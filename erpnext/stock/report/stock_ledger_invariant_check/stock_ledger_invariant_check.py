@@ -111,17 +111,17 @@ def get_columns():
 		},
 		{
 			"fieldname": "posting_date",
-			"fieldtype": "Date",
+			"fieldtype": "Data",
 			"label": _("Posting Date"),
 		},
 		{
 			"fieldname": "posting_time",
-			"fieldtype": "Time",
+			"fieldtype": "Data",
 			"label": _("Posting Time"),
 		},
 		{
 			"fieldname": "creation",
-			"fieldtype": "Datetime",
+			"fieldtype": "Data",
 			"label": _("Creation"),
 		},
 		{
