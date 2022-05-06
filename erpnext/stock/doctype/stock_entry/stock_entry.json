@@ -148,11 +148,11 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
-   "fieldname": "purchase_order",
-   "fieldtype": "Link",
-   "label": "Purchase Order",
-   "options": "Purchase Order"
+    "fieldname": "purchase_order",
+    "fieldtype": "Link",
+    "label": "Purchase Order",
+    "options": "Purchase Order",
+    "read_only": 1
   },
   {
     "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",

@@ -867,15 +867,19 @@ class StockEntry(StockController):
 							se_item.item_code, self.subcontracting_order
 						)
 					)
-				total_supplied = frappe.db.sql(
-					"""select sum(transfer_qty)
-					from `tabStock Entry Detail`, `tabStock Entry`
-					where `tabStock Entry`.subcontracting_order = %s
-						and `tabStock Entry`.docstatus = 1
-						and `tabStock Entry Detail`.item_code = %s
-						and `tabStock Entry Detail`.parent = `tabStock Entry`.name""",
-					(self.subcontracting_order, se_item.item_code),
-				)[0][0]
+
+				parent = frappe.qb.DocType("Stock Entry")
+				child = frappe.qb.DocType("Stock Entry Detail")
+
+				total_supplied = (
+					frappe.qb.from_(parent)
+					.inner_join(child)
+					.on(parent.name == child.parent)
+					.select(Sum(child.transfer_qty))
+					.where(parent.docstatus == 1)
+					.where(parent.subcontracting_order == self.subcontracting_order)
+					.where(child.item_code == se_item.item_code)
+				).run()[0][0]
 
 				if flt(total_supplied, precision) > flt(total_allowed, precision):
 					frappe.throw(
@@ -1261,11 +1265,13 @@ class StockEntry(StockController):
 			args.batch_no = get_batch_no(args["item_code"], args["s_warehouse"], args["qty"])
 
 		if (
-			self.purpose == "Send to Subcontractor" and self.get("purchase_order") and args.get("item_code")
+			self.purpose == "Send to Subcontractor"
+			and self.get("subcontracting_order")
+			and args.get("item_code")
 		):
 			subcontract_items = frappe.get_all(
-				"Purchase Order Item Supplied",
-				{"parent": self.purchase_order, "rm_item_code": args.get("item_code")},
+				"Subcontracting Order Supplied Item",
+				{"parent": self.subcontracting_order, "rm_item_code": args.get("item_code")},
 				"main_item_code",
 			)
 
@@ -1359,27 +1365,27 @@ class StockEntry(StockController):
 
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
 
-					# Get PO Supplied Items Details
-					if self.purchase_order and self.purpose == "Send to Subcontractor":
-						# Get PO Supplied Items Details
-						item_wh = frappe._dict(
-							frappe.db.sql(
-								"""
-							SELECT
-								rm_item_code, reserve_warehouse
-							FROM
-								`tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-							WHERE
-								po.name = poitemsup.parent and po.name = %s """,
-								self.purchase_order,
-							)
-						)
+					# Get SCO Supplied Items Details
+					if self.subcontracting_order and self.purpose == "Send to Subcontractor":
+						# Get SCO Supplied Items Details
+						parent = frappe.qb.DocType("Subcontracting Order")
+						child = frappe.qb.DocType("Subcontracting Order Supplied Item")
+
+						item_wh = (
+							frappe.qb.from_(parent)
+							.inner_join(child)
+							.on(parent.name == child.parent)
+							.select(child.rm_item_code, child.reserve_warehouse)
+							.where(parent.name == self.subcontracting_order)
+						).run(as_list=True)
+
+						item_wh = frappe._dict(item_wh)
 
 					for item in item_dict.values():
 						if self.pro_doc and cint(self.pro_doc.from_wip_warehouse):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
-						# Get Reserve Warehouse from PO
-						if self.purchase_order and self.purpose == "Send to Subcontractor":
+						# Get Reserve Warehouse from SCO
+						if self.subcontracting_order and self.purpose == "Send to Subcontractor":
 							item["from_warehouse"] = item_wh.get(item.item_code)
 						item["to_warehouse"] = self.to_warehouse if self.purpose == "Send to Subcontractor" else ""
 
@@ -1996,20 +2002,21 @@ class StockEntry(StockController):
 
 	def update_subcontracting_order_supplied_items(self):
 		if self.subcontracting_order and (
-			self.purpose in ["Send to Subcontractor", "Material Transfer"] or self.is_return
+			self.purpose in ["Send to Subcontractor", "Material Transfer"]
 		):
 
 			# Get SCO Supplied Items Details
-			item_wh = frappe._dict(
-				frappe.db.sql(
-					"""
-				select rm_item_code, reserve_warehouse
-				from `tabSubcontracting Order` sco, `tabSubcontracting Order Supplied Item` scoitemsup
-				where sco.name = scoitemsup.parent
-				and sco.name = %s""",
-					self.subcontracting_order,
-				)
-			)
+			parent = frappe.qb.DocType("Subcontracting Order")
+			child = frappe.qb.DocType("Subcontracting Order Supplied Item")
+			item_wh = (
+				frappe.qb.from_(parent)
+				.inner_join(child)
+				.on(parent.name == child.parent)
+				.select(child.rm_item_code, child.reserve_warehouse)
+				.where(parent.name == self.subcontracting_order)
+			).run(as_list=True)
+
+			item_wh = frappe._dict(item_wh)
 
 			supplied_items = get_supplied_items(self.subcontracting_order)
 			for name, item in supplied_items.items():
@@ -2363,12 +2370,12 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	return operating_cost_per_unit
 
 
-def get_used_alternative_items(purchase_order=None, work_order=None):
+def get_used_alternative_items(subcontracting_order=None, work_order=None):
 	cond = ""
 
-	if purchase_order:
-		cond = "and ste.purpose = 'Send to Subcontractor' and ste.purchase_order = '{0}'".format(
-			purchase_order
+	if subcontracting_order:
+		cond = "and ste.purpose = 'Send to Subcontractor' and ste.subcontracting_order = '{0}'".format(
+			subcontracting_order
 		)
 	elif work_order:
 		cond = "and ste.purpose = 'Material Transfer for Manufacture' and ste.work_order = '{0}'".format(
@@ -2422,7 +2429,6 @@ def get_valuation_rate_for_finished_good_entry(work_order):
 @frappe.whitelist()
 def get_uom_details(item_code, uom, qty):
 	"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
-
 	:param args: dict with `item_code`, `uom` and `qty`"""
 	conversion_factor = get_conversion_factor(item_code, uom).get("conversion_factor")
 
@@ -2542,3 +2548,36 @@ def get_supplied_items(subcontracting_order):
 		)
 
 	return supplied_item_details
+
+
+@frappe.whitelist()
+def get_items_from_subcontracting_order(source_name, target_doc=None):
+	sco = frappe.get_doc("Subcontracting Order", source_name)
+
+	if sco.docstatus == 1:
+		if target_doc and isinstance(target_doc, str):
+			target_doc = frappe.get_doc(json.loads(target_doc))
+
+		if target_doc.items:
+			target_doc.items = []
+
+		warehouses = {}
+		for item in sco.items:
+			warehouses[item.name] = item.warehouse
+
+		for item in sco.supplied_items:
+			target_doc.append(
+				"items",
+				{
+					"s_warehouse": warehouses.get(item.reference_name),
+					"t_warehouse": sco.supplier_warehouse,
+					"item_code": item.rm_item_code,
+					"qty": item.required_qty,
+					"transfer_qty": item.required_qty,
+					"uom": item.stock_uom,
+					"stock_uom": item.stock_uom,
+					"conversion_factor": 1,
+				},
+			)
+
+	return target_doc
