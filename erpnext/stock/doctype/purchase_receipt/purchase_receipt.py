@@ -231,7 +231,6 @@ class PurchaseReceipt(BuyingController):
 
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
-		self.set_consumed_qty_in_po()
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
@@ -267,18 +266,6 @@ class PurchaseReceipt(BuyingController):
 		self.repost_future_sle_and_gle()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
 		self.delete_auto_created_batches()
-		self.set_consumed_qty_in_po()
-
-	@frappe.whitelist()
-	def get_current_stock(self):
-		for d in self.get("supplied_items"):
-			if self.supplier_warehouse:
-				bin = frappe.db.sql(
-					"select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
-					(d.rm_item_code, self.supplier_warehouse),
-					as_dict=1,
-				)
-				d.current_stock = bin and flt(bin[0]["actual_qty"]) or 0
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
