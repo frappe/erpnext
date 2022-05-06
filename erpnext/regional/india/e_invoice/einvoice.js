@@ -107,7 +107,13 @@ erpnext.setup_einvoice_actions = (doctype) => {
 									frm.reload_doc();
 									d.hide();
 								},
-								error: () => frappe.show_alert({ message:__('E-Way Bill was not Generated'), indicator:'red'}, 7)
+								error: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill was not Generated'),
+										indicator: 'red'
+									}, 7);
+									d.hide();
+								}
 							});
 						},
 						primary_action_label: __('Submit')
