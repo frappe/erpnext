@@ -45,7 +45,7 @@
   "first_name": "_Test Employee 3",
   "gender": "Male",
   "naming_series": "_T-Employee-",
-  "status": "Inactive",
+  "status": "Left",
   "user_id": "test3@example.com"
  }
 ]

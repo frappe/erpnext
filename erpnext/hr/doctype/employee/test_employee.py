@@ -30,27 +30,28 @@ class TestEmployee(unittest.TestCase):
 		from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
-		employee = make_employee("test_employee_status@company.com")
-		employee_doc = frappe.get_doc("Employee", employee)
-		employee_doc.status = "Inactive"
-		employee_doc.save()
-		employee_doc.reload()
-
-		make_holiday_list()
-		frappe.db.set_value(
-			"Company", employee_doc.company, "default_holiday_list", "Salary Slip Test Holiday List"
+		company_name = erpnext.get_default_company()
+		employee_name = make_employee(
+			"test_employee_status@company.com",
+			company_name,
+			{
+				"status": "Inactive",
+				"relieving_date": frappe.utils.add_days(frappe.utils.today(), -1),
+			},
 		)
 
-		frappe.db.sql(
-			"""delete from `tabSalary Structure` where name='Test Inactive Employee Salary Slip'"""
-		)
+		holiday_list_name = "Salary Slip Test Holiday List"
+		make_holiday_list(holiday_list_name)
+		frappe.db.set_value("Company", company_name, "default_holiday_list", holiday_list_name)
+
+		frappe.delete_doc_if_exists("Salary Structure", "Test Inactive Employee Salary Slip")
 		salary_structure = make_salary_structure(
 			"Test Inactive Employee Salary Slip",
 			"Monthly",
-			employee=employee_doc.name,
-			company=employee_doc.company,
+			employee=employee_name,
+			company=company_name,
 		)
-		salary_slip = make_salary_slip(salary_structure.name, employee=employee_doc.name)
+		salary_slip = make_salary_slip(salary_structure.name, employee=employee_name)
 
 		self.assertRaises(InactiveEmployeeStatusError, salary_slip.save)
 

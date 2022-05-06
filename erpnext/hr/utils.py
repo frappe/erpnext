@@ -608,7 +608,7 @@ def share_doc_with_approver(doc, user):
 def validate_active_employee(employee: str, on_date: Optional[str] = None):
 	relieving_date, status = frappe.get_value("Employee", employee, ("relieving_date", "status"))
 
-	if status == "Inactive" and (
+	if status in ["Inactive", "Left"] and (
 		not relieving_date or (on_date and relieving_date and relieving_date < getdate(on_date))
 	):
 		frappe.throw(
