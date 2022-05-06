@@ -10,6 +10,7 @@
   "employee",
   "employee_name",
   "department",
+  "grade",
   "company",
   "payroll_payable_account",
   "column_break_6",
@@ -67,6 +68,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "grade.default_salary_structure",
+   "fetch_if_empty": 1,
    "fieldname": "salary_structure",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -96,6 +99,8 @@
    "label": "Base & Variable"
   },
   {
+   "fetch_from": "grade.default_base_pay",
+   "fetch_if_empty": 1,
    "fieldname": "base",
    "fieldtype": "Currency",
    "label": "Base",
@@ -158,11 +163,19 @@
    "fieldtype": "Table",
    "label": "Cost Centers",
    "options": "Employee Cost Center"
+  },
+  {
+   "fetch_from": "employee.grade",
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Employee Grade",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-19 12:43:54.439073",
+ "modified": "2022-05-06 12:18:36.972336",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
