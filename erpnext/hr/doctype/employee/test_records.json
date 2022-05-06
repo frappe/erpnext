@@ -34,5 +34,18 @@
   "naming_series": "_T-Employee-",
   "status": "Active",
   "user_id": "test2@example.com"
+ },
+ {
+  "company": "_Test Company",
+  "date_of_birth": "1980-01-01",
+  "date_of_joining": "2010-01-01",
+  "relieving_date": "2015-01-01",
+  "department": "_Test Department 1 - _TC",
+  "doctype": "Employee",
+  "first_name": "_Test Employee 3",
+  "gender": "Male",
+  "naming_series": "_T-Employee-",
+  "status": "Inactive",
+  "user_id": "test3@example.com"
  }
 ]
