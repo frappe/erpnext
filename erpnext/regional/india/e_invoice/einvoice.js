@@ -178,7 +178,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								},
 								error: () => {
 									frappe.show_alert({
-										message: __('E-Way Bill was not Cancelled '),
+										message: __('E-Way Bill was not Cancelled'),
 										indicator: 'red'
 									}, 7);
 									d.hide();
