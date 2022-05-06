@@ -167,7 +167,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 const get_ewaybill_fields = (frm) => {
 	return [
 		{
-			fieldname: "transporter_section_break",
+			fieldname: "eway_part_a_section_break",
 			fieldtype: "Section Break",
 			label: "Part A",
 		},
@@ -187,7 +187,7 @@ const get_ewaybill_fields = (frm) => {
 			depends_on: "transporter",
 		},
 		{
-			fieldname: "transporter_column_break",
+			fieldname: "part_a_column_break",
 			fieldtype: "Column Break",
 		},
 		{
@@ -204,7 +204,7 @@ const get_ewaybill_fields = (frm) => {
 			description: "Set as zero to auto calculate distance using pin codes",
 		},
 		{
-			fieldname: "transporter_section_break",
+			fieldname: "eway_part_b_section_break",
 			fieldtype: "Section Break",
 			label: "Part B",
 		},
@@ -230,7 +230,7 @@ const get_ewaybill_fields = (frm) => {
 			default: frm.doc.vehicle_no,
 		},
 		{
-			fieldname: "vehicle_column_break",
+			fieldname: "part_b_column_break",
 			fieldtype: "Column Break",
 		},
 		{
