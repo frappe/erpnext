@@ -149,9 +149,9 @@ class PickList(Document):
 					self,item_code, from_warehouses, self.item_count_map.get(item_code), self.company
 				),
 			)
-
+			manual_picking = 0
 			locations = get_items_with_location_and_quantity(
-				item_doc, self.item_location_map, self.docstatus
+				manual_picking, item_doc, self.item_location_map, self.docstatus
 			)
 
 			item_doc.idx = None
