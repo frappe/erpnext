@@ -792,7 +792,7 @@ class GSPConnector:
 		self.irn_details_url = self.base_url + "/enriched/ei/api/invoice/irn"
 		self.generate_irn_url = self.base_url + "/enriched/ei/api/invoice"
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
-		self.cancel_ewaybill_url = self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
+		self.cancel_ewaybill_url = self.base_url + "/enriched/ei/api/ewayapi"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
 
 	def set_invoice(self):
@@ -1113,6 +1113,19 @@ class GSPConnector:
 				self.invoice.eway_bill_validity = res.get("result").get("EwbValidTill")
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
+				if res.get("info"):
+					info = res.get("info")
+					# when we have more features (responses) in eway bill, we can add them using below forloop.
+					for msg in info:
+						if msg.get("InfCd") == "EWBPPD":
+							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
+							frappe.msgprint(
+								_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
+								title="Notification",
+								indicator="green",
+								alert=True,
+							)
+							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
 					"doctype": self.invoice.doctype,
 					"docname": self.invoice.name,
@@ -1135,7 +1148,6 @@ class GSPConnector:
 		headers = self.get_headers()
 		data = json.dumps({"ewbNo": eway_bill, "cancelRsnCode": reason, "cancelRmrk": remark}, indent=4)
 		headers["username"] = headers["user_name"]
-		del headers["user_name"]
 		try:
 			res = self.make_request("post", self.cancel_ewaybill_url, headers, data)
 			if res.get("success"):
@@ -1300,13 +1312,9 @@ def generate_eway_bill(doctype, docname, **kwargs):
 
 
 @frappe.whitelist()
-def cancel_eway_bill(doctype, docname):
-	# TODO: uncomment when eway_bill api from Adequare is enabled
-	# gsp_connector = GSPConnector(doctype, docname)
-	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
-
-	frappe.db.set_value(doctype, docname, "ewaybill", "")
-	frappe.db.set_value(doctype, docname, "eway_bill_cancelled", 1)
+def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
 
 
 @frappe.whitelist()
