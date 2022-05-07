@@ -786,7 +786,6 @@ class PurchaseReceipt(BuyingController):
 
 		for asset in assets:
 			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(valuation_rate))
-			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
 
 	def update_status(self, status):
 		self.set_status(update=True, status=status)
@@ -969,6 +968,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 					"is_fixed_asset": "is_fixed_asset",
 					"asset_location": "asset_location",
 					"asset_category": "asset_category",
+					"is_serialized_asset": "is_serialized_asset",
 				},
 				"postprocess": update_item,
 				"filter": lambda d: get_pending_qty(d)[0] <= 0
