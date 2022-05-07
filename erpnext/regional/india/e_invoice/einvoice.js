@@ -201,7 +201,7 @@ const get_ewaybill_fields = (frm) => {
 			label: "Distance (in km)",
 			fieldtype: "Float",
 			default: frm.doc.distance,
-			description: "Set as zero to auto calculate distance using pin codes",
+			description: 'Set as zero to auto calculate distance using pin codes',
 		},
 		{
 			fieldname: "eway_part_b_section_break",
