@@ -666,6 +666,7 @@
   },
   {
    "collapsible": 1,
+   "default": "eval:!doc.is_fixed_asset",
    "fieldname": "sales_details",
    "fieldtype": "Section Break",
    "label": "Sales Details",
@@ -960,7 +961,7 @@
    "fieldname": "bom_item_type",
    "fieldtype": "Select",
    "label": "BOM Item Type",
-   "options": "RM\nFG"
+   "options": "RM\nFG\nPKG"
   },
   {
    "fieldname": "intercompany_item",
@@ -1005,7 +1006,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-05 20:06:13.049150",
+ "modified": "2022-05-01 21:47:49.294814",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
