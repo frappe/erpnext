@@ -260,7 +260,6 @@ def get_tax_accounts(
 
 
 def get_merged_data(columns, data):
-	print(data)
 	merged_hsn_dict = {}  # to group same hsn under one key and perform row addition
 	result = []
 
