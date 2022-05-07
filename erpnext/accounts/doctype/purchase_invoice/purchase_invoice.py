@@ -934,9 +934,6 @@ class PurchaseInvoice(BuyingController):
 						)
 						for asset in assets:
 							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
-							)
 
 			if (
 				self.auto_accounting_for_stock
@@ -1108,9 +1105,6 @@ class PurchaseInvoice(BuyingController):
 						)
 						for asset in assets:
 							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
-							)
 
 		return gl_entries
 
