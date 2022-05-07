@@ -146,7 +146,7 @@ class PickList(Document):
 			self.item_location_map.setdefault(
 				item_code,
 				get_available_item_locations(
-					item_code, from_warehouses, self.item_count_map.get(item_code), self.company
+					self,item_code, from_warehouses, self.item_count_map.get(item_code), self.company
 				),
 			)
 
