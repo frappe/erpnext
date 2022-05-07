@@ -149,27 +149,58 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			}
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
+				const fields = [
+					{
+						"label": "Reason",
+						"fieldname": "reason",
+						"fieldtype": "Select",
+						"reqd": 1,
+						"default": "1-Duplicate",
+						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
+					},
+					{
+						"label": "Remark",
+						"fieldname": "remark",
+						"fieldtype": "Data",
+						"reqd": 1
+					}
+				];
 				const action = () => {
-					let message = __('Cancellation of e-way bill is currently not supported.') + ' ';
-					message += '<br><br>';
-					message += __('You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system.');
-
-					const dialog = frappe.msgprint({
-						title: __('Update E-Way Bill Cancelled Status?'),
-						message: message,
-						indicator: 'orange',
-						primary_action: {
-							action: function() {
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
-									args: { doctype, docname: name },
-									freeze: true,
-									callback: () => frm.reload_doc() || dialog.hide()
-								});
-							}
+					const d = new frappe.ui.Dialog({
+						title: __('Cancel E-Way Bill'),
+						fields: fields,
+						primary_action: function() {
+							const data = d.get_values();
+							frappe.call({
+								method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
+								args: {
+									doctype,
+									docname: name,
+									eway_bill: ewaybill,
+									reason: data.reason.split('-')[0],
+									remark: data.remark
+								},
+								freeze: true,
+								callback: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill Cancelled successfully'),
+										indicator: 'green'
+									}, 7);
+									frm.reload_doc();
+									d.hide();
+								},
+								error: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill was not Cancelled'),
+										indicator: 'red'
+									}, 7);
+									d.hide();
+								}
+							});
 						},
-						primary_action_label: __('Yes')
+						primary_action_label: __('Submit')
 					});
+					d.show();
 				};
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}
