@@ -96,6 +96,10 @@ def get_columns():
 		{"fieldname": "description", "label": _("Description"), "fieldtype": "Data", "width": 300},
 		{"fieldname": "stock_uom", "label": _("Stock UOM"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "stock_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 90},
+<<<<<<< HEAD
+=======
+		{"fieldname": "tax_rate", "label": _("Tax Rate"), "fieldtype": "Data", "width": 90},
+>>>>>>> b0e929b8ae (chore: Remove extra columns)
 		{"fieldname": "total_amount", "label": _("Total Amount"), "fieldtype": "Currency", "width": 120},
 		{
 			"fieldname": "taxable_amount",
@@ -256,6 +260,7 @@ def get_tax_accounts(
 
 
 def get_merged_data(columns, data):
+	print(data)
 	merged_hsn_dict = {}  # to group same hsn under one key and perform row addition
 	result = []
 
