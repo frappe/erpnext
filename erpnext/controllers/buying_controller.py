@@ -648,30 +648,14 @@ class BuyingController(StockController, Subcontracting):
 					# If asset has to be auto created
 					# Check for asset naming series
 					if item_data.get("asset_naming_series"):
-						created_assets = []
-						if item_data.get("is_grouped_asset"):
-							asset = self.make_asset(d, is_grouped_asset=True)
-							created_assets.append(asset)
-						else:
-							for qty in range(cint(d.qty)):
-								asset = self.make_asset(d)
-								created_assets.append(asset)
+						self.validate_asset_location(d, item_data.get("is_serialized_asset"))
+						asset = self.make_asset(d, item_data)
 
-						if len(created_assets) > 5:
-							# dont show asset form links if more than 5 assets are created
-							messages.append(
-								_("{} Assets created for {}").format(len(created_assets), frappe.bold(d.item_code))
+						messages.append(
+							_("Asset {0} created for {1}").format(
+								frappe.bold(frappe.utils.get_link_to_form("Asset", asset)), frappe.bold(d.item_code)
 							)
-						else:
-							assets_link = list(map(lambda d: frappe.utils.get_link_to_form("Asset", d), created_assets))
-							assets_link = frappe.bold(",".join(assets_link))
-
-							is_plural = "s" if len(created_assets) != 1 else ""
-							messages.append(
-								_("Asset{} {assets_link} created for {}").format(
-									is_plural, frappe.bold(d.item_code), assets_link=assets_link
-								)
-							)
+						)
 					else:
 						frappe.throw(
 							_("Row {}: Asset Naming Series is mandatory for the auto creation for item {}").format(
@@ -688,19 +672,7 @@ class BuyingController(StockController, Subcontracting):
 		for message in messages:
 			frappe.msgprint(message, title="Success", indicator="green")
 
-	def make_asset(self, row, is_grouped_asset=False):
-		if not row.asset_location:
-			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
-
-		item_data = frappe.db.get_value(
-			"Item", row.item_code, ["asset_naming_series", "asset_category"], as_dict=1
-		)
-
-		if is_grouped_asset:
-			purchase_amount = flt(row.base_amount + row.item_tax_amount)
-		else:
-			purchase_amount = flt(row.base_rate + row.item_tax_amount)
-
+	def make_asset(self, row, item_data):
 		asset = frappe.get_doc(
 			{
 				"doctype": "Asset",
@@ -708,25 +680,26 @@ class BuyingController(StockController, Subcontracting):
 				"asset_name": row.item_name,
 				"naming_series": item_data.get("asset_naming_series") or "AST",
 				"asset_category": item_data.get("asset_category"),
-				"location": row.asset_location,
+				"location": row.asset_location if not item_data.get("is_serialized_asset") else None,
 				"company": self.company,
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
-				"calculate_depreciation": 1,
-				"purchase_receipt_amount": purchase_amount,
-				"gross_purchase_amount": purchase_amount,
-				"asset_quantity": row.qty if is_grouped_asset else 0,
+				"gross_purchase_amount": flt(row.base_rate + (row.item_tax_amount / row.qty)),
+				"num_of_assets": row.qty,
+				"is_serialized_asset": item_data.get("is_serialized_asset"),
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
 			}
 		)
 
-		asset.flags.ignore_validate = True
 		asset.flags.ignore_mandatory = True
-		asset.set_missing_values()
 		asset.insert()
 
 		return asset.name
+
+	def validate_asset_location(self, row, is_serialized_asset):
+		if not is_serialized_asset and not row.asset_location:
+			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
 
 	def update_fixed_asset(self, field, delete_asset=False):
 		for d in self.get("items"):
@@ -817,7 +790,13 @@ def get_asset_item_details(asset_items):
 	asset_items_data = {}
 	for d in frappe.get_all(
 		"Item",
-		fields=["name", "auto_create_assets", "asset_naming_series", "is_grouped_asset"],
+		fields=[
+			"name",
+			"auto_create_assets",
+			"asset_naming_series",
+			"asset_category",
+			"is_serialized_asset",
+		],
 		filters={"name": ("in", asset_items)},
 	):
 		asset_items_data.setdefault(d.name, d)
