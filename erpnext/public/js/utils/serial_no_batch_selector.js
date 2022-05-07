@@ -75,7 +75,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype:'Float',
 				read_only: me.has_batch && !me.has_serial_no,
 				label: __(me.has_batch && !me.has_serial_no ? 'Selected Qty' : 'Qty'),
-				default: flt(me.item.stock_qty),
+				default: flt(me.item.stock_qty) || flt(me.item.transfer_qty),
 			},
 			...get_pending_qty_fields(me),
 			{
@@ -94,14 +94,16 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				description: __('Fetch Serial Numbers based on FIFO'),
 				click: () => {
 					let qty = this.dialog.fields_dict.qty.get_value();
+					let already_selected_serial_nos = get_selected_serial_nos(me);
 					let numbers = frappe.call({
 						method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
 						args: {
 							qty: qty,
 							item_code: me.item_code,
 							warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
-							batch_no: me.item.batch_no || null,
-							posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
+							batch_nos: me.item.batch_no || null,
+							posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date,
+							exclude_sr_nos: already_selected_serial_nos
 						}
 					});
 
@@ -575,14 +577,28 @@ function get_pending_qty_fields(me) {
 	return pending_qty_fields;
 }
 
-function calc_total_selected_qty(me) {
+// get all items with same item code except row for which selector is open.
+function get_rows_with_same_item_code(me) {
 	const { frm: { doc: { items }}, item: { name, item_code }} = me;
-	const totalSelectedQty = items
-		.filter( item => ( item.name !== name ) && ( item.item_code === item_code ) )
-		.map( item => flt(item.qty) )
-		.reduce( (i, j) => i + j, 0);
+	return items.filter(item => (item.name !== name) && (item.item_code === item_code))
+}
+
+function calc_total_selected_qty(me) {
+	const totalSelectedQty = get_rows_with_same_item_code(me)
+		.map(item => flt(item.qty))
+		.reduce((i, j) => i + j, 0);
 	return totalSelectedQty;
 }
+
+function get_selected_serial_nos(me) {
+	const selected_serial_nos = get_rows_with_same_item_code(me)
+		.map(item => item.serial_no)
+		.filter(serial => serial)
+		.map(sr_no_string => sr_no_string.split('\n'))
+		.reduce((acc, arr) => acc.concat(arr), [])
+		.filter(serial => serial);
+	return selected_serial_nos;
+};
 
 function check_can_calculate_pending_qty(me) {
 	const { frm: { doc }, item } = me;
@@ -590,6 +606,11 @@ function check_can_calculate_pending_qty(me) {
 		&& doc.fg_completed_qty
 		&& erpnext.stock.bom
 		&& erpnext.stock.bom.name === doc.bom_no;
-	const itemChecks = !!item  && !item.allow_alternative_item;
+	const itemChecks = !!item
+		&& !item.original_item
+		&& erpnext.stock.bom && erpnext.stock.bom.items
+		&& (item.item_code in erpnext.stock.bom.items);
 	return docChecks && itemChecks;
 }
+
+//# sourceURL=serial_no_batch_selector.js

@@ -13,6 +13,7 @@
   "territory",
   "crm_settings_section",
   "campaign_naming_by",
+  "contract_naming_by",
   "default_valid_till",
   "column_break_9",
   "close_opportunity_after_days",
@@ -29,7 +30,6 @@
   "so_required",
   "dn_required",
   "sales_update_frequency",
-  "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
   "hide_tax_id"
@@ -193,6 +193,12 @@
    "fieldname": "sales_transactions_settings_section",
    "fieldtype": "Section Break",
    "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "contract_naming_by",
+   "fieldtype": "Select",
+   "label": "Contract Naming By",
+   "options": "Party Name\nNaming Series"
   }
  ],
  "icon": "fa fa-cog",
@@ -200,7 +206,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-14 22:05:06.139820",
+ "modified": "2022-03-28 12:18:06.768403",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

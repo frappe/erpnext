@@ -23,16 +23,17 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 	cart_settings = get_shopping_cart_settings()
 	if not cart_settings.enabled:
 		# return settings even if cart is disabled
-		return frappe._dict({
-			"product_info": {},
-			"cart_settings": cart_settings
-		})
+		return frappe._dict({"product_info": {}, "cart_settings": cart_settings})
 
 	cart_quotation = frappe._dict()
 	if not skip_quotation_creation:
 		cart_quotation = _get_cart_quotation()
 
-	selling_price_list = cart_quotation.get("selling_price_list") if cart_quotation else _set_price_list(cart_settings, None)
+	selling_price_list = (
+		cart_quotation.get("selling_price_list")
+		if cart_quotation
+		else _set_price_list(cart_settings, None)
+	)
 
 	price = {}
 	if cart_settings.show_price:
@@ -41,10 +42,7 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 		# If not logged in, check if price is hidden for guest.
 		if not is_guest or not cart_settings.hide_price_for_guest:
 			price = get_price(
-				item_code,
-				selling_price_list,
-				cart_settings.default_customer_group,
-				cart_settings.company
+				item_code, selling_price_list, cart_settings.default_customer_group, cart_settings.company
 			)
 
 	stock_status = None
@@ -60,7 +58,7 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 		"price": price,
 		"qty": 0,
 		"uom": frappe.db.get_value("Item", item_code, "stock_uom"),
-		"sales_uom": frappe.db.get_value("Item", item_code, "sales_uom")
+		"sales_uom": frappe.db.get_value("Item", item_code, "sales_uom"),
 	}
 
 	if stock_status:
@@ -68,7 +66,11 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 			product_info["on_backorder"] = True
 		else:
 			product_info["stock_qty"] = stock_status.stock_qty
-			product_info["in_stock"] = stock_status.in_stock if stock_status.is_stock_item else get_non_stock_item_status(item_code, "website_warehouse")
+			product_info["in_stock"] = (
+				stock_status.in_stock
+				if stock_status.is_stock_item
+				else get_non_stock_item_status(item_code, "website_warehouse")
+			)
 			product_info["show_stock_qty"] = show_quantity_in_website()
 
 	if product_info["price"]:
@@ -77,14 +79,14 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 			if item:
 				product_info["qty"] = item[0].qty
 
-	return frappe._dict({
-		"product_info": product_info,
-		"cart_settings": cart_settings
-	})
+	return frappe._dict({"product_info": product_info, "cart_settings": cart_settings})
+
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""
-	product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get("product_info")
+	product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get(
+		"product_info"
+	)
 
 	if product_info:
 		item.update(product_info)

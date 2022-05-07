@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "columns": [],
  "creation": "2013-02-25 17:03:34",
  "disable_prepared_report": 0,
@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2021-11-13 19:14:23.730198",
+ "modified": "2022-02-11 10:18:36.956558",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Gross Profit",
