@@ -1113,6 +1113,19 @@ class GSPConnector:
 				self.invoice.eway_bill_validity = res.get("result").get("EwbValidTill")
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
+				if res.get("info"):
+					info = res.get("info")
+					# when we have more features (responses) in eway bill, we can add them using below forloop.
+					for msg in info:
+						if msg.get("InfCd") == "EWBPPD":
+							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
+							frappe.msgprint(
+								_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
+								title="Notification",
+								indicator="green",
+								alert=True,
+							)
+							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
 					"doctype": self.invoice.doctype,
 					"docname": self.invoice.name,
