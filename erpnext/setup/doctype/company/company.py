@@ -528,7 +528,7 @@ def install_country_fixtures(company, country):
 	except ImportError:
 		pass
 	except Exception:
-		frappe.log_error()
+		frappe.log_error("Unable to set country fixtures")
 		frappe.throw(
 			_("Failed to setup defaults for country {0}. Please contact support.").format(
 				frappe.bold(country)
