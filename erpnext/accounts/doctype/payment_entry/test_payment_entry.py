@@ -33,7 +33,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d) for d in [["Debtors - _TC", 0, 0, 1000, 1000, so.name], ["_Test Cash - _TC", 1000, 1000, 0, 0, None]]
+			(d[0], d)
+			for d in [
+				["Debtors - _TC", 0, 0, 1000, 1000, so.name],
+				["_Test Cash - _TC", 1000, 1000, 0, 0, None],
+			]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -308,7 +312,8 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.submit()
 
 		expected_gle = dict(
-			(d[0], d) for d in [[payable, 300, 300, 0, 0, ec.name], ["_Test Bank USD - _TC", 0, 0, 300, 300, None]]
+			(d[0], d)
+			for d in [[payable, 300, 300, 0, 0, ec.name], ["_Test Bank USD - _TC", 0, 0, 300, 300, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -385,7 +390,7 @@ class TestPaymentEntry(unittest.TestCase):
 			{
 				"account": "_Test Exchange Gain/Loss - _TC",
 				"cost_center": "_Test Cost Center - _TC",
-				"amount": 94.80,
+				"amount": 94.74,
 			},
 		)
 
@@ -503,7 +508,11 @@ class TestPaymentEntry(unittest.TestCase):
 		pe3.submit()
 
 		expected_gle = dict(
-			(d[0], d) for d in [["Debtors - _TC", 100, 100, 0, 0, si1.name], ["_Test Cash - _TC", 0, 0, 100, 100, None]]
+			(d[0], d)
+			for d in [
+				["Debtors - _TC", 100, 100, 0, 0, si1.name],
+				["_Test Cash - _TC", 0, 0, 100, 100, None],
+			]
 		)
 
 		self.validate_gl_entries(pe3.name, expected_gle)
