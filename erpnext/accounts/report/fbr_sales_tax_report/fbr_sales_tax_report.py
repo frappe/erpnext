@@ -272,12 +272,12 @@ class FBRInvoiceWiseTaxes(object):
 			if d.tax_id:
 				d.registration_no = d.tax_id
 				# remove check digit for registration number instead of ntn
-				if self.filters.for_export and d.registration_no and self.ntn_regex.match(d.registration_no):
-					d.registration_no = d.registration_no[:-2]
+				# if self.filters.for_export and d.registration_no and self.ntn_regex.match(d.registration_no):
+				# 	d.registration_no = d.registration_no[:-2]
 			elif d.tax_cnic:
 				d.registration_no = d.tax_cnic
-				if self.filters.for_export and d.registration_no:
-					d.registration_no = d.registration_no.replace('-', '')
+				# if self.filters.for_export and d.registration_no:
+				# 	d.registration_no = d.registration_no.replace('-', '')
 
 			d.has_third_schedule_goods = False
 			d.qty = 0
