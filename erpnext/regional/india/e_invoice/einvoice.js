@@ -211,86 +211,100 @@ erpnext.setup_einvoice_actions = (doctype) => {
 const get_ewaybill_fields = (frm) => {
 	return [
 		{
-			'fieldname': 'transporter',
-			'label': 'Transporter',
-			'fieldtype': 'Link',
-			'options': 'Supplier',
-			'default': frm.doc.transporter
+			fieldname: "eway_part_a_section_break",
+			fieldtype: "Section Break",
+			label: "Part A",
 		},
 		{
-			'fieldname': 'gst_transporter_id',
-			'label': 'GST Transporter ID',
-			'fieldtype': 'Data',
-			'default': frm.doc.gst_transporter_id
+			fieldname: "transporter",
+			label: "Transporter",
+			fieldtype: "Link",
+			options: "Supplier",
+			default: frm.doc.transporter,
 		},
 		{
-			'fieldname': 'driver',
-			'label': 'Driver',
-			'fieldtype': 'Link',
-			'options': 'Driver',
-			'default': frm.doc.driver
+			fieldname: "transporter_name",
+			label: "Transporter Name",
+			fieldtype: "Data",
+			read_only: 1,
+			default: frm.doc.transporter_name,
+			depends_on: "transporter",
 		},
 		{
-			'fieldname': 'lr_no',
-			'label': 'Transport Receipt No',
-			'fieldtype': 'Data',
-			'default': frm.doc.lr_no
+			fieldname: "part_a_column_break",
+			fieldtype: "Column Break",
 		},
 		{
-			'fieldname': 'vehicle_no',
-			'label': 'Vehicle No',
-			'fieldtype': 'Data',
-			'default': frm.doc.vehicle_no
+			fieldname: "gst_transporter_id",
+			label: "GST Transporter ID",
+			fieldtype: "Data",
+			default: frm.doc.gst_transporter_id,
 		},
 		{
-			'fieldname': 'distance',
-			'label': 'Distance (in km)',
-			'fieldtype': 'Float',
-			'default': frm.doc.distance,
-			'description': 'Set as zero to auto calculate distance using pin codes',
+			fieldname: "distance",
+			label: "Distance (in km)",
+			fieldtype: "Float",
+			default: frm.doc.distance,
+			description: 'Set as zero to auto calculate distance using pin codes',
 		},
 		{
-			'fieldname': 'transporter_col_break',
-			'fieldtype': 'Column Break',
+			fieldname: "eway_part_b_section_break",
+			fieldtype: "Section Break",
+			label: "Part B",
 		},
 		{
-			'fieldname': 'transporter_name',
-			'label': 'Transporter Name',
-			'fieldtype': 'Data',
-			'read_only': 1,
-			'default': frm.doc.transporter_name,
-			'depends_on': 'transporter'
+			fieldname: "mode_of_transport",
+			label: "Mode of Transport",
+			fieldtype: "Select",
+			options: `\nRoad\nAir\nRail\nShip`,
+			default: frm.doc.mode_of_transport,
 		},
 		{
-			'fieldname': 'mode_of_transport',
-			'label': 'Mode of Transport',
-			'fieldtype': 'Select',
-			'options': `\nRoad\nAir\nRail\nShip`,
-			'default': frm.doc.mode_of_transport
+			fieldname: "gst_vehicle_type",
+			label: "GST Vehicle Type",
+			fieldtype: "Select",
+			options: `Regular\nOver Dimensional Cargo (ODC)`,
+			depends_on: 'eval:(doc.mode_of_transport === "Road")',
+			default: frm.doc.gst_vehicle_type,
 		},
 		{
-			'fieldname': 'driver_name',
-			'label': 'Driver Name',
-			'fieldtype': 'Data',
-			'fetch_from': 'driver.full_name',
-			'read_only': 1,
-			'default': frm.doc.driver_name,
-			'depends_on': 'driver'
+			fieldname: "vehicle_no",
+			label: "Vehicle No",
+			fieldtype: "Data",
+			default: frm.doc.vehicle_no,
 		},
 		{
-			'fieldname': 'lr_date',
-			'label': 'Transport Receipt Date',
-			'fieldtype': 'Date',
-			'default': frm.doc.lr_date
+			fieldname: "part_b_column_break",
+			fieldtype: "Column Break",
 		},
 		{
-			'fieldname': 'gst_vehicle_type',
-			'label': 'GST Vehicle Type',
-			'fieldtype': 'Select',
-			'options': `Regular\nOver Dimensional Cargo (ODC)`,
-			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
-			'default': frm.doc.gst_vehicle_type
-		}
+			fieldname: "lr_date",
+			label: "Transport Receipt Date",
+			fieldtype: "Date",
+			default: frm.doc.lr_date,
+		},
+		{
+			fieldname: "lr_no",
+			label: "Transport Receipt No",
+			fieldtype: "Data",
+			default: frm.doc.lr_no,
+		},
+		{
+			fieldname: "driver",
+			label: "Driver",
+			fieldtype: "Link",
+			options: "Driver",
+			default: frm.doc.driver,
+		},
+		{
+			fieldname: "driver_name",
+			label: "Driver Name",
+			fieldtype: "Data",
+			fetch_from: "driver.full_name",
+			read_only: 1,
+			default: frm.doc.driver_name,
+			depends_on: "driver",
+		},
 	];
 };
 
