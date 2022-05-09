@@ -1474,7 +1474,7 @@ def job_already_enqueued(job_name):
 
 
 def generate_irn_on_submit(doc, method):
-	if doc.irn:
+	if doc.get("irn"):
 		return
 
 	eligible = validate_eligibility(doc)
@@ -1488,10 +1488,10 @@ def generate_irn_on_submit(doc, method):
 
 
 def cancel_irn_on_cancel(doc, method):
-	if doc.irn_cancelled:
+	if doc.get("irn_cancelled"):
 		return
 
-	if doc.ewaybill and not doc.eway_bill_cancelled:
+	if doc.get("ewaybill") and not doc.get("eway_bill_cancelled"):
 		frappe.throw(
 			_("Cannot cancel IRN as E-Way Bill is generated. You must cancel E-Way Bill first."),
 			title=_("Not Allowed"),
