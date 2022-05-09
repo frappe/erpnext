@@ -34,15 +34,6 @@ frappe.ui.form.on("Leave Allocation", {
 				});
 			}
 		}
-
-		// make new leaves allocated field read only if allocation is created via leave policy assignment
-		// and leave type is earned leave, since these leaves would be allocated via the scheduler
-		if (frm.doc.leave_policy_assignment) {
-			frappe.db.get_value("Leave Type", frm.doc.leave_type, "is_earned_leave", (r) => {
-				if (r && cint(r.is_earned_leave))
-					frm.set_df_property("new_leaves_allocated", "read_only", 1);
-			});
-		}
 	},
 
 	expire_allocation: function(frm) {
