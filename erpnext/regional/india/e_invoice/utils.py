@@ -858,8 +858,8 @@ class GSPConnector:
 		return res
 
 	def auto_refresh_token(self):
-		self.fetch_auth_token()
 		self.token_auto_refreshed = True
+		self.fetch_auth_token()
 
 	def log_request(self, url, headers, data, res):
 		headers.update({"password": self.credentials.password})
