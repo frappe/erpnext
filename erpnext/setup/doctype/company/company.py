@@ -182,7 +182,7 @@ class Company(NestedSet):
 		try:
 			install_app(country_mapper[self.country])
 		except KeyError:
-			pass
+			frappe.msgprint(_("No regional apps found for {}".format(self.country)))
 
 	def create_default_warehouses(self):
 		for wh_detail in [
