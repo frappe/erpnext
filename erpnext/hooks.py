@@ -355,8 +355,6 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.india.utils.validate_reverse_charge_transaction",
 			"erpnext.regional.india.utils.update_itc_availed_fields",
-			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
-			"erpnext.regional.united_arab_emirates.utils.validate_returns",
 			"erpnext.regional.india.utils.update_taxable_values",
 		]
 	},
@@ -568,10 +566,6 @@ regional_overrides = {
 		"erpnext.controllers.accounts_controller.validate_einvoice_fields": "erpnext.regional.india.e_invoice.utils.validate_einvoice_fields",
 		"erpnext.assets.doctype.asset.asset.get_depreciation_amount": "erpnext.regional.india.utils.get_depreciation_amount",
 		"erpnext.stock.doctype.item.item.set_item_tax_from_hsn_code": "erpnext.regional.india.utils.set_item_tax_from_hsn_code",
-	},
-	"United Arab Emirates": {
-		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data",
-		"erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries": "erpnext.regional.united_arab_emirates.utils.make_regional_gl_entries",
 	},
 	"Saudi Arabia": {
 		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data"
