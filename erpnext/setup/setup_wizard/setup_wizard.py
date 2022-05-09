@@ -36,7 +36,6 @@ def get_setup_stages(args=None):
 				"tasks": [
 					{"fn": setup_defaults, "args": args, "fail_msg": _("Failed to setup defaults")},
 					{"fn": stage_four, "args": args, "fail_msg": _("Failed to create website")},
-					{"fn": set_active_domains, "args": args, "fail_msg": _("Failed to add Domain")},
 				],
 			},
 			{
@@ -84,8 +83,3 @@ def setup_complete(args=None):
 	setup_defaults(args)
 	stage_four(args)
 	fin(args)
-
-
-def set_active_domains(args):
-	domain_settings = frappe.get_single("Domain Settings")
-	domain_settings.set_active_domains(args.get("domains"))

@@ -1081,9 +1081,14 @@ class AccountsController(TransactionBase):
 		return amount, base_amount
 
 	def make_discount_gl_entries(self, gl_entries):
-		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
-		)
+		if self.doctype == "Purchase Invoice":
+			enable_discount_accounting = cint(
+				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
+			)
+		elif self.doctype == "Sales Invoice":
+			enable_discount_accounting = cint(
+				frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
+			)
 
 		if enable_discount_accounting:
 			if self.doctype == "Purchase Invoice":
@@ -1999,12 +2004,13 @@ def get_advance_journal_entries(
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
 
+	# nosemgrep
 	journal_entries = frappe.db.sql(
 		"""
 		select
 			"Journal Entry" as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
-			t2.reference_name as against_order
+			t2.reference_name as against_order, t2.exchange_rate
 		from
 			`tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where

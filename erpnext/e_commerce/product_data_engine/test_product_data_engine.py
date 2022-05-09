@@ -277,6 +277,54 @@ class TestProductDataEngine(unittest.TestCase):
 		# tear down
 		setup_e_commerce_settings({"enable_attribute_filters": 1, "hide_variants": 0})
 
+	def test_custom_field_as_filter(self):
+		"Test if custom field functions as filter correctly."
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+		create_custom_field(
+			"Website Item",
+			dict(
+				owner="Administrator",
+				fieldname="supplier",
+				label="Supplier",
+				fieldtype="Link",
+				options="Supplier",
+				insert_after="on_backorder",
+			),
+		)
+
+		frappe.db.set_value(
+			"Website Item", {"item_code": "Test 11I Laptop"}, "supplier", "_Test Supplier"
+		)
+		frappe.db.set_value(
+			"Website Item", {"item_code": "Test 12I Laptop"}, "supplier", "_Test Supplier 1"
+		)
+
+		settings = frappe.get_doc("E Commerce Settings")
+		settings.append("filter_fields", {"fieldname": "supplier"})
+		settings.save()
+
+		filter_engine = ProductFiltersBuilder()
+		field_filters = filter_engine.get_field_filters()
+		custom_filter = field_filters[1]
+		filter_values = custom_filter[1]
+
+		self.assertEqual(custom_filter[0].options, "Supplier")
+		self.assertEqual(len(filter_values), 2)
+		self.assertIn("_Test Supplier", filter_values)
+
+		# test if custom filter works in query
+		field_filters = {"supplier": "_Test Supplier 1"}
+		engine = ProductQuery()
+		result = engine.query(
+			attributes={}, fields=field_filters, search_term=None, start=0, item_group=None
+		)
+		items = result.get("items")
+
+		# check if only 'Raw Material' are fetched in the right order
+		self.assertEqual(len(items), 1)
+		self.assertEqual(items[0].get("item_code"), "Test 12I Laptop")
+
 
 def create_variant_web_item():
 	"Create Variant and Template Website Items."

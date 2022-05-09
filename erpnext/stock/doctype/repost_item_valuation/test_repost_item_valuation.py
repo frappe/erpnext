@@ -186,3 +186,10 @@ class TestRepostItemValuation(FrappeTestCase):
 		riv.db_set("status", "Skipped")
 		riv.reload()
 		riv.cancel()  # it should cancel now
+
+	def test_queue_progress_serialization(self):
+		# Make sure set/tuple -> list behaviour is retained.
+		self.assertEqual(
+			[["a", "b"], ["c", "d"]],
+			sorted(frappe.parse_json(frappe.as_json(set([("a", "b"), ("c", "d")])))),
+		)

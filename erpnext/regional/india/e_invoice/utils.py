@@ -12,6 +12,7 @@ import traceback
 
 import frappe
 import jwt
+import requests
 from frappe import _, bold
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_get_request, make_post_request
@@ -56,6 +57,7 @@ def validate_eligibility(doc):
 	invalid_company = not frappe.db.get_value("E Invoice User", {"company": doc.get("company")})
 	invalid_supply_type = doc.get("gst_category") not in [
 		"Registered Regular",
+		"Registered Composition",
 		"SEZ",
 		"Overseas",
 		"Deemed Export",
@@ -123,24 +125,33 @@ def read_json(name):
 
 def get_transaction_details(invoice):
 	supply_type = ""
-	if invoice.gst_category == "Registered Regular":
+	if (
+		invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition"
+	):
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
-		supply_type = "SEZWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "SEZWOP"
+		else:
+			supply_type = "SEZWP"
 	elif invoice.gst_category == "Overseas":
-		supply_type = "EXPWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "EXPWOP"
+		else:
+			supply_type = "EXPWP"
 	elif invoice.gst_category == "Deemed Export":
 		supply_type = "DEXP"
 
 	if not supply_type:
-		rr, sez, overseas, export = (
+		rr, rc, sez, overseas, export = (
 			bold("Registered Regular"),
+			bold("Registered Composition"),
 			bold("SEZ"),
 			bold("Overseas"),
 			bold("Deemed Export"),
 		)
 		frappe.throw(
-			_("GST category should be one of {}, {}, {}, {}").format(rr, sez, overseas, export),
+			_("GST category should be one of {}, {}, {}, {}, {}").format(rr, rc, sez, overseas, export),
 			title=_("Invalid Supply Type"),
 		)
 
@@ -432,7 +443,7 @@ def get_eway_bill_details(invoice):
 		dict(
 			gstin=invoice.gst_transporter_id,
 			name=invoice.transporter_name,
-			mode_of_transport=mode_of_transport[invoice.mode_of_transport],
+			mode_of_transport=mode_of_transport[invoice.mode_of_transport or ""] or None,
 			distance=invoice.distance or 0,
 			document_name=invoice.lr_no,
 			document_date=format_date(invoice.lr_date, "dd/mm/yyyy"),
@@ -552,6 +563,7 @@ def validate_totals(einvoice):
 		+ flt(value_details["CgstVal"])
 		+ flt(value_details["SgstVal"])
 		+ flt(value_details["IgstVal"])
+		+ flt(value_details["CesVal"])
 		+ flt(value_details["OthChrg"])
 		+ flt(value_details["RndOffAmt"])
 		- flt(value_details["Discount"])
@@ -780,7 +792,7 @@ class GSPConnector:
 		self.irn_details_url = self.base_url + "/enriched/ei/api/invoice/irn"
 		self.generate_irn_url = self.base_url + "/enriched/ei/api/invoice"
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
-		self.cancel_ewaybill_url = self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
+		self.cancel_ewaybill_url = self.base_url + "/enriched/ei/api/ewayapi"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
 		self.get_qrcode_url = self.base_url + "/enriched/ei/others/qr/image"
 
@@ -830,13 +842,24 @@ class GSPConnector:
 		return self.e_invoice_settings.auth_token
 
 	def make_request(self, request_type, url, headers=None, data=None):
-		if request_type == "post":
-			res = make_post_request(url, headers=headers, data=data)
-		else:
-			res = make_get_request(url, headers=headers, data=data)
+		try:
+			if request_type == "post":
+				res = make_post_request(url, headers=headers, data=data)
+			else:
+				res = make_get_request(url, headers=headers, data=data)
+
+		except requests.exceptions.HTTPError as e:
+			if e.response.status_code in [401, 403] and not hasattr(self, "token_auto_refreshed"):
+				self.auto_refresh_token()
+				headers = self.get_headers()
+				return self.make_request(request_type, url, headers, data)
 
 		self.log_request(url, headers, data, res)
 		return res
+
+	def auto_refresh_token(self):
+		self.fetch_auth_token()
+		self.token_auto_refreshed = True
 
 	def log_request(self, url, headers, data, res):
 		headers.update({"password": self.credentials.password})
@@ -1109,7 +1132,7 @@ class GSPConnector:
 				"Distance": cint(eway_bill_details.distance),
 				"TransMode": eway_bill_details.mode_of_transport,
 				"TransId": eway_bill_details.gstin,
-				"TransName": eway_bill_details.transporter,
+				"TransName": eway_bill_details.name,
 				"TrnDocDt": eway_bill_details.document_date,
 				"TrnDocNo": eway_bill_details.document_name,
 				"VehNo": eway_bill_details.vehicle_no,
@@ -1125,6 +1148,19 @@ class GSPConnector:
 				self.invoice.eway_bill_validity = res.get("result").get("EwbValidTill")
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
+				if res.get("info"):
+					info = res.get("info")
+					# when we have more features (responses) in eway bill, we can add them using below forloop.
+					for msg in info:
+						if msg.get("InfCd") == "EWBPPD":
+							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
+							frappe.msgprint(
+								_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
+								title="Notification",
+								indicator="green",
+								alert=True,
+							)
+							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
 					"doctype": self.invoice.doctype,
 					"docname": self.invoice.name,
@@ -1147,7 +1183,6 @@ class GSPConnector:
 		headers = self.get_headers()
 		data = json.dumps({"ewbNo": eway_bill, "cancelRsnCode": reason, "cancelRmrk": remark}, indent=4)
 		headers["username"] = headers["user_name"]
-		del headers["user_name"]
 		try:
 			res = self.make_request("post", self.cancel_ewaybill_url, headers, data)
 			if res.get("success"):
@@ -1324,13 +1359,9 @@ def generate_eway_bill(doctype, docname, **kwargs):
 
 
 @frappe.whitelist()
-def cancel_eway_bill(doctype, docname):
-	# TODO: uncomment when eway_bill api from Adequare is enabled
-	# gsp_connector = GSPConnector(doctype, docname)
-	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
-
-	frappe.db.set_value(doctype, docname, "ewaybill", "")
-	frappe.db.set_value(doctype, docname, "eway_bill_cancelled", 1)
+def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
 
 
 @frappe.whitelist()

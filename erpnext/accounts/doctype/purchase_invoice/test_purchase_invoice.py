@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -336,8 +337,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -353,10 +354,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
+
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -1482,7 +1483,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
 
 	def test_provisional_accounting_entry(self):
-		item = create_item("_Test Non Stock Item", is_stock_item=0)
+		create_item("_Test Non Stock Item", is_stock_item=0)
+
 		provisional_account = create_account(
 			account_name="Provision Account",
 			parent_account="Current Liabilities - _TC",
@@ -1504,6 +1506,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
 		pi.save()
 		pi.submit()
+
+		self.assertEquals(pr.items[0].provisional_expense_account, "Provision Account - _TC")
 
 		# Check GLE for Purchase Invoice
 		expected_gle = [
@@ -1582,12 +1586,6 @@ def update_tax_witholding_category(company, account):
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
-	accounts_settings.save()
-
-
-def enable_discount_accounting(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.enable_discount_accounting = enable
 	accounts_settings.save()
 
 
