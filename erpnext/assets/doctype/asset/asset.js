@@ -50,6 +50,7 @@ frappe.ui.form.on("Asset", {
 	refresh: function (frm) {
 		frm.trigger("toggle_reference_doc");
 		frm.trigger("toggle_depreciation_details");
+		frm.trigger("toggle_asset_value");
 
 		if (frm.doc.docstatus == 1) {
 			if (frm.doc.is_serialized_asset) {
@@ -360,6 +361,7 @@ frappe.ui.form.on("Asset", {
 
 	calculate_depreciation: function (frm) {
 		frm.trigger("toggle_depreciation_details");
+		frm.trigger("toggle_asset_value");
 	},
 
 	toggle_depreciation_details: function (frm) {
@@ -377,6 +379,17 @@ frappe.ui.form.on("Asset", {
 
 					frm.toggle_reqd("depreciation_template", (frm.doc.calculate_depreciation && !frm.doc.is_serialized_asset));
 					frm.toggle_display("depreciation_template", (frm.doc.calculate_depreciation && !frm.doc.is_serialized_asset));
+				}
+			});
+	},
+
+	toggle_asset_value: function (frm) {
+		frappe.db.get_single_value("Accounts Settings", "enable_finance_books")
+			.then((value) => {
+				if (value) {
+					frm.toggle_display("asset_value", (!frm.doc.calculate_depreciation && !frm.doc.is_serialized_asset));
+				} else {
+					frm.toggle_display("asset_value", !frm.doc.is_serialized_asset);
 				}
 			});
 	},
