@@ -1465,38 +1465,3 @@ def job_already_enqueued(job_name):
 	enqueued_jobs = [d.get("job_name") for d in get_info()]
 	if job_name in enqueued_jobs:
 		return True
-
-
-def generate_irn_on_submit(doc, method):
-	if doc.get("irn"):
-		return
-
-	eligible = validate_eligibility(doc)
-
-	if not eligible:
-		return
-
-	generate_irn(doc.doctype, doc.name)
-
-	frappe.msgprint(_("IRN generated successfully."), alert=True)
-
-
-def cancel_irn_on_cancel(doc, method):
-	if doc.get("irn_cancelled"):
-		return
-
-	if doc.get("ewaybill") and not doc.get("eway_bill_cancelled"):
-		frappe.throw(
-			_("Cannot cancel IRN as E-Way Bill is generated. You must cancel E-Way Bill first."),
-			title=_("Not Allowed"),
-			exc=CancellationNotAllowed,
-		)
-
-	eligible = validate_eligibility(doc)
-
-	if not eligible:
-		return
-
-	cancel_irn(doc.doctype, doc.name, doc.irn, "3", "Cancelled by user")
-
-	frappe.msgprint(_("IRN cancelled successfully."), alert=True)
