@@ -13,7 +13,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
 
-			const automate_irns = await frappe.db.get_single_value('E Invoice Settings', 'automate_irns')
+			const automate_irns = await frappe.db.get_single_value('E Invoice Settings', 'automate_irns');
 
 			const add_custom_button = (label, action) => {
 				if (!frm.custom_buttons[label]) {

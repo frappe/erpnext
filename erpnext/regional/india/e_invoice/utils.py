@@ -1460,6 +1460,13 @@ def cancel_irn_on_cancel(doc, method):
 	if doc.irn_cancelled:
 		return
 
+	if doc.ewaybill and not doc.eway_bill_cancelled:
+		frappe.throw(
+			_("Cannot cancel IRN as E-Way Bill is generated. You must cancel E-Way Bill first."),
+			title=_("Not Allowed"),
+			exc=CancellationNotAllowed,
+		)
+
 	eligible = validate_eligibility(doc)
 
 	if not eligible:
