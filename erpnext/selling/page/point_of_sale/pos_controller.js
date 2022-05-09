@@ -479,16 +479,20 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.freeze();
 		this.frm = this.get_new_frm(this.frm);
 		this.frm.doc.items = [];
-		const res = await frappe.call({
+		return frappe.call({
 			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
 			args: {
 				'source_name': doc.name,
 				'target_doc': this.frm.doc
+			},
+			callback: (r) => {
+				frappe.model.sync(r.message);
+				frappe.get_doc(r.message.doctype, r.message.name).__run_link_triggers = false;
+				this.set_pos_profile_data().then(() => {
+					frappe.dom.unfreeze();
+				});
 			}
 		});
-		frappe.model.sync(res.message);
-		await this.set_pos_profile_data();
-		frappe.dom.unfreeze();
 	}
 
 	set_pos_profile_data() {
