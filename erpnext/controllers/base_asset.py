@@ -38,9 +38,7 @@ class BaseAsset(AccountsController):
 				self.validate_salvage_value()
 				self.validate_opening_accumulated_depreciation()
 
-				if self.is_new():
-					self.set_initial_asset_value_for_finance_books()
-				else:
+				if not self.is_new():
 					self.create_schedules_if_depr_details_have_been_updated()
 
 		self.status = self.get_status()
@@ -98,7 +96,7 @@ class BaseAsset(AccountsController):
 		"""
 		Certain actions should only be performed on Asset Serial No docs or non-serialized Assets.
 		"""
-		if self.doctype == "Asset Serial No" or not self.is_serialized_asset:
+		if self.doctype == "Asset Serial No" or not self.get("is_serialized_asset"):
 			return True
 
 		return False
@@ -206,9 +204,6 @@ class BaseAsset(AccountsController):
 			)
 
 	def set_missing_values(self):
-		if not self.get("asset_value") and self.is_not_serialized_asset():
-			self.set_initial_asset_value()
-
 		if self.enable_finance_books and self.is_depreciable_asset() and not self.get("finance_books"):
 			asset_category = self.get_asset_category()
 			finance_books = get_finance_books(asset_category)
@@ -217,8 +212,17 @@ class BaseAsset(AccountsController):
 		elif self.doctype == "Asset" and not self.get("asset_category"):
 			self.set_asset_category()
 
+		if not self.get("asset_value") and self.is_not_serialized_asset():
+			self.set_initial_asset_value()
+
 	def set_initial_asset_value(self):
-		self.asset_value = self.get_initial_asset_value()
+		initial_asset_value = self.get_initial_asset_value()
+
+		if self.enable_finance_books and self.is_depreciable_asset():
+			for row in self.get("finance_books"):
+				row.asset_value = initial_asset_value
+		else:
+			self.asset_value = initial_asset_value
 
 	def get_initial_asset_value(self):
 		purchase_doc = get_purchase_details(self)
@@ -233,6 +237,30 @@ class BaseAsset(AccountsController):
 			asset_value = gross_purchase_amount
 
 		return asset_value
+
+	def update_asset_value(self, change_in_value=0, finance_book=None):
+		if finance_book:
+			self.update_asset_value_for_specific_finance_book(finance_book, change_in_value)
+
+		else:
+			if self.is_not_serialized_asset():
+				if not self.get("enable_finance_books"):
+					self.get_enable_finance_books_value()
+
+				if self.enable_finance_books and self.is_depreciable_asset():
+					self.update_asset_value_for_all_finance_books(change_in_value)
+				else:
+					self.asset_value += change_in_value
+
+	def update_asset_value_for_specific_finance_book(self, finance_book, change_in_value):
+		for row in self.get("finance_books"):
+			if row.finance_book == finance_book:
+				row.asset_value += change_in_value
+				break
+
+	def update_asset_value_for_all_finance_books(self, change_in_value):
+		for row in self.get("finance_books"):
+			row.asset_value += change_in_value
 
 	def get_asset_category(self):
 		if self.doctype == "Asset":
@@ -411,8 +439,6 @@ class BaseAsset(AccountsController):
 
 			if self.has_value_changed("gross_purchase_amount"):
 				self.set_initial_asset_value()
-
-			self.set_initial_asset_value_for_finance_books()
 			return
 
 		if self.enable_finance_books:
@@ -423,22 +449,10 @@ class BaseAsset(AccountsController):
 
 				self.delete_schedules_belonging_to_deleted_finance_books(old_finance_books)
 				self.create_new_schedules_for_new_finance_books(old_finance_books)
-
-				self.set_initial_asset_value_for_finance_books()
 		else:
 			if self.has_updated_template_details():
 				delete_existing_schedules(self)
 				create_depreciation_schedules(self)
-
-	def set_initial_asset_value_for_finance_books(self):
-		for row in self.get("finance_books"):
-			row.asset_value = self.asset_value
-
-	def update_asset_value(self, change_in_value=0):
-		if self.get("finance_books"):
-			self.asset_value = self.finance_books[0].asset_value
-		else:
-			self.asset_value += change_in_value
 
 	def has_updated_basic_depr_details(self):
 		return (

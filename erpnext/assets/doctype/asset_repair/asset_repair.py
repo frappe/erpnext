@@ -115,14 +115,7 @@ class AssetRepair(AccountsController):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 		increase_in_value = self.get_change_in_value(total_value_of_stock_consumed)
 
-		if self.is_depreciable_asset():
-			for row in self.asset_doc.finance_books:
-				row.asset_value += increase_in_value
-
-			self.asset_doc.update_asset_value()
-		else:
-			self.asset_doc.update_asset_value(increase_in_value)
-
+		self.asset_doc.update_asset_value(increase_in_value)
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.save()
 
@@ -130,14 +123,7 @@ class AssetRepair(AccountsController):
 		total_value_of_stock_consumed = self.get_total_value_of_stock_consumed()
 		decrease_in_value = self.get_change_in_value(total_value_of_stock_consumed)
 
-		if self.is_depreciable_asset():
-			for row in self.asset_doc.finance_books:
-				row.asset_value -= decrease_in_value
-
-			self.asset_doc.update_asset_value()
-		else:
-			self.asset_doc.update_asset_value(-decrease_in_value)
-
+		self.asset_doc.update_asset_value(-decrease_in_value)
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		self.asset_doc.save()
 
