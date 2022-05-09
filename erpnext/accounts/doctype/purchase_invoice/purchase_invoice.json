@@ -338,6 +338,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time",
@@ -1808,7 +1809,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-12-30 17:43:52.142598",
+ "modified": "2022-05-09 18:40:34.685147",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

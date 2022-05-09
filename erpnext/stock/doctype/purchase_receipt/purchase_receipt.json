@@ -271,6 +271,7 @@
    "width": "100px"
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Received Time",
@@ -1542,7 +1543,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2021-12-30 17:44:03.209703",
+ "modified": "2022-05-09 18:40:32.127022",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

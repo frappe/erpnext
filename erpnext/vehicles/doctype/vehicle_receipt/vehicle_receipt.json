@@ -149,6 +149,7 @@
    "search_index": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Received Time",
@@ -460,7 +461,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-04-04 14:18:58.653717",
+ "modified": "2022-05-09 18:40:30.348657",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

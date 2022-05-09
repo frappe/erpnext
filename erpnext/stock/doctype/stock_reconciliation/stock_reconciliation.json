@@ -82,6 +82,7 @@
    "reqd": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "in_list_view": 1,
@@ -263,7 +264,7 @@
  "idx": 1,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-05-30 16:06:18.924568",
+ "modified": "2022-05-09 18:40:37.135565",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
