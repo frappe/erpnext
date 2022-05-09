@@ -8,7 +8,12 @@ import frappe
 from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
+<<<<<<< HEAD
 from frappe.utils import cint, cstr, get_fullname
+=======
+from frappe.query_builder import DocType
+from frappe.utils import cint, flt, get_fullname
+>>>>>>> 3f41cb762d (fix: allow to use formatting for the field to_discuss in opportunity)
 
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.setup.utils import get_exchange_rate
@@ -191,6 +196,7 @@ class Opportunity(TransactionBase):
 		opts.description = ""
 		opts.contact_date = self.contact_date
 
+<<<<<<< HEAD
 		if self.party_name and self.opportunity_from == "Customer":
 			if self.contact_person:
 				opts.description = "Contact " + cstr(self.contact_person)
@@ -207,6 +213,24 @@ class Opportunity(TransactionBase):
 
 		if self.to_discuss:
 			opts.description += " To Discuss : " + cstr(self.to_discuss)
+=======
+			if self.party_name and self.opportunity_from == "Customer":
+				if self.contact_person:
+					opts.description = f"Contact {self.contact_person}"
+				else:
+					opts.description = f"Contact customer {self.party_name}"
+			elif self.party_name and self.opportunity_from == "Lead":
+				if self.contact_display:
+					opts.description = f"Contact {self.contact_display}"
+				else:
+					opts.description = f"Contact lead {self.party_name}"
+
+			opts.subject = opts.description
+			opts.description += f". By : {self.contact_by}"
+
+			if self.to_discuss:
+				opts.description += f" To Discuss : {frappe.render_template(self.to_discuss, {'doc': self})}"
+>>>>>>> 3f41cb762d (fix: allow to use formatting for the field to_discuss in opportunity)
 
 		super(Opportunity, self).add_calendar_event(opts, force)
 

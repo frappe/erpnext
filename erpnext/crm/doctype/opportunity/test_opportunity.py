@@ -4,7 +4,11 @@
 import unittest
 
 import frappe
+<<<<<<< HEAD
 from frappe.utils import random_string, today
+=======
+from frappe.utils import add_days, now_datetime, random_string, today
+>>>>>>> 3f41cb762d (fix: allow to use formatting for the field to_discuss in opportunity)
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.opportunity.opportunity import make_quotation
@@ -53,10 +57,92 @@ class TestOpportunity(unittest.TestCase):
 		contact.add_email(new_lead_email_id, is_primary=True)
 		contact.insert(ignore_permissions=True)
 
+<<<<<<< HEAD
 		opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
 		self.assertTrue(opp_doc.party_name)
 		self.assertEqual(opp_doc.opportunity_from, "Customer")
 		self.assertEqual(opp_doc.party_name, customer.name)
+=======
+	def test_opportunity_item(self):
+		opportunity_doc = make_opportunity(with_items=1, rate=1100, qty=2)
+		self.assertEqual(opportunity_doc.total, 2200)
+
+	def test_carry_forward_of_email_and_comments(self):
+		frappe.db.set_value(
+			"CRM Settings", "CRM Settings", "carry_forward_communication_and_comments", 1
+		)
+		lead_doc = make_lead()
+		lead_doc.add_comment("Comment", text="Test Comment 1")
+		lead_doc.add_comment("Comment", text="Test Comment 2")
+		create_communication(lead_doc.doctype, lead_doc.name, lead_doc.email_id)
+		create_communication(lead_doc.doctype, lead_doc.name, lead_doc.email_id)
+
+		opp_doc = make_opportunity(opportunity_from="Lead", lead=lead_doc.name)
+		opportunity_comment_count = frappe.db.count(
+			"Comment", {"reference_doctype": opp_doc.doctype, "reference_name": opp_doc.name}
+		)
+		opportunity_communication_count = len(
+			get_linked_communication_list(opp_doc.doctype, opp_doc.name)
+		)
+		self.assertEqual(opportunity_comment_count, 2)
+		self.assertEqual(opportunity_communication_count, 2)
+
+		opp_doc.add_comment("Comment", text="Test Comment 3")
+		opp_doc.add_comment("Comment", text="Test Comment 4")
+		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
+		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
+
+		quotation_doc = make_quotation(opp_doc.name)
+		quotation_doc.append("items", {"item_code": "_Test Item", "qty": 1})
+		quotation_doc.run_method("set_missing_values")
+		quotation_doc.run_method("calculate_taxes_and_totals")
+		quotation_doc.save()
+
+		quotation_comment_count = frappe.db.count(
+			"Comment",
+			{
+				"reference_doctype": quotation_doc.doctype,
+				"reference_name": quotation_doc.name,
+				"comment_type": "Comment",
+			},
+		)
+		quotation_communication_count = len(
+			get_linked_communication_list(quotation_doc.doctype, quotation_doc.name)
+		)
+		self.assertEqual(quotation_comment_count, 4)
+		self.assertEqual(quotation_communication_count, 4)
+
+	def test_render_template_for_to_discuss(self):
+		doc = make_opportunity(with_items=0, opportunity_from="Lead")
+		doc.contact_by = "test@example.com"
+		doc.contact_date = add_days(today(), days=2)
+		doc.to_discuss = "{{ doc.name }} test data"
+		doc.save()
+
+		event = frappe.get_all(
+			"Event Participants",
+			fields=["parent"],
+			filters={"reference_doctype": doc.doctype, "reference_docname": doc.name},
+		)
+
+		event_description = frappe.db.get_value("Event", event[0].parent, "description")
+		self.assertTrue(doc.name in event_description)
+
+
+def make_opportunity_from_lead():
+	new_lead_email_id = "new{}@example.com".format(random_string(5))
+	args = {
+		"doctype": "Opportunity",
+		"contact_email": new_lead_email_id,
+		"opportunity_type": "Sales",
+		"with_items": 0,
+		"transaction_date": today(),
+	}
+	# new lead should be created against the new.opportunity@example.com
+	opp_doc = frappe.get_doc(args).insert(ignore_permissions=True)
+
+	return opp_doc
+>>>>>>> 3f41cb762d (fix: allow to use formatting for the field to_discuss in opportunity)
 
 
 def make_opportunity(**args):
