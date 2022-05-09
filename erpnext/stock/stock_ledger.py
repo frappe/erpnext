@@ -1255,7 +1255,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
 	frappe.db.sql(
-		"""
+		f"""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty_shift}
 		where
@@ -1266,9 +1266,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			and timestamp(posting_date, time_format(posting_time, %(time_format)s))
 				> timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
 		{datetime_limit_condition}
-		""".format(
-			qty_shift=qty_shift, datetime_limit_condition=datetime_limit_condition
-		),
+		""",
 		args,
 	)
 
@@ -1319,6 +1317,7 @@ def get_next_stock_reco(args):
 					and creation > %(creation)s
 				)
 			)
+		order by timestamp(posting_date, posting_time) asc, creation asc
 		limit 1
 	""",
 		args,
