@@ -23,7 +23,7 @@ class TransactionBase(StatusUpdater):
 		if not getattr(self, "set_posting_time", None):
 			now = now_datetime()
 			self.posting_date = now.strftime("%Y-%m-%d")
-			self.posting_time = now.strftime("%H:%M:%S.%f")
+			self.posting_time = now.strftime("%H:%M:%S")
 		elif self.posting_time:
 			try:
 				get_time(self.posting_time)
