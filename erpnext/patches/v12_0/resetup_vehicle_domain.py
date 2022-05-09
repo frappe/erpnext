@@ -8,6 +8,8 @@ import frappe
 def execute():
 	frappe.reload_doc("projects", "doctype", "project")
 	frappe.reload_doc("projects", "doctype", "project_type")
+	frappe.reload_doc("projects", "doctype", "project_template")
+	frappe.reload_doc("projects", "doctype", "project_template_category")
 
 	domain = 'Vehicles'
 	if domain in frappe.get_active_domains():
