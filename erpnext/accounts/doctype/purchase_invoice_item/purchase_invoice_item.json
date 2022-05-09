@@ -619,7 +619,8 @@
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
-   "options": "BOM"
+   "options": "BOM",
+   "read_only": 1
   },
   {
    "default": "0",

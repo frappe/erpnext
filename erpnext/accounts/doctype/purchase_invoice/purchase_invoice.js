@@ -570,13 +570,6 @@ frappe.ui.form.on("Purchase Invoice", {
 		});
 	},
 
-	is_subcontracted: function(frm) {
-		if (frm.doc.is_subcontracted) {
-			erpnext.buying.get_default_bom(frm);
-		}
-		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
-	},
-
 	update_stock: function(frm) {
 		hide_fields(frm.doc);
 		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock? true: false);
