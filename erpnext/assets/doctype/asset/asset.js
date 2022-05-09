@@ -108,6 +108,10 @@ frappe.ui.form.on('Asset', {
 				frm.trigger("create_asset_repair");
 			}, __("Manage"));
 
+			frm.add_custom_button(__("Split Asset"), function() {
+				frm.trigger("split_asset");
+			}, __("Manage"));
+
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Adjust Asset Value"), function() {
 					frm.trigger("create_asset_value_adjustment");
@@ -320,6 +324,43 @@ frappe.ui.form.on('Asset', {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
+	},
+
+	split_asset: function(frm) {
+		const title = __('Split Asset');
+
+		const fields = [
+			{
+				fieldname: 'split_qty',
+				fieldtype: 'Int',
+				label: __('Split Qty'),
+				reqd: 1
+			}
+		];
+
+		let dialog = new frappe.ui.Dialog({
+			title: title,
+			fields: fields
+		});
+
+		dialog.set_primary_action(__('Split'), function() {
+			const dialog_data = dialog.get_values();
+			frappe.call({
+				args: {
+					"asset_name": frm.doc.name,
+					"split_qty": cint(dialog_data.split_qty)
+				},
+				method: "erpnext.assets.doctype.asset.asset.split_asset",
+				callback: function(r) {
+					let doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			});
+
+			dialog.hide();
+		});
+
+		dialog.show();
 	},
 
 	create_asset_value_adjustment: function(frm) {

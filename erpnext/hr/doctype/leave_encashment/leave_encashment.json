@@ -154,10 +154,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:32:55.492327",
+ "modified": "2022-01-18 19:16:52.414356",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -218,7 +219,10 @@
    "write": 1
   }
  ],
+ "search_fields": "employee,employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
  "track_changes": 1
 }

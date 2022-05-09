@@ -5,35 +5,41 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "defaults_tab",
   "item_defaults_section",
   "item_naming_by",
   "item_group",
   "stock_uom",
-  "default_warehouse",
   "column_break_4",
-  "valuation_method",
+  "default_warehouse",
   "sample_retention_warehouse",
-  "use_naming_series",
-  "naming_series_prefix",
+  "valuation_method",
+  "price_list_defaults_section",
+  "auto_insert_price_list_rate_if_missing",
+  "column_break_12",
+  "update_existing_price_list_rate",
+  "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
-  "role_allowed_to_over_deliver_receive",
   "mr_qty_allowance",
-  "column_break_12",
-  "auto_insert_price_list_rate_if_missing",
-  "update_existing_price_list_rate",
+  "column_break_121",
+  "role_allowed_to_over_deliver_receive",
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
-  "column_break_21",
+  "column_break_23",
   "action_if_quality_inspection_is_rejected",
+  "serial_and_batch_item_settings_tab",
   "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
   "column_break_10",
   "disable_serial_no_and_batch_selector",
+  "use_naming_series",
+  "naming_series_prefix",
+  "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
   "column_break_27",
@@ -42,6 +48,7 @@
   "allow_from_dn",
   "column_break_31",
   "allow_from_pr",
+  "stock_closing_tab",
   "control_historical_stock_transactions_section",
   "stock_frozen_upto",
   "stock_frozen_upto_days",
@@ -92,7 +99,7 @@
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Default Valuation Method",
-   "options": "FIFO\nMoving Average"
+   "options": "FIFO\nMoving Average\nLIFO"
   },
   {
    "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
@@ -122,7 +129,7 @@
   {
    "fieldname": "section_break_7",
    "fieldtype": "Section Break",
-   "label": "Serialised and Batch Setting"
+   "label": "Serial & Batch Item Settings"
   },
   {
    "default": "0",
@@ -276,10 +283,6 @@
    "label": "Quality Inspection Settings"
   },
   {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Stop",
    "fieldname": "action_if_quality_inspection_is_rejected",
    "fieldtype": "Select",
@@ -298,6 +301,44 @@
    "fieldname": "update_existing_price_list_rate",
    "fieldtype": "Check",
    "label": "Update Existing Price List Rate"
+  },
+  {
+   "fieldname": "defaults_tab",
+   "fieldtype": "Tab Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "stock_validations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Validations"
+  },
+  {
+   "fieldname": "stock_planning_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Planning"
+  },
+  {
+   "fieldname": "stock_closing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Closing"
+  },
+  {
+   "fieldname": "serial_and_batch_item_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Serial & Batch Item"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "price_list_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Price List Defaults"
+  },
+  {
+   "fieldname": "column_break_121",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -305,7 +346,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-06 19:40:02.183592",
+ "modified": "2022-02-05 15:33:43.692736",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -324,5 +365,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

@@ -4,13 +4,6 @@
 
 {% block header %}<h3 class="shopping-cart-header mt-2 mb-6">{{ _("Shopping Cart") }}</h1>{% endblock %}
 
-<!--
-{% block script %}
-<script>{% include "templates/includes/cart.js" %}</script>
-{% endblock %}
--->
-
-
 {% block header_actions %}
 {% endblock %}
 
@@ -21,8 +14,9 @@
 {% if doc.items %}
 <div class="cart-container">
 	<div class="row m-0">
-		<div class="col-md-8 frappe-card p-5">
-			<div>
+		<!-- Left section -->
+		<div class="col-md-8">
+			<div class="frappe-card p-5 mb-4">
 				<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
 				<div class="cart-items-header">
 					{{ _('Items') }}
@@ -30,89 +24,82 @@
 				<table class="table mt-3 cart-table">
 					<thead>
 						<tr>
-							<th width="60%">{{ _('Item') }}</th>
+							<th class="item-column">{{ _('Item') }}</th>
 							<th width="20%">{{ _('Quantity') }}</th>
-							{% if cart_settings.enable_checkout %}
-							<th width="20%" class="text-right">{{ _('Subtotal') }}</th>
+							{% if cart_settings.enable_checkout or cart_settings.show_price_in_quotation %}
+								<th width="20" class="text-right column-sm-view">{{ _('Subtotal') }}</th>
 							{% endif %}
+							<th width="10%" class="column-sm-view"></th>
 						</tr>
 					</thead>
 					<tbody class="cart-items">
 						{% include "templates/includes/cart/cart_items.html" %}
 					</tbody>
-					{% if cart_settings.enable_checkout %}
-					<tfoot class="cart-tax-items">
-						{% include "templates/includes/order/order_taxes.html" %}
-					</tfoot>
+
+					{% if cart_settings.enable_checkout or cart_settings.show_price_in_quotation %}
+						<tfoot class="cart-tax-items">
+							{% include "templates/includes/cart/cart_items_total.html" %}
+						</tfoot>
 					{% endif %}
 				</table>
-			</div>
-			<div class="row">
-				<div class="col-4">
-					{% if cart_settings.enable_checkout %}
-					<a class="btn btn-outline-primary" href="/orders">
-						{{ _('See past orders') }}
-					</a>
-					{% else %}
-					<a class="btn btn-outline-primary" href="/quotations">
-						{{ _('See past quotations') }}
-					</a>
-					{% endif %}
-				</div>
-				<div class="col-8">
-					{% if doc.items %}
-					<div class="place-order-container">
-						<a class="btn btn-primary-light mr-2" href="/all-products">
-							{{ _("Continue Shopping") }}
-						</a>
+
+				<div class="row mt-2">
+					<div class="col-3">
 						{% if cart_settings.enable_checkout %}
-							<button class="btn btn-primary btn-place-order" type="button">
-								{{ _("Place Order") }}
-							</button>
+							<a class="btn btn-primary-light font-md" href="/orders">
+								{{ _('Past Orders') }}
+							</a>
 						{% else %}
-							<button class="btn btn-primary btn-request-for-quotation" type="button">
-								{{ _("Request for Quotation") }}
-							</button>
+							<a class="btn btn-primary-light font-md" href="/quotations">
+								{{ _('Past Quotes') }}
+							</a>
 						{% endif %}
 					</div>
-					{% endif %}
+					<div class="col-9">
+						{% if doc.items %}
+						<div class="place-order-container">
+							<a class="btn btn-primary-light mr-2 font-md" href="/all-products">
+								{{ _('Continue Shopping') }}
+							</a>
+						</div>
+						{% endif %}
+					</div>
 				</div>
 			</div>
 
-
+			<!-- Terms and Conditions -->
 			{% if doc.items %}
-			{% if doc.tc_name %}
-				<div class="terms-and-conditions-link">
-					<a href class="link-terms-and-conditions" data-terms-name="{{ doc.tc_name }}">
-						{{ _("Terms and Conditions") }}
-					</a>
-					<script>
-						frappe.ready(() => {
-							$('.link-terms-and-conditions').click((e) => {
-								e.preventDefault();
-								const $link = $(e.target);
-								const terms_name = $link.attr('data-terms-name');
-								show_terms_and_conditions(terms_name);
-							})
-						});
-						function show_terms_and_conditions(terms_name) {
-							frappe.call('erpnext.shopping_cart.cart.get_terms_and_conditions', { terms_name })
-							.then(r => {
-								frappe.msgprint({
-									title: terms_name,
-									message: r.message
-								});
-							});
-						}
-					</script>
-				</div>
-			{% endif %}
+				{% if doc.terms %}
+					<div class="t-and-c-container mt-4 frappe-card">
+						<h5>{{ _("Terms and Conditions") }}</h5>
+						<div class="t-and-c-terms mt-2">
+							{{ doc.terms }}
+						</div>
+					</div>
+				{% endif %}
 		</div>
 
+		<!-- Right section -->
 		<div class="col-md-4">
-			<div class="cart-addresses">
-				{% include "templates/includes/cart/cart_address.html" %}
+			<div class="cart-payment-addresses">
+				<!-- Apply Coupon Code  -->
+				{% set show_coupon_code = cart_settings.show_apply_coupon_code_in_website and cart_settings.enable_checkout %}
+				{% if show_coupon_code == 1%}
+					<div class="mb-3">
+						<div class="row no-gutters">
+							<input type="text" class="txtcoupon form-control mr-3 w-50 font-md" placeholder="Enter Coupon Code" name="txtcouponcode"  ></input>
+							<button class="btn btn-primary btn-sm bt-coupon font-md">{{ _("Apply Coupon Code") }}</button>
+							<input type="hidden" class="txtreferral_sales_partner font-md" placeholder="Enter Sales Partner" name="txtreferral_sales_partner" type="text"></input>
+							</div>
+					</div>
+				{% endif %}
+
+				<div class="mb-3 frappe-card p-5 payment-summary">
+					{% include "templates/includes/cart/cart_payment_summary.html" %}
 				</div>
+
+				{% include "templates/includes/cart/cart_address.html" %}
+			</div>
 		</div>
 		{% endif %}
 	</div>
@@ -124,11 +111,11 @@
 	</div>
 	<div class="cart-empty-message mt-4">{{ _('Your cart is Empty') }}</p>
 	{% if cart_settings.enable_checkout %}
-		<a class="btn btn-outline-primary" href="/orders">
+		<a class="btn btn-outline-primary" href="/orders" style="font-size: 16px;">
 			{{ _('See past orders') }}
 		</a>
 		{% else %}
-		<a class="btn btn-outline-primary" href="/quotations">
+		<a class="btn btn-outline-primary" href="/quotations" style="font-size: 16px;">
 			{{ _('See past quotations') }}
 		</a>
 	{% endif %}

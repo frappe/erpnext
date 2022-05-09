@@ -6,17 +6,21 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "supplier_and_price_defaults_section",
   "supp_master_name",
   "supplier_group",
+  "column_break_4",
   "buying_price_list",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
-  "column_break_3",
+  "transaction_settings_section",
   "po_required",
   "pr_required",
+  "column_break_12",
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
+  "enable_discount_accounting",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -41,10 +45,6 @@
    "fieldtype": "Link",
    "label": "Default Buying Price List",
    "options": "Price List"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "po_required",
@@ -73,7 +73,7 @@
   {
    "fieldname": "subcontract",
    "fieldtype": "Section Break",
-   "label": "Subcontract"
+   "label": "Subcontracting Settings"
   },
   {
    "default": "Material Transferred for Subcontract",
@@ -116,6 +116,31 @@
    "fieldname": "bill_for_rejected_quantity_in_purchase_invoice",
    "fieldtype": "Check",
    "label": "Bill for Rejected Quantity in Purchase Invoice"
+  },
+  {
+   "fieldname": "supplier_and_price_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier and Price Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Buying"
   }
  ],
  "icon": "fa fa-cog",
@@ -123,7 +148,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-08 19:26:23.548837",
+ "modified": "2022-04-14 15:56:42.340223",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -141,5 +166,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

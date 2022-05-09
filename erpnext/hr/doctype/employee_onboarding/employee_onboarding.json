@@ -92,6 +92,7 @@
    "options": "Employee Onboarding Template"
   },
   {
+   "fetch_from": "employee_onboarding_template.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -99,6 +100,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "employee_onboarding_template.department",
    "fieldname": "department",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -106,6 +108,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "employee_onboarding_template.designation",
    "fieldname": "designation",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -113,6 +116,7 @@
    "options": "Designation"
   },
   {
+   "fetch_from": "employee_onboarding_template.employee_grade",
    "fieldname": "employee_grade",
    "fieldtype": "Link",
    "label": "Employee Grade",
@@ -170,10 +174,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-07-30 14:55:04.560683",
+ "modified": "2022-01-29 12:33:57.120384",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Onboarding",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -194,6 +199,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "employee_name",
  "track_changes": 1
 }

@@ -21,9 +21,9 @@ frappe.ui.form.on("Job Applicant", {
 
 	create_custom_buttons: function(frm) {
 		if (!frm.doc.__islocal && frm.doc.status !== "Rejected" && frm.doc.status !== "Accepted") {
-			frm.add_custom_button(__("Create Interview"), function() {
+			frm.add_custom_button(__("Interview"), function() {
 				frm.events.create_dialog(frm);
-			});
+			}, __("Create"));
 		}
 
 		if (!frm.doc.__islocal) {
@@ -40,10 +40,10 @@ frappe.ui.form.on("Job Applicant", {
 					frappe.route_options = {
 						"job_applicant": frm.doc.name,
 						"applicant_name": frm.doc.applicant_name,
-						"designation": frm.doc.job_opening,
+						"designation": frm.doc.job_opening || frm.doc.designation,
 					};
 					frappe.new_doc("Job Offer");
-				});
+				}, __("Create"));
 			}
 		}
 	},
@@ -55,13 +55,16 @@ frappe.ui.form.on("Job Applicant", {
 				job_applicant: frm.doc.name
 			},
 			callback: function(r) {
-				$("div").remove(".form-dashboard-section.custom");
-				frm.dashboard.add_section(
-					frappe.render_template('job_applicant_dashboard', {
-						data: r.message
-					}),
-					__("Interview Summary")
-				);
+				if (r.message) {
+					$("div").remove(".form-dashboard-section.custom");
+					frm.dashboard.add_section(
+						frappe.render_template("job_applicant_dashboard", {
+							data: r.message.interviews,
+							number_of_stars: r.message.stars
+						}),
+						__("Interview Summary")
+					);
+				}
 			}
 		});
 	},

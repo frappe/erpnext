@@ -23,13 +23,13 @@ erpnext/stock/                  @marination @rohitwaghchaure @ankush
 
 erpnext/crm/                    @ruchamahabal @pateljannat
 erpnext/education/              @ruchamahabal @pateljannat
-erpnext/healthcare/             @ruchamahabal @pateljannat @chillaranand
 erpnext/hr/                     @ruchamahabal @pateljannat
-erpnext/non_profit/             @ruchamahabal
 erpnext/payroll                 @ruchamahabal @pateljannat
 erpnext/projects/               @ruchamahabal @pateljannat
 
-erpnext/controllers             @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure @marination
+erpnext/controllers/            @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure @marination @ankush
+erpnext/patches/                @deepeshgarg007 @nextchamp-saqib @marination @ankush
+erpnext/public/                 @nextchamp-saqib @marination
 
-.github/                        @surajshetty3416 @ankush
+.github/                        @ankush
 requirements.txt                @gavindsouza
