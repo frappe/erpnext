@@ -414,6 +414,7 @@
    "fieldname": "asset_value",
    "fieldtype": "Currency",
    "label": "Asset Value",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -544,7 +545,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-05-09 17:47:21.962300",
+ "modified": "2022-05-09 18:56:02.359064",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
