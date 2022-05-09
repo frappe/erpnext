@@ -57,49 +57,12 @@ def get_columns():
 			"label": _("HSN/SAC"),
 			"fieldtype": "Link",
 			"options": "GST HSN Code",
-<<<<<<< HEAD
 			"width": 100,
-=======
-			"width": 100
-		},
-		{
-			"fieldname": "description",
-			"label": _("Description"),
-			"fieldtype": "Data",
-			"width": 300
-		},
-		{
-			"fieldname": "stock_uom",
-			"label": _("Stock UOM"),
-			"fieldtype": "Data",
-			"width": 100
-		},
-		{
-			"fieldname": "stock_qty",
-			"label": _("Stock Qty"),
-			"fieldtype": "Float",
-			"width": 90
-		},
-		{
-			"fieldname": "tax_rate",
-			"label": _("Tax Rate"),
-			"fieldtype": "Data",
-			"width": 90
-		},
-		{
-			"fieldname": "total_amount",
-			"label": _("Total Amount"),
-			"fieldtype": "Currency",
-			"width": 120
->>>>>>> 363752510e (fix: HSN-wise-summary of outward supplies Updated Report)
 		},
 		{"fieldname": "description", "label": _("Description"), "fieldtype": "Data", "width": 300},
 		{"fieldname": "stock_uom", "label": _("Stock UOM"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "stock_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 90},
-<<<<<<< HEAD
-=======
 		{"fieldname": "tax_rate", "label": _("Tax Rate"), "fieldtype": "Data", "width": 90},
->>>>>>> b0e929b8ae (chore: Remove extra columns)
 		{"fieldname": "total_amount", "label": _("Total Amount"), "fieldtype": "Currency", "width": 120},
 		{
 			"fieldname": "taxable_amount",
@@ -159,19 +122,13 @@ def get_items(filters):
 			and `tabSales Invoice Item`.gst_hsn_code is not NULL
 			and `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name %s %s
 		group by
-<<<<<<< HEAD
-			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code
-
+			`tabSales Invoice Item`.parent,
+			`tabSales Invoice Item`.item_code
 		"""
 		% (conditions, match_conditions),
 		filters,
 		as_dict=1,
 	)
-=======
-			`tabSales Invoice Item`.parent,
-			`tabSales Invoice Item`.item_code
-		""" % (conditions, match_conditions), filters, as_dict=1)
->>>>>>> 363752510e (fix: HSN-wise-summary of outward supplies Updated Report)
 
 	return items
 
@@ -264,26 +221,16 @@ def get_merged_data(columns, data):
 	result = []
 
 	for row in data:
-		key = row[0] + '-' + str(row[4])
+		key = row[0] + "-" + str(row[4])
 		merged_hsn_dict.setdefault(key, {})
 		for i, d in enumerate(columns):
-<<<<<<< HEAD
 			if d["fieldtype"] not in ("Int", "Float", "Currency"):
-				merged_hsn_dict[row[0]][d["fieldname"]] = row[i]
+				merged_hsn_dict[key][d["fieldname"]] = row[i]
 			else:
-				if merged_hsn_dict.get(row[0], {}).get(d["fieldname"], ""):
-					merged_hsn_dict[row[0]][d["fieldname"]] += row[i]
+				if merged_hsn_dict.get(key, {}).get(d["fieldname"], ""):
+					merged_hsn_dict[key][d["fieldname"]] += row[i]
 				else:
-					merged_hsn_dict[row[0]][d["fieldname"]] = row[i]
-=======
-			if d['fieldtype'] not in ('Int', 'Float', 'Currency'):
-				merged_hsn_dict[key][d['fieldname']] = row[i]
-			else:
-				if merged_hsn_dict.get(key, {}).get(d['fieldname'], ''):
-					merged_hsn_dict[key][d['fieldname']] += row[i]
-				else:
-					merged_hsn_dict[key][d['fieldname']] = row[i]
->>>>>>> 363752510e (fix: HSN-wise-summary of outward supplies Updated Report)
+					merged_hsn_dict[key][d["fieldname"]] = row[i]
 
 	for key, value in merged_hsn_dict.items():
 		result.append(value)
@@ -302,14 +249,9 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-<<<<<<< HEAD
-	gst_json = {"version": "GST2.3.4", "hash": "hash", "gstin": gstin, "fp": fp}
+	gst_json = {"version": "GST3.0.3", "hash": "hash", "gstin": gstin, "fp": fp}
 
 	gst_json["hsn"] = {"data": get_hsn_wise_json_data(filters, report_data)}
-=======
-	gst_json = {"version": "GST3.0.3",
-		"hash": "hash", "gstin": gstin, "fp": fp}
->>>>>>> 363752510e (fix: HSN-wise-summary of outward supplies Updated Report)
 
 	return {"report_name": report_name, "data": gst_json}
 
