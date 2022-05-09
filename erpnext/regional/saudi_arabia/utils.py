@@ -5,10 +5,11 @@ from base64 import b64encode
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils.data import add_to_date, get_time, getdate
+from frappe.utils.data import add_to_date, flt, get_time, getdate
 from pyqrcode import create as qr_create
 
 from erpnext import get_region
+from erpnext.controllers.taxes_and_totals import get_itemised_tax
 
 
 def create_qr_code(doc, method=None):
@@ -167,3 +168,29 @@ def delete_vat_settings_for_company(doc, method=None):
 
 	if frappe.db.exists("KSA VAT Setting", doc.name):
 		frappe.delete_doc("KSA VAT Setting", doc.name)
+
+
+def update_itemised_tax_data(doc):
+	if not doc.taxes:
+		return
+
+	itemised_tax = get_itemised_tax(doc.taxes)
+
+	for row in doc.items:
+		tax_rate = 0.0
+		item_tax_rate = 0.0
+
+		if row.item_tax_rate:
+			item_tax_rate = frappe.parse_json(row.item_tax_rate)
+
+		# First check if tax rate is present
+		# If not then look up in item_wise_tax_detail
+		if item_tax_rate:
+			for account, rate in item_tax_rate.items():
+				tax_rate += rate
+		elif row.item_code and itemised_tax.get(row.item_code):
+			tax_rate = sum([tax.get("tax_rate", 0) for d, tax in itemised_tax.get(row.item_code).items()])
+
+		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
+		row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
+		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))

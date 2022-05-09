@@ -568,7 +568,7 @@ regional_overrides = {
 		"erpnext.stock.doctype.item.item.set_item_tax_from_hsn_code": "erpnext.regional.india.utils.set_item_tax_from_hsn_code",
 	},
 	"Saudi Arabia": {
-		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data"
+		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.saudi_arabia.utils.update_itemised_tax_data"
 	},
 	"Italy": {
 		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.italy.utils.update_itemised_tax_data",
