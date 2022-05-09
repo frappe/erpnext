@@ -139,7 +139,7 @@ class TestShoppingCart(unittest.TestCase):
 		tax_rule_master = set_taxes(
 			quotation.party_name,
 			"Customer",
-			quotation.transaction_date,
+			None,
 			quotation.company,
 			customer_group=None,
 			supplier_group=None,
