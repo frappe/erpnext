@@ -204,6 +204,29 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				};
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}
+
+			if (irn && !irn_cancelled) {
+				const action = () => {
+					const dialog = frappe.msgprint({
+						title: __("Generate QRCode"),
+						message: __("Generate and attach QR Code using IRN?"),
+						primary_action: {
+							action: function() {
+								frappe.call({
+									method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
+									args: { doctype, docname: name },
+									freeze: true,
+									callback: () => frm.reload_doc() || dialog.hide(),
+									error: () => dialog.hide()
+								});
+							}
+						},
+						primary_action_label: __('Yes')
+					});
+					dialog.show();
+				};
+				add_custom_button(__("Generate QRCode"), action);
+			}
 		}
 	});
 };
