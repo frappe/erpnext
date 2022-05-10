@@ -99,8 +99,21 @@ erpnext.setup_einvoice_actions = (doctype) => {
 									...data
 								},
 								freeze: true,
-								callback: () => frm.reload_doc() || d.hide(),
-								error: () => d.hide()
+								callback: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill Generated successfully'),
+										indicator: 'green'
+									}, 7);
+									frm.reload_doc();
+									d.hide();
+								},
+								error: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill was not Generated'),
+										indicator: 'red'
+									}, 7);
+									d.hide();
+								}
 							});
 						},
 						primary_action_label: __('Submit')
@@ -136,29 +149,83 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			}
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
+				const fields = [
+					{
+						"label": "Reason",
+						"fieldname": "reason",
+						"fieldtype": "Select",
+						"reqd": 1,
+						"default": "1-Duplicate",
+						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
+					},
+					{
+						"label": "Remark",
+						"fieldname": "remark",
+						"fieldtype": "Data",
+						"reqd": 1
+					}
+				];
 				const action = () => {
-					let message = __('Cancellation of e-way bill is currently not supported.') + ' ';
-					message += '<br><br>';
-					message += __('You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system.');
+					const d = new frappe.ui.Dialog({
+						title: __('Cancel E-Way Bill'),
+						fields: fields,
+						primary_action: function() {
+							const data = d.get_values();
+							frappe.call({
+								method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
+								args: {
+									doctype,
+									docname: name,
+									eway_bill: ewaybill,
+									reason: data.reason.split('-')[0],
+									remark: data.remark
+								},
+								freeze: true,
+								callback: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill Cancelled successfully'),
+										indicator: 'green'
+									}, 7);
+									frm.reload_doc();
+									d.hide();
+								},
+								error: () => {
+									frappe.show_alert({
+										message: __('E-Way Bill was not Cancelled'),
+										indicator: 'red'
+									}, 7);
+									d.hide();
+								}
+							});
+						},
+						primary_action_label: __('Submit')
+					});
+					d.show();
+				};
+				add_custom_button(__("Cancel E-Way Bill"), action);
+			}
 
+			if (irn && !irn_cancelled) {
+				const action = () => {
 					const dialog = frappe.msgprint({
-						title: __('Update E-Way Bill Cancelled Status?'),
-						message: message,
-						indicator: 'orange',
+						title: __("Generate QRCode"),
+						message: __("Generate and attach QR Code using IRN?"),
 						primary_action: {
 							action: function() {
 								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
+									method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
 									args: { doctype, docname: name },
 									freeze: true,
-									callback: () => frm.reload_doc() || dialog.hide()
+									callback: () => frm.reload_doc() || dialog.hide(),
+									error: () => dialog.hide()
 								});
 							}
 						},
 						primary_action_label: __('Yes')
 					});
+					dialog.show();
 				};
-				add_custom_button(__("Cancel E-Way Bill"), action);
+				add_custom_button(__("Generate QRCode"), action);
 			}
 		}
 	});
@@ -167,85 +234,100 @@ erpnext.setup_einvoice_actions = (doctype) => {
 const get_ewaybill_fields = (frm) => {
 	return [
 		{
-			'fieldname': 'transporter',
-			'label': 'Transporter',
-			'fieldtype': 'Link',
-			'options': 'Supplier',
-			'default': frm.doc.transporter
+			fieldname: "eway_part_a_section_break",
+			fieldtype: "Section Break",
+			label: "Part A",
 		},
 		{
-			'fieldname': 'gst_transporter_id',
-			'label': 'GST Transporter ID',
-			'fieldtype': 'Data',
-			'default': frm.doc.gst_transporter_id
+			fieldname: "transporter",
+			label: "Transporter",
+			fieldtype: "Link",
+			options: "Supplier",
+			default: frm.doc.transporter,
 		},
 		{
-			'fieldname': 'driver',
-			'label': 'Driver',
-			'fieldtype': 'Link',
-			'options': 'Driver',
-			'default': frm.doc.driver
+			fieldname: "transporter_name",
+			label: "Transporter Name",
+			fieldtype: "Data",
+			read_only: 1,
+			default: frm.doc.transporter_name,
+			depends_on: "transporter",
 		},
 		{
-			'fieldname': 'lr_no',
-			'label': 'Transport Receipt No',
-			'fieldtype': 'Data',
-			'default': frm.doc.lr_no
+			fieldname: "part_a_column_break",
+			fieldtype: "Column Break",
 		},
 		{
-			'fieldname': 'vehicle_no',
-			'label': 'Vehicle No',
-			'fieldtype': 'Data',
-			'default': frm.doc.vehicle_no
+			fieldname: "gst_transporter_id",
+			label: "GST Transporter ID",
+			fieldtype: "Data",
+			default: frm.doc.gst_transporter_id,
 		},
 		{
-			'fieldname': 'distance',
-			'label': 'Distance (in km)',
-			'fieldtype': 'Float',
-			'default': frm.doc.distance
+			fieldname: "distance",
+			label: "Distance (in km)",
+			fieldtype: "Float",
+			default: frm.doc.distance,
+			description: 'Set as zero to auto calculate distance using pin codes',
 		},
 		{
-			'fieldname': 'transporter_col_break',
-			'fieldtype': 'Column Break',
+			fieldname: "eway_part_b_section_break",
+			fieldtype: "Section Break",
+			label: "Part B",
 		},
 		{
-			'fieldname': 'transporter_name',
-			'label': 'Transporter Name',
-			'fieldtype': 'Data',
-			'read_only': 1,
-			'default': frm.doc.transporter_name,
-			'depends_on': 'transporter'
+			fieldname: "mode_of_transport",
+			label: "Mode of Transport",
+			fieldtype: "Select",
+			options: `\nRoad\nAir\nRail\nShip`,
+			default: frm.doc.mode_of_transport,
 		},
 		{
-			'fieldname': 'mode_of_transport',
-			'label': 'Mode of Transport',
-			'fieldtype': 'Select',
-			'options': `\nRoad\nAir\nRail\nShip`,
-			'default': frm.doc.mode_of_transport
+			fieldname: "gst_vehicle_type",
+			label: "GST Vehicle Type",
+			fieldtype: "Select",
+			options: `Regular\nOver Dimensional Cargo (ODC)`,
+			depends_on: 'eval:(doc.mode_of_transport === "Road")',
+			default: frm.doc.gst_vehicle_type,
 		},
 		{
-			'fieldname': 'driver_name',
-			'label': 'Driver Name',
-			'fieldtype': 'Data',
-			'fetch_from': 'driver.full_name',
-			'read_only': 1,
-			'default': frm.doc.driver_name,
-			'depends_on': 'driver'
+			fieldname: "vehicle_no",
+			label: "Vehicle No",
+			fieldtype: "Data",
+			default: frm.doc.vehicle_no,
 		},
 		{
-			'fieldname': 'lr_date',
-			'label': 'Transport Receipt Date',
-			'fieldtype': 'Date',
-			'default': frm.doc.lr_date
+			fieldname: "part_b_column_break",
+			fieldtype: "Column Break",
 		},
 		{
-			'fieldname': 'gst_vehicle_type',
-			'label': 'GST Vehicle Type',
-			'fieldtype': 'Select',
-			'options': `Regular\nOver Dimensional Cargo (ODC)`,
-			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
-			'default': frm.doc.gst_vehicle_type
-		}
+			fieldname: "lr_date",
+			label: "Transport Receipt Date",
+			fieldtype: "Date",
+			default: frm.doc.lr_date,
+		},
+		{
+			fieldname: "lr_no",
+			label: "Transport Receipt No",
+			fieldtype: "Data",
+			default: frm.doc.lr_no,
+		},
+		{
+			fieldname: "driver",
+			label: "Driver",
+			fieldtype: "Link",
+			options: "Driver",
+			default: frm.doc.driver,
+		},
+		{
+			fieldname: "driver_name",
+			label: "Driver Name",
+			fieldtype: "Data",
+			fetch_from: "driver.full_name",
+			read_only: 1,
+			default: frm.doc.driver_name,
+			depends_on: "driver",
+		},
 	];
 };
 
