@@ -168,7 +168,7 @@ def get_periodic_data(entry, filters):
 			previous_balance = periodic_data[d.item_code]["balance"].copy()
 			periodic_data[d.item_code][period] = previous_balance
 
-		if d.voucher_type == "Stock Reconciliation":
+		if d.voucher_type == "Stock Reconciliation" and not d.batch_no:
 			if periodic_data.get(d.item_code) and periodic_data.get(d.item_code).get("balance").get(
 				d.warehouse
 			):
