@@ -1,16 +1,50 @@
+import json
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.utils import scan_barcode
 
 
-class TestStockUtilities(FrappeTestCase):
+class StockTestMixin:
+	"""Mixin to simplfy stock ledger tests, useful for all stock transactions."""
+
+	def make_item(self, *args, **kwargs):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		return make_item(*args, **kwargs)
+
+	def assertSLEs(self, doc, expected_sles, sle_filters=None):
+		"""Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
+
+		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
+		if sle_filters:
+			filters.update(sle_filters)
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["*"],
+			filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation",
+		)
+
+		for exp_sle, act_sle in zip(expected_sles, sles):
+			for k, v in exp_sle.items():
+				act_value = act_sle[k]
+				if k == "stock_queue":
+					act_value = json.loads(act_value)
+					if act_value and act_value[0][0] == 0:
+						# ignore empty fifo bins
+						continue
+
+				self.assertEqual(v, act_value, msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
+
+
+class TestStockUtilities(FrappeTestCase, StockTestMixin):
 	def test_barcode_scanning(self):
-		simple_item = make_item(properties={"barcodes": [{"barcode": "12399"}]})
+		simple_item = self.make_item(properties={"barcodes": [{"barcode": "12399"}]})
 		self.assertEqual(scan_barcode("12399")["item_code"], simple_item.name)
 
-		batch_item = make_item(properties={"has_batch_no": 1, "create_new_batch": 1})
+		batch_item = self.make_item(properties={"has_batch_no": 1, "create_new_batch": 1})
 		batch = frappe.get_doc(doctype="Batch", item=batch_item.name).insert()
 
 		batch_scan = scan_barcode(batch.name)
@@ -19,7 +53,7 @@ class TestStockUtilities(FrappeTestCase):
 		self.assertEqual(batch_scan["has_batch_no"], 1)
 		self.assertEqual(batch_scan["has_serial_no"], 0)
 
-		serial_item = make_item(properties={"has_serial_no": 1})
+		serial_item = self.make_item(properties={"has_serial_no": 1})
 		serial = frappe.get_doc(
 			doctype="Serial No", item_code=serial_item.name, serial_no=frappe.generate_hash()
 		).insert()
