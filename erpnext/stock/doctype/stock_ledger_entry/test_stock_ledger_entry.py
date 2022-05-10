@@ -683,65 +683,6 @@ class TestStockLedgerEntry(FrappeTestCase):
 		# original amount
 		self.assertEqual(50, _get_stock_credit(final_consumption))
 
-<<<<<<< HEAD
-=======
-	def test_tie_breaking(self):
-		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
-
-		item = make_item().name
-		warehouse = "_Test Warehouse - _TC"
-
-		posting_date = "2022-01-01"
-		posting_time = "00:00:01"
-		sle = frappe.qb.DocType("Stock Ledger Entry")
-
-		def ordered_qty_after_transaction():
-			return (
-				frappe.qb.from_(sle)
-				.select("qty_after_transaction")
-				.where((sle.item_code == item) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
-				.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
-				.orderby(sle.creation)
-			).run(pluck=True)
-
-		first = make_stock_entry(
-			item_code=item,
-			to_warehouse=warehouse,
-			qty=10,
-			posting_time=posting_time,
-			posting_date=posting_date,
-			do_not_submit=True,
-		)
-		second = make_stock_entry(
-			item_code=item,
-			to_warehouse=warehouse,
-			qty=1,
-			posting_date=posting_date,
-			posting_time=posting_time,
-			do_not_submit=True,
-		)
-
-		first.submit()
-		second.submit()
-
-		self.assertEqual([10, 11], ordered_qty_after_transaction())
-
-		first.cancel()
-		self.assertEqual([1], ordered_qty_after_transaction())
-
-		backdated = make_stock_entry(
-			item_code=item,
-			to_warehouse=warehouse,
-			qty=1,
-			posting_date="2021-01-01",
-			posting_time=posting_time,
-		)
-		self.assertEqual([1, 2], ordered_qty_after_transaction())
-
-		backdated.cancel()
-		self.assertEqual([1], ordered_qty_after_transaction())
-
 	def test_timestamp_clash(self):
 
 		item = make_item().name
@@ -778,7 +719,6 @@ class TestStockLedgerEntry(FrappeTestCase):
 		except Exception as e:
 			self.fail("Double processing of qty for clashing timestamp.")
 
->>>>>>> 7c839c4503 (fix: double future qty updates)
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
