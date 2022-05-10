@@ -692,6 +692,6 @@ def process_all() -> None:
 			subscription = frappe.get_doc("Subscription", subscription)
 			subscription.process()
 			frappe.db.commit()
-		except Exception:
-			frappe.log_error(frappe.get_traceback())
-
+		except frappe.ValidationError:
+			frappe.db.rollback()
+			subscription.log_error("Subscription failed")
