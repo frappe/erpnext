@@ -1819,27 +1819,26 @@ def is_overdue(doc, total):
 
 
 def get_discounting_status(sales_invoice):
-	status = None
-
-	invoice_discounting_list = frappe.db.sql(
-		"""
-		select status
-		from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
-		where
-			id.name = d.parent
-			and d.sales_invoice=%s
-			and id.docstatus=1
-			and status in ('Disbursed', 'Settled')
-	""",
-		sales_invoice,
+	invoice_discountings = frappe.get_all(
+		"Discounted Invoice", filters={"sales_invoice": sales_invoice}, pluck="parent"
+	)
+	status_list = frappe.get_all(
+		"Invoice Discounting",
+		filters={
+			"docstatus": DocStatus.submitted(),
+			"status": ("in", ("Disbursed", "Settled")),
+			"name": ("in", invoice_discountings),
+		},
+		pluck="status",
 	)
 
-	for d in invoice_discounting_list:
-		status = d[0]
-		if status == "Disbursed":
-			break
+	if not status_list:
+		return None
 
-	return status
+	if "Disbursed" in status_list:
+		return "Disbursed"
+
+	return "Settled"
 
 
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
