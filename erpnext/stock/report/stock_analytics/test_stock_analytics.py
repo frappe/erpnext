@@ -102,3 +102,15 @@ class TestStockAnalyticsReport(FrappeTestCase):
 			(20, add_to_date(today, months=3).replace(day=15)),
 		]
 		self.assert_single_item_report(movement, [100, 50, 50, 70])
+
+	def test_multi_month_missings(self):
+		today = getdate()
+		movement = [
+			(100, add_to_date(today, months=0).replace(day=15)),
+			(-50, add_to_date(today, months=1).replace(day=15)),
+			# Skip a month
+			(20, add_to_date(today, months=3).replace(day=15)),
+			# Skip another month
+			(-10, add_to_date(today, months=5).replace(day=15)),
+		]
+		self.assert_single_item_report(movement, [100, 50, 50, 70, 70, 60])
