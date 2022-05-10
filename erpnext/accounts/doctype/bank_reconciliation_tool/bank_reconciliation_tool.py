@@ -467,6 +467,7 @@ def get_lr_matching_query(bank_account, amount_condition, filters):
 			loan_repayment.posting_date,
 		)
 		.where(loan_repayment.docstatus == 1)
+		.where(loan_repayment.repay_from_salary == 0)
 		.where(loan_repayment.clearance_date.isnull())
 		.where(loan_repayment.payment_account == bank_account)
 	)
