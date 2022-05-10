@@ -55,8 +55,6 @@ doctype_series_map = {
 	"Shareholder": "ACC-SH-.YYYY.-",
 	"Stock Entry": "MAT-STE-.YYYY.-",
 	"Stock Reconciliation": "MAT-RECO-.YYYY.-",
-	"Student": "EDU-STU-.YYYY.-",
-	"Student Applicant": "EDU-APP-.YYYY.-",
 	"Supplier": "SUP-.YYYY.-",
 	"Supplier Quotation": "PUR-SQTN-.YYYY.-",
 	"Supplier Scorecard Period": "PU-SSP-.YYYY.-",

@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import now_datetime, random_string, today
+from frappe.utils import add_days, now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
@@ -96,6 +96,22 @@ class TestOpportunity(unittest.TestCase):
 		)
 		self.assertEqual(quotation_comment_count, 4)
 		self.assertEqual(quotation_communication_count, 4)
+
+	def test_render_template_for_to_discuss(self):
+		doc = make_opportunity(with_items=0, opportunity_from="Lead")
+		doc.contact_by = "test@example.com"
+		doc.contact_date = add_days(today(), days=2)
+		doc.to_discuss = "{{ doc.name }} test data"
+		doc.save()
+
+		event = frappe.get_all(
+			"Event Participants",
+			fields=["parent"],
+			filters={"reference_doctype": doc.doctype, "reference_docname": doc.name},
+		)
+
+		event_description = frappe.db.get_value("Event", event[0].parent, "description")
+		self.assertTrue(doc.name in event_description)
 
 
 def make_opportunity_from_lead():

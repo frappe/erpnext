@@ -2,9 +2,6 @@
 # For license information, please see license.txt
 
 
-import traceback
-from json import dumps
-
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
@@ -247,11 +244,7 @@ def start_import(invoices):
 		except Exception:
 			errors += 1
 			frappe.db.rollback()
-			message = "\n".join(
-				["Data:", dumps(d, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()]
-			)
-			frappe.log_error(title="Error while creating Opening Invoice", message=message)
-			frappe.db.commit()
+			doc.log_error("Opening invoice creation failed")
 	if errors:
 		frappe.msgprint(
 			_("You had {} errors while creating opening invoices. Check {} for more details").format(
