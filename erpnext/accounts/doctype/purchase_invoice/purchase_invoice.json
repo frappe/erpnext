@@ -164,6 +164,7 @@
   "unrealized_profit_loss_account",
   "remarks",
   "subscription_section",
+  "subscription",
   "from_date",
   "to_date",
   "column_break_114",
@@ -1416,13 +1417,19 @@
    "label": "Advance Tax",
    "options": "Advance Tax",
    "read_only": 1
+  },
+  {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-25 13:31:02.716727",
+ "modified": "2022-02-15 08:08:27.810033",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

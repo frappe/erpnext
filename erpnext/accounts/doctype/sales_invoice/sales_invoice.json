@@ -188,6 +188,7 @@
   "section_break2",
   "sales_team",
   "subscription_section",
+  "subscription",
   "from_date",
   "to_date",
   "column_break_140",
@@ -2026,6 +2027,12 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2038,7 +2045,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-03-08 16:08:53.517903",
+ "modified": "2022-03-28 16:08:53.517903",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
