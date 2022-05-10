@@ -20,7 +20,7 @@
         "new_asset_value",
         "column_break_11",
         "difference_amount",
-        "journal_entry",
+        "depreciation_entry",
         "accounting_dimensions_section",
         "cost_center"
     ],
@@ -52,10 +52,10 @@
             "options": "Finance Book"
         },
         {
-            "fieldname": "journal_entry",
+            "fieldname": "depreciation_entry",
             "fieldtype": "Link",
-            "label": "Journal Entry",
-            "options": "Journal Entry",
+            "label": "Depreciation Entry",
+            "options": "Depreciation Entry",
             "read_only": 1
         },
         {
