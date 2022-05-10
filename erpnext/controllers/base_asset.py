@@ -225,7 +225,7 @@ class BaseAsset(AccountsController):
 			self.asset_value = initial_asset_value
 
 	def get_initial_asset_value(self):
-		purchase_doc = get_purchase_details(self)
+		_, purchase_doc = get_purchase_details(self)
 		(
 			gross_purchase_amount,
 			opening_accumulated_depreciation,
