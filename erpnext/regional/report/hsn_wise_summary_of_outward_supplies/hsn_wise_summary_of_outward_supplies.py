@@ -32,7 +32,7 @@ def _execute(filters=None):
 	added_item = []
 	for d in item_list:
 		if (d.parent, d.item_code) not in added_item:
-			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty]
+			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty, d.tax_rate]
 			total_tax = 0
 			for tax in tax_columns:
 				item_tax = itemised_tax.get((d.parent, d.item_code), {}).get(tax, {})
@@ -40,11 +40,9 @@ def _execute(filters=None):
 
 			row += [d.base_net_amount + total_tax]
 			row += [d.base_net_amount]
-
 			for tax in tax_columns:
 				item_tax = itemised_tax.get((d.parent, d.item_code), {}).get(tax, {})
 				row += [item_tax.get("tax_amount", 0)]
-
 			data.append(row)
 			added_item.append((d.parent, d.item_code))
 	if data:
@@ -64,6 +62,7 @@ def get_columns():
 		{"fieldname": "description", "label": _("Description"), "fieldtype": "Data", "width": 300},
 		{"fieldname": "stock_uom", "label": _("Stock UOM"), "fieldtype": "Data", "width": 100},
 		{"fieldname": "stock_qty", "label": _("Stock Qty"), "fieldtype": "Float", "width": 90},
+		{"fieldname": "tax_rate", "label": _("Tax Rate"), "fieldtype": "Data", "width": 90},
 		{"fieldname": "total_amount", "label": _("Total Amount"), "fieldtype": "Currency", "width": 120},
 		{
 			"fieldname": "taxable_amount",
@@ -106,16 +105,25 @@ def get_items(filters):
 			sum(`tabSales Invoice Item`.stock_qty) as stock_qty,
 			sum(`tabSales Invoice Item`.base_net_amount) as base_net_amount,
 			sum(`tabSales Invoice Item`.base_price_list_rate) as base_price_list_rate,
-			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code,
-			`tabGST HSN Code`.description
-		from `tabSales Invoice`, `tabSales Invoice Item`, `tabGST HSN Code`
-		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
+			`tabSales Invoice Item`.parent,
+			`tabSales Invoice Item`.item_code,
+			`tabGST HSN Code`.description,
+			json_extract(`tabSales Taxes and Charges`.item_wise_tax_detail,
+			concat('$."' , `tabSales Invoice Item`.item_code, '"[0]')) * count(distinct `tabSales Taxes and Charges`.name) as tax_rate
+		from
+			`tabSales Invoice`,
+			`tabSales Invoice Item`,
+			`tabGST HSN Code`,
+			`tabSales Taxes and Charges`
+		where
+			`tabSales Invoice`.name = `tabSales Invoice Item`.parent
+			and `tabSales Taxes and Charges`.parent = `tabSales Invoice`.name
 			and `tabSales Invoice`.docstatus = 1
 			and `tabSales Invoice Item`.gst_hsn_code is not NULL
 			and `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name %s %s
 		group by
-			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code
-
+			`tabSales Invoice Item`.parent,
+			`tabSales Invoice Item`.item_code
 		"""
 		% (conditions, match_conditions),
 		filters,
@@ -213,15 +221,16 @@ def get_merged_data(columns, data):
 	result = []
 
 	for row in data:
-		merged_hsn_dict.setdefault(row[0], {})
+		key = row[0] + "-" + str(row[4])
+		merged_hsn_dict.setdefault(key, {})
 		for i, d in enumerate(columns):
 			if d["fieldtype"] not in ("Int", "Float", "Currency"):
-				merged_hsn_dict[row[0]][d["fieldname"]] = row[i]
+				merged_hsn_dict[key][d["fieldname"]] = row[i]
 			else:
-				if merged_hsn_dict.get(row[0], {}).get(d["fieldname"], ""):
-					merged_hsn_dict[row[0]][d["fieldname"]] += row[i]
+				if merged_hsn_dict.get(key, {}).get(d["fieldname"], ""):
+					merged_hsn_dict[key][d["fieldname"]] += row[i]
 				else:
-					merged_hsn_dict[row[0]][d["fieldname"]] = row[i]
+					merged_hsn_dict[key][d["fieldname"]] = row[i]
 
 	for key, value in merged_hsn_dict.items():
 		result.append(value)
@@ -240,7 +249,7 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"version": "GST2.3.4", "hash": "hash", "gstin": gstin, "fp": fp}
+	gst_json = {"version": "GST3.0.3", "hash": "hash", "gstin": gstin, "fp": fp}
 
 	gst_json["hsn"] = {"data": get_hsn_wise_json_data(filters, report_data)}
 
@@ -271,7 +280,7 @@ def get_hsn_wise_json_data(filters, report_data):
 			"desc": hsn.get("description"),
 			"uqc": hsn.get("stock_uom").upper(),
 			"qty": hsn.get("stock_qty"),
-			"val": flt(hsn.get("total_amount"), 2),
+			"rt": flt(hsn.get("tax_rate"), 2),
 			"txval": flt(hsn.get("taxable_amount", 2)),
 			"iamt": 0.0,
 			"camt": 0.0,

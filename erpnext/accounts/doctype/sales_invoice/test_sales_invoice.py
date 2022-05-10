@@ -2648,6 +2648,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		einvoice_settings = frappe.get_doc("E Invoice Settings")
 		einvoice_settings.enable = 0
+		einvoice_settings.save()
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):
