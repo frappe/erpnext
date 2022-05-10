@@ -144,7 +144,7 @@ class FollowUp(Document):
 			args["customer"] = customer
 			args["customer_name"] = frappe.db.get_value('Customer', customer, "customer_name")
 			args["outstanding_details"] = comm_voucher_no
-			args["total_due"] = "<b>"+ total_due + "</b>"
+			args["total_due"] = "<b>"+ str(total_due) + "</b>"
 
 			# Sending Email
 			if follow.send_email == 1:
@@ -169,6 +169,26 @@ class FollowUp(Document):
 				
 				})
 
+				message = frappe.render_template(email_template.response, args)
+				new_comm = frappe.new_doc("Communication")
+				
+				new_comm.subject = "Invoice Follow Up"
+				new_comm.communication_medium = "Email"
+				new_comm.sender = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
+				new_comm.recipients = comm_email
+				# new_comm.content = message
+				new_comm.content = str(comm_voucher_no)
+				new_comm.communication_type	= "Communication"
+				new_comm.status = "Linked"
+				new_comm.sent_or_received = "Sent"      
+				new_comm.communication_date	= str(utils.today())
+				new_comm.sender_full_name = frappe.session.user_fullname
+				new_comm.reference_doctype = "Sales Invoice"
+				new_comm.reference_name = i["voucher_no"]
+				new_comm.reference_owner = customer
+				new_comm.save(ignore_permissions=True)	
+
+
 			# Send SMS	
 			if follow.send_message == 1:
 				# print(" Send Message")
@@ -192,25 +212,7 @@ class FollowUp(Document):
 				todo.assigned_by = frappe.session.user
 				todo.save(ignore_permissions=True)
 
-			message = frappe.render_template(email_template.response, args)
-			new_comm = frappe.new_doc("Communication")
 			
-			new_comm.subject = "Invoice Follow Up"
-			new_comm.communication_medium = "Email"
-			new_comm.sender = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
-			new_comm.recipients = comm_email
-			# new_comm.content = message
-			new_comm.content = str(comm_voucher_no)
-			new_comm.communication_type	= "Communication"
-			new_comm.status = "Linked"
-			new_comm.sent_or_received = "Sent"      
-			new_comm.communication_date	= str(utils.today())
-			new_comm.sender_full_name = frappe.session.user_fullname
-			new_comm.reference_doctype = "Sales Invoice"
-			new_comm.reference_name = i["voucher_no"]
-			new_comm.reference_owner = customer
-			new_comm.save(ignore_permissions=True)	
-
 			
 			return True
 			# elif "due_date" not in i.keys():
@@ -228,10 +230,14 @@ class FollowUp(Document):
 		for i in trans_items:
 			commit_name = ""
 			commit_link = ""
-			primary_c, full_name, currency = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name", "default_currency"])
+			comp = frappe.defaults.get_user_default('Company')
+			currency = frappe.db.get_value("Company", comp , "default_currency")
+			primary_c, full_name = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name"])
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			emails = []
 			
+			
+
 			comm_email = ""
 			for e in email_id:
 				emails.append(e.get('email_id'))
