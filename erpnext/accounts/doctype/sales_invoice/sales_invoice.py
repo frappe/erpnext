@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.docstatus import DocStatus
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (
@@ -940,10 +941,16 @@ class SalesInvoice(SellingController):
 
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
-			if d.sales_order and frappe.db.get_value("Sales Order", d.sales_order, "docstatus") != 1:
+			if (
+				d.sales_order
+				and frappe.db.get_value("Sales Order", d.sales_order, "docstatus") != DocStatus.submitted()
+			):
 				frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
 
-			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
+			if (
+				d.delivery_note
+				and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != DocStatus.submitted()
+			):
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
@@ -1491,12 +1498,14 @@ class SalesInvoice(SellingController):
 		updated_delivery_notes = []
 		for d in self.get("items"):
 			if d.dn_detail:
-				billed_amt = frappe.db.sql(
-					"""select sum(amount) from `tabSales Invoice Item`
-					where dn_detail=%s and docstatus=1""",
-					d.dn_detail,
+				billed_amt = (
+					frappe.db.get_value(
+						"Sales Invoice Item",
+						{"dn_detail": d.dn_detail, "docstatus": DocStatus.submitted()},
+						"sum(amount)",
+					)
+					or 0
 				)
-				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value(
 					"Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified
 				)
@@ -1674,7 +1683,7 @@ class SalesInvoice(SellingController):
 			frappe.qb.from_(doc)
 			.select(Sum(doc.grand_total))
 			.where(
-				(doc.docstatus.is_submitted())
+				(doc.docstatus == DocStatus.draft())
 				& (doc.is_return == 1)
 				& (Coalesce(doc.return_against, "") == self.name)
 			)
@@ -1936,7 +1945,10 @@ def make_maintenance_schedule(source_name, target_doc=None):
 		"Sales Invoice",
 		source_name,
 		{
-			"Sales Invoice": {"doctype": "Maintenance Schedule", "validation": {"docstatus": ["=", 1]}},
+			"Sales Invoice": {
+				"doctype": "Maintenance Schedule",
+				"validation": {"docstatus": ["=", DocStatus.submitted()]},
+			},
 			"Sales Invoice Item": {
 				"doctype": "Maintenance Schedule Item",
 			},
@@ -1965,7 +1977,10 @@ def make_delivery_note(source_name, target_doc=None):
 		"Sales Invoice",
 		source_name,
 		{
-			"Sales Invoice": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
+			"Sales Invoice": {
+				"doctype": "Delivery Note",
+				"validation": {"docstatus": ["=", DocStatus.submitted()]},
+			},
 			"Sales Invoice Item": {
 				"doctype": "Delivery Note Item",
 				"field_map": {
