@@ -1303,6 +1303,8 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	datetime_limit_condition = ""
 	qty_shift = args.actual_qty
 
+	args["time_format"] = "%H:%i:%s"
+
 	# find difference/shift in qty caused by stock reconciliation
 	if args.voucher_type == "Stock Reconciliation":
 		qty_shift = get_stock_reco_qty_shift(args)
@@ -1315,7 +1317,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
 	frappe.db.sql(
-		"""
+		f"""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty_shift}
 		where
@@ -1323,16 +1325,10 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
-			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
-				or (
-					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
-					and creation > %(creation)s
-				)
-			)
+			and timestamp(posting_date, time_format(posting_time, %(time_format)s))
+				> timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
 		{datetime_limit_condition}
-		""".format(
-			qty_shift=qty_shift, datetime_limit_condition=datetime_limit_condition
-		),
+		""",
 		args,
 	)
 
@@ -1383,6 +1379,7 @@ def get_next_stock_reco(args):
 					and creation > %(creation)s
 				)
 			)
+		order by timestamp(posting_date, posting_time) asc, creation asc
 		limit 1
 	""",
 		args,
