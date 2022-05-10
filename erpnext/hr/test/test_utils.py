@@ -9,9 +9,7 @@ test_dependencies = ["Employee"]
 
 class TestUtils(FrappeTestCase):
 	def test_validate_active_employee(self):
-		active_employee = frappe.db.get_value(
-			"Employee", {"status": "Active", "relieving_date": ("is", "not set")}
-		)
+		active_employee = frappe.db.get_value("Employee", {"status": "Active", "relieving_date": None})
 		validate_active_employee(active_employee, today())
 
 		inactive_employee = frappe.db.get_value(
