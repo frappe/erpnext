@@ -34,10 +34,8 @@ class TestEmployee(unittest.TestCase):
 		employee_name = make_employee(
 			"test_employee_status@company.com",
 			company_name,
-			{
-				"status": "Inactive",
-				"relieving_date": frappe.utils.add_days(frappe.utils.today(), -1),
-			},
+			status="Inactive",
+			relieving_date=frappe.utils.add_days(frappe.utils.today(), -1),
 		)
 
 		holiday_list_name = "Salary Slip Test Holiday List"
