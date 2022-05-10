@@ -31,6 +31,7 @@ class TestStockReconciliation(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.local.future_sle = {}
+		frappe.flags.pop("dont_execute_stock_reposts", None)
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -383,6 +384,7 @@ class TestStockReconciliation(FrappeTestCase):
 		-------------------------------------------
 		Var		| Doc	|	Qty	| Balance
 		-------------------------------------------
+		PR5     | PR    |   10  |  10   (posting date: today-4) [backdated]
 		SR5		| Reco	|	0	|	8	(posting date: today-4) [backdated]
 		PR1		| PR	|	10	|	18	(posting date: today-3)
 		PR2		| PR	|	1	|	19	(posting date: today-2)
@@ -391,6 +393,14 @@ class TestStockReconciliation(FrappeTestCase):
 		"""
 		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
+
+		frappe.flags.dont_execute_stock_reposts = True
+
+		def assertBalance(doc, qty_after_transaction):
+			sle_balance = frappe.db.get_value(
+				"Stock Ledger Entry", {"voucher_no": doc.name, "is_cancelled": 0}, "qty_after_transaction"
+			)
+			self.assertEqual(sle_balance, qty_after_transaction)
 
 		pr1 = make_purchase_receipt(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -3)
@@ -401,62 +411,37 @@ class TestStockReconciliation(FrappeTestCase):
 		pr3 = make_purchase_receipt(
 			item_code=item_code, warehouse=warehouse, qty=1, rate=100, posting_date=nowdate()
 		)
-
-		pr1_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		pr3_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr3.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr1_balance, 10)
-		self.assertEqual(pr3_balance, 12)
+		assertBalance(pr1, 10)
+		assertBalance(pr3, 12)
 
 		# post backdated stock reco in between
 		sr4 = create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=6, rate=100, posting_date=add_days(nowdate(), -1)
 		)
-		pr3_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr3.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr3_balance, 7)
+		assertBalance(pr3, 7)
 
 		# post backdated stock reco at the start
 		sr5 = create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=8, rate=100, posting_date=add_days(nowdate(), -4)
 		)
-		pr1_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0}, "qty_after_transaction"
+		assertBalance(pr1, 18)
+		assertBalance(pr2, 19)
+		assertBalance(sr4, 6)  # check if future stock reco is unaffected
+
+		# Make a backdated receipt and check only entries till first SR are affected
+		pr5 = make_purchase_receipt(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -5)
 		)
-		pr2_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr2.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		sr4_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": sr4.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr1_balance, 18)
-		self.assertEqual(pr2_balance, 19)
-		self.assertEqual(sr4_balance, 6)  # check if future stock reco is unaffected
+		assertBalance(pr5, 10)
+		# check if future stock reco is unaffected
+		assertBalance(sr4, 6)
+		assertBalance(sr5, 8)
 
 		# cancel backdated stock reco and check future impact
 		sr5.cancel()
-		pr1_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		pr2_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr2.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		sr4_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": sr4.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr1_balance, 10)
-		self.assertEqual(pr2_balance, 11)
-		self.assertEqual(sr4_balance, 6)  # check if future stock reco is unaffected
-
-		# teardown
-		sr4.cancel()
-		pr3.cancel()
-		pr2.cancel()
-		pr1.cancel()
+		assertBalance(pr1, 10)
+		assertBalance(pr2, 11)
+		assertBalance(sr4, 6)  # check if future stock reco is unaffected
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_stock_reco_future_negative_stock(self):
@@ -562,7 +547,6 @@ class TestStockReconciliation(FrappeTestCase):
 
 		# repost will make this test useless, qty should update in realtime without reposts
 		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
