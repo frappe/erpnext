@@ -1390,6 +1390,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		// Target doc created from a mapped doc
 		if (this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
+			// Calculate totals even though pricing rule is not applied.
+			// `apply_pricing_rule` is triggered due to change in data which most likely contributes to Total.
+			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 			return;
 		}
 
