@@ -167,7 +167,12 @@ def get_doc_details(invoice):
 			title=_("Not Allowed"),
 		)
 
-	invoice_type = "CRN" if invoice.is_return else "INV"
+	if invoice.is_return:
+		invoice_type = "CRN"
+	elif invoice.is_debit_note:
+		invoice_type = "DBN"
+	else:
+		invoice_type = "INV"
 
 	invoice_name = invoice.name
 	invoice_date = format_date(invoice.posting_date, "dd/mm/yyyy")
