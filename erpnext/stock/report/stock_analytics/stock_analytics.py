@@ -233,6 +233,8 @@ def get_data(filters):
 	periodic_data = get_periodic_data(sle, filters)
 	ranges = get_period_date_ranges(filters)
 
+	today = getdate()
+
 	for dummy, item_data in item_details.items():
 		row = {
 			"name": item_data.name,
@@ -242,13 +244,13 @@ def get_data(filters):
 			"brand": item_data.brand,
 		}
 		previous_period_value = 0.0
-		for _start_date, end_date in ranges:
+		for start_date, end_date in ranges:
 			period = get_period(end_date, filters)
 			period_data = periodic_data.get(item_data.name, {}).get(period)
 			if period_data:
 				row[scrub(period)] = previous_period_value = sum(period_data.values())
 			else:
-				row[scrub(period)] = previous_period_value
+				row[scrub(period)] = previous_period_value if today >= start_date else None
 
 		data.append(row)
 
