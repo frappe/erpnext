@@ -30,8 +30,10 @@ class AssetRevaluation(Document):
 			self.prevent_increase_in_value()
 
 	def validate_asset_values(self):
-		purchase_date, is_serialized_asset, num_of_assets = frappe.db.get_value(
-			"Asset", self.asset, ["purchase_date", "is_serialized_asset", "num_of_assets"]
+		purchase_date, is_serialized_asset, num_of_assets, is_depreciable_asset = frappe.db.get_value(
+			"Asset",
+			self.asset,
+			["purchase_date", "is_serialized_asset", "num_of_assets", "calculate_depreciation"],
 		)
 
 		self.validate_transaction_date_against_purchase_date(purchase_date)
@@ -40,6 +42,9 @@ class AssetRevaluation(Document):
 			validate_serial_no(self)
 		else:
 			validate_num_of_assets(self, num_of_assets)
+
+		if not is_depreciable_asset:
+			frappe.throw(_("Asset {} is not depreciable.").format(self.asset))
 
 	def validate_transaction_date_against_purchase_date(self, purchase_date):
 		if getdate(self.date) < getdate(purchase_date):
