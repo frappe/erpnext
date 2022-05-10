@@ -1008,7 +1008,7 @@ class StockEntry(StockController):
 		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
 
 		# reverse sl entries if cancel
-		if self.docstatus == 2:
+		if self.docstatus.is_cancelled():
 			sl_entries.reverse()
 
 		self.make_sl_entries(sl_entries)
@@ -2107,7 +2107,7 @@ class StockEntry(StockController):
 	def update_quality_inspection(self):
 		if self.inspection_required:
 			reference_type = reference_name = ""
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				reference_name = self.name
 				reference_type = "Stock Entry"
 

@@ -87,7 +87,7 @@ def validate_einvoice_fields(doc):
 	if not invoice_eligible:
 		return
 
-	if doc.docstatus == 0 and doc._action == "save":
+	if doc.docstatus.is_draft() and doc._action == "save":
 		if doc.irn:
 			frappe.throw(_("You cannot edit the invoice after generating IRN"), title=_("Edit Not Allowed"))
 		if len(doc.name) > 16:
@@ -95,10 +95,12 @@ def validate_einvoice_fields(doc):
 
 		doc.einvoice_status = "Pending"
 
-	elif doc.docstatus == 1 and doc._action == "submit" and not doc.irn:
+	elif doc.docstatus.is_submitted() and doc._action == "submit" and not doc.irn:
 		frappe.throw(_("You must generate IRN before submitting the document."), title=_("Missing IRN"))
 
-	elif doc.irn and doc.docstatus == 2 and doc._action == "cancel" and not doc.irn_cancelled:
+	elif (
+		doc.irn and doc.docstatus.is_cancelled() and doc._action == "cancel" and not doc.irn_cancelled
+	):
 		frappe.throw(
 			_("You must cancel IRN before cancelling the document."), title=_("Cancel Not Allowed")
 		)
@@ -1212,7 +1214,7 @@ class GSPConnector:
 		"""
 		On validation errors, response message looks something like this:
 		message = '2174 : For inter-state transaction, CGST and SGST amounts are not applicable; only IGST amount is applicable,
-		                        3095 : Supplier GSTIN is inactive'
+		        3095 : Supplier GSTIN is inactive'
 		we search for string between ':' to extract the error messages
 		errors = [
 		        ': For inter-state transaction, CGST and SGST amounts are not applicable; only IGST amount is applicable, 3095 ',

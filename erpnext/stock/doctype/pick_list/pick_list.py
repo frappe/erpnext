@@ -93,7 +93,7 @@ class PickList(Document):
 			["picked_qty", stock_qty_field],
 		)
 
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			if (((already_picked + picked_qty) / actual_qty) * 100) > (
 				100 + flt(frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance"))
 			):
@@ -150,7 +150,7 @@ class PickList(Document):
 
 		# If table is empty on update after submit, set stock_qty, picked_qty to 0 so that indicator is red
 		# and give feedback to the user. This is to avoid empty Pick Lists.
-		if not self.get("locations") and self.docstatus == 1:
+		if not self.get("locations") and self.docstatus.is_submitted():
 			for location in locations_replica:
 				location.stock_qty = 0
 				location.picked_qty = 0
@@ -238,7 +238,7 @@ class PickList(Document):
 				item_table,
 				so_row,
 				"picked_qty",
-				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
+				already_picked + (picked_qty * (1 if self.docstatus.is_submitted() else -1)),
 			)
 
 	def _get_product_bundles(self) -> Dict[str, str]:

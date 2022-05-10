@@ -54,7 +54,7 @@ class ExpenseClaim(AccountsController):
 				and (
 					# grand total is reimbursed
 					(
-						self.docstatus == 1
+						self.docstatus.is_submitted()
 						and flt(self.grand_total, precision) == flt(self.total_amount_reimbursed, precision)
 					)
 					# grand total (to be paid) is 0 since linked advances already cover the claimed amount
@@ -65,11 +65,11 @@ class ExpenseClaim(AccountsController):
 			status = "Paid"
 		elif (
 			flt(self.total_sanctioned_amount) > 0
-			and self.docstatus == 1
+			and self.docstatus.is_submitted()
 			and self.approval_status == "Approved"
 		):
 			status = "Unpaid"
-		elif self.docstatus == 1 and self.approval_status == "Rejected":
+		elif self.docstatus.is_submitted() and self.approval_status == "Rejected":
 			status = "Rejected"
 
 		if update:

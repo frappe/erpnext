@@ -118,7 +118,7 @@ class AdditionalSalary(Document):
 		if self.ref_doctype == "Employee Advance" and self.ref_docname:
 			return_amount = frappe.db.get_value("Employee Advance", self.ref_docname, "return_amount")
 
-			if self.docstatus == 2:
+			if self.docstatus.is_cancelled():
 				return_amount -= self.amount
 			else:
 				return_amount += self.amount

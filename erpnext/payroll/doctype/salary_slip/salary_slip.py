@@ -129,7 +129,7 @@ class SalarySlip(TransactionBase):
 		)
 
 		if len(add_salary):
-			status = "Paid" if self.docstatus == 1 else "Unpaid"
+			status = "Paid" if self.docstatus.is_submitted() else "Unpaid"
 			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
 				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
 
@@ -145,11 +145,11 @@ class SalarySlip(TransactionBase):
 		revert_series_if_last(self.series, self.name)
 
 	def get_status(self):
-		if self.docstatus == 0:
+		if self.docstatus.is_draft():
 			status = "Draft"
-		elif self.docstatus == 1:
+		elif self.docstatus.is_submitted():
 			status = "Submitted"
-		elif self.docstatus == 2:
+		elif self.docstatus.is_cancelled():
 			status = "Cancelled"
 		return status
 

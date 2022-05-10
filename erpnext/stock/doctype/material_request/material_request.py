@@ -263,7 +263,7 @@ class MaterialRequest(BuyingController):
 		production_plans = []
 		for d in self.get("items"):
 			if d.production_plan and d.material_request_plan_item:
-				qty = d.qty if self.docstatus == 1 else 0
+				qty = d.qty if self.docstatus.is_submitted() else 0
 				frappe.db.set_value(
 					"Material Request Plan Item", d.material_request_plan_item, "requested_qty", qty
 				)

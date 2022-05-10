@@ -30,7 +30,7 @@ class TestEmployeeSeparation(unittest.TestCase):
 	def tearDown(self):
 		for entry in frappe.get_all("Employee Separation"):
 			doc = frappe.get_doc("Employee Separation", entry.name)
-			if doc.docstatus == 1:
+			if doc.docstatus.is_submitted():
 				doc.cancel()
 			doc.delete()
 

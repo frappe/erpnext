@@ -182,7 +182,7 @@ class SalesInvoice(SellingController):
 		for d in self.get("items"):
 			if d.is_fixed_asset and d.meta.get_field("asset") and d.asset:
 				asset = frappe.get_doc("Asset", d.asset)
-				if self.doctype == "Sales Invoice" and self.docstatus == 1:
+				if self.doctype == "Sales Invoice" and self.docstatus.is_submitted():
 					if self.update_stock:
 						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
@@ -961,14 +961,14 @@ class SalesInvoice(SellingController):
 				else "Yes"
 			)
 
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				make_gl_entries(
 					gl_entries,
 					update_outstanding=update_outstanding,
 					merge_entries=False,
 					from_repost=from_repost,
 				)
-			elif self.docstatus == 2:
+			elif self.docstatus.is_cancelled():
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
@@ -982,7 +982,9 @@ class SalesInvoice(SellingController):
 					self.return_against if cint(self.is_return) and self.return_against else self.name,
 				)
 
-		elif self.docstatus == 2 and cint(self.update_stock) and cint(auto_accounting_for_stock):
+		elif (
+			self.docstatus.is_cancelled() and cint(self.update_stock) and cint(auto_accounting_for_stock)
+		):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
@@ -1285,7 +1287,7 @@ class SalesInvoice(SellingController):
 		if self.is_return:
 			asset.set_status()
 		else:
-			asset.set_status("Sold" if self.docstatus == 1 else None)
+			asset.set_status("Sold" if self.docstatus.is_submitted() else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		if cint(self.redeem_loyalty_points):
@@ -1672,7 +1674,9 @@ class SalesInvoice(SellingController):
 			frappe.qb.from_(doc)
 			.select(Sum(doc.grand_total))
 			.where(
-				(doc.docstatus == 1) & (doc.is_return == 1) & (Coalesce(doc.return_against, "") == self.name)
+				(doc.docstatus.is_submitted())
+				& (doc.is_return == 1)
+				& (Coalesce(doc.return_against, "") == self.name)
 			)
 		).run()
 
@@ -1733,9 +1737,9 @@ class SalesInvoice(SellingController):
 		total = get_total_in_party_account_currency(self)
 
 		if not status:
-			if self.docstatus == 2:
+			if self.docstatus.is_cancelled():
 				status = "Cancelled"
-			elif self.docstatus == 1:
+			elif self.docstatus.is_submitted():
 				if self.is_internal_transfer():
 					self.status = "Internal Transfer"
 				elif is_overdue(self, total):

@@ -66,7 +66,7 @@ class QualityInspection(Document):
 		self.update_qc_reference()
 
 	def update_qc_reference(self):
-		quality_inspection = self.name if self.docstatus == 1 else ""
+		quality_inspection = self.name if self.docstatus.is_submitted() else ""
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
@@ -90,11 +90,11 @@ class QualityInspection(Document):
 
 			if self.reference_type and self.reference_name:
 				conditions = ""
-				if self.batch_no and self.docstatus == 1:
+				if self.batch_no and self.docstatus.is_submitted():
 					conditions += " and t1.batch_no = %s"
 					args.append(self.batch_no)
 
-				if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
+				if self.docstatus.is_cancelled():  # if cancel, then remove qi link wherever same name
 					conditions += " and t1.quality_inspection = %s"
 					args.append(self.name)
 

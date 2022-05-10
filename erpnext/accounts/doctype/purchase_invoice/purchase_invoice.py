@@ -537,14 +537,14 @@ class PurchaseInvoice(BuyingController):
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				make_gl_entries(
 					gl_entries,
 					update_outstanding=update_outstanding,
 					merge_entries=False,
 					from_repost=from_repost,
 				)
-			elif self.docstatus == 2:
+			elif self.docstatus.is_cancelled():
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
@@ -556,7 +556,9 @@ class PurchaseInvoice(BuyingController):
 					self.return_against if cint(self.is_return) and self.return_against else self.name,
 				)
 
-		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
+		elif (
+			self.docstatus.is_cancelled() and cint(self.update_stock) and self.auto_accounting_for_stock
+		):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
@@ -1592,9 +1594,9 @@ class PurchaseInvoice(BuyingController):
 		total = get_total_in_party_account_currency(self)
 
 		if not status:
-			if self.docstatus == 2:
+			if self.docstatus.is_cancelled():
 				status = "Cancelled"
-			elif self.docstatus == 1:
+			elif self.docstatus.is_submitted():
 				if self.is_internal_transfer():
 					self.status = "Internal Transfer"
 				elif is_overdue(self, total):

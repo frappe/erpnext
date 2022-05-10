@@ -239,7 +239,7 @@ class POSInvoiceMergeLog(Document):
 			doc.update(
 				{
 					"consolidated_invoice": None
-					if self.docstatus == 2
+					if self.docstatus.is_cancelled()
 					else (credit_note if doc.is_return else sales_invoice)
 				}
 			)

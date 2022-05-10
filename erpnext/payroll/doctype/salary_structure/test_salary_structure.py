@@ -209,7 +209,7 @@ def make_salary_structure(
 	if (
 		employee
 		and not frappe.db.get_value("Salary Structure Assignment", filters)
-		and salary_structure_doc.docstatus == 1
+		and salary_structure_doc.docstatus.is_submitted()
 	):
 		create_salary_structure_assignment(
 			employee,

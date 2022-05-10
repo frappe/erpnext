@@ -10,7 +10,7 @@ from frappe.utils import flt, get_link_to_form, today
 class FullandFinalStatement(Document):
 	def validate(self):
 		self.get_outstanding_statements()
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			self.validate_settlement("payables")
 			self.validate_settlement("receivables")
 			self.validate_asset()

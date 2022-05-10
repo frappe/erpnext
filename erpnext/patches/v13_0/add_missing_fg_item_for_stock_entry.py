@@ -63,7 +63,7 @@ def execute():
 		set_expense_account(doc)
 		doc.make_batches("t_warehouse")
 
-		if doc.docstatus == 0:
+		if doc.docstatus.is_draft():
 			doc.save()
 		else:
 			repost_stock_entry(doc)

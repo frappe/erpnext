@@ -50,7 +50,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 
 		for si in self.invoice_list:
 			si.load_from_db()
-			if si.docstatus == 1:
+			if si.docstatus.is_submitted():
 				si.cancel()
 
 

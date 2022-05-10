@@ -234,9 +234,9 @@ class WorkOrder(Document):
 		if not status:
 			status = self.status
 
-		if self.docstatus == 0:
+		if self.docstatus.is_draft():
 			status = "Draft"
-		elif self.docstatus == 1:
+		elif self.docstatus.is_submitted():
 			if status != "Stopped":
 				stock_entries = frappe._dict(
 					frappe.db.sql(
@@ -569,9 +569,9 @@ class WorkOrder(Document):
 		):
 			qty = frappe.get_value("Production Plan Item", self.production_plan_item, "ordered_qty") or 0.0
 
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				qty += self.qty
-			elif self.docstatus == 2:
+			elif self.docstatus.is_cancelled():
 				qty -= self.qty
 
 			frappe.db.set_value("Production Plan Item", self.production_plan_item, "ordered_qty", qty)
@@ -637,7 +637,7 @@ class WorkOrder(Document):
 		for plan_reference in prod_plan.prod_plan_references:
 			work_order_qty = 0.0
 			if plan_reference.item_reference == item_reference:
-				if self.docstatus == 1:
+				if self.docstatus.is_submitted():
 					work_order_qty = flt(plan_reference.qty) / total_bundle_qty
 				frappe.db.set_value(
 					"Sales Order Item", plan_reference.sales_order_item, "work_order_qty", work_order_qty
@@ -832,7 +832,7 @@ class WorkOrder(Document):
 				)
 
 	def validate_transfer_against(self):
-		if not self.docstatus == 1:
+		if not self.docstatus.is_submitted():
 			# let user configure operations until they're ready to submit
 			return
 		if not self.operations:
@@ -856,7 +856,7 @@ class WorkOrder(Document):
 		# calculate consumed qty based on submitted stock entries
 		self.update_consumed_qty_for_required_items()
 
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			# calculate transferred qty based on submitted stock entries
 			self.update_transferred_qty_for_required_items()
 

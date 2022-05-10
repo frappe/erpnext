@@ -393,9 +393,9 @@ class POSInvoice(SalesInvoice):
 			return
 
 		if not status:
-			if self.docstatus == 2:
+			if self.docstatus.is_cancelled():
 				status = "Cancelled"
-			elif self.docstatus == 1:
+			elif self.docstatus.is_submitted():
 				if self.consolidated_invoice:
 					self.status = "Consolidated"
 				elif (

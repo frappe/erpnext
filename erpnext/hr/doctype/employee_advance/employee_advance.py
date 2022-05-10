@@ -36,9 +36,9 @@ class EmployeeAdvance(Document):
 		total_amount = flt(flt(self.claimed_amount) + flt(self.return_amount), precision)
 		status = None
 
-		if self.docstatus == 0:
+		if self.docstatus.is_draft():
 			status = "Draft"
-		elif self.docstatus == 1:
+		elif self.docstatus.is_submitted():
 			if flt(self.claimed_amount) > 0 and flt(self.claimed_amount, precision) == flt(
 				self.paid_amount, precision
 			):
@@ -59,7 +59,7 @@ class EmployeeAdvance(Document):
 				status = "Paid"
 			else:
 				status = "Unpaid"
-		elif self.docstatus == 2:
+		elif self.docstatus.is_cancelled():
 			status = "Cancelled"
 
 		if update:

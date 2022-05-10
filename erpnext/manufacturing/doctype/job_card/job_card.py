@@ -540,7 +540,7 @@ class JobCard(Document):
 	def set_transferred_qty(self, update_status=False):
 		"Set total FG Qty for which RM was transferred."
 		if not self.items:
-			self.transferred_qty = self.for_quantity if self.docstatus == 1 else 0
+			self.transferred_qty = self.for_quantity if self.docstatus.is_submitted() else 0
 
 		doc = frappe.get_doc("Work Order", self.get("work_order"))
 		if doc.transfer_material_against == "Work Order" or doc.skip_transfer:

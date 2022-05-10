@@ -46,7 +46,7 @@ class StockController(AccountsController):
 		self.validate_putaway_capacity()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
-		if self.docstatus == 2:
+		if self.docstatus.is_cancelled():
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 		provisional_accounting_for_non_stock_items = cint(
@@ -61,12 +61,12 @@ class StockController(AccountsController):
 		):
 			warehouse_account = get_warehouse_account_map(self.company)
 
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				if not gl_entries:
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus == 1:
+		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus.is_submitted():
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
 			make_gl_entries(gl_entries, from_repost=from_repost)
@@ -350,7 +350,7 @@ class StockController(AccountsController):
 				"voucher_type": self.doctype,
 				"voucher_no": self.name,
 				"voucher_detail_no": d.name,
-				"actual_qty": (self.docstatus == 1 and 1 or -1) * flt(d.get("stock_qty")),
+				"actual_qty": (self.docstatus.is_submitted() and 1 or -1) * flt(d.get("stock_qty")),
 				"stock_uom": frappe.db.get_value(
 					"Item", args.get("item_code") or d.get("item_code"), "stock_uom"
 				),
@@ -359,7 +359,7 @@ class StockController(AccountsController):
 				"batch_no": cstr(d.get("batch_no")).strip(),
 				"serial_no": d.get("serial_no"),
 				"project": d.get("project") or self.get("project"),
-				"is_cancelled": 1 if self.docstatus == 2 else 0,
+				"is_cancelled": 1 if self.docstatus.is_cancelled() else 0,
 			}
 		)
 
@@ -460,7 +460,7 @@ class StockController(AccountsController):
 
 			if qi_required:  # validate row only if inspection is required on item level
 				self.validate_qi_presence(row)
-				if self.docstatus == 1:
+				if self.docstatus.is_submitted():
 					self.validate_qi_submission(row)
 					self.validate_qi_rejection(row)
 
@@ -468,7 +468,7 @@ class StockController(AccountsController):
 		"""Check if QI is present on row level. Warn on save and stop on submit if missing."""
 		if not row.quality_inspection:
 			msg = f"Row #{row.idx}: Quality Inspection is required for Item {frappe.bold(row.item_code)}"
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				frappe.throw(_(msg), title=_("Inspection Required"), exc=QualityInspectionRequiredError)
 			else:
 				frappe.msgprint(_(msg), title=_("Inspection Required"), indicator="blue")

@@ -51,9 +51,9 @@ class ExitInterview(Document):
 		self.db_set("status", "Cancelled")
 
 	def update_interview_date_in_employee(self):
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			frappe.db.set_value("Employee", self.employee, "held_on", self.date)
-		elif self.docstatus == 2:
+		elif self.docstatus.is_cancelled():
 			frappe.db.set_value("Employee", self.employee, "held_on", None)
 
 

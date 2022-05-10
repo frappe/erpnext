@@ -62,12 +62,12 @@ class BOMTree:
 		"""Get level order traversal of tree.
 		E.g. for following tree the traversal will return list of nodes in order from top to bottom.
 		BOM:
-		        - SubAssy1
-		                - item1
-		                - item2
-		        - SubAssy2
-		                - item3
-		        - item4
+		- SubAssy1
+		        - item1
+		        - item2
+		- SubAssy2
+		        - item3
+		- item4
 
 		returns = [SubAssy1, item1, item2, SubAssy2, item3, item4]
 		"""
@@ -378,7 +378,7 @@ class BOM(WebsiteGenerator):
 
 	@frappe.whitelist()
 	def update_cost(self, update_parent=True, from_child_bom=False, update_hour_rate=True, save=True):
-		if self.docstatus == 2:
+		if self.docstatus.is_cancelled():
 			return
 
 		existing_bom_cost = self.total_cost
@@ -409,7 +409,7 @@ class BOM(WebsiteGenerator):
 			if save:
 				d.db_update()
 
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost(update_hour_rate)
 		if save:
@@ -826,7 +826,7 @@ class BOM(WebsiteGenerator):
 			self.get_routing()
 
 	def validate_operations(self):
-		if self.with_operations and not self.get("operations") and self.docstatus == 1:
+		if self.with_operations and not self.get("operations") and self.docstatus.is_submitted():
 			frappe.throw(_("Operations cannot be left blank"))
 
 		if self.with_operations:

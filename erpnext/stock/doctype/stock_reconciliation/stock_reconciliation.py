@@ -369,7 +369,9 @@ class StockReconciliation(StockController):
 			self.update_valuation_rate_for_serial_nos(d, serial_nos)
 
 	def update_valuation_rate_for_serial_nos(self, row, serial_nos):
-		valuation_rate = row.valuation_rate if self.docstatus == 1 else row.current_valuation_rate
+		valuation_rate = (
+			row.valuation_rate if self.docstatus.is_submitted() else row.current_valuation_rate
+		)
 		if valuation_rate is None:
 			return
 
@@ -394,7 +396,7 @@ class StockReconciliation(StockController):
 				"voucher_detail_no": row.name,
 				"company": self.company,
 				"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
-				"is_cancelled": 1 if self.docstatus == 2 else 0,
+				"is_cancelled": 1 if self.docstatus.is_cancelled() else 0,
 				"serial_no": "\n".join(serial_nos) if serial_nos else "",
 				"batch_no": row.batch_no,
 				"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
@@ -404,7 +406,7 @@ class StockReconciliation(StockController):
 		if not row.batch_no:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
-		if self.docstatus == 2 and not row.batch_no:
+		if self.docstatus.is_cancelled() and not row.batch_no:
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)

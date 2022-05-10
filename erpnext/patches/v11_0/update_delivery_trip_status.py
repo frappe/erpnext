@@ -15,7 +15,7 @@ def execute():
 
 		status = {0: "Draft", 1: "Scheduled", 2: "Cancelled"}[trip_doc.docstatus]
 
-		if trip_doc.docstatus == 1:
+		if trip_doc.docstatus.is_submitted():
 			visited_stops = [stop.visited for stop in trip_doc.delivery_stops]
 			if all(visited_stops):
 				status = "Completed"

@@ -96,7 +96,7 @@ class Dunning(AccountsController):
 			)
 		)
 		make_gl_entries(
-			gl_entries, cancel=(self.docstatus == 2), update_outstanding="No", merge_entries=False
+			gl_entries, cancel=(self.docstatus.is_cancelled()), update_outstanding="No", merge_entries=False
 		)
 
 

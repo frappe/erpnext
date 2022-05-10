@@ -475,8 +475,8 @@ class BuyingController(StockController, Subcontracting):
 				if pr_qty:
 
 					if d.from_warehouse and (
-						(not cint(self.is_return) and self.docstatus == 1)
-						or (cint(self.is_return) and self.docstatus == 2)
+						(not cint(self.is_return) and self.docstatus.is_submitted())
+						or (cint(self.is_return) and self.docstatus.is_cancelled())
 					):
 						from_warehouse_sle = self.get_sl_entries(
 							d,
@@ -515,8 +515,8 @@ class BuyingController(StockController, Subcontracting):
 					sl_entries.append(sle)
 
 					if d.from_warehouse and (
-						(not cint(self.is_return) and self.docstatus == 2)
-						or (cint(self.is_return) and self.docstatus == 1)
+						(not cint(self.is_return) and self.docstatus.is_cancelled())
+						or (cint(self.is_return) and self.docstatus.is_submitted())
 					):
 						from_warehouse_sle = self.get_sl_entries(
 							d, {"actual_qty": -1 * pr_qty, "warehouse": d.from_warehouse, "recalculate_rate": 1}
@@ -613,7 +613,7 @@ class BuyingController(StockController, Subcontracting):
 			self.update_fixed_asset(field, delete_asset=True)
 
 	def validate_budget(self):
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			for data in self.get("items"):
 				args = data.as_dict()
 				args.update(
@@ -754,7 +754,7 @@ class BuyingController(StockController, Subcontracting):
 						asset.set(field, self.name)
 						asset.purchase_date = self.posting_date
 						asset.supplier = self.supplier
-					elif self.docstatus == 2:
+					elif self.docstatus.is_cancelled():
 						if asset.docstatus == 0:
 							asset.set(field, None)
 							asset.supplier = None

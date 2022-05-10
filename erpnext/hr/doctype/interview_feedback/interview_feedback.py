@@ -33,7 +33,7 @@ class InterviewFeedback(Document):
 	def validate_interview_date(self):
 		scheduled_date = frappe.db.get_value("Interview", self.interview, "scheduled_on")
 
-		if getdate() < getdate(scheduled_date) and self.docstatus == 1:
+		if getdate() < getdate(scheduled_date) and self.docstatus.is_submitted():
 			frappe.throw(
 				_("{0} submission before {1} is not allowed").format(
 					frappe.bold("Interview Feedback"), frappe.bold("Interview Scheduled Date")
@@ -68,7 +68,7 @@ class InterviewFeedback(Document):
 	def update_interview_details(self):
 		doc = frappe.get_doc("Interview", self.interview)
 
-		if self.docstatus == 2:
+		if self.docstatus.is_cancelled():
 			for entry in doc.interview_details:
 				if entry.interview_feedback == self.name:
 					entry.average_rating = entry.interview_feedback = entry.comments = entry.result = None

@@ -62,7 +62,7 @@ class JournalEntry(AccountsController):
 			self.validate_stock_accounts()
 
 		self.validate_reference_doc()
-		if self.docstatus == 0:
+		if self.docstatus.is_draft():
 			self.set_against_account()
 		self.create_remarks()
 		self.set_print_format_fields()
@@ -72,7 +72,7 @@ class JournalEntry(AccountsController):
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
 
-		if self.docstatus == 0:
+		if self.docstatus.is_draft():
 			self.apply_tax_withholding()
 
 		if not self.title:
@@ -122,9 +122,9 @@ class JournalEntry(AccountsController):
 	def update_status_for_full_and_final_statement(self):
 		for entry in self.accounts:
 			if entry.reference_type == "Full and Final Statement":
-				if self.docstatus == 1:
+				if self.docstatus.is_submitted():
 					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Paid")
-				elif self.docstatus == 2:
+				elif self.docstatus.is_cancelled():
 					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Unpaid")
 
 	def validate_inter_company_accounts(self):
@@ -269,7 +269,7 @@ class JournalEntry(AccountsController):
 			status = None
 			for d in self.accounts:
 				if d.account == inv_disc_doc.short_term_loan and d.reference_name == inv_disc:
-					if self.docstatus == 1:
+					if self.docstatus.is_submitted():
 						if d.credit > 0:
 							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Sanctioned", d.idx)
 							status = "Disbursed"
@@ -936,7 +936,7 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type == "Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				if self.docstatus == 2:
+				if self.docstatus.is_cancelled():
 					update_reimbursed_amount(doc, -1 * d.debit)
 				else:
 					update_reimbursed_amount(doc, d.debit)

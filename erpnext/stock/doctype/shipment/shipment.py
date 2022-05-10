@@ -16,7 +16,7 @@ class Shipment(Document):
 		self.validate_weight()
 		self.validate_pickup_time()
 		self.set_value_of_goods()
-		if self.docstatus == 0:
+		if self.docstatus.is_draft():
 			self.status = "Draft"
 
 	def on_submit(self):

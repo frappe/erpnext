@@ -283,7 +283,7 @@ class LeaveApplication(Document):
 			doc.submit()
 
 	def cancel_attendance(self):
-		if self.docstatus == 2:
+		if self.docstatus.is_cancelled():
 			attendance = frappe.db.sql(
 				"""select name from `tabAttendance` where employee = %s\
 				and (attendance_date between %s and %s) and docstatus < 2 and status in ('On Leave', 'Half Day')""",

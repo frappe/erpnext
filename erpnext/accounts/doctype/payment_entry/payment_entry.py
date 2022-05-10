@@ -472,9 +472,9 @@ class PaymentEntry(AccountsController):
 					)
 
 	def set_status(self):
-		if self.docstatus == 2:
+		if self.docstatus.is_cancelled():
 			self.status = "Cancelled"
-		elif self.docstatus == 1:
+		elif self.docstatus.is_submitted():
 			self.status = "Submitted"
 		else:
 			self.status = "Draft"
@@ -984,7 +984,7 @@ class PaymentEntry(AccountsController):
 			for d in self.get("references"):
 				if d.reference_doctype == "Expense Claim" and d.reference_name:
 					doc = frappe.get_doc("Expense Claim", d.reference_name)
-					if self.docstatus == 2:
+					if self.docstatus.is_cancelled():
 						update_reimbursed_amount(doc, -1 * d.allocated_amount)
 					else:
 						update_reimbursed_amount(doc, d.allocated_amount)
@@ -1583,7 +1583,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("dunning_amount")
-	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
+	elif reference_doctype == "Journal Entry" and ref_doc.docstatus.is_submitted():
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
 			exchange_rate = get_exchange_rate(
@@ -1661,7 +1661,7 @@ def get_amounts_based_on_reference_doctype(
 		total_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("dunning_amount")
-	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
+	elif reference_doctype == "Journal Entry" and ref_doc.docstatus.is_submitted():
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
 			exchange_rate = get_exchange_rate(

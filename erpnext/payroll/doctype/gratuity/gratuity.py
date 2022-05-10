@@ -17,7 +17,7 @@ class Gratuity(AccountsController):
 		data = calculate_work_experience_and_amount(self.employee, self.gratuity_rule)
 		self.current_work_experience = data["current_work_experience"]
 		self.amount = data["amount"]
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			self.status = "Unpaid"
 
 	def on_submit(self):

@@ -393,7 +393,7 @@ def calculate_annual_eligible_hra_exemption(doc):
 						else:
 							annual_exemption = 0
 
-		elif doc.docstatus == 1:
+		elif doc.docstatus.is_submitted():
 			frappe.throw(
 				_("Salary Structure must be submitted before submission of Tax Ememption Declaration")
 			)

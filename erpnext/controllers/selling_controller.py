@@ -480,8 +480,8 @@ class SellingController(StockController):
 				# target warehouse first, to update serial no values properly
 
 				if d.warehouse and (
-					(not cint(self.is_return) and self.docstatus == 1)
-					or (cint(self.is_return) and self.docstatus == 2)
+					(not cint(self.is_return) and self.docstatus.is_submitted())
+					or (cint(self.is_return) and self.docstatus.is_cancelled())
 				):
 					sl_entries.append(self.get_sle_for_source_warehouse(d))
 
@@ -489,8 +489,8 @@ class SellingController(StockController):
 					sl_entries.append(self.get_sle_for_target_warehouse(d))
 
 				if d.warehouse and (
-					(not cint(self.is_return) and self.docstatus == 2)
-					or (cint(self.is_return) and self.docstatus == 1)
+					(not cint(self.is_return) and self.docstatus.is_cancelled())
+					or (cint(self.is_return) and self.docstatus.is_submitted())
 				):
 					sl_entries.append(self.get_sle_for_source_warehouse(d))
 
@@ -515,7 +515,7 @@ class SellingController(StockController):
 			item_row, {"actual_qty": flt(item_row.qty), "warehouse": item_row.target_warehouse}
 		)
 
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			if not cint(self.is_return):
 				sle.update({"incoming_rate": item_row.incoming_rate, "recalculate_rate": 1})
 			else:

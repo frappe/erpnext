@@ -15,7 +15,7 @@ form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 class Quotation(SellingController):
 	def set_indicator(self):
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			self.indicator_color = "blue"
 			self.indicator_title = "Submitted"
 		if self.valid_till and getdate(self.valid_till) < getdate(nowdate()):

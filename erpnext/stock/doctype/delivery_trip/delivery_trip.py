@@ -46,7 +46,7 @@ class DeliveryTrip(Document):
 	def update_status(self):
 		status = {0: "Draft", 1: "Scheduled", 2: "Cancelled"}[self.docstatus]
 
-		if self.docstatus == 1:
+		if self.docstatus.is_submitted():
 			visited_stops = [stop.visited for stop in self.delivery_stops]
 			if all(visited_stops):
 				status = "Completed"

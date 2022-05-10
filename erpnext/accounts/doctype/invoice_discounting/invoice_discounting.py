@@ -29,7 +29,7 @@ class InvoiceDiscounting(AccountsController):
 			self.loan_end_date = add_days(self.loan_start_date, self.loan_period)
 
 	def validate_mandatory(self):
-		if self.docstatus == 1 and not (self.loan_start_date and self.loan_period):
+		if self.docstatus.is_submitted() and not (self.loan_start_date and self.loan_period):
 			frappe.throw(_("Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"))
 
 	def validate_invoices(self):
@@ -80,9 +80,9 @@ class InvoiceDiscounting(AccountsController):
 				frappe.get_doc("Sales Invoice", d.sales_invoice).set_status(update=True, update_modified=False)
 		else:
 			self.status = "Draft"
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				self.status = "Sanctioned"
-			elif self.docstatus == 2:
+			elif self.docstatus.is_cancelled():
 				self.status = "Cancelled"
 
 		if cancel:
@@ -90,7 +90,7 @@ class InvoiceDiscounting(AccountsController):
 
 	def update_sales_invoice(self):
 		for d in self.invoices:
-			if self.docstatus == 1:
+			if self.docstatus.is_submitted():
 				is_discounted = 1
 			else:
 				discounted_invoice = frappe.db.exists(
@@ -159,7 +159,7 @@ class InvoiceDiscounting(AccountsController):
 					)
 				)
 
-		make_gl_entries(gl_entries, cancel=(self.docstatus == 2), update_outstanding="No")
+		make_gl_entries(gl_entries, cancel=(self.docstatus.is_cancelled()), update_outstanding="No")
 
 	@frappe.whitelist()
 	def create_disbursement_entry(self):
