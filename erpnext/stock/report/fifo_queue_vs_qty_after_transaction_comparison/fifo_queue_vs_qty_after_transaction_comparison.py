@@ -91,11 +91,6 @@ def find_first_bad_queue(sles):
 			sle.fifo_qty_diff = sle.qty_after_transaction - sle.fifo_queue_qty
 			sle.fifo_value_diff = sle.stock_value - sle.fifo_stock_value
 
-			if sle.batch_no:
-				sle.use_batchwise_valuation = frappe.db.get_value(
-					"Batch", sle.batch_no, "use_batchwise_valuation", cache=True
-				)
-
 			if abs(sle.fifo_qty_diff) > 0.001 or abs(sle.fifo_value_diff) > 0.1:
 				if idx:
 					data.append(sles[idx - 1])
