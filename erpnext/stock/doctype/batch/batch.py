@@ -244,6 +244,7 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 		)
 	)
 	stock_entry.set_stock_entry_type()
+	stock_entry.set_missing_values()
 	stock_entry.insert()
 	stock_entry.submit()
 
