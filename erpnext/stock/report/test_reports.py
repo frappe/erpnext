@@ -65,6 +65,8 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("Delayed Item Report", {"based_on": "Delivery Note"}),
 	("Stock Ageing", {"range1": 30, "range2": 60, "range3": 90, "_optional": True}),
 	("Stock Ledger Invariant Check", {"warehouse": "_Test Warehouse - _TC", "item": "_Test Item"}),
+	("FIFO Queue vs Qty After Transaction Comparison", {"warehouse": "_Test Warehouse - _TC"}),
+	("FIFO Queue vs Qty After Transaction Comparison", {"item_group": "All Item Groups"}),
 ]
 
 OPTIONAL_FILTERS = {
