@@ -1381,6 +1381,25 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, se.save)
 
+	def test_mapped_stock_entry(self):
+		"Check if rate and stock details are populated in mapped SE given warehouse."
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_stock_entry
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = "_TestMappedItem"
+		create_item(item_code, is_stock_item=True)
+
+		pr = make_purchase_receipt(
+			item_code=item_code, qty=2, rate=100, company="_Test Company", warehouse="Stores - _TC"
+		)
+
+		mapped_se = make_stock_entry(pr.name)
+
+		self.assertEqual(mapped_se.items[0].s_warehouse, "Stores - _TC")
+		self.assertEqual(mapped_se.items[0].actual_qty, 2)
+		self.assertEqual(mapped_se.items[0].basic_rate, 100)
+		self.assertEqual(mapped_se.items[0].basic_amount, 200)
+
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
