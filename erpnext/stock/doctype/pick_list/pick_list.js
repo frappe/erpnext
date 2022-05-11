@@ -166,7 +166,8 @@ frappe.ui.form.on('Pick List', {
 			qty_field: 'picked_qty',
 			max_qty_field: 'qty',
 			dont_allow_new_row: true,
-			prompt_qty: frm.doc.prompt_qty
+			prompt_qty: frm.doc.prompt_qty,
+			serial_no_field: "not_supported",  // doesn't make sense for picklist without a separate field.
 		};
 		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
 		barcode_scanner.process_scan();
