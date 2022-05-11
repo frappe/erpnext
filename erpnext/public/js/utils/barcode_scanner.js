@@ -10,6 +10,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.serial_no_field = opts.serial_no_field || "serial_no";
 		this.batch_no_field = opts.batch_no_field || "batch_no";
 		this.qty_field = opts.qty_field || "qty";
+		// field name on row which defines max quantity to be scanned e.g. picklist
+		this.max_qty_field = opts.max_qty_field;
+		// scanner won't add a new row if this flag is set.
+		this.dont_allow_new_row = opts.dont_allow_new_row;
+		// scanner will ask user to type the quantity instead of incrementing by 1
+		this.prompt_qty = opts.prompt_qty;
 
 		this.items_table_name = opts.items_table_name || "items";
 		this.items_table = this.frm.doc[this.items_table_name];
@@ -42,10 +48,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			.then((r) => {
 				const data = r && r.message;
 				if (!data || Object.keys(data).length === 0) {
-					frappe.show_alert({
-						message: __("Cannot find Item with this Barcode"),
-						indicator: "red",
-					});
+					this.show_alert(__("Cannot find Item with this Barcode"), "red");
 					this.clean_up();
 					return;
 				}
@@ -56,22 +59,18 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	update_table(data) {
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
-		let row = null;
 
 		const {item_code, barcode, batch_no, serial_no} = data;
 
-		// Check if batch is scanned and table has batch no field
-		let batch_no_scan =
-			Boolean(batch_no) && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
-
-		if (batch_no_scan) {
-			row = this.get_batch_row_to_modify(batch_no);
-		} else {
-			// serial or barcode scan
-			row = this.get_row_to_modify_on_scan(item_code);
-		}
+		let row = this.get_row_to_modify_on_scan(item_code, batch_no);
 
 		if (!row) {
+			if (this.dont_allow_new_row) {
+				this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
+				this.clean_up();
+				return;
+			}
+
 			// add new row if new item/batch is scanned
 			row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
 			// trigger any row add triggers defined on child table.
@@ -83,9 +82,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			return;
 		}
 
-		this.show_scan_message(row.idx, row.item_code);
 		this.set_selector_trigger_flag(row, data);
-		this.set_item(row, item_code);
+		this.set_item(row, item_code).then(qty => {
+			this.show_scan_message(row.idx, row.item_code, qty);
+		});
 		this.set_serial_no(row, serial_no);
 		this.set_batch_no(row, batch_no);
 		this.set_barcode(row, barcode);
@@ -106,9 +106,23 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	set_item(row, item_code) {
-		const item_data = { item_code: item_code };
-		item_data[this.qty_field] = (row[this.qty_field] || 0) + 1;
-		frappe.model.set_value(row.doctype, row.name, item_data);
+		return new Promise(resolve => {
+			const increment = (value = 1) => {
+				const item_data = {item_code: item_code};
+				item_data[this.qty_field] = Number((row[this.qty_field] || 0)) + Number(value);
+				frappe.model.set_value(row.doctype, row.name, item_data);
+			};
+
+			if (this.prompt_qty) {
+				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({value}) => {
+					increment(value);
+					resolve(value);
+				});
+			} else {
+				increment();
+				resolve();
+			}
+		});
 	}
 
 	set_serial_no(row, serial_no) {
@@ -137,53 +151,42 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
-	show_scan_message(idx, exist = null) {
+	show_scan_message(idx, exist = null, qty = 1) {
 		// show new row or qty increase toast
 		if (exist) {
-			frappe.show_alert(
-				{
-					message: __("Row #{0}: Qty increased by 1", [idx]),
-					indicator: "green",
-				},
-				5
-			);
+			this.show_alert(__("Row #{0}: Qty increased by {1}", [idx, qty]), "green");
 		} else {
-			frappe.show_alert(
-				{
-					message: __("Row #{0}: Item added", [idx]),
-					indicator: "green",
-				},
-				5
-			);
+			this.show_alert(__("Row #{0}: Item added", [idx]), "green")
 		}
 	}
 
 	is_duplicate_serial_no(row, serial_no) {
-		const is_duplicate = !!serial_no && !!row[this.serial_no_field]
-			&& row[this.serial_no_field].includes(serial_no);
+		const is_duplicate = row[this.serial_no_field]?.includes(serial_no);
 
 		if (is_duplicate) {
-			frappe.show_alert(
-				{
-					message: __("Serial No {0} is already added", [serial_no]),
-					indicator: "orange",
-				},
-				5
-			);
+			this.show_alert(__("Serial No {0} is already added", [serial_no]), "orange");
 		}
 		return is_duplicate;
 	}
 
-	get_batch_row_to_modify(batch_no) {
-		// get row if batch already exists in table
-		const existing_batch_row = this.items_table.find((d) => d.batch_no === batch_no);
-		return existing_batch_row || this.get_existing_blank_row();
-	}
+	get_row_to_modify_on_scan(item_code, batch_no) {
+		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
-	get_row_to_modify_on_scan(item_code) {
-		// get an existing item row to increment or blank row to modify
-		const existing_item_row = this.items_table.find((d) => d.item_code === item_code);
-		return existing_item_row || this.get_existing_blank_row();
+		// Check if batch is scanned and table has batch no field
+		let is_batch_no_scan = batch_no && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
+		let check_max_qty = this.max_qty_field && frappe.meta.has_field(cur_grid.doctype, this.max_qty_field);
+
+		const matching_row = (row) => {
+			const item_match = row.item_code == item_code;
+			const batch_match = row.batch_no == batch_no;
+			const qty_in_limit = flt(row[this.qty_field]) < flt(row[this.max_qty_field]);
+
+			return item_match
+				&& (!is_batch_no_scan || batch_match)
+				&& (!check_max_qty || qty_in_limit)
+		}
+
+		return this.items_table.find(matching_row) || this.get_existing_blank_row();
 	}
 
 	get_existing_blank_row() {
@@ -193,5 +196,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	clean_up() {
 		this.scan_barcode_field.set_value("");
 		refresh_field(this.items_table_name);
+	}
+	show_alert(msg, indicator, duration=3) {
+		frappe.show_alert({message: msg, indicator: indicator}, duration);
 	}
 };

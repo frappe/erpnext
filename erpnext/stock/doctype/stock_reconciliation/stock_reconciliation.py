@@ -62,6 +62,7 @@ class StockReconciliation(StockController):
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
+		self.delete_auto_created_batches()
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
@@ -456,7 +457,7 @@ class StockReconciliation(StockController):
 
 			key = (d.item_code, d.warehouse)
 			if key not in merge_similar_entries:
-				d.total_amount = d.actual_qty * d.valuation_rate
+				d.total_amount = flt(d.actual_qty) * d.valuation_rate
 				merge_similar_entries[key] = d
 			elif d.serial_no:
 				data = merge_similar_entries[key]
