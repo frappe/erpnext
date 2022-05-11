@@ -422,8 +422,8 @@ def calculate_annual_eligible_hra_exemption(doc):
 	return frappe._dict(
 		{
 			"hra_amount": hra_amount,
-			"annual_exemption": flt(annual_exemption, doc.precision("annual_hra_exemption")),
-			"monthly_exemption": flt(monthly_exemption, doc.precision("monthly_hra_exemption")),
+			"annual_exemption": annual_exemption,
+			"monthly_exemption": monthly_exemption,
 		}
 	)
 
