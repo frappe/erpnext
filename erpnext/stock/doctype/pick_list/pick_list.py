@@ -43,9 +43,9 @@ class PickList(Document):
 		for item in self.locations:
 			if self.scan_mode and item.picked_qty < item.stock_qty:
 				frappe.throw(
-					_("Row {0} is short by {1} {2}").format(
-						item.idx, item.stock_qty - item.picked_qty, item.stock_uom
-					),
+					_(
+						"Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
+					).format(item.idx, item.stock_qty - item.picked_qty, item.stock_uom),
 					title=_("Pick List Incomplete"),
 				)
 			elif not self.scan_mode and item.picked_qty == 0:
