@@ -10,8 +10,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.serial_no_field = opts.serial_no_field || "serial_no";
 		this.batch_no_field = opts.batch_no_field || "batch_no";
 		this.qty_field = opts.qty_field || "qty";
-		this.max_qty_field = opts.max_qty_field || null;
+		// field name on row which defines max quantity to be scanned e.g. picklist
+		this.max_qty_field = opts.max_qty_field;
+		// scanner won't add a new row if this flag is set.
 		this.dont_allow_new_row = opts.dont_allow_new_row;
+		// scanner will ask user to type the quantity instead of incrementing by 1
 		this.prompt_qty = opts.prompt_qty;
 
 		this.items_table_name = opts.items_table_name || "items";
