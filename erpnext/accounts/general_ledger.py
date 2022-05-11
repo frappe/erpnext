@@ -31,6 +31,7 @@ def make_gl_entries(
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
+			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
@@ -43,6 +44,26 @@ def make_gl_entries(
 				)
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
+
+def validate_disabled_accounts(gl_map):
+	accounts = [d.account for d in gl_map if d.account]
+
+	Account = frappe.qb.DocType("Account")
+
+	disabled_accounts = (
+		frappe.qb.from_(Account)
+		.where(Account.name.isin(accounts) & Account.disabled == 1)
+		.select(Account.name, Account.disabled)
+	).run(as_dict=True)
+
+	if disabled_accounts:
+		account_list = "<br>"
+		account_list += ", ".join([frappe.bold(d.name) for d in disabled_accounts])
+		frappe.throw(
+			_("Cannot create accounting entries against disabled accounts: {0}").format(account_list),
+			title=_("Disabled Account Selected"),
+		)
 
 
 def validate_accounting_period(gl_map):
