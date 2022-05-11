@@ -422,8 +422,8 @@ def calculate_annual_eligible_hra_exemption(doc):
 	return frappe._dict(
 		{
 			"hra_amount": hra_amount,
-			"annual_exemption": annual_exemption,
-			"monthly_exemption": monthly_exemption,
+			"annual_exemption": flt(annual_exemption, doc.precision("annual_hra_exemption")),
+			"monthly_exemption": flt(monthly_exemption, doc.precision("monthly_hra_exemption")),
 		}
 	)
 
@@ -459,12 +459,12 @@ def get_component_amt_from_salary_slip(
 	employee, salary_structure, basic_component, hra_component, from_date
 ):
 	salary_slip = make_salary_slip(
-		salary_structure, employee=employee, for_preview=1, ignore_permissions=True
+		salary_structure,
+		employee=employee,
+		for_preview=1,
+		ignore_permissions=True,
+		posting_date=from_date,
 	)
-	# generate salary slip as per assignment on "from_date"
-	salary_slip.posting_date = from_date
-	salary_slip.start_date = salary_slip.end_date = None
-	salary_slip.run_method("process_salary_structure", for_preview=True)
 
 	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
@@ -502,13 +502,13 @@ def get_component_pay(frequency, amount, from_date, to_date):
 	if frequency == "Daily":
 		return amount * days
 	elif frequency == "Weekly":
-		return amount * math.ceil(days / 7)
+		return amount * math.floor(days / 7)
 	elif frequency == "Fortnightly":
-		return amount * math.ceil(days / 15)
+		return amount * math.floor(days / 14)
 	elif frequency == "Monthly":
 		return amount * month_diff(to_date, from_date)
 	elif frequency == "Bimonthly":
-		return amount * math.ceil(days / 60)
+		return amount * (month_diff(to_date, from_date) / 2)
 
 
 def validate_house_rent_dates(doc):
