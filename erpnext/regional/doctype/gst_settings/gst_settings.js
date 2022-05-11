@@ -11,6 +11,12 @@ frappe.ui.form.on('GST Settings', {
 			});
 		});
 
+		frm.add_custom_button('Sync HSN Codes', () => {
+			frappe.call({
+				"method": "erpnext.regional.doctype.gst_settings.gst_settings.update_hsn_codes"
+			})
+		});
+
 		$(frm.fields_dict.gst_summary.wrapper).empty().html(
 			`<table class="table table-bordered">
 				<tbody>
