@@ -157,8 +157,8 @@ class FollowUp(Document):
 			msg += "Transaction Details <br>"
 			msg += "<div><table style = 'border: 1px solid black; widht: 100%; text-align:center '>"
 			msg += """<tr> 
-						<th style = 'border: 1px solid black; width : 20%' >Invoice</th>
-						<th style = 'border: 1px solid black; width : 15%'>Date</th>
+						<th style = 'border: 1px solid black; width : 20%' >Invoice No</th>
+						<th style = 'border: 1px solid black; width : 15%'>Posting Date</th>
 						<th style = 'border: 1px solid black; width : 15%'>Due Date</th>
 						<th style = 'border: 1px solid black; width : 10%'>Currency</th>
 						<th style = 'border: 1px solid black; width : 15%'>Invoice Amt</th>
