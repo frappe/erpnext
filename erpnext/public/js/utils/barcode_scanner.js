@@ -48,10 +48,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			.then((r) => {
 				const data = r && r.message;
 				if (!data || Object.keys(data).length === 0) {
-					frappe.show_alert({
-						message: __("Cannot find Item with this Barcode"),
-						indicator: "red",
-					});
+					this.show_alert(__("Cannot find Item with this Barcode"), "red");
 					this.clean_up();
 					return;
 				}
@@ -79,10 +76,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 		if (!row) {
 			if (this.dont_allow_new_row) {
-				frappe.show_alert({
-					message: __("Maximum quantity scanned for item {0}.", [item_code]),
-					indicator: "red"
-				});
+				this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
 				this.clean_up();
 				return;
 			}
@@ -170,36 +164,17 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	show_scan_message(idx, exist = null, qty = 1) {
 		// show new row or qty increase toast
 		if (exist) {
-			frappe.show_alert(
-				{
-					message: __("Row #{0}: Qty increased by {1}", [idx, qty]),
-					indicator: "green",
-				},
-				5
-			);
+			this.show_alert(__("Row #{0}: Qty increased by {1}", [idx, qty]), "green");
 		} else {
-			frappe.show_alert(
-				{
-					message: __("Row #{0}: Item added", [idx]),
-					indicator: "green",
-				},
-				5
-			);
+			this.show_alert(__("Row #{0}: Item added", [idx]), "green")
 		}
 	}
 
 	is_duplicate_serial_no(row, serial_no) {
-		const is_duplicate = !!serial_no && !!row[this.serial_no_field]
-			&& row[this.serial_no_field].includes(serial_no);
+		const is_duplicate = row[this.serial_no_field]?.includes(serial_no);
 
 		if (is_duplicate) {
-			frappe.show_alert(
-				{
-					message: __("Serial No {0} is already added", [serial_no]),
-					indicator: "orange",
-				},
-				5
-			);
+			this.show_alert(__("Serial No {0} is already added", [serial_no]), "orange");
 		}
 		return is_duplicate;
 	}
@@ -227,5 +202,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	clean_up() {
 		this.scan_barcode_field.set_value("");
 		refresh_field(this.items_table_name);
+	}
+	show_alert(msg, indicator, duration=3) {
+		frappe.show_alert({message: msg, indicator: indicator}, duration);
 	}
 };
