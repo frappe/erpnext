@@ -9,20 +9,15 @@ Manufacturing
 Stock
 Support
 Utilities
-Shopping Cart
 Assets
 Portal
 Maintenance
-Education
 Regional
-Restaurant
-Agriculture
 ERPNext Integrations
-Non Profit
-Hotels
-Hub Node
 Quality Management
 Communication
 Loan Management
 Payroll
 Telephony
+Bulk Transaction
+E-commerce

@@ -4,7 +4,10 @@ on:
   pull_request:
     paths-ignore:
       - '**.js'
+      - '**.css'
       - '**.md'
+      - '**.html'
+      - '**.csv'
   workflow_dispatch:
 
 concurrency:
@@ -34,7 +37,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -80,10 +83,36 @@ jobs:
 
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        env:
+          DB: mariadb
+          TYPE: server
 
       - name: Run Patch Tests
         run: |
           cd ~/frappe-bench/
           wget https://erpnext.com/files/v10-erpnext.sql.gz
           bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
+
+          git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
+          git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
+
+          for version in $(seq 12 13)
+          do
+              echo "Updating to v$version"
+              branch_name="version-$version-hotfix"
+
+              git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
+              git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
+
+              git -C "apps/frappe" checkout -q -f $branch_name
+              git -C "apps/erpnext" checkout -q -f $branch_name
+
+              bench setup requirements --python
+              bench --site test_site migrate
+          done
+
+
+          echo "Updating to latest version"
+          git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
+          git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
           bench --site test_site migrate

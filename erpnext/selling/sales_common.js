@@ -41,6 +41,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
 		me.frm.set_query('shipping_address_name', erpnext.queries.address_query);
+		me.frm.set_query('dispatch_address_name', erpnext.queries.dispatch_address_query);
 
 
 		if(this.frm.fields_dict.selling_price_list) {
@@ -157,25 +158,19 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 
 	commission_rate() {
 		this.calculate_commission();
-		refresh_field("total_commission");
 	}
 
 	total_commission() {
-		if(this.frm.doc.base_net_total) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "total_commission"]);
+		frappe.model.round_floats_in(this.frm.doc, ["amount_eligible_for_commission", "total_commission"]);
 
-			if(this.frm.doc.base_net_total < this.frm.doc.total_commission) {
-				var msg = (__("[Error]") + " " +
-					__(frappe.meta.get_label(this.frm.doc.doctype, "total_commission",
-						this.frm.doc.name)) + " > " +
-					__(frappe.meta.get_label(this.frm.doc.doctype, "base_net_total", this.frm.doc.name)));
-				frappe.msgprint(msg);
-				throw msg;
-			}
+		const { amount_eligible_for_commission } = this.frm.doc;
+		if(!amount_eligible_for_commission) return;
 
-			this.frm.set_value("commission_rate",
-				flt(this.frm.doc.total_commission * 100.0 / this.frm.doc.base_net_total));
-		}
+		this.frm.set_value(
+			"commission_rate", flt(
+				this.frm.doc.total_commission * 100.0 / amount_eligible_for_commission
+			)
+		);
 	}
 
 	allocated_percentage(doc, cdt, cdn) {
@@ -185,7 +180,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
 				precision("allocated_percentage", sales_person));
 
-			sales_person.allocated_amount = flt(this.frm.doc.base_net_total *
+			sales_person.allocated_amount = flt(this.frm.doc.amount_eligible_for_commission *
 				sales_person.allocated_percentage / 100.0,
 				precision("allocated_amount", sales_person));
 				refresh_field(["allocated_amount"], sales_person);
@@ -206,8 +201,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.serial_no && item.qty === item.serial_no.split(`\n`).length) {
-			return;
+		// check if serial nos entered are as much as qty in row
+		if (item.serial_no) {
+			let serial_nos = item.serial_no.split(`\n`).filter(sn => sn.trim()); // filter out whitespaces
+			if (item.qty === serial_nos.length) return;
 		}
 
 		if (item.serial_no && !item.batch_no) {
@@ -230,11 +227,11 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 					},
 					callback:function(r){
 						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-
 							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-
-							me.set_batch_number(cdt, cdn);
-							me.batch_no(doc, cdt, cdn);
+							if (has_batch_no) {
+								me.set_batch_number(cdt, cdn);
+								me.batch_no(doc, cdt, cdn);
+							}
 						}
 					}
 				});
@@ -257,28 +254,39 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	}
 
 	calculate_commission() {
-		if(this.frm.fields_dict.commission_rate) {
-			if(this.frm.doc.commission_rate > 100) {
-				var msg = __(frappe.meta.get_label(this.frm.doc.doctype, "commission_rate", this.frm.doc.name)) +
-					" " + __("cannot be greater than 100");
-				frappe.msgprint(msg);
-				throw msg;
-			}
+		if(!this.frm.fields_dict.commission_rate) return;
 
-			this.frm.doc.total_commission = flt(this.frm.doc.base_net_total * this.frm.doc.commission_rate / 100.0,
-				precision("total_commission"));
+		if(this.frm.doc.commission_rate > 100) {
+			this.frm.set_value("commission_rate", 100);
+			frappe.throw(`${__(frappe.meta.get_label(
+				this.frm.doc.doctype, "commission_rate", this.frm.doc.name
+			))} ${__("cannot be greater than 100")}`);
 		}
+
+		this.frm.doc.amount_eligible_for_commission = this.frm.doc.items.reduce(
+			(sum, item) => item.grant_commission ? sum + item.base_net_amount : sum, 0
+		)
+
+		this.frm.doc.total_commission = flt(
+			this.frm.doc.amount_eligible_for_commission * this.frm.doc.commission_rate / 100.0,
+			precision("total_commission")
+		);
+
+		refresh_field(["amount_eligible_for_commission", "total_commission"]);
 	}
 
 	calculate_contribution() {
 		var me = this;
 		$.each(this.frm.doc.doctype.sales_team || [], function(i, sales_person) {
 			frappe.model.round_floats_in(sales_person);
-			if(sales_person.allocated_percentage) {
-				sales_person.allocated_amount = flt(
-					me.frm.doc.base_net_total * sales_person.allocated_percentage / 100.0,
-					precision("allocated_amount", sales_person));
-			}
+			if (!sales_person.allocated_percentage) return;
+
+			sales_person.allocated_amount = flt(
+				me.frm.doc.amount_eligible_for_commission
+				* sales_person.allocated_percentage
+				/ 100.0,
+				precision("allocated_amount", sales_person)
+			);
 		});
 	}
 
@@ -472,29 +480,33 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"reqd": 1
 				},
 				{
-					"fieldtype": "Text",
+					"fieldtype": "Table MultiSelect",
+					"label": __("Competitors"),
+					"fieldname": "competitors",
+					"options": "Competitor Detail"
+				},
+				{
+					"fieldtype": "Small Text",
 					"label": __("Detailed Reason"),
 					"fieldname": "detailed_reason"
 				},
 			],
 			primary_action: function() {
-				var values = dialog.get_values();
-				var reasons = values["lost_reason"];
-				var detailed_reason = values["detailed_reason"];
+				let values = dialog.get_values();
 
 				frm.call({
 					doc: frm.doc,
 					method: 'declare_enquiry_lost',
 					args: {
-						'lost_reasons_list': reasons,
-						'detailed_reason': detailed_reason
+						'lost_reasons_list': values.lost_reason,
+						'competitors': values.competitors ? values.competitors : [],
+						'detailed_reason': values.detailed_reason
 					},
 					callback: function(r) {
 						dialog.hide();
 						frm.reload_doc();
 					},
 				});
-				refresh_field("lost_reason");
 			},
 			primary_action_label: __('Declare Lost')
 		});

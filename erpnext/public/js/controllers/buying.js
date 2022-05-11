@@ -81,7 +81,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if (me.frm.doc.is_subcontracted == "Yes") {
+			if (me.frm.doc.is_subcontracted) {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
@@ -165,43 +165,31 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 	}
 
 	qty(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
 		if ((doc.doctype == "Purchase Receipt") || (doc.doctype == "Purchase Invoice" && (doc.update_stock || doc.is_return))) {
-			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-
-			if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["qty", "received_qty"])){ return }
-
-			if(!item.rejected_qty && item.qty) {
-				item.received_qty = item.qty;
-			}
-
-			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
-			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
-			item.received_stock_qty = flt(item.conversion_factor, precision("conversion_factor", item)) * flt(item.received_qty);
+			this.calculate_received_qty(doc, cdt, cdn)
 		}
 		super.qty(doc, cdt, cdn);
 	}
 
+	rejected_qty(doc, cdt, cdn) {
+		this.calculate_received_qty(doc, cdt, cdn)
+	}
+
+	calculate_received_qty(doc, cdt, cdn){
+		var item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["qty", "rejected_qty"]);
+
+		if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["qty", "rejected_qty"])){ return }
+
+		let received_qty = flt(item.qty + item.rejected_qty, precision("received_qty", item));
+		let received_stock_qty = flt(item.conversion_factor, precision("conversion_factor", item)) * flt(received_qty);
+
+		frappe.model.set_value(cdt, cdn, "received_qty", received_qty);
+		frappe.model.set_value(cdt, cdn, "received_stock_qty", received_stock_qty);
+	}
+
 	batch_no(doc, cdt, cdn) {
 		super.batch_no(doc, cdt, cdn);
-	}
-
-	received_qty(doc, cdt, cdn) {
-		this.calculate_accepted_qty(doc, cdt, cdn)
-	}
-
-	rejected_qty(doc, cdt, cdn) {
-		this.calculate_accepted_qty(doc, cdt, cdn)
-	}
-
-	calculate_accepted_qty(doc, cdt, cdn){
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["received_qty", "rejected_qty"]);
-
-		if(!doc.is_return && this.validate_negative_quantity(cdt, cdn, item, ["received_qty", "rejected_qty"])){ return }
-
-		item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
-		this.qty(doc, cdt, cdn);
 	}
 
 	validate_negative_quantity(cdt, cdn, item, fieldnames){
@@ -453,7 +441,7 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 				type: "GET",
 				method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
 				args: {
-					args: {
+					row: {
 						item_code: args.product_bundle,
 						quantity: args.quantity,
 						parenttype: frm.doc.doctype,

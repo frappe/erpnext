@@ -61,13 +61,14 @@
   "taxes_and_charges_section",
   "purchase_taxes_and_charges_template",
   "sales_taxes_and_charges_template",
-  "advance_tax_account",
   "column_break_55",
   "apply_tax_withholding_amount",
   "tax_withholding_category",
   "section_break_56",
   "taxes",
+  "section_break_60",
   "base_total_taxes_and_charges",
+  "column_break_61",
   "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
@@ -686,15 +687,6 @@
    "hide_border": 1
   },
   {
-   "depends_on": "eval:doc.apply_tax_withholding_amount",
-   "description": "Provisional tax account for advance tax. Taxes are parked in this account until payments are allocated to invoices",
-   "fieldname": "advance_tax_account",
-   "fieldtype": "Link",
-   "label": "Advance Tax Account",
-   "mandatory_depends_on": "eval:doc.apply_tax_withholding_amount",
-   "options": "Account"
-  },
-  {
    "depends_on": "eval:doc.received_amount && doc.payment_type != 'Internal Transfer'",
    "fieldname": "received_amount_after_tax",
    "fieldtype": "Currency",
@@ -725,12 +717,21 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Paid To Account Type"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_60",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-22 17:50:24.632806",
+ "modified": "2022-02-23 20:08:39.559814",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -773,6 +774,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

@@ -36,7 +36,11 @@
   "remind_before",
   "column_break_4",
   "send_interview_feedback_reminder",
-  "feedback_reminder_notification_template"
+  "feedback_reminder_notification_template",
+  "employee_exit_section",
+  "exit_questionnaire_web_form",
+  "column_break_34",
+  "exit_questionnaire_notification_template"
  ],
  "fields": [
   {
@@ -226,13 +230,34 @@
    "fieldname": "check_vacancies",
    "fieldtype": "Check",
    "label": "Check Vacancies On Job Offer Creation"
+  },
+  {
+   "fieldname": "employee_exit_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Exit Settings"
+  },
+  {
+   "fieldname": "exit_questionnaire_web_form",
+   "fieldtype": "Link",
+   "label": "Exit Questionnaire Web Form",
+   "options": "Web Form"
+  },
+  {
+   "fieldname": "exit_questionnaire_notification_template",
+   "fieldtype": "Link",
+   "label": "Exit Questionnaire Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-01 23:46:11.098236",
+ "modified": "2021-12-05 14:48:10.884253",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

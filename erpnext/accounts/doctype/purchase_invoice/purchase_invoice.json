@@ -130,6 +130,7 @@
   "allocate_advances_automatically",
   "get_advances",
   "advances",
+  "advance_tax",
   "payment_schedule_section",
   "payment_terms_template",
   "ignore_default_payment_terms_template",
@@ -542,11 +543,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
-   "label": "Raw Materials Supplied",
-   "options": "No\nYes",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
    "print_hide": 1
   },
   {
@@ -1365,7 +1365,7 @@
    "width": "50px"
   },
   {
-   "depends_on": "eval:doc.update_stock && doc.is_subcontracted==\"Yes\"",
+   "depends_on": "eval:doc.update_stock && doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1408,13 +1408,21 @@
   {
    "fieldname": "column_break_147",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advance_tax",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Advance Tax",
+   "options": "Advance Tax",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-12 20:55:16.145651",
+ "modified": "2021-11-25 13:31:02.716727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

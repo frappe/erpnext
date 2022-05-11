@@ -1,11 +1,12 @@
 {
  "actions": [],
- "autoname": "HR-APP-LETTER-TEMP-.#####",
+ "autoname": "field:template_name",
  "creation": "2019-12-26 12:20:14.219578",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "template_name",
   "introduction",
   "terms",
   "closing_notes"
@@ -29,13 +30,21 @@
    "label": "Terms",
    "options": "Appointment Letter content",
    "reqd": 1
+  },
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "links": [],
- "modified": "2020-01-21 17:00:46.779420",
+ "modified": "2022-01-18 19:25:14.614616",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Appointment Letter Template",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -63,7 +72,10 @@
    "write": 1
   }
  ],
+ "search_fields": "template_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
+ "title_field": "template_name",
  "track_changes": 1
 }

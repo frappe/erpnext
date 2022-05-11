@@ -18,11 +18,11 @@ erpnext.PointOfSale.Payment = class {
 	prepare_dom() {
 		this.wrapper.append(
 			`<section class="payment-container">
-				<div class="section-label payment-section">Payment Method</div>
+				<div class="section-label payment-section">${__('Payment Method')}</div>
 				<div class="payment-modes"></div>
 				<div class="fields-numpad-container">
 					<div class="fields-section">
-						<div class="section-label">Additional Information</div>
+						<div class="section-label">${__('Additional Information')}</div>
 						<div class="invoice-fields"></div>
 					</div>
 					<div class="number-pad"></div>
@@ -30,7 +30,7 @@ erpnext.PointOfSale.Payment = class {
 				<div class="totals-section">
 					<div class="totals"></div>
 				</div>
-				<div class="submit-order-btn">Complete Order</div>
+				<div class="submit-order-btn">${__("Complete Order")}</div>
 			</section>`
 		);
 		this.$component = this.wrapper.find('.payment-container');
@@ -168,6 +168,28 @@ erpnext.PointOfSale.Payment = class {
 				request_button.removeClass('btn-primary').addClass('btn-default');
       }
     });
+
+		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
+			if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {
+				if (!frm.doc.ignore_pricing_rule) {
+					frm.applying_pos_coupon_code = true;
+					frappe.run_serially([
+						() => frm.doc.ignore_pricing_rule=1,
+						() => frm.trigger('ignore_pricing_rule'),
+						() => frm.doc.ignore_pricing_rule=0,
+						() => frm.trigger('apply_pricing_rule'),
+						() => frm.save(),
+						() => this.update_totals_section(frm.doc),
+						() => (frm.applying_pos_coupon_code = false)
+					]);
+				} else if (frm.doc.ignore_pricing_rule) {
+					frappe.show_alert({
+						message: __("Ignore Pricing Rule is enabled. Cannot apply coupon code."),
+						indicator: "orange"
+					});
+				}
+			}
+		});
 
 		this.setup_listener_for_payments();
 
@@ -518,12 +540,12 @@ erpnext.PointOfSale.Payment = class {
 
 		this.$totals.html(
 			`<div class="col">
-				<div class="total-label">Grand Total</div>
+				<div class="total-label">${__('Grand Total')}</div>
 				<div class="value">${format_currency(grand_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
-				<div class="total-label">Paid Amount</div>
+				<div class="total-label">${__('Paid Amount')}</div>
 				<div class="value">${format_currency(paid_amount, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>

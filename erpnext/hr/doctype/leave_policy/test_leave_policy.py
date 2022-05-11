@@ -1,7 +1,5 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
 import unittest
 
@@ -17,17 +15,25 @@ class TestLeavePolicy(unittest.TestCase):
 			leave_type.max_leaves_allowed = 2
 			leave_type.save()
 
-		leave_policy = create_leave_policy(leave_type=leave_type.name, annual_allocation=leave_type.max_leaves_allowed + 1)
+		leave_policy = create_leave_policy(
+			leave_type=leave_type.name, annual_allocation=leave_type.max_leaves_allowed + 1
+		)
 
 		self.assertRaises(frappe.ValidationError, leave_policy.insert)
 
+
 def create_leave_policy(**args):
-	''' Returns an object of leave policy '''
+	"""Returns an object of leave policy"""
 	args = frappe._dict(args)
-	return frappe.get_doc({
-		"doctype": "Leave Policy",
-		"leave_policy_details": [{
-			"leave_type": args.leave_type or "_Test Leave Type",
-			"annual_allocation": args.annual_allocation or 10
-		}]
-	})
+	return frappe.get_doc(
+		{
+			"doctype": "Leave Policy",
+			"title": "Test Leave Policy",
+			"leave_policy_details": [
+				{
+					"leave_type": args.leave_type or "_Test Leave Type",
+					"annual_allocation": args.annual_allocation or 10,
+				}
+			],
+		}
+	)

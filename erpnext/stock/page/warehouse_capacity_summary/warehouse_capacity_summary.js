@@ -4,7 +4,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 		title: 'Warehouse Capacity Summary',
 		single_column: true
 	});
-	page.set_secondary_action('Refresh', () => page.capacity_dashboard.refresh(), 'octicon octicon-sync');
+	page.set_secondary_action('Refresh', () => page.capacity_dashboard.refresh(), 'refresh');
 	page.start = 0;
 
 	page.company_field = page.add_field({
@@ -68,7 +68,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 			options: [
 				{fieldname: 'stock_capacity', label: __('Capacity (Stock UOM)')},
 				{fieldname: 'percent_occupied', label: __('% Occupied')},
-				{fieldname: 'actual_qty', label: __('Balance Qty (Stock ')}
+				{fieldname: 'actual_qty', label: __('Balance Qty (Stock)')}
 			]
 		},
 		change: function(sort_by, sort_order) {

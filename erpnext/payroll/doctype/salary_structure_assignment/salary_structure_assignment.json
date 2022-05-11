@@ -10,6 +10,7 @@
   "employee",
   "employee_name",
   "department",
+  "grade",
   "company",
   "payroll_payable_account",
   "column_break_6",
@@ -22,7 +23,9 @@
   "base",
   "column_break_9",
   "variable",
-  "amended_from"
+  "amended_from",
+  "section_break_17",
+  "payroll_cost_centers"
  ],
  "fields": [
   {
@@ -65,6 +68,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "grade.default_salary_structure",
+   "fetch_if_empty": 1,
    "fieldname": "salary_structure",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -90,9 +95,12 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Base & Variable"
   },
   {
+   "fetch_from": "grade.default_base_pay",
+   "fetch_if_empty": 1,
    "fieldname": "base",
    "fieldtype": "Currency",
    "label": "Base",
@@ -141,14 +149,37 @@
    "fieldtype": "Link",
    "label": "Payroll Payable Account",
    "options": "Account"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "employee",
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break",
+   "label": "Payroll Cost Centers"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payroll_cost_centers",
+   "fieldtype": "Table",
+   "label": "Cost Centers",
+   "options": "Employee Cost Center"
+  },
+  {
+   "fetch_from": "employee.grade",
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Employee Grade",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:46.267974",
+ "modified": "2022-05-06 12:18:36.972336",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -191,8 +222,10 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name, salary_structure",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "employee_name",
  "track_changes": 1
 }

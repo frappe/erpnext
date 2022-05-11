@@ -1,7 +1,0 @@
-erpnext/agriculture/doctype/land_unit/test_land_unit.js
-erpnext/agriculture/doctype/fertilizer/test_fertilizer.js
-erpnext/agriculture/doctype/water_analysis/test_water_analysis.js
-erpnext/agriculture/doctype/disease/test_disease.js
-erpnext/agriculture/doctype/soil_texture/test_soil_texture.js
-erpnext/agriculture/doctype/crop/test_crop.js
-erpnext/agriculture/doctype/crop_cycle/test_crop_cycle.js

@@ -88,7 +88,11 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				}
 
-				filters["warehouse"] = item.s_warehouse || item.t_warehouse;
+				// User could want to select a manually created empty batch (no warehouse)
+				// or a pre-existing batch
+				if (frm.doc.purpose != "Material Receipt") {
+					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
+				}
 
 				return {
 					query : "erpnext.controllers.queries.get_batch_no",
@@ -210,7 +214,7 @@ frappe.ui.form.on('Stock Entry', {
 
 		if (frm.doc.docstatus === 1) {
 			if (frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer' && frm.doc.per_transferred < 100) {
-				frm.add_custom_button('End Transit', function() {
+				frm.add_custom_button(__('End Transit'), function() {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.stock_entry.stock_entry.make_stock_in_entry",
 						frm: frm
@@ -421,6 +425,7 @@ frappe.ui.form.on('Stock Entry', {
 			'posting_time'		: frm.doc.posting_time,
 			'warehouse'			: cstr(item.s_warehouse) || cstr(item.t_warehouse),
 			'serial_no'			: item.serial_no,
+			'batch_no'          : item.batch_no,
 			'company'			: frm.doc.company,
 			'qty'				: item.s_warehouse ? -1*flt(item.transfer_qty) : flt(item.transfer_qty),
 			'voucher_type'		: frm.doc.doctype,
@@ -453,6 +458,7 @@ frappe.ui.form.on('Stock Entry', {
 						'warehouse': cstr(child.s_warehouse) || cstr(child.t_warehouse),
 						'transfer_qty': child.transfer_qty,
 						'serial_no': child.serial_no,
+						'batch_no': child.batch_no,
 						'qty': child.s_warehouse ? -1* child.transfer_qty : child.transfer_qty,
 						'posting_date': frm.doc.posting_date,
 						'posting_time': frm.doc.posting_time,
@@ -623,6 +629,12 @@ frappe.ui.form.on('Stock Entry Detail', {
 		frm.events.set_serial_no(frm, cdt, cdn, () => {
 			frm.events.get_warehouse_details(frm, cdt, cdn);
 		});
+
+		// set allow_zero_valuation_rate to 0 if s_warehouse is selected.
+		let item = frappe.get_doc(cdt, cdn);
+		if (item.s_warehouse) {
+			frappe.model.set_value(cdt, cdn, "allow_zero_valuation_rate", 0);
+		}
 	},
 
 	t_warehouse: function(frm, cdt, cdn) {
@@ -632,21 +644,6 @@ frappe.ui.form.on('Stock Entry Detail', {
 	basic_rate: function(frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 		frm.events.calculate_basic_amount(frm, item);
-	},
-
-	barcode: function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.barcode) {
-			frappe.call({
-				method: "erpnext.stock.get_item_details.get_item_code",
-				args: {"barcode": d.barcode },
-				callback: function(r) {
-					if (!r.exe){
-						frappe.model.set_value(cdt, cdn, "item_code", r.message);
-					}
-				}
-			});
-		}
 	},
 
 	uom: function(doc, cdt, cdn) {
@@ -676,6 +673,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
 				'transfer_qty'		: d.transfer_qty,
 				'serial_no'		: d.serial_no,
+				'batch_no'      : d.batch_no,
 				'bom_no'		: d.bom_no,
 				'expense_account'	: d.expense_account,
 				'cost_center'		: d.cost_center,
@@ -780,7 +778,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return {
 				"filters": {
 					"docstatus": 1,
-					"is_subcontracted": "Yes",
+					"is_subcontracted": 1,
 					"company": me.frm.doc.company
 				}
 			};
@@ -832,8 +830,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	scan_barcode() {
-		let transaction_controller= new erpnext.TransactionController({frm:this.frm});
-		transaction_controller.scan_barcode();
+		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
+		barcode_scanner.process_scan();
 	}
 
 	on_submit() {

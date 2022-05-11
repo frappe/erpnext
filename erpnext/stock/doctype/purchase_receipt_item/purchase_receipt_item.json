@@ -96,7 +96,6 @@
   "include_exploded_items",
   "batch_no",
   "rejected_serial_no",
-  "expense_account",
   "item_tax_rate",
   "item_weight_details",
   "weight_per_unit",
@@ -107,6 +106,10 @@
   "manufacturer",
   "column_break_16",
   "manufacturer_part_no",
+  "accounting_details_section",
+  "expense_account",
+  "column_break_102",
+  "provisional_expense_account",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -197,6 +200,7 @@
   },
   {
    "bold": 1,
+   "default": "0",
    "fieldname": "received_qty",
    "fieldtype": "Float",
    "label": "Received Quantity",
@@ -204,6 +208,7 @@
    "oldfieldtype": "Currency",
    "print_hide": 1,
    "print_width": "100px",
+   "read_only": 1,
    "reqd": 1,
    "width": "100px"
   },
@@ -219,8 +224,10 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "rejected_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Rejected Quantity",
    "oldfieldname": "rejected_qty",
    "oldfieldtype": "Currency",
@@ -327,7 +334,7 @@
   },
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -543,6 +550,7 @@
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Accepted Qty in Stock UOM",
+   "no_copy": 1,
    "oldfieldname": "stock_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -643,7 +651,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.is_subcontracted == 'Yes'",
+   "depends_on": "eval:parent.is_subcontracted",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "label": "Include Exploded Items",
@@ -882,7 +890,9 @@
    "fieldname": "received_stock_qty",
    "fieldtype": "Float",
    "label": "Received Qty in Stock UOM",
-   "print_hide": 1
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "eval: doc.uom != doc.stock_uom",
@@ -964,18 +974,35 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "fieldname": "provisional_expense_account",
+   "fieldtype": "Link",
+   "label": "Provisional Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "column_break_102",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-01 16:02:40.338597",
+ "modified": "2022-04-11 13:07:32.061402",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

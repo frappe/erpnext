@@ -23,7 +23,6 @@
   "status",
   "converted_by",
   "sales_stage",
-  "order_lost_reason",
   "first_response_time",
   "expected_closing",
   "next_contact",
@@ -43,10 +42,8 @@
   "items",
   "section_break_32",
   "base_total",
-  "base_grand_total",
   "column_break_33",
   "total",
-  "grand_total",
   "contact_info",
   "customer_address",
   "address_display",
@@ -64,7 +61,11 @@
   "transaction_date",
   "language",
   "amended_from",
-  "lost_reasons"
+  "lost_detail_section",
+  "lost_reasons",
+  "order_lost_reason",
+  "column_break_56",
+  "competitors"
  ],
  "fields": [
   {
@@ -154,10 +155,9 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.status===\"Lost\"",
    "fieldname": "order_lost_reason",
    "fieldtype": "Small Text",
-   "label": "Lost Reason",
+   "label": "Detailed Reason",
    "no_copy": 1,
    "read_only": 1
   },
@@ -409,6 +409,7 @@
    "width": "150px"
   },
   {
+   "depends_on": "eval:doc.status===\"Lost\"",
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
@@ -473,28 +474,30 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "base_grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "lost_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Lost Reasons"
   },
   {
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total",
-   "options": "currency",
+   "fieldname": "column_break_56",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "competitors",
+   "fieldtype": "Table MultiSelect",
+   "label": "Competitors",
+   "options": "Competitor Detail",
    "read_only": 1
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2021-09-06 10:02:18.609136",
+ "modified": "2022-01-29 19:32:26.382896",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -527,6 +530,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "subject_field": "title",
  "timeline_field": "party_name",
  "title_field": "title",

@@ -235,13 +235,13 @@
   {
    "fieldname": "actual_start_date",
    "fieldtype": "Data",
-   "label": "Actual Start Date",
+   "label": "Actual Start Date (via Time Sheet)",
    "read_only": 1
   },
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time (in Hours)",
+   "label": "Actual Time (in Hours via Time Sheet)",
    "read_only": 1
   },
   {
@@ -251,7 +251,7 @@
   {
    "fieldname": "actual_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date",
+   "label": "Actual End Date (via Time Sheet)",
    "oldfieldname": "act_completion_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -458,10 +458,11 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2021-04-28 16:36:11.654632",
+ "modified": "2022-01-29 13:58:27.712714",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -499,6 +500,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "project_name",
  "track_seen": 1

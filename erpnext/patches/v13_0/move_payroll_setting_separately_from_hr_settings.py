@@ -1,13 +1,13 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 
 
 def execute():
-    data = frappe.db.sql('''SELECT *
+	data = frappe.db.sql(
+		"""SELECT *
         FROM `tabSingles`
         WHERE
             doctype = "HR Settings"
@@ -22,7 +22,9 @@ def execute():
                 "payroll_based_on",
                 "password_policy"
             )
-            ''', as_dict=1)
+            """,
+		as_dict=1,
+	)
 
-    for d in data:
-        frappe.db.set_value("Payroll Settings", None, d.field, d.value)
+	for d in data:
+		frappe.db.set_value("Payroll Settings", None, d.field, d.value)

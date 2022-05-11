@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 
 import frappe
 from apiclient.discovery import build
@@ -20,5 +18,5 @@ class VideoSettings(Document):
 				build("youtube", "v3", developerKey=self.api_key)
 			except Exception:
 				title = _("Failed to Authenticate the API key.")
-				frappe.log_error(title + "\n\n" +  frappe.get_traceback(), title=title)
+				self.log_error("Failed to authenticate API key")
 				frappe.throw(title + " Please check the error logs.", title=_("Invalid Credentials"))
