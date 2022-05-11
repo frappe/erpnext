@@ -65,7 +65,6 @@ frappe.ui.form.on('POS Closing Entry', {
 		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user) {
 			reset_values(frm);
 			frm.trigger("set_opening_amounts");
-			frm.trigger("get_pos_invoices");
 		}
 	},
 
@@ -79,6 +78,7 @@ frappe.ui.form.on('POS Closing Entry', {
 						expected_amount: detail.opening_amount
 					});
 				})
+				frm.trigger("get_pos_invoices");
 			});
 	},
 
