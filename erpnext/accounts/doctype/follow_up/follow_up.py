@@ -86,19 +86,35 @@ class FollowUp(Document):
 		to_add_to_date = follow.no_of_days
 		total_due = 0
 		log_name = ""
+		details_list = []
 		# Creating logs
 		for i in trans_items:
 			print("thi is i ", type(trans_items) , i.keys())
 			
 			print(" In sidde follow up button click", i.get("follow_up"),  follow_up)
+
 			if i["__checked"] == 1 and i["follow_up"] == follow_up :
 			# if i["__checked"] == 1 and i["follow_up"] == follow_up and "due_date" in i.keys():
 				print(" In sidde follow up button click", i.get("follow_up", follow_up))
-				if "due_date" in i.keys():
+				if "due_date" in i.keys() and i["voucher_no"]:
 					comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + i["due_date"] + "    " + str(i["outstanding_amount"]) +" \n "
-				else: 				
-					comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + str(utils.today()) + "    " + str(i["outstanding_amount"]) +" \n "
-	
+					detail_dict = {"voucher_type": i["voucher_type"],
+									"voucher_no": i["voucher_no"] if i["voucher_no"] else "",
+									"due_date": i["due_date"],
+									"outstanding_amount" :i["outstanding_amount"],
+									"invoice_amount" : i["invoice_amount"],
+									"date": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "posting_date"),
+									"age": i["age"],
+									"currency": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "currency")}
+					details_list.append(detail_dict)
+				# else: 				
+				# 	comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + str(utils.today()) + "    " + str(i["outstanding_amount"]) +" \n "
+				# 	detail_dict = {"voucher_type": i["voucher_type"],
+				# 					"voucher_no": i["voucher_no"] if i["voucher_no"] else "",
+				# 					"due_date": str(utils.today()),
+				# 					"outstanding_amount" :i["outstanding_amount"]}
+				# 	details_list.append(detail_dict)
+
 				total_due += i["outstanding_amount"]
 				# print(" i[__checked]", i["__checked"], i["voucher_type"] )
 				new_log = frappe.new_doc("Follow Up Logs")
@@ -114,10 +130,56 @@ class FollowUp(Document):
 				new_log.save(ignore_permissions=True)
 				log_name = new_log.name
 
+				# Adding comment on Customer of Follow Up Performed for this invoice
+				if log_name:
+					print(" Creating Comment for invoice", )
+					comm = frappe.new_doc("Comment")
+					comm.subject = "Overdue payment reminder"
+					comm.comment_type = "Comment" 
+					comm.reference_doctype = "Sales Invoice"
+					comm.reference_name = i["voucher_no"]
+					comm.comment_by = frappe.session.user
+					comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
+					
+					comm.content = """<div class="ql-editor read-mode"><p>Follow Up Conducted for this Invoice""".format(comm_voucher_no)
+					comm.save(ignore_permissions=True)		
 
-				# continue from here
+
+				
 
 		if log_name:
+
+			msg = "<div> Dear <b> {0}</b> <br>".format(frappe.db.get_value('Customer', customer, "customer_name"))
+			msg += "<p>Exception made if there was a mistake of ours, it seems that the following amount stays unpaid."
+			msg += " Please, take appropriate measures in order to carry out this payment within next couple of days."
+			msg += " Would your payment have been carried out after this mail was sent, please ignore this message."
+			msg += " Do not hesitate to contact our accounting department.</p><br><br>"
+			msg += "Transaction Details <br>"
+			msg += "<div><table style = 'border: 1px solid black; widht: 100%; text-align:center '>"
+			msg += """<tr> 
+						<th style = 'border: 1px solid black; width : 20%' >Invoice</th>
+						<th style = 'border: 1px solid black; width : 15%'>Date</th>
+						<th style = 'border: 1px solid black; width : 15%'>Due Date</th>
+						<th style = 'border: 1px solid black; width : 10%'>Currency</th>
+						<th style = 'border: 1px solid black; width : 15%'>Invoice Amt</th>
+						<th style = 'border: 1px solid black; width : 15%'>Outstanding Amt</th>
+						<th style = 'border: 1px solid black; width : 10%'>Age</th>
+						</tr>
+					"""
+			for d in details_list: 		
+				msg += """<tr> 
+							<td style = 'border: 1px solid black; width : 20%'>{0}</th>
+							<td style = 'border: 1px solid black; width : 15%'>{1}</th>
+							<td style = 'border: 1px solid black; width : 15%'>{2}</th>
+							<td style = 'border: 1px solid black; width : 10%'>{3}</th>
+							<td style = 'border: 1px solid black; width : 15%'>{4}</th>
+							<td style = 'border: 1px solid black; width : 15%'>{5}</th>
+							<td style = 'border: 1px solid black; width : 10%'>{6} Days</th>
+							</tr>
+						""".format(d.get("voucher_no"), d.get("date"), d.get("due_date"), d.get("currency"), d.get("invoice_amount"), d.get("outstanding_amount"), d.get("age"))		
+
+			msg += "</table></div><br> Thank You"
+
 			email_template = frappe.get_doc("Email Template", follow.email_template)
 			primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
@@ -127,23 +189,13 @@ class FollowUp(Document):
 				emails.append(e.get('email_id'))
 				comm_email += e.get('email_id') +', '
 
-			# Adding comment on Customer of Follow Up Performed
-			comm = frappe.new_doc("Comment")
-			comm.subject = "Overdue payment reminder"
-			comm.comment_type = "Comment" 
-			comm.reference_doctype = "Customer"
-			comm.reference_name = customer
-			comm.comment_by = frappe.session.user
-			comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
-			comm.content = """<div class="ql-editor read-mode"><p>Follow Up Conducted for Following Transcations</p>
-							<p>{0}</p> </div>	""".format(comm_voucher_no)
-			comm.save(ignore_permissions=True)		
+			
 
 			#Creating new dict for args for email Template ,comment and ToDo
 			args = {}
 			args["customer"] = customer
 			args["customer_name"] = frappe.db.get_value('Customer', customer, "customer_name")
-			args["outstanding_details"] = comm_voucher_no
+			args["outstanding_details"] = details_list
 			args["total_due"] = "<b>"+ str(total_due) + "</b>"
 
 			# Sending Email
@@ -160,9 +212,12 @@ class FollowUp(Document):
 				if not email_id:
 					frappe.throw("Please set Email Id for Customer {0}".format(customer))
 				message = frappe.render_template(email_template.response, args)
+
+				
 				self.notify({
 				# for post in messages
-				"message": message,
+				# "message": message,
+				"message": msg,
 				"message_to": comm_email,
 				# for email
 				"subject": email_template.subject,
@@ -177,14 +232,14 @@ class FollowUp(Document):
 				new_comm.sender = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
 				new_comm.recipients = comm_email
 				# new_comm.content = message
-				new_comm.content = str(comm_voucher_no)
+				new_comm.content = msg
 				new_comm.communication_type	= "Communication"
 				new_comm.status = "Linked"
 				new_comm.sent_or_received = "Sent"      
 				new_comm.communication_date	= str(utils.today())
 				new_comm.sender_full_name = frappe.session.user_fullname
-				new_comm.reference_doctype = "Sales Invoice"
-				new_comm.reference_name = i["voucher_no"]
+				new_comm.reference_doctype = "Customer"
+				new_comm.reference_name = customer
 				new_comm.reference_owner = customer
 				new_comm.save(ignore_permissions=True)	
 
@@ -198,7 +253,7 @@ class FollowUp(Document):
 			if follow.manual_action == 1:
 
 				desc = "<div><p> Please {0} Customer  <b>{1}</b><br> ".format(follow.action_type, frappe.db.get_value('Customer', customer, "customer_name"))
-				desc += "For Following Overdues : {0} <br> ".format(args)
+				desc += "We have send a follow up as following: {0} <br> ".format(msg)
 				desc += "ACTION TODO : {0}</p> </div>".format(follow.action_to_do)
 				# print(" Adding ToDo")
 				todo = frappe.new_doc('ToDo')
@@ -231,7 +286,7 @@ class FollowUp(Document):
 			commit_name = ""
 			commit_link = ""
 			comp = frappe.defaults.get_user_default('Company')
-			currency = frappe.db.get_value("Company", comp , "default_currency")
+			currency = frappe.db.get_value("Sales Invoice", i["voucher_no"] , "currency")
 			primary_c, full_name = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name"])
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			emails = []
@@ -276,7 +331,7 @@ class FollowUp(Document):
 				commit_name = prc.name
 				commit_link= site+"/app/payment-receivable-commitment/"+ prc.name
 			
-				comment_v = "  Commitment Given on "+ str(utils.today()) +" for Sales Invoice- "+i["voucher_no"]+"  Invoice Amount- "+ str(i["invoice_amount"])
+				comment_v = "Commitment Given on "+ str(utils.today()) +" for Sales Invoice- "+i["voucher_no"]+"  Invoice Amount- "+ str(i["invoice_amount"])
 				# comment_v += "  Outstanding Amount- "+str(i["invoice_amount"])+"  Commitment Amount- "+ str(i["commited_amount"])+"  Commitment Date- "+str(i["commited_date"])
 			if 	"commited_date" in i.keys() and i["commited_amount"] > 0 and i["voucher_type"] == "Sales Invoice" and commit_name:
 				print(" After Creating Commit")
@@ -291,6 +346,7 @@ class FollowUp(Document):
 				comm.content = """<div class="ql-editor read-mode">
 								<p>{0}</p><br> <a href="{1}">Click here to view Commitment information. </a>  </div>	""".format(comment_v, commit_link)
 				comm.save(ignore_permissions=True)	
+				
 				content = "Dear <b>{2}</b><br><br>Commitment given the following Transcation <br>Commitment given on <b>{0}</b> for Sales Invoice <b>{1}</b><br>".format(str(utils.today()), i["voucher_no"], full_name)
 				content += "Invoice Amount <b>{4} {0}</b> and Outstanding Amount <b>{4} {1}</b> <br>You have given commitment of Amount <b>{4} {2} </b> on <b>{3}</b><br><br>".format(str(i["invoice_amount"]), str(i['outstanding_amount']), str(i["commited_amount"]), str(i["commited_date"]), currency)
 					
@@ -302,7 +358,7 @@ class FollowUp(Document):
 				comm.reference_name = customer
 				comm.comment_by = frappe.session.user
 				comm.comment_email = frappe.db.get_value("User",{"name":frappe.session.user}, "email")
-				comm.content = """<div class="ql-editor read-mode"><p> Commitment given the following  Transcation </p>
+				comm.content = """<div class="ql-editor read-mode"><p> Commitment given on the following  Transcation </p>
 								<p> {0} </p> <br> <a href="{1}">Click here to view Commitment information. </a>  </div>	""".format(content, commit_link)
 				comm.save(ignore_permissions=True)		
 
