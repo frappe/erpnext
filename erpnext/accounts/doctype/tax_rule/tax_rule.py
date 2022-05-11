@@ -163,17 +163,15 @@ def get_party_details(party, party_type, args=None):
 def get_tax_template(posting_date, args):
 	"""Get matching tax rule"""
 	args = frappe._dict(args)
-	from_date = to_date = posting_date
-	if not posting_date:
-		from_date = "1900-01-01"
-		to_date = "4000-01-01"
+	conditions = []
 
-	conditions = [
-		"""(from_date is null or from_date <= '{0}')
-		and (to_date is null or to_date >= '{1}')""".format(
-			from_date, to_date
+	if posting_date:
+		conditions.append(
+			f"""(from_date is null or from_date <= '{posting_date}')
+			and (to_date is null or to_date >= '{posting_date}')"""
 		)
-	]
+	else:
+		conditions.append("(from_date is null) and (to_date is null)")
 
 	conditions.append(
 		"ifnull(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category"))))

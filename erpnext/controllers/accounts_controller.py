@@ -2451,11 +2451,21 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row
 		)
 
-	def validate_quantity(child_item, d):
-		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
+	def validate_quantity(child_item, new_data):
+		if not flt(new_data.get("qty")):
+			frappe.throw(
+				_("Row # {0}: Quantity for Item {1} cannot be zero").format(
+					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
+				),
+				title=_("Invalid Qty"),
+			)
+
+		if parent_doctype == "Sales Order" and flt(new_data.get("qty")) < flt(child_item.delivered_qty):
 			frappe.throw(_("Cannot set quantity less than delivered quantity"))
 
-		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < flt(child_item.received_qty):
+		if parent_doctype == "Purchase Order" and flt(new_data.get("qty")) < flt(
+			child_item.received_qty
+		):
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
 	data = json.loads(trans_items)
