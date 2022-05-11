@@ -9,10 +9,10 @@ from erpnext.stock.utils import scan_barcode
 class StockTestMixin:
 	"""Mixin to simplfy stock ledger tests, useful for all stock transactions."""
 
-	def make_item(self, *args, **kwargs):
+	def make_item(self, item_code=None, properties=None, *args, **kwargs):
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		return make_item(*args, **kwargs)
+		return make_item(item_code, properties, *args, **kwargs)
 
 	def assertSLEs(self, doc, expected_sles, sle_filters=None):
 		"""Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""

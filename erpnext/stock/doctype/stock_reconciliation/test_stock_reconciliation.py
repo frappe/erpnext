@@ -13,6 +13,7 @@ from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	get_items,
@@ -643,6 +644,73 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			"Serial No", filters={"item_code": item_code, "warehouse": warehouse, "status": "Active"}
 		)
 		self.assertEqual(len(active_sr_no), 0)
+
+	def test_backdated_batched_reco(self):
+		item = self.make_item(properties={"has_batch_no": 1, "create_new_batch": 1}).name
+		warehouse = "_Test Warehouse - _TC"
+
+		frappe.flags.dont_execute_stock_reposts = True
+
+		today = nowdate()
+
+		# create current
+		b1 = make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, posting_date=today)
+		b2 = make_stock_entry(
+			item_code=item, to_warehouse=warehouse, qty=5, posting_date=add_days(today, 1)
+		)
+
+		batch1 = b1.items[0].batch_no
+		batch2 = b2.items[0].batch_no
+
+		# more b2
+		b2_2 = make_stock_entry(
+			item_code=item, to_warehouse=warehouse, qty=5, posting_date=add_days(today, 3), batch_no=batch2
+		)
+		self.assertSLEs(b2_2, [{"actual_qty": 5, "qty_after_transaction": 20}])
+
+		# more b1
+		b1_2 = make_stock_entry(
+			item_code=item, to_warehouse=warehouse, qty=5, posting_date=add_days(today, 4), batch_no=batch1
+		)
+		self.assertSLEs(b1_2, [{"actual_qty": 5, "qty_after_transaction": 25}])
+
+		# backdated reco for two batches
+		sr = create_stock_reconciliation(
+			item_code=item,
+			warehouse=warehouse,
+			batch_no=batch2,
+			qty=10,
+			posting_date=add_days(today, 2),
+			do_not_save=True,
+		)
+		sr.append(
+			"items",
+			{
+				"item_code": item,
+				"warehouse": warehouse,
+				"qty": 12,
+				"batch_no": batch1,
+			},
+		)
+		sr.save().submit()
+		self.assertSLEs(
+			sr,
+			[
+				{"actual_qty": -5, "qty_after_transaction": 10},
+				{"actual_qty": 10, "qty_after_transaction": 20},
+				{"actual_qty": -10, "qty_after_transaction": 10},
+				{"actual_qty": 12, "qty_after_transaction": 22},
+			],
+		)
+
+		# recheck incr of 7 in previous vouchers SLE qty
+		self.assertSLEs(b2_2, [{"actual_qty": 5, "qty_after_transaction": 27}])
+		self.assertSLEs(b1_2, [{"actual_qty": 5, "qty_after_transaction": 32}])
+
+		# cancel stock reco and things should be back to normal
+		sr.cancel()
+		self.assertSLEs(b2_2, [{"actual_qty": 5, "qty_after_transaction": 20}])
+		self.assertSLEs(b1_2, [{"actual_qty": 5, "qty_after_transaction": 25}])
 
 
 def create_batch_item_with_batch(item_name, batch_id):
