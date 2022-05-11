@@ -59,20 +59,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	update_table(data) {
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
-		let row = null;
 
 		const {item_code, barcode, batch_no, serial_no} = data;
 
-		// Check if batch is scanned and table has batch no field
-		let batch_no_scan =
-			Boolean(batch_no) && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
-
-		if (batch_no_scan) {
-			row = this.get_batch_row_to_modify(batch_no);
-		} else {
-			// serial or barcode scan
-			row = this.get_row_to_modify_on_scan(item_code);
-		}
+		let row = this.get_row_to_modify_on_scan(item_code, batch_no);
 
 		if (!row) {
 			if (this.dont_allow_new_row) {
@@ -179,20 +169,24 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return is_duplicate;
 	}
 
-	get_batch_row_to_modify(batch_no) {
-		// get row if batch already exists in table
-		const existing_batch_row = this.items_table.find((d) => d.batch_no === batch_no);
-		return existing_batch_row || this.get_existing_blank_row();
-	}
+	get_row_to_modify_on_scan(item_code, batch_no) {
+		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
-	get_row_to_modify_on_scan(item_code) {
-		// get an existing item row to increment or blank row to modify
-		const existing_item_row = this.items_table.filter((d) => {
-			const [qty, max_qty] = [d[this.qty_field], d[this.max_qty_field] || null];
-			return d.item_code === item_code && ((max_qty === null) || (qty < max_qty));
-		}).splice(0, 1).pop();
+		// Check if batch is scanned and table has batch no field
+		let is_batch_no_scan = batch_no && frappe.meta.has_field(cur_grid.doctype, this.batch_no_field);
+		let check_max_qty = this.max_qty_field && frappe.meta.has_field(cur_grid.doctype, this.max_qty_field);
 
-		return existing_item_row || this.get_existing_blank_row();
+		const matching_row = (row) => {
+			const item_match = row.item_code == item_code;
+			const batch_match = row.batch_no == batch_no;
+			const qty_in_limit = flt(row[this.qty_field]) < flt(row[this.max_qty_field]);
+
+			return item_match
+				&& (!is_batch_no_scan || batch_match)
+				&& (!check_max_qty || qty_in_limit)
+		}
+
+		return this.items_table.find(matching_row) || this.get_existing_blank_row();
 	}
 
 	get_existing_blank_row() {
