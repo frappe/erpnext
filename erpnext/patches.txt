@@ -370,4 +370,4 @@ erpnext.patches.v13_0.change_default_item_manufacturer_fieldtype
 erpnext.patches.v14_0.discount_accounting_separation
 erpnext.patches.v14_0.delete_employee_transfer_property_doctype
 erpnext.patches.v13_0.create_accounting_dimensions_in_orders
-erpnext.patches.v14_0.set_per_billed_in_return_delivery_note
+erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
