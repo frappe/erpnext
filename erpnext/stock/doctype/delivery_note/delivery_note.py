@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from datetime import datetime
 
 import frappe
 import frappe.defaults
@@ -296,6 +297,9 @@ class DeliveryNote(SellingController):
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
 	def update_status(self, status):
+		if status == 'Closed':
+			frappe.db.sql(f"update `tabDelivery Note` set closing_time = '{datetime.now()}' where name = '{self.name}'")
+			frappe.db.commit()
 		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
