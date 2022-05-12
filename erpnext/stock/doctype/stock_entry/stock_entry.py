@@ -2197,6 +2197,12 @@ class StockEntry(StockController):
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
+	def set_missing_values(self):
+		"Updates rate and availability of all the items of mapped doc."
+		self.set_transfer_qty()
+		self.set_actual_qty()
+		self.calculate_rate_and_amount()
+
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
@@ -2246,6 +2252,7 @@ def move_sample_to_retention_warehouse(company, items):
 def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.set_stock_entry_type()
+		target.set_missing_values()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ""
