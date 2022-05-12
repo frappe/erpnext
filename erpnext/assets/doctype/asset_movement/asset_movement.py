@@ -120,7 +120,7 @@ class AssetMovement(Document):
 					"Issuing cannot be done to a location. \
 				Please enter employee who has issued Asset {0}"
 				).format(asset.asset),
-				title="Incorrect Movement Purpose",
+				title=_("Incorrect Movement Purpose"),
 			)
 
 		if not asset.to_employee:
@@ -133,7 +133,7 @@ class AssetMovement(Document):
 					"Transferring cannot be done to an Employee. \
 				Please enter location where Asset {0} has to be transferred"
 				).format(asset.asset),
-				title="Incorrect Movement Purpose",
+				title=_("Incorrect Movement Purpose"),
 			)
 
 		if not asset.target_location:

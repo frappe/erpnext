@@ -52,7 +52,7 @@ class AssetRevaluation(Document):
 				_("Asset Revaluation cannot be posted before Asset's purchase date ({0}).").format(
 					frappe.bold(formatdate(purchase_date))
 				),
-				title="Invalid Date",
+				title=_("Invalid Date"),
 			)
 
 	def set_current_asset_value(self):
