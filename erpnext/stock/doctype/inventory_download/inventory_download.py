@@ -13,7 +13,6 @@ class InventoryDownload(Document):
 	def validate(self):
 		if self.docstatus == 1:
 			# self.apply_inventory_download()
-			self.set_valuation_rate()
 
 			for item in self.get("items"):
 				items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
@@ -22,6 +21,10 @@ class InventoryDownload(Document):
 					if self.warehouse == bin.warehouse:
 						doc = frappe.get_doc("Bin", bin.name)
 						self.create_stock_ledger_entry(item, doc.actual_qty, 0)
+	
+	def on_update(self):
+		if self.docstatus == 0:
+			self.set_valuation_rate()
 	
 	def on_cancel(self):
 		frappe.throw(_("Unable to cancel inventory downloads"))
@@ -77,15 +80,19 @@ class InventoryDownload(Document):
 			frappe.db.sql("Delete FROM `tabStock Ledger Entry` where name=%s", stock.name)
 	
 	def set_valuation_rate(self):
-		
+		valuation_rate = 0
+
 		for item in self.get("items"):
 			stock = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"item_code": item.item_code})
 
-			stock_reversed = list(reversed(stock))
-
 			doc = frappe.get_doc("Inventory Download Detail", item.name)
 			doc.db_set('valuation_rate', stock[0].valuation_rate, update_modified=False)
-	
+
+			valuation_rate += stock[0].valuation_rate
+		
+		self.total_valuation_rate = valuation_rate
+		self.db_set('total_valuation_rate', valuation_rate, update_modified=False)
+
 	def delete_bin(self):
 		for item in self.get("items"):
 			items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
