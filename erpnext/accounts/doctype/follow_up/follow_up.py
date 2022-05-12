@@ -180,7 +180,7 @@ class FollowUp(Document):
 
 			msg += "</table></div><br> Thank You"
 
-			email_template = frappe.get_doc("Email Template", follow.email_template)
+			# email_template = frappe.get_doc("Email Template", follow.email_template)
 			primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			comm_email = ""
@@ -202,7 +202,7 @@ class FollowUp(Document):
 			if follow.send_email == 1:
 				# print(" Send Email")
 				# email_template = follow.email_template
-				email_template = frappe.get_doc("Email Template", follow.email_template)
+				# email_template = frappe.get_doc("Email Template", follow.email_template)
 				primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
 				email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 				# emails = []
@@ -211,7 +211,7 @@ class FollowUp(Document):
 
 				if not email_id:
 					frappe.throw("Please set Email Id for Customer {0}".format(customer))
-				message = frappe.render_template(email_template.response, args)
+				# message = frappe.render_template(email_template.response, args)
 
 				
 				self.notify({
@@ -220,11 +220,11 @@ class FollowUp(Document):
 				"message": msg,
 				"message_to": comm_email,
 				# for email
-				"subject": email_template.subject,
+				"subject": follow.email_subject,
 				
 				})
 
-				message = frappe.render_template(email_template.response, args)
+				# message = frappe.render_template(email_template.response, args)
 				new_comm = frappe.new_doc("Communication")
 				
 				new_comm.subject = "Invoice Follow Up"

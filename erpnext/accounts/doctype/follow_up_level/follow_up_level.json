@@ -12,6 +12,7 @@
   "no_of_days",
   "actions_section",
   "send_email",
+  "email_subject",
   "email_template",
   "auto_execute",
   "column_break_6",
@@ -126,11 +127,18 @@
    "fieldtype": "Text",
    "label": "Action To Do",
    "mandatory_depends_on": "manual_action"
+  },
+  {
+   "depends_on": "send_email",
+   "fieldname": "email_subject",
+   "fieldtype": "Data",
+   "label": "Email Subject",
+   "mandatory_depends_on": "send_email"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-11 17:37:08.171566",
+ "modified": "2022-05-12 10:50:55.742304",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Level",
