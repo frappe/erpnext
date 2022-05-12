@@ -49,8 +49,8 @@ class AssetRevaluation(Document):
 	def validate_transaction_date_against_purchase_date(self, purchase_date):
 		if getdate(self.date) < getdate(purchase_date):
 			frappe.throw(
-				_("Asset Revaluation cannot be posted before Asset's purchase date: <b>{0}</b>.").format(
-					formatdate(purchase_date)
+				_("Asset Revaluation cannot be posted before Asset's purchase date ({0}).").format(
+					frappe.bold(formatdate(purchase_date))
 				),
 				title="Invalid Date",
 			)
