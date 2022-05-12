@@ -31,43 +31,61 @@ def execute(filters=None):
 			data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, 0)
 
 	chart = get_chart_data(filters, columns, data)
-
 	return columns, data, None, chart
 
 
 def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
-	for account, monthwise_data in dimension_items.items():
-		row = [dimension, account]
-		totals = [0, 0, 0]
-		for year in get_fiscal_years(filters):
-			last_total = 0
-			for relevant_months in period_month_ranges:
-				period_data = [0, 0, 0]
-				for month in relevant_months:
-					if monthwise_data.get(year[0]):
-						month_data = monthwise_data.get(year[0]).get(month, {})
-						for i, fieldname in enumerate(["target", "actual", "variance"]):
-							value = flt(month_data.get(fieldname))
-							period_data[i] += value
-							totals[i] += value
+	fiscal_years = get_fiscal_years(filters)
+	for account, raw_data in dimension_items.items():
+		for ele in raw_data:
+			row = [dimension, account, ""]
+			totals = [0, 0, 0]
 
-				period_data[0] += last_total
+			if isinstance(ele, tuple):
+				monthwise_data = raw_data[ele]
+				row[2] = ele[1]  # row[2] is dimension position and ele[1] is dimension value
+			else:
+				monthwise_data = raw_data
 
-				if DCC_allocation:
-					period_data[0] = period_data[0] * (DCC_allocation / 100)
-					period_data[1] = period_data[1] * (DCC_allocation / 100)
+			get_month_wise_data(
+				filters, fiscal_years, period_month_ranges, row, totals, monthwise_data, DCC_allocation
+			)
 
-				if filters.get("show_cumulative"):
-					last_total = period_data[0] - period_data[1]
+			totals[2] = totals[0] - totals[1]
+			if filters["period"] != "Yearly":
+				row += totals
 
-				period_data[2] = period_data[0] - period_data[1]
-				row += period_data
-		totals[2] = totals[0] - totals[1]
-		if filters["period"] != "Yearly":
-			row += totals
-		data.append(row)
+			data.append(row)
 
 	return data
+
+
+def get_month_wise_data(
+	filters, fiscal_years, period_month_ranges, row, totals, monthwise_data, DCC_allocation
+):
+	for year in fiscal_years:
+		last_total = 0
+		for relevant_months in period_month_ranges:
+			period_data = [0, 0, 0]
+			for month in relevant_months:
+				if monthwise_data.get(year[0]):
+					month_data = monthwise_data.get(year[0]).get(month, {})
+					for i, fieldname in enumerate(["target", "actual", "variance"]):
+						value = flt(month_data.get(fieldname))
+						period_data[i] += value
+						totals[i] += value
+
+			period_data[0] += last_total
+
+			if DCC_allocation:
+				period_data[0] = period_data[0] * (DCC_allocation / 100)
+				period_data[1] = period_data[1] * (DCC_allocation / 100)
+
+			if filters.get("show_cumulative"):
+				last_total = period_data[0] - period_data[1]
+
+			period_data[2] = period_data[0] - period_data[1]
+			row += period_data
 
 
 def get_columns(filters):
@@ -84,6 +102,11 @@ def get_columns(filters):
 			"fieldname": "Account",
 			"fieldtype": "Link",
 			"options": "Account",
+			"width": 150,
+		},
+		{
+			"label": _("Dimension"),
+			"fieldname": "Dimension",
 			"width": 150,
 		},
 	]
@@ -181,6 +204,8 @@ def get_dimension_target_details(filters):
 				b.monthly_distribution,
 				ba.account,
 				ba.budget_amount,
+				ba.dimension_type,
+				ba.dimension,
 				b.fiscal_year
 			from
 				`tabBudget` b,
@@ -238,18 +263,21 @@ def get_target_distribution_details(filters):
 
 
 # Get actual details from gl entry
-def get_actual_details(name, filters):
+def get_actual_details(budget, filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
-	cond = ""
+	sub_cond, condition = "", ""
 
 	if filters.get("budget_against") == "Cost Center":
-		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", name, ["lft", "rgt"])
-		cond = """
+		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", budget.budget_against, ["lft", "rgt"])
+		sub_cond = """
 				and lft >= "{lft}"
 				and rgt <= "{rgt}"
 			""".format(
 			lft=cc_lft, rgt=cc_rgt
 		)
+
+	if budget.dimension_type:
+		condition = " and gl.{0} = '{1}'".format(frappe.scrub(budget.dimension_type), budget.dimension)
 
 	ac_details = frappe.db.sql(
 		"""
@@ -278,15 +306,19 @@ def get_actual_details(name, filters):
 						`tab{tab}`
 					where
 						name = gl.{budget_against}
-						{cond}
+						{sub_cond}
 				)
+				{condition}
 				group by
 					gl.name
 				order by gl.fiscal_year
 		""".format(
-			tab=filters.budget_against, budget_against=budget_against, cond=cond
+			tab=filters.budget_against,
+			budget_against=budget_against,
+			sub_cond=sub_cond,
+			condition=condition,
 		),
-		(filters.from_fiscal_year, filters.to_fiscal_year, name),
+		(filters.from_fiscal_year, filters.to_fiscal_year, budget.budget_against),
 		as_dict=1,
 	)
 
@@ -304,15 +336,27 @@ def get_dimension_account_month_map(filters):
 	cam_map = {}
 
 	for ccd in dimension_target_details:
-		actual_details = get_actual_details(ccd.budget_against, filters)
-
+		actual_details = get_actual_details(ccd, filters)
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime("%B")
-			cam_map.setdefault(ccd.budget_against, {}).setdefault(ccd.account, {}).setdefault(
-				ccd.fiscal_year, {}
-			).setdefault(month, frappe._dict({"target": 0.0, "actual": 0.0}))
 
-			tav_dict = cam_map[ccd.budget_against][ccd.account][ccd.fiscal_year][month]
+			if ccd.dimension_type:
+				dimension_key = (frappe.scrub(ccd.dimension_type), ccd.dimension)
+
+				cam_map.setdefault(ccd.budget_against, {}).setdefault(ccd.account, {}).setdefault(
+					dimension_key, {}
+				).setdefault(ccd.fiscal_year, {}).setdefault(
+					month, frappe._dict({"target": 0.0, "actual": 0.0})
+				)
+
+				tav_dict = cam_map[ccd.budget_against][ccd.account][dimension_key][ccd.fiscal_year][month]
+			else:
+				cam_map.setdefault(ccd.budget_against, {}).setdefault(ccd.account, {}).setdefault(
+					ccd.fiscal_year, {}
+				).setdefault(month, frappe._dict({"target": 0.0, "actual": 0.0}))
+
+				tav_dict = cam_map[ccd.budget_against][ccd.account][ccd.fiscal_year][month]
+
 			month_percentage = (
 				tdd.get(ccd.monthly_distribution, {}).get(month, 0) if ccd.monthly_distribution else 100.0 / 12
 			)
@@ -371,7 +415,7 @@ def get_chart_data(filters, columns, data):
 
 	budget_values, actual_values = [0] * no_of_columns, [0] * no_of_columns
 	for d in data:
-		values = d[2:]
+		values = d[3:]
 		index = 0
 
 		for i in range(no_of_columns):

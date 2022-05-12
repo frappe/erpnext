@@ -117,22 +117,28 @@ def add_dimension_to_budget_doctype(df, doc):
 
 	create_custom_field("Budget", df, ignore_validate=True)
 
-	property_setter = frappe.db.exists("Property Setter", "Budget-budget_against-options")
+	for property_name in ["Budget-budget_against-options", "Budget Account-dimension_type-options"]:
+		set_property(property_name, doc)
+
+
+def set_property(property_name, doc):
+	doc_type, field_name, field_property = property_name.split("-")
+	property_setter = frappe.db.exists("Property Setter", property_name)
 
 	if property_setter:
-		property_setter_doc = frappe.get_doc("Property Setter", "Budget-budget_against-options")
+		property_setter_doc = frappe.get_doc("Property Setter", property_name)
 		property_setter_doc.value = property_setter_doc.value + "\n" + doc.document_type
 		property_setter_doc.save()
 
-		frappe.clear_cache(doctype="Budget")
+		frappe.clear_cache(doctype=doc_type)
 	else:
 		frappe.get_doc(
 			{
 				"doctype": "Property Setter",
 				"doctype_or_field": "DocField",
-				"doc_type": "Budget",
-				"field_name": "budget_against",
-				"property": "options",
+				"doc_type": doc_type,
+				"field_name": field_name,
+				"property": field_property,
 				"property_type": "Text",
 				"value": "\nCost Center\nProject\n" + doc.document_type,
 			}

@@ -122,7 +122,7 @@ class Budget(Document):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
-	print(args)
+
 	if args.get("company") and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
@@ -398,7 +398,7 @@ def get_actual_expense(args, budget):
 			(args),
 		)[0][0]
 	)  # nosec
-	print(amount)
+
 	return amount
 
 
