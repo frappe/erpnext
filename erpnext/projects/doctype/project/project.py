@@ -948,13 +948,18 @@ def get_stock_items(project, get_sales_invoice=True):
 		select p.name as sales_order,
 			p.transaction_date, i.idx,
 			i.item_code, i.item_name, i.description, i.item_group, i.is_stock_item,
-			i.qty - i.delivered_qty as qty, i.qty as ordered_qty, i.uom,
-			i.base_net_amount * (i.qty - i.delivered_qty) / i.qty as net_amount,
+			if(i.is_stock_item = 1, i.qty - i.delivered_qty, i.qty) as qty,
+			i.qty as ordered_qty,
+			i.delivered_qty,
+			i.uom,
+			if(i.is_stock_item = 1, i.base_net_amount * (i.qty - i.delivered_qty) / i.qty, i.base_net_amount) as net_amount,
 			i.base_net_rate as net_rate,
 			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
-		where p.docstatus = 1 and {0} and i.delivered_qty < i.qty and i.qty > 0
+		where p.docstatus = 1 and {0}
+			and (i.delivered_qty < i.qty or i.is_stock_item = 0)
+			and i.qty > 0
 			and (p.status != 'Closed' or exists(select sum(si_item.amount)
 				from `tabSales Invoice Item` si_item
 				where si_item.docstatus = 1 and si_item.sales_order_item = i.name and ifnull(si_item.delivery_note, '') = ''
@@ -964,12 +969,27 @@ def get_stock_items(project, get_sales_invoice=True):
 	""".format(is_material_condition), project.name, as_dict=1)
 	set_sales_data_customer_amounts(so_data, project)
 
+	sinv_data = frappe.db.sql("""
+		select p.name as sales_invoice, i.delivery_note, i.sales_order,
+			p.posting_date, p.posting_time, i.idx,
+			i.item_code, i.item_name, i.description, i.item_group, i.is_stock_item,
+			i.qty, i.uom,
+			i.base_net_amount as net_amount,
+			i.base_net_rate as net_rate,
+			i.item_tax_detail, p.conversion_rate
+		from `tabSales Invoice Item` i
+		inner join `tabSales Invoice` p on p.name = i.parent
+		where p.docstatus = 1 and {0} and ifnull(i.sales_order, '') = '' and ifnull(i.delivery_note, '') = ''
+			and (p.project = %s or i.project = %s)
+	""".format(is_material_condition), [project.name, project.name], as_dict=1)
+	set_sales_data_customer_amounts(sinv_data, project)
+
 	stock_data = get_items_data_template()
 	parts_data = get_items_data_template()
 	lubricants_data = get_items_data_template()
 
 	lubricants_item_groups = project.get_item_groups_subtree(project.lubricants_item_group)
-	for d in dn_data + so_data:
+	for d in dn_data + so_data + sinv_data:
 		stock_data['items'].append(d)
 
 		if d.item_group in lubricants_item_groups:
