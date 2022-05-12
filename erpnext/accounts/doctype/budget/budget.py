@@ -62,7 +62,11 @@ class Budget(Document):
 			)
 
 	def validate_accounts(self):
-		account_list = []
+		account_dict = {}
+
+		def _throw(account):
+			frappe.throw(_("Account {0} has been entered multiple times").format(account))
+
 		for d in self.get("accounts"):
 			if d.account:
 				account_details = frappe.db.get_value(
@@ -80,10 +84,16 @@ class Budget(Document):
 						)
 					)
 
-				if d.account in account_list:
-					frappe.throw(_("Account {0} has been entered multiple times").format(d.account))
+				if d.account in account_dict:
+					if d.dimension:
+						if not account_dict[d.account] or d.dimension in account_dict[d.account]:
+							_throw(d.account)
+						else:
+							account_dict[d.account].append(d.dimension)
+					else:
+						_throw(d.account)
 				else:
-					account_list.append(d.account)
+					account_dict[d.account] = [d.dimension] if d.dimension else []
 
 	def set_null_value(self):
 		if self.budget_against == "Cost Center":
@@ -112,7 +122,7 @@ class Budget(Document):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
-
+	print(args)
 	if args.get("company") and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
@@ -157,8 +167,8 @@ def validate_expense_against_budget(args):
 			budget_records = frappe.db.sql(
 				"""
 				select
-					b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
-					ifnull(b.applicable_on_material_request, 0) as for_material_request,
+					b.{budget_against_field} as budget_against, ba.budget_amount, ba.dimension_type, ba.dimension,
+					b.monthly_distribution, ifnull(b.applicable_on_material_request, 0) as for_material_request,
 					ifnull(applicable_on_purchase_order, 0) as for_purchase_order,
 					ifnull(applicable_on_booking_actual_expenses,0) as for_actual_expenses,
 					b.action_if_annual_budget_exceeded, b.action_if_accumulated_monthly_budget_exceeded,
@@ -195,7 +205,13 @@ def validate_budget_records(args, budget_records):
 				args["month_end_date"] = get_last_day(args.posting_date)
 
 				compare_expense_with_budget(
-					args, budget_amount, _("Accumulated Monthly"), monthly_action, budget.budget_against, amount
+					args,
+					budget_amount,
+					_("Accumulated Monthly"),
+					monthly_action,
+					budget.budget_against,
+					budget,
+					amount,
 				)
 
 			if (
@@ -204,12 +220,20 @@ def validate_budget_records(args, budget_records):
 				and yearly_action != monthly_action
 			):
 				compare_expense_with_budget(
-					args, flt(budget.budget_amount), _("Annual"), yearly_action, budget.budget_against, amount
+					args,
+					flt(budget.budget_amount),
+					_("Annual"),
+					yearly_action,
+					budget.budget_against,
+					budget,
+					amount,
 				)
 
 
-def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against, amount=0):
-	actual_expense = amount or get_actual_expense(args)
+def compare_expense_with_budget(
+	args, budget_amount, action_for, action, budget_against, budget, amount=0
+):
+	actual_expense = amount or get_actual_expense(args, budget)
 	if actual_expense > budget_amount:
 		diff = actual_expense - budget_amount
 		currency = frappe.get_cached_value("Company", args.company, "default_currency")
@@ -320,15 +344,23 @@ def get_other_condition(args, budget, for_doc):
 			end_date,
 		)
 
+	if budget.dimension_type:
+		condition += " and child.%s = '%s'" % (frappe.scrub(budget.dimension_type), budget.dimension)
+
 	return condition
 
 
-def get_actual_expense(args):
+def get_actual_expense(args, budget):
 	if not args.budget_against_doctype:
 		args.budget_against_doctype = frappe.unscrub(args.budget_against_field)
 
 	budget_against_field = args.get("budget_against_field")
 	condition1 = " and gle.posting_date <= %(month_end_date)s" if args.get("month_end_date") else ""
+
+	if budget.dimension_type:
+		condition1 += " and gle.{0} = '{1}' ".format(
+			frappe.scrub(budget.dimension_type), budget.dimension
+		)
 
 	if args.is_tree:
 		lft_rgt = frappe.db.get_value(
@@ -366,7 +398,7 @@ def get_actual_expense(args):
 			(args),
 		)[0][0]
 	)  # nosec
-
+	print(amount)
 	return amount
 
 

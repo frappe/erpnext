@@ -65,9 +65,8 @@ def get_filter_condition(report_filters):
 	for field in ["name", "production_item", "company", "status"]:
 		value = report_filters.get(field)
 		if value:
-			key = f"`{field}`"
+			key = f"{field}"
 			filters.update({key: value})
-
 	return filters
 
 
