@@ -327,7 +327,7 @@ class BaseAsset(AccountsController):
 			)
 
 			if row:
-				message += _(" in Row {} of the Template Details table.").format(row)
+				message += " " + _("in Row {} of the Template Details table.").format(row)
 
 			frappe.throw(message, title=_("Invalid Depreciation Posting Start Date"))
 
@@ -412,7 +412,7 @@ class BaseAsset(AccountsController):
 			message = _("Please enter Depreciation Template in the Template Details table")
 
 			if row:
-				message = _("Row {0}: ").format(row.idx) + message
+				message = _("Row {0}:").format(row.idx) + " " + message
 
 			frappe.throw(message, title=_("Missing Depreciation Template"))
 
