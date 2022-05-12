@@ -1,53 +1,62 @@
 {
  "allow_import": 1,
- "autoname": "TASK-.YYYY.-.#####",
+ "autoname": "naming_series:",
  "creation": "2013-01-29 19:25:50",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "subject",
   "project",
   "issue",
+  "column_break_5",
   "type",
-  "is_group",
+  "department",
   "column_break0",
-  "status",
+  "company",
   "priority",
   "task_weight",
+  "status_section",
+  "status",
+  "progress",
+  "column_break_23",
+  "review_date",
+  "reviewed_by",
+  "column_break_25",
+  "closing_date",
   "completed_by",
-  "color",
-  "parent_task",
   "sb_timeline",
   "exp_start_date",
-  "expected_time",
+  "act_start_date",
   "column_break_11",
   "exp_end_date",
-  "progress",
+  "act_end_date",
+  "column_break_21",
+  "expected_time",
+  "actual_time",
+  "section_break_10",
+  "parent_task",
+  "is_group",
+  "column_break_33",
+  "color",
   "is_milestone",
+  "column_break_16",
   "sb_details",
   "description",
   "sb_depends_on",
   "depends_on",
   "depends_on_tasks",
-  "sb_actual",
-  "act_start_date",
-  "actual_time",
-  "column_break_15",
-  "act_end_date",
   "sb_costing",
   "total_costing_amount",
+  "column_break_44",
   "total_expense_claim",
   "column_break_20",
   "total_billing_amount",
   "sb_more_info",
-  "review_date",
-  "closing_date",
-  "column_break_22",
-  "department",
-  "company",
   "lft",
   "rgt",
+  "column_break_22",
   "old_parent"
  ],
  "fields": [
@@ -114,6 +123,7 @@
    "options": "Open\nWorking\nPending Review\nOverdue\nCompleted\nCancelled"
   },
   {
+   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -139,8 +149,6 @@
    "search_index": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.__islocal",
    "fieldname": "sb_timeline",
    "fieldtype": "Section Break",
    "label": "Timeline"
@@ -183,7 +191,8 @@
    "fieldname": "progress",
    "fieldtype": "Percent",
    "label": "% Progress",
-   "no_copy": 1
+   "no_copy": 1,
+   "precision": "1"
   },
   {
    "default": "0",
@@ -201,7 +210,6 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_preview": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
@@ -209,6 +217,8 @@
    "width": "300px"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "depends_on",
    "fieldname": "sb_depends_on",
    "fieldtype": "Section Break",
    "label": "Dependencies",
@@ -228,13 +238,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "sb_actual",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Column Break",
-   "print_width": "50%",
-   "width": "50%"
-  },
-  {
    "fieldname": "act_start_date",
    "fieldtype": "Date",
    "label": "Actual Start Date (via Time Sheet)",
@@ -243,14 +246,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "actual_time",
    "fieldname": "actual_time",
    "fieldtype": "Float",
    "label": "Actual Time (in hours)",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "act_end_date",
@@ -299,7 +299,6 @@
    "label": "More Info"
   },
   {
-   "depends_on": "eval:doc.status == \"Closed\" || doc.status == \"Pending Review\"",
    "fieldname": "review_date",
    "fieldtype": "Date",
    "label": "Review Date",
@@ -307,7 +306,6 @@
    "oldfieldtype": "Date"
   },
   {
-   "depends_on": "eval:doc.status == \"Closed\"",
    "fieldname": "closing_date",
    "fieldtype": "Date",
    "label": "Closing Date",
@@ -360,13 +358,67 @@
    "label": "Completed By",
    "no_copy": 1,
    "options": "User"
+  },
+  {
+   "default": "TASK-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "TASK-"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break",
+   "label": "Style and Organization"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reviewed_by",
+   "fieldtype": "Link",
+   "label": "Reviewed By",
+   "no_copy": 1,
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-check",
  "idx": 1,
  "is_tree": 1,
  "max_attachments": 5,
- "modified": "2020-07-03 12:36:04.960457",
+ "modified": "2022-05-12 16:01:03.943809",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

@@ -43,6 +43,7 @@ frappe.ui.form.on("Timesheet", {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		if(frm.doc.docstatus==1) {
 			if(frm.doc.per_billed < 100 && frm.doc.total_billable_hours && frm.doc.total_billable_hours > frm.doc.total_billed_hours){
 				frm.add_custom_button(__('Create Sales Invoice'), function() { frm.trigger("make_invoice") },

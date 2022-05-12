@@ -32,6 +32,7 @@ frappe.ui.form.on("Task", {
 	},
 
 	refresh: function (frm) {
+		erpnext.hide_company();
 		frm.set_query("parent_task", { "is_group": 1 });
 	},
 
