@@ -367,7 +367,14 @@ def set_credit_limit(customer, company, credit_limit):
 		customer.credit_limits[-1].db_insert()
 
 
-def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+def create_internal_customer(
+	customer_name=None, represents_company=None, allowed_to_interact_with=None
+):
+	if not customer_name:
+		customer_name = represents_company
+	if not allowed_to_interact_with:
+		allowed_to_interact_with = represents_company
+
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc(
 			{

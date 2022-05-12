@@ -570,14 +570,11 @@ class TestDeliveryNote(FrappeTestCase):
 			customer=customer_name,
 			cost_center="Main - TCP1",
 			expense_account="Cost of Goods Sold - TCP1",
-			do_not_submit=True,
 			qty=5,
 			rate=500,
 			warehouse="Stores - TCP1",
 			target_warehouse=target_warehouse,
 		)
-
-		dn.submit()
 
 		# qty after delivery
 		actual_qty_at_source = get_qty_after_transaction(warehouse="Stores - TCP1")
@@ -999,6 +996,51 @@ class TestDeliveryNote(FrappeTestCase):
 		dn2.reload()
 		self.assertEqual(dn2.items[0].returned_qty, 0)
 		self.assertEqual(dn2.per_billed, 100)
+
+	def test_internal_transfer_with_valuation_only(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		target = "Stores - _TC"
+		company = "_Test Company"
+		customer = create_internal_customer(represents_company=company)
+		rate = 42
+
+		frappe.get_doc(
+			{
+				"item_code": item,
+				"price_list": "Standard Selling",
+				"price_list_rate": 1000,
+				"doctype": "Item Price",
+			}
+		).insert()
+
+		make_stock_entry(target=warehouse, qty=5, basic_rate=rate, item_code=item)
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=5,
+			rate=500,
+			warehouse=warehouse,
+			target_warehouse=target,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+
+		self.assertEqual(dn.items[0].rate, 500)  # haven't saved yet
+		dn.save()
+
+		# rate should reset to incoming rate
+		self.assertEqual(dn.items[0].rate, rate)
+
+		# rate should reset again if discounts are fiddled with
+		dn.items[0].margin_type = "Amount"
+		dn.items[0].margin_rate_or_amount = 50
+		dn.save()
+
+		self.assertEqual(dn.items[0].rate, rate)
 
 
 def create_delivery_note(**args):
