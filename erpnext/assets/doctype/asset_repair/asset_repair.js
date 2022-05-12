@@ -42,7 +42,7 @@ frappe.ui.form.on('Asset Repair', {
 		frm.trigger('toggle_serial_no_and_num_of_assets');
 
 		if (frm.doc.docstatus) {
-			frm.add_custom_button(_('View General Ledger'), function () {
+			frm.add_custom_button(__('View General Ledger'), function () {
 				frappe.route_options = {
 					'voucher_no': frm.doc.name
 				};
