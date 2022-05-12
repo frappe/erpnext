@@ -232,6 +232,7 @@ class SalesForUser(Document):
 		conditions += '"creation": ["between", ["{}", "{}"]]'.format(self.start_date, self.final_date)
 		conditions += ', "naming_series": "{}"'.format(self.prefix)
 		conditions += ', "company": "{}"'.format(self.company)
+		conditions += ', "status": ["!=", "Canceled"]'
 		if self.user != None:
 			conditions += ', "cashier": "{}"'.format(self.user)
 		conditions += '}'
