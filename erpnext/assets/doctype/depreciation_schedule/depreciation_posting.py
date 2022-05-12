@@ -20,6 +20,8 @@ def post_all_depreciation_entries(date=None):
 
 	for schedule in get_schedules_that_need_posting(date):
 		post_depreciation_entries(schedule, date)
+
+		# since values in child tables of submitted docs are getting updated directly // no semgrep
 		frappe.db.commit()
 
 	schedules_that_failed_posting = get_schedules_that_failed_to_post_depr_entries()
