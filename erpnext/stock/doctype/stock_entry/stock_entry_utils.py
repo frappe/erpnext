@@ -133,6 +133,7 @@ def make_stock_entry(**args):
 	)
 
 	s.set_stock_entry_type()
+
 	if not args.do_not_save:
 		s.insert()
 		if not args.do_not_submit:
