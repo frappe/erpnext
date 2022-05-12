@@ -722,9 +722,7 @@ def process(data):
 			frappe.db.commit()
 		except frappe.ValidationError:
 			frappe.db.rollback()
-			frappe.db.begin()
-			frappe.log_error(frappe.get_traceback())
-			frappe.db.commit()
+			subscription.log_error("Subscription failed")
 
 
 @frappe.whitelist()

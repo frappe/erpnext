@@ -17,7 +17,7 @@ def execute():
 			"""
 			)
 		except Exception as e:
-			frappe.log_error(e, title="Patch Migration Failed")
+			frappe.log_error("Bank to Bank Account patch migration failed")
 
 	frappe.reload_doc("accounts", "doctype", "bank_account")
 	frappe.reload_doc("accounts", "doctype", "payment_request")
