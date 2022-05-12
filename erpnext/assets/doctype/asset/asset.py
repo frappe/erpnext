@@ -355,7 +355,7 @@ class Asset(AccountsController):
 						# In pro rata case, for first and last depreciation, month range would be different
 						if (has_pro_rata and n == 0 and not self.number_of_depreciations_booked) or (
 							has_pro_rata and n == cint(number_of_pending_depreciations) - 1
- 						):
+						):
 							month_range = months
 						else:
 							month_range = finance_book.frequency_of_depreciation
