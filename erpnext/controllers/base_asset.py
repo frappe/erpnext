@@ -191,9 +191,7 @@ class BaseAsset(AccountsController):
 
 			frappe.throw(
 				_(
-					"The Number of Assets to be created needs to be decreased. \
-				A maximum of {0} Assets can be created now, as only {1} were purchased in {2}, \
-				of which {3} have already been created."
+					"The Number of Assets to be created needs to be decreased. A maximum of {0} Assets can be created now, as only {1} were purchased in {2}, of which {3} have already been created."
 				).format(
 					frappe.bold(int(max_num_of_assets)),
 					frappe.bold(int(num_of_items_in_purchase_doc)),
@@ -321,8 +319,7 @@ class BaseAsset(AccountsController):
 
 		if self.depreciation_posting_start_date > latest_possible_depr_posting_start_date:
 			message = _(
-				"Depreciation Posting Start Date cannot be after {0} as the Available for Use Date  \
-				is {1} and the Frequency of Depreciation is {2}"
+				"Depreciation Posting Start Date cannot be after {0} as the Available for Use Date is {1} and the Frequency of Depreciation is {2}"
 			).format(
 				frappe.bold(format_date(latest_possible_depr_posting_start_date)),
 				frappe.bold(format_date(self.available_for_use_date)),
@@ -812,8 +809,7 @@ class BaseAsset(AccountsController):
 		if self.status in ("In Maintenance", "Out of Order"):
 			frappe.throw(
 				_(
-					"There are active maintenance or repairs against the asset. \
-					You must complete all of them before cancelling the asset."
+					"There are active maintenance or repairs against the asset. You must complete all of them before cancelling the asset."
 				)
 			)
 
@@ -834,8 +830,7 @@ class BaseAsset(AccountsController):
 		if movement_drafts:
 			frappe.msgprint(
 				_(
-					"The following Asset Movements drafts are linked with {0}: {1}. \
-				Kindly delete the Movements or remove the Asset from them to avoid raising errors."
+					"The following Asset Movements drafts are linked with {0}: {1}. Kindly delete the Movements or remove the Asset from them to avoid raising errors."
 				).format(self.name, movement_drafts)
 			)
 
