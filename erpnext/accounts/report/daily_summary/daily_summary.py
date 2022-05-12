@@ -367,6 +367,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "status": ["!=", "Canceled"]'
 	conditions += '}'
 
 	return conditions
