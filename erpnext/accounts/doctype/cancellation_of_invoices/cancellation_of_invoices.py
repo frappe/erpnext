@@ -9,31 +9,34 @@ from frappe import _
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 from frappe.utils.data import money_in_words
+from frappe.utils import flt
 
 class CancellationOfInvoices(Document):
 	def validate(self):
-		self.in_words = money_in_words(self.grand_total)	
+		self.in_words = money_in_words(self.grand_total)
+		total_cost = self.get_cost()
 		if self.docstatus == 0:
 			if self.grand_total > 0:
 				items = frappe.get_all("Cancellation Of Invoices Item", ["*"], filters = {"parent": self.name})
 				self.delete_items(items)
 
 			self.get_items()
-		
+
 		if self.docstatus == 1:
 			self.add_bin()
 			# self.delete_gl_entry()
 			self.modified_sale_invoice()
-	
+			# cost = super(CancellationOfInvoices, self).get_cost()
+
 	def on_cancel(self):
 		frappe.throw(_("Unable to cancel Cancellation Of Invoice"))
 		self.delete_stock_ledger_entry()
 		# frappe.throw(_("An annulment cannot be canceled."))
-	
+
 	def delete_items(self, items):
 		for item in items:
 			frappe.delete_doc("Cancellation Of Invoices Item", item.name)
-	
+
 	def add_bin(self):
 		items = frappe.get_all("Cancellation Of Invoices Item", ["*"], filters = {"parent": self.name})
 
@@ -46,13 +49,23 @@ class CancellationOfInvoices(Document):
 					doc.actual_qty += item.qty
 					doc.db_set('actual_qty', doc.actual_qty, update_modified=False)
 					self.create_stock_ledger_entry(item, doc.actual_qty, 0)
-	
+
 	def delete_stock_ledger_entry(self):
 		stocks = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"voucher_no": self.name})
 
 		for stock in stocks:
 			frappe.delete_doc("Stock Ledger Entry", stock.name)
-			
+	
+	def get_cost(self):
+		ledgers = frappe.get_all("Stock Ledger Entry", ["*"], filters ={"voucher_type": "Sales Invoice", "voucher_no": self.sale_invoice})
+
+		total_cost = 0
+
+		for ledger in ledgers:
+			total_cost += flt(ledger.stock_value_difference, 2)
+		
+		return total_cost
+
 	def create_stock_ledger_entry(self, item, qty, delete, allow_negative_stock=False, via_landed_cost_voucher=False, is_amended=None):
 		qty_item = 0
 
@@ -71,7 +84,7 @@ class CancellationOfInvoices(Document):
 		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
 
 		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
-		
+
 		sle = ({
 			"item_code": item.item_code,
 			"warehouse": item.warehouse,
@@ -110,7 +123,7 @@ class CancellationOfInvoices(Document):
 
 		for item in items:
 			self.set_new_row_item(item)
-	
+
 	def set_new_row_item(self, item):
 		row = self.append("items", {})
 		row.item_code = item.item_code
@@ -206,7 +219,7 @@ class CancellationOfInvoices(Document):
 		# 	product = frappe.get_doc("Sales Invoice Item", item.name)
 		# 	product.db_set('rate', 0, update_modified=False)
 		# 	product.db_set('amount', 0, update_modified=False)
-		
+
 		doc = frappe.get_doc("Sales Invoice", self.sale_invoice)
 		doc.db_set('status', "Canceled", update_modified=False)
 		doc.db_set('docstatus', 10, update_modified=False)
