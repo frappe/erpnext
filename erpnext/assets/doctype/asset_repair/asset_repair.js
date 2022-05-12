@@ -119,8 +119,8 @@ frappe.ui.form.on('Asset Repair', {
 				if (frm.doc.num_of_assets < r.num_of_assets) {
 					frappe.msgprint({
 						title: __('Warning'),
-						message: __('Asset {0} will be split on submitting this repair as the Number of Assets entered \
-							is less than {1}.', [frm.doc.asset, r.num_of_assets])
+						message: __('Asset {0} will be split on submitting this repair as the Number of Assets entered is less than {1}.',
+							[frm.doc.asset, r.num_of_assets])
 					});
 				}
 			}
