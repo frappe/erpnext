@@ -102,7 +102,6 @@
   },
   {
    "columns": 1,
-   "fetch_from": "bom_no.bom_level",
    "fieldname": "bom_level",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -189,7 +188,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-28 20:10:56.296410",
+ "modified": "2022-01-30 21:31:10.527559",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",
@@ -198,5 +197,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

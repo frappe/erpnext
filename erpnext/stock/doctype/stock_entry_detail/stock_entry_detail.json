@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "hash",
- "creation": "2013-03-29 18:22:12",
+ "creation": "2022-02-05 00:17:49.860824",
  "doctype": "DocType",
  "document_type": "Other",
  "editable_grid": 1,
@@ -340,13 +340,13 @@
    "label": "More Information"
   },
   {
-   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "allow_zero_valuation_rate",
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.s_warehouse"
   },
   {
    "allow_on_submit": 1,
@@ -556,12 +556,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-22 16:47:11.268975",
+ "modified": "2022-02-26 00:51:24.963653",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

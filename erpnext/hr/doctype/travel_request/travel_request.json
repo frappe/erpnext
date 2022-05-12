@@ -216,10 +216,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-12 18:42:26.451359",
+ "modified": "2022-01-18 19:19:33.678664",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -235,7 +236,10 @@
    "write": 1
   }
  ],
+ "search_fields": "employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
+ "title_field": "employee_name",
  "track_changes": 1
 }

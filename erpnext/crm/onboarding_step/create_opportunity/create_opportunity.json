@@ -5,7 +5,6 @@
  "doctype": "Onboarding Step",
  "idx": 0,
  "is_complete": 0,
- "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
  "modified": "2021-01-21 15:28:52.483839",
@@ -13,6 +12,7 @@
  "name": "Create Opportunity",
  "owner": "Administrator",
  "reference_document": "Opportunity",
+ "show_form_tour": 0,
  "show_full_form": 1,
  "title": "Create Opportunity",
  "validate_action": 1

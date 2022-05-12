@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "creation": "2020-09-24 16:23:16.235722",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable",
+  "section_break_2",
+  "sandbox_mode",
+  "applicable_from",
+  "credentials",
+  "advanced_settings_section",
+  "client_id",
+  "column_break_8",
+  "client_secret",
+  "auth_token",
+  "token_expiry"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  },
+  {
+   "depends_on": "enable",
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "auth_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "token_expiry",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "credentials",
+   "fieldtype": "Table",
+   "label": "Credentials",
+   "mandatory_depends_on": "enable",
+   "options": "E Invoice User"
+  },
+  {
+   "default": "0",
+   "fieldname": "sandbox_mode",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
+  },
+  {
+   "fieldname": "applicable_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Applicable From",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "advanced_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Advanced Settings"
+  },
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "Client ID"
+  },
+  {
+   "fieldname": "client_secret",
+   "fieldtype": "Password",
+   "label": "Client Secret"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-11-16 19:50:28.029517",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "E Invoice Settings",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

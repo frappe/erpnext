@@ -12,7 +12,6 @@
   "department",
   "designation",
   "branch",
-  "payroll_cost_center",
   "column_break1",
   "status",
   "journal_entry",
@@ -463,15 +462,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "employee.payroll_cost_center",
-   "fetch_if_empty": 1,
-   "fieldname": "payroll_cost_center",
-   "fieldtype": "Link",
-   "label": "Payroll Cost Center",
-   "options": "Cost Center",
-   "read_only": 1
-  },
-  {
    "fieldname": "mode_of_payment",
    "fieldtype": "Select",
    "label": "Mode Of Payment",
@@ -647,7 +637,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-08 11:47:47.098248",
+ "modified": "2022-01-19 12:45:54.999345",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
@@ -683,9 +673,11 @@
    "role": "Employee"
   }
  ],
+ "search_fields": "employee_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "employee",
  "title_field": "employee_name"
 }

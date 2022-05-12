@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "ACC-LOAN-.YYYY.-.#####",
- "creation": "2019-08-29 17:29:18.176786",
+ "creation": "2022-01-25 10:30:02.294967",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
@@ -32,8 +32,11 @@
   "monthly_repayment_amount",
   "repayment_start_date",
   "is_term_loan",
+  "accounting_dimensions_section",
+  "cost_center",
   "account_info",
   "mode_of_payment",
+  "disbursement_account",
   "payment_account",
   "column_break_9",
   "loan_account",
@@ -240,12 +243,14 @@
    "label": "Repayment Schedule"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.is_term_loan == 1",
    "fieldname": "repayment_schedule",
    "fieldtype": "Table",
    "label": "Repayment Schedule",
    "no_copy": 1,
-   "options": "Repayment Schedule"
+   "options": "Repayment Schedule",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_17",
@@ -354,15 +359,36 @@
    "fieldtype": "Date",
    "label": "Closure Date",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan_type.disbursement_account",
+   "fieldname": "disbursement_account",
+   "fieldtype": "Link",
+   "label": "Disbursement Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-12 18:10:32.360818",
+ "modified": "2022-03-10 11:50:31.957360",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -388,5 +414,6 @@
  "search_fields": "posting_date",
  "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

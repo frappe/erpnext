@@ -1,0 +1,21 @@
+{
+ "action": "Create Entry",
+ "action_label": "Let's review your Company",
+ "creation": "2021-11-22 11:55:48.931427",
+ "description": "# Set Up a Company\n\nA company is a legal entity for which you will set up your books of account and create accounting transactions. In ERPNext, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n\nWithin the company master, you can capture various default accounts for that Company and set crucial settings related to the accounting methodology followed for a company.\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-12-15 14:22:18.317423",
+ "modified_by": "Administrator",
+ "name": "Company Set Up",
+ "owner": "Administrator",
+ "reference_document": "Company",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Set Up a Company",
+ "validate_action": 1
+}
