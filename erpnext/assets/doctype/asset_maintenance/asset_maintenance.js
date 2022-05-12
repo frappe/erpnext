@@ -124,8 +124,8 @@ frappe.ui.form.on('Asset Maintenance', {
 				if (frm.doc.num_of_assets < r.num_of_assets) {
 					frappe.msgprint({
 						title: __('Warning'),
-						message: __('Asset {0} will be split on saving this document as the Number of Assets entered \
-							is less than {1}.', [frm.doc.asset, r.num_of_assets])
+						message: __('Asset {0} will be split on saving this document as the Number of Assets entered is less than {1}.',
+							[frm.doc.asset, r.num_of_assets])
 					});
 				}
 			}

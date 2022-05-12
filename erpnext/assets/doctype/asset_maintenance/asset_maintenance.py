@@ -56,10 +56,7 @@ class AssetMaintenance(Document):
 
 		if not maintenance_required:
 			frappe.throw(
-				_(
-					"Maintenance records can only be created for Assets with \
-				Maintenance Required enabled."
-				),
+				_("Maintenance records can only be created for Assets with Maintenance Required enabled."),
 				title=_("Invalid Asset"),
 			)
 

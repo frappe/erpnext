@@ -117,8 +117,7 @@ class AssetMovement(Document):
 		if asset.target_location:
 			frappe.throw(
 				_(
-					"Issuing cannot be done to a location. \
-				Please enter employee who has issued Asset {0}"
+					"Issuing cannot be done to a location. Please enter employee who has issued Asset {0}."
 				).format(asset.asset),
 				title=_("Incorrect Movement Purpose"),
 			)
@@ -130,8 +129,7 @@ class AssetMovement(Document):
 		if asset.to_employee:
 			frappe.throw(
 				_(
-					"Transferring cannot be done to an Employee. \
-				Please enter location where Asset {0} has to be transferred"
+					"Transferring cannot be done to an Employee. Please enter location where Asset {0} has to be transferred."
 				).format(asset.asset),
 				title=_("Incorrect Movement Purpose"),
 			)
@@ -167,8 +165,7 @@ class AssetMovement(Document):
 			if asset.to_employee and asset.target_location:
 				frappe.throw(
 					_(
-						"Asset {0} cannot be received at a location and \
-					given to employee in a single movement"
+						"Asset {0} cannot be received at a location and given to employee in a single movement"
 					).format(asset.asset)
 				)
 
