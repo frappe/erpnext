@@ -962,6 +962,44 @@ class TestDeliveryNote(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_returned_qty_in_return_dn(self):
+		# SO ---> SI ---> DN
+		#                 |
+		#                 |---> DN(Partial Sales Return) ---> SI(Credit Note)
+		#                 |
+		#                 |---> DN(Partial Sales Return) ---> SI(Credit Note)
+
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+
+		so = make_sales_order(qty=10)
+		si = make_sales_invoice(so.name)
+		si.insert()
+		si.submit()
+		dn = make_delivery_note(si.name)
+		dn.insert()
+		dn.submit()
+		self.assertEqual(dn.items[0].returned_qty, 0)
+		self.assertEqual(dn.per_billed, 100)
+
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3)
+		si1 = make_sales_invoice(dn1.name)
+		si1.insert()
+		si1.submit()
+		dn1.reload()
+		self.assertEqual(dn1.items[0].returned_qty, 0)
+		self.assertEqual(dn1.per_billed, 100)
+
+		dn2 = create_delivery_note(is_return=1, return_against=dn.name, qty=-4)
+		si2 = make_sales_invoice(dn2.name)
+		si2.insert()
+		si2.submit()
+		dn2.reload()
+		self.assertEqual(dn2.items[0].returned_qty, 0)
+		self.assertEqual(dn2.per_billed, 100)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

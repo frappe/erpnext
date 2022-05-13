@@ -652,6 +652,104 @@ class TestStockEntry(FrappeTestCase):
 		serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
 		self.assertFalse(frappe.db.get_value("Serial No", serial_no, "warehouse"))
 
+	def test_serial_batch_item_stock_entry(self):
+		"""
+		Behaviour: 1) Submit Stock Entry (Receipt) with Serial & Batched Item
+		2) Cancel same Stock Entry
+		Expected Result: 1) Batch is created with Reference in Serial No
+		2) Batch is deleted and Serial No is Inactive
+		"""
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		item = frappe.db.exists("Item", {"item_name": "Batched and Serialised Item"})
+		if not item:
+			item = create_item("Batched and Serialised Item")
+			item.has_batch_no = 1
+			item.create_new_batch = 1
+			item.has_serial_no = 1
+			item.batch_number_series = "B-BATCH-.##"
+			item.serial_no_series = "S-.####"
+			item.save()
+		else:
+			item = frappe.get_doc("Item", {"item_name": "Batched and Serialised Item"})
+
+		se = make_stock_entry(
+			item_code=item.item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		batch_no = se.items[0].batch_no
+		serial_no = get_serial_nos(se.items[0].serial_no)[0]
+		batch_qty = get_batch_qty(batch_no, "_Test Warehouse - _TC", item.item_code)
+
+		batch_in_serial_no = frappe.db.get_value("Serial No", serial_no, "batch_no")
+		self.assertEqual(batch_in_serial_no, batch_no)
+
+		self.assertEqual(batch_qty, 1)
+
+		se.cancel()
+
+		batch_in_serial_no = frappe.db.get_value("Serial No", serial_no, "batch_no")
+		self.assertEqual(batch_in_serial_no, None)
+
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Inactive")
+		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
+
+	def test_serial_batch_item_qty_deduction(self):
+		"""
+		Behaviour: Create 2 Stock Entries, both adding Serial Nos to same batch
+		Expected: 1) Cancelling first Stock Entry (origin transaction of created batch)
+		should throw a LinkExistsError
+		2) Cancelling second Stock Entry should make Serial Nos that are, linked to mentioned batch
+		and in that transaction only, Inactive.
+		"""
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		item = frappe.db.exists("Item", {"item_name": "Batched and Serialised Item"})
+		if not item:
+			item = create_item("Batched and Serialised Item")
+			item.has_batch_no = 1
+			item.create_new_batch = 1
+			item.has_serial_no = 1
+			item.batch_number_series = "B-BATCH-.##"
+			item.serial_no_series = "S-.####"
+			item.save()
+		else:
+			item = frappe.get_doc("Item", {"item_name": "Batched and Serialised Item"})
+
+		se1 = make_stock_entry(
+			item_code=item.item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		batch_no = se1.items[0].batch_no
+		serial_no1 = get_serial_nos(se1.items[0].serial_no)[0]
+
+		# Check Source (Origin) Document of Batch
+		self.assertEqual(frappe.db.get_value("Batch", batch_no, "reference_name"), se1.name)
+
+		se2 = make_stock_entry(
+			item_code=item.item_code,
+			target="_Test Warehouse - _TC",
+			qty=1,
+			basic_rate=100,
+			batch_no=batch_no,
+		)
+		serial_no2 = get_serial_nos(se2.items[0].serial_no)[0]
+
+		batch_qty = get_batch_qty(batch_no, "_Test Warehouse - _TC", item.item_code)
+		self.assertEqual(batch_qty, 2)
+
+		se2.cancel()
+
+		# Check decrease in Batch Qty
+		batch_qty = get_batch_qty(batch_no, "_Test Warehouse - _TC", item.item_code)
+		self.assertEqual(batch_qty, 1)
+
+		# Check if Serial No from Stock Entry 1 is intact
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no1, "batch_no"), batch_no)
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no1, "status"), "Active")
+
+		# Check if Serial No from Stock Entry 2 is Unlinked and Inactive
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no2, "batch_no"), None)
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no2, "status"), "Inactive")
+
 	def test_warehouse_company_validation(self):
 		company = frappe.db.get_value("Warehouse", "_Test Warehouse 2 - _TC1", "company")
 		frappe.get_doc("User", "test2@example.com").add_roles(
@@ -1325,6 +1423,25 @@ class TestStockEntry(FrappeTestCase):
 		se.items[0].conversion_factor = 0.002
 
 		self.assertRaises(frappe.ValidationError, se.save)
+
+	def test_mapped_stock_entry(self):
+		"Check if rate and stock details are populated in mapped SE given warehouse."
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_stock_entry
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = "_TestMappedItem"
+		create_item(item_code, is_stock_item=True)
+
+		pr = make_purchase_receipt(
+			item_code=item_code, qty=2, rate=100, company="_Test Company", warehouse="Stores - _TC"
+		)
+
+		mapped_se = make_stock_entry(pr.name)
+
+		self.assertEqual(mapped_se.items[0].s_warehouse, "Stores - _TC")
+		self.assertEqual(mapped_se.items[0].actual_qty, 2)
+		self.assertEqual(mapped_se.items[0].basic_rate, 100)
+		self.assertEqual(mapped_se.items[0].basic_amount, 200)
 
 
 def make_serialized_item(**args):
