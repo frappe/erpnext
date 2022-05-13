@@ -37,7 +37,6 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		frappe.set_user("Administrator")
 
 		self.employee_id = make_employee("test_emp_leave_balance@example.com", company="_Test Company")
-		self.employee_id = make_employee("test_emp_leave_balance@example.com", company="_Test Company")
 
 		self.date = getdate()
 		self.year_start = getdate(get_year_start(self.date))
@@ -146,3 +145,37 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 		]
 
 		self.assertEqual(report[1], expected_data)
+
+	@set_holiday_list("_Test Emp Balance Holiday List", "_Test Company")
+	def test_employee_status_filter(self):
+		frappe.get_doc(test_records[0]).insert()
+
+		inactive_emp = make_employee("test_emp_status@example.com", company="_Test Company")
+		allocation = make_allocation_record(
+			employee=inactive_emp, from_date=self.year_start, to_date=self.year_end
+		)
+
+		# set employee as inactive
+		frappe.db.set_value("Employee", inactive_emp, "status", "Inactive")
+
+		filters = frappe._dict(
+			{
+				"date": allocation.from_date,
+				"company": "_Test Company",
+				"employee": inactive_emp,
+				"employee_status": "Active",
+			}
+		)
+		report = execute(filters)
+		self.assertEqual(len(report[1]), 0)
+
+		filters = frappe._dict(
+			{
+				"date": allocation.from_date,
+				"company": "_Test Company",
+				"employee": inactive_emp,
+				"employee_status": "Inactive",
+			}
+		)
+		report = execute(filters)
+		self.assertEqual(len(report[1]), 1)
