@@ -70,11 +70,15 @@ class Bin(Document):
 			(self.item_code, self.warehouse),
 		)[0][0]
 
+		if frappe.db.field_exists("Stock Entry", "is_return"):
+			qty_field = "CASE WHEN se.is_return = 1 THEN (transfer_qty * -1) ELSE transfer_qty END"
+		else:
+			qty_field = "transfer_qty"
+
 		# Get Transferred Entries
-		materials_transferred = frappe.db.sql(
-			"""
-			select
-				ifnull(sum(CASE WHEN se.is_return = 1 THEN (transfer_qty * -1) ELSE transfer_qty END),0)
+		materials_transferred = (
+			frappe.db.sql(
+				f"""select sum({qty_field})
 			from
 				`tabStock Entry` se, `tabStock Entry Detail` sed, `tabPurchase Order` po
 			where
@@ -89,8 +93,10 @@ class Bin(Document):
 				and po.status != 'Closed'
 				and po.per_received < 100
 		""",
-			{"item": self.item_code},
-		)[0][0]
+				{"item": self.item_code},
+			)[0][0]
+			or 0.0
+		)
 
 		if reserved_qty_for_sub_contract > materials_transferred:
 			reserved_qty_for_sub_contract = reserved_qty_for_sub_contract - materials_transferred
