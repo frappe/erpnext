@@ -264,7 +264,7 @@ class LoanRepayment(AccountsController):
 			regenerate_repayment_schedule(self.against_loan, cancel)
 
 	def allocate_amounts(self, repayment_details):
-		precision = 2
+		precision = cint(frappe.db.get_default("currency_precision")) or 2
 		self.set("repayment_details", [])
 		self.principal_amount_paid = 0
 		self.total_penalty_paid = 0
