@@ -46,10 +46,10 @@ def get_columns():
 
 
 def get_data(filters):
-	po_rm_item_details = get_po_items_to_supply(filters)
+	sco_rm_item_details = get_sco_items_to_supply(filters)
 
 	data = []
-	for row in po_rm_item_details:
+	for row in sco_rm_item_details:
 		transferred_qty = row.get("transferred_qty") or 0
 		if transferred_qty < row.get("reqd_qty", 0):
 			pending_qty = frappe.utils.flt(row.get("reqd_qty", 0) - transferred_qty)
@@ -59,23 +59,22 @@ def get_data(filters):
 	return data
 
 
-def get_po_items_to_supply(filters):
+def get_sco_items_to_supply(filters):
 	return frappe.db.get_all(
-		"Purchase Order",
+		"Subcontracting Order",
 		fields=[
-			"name as purchase_order",
+			"name as subcontracting_order",
 			"transaction_date as date",
 			"supplier as supplier",
-			"`tabPurchase Order Item Supplied`.rm_item_code as rm_item_code",
-			"`tabPurchase Order Item Supplied`.required_qty as reqd_qty",
-			"`tabPurchase Order Item Supplied`.supplied_qty as transferred_qty",
+			"`tabSubcontracting Order Supplied Item`.rm_item_code as rm_item_code",
+			"`tabSubcontracting Order Supplied Item`.required_qty as reqd_qty",
+			"`tabSubcontracting Order Supplied Item`.supplied_qty as transferred_qty",
 		],
 		filters=[
-			["Purchase Order", "per_received", "<", "100"],
-			["Purchase Order", "is_subcontracted", "=", 1],
-			["Purchase Order", "supplier", "=", filters.supplier],
-			["Purchase Order", "transaction_date", "<=", filters.to_date],
-			["Purchase Order", "transaction_date", ">=", filters.from_date],
-			["Purchase Order", "docstatus", "=", 1],
+			["Subcontracting Order", "per_received", "<", "100"],
+			["Subcontracting Order", "supplier", "=", filters.supplier],
+			["Subcontracting Order", "transaction_date", "<=", filters.to_date],
+			["Subcontracting Order", "transaction_date", ">=", filters.from_date],
+			["Subcontracting Order", "docstatus", "=", 1],
 		],
 	)
