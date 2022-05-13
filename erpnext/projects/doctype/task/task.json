@@ -23,8 +23,6 @@
   "progress",
   "priority",
   "task_weight",
-  "status_section",
-  "column_break_25",
   "sb_timeline",
   "exp_start_date",
   "act_start_date",
@@ -59,6 +57,7 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -68,6 +67,7 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "project",
    "fieldtype": "Link",
@@ -82,18 +82,23 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
    "fieldname": "issue",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Issue",
    "options": "Issue"
   },
   {
    "fieldname": "type",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Type",
    "options": "Task Type"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "default": "0",
    "fieldname": "is_group",
@@ -109,7 +114,9 @@
    "width": "50%"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -138,6 +145,7 @@
    "label": "Color"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "parent_task",
    "fieldtype": "Link",
@@ -152,6 +160,8 @@
    "label": "Timeline"
   },
   {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Date",
    "label": "Expected Start Date",
@@ -177,6 +187,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "exp_end_date",
    "fieldtype": "Date",
@@ -317,6 +328,7 @@
   {
    "fieldname": "department",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Department",
    "options": "Department"
   },
@@ -378,15 +390,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status_section",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "reviewed_by",
    "fieldtype": "Link",
    "label": "Reviewed By",
@@ -407,7 +410,7 @@
  "idx": 1,
  "is_tree": 1,
  "max_attachments": 5,
- "modified": "2022-05-13 12:30:18.463860",
+ "modified": "2022-05-13 15:45:48.279280",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -426,6 +429,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "search_fields": "subject",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
@@ -433,5 +437,6 @@
  "sort_order": "DESC",
  "timeline_field": "project",
  "title_field": "subject",
+ "track_changes": 1,
  "track_seen": 1
 }
