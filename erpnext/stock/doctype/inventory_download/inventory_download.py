@@ -88,7 +88,7 @@ class InventoryDownload(Document):
 			doc = frappe.get_doc("Inventory Download Detail", item.name)
 			doc.db_set('valuation_rate', stock[0].valuation_rate, update_modified=False)
 
-			valuation_rate += stock[0].valuation_rate
+			valuation_rate += stock[0].valuation_rate * item.qty
 		
 		self.total_valuation_rate = valuation_rate
 		self.db_set('total_valuation_rate', valuation_rate, update_modified=False)
@@ -138,6 +138,7 @@ class InventoryDownload(Document):
 			"company": self.company,
 			"batch_no": item.batch_no,
 			"serial_no": item.serial_no,
+			"valuation_rate": item.valuation_rate,
 			"project": self.project,
 			"is_cancelled": self.docstatus==2 and "Yes" or "No",
 			'doctype':self.doctype
