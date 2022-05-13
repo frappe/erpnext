@@ -14,28 +14,28 @@ frappe.query_reports["Subcontract Order Summary"] = {
 		},
 		{
 			label: __("From Date"),
-			fieldname:"from_date",
+			fieldname: "from_date",
 			fieldtype: "Date",
 			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			reqd: 1
 		},
 		{
 			label: __("To Date"),
-			fieldname:"to_date",
+			fieldname: "to_date",
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
 			reqd: 1
 		},
 		{
-			label: __("Purchase Order"),
+			label: __("Subcontracting Order"),
 			fieldname: "name",
 			fieldtype: "Link",
-			options: "Purchase Order",
-			get_query: function() {
+			options: "Subcontracting Order",
+			get_query: function () {
 				return {
 					filters: {
 						docstatus: 1,
-						is_subcontracted: 1,
+
 						company: frappe.query_report.get_filter_value('company')
 					}
 				}
