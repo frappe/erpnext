@@ -1034,13 +1034,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.utils.get_contact_details(this.frm);
 	},
 
+<<<<<<< HEAD
 	currency: function() {
 		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
 		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
 		/* end manqala */
 		var me = this;
+=======
+	currency() {
+		// The transaction date be either transaction_date (from orders) or posting_date (from invoices)
+		let transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
+
+		let me = this;
+>>>>>>> 54d6cf18fc (fix: Item rate reset on changing posting date (#30990))
 		this.set_dynamic_labels();
-		var company_currency = this.get_company_currency();
+		let company_currency = this.get_company_currency();
 		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
@@ -1054,7 +1062,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				});
 		} else {
-			this.conversion_rate();
+			// company currency and doc currency is same
+			// this will prevent unnecessary conversion rate triggers
+			this.frm.set_value("conversion_rate", 1.0);
 		}
 	},
 
