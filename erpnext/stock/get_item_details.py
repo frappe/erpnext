@@ -614,13 +614,13 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 			tax.item_tax_template
 			for tax in taxes
 			if (
-				cstr(tax.tax_category) == cstr(args.get("tax_category"))
+				(cstr(tax.tax_category) == cstr(args.get('tax_category')) or not(tax.tax_category))
 				and (tax.item_tax_template not in taxes)
 			)
 		]
 
 	# all templates have validity and no template is valid
-	if not taxes_with_validity and (not taxes_with_no_validity):
+	if not taxes:
 		return None
 
 	# do not change if already a valid template
@@ -628,11 +628,16 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 		out["item_tax_template"] = args.get("item_tax_template")
 		return args.get("item_tax_template")
 
+	common_tax_template = None
 	for tax in taxes:
 		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
 			out["item_tax_template"] = tax.item_tax_template
 			return tax.item_tax_template
-	return None
+		if not common_tax_template and not tax.tax_category:
+			common_tax_template = tax.item_tax_template
+
+	out["item_tax_template"] = common_tax_template
+	return common_tax_template
 
 
 def is_within_valid_range(args, tax):
