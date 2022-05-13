@@ -278,9 +278,9 @@ class LoanRepayment(AccountsController):
 
 		if interest_paid > 0:
 			if self.penalty_amount and interest_paid > self.penalty_amount:
-				self.total_penalty_paid = self.penalty_amount
+				self.total_penalty_paid = flt(self.penalty_amount, self.precision("debit"))
 			elif self.penalty_amount:
-				self.total_penalty_paid = interest_paid
+				self.total_penalty_paid = flt(interest_paid, self.precision("debit"))
 
 			interest_paid -= self.total_penalty_paid
 
