@@ -10,22 +10,21 @@
   "subject",
   "project",
   "issue",
+  "parent_task",
+  "is_group",
   "column_break_5",
   "type",
   "department",
+  "color",
+  "is_milestone",
   "column_break0",
   "company",
+  "status",
+  "progress",
   "priority",
   "task_weight",
   "status_section",
-  "status",
-  "progress",
-  "column_break_23",
-  "review_date",
-  "reviewed_by",
   "column_break_25",
-  "closing_date",
-  "completed_by",
   "sb_timeline",
   "exp_start_date",
   "act_start_date",
@@ -35,13 +34,12 @@
   "column_break_21",
   "expected_time",
   "actual_time",
-  "section_break_10",
-  "parent_task",
-  "is_group",
-  "column_break_33",
-  "color",
-  "is_milestone",
+  "completion_section",
+  "review_date",
+  "reviewed_by",
   "column_break_16",
+  "closing_date",
+  "completed_by",
   "sb_details",
   "description",
   "sb_depends_on",
@@ -376,12 +374,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break",
-   "label": "Style and Organization"
-  },
-  {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
   },
@@ -389,10 +381,6 @@
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Status"
-  },
-  {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_25",
@@ -406,19 +394,20 @@
    "options": "User"
   },
   {
-   "fieldname": "column_break_33",
+   "fieldname": "column_break_44",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_44",
-   "fieldtype": "Column Break"
+   "fieldname": "completion_section",
+   "fieldtype": "Section Break",
+   "label": "Completion"
   }
  ],
  "icon": "fa fa-check",
  "idx": 1,
  "is_tree": 1,
  "max_attachments": 5,
- "modified": "2022-05-12 16:01:03.943809",
+ "modified": "2022-05-13 12:30:18.463860",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
