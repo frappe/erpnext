@@ -108,12 +108,11 @@
    "fieldname": "total_valuation_rate",
    "fieldtype": "Currency",
    "label": "Total Valuation Rate",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-05-12 15:35:54.285756",
+ "modified": "2022-05-13 09:15:43.969316",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",
