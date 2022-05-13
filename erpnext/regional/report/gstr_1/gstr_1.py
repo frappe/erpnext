@@ -334,6 +334,7 @@ class Gstr1Report(object):
 		self.item_hsn_map = frappe._dict()
 		self.nil_exempt_non_gst = {}
 
+		# nosemgrep
 		items = frappe.db.sql(
 			"""
 			select item_code, parent, taxable_value, base_net_amount, item_tax_rate, is_nil_exempt,
