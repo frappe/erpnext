@@ -929,7 +929,7 @@ Employee Promotion cannot be submitted before Promotion Date ,Повышение
 Employee Referral,Перечень сотрудников,
 Employee Transfer cannot be submitted before Transfer Date ,Передача сотрудника не может быть отправлена до даты передачи,
 Employee cannot report to himself.,Сотрудник не может сообщить самому себе.,
-Employee relieved on {0} must be set as 'Left',"Сотрудник освобожден от {0} должен быть установлен как ""Покинул""",
+Employee relieved on {0} must be set as 'Left',"Сотрудник освобожден от {0} должен быть установлен как 'Покинул'",
 Employee {0} already submited an apllication {1} for the payroll period {2},Сотрудник {0} уже отправил заявку {1} для периода расчета {2},
 Employee {0} has already applied for {1} between {2} and {3} : ,Сотрудник {0} уже подал заявку на {1} между {2} и {3}:,
 Employee {0} has no maximum benefit amount,Сотрудник {0} не имеет максимальной суммы пособия,
