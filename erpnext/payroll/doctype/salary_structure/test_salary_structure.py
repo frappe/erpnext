@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_years, date_diff, get_first_day, nowdate
 from frappe.utils.make_random import get_random
 
@@ -23,7 +24,7 @@ from erpnext.payroll.doctype.salary_structure.salary_structure import make_salar
 test_dependencies = ["Fiscal Year"]
 
 
-class TestSalaryStructure(unittest.TestCase):
+class TestSalaryStructure(FrappeTestCase):
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
@@ -131,6 +132,23 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.docstatus, 1)
 		self.assertEqual(salary_structure_assignment.base, 5000)
 		self.assertEqual(salary_structure_assignment.variable, 200)
+
+	def test_employee_grade_defaults(self):
+		salary_structure = make_salary_structure(
+			"Salary Structure - Lead", "Monthly", currency="INR", company="_Test Company"
+		)
+		create_employee_grade("Lead", salary_structure.name)
+		employee = make_employee("test_employee_grade@salary.com", company="_Test Company", grade="Lead")
+
+		# structure assignment should have the default salary structure and base pay
+		salary_structure.assign_salary_structure(employee=employee, from_date=nowdate())
+		structure, base = frappe.db.get_value(
+			"Salary Structure Assignment",
+			{"employee": employee, "salary_structure": salary_structure.name, "from_date": nowdate()},
+			["salary_structure", "base"],
+		)
+		self.assertEqual(structure, salary_structure.name)
+		self.assertEqual(base, 50000)
 
 	def test_multi_currency_salary_structure(self):
 		make_employee("test_muti_currency_employee@salary.com")
@@ -251,3 +269,15 @@ def get_payable_account(company=None):
 	if not company:
 		company = erpnext.get_default_company()
 	return frappe.db.get_value("Company", company, "default_payroll_payable_account")
+
+
+def create_employee_grade(grade, default_structure=None):
+	if not frappe.db.exists("Employee Grade", grade):
+		frappe.get_doc(
+			{
+				"doctype": "Employee Grade",
+				"__newname": grade,
+				"default_salary_structure": default_structure,
+				"default_base_pay": 50000,
+			}
+		).insert()

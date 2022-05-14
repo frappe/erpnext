@@ -31,6 +31,7 @@ class TestStockReconciliation(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.local.future_sle = {}
+		frappe.flags.pop("dont_execute_stock_reposts", None)
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
@@ -250,7 +251,7 @@ class TestStockReconciliation(FrappeTestCase):
 		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
 
 		sr = create_stock_reconciliation(
-			item_code=item_code, warehouse=warehouse, qty=5, rate=200, do_not_submit=1
+			item_code=item_code, warehouse=warehouse, qty=5, rate=200, do_not_save=1
 		)
 		sr.save()
 		sr.submit()
@@ -288,6 +289,84 @@ class TestStockReconciliation(FrappeTestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
+	def test_stock_reco_for_serial_and_batch_item(self):
+		item = create_item("_TestBatchSerialItemReco")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.has_serial_no = 1
+		item.batch_number_series = "TBS-BATCH-.##"
+		item.serial_no_series = "TBS-.####"
+		item.save()
+
+		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
+
+		sr = create_stock_reconciliation(item_code=item.item_code, warehouse=warehouse, qty=1, rate=100)
+
+		batch_no = sr.items[0].batch_no
+
+		serial_nos = get_serial_nos(sr.items[0].serial_no)
+		self.assertEqual(len(serial_nos), 1)
+		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "batch_no"), batch_no)
+
+		sr.cancel()
+
+		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Inactive")
+		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
+
+	def test_stock_reco_for_serial_and_batch_item_with_future_dependent_entry(self):
+		"""
+		Behaviour: 1) Create Stock Reconciliation, which will be the origin document
+		of a new batch having a serial no
+		2) Create a Stock Entry that adds a serial no to the same batch following this
+		Stock Reconciliation
+		3) Cancel Stock Entry
+		Expected Result: 3) Serial No only in the Stock Entry is Inactive and Batch qty decreases
+		"""
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		item = create_item("_TestBatchSerialItemDependentReco")
+		item.has_batch_no = 1
+		item.create_new_batch = 1
+		item.has_serial_no = 1
+		item.batch_number_series = "TBSD-BATCH-.##"
+		item.serial_no_series = "TBSD-.####"
+		item.save()
+
+		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
+
+		stock_reco = create_stock_reconciliation(
+			item_code=item.item_code, warehouse=warehouse, qty=1, rate=100
+		)
+		batch_no = stock_reco.items[0].batch_no
+		reco_serial_no = get_serial_nos(stock_reco.items[0].serial_no)[0]
+
+		stock_entry = make_stock_entry(
+			item_code=item.item_code, target=warehouse, qty=1, basic_rate=100, batch_no=batch_no
+		)
+		serial_no_2 = get_serial_nos(stock_entry.items[0].serial_no)[0]
+
+		# Check Batch qty after 2 transactions
+		batch_qty = get_batch_qty(batch_no, warehouse, item.item_code)
+		self.assertEqual(batch_qty, 2)
+
+		# Cancel latest stock document
+		stock_entry.cancel()
+
+		# Check Batch qty after cancellation
+		batch_qty = get_batch_qty(batch_no, warehouse, item.item_code)
+		self.assertEqual(batch_qty, 1)
+
+		# Check if Serial No from Stock Reconcilation is intact
+		self.assertEqual(frappe.db.get_value("Serial No", reco_serial_no, "batch_no"), batch_no)
+		self.assertEqual(frappe.db.get_value("Serial No", reco_serial_no, "status"), "Active")
+
+		# Check if Serial No from Stock Entry is Unlinked and Inactive
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no_2, "batch_no"), None)
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no_2, "status"), "Inactive")
+
+		stock_reco.cancel()
+
 	def test_customer_provided_items(self):
 		item_code = "Stock-Reco-customer-Item-100"
 		create_item(
@@ -306,6 +385,7 @@ class TestStockReconciliation(FrappeTestCase):
 		-------------------------------------------
 		Var		| Doc	|	Qty	| Balance
 		-------------------------------------------
+		PR5     | PR    |   10  |  10   (posting date: today-4) [backdated]
 		SR5		| Reco	|	0	|	8	(posting date: today-4) [backdated]
 		PR1		| PR	|	10	|	18	(posting date: today-3)
 		PR2		| PR	|	1	|	19	(posting date: today-2)
@@ -314,6 +394,14 @@ class TestStockReconciliation(FrappeTestCase):
 		"""
 		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
+
+		frappe.flags.dont_execute_stock_reposts = True
+
+		def assertBalance(doc, qty_after_transaction):
+			sle_balance = frappe.db.get_value(
+				"Stock Ledger Entry", {"voucher_no": doc.name, "is_cancelled": 0}, "qty_after_transaction"
+			)
+			self.assertEqual(sle_balance, qty_after_transaction)
 
 		pr1 = make_purchase_receipt(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -3)
@@ -324,62 +412,37 @@ class TestStockReconciliation(FrappeTestCase):
 		pr3 = make_purchase_receipt(
 			item_code=item_code, warehouse=warehouse, qty=1, rate=100, posting_date=nowdate()
 		)
-
-		pr1_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		pr3_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr3.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr1_balance, 10)
-		self.assertEqual(pr3_balance, 12)
+		assertBalance(pr1, 10)
+		assertBalance(pr3, 12)
 
 		# post backdated stock reco in between
 		sr4 = create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=6, rate=100, posting_date=add_days(nowdate(), -1)
 		)
-		pr3_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr3.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr3_balance, 7)
+		assertBalance(pr3, 7)
 
 		# post backdated stock reco at the start
 		sr5 = create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=8, rate=100, posting_date=add_days(nowdate(), -4)
 		)
-		pr1_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0}, "qty_after_transaction"
+		assertBalance(pr1, 18)
+		assertBalance(pr2, 19)
+		assertBalance(sr4, 6)  # check if future stock reco is unaffected
+
+		# Make a backdated receipt and check only entries till first SR are affected
+		pr5 = make_purchase_receipt(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -5)
 		)
-		pr2_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr2.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		sr4_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": sr4.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr1_balance, 18)
-		self.assertEqual(pr2_balance, 19)
-		self.assertEqual(sr4_balance, 6)  # check if future stock reco is unaffected
+		assertBalance(pr5, 10)
+		# check if future stock reco is unaffected
+		assertBalance(sr4, 6)
+		assertBalance(sr5, 8)
 
 		# cancel backdated stock reco and check future impact
 		sr5.cancel()
-		pr1_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr1.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		pr2_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": pr2.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		sr4_balance = frappe.db.get_value(
-			"Stock Ledger Entry", {"voucher_no": sr4.name, "is_cancelled": 0}, "qty_after_transaction"
-		)
-		self.assertEqual(pr1_balance, 10)
-		self.assertEqual(pr2_balance, 11)
-		self.assertEqual(sr4_balance, 6)  # check if future stock reco is unaffected
-
-		# teardown
-		sr4.cancel()
-		pr3.cancel()
-		pr2.cancel()
-		pr1.cancel()
+		assertBalance(pr1, 10)
+		assertBalance(pr2, 11)
+		assertBalance(sr4, 6)  # check if future stock reco is unaffected
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_backdated_stock_reco_future_negative_stock(self):
@@ -485,7 +548,6 @@ class TestStockReconciliation(FrappeTestCase):
 
 		# repost will make this test useless, qty should update in realtime without reposts
 		frappe.flags.dont_execute_stock_reposts = True
-		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
 		item_code = make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -684,11 +746,13 @@ def create_stock_reconciliation(**args):
 		},
 	)
 
-	try:
-		if not args.do_not_submit:
-			sr.submit()
-	except EmptyStockReconciliationItemsError:
-		pass
+	if not args.do_not_save:
+		sr.insert()
+		try:
+			if not args.do_not_submit:
+				sr.submit()
+		except EmptyStockReconciliationItemsError:
+			pass
 	return sr
 
 

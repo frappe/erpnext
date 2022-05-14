@@ -1183,6 +1183,42 @@ class TestStockLedgerEntry(FrappeTestCase):
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
 
+	def test_timestamp_clash(self):
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reciept = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="01:00:00",
+		)
+
+		consumption = make_stock_entry(
+			item_code=item,
+			from_warehouse=warehouse,
+			qty=50,
+			posting_date="2021-01-01",
+			posting_time="02:00:00.1234",  # ms are possible when submitted without editing posting time
+		)
+
+		backdated_receipt = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			posting_date="2021-01-01",
+			rate=10,
+			posting_time="02:00:00",  # same posting time as consumption but ms part stripped
+		)
+
+		try:
+			backdated_receipt.cancel()
+		except Exception as e:
+			self.fail("Double processing of qty for clashing timestamp.")
+
 
 def create_repack_entry(**args):
 	args = frappe._dict(args)
