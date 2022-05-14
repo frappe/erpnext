@@ -21,7 +21,6 @@
   "package_item_details",
   "scan_barcode",
   "column_break_13",
-  "get_items",
   "section_break_15",
   "items",
   "package_weight_details",
@@ -101,11 +100,6 @@
   {
    "fieldname": "package_item_details",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "get_items",
-   "fieldtype": "Button",
-   "label": "Get Items"
   },
   {
    "fieldname": "items",
@@ -199,7 +193,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-14 12:06:16.124508",
+ "modified": "2022-05-14 12:13:11.169123",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

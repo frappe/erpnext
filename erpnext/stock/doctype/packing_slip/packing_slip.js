@@ -10,6 +10,10 @@ frappe.ui.form.on("Packing Slip", {
 
 	refresh(frm) {
 		frm.toggle_display("misc_details", frm.doc.amended_from);
+
+		if (frm.doc.delivery_note && frm.doc.__islocal) {
+			frm.add_custom_button(__("Get Items"), () => get_items(frm));
+		}
 	},
 
 	validate(frm) {
@@ -20,6 +24,10 @@ frappe.ui.form.on("Packing Slip", {
 	scan_barcode(frm) {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm});
 		barcode_scanner.process_scan();
+	},
+
+	delivery_note(frm) {
+		frm.trigger("refresh");
 	}
 });
 
