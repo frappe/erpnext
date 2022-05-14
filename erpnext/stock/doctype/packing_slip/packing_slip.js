@@ -2,6 +2,21 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Packing Slip", {
+	onload_post_render(frm) {
+		if(frm.doc.delivery_note && frm.doc.__islocal) {
+			get_items(frm);
+		}
+	},
+
+	refresh(frm) {
+		frm.toggle_display("misc_details", frm.doc.amended_from);
+	},
+
+	validate(frm) {
+		validate_case_nos(frm.doc);
+		validate_calculate_item_details(frm.doc);
+	},
+
 	scan_barcode(frm) {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm});
 		barcode_scanner.process_scan();
@@ -26,33 +41,18 @@ cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(do
 	}
 }
 
-cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
-	if(doc.delivery_note && doc.__islocal) {
-		cur_frm.cscript.get_items(doc, cdt, cdn);
-	}
-}
-
-cur_frm.cscript.get_items = function(doc, cdt, cdn) {
-	return this.frm.call({
-		doc: this.frm.doc,
+function get_items(frm) {
+	return frm.call({
+		doc: frm.doc,
 		method: "get_items",
 		callback: function(r) {
-			if(!r.exc) cur_frm.refresh();
+			if(!r.exc) frm.refresh();
 		}
 	});
 }
 
-cur_frm.cscript.refresh = function(doc, dt, dn) {
-	cur_frm.toggle_display("misc_details", doc.amended_from);
-}
-
-cur_frm.cscript.validate = function(doc, cdt, cdn) {
-	cur_frm.cscript.validate_case_nos(doc);
-	cur_frm.cscript.validate_calculate_item_details(doc);
-}
-
 // To Case No. cannot be less than From Case No.
-cur_frm.cscript.validate_case_nos = function(doc) {
+function validate_case_nos(doc) {
 	doc = locals[doc.doctype][doc.name];
 	if(cint(doc.from_case_no)==0) {
 		frappe.msgprint(__("The 'From Package No.' field must neither be empty nor it's value less than 1."));
@@ -67,18 +67,18 @@ cur_frm.cscript.validate_case_nos = function(doc) {
 }
 
 
-cur_frm.cscript.validate_calculate_item_details = function(doc) {
+function validate_calculate_item_details(doc) {
 	doc = locals[doc.doctype][doc.name];
 	var ps_detail = doc.items || [];
 
-	cur_frm.cscript.validate_duplicate_items(doc, ps_detail);
-	cur_frm.cscript.calc_net_total_pkg(doc, ps_detail);
+	validate_duplicate_items(doc, ps_detail);
+	calc_net_total_pkg(doc, ps_detail);
 }
 
 
 // Do not allow duplicate items i.e. items with same item_code
 // Also check for 0 qty
-cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
+function validate_duplicate_items(doc, ps_detail) {
 	for(var i=0; i<ps_detail.length; i++) {
 		for(var j=0; j<ps_detail.length; j++) {
 			if(i!=j && ps_detail[i].item_code && ps_detail[i].item_code==ps_detail[j].item_code) {
@@ -96,7 +96,7 @@ cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
 
 
 // Calculate Net Weight of Package
-cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
+function calc_net_total_pkg (doc, ps_detail) {
 	var net_weight_pkg = 0;
 	doc.net_weight_uom = (ps_detail && ps_detail.length) ? ps_detail[0].weight_uom : '';
 	doc.gross_weight_uom = doc.net_weight_uom;
