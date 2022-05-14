@@ -31,6 +31,12 @@ frappe.ui.form.on("Packing Slip", {
 	}
 });
 
+frappe.ui.form.on("Packing Slip Item", {
+	items_add(frm) {
+		validate_item_codes(frm);
+	}
+});
+
 cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'docstatus': 0}
@@ -55,6 +61,19 @@ function get_items(frm) {
 		method: "get_items",
 		callback: function(r) {
 			if(!r.exc) frm.refresh();
+		}
+	});
+}
+
+function validate_item_codes(frm) {
+	return frm.call({
+		doc: frm.doc,
+		method: "validate_item_codes",
+		error(r) {
+			if (r.exc_type && r.exc_type === "InvalidPackingSlipItem") {
+				// remove the last grid row.
+				frm.get_field("items").grid.grid_rows.at(-1).remove();
+			}
 		}
 	});
 }

@@ -7,6 +7,11 @@ from frappe import _
 from frappe.model import no_value_fields
 from frappe.model.document import Document
 from frappe.utils import cint, flt
+from frappe.exceptions import ValidationError
+
+
+class InvalidPackingSlipItem(ValidationError):
+	pass
 
 
 class PackingSlip(Document):
@@ -20,6 +25,7 @@ class PackingSlip(Document):
 		"""
 		self.validate_delivery_note()
 		self.validate_items_mandatory()
+		self.validate_item_codes()
 		self.validate_case_nos()
 		self.validate_qty()
 
@@ -39,6 +45,17 @@ class PackingSlip(Document):
 		rows = [d.item_code for d in self.get("items")]
 		if not rows:
 			frappe.msgprint(_("No Items to pack"), raise_exception=1)
+
+	@frappe.whitelist()
+	def validate_item_codes(self):
+		packed_items = [d.item_code for d in self.get("items")]
+		delivery_items = frappe.db.get_all("Delivery Note Item", filters={
+			"parenttype": "Delivery Note",
+			"parent": self.delivery_note
+		}, fields=["item_code"], pluck="item_code")
+		for item in packed_items:
+			if item not in delivery_items:
+				frappe.throw(_("Item {0} is not part of delivery note {1}").format(item, self.delivery_note), InvalidPackingSlipItem)
 
 	def validate_case_nos(self):
 		"""
