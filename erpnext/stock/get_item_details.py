@@ -636,7 +636,7 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 		if not common_tax_template and not tax.tax_category:
 			common_tax_template = tax.item_tax_template
 
-	out["item_tax_template"] = common_tax_template
+	out["item_tax_template"] = common_tax_template if common_tax_template else out.get("item_tax_template")
 	return common_tax_template
 
 
