@@ -21,6 +21,7 @@
   "package_item_details",
   "scan_barcode",
   "column_break_13",
+  "prompt_qty",
   "section_break_15",
   "items",
   "package_weight_details",
@@ -187,13 +188,19 @@
   {
    "fieldname": "section_break_15",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "prompt_qty",
+   "fieldtype": "Check",
+   "label": "Prompt Qty"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-14 12:13:11.169123",
+ "modified": "2022-05-14 14:07:41.183290",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

@@ -22,7 +22,10 @@ frappe.ui.form.on("Packing Slip", {
 	},
 
 	scan_barcode(frm) {
-		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm});
+		const barcode_scanner = new erpnext.utils.BarcodeScanner({
+			frm,
+			prompt_qty: frm.doc.prompt_qty
+		});
 		barcode_scanner.process_scan();
 	},
 
