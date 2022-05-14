@@ -97,7 +97,7 @@ def get_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql(
 		"""
 		select
-			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty) / so_item_qty))
+			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - so_item_returned_qty) / so_item_qty))
 		from
 			(
 				(select
@@ -112,6 +112,11 @@ def get_reserved_qty(item_code, warehouse):
 						where name = dnpi.parent_detail_docname
 						and delivered_by_supplier = 0
 					) as so_item_delivered_qty,
+					(
+						select returned_qty from `tabSales Order Item`
+						where name = dnpi.parent_detail_docname
+						and delivered_by_supplier = 0
+					) as so_item_returned_qty,
 					parent, name
 				from
 				(
@@ -125,7 +130,8 @@ def get_reserved_qty(item_code, warehouse):
 				) dnpi)
 			union
 				(select stock_qty as dnpi_qty, qty as so_item_qty,
-					delivered_qty as so_item_delivered_qty, parent, name
+					delivered_qty as so_item_delivered_qty,
+					returned_qty as so_item_returned_qty, parent, name
 				from `tabSales Order Item` so_item
 				where item_code = %s and warehouse = %s
 				and (so_item.delivered_by_supplier is null or so_item.delivered_by_supplier = 0)
