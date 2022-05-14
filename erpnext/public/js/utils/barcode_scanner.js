@@ -51,6 +51,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					if (!data || Object.keys(data).length === 0) {
 						this.show_alert(__("Cannot find Item with this Barcode"), "red");
 						this.clean_up();
+						reject();
 						return;
 					}
 
