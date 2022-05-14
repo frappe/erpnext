@@ -11,7 +11,7 @@ frappe.ui.form.on("Packing Slip", {
 	refresh(frm) {
 		frm.toggle_display("misc_details", frm.doc.amended_from);
 
-		if (frm.doc.delivery_note && frm.doc.status === 0) {
+		if (frm.doc.delivery_note && frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("Get Items"), () => get_items(frm));
 		}
 	},
