@@ -703,7 +703,7 @@ def get_custom_fields():
 			fieldname="gst_section",
 			label="GST Details",
 			fieldtype="Section Break",
-			insert_after="deductions",
+			insert_after="losses",
 			print_hide=1,
 			collapsible=1,
 		),
