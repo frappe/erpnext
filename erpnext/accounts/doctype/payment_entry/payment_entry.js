@@ -779,8 +779,7 @@ frappe.ui.form.on('Payment Entry', {
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount, paid_amount_change) {
 		var total_positive_outstanding_including_order = 0;
 		var total_negative_outstanding = 0;
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
+		var total_deductions = get_deductions_and_losses(frm)["deductions"];
 
 		paid_amount -= total_deductions;
 
@@ -867,8 +866,7 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_unallocated_amount: function(frm) {
 		var unallocated_amount = 0;
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
+		var total_deductions = get_deductions_and_losses(frm)["deductions"]
 
 		if(frm.doc.party) {
 			if(frm.doc.payment_type === "Receive"
@@ -911,8 +909,7 @@ frappe.ui.form.on('Payment Entry', {
 			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
 		}
 
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
+		var total_deductions = get_deductions_and_losses(frm)["deductions"];
 
 		frm.set_value("difference_amount", difference_amount - total_deductions +
 			frm.doc.base_total_taxes_and_charges);
@@ -1416,3 +1413,11 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 })
+
+function get_deductions_and_losses(frm) {
+	const deductions_and_losses = {};
+	["deductions", "losses"].forEach(fieldname => {
+		deductions_and_losses[fieldname] = frm.doc[fieldname].reduce((acc, d) => flt(acc + d.amount), 0);
+	});
+	return deductions_and_losses;
+}

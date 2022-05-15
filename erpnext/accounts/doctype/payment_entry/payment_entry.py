@@ -621,7 +621,7 @@ class PaymentEntry(AccountsController):
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
 		if self.party:
-			total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
+			total_deductions = self.get_deductions_and_losses().get("deductions")
 			included_taxes = self.get_included_taxes()
 			if (
 				self.payment_type == "Receive"
@@ -663,7 +663,7 @@ class PaymentEntry(AccountsController):
 		else:
 			self.difference_amount = self.base_paid_amount - flt(self.base_received_amount)
 
-		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
+		total_deductions = self.get_deductions_and_losses().get("deductions")
 		included_taxes = self.get_included_taxes()
 
 		self.difference_amount = flt(
@@ -1151,6 +1151,19 @@ class PaymentEntry(AccountsController):
 			current_tax_fraction *= -1.0
 
 		return current_tax_fraction
+
+	def get_deductions_and_losses(self):
+		deductions_and_losses = {
+			"deductions": 0,
+			"losses": 0
+		}
+
+		for fieldname in deductions_and_losses.keys():
+			deductions_and_losses.update({
+				fieldname: sum([flt(d.amount) for d in self.get(fieldname)])
+			})
+
+		return deductions_and_losses
 
 
 def validate_inclusive_tax(tax, doc):
