@@ -66,6 +66,13 @@ class CancellationOfInvoices(Document):
 		
 		return total_cost
 
+	def set_valuation_rate(self, item):		
+		stock = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"item_code": item.item_code})
+
+		valuation_rate = stock[0].valuation_rate
+
+		return valuation_rate
+
 	def create_stock_ledger_entry(self, item, qty, delete, allow_negative_stock=False, via_landed_cost_voucher=False, is_amended=None):
 		qty_item = 0
 
@@ -85,6 +92,8 @@ class CancellationOfInvoices(Document):
 
 		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
 
+		valuation_rate = self.set_valuation_rate(item)
+
 		sle = ({
 			"item_code": item.item_code,
 			"warehouse": item.warehouse,
@@ -100,6 +109,7 @@ class CancellationOfInvoices(Document):
 			"company": self.company,
 			"batch_no": item.batch_no,
 			"serial_no": item.serial_no,
+			"valuation_rate": valuation_rate,
 			"project": self.project,
 			"is_cancelled": self.docstatus==2 and "Yes" or "No",
 			'doctype':self.doctype
