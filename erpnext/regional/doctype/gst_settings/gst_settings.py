@@ -151,10 +151,7 @@ def enqueue_update():
 					"gst_rates",
 					{
 						"minimum_taxable_value": flt(hsn_code.get("minimum_taxable_value")),
-						"cgst_rate": flt(rate.get("cgst_rate")),
-						"sgst_rate": flt(rate.get("sgst_rate")),
-						"igst_rate": flt(rate.get("igst_rate")),
-						"cess_rate": flt(rate.get("cess_rate")),
+						"tax_rate": flt(rate.get("tax_rate")),
 					},
 				)
 

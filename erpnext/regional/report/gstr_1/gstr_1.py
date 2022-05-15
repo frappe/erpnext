@@ -1179,7 +1179,7 @@ def get_hsn_wise_tax_rates():
 		frappe.qb.from_(gst_hsn_code)
 		.inner_join(hsn_tax_rates)
 		.on(gst_hsn_code.name == hsn_tax_rates.parent)
-		.select(gst_hsn_code.hsn_code, hsn_tax_rates.igst_rate, hsn_tax_rates.minimum_taxable_value)
+		.select(gst_hsn_code.hsn_code, hsn_tax_rates.tax_rate, hsn_tax_rates.minimum_taxable_value)
 		.orderby(hsn_tax_rates.minimum_taxable_value)
 		.run(as_dict=1)
 	)
@@ -1187,7 +1187,7 @@ def get_hsn_wise_tax_rates():
 	for d in hsn_code_data:
 		hsn_wise_tax_rate.setdefault(d.hsn_code, [])
 		hsn_wise_tax_rate[d.hsn_code].append(
-			{"minimum_taxable_value": d.minimum_taxable_value, "tax_rate": d.igst_rate}
+			{"minimum_taxable_value": d.minimum_taxable_value, "tax_rate": d.tax_rate}
 		)
 
 	return hsn_wise_tax_rate
