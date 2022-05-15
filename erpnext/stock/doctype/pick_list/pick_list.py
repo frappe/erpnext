@@ -679,8 +679,7 @@ def create_stock_entry(pick_list):
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
 
-	stock_entry.set_actual_qty()
-	stock_entry.calculate_rate_and_amount()
+	stock_entry.set_missing_values()
 
 	return stock_entry.as_dict()
 
