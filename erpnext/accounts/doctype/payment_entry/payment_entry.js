@@ -865,26 +865,22 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_unallocated_amount: function(frm) {
-		var unallocated_amount = 0;
-		var total_deductions = get_deductions_and_losses(frm)["deductions"]
+		let unallocated_amount = 0;
+
+		const { deductions } = get_deductions_and_losses(frm);
+		const total_deductions = deductions;
 
 		if(frm.doc.party) {
-			if(frm.doc.payment_type === "Receive"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
+			if(frm.doc.payment_type === "Receive") {
 					unallocated_amount = (
-						((frm.doc.base_received_amount + frm.doc.base_total_taxes_and_charges
-							 + (total_deductions > 0 ? total_deductions : 0))
+						((frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges + total_deductions)
 						/ frm.doc.source_exchange_rate)
 						- frm.doc.total_allocated_amount
 					);
 
-			} else if (frm.doc.payment_type === "Pay"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
+			} else if (frm.doc.payment_type === "Pay") {
 					unallocated_amount = (
-						((frm.doc.base_paid_amount + frm.doc.total_taxes_and_charges
-						  - (total_deductions > 0 ? total_deductions : 0))
+						((frm.doc.base_paid_amount + frm.doc.total_taxes_and_charges - total_deductions)
 							/ frm.doc.target_exchange_rate)
 						- frm.doc.total_allocated_amount
 					);
@@ -909,7 +905,8 @@ frappe.ui.form.on('Payment Entry', {
 			difference_amount = flt(frm.doc.base_paid_amount) - flt(frm.doc.base_received_amount);
 		}
 
-		var total_deductions = get_deductions_and_losses(frm)["deductions"];
+		const { deductions, losses } = get_deductions_and_losses(frm);
+		const total_deductions = deductions + losses;
 
 		frm.set_value("difference_amount", difference_amount - total_deductions +
 			frm.doc.base_total_taxes_and_charges);
@@ -1380,6 +1377,10 @@ frappe.ui.form.on('Payment Entry Deduction', {
 	},
 
 	deductions_remove: function(frm) {
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	losses_remove: function (frm) {
 		frm.events.set_unallocated_amount(frm);
 	}
 })
