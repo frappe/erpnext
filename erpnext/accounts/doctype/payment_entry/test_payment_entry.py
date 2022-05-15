@@ -339,7 +339,7 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(pe.difference_amount, 100)
 
 		pe.append(
-			"deductions",
+			"losses",
 			{
 				"account": "_Test Exchange Gain/Loss - _TC",
 				"cost_center": "_Test Cost Center - _TC",
@@ -386,7 +386,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.reference_date = "2016-01-01"
 
 		pe.append(
-			"deductions",
+			"losses",
 			{
 				"account": "_Test Exchange Gain/Loss - _TC",
 				"cost_center": "_Test Cost Center - _TC",
@@ -593,7 +593,7 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.source_exchange_rate = 55
 
 		pe.append(
-			"deductions",
+			"losses",
 			{
 				"account": "_Test Exchange Gain/Loss - _TC",
 				"cost_center": "_Test Cost Center - _TC",
