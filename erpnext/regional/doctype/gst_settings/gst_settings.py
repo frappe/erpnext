@@ -2,13 +2,14 @@
 # For license information, please see license.txt
 
 
+import json
 import os
 
 import frappe
 from frappe import _
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.document import Document
-from frappe.utils import date_diff, get_url, nowdate
+from frappe.utils import date_diff, flt, get_url, nowdate
 
 
 class EmailMissing(frappe.ValidationError):
@@ -129,3 +130,31 @@ def _send_gstin_reminder(party_type, party, default_email_id=None, sent_to=None)
 	)
 
 	return email_id
+
+
+@frappe.whitelist()
+def update_hsn_codes():
+	frappe.enqueue(enqueue_update)
+	frappe.msgprint(_("HSN/SAC Code sync started, this may take a few minutes..."))
+
+
+def enqueue_update():
+	with open(os.path.join(os.path.dirname(__file__), "hsn_code_data.json"), "r") as f:
+		hsn_codes = json.loads(f.read())
+
+	for hsn_code in hsn_codes:
+		try:
+			hsn_code_doc = frappe.get_doc("GST HSN Code", hsn_code.get("hsn_code"))
+			hsn_code_doc.set("gst_rates", [])
+			for rate in hsn_code.get("gst_rates"):
+				hsn_code_doc.append(
+					"gst_rates",
+					{
+						"minimum_taxable_value": flt(hsn_code.get("minimum_taxable_value")),
+						"tax_rate": flt(rate.get("tax_rate")),
+					},
+				)
+
+			hsn_code_doc.save()
+		except Exception as e:
+			pass

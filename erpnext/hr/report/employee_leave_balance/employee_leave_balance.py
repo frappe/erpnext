@@ -168,9 +168,8 @@ def get_opening_balance(
 
 
 def get_conditions(filters: Filters) -> Dict:
-	conditions = {
-		"status": "Active",
-	}
+	conditions = {}
+
 	if filters.get("employee"):
 		conditions["name"] = filters.get("employee")
 
@@ -179,6 +178,9 @@ def get_conditions(filters: Filters) -> Dict:
 
 	if filters.get("department"):
 		conditions["department"] = filters.get("department")
+
+	if filters.get("employee_status"):
+		conditions["status"] = filters.get("employee_status")
 
 	return conditions
 
