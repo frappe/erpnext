@@ -56,7 +56,6 @@ class JournalEntry(AccountsController):
 		self.clearance_date = None
 
 		self.validate_party()
-		self.validate_party_account_currency()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
@@ -341,6 +340,7 @@ class JournalEntry(AccountsController):
 							d.idx, d.account
 						)
 					)
+<<<<<<< HEAD
 =======
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 	
@@ -354,6 +354,8 @@ class JournalEntry(AccountsController):
 				if not party_gle_currency and (party_account_currency != party_currency):
 					frappe.throw(_("Party Account {0} currency and default party currency should be same").format(frappe.bold(d.account)))
 >>>>>>> 417d6abcf4 (fix: Party account validation in JV)
+=======
+>>>>>>> 5b8726405d (fix: Remove validation from Journal Entry)
 
 	def check_credit_limit(self):
 		customers = list(
