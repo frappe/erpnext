@@ -306,14 +306,15 @@ class BuyingController(StockController, Subcontracting):
 				if self.is_internal_transfer():
 					if rate != d.rate:
 						d.rate = rate
-						d.discount_percentage = 0
-						d.discount_amount = 0
 						frappe.msgprint(
 							_(
 								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
 							).format(d.idx),
 							alert=1,
 						)
+					d.discount_percentage = 0.0
+					d.discount_amount = 0.0
+					d.margin_rate_or_amount = 0.0
 
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
 		supplied_items_cost = 0.0
