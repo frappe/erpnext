@@ -937,7 +937,8 @@ class PaymentEntry(AccountsController):
 				)
 
 	def add_deductions_gl_entries(self, gl_entries):
-		for d in self.get("deductions"):
+		deductions = self.get("deductions") + self.get("losses")
+		for d in deductions:
 			if d.amount:
 				account_currency = get_account_currency(d.account)
 				if account_currency != self.company_currency:
