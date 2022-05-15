@@ -72,6 +72,7 @@
   "total_taxes_and_charges",
   "deductions_or_loss_section",
   "deductions",
+  "losses",
   "transaction_references",
   "reference_no",
   "column_break_23",
@@ -428,9 +429,10 @@
    "label": "Deductions or Loss"
   },
   {
+   "description": "Example: Writeoff, or rounding.",
    "fieldname": "deductions",
    "fieldtype": "Table",
-   "label": "Payment Deductions or Loss",
+   "label": "Payment Deductions",
    "options": "Payment Entry Deduction"
   },
   {
@@ -726,12 +728,19 @@
    "fieldname": "section_break_60",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "description": "Example: Exchange gain, or loss.",
+   "fieldname": "losses",
+   "fieldtype": "Table",
+   "label": "Payment Losses",
+   "options": "Payment Entry Deduction"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-23 20:08:39.559814",
+ "modified": "2022-05-14 20:47:05.313587",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
