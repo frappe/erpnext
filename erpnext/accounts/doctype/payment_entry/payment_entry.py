@@ -625,17 +625,11 @@ class PaymentEntry(AccountsController):
 			included_taxes = self.get_included_taxes()
 			if self.payment_type == "Receive":
 				self.unallocated_amount = (
-					(
-						self.base_paid_amount
-						+ included_taxes
-						+ total_deductions
-					)
-					/ self.source_exchange_rate
+					(self.base_paid_amount + included_taxes + total_deductions) / self.source_exchange_rate
 				) - self.total_allocated_amount
 			elif self.payment_type == "Pay":
 				self.unallocated_amount = (
-					(self.base_paid_amount + included_taxes)
-					- total_deductions
+					(self.base_paid_amount + included_taxes) - total_deductions
 				) / self.target_exchange_rate - self.total_allocated_amount
 
 	def set_difference_amount(self):
@@ -1146,15 +1140,10 @@ class PaymentEntry(AccountsController):
 		return current_tax_fraction
 
 	def get_deductions_and_losses(self):
-		deductions_and_losses = {
-			"deductions": 0,
-			"losses": 0
-		}
+		deductions_and_losses = {"deductions": 0, "losses": 0}
 
 		for fieldname in deductions_and_losses.keys():
-			deductions_and_losses.update({
-				fieldname: sum([flt(d.amount) for d in self.get(fieldname)])
-			})
+			deductions_and_losses.update({fieldname: sum([flt(d.amount) for d in self.get(fieldname)])})
 
 		return deductions_and_losses
 
