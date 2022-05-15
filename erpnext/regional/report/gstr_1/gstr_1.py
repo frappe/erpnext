@@ -435,13 +435,8 @@ class Gstr1Report(object):
 				alert=True,
 			)
 
-<<<<<<< HEAD
-		# Build itemised tax for export invoices where tax table is blank
-		for invoice, items in self.invoice_items.items():
-=======
 		# Build itemised tax for export invoices where tax table is blank (Export and SEZ Invoices)
-		for invoice, items in iteritems(self.invoice_items):
->>>>>>> f2cbb70325 (fix: Multiple fixes in GSTR-1 report)
+		for invoice, items in self.invoice_items.items():
 			if (
 				invoice not in self.items_based_on_tax_rate
 				and invoice not in unidentified_gst_accounts_invoice
