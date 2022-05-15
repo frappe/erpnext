@@ -382,6 +382,7 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.india.utils.validate_document_name",
 			"erpnext.regional.india.utils.update_taxable_values",
+			"erpnext.regional.india.utils.validate_sez_and_export_invoices",
 		],
 	},
 	"POS Invoice": {"on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]},
