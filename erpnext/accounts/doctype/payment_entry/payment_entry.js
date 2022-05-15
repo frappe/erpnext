@@ -981,6 +981,8 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_deductions_entry: function(frm, account) {
+		const child_fieldname = account === "exchange_gain_loss_account" ? "losses" : "deductions";
+
 		if(frm.doc.difference_amount) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_company_defaults",
@@ -989,7 +991,7 @@ frappe.ui.form.on('Payment Entry', {
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						var write_off_row = $.map(frm.doc["deductions"] || [], function(t) {
+						var write_off_row = $.map(frm.doc[child_fieldname] || [], function(t) {
 							return t.account==r.message[account] ? t : null; });
 
 						var row = [];
@@ -998,7 +1000,7 @@ frappe.ui.form.on('Payment Entry', {
 							precision("difference_amount"));
 
 						if (!write_off_row.length && difference_amount) {
-							row = frm.add_child("deductions");
+							row = frm.add_child(child_fieldname);
 							row.account = r.message[account];
 							row.cost_center = r.message["cost_center"];
 						} else {
@@ -1011,7 +1013,7 @@ frappe.ui.form.on('Payment Entry', {
 							frappe.msgprint(__("No gain or loss in the exchange rate"))
 						}
 
-						refresh_field("deductions");
+						refresh_field(child_fieldname);
 
 						frm.events.set_unallocated_amount(frm);
 					}
