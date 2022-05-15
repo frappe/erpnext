@@ -2,25 +2,7 @@ import inspect
 
 import frappe
 
-<<<<<<< HEAD
 __version__ = "14.0.0-dev"
-=======
-from erpnext.hooks import regional_overrides
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-__version__ = "13.27.1"
->>>>>>> 096dcf0e54 (chore(release): Bumped to Version 13.27.1)
-=======
-__version__ = "13.28.0"
->>>>>>> 8cc2ea0ddb (chore(release): Bumped to Version 13.28.0)
-=======
-__version__ = "13.29.0"
->>>>>>> 7369db59aa (chore(release): Bumped to Version 13.29.0)
-=======
-__version__ = "13.27.0"
->>>>>>> 5b02b5b3cd (chore: Remove unintended changes)
 
 
 def get_default_company(user=None):
