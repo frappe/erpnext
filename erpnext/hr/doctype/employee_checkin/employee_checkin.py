@@ -227,11 +227,15 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 					in_log = out_log = None
 				if not in_log:
 					in_log = log if log.log_type == "IN" else None
+					if in_log and not in_time:
+						in_time = in_log.time
 				elif not out_log:
 					out_log = log if log.log_type == "OUT" else None
+
 			if in_log and out_log:
 				out_time = out_log.time
 				total_hours += time_diff_in_hours(in_log.time, out_log.time)
+
 	return total_hours, in_time, out_time
 
 
