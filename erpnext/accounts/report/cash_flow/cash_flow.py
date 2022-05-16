@@ -264,7 +264,7 @@ def get_chart_data(columns, data):
 	datasets = [
 		{
 			"name": account.get("account").replace("'", ""),
-			"values": [account.get(d.get("fieldname")) for d in columns[2:]]
+			"values": [account.get(d.get("fieldname")) for d in columns[2:]],
 		}
 		for account in data
 		if account.get("parent_account") == None and account.get("currency")
