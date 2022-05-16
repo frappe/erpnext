@@ -79,9 +79,14 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			rate=400,
 			debit_to="Debtors - TPC",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 			currency="USD"
 >>>>>>> 60915e874d (test: Update test cases for currency change validation)
+=======
+			currency="USD",
+			customer="_Test Customer USD",
+>>>>>>> 65232edfd5 (test: Update test cases)
 		)
 		create_sales_invoice(
 			company=company,
@@ -91,9 +96,14 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			rate=200,
 			debit_to="Debtors - TPC",
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 			currency="USD"
 >>>>>>> 60915e874d (test: Update test cases for currency change validation)
+=======
+			currency="USD",
+			customer="_Test Customer USD",
+>>>>>>> 65232edfd5 (test: Update test cases)
 		)
 
 		pcv = self.make_period_closing_voucher(submit=False)
@@ -127,14 +137,17 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 
-		create_sales_invoice(
+		si = create_sales_invoice(
 			company=company,
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
 			cost_center=cost_center,
 			rate=400,
 			debit_to="Debtors - TPC",
+			currency="USD",
+			customer="_Test Customer USD",
 		)
+
 		jv = make_journal_entry(
 			account1="Cash - TPC",
 			account2="Sales - TPC",
