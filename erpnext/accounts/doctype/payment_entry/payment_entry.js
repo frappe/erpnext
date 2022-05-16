@@ -975,7 +975,27 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	set_deductions_entry: function(frm, account) {
-		const child_fieldname = account === "exchange_gain_loss_account" ? "losses" : "deductions";
+		const deduction_info = {};
+		if (account === "exchange_gain_loss_account") {
+			deduction_info.child_fieldname = "losses";
+			deduction_info.amount = flt(frm.doc.difference_amount, precision("difference_amount"));
+		}
+		else if(account === "write_off_account") {
+			deduction_info.child_fieldname = "deductions";
+
+			if (frm.doc.payment_type === "Pay") {
+				deduction_info.amount = flt(frm.doc.unallocated_amount * frm.doc.target_exchange_rate,
+					precision("unallocated_amount"));
+			}
+			else if(frm.doc.payment_type === "Receive") {
+				deduction_info.amount = flt(frm.doc.unallocated_amount * frm.doc.source_exchange_rate,
+					precision("unallocated_amount"));
+			}
+		}
+		else {
+			frappe.throw(__("Deduction entry not implemented for account {0}.", [account]));
+		}
+
 
 		if(frm.doc.difference_amount) {
 			frappe.call({
@@ -985,16 +1005,16 @@ frappe.ui.form.on('Payment Entry', {
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						var write_off_row = $.map(frm.doc[child_fieldname] || [], function(t) {
+						var write_off_row = $.map(frm.doc[deduction_info.child_fieldname] || [], function(t) {
 							return t.account==r.message[account] ? t : null; });
 
 						var row = [];
 
-						var difference_amount = flt(frm.doc.difference_amount,
-							precision("difference_amount"));
+						// var difference_amount = flt(frm.doc.difference_amount,
+						// 	precision("difference_amount"));
 
-						if (!write_off_row.length && difference_amount) {
-							row = frm.add_child(child_fieldname);
+						if (!write_off_row.length && deduction_info.amount) {
+							row = frm.add_child(deduction_info.child_fieldname);
 							row.account = r.message[account];
 							row.cost_center = r.message["cost_center"];
 						} else {
@@ -1002,12 +1022,12 @@ frappe.ui.form.on('Payment Entry', {
 						}
 
 						if (row) {
-							row.amount = flt(row.amount) + difference_amount;
+							row.amount = flt(row.amount) + deduction_info.amount;
 						} else {
 							frappe.msgprint(__("No gain or loss in the exchange rate"))
 						}
 
-						refresh_field(child_fieldname);
+						refresh_field(deduction_info.child_fieldname);
 
 						frm.events.set_unallocated_amount(frm);
 					}
