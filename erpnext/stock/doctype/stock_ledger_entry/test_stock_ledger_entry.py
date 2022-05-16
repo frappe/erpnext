@@ -6,15 +6,8 @@ import json
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-<<<<<<< HEAD
-from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, today
-from frappe.utils.data import add_to_date
-=======
-from frappe.query_builder.functions import CombineDatetime
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, flt, today
->>>>>>> b1c90e9949 (fix: stock transfer value when precision differs)
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
