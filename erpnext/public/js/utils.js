@@ -125,7 +125,7 @@ $.extend(erpnext.utils, {
 	},
 
 	add_indicator_for_multicompany: function(frm, info) {
-		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
 		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
 
