@@ -1,5 +1,5 @@
 <div class="row">
-	{% if doc.flags.show_inclusive_tax_in_print %}
+	{% if doc.flags.show_inclusive_tax_in_print and (not doc.hide_total_without_tax) %}
 		<div class="col-xs-5 {%- if doc.align_labels_right %} text-right{%- endif -%}">
 			<label>{{ _("Total (Without Tax)") }}</label></div>
 		<div class="col-xs-7 text-right">
