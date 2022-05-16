@@ -1108,13 +1108,8 @@ From and To dates required,"От и До даты, необходимых",
 From date can not be less than employee's joining date,От даты не может быть меньше даты вступления в должность сотрудника,
 From value must be less than to value in row {0},"От значение должно быть меньше, чем значение в строке {0}",
 From {0} | {1} {2},С {0} | {1} {2},
-<<<<<<< HEAD
-Fuel Price,Топливо Цена,
-Fuel Qty,Топливо Кол-во,
-=======
 Fuel Price,Стоимость топлива,
 Fuel Qty,Топливо кол-во,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Fulfillment,свершение,
 Full,Полный,
 Full Name,Полное имя,
@@ -1344,21 +1339,12 @@ Issued,Запрошено,
 Issues,Вопросов,
 It is needed to fetch Item Details.,Это необходимо для отображения подробностей продукта.,
 Item,Продукт,
-<<<<<<< HEAD
-Item 1,Пункт 1,
-Item 2,Пункт 2,
-Item 3,Пункт 3,
-Item 4,Пункт 4,
-Item 5,Пункт 5,
-Item Cart,Продуктовая корзина,
-=======
 Item 1,Продукт 1,
 Item 2,Продукт 2,
 Item 3,Продукт 3,
 Item 4,Продукт 4,
 Item 5,Продукт 5,
 Item Cart,Корзина,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Item Code,Код продукта,
 Item Code cannot be changed for Serial No.,Код продукта не может быть изменен для серийного номера,
 Item Code required at Row No {0},Требуется код продукта в строке № {0},
@@ -1370,13 +1356,8 @@ Item Name,Название продукта,
 Item Price added for {0} in Price List {1},Цена продукта {0} добавлена в прайс-лист {1},
 "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.","Цена товара отображается несколько раз на основе Прайс-листа, Поставщика / Клиента, Валюты, Предмет, UOM, Кол-во и Даты.",
 Item Price updated for {0} in Price List {1},Цена продукта {0} обновлена в прайс-листе {1},
-<<<<<<< HEAD
-Item Row {0}: {1} {2} does not exist in above '{1}' table,Элемент Row {0}: {1} {2} не существует в таблице «{1}»,
-Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Пункт Налоговый ряд {0} должен иметь учетную запись типа налога или доходов или расходов или платная,
-=======
 Item Row {0}: {1} {2} does not exist in above '{1}' table,Строка {0}: {1} {2} не существует в таблице «{1}»,
 Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,"Строка налога {0} должен иметь счет типа Налога, Доход, Расходов или Облагаемый налогом",
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Item Template,Шаблон продукта,
 Item Variant Settings,Параметры модификации продукта,
 Item Variant {0} already exists with same attributes,Модификация продукта {0} с этими атрибутами уже существует,
@@ -1390,20 +1371,6 @@ Item {0} does not exist,Продукт {0} не существует,
 Item {0} does not exist in the system or has expired,Продукт {0} не существует или просрочен,
 Item {0} has already been returned,Продукт {0} уже возвращен,
 Item {0} has been disabled,Продукт {0} не годен,
-<<<<<<< HEAD
-Item {0} has reached its end of life on {1},Пункт {0} достигла своей жизни на {1},
-Item {0} ignored since it is not a stock item,"Пункт {0} игнорируется, так как это не складские позиции",
-"Item {0} is a template, please select one of its variants","Пункт {0} шаблона, выберите один из его вариантов",
-Item {0} is cancelled,Пункт {0} отменяется,
-Item {0} is disabled,Пункт {0} отключена,
-Item {0} is not a serialized Item,Пункт {0} не сериализованным Пункт,
-Item {0} is not a stock Item,Продукта {0} нет на складе,
-Item {0} is not active or end of life has been reached,Пункт {0} не является активным или конец жизни был достигнут,
-Item {0} is not setup for Serial Nos. Check Item master,Пункт {0} не установка для мастера серийные номера Проверить товара,
-Item {0} is not setup for Serial Nos. Column must be blank,Пункт {0} не установка для серийные номера колонке должно быть пустым,
-Item {0} must be a Fixed Asset Item,Пункт {0} должен быть Fixed Asset Item,
-Item {0} must be a Sub-contracted Item,Пункт {0} должен быть Субдоговорная Пункт,
-=======
 Item {0} has reached its end of life on {1},Продукт {0} достигокончания срока годности на {1},
 Item {0} ignored since it is not a stock item,"Продукт {0} игнорируется, так как это не складские позиции",
 "Item {0} is a template, please select one of its variants","Продукт {0} это шаблон, выберите один из его вариантов",
@@ -1416,7 +1383,6 @@ Item {0} is not setup for Serial Nos. Check Item master,Продукт {0} не 
 Item {0} is not setup for Serial Nos. Column must be blank,Продукт {0} не настроен для серийных номеров. Колонка должны быть пуста,
 Item {0} must be a Fixed Asset Item,Продукт {0} должен быть объектом основных средств,
 Item {0} must be a Sub-contracted Item,Продукт {0} должен быть предметом субподряда,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Item {0} must be a non-stock item,Продукт {0} должен отсутствовать на складе,
 Item {0} must be a stock Item,Продукт {0} должен быть в наличии,
 Item {0} not found,Продукт {0} не найден,
@@ -1573,15 +1539,9 @@ Marketing Expenses,Маркетинговые расходы,
 Marketplace,Торговая площадка,
 Marketplace Error,Ошибка торговой площадки,
 Masters,Мастеры,
-<<<<<<< HEAD
-Match Payments with Invoices,Соответствие Платежи с счетов-фактур,
-Match non-linked Invoices and Payments.,"Подходим, не связанных Счета и платежи.",
-Material,материал,
-=======
 Match Payments with Invoices,Соответствие платежей со счетами,
 Match non-linked Invoices and Payments.,Сопоставьте несвязанные счета и платежи.,
 Material,Материал,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Material Consumption,Расход материала,
 Material Consumption is not set in Manufacturing Settings.,Потребление материала не задано в настройках производства.,
 Material Receipt,Материал Поступление,
@@ -1700,13 +1660,8 @@ New Batch ID (Optional),Новый идентификатор партии (не
 New Batch Qty,Новое количество партий,
 New Company,Новая компания,
 New Cost Center Name,Название нового центра затрат,
-<<<<<<< HEAD
-New Customer Revenue,Новый Выручка клиентов,
-New Customers,новые клиенты,
-=======
 New Customer Revenue,Доход от нового клиента,
 New Customers,Новые клиенты,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 New Department,Новый отдел,
 New Employee,Новый сотрудник,
 New Location,Новое место,
@@ -2468,15 +2423,9 @@ Root cannot have a parent cost center,Корневая не может имет�
 Round Off,Округлять,
 Rounded Total,Итого с округлением,
 Route,Маршрут,
-<<<<<<< HEAD
-Row # {0}: ,Ряд # {0}:,
-Row # {0}: Batch No must be same as {1} {2},"Ряд # {0}: Пакетное Нет должно быть таким же, как {1} {2}",
-Row # {0}: Cannot return more than {1} for Item {2},Ряд # {0}: Невозможно вернуть более {1} для п {2},
-=======
 Row # {0}: ,Строка # {0}: ,
 Row # {0}: Batch No must be same as {1} {2},"Строка # {0}: Номер партии не должен быть таким же, как {1} {2}",
 Row # {0}: Cannot return more than {1} for Item {2},Строка # {0}: Невозможно вернуть более {1} для {2},
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Row # {0}: Rate cannot be greater than the rate used in {1} {2},"Строка # {0}: ставка не может быть больше ставки, используемой в {1} {2}",
 Row # {0}: Serial No is mandatory,Ряд # {0}: Серийный номер является обязательным,
 Row # {0}: Serial No {1} does not match with {2} {3},"Ряд # {0}: Серийный номер {1}, не соответствует {2} {3}",
@@ -2661,11 +2610,7 @@ Select Property,Выберите свойство,
 Select Quantity,Выберите количество,
 Select Serial Numbers,Выберите серийные номера,
 Select Target Warehouse,Выберите целевое хранилище,
-<<<<<<< HEAD
-Select Warehouse...,Выберите Склад ...,
-=======
 Select Warehouse...,Выберите cклад...,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Select an account to print in account currency,Выберите учетную запись для печати в валюте счета.,
 Select an employee to get the employee advance.,"Выберите сотрудника, чтобы получить работу сотрудника.",
 Select at least one value from each of the attributes.,Выберите по крайней мере одно значение из каждого из атрибутов.,
@@ -3390,11 +3335,7 @@ You can only submit Leave Encashment for a valid encashment amount,Вы може
 You can't redeem Loyalty Points having more value than the Grand Total.,"Вы не можете выкупить очки лояльности, имеющие большую ценность, чем Grand Total.",
 You cannot credit and debit same account at the same time,Нельзя кредитовать и дебетовать один счёт за один раз,
 You cannot delete Fiscal Year {0}. Fiscal Year {0} is set as default in Global Settings,Нельзя удалить {0} финансовый год. Финансовый год {0} установлен  основным в глобальных параметрах,
-<<<<<<< HEAD
-You cannot delete Project Type 'External',Вы не можете удалить Project Type &#39;External&#39;,
-=======
 You cannot delete Project Type 'External',Вы не можете удалить проект типа "Внешний",
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 You cannot edit root node.,Вы не можете редактировать корневой узел.,
 You cannot restart a Subscription that is not cancelled.,"Вы не можете перезапустить подписку, которая не отменена.",
 You don't have enought Loyalty Points to redeem,У вас недостаточно очков лояльности для выкупа,
@@ -3628,15 +3569,6 @@ Webhook Secret,Webhook Secret,
 <b>From Time</b> cannot be later than <b>To Time</b> for {0},"<b>Начально время</b> не может быть позже, чем <b>конечное время</b> для {0}",
 <b>To Date</b> is a mandatory filter.,<b>На сегодняшний день</b> это обязательный фильтр.,
 A new appointment has been created for you with {0},Для вас создана новая встреча с {0},
-<<<<<<< HEAD
-Account Value,Стоимость аккаунта,
-Account is mandatory to get payment entries,Аккаунт обязателен для получения платежных записей,
-Account is not set for the dashboard chart {0},Учетная запись не настроена для диаграммы панели мониторинга {0},
-Account {0} does not belong to company {1},Аккаунт {0} не принадлежит компании {1},
-Account {0} does not exists in the dashboard chart {1},Аккаунт {0} не существует в диаграмме панели {1},
-Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry,Аккаунт: <b>{0}</b> является капитальным незавершенным и не может быть обновлен в журнале,
-Account: {0} is not permitted under Payment Entry,Аккаунт: {0} не разрешен при вводе платежа,
-=======
 Account Value,Стоимость счета,
 Account is mandatory to get payment entries,Счет обязателен для получения платежных записей,
 Account is not set for the dashboard chart {0},Счет не настроен для диаграммы панели мониторинга {0},
@@ -3644,7 +3576,6 @@ Account {0} does not belong to company {1},Счет {0} не принадлеж�
 Account {0} does not exists in the dashboard chart {1},Счет {0} не существует в диаграмме панели {1},
 Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry,Счет: <b>{0}</b> является незавершенным и не может быть обновлен в журнале,
 Account: {0} is not permitted under Payment Entry,Счет: {0} не разрешен при вводе платежа,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.,Параметр учета <b>{0}</b> требуется для счета «Баланс» {1}.,
 Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.,Параметр учета <b>{0}</b> требуется для счета «Прибыли и убытки» {1}.,
 Accounting Masters,Бухгалтерские мастера,
@@ -4319,15 +4250,9 @@ No employee found,Сотрудник не найден,
 No students found,Нет студентов не найдено,
 Not in stock,Нет в наличии,
 Not permitted,Не разрешено,
-<<<<<<< HEAD
-Open Issues ,Открыть вопросы,
-Open Projects ,Открыть проекты,
-Open To Do ,Открыть список задач,
-=======
 Open Issues ,Открытые вопросы ,
 Open Projects ,Открытые проекты,
 Open To Do ,Открыть список задач ,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Operation Id,Код операции,
 Partially ordered,Частично заказанно,
 Please select company first,Сначала выберите компанию,
@@ -4593,15 +4518,9 @@ Users with this role are allowed to set frozen accounts and create / modify acco
 Determine Address Tax Category From,Определить адрес налоговой категории от,
 Over Billing Allowance (%),Превышение надбавки (%),
 Credit Controller,Кредитная контроллер,
-<<<<<<< HEAD
-Check Supplier Invoice Number Uniqueness,Проверять Уникальность Номера Счетов получаемых от Поставщика,
-Make Payment via Journal Entry,Платежи через журнал Вход,
-Unlink Payment on Cancellation of Invoice,Unlink Оплата об аннулировании счета-фактуры,
-=======
 Check Supplier Invoice Number Uniqueness,Проверять уникальность номеров счетов получаемых от поставщика,
 Make Payment via Journal Entry,Произвести оплату через журнальную запись,
 Unlink Payment on Cancellation of Invoice,Отменить привязку платежа при аннулировании счета,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Book Asset Depreciation Entry Automatically,Автоматическое внесение амортизации в книгу,
 Automatically Add Taxes and Charges from Item Tax Template,Автоматически добавлять налоги и сборы из шаблона налога на товар,
 Automatically Fetch Payment Terms,Автоматически получать условия оплаты,
@@ -4676,13 +4595,8 @@ Payment Invoice Items,Платежные счета,
 Reconciled Transactions,Согласованные транзакции,
 Bank Statement Transaction Invoice Item,Элемент счета транзакции банковского выписки,
 Payment Description,Описание платежа,
-<<<<<<< HEAD
-Invoice Date,Дата Счета,
-invoice,счет-фактура,
-=======
 Invoice Date,Дата счета,
 invoice,счет,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Bank Statement Transaction Payment Item,Элемент оплаты транзакции по банковскому счету,
 outstanding_amount,outstanding_amount,
 Payment Reference,Ссылка на платеж,
@@ -4952,15 +4866,9 @@ Payment Reconciliation,Оплата Примирение,
 Receivable / Payable Account,Счет Дебиторской / Кредиторской задолженности,
 Bank / Cash Account,Банк / Расчетный счет,
 From Invoice Date,От Дата Счета,
-<<<<<<< HEAD
-To Invoice Date,Счета-фактуры Дата,
-Minimum Invoice Amount,Минимальная Сумма счета,
-Maximum Invoice Amount,Максимальная Сумма счета,
-=======
 To Invoice Date,К дате выставления счета,
 Minimum Invoice Amount,Минимальная сумма счета,
 Maximum Invoice Amount,Максимальная сумма счета,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 System will fetch all the entries if limit value is zero.,"Система извлечет все записи, если предельное значение равно нулю.",
 Get Unreconciled Entries,Получить несверенные записи,
 Unreconciled Payment Details,Несогласованные Детали компенсации,
@@ -6652,15 +6560,9 @@ Educational Qualification,Образовательный ценз,
 Previous Work Experience,Предыдущий опыт работы,
 External Work History,Внешний Работа История,
 History In Company,История в компании,
-<<<<<<< HEAD
-Internal Work History,Внутренняя история Работа,
-Resignation Letter Date,Отставка Письмо Дата,
-Relieving Date,Освобождение Дата,
-=======
 Internal Work History,Внутренняя история работ,
 Resignation Letter Date,Дата заявления об уходе,
 Relieving Date,Дата увольнения,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Reason for Leaving,Причина увольнения,
 Leave Encashed?,Оставьте инкассированы?,
 Encashment Date,Инкассация Дата,
@@ -6700,17 +6602,10 @@ Log Type,Тип журнала,
 OUT,ИЗ,
 Location / Device ID,Расположение / ID устройства,
 Skip Auto Attendance,Пропустить автоматическое посещение,
-<<<<<<< HEAD
-Shift Start,Shift Start,
-Shift End,Shift End,
-Shift Actual Start,Сдвиг фактического начала,
-Shift Actual End,Сдвиг фактического конца,
-=======
 Shift Start,Начало смены,
 Shift End,Конец смены,
 Shift Actual Start,Фактическое начало смены,
 Shift Actual End,Фактическое окончание смены,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Employee Education,Сотрудник Образование,
 School/University,Школа / университет,
 Graduate,Выпускник,
@@ -8947,13 +8842,8 @@ Add to Topics,Добавить в темы,
 Add Article to Topics,Добавить статью в темы,
 This article is already added to the existing topics,Эта статья уже добавлена в существующие темы,
 Add to Programs,Добавить в программы,
-<<<<<<< HEAD
-Programs,Программ,
-...Adding Course to Programs,... Добавление курса в программы,
-=======
 Programs,Программы,
 ...Adding Course to Programs,...Добавление курса в программы,
->>>>>>> af1eab5d54 (fix(translations): Update ru translations (#30992))
 Add Course to Programs,Добавить курс в программы,
 This course is already added to the existing programs,Этот курс уже добавлен в существующие программы,
 Learning Management System Settings,Настройки системы управления обучением,
