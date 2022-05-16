@@ -87,14 +87,24 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 		price = frappe.get_all(
 			"Item Price",
 			fields=["price_list_rate", "currency"],
-			filters={"price_list": price_list, "item_code": item_code},
+			filters=[
+				["price_list", "=", price_list],
+				["item_code", "=", item_code],
+				["valid_from", "<=", frappe.utils.nowdate()],
+				["valid_upto", ">=", frappe.utils.nowdate()]
+			]
 		)
 
 		if template_item_code and not price:
 			price = frappe.get_all(
 				"Item Price",
 				fields=["price_list_rate", "currency"],
-				filters={"price_list": price_list, "item_code": template_item_code},
+				filters=[
+					["price_list", "=", price_list],
+					["item_code", "=", template_item_code],
+					["valid_from", "<=", frappe.utils.nowdate()],
+					["valid_upto", ">=", frappe.utils.nowdate()]
+				]
 			)
 
 		if price:
