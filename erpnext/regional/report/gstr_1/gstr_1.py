@@ -936,7 +936,7 @@ def get_export_json(res):
 	for exp_type in res:
 		exp_item, inv = {"exp_typ": exp_type, "inv": []}, []
 
-		for number, invoice in iteritems(res[exp_type]):
+		for number, invoice in res[exp_type].items():
 			inv_item = get_basic_invoice_detail(invoice[0])
 			inv_item["itms"] = []
 
