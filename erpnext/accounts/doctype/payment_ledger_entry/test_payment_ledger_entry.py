@@ -1,30 +1,27 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
-
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, nowdate
+from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.party import get_party_account
 from erpnext.stock.doctype.item.test_item import create_item
 
 
-# class TestPaymentLedgerEntry(FrappeTestCase):
-class TestPaymentLedgerEntry(unittest.TestCase):
+class TestPaymentLedgerEntry(FrappeTestCase):
 	def setUp(self):
+		self.ple = qb.DocType("Payment Ledger Entry")
 		self.create_company()
 		self.create_item()
 		self.create_customer()
 		self.clear_old_entries()
 
-	# def tearDown(self):
-	# 	frappe.db.rollback()
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def create_company(self):
 		company_name = "_Test Payment Ledger"
@@ -170,12 +167,55 @@ class TestPaymentLedgerEntry(unittest.TestCase):
 		)
 		return je
 
-	def test_create_all_types(self):
+	def test_payment_against_invoice(self):
 		transaction_date = nowdate()
 		amount = 100
+		ple = self.ple
+
 		# full payment using PE
 		si1 = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
-		pe2 = get_payment_entry(si1.doctype, si1.name).save().submit()
+		pe1 = get_payment_entry(si1.doctype, si1.name).save().submit()
+
+		pl_entries = (
+			qb.from_(ple)
+			.select(
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.against_voucher_type,
+				ple.against_voucher_no,
+				ple.amount,
+				ple.delinked,
+			)
+			.where((ple.against_voucher_type == si1.doctype) & (ple.against_voucher_no == si1.name))
+			.orderby(ple.creation)
+			.run(as_dict=True)
+		)
+
+		expected_values = [
+			{
+				"voucher_type": si1.doctype,
+				"voucher_no": si1.name,
+				"against_voucher_type": si1.doctype,
+				"against_voucher_no": si1.name,
+				"amount": amount,
+				"delinked": 0,
+			},
+			{
+				"voucher_type": pe1.doctype,
+				"voucher_no": pe1.name,
+				"against_voucher_type": si1.doctype,
+				"against_voucher_no": si1.name,
+				"amount": -amount,
+				"delinked": 0,
+			},
+		]
+		self.assertEqual(pl_entries[0], expected_values[0])
+		self.assertEqual(pl_entries[1], expected_values[1])
+
+	def test_partial_payment_against_invoice(self):
+		ple = self.ple
+		transaction_date = nowdate()
+		amount = 100
 
 		# partial payment of invoice using PE
 		si2 = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
@@ -183,6 +223,47 @@ class TestPaymentLedgerEntry(unittest.TestCase):
 		pe2.get("references")[0].allocated_amount = 50
 		pe2.get("references")[0].outstanding_amount = 50
 		pe2 = pe2.save().submit()
+
+		pl_entries = (
+			qb.from_(ple)
+			.select(
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.against_voucher_type,
+				ple.against_voucher_no,
+				ple.amount,
+				ple.delinked,
+			)
+			.where((ple.against_voucher_type == si2.doctype) & (ple.against_voucher_no == si2.name))
+			.orderby(ple.creation)
+			.run(as_dict=True)
+		)
+
+		expected_values = [
+			{
+				"voucher_type": si2.doctype,
+				"voucher_no": si2.name,
+				"against_voucher_type": si2.doctype,
+				"against_voucher_no": si2.name,
+				"amount": amount,
+				"delinked": 0,
+			},
+			{
+				"voucher_type": pe2.doctype,
+				"voucher_no": pe2.name,
+				"against_voucher_type": si2.doctype,
+				"against_voucher_no": si2.name,
+				"amount": -50,
+				"delinked": 0,
+			},
+		]
+		self.assertEqual(pl_entries[0], expected_values[0])
+		self.assertEqual(pl_entries[1], expected_values[1])
+
+	def test_cr_note_against_invoice(self):
+		ple = self.ple
+		transaction_date = nowdate()
+		amount = 100
 
 		# reconcile against return invoice
 		si3 = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
@@ -192,6 +273,47 @@ class TestPaymentLedgerEntry(unittest.TestCase):
 		cr_note1.is_return = 1
 		cr_note1.return_against = si3.name
 		cr_note1 = cr_note1.save().submit()
+
+		pl_entries = (
+			qb.from_(ple)
+			.select(
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.against_voucher_type,
+				ple.against_voucher_no,
+				ple.amount,
+				ple.delinked,
+			)
+			.where((ple.against_voucher_type == si3.doctype) & (ple.against_voucher_no == si3.name))
+			.orderby(ple.creation)
+			.run(as_dict=True)
+		)
+
+		expected_values = [
+			{
+				"voucher_type": si3.doctype,
+				"voucher_no": si3.name,
+				"against_voucher_type": si3.doctype,
+				"against_voucher_no": si3.name,
+				"amount": amount,
+				"delinked": 0,
+			},
+			{
+				"voucher_type": cr_note1.doctype,
+				"voucher_no": cr_note1.name,
+				"against_voucher_type": si3.doctype,
+				"against_voucher_no": si3.name,
+				"amount": -amount,
+				"delinked": 0,
+			},
+		]
+		self.assertEqual(pl_entries[0], expected_values[0])
+		self.assertEqual(pl_entries[1], expected_values[1])
+
+	def test_je_against_inv_and_note(self):
+		ple = self.ple
+		transaction_date = nowdate()
+		amount = 100
 
 		# reconcile against return invoice using JE
 		si4 = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
@@ -211,5 +333,76 @@ class TestPaymentLedgerEntry(unittest.TestCase):
 		je1.get("accounts")[1].reference_name = si4.name
 		je1 = je1.save().submit()
 
-	def test_dummy(self):
-		pass
+		pl_entries_for_invoice = (
+			qb.from_(ple)
+			.select(
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.against_voucher_type,
+				ple.against_voucher_no,
+				ple.amount,
+				ple.delinked,
+			)
+			.where((ple.against_voucher_type == si4.doctype) & (ple.against_voucher_no == si4.name))
+			.orderby(ple.creation)
+			.run(as_dict=True)
+		)
+
+		expected_values = [
+			{
+				"voucher_type": si4.doctype,
+				"voucher_no": si4.name,
+				"against_voucher_type": si4.doctype,
+				"against_voucher_no": si4.name,
+				"amount": amount,
+				"delinked": 0,
+			},
+			{
+				"voucher_type": je1.doctype,
+				"voucher_no": je1.name,
+				"against_voucher_type": si4.doctype,
+				"against_voucher_no": si4.name,
+				"amount": -amount,
+				"delinked": 0,
+			},
+		]
+		self.assertEqual(pl_entries_for_invoice[0], expected_values[0])
+		self.assertEqual(pl_entries_for_invoice[1], expected_values[1])
+
+		pl_entries_for_crnote = (
+			qb.from_(ple)
+			.select(
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.against_voucher_type,
+				ple.against_voucher_no,
+				ple.amount,
+				ple.delinked,
+			)
+			.where(
+				(ple.against_voucher_type == cr_note2.doctype) & (ple.against_voucher_no == cr_note2.name)
+			)
+			.orderby(ple.creation)
+			.run(as_dict=True)
+		)
+
+		expected_values = [
+			{
+				"voucher_type": cr_note2.doctype,
+				"voucher_no": cr_note2.name,
+				"against_voucher_type": cr_note2.doctype,
+				"against_voucher_no": cr_note2.name,
+				"amount": -amount,
+				"delinked": 0,
+			},
+			{
+				"voucher_type": je1.doctype,
+				"voucher_no": je1.name,
+				"against_voucher_type": cr_note2.doctype,
+				"against_voucher_no": cr_note2.name,
+				"amount": amount,
+				"delinked": 0,
+			},
+		]
+		self.assertEqual(pl_entries_for_crnote[0], expected_values[0])
+		self.assertEqual(pl_entries_for_crnote[1], expected_values[1])
