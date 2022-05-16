@@ -743,23 +743,6 @@ class TestDepreciationBasics(AssetSetup):
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 
-	def test_pro_rata_calculation_for_first_row_for_existing_assets(self):
-		"""Tests if pro-rata calculation is skipped for the first row when number_of_depreciations_booked != 0."""
-
-		asset = create_asset(
-			item_code="Macbook Pro",
-			calculate_depreciation=1,
-			available_for_use_date=getdate("2020-01-01"),
-			total_number_of_depreciations=3,
-			expected_value_after_useful_life=10000,
-			opening_accumulated_depreciation=15000,
-			number_of_depreciations_booked=1,
-			depreciation_start_date=getdate("2020-07-01"),
-			submit=1,
-		)
-
-		self.assertEqual(asset.schedules[0].depreciation_amount, 30000)
-
 	def test_get_depreciation_amount(self):
 		"""Tests if get_depreciation_amount() returns the right value."""
 
