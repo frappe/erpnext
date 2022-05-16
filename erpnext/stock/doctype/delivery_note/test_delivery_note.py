@@ -1087,6 +1087,9 @@ class TestDeliveryNote(FrappeTestCase):
 		sr = make_return_doc("Delivery Note", dn.name)
 		sr.submit()
 
+		returned = frappe.get_doc("Delivery Note", sr.name)
+		returned.update_prevdoc_status()
+
 		# Test that item qty is not reserved on sales return.
 		self.assertEqual(get_reserved_qty(soi.item_code, soi.warehouse), 0)
 
