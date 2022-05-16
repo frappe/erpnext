@@ -188,9 +188,9 @@ def get_rootwise_opening_balances(filters, report_type):
 					filters[dimension.fieldname] = get_dimension_with_children(
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
-					additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
+					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
 				else:
-					additional_conditions += "and {0} in (%({0})s)".format(dimension.fieldname)
+					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
 
 				query_filters.update({dimension.fieldname: filters.get(dimension.fieldname)})
 
