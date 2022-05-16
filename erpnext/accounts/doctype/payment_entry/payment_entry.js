@@ -1010,9 +1010,6 @@ frappe.ui.form.on('Payment Entry', {
 
 						var row = [];
 
-						// var difference_amount = flt(frm.doc.difference_amount,
-						// 	precision("difference_amount"));
-
 						if (!write_off_row.length && deduction_info.amount) {
 							row = frm.add_child(deduction_info.child_fieldname);
 							row.account = r.message[account];
