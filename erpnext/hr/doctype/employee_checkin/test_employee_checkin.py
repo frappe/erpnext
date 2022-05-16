@@ -125,6 +125,11 @@ class TestEmployeeCheckin(FrappeTestCase):
 		)
 		self.assertEqual(working_hours, (4.5, logs_type_2[1].time, logs_type_2[-1].time))
 
+		working_hours = calculate_working_hours(
+			[logs_type_2[1], logs_type_2[-1]], check_in_out_type[1], working_hours_calc_type[1]
+		)
+		self.assertEqual(working_hours, (5.0, logs_type_2[1].time, logs_type_2[-1].time))
+
 	def test_fetch_shift(self):
 		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
 

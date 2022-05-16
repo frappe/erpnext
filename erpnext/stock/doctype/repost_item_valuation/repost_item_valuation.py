@@ -3,9 +3,11 @@
 
 import frappe
 from frappe import _
+from frappe.exceptions import QueryDeadlockError, QueryTimeoutError
 from frappe.model.document import Document
 from frappe.utils import cint, get_link_to_form, get_weekday, now, nowtime
 from frappe.utils.user import get_users_with_role
+from rq.timeouts import JobTimeoutException
 
 import erpnext
 from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
@@ -14,6 +16,8 @@ from erpnext.stock.stock_ledger import (
 	get_items_to_be_repost,
 	repost_future_sle,
 )
+
+RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
 
 class RepostItemValuation(Document):
@@ -132,7 +136,7 @@ def repost(doc):
 
 		doc.set_status("Completed")
 
-	except Exception:
+	except Exception as e:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		doc.log_error("Unable to repost item valuation")
@@ -142,9 +146,9 @@ def repost(doc):
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
 
-		notify_error_to_stock_managers(doc, message)
-		doc.set_status("Failed")
-		raise
+		if not isinstance(e, RecoverableErrors):
+			notify_error_to_stock_managers(doc, message)
+			doc.set_status("Failed")
 	finally:
 		if not frappe.flags.in_test:
 			frappe.db.commit()
