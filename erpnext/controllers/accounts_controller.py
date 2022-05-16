@@ -1747,6 +1747,8 @@ class AccountsController(TransactionBase):
 			internal_party_field = "is_internal_customer"
 		elif self.doctype in ("Purchase Invoice", "Purchase Receipt", "Purchase Order"):
 			internal_party_field = "is_internal_supplier"
+		else:
+			return False
 
 		if self.get(internal_party_field) and (self.represents_company == self.company):
 			return True
