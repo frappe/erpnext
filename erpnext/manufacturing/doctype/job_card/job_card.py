@@ -764,8 +764,6 @@ def make_stock_entry(source_name, target_doc=None):
 		pending_fg_qty = flt(source.get("for_quantity", 0)) - flt(source.get("transferred_qty", 0))
 		target.fg_completed_qty = pending_fg_qty if pending_fg_qty > 0 else 0
 
-		target.set_transfer_qty()
-		target.calculate_rate_and_amount()
 		target.set_missing_values()
 		target.set_stock_entry_type()
 

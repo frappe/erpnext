@@ -207,3 +207,40 @@ class TestEmployeeLeaveBalance(unittest.TestCase):
 			allocation1.new_leaves_allocated - leave_application.total_leave_days
 		)
 		self.assertEqual(report[1][0].opening_balance, opening_balance)
+
+	@set_holiday_list("_Test Emp Balance Holiday List", "_Test Company")
+	def test_employee_status_filter(self):
+		frappe.get_doc(test_records[0]).insert()
+		inactive_emp = make_employee("test_emp_status@example.com", company="_Test Company")
+
+		allocation = make_allocation_record(
+			employee=inactive_emp,
+			from_date=self.year_start,
+			to_date=self.year_end,
+			leaves=5,
+		)
+
+		# set employee as inactive
+		frappe.db.set_value("Employee", inactive_emp, "status", "Inactive")
+
+		filters = frappe._dict(
+			{
+				"from_date": allocation.from_date,
+				"to_date": allocation.to_date,
+				"employee": inactive_emp,
+				"employee_status": "Active",
+			}
+		)
+		report = execute(filters)
+		self.assertEqual(len(report[1]), 0)
+
+		filters = frappe._dict(
+			{
+				"from_date": allocation.from_date,
+				"to_date": allocation.to_date,
+				"employee": inactive_emp,
+				"employee_status": "Inactive",
+			}
+		)
+		report = execute(filters)
+		self.assertEqual(len(report[1]), 1)
