@@ -148,6 +148,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_inter_company_reference()
 
+		self.disable_pricing_rule_on_internal_transfer()
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -381,6 +382,14 @@ class AccountsController(TransactionBase):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
+
+	def disable_pricing_rule_on_internal_transfer(self):
+		if not self.get("ignore_pricing_rule"):
+			self.ignore_pricing_rule = 1
+			frappe.msgprint(
+				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
+				alert=1,
+			)
 
 	def validate_due_date(self):
 		if self.get("is_pos"):
