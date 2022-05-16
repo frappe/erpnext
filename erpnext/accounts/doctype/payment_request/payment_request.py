@@ -266,7 +266,7 @@ class PaymentRequest(Document):
 			company_details = get_company_defaults(ref_doc.company)
 
 			payment_entry.append(
-				"deductions",
+				"losses",
 				{
 					"account": company_details.exchange_gain_loss_account,
 					"cost_center": company_details.cost_center,
