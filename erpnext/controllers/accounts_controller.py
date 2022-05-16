@@ -384,7 +384,7 @@ class AccountsController(TransactionBase):
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
 	def disable_pricing_rule_on_internal_transfer(self):
-		if not self.get("ignore_pricing_rule"):
+		if not self.get("ignore_pricing_rule") and self.is_internal_transfer():
 			self.ignore_pricing_rule = 1
 			frappe.msgprint(
 				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
