@@ -1007,12 +1007,32 @@ class TestDeliveryNote(FrappeTestCase):
 		customer = create_internal_customer(represents_company=company)
 		rate = 42
 
+		# Create item price and pricing rule
 		frappe.get_doc(
 			{
 				"item_code": item,
 				"price_list": "Standard Selling",
 				"price_list_rate": 1000,
 				"doctype": "Item Price",
+			}
+		).insert()
+
+		frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": frappe.generate_hash(),
+				"apply_on": "Item Code",
+				"price_or_product_discount": "Price",
+				"selling": 1,
+				"company": company,
+				"margin_type": "Percentage",
+				"margin_rate_or_amount": 10,
+				"apply_discount_on": "Grand Total",
+				"items": [
+					{
+						"item_code": item,
+					}
+				],
 			}
 		).insert()
 
@@ -1025,12 +1045,14 @@ class TestDeliveryNote(FrappeTestCase):
 			rate=500,
 			warehouse=warehouse,
 			target_warehouse=target,
+			ignore_pricing_rule=0,
 			do_not_save=True,
 			do_not_submit=True,
 		)
 
 		self.assertEqual(dn.items[0].rate, 500)  # haven't saved yet
 		dn.save()
+		self.assertEqual(dn.ignore_pricing_rule, 1)
 
 		# rate should reset to incoming rate
 		self.assertEqual(dn.items[0].rate, rate)
