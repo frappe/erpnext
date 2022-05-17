@@ -139,19 +139,19 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			} else {
 				new_serial_nos = serial_no;
 			}
-			frappe.model.set_value(row.doctype, row.name, this.serial_no_field, new_serial_nos);
+			await frappe.model.set_value(row.doctype, row.name, this.serial_no_field, new_serial_nos);
 		}
 	}
 
 	async set_batch_no(row, batch_no) {
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
-			frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
+			await frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
 		}
 	}
 
 	async set_barcode(row, barcode) {
 		if (barcode && frappe.meta.has_field(row.doctype, this.barcode_field)) {
-			frappe.model.set_value(row.doctype, row.name, this.barcode_field, barcode);
+			await frappe.model.set_value(row.doctype, row.name, this.barcode_field, barcode);
 		}
 	}
 
