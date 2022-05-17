@@ -204,7 +204,8 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	clean_up() {
-		this.scan_barcode_field.set_value("");
+		const doc = this.frm.doc;
+		frappe.model.set_value(doc.doctype, doc.name, this.scan_field_name, "", "Data");
 		refresh_field(this.items_table_name);
 	}
 	show_alert(msg, indicator, duration=3) {
