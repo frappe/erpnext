@@ -260,7 +260,7 @@ class DeliveryNote(SellingController):
 					from `tabDelivery Note Item` i
 					inner join `tabDelivery Note` p on p.name = i.parent
 					where p.docstatus = 1 and p.is_return = 1 and p.reopen_order = 0 and i.delivery_note_item in %s
-					group by i.sales_order_item
+					group by i.delivery_note_item
 				""", [row_names]))
 
 		return delivery_return_qty_map
