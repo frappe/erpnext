@@ -19,8 +19,7 @@
   "column_break_10",
   "stock_uom",
   "weight_uom",
-  "page_break",
-  "dn_detail"
+  "page_break"
  ],
  "fields": [
   {
@@ -115,19 +114,12 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Page Break"
-  },
-  {
-   "fieldname": "dn_detail",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "DN Detail"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-12-14 01:22:00.715935",
+ "modified": "2022-05-16 20:35:45.242278",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",
@@ -136,5 +128,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
