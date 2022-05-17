@@ -55,18 +55,14 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 						return;
 					}
 
-					const row = me.update_table(data);
-					if (row) {
-						resolve(row);
-					}
-					else {
-						reject();
-					}
+					me.update_table(data).then(row => {
+						row ? resolve(row) : reject();
+					});
 				});
 		});
 	}
 
-	update_table(data) {
+	async update_table(data) {
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
 		const {item_code, barcode, batch_no, serial_no} = data;
@@ -92,12 +88,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 
 		this.set_selector_trigger_flag(row, data);
-		this.set_item(row, item_code).then(qty => {
-			this.show_scan_message(row.idx, row.item_code, qty);
-		});
-		this.set_serial_no(row, serial_no);
-		this.set_batch_no(row, batch_no);
-		this.set_barcode(row, barcode);
+		const qty = await this.set_item(row, item_code);
+		this.show_scan_message(row.idx, row.item_code, qty);
+		await this.set_serial_no(row, serial_no);
+		await this.set_batch_no(row, batch_no);
+		await this.set_barcode(row, barcode);
 		this.clean_up();
 		return row;
 	}
@@ -117,25 +112,24 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	set_item(row, item_code) {
 		return new Promise(resolve => {
-			const increment = (value = 1) => {
+			const increment = async (value = 1) => {
 				const item_data = {item_code: item_code};
 				item_data[this.qty_field] = Number((row[this.qty_field] || 0)) + Number(value);
-				frappe.model.set_value(row.doctype, row.name, item_data);
+				await frappe.model.set_value(row.doctype, row.name, item_data);
+				return value
 			};
 
 			if (this.prompt_qty) {
 				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({value}) => {
-					increment(value);
-					resolve(value);
+					increment(value).then((value) => resolve(value));
 				});
 			} else {
-				increment();
-				resolve();
+				increment().then((value) => resolve(value));
 			}
 		});
 	}
 
-	set_serial_no(row, serial_no) {
+	async set_serial_no(row, serial_no) {
 		if (serial_no && frappe.meta.has_field(row.doctype, this.serial_no_field)) {
 			const existing_serial_nos = row[this.serial_no_field];
 			let new_serial_nos = "";
@@ -149,13 +143,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
-	set_batch_no(row, batch_no) {
+	async set_batch_no(row, batch_no) {
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
 			frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
 		}
 	}
 
-	set_barcode(row, barcode) {
+	async set_barcode(row, barcode) {
 		if (barcode && frappe.meta.has_field(row.doctype, this.barcode_field)) {
 			frappe.model.set_value(row.doctype, row.name, this.barcode_field, barcode);
 		}
