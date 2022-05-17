@@ -797,9 +797,8 @@ class GSPConnector:
 		self.irn_details_url = self.base_url + "/enriched/ei/api/invoice/irn"
 		self.generate_irn_url = self.base_url + "/enriched/ei/api/invoice"
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
-		self.cancel_ewaybill_url = (
-			self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
-		)  # this will only work if user have bought ewb api from adaequare.
+		# cancel_ewaybill_url will only work if user have bought ewb api from adaequare.
+		self.cancel_ewaybill_url = self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
 		self.get_qrcode_url = self.base_url + "/enriched/ei/others/qr/image"
 
