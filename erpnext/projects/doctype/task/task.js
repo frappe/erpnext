@@ -5,11 +5,9 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Task", {
 	setup: function (frm) {
-		frm.set_query("project", function () {
-			return {
-				query: "erpnext.projects.doctype.task.task.get_project"
-			}
-		});
+		frm.custom_make_buttons = {
+			'Task': 'Create Child Task',
+		};
 
 		frm.make_methods = {
 			'Timesheet': () => frappe.model.open_mapped_doc({
@@ -28,12 +26,31 @@ frappe.ui.form.on("Task", {
 			return {
 				filters: filters
 			};
-		})
+		});
+
+		frm.set_query("parent_task", function() {
+			var filters = {};
+
+			if (frm.doc.project) {
+				filters.project = frm.doc.project
+			} else if (frm.doc.issue) {
+				filters.issue = frm.doc.issue
+			}
+			filters['is_group'] = 1;
+
+			return {
+				filters: filters
+			};
+		});
 	},
 
 	refresh: function (frm) {
 		erpnext.hide_company();
-		frm.set_query("parent_task", { "is_group": 1 });
+
+		if (frm.doc.is_group) {
+			frm.add_custom_button(__('Children Task List'), () => frm.events.view_child_task(frm));
+			frm.add_custom_button(__('Create Child Task'), () => frm.events.create_child_task(frm));
+		}
 	},
 
 	is_group: function (frm) {
@@ -54,5 +71,19 @@ frappe.ui.form.on("Task", {
 	validate: function (frm) {
 		frm.doc.project && frappe.model.remove_from_locals("Project",
 			frm.doc.project);
-	}
+	},
+
+	view_child_task: function (frm) {
+		frappe.set_route('List', 'Task', 'List', {
+			parent_task: frm.doc.name
+		});
+	},
+
+	create_child_task: function (frm) {
+		frappe.new_doc("Task", {
+			parent_task: frm.doc.name,
+			project: frm.doc.project,
+			issue: frm.doc.issue,
+		});
+	},
 });
