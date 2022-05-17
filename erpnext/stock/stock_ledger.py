@@ -619,6 +619,7 @@ class update_entries_after(object):
 			"Purchase Invoice",
 			"Delivery Note",
 			"Sales Invoice",
+			"Subcontracting Receipt",
 		):
 			if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return"):
 				from erpnext.controllers.sales_and_purchase_return import (
@@ -635,6 +636,8 @@ class update_entries_after(object):
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"
+				elif sle.voucher_type == "Subcontracting Receipt":
+					rate_field = "rate"
 				else:
 					rate_field = "incoming_rate"
 
@@ -648,6 +651,8 @@ class update_entries_after(object):
 				else:
 					if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 						ref_doctype = "Packed Item"
+					elif sle == "Subcontracting Receipt":
+						ref_doctype = "Subcontracting Receipt Supplied Item"
 					else:
 						ref_doctype = "Purchase Receipt Item Supplied"
 
@@ -673,6 +678,8 @@ class update_entries_after(object):
 				self.update_rate_on_delivery_and_sales_return(sle, outgoing_rate)
 			elif flt(sle.actual_qty) < 0 and sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
+			elif flt(sle.actual_qty) < 0 and sle.voucher_type == "Subcontracting Receipt":
+				self.update_rate_on_subcontracting_receipt(sle, outgoing_rate)
 
 	def update_rate_on_stock_entry(self, sle, outgoing_rate):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
@@ -714,12 +721,13 @@ class update_entries_after(object):
 				"Purchase Receipt Item Supplied", sle.voucher_detail_no, "rate", outgoing_rate
 			)
 
-		# Recalculate subcontracted item's rate in case of subcontracted purchase receipt/invoice
-		if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_subcontracted"):
-			doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
-			doc.update_valuation_rate(reset_outgoing_rate=False)
-			for d in doc.items + doc.supplied_items:
-				d.db_update()
+	def update_rate_on_subcontracting_receipt(self, sle, outgoing_rate):
+		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
+			frappe.db.set_value(sle.voucher_type + " Item", sle.voucher_detail_no, "rate", outgoing_rate)
+		else:
+			frappe.db.set_value(
+				"Subcontracting Receipt Supplied Item", sle.voucher_detail_no, "rate", outgoing_rate
+			)
 
 	def get_serialized_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
