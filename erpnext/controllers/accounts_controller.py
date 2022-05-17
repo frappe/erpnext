@@ -1126,11 +1126,10 @@ class AccountsController(TransactionBase):
 							{
 								"account": item.discount_account,
 								"against": supplier_or_customer,
-								dr_or_cr: flt(discount_amount, item.precision("discount_amount")),
-								dr_or_cr
-								+ "_in_account_currency": flt(
+								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
+								dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project,
 							},
@@ -1145,11 +1144,11 @@ class AccountsController(TransactionBase):
 							{
 								"account": income_or_expense_account,
 								"against": supplier_or_customer,
-								rev_dr_cr: flt(discount_amount, item.precision("discount_amount")),
-								rev_dr_cr
-								+ "_in_account_currency": flt(
+								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
+								rev_dr_cr
+								+ "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project or self.project,
 							},
