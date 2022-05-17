@@ -106,6 +106,8 @@ class Attendance(Document):
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 	def unlink_attendance_from_checkins(self):
+		from frappe.utils import get_link_to_form
+
 		EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
 		linked_logs = (
 			frappe.qb.from_(EmployeeCheckin)
