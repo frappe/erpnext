@@ -625,3 +625,21 @@ global_search_doctypes = {
 additional_timeline_content = {
 	"*": ["erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs"]
 }
+
+fixtures = [
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "name",
+                "in",
+                (
+                    "Sales Taxes and Charges-hidden",
+                    "Sales Order-hide_total_without_tax",
+					"Sales Invoice-hide_total_without_tax",
+                    "Quotation-hide_total_without_tax",									
+                ),
+            ]
+        ],
+    },
+]
