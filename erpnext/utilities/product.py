@@ -92,7 +92,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				["item_code", "=", item_code],
 				["valid_from", "<=", frappe.utils.nowdate()],
 				["valid_upto", ">=", frappe.utils.nowdate()],
-			]
+			],
 		)
 
 		if template_item_code and not price:
@@ -104,7 +104,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 					["item_code", "=", template_item_code],
 					["valid_from", "<=", frappe.utils.nowdate()],
 					["valid_upto", ">=", frappe.utils.nowdate()],
-				]
+				],
 			)
 
 		if price:
