@@ -104,6 +104,7 @@
    "fieldname": "is_group",
    "fieldtype": "Check",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Is Group"
   },
   {
@@ -150,6 +151,7 @@
    "fieldname": "parent_task",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
    "label": "Parent Task",
    "options": "Task",
    "search_index": 1
@@ -164,6 +166,8 @@
    "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Expected Start Date",
    "oldfieldname": "exp_start_date",
    "oldfieldtype": "Date"
@@ -207,7 +211,6 @@
    "default": "0",
    "fieldname": "is_milestone",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Is Milestone"
   },
   {
@@ -410,7 +413,7 @@
  "idx": 1,
  "is_tree": 1,
  "max_attachments": 5,
- "modified": "2022-05-13 15:45:48.279280",
+ "modified": "2022-05-17 16:49:41.957150",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
