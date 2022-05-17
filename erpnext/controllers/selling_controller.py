@@ -447,15 +447,16 @@ class SellingController(StockController):
 						rate = flt(d.incoming_rate * d.conversion_factor, d.precision("rate"))
 						if d.rate != rate:
 							d.rate = rate
+							frappe.msgprint(
+								_(
+									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+								).format(d.idx),
+								alert=1,
+							)
 
-						d.discount_percentage = 0
-						d.discount_amount = 0
-						frappe.msgprint(
-							_(
-								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-							).format(d.idx),
-							alert=1,
-						)
+						d.discount_percentage = 0.0
+						d.discount_amount = 0.0
+						d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
