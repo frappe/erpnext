@@ -14,7 +14,7 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, get_datetime
 import time
 
 form_grid_templates = {
@@ -300,8 +300,9 @@ class DeliveryNote(SellingController):
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
 	def update_status(self, status):
+		
 		if status == 'Closed':
-			frappe.db.sql(f"update `tabDelivery Note` set closing_time = '{datetime.now()}' where name = '{self.name}'")
+			frappe.db.sql(f"update `tabDelivery Note` set closing_time = '{get_datetime()}' where name = '{self.name}'")
 			frappe.db.commit()
 		self.set_status(update=True, status=status)
 		self.notify_update()
