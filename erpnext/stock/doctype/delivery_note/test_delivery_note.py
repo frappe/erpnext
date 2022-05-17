@@ -1071,9 +1071,12 @@ class TestDeliveryNote(FrappeTestCase):
 
 		item = make_item()
 
-		so = make_sales_order(items=[{"item_code": item.name}])
+		so = make_sales_order(item_code=item.name)
 
 		soi = so.items[0]
+
+		# Make qty avl for test.
+		make_stock_entry(item_code=item.name, target=soi.warehouse, qty=10, basic_rate=100)
 
 		# Test that item qty has been reserved on submit of sales order.
 		self.assertEqual(get_reserved_qty(soi.item_code, soi.warehouse), soi.qty)
