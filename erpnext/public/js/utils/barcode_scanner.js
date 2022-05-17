@@ -116,7 +116,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				const item_data = {item_code: item_code};
 				item_data[this.qty_field] = Number((row[this.qty_field] || 0)) + Number(value);
 				await frappe.model.set_value(row.doctype, row.name, item_data);
-				return value
+				return value;
 			};
 
 			if (this.prompt_qty) {
