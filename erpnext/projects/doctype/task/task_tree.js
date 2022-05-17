@@ -6,15 +6,15 @@ frappe.treeview_settings['Task'] = {
 	filters: [
 		{
 			fieldname: "project",
-			fieldtype:"Link",
+			fieldtype: "Link",
 			options: "Project",
 			label: __("Project"),
 		},
 		{
 			fieldname: "task",
-			fieldtype:"Link",
+			fieldtype: "Link",
 			options: "Task",
-			label: __("Task"),
+			label: __("Parent Task"),
 			get_query: function() {
 				var me = frappe.treeview_settings['Task'];
 				var project = me.page.fields_dict.project.get_value();
@@ -26,6 +26,12 @@ frappe.treeview_settings['Task'] = {
 					filters: args
 				};
 			}
+		},
+		{
+			fieldname: "status",
+			fieldtype: "Select",
+			options: ['', 'Open', 'Completed'],
+			label: __("Status"),
 		}
 	],
 	breadcrumb: "Projects",
@@ -78,7 +84,24 @@ frappe.treeview_settings['Task'] = {
 				});
 				dialog.show();
 			}
+		},
+		{
+			label: __("List View"),
+			condition: function(node) {
+				return node.expandable;
+			},
+			click: function(node) {
+				frappe.set_route('List', 'Task', 'List', {
+					parent_task: node.data.value
+				});
+			}
 		}
 	],
-	extend_toolbar: true
+	extend_toolbar: true,
+	get_add_child_args: function (node) {
+		return {
+			project: node.data.project,
+			issue: node.data.issue,
+		}
+	}
 };

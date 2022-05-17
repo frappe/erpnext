@@ -249,9 +249,12 @@ def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, task=None, project=None, is_root=False):
+def get_children(doctype, parent, task=None, project=None, status=None, is_root=False):
 
 	filters = [['docstatus', '<', '2']]
+
+	if project:
+		filters.append(['project', '=', project])
 
 	if task:
 		filters.append(['parent_task', '=', task])
@@ -261,13 +264,18 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 	else:
 		filters.append(['ifnull(`parent_task`, "")', '=', ''])
 
-	if project:
-		filters.append(['project', '=', project])
+	if status:
+		if status == "Open":
+			filters.append(['status', 'not in', ['Completed', 'Cancelled']])
+		elif status == "Completed":
+			filters.append(['status', '=', 'Completed'])
 
 	tasks = frappe.get_list(doctype, fields=[
 		'name as value',
 		'subject as title',
-		'is_group as expandable'
+		'is_group as expandable',
+		'project',
+		'issue'
 	], filters=filters, order_by='name')
 
 	# return tasks
