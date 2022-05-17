@@ -2,10 +2,14 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
 
-from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError, OverlapError
+from erpnext.manufacturing.doctype.job_card.job_card import (
+	JobCardOverTransferError,
+	OperationMismatchError,
+	OverlapError,
+)
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
@@ -25,6 +29,7 @@ class TestJobCard(FrappeTestCase):
 			"test_job_card_multiple_materials_transfer",
 			"test_job_card_excess_material_transfer",
 			"test_job_card_partial_material_transfer",
+			"test_job_card_excess_material_transfer_block",
 		)
 
 		if self._testMethodName in tests_that_skip_setup:
@@ -165,6 +170,7 @@ class TestJobCard(FrappeTestCase):
 		# transfer was made for 2 fg qty in first transfer Stock Entry
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
 		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
@@ -207,6 +213,29 @@ class TestJobCard(FrappeTestCase):
 
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
+
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	def test_job_card_excess_material_transfer_block(self):
+		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=15, basic_rate=100
+		)
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
+
+		# fully transfer both RMs
+		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
+		transfer_entry_1.insert()
+		transfer_entry_1.submit()
+
+		# transfer extra qty of both RM due to previously damaged RM
+		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
+		# deliberately change 'For Quantity'
+		transfer_entry_2.fg_completed_qty = 1
+		transfer_entry_2.items[0].qty = 5
+		transfer_entry_2.items[1].qty = 3
+		transfer_entry_2.insert()
+		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
 	def test_job_card_partial_material_transfer(self):
 		"Test partial material transfer against Job Card"
