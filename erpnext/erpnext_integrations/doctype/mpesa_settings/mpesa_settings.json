@@ -6,14 +6,16 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "paybill_number",
+  "buy_goods_number",
   "payment_gateway_name",
   "consumer_key",
   "consumer_secret",
   "initiator_name",
-  "till_number",
   "transaction_limit",
   "sandbox",
   "column_break_4",
+  "till_number",
   "business_shortcode",
   "online_passkey",
   "security_credential",
@@ -21,6 +23,18 @@
   "account_balance"
  ],
  "fields": [
+  {
+   "default": "0",
+   "fieldname": "paybill_number",
+   "fieldtype": "Check",
+   "label": "Paybill Number"
+  },
+  {
+   "default": "0",
+   "fieldname": "buy_goods_number",
+   "fieldtype": "Check",
+   "label": "Buy Goods Number"
+  },
   {
    "fieldname": "payment_gateway_name",
    "fieldtype": "Data",
@@ -43,14 +57,20 @@
    "reqd": 1
   },
   {
-   "fieldname": "till_number",
+   "fieldname": "initiator_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Till Number",
-   "reqd": 1
+   "label": "Initiator Name"
+  },
+  {
+   "default": "150000",
+   "fieldname": "transaction_limit",
+   "fieldtype": "Float",
+   "label": "Transaction Limit",
+   "non_negative": 1
   },
   {
    "default": "0",
+   "depends_on": "eval:((doc.buy_goods_number==1) || (doc.paybill_number==1))",
    "fieldname": "sandbox",
    "fieldtype": "Check",
    "label": "Sandbox"
@@ -60,15 +80,25 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:(doc.buy_goods_number==1)",
+   "fieldname": "till_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Till Number",
+   "mandatory_depends_on": "eval:(doc.buy_goods_number==1)"
+  },
+  {
+   "depends_on": "eval:(doc.paybill_number==1)",
+   "fieldname": "business_shortcode",
+   "fieldtype": "Data",
+   "label": "Business Shortcode",
+   "mandatory_depends_on": "eval:(doc.paybill_number==1)"
+  },
+  {
    "fieldname": "online_passkey",
    "fieldtype": "Password",
    "label": " Online PassKey",
    "reqd": 1
-  },
-  {
-   "fieldname": "initiator_name",
-   "fieldtype": "Data",
-   "label": "Initiator Name"
   },
   {
    "fieldname": "security_credential",
@@ -76,34 +106,20 @@
    "label": "Security Credential"
   },
   {
-   "fieldname": "account_balance",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "label": "Account Balance",
-   "read_only": 1
-  },
-  {
    "fieldname": "get_account_balance",
    "fieldtype": "Button",
    "label": "Get Account Balance"
   },
   {
-   "depends_on": "eval:(doc.sandbox==0)",
-   "fieldname": "business_shortcode",
-   "fieldtype": "Data",
-   "label": "Business Shortcode",
-   "mandatory_depends_on": "eval:(doc.sandbox==0)"
-  },
-  {
-   "default": "150000",
-   "fieldname": "transaction_limit",
-   "fieldtype": "Float",
-   "label": "Transaction Limit",
-   "non_negative": 1
+   "fieldname": "account_balance",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Account Balance",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2021-03-02 17:35:14.084342",
+ "modified": "2022-05-17 15:09:46.968682",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Mpesa Settings",

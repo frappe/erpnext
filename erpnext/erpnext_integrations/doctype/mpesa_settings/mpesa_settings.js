@@ -6,6 +6,13 @@ frappe.ui.form.on('Mpesa Settings', {
 		frm.events.setup_account_balance_html(frm);
 	},
 
+	validate: function(frm) {
+		if(frm.doc.paybill_number==1 && frm.doc.buy_goods_number==1) {
+			msgprint('Kindly Select either Paybill or Buygoods Only');
+			validated = false;
+		}
+	},
+
 	refresh: function(frm) {
 		frappe.realtime.on("refresh_mpesa_dashboard", function(){
 			frm.reload_doc();
