@@ -16,6 +16,7 @@ from frappe.utils.nestedset import NestedSet
 class CircularReferenceError(frappe.ValidationError): pass
 class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
 
+
 class Task(NestedSet):
 	nsm_parent_field = 'parent_task'
 
@@ -185,6 +186,7 @@ class Task(NestedSet):
 				self.db_set('status', 'Overdue', update_modified=False)
 				self.update_project()
 
+
 @frappe.whitelist()
 def check_if_child_exists(name):
 	child_tasks = frappe.get_all("Task", filters={"parent_task": name})
@@ -216,6 +218,7 @@ def set_multiple_status(names, status):
 		task = frappe.get_doc("Task", name)
 		task.status = status
 		task.save()
+
 
 def set_tasks_as_overdue():
 	tasks = frappe.get_all("Task", filters={"status": ["not in", ["Cancelled", "Completed"]]}, fields=["name", "status", "review_date"])
@@ -270,6 +273,7 @@ def get_children(doctype, parent, task=None, project=None, is_root=False):
 	# return tasks
 	return tasks
 
+
 @frappe.whitelist()
 def add_node():
 	from frappe.desk.treeview import make_tree_args
@@ -284,6 +288,7 @@ def add_node():
 
 	frappe.get_doc(args).insert()
 
+
 @frappe.whitelist()
 def add_multiple_tasks(data, parent):
 	data = json.loads(data)
@@ -296,8 +301,10 @@ def add_multiple_tasks(data, parent):
 		new_task = frappe.get_doc(new_doc)
 		new_task.insert()
 
+
 def on_doctype_update():
 	frappe.db.add_index("Task", ["lft", "rgt"])
+
 
 def validate_project_dates(project_end_date, task, task_start, task_end, actual_or_expected_date):
 	if task.get(task_start) and date_diff(project_end_date, getdate(task.get(task_start))) < 0:
