@@ -671,7 +671,8 @@ class StockEntry(StockController):
 					raise_error_if_no_rate=raise_error_if_no_rate,
 				)
 
-			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
+			# do not round off basic rate to avoid precision loss
+			d.basic_rate = flt(d.basic_rate)
 			if d.is_process_loss:
 				d.basic_rate = flt(0.0)
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -718,7 +719,7 @@ class StockEntry(StockController):
 				total_fg_qty = sum([flt(d.transfer_qty) for d in self.items if d.is_finished_item])
 				return flt(outgoing_items_cost / total_fg_qty)
 
-	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0):
+	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
 		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
 
 		# Get raw materials cost from BOM if multiple material consumption entries
@@ -758,10 +759,8 @@ class StockEntry(StockController):
 		for d in self.get("items"):
 			if d.transfer_qty:
 				d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
-				d.valuation_rate = flt(
-					flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty)),
-					d.precision("valuation_rate"),
-				)
+				# Do not round off valuation rate to avoid precision loss
+				d.valuation_rate = flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty))
 
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
@@ -2196,6 +2195,12 @@ class StockEntry(StockController):
 
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
+	def set_missing_values(self):
+		"Updates rate and availability of all the items of mapped doc."
+		self.set_transfer_qty()
+		self.set_actual_qty()
+		self.calculate_rate_and_amount()
+
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
@@ -2245,6 +2250,7 @@ def move_sample_to_retention_warehouse(company, items):
 def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.set_stock_entry_type()
+		target.set_missing_values()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ""

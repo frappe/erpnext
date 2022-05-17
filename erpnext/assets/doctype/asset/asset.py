@@ -353,15 +353,15 @@ class Asset(AccountsController):
 					if self.allow_monthly_depreciation:
 						# month range is 1 to 12
 						# In pro rata case, for first and last depreciation, month range would be different
-						month_range = (
-							months
-							if (has_pro_rata and n == 0)
-							or (has_pro_rata and n == cint(number_of_pending_depreciations) - 1)
-							else finance_book.frequency_of_depreciation
-						)
+						if (has_pro_rata and n == 0 and not self.number_of_depreciations_booked) or (
+							has_pro_rata and n == cint(number_of_pending_depreciations) - 1
+						):
+							month_range = months
+						else:
+							month_range = finance_book.frequency_of_depreciation
 
 						for r in range(month_range):
-							if has_pro_rata and n == 0:
+							if has_pro_rata and n == 0 and not self.number_of_depreciations_booked:
 								# For first entry of monthly depr
 								if r == 0:
 									days_until_first_depr = date_diff(monthly_schedule_date, self.available_for_use_date) + 1

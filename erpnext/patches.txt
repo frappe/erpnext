@@ -363,4 +363,6 @@ erpnext.patches.v13_0.set_return_against_in_pos_invoice_references
 erpnext.patches.v13_0.copy_custom_field_filters_to_website_item
 erpnext.patches.v13_0.set_available_for_use_date_if_missing
 erpnext.patches.v13_0.education_deprecation_warning
+erpnext.patches.v13_0.requeue_recoverable_reposts
 erpnext.patches.v13_0.create_accounting_dimensions_in_orders
+erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
