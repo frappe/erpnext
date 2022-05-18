@@ -26,17 +26,43 @@ frappe.ui.form.on("Packing Slip", {
 			frm,
 			prompt_qty: frm.doc.prompt_qty
 		});
-		barcode_scanner.process_scan();
+
+		// snapshot of the document before being modified by barcode_scanner
+		// in-case validation fails after the barcode is scanned we can use
+		// this as a fallback to reference.
+		const backup = frm.doc.items.map(item => ({...item}));
+
+		frappe.msgprint
+
+		function after_scan(scanned_row, event) {
+			if (event === "remove") {
+				frm.get_field("items").grid.grid_rows[scanned_row.idx - 1].remove();
+				frappe.msgprint(__("Item {0} is not valid for this delivery.", [scanned_row.item_code]), __("Item Removed"));
+			}
+			else if (event === "qty") {
+				// Reset the qty to the value before the row was scanned.
+				const row = backup.find(row => row.name === scanned_row.name);
+				frappe.model.set_value(row.doctype, row.name, "qty", row.qty, "Float");
+				frappe.msgprint(__("Item {0} packed quantity has been reverted to {1}",
+					[scanned_row.item_code, scanned_row.qty]));
+			}
+		}
+
+		barcode_scanner.process_scan().then(scanned_row => {
+			frm.call({
+				doc: frm.doc,
+				method: "validate_scanned_item",
+				args: {scanned_row}
+			}).then(r => {
+				after_scan(scanned_row, r.message);
+			}).catch(r => {
+				after_scan(scanned_row, r.message);
+			});
+		});
 	},
 
 	delivery_note(frm) {
 		frm.trigger("refresh");
-	}
-});
-
-frappe.ui.form.on("Packing Slip Item", {
-	items_add(frm) {
-		validate_item_codes(frm);
 	}
 });
 
@@ -64,19 +90,6 @@ function get_items(frm) {
 		method: "get_items",
 		callback: function(r) {
 			if(!r.exc) frm.refresh();
-		}
-	});
-}
-
-function validate_item_codes(frm) {
-	return frm.call({
-		doc: frm.doc,
-		method: "validate_item_codes",
-		error(r) {
-			if (r.exc_type && r.exc_type === "InvalidPackingSlipItem") {
-				// remove the last grid row.
-				frm.get_field("items").grid.grid_rows.at(-1).remove();
-			}
 		}
 	});
 }

@@ -46,7 +46,6 @@ class PackingSlip(Document):
 		if not rows:
 			frappe.msgprint(_("No Items to pack"), raise_exception=1)
 
-	@frappe.whitelist()
 	def validate_item_codes(self):
 		packed_items = [d.item_code for d in self.get("items")]
 		delivery_items = frappe.db.get_all("Delivery Note Item", filters={
@@ -55,7 +54,7 @@ class PackingSlip(Document):
 		}, fields=["item_code"], pluck="item_code")
 		for item in packed_items:
 			if item not in delivery_items:
-				frappe.throw(_("Item {0} is not part of delivery note {1}").format(item, self.delivery_note), InvalidPackingSlipItem)
+				raise InvalidPackingSlipItem
 
 	def validate_case_nos(self):
 		"""
@@ -208,6 +207,22 @@ class PackingSlip(Document):
 						ch.set(d.fieldname, item.get(d.fieldname))
 
 		self.update_item_details()
+
+	@frappe.whitelist()
+	def validate_scanned_item(self, scanned_row):
+		# Because sometimes frappe.model doesn't update the item row qty
+		# before the validation is triggered.
+		for k, v in scanned_row.items():
+			self.items[scanned_row.get("idx") - 1].set(k, v)
+
+		try:
+			self.validate_item_codes()
+			self.validate_qty()
+		except InvalidPackingSlipItem:
+			return "remove"
+		except frappe.exceptions.ValidationError:
+			return "qty"
+
 
 
 @frappe.whitelist()
