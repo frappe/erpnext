@@ -32,8 +32,6 @@ frappe.ui.form.on("Packing Slip", {
 		// this as a fallback to reference.
 		const backup = frm.doc.items.map(item => ({...item}));
 
-		frappe.msgprint
-
 		function after_scan(scanned_row, event) {
 			if (event === "remove") {
 				frm.get_field("items").grid.grid_rows[scanned_row.idx - 1].remove();
