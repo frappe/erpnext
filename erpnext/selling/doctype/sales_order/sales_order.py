@@ -612,6 +612,8 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
+			# no need to update batch no field
+			"field_no_map" : ["batch_no"],
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		}
