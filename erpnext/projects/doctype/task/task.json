@@ -32,12 +32,14 @@
   "column_break_21",
   "expected_time",
   "actual_time",
+  "assignment_section",
+  "assigned_to",
   "completion_section",
+  "finish_date",
+  "column_break_29",
   "review_date",
-  "reviewed_by",
   "column_break_16",
-  "closing_date",
-  "completed_by",
+  "reviewed_by",
   "sb_details",
   "description",
   "sb_depends_on",
@@ -170,7 +172,6 @@
    "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Expected Start Date",
@@ -200,7 +201,9 @@
    "bold": 1,
    "fieldname": "exp_end_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Expected End Date",
    "oldfieldname": "exp_end_date",
    "oldfieldtype": "Date",
@@ -324,13 +327,6 @@
    "oldfieldtype": "Date"
   },
   {
-   "fieldname": "closing_date",
-   "fieldtype": "Date",
-   "label": "Closing Date",
-   "oldfieldname": "closing_date",
-   "oldfieldtype": "Date"
-  },
-  {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
   },
@@ -372,13 +368,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "completed_by",
-   "fieldtype": "Link",
-   "label": "Completed By",
-   "no_copy": 1,
-   "options": "User"
-  },
-  {
    "default": "TASK-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -403,7 +392,7 @@
    "fieldtype": "Link",
    "label": "Reviewed By",
    "no_copy": 1,
-   "options": "User"
+   "options": "Employee"
   },
   {
    "fieldname": "column_break_44",
@@ -413,13 +402,38 @@
    "fieldname": "completion_section",
    "fieldtype": "Section Break",
    "label": "Completion"
+  },
+  {
+   "fieldname": "finish_date",
+   "fieldtype": "Date",
+   "label": "Finish Date",
+   "oldfieldname": "closing_date",
+   "oldfieldtype": "Date"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "assigned_to",
+   "fieldname": "assignment_section",
+   "fieldtype": "Section Break",
+   "label": "Assignment"
+  },
+  {
+   "fieldname": "assigned_to",
+   "fieldtype": "Table",
+   "label": "Assigned To",
+   "no_copy": 1,
+   "options": "Task Assignment"
   }
  ],
  "icon": "fa fa-check",
  "idx": 1,
  "is_tree": 1,
  "max_attachments": 5,
- "modified": "2022-05-17 18:52:15.274047",
+ "modified": "2022-05-18 13:14:42.725384",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

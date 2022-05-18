@@ -23,18 +23,31 @@ class Task(NestedSet):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
 
-	def get_customer_details(self):
-		cust = frappe.db.sql("select customer_name from `tabCustomer` where name=%s", self.customer)
-		if cust:
-			ret = {'customer_name': cust and cust[0][0] or ''}
-			return ret
-
 	def validate(self):
+		self.get_previous_status()
 		self.validate_dates()
 		self.validate_parent_project_dates()
 		self.validate_progress()
 		self.validate_status()
+		self.set_completion_values()
 		self.update_depends_on()
+
+	def on_update(self):
+		self.update_nsm_model()
+		self.check_recursion()
+		self.reschedule_dependent_tasks()
+		self.update_project()
+		self.unassign_todo()
+		self.populate_depends_on()
+
+	def on_trash(self):
+		if check_if_child_exists(self.name):
+			throw(_("Child Task exists for this Task. You can not delete this Task."))
+
+		self.update_nsm_model()
+
+	def get_previous_status(self):
+		self._previous_status = self.get_db_value("status")
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -55,41 +68,50 @@ class Task(NestedSet):
 			validate_project_dates(getdate(expected_end_date), self, "exp_start_date", "exp_end_date", "Expected")
 			validate_project_dates(getdate(expected_end_date), self, "act_start_date", "act_end_date", "Actual")
 
-	def validate_status(self):
-		if self.status!=self.get_db_value("status") and self.status == "Completed":
-			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
-					frappe.throw(_("Cannot complete task {0} as its dependant tasks {1} are not completed / cancelled.").format(frappe.bold(self.name), frappe.bold(d.task)))
-
-			close_all_assignments(self.doctype, self.name)
-
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
-		if self.progress == 100:
-			self.status = 'Completed'
-
 		if self.status == 'Completed':
 			self.progress = 100
 
+	def validate_status(self):
+		if self.status != self._previous_status and self.status == "Completed":
+			for d in self.depends_on:
+				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
+					frappe.throw(_("Cannot complete task {0} as its dependant {1} is not completed / cancelled.")
+						.format(frappe.bold(self.name), frappe.get_desk_link("Task", d.task)))
+
+	def set_completion_values(self):
+		if self._previous_status in ['Open', 'Working'] and self.status in ["Completed", "Pending Review"]:
+			if not self.finish_date:
+				self.finish_date = today()
+
+		if self._previous_status == "Pending Review" and self.status == "Completed":
+			if not self.review_date:
+				self.review_date = today()
+
 	def update_depends_on(self):
-		depends_on_tasks = self.depends_on_tasks or ""
+		depends_on_tasks = []
 		for d in self.depends_on:
-			if d.task and not d.task in depends_on_tasks:
-				depends_on_tasks += d.task + ","
-		self.depends_on_tasks = depends_on_tasks
+			if d.task and d.task not in depends_on_tasks:
+				depends_on_tasks.append(d.task)
+
+		self.depends_on_tasks = ", ".join(depends_on_tasks)
+
+	def populate_depends_on(self):
+		if self.parent_task:
+			parent = frappe.get_doc('Task', self.parent_task)
+			if not self.name in [row.task for row in parent.depends_on]:
+				parent.append("depends_on", {
+					"doctype": "Task Depends On",
+					"task": self.name,
+					"subject": self.subject
+				})
+				parent.save()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
-
-	def on_update(self):
-		self.update_nsm_model()
-		self.check_recursion()
-		self.reschedule_dependent_tasks()
-		self.update_project()
-		self.unassign_todo()
-		self.populate_depends_on()
 
 	def unassign_todo(self):
 		if self.status == "Completed":
@@ -98,21 +120,29 @@ class Task(NestedSet):
 			clear(self.doctype, self.name)
 
 	def update_total_expense_claim(self):
-		self.total_expense_claim = frappe.db.sql("""select sum(sanctioned_amount) from `tabExpense Claim Detail`
-			where project = %s and task = %s and docstatus=1""",(self.project, self.name))[0][0]
+		self.total_expense_claim = frappe.db.sql("""
+			select sum(sanctioned_amount)
+			from `tabExpense Claim Detail`
+			where project = %s and task = %s and docstatus=1
+		""", (self.project, self.name))[0][0]
 
 	def update_time_and_costing(self):
-		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
-			sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTimesheet Detail` where task = %s and docstatus=1"""
-			,self.name, as_dict=1)[0]
+		tl = frappe.db.sql("""
+			select min(from_time) as start_date, max(to_time) as end_date,
+				sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
+				sum(hours) as time
+			from `tabTimesheet Detail`
+			where task = %s and docstatus=1
+		""", self.name, as_dict=1)[0]
+
 		if self.status == "Open":
 			self.status = "Working"
-		self.total_costing_amount= tl.total_costing_amount
-		self.total_billing_amount= tl.total_billing_amount
-		self.actual_time= tl.time
-		self.act_start_date= tl.start_date
-		self.act_end_date= tl.end_date
+
+		self.total_costing_amount = tl.total_costing_amount
+		self.total_billing_amount = tl.total_billing_amount
+		self.actual_time = tl.time
+		self.act_start_date = tl.start_date
+		self.act_end_date = tl.end_date
 
 	def update_project(self):
 		if self.project and not self.flags.from_project:
@@ -122,13 +152,18 @@ class Task(NestedSet):
 			doc.notify_update()
 
 	def check_recursion(self):
-		if self.flags.ignore_recursion_check: return
+		if self.flags.ignore_recursion_check:
+			return
+
 		check_list = [['task', 'parent'], ['parent', 'task']]
 		for d in check_list:
 			task_list, count = [self.name], 0
-			while (len(task_list) > count ):
-				tasks = frappe.db.sql(" select %s from `tabTask Depends On` where %s = %s " %
-					(d[0], d[1], '%s'), cstr(task_list[count]))
+			while len(task_list) > count:
+				tasks = frappe.db.sql("""
+					select {0}
+					from `tabTask Depends On`
+					where {1} = %s
+				""".format(d[0], d[1]), cstr(task_list[count]))
 				count = count + 1
 				for b in tasks:
 					if b[0] == self.name:
@@ -161,23 +196,6 @@ class Task(NestedSet):
 		project_user = frappe.db.get_value("Project User", {"parent": self.project, "user":frappe.session.user} , "user")
 		if project_user:
 			return True
-
-	def populate_depends_on(self):
-		if self.parent_task:
-			parent = frappe.get_doc('Task', self.parent_task)
-			if not self.name in [row.task for row in parent.depends_on]:
-				parent.append("depends_on", {
-					"doctype": "Task Depends On",
-					"task": self.name,
-					"subject": self.subject
-				})
-				parent.save()
-
-	def on_trash(self):
-		if check_if_child_exists(self.name):
-			throw(_("Child Task exists for this Task. You can not delete this Task."))
-
-		self.update_nsm_model()
 
 	def update_status(self):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:

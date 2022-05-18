@@ -1,0 +1,51 @@
+{
+ "creation": "2022-05-18 13:11:25.472866",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "assigning_notes"
+ ],
+ "fields": [
+  {
+   "columns": 4,
+   "fieldname": "assigning_notes",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Assigning Notes"
+  },
+  {
+   "columns": 2,
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Assigned To",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "columns": 4,
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Assigned To Name",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-05-18 13:14:56.635278",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Task Assignment",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
