@@ -207,7 +207,7 @@ class DeliveryNote(SellingController):
 			self.make_return_invoice()
 		elif self.is_return and self.return_type == 'Shop Return':
 			savedoc =	make_sales_invoice(self.name)
-			savedoc.save()
+			savedoc.submit()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
