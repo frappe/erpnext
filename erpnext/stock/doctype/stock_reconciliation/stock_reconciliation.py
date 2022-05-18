@@ -12,6 +12,7 @@ from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import get_stock_balance
 
 
@@ -556,13 +557,19 @@ class StockReconciliation(StockController):
 
 @frappe.whitelist()
 def get_items(
-	warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False
+	warehouse,
+	posting_date,
+	posting_time,
+	company,
+	item_code=None,
+	ignore_empty_stock=False,
+	item_group=None,
 ):
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
 
 	if not item_code:
-		items = get_items_for_stock_reco(warehouse, company)
+		items = get_items_for_stock_reco(warehouse, company, item_group)
 
 	res = []
 	itemwise_batch_data = get_itemwise_batch(warehouse, posting_date, company, item_code)
@@ -604,22 +611,26 @@ def get_items(
 	return res
 
 
-def get_items_for_stock_reco(warehouse, company):
+def get_items_for_stock_reco(warehouse, company, item_group=None):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	conditions = ""
+	if item_group:
+		conditions += "and {0}".format(get_item_group_condition(item_group))
 	items = frappe.db.sql(
 		f"""
 		select
-			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
+			item.name as item_code, item.item_name, bin.warehouse as warehouse, item.has_serial_no, item.has_batch_no
 		from
-			tabBin bin, tabItem i
+			tabBin bin, tabItem item
 		where
-			i.name = bin.item_code
-			and IFNULL(i.disabled, 0) = 0
-			and i.is_stock_item = 1
-			and i.has_variants = 0
+			item.name = bin.item_code
+			and IFNULL(item.disabled, 0) = 0
+			and item.is_stock_item = 1
+			and item.has_variants = 0
 			and exists(
 				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse
 			)
+			{conditions}
 	""",
 		as_dict=1,
 	)
@@ -627,20 +638,23 @@ def get_items_for_stock_reco(warehouse, company):
 	items += frappe.db.sql(
 		"""
 		select
-			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
+			item.name as item_code, item.item_name, id.default_warehouse as warehouse, item.has_serial_no, item.has_batch_no
 		from
-			tabItem i, `tabItem Default` id
+			tabItem item, `tabItem Default` id
 		where
-			i.name = id.parent
+			item.name = id.parent
 			and exists(
 				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse
 			)
-			and i.is_stock_item = 1
-			and i.has_variants = 0
-			and IFNULL(i.disabled, 0) = 0
+			and item.is_stock_item = 1
+			and item.has_variants = 0
+			and IFNULL(item.disabled, 0) = 0
 			and id.company = %s
-		group by i.name
-	""",
+			{conditions}
+		group by item.name
+	""".format(
+			conditions=conditions
+		),
 		(lft, rgt, company),
 		as_dict=1,
 	)

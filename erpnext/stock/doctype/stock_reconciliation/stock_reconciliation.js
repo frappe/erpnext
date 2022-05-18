@@ -104,6 +104,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 				}
 			},
 			{
+				label: "Item Group",
+				fieldname: "item_group",
+				fieldtype: "Link",
+				options: "Item Group"
+			},
+			{
 				label: __("Ignore Empty Stock"),
 				fieldname: "ignore_empty_stock",
 				fieldtype: "Check"
@@ -119,7 +125,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					posting_time: frm.doc.posting_time,
 					company: frm.doc.company,
 					item_code: data.item_code,
-					ignore_empty_stock: data.ignore_empty_stock
+					ignore_empty_stock: data.ignore_empty_stock,
+					item_group: data.item_group
 				},
 				callback: function(r) {
 					if (r.exc || !r.message || !r.message.length) return;
