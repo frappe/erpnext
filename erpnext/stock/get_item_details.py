@@ -113,7 +113,7 @@ def update_stock(args, out):
 		(args.get("doctype") == "Sales Invoice" and args.get('update_stock'))) \
 		and out.warehouse and out.stock_qty > 0:
 
-		if out.has_batch_no and not args.get("batch_no"):
+		if out.has_batch_no and not args.get("batch_no") and args.get("doctype") != "Delivery Note":
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
 			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
 			if actual_batch_qty:
