@@ -12,8 +12,8 @@ from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.batch.batch import get_batch_qty
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import get_stock_balance
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -554,10 +554,15 @@ class StockReconciliation(StockController):
 		else:
 			self._cancel()
 
-
 @frappe.whitelist()
 def get_items(
-	warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False, item_group=None
+	warehouse,
+	posting_date,
+	posting_time,
+	company,
+	item_code=None,
+	ignore_empty_stock=False,
+	item_group=None
 ):
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
@@ -609,7 +614,8 @@ def get_items_for_stock_reco(warehouse, company, item_group=None):
 	conditions = ""
 	if item_group:
 		conditions += "and {0}".format(get_item_group_condition(item_group))
-	items = frappe.db.sql(f"""
+	items = frappe.db.sql(
+		f"""
 		select
 			item.name as item_code, item.item_name, bin.warehouse as warehouse, item.has_serial_no, item.has_batch_no
 		from
@@ -624,10 +630,11 @@ def get_items_for_stock_reco(warehouse, company, item_group=None):
 			)
 			{conditions}
 	""", 
-		as_dict=1
+		as_dict=1,
 	)
 
-	items += frappe.db.sql("""
+	items += frappe.db.sql(
+		"""
 		select
 			item.name as item_code, item.item_name, id.default_warehouse as warehouse, item.has_serial_no, item.has_batch_no
 		from
@@ -643,9 +650,11 @@ def get_items_for_stock_reco(warehouse, company, item_group=None):
 			and id.company = %s
 			{conditions}
 		group by item.name
-	""".format(conditions=conditions),
-		(lft, rgt, company), 
-		as_dict=1
+	""".format(
+			conditions=conditions
+		),
+		(lft, rgt, company),
+		as_dict=1,
 	)
 
 	# remove duplicates
