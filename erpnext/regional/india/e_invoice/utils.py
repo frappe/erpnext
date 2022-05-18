@@ -797,7 +797,8 @@ class GSPConnector:
 		self.irn_details_url = self.base_url + "/enriched/ei/api/invoice/irn"
 		self.generate_irn_url = self.base_url + "/enriched/ei/api/invoice"
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
-		self.cancel_ewaybill_url = self.base_url + "/enriched/ei/api/ewayapi"
+		# cancel_ewaybill_url will only work if user have bought ewb api from adaequare.
+		self.cancel_ewaybill_url = self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
 		self.get_qrcode_url = self.base_url + "/enriched/ei/others/qr/image"
 
@@ -1185,6 +1186,7 @@ class GSPConnector:
 		headers = self.get_headers()
 		data = json.dumps({"ewbNo": eway_bill, "cancelRsnCode": reason, "cancelRmrk": remark}, indent=4)
 		headers["username"] = headers["user_name"]
+		del headers["user_name"]
 		try:
 			res = self.make_request("post", self.cancel_ewaybill_url, headers, data)
 			if res.get("success"):
@@ -1358,9 +1360,13 @@ def generate_eway_bill(doctype, docname, **kwargs):
 
 
 @frappe.whitelist()
-def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
-	gsp_connector = GSPConnector(doctype, docname)
-	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+def cancel_eway_bill(doctype, docname):
+	# NOTE: cancel_eway_bill api is disabled by Adequare.
+	# gsp_connector = GSPConnector(doctype, docname)
+	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+
+	frappe.db.set_value(doctype, docname, "ewaybill", "")
+	frappe.db.set_value(doctype, docname, "eway_bill_cancelled", 1)
 
 
 @frappe.whitelist()
