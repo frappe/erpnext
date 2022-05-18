@@ -76,7 +76,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}, __("View"));
 		}
 
-		if (!frm.doc.is_return && frm.doc.docstatus == 1) {
+		if (!frm.doc.is_return && frm.doc.docstatus == 1 && frm.doc.per_returned < 100) {
 			frm.add_custom_button('Subcontract Return', function () {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return',
