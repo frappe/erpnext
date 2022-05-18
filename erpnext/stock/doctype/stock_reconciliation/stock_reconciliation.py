@@ -562,7 +562,7 @@ def get_items(
 	company,
 	item_code=None,
 	ignore_empty_stock=False,
-	item_group=None
+	item_group=None,
 ):
 	ignore_empty_stock = cint(ignore_empty_stock)
 	items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
@@ -629,7 +629,7 @@ def get_items_for_stock_reco(warehouse, company, item_group=None):
 				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse
 			)
 			{conditions}
-	""", 
+	""",
 		as_dict=1,
 	)
 
