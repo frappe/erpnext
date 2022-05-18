@@ -530,8 +530,8 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 			where
 			item_code = %s
 			AND valuation_rate > 0
-			AND voucher_no like '%STE%'
-			order by posting_date desc, posting_time desc,batch_no desc, name desc limit 1""", (item_code))
+			AND voucher_no like %s 
+			order by posting_date desc, posting_time desc,batch_no desc, name desc limit 1""", (item_code,"%STE%"))
 	else:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
