@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+from erpnext.hr.utils import get_holidays_for_employee
 import frappe
 from datetime import datetime
 import math
@@ -735,13 +736,24 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 	salary_slips_exists_for = get_existing_salary_slips(employees, args)
 	count = 0
 	salary_slips_not_created = []
-	for emp in employees:
+	for emp in employees: 
+	
 		from calendar import monthrange
 		a = getdate(start_date).year
 		b = getdate(start_date).month
 		num_days = monthrange(a, b)[1]
 		days_in_month = num_days
-		print("&&&&&&&&&&&&",num_days)
+
+		leaveA = frappe.db.get_all("Leave Application",{'employee':emp,'from_date':[">=",start_date],'to_date':["<=",end_date]},['total_leave_days'])
+		
+		holidays = get_holidays_for_employee(emp,start_date,end_date)
+		holiday1= len(holidays)
+		if leaveA :
+			lt = []
+			for i in leaveA:
+				lt.append(i.get("total_leave_days"))
+			net_present_days = days_in_month - sum(lt) - holiday1
+
 		#Paid Holidays
 		paid_holidays=0
 		cdoc = frappe.get_doc("Employee",emp)
@@ -840,7 +852,8 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 				"compoff":compoff,
 				"paid_holidays":paid_holidays,
 				"days_in_month":days_in_month,
-				"encashment_days":encashment_days
+				"encashment_days":encashment_days,
+				"net_present_days":net_present_days
 			})
 			ss = frappe.get_doc(args)
 			
