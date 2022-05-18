@@ -1,11 +1,11 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import functools
 import re
-from collections import deque
+from collections import defaultdict, deque
 from operator import itemgetter
-from typing import List
+from typing import List, Optional
 
 import frappe
 from frappe import _
@@ -1130,35 +1130,77 @@ def get_children(parent=None, is_root=False, **filters):
 		return bom_items
 
 
-def get_boms_in_bottom_up_order(bom_no=None):
-	def _get_parent(bom_no):
-		return frappe.db.sql_list(
-			"""
-			select distinct bom_item.parent from `tabBOM Item` bom_item
-			where bom_item.bom_no = %s and bom_item.docstatus=1 and bom_item.parenttype='BOM'
-				and exists(select bom.name from `tabBOM` bom where bom.name=bom_item.parent and bom.is_active=1)
-		""",
-			bom_no,
-		)
+def get_boms_in_bottom_up_order(bom_no: Optional[str] = None) -> List:
+	def _generate_child_parent_map():
+		bom = frappe.qb.DocType("BOM")
+		bom_item = frappe.qb.DocType("BOM Item")
 
-	count = 0
-	bom_list = []
-	if bom_no:
-		bom_list.append(bom_no)
-	else:
-		# get all leaf BOMs
-		bom_list = frappe.db.sql_list(
+		bom_parents = (
+			frappe.qb.from_(bom_item)
+			.join(bom)
+			.on(bom_item.parent == bom.name)
+			.select(bom_item.bom_no, bom_item.parent)
+			.where(
+				(bom_item.bom_no.isnotnull())
+				& (bom_item.bom_no != "")
+				& (bom.docstatus == 1)
+				& (bom.is_active == 1)
+				& (bom_item.parenttype == "BOM")
+			)
+		).run(as_dict=True)
+
+		child_parent_map = defaultdict(list)
+		for bom in bom_parents:
+			child_parent_map[bom.bom_no].append(bom.parent)
+
+		return child_parent_map
+
+	def _get_flat_parent_map(leaf, child_parent_map):
+		parents_list = []
+
+		def _get_parents(node, parents_list):
+			"Returns updated ancestors list."
+			first_parents = child_parent_map.get(node)  # immediate parents of node
+			if not first_parents:  # top most node
+				return parents_list
+
+			parents_list.extend(first_parents)
+			parents_list = list(dict.fromkeys(parents_list).keys())  # remove duplicates
+
+			for nth_node in first_parents:
+				# recursively find parents
+				parents_list = _get_parents(nth_node, parents_list)
+
+			return parents_list
+
+		parents_list = _get_parents(leaf, parents_list)
+		return parents_list
+
+	def _get_leaf_boms():
+		return frappe.db.sql_list(
 			"""select name from `tabBOM` bom
 			where docstatus=1 and is_active=1
 				and not exists(select bom_no from `tabBOM Item`
 					where parent=bom.name and ifnull(bom_no, '')!='')"""
 		)
 
-	while count < len(bom_list):
-		for child_bom in _get_parent(bom_list[count]):
-			if child_bom not in bom_list:
-				bom_list.append(child_bom)
-		count += 1
+	bom_list = []
+	if bom_no:
+		bom_list.append(bom_no)
+	else:
+		bom_list = _get_leaf_boms()
+
+	child_parent_map = _generate_child_parent_map()
+
+	for leaf_bom in bom_list:
+		# generate list recursively bottom to top
+		parent_list = _get_flat_parent_map(leaf_bom, child_parent_map)
+
+		if not parent_list:
+			continue
+
+		bom_list.extend(parent_list)
+		bom_list = list(dict.fromkeys(bom_list).keys())  # remove duplicates
 
 	return bom_list
 
