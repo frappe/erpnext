@@ -34,7 +34,7 @@ frappe.ui.form.on('Expense Entry', {
 					filters:[
 						['Account', 'company', '=', frm.doc.company],
 						['Account', 'is_group', '=', 0],
-						['Account', 'account_type', 'in', ['Bank', 'Cash']]
+						['Account', 'account_type', 'in', ['Bank', 'Cash', 'Equity']]
 					]
 				};
 			}
@@ -45,8 +45,10 @@ frappe.ui.form.on('Expense Entry', {
 				frappe.msgprint(__("Please select Company first"));
 			} else {
 				return {
-					query: "erpnext.controllers.queries.get_expense_account",
-					filters: {'company': frm.doc.company}
+					filters: [
+						['Account', 'company', '=', frm.doc.company],
+						['Account', 'is_group', '=', 0],
+					]
 				}
 			}
 		});

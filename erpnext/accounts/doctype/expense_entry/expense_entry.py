@@ -52,7 +52,7 @@ class ExpenseEntry(Document):
 	def validate_accounts(self):
 		if self.payable_account and frappe.get_cached_value("Account", self.payable_account, "account_type") != 'Payable':
 			frappe.throw(_("Incorrect Account Type for Payable Account {0}").format(self.payable_account))
-		if self.paid_from_account and frappe.get_cached_value("Account", self.paid_from_account, "account_type") not in ['Bank', 'Cash']:
+		if self.paid_from_account and frappe.get_cached_value("Account", self.paid_from_account, "account_type") not in ['Bank', 'Cash', 'Equity']:
 			frappe.throw(_("Incorrect Account Type for Paid From Account {0}").format(self.paid_from_account))
 
 		for d in self.accounts:
