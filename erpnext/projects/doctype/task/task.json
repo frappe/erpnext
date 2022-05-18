@@ -32,14 +32,15 @@
   "column_break_21",
   "expected_time",
   "actual_time",
-  "assignment_section",
-  "assigned_to",
   "completion_section",
-  "finish_date",
+  "assigned_to",
+  "assigned_to_name",
   "column_break_29",
+  "reviewer",
+  "reviewer_name",
+  "column_break_33",
+  "finish_date",
   "review_date",
-  "column_break_16",
-  "reviewed_by",
   "sb_details",
   "description",
   "sb_depends_on",
@@ -384,17 +385,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "reviewed_by",
-   "fieldtype": "Link",
-   "label": "Reviewed By",
-   "no_copy": 1,
-   "options": "Employee"
-  },
-  {
    "fieldname": "column_break_44",
    "fieldtype": "Column Break"
   },
@@ -415,25 +405,52 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "assigned_to",
-   "fieldname": "assignment_section",
-   "fieldtype": "Section Break",
-   "label": "Assignment"
-  },
-  {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
    "fieldname": "assigned_to",
-   "fieldtype": "Table",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
    "label": "Assigned To",
    "no_copy": 1,
-   "options": "Task Assignment"
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "assigned_to.employee_name",
+   "fieldname": "assigned_to_name",
+   "fieldtype": "Data",
+   "in_preview": 1,
+   "label": "Assigned To Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reviewer",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Reviewer",
+   "no_copy": 1,
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "reviewer.employee_name",
+   "fieldname": "reviewer_name",
+   "fieldtype": "Data",
+   "label": "Reviewer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-check",
  "idx": 1,
  "is_tree": 1,
  "max_attachments": 5,
- "modified": "2022-05-18 13:14:42.725384",
+ "modified": "2022-05-18 13:39:13.992231",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
