@@ -304,6 +304,7 @@ class DeliveryNote(SellingController):
 		if status == 'Closed':
 			frappe.db.sql(f"update `tabDelivery Note` set closing_time = '{get_datetime()}' where name = '{self.name}'")
 			frappe.db.commit()
+            
 		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
