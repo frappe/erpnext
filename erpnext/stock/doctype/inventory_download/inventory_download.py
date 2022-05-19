@@ -21,6 +21,8 @@ class InventoryDownload(Document):
 					if self.warehouse == bin.warehouse:
 						doc = frappe.get_doc("Bin", bin.name)
 						self.create_stock_ledger_entry(item, doc.actual_qty, 0)
+			
+			self.apply_gl_entry()
 	
 	def on_update(self):
 		if self.docstatus == 0:
@@ -156,6 +158,86 @@ class InventoryDownload(Document):
 		update_bin(sle, allow_negative_stock, via_landed_cost_voucher)
 
 		# doc.insert()
+	
+	def apply_gl_entry(self):
+		currentDateTime = datetime.now()
+		date = currentDateTime.date()
+		year = date.strftime("%Y")
+
+		fecha_inicial = '01-01-{}'.format(year)
+		fecha_final = '31-12-{}'.format(year)
+		fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+
+		company = frappe.get_doc("Company", self.company)
+
+		if company.inventory_download_acc == None:
+			frappe.throw(_("Assign an inventory download account in company."))
+		
+		if company.default_inventory_account == None:
+			frappe.throw(_("Assign an default inventory account in company."))
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.creation_date
+		doc.transaction_date = None
+		doc.account = company.inventory_download_acc
+		doc.party_type = "Customer"
+		doc.party = self.responsable
+		doc.cost_center = self.cost_center
+		doc.debit = self.total_valuation_rate
+		doc.credit = 0
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = self.total_valuation_rate
+		doc.credit_in_account_currency = 0
+		doc.against = company.default_inventory_account
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
+
+		doc = frappe.new_doc("GL Entry")
+		doc.posting_date = self.creation_date
+		doc.transaction_date = None
+		doc.account = company.default_inventory_account
+		doc.party_type = "Customer"
+		doc.party = self.responsable
+		doc.cost_center = self.cost_center
+		doc.debit = 0
+		doc.credit = self.total_valuation_rate
+		doc.account_currency = self.currency
+		doc.debit_in_account_currency = 0
+		doc.credit_in_account_currency = self.total_valuation_rate
+		doc.against = company.inventory_download_acc
+		doc.against_voucher_type = self.doctype
+		doc.against_voucher = self.name
+		doc.voucher_type =  self.doctype
+		doc.voucher_no = self.name
+		doc.voucher_detail_no = None
+		doc.project = None
+		doc.remarks = 'No Remarks'
+		doc.is_opening = "No"
+		doc.is_advance = "No"
+		doc.fiscal_year = fiscal_year[0].name
+		doc.company = self.company
+		doc.finance_book = None
+		doc.to_rename = 1
+		doc.due_date = None
+		# doc.docstatus = 1
+		doc.insert()
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	args.update({"doctype": "Stock Ledger Entry"})

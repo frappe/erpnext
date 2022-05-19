@@ -457,6 +457,18 @@ class SalesInvoice(SellingController):
 
 				self.discount_amount = discount_amount
 				self.db_set('discount_amount', discount_amount, update_modified=False)
+		else:
+			if self.round_off_discount == 1:
+				discount_amount = math.ceil(self.discount_amount)
+
+				net_total = math.floor(self.net_total)
+				self.db_set('net_total', net_total, update_modified=False)
+
+				# rounding_adjustment = math.floor(self.rounding_adjustment)
+				self.db_set('rounding_adjustment', 0, update_modified=False)
+
+				self.discount_amount = discount_amount
+				self.db_set('discount_amount', discount_amount, update_modified=False)
 
 		if self.exonerated == 1:
 			if self.discount_amount:
@@ -493,6 +505,12 @@ class SalesInvoice(SellingController):
 			pos = frappe.get_doc("POS Profile", self.pos_profile)
 
 			if pos.round_off_discount == 1:
+				self.db_set('rounded_total', self.grand_total, update_modified=False)
+
+				if self.grand_total == self.paid_amount:
+					self.db_set('outstanding_amount', 0, update_modified=False)	
+		else:
+			if self.round_off_discount == 1:
 				self.db_set('rounded_total', self.grand_total, update_modified=False)
 
 				if self.grand_total == self.paid_amount:
@@ -1438,7 +1456,24 @@ class SalesInvoice(SellingController):
 				else:
 					base_net_amount = item.base_net_amount
 			else:
-				base_net_amount = item.base_net_amount
+				if self.round_off_discount:
+					base_net_amount = math.floor(item.base_net_amount)
+					total_amount += base_net_amount
+					items = self.get("items")
+					last = items[-1]
+						
+					if last.item_code == item.item_code:
+						if total_amount < gl_entries[0].debit:
+							total_amount -= base_net_amount
+							base_net_amount = math.ceil(item.base_net_amount)
+							total_amount += base_net_amount
+
+							if total_amount < gl_entries[0].debit:
+								sum_amount = gl_entries[0].debit - total_amount
+								base_net_amount += sum_amount
+								total_amount += sum_amount
+				else:
+					base_net_amount = item.base_net_amount
 
 			if flt(base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
