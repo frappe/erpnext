@@ -377,6 +377,17 @@ def get_conditions(filters):
 	if filters.get("brand"):
 		conditions +=  """and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s"""
 
+	if filters.get('sales_invoice_status'):
+		if filters.get('sales_invoice_status') == 'All':
+			conditions += f" and `tabSales Invoice`.docstatus IN (0,1) "
+		elif filters.get('sales_invoice_status') == 'Submitted':
+			conditions += f" and `tabSales Invoice`.docstatus = 1 "
+		elif filters.get('sales_invoice_status') == 'Draft':
+			conditions += f" and `tabSales Invoice`.docstatus = 0 "		
+	else:
+		conditions += f" and `tabSales Invoice`.docstatus IN (0,1) "
+
+
 	if filters.get("item_group"):
 		conditions +=  """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
 
@@ -423,8 +434,7 @@ def get_items(filters, additional_query_columns):
             (SELECT incoming_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = `tabSales Invoice Item`.batch_no and s_l_e.item_code = `tabSales Invoice Item`.item_code AND incoming_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1) AS incoming_rate,
             (SELECT outgoing_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = `tabSales Invoice Item`.batch_no and s_l_e.item_code = `tabSales Invoice Item`.item_code AND outgoing_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1) AS outgoing_rate
 		from `tabSales Invoice`, `tabSales Invoice Item`
-		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
-			and `tabSales Invoice`.docstatus = 1 {1}
+		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent {1}
 		""".format(additional_query_columns or '', conditions), filters, as_dict=1) #nosec
 
 def get_delivery_notes_against_sales_order(item_list):
