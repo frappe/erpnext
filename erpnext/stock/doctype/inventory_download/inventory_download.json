@@ -15,6 +15,8 @@
   "warehouse",
   "project",
   "download_area",
+  "cost_center",
+  "currency",
   "items",
   "total_valuation_rate",
   "amended_from"
@@ -51,8 +53,9 @@
   },
   {
    "fieldname": "responsable",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Responsable",
+   "options": "Customer",
    "reqd": 1
   },
   {
@@ -109,10 +112,24 @@
    "fieldtype": "Currency",
    "label": "Total Valuation Rate",
    "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-05-13 09:15:43.969316",
+ "modified": "2022-05-18 15:20:09.111443",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",
