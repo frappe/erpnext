@@ -385,7 +385,9 @@ class BOM(WebsiteGenerator):
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
-			self.calculate_cost(save_updates=save, update_hour_rate=update_hour_rate)
+
+		self.calculate_cost(save_updates=save, update_hour_rate=update_hour_rate)
+
 		if save:
 			self.db_update()
 
@@ -587,11 +589,11 @@ class BOM(WebsiteGenerator):
 		bom_list.reverse()
 		return bom_list
 
-	def calculate_cost(self, save_update=False, update_hour_rate=False):
+	def calculate_cost(self, save_updates=False, update_hour_rate=False):
 		"""Calculate bom totals"""
 		self.calculate_op_cost(update_hour_rate)
-		self.calculate_rm_cost(save=save_update)
-		self.calculate_sm_cost(save=save_update)
+		self.calculate_rm_cost(save=save_updates)
+		self.calculate_sm_cost(save=save_updates)
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = (
 			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
