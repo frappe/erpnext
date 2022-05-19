@@ -133,6 +133,7 @@
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
+  "round_off_discount",
   "totals",
   "taxed_sales15",
   "isv15",
@@ -1879,12 +1880,18 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_off_discount",
+   "fieldtype": "Check",
+   "label": "Round Off Discount"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-04-21 12:08:32.143045",
+ "modified": "2022-05-18 15:42:17.448714",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
