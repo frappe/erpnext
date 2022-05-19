@@ -160,6 +160,7 @@
    "options": "User"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -168,7 +169,6 @@
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
    "options": "Customer Group",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -511,7 +511,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 20:32:34.000304",
+ "modified": "2022-05-19 18:55:07.137251",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
