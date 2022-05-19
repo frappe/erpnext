@@ -76,10 +76,10 @@ def create_bom_update_log(
 def get_boms_in_bottom_up_order(bom_no: Optional[str] = None) -> List:
 	"""
 	Eg: Main BOM
-	        |- Sub BOM 1
-	                |- Leaf BOM 1
-	        |- Sub BOM 2
-	                |- Leaf BOM 2
+	                |- Sub BOM 1
+	                                |- Leaf BOM 1
+	                |- Sub BOM 2
+	                                |- Leaf BOM 2
 	Result: [Leaf BOM 1, Leaf BOM 2, Sub BOM 1, Sub BOM 2, Main BOM]
 	"""
 	leaf_boms = []
