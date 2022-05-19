@@ -35,6 +35,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			let me = this;
 
 			const input = this.scan_barcode_field.value;
+			this.scan_barcode_field.set_value("");
 			if (!input) {
 				return;
 			}
