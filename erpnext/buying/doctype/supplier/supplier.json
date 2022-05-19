@@ -157,6 +157,7 @@
    "width": "50%"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "supplier_group",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -164,8 +165,7 @@
    "label": "Supplier Group",
    "oldfieldname": "supplier_type",
    "oldfieldtype": "Link",
-   "options": "Supplier Group",
-   "reqd": 1
+   "options": "Supplier Group"
   },
   {
    "default": "Company",
@@ -432,7 +432,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 18:02:27.838623",
+ "modified": "2022-05-19 18:59:18.503456",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
