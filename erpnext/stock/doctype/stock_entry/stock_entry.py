@@ -299,19 +299,17 @@ class StockEntry(StockController):
 				for_update=True,
 			)
 
-			for f in (
-				"uom",
-				"stock_uom",
-				"description",
-				"item_name",
-				"expense_account",
-				"cost_center",
-				"conversion_factor",
-			):
-				if f == "stock_uom" or not item.get(f):
-					item.set(f, item_details.get(f))
-				if f == "conversion_factor" and item.uom == item_details.get("stock_uom"):
-					item.set(f, item_details.get(f))
+			reset_fields = ("stock_uom", "item_name")
+			for field in reset_fields:
+				item.set(field, item_details.get(field))
+
+			update_fields = ("uom", "description", "expense_account", "cost_center", "conversion_factor")
+
+			for field in update_fields:
+				if not item.get(field):
+					item.set(field, item_details.get(field))
+				if field == "conversion_factor" and item.uom == item_details.get("stock_uom"):
+					item.set(field, item_details.get(field))
 
 			if not item.transfer_qty and item.qty:
 				item.transfer_qty = flt(
