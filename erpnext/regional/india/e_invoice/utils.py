@@ -306,11 +306,7 @@ def update_other_charges(tax_row, invoice_value_details, gst_accounts_list, invo
 
 def get_payment_details(invoice):
 	payee_name = invoice.company
-<<<<<<< HEAD
-	mode_of_payment = ', '.join([d.mode_of_payment for d in invoice.payments])
-=======
 	mode_of_payment = ""
->>>>>>> 0c26f9a8c8 (fix(india): cannot generate e-invoice for is_pos invoices)
 	paid_amount = invoice.base_paid_amount
 	outstanding_amount = invoice.outstanding_amount
 
