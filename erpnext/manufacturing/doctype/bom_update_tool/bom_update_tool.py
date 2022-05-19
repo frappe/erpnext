@@ -46,7 +46,7 @@ def update_cost() -> None:
 	"""Updates Cost for all BOMs from bottom to top."""
 	bom_list = get_boms_in_bottom_up_order()
 	for bom in bom_list:
-		bom_doc = frappe.get_doc("BOM", bom)
+		bom_doc = frappe.get_cached_doc("BOM", bom)
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
 		# bom_doc.update_exploded_items(save=True) #TODO: edit exploded items rate
 		bom_doc.db_update()
