@@ -63,39 +63,44 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		});
 	}
 
-	async update_table(data) {
-		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
+	update_table(data) {
+		return new Promise(resolve => {
+			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
-		const {item_code, barcode, batch_no, serial_no} = data;
+			const {item_code, barcode, batch_no, serial_no} = data;
 
-		let row = this.get_row_to_modify_on_scan(item_code, batch_no);
+			let row = this.get_row_to_modify_on_scan(item_code, batch_no);
 
-		if (!row) {
-			if (this.dont_allow_new_row) {
-				this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
+			if (!row) {
+				if (this.dont_allow_new_row) {
+					this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
+					this.clean_up();
+					return;
+				}
+
+				// add new row if new item/batch is scanned
+				row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
+				// trigger any row add triggers defined on child table.
+				this.frm.script_manager.trigger(`${this.items_table_name}_add`, row.doctype, row.name);
+			}
+
+			if (this.is_duplicate_serial_no(row, serial_no)) {
 				this.clean_up();
 				return;
 			}
 
-			// add new row if new item/batch is scanned
-			row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
-			// trigger any row add triggers defined on child table.
-			this.frm.script_manager.trigger(`${this.items_table_name}_add`, row.doctype, row.name);
-		}
-
-		if (this.is_duplicate_serial_no(row, serial_no)) {
-			this.clean_up();
-			return;
-		}
-
-		this.set_selector_trigger_flag(row, data);
-		const qty = await this.set_item(row, item_code);
-		this.show_scan_message(row.idx, row.item_code, qty);
-		await this.set_serial_no(row, serial_no);
-		await this.set_batch_no(row, batch_no);
-		await this.set_barcode(row, barcode);
-		this.clean_up();
-		return row;
+			frappe.run_serially([
+				() => this.set_selector_trigger_flag(row, data),
+				() => this.set_item(row, item_code).then(qty => {
+					this.show_scan_message(row.idx, row.item_code, qty);
+				}),
+				() => this.set_serial_no(row, serial_no),
+				() => this.set_batch_no(row, batch_no),
+				() => this.set_barcode(row, barcode),
+				() => this.clean_up(),
+				() => resolve(row)
+			]);
+		});
 	}
 
 	// batch and serial selector is reduandant when all info can be added by scan
