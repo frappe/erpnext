@@ -172,6 +172,7 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "territory",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -180,8 +181,7 @@
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
    "options": "Territory",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "tax_id",
@@ -511,7 +511,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-05-19 18:55:07.137251",
+ "modified": "2022-05-19 18:56:42.488627",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
