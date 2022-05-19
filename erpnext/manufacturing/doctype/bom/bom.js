@@ -499,15 +499,11 @@ cur_frm.cscript.qty = function(doc) {
 
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	var scrap_items = false;
-
-	if(cdt == 'BOM Scrap Item') {
-		scrap_items = true;
-	}
+	const is_scrap_item = cdt == "BOM Scrap Item";
 
 	if (d.bom_no) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-		get_bom_material_detail(doc, cdt, cdn, scrap_items);
+		get_bom_material_detail(doc, cdt, cdn, is_scrap_item);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);
 		erpnext.bom.calculate_scrap_materials_cost(doc);
