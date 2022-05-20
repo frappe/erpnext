@@ -221,7 +221,7 @@ def get_merged_data(columns, data):
 	result = []
 
 	for row in data:
-		key = row[0] + "-" + str(row[4])
+		key = row[0] + "-" + row[2] + "-" + str(row[4])
 		merged_hsn_dict.setdefault(key, {})
 		for i, d in enumerate(columns):
 			if d["fieldtype"] not in ("Int", "Float", "Currency"):

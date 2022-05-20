@@ -40,3 +40,8 @@ class TestInit(unittest.TestCase):
 				enc_name == expected_names[i],
 				"{enc} is not same as {exp}".format(enc=enc_name, exp=expected_names[i]),
 			)
+
+	def test_translation_files(self):
+		from frappe.tests.test_translate import verify_translation_files
+
+		verify_translation_files("erpnext")

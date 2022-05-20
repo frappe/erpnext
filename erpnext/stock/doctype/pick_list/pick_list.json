@@ -17,6 +17,11 @@
   "parent_warehouse",
   "get_item_locations",
   "section_break_6",
+  "scan_barcode",
+  "column_break_13",
+  "scan_mode",
+  "prompt_qty",
+  "section_break_15",
   "locations",
   "amended_from",
   "print_settings_section",
@@ -36,6 +41,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.docstatus",
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
   },
@@ -126,11 +132,38 @@
    "fieldtype": "Check",
    "label": "Group Same Items",
    "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If checked, picked qty won't automatically be fulfilled on submit of pick list.",
+   "fieldname": "scan_mode",
+   "fieldtype": "Check",
+   "label": "Scan Mode"
+  },
+  {
+   "default": "0",
+   "fieldname": "prompt_qty",
+   "fieldtype": "Check",
+   "label": "Prompt Qty"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-21 07:56:40.646473",
+ "modified": "2022-05-11 09:09:53.029312",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
