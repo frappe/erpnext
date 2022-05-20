@@ -430,12 +430,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Analytical Ledger",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
 					"name": "Customer Ledger Summary",
 					"doctype": "Sales Invoice",
 					"is_query_report": True,
@@ -533,25 +527,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Balance Sheet Accounts",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Statement Of Income",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Provider Account Statement",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Ledger",
+					"name": "Analytical Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
@@ -570,12 +546,6 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Cash Flow",
-					"doctype": "GL Entry",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Consolidated Financial Statement",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
@@ -747,7 +717,38 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Cash Report",
-				}
+				},
+
+				{
+					"type": "report",
+					"name": "Balance Sheet Accounts",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Statement Of Income",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Provider Account Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Consolidated Financial Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
 			]
 		},
 		{
