@@ -1,6 +1,7 @@
 erpnext.setup_auto_gst_taxation = (doctype) => {
 	frappe.ui.form.on(doctype, {
 		company_address: function(frm) {
+			console.log("#########");
 			frm.trigger('get_tax_template');
 		},
 		shipping_address: function(frm) {
@@ -22,6 +23,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				'shipping_address': frm.doc.shipping_address || '',
 				'shipping_address_name': frm.doc.shipping_address_name || '',
 				'customer_address': frm.doc.customer_address || '',
+				'company_address': frm.doc.company_address,
 				'supplier_address': frm.doc.supplier_address,
 				'customer': frm.doc.customer,
 				'supplier': frm.doc.supplier,
@@ -39,6 +41,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				},
 				debounce: 2000,
 				callback: function(r) {
+					console.log(r.message);
 					if(r.message) {
 						frm.set_value('taxes_and_charges', r.message.taxes_and_charges);
 						frm.set_value('taxes', r.message.taxes);
