@@ -183,7 +183,7 @@ class InventoryDownload(Document):
 		doc.posting_date = self.creation_date
 		doc.transaction_date = None
 		doc.account = company.inventory_download_acc
-		doc.party_type = "Customer"
+		doc.party_type = "Employee"
 		doc.party = self.responsable
 		doc.cost_center = self.cost_center
 		doc.debit = self.total_valuation_rate
@@ -213,7 +213,7 @@ class InventoryDownload(Document):
 		doc.posting_date = self.creation_date
 		doc.transaction_date = None
 		doc.account = company.default_inventory_account
-		doc.party_type = "Customer"
+		doc.party_type = "Employee"
 		doc.party = self.responsable
 		doc.cost_center = self.cost_center
 		doc.debit = 0

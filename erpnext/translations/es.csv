@@ -363,6 +363,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure d
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.","No se puede garantizar la entrega por número de serie, ya que \ Item {0} se agrega con y sin Garantizar entrega por \ Serial No."
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,At least one mode of payment is required for POS invoice.,Se requiere al menos un modo de pago de la factura POS.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,When selecting a discount reason, check the field to update inventory.,Al selecciona una razon de descuento marque el campo de actualizar inventario.
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Batch no is required for batched item {0},No se requiere lote para el artículo en lote {0}
 DocType: Bank Statement Transaction Invoice Item,Bank Statement Transaction Invoice Item,Estado de Factura de Transacción de Extracto Bancario
 DocType: Salary Detail,Tax on flexible benefit,Impuesto sobre el Beneficio Flexible
@@ -2086,7 +2087,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/bank_account.js,This action w
 apps/erpnext/erpnext/config/buying.py,Supplier database.,Base de datos de proveedores.
 DocType: Contract Template,Contract Terms and Conditions,Términos y Condiciones del Contrato
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,You cannot restart a Subscription that is not cancelled.,No puede reiniciar una Suscripción que no está cancelada.
-DocType: Account,Balance Sheet,Hoja de balance
+DocType: Account,Balance Sheet,Balance General
 DocType: Leave Type,Is Earned Leave,Es Licencia Ganada
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Purchase Order Amount,Monto de orden de compra
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Cost Center For Item with Item Code ',Centro de costos para el producto con código '
@@ -2144,6 +2145,7 @@ DocType: Marketplace Settings,Disable Marketplace,Deshabilitar Marketplace
 DocType: Quality Meeting,Minutes,Minutos
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Featured Items,Tus artículos destacados
 ,Trial Balance,Balanza de Comprobación
+apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Analytical Ledger, Libro Mayor
 apps/erpnext/erpnext/templates/pages/projects.js,Show Completed,Mostrar completado
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Fiscal Year {0} not found,Año fiscal {0} no encontrado
 apps/erpnext/erpnext/config/help.py,Setting up Employees,Configuración de empleados
@@ -4408,7 +4410,7 @@ DocType: Customer,"Reselect, if the chosen contact is edited after save","Vuelva
 DocType: Quality Procedure,Parent Procedure,Procedimiento para padres
 DocType: Patient Encounter,In print,En la impresión
 DocType: Accounting Dimension,Accounting Dimension,Dimensión contable
-,Profit and Loss Statement,Cuenta de pérdidas y ganancias
+,Profit and Loss Statement,Estado Resultados
 DocType: Bank Reconciliation Detail,Cheque Number,Número de cheque
 apps/erpnext/erpnext/healthcare/utils.py,The item referenced by {0} - {1} is already invoiced,El elemento al que hace referencia {0} - {1} ya está facturado
 ,Sales Browser,Explorar ventas
