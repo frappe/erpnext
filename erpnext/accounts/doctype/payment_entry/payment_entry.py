@@ -183,9 +183,7 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			_party_name = (
-				"title" if self.party_type in ("Student", "Shareholder") else self.party_type.lower() + "_name"
-			)
+			_party_name = "title" if self.party_type == "Shareholder" else self.party_type.lower() + "_name"
 			self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
@@ -298,9 +296,7 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(field)))
 
 	def validate_reference_documents(self):
-		if self.party_type == "Student":
-			valid_reference_doctypes = "Fees"
-		elif self.party_type == "Customer":
+		if self.party_type == "Customer":
 			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
 		elif self.party_type == "Supplier":
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
@@ -338,8 +334,6 @@ class PaymentEntry(AccountsController):
 							ref_party_account = (
 								get_party_account_based_on_invoice_discounting(d.reference_name) or ref_doc.debit_to
 							)
-						elif self.party_type == "Student":
-							ref_party_account = ref_doc.receivable_account
 						elif self.party_type == "Supplier":
 							ref_party_account = ref_doc.credit_to
 						elif self.party_type == "Employee":
@@ -350,6 +344,12 @@ class PaymentEntry(AccountsController):
 								_("{0} {1} is associated with {2}, but Party Account is {3}").format(
 									d.reference_doctype, d.reference_name, ref_party_account, self.party_account
 								)
+							)
+
+						if ref_doc.doctype == "Purchase Invoice" and ref_doc.get("on_hold"):
+							frappe.throw(
+								_("{0} {1} is on hold").format(d.reference_doctype, d.reference_name),
+								title=_("Invalid Invoice"),
 							)
 
 					if ref_doc.docstatus != 1:
@@ -1259,20 +1259,19 @@ def get_outstanding_reference_documents(args):
 
 	# Get all SO / PO which are not fully billed or against which full advance not paid
 	orders_to_be_billed = []
-	if args.get("party_type") != "Student":
-		orders_to_be_billed = get_orders_to_be_billed(
-			args.get("posting_date"),
-			args.get("party_type"),
-			args.get("party"),
-			args.get("company"),
-			party_account_currency,
-			company_currency,
-			filters=args,
-		)
+	orders_to_be_billed = get_orders_to_be_billed(
+		args.get("posting_date"),
+		args.get("party_type"),
+		args.get("party"),
+		args.get("company"),
+		party_account_currency,
+		company_currency,
+		filters=args,
+	)
 
 	# Get negative outstanding sales /purchase invoices
 	negative_outstanding_invoices = []
-	if args.get("party_type") not in ["Student", "Employee"] and not args.get("voucher_no"):
+	if args.get("party_type") != "Employee" and not args.get("voucher_no"):
 		negative_outstanding_invoices = get_negative_outstanding_invoices(
 			args.get("party_type"),
 			args.get("party"),
@@ -1496,9 +1495,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
-	_party_name = (
-		"title" if party_type in ("Student", "Shareholder") else party_type.lower() + "_name"
-	)
+	_party_name = "title" if party_type == "Shareholder" else party_type.lower() + "_name"
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 	if party_type in ["Customer", "Supplier"]:
@@ -1560,7 +1557,7 @@ def get_company_defaults(company):
 def get_outstanding_on_journal_entry(name):
 	res = frappe.db.sql(
 		"SELECT "
-		'CASE WHEN party_type IN ("Customer", "Student") '
+		'CASE WHEN party_type IN ("Customer") '
 		"THEN ifnull(sum(debit_in_account_currency - credit_in_account_currency), 0) "
 		"ELSE ifnull(sum(credit_in_account_currency - debit_in_account_currency), 0) "
 		"END as outstanding_amount "
@@ -1917,8 +1914,6 @@ def set_party_type(dt):
 		party_type = "Supplier"
 	elif dt in ("Expense Claim", "Employee Advance", "Gratuity"):
 		party_type = "Employee"
-	elif dt == "Fees":
-		party_type = "Student"
 	return party_type
 
 

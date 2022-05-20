@@ -89,29 +89,6 @@ def delete_employee_work_history(details, employee, date):
 
 
 @frappe.whitelist()
-def get_employee_fields_label():
-	fields = []
-	for df in frappe.get_meta("Employee").get("fields"):
-		if df.fieldname in [
-			"salutation",
-			"user_id",
-			"employee_number",
-			"employment_type",
-			"holiday_list",
-			"branch",
-			"department",
-			"designation",
-			"grade",
-			"notice_number_of_days",
-			"reports_to",
-			"leave_policy",
-			"company_email",
-		]:
-			fields.append({"value": df.fieldname, "label": df.label})
-	return fields
-
-
-@frappe.whitelist()
 def get_employee_field_property(employee, fieldname):
 	if employee and fieldname:
 		field = frappe.get_meta("Employee").get_field(fieldname)
@@ -292,7 +269,7 @@ def generate_leave_encashment():
 		create_leave_encashment(leave_allocation=leave_allocation)
 
 
-def allocate_earned_leaves(ignore_duplicates=False):
+def allocate_earned_leaves():
 	"""Allocate earned leaves to Employees"""
 	e_leave_types = get_earned_leaves()
 	today = getdate()
@@ -328,14 +305,10 @@ def allocate_earned_leaves(ignore_duplicates=False):
 			if check_effective_date(
 				from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining
 			):
-				update_previous_leave_allocation(
-					allocation, annual_allocation, e_leave_type, ignore_duplicates
-				)
+				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
 
 
-def update_previous_leave_allocation(
-	allocation, annual_allocation, e_leave_type, ignore_duplicates=False
-):
+def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
 	earned_leaves = get_monthly_earned_leave(
 		annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding
 	)
@@ -349,9 +322,19 @@ def update_previous_leave_allocation(
 	if new_allocation != allocation.total_leaves_allocated:
 		today_date = today()
 
-		if ignore_duplicates or not is_earned_leave_already_allocated(allocation, annual_allocation):
-			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
-			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+		allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
+		create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+
+		if e_leave_type.based_on_date_of_joining:
+			text = _("allocated {0} leave(s) via scheduler on {1} based on the date of joining").format(
+				frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
+			)
+		else:
+			text = _("allocated {0} leave(s) via scheduler on {1}").format(
+				frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
+			)
+
+		allocation.add_comment(comment_type="Info", text=text)
 
 
 def get_monthly_earned_leave(annual_leaves, frequency, rounding):

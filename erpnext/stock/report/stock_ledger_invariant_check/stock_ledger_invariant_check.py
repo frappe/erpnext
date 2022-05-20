@@ -4,6 +4,7 @@
 import json
 
 import frappe
+from frappe import _
 
 SLE_FIELDS = (
 	"name",
@@ -105,155 +106,155 @@ def get_columns():
 		{
 			"fieldname": "name",
 			"fieldtype": "Link",
-			"label": "Stock Ledger Entry",
+			"label": _("Stock Ledger Entry"),
 			"options": "Stock Ledger Entry",
 		},
 		{
 			"fieldname": "posting_date",
-			"fieldtype": "Date",
-			"label": "Posting Date",
+			"fieldtype": "Data",
+			"label": _("Posting Date"),
 		},
 		{
 			"fieldname": "posting_time",
-			"fieldtype": "Time",
-			"label": "Posting Time",
+			"fieldtype": "Data",
+			"label": _("Posting Time"),
 		},
 		{
 			"fieldname": "creation",
-			"fieldtype": "Datetime",
-			"label": "Creation",
+			"fieldtype": "Data",
+			"label": _("Creation"),
 		},
 		{
 			"fieldname": "voucher_type",
 			"fieldtype": "Link",
-			"label": "Voucher Type",
+			"label": _("Voucher Type"),
 			"options": "DocType",
 		},
 		{
 			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
-			"label": "Voucher No",
+			"label": _("Voucher No"),
 			"options": "voucher_type",
 		},
 		{
 			"fieldname": "batch_no",
 			"fieldtype": "Link",
-			"label": "Batch",
+			"label": _("Batch"),
 			"options": "Batch",
 		},
 		{
 			"fieldname": "use_batchwise_valuation",
 			"fieldtype": "Check",
-			"label": "Batchwise Valuation",
+			"label": _("Batchwise Valuation"),
 		},
 		{
 			"fieldname": "actual_qty",
 			"fieldtype": "Float",
-			"label": "Qty Change",
+			"label": _("Qty Change"),
 		},
 		{
 			"fieldname": "incoming_rate",
 			"fieldtype": "Float",
-			"label": "Incoming Rate",
+			"label": _("Incoming Rate"),
 		},
 		{
 			"fieldname": "consumption_rate",
 			"fieldtype": "Float",
-			"label": "Consumption Rate",
+			"label": _("Consumption Rate"),
 		},
 		{
 			"fieldname": "qty_after_transaction",
 			"fieldtype": "Float",
-			"label": "(A) Qty After Transaction",
+			"label": _("(A) Qty After Transaction"),
 		},
 		{
 			"fieldname": "expected_qty_after_transaction",
 			"fieldtype": "Float",
-			"label": "(B) Expected Qty After Transaction",
+			"label": _("(B) Expected Qty After Transaction"),
 		},
 		{
 			"fieldname": "difference_in_qty",
 			"fieldtype": "Float",
-			"label": "A - B",
+			"label": _("A - B"),
 		},
 		{
 			"fieldname": "stock_queue",
 			"fieldtype": "Data",
-			"label": "FIFO/LIFO Queue",
+			"label": _("FIFO/LIFO Queue"),
 		},
 		{
 			"fieldname": "fifo_queue_qty",
 			"fieldtype": "Float",
-			"label": "(C) Total qty in queue",
+			"label": _("(C) Total qty in queue"),
 		},
 		{
 			"fieldname": "fifo_qty_diff",
 			"fieldtype": "Float",
-			"label": "A - C",
+			"label": _("A - C"),
 		},
 		{
 			"fieldname": "stock_value",
 			"fieldtype": "Float",
-			"label": "(D) Balance Stock Value",
+			"label": _("(D) Balance Stock Value"),
 		},
 		{
 			"fieldname": "fifo_stock_value",
 			"fieldtype": "Float",
-			"label": "(E) Balance Stock Value in Queue",
+			"label": _("(E) Balance Stock Value in Queue"),
 		},
 		{
 			"fieldname": "fifo_value_diff",
 			"fieldtype": "Float",
-			"label": "D - E",
+			"label": _("D - E"),
 		},
 		{
 			"fieldname": "stock_value_difference",
 			"fieldtype": "Float",
-			"label": "(F) Stock Value Difference",
+			"label": _("(F) Stock Value Difference"),
 		},
 		{
 			"fieldname": "stock_value_from_diff",
 			"fieldtype": "Float",
-			"label": "Balance Stock Value using (F)",
+			"label": _("Balance Stock Value using (F)"),
 		},
 		{
 			"fieldname": "diff_value_diff",
 			"fieldtype": "Float",
-			"label": "K - D",
+			"label": _("K - D"),
 		},
 		{
 			"fieldname": "fifo_stock_diff",
 			"fieldtype": "Float",
-			"label": "(G) Stock Value difference (FIFO queue)",
+			"label": _("(G) Stock Value difference (FIFO queue)"),
 		},
 		{
 			"fieldname": "fifo_difference_diff",
 			"fieldtype": "Float",
-			"label": "F - G",
+			"label": _("F - G"),
 		},
 		{
 			"fieldname": "valuation_rate",
 			"fieldtype": "Float",
-			"label": "(H) Valuation Rate",
+			"label": _("(H) Valuation Rate"),
 		},
 		{
 			"fieldname": "fifo_valuation_rate",
 			"fieldtype": "Float",
-			"label": "(I) Valuation Rate as per FIFO",
+			"label": _("(I) Valuation Rate as per FIFO"),
 		},
 		{
 			"fieldname": "fifo_valuation_diff",
 			"fieldtype": "Float",
-			"label": "H - I",
+			"label": _("H - I"),
 		},
 		{
 			"fieldname": "balance_value_by_qty",
 			"fieldtype": "Float",
-			"label": "(J) Valuation = Value (D) ÷ Qty (A)",
+			"label": _("(J) Valuation = Value (D) ÷ Qty (A)"),
 		},
 		{
 			"fieldname": "valuation_diff",
 			"fieldtype": "Float",
-			"label": "H - J",
+			"label": _("H - J"),
 		},
 	]

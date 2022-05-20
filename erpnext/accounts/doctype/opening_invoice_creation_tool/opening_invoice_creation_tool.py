@@ -2,9 +2,6 @@
 # For license information, please see license.txt
 
 
-import traceback
-from json import dumps
-
 import frappe
 from frappe import _, scrub
 from frappe.model.document import Document
@@ -114,10 +111,13 @@ class OpeningInvoiceCreationTool(Document):
 				)
 				or {}
 			)
+
+			default_currency = frappe.db.get_value(row.party_type, row.party, "default_currency")
+
 			if company_details:
 				invoice.update(
 					{
-						"currency": company_details.get("default_currency"),
+						"currency": default_currency or company_details.get("default_currency"),
 						"letter_head": company_details.get("default_letter_head"),
 					}
 				)
@@ -244,11 +244,7 @@ def start_import(invoices):
 		except Exception:
 			errors += 1
 			frappe.db.rollback()
-			message = "\n".join(
-				["Data:", dumps(d, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()]
-			)
-			frappe.log_error(title="Error while creating Opening Invoice", message=message)
-			frappe.db.commit()
+			doc.log_error("Opening invoice creation failed")
 	if errors:
 		frappe.msgprint(
 			_("You had {} errors while creating opening invoices. Check {} for more details").format(

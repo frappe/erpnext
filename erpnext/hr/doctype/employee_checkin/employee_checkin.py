@@ -5,8 +5,12 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_datetime
+from frappe.utils import cint, get_datetime, get_link_to_form
 
+from erpnext.hr.doctype.attendance.attendance import (
+	get_duplicate_attendance_record,
+	get_overlapping_shift_attendance,
+)
 from erpnext.hr.doctype.shift_assignment.shift_assignment import (
 	get_actual_start_end_datetime_of_shift,
 )
@@ -33,24 +37,24 @@ class EmployeeCheckin(Document):
 		shift_actual_timings = get_actual_start_end_datetime_of_shift(
 			self.employee, get_datetime(self.time), True
 		)
-		if shift_actual_timings[0] and shift_actual_timings[1]:
+		if shift_actual_timings:
 			if (
-				shift_actual_timings[2].shift_type.determine_check_in_and_check_out
+				shift_actual_timings.shift_type.determine_check_in_and_check_out
 				== "Strictly based on Log Type in Employee Checkin"
 				and not self.log_type
 				and not self.skip_auto_attendance
 			):
 				frappe.throw(
 					_("Log Type is required for check-ins falling in the shift: {0}.").format(
-						shift_actual_timings[2].shift_type.name
+						shift_actual_timings.shift_type.name
 					)
 				)
 			if not self.attendance:
-				self.shift = shift_actual_timings[2].shift_type.name
-				self.shift_actual_start = shift_actual_timings[0]
-				self.shift_actual_end = shift_actual_timings[1]
-				self.shift_start = shift_actual_timings[2].start_datetime
-				self.shift_end = shift_actual_timings[2].end_datetime
+				self.shift = shift_actual_timings.shift_type.name
+				self.shift_actual_start = shift_actual_timings.actual_start
+				self.shift_actual_end = shift_actual_timings.actual_end
+				self.shift_start = shift_actual_timings.start_datetime
+				self.shift_end = shift_actual_timings.end_datetime
 		else:
 			self.shift = None
 
@@ -126,20 +130,17 @@ def mark_attendance_and_link_log(
 	"""
 	log_names = [x.name for x in logs]
 	employee = logs[0].employee
+
 	if attendance_status == "Skip":
-		frappe.db.sql(
-			"""update `tabEmployee Checkin`
-			set skip_auto_attendance = %s
-			where name in %s""",
-			("1", log_names),
-		)
+		skip_attendance_in_checkins(log_names)
 		return None
+
 	elif attendance_status in ("Present", "Absent", "Half Day"):
 		employee_doc = frappe.get_doc("Employee", employee)
-		if not frappe.db.exists(
-			"Attendance",
-			{"employee": employee, "attendance_date": attendance_date, "docstatus": ("!=", "2")},
-		):
+		duplicate = get_duplicate_attendance_record(employee, attendance_date, shift)
+		overlapping = get_overlapping_shift_attendance(employee, attendance_date, shift)
+
+		if not duplicate and not overlapping:
 			doc_dict = {
 				"doctype": "Attendance",
 				"employee": employee,
@@ -155,6 +156,12 @@ def mark_attendance_and_link_log(
 			}
 			attendance = frappe.get_doc(doc_dict).insert()
 			attendance.submit()
+
+			if attendance_status == "Absent":
+				attendance.add_comment(
+					text=_("Employee was marked Absent for not meeting the working hours threshold.")
+				)
+
 			frappe.db.sql(
 				"""update `tabEmployee Checkin`
 				set attendance = %s
@@ -163,13 +170,10 @@ def mark_attendance_and_link_log(
 			)
 			return attendance
 		else:
-			frappe.db.sql(
-				"""update `tabEmployee Checkin`
-				set skip_auto_attendance = %s
-				where name in %s""",
-				("1", log_names),
-			)
+			skip_attendance_in_checkins(log_names)
+			add_comment_in_checkins(log_names, duplicate, overlapping)
 			return None
+
 	else:
 		frappe.throw(_("{} is an invalid Attendance Status.").format(attendance_status))
 
@@ -223,17 +227,52 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 					in_log = out_log = None
 				if not in_log:
 					in_log = log if log.log_type == "IN" else None
+					if in_log and not in_time:
+						in_time = in_log.time
 				elif not out_log:
 					out_log = log if log.log_type == "OUT" else None
+
 			if in_log and out_log:
 				out_time = out_log.time
 				total_hours += time_diff_in_hours(in_log.time, out_log.time)
+
 	return total_hours, in_time, out_time
 
 
 def time_diff_in_hours(start, end):
-	return round((end - start).total_seconds() / 3600, 1)
+	return round(float((end - start).total_seconds()) / 3600, 2)
 
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)
+
+
+def add_comment_in_checkins(log_names, duplicate, overlapping):
+	if duplicate:
+		text = _("Auto Attendance skipped due to duplicate attendance record: {}").format(
+			get_link_to_form("Attendance", duplicate[0].name)
+		)
+	else:
+		text = _("Auto Attendance skipped due to overlapping attendance record: {}").format(
+			get_link_to_form("Attendance", overlapping.name)
+		)
+
+	for name in log_names:
+		frappe.get_doc(
+			{
+				"doctype": "Comment",
+				"comment_type": "Comment",
+				"reference_doctype": "Employee Checkin",
+				"reference_name": name,
+				"content": text,
+			}
+		).insert(ignore_permissions=True)
+
+
+def skip_attendance_in_checkins(log_names):
+	EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
+	(
+		frappe.qb.update(EmployeeCheckin)
+		.set("skip_auto_attendance", 1)
+		.where(EmployeeCheckin.name.isin(log_names))
+	).run()

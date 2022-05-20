@@ -77,7 +77,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		}
 
 		if (!frm.doc.is_return && frm.doc.docstatus == 1 && frm.doc.per_returned < 100) {
-			frm.add_custom_button('Subcontract Return', function () {
+			frm.add_custom_button(__('Subcontract Return'), function () {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return',
 					frm: frm
@@ -107,7 +107,7 @@ frappe.ui.form.on('Subcontracting Receipt', {
 						per_received: ["<", 100],
 						company: frm.doc.company
 					}
-				})
+				});
 			}, __("Get Items From"));
 		}
 	},
@@ -144,7 +144,7 @@ frappe.ui.form.on('Subcontracting Receipt Supplied Item', {
 let set_warehouse_in_children = (child_table, warehouse_field, warehouse) => {
 	let transaction_controller = new erpnext.TransactionController();
 	transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
-}
+};
 
 let set_missing_values = (frm) => {
 	frappe.call({

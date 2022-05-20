@@ -33,7 +33,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		var me = this;
 		super.onload();
 
-		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log', 'POS Closing Entry'];
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log',
+			'POS Closing Entry', 'Journal Entry', 'Payment Entry'];
+
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
@@ -822,29 +824,6 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
-	// Healthcare
-	patient: function(frm) {
-		if (frappe.boot.active_domains.includes("Healthcare")){
-			if(frm.doc.patient){
-				frappe.call({
-					method: "frappe.client.get_value",
-					args:{
-						doctype: "Patient",
-						filters: {
-							"name": frm.doc.patient
-						},
-						fieldname: "customer"
-					},
-					callback:function(r) {
-						if(r && r.message.customer){
-							frm.set_value("customer", r.message.customer);
-						}
-					}
-				});
-			}
-		}
-	},
-
 	project: function(frm) {
 		if (frm.doc.project) {
 			frm.events.add_timesheet_data(frm, {
@@ -973,25 +952,6 @@ frappe.ui.form.on('Sales Invoice', {
 
 		if (frm.doc.is_debit_note) {
 			frm.set_df_property('return_against', 'label', __('Adjustment Against'));
-		}
-
-		if (frappe.boot.active_domains.includes("Healthcare")) {
-			frm.set_df_property("patient", "hidden", 0);
-			frm.set_df_property("patient_name", "hidden", 0);
-			frm.set_df_property("ref_practitioner", "hidden", 0);
-			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
-				frm.add_custom_button(__('Healthcare Services'), function() {
-					get_healthcare_services_to_invoice(frm);
-				},__("Get Items From"));
-				frm.add_custom_button(__('Prescriptions'), function() {
-					get_drugs_to_invoice(frm);
-				},__("Get Items From"));
-			}
-		}
-		else {
-			frm.set_df_property("patient", "hidden", 1);
-			frm.set_df_property("patient_name", "hidden", 1);
-			frm.set_df_property("ref_practitioner", "hidden", 1);
 		}
 	},
 

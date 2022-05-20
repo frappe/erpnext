@@ -264,6 +264,7 @@ class LoanRepayment(AccountsController):
 			regenerate_repayment_schedule(self.against_loan, cancel)
 
 	def allocate_amounts(self, repayment_details):
+		precision = cint(frappe.db.get_default("currency_precision")) or 2
 		self.set("repayment_details", [])
 		self.principal_amount_paid = 0
 		self.total_penalty_paid = 0
@@ -278,9 +279,9 @@ class LoanRepayment(AccountsController):
 
 		if interest_paid > 0:
 			if self.penalty_amount and interest_paid > self.penalty_amount:
-				self.total_penalty_paid = self.penalty_amount
+				self.total_penalty_paid = flt(self.penalty_amount, precision)
 			elif self.penalty_amount:
-				self.total_penalty_paid = interest_paid
+				self.total_penalty_paid = flt(interest_paid, precision)
 
 			interest_paid -= self.total_penalty_paid
 
@@ -387,13 +388,13 @@ class LoanRepayment(AccountsController):
 		gle_map = []
 
 		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}.\nRepayment against Loan: {1}").format(
+			remarks = _("Shortfall Repayment of {0}.<br>Repayment against Loan: {1}").format(
 				self.shortfall_amount, self.against_loan
 			)
 		elif self.shortfall_amount:
 			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
 		else:
-			remarks = _("Repayment against Loan: ") + self.against_loan
+			remarks = _("Repayment against Loan:") + " " + self.against_loan
 
 		if self.repay_from_salary:
 			payment_account = self.payroll_payable_account
@@ -584,9 +585,10 @@ def regenerate_repayment_schedule(loan, cancel=0):
 			balance_amount / len(loan_doc.get("repayment_schedule")) - accrued_entries
 		)
 	else:
-		if not cancel:
+		repayment_period = loan_doc.repayment_periods - accrued_entries
+		if not cancel and repayment_period > 0:
 			monthly_repayment_amount = get_monthly_repayment_amount(
-				balance_amount, loan_doc.rate_of_interest, loan_doc.repayment_periods - accrued_entries
+				balance_amount, loan_doc.rate_of_interest, repayment_period
 			)
 		else:
 			monthly_repayment_amount = last_repayment_amount
@@ -745,6 +747,8 @@ def calculate_amounts(against_loan, posting_date, payment_type=""):
 	if payment_type == "Loan Closure":
 		amounts["payable_principal_amount"] = amounts["pending_principal_amount"]
 		amounts["interest_amount"] += amounts["unaccrued_interest"]
-		amounts["payable_amount"] = amounts["payable_principal_amount"] + amounts["interest_amount"]
+		amounts["payable_amount"] = (
+			amounts["payable_principal_amount"] + amounts["interest_amount"] + amounts["penalty_amount"]
+		)
 
 	return amounts

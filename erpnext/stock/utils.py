@@ -3,9 +3,11 @@
 
 
 import json
+from typing import Dict, Optional
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
@@ -142,12 +144,10 @@ def get_stock_balance(
 
 
 def get_serial_nos_data_after_transactions(args):
-	from pypika import CustomFunction
 
 	serial_nos = set()
 	args = frappe._dict(args)
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	Timestamp = CustomFunction("timestamp", ["date", "time"])
 
 	stock_ledger_entries = (
 		frappe.qb.from_(sle)
@@ -156,7 +156,8 @@ def get_serial_nos_data_after_transactions(args):
 			(sle.item_code == args.item_code)
 			& (sle.warehouse == args.warehouse)
 			& (
-				Timestamp(sle.posting_date, sle.posting_time) < Timestamp(args.posting_date, args.posting_time)
+				CombineDatetime(sle.posting_date, sle.posting_time)
+				< CombineDatetime(args.posting_date, args.posting_time)
 			)
 			& (sle.is_cancelled == 0)
 		)
@@ -548,3 +549,51 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 		)
 
 	return bool(reposting_pending)
+
+
+@frappe.whitelist()
+def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
+
+	# search barcode no
+	barcode_data = frappe.db.get_value(
+		"Item Barcode",
+		{"barcode": search_value},
+		["barcode", "parent as item_code"],
+		as_dict=True,
+	)
+	if barcode_data:
+		return _update_item_info(barcode_data)
+
+	# search serial no
+	serial_no_data = frappe.db.get_value(
+		"Serial No",
+		search_value,
+		["name as serial_no", "item_code", "batch_no"],
+		as_dict=True,
+	)
+	if serial_no_data:
+		return _update_item_info(serial_no_data)
+
+	# search batch no
+	batch_no_data = frappe.db.get_value(
+		"Batch",
+		search_value,
+		["name as batch_no", "item as item_code"],
+		as_dict=True,
+	)
+	if batch_no_data:
+		return _update_item_info(batch_no_data)
+
+	return {}
+
+
+def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
+	if item_code := scan_result.get("item_code"):
+		if item_info := frappe.get_cached_value(
+			"Item",
+			item_code,
+			["has_batch_no", "has_serial_no"],
+			as_dict=True,
+		):
+			scan_result.update(item_info)
+	return scan_result

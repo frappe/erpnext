@@ -30,6 +30,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	onload() {
 		super.onload();
 
+		// Ignore linked advances
+		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry'];
+
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
 			if(!this.frm.doc.supplier && this.frm.doc.credit_to) {
@@ -568,6 +571,10 @@ frappe.ui.form.on("Purchase Invoice", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+	},
+
+	is_subcontracted: function(frm) {
+		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
 	},
 
 	update_stock: function(frm) {

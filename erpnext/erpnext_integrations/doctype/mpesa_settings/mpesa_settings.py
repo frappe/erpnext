@@ -152,7 +152,7 @@ def generate_stk_push(**kwargs):
 		return response
 
 	except Exception:
-		frappe.log_error(title=_("Mpesa Express Transaction Error"))
+		frappe.log_error("Mpesa Express Transaction Error")
 		frappe.throw(
 			_("Issue detected with Mpesa configuration, check the error logs for more details"),
 			title=_("Mpesa Express Error"),
@@ -203,7 +203,7 @@ def verify_transaction(**kwargs):
 				integration_request.handle_success(transaction_response)
 			except Exception:
 				integration_request.handle_failure(transaction_response)
-				frappe.log_error(frappe.get_traceback())
+				frappe.log_error("Mpesa: Failed to verify transaction")
 
 	else:
 		integration_request.handle_failure(transaction_response)
@@ -275,7 +275,7 @@ def get_account_balance(request_payload):
 		)
 		return response
 	except Exception:
-		frappe.log_error(title=_("Account Balance Processing Error"))
+		frappe.log_error("Mpesa: Failed to get account balance")
 		frappe.throw(_("Please check your configuration and try again"), title=_("Error"))
 
 
@@ -315,7 +315,7 @@ def process_balance_info(**kwargs):
 		except Exception:
 			request.handle_failure(account_balance_response)
 			frappe.log_error(
-				title=_("Mpesa Account Balance Processing Error"), message=account_balance_response
+				title="Mpesa Account Balance Processing Error", message=account_balance_response
 			)
 	else:
 		request.handle_failure(account_balance_response)

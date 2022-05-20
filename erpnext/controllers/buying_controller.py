@@ -252,9 +252,7 @@ class BuyingController(StockController):
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				item.valuation_rate = (
-					item.base_net_amount
-					+ item.item_tax_amount
-					+ flt(item.landed_cost_voucher_amount)
+					item.base_net_amount + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
 				) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0
@@ -300,14 +298,15 @@ class BuyingController(StockController):
 				if self.is_internal_transfer():
 					if rate != d.rate:
 						d.rate = rate
-						d.discount_percentage = 0
-						d.discount_amount = 0
 						frappe.msgprint(
 							_(
 								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
 							).format(d.idx),
 							alert=1,
 						)
+					d.discount_percentage = 0.0
+					d.discount_amount = 0.0
+					d.margin_rate_or_amount = 0.0
 
 	def validate_for_subcontracting(self):
 		if self.is_subcontracted:
@@ -398,7 +397,10 @@ class BuyingController(StockController):
 		stock_items = self.get_stock_items()
 
 		for d in self.get("items"):
-			if d.item_code in stock_items and d.warehouse:
+			if d.item_code not in stock_items:
+				continue
+
+			if d.warehouse:
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
@@ -423,6 +425,7 @@ class BuyingController(StockController):
 					sle = self.get_sl_entries(
 						d, {"actual_qty": flt(pr_qty), "serial_no": cstr(d.serial_no).strip()}
 					)
+
 					if self.is_return:
 						outgoing_rate = get_rate_for_return(
 							self.doctype, self.name, d.item_code, self.return_against, item_row=d
@@ -452,18 +455,18 @@ class BuyingController(StockController):
 
 						sl_entries.append(from_warehouse_sle)
 
-				if flt(d.rejected_qty) != 0:
-					sl_entries.append(
-						self.get_sl_entries(
-							d,
-							{
-								"warehouse": d.rejected_warehouse,
-								"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
-								"serial_no": cstr(d.rejected_serial_no).strip(),
-								"incoming_rate": 0.0,
-							},
-						)
+			if flt(d.rejected_qty) != 0:
+				sl_entries.append(
+					self.get_sl_entries(
+						d,
+						{
+							"warehouse": d.rejected_warehouse,
+							"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
+							"serial_no": cstr(d.rejected_serial_no).strip(),
+							"incoming_rate": 0.0,
+						},
 					)
+				)
 
 		self.make_sl_entries(
 			sl_entries,

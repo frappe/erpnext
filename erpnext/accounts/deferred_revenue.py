@@ -386,7 +386,6 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 				doc,
 				credit_account,
 				debit_account,
-				against,
 				amount,
 				base_amount,
 				end_date,
@@ -540,19 +539,11 @@ def make_gl_entries(
 			frappe.db.commit()
 		except Exception as e:
 			if frappe.flags.in_test:
-				traceback = frappe.get_traceback()
-				frappe.log_error(
-					title=_("Error while processing deferred accounting for Invoice {0}").format(doc.name),
-					message=traceback,
-				)
+				doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
 				raise e
 			else:
 				frappe.db.rollback()
-				traceback = frappe.get_traceback()
-				frappe.log_error(
-					title=_("Error while processing deferred accounting for Invoice {0}").format(doc.name),
-					message=traceback,
-				)
+				doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
 				frappe.flags.deferred_accounting_error = True
 
 
@@ -570,7 +561,6 @@ def book_revenue_via_journal_entry(
 	doc,
 	credit_account,
 	debit_account,
-	against,
 	amount,
 	base_amount,
 	posting_date,
@@ -591,6 +581,7 @@ def book_revenue_via_journal_entry(
 	journal_entry.voucher_type = (
 		"Deferred Revenue" if doc.doctype == "Sales Invoice" else "Deferred Expense"
 	)
+	journal_entry.process_deferred_accounting = deferred_process
 
 	debit_entry = {
 		"account": credit_account,
@@ -633,12 +624,7 @@ def book_revenue_via_journal_entry(
 		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
-		traceback = frappe.get_traceback()
-		frappe.log_error(
-			title=_("Error while processing deferred accounting for Invoice {0}").format(doc.name),
-			message=traceback,
-		)
-
+		doc.log_error(f"Error while processing deferred accounting for Invoice {doc.name}")
 		frappe.flags.deferred_accounting_error = True
 
 

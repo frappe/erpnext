@@ -112,8 +112,6 @@ frappe.ui.form.on('Payment Entry', {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
 			} else if (frm.doc.party_type == "Employee") {
 				var doctypes = ["Expense Claim", "Journal Entry"];
-			} else if (frm.doc.party_type == "Student") {
-				var doctypes = ["Fees"];
 			} else {
 				var doctypes = ["Journal Entry"];
 			}
@@ -224,10 +222,7 @@ frappe.ui.form.on('Payment Entry', {
 			(frm.doc.total_allocated_amount > party_amount)));
 
 		frm.toggle_display("set_exchange_gain_loss",
-			(frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount &&
-				((frm.doc.paid_from_account_currency != company_currency ||
-					frm.doc.paid_to_account_currency != company_currency) &&
-					frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)));
+			frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount);
 
 		frm.refresh_fields();
 	},
@@ -758,8 +753,7 @@ frappe.ui.form.on('Payment Entry', {
 					if(
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier")  ||
-						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
-						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
+						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
 							if (!frm.doc.paid_amount)
@@ -801,8 +795,7 @@ frappe.ui.form.on('Payment Entry', {
 		if (
 				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
-				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
+				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")
 			) {
 				if(total_positive_outstanding_including_order > paid_amount) {
 					var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;

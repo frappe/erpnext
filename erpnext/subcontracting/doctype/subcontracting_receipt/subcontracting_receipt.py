@@ -25,7 +25,7 @@ class SubcontractingReceipt(SubcontractingController):
 				"overflow_type": "receipt",
 			},
 		]
-	
+
 	def update_status_updater_args(self):
 		if cint(self.is_return):
 			self.status_updater.extend(
@@ -117,7 +117,7 @@ class SubcontractingReceipt(SubcontractingController):
 				rm_supp_cost[item.reference_name] += item.amount
 			else:
 				rm_supp_cost[item.reference_name] = item.amount
-		
+
 		total_qty = total_amount = 0
 		for item in self.items:
 			if item.name in rm_supp_cost:
@@ -126,8 +126,10 @@ class SubcontractingReceipt(SubcontractingController):
 				rm_supp_cost.pop(item.name)
 
 			if self.is_new() and item.rm_supp_cost > 0:
-				item.rate = item.rm_cost_per_qty + (item.service_cost_per_qty or 0) + item.additional_cost_per_qty
-			
+				item.rate = (
+					item.rm_cost_per_qty + (item.service_cost_per_qty or 0) + item.additional_cost_per_qty
+				)
+
 			item.received_qty = item.qty + (item.rejected_qty or 0)
 			item.amount = item.qty * item.rate
 			total_qty += item.qty

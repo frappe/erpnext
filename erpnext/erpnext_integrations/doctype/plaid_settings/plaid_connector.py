@@ -23,7 +23,7 @@ class PlaidConnector:
 
 	def get_access_token(self, public_token):
 		if public_token is None:
-			frappe.log_error(_("Public token is missing for this bank"), _("Plaid public token error"))
+			frappe.log_error("Plaid: Public token is missing")
 		response = self.client.Item.public_token.exchange(public_token)
 		access_token = response["access_token"]
 		return access_token
@@ -61,10 +61,10 @@ class PlaidConnector:
 		try:
 			response = self.client.LinkToken.create(token_request)
 		except InvalidRequestError:
-			frappe.log_error(frappe.get_traceback(), _("Plaid invalid request error"))
+			frappe.log_error("Plaid: Invalid request error")
 			frappe.msgprint(_("Please check your Plaid client ID and secret values"))
 		except APIError as e:
-			frappe.log_error(frappe.get_traceback(), _("Plaid authentication error"))
+			frappe.log_error("Plaid: Authentication error")
 			frappe.throw(_(str(e)), title=_("Authentication Failed"))
 		else:
 			return response["link_token"]
@@ -81,7 +81,7 @@ class PlaidConnector:
 		except requests.Timeout:
 			pass
 		except Exception as e:
-			frappe.log_error(frappe.get_traceback(), _("Plaid authentication error"))
+			frappe.log_error("Plaid: Authentication error")
 			frappe.throw(_(str(e)), title=_("Authentication Failed"))
 
 	def get_transactions(self, start_date, end_date, account_id=None):
@@ -102,4 +102,4 @@ class PlaidConnector:
 		except ItemError as e:
 			raise e
 		except Exception:
-			frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))
+			frappe.log_error("Plaid: Transactions sync error")

@@ -167,6 +167,9 @@ def update_stock(args, out):
 			reserved_so = get_so_reservation_for_item(args)
 			out.serial_no = get_serial_no(out, args.serial_no, sales_order=reserved_so)
 
+	if not out.serial_no:
+		out.pop("serial_no", None)
+
 
 def set_valuation_rate(out, args):
 	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
@@ -342,6 +345,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"expense_account": expense_account
 			or get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults),
 			"discount_account": get_default_discount_account(args, item_defaults),
+			"provisional_expense_account": get_provisional_account(args, item_defaults),
 			"cost_center": get_default_cost_center(
 				args, item_defaults, item_group_defaults, brand_defaults
 			),
@@ -694,6 +698,10 @@ def get_default_expense_account(args, item, item_group, brand):
 		or brand.get("expense_account")
 		or args.expense_account
 	)
+
+
+def get_provisional_account(args, item):
+	return item.get("default_provisional_account") or args.default_provisional_account
 
 
 def get_default_discount_account(args, item):

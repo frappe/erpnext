@@ -8,6 +8,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
@@ -21,9 +22,10 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import make_subcontracting_receipt
+from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	make_subcontracting_receipt,
+)
 
 
 class TestSubcontractingReceipt(FrappeTestCase):
@@ -107,7 +109,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 		scr.submit()
-		
+
 		gl_entries = get_gl_entries("Subcontracting Receipt", scr.name)
 		self.assertFalse(gl_entries)
 
@@ -311,6 +313,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr1.submit()
 
 		from erpnext.controllers.status_updater import OverAllowanceError
+
 		args = frappe._dict(scr_name=scr1.name, qty=-15)
 		self.assertRaises(OverAllowanceError, make_return_subcontracting_receipt, **args)
 
@@ -318,19 +321,22 @@ class TestSubcontractingReceipt(FrappeTestCase):
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
 	return_doc = make_return_doc("Subcontracting Receipt", args.scr_name)
-	return_doc.supplier_warehouse = args.supplier_warehouse or args.warehouse or "_Test Warehouse 1 - _TC"
-	
+	return_doc.supplier_warehouse = (
+		args.supplier_warehouse or args.warehouse or "_Test Warehouse 1 - _TC"
+	)
+
 	if args.qty:
 		for item in return_doc.items:
 			item.qty = args.qty
-	
+
 	if not args.do_not_save:
 		return_doc.save()
 		if not args.do_not_submit:
 			return_doc.submit()
-	
+
 	return_doc.load_from_db()
 	return return_doc
+
 
 def get_items(**args):
 	args = frappe._dict(args)

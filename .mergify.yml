@@ -88,3 +88,37 @@ pull_request_rules:
           - version-12-pre-release
         assignees:
           - "{{ author }}"
+
+  - name: Automatic merge on CI success and review
+    conditions:
+      - status-success=linters
+      - status-success=Sider
+      - status-success=Semantic Pull Request
+      - status-success=Patch Test
+      - status-success=Python Unit Tests (1)
+      - status-success=Python Unit Tests (2)
+      - status-success=Python Unit Tests (3)
+      - label!=dont-merge
+      - label!=squash
+      - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: merge
+  - name: Automatic squash on CI success and review
+    conditions:
+      - status-success=linters
+      - status-success=Sider
+      - status-success=Patch Test
+      - status-success=Python Unit Tests (1)
+      - status-success=Python Unit Tests (2)
+      - status-success=Python Unit Tests (3)
+      - label!=dont-merge
+      - label=squash
+      - "#approved-reviews-by>=1"
+    actions:
+      merge:
+        method: squash
+        commit_message_template: |
+            {{ title }} (#{{ number }})
+
+            {{ body }}

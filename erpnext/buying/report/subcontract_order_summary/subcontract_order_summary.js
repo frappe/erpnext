@@ -35,7 +35,6 @@ frappe.query_reports["Subcontract Order Summary"] = {
 				return {
 					filters: {
 						docstatus: 1,
-
 						company: frappe.query_report.get_filter_value('company')
 					}
 				}

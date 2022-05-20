@@ -213,7 +213,8 @@ def make_all_scorecards(docname):
 		end_date = get_scorecard_date(sc.period, start_date)
 	if scp_count > 0:
 		frappe.msgprint(
-			_("Created {0} scorecards for {1} between: ").format(scp_count, sc.supplier)
+			_("Created {0} scorecards for {1} between:").format(scp_count, sc.supplier)
+			+ " "
 			+ str(first_start_date)
 			+ " - "
 			+ str(last_end_date)

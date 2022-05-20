@@ -3,14 +3,13 @@
 
 import copy
 import json
-from typing import Optional
+from typing import Optional, Set, Tuple
 
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
-from pypika import CustomFunction
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -178,9 +177,9 @@ def validate_cancellation(args):
 				)
 			if repost_entry.status == "Queued":
 				doc = frappe.get_doc("Repost Item Valuation", repost_entry.name)
+				doc.status = "Skipped"
 				doc.flags.ignore_permissions = True
 				doc.cancel()
-				doc.delete()
 
 
 def set_as_cancel(voucher_type, voucher_no):
@@ -214,6 +213,7 @@ def repost_future_sle(
 		args = get_items_to_be_repost(voucher_type, voucher_no, doc)
 
 	distinct_item_warehouses = get_distinct_item_warehouse(args, doc)
+	affected_transactions = get_affected_transactions(doc)
 
 	i = get_current_index(doc) or 0
 	while i < len(args):
@@ -231,6 +231,7 @@ def repost_future_sle(
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
+		affected_transactions.update(obj.affected_transactions)
 
 		distinct_item_warehouses[
 			(args[i].get("item_code"), args[i].get("warehouse"))
@@ -250,10 +251,14 @@ def repost_future_sle(
 		i += 1
 
 		if doc and i % 2 == 0:
-			update_args_in_repost_item_valuation(doc, i, args, distinct_item_warehouses)
+			update_args_in_repost_item_valuation(
+				doc, i, args, distinct_item_warehouses, affected_transactions
+			)
 
 	if doc and args:
-		update_args_in_repost_item_valuation(doc, i, args, distinct_item_warehouses)
+		update_args_in_repost_item_valuation(
+			doc, i, args, distinct_item_warehouses, affected_transactions
+		)
 
 
 def validate_item_warehouse(args):
@@ -263,20 +268,22 @@ def validate_item_warehouse(args):
 			frappe.throw(_(validation_msg))
 
 
-def update_args_in_repost_item_valuation(doc, index, args, distinct_item_warehouses):
-	frappe.db.set_value(
-		doc.doctype,
-		doc.name,
+def update_args_in_repost_item_valuation(
+	doc, index, args, distinct_item_warehouses, affected_transactions
+):
+	doc.db_set(
 		{
 			"items_to_be_repost": json.dumps(args, default=str),
 			"distinct_item_and_warehouse": json.dumps(
 				{str(k): v for k, v in distinct_item_warehouses.items()}, default=str
 			),
 			"current_index": index,
-		},
+			"affected_transactions": frappe.as_json(affected_transactions),
+		}
 	)
 
-	frappe.db.commit()
+	if not frappe.flags.in_test:
+		frappe.db.commit()
 
 	frappe.publish_realtime(
 		"item_reposting_progress",
@@ -311,6 +318,14 @@ def get_distinct_item_warehouse(args=None, doc=None):
 			)
 
 	return distinct_item_warehouses
+
+
+def get_affected_transactions(doc) -> Set[Tuple[str, str]]:
+	if not doc.affected_transactions:
+		return set()
+
+	transactions = frappe.parse_json(doc.affected_transactions)
+	return {tuple(transaction) for transaction in transactions}
 
 
 def get_current_index(doc=None):
@@ -360,6 +375,7 @@ class update_entries_after(object):
 
 		self.new_items_found = False
 		self.distinct_item_warehouses = args.get("distinct_item_warehouses", frappe._dict())
+		self.affected_transactions: Set[Tuple[str, str]] = set()
 
 		self.data = frappe._dict()
 		self.initialize_previous_data(self.args)
@@ -518,6 +534,7 @@ class update_entries_after(object):
 
 		# previous sle data for this warehouse
 		self.wh_data = self.data[sle.warehouse]
+		self.affected_transactions.add((sle.voucher_type, sle.voucher_no))
 
 		if (sle.serial_no and not self.via_landed_cost_voucher) or not cint(self.allow_negative_stock):
 			# validate negative stock for serialized items, fifo valuation
@@ -1148,16 +1165,15 @@ def get_batch_incoming_rate(
 	item_code, warehouse, batch_no, posting_date, posting_time, creation=None
 ):
 
-	Timestamp = CustomFunction("timestamp", ["date", "time"])
-
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	timestamp_condition = Timestamp(sle.posting_date, sle.posting_time) < Timestamp(
+	timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
 		posting_date, posting_time
 	)
 	if creation:
 		timestamp_condition |= (
-			Timestamp(sle.posting_date, sle.posting_time) == Timestamp(posting_date, posting_time)
+			CombineDatetime(sle.posting_date, sle.posting_time)
+			== CombineDatetime(posting_date, posting_time)
 		) & (sle.creation < creation)
 
 	batch_details = (
@@ -1295,6 +1311,8 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	datetime_limit_condition = ""
 	qty_shift = args.actual_qty
 
+	args["time_format"] = "%H:%i:%s"
+
 	# find difference/shift in qty caused by stock reconciliation
 	if args.voucher_type == "Stock Reconciliation":
 		qty_shift = get_stock_reco_qty_shift(args)
@@ -1307,7 +1325,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
 	frappe.db.sql(
-		"""
+		f"""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty_shift}
 		where
@@ -1315,16 +1333,10 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
-			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
-				or (
-					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
-					and creation > %(creation)s
-				)
-			)
+			and timestamp(posting_date, time_format(posting_time, %(time_format)s))
+				> timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
 		{datetime_limit_condition}
-		""".format(
-			qty_shift=qty_shift, datetime_limit_condition=datetime_limit_condition
-		),
+		""",
 		args,
 	)
 
@@ -1375,6 +1387,7 @@ def get_next_stock_reco(args):
 					and creation > %(creation)s
 				)
 			)
+		order by timestamp(posting_date, posting_time) asc, creation asc
 		limit 1
 	""",
 		args,

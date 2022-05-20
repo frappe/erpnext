@@ -403,17 +403,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var sms_man = new erpnext.SMSManager(this.frm.doc);
 	}
 
-	barcode(doc, cdt, cdn) {
-		const d = locals[cdt][cdn];
-		if (!d.barcode) {
-			// barcode cleared, remove item
-			d.item_code = "";
-		}
-		// flag required for circular triggers
-		d._triggerd_from_barcode = true;
-		this.item_code(doc, cdt, cdn);
-	}
-
 	item_code(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
@@ -431,9 +420,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
-		if (!item._triggerd_from_barcode) {
-			item.barcode = null;
-		}
+		item.barcode = null;
 
 
 		if(item.item_code || item.barcode || item.serial_no) {
@@ -538,6 +525,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 										$.each(r.message, function(k, v) {
 											if(!d[k]) d[k] = v;
 										});
+
+										if (d.__disable_batch_serial_selector) {
+											// reset for future use.
+											d.__disable_batch_serial_selector = false;
+											return;
+										}
 
 										if (d.has_batch_no && d.has_serial_no) {
 											d.batch_no = undefined;
@@ -930,12 +923,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	currency() {
-		/* manqala 19/09/2016: let the translation date be whichever of the transaction_date or posting_date is available */
-		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
-		/* end manqala */
-		var me = this;
+		// The transaction date be either transaction_date (from orders) or posting_date (from invoices)
+		let transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
+
+		let me = this;
 		this.set_dynamic_labels();
-		var company_currency = this.get_company_currency();
+		let company_currency = this.get_company_currency();
 		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
 				&& !(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
@@ -949,7 +942,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					}
 				});
 		} else {
-			this.conversion_rate();
+			// company currency and doc currency is same
+			// this will prevent unnecessary conversion rate triggers
+			this.frm.set_value("conversion_rate", 1.0);
 		}
 	}
 
@@ -981,6 +976,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
+				callback: function(r) {
+					me._calculate_taxes_and_totals();
+				}
 			}).fail(() => this.frm.set_value('shipping_rule', ''));
 		}
 	}
@@ -1388,7 +1386,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var args = this._get_args(item);
 		if (!(args.items && args.items.length)) {
-			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+			if (calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+			return;
+		}
+
+		// Target doc created from a mapped doc
+		if (this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
+			// Calculate totals even though pricing rule is not applied.
+			// `apply_pricing_rule` is triggered due to change in data which most likely contributes to Total.
+			if (calculate_taxes_and_totals) me.calculate_taxes_and_totals();
 			return;
 		}
 
@@ -1508,7 +1514,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
 			}
 
-			if (d.free_item_data) {
+			if (d.free_item_data.length > 0) {
 				me.apply_product_discount(d);
 			}
 
