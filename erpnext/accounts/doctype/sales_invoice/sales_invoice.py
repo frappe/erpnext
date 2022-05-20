@@ -206,7 +206,9 @@ class SalesInvoice(SellingController):
 		self.validate_auto_set_posting_time()
 		self.discount_product()
 		self.calculate_insurance()
-
+		if self.round_off_discount == 1 and self.update_stock == 0:
+			frappe.throw(_("When selecting a discount reason, check the field to update inventory."))
+			
 		if self.docstatus == 0:
 			self.caculate_items_amount()
 			# self.set_cost_center()
@@ -286,7 +288,7 @@ class SalesInvoice(SellingController):
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
-
+		# if self.round_off_discount == 1
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
 	
@@ -487,7 +489,12 @@ class SalesInvoice(SellingController):
 			outstanding_amount = 0
 			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 		else:
-			self.outstanding_amount = self.grand_total - self.total_advance
+			if self.round_off_discount:
+				if self.grand_total != self.outstanding_amount:
+					outstanding_amount = self.grand_total
+					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+			else:
+				self.outstanding_amount = self.grand_total - self.total_advance
 		
 		self.rounded_total = self.grand_total
 
@@ -576,6 +583,9 @@ class SalesInvoice(SellingController):
 		now = datetime.now()
 
 		date = now.date()
+
+		if current_value == None:
+			current_value = 0
 
 		number_final = current_value + 1
 
