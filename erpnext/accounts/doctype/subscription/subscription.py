@@ -133,9 +133,7 @@ class Subscription(Document):
 		same billing interval
 		"""
 		if billing_cycle_data and len(billing_cycle_data) != 1:
-			frappe.throw(
-				_("You can only have Plans with the same billing cycle in a Subscription")
-			)
+			frappe.throw(_("You can only have Plans with the same billing cycle in a Subscription"))
 
 	def get_billing_cycle_and_interval(self) -> List[Dict[str, str]]:
 		"""
@@ -220,9 +218,7 @@ class Subscription(Document):
 		return getdate(frappe.flags.current_date) > getdate(end_date)
 
 	def get_status_for_past_grace_period(self) -> str:
-		cancel_after_grace = cint(
-			frappe.get_value("Subscription Settings", None, "cancel_after_grace")
-		)
+		cancel_after_grace = cint(frappe.get_value("Subscription Settings", None, "cancel_after_grace"))
 		status = "Unpaid"
 
 		if cancel_after_grace:
@@ -259,9 +255,7 @@ class Subscription(Document):
 		"""
 		Returns `True` if `Subscription` has never generated an invoice
 		"""
-		return not frappe.db.exists(
-			{"doctype": self.invoice_document_type, "subscription": self.name}
-		)
+		return not frappe.db.exists({"doctype": self.invoice_document_type, "subscription": self.name})
 
 	def validate(self) -> None:
 		self.validate_trial_period()
@@ -290,9 +284,7 @@ class Subscription(Document):
 
 		if self.end_date and getdate(self.end_date) <= getdate(end_date):
 			frappe.throw(
-				_("Subscription End Date must be after {0} as per the subscription plan").format(
-					end_date
-				)
+				_("Subscription End Date must be after {0} as per the subscription plan").format(end_date)
 			)
 
 	def validate_to_follow_calendar_months(self) -> None:
@@ -515,9 +507,7 @@ class Subscription(Document):
 		2. `process_for_past_due`
 		"""
 		if (
-			not self.is_current_invoice_generated(
-				self.current_invoice_start, self.current_invoice_end
-			)
+			not self.is_current_invoice_generated(self.current_invoice_start, self.current_invoice_end)
 			and self.can_generate_new_invoice()
 		):
 			self.generate_invoice()
@@ -634,9 +624,7 @@ class Subscription(Document):
 			frappe.throw(_("subscription is already cancelled."), InvoiceCancelled)
 
 		to_generate_invoice = (
-			True
-			if self.status == "Active" and not self.generate_invoice_at_period_start
-			else False
+			True if self.status == "Active" and not self.generate_invoice_at_period_start else False
 		)
 		self.status = "Cancelled"
 		self.cancelation_date = nowdate()
@@ -654,9 +642,7 @@ class Subscription(Document):
 		it has.
 		"""
 		if not self.status == "Cancelled":
-			frappe.throw(
-				_("You cannot restart a Subscription that is not cancelled."), InvoiceNotCancelled
-			)
+			frappe.throw(_("You cannot restart a Subscription that is not cancelled."), InvoiceNotCancelled)
 
 		self.status = "Active"
 		self.cancelation_date = None
@@ -685,9 +671,7 @@ def process_all() -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
 	"""
-	for subscription in frappe.get_all(
-		"Subscription", {"status": ("!=", "Cancelled")}, pluck="name"
-	):
+	for subscription in frappe.get_all("Subscription", {"status": ("!=", "Cancelled")}, pluck="name"):
 		try:
 			subscription = frappe.get_doc("Subscription", subscription)
 			subscription.process()
