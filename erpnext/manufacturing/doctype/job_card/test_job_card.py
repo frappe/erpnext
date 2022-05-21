@@ -17,34 +17,36 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 class TestJobCard(FrappeTestCase):
 	def setUp(self):
 		make_bom_for_jc_tests()
+		self.transfer_material_against = "Work Order"
+		self.source_warehouse = None
+		self._work_order = None
 
-		transfer_material_against, source_warehouse = None, None
+	@property
+	def work_order(self):
+		"""Work Order lazily created for tests."""
+		if not self._work_order:
+			self._work_order = make_wo_order_test_record(
+				item="_Test FG Item 2",
+				qty=2,
+				transfer_material_against=self.transfer_material_against,
+				source_warehouse=self.source_warehouse,
+			)
+		return self._work_order
 
-		tests_that_skip_setup = ("test_job_card_material_transfer_correctness",)
-		tests_that_transfer_against_jc = (
-			"test_job_card_multiple_materials_transfer",
-			"test_job_card_excess_material_transfer",
-			"test_job_card_partial_material_transfer",
-		)
-
-		if self._testMethodName in tests_that_skip_setup:
-			return
-
-		if self._testMethodName in tests_that_transfer_against_jc:
-			transfer_material_against = "Job Card"
-			source_warehouse = "Stores - _TC"
-
-		self.work_order = make_wo_order_test_record(
-			item="_Test FG Item 2",
-			qty=2,
-			transfer_material_against=transfer_material_against,
-			source_warehouse=source_warehouse,
-		)
+	def generate_required_stock(self, work_order: WorkOrder) -> None:
+		"""Create twice the stock for all required items in work order."""
+		for item in work_order.required_items:
+			make_stock_entry(
+				item_code=item.item_code,
+				target=item.source_warehouse or self.source_warehouse,
+				qty=item.required_qty * 2,
+				basic_rate=100,
+			)
 
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def test_job_card(self):
+	def test_job_card_operations(self):
 
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": self.work_order.name}, fields=["operation_id", "name"]
@@ -57,9 +59,6 @@ class TestJobCard(FrappeTestCase):
 			doc = frappe.get_doc("Job Card", job_card.name)
 			doc.operation_id = "Test Data"
 			self.assertRaises(OperationMismatchError, doc.save)
-
-		for d in job_cards:
-			frappe.delete_doc("Job Card", d.name)
 
 	def test_job_card_with_different_work_station(self):
 		job_cards = frappe.get_all(
@@ -96,19 +95,11 @@ class TestJobCard(FrappeTestCase):
 			)
 			self.assertEqual(completed_qty, job_card.for_quantity)
 
-			doc.cancel()
-
-			for d in job_cards:
-				frappe.delete_doc("Job Card", d.name)
-
 	def test_job_card_overlap(self):
 		wo2 = make_wo_order_test_record(item="_Test FG Item 2", qty=2)
 
-		jc1_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
-		jc2_name = frappe.db.get_value("Job Card", {"work_order": wo2.name})
-
-		jc1 = frappe.get_doc("Job Card", jc1_name)
-		jc2 = frappe.get_doc("Job Card", jc2_name)
+		jc1 = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+		jc2 = frappe.get_last_doc("Job Card", {"work_order": wo2.name})
 
 		employee = "_T-Employee-00001"  # from test records
 
@@ -137,10 +128,10 @@ class TestJobCard(FrappeTestCase):
 
 	def test_job_card_multiple_materials_transfer(self):
 		"Test transferring RMs separately against Job Card with multiple RMs."
-		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=10, basic_rate=100)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=6, basic_rate=100
-		)
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+
+		self.generate_required_stock(self.work_order)
 
 		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
 		job_card = frappe.get_doc("Job Card", job_card_name)
@@ -167,22 +158,21 @@ class TestJobCard(FrappeTestCase):
 
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
-		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=15, basic_rate=100
-		)
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
 
-		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
-		job_card = frappe.get_doc("Job Card", job_card_name)
+		self.generate_required_stock(self.work_order)
+
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 		self.assertEqual(job_card.status, "Open")
 
 		# fully transfer both RMs
-		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
+		transfer_entry_1 = make_stock_entry_from_jc(job_card.name)
 		transfer_entry_1.insert()
 		transfer_entry_1.submit()
 
 		# transfer extra qty of both RM due to previously damaged RM
-		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
+		transfer_entry_2 = make_stock_entry_from_jc(job_card.name)
 		# deliberately change 'For Quantity'
 		transfer_entry_2.fg_completed_qty = 1
 		transfer_entry_2.items[0].qty = 5
@@ -195,7 +185,7 @@ class TestJobCard(FrappeTestCase):
 
 		# Check if 'For Quantity' is negative
 		# as 'transferred_qty' > Qty to Manufacture
-		transfer_entry_3 = make_stock_entry_from_jc(job_card_name)
+		transfer_entry_3 = make_stock_entry_from_jc(job_card.name)
 		self.assertEqual(transfer_entry_3.fg_completed_qty, 0)
 
 		job_card.append(
@@ -210,17 +200,15 @@ class TestJobCard(FrappeTestCase):
 
 	def test_job_card_partial_material_transfer(self):
 		"Test partial material transfer against Job Card"
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
 
-		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=15, basic_rate=100
-		)
+		self.generate_required_stock(self.work_order)
 
-		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
-		job_card = frappe.get_doc("Job Card", job_card_name)
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
 
 		# partially transfer
-		transfer_entry = make_stock_entry_from_jc(job_card_name)
+		transfer_entry = make_stock_entry_from_jc(job_card.name)
 		transfer_entry.fg_completed_qty = 1
 		transfer_entry.get_items()
 		transfer_entry.insert()
@@ -232,7 +220,7 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(transfer_entry.items[1].qty, 3)
 
 		# transfer remaining
-		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
+		transfer_entry_2 = make_stock_entry_from_jc(job_card.name)
 
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 1)
 		self.assertEqual(transfer_entry_2.items[0].qty, 5)
