@@ -866,6 +866,7 @@ def make_corrective_job_card(source_name, operation=None, for_operation=None, ta
 		target.set("time_logs", [])
 		target.set("employee", [])
 		target.set("items", [])
+		target.set("sub_operations", [])
 		target.set_sub_operations()
 		target.get_required_items()
 		target.validate_time_logs()
