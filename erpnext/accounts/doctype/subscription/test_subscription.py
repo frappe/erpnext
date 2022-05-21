@@ -478,7 +478,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.start_date = "2018-01-01"
 		subscription.insert()
 		frappe.flags.current_date = "2018-01-31"
-		subscription.process()		# generate first invoice
+		subscription.process() # generate first invoice
 
 		# Status is unpaid as Days until Due is zero and grace period is Zero
 		self.assertEqual(subscription.status, "Unpaid")
@@ -518,7 +518,7 @@ class TestSubscription(unittest.TestCase):
 
 		frappe.flags.current_date = subscription.current_invoice_start
 
-		subscription.process()		# generate first invoice
+		subscription.process() # generate first invoice
 		# This should change status to Unpaid since grace period is 0
 		self.assertEqual(subscription.status, "Unpaid")
 
@@ -729,29 +729,32 @@ class TestSubscription(unittest.TestCase):
 
 		frappe.flags.current_date = "2022-01-31"
 		subscription.process()
-		frappe.db.commit() # commit needed to query invoice dates // nosemgrep
+
+		# commit needed to query invoice dates
+		frappe.db.commit() # nosemgrep
 
 		self.assertEqual(len(subscription.invoices), 2)
 		self.assertEqual(
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "from_date")),
-			getdate("2021-12-01")
+			getdate("2021-12-01"),
 		)
 		self.assertEqual(
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[1].name, "from_date")),
-			getdate("2022-01-01")
+			getdate("2022-01-01"),
 		)
 
 		# recreate most recent invoice
 		subscription.process()
 
-		frappe.db.commit() # commit needed to query invoice dates // nosemgrep
+		# commit needed to query invoice dates
+		frappe.db.commit() # nosemgrep
 		self.assertEqual(len(subscription.invoices), 2)
 		self.assertEqual(
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[0].name, "from_date")),
-			getdate("2021-12-01")
+			getdate("2021-12-01"),
 		)
 		self.assertEqual(
 			getdate(frappe.db.get_value("Sales Invoice", subscription.invoices[1].name, "from_date")),
-			getdate("2022-01-01")
+			getdate("2022-01-01"),
 		)
 
