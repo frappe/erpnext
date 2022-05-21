@@ -2,14 +2,20 @@
 # See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
+from frappe.utils.data import add_to_date, now
 
-from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchError, OverlapError
+from erpnext.manufacturing.doctype.job_card.job_card import (
+	OperationMismatchError,
+	OverlapError,
+	make_corrective_job_card,
+)
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
 from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -22,7 +28,7 @@ class TestJobCard(FrappeTestCase):
 		self._work_order = None
 
 	@property
-	def work_order(self):
+	def work_order(self) -> WorkOrder:
 		"""Work Order lazily created for tests."""
 		if not self._work_order:
 			self._work_order = make_wo_order_test_record(
@@ -265,7 +271,49 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(transfer_entry.items[0].item_code, "_Test Item")
 		self.assertEqual(transfer_entry.items[0].qty, 2)
 
-		# rollback via tearDown method
+	@change_settings(
+		"Manufacturing Settings", {"add_corrective_operation_cost_in_finished_good_valuation": 1}
+	)
+	def test_corrective_costing(self):
+		job_card = frappe.get_last_doc("Job Card", {"work_order": self.work_order.name})
+
+		job_card.append(
+			"time_logs",
+			{"from_time": now(), "to_time": add_to_date(now(), hours=1), "completed_qty": 2},
+		)
+		job_card.submit()
+
+		self.work_order.reload()
+		original_cost = self.work_order.total_operating_cost
+
+		# Create a corrective operation against it
+		corrective_action = frappe.get_doc(
+			doctype="Operation", is_corrective_operation=1, name=frappe.generate_hash()
+		).insert()
+
+		corrective_job_card = make_corrective_job_card(
+			job_card.name, operation=corrective_action.name, for_operation=job_card.operation
+		)
+		corrective_job_card.hour_rate = 100
+		corrective_job_card.insert()
+		corrective_job_card.append(
+			"time_logs",
+			{
+				"from_time": add_to_date(now(), hours=2),
+				"to_time": add_to_date(now(), hours=2, minutes=30),
+				"completed_qty": 2,
+			},
+		)
+		corrective_job_card.submit()
+
+		self.work_order.reload()
+		cost_after_correction = self.work_order.total_operating_cost
+		self.assertGreater(cost_after_correction, original_cost)
+
+		corrective_job_card.cancel()
+		self.work_order.reload()
+		cost_after_cancel = self.work_order.total_operating_cost
+		self.assertEqual(cost_after_cancel, original_cost)
 
 
 def create_bom_with_multiple_operations():
