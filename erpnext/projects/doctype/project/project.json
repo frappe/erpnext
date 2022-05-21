@@ -234,7 +234,7 @@
   },
   {
    "fieldname": "actual_start_date",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "label": "Actual Start Date (via Time Sheet)",
    "read_only": 1
   },
