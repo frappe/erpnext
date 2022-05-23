@@ -116,6 +116,10 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		self.assertEqual(declaration.total_exemption_amount, 100000)
 
 	def test_india_hra_exemption(self):
+		# set country
+		current_country = frappe.flags.country
+		frappe.flags.country = "India"
+
 		setup_hra_exemption_prerequisites("Monthly")
 		employee = frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name")
 
@@ -124,7 +128,7 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 				"doctype": "Employee Tax Exemption Declaration",
 				"employee": employee,
 				"company": "_Test Company",
-				"payroll_period": "_Test Payroll Period 1",
+				"payroll_period": "_Test Payroll Period",
 				"currency": "INR",
 				"monthly_house_rent": 50000,
 				"rented_in_metro_city": 1,
@@ -150,7 +154,14 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		# 100000 Standard Exemption + 36000 HRA exemption
 		self.assertEqual(declaration.total_exemption_amount, 136000)
 
+		# reset
+		frappe.flags.country = current_country
+
 	def test_india_hra_exemption_with_daily_payroll_frequency(self):
+		# set country
+		current_country = frappe.flags.country
+		frappe.flags.country = "India"
+
 		setup_hra_exemption_prerequisites("Daily")
 		employee = frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name")
 
@@ -159,7 +170,7 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 				"doctype": "Employee Tax Exemption Declaration",
 				"employee": employee,
 				"company": "_Test Company",
-				"payroll_period": "_Test Payroll Period 1",
+				"payroll_period": "_Test Payroll Period",
 				"currency": "INR",
 				"monthly_house_rent": 170000,
 				"rented_in_metro_city": 1,
@@ -180,7 +191,14 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		# 50000 Standard Exemption + 215000 HRA exemption
 		self.assertEqual(declaration.total_exemption_amount, 265000)
 
+		# reset
+		frappe.flags.country = current_country
+
 	def test_india_hra_exemption_with_weekly_payroll_frequency(self):
+		# set country
+		current_country = frappe.flags.country
+		frappe.flags.country = "India"
+
 		setup_hra_exemption_prerequisites("Weekly")
 		employee = frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name")
 
@@ -189,7 +207,7 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 				"doctype": "Employee Tax Exemption Declaration",
 				"employee": employee,
 				"company": "_Test Company",
-				"payroll_period": "_Test Payroll Period 1",
+				"payroll_period": "_Test Payroll Period",
 				"currency": "INR",
 				"monthly_house_rent": 170000,
 				"rented_in_metro_city": 1,
@@ -210,7 +228,14 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		# 50000 Standard Exemption + 156000 HRA exemption
 		self.assertEqual(declaration.total_exemption_amount, 206000)
 
+		# reset
+		frappe.flags.country = current_country
+
 	def test_india_hra_exemption_with_fortnightly_payroll_frequency(self):
+		# set country
+		current_country = frappe.flags.country
+		frappe.flags.country = "India"
+
 		setup_hra_exemption_prerequisites("Fortnightly")
 		employee = frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name")
 
@@ -219,7 +244,7 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 				"doctype": "Employee Tax Exemption Declaration",
 				"employee": employee,
 				"company": "_Test Company",
-				"payroll_period": "_Test Payroll Period 1",
+				"payroll_period": "_Test Payroll Period",
 				"currency": "INR",
 				"monthly_house_rent": 170000,
 				"rented_in_metro_city": 1,
@@ -240,7 +265,14 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		# 50000 Standard Exemption + 78000 HRA exemption
 		self.assertEqual(declaration.total_exemption_amount, 128000)
 
+		# reset
+		frappe.flags.country = current_country
+
 	def test_india_hra_exemption_with_bimonthly_payroll_frequency(self):
+		# set country
+		current_country = frappe.flags.country
+		frappe.flags.country = "India"
+
 		setup_hra_exemption_prerequisites("Bimonthly")
 		employee = frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name")
 
@@ -249,7 +281,7 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 				"doctype": "Employee Tax Exemption Declaration",
 				"employee": employee,
 				"company": "_Test Company",
-				"payroll_period": "_Test Payroll Period 1",
+				"payroll_period": "_Test Payroll Period",
 				"currency": "INR",
 				"monthly_house_rent": 50000,
 				"rented_in_metro_city": 1,
@@ -275,6 +307,9 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		# 100000 Standard Exemption + 18000 HRA exemption
 		self.assertEqual(declaration.total_exemption_amount, 118000)
 
+		# reset
+		frappe.flags.country = current_country
+
 	def test_india_hra_exemption_with_multiple_salary_structure_assignments(self):
 		from erpnext.payroll.doctype.salary_slip.test_salary_slip import create_tax_slab
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
@@ -282,8 +317,12 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 			make_salary_structure,
 		)
 
+		# set country
+		current_country = frappe.flags.country
+		frappe.flags.country = "India"
+
 		employee = make_employee("employee@taxexemption2.com", company="_Test Company")
-		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+		payroll_period = create_payroll_period(name="_Test Payroll Period", company="_Test Company")
 
 		create_tax_slab(
 			payroll_period,
@@ -365,6 +404,9 @@ class TestEmployeeTaxExemptionDeclaration(FrappeTestCase):
 		# 50000 Standard Exemption + 102000 HRA exemption
 		self.assertEqual(declaration.total_exemption_amount, 152000)
 
+		# reset
+		frappe.flags.country = current_country
+
 
 def create_payroll_period(**args):
 	args = frappe._dict(args)
@@ -422,7 +464,7 @@ def setup_hra_exemption_prerequisites(frequency):
 	from erpnext.payroll.doctype.salary_slip.test_salary_slip import create_tax_slab
 	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
-	payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+	payroll_period = create_payroll_period(name="_Test Payroll Period", company="_Test Company")
 
 	create_tax_slab(
 		payroll_period,
