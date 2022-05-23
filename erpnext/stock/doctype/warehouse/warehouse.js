@@ -33,34 +33,25 @@ frappe.ui.form.on("Warehouse", {
 			});
 		});
 
-		if (cint(frm.doc.is_group) == 1) {
-			frm.add_custom_button(
-				__("Group to Non-Group"),
-				function () {
-					convert_to_group_or_ledger(frm);
-				},
-				"fa fa-retweet",
-				"btn-default"
-			);
-		} else if (cint(frm.doc.is_group) == 0) {
-			if (frm.doc.__onload && frm.doc.__onload.account) {
-				frm.add_custom_button(__("General Ledger"), function () {
-					frappe.route_options = {
-						account: frm.doc.__onload.account,
-						company: frm.doc.company,
-					};
-					frappe.set_route("query-report", "General Ledger");
-				});
-			}
+		frm.add_custom_button(
+			frm.doc.is_group
+				? __("Convert to Ledger", null, "Warehouse")
+				: __("Convert to Group", null, "Warehouse"),
+			function () {
+				convert_to_group_or_ledger(frm);
+			},
+			"fa fa-retweet",
+			"btn-default"
+		);
 
-			frm.add_custom_button(
-				__("Non-Group to Group"),
-				function () {
-					convert_to_group_or_ledger(frm);
-				},
-				"fa fa-retweet",
-				"btn-default"
-			);
+		if (!frm.doc.is_group && frm.doc.__onload && frm.doc.__onload.account) {
+			frm.add_custom_button(__("General Ledger", null, "Warehouse"), function () {
+				frappe.route_options = {
+					account: frm.doc.__onload.account,
+					company: frm.doc.company,
+				};
+				frappe.set_route("query-report", "General Ledger");
+			});
 		}
 
 		frm.toggle_enable(["is_group", "company"], false);
@@ -84,7 +75,7 @@ frappe.ui.form.on("Warehouse", {
 				filters: {
 					is_group: 0,
 					account_type: "Stock",
-					company: frm.doc.company,
+					company: doc.company,
 				},
 			};
 		};
