@@ -1254,7 +1254,7 @@
    "modified_by": "Administrator",
    "name": "Item-business_group",
    "no_copy": 0,
-   "options": "\nCSD (Carbonated Soft Drinks)\nNCB (Non Carbonated Beverage)\nConfectionery\nBakery\nWater\nIce Cream\nDairy\nHusky",
+   "options": "\nCSD (Carbonated Soft Drinks)\nNCB (Non Carbonated Beverage)\nConfectionery\nBakery\nWater\nIce Cream\nDairy\nHusky\nN/A",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
