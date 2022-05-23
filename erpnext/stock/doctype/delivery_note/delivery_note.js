@@ -295,6 +295,13 @@ frappe.ui.form.on('Delivery Note', {
 	},
 
 	company: function(frm) {
+        if (["Unit 5","Unit 8","Unit 11"].includes(frm.doc.company)){
+            frm.set_df_property('shipping_type', 'hidden', false);
+            frm.set_df_property('shipping_type', 'reqd', 1);
+        }else{
+            frm.set_df_property('shipping_type', 'hidden', true);
+            frm.set_df_property('shipping_type', 'reqd', 0);
+        }
 		frm.trigger("unhide_account_head");
 	},
 
@@ -302,7 +309,17 @@ frappe.ui.form.on('Delivery Note', {
 		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
 		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
-	}
+	},
+    refresh: function(frm){
+        if (["Unit 5","Unit 8","Unit 11"].includes(frm.doc.company)){
+            frm.set_df_property('shipping_type', 'hidden', false);
+            frm.set_df_property('shipping_type', 'reqd', 1);
+        }else{
+            frm.set_df_property('shipping_type', 'hidden', true);
+            frm.set_df_property('shipping_type', 'reqd', 0);
+        }
+
+    }
 })
 
 
