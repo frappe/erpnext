@@ -6,7 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import (
 	BOMMissingError,
-	run_bom_job,
+	run_replace_bom_job,
 )
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
 
@@ -71,7 +71,7 @@ class TestBOMUpdateLog(FrappeTestCase):
 
 		# Explicitly commits log, new bom (setUp) and replacement impact.
 		# Is run via background jobs IRL
-		run_bom_job(
+		run_replace_bom_job(
 			doc=log,
 			boms=self.boms,
 			update_type="Replace BOM",
@@ -88,7 +88,7 @@ class TestBOMUpdateLog(FrappeTestCase):
 		log2 = enqueue_replace_bom(
 			boms=self.boms,
 		)
-		run_bom_job(  # Explicitly commits
+		run_replace_bom_job(  # Explicitly commits
 			doc=log2,
 			boms=boms,
 			update_type="Replace BOM",
