@@ -188,7 +188,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					}
 				}
 				if (!is_qrcode_attached || !qrcode_image) {
-				const action = () => {
+					const action = () => {
 						if (frm.doc.__unsaved) {
 							frappe.throw(__('Please save the document to generate QRCode.'));
 						}
