@@ -2,14 +2,14 @@
 # See license.txt
 
 import json
-from operator import itemgetter
 from uuid import uuid4
 
 import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, today
+from frappe.query_builder.functions import CombineDatetime
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -1066,6 +1066,192 @@ class TestStockLedgerEntry(FrappeTestCase):
 
 		receipt2 = make_stock_entry(item_code=item, target=warehouse, qty=15, rate=15)
 		self.assertSLEs(receipt2, [{"stock_queue": [[5, 15]], "stock_value_difference": 175}])
+
+	def test_dependent_gl_entry_reposting(self):
+		def _get_stock_credit(doc):
+			return frappe.db.get_value(
+				"GL Entry",
+				{
+					"voucher_no": doc.name,
+					"voucher_type": doc.doctype,
+					"is_cancelled": 0,
+					"account": "Stock In Hand - TCP1",
+				},
+				"sum(credit)",
+			)
+
+		def _day(days):
+			return add_to_date(date=today(), days=days)
+
+		item = make_item().name
+		A = "Stores - TCP1"
+		B = "Work In Progress - TCP1"
+		C = "Finished Goods - TCP1"
+
+		make_stock_entry(item_code=item, to_warehouse=A, qty=5, rate=10, posting_date=_day(0))
+		make_stock_entry(item_code=item, from_warehouse=A, to_warehouse=B, qty=5, posting_date=_day(1))
+		depdendent_consumption = make_stock_entry(
+			item_code=item, from_warehouse=B, qty=5, posting_date=_day(2)
+		)
+		self.assertEqual(50, _get_stock_credit(depdendent_consumption))
+
+		# backdated receipt - should trigger GL repost of all previous stock entries
+		bd_receipt = make_stock_entry(
+			item_code=item, to_warehouse=A, qty=5, rate=20, posting_date=_day(-1)
+		)
+		self.assertEqual(100, _get_stock_credit(depdendent_consumption))
+
+		# cancelling receipt should reset it back
+		bd_receipt.cancel()
+		self.assertEqual(50, _get_stock_credit(depdendent_consumption))
+
+		bd_receipt2 = make_stock_entry(
+			item_code=item, to_warehouse=A, qty=2, rate=20, posting_date=_day(-2)
+		)
+		# total as per FIFO -> 2 * 20 + 3 * 10 = 70
+		self.assertEqual(70, _get_stock_credit(depdendent_consumption))
+
+		# transfer WIP material to final destination and consume it all
+		depdendent_consumption.cancel()
+		make_stock_entry(item_code=item, from_warehouse=B, to_warehouse=C, qty=5, posting_date=_day(3))
+		final_consumption = make_stock_entry(
+			item_code=item, from_warehouse=C, qty=5, posting_date=_day(4)
+		)
+		# exact amount gets consumed
+		self.assertEqual(70, _get_stock_credit(final_consumption))
+
+		# cancel original backdated receipt - should repost A -> B -> C
+		bd_receipt2.cancel()
+		# original amount
+		self.assertEqual(50, _get_stock_credit(final_consumption))
+
+	def test_tie_breaking(self):
+		frappe.flags.dont_execute_stock_reposts = True
+		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		posting_date = "2022-01-01"
+		posting_time = "00:00:01"
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+
+		def ordered_qty_after_transaction():
+			return (
+				frappe.qb.from_(sle)
+				.select("qty_after_transaction")
+				.where((sle.item_code == item) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
+				.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+				.orderby(sle.creation)
+			).run(pluck=True)
+
+		first = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=10,
+			posting_time=posting_time,
+			posting_date=posting_date,
+			do_not_submit=True,
+		)
+		second = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=1,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_submit=True,
+		)
+
+		first.submit()
+		second.submit()
+
+		self.assertEqual([10, 11], ordered_qty_after_transaction())
+
+		first.cancel()
+		self.assertEqual([1], ordered_qty_after_transaction())
+
+		backdated = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=1,
+			posting_date="2021-01-01",
+			posting_time=posting_time,
+		)
+		self.assertEqual([1, 2], ordered_qty_after_transaction())
+
+		backdated.cancel()
+		self.assertEqual([1], ordered_qty_after_transaction())
+
+	def test_timestamp_clash(self):
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reciept = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="01:00:00",
+		)
+
+		consumption = make_stock_entry(
+			item_code=item,
+			from_warehouse=warehouse,
+			qty=50,
+			posting_date="2021-01-01",
+			posting_time="02:00:00.1234",  # ms are possible when submitted without editing posting time
+		)
+
+		backdated_receipt = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			posting_date="2021-01-01",
+			rate=10,
+			posting_time="02:00:00",  # same posting time as consumption but ms part stripped
+		)
+
+		try:
+			backdated_receipt.cancel()
+		except Exception as e:
+			self.fail("Double processing of qty for clashing timestamp.")
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	def test_transfer_invariants(self):
+		"""Extact stock value should be transferred."""
+
+		item = make_item(
+			properties={
+				"valuation_method": "Moving Average",
+				"stock_uom": "Kg",
+			}
+		).name
+		source_warehouse = "Stores - TCP1"
+		target_warehouse = "Finished Goods - TCP1"
+
+		make_purchase_receipt(
+			item=item,
+			warehouse=source_warehouse,
+			qty=20,
+			conversion_factor=1000,
+			uom="Tonne",
+			rate=156_526.0,
+			company="_Test Company with perpetual inventory",
+		)
+		transfer = make_stock_entry(
+			item=item, from_warehouse=source_warehouse, to_warehouse=target_warehouse, qty=1_728.0
+		)
+
+		filters = {"voucher_no": transfer.name, "voucher_type": transfer.doctype, "is_cancelled": 0}
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["*"],
+			filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation",
+		)
+		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
 
 def create_repack_entry(**args):

@@ -7,6 +7,7 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate
 
 import erpnext
@@ -1977,6 +1978,13 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_rounding_adjustment_3(self):
+		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+			create_dimension,
+			disable_dimension,
+		)
+
+		create_dimension()
+
 		si = create_sales_invoice(do_not_save=True)
 		si.items = []
 		for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
@@ -2004,6 +2012,10 @@ class TestSalesInvoice(unittest.TestCase):
 					"included_in_print_rate": 1,
 				},
 			)
+
+		si.cost_center = "_Test Cost Center 2 - _TC"
+		si.location = "Block 1"
+
 		si.save()
 		si.submit()
 		self.assertEqual(si.net_total, 4007.16)
@@ -2038,6 +2050,18 @@ class TestSalesInvoice(unittest.TestCase):
 			debit_credit_diff += gle.debit - gle.credit
 
 		self.assertEqual(debit_credit_diff, 0)
+
+		round_off_gle = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_type": "Sales Invoice", "voucher_no": si.name, "account": "Round Off - _TC"},
+			["cost_center", "location"],
+			as_dict=1,
+		)
+
+		self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
+		self.assertEqual(round_off_gle.location, "Block 1")
+
+		disable_dimension()
 
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
@@ -2624,6 +2648,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		einvoice_settings = frappe.get_doc("E Invoice Settings")
 		einvoice_settings.enable = 0
+		einvoice_settings.save()
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):
@@ -2684,12 +2709,8 @@ class TestSalesInvoice(unittest.TestCase):
 			sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC"
 		)
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
-
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -2705,14 +2726,10 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
 
-		enable_discount_accounting()
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -2743,7 +2760,6 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-		enable_discount_accounting(enable=0)
 
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
@@ -3123,6 +3139,39 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		si.reload()
 		self.assertTrue(si.items[0].serial_no)
+
+	def test_sales_invoice_with_disabled_account(self):
+		try:
+			account = frappe.get_doc("Account", "VAT 5% - _TC")
+			account.disabled = 1
+			account.save()
+
+			si = create_sales_invoice(do_not_save=True)
+			si.posting_date = add_days(getdate(), 1)
+			si.taxes = []
+
+			si.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": "VAT 5% - _TC",
+					"cost_center": "Main - _TC",
+					"description": "VAT @ 5.0",
+					"rate": 9,
+				},
+			)
+			si.save()
+
+			with self.assertRaises(frappe.ValidationError) as err:
+				si.submit()
+
+			self.assertTrue(
+				"Cannot create accounting entries against disabled accounts" in str(err.exception)
+			)
+
+		finally:
+			account.disabled = 0
+			account.save()
 
 	def test_gain_loss_with_advance_entry(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

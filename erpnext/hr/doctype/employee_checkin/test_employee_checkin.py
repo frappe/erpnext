@@ -76,6 +76,17 @@ class TestEmployeeCheckin(FrappeTestCase):
 		)
 		self.assertEqual(attendance_count, 1)
 
+	def test_unlink_attendance_on_cancellation(self):
+		employee = make_employee("test_mark_attendance_and_link_log@example.com")
+		logs = make_n_checkins(employee, 3)
+
+		frappe.db.delete("Attendance", {"employee": employee})
+		attendance = mark_attendance_and_link_log(logs, "Present", nowdate(), 8.2)
+		attendance.cancel()
+
+		linked_logs = frappe.db.get_all("Employee Checkin", {"attendance": attendance.name})
+		self.assertEquals(len(linked_logs), 0)
+
 	def test_calculate_working_hours(self):
 		check_in_out_type = [
 			"Alternating entries as IN and OUT during the same shift",
@@ -125,6 +136,11 @@ class TestEmployeeCheckin(FrappeTestCase):
 		)
 		self.assertEqual(working_hours, (4.5, logs_type_2[1].time, logs_type_2[-1].time))
 
+		working_hours = calculate_working_hours(
+			[logs_type_2[1], logs_type_2[-1]], check_in_out_type[1], working_hours_calc_type[1]
+		)
+		self.assertEqual(working_hours, (5.0, logs_type_2[1].time, logs_type_2[-1].time))
+
 	def test_fetch_shift(self):
 		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
 
@@ -150,6 +166,31 @@ class TestEmployeeCheckin(FrappeTestCase):
 
 		# should not fetch this shift beyond allowed time
 		timestamp = datetime.combine(date, get_time("13:01:00"))
+		log = make_checkin(employee, timestamp)
+		self.assertIsNone(log.shift)
+
+	def test_fetch_shift_for_assignment_with_end_date(self):
+		employee = make_employee("test_employee_checkin@example.com", company="_Test Company")
+
+		# shift setup for 8-12
+		shift1 = setup_shift_type()
+		# 12:30 - 16:30
+		shift2 = setup_shift_type(shift_type="Shift 2", start_time="12:30:00", end_time="16:30:00")
+
+		date = getdate()
+		make_shift_assignment(shift1.name, employee, date, add_days(date, 15))
+		make_shift_assignment(shift2.name, employee, date, add_days(date, 15))
+
+		timestamp = datetime.combine(date, get_time("08:45:00"))
+		log = make_checkin(employee, timestamp)
+		self.assertEqual(log.shift, shift1.name)
+
+		timestamp = datetime.combine(date, get_time("12:45:00"))
+		log = make_checkin(employee, timestamp)
+		self.assertEqual(log.shift, shift2.name)
+
+		# log after end date
+		timestamp = datetime.combine(add_days(date, 16), get_time("12:45:00"))
 		log = make_checkin(employee, timestamp)
 		self.assertIsNone(log.shift)
 

@@ -99,7 +99,7 @@ def make_dimension_in_accounting_doctypes(doc, doclist=None):
 			if doctype == "Budget":
 				add_dimension_to_budget_doctype(df.copy(), doc)
 			else:
-				create_custom_field(doctype, df)
+				create_custom_field(doctype, df, ignore_validate=True)
 
 		count += 1
 
@@ -115,7 +115,7 @@ def add_dimension_to_budget_doctype(df, doc):
 		}
 	)
 
-	create_custom_field("Budget", df)
+	create_custom_field("Budget", df, ignore_validate=True)
 
 	property_setter = frappe.db.exists("Property Setter", "Budget-budget_against-options")
 
@@ -234,17 +234,19 @@ def get_checks_for_pl_and_bs_accounts():
 	return dimensions
 
 
-def get_dimension_with_children(doctype, dimension):
+def get_dimension_with_children(doctype, dimensions):
 
-	if isinstance(dimension, list):
-		dimension = dimension[0]
+	if isinstance(dimensions, str):
+		dimensions = [dimensions]
 
 	all_dimensions = []
-	lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
-	children = frappe.get_all(
-		doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft"
-	)
-	all_dimensions += [c.name for c in children]
+
+	for dimension in dimensions:
+		lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
+		children = frappe.get_all(
+			doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft"
+		)
+		all_dimensions += [c.name for c in children]
 
 	return all_dimensions
 
