@@ -208,10 +208,11 @@ class TestJobCard(FrappeTestCase):
 
 	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_block(self):
-		make_stock_entry(item_code="_Test Item", target="Stores - _TC", qty=25, basic_rate=100)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop Manufactured", target="Stores - _TC", qty=15, basic_rate=100
-		)
+
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+
+		self.generate_required_stock(self.work_order)
 
 		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
 
