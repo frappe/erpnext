@@ -459,7 +459,7 @@ def get_grand_total(filters, doctype):
 	return frappe.db.sql(""" SELECT
 		SUM(`tab{0}`.base_grand_total)
 		FROM `tab{0}`
-		WHERE `tab{0}`.docstatus = 1
+		WHERE `tab{0}`.docstatus IN (0,1)
 		and posting_date between %s and %s
 	""".format(doctype), (filters.get('from_date'), filters.get('to_date')))[0][0] #nosec
 
@@ -492,7 +492,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
-			parenttype = %s and docstatus = 1
+			parenttype = %s and docstatus IN (0,1)
 			and (description is not null and description != '')
 			and parent in (%s)
 			%s
