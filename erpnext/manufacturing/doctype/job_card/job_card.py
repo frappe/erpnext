@@ -531,11 +531,9 @@ class JobCard(Document):
 
 		def _validate_over_transfer(row, transferred_qty):
 			"Block over transfer of items if not allowed in settings."
-			allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
 			required_qty = frappe.db.get_value("Job Card Item", row.job_card_item, "required_qty")
 			is_excess = flt(transferred_qty) > flt(required_qty)
-
-			if is_excess and not allow_excess:
+			if is_excess:
 				frappe.throw(
 					_(
 						"Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
@@ -564,7 +562,9 @@ class JobCard(Document):
 				)
 			).run()[0][0]
 
-			_validate_over_transfer(row, transferred_qty)
+			allow_excess = frappe.db.get_single_value("Manufacturing Settings", "job_card_excess_transfer")
+			if not allow_excess:
+				_validate_over_transfer(row, transferred_qty)
 
 			frappe.db.set_value("Job Card Item", row.job_card_item, "transferred_qty", flt(transferred_qty))
 
