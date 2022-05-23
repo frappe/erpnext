@@ -33,7 +33,6 @@
   "amount",
   "base_amount",
   "section_break_18",
-  "scrap",
   "qty_consumed_per_unit",
   "section_break_27",
   "has_variants",
@@ -224,15 +223,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "columns": 1,
-   "fieldname": "scrap",
-   "fieldtype": "Float",
-   "label": "Scrap %",
-   "oldfieldname": "scrap",
-   "oldfieldtype": "Currency",
-   "print_hide": 1
-  },
-  {
    "fieldname": "qty_consumed_per_unit",
    "fieldtype": "Float",
    "hidden": 1,
@@ -298,7 +288,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-01-24 16:57:57.020232",
+ "modified": "2022-05-19 02:32:43.785470",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
