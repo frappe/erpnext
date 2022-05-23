@@ -11,7 +11,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (!invoice_eligible) return;
 
-			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
+			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, qrcode_image, __unsaved } = frm.doc;
 
 			const add_custom_button = (label, action) => {
 				if (!frm.custom_buttons[label]) {
@@ -175,7 +175,23 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			}
 
 			if (irn && !irn_cancelled) {
+				let is_qrcode_attached = false;
+				if (qrcode_image && frm.attachments) {
+					let attachments = frm.attachments.get_attachments()
+					if (attachments.length != 0) {
+						for (let i = 0; i < attachments.length; i++) {
+							if (attachments[i].file_url == qrcode_image) {
+								is_qrcode_attached = true;
+								break;
+							}
+						}
+					}
+				}
+				if (!is_qrcode_attached || !qrcode_image) {
 				const action = () => {
+					if (frm.doc.__unsaved) {
+						frappe.throw(__('Please save the document to generate QRCode.'));
+					}
 					const dialog = frappe.msgprint({
 						title: __("Generate QRCode"),
 						message: __("Generate and attach QR Code using IRN?"),
@@ -195,6 +211,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					dialog.show();
 				};
 				add_custom_button(__("Generate QRCode"), action);
+			}
 			}
 		}
 	});

@@ -1010,13 +1010,29 @@ class GSPConnector:
 		return failed
 
 	def fetch_and_attach_qrcode_from_irn(self):
-		qrcode = self.get_qrcode_from_irn(self.invoice.irn)
-		if qrcode:
-			qrcode_file = self.create_qr_code_file(qrcode)
-			frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", qrcode_file.file_url)
-			frappe.msgprint(_("QR Code attached to the invoice"), alert=True)
-		else:
-			frappe.msgprint(_("QR Code not found for the IRN"), alert=True)
+		is_qrcode_file_attached = frappe.db.exists(
+			"File",
+			{
+				"attached_to_doctype": "Sales Invoice",
+				"attached_to_name": self.invoice.name,
+				"file_url": self.invoice.qrcode_image,
+				"attached_to_field": "qrcode_image",
+			},
+		)
+		if not is_qrcode_file_attached:
+			if self.invoice.signed_qr_code:
+				self.attach_qrcode_image(update_url=True)
+				frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
+			else:
+				qrcode = self.get_qrcode_from_irn(self.invoice.irn)
+				if qrcode:
+					qrcode_file = self.create_qr_code_file(qrcode)
+					frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", qrcode_file.file_url)
+					frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
+				else:
+					frappe.msgprint(_("QR Code not found for the IRN"), alert=True)
+		elif is_qrcode_file_attached and self.invoice.qrcode_image:
+			frappe.msgprint(_("QR Code is already Attached"), indicator="green", alert=True)
 
 	def get_qrcode_from_irn(self, irn):
 		import requests
@@ -1279,7 +1295,7 @@ class GSPConnector:
 		}
 		self.update_invoice()
 
-	def attach_qrcode_image(self):
+	def attach_qrcode_image(self, update_url=False):
 		qrcode = self.invoice.signed_qr_code
 
 		qr_image = io.BytesIO()
@@ -1287,6 +1303,8 @@ class GSPConnector:
 		url.png(qr_image, scale=2, quiet_zone=1)
 		qrcode_file = self.create_qr_code_file(qr_image.getvalue())
 		self.invoice.qrcode_image = qrcode_file.file_url
+		if update_url:
+			frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", qrcode_file.file_url)
 
 	def create_qr_code_file(self, qr_image):
 		doctype = self.invoice.doctype
