@@ -363,7 +363,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure d
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.","No se puede garantizar la entrega por número de serie, ya que \ Item {0} se agrega con y sin Garantizar entrega por \ Serial No."
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,At least one mode of payment is required for POS invoice.,Se requiere al menos un modo de pago de la factura POS.
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,When selecting a discount reason, check the field to update inventory.,Al selecciona una razon de descuento marque el campo de actualizar inventario.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,When selecting a discount reason check the field to update inventory.,Al seleccionar una razon de descuento marque el campo de actualizar inventario.
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Batch no is required for batched item {0},No se requiere lote para el artículo en lote {0}
 DocType: Bank Statement Transaction Invoice Item,Bank Statement Transaction Invoice Item,Estado de Factura de Transacción de Extracto Bancario
 DocType: Salary Detail,Tax on flexible benefit,Impuesto sobre el Beneficio Flexible
