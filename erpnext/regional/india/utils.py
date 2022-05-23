@@ -369,6 +369,7 @@ def calculate_annual_eligible_hra_exemption(doc):
 	basic_component, hra_component = frappe.db.get_value(
 		"Company", doc.company, ["basic_component", "hra_component"]
 	)
+
 	if not (basic_component and hra_component):
 		frappe.throw(
 			_("Please set Basic and HRA component in Company {0}").format(
