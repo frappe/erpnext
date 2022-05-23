@@ -460,11 +460,13 @@ def create_exemption_category():
 		).insert()
 
 
-def setup_hra_exemption_prerequisites(frequency):
+def setup_hra_exemption_prerequisites(frequency, employee=None):
 	from erpnext.payroll.doctype.salary_slip.test_salary_slip import create_tax_slab
 	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 	payroll_period = create_payroll_period(name="_Test Payroll Period", company="_Test Company")
+	if not employee:
+		employee = frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name")
 
 	create_tax_slab(
 		payroll_period,
@@ -477,7 +479,7 @@ def setup_hra_exemption_prerequisites(frequency):
 	make_salary_structure(
 		f"{frequency} Structure for HRA Exemption",
 		frequency,
-		employee=frappe.get_value("Employee", {"user_id": "employee@taxexemption.com"}, "name"),
+		employee=employee,
 		company="_Test Company",
 		currency="INR",
 		payroll_period=payroll_period,
