@@ -177,7 +177,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			if (irn && !irn_cancelled) {
 				let is_qrcode_attached = false;
 				if (qrcode_image && frm.attachments) {
-					let attachments = frm.attachments.get_attachments()
+					let attachments = frm.attachments.get_attachments();
 					if (attachments.length != 0) {
 						for (let i = 0; i < attachments.length; i++) {
 							if (attachments[i].file_url == qrcode_image) {
@@ -189,23 +189,23 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				}
 				if (!is_qrcode_attached || !qrcode_image) {
 				const action = () => {
-					if (frm.doc.__unsaved) {
-						frappe.throw(__('Please save the document to generate QRCode.'));
-					}
-					const dialog = frappe.msgprint({
-						title: __("Generate QRCode"),
-						message: __("Generate and attach QR Code using IRN?"),
-						primary_action: {
-							action: function() {
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
-									args: { doctype, docname: name },
-									freeze: true,
-									callback: () => frm.reload_doc() || dialog.hide(),
-									error: () => dialog.hide()
-								});
-							}
-						},
+						if (frm.doc.__unsaved) {
+							frappe.throw(__('Please save the document to generate QRCode.'));
+						}
+						const dialog = frappe.msgprint({
+							title: __("Generate QRCode"),
+							message: __("Generate and attach QR Code using IRN?"),
+							primary_action: {
+								action: function() {
+									frappe.call({
+										method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
+										args: { doctype, docname: name },
+										freeze: true,
+										callback: () => frm.reload_doc() || dialog.hide(),
+										error: () => dialog.hide()
+									});
+								}
+							},
 						primary_action_label: __('Yes')
 					});
 					dialog.show();
