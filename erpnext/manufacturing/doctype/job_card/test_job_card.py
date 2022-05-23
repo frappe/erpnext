@@ -7,15 +7,10 @@ from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
-<<<<<<< HEAD
-	OperationMismatchError,
-	OverlapError,
-	make_corrective_job_card,
-=======
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
->>>>>>> e07ce6efe0 (fix: Job Card excess transfer behaviour)
+	make_corrective_job_card,
 )
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
@@ -29,7 +24,6 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 class TestJobCard(FrappeTestCase):
 	def setUp(self):
 		make_bom_for_jc_tests()
-<<<<<<< HEAD
 		self.transfer_material_against = "Work Order"
 		self.source_warehouse = None
 		self._work_order = None
@@ -55,32 +49,6 @@ class TestJobCard(FrappeTestCase):
 				qty=item.required_qty * 2,
 				basic_rate=100,
 			)
-=======
-
-		transfer_material_against, source_warehouse = None, None
-
-		tests_that_skip_setup = ("test_job_card_material_transfer_correctness",)
-		tests_that_transfer_against_jc = (
-			"test_job_card_multiple_materials_transfer",
-			"test_job_card_excess_material_transfer",
-			"test_job_card_partial_material_transfer",
-			"test_job_card_excess_material_transfer_block",
-		)
-
-		if self._testMethodName in tests_that_skip_setup:
-			return
-
-		if self._testMethodName in tests_that_transfer_against_jc:
-			transfer_material_against = "Job Card"
-			source_warehouse = "Stores - _TC"
-
-		self.work_order = make_wo_order_test_record(
-			item="_Test FG Item 2",
-			qty=2,
-			transfer_material_against=transfer_material_against,
-			source_warehouse=source_warehouse,
-		)
->>>>>>> e07ce6efe0 (fix: Job Card excess transfer behaviour)
 
 	def tearDown(self):
 		frappe.db.rollback()
