@@ -501,12 +501,32 @@ class SalarySlip(TransactionBase):
 	@frappe.whitelist()
 	def set_days(self):
 		#days_in_month
+
+		
+
+			# return self.present_days
+
 		if not self.days_in_month:
 			from calendar import monthrange
 			a = getdate(self.start_date).year
 			b = getdate(self.start_date).month
 			num_days = monthrange(a, b)[1]
 			self.days_in_month = num_days
+
+		leaveA = frappe.db.get_all("Leave Application",{'employee':self.employee,'from_date':[">=",self.start_date],'to_date':["<=",self.end_date]},['total_leave_days'])
+		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
+		holiday1= len(holidays)
+		print("##############################",holiday1,leaveA)
+		if leaveA :
+			lt = []
+			for i in leaveA:
+				lt.append(i.get("total_leave_days"))
+
+			# print("$$$$$$$$$$$$$$$$$$$$$$leaves",i)
+			print("$$$$$$$$$$$$$$$$$$$$$$holiday",holiday1)
+			print("$$$$$$$$$$$$$$$$$$$$$$wd",self.total_working_days)
+			self.net_present_days = num_days - sum(lt) - holiday1
+				
 
 		#Paid Holidays
 		if not self.paid_holidays:
