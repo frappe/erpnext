@@ -51,12 +51,12 @@ frappe.ui.form.on("Packing Slip", {
 		// this as a fallback to reference.
 		const backup = frm.doc.items.map(item => ({...item}));
 
-		function after_scan(scanned_row, event) {
-			if (event === "remove") {
+		function after_scan(scanned_row, exc_type) {
+			if (exc_type === "InvalidPackingSlipItem") {
 				frm.get_field("items").grid.grid_rows[scanned_row.idx - 1].remove();
-				frappe.msgprint(__("Item {0} is not valid for this delivery.", [scanned_row.item_code]), __("Item Removed"));
+				frappe.msgprint(__("Item {0} has automatically been removed from this packing slip.", [scanned_row.item_code]));
 			}
-			else if (event === "qty") {
+			else if (exc_type === "InvalidPackedQty") {
 				// Reset the qty to the value before the row was scanned.
 				const row = backup.find(row => row.name === scanned_row.name);
 				frappe.model.set_value(row.doctype, row.name, "qty", row.qty, "Float");
@@ -70,10 +70,8 @@ frappe.ui.form.on("Packing Slip", {
 				doc: frm.doc,
 				method: "validate_scanned_item",
 				args: {scanned_row}
-			}).then(r => {
-				after_scan(scanned_row, r.message);
-			}).catch(r => {
-				after_scan(scanned_row, r.message);
+			}).catch(({ responseJSON }) => {
+				after_scan(scanned_row, responseJSON.exc_type);
 			});
 		});
 	},

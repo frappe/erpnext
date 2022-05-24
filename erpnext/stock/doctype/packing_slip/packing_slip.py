@@ -4,13 +4,17 @@
 
 import frappe
 from frappe import _
+from frappe.exceptions import ValidationError
 from frappe.model import no_value_fields
 from frappe.model.document import Document
 from frappe.utils import cint, flt
-from frappe.exceptions import ValidationError
 
 
 class InvalidPackingSlipItem(ValidationError):
+	pass
+
+
+class InvalidPackedQty(ValidationError):
 	pass
 
 
@@ -48,13 +52,18 @@ class PackingSlip(Document):
 
 	def validate_item_codes(self):
 		packed_items = [d.item_code for d in self.get("items")]
-		delivery_items = frappe.db.get_all("Delivery Note Item", filters={
-			"parenttype": "Delivery Note",
-			"parent": self.delivery_note
-		}, fields=["item_code"], pluck="item_code")
+		delivery_items = frappe.db.get_all(
+			"Delivery Note Item",
+			filters={"parenttype": "Delivery Note", "parent": self.delivery_note},
+			fields=["item_code"],
+			pluck="item_code",
+		)
 		for item in packed_items:
 			if item not in delivery_items:
-				raise InvalidPackingSlipItem
+				frappe.throw(
+					_("Item {0} does not exist in Delivery Note {1}").format(item, self.delivery_note),
+					InvalidPackingSlipItem,
+				)
 
 	def validate_case_nos(self):
 		"""
@@ -154,7 +163,8 @@ class PackingSlip(Document):
 		frappe.throw(
 			_("Quantity for Item {0} must be less than {1}").format(
 				item.get("item_code"), item.get("recommended_qty")
-			)
+			),
+			InvalidPackedQty,
 		)
 
 	def update_item_details(self):
@@ -210,14 +220,8 @@ class PackingSlip(Document):
 
 	@frappe.whitelist()
 	def validate_scanned_item(self):
-		try:
-			self.validate_item_codes()
-			self.validate_qty()
-		except InvalidPackingSlipItem:
-			return "remove"
-		except frappe.exceptions.ValidationError:
-			return "qty"
-
+		self.validate_item_codes()
+		self.validate_qty()
 
 
 @frappe.whitelist()
