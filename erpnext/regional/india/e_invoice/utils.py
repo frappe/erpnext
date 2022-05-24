@@ -1022,7 +1022,9 @@ class GSPConnector:
 		if not is_qrcode_file_attached:
 			if self.invoice.signed_qr_code:
 				self.attach_qrcode_image()
-				frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", self.invoice.qrcode_image)
+				frappe.db.set_value(
+					"Sales Invoice", self.invoice.name, "qrcode_image", self.invoice.qrcode_image
+				)
 				frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
 			else:
 				qrcode = self.get_qrcode_from_irn(self.invoice.irn)
@@ -1296,16 +1298,13 @@ class GSPConnector:
 		}
 		self.update_invoice()
 
-	def attach_qrcode_image(self, update_url=False):
+	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
-
 		qr_image = io.BytesIO()
 		url = qrcreate(qrcode, error="L")
 		url.png(qr_image, scale=2, quiet_zone=1)
 		qrcode_file = self.create_qr_code_file(qr_image.getvalue())
 		self.invoice.qrcode_image = qrcode_file.file_url
-		if update_url:
-			frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", qrcode_file.file_url)
 
 	def create_qr_code_file(self, qr_image):
 		doctype = self.invoice.doctype
