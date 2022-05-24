@@ -1010,7 +1010,7 @@ class GSPConnector:
 		return failed
 
 	def fetch_and_attach_qrcode_from_irn(self):
-		is_qrcode_file_attached = frappe.db.exists(
+		is_qrcode_file_attached = self.invoice.qrcode_image and frappe.db.exists(
 			"File",
 			{
 				"attached_to_doctype": "Sales Invoice",
@@ -1021,7 +1021,8 @@ class GSPConnector:
 		)
 		if not is_qrcode_file_attached:
 			if self.invoice.signed_qr_code:
-				self.attach_qrcode_image(update_url=True)
+				self.attach_qrcode_image()
+				frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", self.invoice.qrcode_image)
 				frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
 			else:
 				qrcode = self.get_qrcode_from_irn(self.invoice.irn)
@@ -1031,7 +1032,7 @@ class GSPConnector:
 					frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
 				else:
 					frappe.msgprint(_("QR Code not found for the IRN"), alert=True)
-		elif is_qrcode_file_attached and self.invoice.qrcode_image:
+		else:
 			frappe.msgprint(_("QR Code is already Attached"), indicator="green", alert=True)
 
 	def get_qrcode_from_irn(self, irn):
