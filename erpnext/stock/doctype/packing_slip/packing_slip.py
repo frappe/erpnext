@@ -209,12 +209,7 @@ class PackingSlip(Document):
 		self.update_item_details()
 
 	@frappe.whitelist()
-	def validate_scanned_item(self, scanned_row):
-		# Because sometimes frappe.model doesn't update the item row qty
-		# before the validation is triggered.
-		for k, v in scanned_row.items():
-			self.items[scanned_row.get("idx") - 1].set(k, v)
-
+	def validate_scanned_item(self):
 		try:
 			self.validate_item_codes()
 			self.validate_qty()
