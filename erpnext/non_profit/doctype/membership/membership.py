@@ -61,10 +61,6 @@ class Membership(Document):
 				frappe.throw(_("You can only renew if your membership expires within 30 days"))
 
 			self.from_date = add_days(last_membership.to_date, 1)
-		elif frappe.session.user == "Administrator":
-			self.from_date = self.from_date
-		else:
-			self.from_date = nowdate()
 
 		if frappe.db.get_single_value("Non Profit Settings", "billing_cycle") == "Yearly":
 			self.to_date = add_years(self.from_date, 1)
