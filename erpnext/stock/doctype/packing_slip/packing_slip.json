@@ -18,11 +18,11 @@
   "from_case_no",
   "column_break3",
   "to_case_no",
-  "package_item_details",
+  "barcode_scanner_section",
   "scan_barcode",
   "column_break_13",
   "prompt_qty",
-  "section_break_15",
+  "package_item_details",
   "items",
   "package_weight_details",
   "net_weight_pkg",
@@ -186,21 +186,22 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_15",
-   "fieldtype": "Section Break"
-  },
-  {
    "default": "0",
    "fieldname": "prompt_qty",
    "fieldtype": "Check",
    "label": "Prompt Qty"
+  },
+  {
+   "depends_on": "eval:doc.delivery_note",
+   "fieldname": "barcode_scanner_section",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-14 14:07:41.183290",
+ "modified": "2022-05-24 17:00:46.482577",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
