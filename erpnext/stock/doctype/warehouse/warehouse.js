@@ -2,13 +2,31 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Warehouse", {
-	onload: function (frm) {
-		frm.set_query("default_in_transit_warehouse", function () {
+	setup: function (frm) {
+		frm.set_query("default_in_transit_warehouse", function (doc) {
 			return {
 				filters: {
 					warehouse_type: "Transit",
 					is_group: 0,
-					company: frm.doc.company,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("parent_warehouse", function () {
+			return {
+				filters: {
+					is_group: 1,
+				},
+			};
+		});
+
+		frm.set_query("account", function (doc) {
+			return {
+				filters: {
+					is_group: 0,
+					account_type: "Stock",
+					company: doc.company,
 				},
 			};
 		});
@@ -58,24 +76,6 @@ frappe.ui.form.on("Warehouse", {
 			doc: frm.doc,
 			fieldname: "name",
 			doctype: "Warehouse",
-		};
-
-		frm.fields_dict["parent_warehouse"].get_query = function (doc) {
-			return {
-				filters: {
-					is_group: 1,
-				},
-			};
-		};
-
-		frm.fields_dict["account"].get_query = function (doc) {
-			return {
-				filters: {
-					is_group: 0,
-					account_type: "Stock",
-					company: doc.company,
-				},
-			};
 		};
 	},
 });
