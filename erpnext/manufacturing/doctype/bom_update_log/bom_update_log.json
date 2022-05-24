@@ -69,6 +69,7 @@
    "options": "Error Log"
   },
   {
+   "collapsible": 1,
    "fieldname": "progress_section",
    "fieldtype": "Section Break",
    "label": "Progress"
@@ -94,7 +95,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-23 14:42:14.725914",
+ "modified": "2022-05-24 17:52:21.824710",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",

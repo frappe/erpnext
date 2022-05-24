@@ -3,7 +3,7 @@
 
 import json
 from collections import defaultdict
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
@@ -13,7 +13,8 @@ from frappe import _
 
 
 def replace_bom(boms: Dict) -> None:
-	"""Replace current BOM with new BOM in parent BOMs."""
+	"Replace current BOM with new BOM in parent BOMs."
+
 	current_bom = boms.get("current_bom")
 	new_bom = boms.get("new_bom")
 
@@ -39,6 +40,7 @@ def replace_bom(boms: Dict) -> None:
 
 def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str]) -> None:
 	"Updates Cost for BOMs within a given level. Runs via background jobs."
+
 	try:
 		status = frappe.db.get_value("BOM Update Log", doc.name, "status")
 		if status == "Failed":
@@ -66,6 +68,8 @@ def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str]) -> None:
 
 
 def get_ancestor_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
+	"Recursively get all ancestors of BOM."
+
 	bom_list = bom_list or []
 	bom_item = frappe.qb.DocType("BOM Item")
 
@@ -99,17 +103,18 @@ def update_new_bom_in_bom_items(unit_cost: float, current_bom: str, new_bom: str
 	).run()
 
 
-def get_bom_unit_cost(new_bom: str) -> float:
+def get_bom_unit_cost(bom_name: str) -> float:
 	bom = frappe.qb.DocType("BOM")
 	new_bom_unitcost = (
-		frappe.qb.from_(bom).select(bom.total_cost / bom.quantity).where(bom.name == new_bom).run()
+		frappe.qb.from_(bom).select(bom.total_cost / bom.quantity).where(bom.name == bom_name).run()
 	)
 
 	return frappe.utils.flt(new_bom_unitcost[0][0])
 
 
-def update_cost_in_boms(bom_list: List[str], docname: str) -> Dict:
+def update_cost_in_boms(bom_list: List[str], docname: str) -> Dict[str, Dict]:
 	"Updates cost in given BOMs. Returns current and total updated BOMs."
+
 	updated_boms = {}  # current boms that have been updated
 
 	for bom in bom_list:
@@ -131,8 +136,11 @@ def update_cost_in_boms(bom_list: List[str], docname: str) -> Dict:
 	return log_data
 
 
-def process_if_level_is_complete(docname: str, current_boms: Dict, processed_boms: Dict) -> None:
-	"Prepare and set higher level BOMs in Log if current level is complete."
+def process_if_level_is_complete(
+	docname: str, current_boms: Dict[str, bool], processed_boms: Dict[str, bool]
+) -> None:
+	"Prepare and set higher level BOMs/dependants in Log if current level is complete."
+
 	processing_complete = all(current_boms.get(bom) for bom in current_boms)
 	if not processing_complete:
 		return
@@ -149,7 +157,9 @@ def process_if_level_is_complete(docname: str, current_boms: Dict, processed_bom
 	)
 
 
-def get_next_higher_level_boms(child_boms: Dict, processed_boms: Dict):
+def get_next_higher_level_boms(
+	child_boms: Dict[str, bool], processed_boms: Dict[str, bool]
+) -> List[str]:
 	"Generate immediate higher level dependants with no unresolved dependencies."
 
 	def _all_children_are_processed(parent):
@@ -167,7 +177,9 @@ def get_next_higher_level_boms(child_boms: Dict, processed_boms: Dict):
 	return list(dependants)
 
 
-def get_leaf_boms():
+def get_leaf_boms() -> List[str]:
+	"Get BOMs that have no dependencies."
+
 	return frappe.db.sql_list(
 		"""select name from `tabBOM` bom
 		where docstatus=1 and is_active=1
@@ -176,7 +188,13 @@ def get_leaf_boms():
 	)
 
 
-def _generate_dependants_map():
+def _generate_dependants_map() -> defaultdict:
+	"""
+	Generate map such as: { BOM-1: [Dependant-BOM-1, Dependant-BOM-2, ..] }.
+	Here BOM-1 is the leaf/lower level node/dependency.
+	The list contains one level higher nodes/dependants that depend on BOM-1.
+	"""
+
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
 
@@ -201,8 +219,9 @@ def _generate_dependants_map():
 	return child_parent_map
 
 
-def set_values_in_log(log_name: str, values: Dict, commit: bool = False) -> None:
+def set_values_in_log(log_name: str, values: Dict[str, Any], commit: bool = False) -> None:
 	"Update BOM Update Log record."
+
 	if not values:
 		return
 
@@ -217,7 +236,9 @@ def set_values_in_log(log_name: str, values: Dict, commit: bool = False) -> None
 		frappe.db.commit()
 
 
-def handle_exception(doc: "BOMUpdateLog"):
+def handle_exception(doc: "BOMUpdateLog") -> None:
+	"Rolls back and fails BOM Update Log."
+
 	frappe.db.rollback()
 	error_log = doc.log_error("BOM Update Tool Error")
 	set_values_in_log(doc.name, {"status": "Failed", "error_log": error_log.name})
