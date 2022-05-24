@@ -95,10 +95,9 @@ class VATAuditReport(object):
 			as_dict=1,
 		)
 		for d in items:
-			if d.item_code not in self.invoice_items.get(d.parent, {}):
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {"net_amount": 0.0})
-				self.invoice_items[d.parent][d.item_code]["net_amount"] += d.get("base_net_amount", 0)
-				self.invoice_items[d.parent][d.item_code]["is_zero_rated"] = d.is_zero_rated
+			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, {"net_amount": 0.0})
+			self.invoice_items[d.parent][d.item_code]["net_amount"] += d.get("base_net_amount", 0)
+			self.invoice_items[d.parent][d.item_code]["is_zero_rated"] = d.is_zero_rated
 
 	def get_items_based_on_tax_rate(self, doctype):
 		self.items_based_on_tax_rate = frappe._dict()
@@ -110,7 +109,7 @@ class VATAuditReport(object):
 		self.tax_details = frappe.db.sql(
 			"""
 			SELECT
-				parent, account_head, item_wise_tax_detail, base_tax_amount_after_discount_amount
+				parent, account_head, item_wise_tax_detail
 			FROM
 				`tab%s`
 			WHERE
@@ -123,7 +122,7 @@ class VATAuditReport(object):
 			tuple([doctype] + list(self.invoices.keys())),
 		)
 
-		for parent, account, item_wise_tax_detail, tax_amount in self.tax_details:
+		for parent, account, item_wise_tax_detail in self.tax_details:
 			if item_wise_tax_detail:
 				try:
 					if account in self.sa_vat_accounts:
@@ -135,7 +134,7 @@ class VATAuditReport(object):
 						# to skip items with non-zero tax rate in multiple rows
 						if taxes[0] == 0 and not is_zero_rated:
 							continue
-						tax_rate, item_amount_map = self.get_item_amount_map(parent, item_code, taxes)
+						tax_rate = self.get_item_amount_map(parent, item_code, taxes)
 
 						if tax_rate is not None:
 							rate_based_dict = self.items_based_on_tax_rate.setdefault(parent, {}).setdefault(
@@ -151,16 +150,22 @@ class VATAuditReport(object):
 		tax_rate = taxes[0]
 		tax_amount = taxes[1]
 		gross_amount = net_amount + tax_amount
-		item_amount_map = self.item_tax_rate.setdefault(parent, {}).setdefault(item_code, [])
-		amount_dict = {
-			"tax_rate": tax_rate,
-			"gross_amount": gross_amount,
-			"tax_amount": tax_amount,
-			"net_amount": net_amount,
-		}
-		item_amount_map.append(amount_dict)
 
-		return tax_rate, item_amount_map
+		self.item_tax_rate.setdefault(parent, {}).setdefault(
+			item_code,
+			{
+				"tax_rate": tax_rate,
+				"gross_amount": 0.0,
+				"tax_amount": 0.0,
+				"net_amount": 0.0,
+			},
+		)
+
+		self.item_tax_rate[parent][item_code]["net_amount"] += net_amount
+		self.item_tax_rate[parent][item_code]["tax_amount"] += tax_amount
+		self.item_tax_rate[parent][item_code]["gross_amount"] += gross_amount
+
+		return tax_rate
 
 	def get_conditions(self):
 		conditions = ""
@@ -205,9 +210,10 @@ class VATAuditReport(object):
 		for inv, inv_data in self.invoices.items():
 			if self.items_based_on_tax_rate.get(inv):
 				for rate, items in self.items_based_on_tax_rate.get(inv).items():
+					row = {"tax_amount": 0.0, "gross_amount": 0.0, "net_amount": 0.0}
+
 					consolidated_data_map.setdefault(rate, {"data": []})
 					for item in items:
-						row = {}
 						item_details = self.item_tax_rate.get(inv).get(item)
 						row["account"] = inv_data.get("account")
 						row["posting_date"] = formatdate(inv_data.get("posting_date"), "dd-mm-yyyy")
@@ -216,10 +222,11 @@ class VATAuditReport(object):
 						row["party_type"] = "Customer" if doctype == "Sales Invoice" else "Supplier"
 						row["party"] = inv_data.get("party")
 						row["remarks"] = inv_data.get("remarks")
-						row["gross_amount"] = item_details[0].get("gross_amount")
-						row["tax_amount"] = item_details[0].get("tax_amount")
-						row["net_amount"] = item_details[0].get("net_amount")
-						consolidated_data_map[rate]["data"].append(row)
+						row["gross_amount"] += item_details.get("gross_amount")
+						row["tax_amount"] += item_details.get("tax_amount")
+						row["net_amount"] += item_details.get("net_amount")
+
+					consolidated_data_map[rate]["data"].append(row)
 
 		return consolidated_data_map
 

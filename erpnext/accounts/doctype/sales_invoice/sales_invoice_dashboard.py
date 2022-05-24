@@ -12,7 +12,10 @@ def get_data():
 			"Sales Invoice": "return_against",
 			"Auto Repeat": "reference_document",
 		},
-		"internal_links": {"Sales Order": ["items", "sales_order"]},
+		"internal_links": {
+			"Sales Order": ["items", "sales_order"],
+			"Timesheet": ["timesheets", "time_sheet"],
+		},
 		"transactions": [
 			{
 				"label": _("Payment"),

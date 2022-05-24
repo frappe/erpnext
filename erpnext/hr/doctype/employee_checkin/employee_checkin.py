@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_datetime
+from frappe.utils import cint, get_datetime, get_link_to_form
 
 from erpnext.hr.doctype.shift_assignment.shift_assignment import (
 	get_actual_start_end_datetime_of_shift,
@@ -127,19 +127,17 @@ def mark_attendance_and_link_log(
 	log_names = [x.name for x in logs]
 	employee = logs[0].employee
 	if attendance_status == "Skip":
-		frappe.db.sql(
-			"""update `tabEmployee Checkin`
-			set skip_auto_attendance = %s
-			where name in %s""",
-			("1", log_names),
-		)
+		skip_attendance_in_checkins(log_names)
 		return None
+
 	elif attendance_status in ("Present", "Absent", "Half Day"):
 		employee_doc = frappe.get_doc("Employee", employee)
-		if not frappe.db.exists(
+		duplicate = frappe.db.exists(
 			"Attendance",
 			{"employee": employee, "attendance_date": attendance_date, "docstatus": ("!=", "2")},
-		):
+		)
+
+		if not duplicate:
 			doc_dict = {
 				"doctype": "Attendance",
 				"employee": employee,
@@ -155,6 +153,12 @@ def mark_attendance_and_link_log(
 			}
 			attendance = frappe.get_doc(doc_dict).insert()
 			attendance.submit()
+
+			if attendance_status == "Absent":
+				attendance.add_comment(
+					text=_("Employee was marked Absent for not meeting the working hours threshold.")
+				)
+
 			frappe.db.sql(
 				"""update `tabEmployee Checkin`
 				set attendance = %s
@@ -163,12 +167,10 @@ def mark_attendance_and_link_log(
 			)
 			return attendance
 		else:
-			frappe.db.sql(
-				"""update `tabEmployee Checkin`
-				set skip_auto_attendance = %s
-				where name in %s""",
-				("1", log_names),
-			)
+			skip_attendance_in_checkins(log_names)
+			if duplicate:
+				add_comment_in_checkins(log_names, duplicate)
+
 			return None
 	else:
 		frappe.throw(_("{} is an invalid Attendance Status.").format(attendance_status))
@@ -223,11 +225,15 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 					in_log = out_log = None
 				if not in_log:
 					in_log = log if log.log_type == "IN" else None
+					if in_log and not in_time:
+						in_time = in_log.time
 				elif not out_log:
 					out_log = log if log.log_type == "OUT" else None
+
 			if in_log and out_log:
 				out_time = out_log.time
 				total_hours += time_diff_in_hours(in_log.time, out_log.time)
+
 	return total_hours, in_time, out_time
 
 
@@ -237,3 +243,29 @@ def time_diff_in_hours(start, end):
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)
+
+
+def add_comment_in_checkins(log_names, duplicate):
+	text = _("Auto Attendance skipped due to duplicate attendance record: {}").format(
+		get_link_to_form("Attendance", duplicate)
+	)
+
+	for name in log_names:
+		frappe.get_doc(
+			{
+				"doctype": "Comment",
+				"comment_type": "Comment",
+				"reference_doctype": "Employee Checkin",
+				"reference_name": name,
+				"content": text,
+			}
+		).insert(ignore_permissions=True)
+
+
+def skip_attendance_in_checkins(log_names):
+	EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
+	(
+		frappe.qb.update(EmployeeCheckin)
+		.set("skip_auto_attendance", 1)
+		.where(EmployeeCheckin.name.isin(log_names))
+	).run()
