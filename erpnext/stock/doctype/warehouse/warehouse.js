@@ -40,8 +40,6 @@ frappe.ui.form.on("Warehouse", {
 			function () {
 				convert_to_group_or_ledger(frm);
 			},
-			"fa fa-retweet",
-			"btn-default"
 		);
 
 		if (!frm.doc.is_group && frm.doc.__onload && frm.doc.__onload.account) {
