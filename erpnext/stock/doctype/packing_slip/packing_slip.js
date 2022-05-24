@@ -2,6 +2,25 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Packing Slip", {
+	onload(frm) {
+		frm.set_query("delivery_note", () => {
+			return {
+				filters: { 'docstatus': 0}
+			}
+		});
+
+		frm.set_query("item_code", "items", () => {
+			if (!frm.doc.delivery_note) {
+				frappe.throw(__("Please select a Delivery Note"));
+			}
+
+			return {
+				query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",
+				filters:{ 'delivery_note': frm.doc.delivery_note}
+			}
+		});
+	},
+
 	onload_post_render(frm) {
 		if(frm.doc.delivery_note && frm.doc.__islocal) {
 			get_items(frm);
@@ -64,24 +83,6 @@ frappe.ui.form.on("Packing Slip", {
 	}
 });
 
-cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
-	return{
-		filters:{ 'docstatus': 0}
-	}
-}
-
-
-cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	if(!doc.delivery_note) {
-		frappe.throw(__("Please select a Delivery Note"));
-	} else {
-		return {
-			query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",
-			filters:{ 'delivery_note': doc.delivery_note}
-		}
-	}
-}
-
 function get_items(frm) {
 	return frm.call({
 		doc: frm.doc,
@@ -138,12 +139,12 @@ function validate_duplicate_items(doc, ps_detail) {
 
 // Calculate Net Weight of Package
 function calc_net_total_pkg (doc, ps_detail) {
-	var net_weight_pkg = 0;
+	let net_weight_pkg = 0;
 	doc.net_weight_uom = (ps_detail && ps_detail.length) ? ps_detail[0].weight_uom : '';
 	doc.gross_weight_uom = doc.net_weight_uom;
 
-	for(var i=0; i<ps_detail.length; i++) {
-		var item = ps_detail[i];
+	for(let i=0; i<ps_detail.length; i++) {
+		const item = ps_detail[i];
 		if(item.weight_uom != doc.net_weight_uom) {
 			frappe.msgprint(__("Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM."));
 			frappe.validated = false;
