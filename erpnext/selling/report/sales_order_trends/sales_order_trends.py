@@ -53,4 +53,5 @@ def get_chart_data(data, conditions, filters):
 		},
 		"type": "line",
 		"lineOptions": {"regionFill": 1},
+		"fieldtype": "Currency",
 	}

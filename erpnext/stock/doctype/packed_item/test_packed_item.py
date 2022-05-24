@@ -1,15 +1,44 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from typing import List, Optional, Tuple
+
+import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_to_date, nowdate
 
-from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+
+def create_product_bundle(
+	quantities: Optional[List[int]] = None, warehouse: Optional[str] = None
+) -> Tuple[str, List[str]]:
+	"""Get a new product_bundle for use in tests.
+
+	Create 10x required stock if warehouse is specified.
+	"""
+	if not quantities:
+		quantities = [2, 2]
+
+	bundle = make_item(properties={"is_stock_item": 0}).name
+
+	bundle_doc = frappe.get_doc({"doctype": "Product Bundle", "new_item_code": bundle})
+
+	components = []
+	for qty in quantities:
+		compoenent = make_item().name
+		components.append(compoenent)
+		bundle_doc.append("items", {"item_code": compoenent, "qty": qty})
+		if warehouse:
+			make_stock_entry(item=compoenent, to_warehouse=warehouse, qty=10 * qty, rate=100)
+
+	bundle_doc.insert()
+
+	return bundle, components
 
 
 class TestPackedItem(FrappeTestCase):
@@ -19,24 +48,11 @@ class TestPackedItem(FrappeTestCase):
 	def setUpClass(cls) -> None:
 		super().setUpClass()
 		cls.warehouse = "_Test Warehouse - _TC"
-		cls.bundle = "_Test Product Bundle X"
-		cls.bundle_items = ["_Test Bundle Item 1", "_Test Bundle Item 2"]
 
-		cls.bundle2 = "_Test Product Bundle Y"
-		cls.bundle2_items = ["_Test Bundle Item 3", "_Test Bundle Item 4"]
+		cls.bundle, cls.bundle_items = create_product_bundle(warehouse=cls.warehouse)
+		cls.bundle2, cls.bundle2_items = create_product_bundle(warehouse=cls.warehouse)
 
-		make_item(cls.bundle, {"is_stock_item": 0})
-		make_item(cls.bundle2, {"is_stock_item": 0})
-		for item in cls.bundle_items + cls.bundle2_items:
-			make_item(item, {"is_stock_item": 1})
-
-		make_item("_Test Normal Stock Item", {"is_stock_item": 1})
-
-		make_product_bundle(cls.bundle, cls.bundle_items, qty=2)
-		make_product_bundle(cls.bundle2, cls.bundle2_items, qty=2)
-
-		for item in cls.bundle_items + cls.bundle2_items:
-			make_stock_entry(item_code=item, to_warehouse=cls.warehouse, qty=100, rate=100)
+		cls.normal_item = make_item().name
 
 	def test_adding_bundle_item(self):
 		"Test impact on packed items if bundle item row is added."
@@ -58,7 +74,7 @@ class TestPackedItem(FrappeTestCase):
 		self.assertEqual(so.packed_items[1].qty, 4)
 
 		# change item code to non bundle item
-		so.items[0].item_code = "_Test Normal Stock Item"
+		so.items[0].item_code = self.normal_item
 		so.save()
 
 		self.assertEqual(len(so.packed_items), 0)

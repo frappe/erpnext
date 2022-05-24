@@ -332,6 +332,9 @@ class PaymentReconciliation(Document):
 	def get_conditions(self, get_invoices=False, get_payments=False, get_return_invoices=False):
 		condition = " and company = '{0}' ".format(self.company)
 
+		if self.get("cost_center") and (get_invoices or get_payments or get_return_invoices):
+			condition = " and cost_center = '{0}' ".format(self.cost_center)
+
 		if get_invoices:
 			condition += (
 				" and posting_date >= {0}".format(frappe.db.escape(self.from_invoice_date))
