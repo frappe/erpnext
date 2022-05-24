@@ -61,13 +61,16 @@ frappe.ui.form.on("Warehouse", {
 		);
 
 		if (!frm.doc.is_group && frm.doc.__onload && frm.doc.__onload.account) {
-			frm.add_custom_button(__("General Ledger", null, "Warehouse"), function () {
-				frappe.route_options = {
-					account: frm.doc.__onload.account,
-					company: frm.doc.company,
-				};
-				frappe.set_route("query-report", "General Ledger");
-			});
+			frm.add_custom_button(
+				__("General Ledger", null, "Warehouse"),
+				function () {
+					frappe.route_options = {
+						account: frm.doc.__onload.account,
+						company: frm.doc.company,
+					};
+					frappe.set_route("query-report", "General Ledger");
+				}
+			);
 		}
 
 		frm.toggle_enable(["is_group", "company"], false);
