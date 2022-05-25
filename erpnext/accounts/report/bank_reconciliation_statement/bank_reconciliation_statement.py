@@ -204,6 +204,7 @@ def get_loan_entries(filters):
 			posting_date = (loan_doc.posting_date).as_("posting_date")
 			account = loan_doc.payment_account
 			salary_condition = loan_doc.repay_from_salary == 0
+
 		query = (
 			frappe.qb.from_(loan_doc)
 			.select(
