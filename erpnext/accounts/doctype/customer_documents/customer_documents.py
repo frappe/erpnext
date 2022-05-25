@@ -18,6 +18,9 @@ class CustomerDocuments(Document):
 		if self.docstatus == 1:
 			self.update_accounts_status()
 			# self.apply_gl_entry()
+	
+	def on_cancel(self):
+		self.update_accounts_status_cancel()
 
 	def on_load(self):
 		self.validate_status()
@@ -65,6 +68,13 @@ class CustomerDocuments(Document):
 		if customer:
 			customer.debit += self.total
 			customer.remaining_balance += self.total
+			customer.save()
+	
+	def update_accounts_status_cancel(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.debit -= self.total
+			customer.remaining_balance -= self.total
 			customer.save()
 	
 	def validate_status(self):
