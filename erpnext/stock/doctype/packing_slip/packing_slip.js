@@ -58,10 +58,14 @@ frappe.ui.form.on("Packing Slip", {
 			}
 			else if (exc_type === "InvalidPackedQty") {
 				// Reset the qty to the value before the row was scanned.
+				// If the row didn't exist, set the qty to zero.
 				const row = backup.find(row => row.name === scanned_row.name);
+				row.item_code = row.item_code ?? scanned_row.item_code;
+				row.qty = row.qty ?? 0;
+
 				frappe.model.set_value(row.doctype, row.name, "qty", row.qty, "Float");
 				frappe.msgprint(__("Item {0} packed quantity has been reverted to {1}",
-					[scanned_row.item_code, scanned_row.qty]));
+					[row.item_code, row.qty]));
 			}
 		}
 
