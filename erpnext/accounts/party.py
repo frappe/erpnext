@@ -560,9 +560,25 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 		info = {}
 
+		if party_type == "Customer":
+			cds = frappe.get_all("Customer Documents", ["total", "outstanding_amount"], filters = {"company": d.company, "customer": party, "docstatus": 1})
+
+			for cd in cds:
+				billing_this_year += cd.total
+				total_unpaid += cd.outstanding_amount
+
+		billing_this_year_supplier = 0			
+
 		if party_type == "Supplier":
+			cds = frappe.get_all("Supplier Documents", ["total", "outstanding_amount"], filters = {"company": d.company, "supplier": party, "docstatus": 1})
+
+			for cd in cds:
+				billing_this_year_supplier += cd.total
+				total_unpaid += cd.outstanding_amount
+
 			supplier = frappe.get_doc("Supplier", party)
-			info["billing_this_year"] = supplier.remaining_balance
+			billing_this_year_supplier += supplier.remaining_balance
+			info["billing_this_year"] = billing_this_year_supplier
 		else:
 			info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
 
