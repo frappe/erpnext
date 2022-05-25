@@ -10,6 +10,7 @@ from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
+	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
 	make_corrective_job_card,
@@ -165,6 +166,7 @@ class TestJobCard(FrappeTestCase):
 		# transfer was made for 2 fg qty in first transfer Stock Entry
 		self.assertEqual(transfer_entry_2.fg_completed_qty, 0)
 
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 1})
 	def test_job_card_excess_material_transfer(self):
 		"Test transferring more than required RM against Job Card."
 		self.transfer_material_against = "Job Card"
@@ -206,6 +208,30 @@ class TestJobCard(FrappeTestCase):
 
 		# JC is Completed with excess transfer
 		self.assertEqual(job_card.status, "Completed")
+
+	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
+	def test_job_card_excess_material_transfer_block(self):
+
+		self.transfer_material_against = "Job Card"
+		self.source_warehouse = "Stores - _TC"
+
+		self.generate_required_stock(self.work_order)
+
+		job_card_name = frappe.db.get_value("Job Card", {"work_order": self.work_order.name})
+
+		# fully transfer both RMs
+		transfer_entry_1 = make_stock_entry_from_jc(job_card_name)
+		transfer_entry_1.insert()
+		transfer_entry_1.submit()
+
+		# transfer extra qty of both RM due to previously damaged RM
+		transfer_entry_2 = make_stock_entry_from_jc(job_card_name)
+		# deliberately change 'For Quantity'
+		transfer_entry_2.fg_completed_qty = 1
+		transfer_entry_2.items[0].qty = 5
+		transfer_entry_2.items[1].qty = 3
+		transfer_entry_2.insert()
+		self.assertRaises(JobCardOverTransferError, transfer_entry_2.submit)
 
 	def test_job_card_partial_material_transfer(self):
 		"Test partial material transfer against Job Card"
