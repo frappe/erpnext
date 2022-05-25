@@ -221,7 +221,7 @@ def get_loan_entries(filters):
 			.where(ifnull(loan_doc.clearance_date, "4000-01-01") > getdate(filters.get("report_date")))
 		)
 
-		entries = query.run(as_dict=1, debug=1)
+		entries = query.run(as_dict=1)
 		loan_docs.extend(entries)
 
 	return loan_docs
