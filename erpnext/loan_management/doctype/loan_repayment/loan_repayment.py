@@ -449,8 +449,6 @@ class LoanRepayment(AccountsController):
 					"remarks": remarks,
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
-					"party_type": self.applicant_type if self.repay_from_salary else "",
-					"party": self.applicant if self.repay_from_salary else "",
 				}
 			)
 		)
