@@ -207,7 +207,7 @@ class SalesInvoice(SellingController):
 		self.discount_product()
 		self.calculate_insurance()
 		if self.round_off_discount == 1 and self.update_stock == 0:
-			frappe.throw(_("When selecting a discount reason, check the field to update inventory."))
+			frappe.throw(_("When selecting a discount reason check the field to update inventory."))
 			
 		if self.docstatus == 0:
 			self.caculate_items_amount()
