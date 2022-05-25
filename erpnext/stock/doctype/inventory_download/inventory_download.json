@@ -98,8 +98,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project",
-   "reqd": 1
+   "options": "Project"
   },
   {
    "fieldname": "posting_time",
@@ -129,7 +128,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-05-20 14:27:03.435957",
+ "modified": "2022-05-25 15:13:31.654555",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",

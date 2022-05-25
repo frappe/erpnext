@@ -55,7 +55,7 @@ def get_data():
 			},
 			{
 				'label': _('Documents'),
-				'items': ['Customer Documents']
+				'items': ['Customer Documents', 'Supplier Documents']
 			},
 		]
 	}
