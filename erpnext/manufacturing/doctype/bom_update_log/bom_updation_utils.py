@@ -120,7 +120,6 @@ def update_cost_in_boms(bom_list: List[str], docname: str) -> Dict[str, Dict]:
 	for bom in bom_list:
 		bom_doc = frappe.get_cached_doc("BOM", bom)
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
-		# bom_doc.update_exploded_items(save=True) #TODO: edit exploded items rate
 		bom_doc.db_update()
 		updated_boms[bom] = True
 

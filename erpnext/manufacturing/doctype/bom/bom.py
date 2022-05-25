@@ -5,7 +5,7 @@ import functools
 import re
 from collections import deque
 from operator import itemgetter
-from typing import List
+from typing import Dict, List
 
 import frappe
 from frappe import _
@@ -185,6 +185,7 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
+		self.update_exploded_items(save=False)
 		self.calculate_cost()
 		self.update_stock_qty()
 		self.validate_scrap_items()
@@ -380,8 +381,6 @@ class BOM(WebsiteGenerator):
 
 		if save:
 			self.db_update()
-
-		self.update_exploded_items(save=save)
 
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
@@ -584,6 +583,10 @@ class BOM(WebsiteGenerator):
 		self.calculate_op_cost(update_hour_rate)
 		self.calculate_rm_cost(save=save_updates)
 		self.calculate_sm_cost(save=save_updates)
+		if save_updates:
+			# not via doc event, table is not regenerated and needs updation
+			self.calculate_exploded_cost()
+
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = (
 			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
@@ -678,6 +681,36 @@ class BOM(WebsiteGenerator):
 
 		self.scrap_material_cost = total_sm_cost
 		self.base_scrap_material_cost = base_total_sm_cost
+
+	def calculate_exploded_cost(self):
+		"Set exploded row cost from it's parent BOM."
+		rm_rate_map = self.get_rm_rate_map()
+
+		for row in self.get("exploded_items"):
+			old_rate = flt(row.rate)
+			row.rate = rm_rate_map.get(row.item_code)
+			row.amount = flt(row.stock_qty) * row.rate
+
+			if old_rate != row.rate:
+				# Only db_update if unchanged
+				row.db_update()
+
+	def get_rm_rate_map(self) -> Dict[str, float]:
+		"Create Raw Material-Rate map for Exploded Items. Fetch rate from Items table or Subassembly BOM."
+		rm_rate_map = {}
+
+		for item in self.get("items"):
+			if item.bom_no:
+				# Get Item-Rate from Subassembly BOM
+				explosion_items = frappe.db.get_all(
+					"BOM Explosion Item", filters={"parent": item.bom_no}, fields=["item_code", "rate"]
+				)
+				explosion_item_rate = {item.item_code: flt(item.rate) for item in explosion_items}
+				rm_rate_map.update(explosion_item_rate)
+			else:
+				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
+
+		return rm_rate_map
 
 	def update_exploded_items(self, save=True):
 		"""Update Flat BOM, following will be correct data"""
