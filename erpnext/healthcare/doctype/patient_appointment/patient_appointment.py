@@ -255,7 +255,8 @@ def create_sales_invoice(appointment_doc):
 	sales_invoice.customer = frappe.get_value("Patient", appointment_doc.patient, "customer")
 	sales_invoice.currency = frappe.get_value(
 		"Customer", sales_invoice.customer, "default_currency"
-	) or get_company_currency(appointment_doc.currency)
+	) or get_company_currency(appointment_doc.company)
+
 	sales_invoice.appointment = appointment_doc.name
 	sales_invoice.due_date = getdate()
 	sales_invoice.company = appointment_doc.company
