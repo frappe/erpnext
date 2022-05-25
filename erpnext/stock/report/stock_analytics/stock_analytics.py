@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
+from typing import List
 
 import frappe
 from frappe import _, scrub
@@ -148,10 +149,18 @@ def get_periodic_data(entry, filters):
 	                        - Warehouse A : bal_qty/value
 	                        - Warehouse B : bal_qty/value
 	"""
+
+	expected_ranges = get_period_date_ranges(filters)
+	expected_periods = []
+	for _start_date, end_date in expected_ranges:
+		expected_periods.append(get_period(end_date, filters))
+
 	periodic_data = {}
 	for d in entry:
 		period = get_period(d.posting_date, filters)
 		bal_qty = 0
+
+		fill_intermediate_periods(periodic_data, d.item_code, period, expected_periods)
 
 		# if period against item does not exist yet, instantiate it
 		# insert existing balance dict against period, and add/subtract to it
@@ -159,7 +168,7 @@ def get_periodic_data(entry, filters):
 			previous_balance = periodic_data[d.item_code]["balance"].copy()
 			periodic_data[d.item_code][period] = previous_balance
 
-		if d.voucher_type == "Stock Reconciliation":
+		if d.voucher_type == "Stock Reconciliation" and not d.batch_no:
 			if periodic_data.get(d.item_code) and periodic_data.get(d.item_code).get("balance").get(
 				d.warehouse
 			):
@@ -186,6 +195,36 @@ def get_periodic_data(entry, filters):
 	return periodic_data
 
 
+def fill_intermediate_periods(
+	periodic_data, item_code: str, current_period: str, all_periods: List[str]
+) -> None:
+	"""There might be intermediate periods where no stock ledger entry exists, copy previous previous data.
+
+	Previous data is ONLY copied if period falls in report range and before period being processed currently.
+
+	args:
+	        current_period: process till this period (exclusive)
+	        all_periods: all periods expected in report via filters
+	        periodic_data: report's periodic data
+	        item_code: item_code being processed
+	"""
+
+	previous_period_data = None
+	for period in all_periods:
+		if period == current_period:
+			return
+
+		if (
+			periodic_data.get(item_code)
+			and not periodic_data.get(item_code).get(period)
+			and previous_period_data
+		):
+			# This period should exist since it's in report range, assign previous period data
+			periodic_data[item_code][period] = previous_period_data.copy()
+
+		previous_period_data = periodic_data.get(item_code, {}).get(period)
+
+
 def get_data(filters):
 	data = []
 	items = get_items(filters)
@@ -193,6 +232,8 @@ def get_data(filters):
 	item_details = get_item_details(items, sle, filters)
 	periodic_data = get_periodic_data(sle, filters)
 	ranges = get_period_date_ranges(filters)
+
+	today = getdate()
 
 	for dummy, item_data in item_details.items():
 		row = {
@@ -202,14 +243,15 @@ def get_data(filters):
 			"uom": item_data.stock_uom,
 			"brand": item_data.brand,
 		}
-		total = 0
-		for dummy, end_date in ranges:
+		previous_period_value = 0.0
+		for start_date, end_date in ranges:
 			period = get_period(end_date, filters)
 			period_data = periodic_data.get(item_data.name, {}).get(period)
-			amount = sum(period_data.values()) if period_data else 0
-			row[scrub(period)] = amount
-			total += amount
-		row["total"] = total
+			if period_data:
+				row[scrub(period)] = previous_period_value = sum(period_data.values())
+			else:
+				row[scrub(period)] = previous_period_value if today >= start_date else None
+
 		data.append(row)
 
 	return data

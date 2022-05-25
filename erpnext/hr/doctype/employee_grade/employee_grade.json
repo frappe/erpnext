@@ -8,7 +8,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "default_salary_structure"
+  "default_salary_structure",
+  "currency",
+  "default_base_pay"
  ],
  "fields": [
   {
@@ -16,14 +18,31 @@
    "fieldtype": "Link",
    "label": "Default Salary Structure",
    "options": "Salary Structure"
+  },
+  {
+   "depends_on": "default_salary_structure",
+   "fieldname": "default_base_pay",
+   "fieldtype": "Currency",
+   "label": "Default Base Pay",
+   "options": "currency"
+  },
+  {
+   "fetch_from": "default_salary_structure.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-26 13:12:07.815330",
+ "modified": "2022-05-06 15:42:10.395508",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grade",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -65,5 +84,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

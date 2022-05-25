@@ -840,6 +840,30 @@ def get_gst_accounts(
 	return gst_accounts
 
 
+def validate_sez_and_export_invoices(doc, method):
+	country = frappe.get_cached_value("Company", doc.company, "country")
+
+	if country != "India":
+		return
+
+	if (
+		doc.get("gst_category") in ("SEZ", "Overseas")
+		and doc.get("export_type") == "Without Payment of Tax"
+	):
+		gst_accounts = get_gst_accounts(doc.company)
+
+		for tax in doc.get("taxes"):
+			for tax in doc.get("taxes"):
+				if (
+					tax.account_head
+					in gst_accounts.get("igst_account", [])
+					+ gst_accounts.get("sgst_account", [])
+					+ gst_accounts.get("cgst_account", [])
+					and tax.tax_amount_after_discount_amount
+				):
+					frappe.throw(_("GST cannot be applied on SEZ or Export invoices without payment of tax"))
+
+
 def validate_reverse_charge_transaction(doc, method):
 	country = frappe.get_cached_value("Company", doc.company, "country")
 
@@ -886,6 +910,8 @@ def validate_reverse_charge_transaction(doc, method):
 			)
 
 			frappe.throw(msg)
+
+		doc.eligibility_for_itc = "ITC on Reverse Charge"
 
 
 def update_itc_availed_fields(doc, method):

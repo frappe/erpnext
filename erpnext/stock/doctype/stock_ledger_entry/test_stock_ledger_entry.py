@@ -8,9 +8,8 @@ import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.query_builder.functions import CombineDatetime
-from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, today
-from frappe.utils.data import add_to_date
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -1182,6 +1181,77 @@ class TestStockLedgerEntry(FrappeTestCase):
 
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
+
+	def test_timestamp_clash(self):
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reciept = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="01:00:00",
+		)
+
+		consumption = make_stock_entry(
+			item_code=item,
+			from_warehouse=warehouse,
+			qty=50,
+			posting_date="2021-01-01",
+			posting_time="02:00:00.1234",  # ms are possible when submitted without editing posting time
+		)
+
+		backdated_receipt = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			posting_date="2021-01-01",
+			rate=10,
+			posting_time="02:00:00",  # same posting time as consumption but ms part stripped
+		)
+
+		try:
+			backdated_receipt.cancel()
+		except Exception as e:
+			self.fail("Double processing of qty for clashing timestamp.")
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	def test_transfer_invariants(self):
+		"""Extact stock value should be transferred."""
+
+		item = make_item(
+			properties={
+				"valuation_method": "Moving Average",
+				"stock_uom": "Kg",
+			}
+		).name
+		source_warehouse = "Stores - TCP1"
+		target_warehouse = "Finished Goods - TCP1"
+
+		make_purchase_receipt(
+			item=item,
+			warehouse=source_warehouse,
+			qty=20,
+			conversion_factor=1000,
+			uom="Tonne",
+			rate=156_526.0,
+			company="_Test Company with perpetual inventory",
+		)
+		transfer = make_stock_entry(
+			item=item, from_warehouse=source_warehouse, to_warehouse=target_warehouse, qty=1_728.0
+		)
+
+		filters = {"voucher_no": transfer.name, "voucher_type": transfer.doctype, "is_cancelled": 0}
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["*"],
+			filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation",
+		)
+		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
 
 
 def create_repack_entry(**args):

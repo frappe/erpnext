@@ -12,7 +12,7 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 
-develop_version = "13.x.x-develop"
+develop_version = "14.x.x-develop"
 
 app_include_js = "erpnext.bundle.js"
 app_include_css = "erpnext.bundle.css"
@@ -79,13 +79,6 @@ calendars = [
 	"Sales Order",
 	"Holiday List",
 ]
-
-domains = {
-	"Distribution": "erpnext.domains.distribution",
-	"Manufacturing": "erpnext.domains.manufacturing",
-	"Retail": "erpnext.domains.retail",
-	"Services": "erpnext.domains.services",
-}
 
 website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner", "Job Opening"]
 
@@ -328,6 +321,7 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.india.utils.validate_document_name",
 			"erpnext.regional.india.utils.update_taxable_values",
+			"erpnext.regional.india.utils.validate_sez_and_export_invoices",
 		],
 	},
 	"POS Invoice": {"on_submit": ["erpnext.regional.saudi_arabia.utils.create_qr_code"]},
@@ -493,6 +487,7 @@ communication_doctypes = ["Customer", "Supplier"]
 
 accounting_dimension_doctypes = [
 	"GL Entry",
+	"Payment Ledger Entry",
 	"Sales Invoice",
 	"Purchase Invoice",
 	"Payment Entry",

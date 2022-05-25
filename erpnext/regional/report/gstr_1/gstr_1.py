@@ -226,7 +226,10 @@ class Gstr1Report(object):
 					taxable_value += abs(net_amount)
 				elif (
 					not tax_rate
-					and self.filters.get("type_of_business") == "EXPORT"
+					and (
+						self.filters.get("type_of_business") == "EXPORT"
+						or invoice_details.get("gst_category") == "SEZ"
+					)
 					and invoice_details.get("export_type") == "Without Payment of Tax"
 				):
 					taxable_value += abs(net_amount)
@@ -328,12 +331,14 @@ class Gstr1Report(object):
 	def get_invoice_items(self):
 		self.invoice_items = frappe._dict()
 		self.item_tax_rate = frappe._dict()
+		self.item_hsn_map = frappe._dict()
 		self.nil_exempt_non_gst = {}
 
+		# nosemgrep
 		items = frappe.db.sql(
 			"""
 			select item_code, parent, taxable_value, base_net_amount, item_tax_rate, is_nil_exempt,
-			is_non_gst from `tab%s Item`
+			gst_hsn_code, is_non_gst from `tab%s Item`
 			where parent in (%s)
 		"""
 			% (self.doctype, ", ".join(["%s"] * len(self.invoices))),
@@ -343,6 +348,7 @@ class Gstr1Report(object):
 
 		for d in items:
 			self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
+			self.item_hsn_map.setdefault(d.item_code, d.gst_hsn_code)
 			self.invoice_items[d.parent][d.item_code] += d.get("taxable_value", 0) or d.get(
 				"base_net_amount", 0
 			)
@@ -367,6 +373,8 @@ class Gstr1Report(object):
 				self.nil_exempt_non_gst[d.parent][2] += d.get("taxable_value", 0)
 
 	def get_items_based_on_tax_rate(self):
+		hsn_wise_tax_rate = get_hsn_wise_tax_rates()
+
 		self.tax_details = frappe.db.sql(
 			"""
 			select
@@ -427,7 +435,7 @@ class Gstr1Report(object):
 				alert=True,
 			)
 
-		# Build itemised tax for export invoices where tax table is blank
+		# Build itemised tax for export invoices where tax table is blank (Export and SEZ Invoices)
 		for invoice, items in self.invoice_items.items():
 			if (
 				invoice not in self.items_based_on_tax_rate
@@ -435,7 +443,17 @@ class Gstr1Report(object):
 				and self.invoices.get(invoice, {}).get("export_type") == "Without Payment of Tax"
 				and self.invoices.get(invoice, {}).get("gst_category") in ("Overseas", "SEZ")
 			):
-				self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
+				self.items_based_on_tax_rate.setdefault(invoice, {})
+				for item_code in items.keys():
+					hsn_code = self.item_hsn_map.get(item_code)
+					tax_rate = 0
+					taxable_value = items.get(item_code)
+					for rates in hsn_wise_tax_rate.get(hsn_code):
+						if taxable_value > rates.get("minimum_taxable_value"):
+							tax_rate = rates.get("tax_rate")
+
+					self.items_based_on_tax_rate[invoice].setdefault(tax_rate, [])
+					self.items_based_on_tax_rate[invoice][tax_rate].append(item_code)
 
 	def get_columns(self):
 		self.other_columns = []
@@ -728,7 +746,7 @@ def get_json(filters, report_name, data):
 
 	elif filters["type_of_business"] == "EXPORT":
 		for item in report_data[:-1]:
-			res.setdefault(item["export_type"], []).append(item)
+			res.setdefault(item["export_type"], {}).setdefault(item["invoice_number"], []).append(item)
 
 		out = get_export_json(res)
 		gst_json["exp"] = out
@@ -918,11 +936,21 @@ def get_export_json(res):
 	for exp_type in res:
 		exp_item, inv = {"exp_typ": exp_type, "inv": []}, []
 
-		for row in res[exp_type]:
-			inv_item = get_basic_invoice_detail(row)
-			inv_item["itms"] = [
-				{"txval": flt(row["taxable_value"], 2), "rt": row["rate"] or 0, "iamt": 0, "csamt": 0}
-			]
+		for number, invoice in res[exp_type].items():
+			inv_item = get_basic_invoice_detail(invoice[0])
+			inv_item["itms"] = []
+
+			for item in invoice:
+				inv_item["itms"].append(
+					{
+						"txval": flt(item["taxable_value"], 2),
+						"rt": flt(item["rate"]),
+						"iamt": flt((item["taxable_value"] * flt(item["rate"])) / 100.0, 2)
+						if exp_type != "WOPAY"
+						else 0,
+						"csamt": (flt(item.get("cess_amount"), 2) or 0),
+					}
+				)
 
 			inv.append(inv_item)
 
@@ -1060,7 +1088,6 @@ def get_rate_and_tax_details(row, gstin):
 
 	# calculate tax amount added
 	tax = flt((row["taxable_value"] * rate) / 100.0, 2)
-	frappe.errprint([tax, tax / 2])
 	if row.get("billing_address_gstin") and gstin[0:2] == row["billing_address_gstin"][0:2]:
 		itm_det.update({"camt": flt(tax / 2.0, 2), "samt": flt(tax / 2.0, 2)})
 	else:
@@ -1136,3 +1163,26 @@ def get_company_gstins(company):
 	address_list = [""] + [d.gstin for d in addresses]
 
 	return address_list
+
+
+def get_hsn_wise_tax_rates():
+	hsn_wise_tax_rate = {}
+	gst_hsn_code = frappe.qb.DocType("GST HSN Code")
+	hsn_tax_rates = frappe.qb.DocType("HSN Tax Rate")
+
+	hsn_code_data = (
+		frappe.qb.from_(gst_hsn_code)
+		.inner_join(hsn_tax_rates)
+		.on(gst_hsn_code.name == hsn_tax_rates.parent)
+		.select(gst_hsn_code.hsn_code, hsn_tax_rates.tax_rate, hsn_tax_rates.minimum_taxable_value)
+		.orderby(hsn_tax_rates.minimum_taxable_value)
+		.run(as_dict=1)
+	)
+
+	for d in hsn_code_data:
+		hsn_wise_tax_rate.setdefault(d.hsn_code, [])
+		hsn_wise_tax_rate[d.hsn_code].append(
+			{"minimum_taxable_value": d.minimum_taxable_value, "tax_rate": d.tax_rate}
+		)
+
+	return hsn_wise_tax_rate

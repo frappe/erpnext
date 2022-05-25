@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import frappe
 import frappe.defaults
-from frappe import _, throw
+from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
 
@@ -15,6 +15,7 @@ import erpnext
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency  # noqa
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
 
@@ -1345,3 +1346,102 @@ def check_and_delete_linked_reports(report):
 	if icons:
 		for icon in icons:
 			frappe.delete_doc("Desktop Icon", icon)
+
+
+def create_payment_ledger_entry(gl_entries, cancel=0):
+	if gl_entries:
+		ple = None
+
+		# companies
+		account = qb.DocType("Account")
+		companies = list(set([x.company for x in gl_entries]))
+
+		# receivable/payable account
+		accounts_with_types = (
+			qb.from_(account)
+			.select(account.name, account.account_type)
+			.where(
+				(account.account_type.isin(["Receivable", "Payable"]) & (account.company.isin(companies)))
+			)
+			.run(as_dict=True)
+		)
+		receivable_or_payable_accounts = [y.name for y in accounts_with_types]
+
+		def get_account_type(account):
+			for entry in accounts_with_types:
+				if entry.name == account:
+					return entry.account_type
+
+		dr_or_cr = 0
+		account_type = None
+		for gle in gl_entries:
+			if gle.account in receivable_or_payable_accounts:
+				account_type = get_account_type(gle.account)
+				if account_type == "Receivable":
+					dr_or_cr = gle.debit - gle.credit
+					dr_or_cr_account_currency = gle.debit_in_account_currency - gle.credit_in_account_currency
+				elif account_type == "Payable":
+					dr_or_cr = gle.credit - gle.debit
+					dr_or_cr_account_currency = gle.credit_in_account_currency - gle.debit_in_account_currency
+
+				if cancel:
+					dr_or_cr *= -1
+					dr_or_cr_account_currency *= -1
+
+				ple = frappe.get_doc(
+					{
+						"doctype": "Payment Ledger Entry",
+						"posting_date": gle.posting_date,
+						"company": gle.company,
+						"account_type": account_type,
+						"account": gle.account,
+						"party_type": gle.party_type,
+						"party": gle.party,
+						"cost_center": gle.cost_center,
+						"finance_book": gle.finance_book,
+						"due_date": gle.due_date,
+						"voucher_type": gle.voucher_type,
+						"voucher_no": gle.voucher_no,
+						"against_voucher_type": gle.against_voucher_type
+						if gle.against_voucher_type
+						else gle.voucher_type,
+						"against_voucher_no": gle.against_voucher if gle.against_voucher else gle.voucher_no,
+						"currency": gle.currency,
+						"amount": dr_or_cr,
+						"amount_in_account_currency": dr_or_cr_account_currency,
+						"delinked": True if cancel else False,
+					}
+				)
+
+				dimensions_and_defaults = get_dimensions()
+				if dimensions_and_defaults:
+					for dimension in dimensions_and_defaults[0]:
+						ple.set(dimension.fieldname, gle.get(dimension.fieldname))
+
+				if cancel:
+					delink_original_entry(ple)
+				ple.flags.ignore_permissions = 1
+				ple.submit()
+
+
+def delink_original_entry(pl_entry):
+	if pl_entry:
+		ple = qb.DocType("Payment Ledger Entry")
+		query = (
+			qb.update(ple)
+			.set(ple.delinked, True)
+			.set(ple.modified, now())
+			.set(ple.modified_by, frappe.session.user)
+			.where(
+				(ple.company == pl_entry.company)
+				& (ple.account_type == pl_entry.account_type)
+				& (ple.account == pl_entry.account)
+				& (ple.party_type == pl_entry.party_type)
+				& (ple.party == pl_entry.party)
+				& (ple.voucher_type == pl_entry.voucher_type)
+				& (ple.voucher_no == pl_entry.voucher_no)
+				& (ple.against_voucher_type == pl_entry.against_voucher_type)
+				& (ple.against_voucher_no == pl_entry.against_voucher_no)
+			)
+		)
+		query.run()

@@ -187,8 +187,9 @@ def get_so_with_invoices(filters):
 		.on(soi.parent == so.name)
 		.join(ps)
 		.on(ps.parent == so.name)
+		.select(so.name)
+		.distinct()
 		.select(
-			so.name,
 			so.customer,
 			so.transaction_date.as_("submitted"),
 			ifelse(datediff(ps.due_date, functions.CurDate()) < 0, "Overdue", "Unpaid").as_("status"),
