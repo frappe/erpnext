@@ -78,6 +78,13 @@ frappe.ui.form.on("Packing Slip", {
 
 	delivery_note(frm) {
 		frm.trigger("refresh");
+	},
+
+	from_case_no(frm) {
+		const {doctype, name, from_case_no, to_case_no} = frm.doc;
+		if (!to_case_no || to_case_no < from_case_no) {
+			frappe.model.set_value(doctype, name, "to_case_no", from_case_no, "Int");
+		}
 	}
 });
 

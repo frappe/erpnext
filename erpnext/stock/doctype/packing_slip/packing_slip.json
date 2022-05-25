@@ -192,7 +192,7 @@
    "label": "Prompt Qty"
   },
   {
-   "depends_on": "eval:doc.delivery_note",
+   "depends_on": "eval:doc.delivery_note && doc.from_case_no && doc.to_case_no",
    "fieldname": "barcode_scanner_section",
    "fieldtype": "Section Break"
   }
@@ -201,7 +201,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-24 17:00:46.482577",
+ "modified": "2022-05-24 22:53:34.415039",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
