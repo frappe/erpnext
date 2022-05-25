@@ -95,7 +95,7 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		self.make_gl_entries(cancel=1)
 		self.update_expense_claim()
 		self.update_outstanding_amounts()
@@ -344,6 +344,12 @@ class PaymentEntry(AccountsController):
 								_("{0} {1} is associated with {2}, but Party Account is {3}").format(
 									d.reference_doctype, d.reference_name, ref_party_account, self.party_account
 								)
+							)
+
+						if ref_doc.doctype == "Purchase Invoice" and ref_doc.get("on_hold"):
+							frappe.throw(
+								_("{0} {1} is on hold").format(d.reference_doctype, d.reference_name),
+								title=_("Invalid Invoice"),
 							)
 
 					if ref_doc.docstatus != 1:
