@@ -6,7 +6,7 @@ import json
 from functools import reduce
 
 import frappe
-from frappe import ValidationError, _, scrub, throw
+from frappe import ValidationError, _, qb, scrub, throw
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 
 import erpnext
@@ -1195,6 +1195,9 @@ def get_outstanding_reference_documents(args):
 	if args.get("party_type") == "Member":
 		return
 
+	ple = qb.DocType("Payment Ledger Entry")
+	common_filter = []
+
 	# confirm that Supplier is not blocked
 	if args.get("party_type") == "Supplier":
 		supplier_status = get_supplier_block_status(args["party"])
@@ -1216,10 +1219,13 @@ def get_outstanding_reference_documents(args):
 		condition = " and voucher_type={0} and voucher_no={1}".format(
 			frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"])
 		)
+		common_filter.append(ple.voucher_type == args["voucher_type"])
+		common_filter.append(ple.voucher_no == args["voucher_no"])
 
 	# Add cost center condition
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
+		common_filter.append(ple.cost_center == args.get("cost_center"))
 
 	date_fields_dict = {
 		"posting_date": ["from_posting_date", "to_posting_date"],
@@ -1231,16 +1237,19 @@ def get_outstanding_reference_documents(args):
 			condition += " and {0} between '{1}' and '{2}'".format(
 				fieldname, args.get(date_fields[0]), args.get(date_fields[1])
 			)
+			common_filter.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
+		common_filter.append(ple.company == args.get("company"))
 
 	outstanding_invoices = get_outstanding_invoices(
 		args.get("party_type"),
 		args.get("party"),
 		args.get("party_account"),
-		filters=args,
-		condition=condition,
+		common_filter=common_filter,
+		min_outstanding=args.get("outstanding_amt_greater_than"),
+		max_outstanding=args.get("outstanding_amt_less_than"),
 	)
 
 	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
