@@ -4,13 +4,10 @@
 
 import frappe
 from frappe.model.document import Document
-<<<<<<< HEAD
 from frappe.utils import flt
 
-=======
-from frappe.utils import flt, today
 from erpnext import get_company_currency
->>>>>>> 60915e874d (test: Update test cases for currency change validation)
+
 
 class TherapyPlan(Document):
 	def validate(self):
@@ -76,13 +73,10 @@ def make_sales_invoice(reference_name, patient, company, therapy_plan_template):
 	si = frappe.new_doc("Sales Invoice")
 	si.company = company
 	si.patient = patient
-<<<<<<< HEAD
 	si.customer = frappe.db.get_value("Patient", patient, "customer")
-=======
-	si.customer = frappe.db.get_value('Patient', patient, 'customer')
-	si.currency = frappe.get_value('Customer', si.customer, 'default_currency') \
-		or get_company_currency(si.company)
->>>>>>> 60915e874d (test: Update test cases for currency change validation)
+	si.currency = frappe.get_value(
+		"Customer", si.customer, "default_currency"
+	) or get_company_currency(si.company)
 
 	item = frappe.db.get_value("Therapy Plan Template", therapy_plan_template, "linked_item")
 	price_list, price_list_currency = frappe.db.get_values(

@@ -235,206 +235,24 @@ class TestPatientAppointment(unittest.TestCase):
 		)
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
 		mark_invoiced_inpatient_occupancy(ip_record1)
-<<<<<<< HEAD
-		discharge_patient(ip_record1, now_datetime())
-
-	def test_payment_should_be_mandatory_for_new_patient_appointment(self):
-		frappe.db.set_value("Healthcare Settings", None, "enable_free_follow_ups", 1)
-		frappe.db.set_value("Healthcare Settings", None, "automate_appointment_invoicing", 1)
-		frappe.db.set_value("Healthcare Settings", None, "max_visits", 3)
-		frappe.db.set_value("Healthcare Settings", None, "valid_days", 30)
-
-		patient = create_patient()
-		assert check_is_new_patient(patient)
-		payment_required = check_payment_fields_reqd(patient)
-		assert payment_required is True
-
-	def test_sales_invoice_should_be_generated_for_new_patient_appointment(self):
-		patient, practitioner = create_healthcare_docs()
-		frappe.db.set_value("Healthcare Settings", None, "automate_appointment_invoicing", 1)
-		invoice_count = frappe.db.count("Sales Invoice")
-
-		assert check_is_new_patient(patient)
-		create_appointment(patient, practitioner, nowdate())
-		new_invoice_count = frappe.db.count("Sales Invoice")
-
-		assert new_invoice_count == invoice_count + 1
-
-	def test_overlap_appointment(self):
-		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import OverlapError
-
-		patient, practitioner = create_healthcare_docs(id=1)
-		patient_1, practitioner_1 = create_healthcare_docs(id=2)
-		service_unit = create_service_unit(id=0)
-		service_unit_1 = create_service_unit(id=1)
-		appointment = create_appointment(
-			patient, practitioner, nowdate(), service_unit=service_unit
-		)  # valid
-
-		# patient and practitioner cannot have overlapping appointments
-		appointment = create_appointment(
-			patient, practitioner, nowdate(), service_unit=service_unit, save=0
-		)
-		self.assertRaises(OverlapError, appointment.save)
-		appointment = create_appointment(
-			patient, practitioner, nowdate(), service_unit=service_unit_1, save=0
-		)  # diff service unit
-		self.assertRaises(OverlapError, appointment.save)
-		appointment = create_appointment(
-			patient, practitioner, nowdate(), save=0
-		)  # with no service unit link
-		self.assertRaises(OverlapError, appointment.save)
-
-		# patient cannot have overlapping appointments with other practitioners
-		appointment = create_appointment(
-			patient, practitioner_1, nowdate(), service_unit=service_unit, save=0
-		)
-		self.assertRaises(OverlapError, appointment.save)
-		appointment = create_appointment(
-			patient, practitioner_1, nowdate(), service_unit=service_unit_1, save=0
-		)
-		self.assertRaises(OverlapError, appointment.save)
-		appointment = create_appointment(patient, practitioner_1, nowdate(), save=0)
-		self.assertRaises(OverlapError, appointment.save)
-
-		# practitioner cannot have overlapping appointments with other patients
-		appointment = create_appointment(
-			patient_1, practitioner, nowdate(), service_unit=service_unit, save=0
-		)
-		self.assertRaises(OverlapError, appointment.save)
-		appointment = create_appointment(
-			patient_1, practitioner, nowdate(), service_unit=service_unit_1, save=0
-		)
-		self.assertRaises(OverlapError, appointment.save)
-		appointment = create_appointment(patient_1, practitioner, nowdate(), save=0)
-		self.assertRaises(OverlapError, appointment.save)
-
-	def test_service_unit_capacity(self):
-		from erpnext.healthcare.doctype.patient_appointment.patient_appointment import (
-			MaximumCapacityError,
-			OverlapError,
-		)
-
-		practitioner = create_practitioner()
-		capacity = 3
-		overlap_service_unit_type = create_service_unit_type(
-			id=10, allow_appointments=1, overlap_appointments=1
-		)
-		overlap_service_unit = create_service_unit(
-			id=100, service_unit_type=overlap_service_unit_type, service_unit_capacity=capacity
-		)
-
-		for i in range(0, capacity):
-			patient = create_patient(id=i)
-			create_appointment(patient, practitioner, nowdate(), service_unit=overlap_service_unit)  # valid
-			appointment = create_appointment(
-				patient, practitioner, nowdate(), service_unit=overlap_service_unit, save=0
-			)  # overlap
-			self.assertRaises(OverlapError, appointment.save)
-
-		patient = create_patient(id=capacity)
-		appointment = create_appointment(
-			patient, practitioner, nowdate(), service_unit=overlap_service_unit, save=0
-		)
-		self.assertRaises(MaximumCapacityError, appointment.save)
-
-	def test_patient_appointment_should_consider_permissions_while_fetching_appointments(self):
-		patient, practitioner = create_healthcare_docs()
-		create_appointment(patient, practitioner, nowdate())
-
-		patient, new_practitioner = create_healthcare_docs(id=2)
-		create_appointment(patient, new_practitioner, nowdate())
-
-		roles = [{"doctype": "Has Role", "role": "Physician"}]
-		user = create_user(roles=roles)
-		new_practitioner = frappe.get_doc("Healthcare Practitioner", new_practitioner)
-		new_practitioner.user_id = user.email
-		new_practitioner.save()
-
-		frappe.set_user(user.name)
-		appointments = frappe.get_list("Patient Appointment")
-		assert len(appointments) == 1
-
-		frappe.set_user("Administrator")
-		appointments = frappe.get_list("Patient Appointment")
-		assert len(appointments) == 2
-
-
-def create_healthcare_docs(id=0):
-	patient = create_patient(id)
-	practitioner = create_practitioner(id)
-
-	return patient, practitioner
-
-
-def create_patient(
-	id=0, patient_name=None, email=None, mobile=None, customer=None, create_user=False
-):
-	if frappe.db.exists("Patient", {"firstname": f"_Test Patient {str(id)}"}):
-		patient = frappe.db.get_value("Patient", {"first_name": f"_Test Patient {str(id)}"}, ["name"])
-		return patient
-
-	patient = frappe.new_doc("Patient")
-	patient.first_name = patient_name if patient_name else f"_Test Patient {str(id)}"
-	patient.sex = "Female"
-	patient.mobile = mobile
-	patient.email = email
-	patient.customer = customer
-	patient.invite_user = create_user
-	patient.save(ignore_permissions=True)
-
-	return patient.name
-
-
-def create_medical_department(id=0):
-	if frappe.db.exists("Medical Department", f"_Test Medical Department {str(id)}"):
-		return f"_Test Medical Department {str(id)}"
-
-	medical_department = frappe.new_doc("Medical Department")
-	medical_department.department = f"_Test Medical Department {str(id)}"
-	medical_department.save(ignore_permissions=True)
-
-	return medical_department.name
-
-
-def create_practitioner(id=0, medical_department=None):
-	if frappe.db.exists(
-		"Healthcare Practitioner", {"firstname": f"_Test Healthcare Practitioner {str(id)}"}
-	):
-		practitioner = frappe.db.get_value(
-			"Healthcare Practitioner", {"firstname": f"_Test Healthcare Practitioner {str(id)}"}, ["name"]
-		)
-		return practitioner
-
-	practitioner = frappe.new_doc("Healthcare Practitioner")
-	practitioner.first_name = f"_Test Healthcare Practitioner {str(id)}"
-	practitioner.gender = "Female"
-	practitioner.department = medical_department or create_medical_department(id)
-	practitioner.op_consulting_charge = 500
-	practitioner.inpatient_visit_charge = 500
-	practitioner.save(ignore_permissions=True)
-
-	return practitioner.name
-
-=======
 		discharge_patient(ip_record1)
 
 
 def create_healthcare_docs():
 	patient = create_patient()
-	practitioner = frappe.db.exists('Healthcare Practitioner', '_Test Healthcare Practitioner')
-	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
+	practitioner = frappe.db.exists("Healthcare Practitioner", "_Test Healthcare Practitioner")
+	medical_department = frappe.db.exists("Medical Department", "_Test Medical Department")
 
 	if not medical_department:
-		medical_department = frappe.new_doc('Medical Department')
-		medical_department.department = '_Test Medical Department'
+		medical_department = frappe.new_doc("Medical Department")
+		medical_department.department = "_Test Medical Department"
 		medical_department.save(ignore_permissions=True)
 		medical_department = medical_department.name
 
 	if not practitioner:
-		practitioner = frappe.new_doc('Healthcare Practitioner')
-		practitioner.first_name = '_Test Healthcare Practitioner'
-		practitioner.gender = 'Female'
+		practitioner = frappe.new_doc("Healthcare Practitioner")
+		practitioner.first_name = "_Test Healthcare Practitioner"
+		practitioner.gender = "Female"
 		practitioner.department = medical_department
 		practitioner.op_consulting_charge = 500
 		practitioner.inpatient_visit_charge = 500
@@ -443,17 +261,18 @@ def create_healthcare_docs():
 
 	return patient, medical_department, practitioner
 
+
 def create_patient():
-	patient = frappe.db.exists('Patient', '_Test Patient')
+	patient = frappe.db.exists("Patient", "_Test Patient")
 	if not patient:
-		patient = frappe.new_doc('Patient')
-		patient.first_name = '_Test Patient'
-		patient.sex = 'Female'
-		patient.default_currency = 'INR'
+		patient = frappe.new_doc("Patient")
+		patient.first_name = "_Test Patient"
+		patient.sex = "Female"
+		patient.default_currency = "INR"
 		patient.save(ignore_permissions=True)
 		patient = patient.name
 	return patient
->>>>>>> 30876a105c (test: Set default currency for patient)
+
 
 def create_encounter(appointment):
 	if appointment:

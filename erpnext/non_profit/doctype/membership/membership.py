@@ -13,12 +13,9 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_months, add_years, get_link_to_form, getdate, nowdate
 
 import erpnext
-<<<<<<< HEAD
+from erpnext import get_company_currency
 from erpnext.non_profit.doctype.member.member import create_member
 
-=======
-from erpnext import get_company_currency
->>>>>>> 60915e874d (test: Update test cases for currency change validation)
 
 class Membership(Document):
 	def validate(self):
@@ -202,35 +199,17 @@ class Membership(Document):
 
 
 def make_invoice(membership, member, plan, settings):
-<<<<<<< HEAD
 	invoice = frappe.get_doc(
 		{
 			"doctype": "Sales Invoice",
 			"customer": member.customer,
 			"debit_to": settings.membership_debit_account,
-			"currency": membership.currency,
+			"currency": membership.currency or get_company_currency(settings.company),
 			"company": settings.company,
 			"is_pos": 0,
 			"items": [{"item_code": plan.linked_item, "rate": membership.amount, "qty": 1}],
 		}
 	)
-=======
-	invoice = frappe.get_doc({
-		"doctype": "Sales Invoice",
-		"customer": member.customer,
-		"debit_to": settings.membership_debit_account,
-		"currency": membership.currency or get_company_currency(settings.company),
-		"company": settings.company,
-		"is_pos": 0,
-		"items": [
-			{
-				"item_code": plan.linked_item,
-				"rate": membership.amount,
-				"qty": 1
-			}
-		]
-	})
->>>>>>> 60915e874d (test: Update test cases for currency change validation)
 	invoice.set_missing_values()
 	invoice.insert()
 	invoice.submit()
