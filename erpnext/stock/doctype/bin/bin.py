@@ -64,13 +64,18 @@ class Bin(Document):
 		se = frappe.qb.DocType("Stock Entry")
 		se_item = frappe.qb.DocType("Stock Entry Detail")
 
+		if frappe.db.field_exists("Stock Entry", "is_return"):
+			qty_field = (
+				Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty)
+			)
+		else:
+			qty_field = se_item.transfer_qty
+
 		materials_transferred = (
 			frappe.qb.from_(se)
 			.from_(se_item)
 			.from_(po)
-			.select(
-				Sum(Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty))
-			)
+			.select(Sum(qty_field))
 			.where(
 				(se.docstatus == 1)
 				& (se.purpose == "Send to Subcontractor")

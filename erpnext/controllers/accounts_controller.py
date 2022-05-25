@@ -34,6 +34,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (
 from erpnext.accounts.party import (
 	get_party_account,
 	get_party_account_currency,
+	get_party_gle_currency,
 	validate_party_frozen_disabled,
 )
 from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
@@ -148,6 +149,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_inter_company_reference()
 
+		self.disable_pricing_rule_on_internal_transfer()
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -167,6 +169,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_party()
 		self.validate_currency()
+		self.validate_party_account_currency()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
@@ -381,6 +384,14 @@ class AccountsController(TransactionBase):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
+
+	def disable_pricing_rule_on_internal_transfer(self):
+		if not self.get("ignore_pricing_rule") and self.is_internal_transfer():
+			self.ignore_pricing_rule = 1
+			frappe.msgprint(
+				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
+				alert=1,
+			)
 
 	def validate_due_date(self):
 		if self.get("is_pos"):
@@ -1121,11 +1132,10 @@ class AccountsController(TransactionBase):
 							{
 								"account": item.discount_account,
 								"against": supplier_or_customer,
-								dr_or_cr: flt(discount_amount, item.precision("discount_amount")),
-								dr_or_cr
-								+ "_in_account_currency": flt(
+								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
+								dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project,
 							},
@@ -1140,11 +1150,11 @@ class AccountsController(TransactionBase):
 							{
 								"account": income_or_expense_account,
 								"against": supplier_or_customer,
-								rev_dr_cr: flt(discount_amount, item.precision("discount_amount")),
-								rev_dr_cr
-								+ "_in_account_currency": flt(
+								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
+								rev_dr_cr
+								+ "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project or self.project,
 							},
@@ -1438,6 +1448,27 @@ class AccountsController(TransactionBase):
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
 				# from creating a sales invoice if sales order is already created
+
+	def validate_party_account_currency(self):
+		if self.doctype not in ("Sales Invoice", "Purchase Invoice"):
+			return
+
+		if self.is_opening == "Yes":
+			return
+
+		party_type, party = self.get_party()
+		party_gle_currency = get_party_gle_currency(party_type, party, self.company)
+		party_account = (
+			self.get("debit_to") if self.doctype == "Sales Invoice" else self.get("credit_to")
+		)
+		party_account_currency = get_account_currency(party_account)
+
+		if not party_gle_currency and (party_account_currency != self.currency):
+			frappe.throw(
+				_("Party Account {0} currency and document currency should be same").format(
+					frappe.bold(party_account)
+				)
+			)
 
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0
@@ -1738,6 +1769,8 @@ class AccountsController(TransactionBase):
 			internal_party_field = "is_internal_customer"
 		elif self.doctype in ("Purchase Invoice", "Purchase Receipt", "Purchase Order"):
 			internal_party_field = "is_internal_supplier"
+		else:
+			return False
 
 		if self.get(internal_party_field) and (self.represents_company == self.company):
 			return True
