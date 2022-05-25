@@ -163,14 +163,8 @@ def create_sales_invoice():
 	sales_invoice.patient = patient
 	sales_invoice.customer = frappe.db.get_value("Patient", patient, "customer")
 	sales_invoice.due_date = getdate()
-<<<<<<< HEAD
 	sales_invoice.company = "_Test Company"
 	sales_invoice.debit_to = get_receivable_account("_Test Company")
-=======
-	sales_invoice.company = '_Test Company'
-	sales_invoice.currency = 'INR'
-	sales_invoice.debit_to = get_receivable_account('_Test Company')
->>>>>>> bcaf475295 (fix: Healthcare module accounting test cases)
 
 	tests = [insulin_resistance_template, blood_test_template]
 	for entry in tests:
