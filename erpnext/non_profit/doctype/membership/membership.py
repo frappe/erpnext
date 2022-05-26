@@ -13,6 +13,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_months, add_years, get_link_to_form, getdate, nowdate
 
 import erpnext
+from erpnext import get_company_currency
 from erpnext.non_profit.doctype.member.member import create_member
 
 
@@ -203,7 +204,7 @@ def make_invoice(membership, member, plan, settings):
 			"doctype": "Sales Invoice",
 			"customer": member.customer,
 			"debit_to": settings.membership_debit_account,
-			"currency": membership.currency,
+			"currency": membership.currency or get_company_currency(settings.company),
 			"company": settings.company,
 			"is_pos": 0,
 			"items": [{"item_code": plan.linked_item, "rate": membership.amount, "qty": 1}],
