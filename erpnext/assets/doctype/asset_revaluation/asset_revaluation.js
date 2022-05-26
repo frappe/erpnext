@@ -42,12 +42,17 @@ frappe.ui.form.on("Asset Revaluation", {
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
+	refresh: function (frm) {
+		frm.trigger("toggle_serial_no_and_num_of_assets");
+	},
+
 	company: function (frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	asset: function (frm) {
 		frm.trigger("set_current_asset_value");
+		frm.trigger("toggle_serial_no_and_num_of_assets");
 	},
 
 	finance_book: function (frm) {
@@ -74,5 +79,38 @@ frappe.ui.form.on("Asset Revaluation", {
 				}
 			});
 		}
-	}
+	},
+
+	toggle_serial_no_and_num_of_assets: (frm) => {
+		if (frm.doc.asset) {
+			frappe.db.get_value("Asset", frm.doc.asset, ["is_serialized_asset", "num_of_assets"], (r) => {
+				if (r && r.is_serialized_asset) {
+					frm.set_df_property("serial_no", "hidden", 0);
+					frm.set_df_property("serial_no", "reqd", 1);
+
+					frm.set_value("num_of_assets", 0);
+					frm.set_df_property("num_of_assets", "hidden", 1);
+					frm.set_df_property("num_of_assets", "reqd", 0);
+				} else {
+					frm.set_df_property("serial_no", "hidden", 1);
+					frm.set_df_property("serial_no", "reqd", 0);
+					frm.set_value("serial_no", "");
+
+					if (r.num_of_assets > 1) {
+						if (!frm.doc.num_of_assets) {
+							frm.set_value("num_of_assets", r.num_of_assets);
+						}
+
+						frm.set_df_property("num_of_assets", "hidden", 0);
+						frm.set_df_property("num_of_assets", "reqd", 1);
+					} else {
+						frm.set_df_property("num_of_assets", "reqd", 0);
+					}
+				}
+			});
+		} else {
+			frm.set_df_property("serial_no", "hidden", 1);
+			frm.set_df_property("num_of_assets", "hidden", 1);
+		}
+	},
 });
