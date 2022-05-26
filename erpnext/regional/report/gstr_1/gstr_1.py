@@ -1162,7 +1162,7 @@ def get_company_gstins(company):
 
 	address_list = [""] + [d.gstin for d in addresses]
 
-	return address_list
+	return set(address_list)
 
 
 def get_hsn_wise_tax_rates():
