@@ -164,6 +164,7 @@ def create_sales_invoice():
 	sales_invoice.customer = frappe.db.get_value("Patient", patient, "customer")
 	sales_invoice.due_date = getdate()
 	sales_invoice.company = "_Test Company"
+	sales_invoice.currency = "INR"
 	sales_invoice.debit_to = get_receivable_account("_Test Company")
 
 	tests = [insulin_resistance_template, blood_test_template]

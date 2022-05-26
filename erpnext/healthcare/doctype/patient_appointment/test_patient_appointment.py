@@ -379,6 +379,7 @@ def create_patient(
 	patient.mobile = mobile
 	patient.email = email
 	patient.customer = customer
+	patient.default_currency = "INR"
 	patient.invite_user = create_user
 	patient.save(ignore_permissions=True)
 
