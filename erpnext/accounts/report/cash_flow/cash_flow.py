@@ -262,7 +262,10 @@ def get_report_summary(summary_data, currency):
 def get_chart_data(columns, data):
 	labels = [d.get("label") for d in columns[2:]]
 	datasets = [
-		{"name": account.get("account").replace("'", ""), "values": [account.get("total")]}
+		{
+			"name": account.get("account").replace("'", ""),
+			"values": [account.get(d.get("fieldname")) for d in columns[2:]],
+		}
 		for account in data
 		if account.get("parent_account") == None and account.get("currency")
 	]
