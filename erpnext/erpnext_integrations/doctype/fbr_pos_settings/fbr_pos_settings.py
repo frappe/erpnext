@@ -103,10 +103,12 @@ def setup_fbr_pos_fields():
 
 
 def disable_fbr_pos():
-	if can_remove_fbr_pos_fields():
-		remove_fbr_pos_fields()
-	else:
-		make_property_setter("Sales Invoice", "is_fbr_pos_invoice", "default", 0, "Check")
+	meta = frappe.get_meta("Sales Invoice")
+	if meta.has_field('is_fbr_pos_invoice'):
+		if can_remove_fbr_pos_fields():
+			remove_fbr_pos_fields()
+		else:
+			make_property_setter("Sales Invoice", "is_fbr_pos_invoice", "default", 0, "Check")
 
 
 def remove_fbr_pos_fields():
