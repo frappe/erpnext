@@ -565,7 +565,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 			for cd in cds:
 				billing_this_year += cd.total
-				total_unpaid += cd.outstanding_amount
+				# total_unpaid += cd.outstanding_amount
 
 		billing_this_year_supplier = 0			
 
@@ -574,7 +574,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 
 			for cd in cds:
 				billing_this_year_supplier += cd.total
-				total_unpaid += cd.outstanding_amount
+				# total_unpaid += cd.outstanding_amount
 
 			supplier = frappe.get_doc("Supplier", party)
 			billing_this_year_supplier += supplier.remaining_balance

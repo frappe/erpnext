@@ -35,10 +35,11 @@ class CustomerRetention(Document):
 	def calculate_retention(self):
 		for document in self.get("references"):
 			total = document.net_total * (self.percentage_total/100)
-			sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
-			# sales_invoice.outstanding_amount -= total
-			sales_invoice.outstanding_amount = document.net_total - total
-			sales_invoice.save()
+			if document.reference_name == "Sales Invoice":
+				sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
+				# sales_invoice.outstanding_amount -= total
+				sales_invoice.outstanding_amount = document.net_total - total
+				sales_invoice.save()
 	
 	def update_accounts_status(self):
 		customer = frappe.get_doc("Customer", self.customer)
