@@ -69,7 +69,7 @@
 
 			{%- if einvoice.ShipDtls -%}
 				{%- set shipping = einvoice.ShipDtls -%}
-				<h5 style="margin-bottom: 5px;">Shipped From</h5>
+				<h5 style="margin-bottom: 5px;">Shipped to</h5>
 				<p>{{ shipping.Gstin }}</p>
 				<p>{{ shipping.LglNm }}</p>
 				<p>{{ shipping.Addr1 }}</p>
@@ -101,7 +101,7 @@
 		</div>
 	</div>
 	<div style="overflow-x: auto;">
-		<h5 class="font-bold" style="margin-top: 15px; margin-bottom: 10px;">3. Item Details</h5>
+		<h5 class="font-bold" style="margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #d1d8dd; padding-bottom: 10px;">3. Item Details</h5>
 		<table class="table table-bordered">
 			<thead>
 				<tr>
@@ -171,10 +171,113 @@
 			</tbody>
 		</table>
 	</div>
-	{% else %}
-	<div class="text-center" style="color: var(--gray-500); font-size: 14px;">
-		You must generate IRN before you can preview GST E-Invoice.
+	{%- set ewaybill = None -%}
+	{%- if
+		doc.irn and doc.ewaybill and (doc.transporter
+		or ((doc.mode_of_transport and doc.mode_of_transport != "Road")
+		or (doc.mode_of_transport == "Road" and doc.vehicle_no)))
+	-%}
+	{%- set ewaybill = {
+		"TransId": doc.gst_transporter_id,
+		"TransName": doc.transporter_name,
+		"TransMode": doc.mode_of_transport,
+		"Distance": doc.distance,
+		"TransDocNo": doc.lr_no,
+		"TransDocDt": doc.lr_date,
+		"VehNo": doc.vehicle_no,
+		"VehType": doc.vehicle_type
+	} -%}
+	{% endif %}
+	{%- if (not doc.irn and einvoice.EwbDtls) or (doc.irn and doc.ewaybill and ewaybill) -%}
+	{%- if einvoice.EwbDtls -%} {%- set ewaybill = einvoice.EwbDtls -%} {% endif %}
+	<h5 class="font-bold"
+	style="margin-top: 15px; margin-bottom: 10px; border-bottom: 1px solid #d1d8dd; padding-bottom: 10px;">5. Eway Bill Details</h5>
+	<div class="col-xs-12">
+		{%- if doc.irn and doc.ewaybill -%}
+		<div class="row data-field column-break" style="border-bottom: 1px solid #d1d8dd; margin-top: 2px!important; padding-bottom: 10px;">
+			<div class="col-xs-3"><label>E-way Bill:</label></div>
+			<div class="col-xs-3 value">
+				{{ doc.ewaybill }}
+			</div>
+			{%- if doc.eway_bill_validity -%}
+			<div class="col-xs-3"><label>E-way Validity :</label></div>
+			<div class="col-xs-3 value">
+				{{ doc.eway_bill_validity }}
+			</div>
+			{% endif %}
+		</div>
+		{% endif %}
+		{% elif not doc.irn %}
+		{%- if not (doc.transporter or ((doc.mode_of_transport and doc.mode_of_transport != "Road") or (doc.mode_of_transport == "Road" and doc.vehicle_no))) -%}
+			{%- set eway_reason = " because tranport details are not added" -%}
+		{% endif %}
+		<div class="row section-break" style="border-bottom: 1px solid #d1d8dd; padding-bottom: 10px;">
+			<p class="col-xs-12"> E-way Bill will not be generated with this IRN {%- if eway_reason -%} {{ eway_reason }} {% endif %} </p>
+		</div>
+		{% endif %}
 	</div>
+	{%- if ewaybill -%}
+	<div class="row section-break" style="border-bottom: 1px solid #d1d8dd; padding-top: 10px; padding-bottom: 10px;">
+		<div class="col-xs-6 column-break">
+			<h5 style="margin-bottom: 5px;">Part A</h5>
+			{%- if ewaybill.TransName -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Transporter Name:</label></div>
+				<div class="col-xs-6 value">{{ ewaybill.TransName }}</div>
+			</div>
+			{% endif %}
+			{%- if ewaybill.TransId -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Transporter GSTIN:</label></div>
+				<div class="col-xs-6 value">{{ ewaybill.TransId }}</div>
+			</div>
+			{% endif %}
+			{%- if ewaybill.Distance == 0 -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Distance:</label></div>
+				<div class="col-xs-6 value">
+					Auto Calculate
+				</div>
+			</div>
+			{% elif ewaybill.Distance %}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Distance:</label></div>
+				<div class="col-xs-6 value">
+					{{ ewaybill.Distance }}
+				</div>
+			</div>
+			{% endif %}
+		</div>
+		<div class="col-xs-6 column-break">
+			<h5 style="margin-bottom: 5px;">Part B</h5>
+			{%- if ewaybill.TransMode -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Transport Mode:</label></div>
+				<div class="col-xs-6 value">{{ doc.mode_of_transport }}</div>
+			</div>
+			{% endif %}
+			{%- if ewaybill.TransDocNo and ewaybill.TransMode -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>L.R. No:</label></div>
+				<div class="col-xs-6 value">{{ doc.lr_no }}</div>
+			</div>
+			{% endif %}
+			{%- if ewaybill.VehNo and ewaybill.TransMode -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Vehicle No:</label></div>
+				<div class="col-xs-6 value">{{ doc.vehicle_no }}</div>
+			</div>
+			{% endif %}
+			{%- if ewaybill.VehType and ewaybill.TransMode -%}
+			<div class="row data-field">
+				<div class="col-xs-6"><label>Vehicle Type:</label></div>
+				<div class="col-xs-6 value">{{ doc.gst_vehicle_type }}</div>
+			</div>
+			{% endif %}
+		</div>
+		{% endif %}
+	{% else %}
+	<p class="alert alert-warning col-xs-12"> You must generate IRN before you can preview GST E-Invoice.</p>
 	{% endif %}
 </div>
 

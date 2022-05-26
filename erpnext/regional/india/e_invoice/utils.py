@@ -582,7 +582,7 @@ def validate_totals(einvoice):
 		)
 
 
-def make_einvoice(invoice):
+def make_einvoice(invoice, generate_ewb=False):
 	validate_mandatory_fields(invoice)
 
 	schema = read_json("einv_template")
@@ -624,8 +624,21 @@ def make_einvoice(invoice):
 	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
 
-	if invoice.transporter and not invoice.is_return:
-		eway_bill_details = get_eway_bill_details(invoice)
+	if (
+		(
+			invoice.transporter
+			or (
+				(invoice.mode_of_transport and invoice.mode_of_transport != "Road")
+				or (invoice.mode_of_transport == "Road" and invoice.vehicle_no)
+			)
+		)
+		and not invoice.is_return
+		and generate_ewb == "true"
+	):
+		if invoice.mode_of_transport == "Road" and not invoice.vehicle_no:
+			frappe.throw(_("Eway Bill : Vehicle No is mandatory if Mode of Transport is Road"))
+		else:
+			eway_bill_details = get_eway_bill_details(invoice)
 
 	# not yet implemented
 	period_details = export_details = frappe._dict({})
@@ -953,11 +966,11 @@ class GSPConnector:
 		frappe.cache().hset("gstin_cache", key, details)
 		return details
 
-	def generate_irn(self):
+	def generate_irn(self, generate_ewb=False):
 		data = {}
 		try:
 			headers = self.get_headers()
-			einvoice = make_einvoice(self.invoice)
+			einvoice = make_einvoice(self.invoice, generate_ewb)
 			data = json.dumps(einvoice, indent=4)
 			res = self.make_request("post", self.generate_irn_url, headers, data)
 
@@ -977,6 +990,30 @@ class GSPConnector:
 						Contact ERPNext support to resolve the issue."
 					)
 
+			if res.get("info"):
+				info = res.get("info")
+				"""
+    				"info": [
+    				    {
+    				        "InfCd": "EWBERR",
+    				        "Desc": [
+    				            {
+    				                "ErrorCode": "4011",
+    				                "ErrorMessage": "Vehicle number  should be passed in case of transportation mode is Road."
+    				            }
+    				        ]
+    				    }
+    				]
+				"""
+				# right now eway bill errors are shown, we can add more when available using below forloop.
+				for msg in info:
+					if msg.get("InfCd") == "EWBERR":
+						for desc in msg.get("Desc"):
+							frappe.msgprint(
+								_(desc.get("ErrorMessage")),
+								title="E-Way Bill not generated",
+								indicator="orange",
+							)
 			else:
 				raise RequestFailed
 
@@ -1334,15 +1371,15 @@ def sanitize_for_json(string):
 
 
 @frappe.whitelist()
-def get_einvoice(doctype, docname):
+def get_einvoice(doctype, docname, generate_ewb=False):
 	invoice = frappe.get_doc(doctype, docname)
-	return make_einvoice(invoice)
+	return make_einvoice(invoice, generate_ewb)
 
 
 @frappe.whitelist()
-def generate_irn(doctype, docname):
+def generate_irn(doctype, docname, generate_ewb=False):
 	gsp_connector = GSPConnector(doctype, docname)
-	gsp_connector.generate_irn()
+	gsp_connector.generate_irn(generate_ewb)
 
 
 @frappe.whitelist()

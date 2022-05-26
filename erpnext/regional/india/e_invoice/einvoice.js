@@ -20,19 +20,76 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			};
 
 			if (!irn && !__unsaved) {
-				const action = () => {
+				const action = async () => {
+					let invoice_grand_total = frm.doc.rounded_total;
+					let eway_eligibility = false;
+					let generate_ewb = false;
+
+					let eway_auto_generate = await frappe.db.get_single_value("E Invoice Settings", "eway_auto_generate")
+
+					let eway_when_generate = await frappe.db.get_single_value("E Invoice Settings", "eway_when_generate")
+
+					if (eway_when_generate != "Above 50000" || (eway_when_generate == "Above 50000" && invoice_grand_total >= 50000)){
+						eway_eligibility = true;
+					}
+
 					if (frm.doc.__unsaved) {
 						frappe.throw(__('Please save the document to generate IRN.'));
 					}
-					frappe.call({
-						method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-						args: { doctype, docname: name },
-						freeze: true,
-						callback: (res) => {
-							const einvoice = res.message;
-							show_einvoice_preview(frm, einvoice);
+					if (eway_auto_generate == "Yes") {
+						if (eway_eligibility){
+							generate_ewb = true;
 						}
-					});
+						frappe.call({
+							method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+							args: { doctype, docname: name, generate_ewb },
+							freeze: true,
+							callback: (res) => {
+								const einvoice = res.message;
+								show_einvoice_preview(frm, einvoice, generate_ewb);
+							}
+						});
+					}
+					else if ((eway_auto_generate == "Always Ask" || eway_auto_generate == "") && eway_eligibility) {
+						frappe.confirm('Would you also like to generate E-way bill ?',
+						() => {
+							generate_ewb = true;
+							console.log(eway_auto_generate, eway_when_generate, eway_eligibility, generate_ewb)
+								frappe.call({
+									method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+									args: { doctype, docname: name, generate_ewb },
+									freeze: true,
+									callback: (res) => {
+										const einvoice = res.message;
+										show_einvoice_preview(frm, einvoice, generate_ewb);
+									}
+								});
+						}, () => {
+							generate_ewb = false;
+								frappe.call({
+									method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+									args: { doctype, docname: name, generate_ewb },
+									freeze: true,
+									callback: (res) => {
+										const einvoice = res.message;
+										show_einvoice_preview(frm, einvoice, generate_ewb);
+									}
+								});
+						})
+					}
+					else {
+						generate_ewb = false;
+							frappe.call({
+								method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+								args: { doctype, docname: name, generate_ewb },
+								freeze: true,
+								callback: (res) => {
+									const einvoice = res.message;
+									show_einvoice_preview(frm, einvoice, generate_ewb);
+								}
+							});
+
+					}
 				};
 
 				add_custom_button(__("Generate IRN"), action);
@@ -300,16 +357,16 @@ const get_ewaybill_fields = (frm) => {
 	];
 };
 
-const request_irn_generation = (frm) => {
+const request_irn_generation = (frm, generate_ewb) => {
 	frappe.call({
 		method: 'erpnext.regional.india.e_invoice.utils.generate_irn',
-		args: { doctype: frm.doc.doctype, docname: frm.doc.name },
+		args: { doctype: frm.doc.doctype, docname: frm.doc.name, generate_ewb },
 		freeze: true,
 		callback: () => frm.reload_doc()
 	});
 };
 
-const get_preview_dialog = (frm, action) => {
+const get_preview_dialog = (frm, action, generate_ewb) => {
 	const dialog = new frappe.ui.Dialog({
 		title: __("Preview"),
 		size: "large",
@@ -320,14 +377,14 @@ const get_preview_dialog = (frm, action) => {
 				"fieldtype": "HTML"
 			}
 		],
-		primary_action: () => action(frm) || dialog.hide(),
+		primary_action: () => action(frm, generate_ewb) || dialog.hide(),
 		primary_action_label: __('Generate IRN')
 	});
 	return dialog;
 };
 
-const show_einvoice_preview = (frm, einvoice) => {
-	const preview_dialog = get_preview_dialog(frm, request_irn_generation);
+const show_einvoice_preview = (frm, einvoice, generate_ewb) => {
+	const preview_dialog = get_preview_dialog(frm, request_irn_generation, generate_ewb);
 
 	// initialize e-invoice fields
 	einvoice["Irn"] = einvoice["AckNo"] = ''; einvoice["AckDt"] = frappe.datetime.nowdate();
