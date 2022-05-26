@@ -53,14 +53,14 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						frappe.confirm('Would you also like to generate E-way bill ?',
 							() => {
 								generate_ewb = true;
-									frappe.call({
-										method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-										args: { doctype, docname: name, generate_ewb },
-										freeze: true,
-										callback: (res) => {
-											const einvoice = res.message;
-											show_einvoice_preview(frm, einvoice, generate_ewb);
-										}
+								frappe.call({
+									method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+									args: { doctype, docname: name, generate_ewb },
+									freeze: true,
+									callback: (res) => {
+										const einvoice = res.message;
+										show_einvoice_preview(frm, einvoice, generate_ewb);
+									}
 								});
 							}, () => {
 								generate_ewb = false;
