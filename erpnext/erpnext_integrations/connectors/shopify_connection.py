@@ -4,6 +4,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, cstr, flt, get_datetime, get_request_session, getdate, nowdate
 
+from erpnext import get_company_currency
 from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import (
 	dump_request_data,
 	make_shopify_log,
@@ -143,6 +144,10 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 				"taxes": get_order_taxes(shopify_order, shopify_settings),
 				"apply_discount_on": "Grand Total",
 				"discount_amount": get_discounted_amount(shopify_order),
+				"currency": frappe.get_value(
+					"Customer", customer or shopify_settings.default_customer, "default_currency"
+				)
+				or get_company_currency(shopify_settings.company),
 			}
 		)
 
@@ -178,6 +183,7 @@ def create_sales_invoice(shopify_order, shopify_settings, so, old_order_sync=Fal
 		si.set_posting_time = 1
 		si.posting_date = posting_date
 		si.due_date = posting_date
+		si.currency = so.currency
 		si.naming_series = shopify_settings.sales_invoice_series or "SI-Shopify-"
 		si.flags.ignore_mandatory = True
 		set_cost_center(si.items, shopify_settings.cost_center)
