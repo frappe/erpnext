@@ -44,6 +44,7 @@ frappe.ui.form.on("Asset Revaluation", {
 
 	refresh: function (frm) {
 		frm.trigger("toggle_serial_no_and_num_of_assets");
+		frm.trigger("toggle_finance_books");
 	},
 
 	company: function (frm) {
@@ -53,6 +54,7 @@ frappe.ui.form.on("Asset Revaluation", {
 	asset: function (frm) {
 		frm.trigger("set_current_asset_value");
 		frm.trigger("toggle_serial_no_and_num_of_assets");
+		frm.trigger("toggle_finance_books");
 	},
 
 	finance_book: function (frm) {
@@ -113,4 +115,16 @@ frappe.ui.form.on("Asset Revaluation", {
 			frm.set_df_property("num_of_assets", "hidden", 1);
 		}
 	},
+
+	toggle_finance_books: (frm) => {
+		if (frm.doc.asset) {
+			frappe.db.get_single_value("Accounts Settings", "enable_finance_books")
+				.then((value) => {
+					frm.toggle_display("finance_book", value);
+				}
+				)
+		} else {
+			frm.set_df_property("finance_book", "hidden", 1);
+		}
+	}
 });
