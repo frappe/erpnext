@@ -75,7 +75,7 @@
    "read_only": 1
   }
  ],
- "modified": "2020-03-03 15:37:15.323449",
+ "modified": "2022-05-25 16:20:01.460765",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level",
@@ -101,7 +101,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Support Team",
    "share": 1,
    "write": 1
   }

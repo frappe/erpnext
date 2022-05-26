@@ -153,7 +153,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-09-03 00:51:01.525191",
+ "modified": "2022-05-25 16:15:59.815768",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",
@@ -199,11 +199,8 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
    "read": 1,
-   "role": "Employee",
-   "write": 1
+   "role": "Employee"
   },
   {
    "delete": 1,

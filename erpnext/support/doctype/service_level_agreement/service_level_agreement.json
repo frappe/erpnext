@@ -158,7 +158,7 @@
    "label": "Enable"
   }
  ],
- "modified": "2020-03-03 15:37:07.995030",
+ "modified": "2022-05-25 16:20:05.403965",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
@@ -184,7 +184,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Support Team",
    "share": 1,
    "write": 1
   }
