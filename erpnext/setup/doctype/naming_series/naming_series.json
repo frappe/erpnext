@@ -37,7 +37,7 @@
    "fieldname": "help_html",
    "fieldtype": "HTML",
    "label": "Help HTML",
-   "options": "<div class=\"well\">\nEdit list of Series in the box below. Rules:\n<ul>\n<li>Each Series Prefix on a new line.</li>\n<li>Allowed special characters are \"/\" and \"-\"</li>\n<li>Optionally, set the number of digits in the series using dot (.) followed by hashes (#). For example, \".####\" means that the series will have four digits. Default is five digits.</li>\n</ul>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\nINV-.####<br>\n</div>\n<br>"
+   "options": "<div class=\"well\">\n    Edit list of Series in the box below. Rules:\n    <ul>\n        <li>Each Series Prefix on a new line.</li>\n        <li>Allowed special characters are \"/\" and \"-\"</li>\n        <li>\n            Optionally, set the number of digits in the series using dot (.)\n            followed by hashes (#). For example, \".####\" means that the series\n            will have four digits. Default is five digits.\n        </li>\n        <li>\n            You can also use variables in the series name by putting them\n            between (.) dots\n            <br>\n            Support Variables:\n            <ul>\n                <li><code>.YYYY.</code> - Year in 4 digits</li>\n                <li><code>.YY.</code> - Year in 2 digits</li>\n                <li><code>.MM.</code> - Month</li>\n                <li><code>.DD.</code> - Day of month</li>\n                <li><code>.WW.</code> - Week of the year</li>\n                <li><code>.FY.</code> - Fiscal Year</li>\n                <li>\n                    <code>.{fieldname}.</code> - fieldname on the document e.g.\n                    <code>branch</code>\n                </li>\n            </ul>\n        </li>\n    </ul>\n    Examples:\n    <ul>\n        <li>INV-</li>\n        <li>INV-10-</li>\n        <li>INVK-</li>\n        <li>INV-.YYYY.-.{branch}.-.MM.-.####</li>\n    </ul>\n</div>\n<br>\n"
   },
   {
    "depends_on": "select_doc_for_series",
@@ -109,7 +109,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-05-26 05:19:10.392657",
+ "modified": "2022-05-26 06:06:42.109504",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Naming Series",
