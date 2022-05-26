@@ -31,30 +31,39 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	process_scan() {
-		let me = this;
+		return new Promise((resolve, reject) => {
+			let me = this;
 
-		const input = this.scan_barcode_field.value;
-		if (!input) {
-			return;
-		}
+			const input = this.scan_barcode_field.value;
+			if (!input) {
+				return;
+			}
 
-		frappe
-			.call({
-				method: this.scan_api,
-				args: {
-					search_value: input,
-				},
-			})
-			.then((r) => {
-				const data = r && r.message;
-				if (!data || Object.keys(data).length === 0) {
-					this.show_alert(__("Cannot find Item with this Barcode"), "red");
-					this.clean_up();
-					return;
-				}
+			frappe
+				.call({
+					method: this.scan_api,
+					args: {
+						search_value: input,
+					},
+				})
+				.then((r) => {
+					const data = r && r.message;
+					if (!data || Object.keys(data).length === 0) {
+						this.show_alert(__("Cannot find Item with this Barcode"), "red");
+						this.clean_up();
+						reject();
+						return;
+					}
 
-				me.update_table(data);
-			});
+					const row = me.update_table(data);
+					if (row) {
+						resolve(row);
+					}
+					else {
+						reject();
+					}
+				});
+		});
 	}
 
 	update_table(data) {
@@ -90,6 +99,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.set_batch_no(row, batch_no);
 		this.set_barcode(row, barcode);
 		this.clean_up();
+		return row;
 	}
 
 	// batch and serial selector is reduandant when all info can be added by scan
