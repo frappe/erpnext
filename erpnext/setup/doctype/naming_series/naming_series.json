@@ -8,9 +8,13 @@
   "setup_series",
   "select_doc_for_series",
   "help_html",
+  "naming_series_to_check",
+  "preview",
+  "add_series",
   "set_options",
   "user_must_always_select",
   "update",
+  "column_break_13",
   "update_series",
   "prefix",
   "current_value",
@@ -33,7 +37,7 @@
    "fieldname": "help_html",
    "fieldtype": "HTML",
    "label": "Help HTML",
-   "options": "<div class=\"well\">\nEdit list of Series in the box below. Rules:\n<ul>\n<li>Each Series Prefix on a new line.</li>\n<li>Allowed special characters are \"/\" and \"-\"</li>\n<li>Optionally, set the number of digits in the series using dot (.) followed by hashes (#). For example, \".####\" means that the series will have four digits. Default is five digits.</li>\n</ul>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\nINV-.####<br>\n</div>"
+   "options": "<div class=\"well\">\nEdit list of Series in the box below. Rules:\n<ul>\n<li>Each Series Prefix on a new line.</li>\n<li>Allowed special characters are \"/\" and \"-\"</li>\n<li>Optionally, set the number of digits in the series using dot (.) followed by hashes (#). For example, \".####\" means that the series will have four digits. Default is five digits.</li>\n</ul>\nExamples:<br>\nINV-<br>\nINV-10-<br>\nINVK-<br>\nINV-.####<br>\n</div>\n<br>"
   },
   {
    "depends_on": "select_doc_for_series",
@@ -77,6 +81,27 @@
    "fieldtype": "Button",
    "label": "Update Series Number",
    "options": "update_series_start"
+  },
+  {
+   "fieldname": "naming_series_to_check",
+   "fieldtype": "Data",
+   "label": "Try a naming Series"
+  },
+  {
+   "default": " ",
+   "fieldname": "preview",
+   "fieldtype": "Text",
+   "label": "Preview of generated names",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "add_series",
+   "fieldtype": "Button",
+   "label": "Add this Series"
   }
  ],
  "hide_toolbar": 1,
@@ -84,7 +109,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-05-26 03:13:05.357751",
+ "modified": "2022-05-26 05:19:10.392657",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Naming Series",
