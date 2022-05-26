@@ -55,7 +55,7 @@ class JobOpening(WebsiteGenerator):
 			if number_of_positions <= current_count:
 				frappe.throw(
 					_(
-						"Job Openings for the designation {0} are already open or the hiring is completed as per the Staffing Plan {1}"
+						"Job Openings for the designation {0} are already open or the hiring is complete as per the Staffing Plan {1}"
 					).format(
 						frappe.bold(self.designation), get_link_to_form("Staffing Plan", self.staffing_plan)
 					),
