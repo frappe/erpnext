@@ -26,6 +26,8 @@ class TestBatch(FrappeTestCase):
 
 		if not frappe.db.exists("Item", item_name):
 			return make_item(item_name, dict(has_batch_no=1, create_new_batch=1, is_stock_item=1))
+		else:
+			return frappe.get_doc("Item", item_name)
 
 	def test_purchase_receipt(self, batch_qty=100):
 		"""Test automated batch creation from Purchase Receipt"""
@@ -304,7 +306,7 @@ class TestBatch(FrappeTestCase):
 
 	def test_autocreation_of_batches(self):
 		"""
-		Test if auto created Serial No excludes existing serial numbers
+		Test if auto created batch no excludes existing batch numbers
 		"""
 		item_code = make_item(
 			properties={
