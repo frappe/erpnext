@@ -2658,7 +2658,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.discount_amount = 100
 		si.save()
 
-		einvoice = make_einvoice(si)
+		einvoice = make_einvoice(si, generate_ewb="true")
 		self.assertTrue(einvoice["EwbDtls"])
 		validate_totals(einvoice)
 
