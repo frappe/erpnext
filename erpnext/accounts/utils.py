@@ -439,7 +439,8 @@ def reconcile_against_document(args):
 		# cancel advance entry
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
-		doc.make_gl_entries(cancel=1, adv_adj=1)
+		gl_map = doc.build_gl_map()
+		create_payment_ledger_entry(gl_map, cancel=1, adv_adj=1)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -454,7 +455,9 @@ def reconcile_against_document(args):
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
-		doc.make_gl_entries(cancel=0, adv_adj=1)
+		gl_map = doc.build_gl_map()
+		create_payment_ledger_entry(gl_map, cancel=0, adv_adj=1)
+
 		frappe.flags.ignore_party_validation = False
 
 		if entry.voucher_type in ("Payment Entry", "Journal Entry"):
@@ -1349,7 +1352,9 @@ def check_and_delete_linked_reports(report):
 			frappe.delete_doc("Desktop Icon", icon)
 
 
-def create_payment_ledger_entry(gl_entries, cancel=0):
+def create_payment_ledger_entry(
+	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0
+):
 	if gl_entries:
 		ple = None
 
@@ -1422,6 +1427,9 @@ def create_payment_ledger_entry(gl_entries, cancel=0):
 				if cancel:
 					delink_original_entry(ple)
 				ple.flags.ignore_permissions = 1
+				ple.flags.adv_adj = adv_adj
+				ple.flags.from_repost = from_repost
+				ple.flags.update_outstanding = update_outstanding
 				ple.submit()
 
 
