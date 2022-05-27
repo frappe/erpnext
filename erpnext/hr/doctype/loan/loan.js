@@ -205,8 +205,41 @@ frappe.ui.form.on('Loan', {
 	toggle_fields: function (frm) {
 		frm.toggle_enable("monthly_repayment_amount", frm.doc.repayment_method == "Repay Fixed Amount per Period")
 		frm.toggle_enable("repayment_periods", frm.doc.repayment_method == "Repay Over Number of Periods")
-	}
+	},
+
+	repayment_schedule_remove: function (frm) {
+		frm.events.update_repayment_schedule(frm);
+	},
+
+	update_repayment_schedule: function (frm) {
+		frm.call({
+			method: "update_repayment_schedule",
+			doc: frm.doc,
+			callback: function(r) {
+				if(!r.exc){
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 });
+
+frappe.ui.form.on('Repayment Schedule', {
+	principal_amount: function (frm, cdt, cdn) {
+		frm.events.update_repayment_schedule(frm);
+	},
+	payment_date: function (frm, cdt, cdn) {
+		frm.events.update_repayment_schedule(frm);
+	},
+
+	before_repayment_schedule_remove: function(frm, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if(row.paid) {
+			frappe.msgprint(__("Cannot remove an already paid repayment schedule"));
+			throw "Cannot remove already paid repayment schedule";
+		}
+	},
+})
 
 var _make_repayment_entry = function(frm, payment_rows) {
 	frappe.call({

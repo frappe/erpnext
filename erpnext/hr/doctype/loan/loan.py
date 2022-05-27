@@ -16,11 +16,19 @@ class Loan(AccountsController):
 		self.set_missing_fields()
 		self.make_repayment_schedule()
 		self.set_repayment_period()
+		self.validate_repayment_schedule_amount()
 		self.calculate_totals()
 		self.set_status()
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
+
+	def before_update_after_submit(self):
+		self.validate_cannot_change_schedule()
+		if not self.rate_of_interest:
+			self.update_repayment_schedule()
+		self.validate_repayment_schedule_amount()
+		self.calculate_totals()
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -38,39 +46,11 @@ class Loan(AccountsController):
 		if self.status == "Repaid/Closed":
 			self.total_amount_paid = self.total_payment
 
-
-	def make_jv_entry(self):
-		self.check_permission('write')
-		journal_entry = frappe.new_doc('Journal Entry')
-		journal_entry.voucher_type = 'Bank Entry'
-		journal_entry.user_remark = _('Against Loan: {0}').format(self.name)
-		journal_entry.company = self.company
-		journal_entry.posting_date = nowdate()
-
-		account_amt_list = []
-
-		account_amt_list.append({
-			"account": self.loan_account,
-			"party_type": self.applicant_type,
-			"party": self.applicant,
-			"debit_in_account_currency": self.loan_amount,
-			"reference_type": "Loan",
-			"reference_name": self.name,
-			})
-		account_amt_list.append({
-			"account": self.payment_account,
-			"credit_in_account_currency": self.loan_amount,
-			"reference_type": "Loan",
-			"reference_name": self.name,
-			})
-		journal_entry.set("accounts", account_amt_list)
-		return journal_entry.as_dict()
-
 	def make_repayment_schedule(self):
 		self.repayment_schedule = []
 		payment_date = self.repayment_start_date
 		balance_amount = self.loan_amount
-		while(balance_amount > 0):
+		while balance_amount > 0:
 			interest_amount = rounded(balance_amount * flt(self.rate_of_interest) / (12*100))
 			principal_amount = self.monthly_repayment_amount - interest_amount
 			balance_amount = rounded(balance_amount + interest_amount - self.monthly_repayment_amount)
@@ -96,15 +76,78 @@ class Loan(AccountsController):
 
 			self.repayment_periods = repayment_periods
 
+	def update_repayment_schedule(self):
+		if self.rate_of_interest:
+			frappe.throw(_("Cannot change repayment schedule for loan with interest"))
+
+		balance_amount = self.loan_amount
+		for d in self.repayment_schedule:
+			balance_amount = rounded(balance_amount - flt(d.principal_amount))
+			d.balance_loan_amount = balance_amount
+			d.total_payment = d.principal_amount
+
+	def validate_cannot_change_schedule(self):
+		has_changes = False
+
+		schedule_row_names = [d.name for d in self.repayment_schedule]
+		if not schedule_row_names:
+			frappe.throw(_("Repayment schedule is empty"))
+
+		paid_schedule_removed = frappe.db.sql("""
+			select name
+			from `tabRepayment Schedule`
+			where parenttype = %s and parent = %s and paid = 1 and name not in %s
+		""", (self.doctype, self.name, schedule_row_names))
+
+		if paid_schedule_removed:
+			frappe.throw(_("Cannot remove paid schedule"))
+
+		for d in self.repayment_schedule:
+			previous_values = frappe.db.get_value("Repayment Schedule", filters={
+				"name": d.name,
+				"parent": self.name,
+				"parenttype": self.doctype,
+			}, fieldname=['paid', 'payment_date', 'principal_amount'], as_dict=1)
+
+			row_changed = False
+
+			if not previous_values:
+				row_changed = True
+			else:
+				if getdate(d.payment_date) != previous_values.payment_date:
+					row_changed = True
+				if flt(d.principal_amount) != flt(previous_values.principal_amount):
+					row_changed = True
+
+			if row_changed:
+				has_changes = True
+
+				if previous_values and previous_values.paid:
+					frappe.throw(_("Row {0}: Cannot change repayment schedule because it is already paid").format(d.idx))
+
+		if has_changes and self.rate_of_interest:
+			frappe.throw(_("Cannot change repayment schedule for loan with interest"))
+
+	def validate_repayment_schedule_amount(self):
+		loan_amount_df = self.meta.get_field('loan_amount')
+
+		total_principal_amount = sum([d.principal_amount for d in self.repayment_schedule])
+		if flt(total_principal_amount, self.precision('loan_amount')) != flt(self.loan_amount, self.precision('loan_amount')):
+			frappe.throw(_("Total Repayment Schedule Principal Amount {0} does not match Loan Amount {1}")
+				.format(
+					frappe.bold(frappe.format(total_principal_amount, df=loan_amount_df)),
+					frappe.bold(frappe.format(self.loan_amount, df=loan_amount_df))
+				))
+
 	def calculate_totals(self):
 		self.total_payment = 0
 		self.total_interest_payable = 0
 		self.total_amount_paid = 0
 		for schedule in self.repayment_schedule:
-			self.total_payment += schedule.total_payment
-			self.total_interest_payable +=schedule.interest_amount
+			self.total_payment += flt(schedule.total_payment)
+			self.total_interest_payable += flt(schedule.interest_amount)
 			if schedule.paid:
-				self.total_amount_paid += schedule.total_payment
+				self.total_amount_paid += flt(schedule.total_payment)
 
 	def update_total_amount_paid(self, update_modified=True):
 		self.total_amount_paid = 0
@@ -155,6 +198,33 @@ class Loan(AccountsController):
 			from `tabGL Entry`
 			where account = %s and against_voucher_type = 'Loan' and against_voucher = %s and debit-credit > 0
 		""", (self.loan_account, self.name), as_dict=1)[0]
+
+	def make_jv_entry(self):
+		self.check_permission('write')
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.user_remark = _('Against Loan: {0}').format(self.name)
+		journal_entry.company = self.company
+		journal_entry.posting_date = nowdate()
+
+		account_amt_list = []
+
+		account_amt_list.append({
+			"account": self.loan_account,
+			"party_type": self.applicant_type,
+			"party": self.applicant,
+			"debit_in_account_currency": self.loan_amount,
+			"reference_type": "Loan",
+			"reference_name": self.name,
+			})
+		account_amt_list.append({
+			"account": self.payment_account,
+			"credit_in_account_currency": self.loan_amount,
+			"reference_type": "Loan",
+			"reference_name": self.name,
+			})
+		journal_entry.set("accounts", account_amt_list)
+		return journal_entry.as_dict()
 
 
 def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
