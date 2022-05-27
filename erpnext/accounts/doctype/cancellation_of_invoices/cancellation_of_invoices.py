@@ -27,6 +27,25 @@ class CancellationOfInvoices(Document):
 			# self.delete_gl_entry()
 			self.modified_sale_invoice()
 			# cost = super(CancellationOfInvoices, self).get_cost()
+			self.update_dashboard_customer()
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		invoice = frappe.get_doc("Sales Invoice", self.sale_invoice)
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.billing_this_year -= invoice.grand_total
+			customer.total_unpaid -= invoice.outstanding_amount
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = invoice.grand_total * -1
+			new_doc.total_unpaid = invoice.outstanding_amount * -1
+			new_doc.insert()
 
 	def on_cancel(self):
 		frappe.throw(_("Unable to cancel Cancellation Of Invoice"))
