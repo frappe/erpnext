@@ -15,6 +15,7 @@ from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
 	make_deduction_salary_component,
 	make_earning_salary_component,
 	make_employee_salary_slip,
+	make_holiday_list,
 )
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
@@ -39,6 +40,7 @@ class TestGratuity(FrappeTestCase):
 		)
 >>>>>>> b81d7519c1 (test: Gratuity status for payment via salary slip)
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
+		make_holiday_list()
 
 <<<<<<< HEAD
 	def setUp(self):
