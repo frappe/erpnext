@@ -116,10 +116,10 @@ class SalarySlip(TransactionBase):
 		self.update_payment_status_for_gratuity()
 
 	def update_payment_status_for_gratuity(self):
-		add_salary = frappe.db.get_all(
+		additional_salary = frappe.db.get_all(
 			"Additional Salary",
 			filters={
-				"payroll_date": ("BETWEEN", [self.start_date, self.end_date]),
+				"payroll_date": ("between", [self.start_date, self.end_date]),
 				"employee": self.employee,
 				"ref_doctype": "Gratuity",
 				"docstatus": 1,
@@ -128,10 +128,10 @@ class SalarySlip(TransactionBase):
 			limit=1,
 		)
 
-		if len(add_salary):
+		if additional_salary:
 			status = "Paid" if self.docstatus == 1 else "Unpaid"
-			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
-				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
+			if additional_salary[0].name in [entry.additional_salary for entry in self.earnings]:
+				frappe.db.set_value("Gratuity", additional_salary[0].ref_docname, "status", status)
 
 	def on_cancel(self):
 		self.set_status()
