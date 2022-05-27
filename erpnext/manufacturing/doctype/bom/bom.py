@@ -702,7 +702,7 @@ class BOM(WebsiteGenerator):
 			row.amount = flt(row.stock_qty) * row.rate
 
 			if old_rate != row.rate:
-				# Only db_update if unchanged
+				# Only db_update if changed
 				row.db_update()
 
 	def get_rm_rate_map(self) -> Dict[str, float]:
