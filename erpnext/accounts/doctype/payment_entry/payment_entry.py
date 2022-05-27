@@ -148,19 +148,53 @@ class PaymentEntry(AccountsController):
 			)
 
 	def validate_allocated_amount(self):
-		for d in self.get("references"):
+		if self.payment_type == "Internal Transfer":
+			return
+
+		fail_message = _(
+			"Row #{0}: Allocated Amount cannot be greater than outstanding amount. You may need to reload your payment references."
+		)
+
+		latest_references = get_outstanding_reference_documents(
+			{
+				"posting_date": self.posting_date,
+				"company": self.company,
+				"party_type": self.party_type,
+				"payment_type": self.payment_type,
+				"party": self.party,
+				"party_account": self.paid_from if self.payment_type == "Receive" else self.paid_to,
+				"cost_center": self.cost_center,
+			}
+		)
+
+		# Group latest_references by (voucher_type, voucher_no)
+		latest_lookup = {}
+		for d in latest_references:
+			d = frappe._dict(d)
+			latest_lookup.update({(d.voucher_type, d.voucher_no): d})
+
+		for d in self.get("references").copy():
+			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
+
+			# The reference has already been allocated.
+			if not latest:
+				self.remove(d)
+				continue
+
+			d.due_date = latest.due_date
+			d.total_amount = latest.invoice_amount
+			d.outstanding_amount = latest.outstanding_amount
+			d.bill_no = latest.bill_no
+			d.payment_term = latest.payment_term
+
 			if (flt(d.allocated_amount)) > 0:
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
-					frappe.throw(
-						_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx)
-					)
+					frappe.throw(fail_message.format(d.idx))
 
 			# Check for negative outstanding invoices as well
 			if flt(d.allocated_amount) < 0:
 				if flt(d.allocated_amount) < flt(d.outstanding_amount):
-					frappe.throw(
-						_("Row #{0}: Allocated Amount cannot be greater than outstanding amount.").format(d.idx)
-					)
+					frappe.throw(fail_message.format(d.idx))
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:
