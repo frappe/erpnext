@@ -159,21 +159,29 @@ def process_if_level_is_complete(
 def get_next_higher_level_boms(
 	child_boms: Dict[str, bool], processed_boms: Dict[str, bool]
 ) -> List[str]:
-	"Generate immediate higher level dependants with no unresolved dependencies."
+	"Generate immediate higher level dependants with no unresolved dependencies (children)."
 
-	def _all_children_are_processed(parent):
-		bom_doc = frappe.get_cached_doc("BOM", parent)
-		return all(processed_boms.get(row.bom_no) for row in bom_doc.items if row.bom_no)
+	def _all_children_are_processed(parent_bom):
+		child_boms = dependency_map.get(parent_bom)
+		return all(processed_boms.get(bom) for bom in child_boms)
 
-	dependants_map = _generate_dependants_map()
-	dependants = set()
+	dependants_map, dependency_map = _generate_dependence_map()
+
+	dependants = []
 	for bom in child_boms:
+		# generate list of immediate dependants
 		parents = dependants_map.get(bom) or []
-		for parent in parents:
-			if _all_children_are_processed(parent):
-				dependants.add(parent)
+		dependants.extend(parents)
 
-	return list(dependants)
+	dependants = set(dependants)  # remove duplicates
+	resolved_dependants = set()
+
+	# consider only if children are all resolved
+	for parent_bom in dependants:
+		if _all_children_are_processed(parent_bom):
+			resolved_dependants.add(parent_bom)
+
+	return list(resolved_dependants)
 
 
 def get_leaf_boms() -> List[str]:
@@ -187,17 +195,19 @@ def get_leaf_boms() -> List[str]:
 	)
 
 
-def _generate_dependants_map() -> defaultdict:
+def _generate_dependence_map() -> defaultdict:
 	"""
-	Generate map such as: { BOM-1: [Dependant-BOM-1, Dependant-BOM-2, ..] }.
+	Generate maps such as: { BOM-1: [Dependant-BOM-1, Dependant-BOM-2, ..] }.
 	Here BOM-1 is the leaf/lower level node/dependency.
 	The list contains one level higher nodes/dependants that depend on BOM-1.
+
+	Generate and return the reverse as well.
 	"""
 
 	bom = frappe.qb.DocType("BOM")
 	bom_item = frappe.qb.DocType("BOM Item")
 
-	bom_parents = (
+	bom_items = (
 		frappe.qb.from_(bom_item)
 		.join(bom)
 		.on(bom_item.parent == bom.name)
@@ -212,10 +222,12 @@ def _generate_dependants_map() -> defaultdict:
 	).run(as_dict=True)
 
 	child_parent_map = defaultdict(list)
-	for bom in bom_parents:
-		child_parent_map[bom.bom_no].append(bom.parent)
+	parent_child_map = defaultdict(list)
+	for row in bom_items:
+		child_parent_map[row.bom_no].append(row.parent)
+		parent_child_map[row.parent].append(row.bom_no)
 
-	return child_parent_map
+	return child_parent_map, parent_child_map
 
 
 def set_values_in_log(log_name: str, values: Dict[str, Any], commit: bool = False) -> None:
