@@ -27,6 +27,7 @@ class CancellationOfInvoices(Document):
 			# self.delete_gl_entry()
 			self.modified_sale_invoice()
 			# cost = super(CancellationOfInvoices, self).get_cost()
+			self.update_dashboard_customer()
 	
 	def update_dashboard_customer(self):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
