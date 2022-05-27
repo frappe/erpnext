@@ -23,12 +23,6 @@ from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 test_dependencies = ["Salary Component", "Salary Slip", "Account"]
 
 
-<<<<<<< HEAD
-class TestGratuity(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
-		make_earning_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
-=======
 class TestGratuity(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Gratuity")
@@ -38,18 +32,10 @@ class TestGratuity(FrappeTestCase):
 		make_earning_salary_component(
 			setup=True, test_tax=True, company_list=["_Test Company"], include_flexi_benefits=True
 		)
->>>>>>> b81d7519c1 (test: Gratuity status for payment via salary slip)
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
 		make_holiday_list()
 
-<<<<<<< HEAD
-	def setUp(self):
-		frappe.db.sql("DELETE FROM `tabGratuity`")
-		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
-
-=======
 	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
->>>>>>> 6c66bbbbfe (refactor: clean-up gratuity tests)
 	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
 		new_employee = make_employee("new_employee@salary.com", company="_Test Company")
 		salary_slip = get_last_salary_slip(new_employee)
@@ -167,13 +153,6 @@ class TestGratuity(FrappeTestCase):
 		self.assertEqual(gratuity.status, "Paid")
 		self.assertEqual(flt(gratuity.paid_amount, 2), flt(gratuity.amount, 2))
 
-<<<<<<< HEAD
-	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabGratuity`")
-		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
-
-=======
->>>>>>> 6c66bbbbfe (refactor: clean-up gratuity tests)
 
 def get_gratuity_rule(name):
 	rule = frappe.db.exists("Gratuity Rule", name)
