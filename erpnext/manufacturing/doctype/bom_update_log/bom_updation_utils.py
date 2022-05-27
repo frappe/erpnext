@@ -251,5 +251,5 @@ def handle_exception(doc: "BOMUpdateLog") -> None:
 	"Rolls back and fails BOM Update Log."
 
 	frappe.db.rollback()
-	error_log = doc.log_error("BOM Update Tool Error")
+	error_log = frappe.log_error(title=_("BOM Update Tool Error"))
 	set_values_in_log(doc.name, {"status": "Failed", "error_log": error_log.name})
