@@ -15,6 +15,7 @@ from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
 	make_deduction_salary_component,
 	make_earning_salary_component,
 	make_employee_salary_slip,
+	make_holiday_list,
 )
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
@@ -32,6 +33,7 @@ class TestGratuity(FrappeTestCase):
 			setup=True, test_tax=True, company_list=["_Test Company"], include_flexi_benefits=True
 		)
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
+		make_holiday_list()
 
 	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
 	def test_get_last_salary_slip_should_return_none_for_new_employee(self):
