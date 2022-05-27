@@ -1055,7 +1055,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		} else {
 			// company currency and doc currency is same
 			// this will prevent unnecessary conversion rate triggers
-			this.frm.set_value("conversion_rate", 1.0);
+			if(this.frm.doc.currency === this.get_company_currency()) {
+				this.frm.set_value("conversion_rate", 1.0);
+			} else {
+				this.conversion_rate();
+			}
 		}
 	},
 
