@@ -76,18 +76,18 @@
   },
   {
    "fieldname": "current_boms",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Current BOMs"
   },
   {
    "description": "Immediate parent BOMs",
    "fieldname": "parent_boms",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Parent BOMs"
   },
   {
    "fieldname": "processed_boms",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Processed BOMs"
   }
  ],
@@ -95,7 +95,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-24 17:52:21.824710",
+ "modified": "2022-05-27 17:03:34.712010",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
