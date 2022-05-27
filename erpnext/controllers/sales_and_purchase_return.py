@@ -240,11 +240,11 @@ def get_already_returned_items(doc):
 	elif doc.doctype == 'Delivery Note':
 		other_dt = 'Sales Invoice'
 		others_docs = [doc.return_against]
-		other_dt_condition = 'and child.delivery_note = %s'
+		other_dt_condition = 'and child.delivery_note = %s and par.update_stock = 1'
 	elif doc.doctype == 'Purchase Receipt':
 		other_dt = 'Purchase Invoice'
 		others_docs = [doc.return_against]
-		other_dt_condition = 'and child.purchase_receipt = %s'
+		other_dt_condition = 'and child.purchase_receipt = %s and par.update_stock = 1'
 
 	other_dt_data = []
 	if others_docs:
