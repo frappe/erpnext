@@ -17,6 +17,7 @@ class CustomerDocuments(Document):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.update_dashboard_customer()
 			# self.apply_gl_entry()
 	
 	def on_cancel(self):
@@ -25,6 +26,22 @@ class CustomerDocuments(Document):
 	def on_load(self):
 		self.validate_status()
 
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.billing_this_year += self.total
+			customer.total_unpaid += self.outstanding_amount
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.total
+			new_doc.total_unpaid = self.outstanding_amount
+			new_doc.insert()
+		
 	def calculate_total(self):
 		self.calculate_isv()
 		total_base = 0
