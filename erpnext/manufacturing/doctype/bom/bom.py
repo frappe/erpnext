@@ -699,7 +699,7 @@ class BOM(WebsiteGenerator):
 		for row in self.get("exploded_items"):
 			old_rate = flt(row.rate)
 			row.rate = rm_rate_map.get(row.item_code)
-			row.amount = flt(row.stock_qty) * row.rate
+			row.amount = flt(row.stock_qty) * flt(row.rate)
 
 			if old_rate != row.rate:
 				# Only db_update if changed
