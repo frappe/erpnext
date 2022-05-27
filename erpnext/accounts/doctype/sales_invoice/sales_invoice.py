@@ -284,6 +284,8 @@ class SalesInvoice(SellingController):
 			self.calculated_taxes()
 			if self.is_pos:
 				self.allow_credit_pos()
+
+			self.update_dashboard_customer()
 			# self.create_dispatch_control()
 
 		# if self.docstatus == 0:
@@ -291,6 +293,22 @@ class SalesInvoice(SellingController):
 		# if self.round_off_discount == 1
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.billing_this_year += self.grand_total
+			customer.total_unpaid += self.outstanding_amount
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.grand_total
+			new_doc.total_unpaid = self.outstanding_amount
+			new_doc.insert()
 	
 	def allow_credit_pos(self):
 		pos_profile = frappe.get_all("POS Profile", ["allow_credit"], filters = {"name": self.pos_profile})

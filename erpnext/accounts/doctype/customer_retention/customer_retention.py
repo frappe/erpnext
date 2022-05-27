@@ -16,6 +16,22 @@ class CustomerRetention(Document):
 			self.update_accounts_status()
 			self.apply_gl_entry()
 			self.apply_changes_sales_invoice()
+			self.update_dashboard_customer()
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.total_unpaid -= self.total_withheld
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_withheld * -1
+			new_doc.insert()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
