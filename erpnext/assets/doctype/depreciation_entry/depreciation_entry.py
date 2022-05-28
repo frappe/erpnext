@@ -46,9 +46,16 @@ class DepreciationEntry(AccountsController):
 				self.debit_account = debit_account
 
 	def validate_reference_doctype(self):
-		if self.reference_doctype not in ["Asset", "Asset Serial No", "Depreciation Schedule"]:
+		if self.reference_doctype not in [
+			"Asset",
+			"Asset Serial No",
+			"Depreciation Schedule",
+			"Asset Revaluation",
+		]:
 			frappe.throw(
-				_("Reference Document can only be an Asset, Asset Serial No or Depreciation Schedule."),
+				_(
+					"Reference Document can only be an Asset, Asset Serial No, Asset Revaluation or Depreciation Schedule."
+				),
 				title=_("Invalid Reference"),
 			)
 
@@ -93,38 +100,38 @@ class DepreciationEntry(AccountsController):
 			frappe.throw(_("Depreciation Schedule Row needs to be fetched."), title=_("Missing Value"))
 
 	def validate_finance_book(self):
-		is_depreciable_asset = frappe.get_value("Asset", self.asset, "calculate_depreciation")
+		enable_finance_books = frappe.db.get_single_value("Accounts Settings", "enable_finance_books")
 
-		if is_depreciable_asset:
-			asset_or_serial_no = self.get_asset_or_serial_no()
-			finance_books = self.get_finance_books_linked_with_asset(asset_or_serial_no)
+		if enable_finance_books:
+			is_depreciable_asset = frappe.get_value("Asset", self.asset, "calculate_depreciation")
 
-			if len(finance_books) == 1:
-				if not self.finance_book:
-					self.finance_book = finance_books[0]
-			elif len(finance_books) > 1:
-				if not self.finance_book:
-					frappe.throw(
-						_("Enter Finance Book as {0} is linked with multiple Finance Books.").format(
-							asset_or_serial_no
-						),
-						title=_("Missing Finance Book"),
-					)
-			else:
-				frappe.throw(
-					_("{0} is not linked with any Finance Books").format(asset_or_serial_no),
-					title=_("Invalid Asset"),
-				)
+			if is_depreciable_asset:
+				asset_or_serial_no = self.get_asset_or_serial_no()
+				finance_books = self.get_finance_books_linked_with_asset(asset_or_serial_no)
 
-			if self.finance_book:
-				if self.finance_book not in finance_books:
-					finance_books = ", ".join([str(fb) for fb in finance_books])
+				if finance_books:
+					if len(finance_books) == 1:
+						if not self.finance_book:
+							self.finance_book = finance_books[0]
 
-					frappe.throw(
-						_("{0} is not used in {1}. Please use one of the following instead: {2}").format(
-							self.finance_book, asset_or_serial_no, finance_books
-						)
-					)
+					elif len(finance_books) > 1:
+						if not self.finance_book:
+							frappe.throw(
+								_("Enter Finance Book as {0} is linked with multiple Finance Books.").format(
+									asset_or_serial_no
+								),
+								title=_("Missing Finance Book"),
+							)
+
+					if self.finance_book:
+						if self.finance_book not in finance_books:
+							finance_books = ", ".join([str(fb) for fb in finance_books])
+
+							frappe.throw(
+								_("{0} is not used in {1}. Please use one of the following instead: {2}").format(
+									self.finance_book, asset_or_serial_no, finance_books
+								)
+							)
 
 	def get_asset_or_serial_no(self):
 		if self.serial_no:
