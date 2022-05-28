@@ -71,18 +71,19 @@ class PaymentEntry(AccountsController):
 			self.paid_supplier_documents()
 			self.paid_customer_documents()
 			self.calculate_diferred_account()
-			self.update_dashboard_customer()
+			if self.party_type == "Customer":
+				self.update_dashboard_customer()
 	
 	def update_dashboard_customer(self):
-		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer = frappe.get_doc("Dashboard Customer", self.party)
 			customer.total_unpaid -= self.total_allocated_amount
 			customer.save()
 		else:
 			new_doc = frappe.new_doc("Dashboard Customer")
-			new_doc.customer = self.customer
+			new_doc.customer = self.party
 			new_doc.company = self.company
 			new_doc.billing_this_year = 0
 			new_doc.total_unpaid = self.total_allocated_amount * -1
