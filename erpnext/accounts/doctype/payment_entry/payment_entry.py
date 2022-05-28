@@ -181,11 +181,7 @@ class PaymentEntry(AccountsController):
 				self.remove(d)
 				continue
 
-			d.due_date = latest.due_date
-			d.total_amount = latest.invoice_amount
 			d.outstanding_amount = latest.outstanding_amount
-			d.bill_no = latest.bill_no
-			d.payment_term = latest.payment_term
 
 			if (flt(d.allocated_amount)) > 0:
 				if flt(d.allocated_amount) > flt(d.outstanding_amount):
