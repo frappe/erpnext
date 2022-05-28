@@ -300,7 +300,13 @@ class SalesInvoice(SellingController):
 		if len(customers) > 0:
 			customer = frappe.get_doc("Dashboard Customer", self.customer)
 			customer.billing_this_year += self.grand_total
-			customer.total_unpaid += self.outstanding_amount
+
+			outstanding_amount = self.outstanding_amount
+
+			if self.grand_total == self.paid_amount:
+				outstanding_amount = 0
+
+			customer.total_unpaid += outstanding_amount
 			customer.save()
 		else:
 			new_doc = frappe.new_doc("Dashboard Customer")
