@@ -789,11 +789,23 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)) {
 			$.each(this.frm.doc['payments'] || [], function(index, data) {
 				if(data.default && payment_status && total_amount_to_pay > 0) {
-					let base_amount = flt(total_amount_to_pay, precision("base_amount", data));
+					let base_amount, amount;
+
+					if (me.frm.doc.party_account_currency == me.frm.doc.currency) {
+						// if customer/supplier currency is same as company currency
+						// total_amount_to_pay is already in customer/supplier currency
+						// so base_amount has to be calculated using total_amount_to_pay
+						base_amount = flt(total_amount_to_pay * me.frm.doc.conversion_rate, precision("base_amount", data));
+						amount = flt(total_amount_to_pay, precision("amount", data));
+					} else {
+						base_amount = flt(total_amount_to_pay, precision("base_amount", data));
+						amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount", data));
+					}
+
 					frappe.model.set_value(data.doctype, data.name, "base_amount", base_amount);
-					let amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount", data));
 					frappe.model.set_value(data.doctype, data.name, "amount", amount);
 					payment_status = false;
+
 				} else if(me.frm.doc.paid_amount) {
 					frappe.model.set_value(data.doctype, data.name, "amount", 0.0);
 				}
