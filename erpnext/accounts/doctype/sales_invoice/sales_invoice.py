@@ -31,11 +31,10 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import get_account_currency
-from erpnext.assets.doctype.asset.depreciation import (
+from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
-	make_depreciation_entry,
 )
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
@@ -1116,13 +1115,13 @@ class SalesInvoice(SellingController):
 							self.reset_depreciation_schedule(asset)
 
 					else:
+						if asset.calculate_depreciation:
+							self.depreciate_asset(asset, item.get("asset_serial_no"))
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.get("asset_serial_no"), item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", self.posting_date)
-
-						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1185,12 +1184,24 @@ class SalesInvoice(SellingController):
 				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
 			)
 
-	def depreciate_asset(self, asset):
-		asset.flags.ignore_validate_update_after_submit = True
-		asset.prepare_depreciation_data(date_of_sale=self.posting_date)
-		asset.save()
+	def depreciate_asset(self, asset, serial_no):
+		from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
+			post_depreciation_entries,
+		)
+		from erpnext.controllers.base_asset import get_linked_depreciation_schedules
 
-		make_depreciation_entry(asset.name, self.posting_date)
+		if serial_no:
+			doc = frappe.get_doc("Asset Serial No", serial_no)
+		else:
+			doc = asset
+
+		doc.create_schedules_if_depr_details_have_been_updated(date_of_sale=getdate(self.posting_date))
+		doc.submit_depreciation_schedules()
+
+		schedules = get_linked_depreciation_schedules(asset.name, serial_no)
+
+		for schedule in schedules:
+			post_depreciation_entries(schedule, self.posting_date)
 
 	def reset_depreciation_schedule(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
