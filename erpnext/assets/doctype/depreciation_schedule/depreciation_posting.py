@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import cint, getdate, today
+from frappe.utils import cint, flt, getdate, today
 from frappe.utils.data import get_link_to_form
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -325,4 +325,143 @@ def record_depreciation_posting(parent, depr_entry):
 		notes=_("{0} {1} depreciated by {2}.").format(
 			parent.doctype, get_link_to_form(parent.doctype, parent.name), depr_entry.depreciation_amount
 		),
+	)
+
+
+def get_gl_entries_on_asset_disposal(asset, serial_no=None, selling_amount=0, finance_book=None):
+	(
+		fixed_asset_account,
+		accumulated_depr_account,
+		asset,
+		depreciation_cost_center,
+		accumulated_depr_amount,
+		disposal_account,
+		asset_value,
+	) = get_asset_details(asset, serial_no, finance_book)
+
+	gl_entries = [
+		{
+			"account": fixed_asset_account,
+			"credit_in_account_currency": asset.gross_purchase_amount,
+			"credit": asset.gross_purchase_amount,
+			"cost_center": depreciation_cost_center,
+		},
+		{
+			"account": accumulated_depr_account,
+			"debit_in_account_currency": accumulated_depr_amount,
+			"debit": accumulated_depr_amount,
+			"cost_center": depreciation_cost_center,
+		},
+	]
+
+	profit_amount = flt(selling_amount) - flt(asset_value)
+	if profit_amount:
+		get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center)
+
+	return gl_entries
+
+
+def get_gl_entries_on_asset_regain(asset, serial_no=None, selling_amount=0, finance_book=None):
+	(
+		fixed_asset_account,
+		accumulated_depr_account,
+		asset,
+		depreciation_cost_center,
+		accumulated_depr_amount,
+		disposal_account,
+		asset_value,
+	) = get_asset_details(asset, serial_no, finance_book)
+
+	gl_entries = [
+		{
+			"account": fixed_asset_account,
+			"debit_in_account_currency": asset.gross_purchase_amount,
+			"debit": asset.gross_purchase_amount,
+			"cost_center": depreciation_cost_center,
+		},
+		{
+			"account": accumulated_depr_account,
+			"credit_in_account_currency": accumulated_depr_amount,
+			"credit": accumulated_depr_amount,
+			"cost_center": depreciation_cost_center,
+		},
+	]
+
+	profit_amount = abs(flt(asset_value)) - abs(flt(selling_amount))
+	if profit_amount:
+		get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center)
+
+	return gl_entries
+
+
+def get_asset_details(asset, serial_no=None, finance_book=None):
+	from erpnext.assets.doctype.asset_revaluation.asset_revaluation import get_current_asset_value
+
+	fixed_asset_account, accumulated_depr_account = get_asset_accounts(
+		asset.asset_category, asset.company
+	)
+	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
+	depreciation_cost_center = asset.cost_center or depreciation_cost_center
+
+	asset_value = get_current_asset_value(asset.name, serial_no, finance_book)
+	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset_value)
+
+	return (
+		fixed_asset_account,
+		accumulated_depr_account,
+		asset,
+		depreciation_cost_center,
+		accumulated_depr_amount,
+		disposal_account,
+		asset_value,
+	)
+
+
+def get_asset_accounts(asset_category, company):
+	fixed_asset_account, accumulated_depr_account = frappe.db.get_value(
+		"Asset Category Account",
+		filters={"parent": asset_category, "company_name": company},
+		fieldname=["fixed_asset_account", "accumulated_depreciation_account"],
+	)
+
+	if not accumulated_depr_account:
+		accumulated_depr_account = frappe.get_cached_value(
+			"Company", company, "accumulated_depreciation_account"
+		)
+
+	if not accumulated_depr_account or not fixed_asset_account:
+		frappe.throw(
+			_("Please set Depreciation related Accounts in Asset Category {0} or Company {1}").format(
+				asset_category, company
+			)
+		)
+
+	return fixed_asset_account, accumulated_depr_account
+
+
+@frappe.whitelist()
+def get_disposal_account_and_cost_center(company):
+	disposal_account, depreciation_cost_center = frappe.get_cached_value(
+		"Company", company, ["disposal_account", "depreciation_cost_center"]
+	)
+
+	if not disposal_account:
+		frappe.throw(
+			_("Please set 'Gain/Loss Account on Asset Disposal' in Company {0}").format(company)
+		)
+	if not depreciation_cost_center:
+		frappe.throw(_("Please set 'Asset Depreciation Cost Center' in Company {0}").format(company))
+
+	return disposal_account, depreciation_cost_center
+
+
+def get_profit_gl_entries(profit_amount, gl_entries, disposal_account, depreciation_cost_center):
+	debit_or_credit = "debit" if profit_amount < 0 else "credit"
+	gl_entries.append(
+		{
+			"account": disposal_account,
+			"cost_center": depreciation_cost_center,
+			debit_or_credit: abs(profit_amount),
+			debit_or_credit + "_in_account_currency": abs(profit_amount),
+		}
 	)
