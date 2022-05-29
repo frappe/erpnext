@@ -97,13 +97,12 @@ class AssetRevaluation(Document):
 
 @frappe.whitelist()
 def get_current_asset_value(asset, serial_no=None, finance_book=None):
-	if not finance_book:
-		if serial_no:
-			return frappe.db.get_value("Asset Serial No", serial_no, "asset_value")
-		else:
-			return frappe.db.get_value("Asset", asset, "asset_value")
-
+	if serial_no:
+		asset_value = frappe.db.get_value("Asset Serial No", serial_no, "asset_value")
 	else:
+		asset_value = frappe.db.get_value("Asset", asset, "asset_value")
+
+	if not asset_value:
 		if serial_no:
 			parent = serial_no
 			parent_type = "Asset Serial No"
@@ -113,4 +112,6 @@ def get_current_asset_value(asset, serial_no=None, finance_book=None):
 
 		filters = {"parent": parent, "parenttype": parent_type, "finance_book": finance_book}
 
-		return frappe.db.get_value("Asset Finance Book", filters, "asset_value")
+		asset_value = frappe.db.get_value("Asset Finance Book", filters, "asset_value")
+
+	return asset_value
