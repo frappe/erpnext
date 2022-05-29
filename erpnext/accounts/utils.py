@@ -1433,6 +1433,36 @@ def create_payment_ledger_entry(
 				ple.submit()
 
 
+def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
+	ple = frappe.qb.DocType("Payment Ledger Entry")
+	vouchers = [frappe._dict({"voucher_type": voucher_type, "voucher_no": voucher_no})]
+	common_filter = []
+	if account:
+		common_filter.append(ple.account == account)
+
+	if party_type:
+		common_filter.append(ple.party_type == party_type)
+
+	if party:
+		common_filter.append(ple.party == party)
+
+	ple_query = QueryPaymentLedger()
+
+	# on cancellation outstanding can be an empty list
+	voucher_outstanding = ple_query.get_voucher_outstandings(vouchers, common_filter=common_filter)
+	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"] and voucher_outstanding:
+		outstanding = voucher_outstanding[0]
+		ref_doc = frappe.get_doc(voucher_type, voucher_no)
+
+		# Didn't use db_set for optimisation purpose
+		ref_doc.outstanding_amount = outstanding["outstanding_in_account_currency"]
+		frappe.db.set_value(
+			voucher_type, voucher_no, "outstanding_amount", outstanding["outstanding_in_account_currency"]
+		)
+
+		ref_doc.set_status(update=True)
+
+
 def delink_original_entry(pl_entry):
 	if pl_entry:
 		ple = qb.DocType("Payment Ledger Entry")
