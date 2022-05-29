@@ -429,12 +429,12 @@ class BaseAsset(AccountsController):
 			],
 		)
 
-	def create_schedules_if_depr_details_have_been_updated(self):
-		if self.has_updated_basic_depr_details():
+	def create_schedules_if_depr_details_have_been_updated(self, date_of_sale=None):
+		if self.has_updated_basic_depr_details() or date_of_sale:
 			delete_existing_schedules(self)
-			create_depreciation_schedules(self)
+			create_depreciation_schedules(self, date_of_sale)
 
-			if self.has_value_changed("gross_purchase_amount"):
+			if self.docstatus == 0 and self.has_value_changed("gross_purchase_amount"):
 				self.set_initial_asset_value()
 			return
 
@@ -1257,4 +1257,10 @@ def get_serialized_assets_that_need_cwip_booking(asset_categories):
 		"Asset",
 		filters={"asset_category": ["in", asset_categories], "is_serialized_asset": 1},
 		pluck="name",
+	)
+
+
+def get_linked_depreciation_schedules(asset, serial_no):
+	return frappe.get_all(
+		"Depreciation Schedule", filters={"asset": asset, "serial_no": serial_no}, pluck="name"
 	)
