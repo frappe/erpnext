@@ -10,7 +10,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
+from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
@@ -324,43 +324,36 @@ class TestBOM(FrappeTestCase):
 
 	def test_bom_recursion_1st_level(self):
 		"""BOM should not allow BOM item again in child"""
-		item_code = "_Test BOM Recursion"
-		make_item(item_code, {"is_stock_item": 1})
+		item_code = make_item(properties={"is_stock_item": 1}).name
 
 		bom = frappe.new_doc("BOM")
 		bom.item = item_code
 		bom.append("items", frappe._dict(item_code=item_code))
-		with self.assertRaises(frappe.ValidationError) as err:
+		bom.save()
+		with self.assertRaises(BOMRecursionError):
+			bom.items[0].bom_no = bom.name
 			bom.save()
 
-		self.assertTrue("recursion" in str(err.exception).lower())
-		frappe.delete_doc("BOM", bom.name, ignore_missing=True)
-
 	def test_bom_recursion_transitive(self):
-		item1 = "_Test BOM Recursion"
-		item2 = "_Test BOM Recursion 2"
-		make_item(item1, {"is_stock_item": 1})
-		make_item(item2, {"is_stock_item": 1})
+		item1 = make_item(properties={"is_stock_item": 1}).name
+		item2 = make_item(properties={"is_stock_item": 1}).name
 
 		bom1 = frappe.new_doc("BOM")
 		bom1.item = item1
 		bom1.append("items", frappe._dict(item_code=item2))
 		bom1.save()
-		bom1.submit()
 
 		bom2 = frappe.new_doc("BOM")
 		bom2.item = item2
 		bom2.append("items", frappe._dict(item_code=item1))
+		bom2.save()
 
-		with self.assertRaises(frappe.ValidationError) as err:
+		bom2.items[0].bom_no = bom1.name
+		bom1.items[0].bom_no = bom2.name
+
+		with self.assertRaises(BOMRecursionError):
+			bom1.save()
 			bom2.save()
-			bom2.submit()
-
-		self.assertTrue("recursion" in str(err.exception).lower())
-
-		bom1.cancel()
-		frappe.delete_doc("BOM", bom1.name, ignore_missing=True, force=True)
-		frappe.delete_doc("BOM", bom2.name, ignore_missing=True, force=True)
 
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
