@@ -251,9 +251,8 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currency(item)
 
-			item.bom_no = ""
-			if not item.do_not_explode:
-				item.bom_no = item.bom_no
+			if item.do_not_explode:
+				item.bom_no = ""
 
 			ret = self.get_bom_material_detail(
 				{
