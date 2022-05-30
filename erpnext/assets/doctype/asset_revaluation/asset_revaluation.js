@@ -13,7 +13,7 @@ frappe.ui.form.on("Asset Revaluation", {
 					company: frm.doc.company,
 					is_group: 0
 				}
-			}
+			};
 		});
 
 		frm.set_query("asset", function () {
@@ -121,8 +121,7 @@ frappe.ui.form.on("Asset Revaluation", {
 			frappe.db.get_single_value("Accounts Settings", "enable_finance_books")
 				.then((value) => {
 					frm.toggle_display("finance_book", value);
-				}
-				)
+				});
 		} else {
 			frm.set_df_property("finance_book", "hidden", 1);
 		}
