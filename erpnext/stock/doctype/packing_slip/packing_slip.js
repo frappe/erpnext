@@ -5,8 +5,8 @@ frappe.ui.form.on("Packing Slip", {
 	onload(frm) {
 		frm.set_query("delivery_note", () => {
 			return {
-				filters: { 'docstatus': 0}
-			}
+				filters: { 'docstatus': 0 }
+			};
 		});
 
 		frm.set_query("item_code", "items", () => {
@@ -16,13 +16,13 @@ frappe.ui.form.on("Packing Slip", {
 
 			return {
 				query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",
-				filters:{ 'delivery_note': frm.doc.delivery_note}
-			}
+				filters: { 'delivery_note': frm.doc.delivery_note }
+			};
 		});
 	},
 
 	onload_post_render(frm) {
-		if(frm.doc.delivery_note && frm.doc.__islocal) {
+		if (frm.doc.delivery_note && frm.doc.__islocal) {
 			get_items(frm);
 		}
 	},
@@ -55,8 +55,7 @@ frappe.ui.form.on("Packing Slip", {
 			if (exc_type === "InvalidPackingSlipItem") {
 				frm.get_field("items").grid.grid_rows[scanned_row.idx - 1].remove();
 				frappe.msgprint(__("Item {0} has automatically been removed from this packing slip.", [scanned_row.item_code]));
-			}
-			else if (exc_type === "InvalidPackedQty") {
+			} else if (exc_type === "InvalidPackedQty") {
 				// Reset the qty to the value before the row was scanned.
 				// If the row didn't exist, set the qty to zero.
 				const row = backup.find(row => row.name === scanned_row.name);
@@ -96,7 +95,7 @@ function get_items(frm) {
 		doc: frm.doc,
 		method: "get_items",
 		callback: function(r) {
-			if(!r.exc) frm.refresh();
+			if (!r.exc) frm.refresh();
 		}
 	});
 }
@@ -104,13 +103,13 @@ function get_items(frm) {
 // To Case No. cannot be less than From Case No.
 function validate_case_nos(doc) {
 	doc = locals[doc.doctype][doc.name];
-	if(cint(doc.from_case_no)==0) {
+	if (cint(doc.from_case_no)==0) {
 		frappe.msgprint(__("The 'From Package No.' field must neither be empty nor it's value less than 1."));
 		frappe.validated = false;
-	} else if(!cint(doc.to_case_no)) {
+	} else if (!cint(doc.to_case_no)) {
 		doc.to_case_no = doc.from_case_no;
 		refresh_field('to_case_no');
-	} else if(cint(doc.to_case_no) < cint(doc.from_case_no)) {
+	} else if (cint(doc.to_case_no) < cint(doc.from_case_no)) {
 		frappe.msgprint(__("'To Case No.' cannot be less than 'From Case No.'"));
 		frappe.validated = false;
 	}
@@ -129,15 +128,15 @@ function validate_calculate_item_details(doc) {
 // Do not allow duplicate items i.e. items with same item_code
 // Also check for 0 qty
 function validate_duplicate_items(doc, ps_detail) {
-	for(var i=0; i<ps_detail.length; i++) {
-		for(var j=0; j<ps_detail.length; j++) {
-			if(i!=j && ps_detail[i].item_code && ps_detail[i].item_code==ps_detail[j].item_code) {
+	for (var i=0; i<ps_detail.length; i++) {
+		for (var j=0; j<ps_detail.length; j++) {
+			if (i!=j && ps_detail[i].item_code && ps_detail[i].item_code==ps_detail[j].item_code) {
 				frappe.msgprint(__("You have entered duplicate items. Please rectify and try again."));
 				frappe.validated = false;
 				return;
 			}
 		}
-		if(flt(ps_detail[i].qty)<=0) {
+		if (flt(ps_detail[i].qty)<=0) {
 			frappe.msgprint(__("Invalid quantity specified for item {0}. Quantity should be greater than 0.", [ps_detail[i].item_code]));
 			frappe.validated = false;
 		}
@@ -151,9 +150,9 @@ function calc_net_total_pkg (doc, ps_detail) {
 	doc.net_weight_uom = (ps_detail && ps_detail.length) ? ps_detail[0].weight_uom : '';
 	doc.gross_weight_uom = doc.net_weight_uom;
 
-	for(let i=0; i<ps_detail.length; i++) {
+	for (let i=0; i<ps_detail.length; i++) {
 		const item = ps_detail[i];
-		if(item.weight_uom != doc.net_weight_uom) {
+		if (item.weight_uom != doc.net_weight_uom) {
 			frappe.msgprint(__("Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM."));
 			frappe.validated = false;
 		}
@@ -161,7 +160,7 @@ function calc_net_total_pkg (doc, ps_detail) {
 	}
 
 	doc.net_weight_pkg = roundNumber(net_weight_pkg, 2);
-	if(!flt(doc.gross_weight_pkg)) {
+	if (!flt(doc.gross_weight_pkg)) {
 		doc.gross_weight_pkg = doc.net_weight_pkg;
 	}
 	refresh_many(['net_weight_pkg', 'net_weight_uom', 'gross_weight_uom', 'gross_weight_pkg']);
