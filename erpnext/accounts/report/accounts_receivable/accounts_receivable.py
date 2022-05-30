@@ -7,6 +7,7 @@ from collections import OrderedDict
 import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Date
 from frappe.utils import cint, cstr, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -654,7 +655,18 @@ class ReceivablePayableReport(object):
 
 		self.prepare_conditions()
 
-		self.qb_selection_filter.append(self.ple.posting_date.lte(self.filters.report_date))
+		if self.filters.show_future_payments:
+			self.qb_selection_filter.append(
+				(
+					self.ple.posting_date.lte(self.filters.report_date)
+					| (
+						(self.ple.voucher_no == self.ple.against_voucher_no)
+						& (Date(self.ple.creation).lte(self.filters.report_date))
+					)
+				)
+			)
+		else:
+			self.qb_selection_filter.append(self.ple.posting_date.lte(self.filters.report_date))
 
 		ple = qb.DocType("Payment Ledger Entry")
 		query = (
