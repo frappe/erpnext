@@ -46,6 +46,16 @@ class CancellationOfInvoices(Document):
 			new_doc.billing_this_year = invoice.grand_total * -1
 			new_doc.total_unpaid = invoice.outstanding_amount * -1
 			new_doc.insert()
+		
+		self.update_accounts_status(invoice)
+
+	def update_accounts_status(self, invoice):
+		customer = frappe.get_doc("Customer", self.customer)
+
+		if customer:
+			customer.debit -= invoice.grand_total
+			customer.remaining_balance -= invoice.grand_total
+			customer.save()
 
 	def on_cancel(self):
 		frappe.throw(_("Unable to cancel Cancellation Of Invoice"))

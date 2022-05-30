@@ -19,6 +19,9 @@ class DebitNoteCXC(Document):
 			self.update_accounts_status()
 			self.apply_gl_entry()
 			self.update_dashboard_customer()
+	
+	def on_cancel(self):
+		self.update_dashboard_customer_cancel()
 
 	def on_load(self):
 		self.validate_status()
@@ -38,6 +41,15 @@ class DebitNoteCXC(Document):
 			new_doc.billing_this_year = self.total
 			new_doc.total_unpaid = self.outstanding_amount
 			new_doc.insert()
+	
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.billing_this_year -= self.total
+			customer.total_unpaid -= self.outstanding_amount
+			customer.save()
 
 	def calculate_total(self):
 		self.calculate_isv()
