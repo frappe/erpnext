@@ -44,7 +44,7 @@ class PayrollEntry(Document):
 		self.set_status()
 
 	def on_submit(self):
-		self.set_status(update=True)
+		self.set_status(update=True, status="Submitted")
 		self.create_salary_slips()
 
 	def before_submit(self):
@@ -90,7 +90,8 @@ class PayrollEntry(Document):
 		)
 		self.db_set("salary_slips_created", 0)
 		self.db_set("salary_slips_submitted", 0)
-		self.set_status(update=True)
+		self.set_status(update=True, status="Cancelled")
+		self.db_set("error_message", "")
 
 	def get_emp_list(self):
 		"""
@@ -187,7 +188,7 @@ class PayrollEntry(Document):
 					"currency": self.currency,
 				}
 			)
-			if len(employees) > 30:
+			if len(employees) > 30 or frappe.flags.enqueue_payroll_entry:
 				self.db_set("status", "Queued")
 				frappe.enqueue(
 					create_salary_slips_for_employees,
@@ -230,14 +231,14 @@ class PayrollEntry(Document):
 	@frappe.whitelist()
 	def submit_salary_slips(self):
 		self.check_permission("write")
-		ss_list = self.get_sal_slip_list(ss_status=0)
-		if len(ss_list) > 30:
+		salary_slips = self.get_sal_slip_list(ss_status=0)
+		if len(salary_slips) > 30 or frappe.flags.enqueue_payroll_entry:
 			self.db_set("status", "Queued")
 			frappe.enqueue(
 				submit_salary_slips_for_employees,
 				timeout=600,
 				payroll_entry=self,
-				salary_slips=ss_list,
+				salary_slips=salary_slips,
 				publish_progress=False,
 			)
 			frappe.msgprint(
@@ -246,7 +247,7 @@ class PayrollEntry(Document):
 				indicator="blue",
 			)
 		else:
-			submit_salary_slips_for_employees(self, ss_list, publish_progress=False)
+			submit_salary_slips_for_employees(self, salary_slips, publish_progress=False)
 
 	def email_salary_slip(self, submitted_ss):
 		if frappe.db.get_single_value("Payroll Settings", "email_salary_slip_to_employee"):
@@ -857,7 +858,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 						title=_("Creating Salary Slips..."),
 					)
 
-		payroll_entry.db_set({"status": "Submitted", "salary_slips_created": 1})
+		payroll_entry.db_set({"status": "Submitted", "salary_slips_created": 1, "error_message": ""})
 
 		if salary_slips_exist_for:
 			frappe.msgprint(
@@ -873,7 +874,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 		log_payroll_failure("creation", payroll_entry, e)
 
 	finally:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 		frappe.publish_realtime("completed_salary_slip_creation")
 
 
@@ -937,7 +938,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		if submitted:
 			payroll_entry.make_accrual_jv_entry()
 			payroll_entry.email_salary_slip(submitted)
-			payroll_entry.db_set({"salary_slips_submitted": 1, "status": "Submitted"})
+			payroll_entry.db_set({"salary_slips_submitted": 1, "status": "Submitted", "error_message": ""})
 
 		show_payroll_submission_status(submitted, not_submitted, salary_slip)
 
@@ -946,7 +947,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		log_payroll_failure("submission", payroll_entry, e)
 
 	finally:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 		frappe.publish_realtime("completed_salary_slip_submission")
 
 	frappe.flags.via_payroll_entry = False
