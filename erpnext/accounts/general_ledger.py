@@ -29,6 +29,7 @@ def make_gl_entries(
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
+			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
@@ -41,6 +42,26 @@ def make_gl_entries(
 				)
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
+
+def validate_disabled_accounts(gl_map):
+	accounts = [d.account for d in gl_map if d.account]
+
+	Account = frappe.qb.DocType("Account")
+
+	disabled_accounts = (
+		frappe.qb.from_(Account)
+		.where(Account.name.isin(accounts) & Account.disabled == 1)
+		.select(Account.name, Account.disabled)
+	).run(as_dict=True)
+
+	if disabled_accounts:
+		account_list = "<br>"
+		account_list += ", ".join([frappe.bold(d.name) for d in disabled_accounts])
+		frappe.throw(
+			_("Cannot create accounting entries against disabled accounts: {0}").format(account_list),
+			title=_("Disabled Account Selected"),
+		)
 
 
 def validate_accounting_period(gl_map):
@@ -273,7 +294,7 @@ def round_off_debit_credit(gl_map):
 
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
-		gl_map[0].company
+		gl_map[0].company, gl_map[0].voucher_type, gl_map[0].voucher_no
 	)
 	round_off_account_exists = False
 	round_off_gle = frappe._dict()
@@ -310,14 +331,43 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		}
 	)
 
+	update_accounting_dimensions(round_off_gle)
+
 	if not round_off_account_exists:
 		gl_map.append(round_off_gle)
 
 
-def get_round_off_account_and_cost_center(company):
+def update_accounting_dimensions(round_off_gle):
+	dimensions = get_accounting_dimensions()
+	meta = frappe.get_meta(round_off_gle["voucher_type"])
+	has_all_dimensions = True
+
+	for dimension in dimensions:
+		if not meta.has_field(dimension):
+			has_all_dimensions = False
+
+	if dimensions and has_all_dimensions:
+		dimension_values = frappe.db.get_value(
+			round_off_gle["voucher_type"], round_off_gle["voucher_no"], dimensions, as_dict=1
+		)
+
+		for dimension in dimensions:
+			round_off_gle[dimension] = dimension_values.get(dimension)
+
+
+def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
 	round_off_account, round_off_cost_center = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
+
+	meta = frappe.get_meta(voucher_type)
+
+	# Give first preference to parent cost center for round off GLE
+	if meta.has_field("cost_center"):
+		parent_cost_center = frappe.db.get_value(voucher_type, voucher_no, "cost_center")
+		if parent_cost_center:
+			round_off_cost_center = parent_cost_center
+
 	if not round_off_account:
 		frappe.throw(_("Please mention Round Off Account in Company"))
 

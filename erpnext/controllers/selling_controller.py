@@ -16,6 +16,9 @@ from erpnext.stock.utils import get_incoming_rate
 
 
 class SellingController(StockController):
+	def __setup__(self):
+		self.flags.ignore_permlevel_for_fields = ["selling_price_list", "price_list_currency"]
+
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency, self.grand_total)
 
@@ -474,15 +477,16 @@ class SellingController(StockController):
 						rate = flt(d.incoming_rate * d.conversion_factor, d.precision("rate"))
 						if d.rate != rate:
 							d.rate = rate
+							frappe.msgprint(
+								_(
+									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+								).format(d.idx),
+								alert=1,
+							)
 
-						d.discount_percentage = 0
-						d.discount_amount = 0
-						frappe.msgprint(
-							_(
-								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-							).format(d.idx),
-							alert=1,
-						)
+						d.discount_percentage = 0.0
+						d.discount_amount = 0.0
+						d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document

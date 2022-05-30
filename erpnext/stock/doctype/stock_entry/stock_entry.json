@@ -52,9 +52,9 @@
   "items",
   "get_stock_and_rate",
   "section_break_19",
-  "total_incoming_value",
-  "column_break_22",
   "total_outgoing_value",
+  "column_break_22",
+  "total_incoming_value",
   "value_difference",
   "additional_costs_section",
   "additional_costs",
@@ -380,7 +380,7 @@
   {
    "fieldname": "total_incoming_value",
    "fieldtype": "Currency",
-   "label": "Total Incoming Value",
+   "label": "Total Incoming Value (Receipt)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -392,7 +392,7 @@
   {
    "fieldname": "total_outgoing_value",
    "fieldtype": "Currency",
-   "label": "Total Outgoing Value",
+   "label": "Total Outgoing Value (Consumption)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -400,7 +400,7 @@
   {
    "fieldname": "value_difference",
    "fieldtype": "Currency",
-   "label": "Total Value Difference (Out - In)",
+   "label": "Total Value Difference (Incoming - Outgoing)",
    "options": "Company:company:default_currency",
    "print_hide_if_no_value": 1,
    "read_only": 1
@@ -668,7 +668,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-20 14:39:19.044478",
+ "modified": "2022-05-02 05:21:39.060501",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

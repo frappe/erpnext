@@ -341,7 +341,7 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	tax_categories = frappe.get_all(
 		"Tax Category",
 		fields=["name", "is_inter_state", "gst_state"],
-		filters={"is_inter_state": is_inter_state, "is_reverse_charge": 0},
+		filters={"is_inter_state": is_inter_state, "is_reverse_charge": 0, "disabled": 0},
 	)
 
 	default_tax = ""
@@ -825,7 +825,7 @@ def get_gst_accounts(
 	gst_settings_accounts = frappe.get_all(
 		"GST Account",
 		filters=filters,
-		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
+		fields=["cgst_account", "sgst_account", "igst_account", "cess_account", "utgst_account"],
 	)
 
 	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
@@ -839,6 +839,30 @@ def get_gst_accounts(
 				gst_accounts[val] = acc
 
 	return gst_accounts
+
+
+def validate_sez_and_export_invoices(doc, method):
+	country = frappe.get_cached_value("Company", doc.company, "country")
+
+	if country != "India":
+		return
+
+	if (
+		doc.get("gst_category") in ("SEZ", "Overseas")
+		and doc.get("export_type") == "Without Payment of Tax"
+	):
+		gst_accounts = get_gst_accounts(doc.company)
+
+		for tax in doc.get("taxes"):
+			for tax in doc.get("taxes"):
+				if (
+					tax.account_head
+					in gst_accounts.get("igst_account", [])
+					+ gst_accounts.get("sgst_account", [])
+					+ gst_accounts.get("cgst_account", [])
+					and tax.tax_amount_after_discount_amount
+				):
+					frappe.throw(_("GST cannot be applied on SEZ or Export invoices without payment of tax"))
 
 
 def validate_reverse_charge_transaction(doc, method):
@@ -887,6 +911,8 @@ def validate_reverse_charge_transaction(doc, method):
 			)
 
 			frappe.throw(msg)
+
+		doc.eligibility_for_itc = "ITC on Reverse Charge"
 
 
 def update_itc_availed_fields(doc, method):

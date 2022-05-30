@@ -34,8 +34,9 @@ class ProcessStatementOfAccounts(Document):
 			frappe.throw(_("Customers not selected."))
 
 		if self.enable_auto_email:
-			self.to_date = self.start_date
-			self.from_date = add_months(self.to_date, -1 * self.filter_duration)
+			if self.start_date and getdate(self.start_date) >= getdate(today()):
+				self.to_date = self.start_date
+				self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 
 
 def get_report_pdf(doc, consolidated=True):

@@ -12,6 +12,7 @@
   "no_of_days",
   "actions_section",
   "send_email",
+  "email_subject",
   "email_template",
   "auto_execute",
   "column_break_6",
@@ -55,18 +56,18 @@
    "label": "Send Email"
   },
   {
-   "depends_on": "send_email",
    "description": "Following variables can be used for designing Email Template - \ncustomer, customer_name,  total_due, outstanding_details",
    "fieldname": "email_template",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Email Template",
-   "mandatory_depends_on": "send_email",
    "options": "Email Template"
   },
   {
    "default": "0",
    "fieldname": "auto_execute",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Auto Execute"
   },
   {
@@ -81,11 +82,10 @@
    "label": "Send SMS Message"
   },
   {
-   "depends_on": "send_message",
    "fieldname": "sms_template",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "SMS Template",
-   "mandatory_depends_on": "send_message",
    "options": "Email Template"
   },
   {
@@ -127,11 +127,18 @@
    "fieldtype": "Text",
    "label": "Action To Do",
    "mandatory_depends_on": "manual_action"
+  },
+  {
+   "depends_on": "send_email",
+   "fieldname": "email_subject",
+   "fieldtype": "Data",
+   "label": "Email Subject",
+   "mandatory_depends_on": "send_email"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-06 11:48:44.764877",
+ "modified": "2022-05-12 10:50:55.742304",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Level",
@@ -170,6 +177,30 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor",
    "share": 1,
    "write": 1
   }

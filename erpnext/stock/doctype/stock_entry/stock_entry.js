@@ -552,7 +552,9 @@ frappe.ui.form.on('Stock Entry', {
 				},
 				callback: function (r) {
 					if (!r.exc) {
-						$.extend(child, r.message);
+						["actual_qty", "basic_rate"].forEach((field) => {
+							frappe.model.set_value(cdt, cdn, field, (r.message[field] || 0.0));
+						});
 						frm.events.calculate_basic_amount(frm, child);
 					}
 				}
@@ -1209,10 +1211,10 @@ function attach_bom_items(bom_no) {
 }
 
 function check_should_not_attach_bom_items(bom_no) {
-	return (
-		bom_no === undefined ||
-		(erpnext.stock.bom && erpnext.stock.bom.name === bom_no)
-	);
+  return (
+	bom_no === undefined ||
+	(erpnext.stock.bom && erpnext.stock.bom.name === bom_no)
+  );
 }
 
 $.extend(cur_frm.cscript, new erpnext.stock.StockEntry({ frm: cur_frm }));

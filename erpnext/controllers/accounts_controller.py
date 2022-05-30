@@ -149,6 +149,7 @@ class AccountsController(TransactionBase):
 
 		self.validate_inter_company_reference()
 
+		self.disable_pricing_rule_on_internal_transfer()
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -181,6 +182,7 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
+			self.validate_deferred_income_expense_account()
 			self.set_inter_company_account()
 
 		if self.doctype == "Purchase Invoice":
@@ -208,6 +210,27 @@ class AccountsController(TransactionBase):
 				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s",
 				(self.doctype, self.name),
 			)
+
+	def validate_deferred_income_expense_account(self):
+		field_map = {
+			"Sales Invoice": "deferred_revenue_account",
+			"Purchase Invoice": "deferred_expense_account",
+		}
+
+		for item in self.get("items"):
+			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
+				if not item.get(field_map.get(self.doctype)):
+					default_deferred_account = frappe.db.get_value(
+						"Company", self.company, "default_" + field_map.get(self.doctype)
+					)
+					if not default_deferred_account:
+						frappe.throw(
+							_(
+								"Row #{0}: Please update deferred revenue/expense account in item row or default account in company master"
+							).format(item.idx)
+						)
+					else:
+						item.set(field_map.get(self.doctype), default_deferred_account)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -360,6 +383,14 @@ class AccountsController(TransactionBase):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
+
+	def disable_pricing_rule_on_internal_transfer(self):
+		if not self.get("ignore_pricing_rule") and self.is_internal_transfer():
+			self.ignore_pricing_rule = 1
+			frappe.msgprint(
+				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
+				alert=1,
+			)
 
 	def validate_due_date(self):
 		if self.get("is_pos"):
@@ -1095,11 +1126,10 @@ class AccountsController(TransactionBase):
 							{
 								"account": item.discount_account,
 								"against": supplier_or_customer,
-								dr_or_cr: flt(discount_amount, item.precision("discount_amount")),
-								dr_or_cr
-								+ "_in_account_currency": flt(
+								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
+								dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project,
 							},
@@ -1114,11 +1144,11 @@ class AccountsController(TransactionBase):
 							{
 								"account": income_or_expense_account,
 								"against": supplier_or_customer,
-								rev_dr_cr: flt(discount_amount, item.precision("discount_amount")),
-								rev_dr_cr
-								+ "_in_account_currency": flt(
+								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
+								rev_dr_cr
+								+ "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project or self.project,
 							},
@@ -1714,6 +1744,8 @@ class AccountsController(TransactionBase):
 			internal_party_field = "is_internal_customer"
 		elif self.doctype in ("Purchase Invoice", "Purchase Receipt", "Purchase Order"):
 			internal_party_field = "is_internal_supplier"
+		else:
+			return False
 
 		if self.get(internal_party_field) and (self.represents_company == self.company):
 			return True
@@ -1978,12 +2010,13 @@ def get_advance_journal_entries(
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
 
+	# nosemgrep
 	journal_entries = frappe.db.sql(
 		"""
 		select
 			"Journal Entry" as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
-			t2.reference_name as against_order
+			t2.reference_name as against_order, t2.exchange_rate
 		from
 			`tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where
@@ -2426,11 +2459,21 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row
 		)
 
-	def validate_quantity(child_item, d):
-		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
+	def validate_quantity(child_item, new_data):
+		if not flt(new_data.get("qty")):
+			frappe.throw(
+				_("Row # {0}: Quantity for Item {1} cannot be zero").format(
+					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
+				),
+				title=_("Invalid Qty"),
+			)
+
+		if parent_doctype == "Sales Order" and flt(new_data.get("qty")) < flt(child_item.delivered_qty):
 			frappe.throw(_("Cannot set quantity less than delivered quantity"))
 
-		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < flt(child_item.received_qty):
+		if parent_doctype == "Purchase Order" and flt(new_data.get("qty")) < flt(
+			child_item.received_qty
+		):
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
 	data = json.loads(trans_items)

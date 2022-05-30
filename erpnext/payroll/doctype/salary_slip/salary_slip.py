@@ -381,13 +381,19 @@ class SalarySlip(TransactionBase):
 		if joining_date and (getdate(self.start_date) < joining_date <= getdate(self.end_date)):
 			start_date = joining_date
 			unmarked_days = self.get_unmarked_days_based_on_doj_or_relieving(
-				unmarked_days, include_holidays_in_total_working_days, self.start_date, joining_date
+				unmarked_days,
+				include_holidays_in_total_working_days,
+				self.start_date,
+				add_days(joining_date, -1),
 			)
 
 		if relieving_date and (getdate(self.start_date) <= relieving_date < getdate(self.end_date)):
 			end_date = relieving_date
 			unmarked_days = self.get_unmarked_days_based_on_doj_or_relieving(
-				unmarked_days, include_holidays_in_total_working_days, relieving_date, self.end_date
+				unmarked_days,
+				include_holidays_in_total_working_days,
+				add_days(relieving_date, 1),
+				self.end_date,
 			)
 
 		# exclude days for which attendance has been marked
@@ -413,10 +419,10 @@ class SalarySlip(TransactionBase):
 		from erpnext.hr.doctype.employee.employee import is_holiday
 
 		if include_holidays_in_total_working_days:
-			unmarked_days -= date_diff(end_date, start_date)
+			unmarked_days -= date_diff(end_date, start_date) + 1
 		else:
 			# exclude only if not holidays
-			for days in range(date_diff(end_date, start_date)):
+			for days in range(date_diff(end_date, start_date) + 1):
 				date = add_days(end_date, -days)
 				if not is_holiday(self.employee, date):
 					unmarked_days -= 1
@@ -495,12 +501,32 @@ class SalarySlip(TransactionBase):
 	@frappe.whitelist()
 	def set_days(self):
 		#days_in_month
+
+		
+
+			# return self.present_days
+
 		if not self.days_in_month:
 			from calendar import monthrange
 			a = getdate(self.start_date).year
 			b = getdate(self.start_date).month
 			num_days = monthrange(a, b)[1]
 			self.days_in_month = num_days
+
+		leaveA = frappe.db.get_all("Leave Application",{'employee':self.employee,'from_date':[">=",self.start_date],'to_date':["<=",self.end_date]},['total_leave_days'])
+		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
+		holiday1= len(holidays)
+		print("##############################",holiday1,leaveA)
+		if leaveA :
+			lt = []
+			for i in leaveA:
+				lt.append(i.get("total_leave_days"))
+
+			# print("$$$$$$$$$$$$$$$$$$$$$$leaves",i)
+			print("$$$$$$$$$$$$$$$$$$$$$$holiday",holiday1)
+			print("$$$$$$$$$$$$$$$$$$$$$$wd",self.total_working_days)
+			self.net_present_days = num_days - sum(lt) - holiday1
+				
 
 		#Paid Holidays
 		if not self.paid_holidays:

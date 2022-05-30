@@ -3,7 +3,11 @@
 
 frappe.ui.form.on('Follow Up', {
 	refresh: function (frm) {
+
 		frm.fields_dict.get_follow_up_details.$input.addClass("btn-primary");
+		frm.disable_save();
+		frm.set_value("report_date", frappe.datetime.get_today())
+		frm.refresh_field("report_date")
 		// console.log("one 123",frm.fields_dict['items'].grid.meta.fields[17])
 	},
 
@@ -252,6 +256,7 @@ frappe.ui.form.on("Follow Up Item", {
 						options: "Customer",
 						default: child.customer,
 						in_list_view: 1,
+						read_only: 1,
 						columns: 1,
 						label: __('Customer'),
 					},

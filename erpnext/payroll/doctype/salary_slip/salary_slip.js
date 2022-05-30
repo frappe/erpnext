@@ -203,6 +203,7 @@ frappe.ui.form.on("Salary Slip", {
 						frm.refresh_field("weekly_off");
 						frm.refresh_field("present_days");
 						frm.refresh_field("leave");
+						frm.refresh_field("net_present_days")
 					}
 					frm.set_value('check', 1);
 				}
