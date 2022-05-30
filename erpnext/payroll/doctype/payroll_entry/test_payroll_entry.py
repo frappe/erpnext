@@ -22,10 +22,10 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_end_date, get_start_end_dates
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
 	create_account,
-	get_salary_component_account,
 	make_deduction_salary_component,
 	make_earning_salary_component,
 	make_employee_salary_slip,
+	set_salary_component_account,
 )
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 	create_salary_structure_assignment,
@@ -66,7 +66,7 @@ class TestPayrollEntry(unittest.TestCase):
 			if not frappe.db.get_value(
 				"Salary Component Account", {"parent": data.name, "company": company}, "name"
 			):
-				get_salary_component_account(data.name)
+				set_salary_component_account(data.name)
 
 		employee = frappe.db.get_value("Employee", {"company": company})
 		company_doc = frappe.get_doc("Company", company)
@@ -95,7 +95,7 @@ class TestPayrollEntry(unittest.TestCase):
 			if not frappe.db.get_value(
 				"Salary Component Account", {"parent": data.name, "company": company}, "name"
 			):
-				get_salary_component_account(data.name)
+				set_salary_component_account(data.name)
 
 		company_doc = frappe.get_doc("Company", company)
 		salary_structure = make_salary_structure(
@@ -148,7 +148,7 @@ class TestPayrollEntry(unittest.TestCase):
 			if not frappe.db.get_value(
 				"Salary Component Account", {"parent": data.name, "company": "_Test Company"}, "name"
 			):
-				get_salary_component_account(data.name)
+				set_salary_component_account(data.name)
 
 		if not frappe.db.exists("Department", "cc - _TC"):
 			frappe.get_doc(
