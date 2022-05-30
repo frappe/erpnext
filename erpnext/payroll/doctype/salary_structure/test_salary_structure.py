@@ -169,9 +169,6 @@ def make_salary_structure(
 	payroll_period=None,
 	include_flexi_benefits=False,
 ):
-	if test_tax:
-		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""", (salary_structure))
-
 	if frappe.db.exists("Salary Structure", salary_structure):
 		frappe.db.delete("Salary Structure", salary_structure)
 

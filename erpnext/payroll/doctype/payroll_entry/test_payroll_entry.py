@@ -5,6 +5,7 @@ import unittest
 
 import frappe
 from dateutil.relativedelta import relativedelta
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_months
 
 import erpnext
@@ -35,14 +36,12 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 test_dependencies = ["Holiday List"]
 
 
-class TestPayrollEntry(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+class TestPayrollEntry(FrappeTestCase):
+	def setUp(self):
 		frappe.db.set_value(
 			"Company", erpnext.get_default_company(), "default_holiday_list", "_Test Holiday List"
 		)
 
-	def setUp(self):
 		for dt in [
 			"Salary Slip",
 			"Salary Component",
@@ -88,40 +87,40 @@ class TestPayrollEntry(unittest.TestCase):
 				currency=company_doc.default_currency,
 			)
 
-	def test_multi_currency_payroll_entry(self):  # pylint: disable=no-self-use
-		company = erpnext.get_default_company()
-		employee = make_employee("test_muti_currency_employee@payroll.com", company=company)
+	def test_multi_currency_payroll_entry(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		employee = make_employee(
+			"test_muti_currency_employee@payroll.com", company=company.name, department="Accounts - _TC"
+		)
+
 		for data in frappe.get_all("Salary Component", fields=["name"]):
 			if not frappe.db.get_value(
-				"Salary Component Account", {"parent": data.name, "company": company}, "name"
+				"Salary Component Account", {"parent": data.name, "company": company.name}, "name"
 			):
 				set_salary_component_account(data.name)
 
-		company_doc = frappe.get_doc("Company", company)
-		salary_structure = make_salary_structure(
-			"_Test Multi Currency Salary Structure", "Monthly", company=company, currency="USD"
+		salary_struct = make_salary_structure(
+			"_Test Multi Currency Salary Structure",
+			"Monthly",
+			employee,
+			currency="USD",
+			company=company.name,
 		)
-		create_salary_structure_assignment(
-			employee, salary_structure.name, company=company, currency="USD"
-		)
-		frappe.db.sql(
-			"""delete from `tabSalary Slip` where employee=%s""",
-			(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})),
-		)
-		salary_slip = get_salary_slip(
-			"test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure"
-		)
+
+		frappe.db.delete("Salary Slip", {"employee": employee})
 		dates = get_start_end_dates("Monthly", nowdate())
 		payroll_entry = make_payroll_entry(
 			start_date=dates.start_date,
 			end_date=dates.end_date,
-			payable_account=company_doc.default_payroll_payable_account,
+			payable_account=company.default_payroll_payable_account,
 			currency="USD",
 			exchange_rate=70,
+			company=company.name,
 		)
 		payroll_entry.make_payment_entry()
 
-		salary_slip.load_from_db()
+		salary_slip = frappe.db.get_value("Salary Slip", {"payroll_entry": payroll_entry.name})
+		salary_slip = frappe.get_doc("Salary Slip", salary_slip)
 
 		payroll_je = salary_slip.journal_entry
 		if payroll_je:
@@ -143,7 +142,7 @@ class TestPayrollEntry(unittest.TestCase):
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_debit)
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_credit)
 
-	def test_payroll_entry_with_employee_cost_center(self):  # pylint: disable=no-self-use
+	def test_payroll_entry_with_employee_cost_center(self):
 		for data in frappe.get_all("Salary Component", fields=["name"]):
 			if not frappe.db.get_value(
 				"Salary Component Account", {"parent": data.name, "company": "_Test Company"}, "name"
@@ -356,8 +355,114 @@ class TestPayrollEntry(unittest.TestCase):
 		if salary_slip.docstatus == 0:
 			frappe.delete_doc("Salary Slip", name)
 
+	def test_salary_slip_operation_queueing(self):
+		# setup
+		company = erpnext.get_default_company()
+		company_doc = frappe.get_doc("Company", company)
+		employee = frappe.db.get_value("Employee", {"company": company})
+		make_salary_structure(
+			"_Test Salary Structure",
+			"Monthly",
+			employee,
+			company=company,
+			currency=company_doc.default_currency,
+		)
 
-def make_payroll_entry(**args):
+		# enqueue salary slip creation via payroll entry
+		# Payroll Entry status should change to Queued
+		dates = get_start_end_dates("Monthly", nowdate())
+		payroll_entry = get_payroll_entry_data(
+			start_date=dates.start_date,
+			end_date=dates.end_date,
+			payable_account=company_doc.default_payroll_payable_account,
+			currency=company_doc.default_currency,
+		)
+		frappe.flags.enqueue_payroll_entry = True
+		payroll_entry.create_salary_slips()
+		payroll_entry.reload()
+
+		self.assertEqual(payroll_entry.status, "Queued")
+		frappe.flags.enqueue_payroll_entry = False
+
+	def test_salary_slip_operation_failure(self):
+		# setup
+		company = erpnext.get_default_company()
+		company_doc = frappe.get_doc("Company", company)
+		employee = frappe.db.get_value("Employee", {"company": company})
+		salary_structure = make_salary_structure(
+			"_Test Salary Structure",
+			"Monthly",
+			employee,
+			company=company,
+			currency=company_doc.default_currency,
+		)
+
+		# reset account in component to test submission failure
+		component = frappe.get_doc("Salary Component", salary_structure.earnings[0].salary_component)
+		component.accounts = []
+		component.save()
+
+		# salary slip submission via payroll entry
+		# Payroll Entry status should change to Failed because of the missing account setup
+		dates = get_start_end_dates("Monthly", nowdate())
+		payroll_entry = get_payroll_entry_data(
+			start_date=dates.start_date,
+			end_date=dates.end_date,
+			payable_account=company_doc.default_payroll_payable_account,
+			currency=company_doc.default_currency,
+		)
+		payroll_entry.create_salary_slips()
+		payroll_entry.submit_salary_slips()
+
+		payroll_entry.reload()
+		self.assertEqual(payroll_entry.status, "Failed")
+		self.assertIsNotNone(payroll_entry.error_message)
+
+		# set accounts
+		for data in frappe.get_all("Salary Component", fields=["name"]):
+			if not frappe.db.get_value(
+				"Salary Component Account", {"parent": data.name, "company": company}, "name"
+			):
+				set_salary_component_account(data.name, company_list=[company])
+
+		# Payroll Entry successful, status should change to Submitted
+		payroll_entry.submit_salary_slips()
+		payroll_entry.reload()
+		self.assertEqual(payroll_entry.status, "Submitted")
+		self.assertEqual(payroll_entry.error_message, "")
+
+	def test_payroll_entry_status(self):
+		company = erpnext.get_default_company()
+		for data in frappe.get_all("Salary Component", fields=["name"]):
+			if not frappe.db.get_value(
+				"Salary Component Account", {"parent": data.name, "company": company}, "name"
+			):
+				set_salary_component_account(data.name)
+
+		employee = frappe.db.get_value("Employee", {"company": company})
+		company_doc = frappe.get_doc("Company", company)
+		make_salary_structure(
+			"_Test Salary Structure",
+			"Monthly",
+			employee,
+			company=company,
+			currency=company_doc.default_currency,
+		)
+		dates = get_start_end_dates("Monthly", nowdate())
+		payroll_entry = get_payroll_entry_data(
+			start_date=dates.start_date,
+			end_date=dates.end_date,
+			payable_account=company_doc.default_payroll_payable_account,
+			currency=company_doc.default_currency,
+		)
+		payroll_entry.submit()
+		self.assertEqual(payroll_entry.status, "Submitted")
+
+		payroll_entry.cancel()
+		self.assertEqual(payroll_entry.status, "Cancelled")
+
+
+def get_payroll_entry_data(**args):
 	args = frappe._dict(args)
 
 	payroll_entry = frappe.new_doc("Payroll Entry")
@@ -381,7 +486,13 @@ def make_payroll_entry(**args):
 
 	payroll_entry.fill_employee_details()
 	payroll_entry.save()
-	payroll_entry.create_salary_slips()
+
+	return payroll_entry
+
+
+def make_payroll_entry(**args):
+	payroll_entry = get_payroll_entry_data(**args)
+	payroll_entry.submit()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status=1):
 		payroll_entry.make_payment_entry()
@@ -421,12 +532,3 @@ def make_holiday(holiday_list_name):
 		).insert()
 
 	return holiday_list_name
-
-
-def get_salary_slip(user, period, salary_structure):
-	salary_slip = make_employee_salary_slip(user, period, salary_structure)
-	salary_slip.exchange_rate = 70
-	salary_slip.calculate_net_pay()
-	salary_slip.db_update()
-
-	return salary_slip
