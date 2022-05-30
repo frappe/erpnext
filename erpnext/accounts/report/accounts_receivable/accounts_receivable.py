@@ -906,9 +906,6 @@ class ReceivablePayableReport(object):
 			width=180,
 		)
 
-		if self.filters.show_remarks:
-			self.add_column(label=_("Remarks"), fieldname="remarks", fieldtype="Text", width=200),
-
 		self.add_column(label="Due Date", fieldtype="Date")
 
 		if self.party_type == "Supplier":
