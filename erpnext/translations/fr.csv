@@ -9871,8 +9871,9 @@ Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les t
 Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
 Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
-Unit Of Measure (UOM),Unité de mesure (UDM),
 Allowed Items,Articles autorisés
 Party Specific Item,Restriction d'article disponible
 Restrict Items Based On,Type de critére de restriction
 Based On Value,critére de restriction
+Unit of Measure (UOM),Unité de mesure (UDM),
+Unit Of Measure (UOM),Unité de mesure (UDM),
