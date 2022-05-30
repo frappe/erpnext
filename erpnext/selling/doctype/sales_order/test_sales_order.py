@@ -1679,9 +1679,9 @@ def make_sales_order(**args):
 				"warehouse": args.warehouse,
 				"qty": args.qty or 10,
 				"uom": args.uom or None,
-				"price_list_rate": args.price_list_rate or 0,
-				"discount_percentage": args.discount_percentage or 0,
-				"rate": args.rate or None if args.price_list_rate else 100,
+				"price_list_rate": args.price_list_rate or None,
+				"discount_percentage": args.discount_percentage or None,
+				"rate": args.rate or (None if args.price_list_rate else 100),
 				"against_blanket_order": args.against_blanket_order,
 			},
 		)
