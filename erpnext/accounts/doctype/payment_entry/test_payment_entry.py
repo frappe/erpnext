@@ -743,6 +743,21 @@ class TestPaymentEntry(unittest.TestCase):
 			flt(payment_entry.total_taxes_and_charges, 2), flt(10 / payment_entry.target_exchange_rate, 2)
 		)
 
+	def test_payment_entry_against_onhold_purchase_invoice(self):
+		pi = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+
+		# block invoice after creating payment entry
+		# since `get_payment_entry` will not attach blocked invoice to payment
+		pi.block_invoice()
+		with self.assertRaises(frappe.ValidationError) as err:
+			pe.save()
+
+		self.assertTrue("is on hold" in str(err.exception).lower())
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")

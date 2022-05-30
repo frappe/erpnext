@@ -298,19 +298,17 @@ class StockEntry(StockController):
 				for_update=True,
 			)
 
-			for f in (
-				"uom",
-				"stock_uom",
-				"description",
-				"item_name",
-				"expense_account",
-				"cost_center",
-				"conversion_factor",
-			):
-				if f == "stock_uom" or not item.get(f):
-					item.set(f, item_details.get(f))
-				if f == "conversion_factor" and item.uom == item_details.get("stock_uom"):
-					item.set(f, item_details.get(f))
+			reset_fields = ("stock_uom", "item_name")
+			for field in reset_fields:
+				item.set(field, item_details.get(field))
+
+			update_fields = ("uom", "description", "expense_account", "cost_center", "conversion_factor")
+
+			for field in update_fields:
+				if not item.get(field):
+					item.set(field, item_details.get(field))
+				if field == "conversion_factor" and item.uom == item_details.get("stock_uom"):
+					item.set(field, item_details.get(field))
 
 			if not item.transfer_qty and item.qty:
 				item.transfer_qty = flt(
@@ -672,7 +670,8 @@ class StockEntry(StockController):
 					batch_no=d.batch_no,
 				)
 
-			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
+			# do not round off basic rate to avoid precision loss
+			d.basic_rate = flt(d.basic_rate)
 			if d.is_process_loss:
 				d.basic_rate = flt(0.0)
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -720,7 +719,7 @@ class StockEntry(StockController):
 				total_fg_qty = sum([flt(d.transfer_qty) for d in self.items if d.is_finished_item])
 				return flt(outgoing_items_cost / total_fg_qty)
 
-	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0):
+	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
 		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
 
 		# Get raw materials cost from BOM if multiple material consumption entries
@@ -760,10 +759,8 @@ class StockEntry(StockController):
 		for d in self.get("items"):
 			if d.transfer_qty:
 				d.amount = flt(flt(d.basic_amount) + flt(d.additional_cost), d.precision("amount"))
-				d.valuation_rate = flt(
-					flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty)),
-					d.precision("valuation_rate"),
-				)
+				# Do not round off valuation rate to avoid precision loss
+				d.valuation_rate = flt(d.basic_rate) + (flt(d.additional_cost) / flt(d.transfer_qty))
 
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
@@ -1142,7 +1139,7 @@ class StockEntry(StockController):
 		if self.job_card:
 			job_doc = frappe.get_doc("Job Card", self.job_card)
 			job_doc.set_transferred_qty(update_status=True)
-			job_doc.set_transferred_qty_in_job_card(self)
+			job_doc.set_transferred_qty_in_job_card_item(self)
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

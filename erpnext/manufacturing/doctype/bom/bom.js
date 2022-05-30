@@ -93,6 +93,11 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
+		frm.add_custom_button(__("New Version"), function() {
+			let new_bom = frappe.model.copy_doc(frm.doc);
+			frappe.set_route("Form", "BOM", new_bom.name);
+		});
+
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__("Work Order"), function() {
 				frm.trigger("make_work_order");
@@ -499,15 +504,11 @@ cur_frm.cscript.qty = function(doc) {
 
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	var scrap_items = false;
-
-	if(cdt == 'BOM Scrap Item') {
-		scrap_items = true;
-	}
+	const is_scrap_item = cdt == "BOM Scrap Item";
 
 	if (d.bom_no) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
-		get_bom_material_detail(doc, cdt, cdn, scrap_items);
+		get_bom_material_detail(doc, cdt, cdn, is_scrap_item);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);
 		erpnext.bom.calculate_scrap_materials_cost(doc);

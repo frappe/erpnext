@@ -54,5 +54,35 @@ frappe.ui.form.on("Naming Series", {
 				frm.events.get_doc_and_prefix(frm);
 			}
 		});
-	}
+	},
+
+	naming_series_to_check(frm) {
+		frappe.call({
+			method: "preview_series",
+			doc: frm.doc,
+			callback: function(r) {
+				if (!r.exc) {
+					frm.set_value("preview", r.message);
+				} else {
+					frm.set_value("preview", __("Failed to generate preview of series"));
+				}
+			}
+		});
+	},
+
+	add_series(frm) {
+		const series = frm.doc.naming_series_to_check;
+
+		if (!series) {
+			frappe.show_alert(__("Please type a valid series."));
+			return;
+		}
+
+		if (!frm.doc.set_options.includes(series)) {
+			const current_series = frm.doc.set_options;
+			frm.set_value("set_options", `${current_series}\n${series}`);
+		} else {
+			frappe.show_alert(__("Series already added to transaction."));
+		}
+	},
 });
