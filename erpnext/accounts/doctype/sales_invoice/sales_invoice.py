@@ -279,6 +279,11 @@ class SalesInvoice(SellingController):
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.exonerated_value()
+
+		if self.grand_total == self.paid_amount:
+			outstanding_amount = 0
+			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+			
 		if self.docstatus == 1:
 			self.update_accounts_status()
 			self.calculated_taxes()
@@ -305,6 +310,7 @@ class SalesInvoice(SellingController):
 
 			if self.grand_total == self.paid_amount:
 				outstanding_amount = 0
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 			customer.total_unpaid += outstanding_amount
 			customer.save()
@@ -313,8 +319,23 @@ class SalesInvoice(SellingController):
 			new_doc.customer = self.customer
 			new_doc.company = self.company
 			new_doc.billing_this_year = self.grand_total
-			new_doc.total_unpaid = self.outstanding_amount
+			outstanding_amount = self.outstanding_amount
+
+			if self.grand_total == self.paid_amount:
+				outstanding_amount = 0
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			new_doc.total_unpaid = outstanding_amount
 			new_doc.insert()
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.billing_this_year -= self.grand_total
+			customer.total_unpaid -= self.outstanding_amount
+			customer.save()
 	
 	def allow_credit_pos(self):
 		pos_profile = frappe.get_all("POS Profile", ["allow_credit"], filters = {"name": self.pos_profile})
@@ -844,6 +865,8 @@ class SalesInvoice(SellingController):
 
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
+
+		self.update_dashboard_customer_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
 
