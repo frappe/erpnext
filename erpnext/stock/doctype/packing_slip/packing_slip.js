@@ -72,8 +72,7 @@ frappe.ui.form.on("Packing Slip", {
 		barcode_scanner.process_scan().then(scanned_row => {
 			frm.call({
 				doc: frm.doc,
-				method: "validate_scanned_item",
-				args: {scanned_row}
+				method: "validate_scanned_item"
 			}).catch(({ responseJSON }) => {
 				after_scan(scanned_row, responseJSON.exc_type);
 			});
