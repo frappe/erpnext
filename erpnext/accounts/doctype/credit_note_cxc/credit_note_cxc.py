@@ -20,6 +20,9 @@ class CreditNoteCXC(Document):
 			self.apply_gl_entry()
 			self.update_dashboard_customer()
 	
+	def on_cancel(self):
+		self.update_dashboard_customer_cancel()
+	
 	def update_dashboard_customer(self):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
@@ -34,6 +37,14 @@ class CreditNoteCXC(Document):
 			new_doc.billing_this_year = 0
 			new_doc.total_unpaid = self.amount_total * -1
 			new_doc.insert()
+	
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer.total_unpaid += self.amount_total
+			customer.save()
 
 	def calculate_total(self):
 		if not self.get("references"):
