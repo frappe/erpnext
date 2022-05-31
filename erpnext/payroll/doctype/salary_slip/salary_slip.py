@@ -30,6 +30,9 @@ from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,
 	create_repayment_entry,
 )
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_term_loans,
+)
 from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
 	get_benefit_component_amount,
@@ -117,10 +120,10 @@ class SalarySlip(TransactionBase):
 		self.update_payment_status_for_gratuity()
 
 	def update_payment_status_for_gratuity(self):
-		add_salary = frappe.db.get_all(
+		additional_salary = frappe.db.get_all(
 			"Additional Salary",
 			filters={
-				"payroll_date": ("BETWEEN", [self.start_date, self.end_date]),
+				"payroll_date": ("between", [self.start_date, self.end_date]),
 				"employee": self.employee,
 				"ref_doctype": "Gratuity",
 				"docstatus": 1,
@@ -129,10 +132,10 @@ class SalarySlip(TransactionBase):
 			limit=1,
 		)
 
-		if len(add_salary):
+		if additional_salary:
 			status = "Paid" if self.docstatus == 1 else "Unpaid"
-			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
-				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
+			if additional_salary[0].name in [entry.additional_salary for entry in self.earnings]:
+				frappe.db.set_value("Gratuity", additional_salary[0].ref_docname, "status", status)
 
 	def on_cancel(self):
 		self.set_status()
@@ -1405,9 +1408,9 @@ class SalarySlip(TransactionBase):
 			self.total_loan_repayment += payment.total_payment
 
 	def get_loan_details(self):
-		return frappe.get_all(
+		loan_details = frappe.get_all(
 			"Loan",
-			fields=["name", "interest_income_account", "loan_account", "loan_type"],
+			fields=["name", "interest_income_account", "loan_account", "loan_type", "is_term_loan"],
 			filters={
 				"applicant": self.employee,
 				"docstatus": 1,
@@ -1415,6 +1418,15 @@ class SalarySlip(TransactionBase):
 				"company": self.company,
 			},
 		)
+
+		if loan_details:
+			for loan in loan_details:
+				if loan.is_term_loan:
+					process_loan_interest_accrual_for_term_loans(
+						posting_date=self.posting_date, loan_type=loan.loan_type, loan=loan.name
+					)
+
+		return loan_details
 
 	def make_loan_repayment_entry(self):
 		payroll_payable_account = get_payroll_payable_account(self.company, self.payroll_entry)
