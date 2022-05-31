@@ -1324,7 +1324,9 @@ class GSPConnector:
 		self.invoice.einvoice_status = "Failed"
 		self.invoice.failure_description = self.get_failure_message(errors) if errors else ""
 		self.update_invoice()
-		frappe.db.commit()
+		if (self.invoice.doctype, self.invoice.name) not in frappe.flags.currently_saving:
+			# prevent commit if triggered from hooks on submit/cancel
+			frappe.db.commit()
 
 	def get_failure_message(self, errors):
 		if isinstance(errors, list):
@@ -1499,6 +1501,8 @@ def generate_irn_on_submit(doc, method):
 
 	generate_irn(doc.doctype, doc.name)
 
+	doc.reload()
+
 	frappe.msgprint(_("IRN generated successfully."), alert=True)
 
 
@@ -1519,5 +1523,7 @@ def cancel_irn_on_cancel(doc, method):
 		return
 
 	cancel_irn(doc.doctype, doc.name, doc.irn, "3", "Cancelled by user")
+
+	doc.reload()
 
 	frappe.msgprint(_("IRN cancelled successfully."), alert=True)
