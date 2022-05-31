@@ -494,14 +494,14 @@ class BaseAsset(AccountsController):
 		filters = {"asset": self.get_asset(), "serial_no": self.get_serial_no()}
 
 		depreciation_schedules = frappe.get_all(
-			"Depreciation Schedule", filters=filters, fields=["name", "status"]
+			"Depreciation Schedule", filters=filters, fields=["name", "docstatus"]
 		)
 
 		for schedule in depreciation_schedules:
-			if schedule["status"] == "Draft":
+			if schedule["docstatus"] == 0:
 				ds = frappe.get_doc("Depreciation Schedule", schedule["name"])
 				ds.submit()
-			elif schedule["status"] == "Active":
+			elif schedule["docstatus"] == 1:
 				self.cancel_active_schedule(schedule["name"], notes)
 
 	def cancel_active_schedule(self, schedule_name, notes):
@@ -512,6 +512,7 @@ class BaseAsset(AccountsController):
 		active_schedule.status = "Cancelled"
 		active_schedule.save()
 
+		active_schedule.flags.ignore_links = True
 		active_schedule.cancel()
 
 	def record_asset_purchase(self):
