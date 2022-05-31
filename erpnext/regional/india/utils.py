@@ -5,10 +5,6 @@ import re
 import frappe
 from frappe import _
 from frappe.model.utils import get_fetch_values
-<<<<<<< HEAD
-from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
-from six import string_types
-=======
 from frappe.utils import (
 	add_days,
 	cint,
@@ -19,7 +15,7 @@ from frappe.utils import (
 	getdate,
 	month_diff,
 )
->>>>>>> 34925a3a8c (fix: HRA Exemption calculation in case of multiple salary structure assignments)
+from six import string_types
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
