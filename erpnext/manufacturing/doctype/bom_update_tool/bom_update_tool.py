@@ -38,7 +38,13 @@ def enqueue_update_cost() -> "BOMUpdateLog":
 def auto_update_latest_price_in_all_boms() -> None:
 	"""Called via hooks.py."""
 	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
-		create_bom_update_log(update_type="Update Cost")
+		wip_log = frappe.get_all(
+			"BOM Update Log",
+			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress", "Paused"]]},
+			limit_page_length=1,
+		)
+		if not wip_log:
+			create_bom_update_log(update_type="Update Cost")
 
 
 def create_bom_update_log(
