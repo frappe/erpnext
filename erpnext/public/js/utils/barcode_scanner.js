@@ -98,7 +98,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				() => this.set_batch_no(row, batch_no),
 				() => this.set_barcode(row, barcode),
 				() => this.clean_up(),
-				() => this.revert_selector_flag(row, data),
+				() => this.revert_selector_flag(),
 				() => resolve(row)
 			]);
 		});
