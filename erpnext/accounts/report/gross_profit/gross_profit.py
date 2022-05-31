@@ -140,7 +140,7 @@ def execute(filters=None):
 				"buying_amount",
 				"gross_profit",
 				"gross_profit_percent",
-			],			
+			],
 		}
 	)
 
@@ -684,12 +684,14 @@ class GrossProfitGenerator(object):
 			sales_team_table = ""
 
 		if self.filters.group_by == "Payment Term":
-			payment_term_cols = """, if(`tabSales Invoice`.is_return = 1,
-										'{0}', 
+			payment_term_cols = """,if(`tabSales Invoice`.is_return = 1,
+										'{0}',
 										coalesce(schedule.payment_term, '{1}')) as payment_term,
-									schedule.invoice_portion, 
-									schedule.payment_amount """.format(_('Sales Return'), _('No Terms'))
-			payment_term_table = """ left join `tabPayment Schedule` schedule on schedule.parent = `tabSales Invoice`.name and 
+									schedule.invoice_portion,
+									schedule.payment_amount """.format(
+					_('Sales Return'), _('No Terms')
+			)
+			payment_term_table = """ left join `tabPayment Schedule` schedule on schedule.parent = `tabSales Invoice`.name and
 																				`tabSales Invoice`.is_return = 0 """
 		else:
 			payment_term_cols = ""
