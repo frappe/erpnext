@@ -526,12 +526,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 											if(!d[k]) d[k] = v;
 										});
 
-										if (d.__disable_batch_serial_selector) {
-											// reset for future use.
-											d.__disable_batch_serial_selector = false;
-											return;
-										}
-
 										if (d.has_batch_no && d.has_serial_no) {
 											d.batch_no = undefined;
 										}
@@ -944,7 +938,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		} else {
 			// company currency and doc currency is same
 			// this will prevent unnecessary conversion rate triggers
-			this.frm.set_value("conversion_rate", 1.0);
+			if(this.frm.doc.currency === this.get_company_currency()) {
+				this.frm.set_value("conversion_rate", 1.0);
+			} else {
+				this.conversion_rate();
+			}
 		}
 	}
 

@@ -33,7 +33,9 @@ class EmployeeTaxExemptionDeclaration(Document):
 			self.total_declared_amount += flt(d.amount)
 
 	def set_total_exemption_amount(self):
-		self.total_exemption_amount = get_total_exemption_amount(self.declarations)
+		self.total_exemption_amount = flt(
+			get_total_exemption_amount(self.declarations), self.precision("total_exemption_amount")
+		)
 
 	def calculate_hra_exemption(self):
 		self.salary_structure_hra, self.annual_hra_exemption, self.monthly_hra_exemption = 0, 0, 0
@@ -41,9 +43,18 @@ class EmployeeTaxExemptionDeclaration(Document):
 			hra_exemption = calculate_annual_eligible_hra_exemption(self)
 			if hra_exemption:
 				self.total_exemption_amount += hra_exemption["annual_exemption"]
-				self.salary_structure_hra = hra_exemption["hra_amount"]
-				self.annual_hra_exemption = hra_exemption["annual_exemption"]
-				self.monthly_hra_exemption = hra_exemption["monthly_exemption"]
+				self.total_exemption_amount = flt(
+					self.total_exemption_amount, self.precision("total_exemption_amount")
+				)
+				self.salary_structure_hra = flt(
+					hra_exemption["hra_amount"], self.precision("salary_structure_hra")
+				)
+				self.annual_hra_exemption = flt(
+					hra_exemption["annual_exemption"], self.precision("annual_hra_exemption")
+				)
+				self.monthly_hra_exemption = flt(
+					hra_exemption["monthly_exemption"], self.precision("monthly_hra_exemption")
+				)
 
 
 @frappe.whitelist()
