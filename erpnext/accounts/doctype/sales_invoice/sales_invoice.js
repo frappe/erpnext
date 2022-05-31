@@ -399,6 +399,19 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					frappe.model.set_value(cdt, cdn, "cost_center", r.message[1]);
 				}
 			})
+
+			frappe.db.get_value("Asset", frm.doc.asset, ["is_serialized_asset"], (r) => {
+				if (r && r.is_serialized_asset) {
+					frm.set_df_property("asset_serial_no", "hidden", 0, cdn, cdt);
+					frm.set_df_property("asset_serial_no", "reqd", 1, cdn, cdt);
+				} else {
+					frm.set_df_property("asset_serial_no", "hidden", 1, cdn, cdt);
+					frm.set_df_property("asset_serial_no", "reqd", 0), cdn, cdt;
+					frm.set_value(cdt, cdn, "asset_serial_no", "");
+				}
+			})
+		} else {
+			frm.set_df_property("asset_serial_no", "hidden", 1, cdn, cdt);
 		}
 	}
 
