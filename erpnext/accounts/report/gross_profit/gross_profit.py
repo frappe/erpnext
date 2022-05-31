@@ -689,7 +689,7 @@ class GrossProfitGenerator(object):
 										coalesce(schedule.payment_term, '{1}')) as payment_term,
 									schedule.invoice_portion,
 									schedule.payment_amount """.format(
-					_('Sales Return'), _('No Terms')
+				_('Sales Return'), _('No Terms')
 			)
 			payment_term_table = """ left join `tabPayment Schedule` schedule on schedule.parent = `tabSales Invoice`.name and
 																				`tabSales Invoice`.is_return = 0 """
