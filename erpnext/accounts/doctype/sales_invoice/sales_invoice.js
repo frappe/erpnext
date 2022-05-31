@@ -574,6 +574,17 @@ cur_frm.set_query("asset", "items", function (doc, cdt, cdn) {
 	}
 });
 
+cur_frm.set_query("asset_serial_no", "items", function (doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	return {
+		filters: [
+			["Asset Serial No", "asset", "=", d.asset],
+			["Asset Serial No", "docstatus", "=", 1],
+			["Asset Serial No", "status", "in", ["Submitted", "Partially Depreciated", "Fully Depreciated"]]
+		]
+	}
+});
+
 frappe.ui.form.on('Sales Invoice', {
 	setup: function (frm) {
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
