@@ -85,13 +85,16 @@ def _set_up():
 	make_company()
 
 
-def make_company():
-	if frappe.db.exists("Company", "_Test Company 10"):
+def make_company(name=None, abbr=None):
+	if not name:
+		name = "_Test Company 10"
+
+	if frappe.db.exists("Company", name):
 		return
 
 	company = frappe.new_doc("Company")
-	company.company_name = "_Test Company 10"
-	company.abbr = "_TC10"
+	company.company_name = name
+	company.abbr = abbr or "_TC10"
 	company.parent_company = "_Test Company 3"
 	company.default_currency = "INR"
 	company.country = "Pakistan"

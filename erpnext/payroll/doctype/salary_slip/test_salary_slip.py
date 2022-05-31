@@ -997,7 +997,7 @@ class TestSalarySlip(unittest.TestCase):
 		return [no_of_days_in_month[1], no_of_holidays_in_month]
 
 
-def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
+def make_employee_salary_slip(user, payroll_frequency, salary_structure=None, posting_date=None):
 	from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 	if not salary_structure:
@@ -1008,7 +1008,11 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	)
 
 	salary_structure_doc = make_salary_structure(
-		salary_structure, payroll_frequency, employee=employee.name, company=employee.company
+		salary_structure,
+		payroll_frequency,
+		employee=employee.name,
+		company=employee.company,
+		from_date=posting_date,
 	)
 	salary_slip_name = frappe.db.get_value(
 		"Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})}
@@ -1018,7 +1022,7 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 		salary_slip = make_salary_slip(salary_structure_doc.name, employee=employee.name)
 		salary_slip.employee_name = employee.employee_name
 		salary_slip.payroll_frequency = payroll_frequency
-		salary_slip.posting_date = nowdate()
+		salary_slip.posting_date = posting_date or nowdate()
 		salary_slip.insert()
 	else:
 		salary_slip = frappe.get_doc("Salary Slip", salary_slip_name)

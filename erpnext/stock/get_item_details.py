@@ -199,7 +199,7 @@ def process_args(args):
 	if not args.get("price_list"):
 		args.price_list = args.get("selling_price_list") or args.get("buying_price_list")
 
-	if args.barcode:
+	if not args.item_code and args.barcode:
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
@@ -353,6 +353,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"has_batch_no": item.has_batch_no,
 			"batch_no": args.get("batch_no"),
 			"uom": args.uom,
+			"stock_uom": item.stock_uom,
 			"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 			"qty": flt(args.qty) or 1.0,
 			"stock_qty": flt(args.qty) or 1.0,
@@ -365,7 +366,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"net_rate": 0.0,
 			"net_amount": 0.0,
 			"discount_percentage": 0.0,
-			"discount_amount": 0.0,
+			"discount_amount": flt(args.discount_amount) or 0.0,
 			"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults),
 			"update_stock": args.get("update_stock")
 			if args.get("doctype") in ["Sales Invoice", "Purchase Invoice"]
@@ -823,7 +824,9 @@ def insert_item_price(args):
 	):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (
-				args.rate / args.get("conversion_factor") if args.get("conversion_factor") else args.rate
+				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				if args.get("conversion_factor")
+				else (args.rate + args.discount_amount)
 			)
 
 			item_price = frappe.db.get_value(
@@ -849,6 +852,7 @@ def insert_item_price(args):
 						"item_code": args.item_code,
 						"currency": args.currency,
 						"price_list_rate": price_list_rate,
+						"uom": args.stock_uom,
 					}
 				)
 				item_price.insert()

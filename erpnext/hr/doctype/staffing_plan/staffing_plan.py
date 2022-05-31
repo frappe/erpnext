@@ -172,27 +172,24 @@ class StaffingPlan(Document):
 
 
 @frappe.whitelist()
-def get_designation_counts(designation, company):
+def get_designation_counts(designation, company, job_opening=None):
 	if not designation:
 		return False
 
-	employee_counts = {}
 	company_set = get_descendants_of("Company", company)
 	company_set.append(company)
 
-	employee_counts["employee_count"] = frappe.db.get_value(
-		"Employee",
-		filters={"designation": designation, "status": "Active", "company": ("in", company_set)},
-		fieldname=["count(name)"],
+	employee_count = frappe.db.count(
+		"Employee", {"designation": designation, "status": "Active", "company": ("in", company_set)}
 	)
 
-	employee_counts["job_openings"] = frappe.db.get_value(
-		"Job Opening",
-		filters={"designation": designation, "status": "Open", "company": ("in", company_set)},
-		fieldname=["count(name)"],
-	)
+	filters = {"designation": designation, "status": "Open", "company": ("in", company_set)}
+	if job_opening:
+		filters["name"] = ("!=", job_opening)
 
-	return employee_counts
+	job_openings = frappe.db.count("Job Opening", filters)
+
+	return {"employee_count": employee_count, "job_openings": job_openings}
 
 
 @frappe.whitelist()
