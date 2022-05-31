@@ -1111,13 +1111,13 @@ class SalesInvoice(SellingController):
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.get("asset_serial_no"), item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", None)
 
 						if asset.calculate_depreciation:
-							self.reverse_depreciation_entry_made_after_sale(asset)
-							self.reset_depreciation_schedule(asset)
+							self.reverse_depreciation_entries_made_after_sale(asset, item.get("asset_serial_no"))
+							self.reset_depreciation_schedules(asset, item.get("asset_serial_no"))
 
 					else:
 						if asset.calculate_depreciation:
@@ -1195,69 +1195,76 @@ class SalesInvoice(SellingController):
 		)
 		from erpnext.controllers.base_asset import get_linked_depreciation_schedules
 
-		if serial_no:
-			doc = frappe.get_doc("Asset Serial No", serial_no)
-		else:
-			doc = asset
+		doc = self.get_asset_or_serial_no(asset, serial_no)
 
 		doc.create_schedules_if_depr_details_have_been_updated(date_of_sale=getdate(self.posting_date))
-		doc.submit_depreciation_schedules()
+		doc.submit_depreciation_schedules(
+			notes=_("This schedule was cancelled because {0} was sold ({1}).").format(
+				get_link_to_form(doc.doctype, doc.name), get_link_to_form(self.doctype, self.name)
+			)
+		)
 
 		schedules = get_linked_depreciation_schedules(asset.name, serial_no)
 
 		for schedule in schedules:
 			post_depreciation_entries(schedule, self.posting_date)
 
-	def reset_depreciation_schedule(self, asset):
-		asset.flags.ignore_validate_update_after_submit = True
+	def reset_depreciation_schedules(self, asset, serial_no):
+		latest_cancelled_schedules = self.get_latest_cancelled_schedules(asset, serial_no)
 
-		# recreate original depreciation schedule of the asset
-		asset.prepare_depreciation_data(date_of_return=self.posting_date)
+		for schedule in latest_cancelled_schedules:
+			cancelled_schedule = frappe.get_doc("Depreciation Schedule", schedule)
 
-		self.modify_depreciation_schedule_for_asset_repairs(asset)
-		asset.save()
+			depr_schedule = frappe.copy_doc(cancelled_schedule)
+			depr_schedule.creation_date = getdate()
+			depr_schedule.save()
 
-	def modify_depreciation_schedule_for_asset_repairs(self, asset):
-		asset_repairs = frappe.get_all(
-			"Asset Repair", filters={"asset": asset.name}, fields=["name", "increase_in_asset_life"]
+			doc = self.get_asset_or_serial_no(asset, serial_no)
+			doc.submit_depreciation_schedules(
+				notes=_("This schedule was cancelled because {0} was returned ({1}).").format(
+					get_link_to_form(doc.doctype, doc.name), get_link_to_form(self.doctype, self.name)
+				)
+			)
+
+	def get_asset_or_serial_no(self, asset, serial_no):
+		if serial_no:
+			return frappe.get_doc("Asset Serial No", serial_no)
+		else:
+			return asset
+
+	def get_latest_cancelled_schedules(self, asset, serial_no):
+		return frappe.get_all(
+			"Depreciation Schedule",
+			filters={"asset": asset.name, "serial_no": serial_no if serial_no else "", "docstatus": 2},
+			order_by="creation desc",
+			limit=self.get_number_of_active_schedules(),
+			pluck="name",
 		)
 
-		for repair in asset_repairs:
-			if repair.increase_in_asset_life:
-				asset_repair = frappe.get_doc("Asset Repair", repair.name)
-				asset_repair.modify_depreciation_schedule()
-				asset.prepare_depreciation_data()
+	def get_number_of_active_schedules(self, asset, serial_no):
+		return frappe.db.count(
+			"Depreciation Schedule",
+			filters={"asset": asset.name, "serial_no": serial_no if serial_no else "", "status": "Active"},
+		)
 
-	def reverse_depreciation_entry_made_after_sale(self, asset):
-		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+	def reverse_depreciation_entries_made_after_sale(self, asset, serial_no):
+		disposal_date = self.get_disposal_date(asset, serial_no)
 
-		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
+		depr_entries_created_on_disposal_date = frappe.get_all(
+			"Depreciation Entry",
+			filters={"asset": asset.name, "serial_no": serial_no, "posting_date": disposal_date},
+			pluck="name",
+		)
 
-		row = -1
-		finance_book = asset.get("schedules")[0].get("finance_book")
-		for schedule in asset.get("schedules"):
-			if schedule.finance_book != finance_book:
-				row = 0
-				finance_book = schedule.finance_book
-			else:
-				row += 1
+		for depr_entry in depr_entries_created_on_disposal_date:
+			de = frappe.get_doc("Depreciation Entry", depr_entry)
+			de.cancel()
 
-			if schedule.schedule_date == posting_date_of_original_invoice:
-				if not self.sale_was_made_on_original_schedule_date(
-					asset, schedule, row, posting_date_of_original_invoice
-				) or self.sale_happens_in_the_future(posting_date_of_original_invoice):
+	def get_disposal_date(self, asset, serial_no):
+		doctype = "Asset" if not serial_no else "Asset Serial No"
+		doc = serial_no if serial_no else asset.name
 
-					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
-					reverse_journal_entry.posting_date = nowdate()
-					frappe.flags.is_reverse_depr_entry = True
-					reverse_journal_entry.submit()
-
-					frappe.flags.is_reverse_depr_entry = False
-					asset.flags.ignore_validate_update_after_submit = True
-					schedule.journal_entry = None
-					depreciation_amount = self.get_depreciation_amount_in_je(reverse_journal_entry)
-					asset.finance_books[0].value_after_depreciation += depreciation_amount
-					asset.save()
+		return frappe.get_value(doctype, doc, "disposal_date")
 
 	def get_posting_date_of_sales_invoice(self):
 		return frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
