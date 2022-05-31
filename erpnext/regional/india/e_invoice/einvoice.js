@@ -150,26 +150,29 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
 				const action = () => {
-					let message = __('Cancellation of e-way bill is currently not supported.') + ' ';
-					message += '<br><br>';
-					message += __('You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system.');
-
-					const dialog = frappe.msgprint({
-						title: __('Update E-Way Bill Cancelled Status?'),
-						message: message,
-						indicator: 'orange',
-						primary_action: {
-							action: function() {
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
-									args: { doctype, docname: name },
-									freeze: true,
-									callback: () => frm.reload_doc() && dialog.hide()
-								});
-							}
+					// This confirm is added to just reduce unnecesory API calls. All required logic is implemented on server side.
+					frappe.confirm(
+						__("Have you cancelled e-way bill on the portal?"),
+						() => {
+							frappe.call({
+								method: "erpnext.regional.india.e_invoice.utils.cancel_eway_bill",
+								args: { doctype, docname: name },
+								freeze: true,
+								callback: () => frm.reload_doc(),
+							});
 						},
-						primary_action_label: __('Yes')
-					});
+						() => {
+							frappe.show_alert(
+								{
+									message: __(
+										"Please cancel e-way bill on the portal first."
+									),
+									indicator: "orange",
+								},
+								5
+							);
+						}
+					);
 				};
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}

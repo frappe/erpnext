@@ -803,6 +803,8 @@ class GSPConnector:
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
 		# cancel_ewaybill_url will only work if user have bought ewb api from adaequare.
 		self.cancel_ewaybill_url = self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
+		# ewaybill_details_url + ?irn={irn_number} will provide eway bill number and details.
+		self.ewaybill_details_url = self.base_url + "/enriched/ei/api/ewaybill/irn"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
 		self.get_qrcode_url = self.base_url + "/enriched/ei/others/qr/image"
 
@@ -1205,23 +1207,22 @@ class GSPConnector:
 			log_error(data)
 			self.raise_error(True)
 
-	def cancel_eway_bill(self, eway_bill, reason, remark):
+	def get_ewb_details(self):
+		"""
+		Get e-Waybill Details by IRN API documentaion for validation is not added yet.
+		https://einv-apisandbox.nic.in/version1.03/get-ewaybill-details-by-irn.html#validations
+		NOTE: if ewaybill Validity period lapsed or scanned by officer enroute (not tested yet) it will still return status as "ACT".
+		"""
 		headers = self.get_headers()
-		data = json.dumps({"ewbNo": eway_bill, "cancelRsnCode": reason, "cancelRmrk": remark}, indent=4)
-		headers["username"] = headers["user_name"]
-		del headers["user_name"]
-		try:
-			res = self.make_request("post", self.cancel_ewaybill_url, headers, data)
-			if res.get("success"):
-				self.invoice.ewaybill = ""
-				self.invoice.eway_bill_cancelled = 1
-				self.invoice.flags.updater_reference = {
-					"doctype": self.invoice.doctype,
-					"docname": self.invoice.name,
-					"label": _("E-Way Bill Cancelled - {}").format(remark),
-				}
-				self.update_invoice()
+		irn = self.invoice.irn
+		if not irn:
+			frappe.throw(_("IRN is mandatory to get E-Waybill Details. Please generate IRN first."))
 
+		try:
+			params = "?irn={irn}".format(irn=irn)
+			res = self.make_request("get", self.ewaybill_details_url + params, headers)
+			if res.get("success"):
+				return res.get("result")
 			else:
 				raise RequestFailed
 
@@ -1230,8 +1231,64 @@ class GSPConnector:
 			self.raise_error(errors=errors)
 
 		except Exception:
-			log_error(data)
+			log_error()
 			self.raise_error(True)
+
+	def update_ewb_details(self, ewb_details=None):
+		# for any reason user chooses to generate eway bill using portal this will allow to update ewaybill details in the invoice.
+		if not self.invoice.irn:
+			frappe.throw(_("IRN is mandatory to update E-Waybill Details. Please generate IRN first."))
+		if not ewb_details:
+			ewb_details = self.get_ewb_details()
+		if ewb_details:
+			self.invoice.ewaybill = ewb_details.get("EwbNo")
+			self.invoice.eway_bill_validity = ewb_details.get("EwbValidTill")
+			self.invoice.eway_bill_cancelled = 0 if ewb_details.get("Status") == "ACT" else 1
+			self.update_invoice()
+
+	def cancel_eway_bill(self):
+		ewb_details = self.get_ewb_details()
+		if ewb_details:
+			ewb_no = str(ewb_details.get("EwbNo"))
+			ewb_status = ewb_details.get("Status")
+			if ewb_status == "CNL":
+				self.invoice.ewaybill = ""
+				self.invoice.eway_bill_cancelled = 1
+				self.invoice.flags.updater_reference = {
+					"doctype": self.invoice.doctype,
+					"docname": self.invoice.name,
+					"label": _("E-Way Bill Cancelled"),
+				}
+				self.update_invoice()
+				frappe.msgprint(
+					_("E-Way Bill Cancelled successfully"),
+					indicator="green",
+					alert=True,
+				)
+			elif ewb_status == "ACT" and self.invoice.ewaybill == ewb_no:
+				msg = _("E-Way Bill {} is still active.").format(bold(ewb_no))
+				msg += "<br><br>"
+				msg += _(
+					"You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system."
+				)
+				frappe.msgprint(msg)
+			elif ewb_status == "ACT" and self.invoice.ewaybill != ewb_no:
+				# if user cancelled the current eway bill and generated new eway bill using portal, then this will update new ewb number in sales invoice.
+				msg = _("E-Way Bill No. {0} doesn't match {1} saved in the invoice.").format(
+					bold(ewb_no), bold(self.invoice.ewaybill)
+				)
+				msg += "<hr/>"
+				msg += _("E-Way Bill No. {} is updated in the invoice.").format(bold(ewb_no))
+				frappe.msgprint(msg)
+				self.update_ewb_details(ewb_details=ewb_details)
+			else:
+				# this block should not be ever called but added incase there is any change in API.
+				msg = _("Unknown E-Way Status Code {}.").format(ewb_status)
+				msg += "<br><br>"
+				msg += _("Please contact your system administrator.")
+				frappe.throw(msg)
+		else:
+			frappe.msgprint(_("E-Way Bill Details not found for this IRN."))
 
 	def sanitize_error_message(self, message):
 		"""
@@ -1383,12 +1440,22 @@ def generate_eway_bill(doctype, docname, **kwargs):
 
 @frappe.whitelist()
 def cancel_eway_bill(doctype, docname):
-	# NOTE: cancel_eway_bill api is disabled by Adequare.
-	# gsp_connector = GSPConnector(doctype, docname)
-	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+	# NOTE: cancel_eway_bill api is disabled by NIC for E-invoice so this will only check if eway bill is canceled or not and update accordingly.
+	# https://einv-apisandbox.nic.in/version1.03/cancel-eway-bill.html#
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.cancel_eway_bill()
 
-	frappe.db.set_value(doctype, docname, "ewaybill", "")
-	frappe.db.set_value(doctype, docname, "eway_bill_cancelled", 1)
+
+@frappe.whitelist()
+def get_ewb_details(doctype, docname):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.get_ewb_details()
+
+
+@frappe.whitelist()
+def update_ewb_details(doctype, docname):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.update_ewb_details()
 
 
 @frappe.whitelist()
