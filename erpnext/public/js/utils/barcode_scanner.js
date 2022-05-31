@@ -98,6 +98,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				() => this.set_batch_no(row, batch_no),
 				() => this.set_barcode(row, barcode),
 				() => this.clean_up(),
+				() => this.revert_selector_flag(row, data),
 				() => resolve(row)
 			]);
 		});
@@ -112,8 +113,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		const require_selecting_serial = has_serial_no && !serial_no;
 
 		if (!(require_selecting_batch || require_selecting_serial)) {
-			row.__disable_batch_serial_selector = true;
+			frappe.flags.hide_serial_batch_dialog = true;
 		}
+	}
+
+	revert_selector_flag() {
+		frappe.flags.hide_serial_batch_dialog = false;
 	}
 
 	set_item(row, item_code) {
