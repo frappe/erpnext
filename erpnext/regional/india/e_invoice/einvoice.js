@@ -152,7 +152,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				const action = () => {
 					// This confirm is added to just reduce unnecesory API calls. All required logic is implemented on server side.
 					frappe.confirm(
-						__("have you cancelled eway bill using portal?"),
+						__("Have you cancelled e-way bill on the portal?"),
 						() => {
 							frappe.call({
 								method: "erpnext.regional.india.e_invoice.utils.cancel_eway_bill",
@@ -165,7 +165,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							frappe.show_alert(
 								{
 									message: __(
-										"Please cancel eway bill on the gov portal first."
+										"Please cancel e-way bill on the portal first."
 									),
 									indicator: "orange",
 								},
