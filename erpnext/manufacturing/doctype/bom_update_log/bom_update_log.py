@@ -26,6 +26,8 @@ class BOMUpdateLog(Document):
 			self.validate_boms_are_specified()
 			self.validate_same_bom()
 			self.validate_bom_items()
+		else:
+			self.validate_bom_cost_update_in_progress()
 
 		self.status = "Queued"
 
@@ -47,6 +49,21 @@ class BOMUpdateLog(Document):
 
 		if current_bom_item != new_bom_item:
 			frappe.throw(_("The selected BOMs are not for the same item"))
+
+	def validate_bom_cost_update_in_progress(self):
+		"If another Cost Updation Log is still in progress, dont make new ones."
+
+		wip_log = frappe.get_all(
+			"BOM Update Log",
+			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress", "Paused"]]},
+			limit_page_length=1,
+		)
+		if wip_log:
+			log_link = frappe.utils.get_link_to_form("BOM Update Log", wip_log[0].name)
+			frappe.throw(
+				_("BOM Updation already in progress. Please wait until {0} is complete.").format(log_link),
+				title=_("Note"),
+			)
 
 	def on_submit(self):
 		if frappe.flags.in_test:
@@ -124,10 +141,11 @@ def queue_bom_cost_jobs(current_boms: Dict, update_doc: "BOMUpdateLog") -> None:
 	current_boms_list = [bom for bom in current_boms]
 
 	while current_boms_list:
-		boms_to_process = current_boms_list[:20000]  # slice out batch of 20k BOMs
+		batch_size = 20_000
+		boms_to_process = current_boms_list[:batch_size]  # slice out batch of 20k BOMs
 
 		# update list to exclude 20K (queued) BOMs
-		current_boms_list = current_boms_list[20000:] if len(current_boms_list) > 20000 else []
+		current_boms_list = current_boms_list[batch_size:] if len(current_boms_list) > batch_size else []
 		frappe.enqueue(
 			method="erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils.update_cost_in_level",
 			doc=update_doc,

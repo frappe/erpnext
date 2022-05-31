@@ -634,6 +634,7 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
+			old_rate = d.rate
 			d.rate = self.get_rm_rate(
 				{
 					"company": self.company,
@@ -646,6 +647,7 @@ class BOM(WebsiteGenerator):
 					"sourced_by_supplier": d.sourced_by_supplier,
 				}
 			)
+
 			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
 			d.amount = flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty"))
 			d.base_amount = d.amount * flt(self.conversion_rate)
@@ -655,7 +657,7 @@ class BOM(WebsiteGenerator):
 
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
-			if save:
+			if save and (old_rate != d.rate):
 				d.db_update()
 
 		self.raw_material_cost = total_rm_cost
