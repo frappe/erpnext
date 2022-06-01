@@ -162,13 +162,15 @@ class PayrollEntry(Document):
 			Get loan details from submitted salary slip based on selected criteria
 		"""
 		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.loan_account, eld.loan,
+		return frappe.db.sql(f""" select eld.loan_account, eld.loan,
 				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment,t1.employee
 			from
 				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
 			where
-				t1.docstatus = 1 and t1.name = eld.parent and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
+                t1.payroll_entry = '{self.name}' and
+				t1.docstatus = 1 and t1.name = eld.parent and start_date >= '{self.start_date}' and end_date <= '{self.end_date}' 
+                {cond}
+			""", as_dict=True) or []
 
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
