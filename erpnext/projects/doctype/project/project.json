@@ -234,7 +234,7 @@
   },
   {
    "fieldname": "actual_start_date",
-   "fieldtype": "Data",
+   "fieldtype": "Date",
    "label": "Actual Start Date (via Time Sheet)",
    "read_only": 1
   },
@@ -458,7 +458,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2022-01-29 13:58:27.712714",
+ "modified": "2022-05-25 22:45:06.108499",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -396,7 +396,12 @@ class SalesInvoice(SellingController):
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		self.unlink_sales_invoice_from_timesheets()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Payment Ledger Entry",
+		)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
