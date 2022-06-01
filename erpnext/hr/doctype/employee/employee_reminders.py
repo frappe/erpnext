@@ -257,8 +257,7 @@ def get_work_anniversary_reminder_text_and_message(anniversary_persons):
 def get_pluralized_years(years):
 	if years == 1:
 		return "1 year"
-	else:
-		return f"{years} years"
+	return f"{years} years"
 
 
 def send_work_anniversary_reminder(recipients, reminder_text, anniversary_persons, message):
