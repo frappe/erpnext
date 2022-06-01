@@ -10,7 +10,6 @@ from frappe.utils import (
 	get_year_ending,
 	get_year_start,
 	getdate,
-	now_datetime,
 	nowdate,
 )
 
