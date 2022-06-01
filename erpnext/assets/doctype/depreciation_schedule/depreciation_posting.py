@@ -337,13 +337,14 @@ def get_gl_entries_on_asset_disposal(asset, serial_no=None, selling_amount=0, fi
 		accumulated_depr_amount,
 		disposal_account,
 		asset_value,
+		gross_purchase_amount,
 	) = get_asset_details(asset, serial_no, finance_book)
 
 	gl_entries = [
 		{
 			"account": fixed_asset_account,
-			"credit_in_account_currency": asset.gross_purchase_amount,
-			"credit": asset.gross_purchase_amount,
+			"credit_in_account_currency": gross_purchase_amount,
+			"credit": gross_purchase_amount,
 			"cost_center": depreciation_cost_center,
 		},
 		{
@@ -370,13 +371,14 @@ def get_gl_entries_on_asset_regain(asset, serial_no=None, selling_amount=0, fina
 		accumulated_depr_amount,
 		disposal_account,
 		asset_value,
+		gross_purchase_amount,
 	) = get_asset_details(asset, serial_no, finance_book)
 
 	gl_entries = [
 		{
 			"account": fixed_asset_account,
-			"debit_in_account_currency": asset.gross_purchase_amount,
-			"debit": asset.gross_purchase_amount,
+			"debit_in_account_currency": gross_purchase_amount,
+			"debit": gross_purchase_amount,
 			"cost_center": depreciation_cost_center,
 		},
 		{
@@ -397,14 +399,16 @@ def get_gl_entries_on_asset_regain(asset, serial_no=None, selling_amount=0, fina
 def get_asset_details(asset, serial_no=None, finance_book=None):
 	from erpnext.assets.doctype.asset_revaluation.asset_revaluation import get_current_asset_value
 
-	fixed_asset_account, accumulated_depr_account = get_asset_accounts(
-		asset.asset_category, asset.company
+	asset_category, company, cost_center, gross_purchase_amount = frappe.get_value(
+		"Asset", asset, "asset_category", "company", "cost_center", "gross_purchase_amount"
 	)
-	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
-	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
-	asset_value = get_current_asset_value(asset.name, serial_no, finance_book)
-	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(asset_value)
+	fixed_asset_account, accumulated_depr_account = get_asset_accounts(asset_category, company)
+	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(company)
+	depreciation_cost_center = cost_center or depreciation_cost_center
+
+	asset_value = get_current_asset_value(asset, serial_no, finance_book)
+	accumulated_depr_amount = flt(gross_purchase_amount) - flt(asset_value)
 
 	return (
 		fixed_asset_account,
@@ -414,6 +418,7 @@ def get_asset_details(asset, serial_no=None, finance_book=None):
 		accumulated_depr_amount,
 		disposal_account,
 		asset_value,
+		gross_purchase_amount,
 	)
 
 
