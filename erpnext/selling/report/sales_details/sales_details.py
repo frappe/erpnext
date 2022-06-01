@@ -262,14 +262,15 @@ class SalesPurchaseDetailsReport(object):
 			self.group_by.append(group_field)
 
 		# Group same items
-		if cint(self.filters.get("group_same_items")):
+		if cint(self.filters.get("group_same_items")) and not self.filters.totals_only:
 			data = group_report_data(data, ("item_code", "item_name", "uom", "voucher_no"), calculate_totals=self.calculate_group_totals,
 				totals_only=True)
 
 		if len(self.group_by) <= 1:
 			return data
 
-		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
+		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals,
+			totals_only=self.filters.totals_only)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
 		total_fields = ['qty'] + self.amount_fields + self.tax_amount_fields

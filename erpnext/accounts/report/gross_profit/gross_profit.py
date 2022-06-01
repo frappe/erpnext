@@ -132,7 +132,7 @@ class GrossProfitGenerator(object):
 			group_object.rows = sorted(group_object.rows, key=lambda d: -flt(d.profit_margin))
 
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals,
-			postprocess_group=sort_group)
+			postprocess_group=sort_group, totals_only=self.filters.totals_only)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
 		total_fields = [

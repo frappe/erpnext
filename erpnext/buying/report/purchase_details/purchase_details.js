@@ -141,6 +141,11 @@ frappe.query_reports["Purchase Details"] = {
 			default: 1
 		},
 		{
+			fieldname: "totals_only",
+			label: __("Group Totals Only"),
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "show_basic_values",
 			label: __("Show Basic Values"),
 			fieldtype: "Check"

@@ -147,6 +147,12 @@ frappe.query_reports["Gross Profit"] = {
 			options: group_by_options_gp,
 			default: "Ungrouped"
 		},
+		{
+			fieldname: "totals_only",
+			label: __("Group Totals Only"),
+			fieldtype: "Check",
+			default: 0
+		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
