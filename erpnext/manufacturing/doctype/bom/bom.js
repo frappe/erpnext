@@ -93,6 +93,11 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
+		frm.add_custom_button(__("New Version"), function() {
+			let new_bom = frappe.model.copy_doc(frm.doc);
+			frappe.set_route("Form", "BOM", new_bom.name);
+		});
+
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__("Work Order"), function() {
 				frm.trigger("make_work_order");
