@@ -328,7 +328,7 @@ class SalesInvoice(SellingController):
 			new_doc.total_unpaid = outstanding_amount
 			new_doc.insert()
 	
-	def update_dashboard_customer(self):
+	def update_dashboard_customer_cancel(self):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
 		if len(customers) > 0:
@@ -604,7 +604,8 @@ class SalesInvoice(SellingController):
 		customer = frappe.get_doc("Customer", self.customer)
 		if customer:
 			customer.debit += self.grand_total
-			customer.remaining_balance += self.grand_total
+			customer.credit += self.paid_amount
+			customer.remaining_balance += self.grand_total - self.paid_amount
 			customer.save()
 			
 	def discount_product(self):
@@ -867,7 +868,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).on_cancel()
 
 		self.update_dashboard_customer_cancel()
-
+ 
 		self.check_sales_order_on_hold_or_close("sales_order")
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
