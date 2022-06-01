@@ -423,7 +423,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		item.barcode = null;
 
 
-		if(item.item_code || item.barcode || item.serial_no) {
+		if(item.item_code || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
@@ -463,6 +463,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							stock_qty: item.stock_qty,
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
+							uom: item.uom,
 							weight_uom: item.weight_uom,
 							manufacturer: item.manufacturer,
 							stock_uom: item.stock_uom,
