@@ -14,6 +14,10 @@
   "client_id",
   "column_break_8",
   "client_secret",
+  "eway_settings_section",
+  "eway_auto_generate",
+  "eway_column_break",
+  "eway_when_generate",
   "auth_token",
   "token_expiry"
  ],
@@ -65,7 +69,7 @@
    "collapsible": 1,
    "fieldname": "advanced_settings_section",
    "fieldtype": "Section Break",
-   "label": "Advanced Settings"
+   "label": "GSP Setting"
   },
   {
    "fieldname": "client_id",
@@ -80,12 +84,36 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+    "collapsible": 1,
+    "fieldname": "eway_settings_section",
+    "fieldtype": "Section Break",
+    "label": "E-way Bill Setting"
+   },
+   {
+    "default": "Always Ask",
+    "fieldname": "eway_auto_generate",
+    "fieldtype": "Select",
+    "options": "Always Ask\nYes\nNo",
+    "label": "Auto Generate Eway Bill"
+   },
+   {
+    "default": "Above 50000",
+    "fieldname": "eway_when_generate",
+    "fieldtype": "Select",
+    "options": "Above 50000\nAlways",
+    "label": "When to Generate Eway Bill"
+   },
+   {
+    "fieldname": "eway_column_break",
+    "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-16 19:50:28.029517",
+ "modified": "2022-06-01 14:20:37.668290",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",
