@@ -1255,7 +1255,7 @@ class SalesInvoice(SellingController):
 
 			for depr_entry in depr_entries_created_on_disposal_date:
 				de = frappe.get_doc("Depreciation Entry", depr_entry)
-				de.cancel()
+				de.reverse_depreciation_entry(self.posting_date)
 
 	def get_posting_date_of_original_invoice(self):
 		return frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
