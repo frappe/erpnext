@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.controllers.base_asset import validate_serial_no
@@ -172,3 +172,13 @@ class DepreciationEntry(AccountsController):
 
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding="Yes")
+
+	def reverse_depreciation_entry(self, posting_date=None):
+		if not posting_date:
+			posting_date = getdate()
+
+		reverse_de = frappe.copy_doc(self)
+		reverse_de.posting_date = posting_date
+		reverse_de.credit_account = self.debit_account
+		reverse_de.debit_account = self.credit_account
+		reverse_de.submit()
