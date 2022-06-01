@@ -216,16 +216,16 @@ class PurchaseInvoice(BuyingController):
 		row_names = [d.name for d in self.items]
 		if self.docstatus == 1 and row_names:
 			returned_with_purchase_invoice = frappe.db.sql("""
-				select i.purchase_invoice_item, -1 * i.qty as qty, p.update_stock
+				select i.purchase_invoice_item, -1 * sum(i.qty) as qty
 				from `tabPurchase Invoice Item` i
 				inner join `tabPurchase Invoice` p on p.name = i.parent
-				where p.docstatus = 1 and p.is_return = 1 and i.purchase_invoice_item in %s
+				where p.docstatus = 1 and p.is_return = 1 and (p.update_stock = 1 or p.reopen_order = 1)
+					and i.purchase_invoice_item in %s
+				group by i.purchase_invoice_item
 			""", [row_names], as_dict=1)
 
 			for d in returned_with_purchase_invoice:
-				if d.update_stock:
-					out.returned_qty_map.setdefault(d.purchase_invoice_item, 0)
-					out.returned_qty_map[d.purchase_invoice_item] += d.qty
+				out.returned_qty_map[d.purchase_invoice_item] = d.qty
 
 		return out
 

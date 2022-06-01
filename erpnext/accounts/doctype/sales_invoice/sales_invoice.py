@@ -396,20 +396,19 @@ class SalesInvoice(SellingController):
 		row_names = [d.name for d in self.items]
 		if self.docstatus == 1 and row_names:
 			returned_with_sales_invoice = frappe.db.sql("""
-				select i.sales_invoice_item, -1 * i.qty as qty, -1 * i.base_net_amount as base_net_amount,
-					p.update_stock, p.depreciation_type
+				select i.sales_invoice_item,
+					-1 * sum(i.qty) as qty,
+					-1 * sum(i.base_net_amount) as base_net_amount
 				from `tabSales Invoice Item` i
 				inner join `tabSales Invoice` p on p.name = i.parent
-				where p.docstatus = 1 and p.is_return = 1 and i.sales_invoice_item in %s
+				where p.docstatus = 1 and p.is_return = 1 and (p.update_stock = 1 or p.reopen_order = 1)
+					and i.sales_invoice_item in %s
+				group by i.sales_invoice_item
 			""", [row_names], as_dict=1)
 
 			for d in returned_with_sales_invoice:
-				if d.update_stock and d.depreciation_type != 'Depreciation Amount Only':
-					out.returned_qty_map.setdefault(d.sales_invoice_item, 0)
-					out.returned_qty_map[d.sales_invoice_item] += d.qty
-
-				out.returned_amount_map.setdefault(d.sales_invoice_item, 0)
-				out.returned_amount_map[d.sales_invoice_item] += d.base_net_amount
+				out.returned_qty_map[d.sales_invoice_item] = d.qty
+				out.returned_amount_map[d.sales_invoice_item] = d.base_net_amount
 
 		return out
 
