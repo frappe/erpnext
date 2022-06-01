@@ -1087,7 +1087,7 @@ class PurchaseInvoice(BuyingController):
 		# Stock ledger value is not matching with the warehouse amount
 		if (
 			self.update_stock
-			and voucher_wise_stock_value.get(item.name)
+			and voucher_wise_stock_value.get((item.name, item.warehouse))
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
