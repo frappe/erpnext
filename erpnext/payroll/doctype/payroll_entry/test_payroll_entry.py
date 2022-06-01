@@ -86,44 +86,32 @@ class TestPayrollEntry(FrappeTestCase):
 		)
 
 	def test_multi_currency_payroll_entry(self):
-		company = erpnext.get_default_company()
-		employee = make_employee("test_muti_currency_employee@payroll.com", company=company)
-		for data in frappe.get_all("Salary Component", fields=["name"]):
-			if not frappe.db.get_value(
-				"Salary Component Account", {"parent": data.name, "company": company}, "name"
-			):
-				get_salary_component_account(data.name)
+		company = frappe.get_doc("Company", "_Test Company")
+		employee = make_employee(
+			"test_muti_currency_employee@payroll.com", company=company.name, department="Accounts - _TC"
+		)
+		salary_structure = "_Test Multi Currency Salary Structure"
+		setup_salary_structure(employee, company, "USD", salary_structure)
 
-		company_doc = frappe.get_doc("Company", company)
-		salary_structure = make_salary_structure(
-			"_Test Multi Currency Salary Structure", "Monthly", company=company, currency="USD"
-		)
-		create_salary_structure_assignment(
-			employee, salary_structure.name, company=company, currency="USD"
-		)
-		frappe.db.sql(
-			"""delete from `tabSalary Slip` where employee=%s""",
-			(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})),
-		)
-		salary_slip = get_salary_slip(
-			"test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure"
-		)
 		dates = get_start_end_dates("Monthly", nowdate())
 		payroll_entry = make_payroll_entry(
 			start_date=dates.start_date,
 			end_date=dates.end_date,
-			payable_account=company_doc.default_payroll_payable_account,
+			payable_account=company.default_payroll_payable_account,
 			currency="USD",
 			exchange_rate=70,
+			company=company.name,
+			cost_center="Main - _TC",
 		)
 		payroll_entry.make_payment_entry()
 
-		salary_slip.load_from_db()
+		salary_slip = frappe.db.get_value("Salary Slip", {"payroll_entry": payroll_entry.name}, "name")
+		salary_slip = frappe.get_doc("Salary Slip", salary_slip)
 
+		payroll_entry.reload()
 		payroll_je = salary_slip.journal_entry
 		if payroll_je:
 			payroll_je_doc = frappe.get_doc("Journal Entry", payroll_je)
-
 			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_debit)
 			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
 
@@ -136,7 +124,6 @@ class TestPayrollEntry(FrappeTestCase):
 			(payroll_entry.name),
 			as_dict=1,
 		)
-
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_debit)
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_credit)
 
@@ -306,7 +293,7 @@ class TestPayrollEntry(FrappeTestCase):
 	def test_salary_slip_operation_queueing(self):
 		company = "_Test Company"
 		company_doc = frappe.get_doc("Company", company)
-		employee = frappe.db.get_value("Employee", {"company": company})
+		employee = make_employee("test_employee@payroll.com", company=company)
 		setup_salary_structure(employee, company_doc)
 
 		# enqueue salary slip creation via payroll entry
@@ -318,6 +305,7 @@ class TestPayrollEntry(FrappeTestCase):
 			payable_account=company_doc.default_payroll_payable_account,
 			currency=company_doc.default_currency,
 			company=company_doc.name,
+			cost_center="Main - _TC",
 		)
 		frappe.flags.enqueue_payroll_entry = True
 		payroll_entry.create_salary_slips()
@@ -329,7 +317,7 @@ class TestPayrollEntry(FrappeTestCase):
 	def test_salary_slip_operation_failure(self):
 		company = "_Test Company"
 		company_doc = frappe.get_doc("Company", company)
-		employee = frappe.db.get_value("Employee", {"company": company})
+		employee = make_employee("test_employee@payroll.com", company=company)
 
 		salary_structure = make_salary_structure(
 			"_Test Salary Structure",
@@ -353,6 +341,7 @@ class TestPayrollEntry(FrappeTestCase):
 			payable_account=company_doc.default_payroll_payable_account,
 			currency=company_doc.default_currency,
 			company=company_doc.name,
+			cost_center="Main - _TC",
 		)
 		payroll_entry.create_salary_slips()
 		payroll_entry.submit_salary_slips()
@@ -375,7 +364,7 @@ class TestPayrollEntry(FrappeTestCase):
 	def test_payroll_entry_status(self):
 		company = "_Test Company"
 		company_doc = frappe.get_doc("Company", company)
-		employee = frappe.db.get_value("Employee", {"company": company})
+		employee = make_employee("test_employee@payroll.com", company=company)
 
 		setup_salary_structure(employee, company_doc)
 
@@ -386,6 +375,7 @@ class TestPayrollEntry(FrappeTestCase):
 			payable_account=company_doc.default_payroll_payable_account,
 			currency=company_doc.default_currency,
 			company=company_doc.name,
+			cost_center="Main - _TC",
 		)
 		payroll_entry.submit()
 		self.assertEqual(payroll_entry.status, "Submitted")
@@ -464,15 +454,6 @@ def make_holiday(holiday_list_name):
 		).insert()
 
 	return holiday_list_name
-
-
-def get_salary_slip(user, period, salary_structure):
-	salary_slip = make_employee_salary_slip(user, period, salary_structure)
-	salary_slip.exchange_rate = 70
-	salary_slip.calculate_net_pay()
-	salary_slip.db_update()
-
-	return salary_slip
 
 
 def setup_salary_structure(employee, company_doc, currency=None, salary_structure=None):
