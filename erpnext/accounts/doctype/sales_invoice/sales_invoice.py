@@ -7,17 +7,7 @@ from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (
-	add_days,
-	add_months,
-	cint,
-	cstr,
-	flt,
-	formatdate,
-	get_link_to_form,
-	getdate,
-	nowdate,
-)
+from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -1107,32 +1097,36 @@ class SalesInvoice(SellingController):
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
-					asset = self.get_asset(item)
+					asset = item.get("asset")
+					serial_no = item.get("asset_serial_no")
+
+					asset_doc = self.get_asset_or_serial_no(asset, serial_no)
+					self.validate_asset(item, asset_doc)
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
-							asset, item.get("asset_serial_no"), item.base_net_amount, item.finance_book
+							asset, serial_no, item.base_net_amount, item.finance_book
 						)
-						asset.db_set("disposal_date", None)
+						asset_doc.db_set("disposal_date", None)
 
 						if asset.calculate_depreciation:
-							self.reverse_depreciation_entries_made_after_sale(asset, item.get("asset_serial_no"))
-							self.reset_depreciation_schedules(asset, item.get("asset_serial_no"))
+							self.reverse_depreciation_entries_made_after_sale(asset, serial_no, item.finance_book)
+							self.reset_depreciation_schedules(asset, serial_no, asset_doc)
 
 					else:
 						if asset.calculate_depreciation:
-							self.depreciate_asset(asset, item.get("asset_serial_no"))
+							self.depreciate_asset(asset, serial_no, asset_doc)
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset, item.get("asset_serial_no"), item.base_net_amount, item.finance_book
+							asset, serial_no, item.base_net_amount, item.finance_book
 						)
-						asset.db_set("disposal_date", self.posting_date)
+						asset_doc.db_set("disposal_date", self.posting_date)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
-					self.set_asset_status(asset)
+					self.set_asset_status(asset_doc)
 
 				else:
 					# Do not book income for transfer within same company
@@ -1169,47 +1163,46 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
-	def get_asset(self, item):
-		if item.get("asset"):
-			asset = frappe.get_doc("Asset", item.asset)
-		else:
+	def validate_asset(self, item, asset_doc):
+		if not item.get("asset"):
 			frappe.throw(
 				_("Row #{0}: You must select an Asset for Item {1}.").format(item.idx, item.item_name),
 				title=_("Missing Asset"),
 			)
 
-		self.check_finance_books(item, asset)
-		return asset
+		self.validate_finance_books(item, asset_doc)
 
-	def check_finance_books(self, item, asset):
+	def validate_finance_books(self, item, asset_doc):
 		if (
-			len(asset.finance_books) > 1 and not item.finance_book and asset.finance_books[0].finance_book
+			len(asset_doc.finance_books) > 1
+			and not item.finance_book
+			and asset_doc.finance_books[0].finance_book
 		):
 			frappe.throw(
 				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
 			)
 
-	def depreciate_asset(self, asset, serial_no):
+	def depreciate_asset(self, asset_name, serial_no, asset_doc):
 		from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
 			post_depreciation_entries,
 		)
 		from erpnext.controllers.base_asset import get_linked_depreciation_schedules
 
-		doc = self.get_asset_or_serial_no(asset, serial_no)
-
-		doc.create_schedules_if_depr_details_have_been_updated(date_of_sale=getdate(self.posting_date))
-		doc.submit_depreciation_schedules(
+		asset_doc.create_schedules_if_depr_details_have_been_updated(
+			date_of_sale=getdate(self.posting_date)
+		)
+		asset_doc.submit_depreciation_schedules(
 			notes=_("This schedule was cancelled because {0} was sold ({1}).").format(
-				get_link_to_form(doc.doctype, doc.name), get_link_to_form(self.doctype, self.name)
+				get_link_to_form(asset_doc.doctype, asset_doc.name), get_link_to_form(self.doctype, self.name)
 			)
 		)
 
-		schedules = get_linked_depreciation_schedules(asset.name, serial_no)
+		schedules = get_linked_depreciation_schedules(asset_name, serial_no)
 
 		for schedule in schedules:
 			post_depreciation_entries(schedule, self.posting_date)
 
-	def reset_depreciation_schedules(self, asset, serial_no):
+	def reset_depreciation_schedules(self, asset, serial_no, asset_doc):
 		latest_cancelled_schedules = self.get_latest_cancelled_schedules(asset, serial_no)
 
 		for schedule in latest_cancelled_schedules:
@@ -1219,10 +1212,9 @@ class SalesInvoice(SellingController):
 			depr_schedule.creation_date = getdate()
 			depr_schedule.save()
 
-			doc = self.get_asset_or_serial_no(asset, serial_no)
-			doc.submit_depreciation_schedules(
+			asset_doc.submit_depreciation_schedules(
 				notes=_("This schedule was cancelled because {0} was returned ({1}).").format(
-					get_link_to_form(doc.doctype, doc.name), get_link_to_form(self.doctype, self.name)
+					get_link_to_form(asset_doc.doctype, asset_doc.name), get_link_to_form(self.doctype, self.name)
 				)
 			)
 
@@ -1230,7 +1222,7 @@ class SalesInvoice(SellingController):
 		if serial_no:
 			return frappe.get_doc("Asset Serial No", serial_no)
 		else:
-			return asset
+			return frappe.get_doc("Asset", asset)
 
 	def get_latest_cancelled_schedules(self, asset, serial_no):
 		return frappe.get_all(
@@ -1247,53 +1239,50 @@ class SalesInvoice(SellingController):
 			filters={"asset": asset.name, "serial_no": serial_no if serial_no else "", "status": "Active"},
 		)
 
-	def reverse_depreciation_entries_made_after_sale(self, asset, serial_no):
-		disposal_date = self.get_disposal_date(asset, serial_no)
+	def reverse_depreciation_entries_made_after_sale(self, asset, serial_no, finance_book):
+		disposal_date = self.get_posting_date_of_original_invoice()
 
-		depr_entries_created_on_disposal_date = frappe.get_all(
-			"Depreciation Entry",
-			filters={"asset": asset.name, "serial_no": serial_no, "posting_date": disposal_date},
-			pluck="name",
-		)
+		if self.sale_happens_in_the_future(
+			disposal_date
+		) or not self.sale_was_made_on_original_schedule_date(
+			asset, serial_no, finance_book, disposal_date
+		):
+			depr_entries_created_on_disposal_date = frappe.get_all(
+				"Depreciation Entry",
+				filters={"asset": asset, "serial_no": serial_no, "posting_date": disposal_date},
+				pluck="name",
+			)
 
-		for depr_entry in depr_entries_created_on_disposal_date:
-			de = frappe.get_doc("Depreciation Entry", depr_entry)
-			de.cancel()
+			for depr_entry in depr_entries_created_on_disposal_date:
+				de = frappe.get_doc("Depreciation Entry", depr_entry)
+				de.cancel()
 
-	def get_disposal_date(self, asset, serial_no):
-		doctype = "Asset" if not serial_no else "Asset Serial No"
-		doc = serial_no if serial_no else asset.name
-
-		return frappe.get_value(doctype, doc, "disposal_date")
-
-	def get_posting_date_of_sales_invoice(self):
+	def get_posting_date_of_original_invoice(self):
 		return frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
 
-	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
-	def sale_was_made_on_original_schedule_date(
-		self, asset, schedule, row, posting_date_of_original_invoice
-	):
-		for finance_book in asset.get("finance_books"):
-			if schedule.finance_book == finance_book.finance_book:
-				orginal_schedule_date = add_months(
-					finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
-				)
-
-				if orginal_schedule_date == posting_date_of_original_invoice:
-					return True
-		return False
-
-	def sale_happens_in_the_future(self, posting_date_of_original_invoice):
-		if posting_date_of_original_invoice > getdate():
+	def sale_happens_in_the_future(self, disposal_date):
+		if disposal_date > getdate():
 			return True
 
 		return False
 
-	def get_depreciation_amount_in_je(self, journal_entry):
-		if journal_entry.accounts[0].debit_in_account_currency:
-			return journal_entry.accounts[0].debit_in_account_currency
-		else:
-			return journal_entry.accounts[0].credit_in_account_currency
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
+	def sale_was_made_on_original_schedule_date(self, asset, serial_no, finance_book, disposal_date):
+		schedule_cancelled_on_sale = self.get_schedule_cancelled_on_sale(asset, serial_no, finance_book)
+
+		return frappe.db.exists(
+			"Asset Depreciation Schedule",
+			{"parent": schedule_cancelled_on_sale, "schedule_date": disposal_date},
+		)
+
+	def get_schedule_cancelled_on_sale(self, asset, serial_no, finance_book):
+		return frappe.get_all(
+			"Depreciation Schedule",
+			filters={"asset": asset, "serial_no": serial_no, "finance_book": finance_book, "docstatus": 2},
+			pluck="name",
+			order_by="creation_date desc",
+			limit=1,
+		)[0]
 
 	@property
 	def enable_discount_accounting(self):
@@ -1304,11 +1293,11 @@ class SalesInvoice(SellingController):
 
 		return self._enable_discount_accounting
 
-	def set_asset_status(self, asset):
+	def set_asset_status(self, doc):
 		if self.is_return:
-			asset.set_status()
+			doc.set_status()
 		else:
-			asset.set_status("Sold" if self.docstatus == 1 else None)
+			doc.set_status("Sold" if self.docstatus == 1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		if cint(self.redeem_loyalty_points):
