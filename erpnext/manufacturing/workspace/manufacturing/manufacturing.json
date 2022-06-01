@@ -402,14 +402,15 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:40:09.474747",
+ "modified": "2022-05-31 22:08:19.408223",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
- "restrict_to_domain": "Manufacturing",
+ "quick_lists": [],
+ "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 17.0,
  "shortcuts": [
