@@ -40,27 +40,40 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 0) {
-			if (!frm.is_new()) {
+		if (frm.doc.docstatus === 0 && !frm.is_new()) {
+			frm.page.clear_primary_action();
+			frm.add_custom_button(__("Get Employees"),
+				function () {
+					frm.events.get_employee_details(frm);
+				}
+			).toggleClass("btn-primary", !(frm.doc.employees || []).length);
+		}
+
+		if (
+			(frm.doc.employees || []).length
+			&& !frappe.model.has_workflow(frm.doctype)
+			&& !cint(frm.doc.salary_slips_created)
+			&& (frm.doc.docstatus != 2)
+		) {
+			if (frm.doc.docstatus == 0) {
 				frm.page.clear_primary_action();
-				frm.add_custom_button(__("Get Employees"),
-					function () {
-						frm.events.get_employee_details(frm);
-					}
-				).toggleClass('btn-primary', !(frm.doc.employees || []).length);
-			}
-			if ((frm.doc.employees || []).length && !frappe.model.has_workflow(frm.doctype)) {
-				frm.page.clear_primary_action();
-				frm.page.set_primary_action(__('Create Salary Slips'), () => {
-					frm.save('Submit').then(() => {
+				frm.page.set_primary_action(__("Create Salary Slips"), () => {
+					frm.save("Submit").then(() => {
 						frm.page.clear_primary_action();
 						frm.refresh();
 						frm.events.refresh(frm);
 					});
 				});
+			} else if (frm.doc.docstatus == 1 && frm.doc.status == "Failed") {
+				frm.add_custom_button(__("Create Salary Slip"), function () {
+					frm.call("create_salary_slips", {}, () => {
+						frm.reload_doc();
+					});
+				}).addClass("btn-primary");
 			}
 		}
-		if (frm.doc.docstatus == 1) {
+
+		if (frm.doc.docstatus == 1 && frm.doc.status == "Submitted") {
 			if (frm.custom_buttons) frm.clear_custom_buttons();
 			frm.events.add_context_buttons(frm);
 		}
