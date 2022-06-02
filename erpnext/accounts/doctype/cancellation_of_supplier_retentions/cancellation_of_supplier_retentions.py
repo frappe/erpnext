@@ -12,7 +12,42 @@ class CancellationOfSupplierRetentions(Document):
 			self.calculate_retention()
 			self.delete_gl_entries()
 			self.change_status_retention()
+			self.update_accounts_status()
+			self.update_dashboard_supplier()
 	
+	def on_cancel(self):
+		self.update_dashboard_supplier_cancel()
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier.total_unpaid += self.total_withheld
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_withheld
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier.total_unpaid -= self.total_withheld
+			supplier.save()
+	
+	def update_accounts_status(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.debit += self.total_withheld
+			supplier.remaining_balance += self.total_withheld
+			supplier.save()
+
 	def calculate_retention(self):
 		retention = frappe.get_doc("Supplier Retention", self.supplier_retention)
 

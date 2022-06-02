@@ -18,6 +18,33 @@ class SupplierRetention(Document):
 			self.calculate_retention()
 			self.update_accounts_status()
 			self.apply_gl_entry()
+			self.update_dashboard_supplier()
+	
+	def on_cancel(self):
+		self.update_dashboard_supplier_cancel()
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier.total_unpaid -= self.total_withheld
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid -= self.total_withheld
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier.total_unpaid += self.total_withheld
+			supplier.save()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
