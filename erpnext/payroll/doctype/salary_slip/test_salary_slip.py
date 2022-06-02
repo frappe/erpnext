@@ -1050,10 +1050,10 @@ def make_salary_component(salary_components, test_tax, company_list=None):
 		doc.update(salary_component)
 		doc.insert()
 
-		get_salary_component_account(doc, company_list)
+		set_salary_component_account(doc, company_list)
 
 
-def get_salary_component_account(sal_comp, company_list=None):
+def set_salary_component_account(sal_comp, company_list=None):
 	company = erpnext.get_default_company()
 
 	if company_list and company not in company_list:
