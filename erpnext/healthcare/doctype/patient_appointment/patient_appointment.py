@@ -12,6 +12,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, get_link_to_form, get_time, getdate
 
+from erpnext import get_company_currency
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
 	get_income_account,
 	get_receivable_account,
@@ -252,6 +253,10 @@ def create_sales_invoice(appointment_doc):
 	sales_invoice = frappe.new_doc("Sales Invoice")
 	sales_invoice.patient = appointment_doc.patient
 	sales_invoice.customer = frappe.get_value("Patient", appointment_doc.patient, "customer")
+	sales_invoice.currency = frappe.get_value(
+		"Customer", sales_invoice.customer, "default_currency"
+	) or get_company_currency(appointment_doc.company)
+
 	sales_invoice.appointment = appointment_doc.name
 	sales_invoice.due_date = getdate()
 	sales_invoice.company = appointment_doc.company

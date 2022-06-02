@@ -366,3 +366,5 @@ erpnext.patches.v13_0.education_deprecation_warning
 erpnext.patches.v13_0.requeue_recoverable_reposts
 erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
+erpnext.patches.v13_0.update_employee_advance_status
+
