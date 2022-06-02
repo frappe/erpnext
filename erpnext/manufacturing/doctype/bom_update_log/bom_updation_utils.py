@@ -38,7 +38,7 @@ def replace_bom(boms: Dict) -> None:
 			bom_obj.save_version()
 
 
-def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str]) -> None:
+def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str], batch_name: int) -> None:
 	"Updates Cost for BOMs within a given level. Runs via background jobs."
 
 	try:
@@ -47,19 +47,9 @@ def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str]) -> None:
 			return
 
 		frappe.db.auto_commit_on_many_writes = 1
-		# main updation logic
-		job_data = update_cost_in_boms(bom_list=bom_list, docname=doc.name)
 
-		set_values_in_log(
-			doc.name,
-			values={
-				"current_boms": json.dumps(job_data.get("current_boms")),
-				"processed_boms": json.dumps(job_data.get("processed_boms")),
-			},
-			commit=True,
-		)
-
-		process_if_level_is_complete(doc.name, job_data["current_boms"], job_data["processed_boms"])
+		update_cost_in_boms(bom_list=bom_list)  # main updation logic
+		frappe.db.set_value("BOM Update Batch", batch_name, "boms_updated", json.dumps(bom_list))
 	except Exception:
 		handle_exception(doc)
 	finally:
@@ -112,48 +102,13 @@ def get_bom_unit_cost(bom_name: str) -> float:
 	return frappe.utils.flt(new_bom_unitcost[0][0])
 
 
-def update_cost_in_boms(bom_list: List[str], docname: str) -> Dict[str, Dict]:
+def update_cost_in_boms(bom_list: List[str]) -> None:
 	"Updates cost in given BOMs. Returns current and total updated BOMs."
-
-	updated_boms = {}  # current boms that have been updated
 
 	for bom in bom_list:
 		bom_doc = frappe.get_cached_doc("BOM", bom)
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
 		bom_doc.db_update()
-		updated_boms[bom] = True
-
-	# Update processed BOMs in Log
-	log_data = frappe.db.get_values(
-		"BOM Update Log", docname, ["current_boms", "processed_boms"], as_dict=True
-	)[0]
-
-	for field in ("current_boms", "processed_boms"):
-		log_data[field] = json.loads(log_data.get(field))
-		log_data[field].update(updated_boms)
-
-	return log_data
-
-
-def process_if_level_is_complete(
-	docname: str, current_boms: Dict[str, bool], processed_boms: Dict[str, bool]
-) -> None:
-	"Prepare and set higher level BOMs/dependants in Log if current level is complete."
-
-	processing_complete = all(current_boms.get(bom) for bom in current_boms)
-	if not processing_complete:
-		return
-
-	parent_boms = get_next_higher_level_boms(child_boms=current_boms, processed_boms=processed_boms)
-	set_values_in_log(
-		docname,
-		values={
-			"current_boms": json.dumps({}),
-			"parent_boms": json.dumps(parent_boms),
-			"status": "Completed" if not parent_boms else "Paused",
-		},
-		commit=True,
-	)
 
 
 def get_next_higher_level_boms(
@@ -244,7 +199,7 @@ def set_values_in_log(log_name: str, values: Dict[str, Any], commit: bool = Fals
 	query.run()
 
 	if commit:
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep
 
 
 def handle_exception(doc: "BOMUpdateLog") -> None:

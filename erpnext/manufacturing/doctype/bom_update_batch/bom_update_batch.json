@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-05-31 17:34:39.825537",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "level",
+  "batch_no",
+  "boms_updated"
+ ],
+ "fields": [
+  {
+   "fieldname": "level",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Level"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Batch No."
+  },
+  {
+   "fieldname": "boms_updated",
+   "fieldtype": "Long Text",
+   "in_list_view": 1,
+   "label": "BOMs Updated"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-05-31 23:36:13.628391",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "BOM Update Batch",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
