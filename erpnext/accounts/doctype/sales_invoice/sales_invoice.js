@@ -53,8 +53,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.refresh_fields();
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
+<<<<<<< HEAD
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
+=======
+	}
+>>>>>>> 3f376cc3a5 (fix: Parent dimension filters in orders)
 
 	refresh: function(doc, dt, dn) {
 		const me = this;
