@@ -8,6 +8,7 @@ from datetime import date
 import frappe
 from frappe import _
 from frappe.utils import flt, formatdate, getdate
+from six import iteritems
 
 from erpnext.regional.india.utils import get_gst_accounts
 
@@ -187,7 +188,7 @@ class Gstr1Report(object):
 					row["cess_amount"] += flt(self.invoice_cess.get(inv), 2)
 					row["type"] = "E" if ecommerce_gstin else "OE"
 
-			for key, value in b2cs_output.items():
+			for key, value in iteritems(b2cs_output):
 				self.data.append(value)
 
 	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
@@ -435,8 +436,8 @@ class Gstr1Report(object):
 				alert=True,
 			)
 
-		# Build itemised tax for export invoices where tax table is blank
-		for invoice, items in self.invoice_items.items():
+		# Build itemised tax for export invoices where tax table is blank (Export and SEZ Invoices)
+		for invoice, items in iteritems(self.invoice_items):
 			if (
 				invoice not in self.items_based_on_tax_rate
 				and invoice not in unidentified_gst_accounts_invoice
@@ -795,7 +796,7 @@ def get_b2b_json(res, gstin):
 		if not gst_in:
 			continue
 
-		for number, invoice in res[gst_in].items():
+		for number, invoice in iteritems(res[gst_in]):
 			if not invoice[0]["place_of_supply"]:
 				frappe.throw(
 					_(
@@ -875,7 +876,7 @@ def get_b2cs_json(data, gstin):
 def get_advances_json(data, gstin):
 	company_state_number = gstin[0:2]
 	out = []
-	for place_of_supply, items in data.items():
+	for place_of_supply, items in iteritems(data):
 		supply_type = "INTRA" if company_state_number == place_of_supply.split("-")[0] else "INTER"
 		row = {"pos": place_of_supply.split("-")[0], "itms": [], "sply_ty": supply_type}
 
@@ -968,7 +969,7 @@ def get_cdnr_reg_json(res, gstin):
 		if not gst_in:
 			continue
 
-		for number, invoice in res[gst_in].items():
+		for number, invoice in iteritems(res[gst_in]):
 			if not invoice[0]["place_of_supply"]:
 				frappe.throw(
 					_(
@@ -1006,7 +1007,7 @@ def get_cdnr_reg_json(res, gstin):
 def get_cdnr_unreg_json(res, gstin):
 	out = []
 
-	for invoice, items in res.items():
+	for invoice, items in iteritems(res):
 		inv_item = {
 			"nt_num": items[0]["invoice_number"],
 			"nt_dt": getdate(items[0]["posting_date"]).strftime("%d-%m-%Y"),
@@ -1162,7 +1163,7 @@ def get_company_gstins(company):
 
 	address_list = [""] + [d.gstin for d in addresses]
 
-	return set(address_list)
+	return address_list
 
 
 def get_hsn_wise_tax_rates():
