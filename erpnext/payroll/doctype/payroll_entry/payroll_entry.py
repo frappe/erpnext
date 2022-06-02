@@ -54,7 +54,7 @@ class PayrollEntry(Document):
 			if self.validate_employee_attendance():
 				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 
-	def set_status(self, status=None, update=True):
+	def set_status(self, status=None, update=False):
 		if not status:
 			status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 
@@ -850,7 +850,6 @@ def log_payroll_failure(process, payroll_entry, error):
 
 def create_salary_slips_for_employees(employees, args, publish_progress=True):
 	try:
-		frappe.db.savepoint("salary_slip_creation")
 		payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
 		salary_slips_exist_for = get_existing_salary_slips(employees, args)
 		count = 0
@@ -879,7 +878,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 			)
 
 	except Exception as e:
-		frappe.db.rollback(save_point="salary_slip_creation")
+		frappe.db.rollback()
 		log_payroll_failure("creation", payroll_entry, e)
 
 	finally:
@@ -887,24 +886,25 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 		frappe.publish_realtime("completed_salary_slip_creation")
 
 
-def show_payroll_submission_status(submitted, not_submitted, salary_slip):
-	if not submitted and not not_submitted:
+def show_payroll_submission_status(submitted, unsubmitted, payroll_entry):
+	if not submitted and not unsubmitted:
 		frappe.msgprint(
 			_(
 				"No salary slip found to submit for the above selected criteria OR salary slip already submitted"
 			)
 		)
-		return
-
-	if submitted:
+	elif submitted and not unsubmitted:
 		frappe.msgprint(
-			_("Salary Slip submitted for period from {0} to {1}").format(
-				salary_slip.start_date, salary_slip.end_date
+			_("Salary Slips submitted for period from {0} to {1}").format(
+				payroll_entry.start_date, payroll_entry.end_date
 			)
 		)
-
-	if not_submitted:
-		frappe.msgprint(_("Could not submit some Salary Slips"))
+	elif unsubmitted:
+		frappe.msgprint(
+			_("Could not submit some Salary Slips: {}").format(
+				", ".join(get_link_to_form("Salary Slip", entry) for entry in unsubmitted)
+			)
+		)
 
 
 def get_existing_salary_slips(employees, args):
@@ -922,23 +922,21 @@ def get_existing_salary_slips(employees, args):
 
 def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progress=True):
 	try:
-		frappe.db.savepoint("salary_slip_submission")
-
 		submitted = []
-		not_submitted = []
+		unsubmitted = []
 		frappe.flags.via_payroll_entry = True
 		count = 0
 
 		for entry in salary_slips:
 			salary_slip = frappe.get_doc("Salary Slip", entry[0])
 			if salary_slip.net_pay < 0:
-				not_submitted.append(entry[0])
+				unsubmitted.append(entry[0])
 			else:
 				try:
 					salary_slip.submit()
 					submitted.append(salary_slip)
 				except frappe.ValidationError:
-					not_submitted.append(entry[0])
+					unsubmitted.append(entry[0])
 
 			count += 1
 			if publish_progress:
@@ -949,10 +947,10 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 			payroll_entry.email_salary_slip(submitted)
 			payroll_entry.db_set({"salary_slips_submitted": 1, "status": "Submitted", "error_message": ""})
 
-		show_payroll_submission_status(submitted, not_submitted, salary_slip)
+		show_payroll_submission_status(submitted, unsubmitted, payroll_entry)
 
 	except Exception as e:
-		frappe.db.rollback(save_point="salary_slip_submission")
+		frappe.db.rollback()
 		log_payroll_failure("submission", payroll_entry, e)
 
 	finally:

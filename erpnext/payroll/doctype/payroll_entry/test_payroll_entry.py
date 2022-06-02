@@ -299,7 +299,7 @@ class TestPayrollEntry(FrappeTestCase):
 		# enqueue salary slip creation via payroll entry
 		# Payroll Entry status should change to Queued
 		dates = get_start_end_dates("Monthly", nowdate())
-		payroll_entry = get_payroll_entry_data(
+		payroll_entry = get_payroll_entry(
 			start_date=dates.start_date,
 			end_date=dates.end_date,
 			payable_account=company_doc.default_payroll_payable_account,
@@ -308,7 +308,7 @@ class TestPayrollEntry(FrappeTestCase):
 			cost_center="Main - _TC",
 		)
 		frappe.flags.enqueue_payroll_entry = True
-		payroll_entry.create_salary_slips()
+		payroll_entry.submit()
 		payroll_entry.reload()
 
 		self.assertEqual(payroll_entry.status, "Queued")
@@ -335,7 +335,7 @@ class TestPayrollEntry(FrappeTestCase):
 		# salary slip submission via payroll entry
 		# Payroll Entry status should change to Failed because of the missing account setup
 		dates = get_start_end_dates("Monthly", nowdate())
-		payroll_entry = get_payroll_entry_data(
+		payroll_entry = get_payroll_entry(
 			start_date=dates.start_date,
 			end_date=dates.end_date,
 			payable_account=company_doc.default_payroll_payable_account,
@@ -343,7 +343,16 @@ class TestPayrollEntry(FrappeTestCase):
 			company=company_doc.name,
 			cost_center="Main - _TC",
 		)
-		payroll_entry.create_salary_slips()
+
+		# set employee as Inactive to check creation failure
+		frappe.db.set_value("Employee", employee, "status", "Inactive")
+		payroll_entry.submit()
+		payroll_entry.reload()
+		self.assertEqual(payroll_entry.status, "Failed")
+		self.assertIsNotNone(payroll_entry.error_message)
+
+		frappe.db.set_value("Employee", employee, "status", "Active")
+		payroll_entry.submit()
 		payroll_entry.submit_salary_slips()
 
 		payroll_entry.reload()
@@ -369,7 +378,7 @@ class TestPayrollEntry(FrappeTestCase):
 		setup_salary_structure(employee, company_doc)
 
 		dates = get_start_end_dates("Monthly", nowdate())
-		payroll_entry = get_payroll_entry_data(
+		payroll_entry = get_payroll_entry(
 			start_date=dates.start_date,
 			end_date=dates.end_date,
 			payable_account=company_doc.default_payroll_payable_account,
@@ -384,7 +393,7 @@ class TestPayrollEntry(FrappeTestCase):
 		self.assertEqual(payroll_entry.status, "Cancelled")
 
 
-def get_payroll_entry_data(**args):
+def get_payroll_entry(**args):
 	args = frappe._dict(args)
 
 	payroll_entry = frappe.new_doc("Payroll Entry")
@@ -407,13 +416,16 @@ def get_payroll_entry_data(**args):
 		payroll_entry.payment_account = args.payment_account
 
 	payroll_entry.fill_employee_details()
-	payroll_entry.save()
+	payroll_entry.insert()
+
+	# Commit so that the first salary slip creation failure does not rollback the Payroll Entry insert.
+	frappe.db.commit()  # nosemgrep
 
 	return payroll_entry
 
 
 def make_payroll_entry(**args):
-	payroll_entry = get_payroll_entry_data(**args)
+	payroll_entry = get_payroll_entry(**args)
 	payroll_entry.submit()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status=1):
