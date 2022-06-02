@@ -73,6 +73,8 @@ class PaymentEntry(AccountsController):
 			self.calculate_diferred_account()
 			if self.party_type == "Customer":
 				self.update_dashboard_customer()
+			if self.party_type == "Supplier":
+				self.update_dashboard_supplier()
 	
 	def update_dashboard_customer(self):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
@@ -88,8 +90,38 @@ class PaymentEntry(AccountsController):
 			new_doc.billing_this_year = 0
 			new_doc.total_unpaid = self.total_allocated_amount * -1
 			new_doc.insert()
-
 	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.party, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", self.party)
+			supplier.total_unpaid -= self.total_allocated_amount
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.party
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_allocated_amount * -1
+			new_doc.insert()
+
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.party, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", self.party)
+			supplier.total_unpaid += self.total_allocated_amount
+			supplier.save()
+
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", self.party)
+			customer.total_unpaid += self.total_allocated_amount
+			customer.save()
+
 	def verificate_bank_check(self):
 		bank_transaction = frappe.get_all("Bank Transactions", "*", filters = {"no_bank_check": self.reference_no, "bank_account": self.bank_account})
 		voided_check = frappe.get_all("Voided Check", "*", filters = {"no_bank_check": self.reference_no, "bank_account": self.bank_account})
@@ -165,6 +197,10 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.set_status()
 		self.calculate_diferred_account_cancel()
+		if self.party_type == "Customer":
+			self.update_dashboard_customer_cancel()
+		if self.party_type == "Supplier":
+			self.update_dashboard_supplier_cancel()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
