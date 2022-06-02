@@ -1466,9 +1466,7 @@ class AccountsController(TransactionBase):
 		if not party_gle_currency and (party_account_currency != self.currency):
 			frappe.throw(
 				_("Party Account {0} currency ({1}) and document currency ({2}) should be same").format(
-					frappe.bold(party_account),
-					party_account_currency,
-					self.currency
+					frappe.bold(party_account), party_account_currency, self.currency
 				)
 			)
 
