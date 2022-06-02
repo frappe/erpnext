@@ -6,6 +6,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import get_link_to_form
 from frappe.website.website_generator import WebsiteGenerator
 
 from erpnext.hr.doctype.staffing_plan.staffing_plan import (
@@ -33,26 +34,32 @@ class JobOpening(WebsiteGenerator):
 				self.staffing_plan = staffing_plan[0].name
 				self.planned_vacancies = staffing_plan[0].vacancies
 		elif not self.planned_vacancies:
-			planned_vacancies = frappe.db.sql(
-				"""
-				select vacancies from `tabStaffing Plan Detail`
-				where parent=%s and designation=%s""",
-				(self.staffing_plan, self.designation),
+			self.planned_vacancies = frappe.db.get_value(
+				"Staffing Plan Detail",
+				{"parent": self.staffing_plan, "designation": self.designation},
+				"vacancies",
 			)
-			self.planned_vacancies = planned_vacancies[0][0] if planned_vacancies else None
 
 		if self.staffing_plan and self.planned_vacancies:
 			staffing_plan_company = frappe.db.get_value("Staffing Plan", self.staffing_plan, "company")
-			lft, rgt = frappe.get_cached_value("Company", staffing_plan_company, ["lft", "rgt"])
 
-			designation_counts = get_designation_counts(self.designation, self.company)
+			designation_counts = get_designation_counts(self.designation, self.company, self.name)
 			current_count = designation_counts["employee_count"] + designation_counts["job_openings"]
 
-			if self.planned_vacancies <= current_count:
+			number_of_positions = frappe.db.get_value(
+				"Staffing Plan Detail",
+				{"parent": self.staffing_plan, "designation": self.designation},
+				"number_of_positions",
+			)
+
+			if number_of_positions <= current_count:
 				frappe.throw(
 					_(
-						"Job Openings for designation {0} already open or hiring completed as per Staffing Plan {1}"
-					).format(self.designation, self.staffing_plan)
+						"Job Openings for the designation {0} are already open or the hiring is complete as per the Staffing Plan {1}"
+					).format(
+						frappe.bold(self.designation), get_link_to_form("Staffing Plan", self.staffing_plan)
+					),
+					title=_("Vacancies fulfilled"),
 				)
 
 	def get_context(self, context):
