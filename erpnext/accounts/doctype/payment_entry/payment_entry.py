@@ -80,7 +80,7 @@ class PaymentEntry(AccountsController):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.party)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.total_unpaid -= self.total_allocated_amount
 			customer.save()
 		else:
@@ -95,7 +95,7 @@ class PaymentEntry(AccountsController):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.party, "company": self.company})
 
 		if len(suppliers) > 0:
-			supplier = frappe.get_doc("Dashboard Supplier", self.party)
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.total_unpaid -= self.total_allocated_amount
 			supplier.save()
 		else:
@@ -110,7 +110,7 @@ class PaymentEntry(AccountsController):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.party, "company": self.company})
 
 		if len(suppliers) > 0:
-			supplier = frappe.get_doc("Dashboard Supplier", self.party)
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.total_unpaid += self.total_allocated_amount
 			supplier.save()
 
@@ -118,7 +118,7 @@ class PaymentEntry(AccountsController):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.party)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.total_unpaid += self.total_allocated_amount
 			customer.save()
 
