@@ -88,7 +88,7 @@ class LeaveApplication(Document):
 		share_doc_with_approver(self, self.leave_approver)
 
 	def on_submit(self):
-		if self.status == "Open":
+		if self.status in ["Open", "Cancelled"]:
 			frappe.throw(
 				_("Only Leave Applications with status 'Approved' and 'Rejected' can be submitted")
 			)
@@ -1117,7 +1117,7 @@ def add_leaves(events, start, end, filter_conditions=None):
 	WHERE
 		from_date <= %(end)s AND to_date >= %(start)s <= to_date
 		AND docstatus < 2
-		AND status != 'Rejected'
+		AND status in ('Approved', 'Open')
 	"""
 
 	if conditions:
@@ -1206,6 +1206,7 @@ def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
 		from `tabLeave Application`
 		where employee=%(employee)s
 			and docstatus=1
+			and status='Approved'
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or (from_date < %(from_date)s and to_date > %(to_date)s))
