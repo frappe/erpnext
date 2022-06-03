@@ -35,7 +35,7 @@ class CancellationOfInvoices(Document):
 		invoice = frappe.get_doc("Sales Invoice", self.sale_invoice)
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.billing_this_year -= invoice.grand_total
 			customer.total_unpaid -= invoice.outstanding_amount
 			customer.save()

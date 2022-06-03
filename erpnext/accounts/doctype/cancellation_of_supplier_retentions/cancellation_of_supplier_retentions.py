@@ -22,7 +22,7 @@ class CancellationOfSupplierRetentions(Document):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
 
 		if len(suppliers) > 0:
-			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.total_unpaid += self.total_withheld
 			supplier.save()
 		else:
@@ -37,7 +37,7 @@ class CancellationOfSupplierRetentions(Document):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
 
 		if len(suppliers) > 0:
-			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.total_unpaid -= self.total_withheld
 			supplier.save()
 	
