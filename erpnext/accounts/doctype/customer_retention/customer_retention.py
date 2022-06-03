@@ -26,7 +26,7 @@ class CustomerRetention(Document):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.total_unpaid -= self.total_withheld
 			customer.save()
 		else:
@@ -41,7 +41,7 @@ class CustomerRetention(Document):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.total_unpaid += self.total_withheld
 			customer.save()
 
