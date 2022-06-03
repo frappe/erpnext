@@ -538,9 +538,6 @@ def safe_json_load(json_string):
 		pos = e.pos
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
 		snippet = json_string[start:end]
-<<<<<<< HEAD
-		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
-=======
 		frappe.throw(
 			_(
 				"Error in input data. Please check for any special characters near following input: <br> {}"
@@ -549,7 +546,6 @@ def safe_json_load(json_string):
 			exc=e,
 		)
 
->>>>>>> 9fb7b49b43 (fix(india): error while parsing e-invoice (#31053))
 
 def throw_error_list(errors, title):
 	if len(errors) > 1:
