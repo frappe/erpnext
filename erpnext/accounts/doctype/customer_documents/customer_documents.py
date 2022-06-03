@@ -31,7 +31,7 @@ class CustomerDocuments(Document):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.billing_this_year += self.total
 			customer.total_unpaid += self.outstanding_amount
 			customer.save()
@@ -47,7 +47,7 @@ class CustomerDocuments(Document):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
 		if len(customers) > 0:
-			customer = frappe.get_doc("Dashboard Customer", self.customer)
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
 			customer.billing_this_year -= self.total
 			customer.total_unpaid -= self.outstanding_amount
 			customer.save()
