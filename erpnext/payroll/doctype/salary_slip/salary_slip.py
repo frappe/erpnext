@@ -466,38 +466,14 @@ class SalarySlip(TransactionBase):
 		)
 
 		for d in range(working_days):
-			dt = add_days(cstr(getdate(self.start_date)), d)
-			leave = frappe.db.sql(
-				"""
-				SELECT t1.name,
-					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
-					THEN t1.half_day else 0 END,
-					t2.is_ppl,
-					t2.fraction_of_daily_salary_per_leave
-				FROM `tabLeave Application` t1, `tabLeave Type` t2
-				WHERE t2.name = t1.leave_type
-				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
-				AND t1.docstatus = 1
-				AND t1.status = 'Approved'
-				AND t1.employee = %(employee)s
-				AND ifnull(t1.salary_slip, '') = ''
-				AND CASE
-					WHEN t2.include_holiday != 1
-						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-					WHEN t2.include_holiday
-						THEN %(dt)s between from_date and to_date
-					END
-				""".format(
-					holidays
-				),
-				{"employee": self.employee, "dt": dt},
-			)
+			date = add_days(cstr(getdate(self.start_date)), d)
+			leave = get_lwp_or_ppl_for_date(date, self.employee, holidays)
 
 			if leave:
 				equivalent_lwp_count = 0
-				is_half_day_leave = cint(leave[0][1])
-				is_partially_paid_leave = cint(leave[0][2])
-				fraction_of_daily_salary_per_leave = flt(leave[0][3])
+				is_half_day_leave = cint(leave[0].is_half_day)
+				is_partially_paid_leave = cint(leave[0].is_ppl)
+				fraction_of_daily_salary_per_leave = flt(leave[0].fraction_of_daily_salary_per_leave)
 
 				equivalent_lwp_count = (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
 
@@ -1727,3 +1703,106 @@ def get_payroll_payable_account(company, payroll_entry):
 		)
 
 	return payroll_payable_account
+<<<<<<< HEAD
+=======
+
+
+def calculate_tax_by_tax_slab(
+	annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
+	eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
+	tax_amount = 0
+	for slab in tax_slab.slabs:
+		cond = cstr(slab.condition).strip()
+		if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+			continue
+		if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
+			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+			continue
+		if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
+			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+		elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
+			tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * 0.01
+
+	# other taxes and charges on income tax
+	for d in tax_slab.other_taxes_and_charges:
+		if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
+			continue
+
+		if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
+			continue
+
+		tax_amount += tax_amount * flt(d.percent) / 100
+
+	return tax_amount
+
+
+def eval_tax_slab_condition(condition, eval_globals=None, eval_locals=None):
+	if not eval_globals:
+		eval_globals = {
+			"int": int,
+			"float": float,
+			"long": int,
+			"round": round,
+			"date": datetime.date,
+			"getdate": getdate,
+		}
+
+	try:
+		condition = condition.strip()
+		if condition:
+			return frappe.safe_eval(condition, eval_globals, eval_locals)
+	except NameError as err:
+		frappe.throw(
+			_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			title=_("Name error"),
+		)
+	except SyntaxError as err:
+		frappe.throw(_("Syntax error in condition: {0} in Income Tax Slab").format(err))
+	except Exception as e:
+		frappe.throw(_("Error in formula or condition: {0} in Income Tax Slab").format(e))
+		raise
+
+
+def get_lwp_or_ppl_for_date(date, employee, holidays):
+	LeaveApplication = frappe.qb.DocType("Leave Application")
+	LeaveType = frappe.qb.DocType("Leave Type")
+
+	is_half_day = (
+		frappe.qb.terms.Case()
+		.when(
+			(
+				(LeaveApplication.half_day_date == date)
+				| (LeaveApplication.from_date == LeaveApplication.to_date)
+			),
+			LeaveApplication.half_day,
+		)
+		.else_(0)
+	).as_("is_half_day")
+
+	query = (
+		frappe.qb.from_(LeaveApplication)
+		.inner_join(LeaveType)
+		.on((LeaveType.name == LeaveApplication.leave_type))
+		.select(
+			LeaveApplication.name,
+			LeaveType.is_ppl,
+			LeaveType.fraction_of_daily_salary_per_leave,
+			(is_half_day),
+		)
+		.where(
+			(((LeaveType.is_lwp == 1) | (LeaveType.is_ppl == 1)))
+			& (LeaveApplication.docstatus == 1)
+			& (LeaveApplication.status == "Approved")
+			& (LeaveApplication.employee == employee)
+			& ((LeaveApplication.salary_slip.isnull()) | (LeaveApplication.salary_slip == ""))
+			& ((LeaveApplication.from_date <= date) & (date <= LeaveApplication.to_date))
+		)
+	)
+
+	# if it's a holiday only include if leave type has "include holiday" enabled
+	if date in holidays:
+		query = query.where((LeaveType.include_holiday == "1"))
+
+	return query.run(as_dict=True)
+>>>>>>> 59de303b13 (refactor: rewrite lwp queries using query builder)
