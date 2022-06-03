@@ -1482,12 +1482,13 @@ def get_applies_to_details(args, for_validate=False):
 	# Get Project
 	project = None
 	if args.project and args.doctype != 'Project':
-		project = frappe.db.get_value("Project", args.project, [
-			'name', 'applies_to_vehicle',
-			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_license_plate', 'vehicle_unregistered',
-			'vehicle_color', 'vehicle_last_odometer',
-		], as_dict=1)
+		if frappe.get_meta("Project").has_field('applies_to_vehicle'):
+			project = frappe.db.get_value("Project", args.project, [
+				'name', 'applies_to_vehicle',
+				'vehicle_chassis_no', 'vehicle_engine_no',
+				'vehicle_license_plate', 'vehicle_unregistered',
+				'vehicle_color', 'vehicle_last_odometer',
+			], as_dict=1)
 
 	# Vehicle Details
 	# Get Vehicle Details from Project if Vehicle is the same in Transaction and Project
