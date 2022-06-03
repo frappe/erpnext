@@ -11,7 +11,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (!invoice_eligible) return;
 
-			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
+			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, qrcode_image, __unsaved } = frm.doc;
 
 			const add_custom_button = (label, action) => {
 				if (!frm.custom_buttons[label]) {
@@ -149,83 +149,72 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			}
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
-				const fields = [
-					{
-						"label": "Reason",
-						"fieldname": "reason",
-						"fieldtype": "Select",
-						"reqd": 1,
-						"default": "1-Duplicate",
-						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
-					},
-					{
-						"label": "Remark",
-						"fieldname": "remark",
-						"fieldtype": "Data",
-						"reqd": 1
-					}
-				];
 				const action = () => {
-					const d = new frappe.ui.Dialog({
-						title: __('Cancel E-Way Bill'),
-						fields: fields,
-						primary_action: function() {
-							const data = d.get_values();
+					// This confirm is added to just reduce unnecesory API calls. All required logic is implemented on server side.
+					frappe.confirm(
+						__("Have you cancelled e-way bill on the portal?"),
+						() => {
 							frappe.call({
-								method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
-								args: {
-									doctype,
-									docname: name,
-									eway_bill: ewaybill,
-									reason: data.reason.split('-')[0],
-									remark: data.remark
-								},
+								method: "erpnext.regional.india.e_invoice.utils.cancel_eway_bill",
+								args: { doctype, docname: name },
 								freeze: true,
-								callback: () => {
-									frappe.show_alert({
-										message: __('E-Way Bill Cancelled successfully'),
-										indicator: 'green'
-									}, 7);
-									frm.reload_doc();
-									d.hide();
-								},
-								error: () => {
-									frappe.show_alert({
-										message: __('E-Way Bill was not Cancelled'),
-										indicator: 'red'
-									}, 7);
-									d.hide();
-								}
+								callback: () => frm.reload_doc(),
 							});
 						},
-						primary_action_label: __('Submit')
-					});
-					d.show();
+						() => {
+							frappe.show_alert(
+								{
+									message: __(
+										"Please cancel e-way bill on the portal first."
+									),
+									indicator: "orange",
+								},
+								5
+							);
+						}
+					);
 				};
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}
 
 			if (irn && !irn_cancelled) {
-				const action = () => {
-					const dialog = frappe.msgprint({
-						title: __("Generate QRCode"),
-						message: __("Generate and attach QR Code using IRN?"),
-						primary_action: {
-							action: function() {
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
-									args: { doctype, docname: name },
-									freeze: true,
-									callback: () => frm.reload_doc() || dialog.hide(),
-									error: () => dialog.hide()
-								});
+				let is_qrcode_attached = false;
+				if (qrcode_image && frm.attachments) {
+					let attachments = frm.attachments.get_attachments();
+					if (attachments.length != 0) {
+						for (let i = 0; i < attachments.length; i++) {
+							if (attachments[i].file_url == qrcode_image) {
+								is_qrcode_attached = true;
+								break;
 							}
-						},
+						}
+					}
+				}
+				if (!is_qrcode_attached) {
+					const action = () => {
+						if (frm.doc.__unsaved) {
+							frappe.throw(__('Please save the document to generate QRCode.'));
+						}
+						const dialog = frappe.msgprint({
+							title: __("Generate QRCode"),
+							message: __("Generate and attach QR Code using IRN?"),
+							primary_action: {
+								action: function() {
+									frappe.call({
+										method: 'erpnext.regional.india.e_invoice.utils.generate_qrcode',
+										args: { doctype, docname: name },
+										freeze: true,
+										callback: () => frm.reload_doc() || dialog.hide(),
+										error: () => dialog.hide()
+									});
+								}
+							},
 						primary_action_label: __('Yes')
 					});
 					dialog.show();
 				};
 				add_custom_button(__("Generate QRCode"), action);
+			}
 			}
 		}
 	});

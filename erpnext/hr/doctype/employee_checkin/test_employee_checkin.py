@@ -54,6 +54,17 @@ class TestEmployeeCheckin(unittest.TestCase):
 		)
 		self.assertEqual(attendance_count, 1)
 
+	def test_unlink_attendance_on_cancellation(self):
+		employee = make_employee("test_mark_attendance_and_link_log@example.com")
+		logs = make_n_checkins(employee, 3)
+
+		frappe.db.delete("Attendance", {"employee": employee})
+		attendance = mark_attendance_and_link_log(logs, "Present", nowdate(), 8.2)
+		attendance.cancel()
+
+		linked_logs = frappe.db.get_all("Employee Checkin", {"attendance": attendance.name})
+		self.assertEquals(len(linked_logs), 0)
+
 	def test_calculate_working_hours(self):
 		check_in_out_type = [
 			"Alternating entries as IN and OUT during the same shift",
@@ -102,6 +113,11 @@ class TestEmployeeCheckin(unittest.TestCase):
 			logs_type_2, check_in_out_type[1], working_hours_calc_type[1]
 		)
 		self.assertEqual(working_hours, (4.5, logs_type_2[1].time, logs_type_2[-1].time))
+
+		working_hours = calculate_working_hours(
+			[logs_type_2[1], logs_type_2[-1]], check_in_out_type[1], working_hours_calc_type[1]
+		)
+		self.assertEqual(working_hours, (5.0, logs_type_2[1].time, logs_type_2[-1].time))
 
 
 def make_n_checkins(employee, n, hours_to_reverse=1):

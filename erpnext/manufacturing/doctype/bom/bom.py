@@ -22,6 +22,10 @@ from erpnext.stock.get_item_details import get_conversion_factor, get_price_list
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 
+class BOMRecursionError(frappe.ValidationError):
+	pass
+
+
 class BOMTree:
 	"""Full tree representation of a BOM"""
 
@@ -250,6 +254,9 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			self.validate_bom_currency(item)
 
+			if item.do_not_explode:
+				item.bom_no = ""
+
 			ret = self.get_bom_material_detail(
 				{
 					"company": self.company,
@@ -263,8 +270,10 @@ class BOM(WebsiteGenerator):
 					"stock_uom": item.stock_uom,
 					"conversion_factor": item.conversion_factor,
 					"sourced_by_supplier": item.sourced_by_supplier,
+					"do_not_explode": item.do_not_explode,
 				}
 			)
+
 			for r in ret:
 				if not item.get(r):
 					item.set(r, ret[r])
@@ -320,6 +329,9 @@ class BOM(WebsiteGenerator):
 			"include_item_in_manufacturing": cint(args.get("transfer_for_manufacture")),
 			"sourced_by_supplier": args.get("sourced_by_supplier", 0),
 		}
+
+		if args.get("do_not_explode"):
+			ret_item["bom_no"] = ""
 
 		return ret_item
 
@@ -545,35 +557,27 @@ class BOM(WebsiteGenerator):
 		"""Check whether recursion occurs in any bom"""
 
 		def _throw_error(bom_name):
-			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {0}").format(bom_name))
+			frappe.throw(
+				_("BOM recursion: {1} cannot be parent or child of {0}").format(self.name, bom_name),
+				exc=BOMRecursionError,
+			)
 
 		bom_list = self.traverse_tree()
-		child_items = (
-			frappe.get_all(
-				"BOM Item",
-				fields=["bom_no", "item_code"],
-				filters={"parent": ("in", bom_list), "parenttype": "BOM"},
-			)
-			or []
+		child_items = frappe.get_all(
+			"BOM Item",
+			fields=["bom_no", "item_code"],
+			filters={"parent": ("in", bom_list), "parenttype": "BOM"},
 		)
 
-		child_bom = {d.bom_no for d in child_items}
-		child_items_codes = {d.item_code for d in child_items}
+		for item in child_items:
+			if self.name == item.bom_no:
+				_throw_error(self.name)
+			if self.item == item.item_code and item.bom_no:
+				# Same item but with different BOM should not be allowed.
+				# Same item can appear recursively once as long as it doesn't have BOM.
+				_throw_error(item.bom_no)
 
-		if self.name in child_bom:
-			_throw_error(self.name)
-
-		if self.item in child_items_codes:
-			_throw_error(self.item)
-
-		bom_nos = (
-			frappe.get_all(
-				"BOM Item", fields=["parent"], filters={"bom_no": self.name, "parenttype": "BOM"}
-			)
-			or []
-		)
-
-		if self.name in {d.parent for d in bom_nos}:
+		if self.name in {d.bom_no for d in self.items}:
 			_throw_error(self.name)
 
 	def traverse_tree(self, bom_list=None):
