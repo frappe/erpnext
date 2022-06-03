@@ -165,7 +165,7 @@ class PurchaseInvoice(BuyingController):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
 
 		if len(suppliers) > 0:
-			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.billing_this_year += self.grand_total
 
 			outstanding_amount = self.outstanding_amount
@@ -194,7 +194,7 @@ class PurchaseInvoice(BuyingController):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
 
 		if len(suppliers) > 0:
-			supplier = frappe.get_doc("Dashboard Supplier", self.supplier)
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.billing_this_year -= self.rounded_total
 			supplier.total_unpaid -= self.outstanding_amount
 			supplier.save()
