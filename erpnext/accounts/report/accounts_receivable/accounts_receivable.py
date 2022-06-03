@@ -193,11 +193,28 @@ class ReceivablePayableReport(object):
 					self.append_row(row)
 
 	def append_row(self, row):
-		self.allocate_future_payments(row)
-		self.set_invoice_details(row)
-		self.set_party_details(row)
-		self.set_ageing(row)
-		self.data.append(row)
+		newrow = True
+
+		if row.voucher_type == 'Payment Entry':
+			newrow = False
+		
+		if row.voucher_type == 'Journal Entry':
+			newrow = False
+		
+		if row.voucher_type == 'Supplier Documents':
+			document = frappe.get_doc('Supplier Documents', row.voucher_no)
+
+			if document.docstatus == 1:
+				newrow = True
+			else:
+				newrow = False
+		
+		if newrow:
+			self.allocate_future_payments(row)
+			self.set_invoice_details(row)
+			self.set_party_details(row)
+			self.set_ageing(row)
+			self.data.append(row)
 
 	def set_invoice_details(self, row):
 		invoice_details = self.invoice_details.get(row.voucher_no, {})
