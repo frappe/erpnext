@@ -10,7 +10,8 @@ import time
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = [_("Item Group") + ":Link/Item Group:100", _("Qty") + ":Int:120", _("Rate") + ":Currency/currency:120",_("Amount") + ":Currency/currency:120"]
+	# columns = [_("Item Group") + ":Link/Item Group:100", _("Qty") + ":Int:120", _("Rate") + ":Currency/currency:120",_("Amount") + ":Currency/currency:120"]
+	columns = [_("Item Group") + ":Link/Item Group:100", _("Qty") + ":Int:120",_("Amount") + ":Currency/currency:120"]
 	data = return_data(filters)
 	return columns, data
 
@@ -57,8 +58,8 @@ def return_data(filters):
 				qty += product.qty
 				base_net_rate += product.base_net_rate
 				base_net_amount += product.base_net_amount
-		
-		row = [group, qty, base_net_rate, base_net_amount]
+		# row = [group, qty, base_net_rate, base_net_amount]
+		row = [group, qty, base_net_amount]
 		data.append(row)
 			
 
@@ -80,6 +81,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	if filters.get("serie"): conditions += ', "name": "{}"'.format(filters.get("serie"))
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "docstatus": 1'
 	conditions += '}'
 
 	return conditions
