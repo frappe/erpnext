@@ -1001,13 +1001,13 @@ def get_stock_items(project, get_sales_invoice=True):
 	parts_data['items'] = sorted(parts_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
 	lubricants_data['items'] = sorted(lubricants_data['items'], key=lambda d: (cstr(d.posting_date), cstr(d.posting_time), d.idx))
 
-	get_item_taxes(stock_data, project.company)
+	get_item_taxes(project, stock_data, project.company)
 	post_process_items_data(stock_data)
 
-	get_item_taxes(parts_data, project.company)
+	get_item_taxes(project, parts_data, project.company)
 	post_process_items_data(parts_data)
 
-	get_item_taxes(lubricants_data, project.company)
+	get_item_taxes(project, lubricants_data, project.company)
 	post_process_items_data(lubricants_data)
 
 	return stock_data, parts_data, lubricants_data
@@ -1067,13 +1067,13 @@ def get_service_items(project, get_sales_invoice=True):
 		else:
 			labour_data['items'].append(d.copy())
 
-	get_item_taxes(service_data, project.company)
+	get_item_taxes(project, service_data, project.company)
 	post_process_items_data(service_data)
 
-	get_item_taxes(labour_data, project.company)
+	get_item_taxes(project, labour_data, project.company)
 	post_process_items_data(labour_data)
 
-	get_item_taxes(sublet_data, project.company)
+	get_item_taxes(project, sublet_data, project.company)
 	post_process_items_data(sublet_data)
 
 	return service_data, labour_data, sublet_data
@@ -1124,7 +1124,7 @@ def set_sales_data_customer_amounts(data, project):
 				d.customer_net_rate = d.net_rate
 
 
-def get_item_taxes(data, company):
+def get_item_taxes(project, data, company):
 	sales_tax_account = frappe.get_cached_value('Company', company, "sales_tax_account")
 	service_tax_account = frappe.get_cached_value('Company', company, "service_tax_account")
 
@@ -1143,38 +1143,39 @@ def get_item_taxes(data, company):
 		d.setdefault('other_taxes_and_charges', 0)
 		d.setdefault('customer_other_taxes_and_charges', 0)
 
-		item_tax_detail = json.loads(d.item_tax_detail or '{}')
-		for tax_row_name, amount in item_tax_detail.items():
-			tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
-			if tax_account:
-				tax_amount = flt(amount)
-				tax_amount *= conversion_rate
+		if project.get('has_stin'):
+			item_tax_detail = json.loads(d.item_tax_detail or '{}')
+			for tax_row_name, amount in item_tax_detail.items():
+				tax_account = frappe.db.get_value("Sales Taxes and Charges", tax_row_name, 'account_head', cache=1)
+				if tax_account:
+					tax_amount = flt(amount)
+					tax_amount *= conversion_rate
 
-				customer_tax_amount = 0 if d.get('is_claim_item') else flt(amount)
-				if d.has_customer_depreciation:
-					customer_tax_amount *= d.depreciation_percentage / 100
+					customer_tax_amount = 0 if d.get('is_claim_item') else flt(amount)
+					if d.has_customer_depreciation:
+						customer_tax_amount *= d.depreciation_percentage / 100
 
-				customer_tax_amount *= conversion_rate
+					customer_tax_amount *= conversion_rate
 
-				if flt(d.ordered_qty):
-					tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
-					customer_tax_amount = customer_tax_amount * flt(d.qty) / flt(d.ordered_qty)
+					if flt(d.ordered_qty):
+						tax_amount = tax_amount * flt(d.qty) / flt(d.ordered_qty)
+						customer_tax_amount = customer_tax_amount * flt(d.qty) / flt(d.ordered_qty)
 
-				d.taxes.setdefault(tax_account, 0)
-				d.taxes[tax_account] += tax_amount
+					d.taxes.setdefault(tax_account, 0)
+					d.taxes[tax_account] += tax_amount
 
-				d.customer_taxes.setdefault(tax_account, 0)
-				d.customer_taxes[tax_account] += customer_tax_amount
+					d.customer_taxes.setdefault(tax_account, 0)
+					d.customer_taxes[tax_account] += customer_tax_amount
 
-				if tax_account == sales_tax_account:
-					d.sales_tax_amount += tax_amount
-					d.customer_sales_tax_amount += customer_tax_amount
-				elif tax_account == service_tax_account:
-					d.service_tax_amount += tax_amount
-					d.customer_service_tax_amount += customer_tax_amount
-				else:
-					d.other_taxes_and_charges += tax_amount
-					d.customer_other_taxes_and_charges += customer_tax_amount
+					if tax_account == sales_tax_account:
+						d.sales_tax_amount += tax_amount
+						d.customer_sales_tax_amount += customer_tax_amount
+					elif tax_account == service_tax_account:
+						d.service_tax_amount += tax_amount
+						d.customer_service_tax_amount += customer_tax_amount
+					else:
+						d.other_taxes_and_charges += tax_amount
+						d.customer_other_taxes_and_charges += customer_tax_amount
 
 
 def post_process_items_data(data):
