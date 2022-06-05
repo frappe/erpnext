@@ -439,20 +439,18 @@ def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining
 	return False
 
 
-def get_salary_assignment(employee, date):
-	assignment = frappe.db.sql(
-		"""
-		select * from `tabSalary Structure Assignment`
-		where employee=%(employee)s
-		and docstatus = 1
-		and %(on_date)s >= from_date order by from_date desc limit 1""",
-		{
-			"employee": employee,
-			"on_date": date,
-		},
-		as_dict=1,
+def get_salary_assignments(employee, payroll_period):
+	start_date, end_date = frappe.db.get_value(
+		"Payroll Period", payroll_period, ["start_date", "end_date"]
 	)
-	return assignment[0] if assignment else None
+	assignments = frappe.db.get_all(
+		"Salary Structure Assignment",
+		filters={"employee": employee, "docstatus": 1, "from_date": ["between", (start_date, end_date)]},
+		fields=["*"],
+		order_by="from_date",
+	)
+
+	return assignments
 
 
 def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):

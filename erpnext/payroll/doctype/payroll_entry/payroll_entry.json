@@ -8,11 +8,11 @@
  "engine": "InnoDB",
  "field_order": [
   "section_break0",
-  "column_break0",
   "posting_date",
   "payroll_frequency",
   "company",
   "column_break1",
+  "status",
   "currency",
   "exchange_rate",
   "payroll_payable_account",
@@ -41,22 +41,20 @@
   "cost_center",
   "account",
   "payment_account",
-  "amended_from",
   "column_break_33",
   "bank_account",
   "salary_slips_created",
-  "salary_slips_submitted"
+  "salary_slips_submitted",
+  "failure_details_section",
+  "error_message",
+  "section_break_41",
+  "amended_from"
  ],
  "fields": [
   {
    "fieldname": "section_break0",
    "fieldtype": "Section Break",
    "label": "Select Employees"
-  },
-  {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "default": "Today",
@@ -231,6 +229,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Salary Slips Created",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -239,6 +238,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Salary Slips Submitted",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -284,15 +284,44 @@
    "label": "Payroll Payable Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "error_message",
+   "depends_on": "eval:doc.status=='Failed';",
+   "fieldname": "failure_details_section",
+   "fieldtype": "Section Break",
+   "label": "Failure Details"
+  },
+  {
+   "depends_on": "eval:doc.status=='Failed';",
+   "fieldname": "error_message",
+   "fieldtype": "Small Text",
+   "label": "Error Message",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_41",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nSubmitted\nCancelled\nQueued\nFailed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-17 15:13:17.766210",
+ "modified": "2022-03-16 12:45:21.662765",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Entry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -308,5 +337,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }
