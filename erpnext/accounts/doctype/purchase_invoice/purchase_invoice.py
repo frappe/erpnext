@@ -527,10 +527,7 @@ class PurchaseInvoice(BuyingController):
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
-			if self.docstatus == 1:
-				gl_entries = self.get_gl_entries()
-			else:
-				gl_entries = self.get_gl_entries(cancel=1)
+			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
@@ -546,7 +543,13 @@ class PurchaseInvoice(BuyingController):
 				provisional_entries = [a for a in gl_entries if a.voucher_type == "Purchase Receipt"]
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 				if provisional_entries:
-					make_gl_entries(provisional_entries)
+					for entry in provisional_entries:
+						frappe.db.set_value(
+							"GL Entry",
+							{"voucher_type": "Purchase Receipt", "voucher_detail_no": entry.voucher_detail_no},
+							"is_cancelled",
+							1,
+						)
 
 			if update_outstanding == "No":
 				update_outstanding_amt(
@@ -560,7 +563,7 @@ class PurchaseInvoice(BuyingController):
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-	def get_gl_entries(self, warehouse_account=None, cancel=0):
+	def get_gl_entries(self, warehouse_account=None):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
@@ -573,7 +576,7 @@ class PurchaseInvoice(BuyingController):
 		gl_entries = []
 
 		self.make_supplier_gl_entry(gl_entries)
-		self.make_item_gl_entries(gl_entries, cancel=cancel)
+		self.make_item_gl_entries(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
 		if self.check_asset_cwip_enabled():
@@ -640,7 +643,7 @@ class PurchaseInvoice(BuyingController):
 				)
 			)
 
-	def make_item_gl_entries(self, gl_entries, cancel=0):
+	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
 		stock_items = self.get_stock_items()
 		if self.update_stock and self.auto_accounting_for_stock:
@@ -832,7 +835,7 @@ class PurchaseInvoice(BuyingController):
 							if expense_booked_in_pr:
 								# Intentionally passing purchase invoice item to handle partial billing
 								purchase_receipt_doc.add_provisional_gl_entry(
-									item, gl_entries, self.posting_date, provisional_account, reverse=not cancel
+									item, gl_entries, self.posting_date, provisional_account, reverse=1
 								)
 
 					if not self.is_internal_transfer():
