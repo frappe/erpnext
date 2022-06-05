@@ -443,12 +443,6 @@ def get_grand_total(filters, doctype):
 	]  # nosec
 
 
-def get_deducted_taxes():
-	return frappe.db.sql_list(
-		"select name from `tabPurchase Taxes and Charges` where add_deduct_tax = 'Deduct'"
-	)
-
-
 def get_tax_accounts(
 	item_list,
 	columns,
@@ -462,6 +456,7 @@ def get_tax_accounts(
 	tax_columns = []
 	invoice_item_row = {}
 	itemised_tax = {}
+	add_deduct_tax = "charge_type"
 
 	tax_amount_precision = (
 		get_field_precision(
@@ -477,13 +472,13 @@ def get_tax_accounts(
 	conditions = ""
 	if doctype == "Purchase Invoice":
 		conditions = " and category in ('Total', 'Valuation and Total') and base_tax_amount_after_discount_amount != 0"
+		add_deduct_tax = "add_deduct_tax"
 
-	deducted_tax = get_deducted_taxes()
 	tax_details = frappe.db.sql(
 		"""
 		select
 			name, parent, description, item_wise_tax_detail,
-			charge_type, base_tax_amount_after_discount_amount
+			charge_type, {add_deduct_tax}, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
 			parenttype = %s and docstatus = 1
@@ -491,12 +486,22 @@ def get_tax_accounts(
 			and parent in (%s)
 			%s
 		order by description
-	"""
+	""".format(
+			add_deduct_tax=add_deduct_tax
+		)
 		% (tax_doctype, "%s", ", ".join(["%s"] * len(invoice_item_row)), conditions),
 		tuple([doctype] + list(invoice_item_row)),
 	)
 
-	for name, parent, description, item_wise_tax_detail, charge_type, tax_amount in tax_details:
+	for (
+		name,
+		parent,
+		description,
+		item_wise_tax_detail,
+		charge_type,
+		add_deduct_tax,
+		tax_amount,
+	) in tax_details:
 		description = handle_html(description)
 		if description not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
@@ -529,7 +534,9 @@ def get_tax_accounts(
 						if item_tax_amount:
 							tax_value = flt(item_tax_amount, tax_amount_precision)
 							tax_value = (
-								tax_value * -1 if (doctype == "Purchase Invoice" and name in deducted_tax) else tax_value
+								tax_value * -1
+								if (doctype == "Purchase Invoice" and add_deduct_tax == "Deduct")
+								else tax_value
 							)
 
 							itemised_tax.setdefault(d.name, {})[description] = frappe._dict(
