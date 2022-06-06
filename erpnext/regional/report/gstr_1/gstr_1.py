@@ -1155,8 +1155,11 @@ def get_company_gstins(company):
 		.inner_join(links)
 		.on(address.name == links.parent)
 		.select(address.gstin)
+		.distinct()
 		.where(links.link_doctype == "Company")
 		.where(links.link_name == company)
+		.where(address.gstin.isnotnull())
+		.where(address.gstin != "")
 		.run(as_dict=1)
 	)
 
