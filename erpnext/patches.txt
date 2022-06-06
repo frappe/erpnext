@@ -373,3 +373,4 @@ erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
 execute:frappe.delete_doc("DocType", "Naming Series")
 erpnext.patches.v13_0.set_payroll_entry_status
+erpnext.patches.v13_0.job_card_status_on_hold
