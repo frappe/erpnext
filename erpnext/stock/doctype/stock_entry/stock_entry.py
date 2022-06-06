@@ -596,21 +596,6 @@ class StockEntry(StockController):
 					title=_("Insufficient Stock"),
 				)
 
-	def set_serial_nos(self, work_order):
-		previous_se = frappe.db.get_value(
-			"Stock Entry",
-			{"work_order": work_order, "purpose": "Material Transfer for Manufacture"},
-			"name",
-		)
-
-		for d in self.get("items"):
-			transferred_serial_no = frappe.db.get_value(
-				"Stock Entry Detail", {"parent": previous_se, "item_code": d.item_code}, "serial_no"
-			)
-
-			if transferred_serial_no:
-				d.serial_no = transferred_serial_no
-
 	@frappe.whitelist()
 	def get_stock_and_rate(self):
 		"""
@@ -1321,7 +1306,7 @@ class StockEntry(StockController):
 					and not self.pro_doc.skip_transfer
 					and self.flags.backflush_based_on == "Material Transferred for Manufacture"
 				):
-					self.get_transfered_raw_materials()
+					self.add_transfered_raw_materials_in_items()
 
 				elif (
 					self.work_order
@@ -1365,7 +1350,6 @@ class StockEntry(StockController):
 
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.work_order and self.purpose == "Manufacture":
-				self.set_serial_nos(self.work_order)
 				work_order = frappe.get_doc("Work Order", self.work_order)
 				add_additional_cost(self, work_order)
 
@@ -1655,7 +1639,7 @@ class StockEntry(StockController):
 					}
 				)
 
-	def get_transfered_raw_materials(self):
+	def add_transfered_raw_materials_in_items(self) -> None:
 		available_materials = get_available_materials(self.work_order)
 
 		wo_data = frappe.db.get_value(
@@ -1666,9 +1650,11 @@ class StockEntry(StockController):
 		)
 
 		for key, row in available_materials.items():
-			qty = (flt(row.qty) * flt(self.fg_completed_qty)) / (
-				flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
-			)
+			remaining_qty_to_produce = flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
+			if remaining_qty_to_produce <= 0:
+				continue
+
+			qty = (flt(row.qty) * flt(self.fg_completed_qty)) / remaining_qty_to_produce
 
 			item = row.item_details
 			if cint(frappe.get_cached_value("UOM", item.stock_uom, "must_be_whole_number")):
@@ -1676,7 +1662,7 @@ class StockEntry(StockController):
 
 			if row.batch_details:
 				for batch_no, batch_qty in row.batch_details.items():
-					if qty <= 0:
+					if qty <= 0 or batch_qty <= 0:
 						continue
 
 					if batch_qty > qty:
@@ -1690,7 +1676,7 @@ class StockEntry(StockController):
 			else:
 				self.update_item_in_stock_entry_detail(row, item, qty)
 
-	def update_item_in_stock_entry_detail(self, row, item, qty):
+	def update_item_in_stock_entry_detail(self, row, item, qty) -> None:
 		ste_item_details = {
 			"from_warehouse": item.warehouse,
 			"to_warehouse": "",
@@ -1704,10 +1690,27 @@ class StockEntry(StockController):
 			"original_item": item.original_item,
 		}
 
-		if item.serial_no:
-			ste_item_details["serial_no"] = "\n".join(item.serial_no[0 : cint(qty)])
+		if row.serial_nos:
+			serial_nos = row.serial_nos
+			if item.batch_no:
+				serial_nos = self.get_serial_nos_based_on_transferred_batch(item.batch_no, row.serial_nos)
+
+			serial_nos = serial_nos[0 : cint(qty)]
+			ste_item_details["serial_no"] = "\n".join(serial_nos)
+
+			# remove consumed serial nos from list
+			for sn in serial_nos:
+				row.serial_nos.remove(sn)
 
 		self.add_to_stock_entry_detail({item.item_code: ste_item_details})
+
+	@staticmethod
+	def get_serial_nos_based_on_transferred_batch(batch_no, serial_nos) -> list:
+		serial_nos = frappe.get_all(
+			"Serial No", filters={"batch_no": batch_no, "name": ("in", serial_nos)}, order_by="creation"
+		)
+
+		return [d.name for d in serial_nos]
 
 	def get_pending_raw_materials(self, backflush_based_on=None):
 		"""
@@ -2489,6 +2492,7 @@ def get_available_materials(work_order) -> dict:
 
 			if row.serial_no:
 				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
+				item_data.serial_nos.sort()
 		else:
 			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
 
@@ -2537,4 +2541,4 @@ def get_stock_entry_data(work_order):
 			)
 		)
 		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
-	).run(as_dict=1, debug=1)
+	).run(as_dict=1)
