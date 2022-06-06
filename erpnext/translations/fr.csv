@@ -3661,7 +3661,7 @@ Chart,Graphique,
 Choose a corresponding payment,Choisissez un paiement correspondant,
 Click on the link below to verify your email and confirm the appointment,Cliquez sur le lien ci-dessous pour vérifier votre email et confirmer le rendez-vous,
 Close,Fermer,
-Communication,la communication,
+Communication,Communication,
 Compact Item Print,Impression de l'Article Compacté,
 Company,Société,
 Company of asset {0} and purchase document {1} doesn't matches.,La société de l'actif {0} et le document d'achat {1} ne correspondent pas.,
@@ -9880,6 +9880,19 @@ Unit Of Measure (UOM),Unité de mesure (UDM),
 CRM Settings,Paramètres CRM
 Do Not Explode,Ne pas décomposer
 Quick Access, Accés rapides
-{}  Available, {}  Disponible(s)
-{} Pending, {}  En attente(s)
-{} To Bill,{} à facturé.e(s)
+{}  Available, {}  Disponible.s
+{} Pending, {}  En attente.s
+{} To Bill,{} à facturer
+{}  To Receive,{}  A recevoir
+{} Active,{} Actif.ve(s)
+{} Open,{} Ouvert.e(s)
+Incorrect Data Report,Rapport de données incohérentes
+Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots
+Incorrect Balance Qty After Transaction,Equilibre des quantitées aprés une transaction
+Interview Type,Type d'entretien
+Interview Round,Cycle d'entretien
+Interview,Entretien
+Interview Feedback,Retour d'entretien
+Journal Energy Point,Historique des points d'énergie
+
+
