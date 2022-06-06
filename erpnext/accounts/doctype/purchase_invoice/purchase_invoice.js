@@ -45,13 +45,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
 			this.frm.trigger('supplier');
 		}
-<<<<<<< HEAD
-
-		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
-=======
-	}
->>>>>>> 3f376cc3a5 (fix: Parent dimension filters in orders)
 
 	refresh: function(doc) {
 		const me = this;
