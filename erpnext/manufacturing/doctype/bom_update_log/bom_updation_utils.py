@@ -3,7 +3,7 @@
 
 import json
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
@@ -38,7 +38,9 @@ def replace_bom(boms: Dict) -> None:
 			bom_obj.save_version()
 
 
-def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str], batch_name: int) -> None:
+def update_cost_in_level(
+	doc: "BOMUpdateLog", bom_list: List[str], batch_name: Union[int, str]
+) -> None:
 	"Updates Cost for BOMs within a given level. Runs via background jobs."
 
 	try:
@@ -49,7 +51,14 @@ def update_cost_in_level(doc: "BOMUpdateLog", bom_list: List[str], batch_name: i
 		frappe.db.auto_commit_on_many_writes = 1
 
 		update_cost_in_boms(bom_list=bom_list)  # main updation logic
-		frappe.db.set_value("BOM Update Batch", batch_name, "boms_updated", json.dumps(bom_list))
+
+		bom_batch = frappe.qb.DocType("BOM Update Batch")
+		(
+			frappe.qb.update(bom_batch)
+			.set(bom_batch.boms_updated, json.dumps(bom_list))
+			.set(bom_batch.status, "Completed")
+			.where(bom_batch.name == batch_name)
+		).run()
 	except Exception:
 		handle_exception(doc)
 	finally:
@@ -105,14 +114,17 @@ def get_bom_unit_cost(bom_name: str) -> float:
 def update_cost_in_boms(bom_list: List[str]) -> None:
 	"Updates cost in given BOMs. Returns current and total updated BOMs."
 
-	for bom in bom_list:
-		bom_doc = frappe.get_cached_doc("BOM", bom)
+	for index, bom in enumerate(bom_list):
+		bom_doc = frappe.get_doc("BOM", bom, for_update=True)
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
 		bom_doc.db_update()
 
+		if index % 100 == 0:
+			frappe.db.commit()
+
 
 def get_next_higher_level_boms(
-	child_boms: Dict[str, bool], processed_boms: Dict[str, bool]
+	child_boms: List[str], processed_boms: Dict[str, bool]
 ) -> List[str]:
 	"Generate immediate higher level dependants with no unresolved dependencies (children)."
 

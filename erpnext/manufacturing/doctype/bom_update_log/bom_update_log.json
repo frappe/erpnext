@@ -15,7 +15,6 @@
   "error_log",
   "progress_section",
   "current_level",
-  "parent_boms",
   "processed_boms",
   "bom_batches",
   "amended_from"
@@ -52,7 +51,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Queued\nIn Progress\nPaused\nCompleted\nFailed"
+   "options": "Queued\nIn Progress\nCompleted\nFailed"
   },
   {
    "fieldname": "amended_from",
@@ -77,14 +76,9 @@
    "label": "Progress"
   },
   {
-   "description": "Immediate parent BOMs",
-   "fieldname": "parent_boms",
-   "fieldtype": "Long Text",
-   "label": "Parent BOMs"
-  },
-  {
    "fieldname": "processed_boms",
    "fieldtype": "Long Text",
+   "hidden": 1,
    "label": "Processed BOMs"
   },
   {
@@ -102,7 +96,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-31 20:20:06.370786",
+ "modified": "2022-06-06 15:15:23.883251",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
