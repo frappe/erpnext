@@ -9872,7 +9872,7 @@ Convert Item Description to Clean HTML in Transactions,Convertir les description
 Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
 Allowed Items,Articles autorisés
-Party Specific Item,Restriction d'article disponible
+Party Specific Item,Restriction d&#39;article disponible
 Restrict Items Based On,Type de critére de restriction
 Based On Value,critére de restriction
 Unit of Measure (UOM),Unité de mesure (UDM),
@@ -9880,22 +9880,22 @@ Unit Of Measure (UOM),Unité de mesure (UDM),
 CRM Settings,Paramètres CRM
 Do Not Explode,Ne pas décomposer
 Quick Access, Accés rapides
-{}  Available, {}  Disponible.s
-{} Pending, {}  En attente.s
+{}  Available, {} Disponible.s
+{} Pending, {} En attente.s
 {} To Bill,{} à facturer
-{}  To Receive,{}  A recevoir
+{}  To Receive,{} A recevoir
 {} Active,{} Actif.ve(s)
 {} Open,{} Ouvert.e(s)
 Incorrect Data Report,Rapport de données incohérentes
 Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots
-Incorrect Balance Qty After Transaction,Equilibre des quantitées aprés une transaction
-Interview Type,Type d'entretien
-Interview Round,Cycle d'entretien
+Incorrect Balance Qty After Transaction,Equilibre des quantités aprés une transaction
+Interview Type,Type d&#39;entretien
+Interview Round,Cycle d&#39;entretien
 Interview,Entretien
 Interview Feedback,Retour d'entretien
-Journal Energy Point,Historique des points d'énergie
-Billing Address Details, Adresse de facturation (détails)
-Supplier Address Details, Adresse Fournisseur (détails)
+Journal Energy Point,Historique des points d'énergies
+Billing Address Details,Adresse de facturation (détails)
+Supplier Address Details,Adresse Fournisseur (détails)
 Retail,Commerce
 Users,Utilisateurs
 Permission Manager,Gestion des permissions
