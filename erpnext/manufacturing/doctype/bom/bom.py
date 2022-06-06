@@ -961,11 +961,8 @@ def get_valuation_rate(args):
 
 	valuation_rate = item_valuation.get("valuation_rate")
 
-	if valuation_rate is None:
-		# Explicit null value check. If null, Bins don't exist, neither does SLE
-		return valuation_rate
-
-	if valuation_rate <= 0:
+	if (valuation_rate is not None) and valuation_rate <= 0:
+		# Explicit null value check. If None, Bins don't exist, neither does SLE
 		last_valuation_rate = frappe.db.sql(
 			"""select valuation_rate
 			from `tabStock Ledger Entry`
