@@ -1967,6 +1967,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
+	child_item.stock_uom = item.stock_uom
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
