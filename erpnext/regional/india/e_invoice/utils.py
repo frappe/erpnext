@@ -457,6 +457,8 @@ def make_einvoice(invoice):
 	try:
 		einvoice = safe_json_load(einvoice)
 		einvoice = santize_einvoice_fields(einvoice)
+	except json.JSONDecodeError:
+		raise
 	except Exception:
 		show_link_to_error_log(invoice, einvoice)
 
@@ -536,7 +538,14 @@ def safe_json_load(json_string):
 		pos = e.pos
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
 		snippet = json_string[start:end]
-		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
+		frappe.throw(
+			_(
+				"Error in input data. Please check for any special characters near following input: <br> {}"
+			).format(snippet),
+			title=_("Invalid JSON"),
+			exc=e,
+		)
+
 
 def throw_error_list(errors, title):
 	if len(errors) > 1:
