@@ -11,7 +11,7 @@ test_dependencies = ["Sales Order", "Item", "Sales Invoice", "Delivery Note"]
 
 
 class TestSalesOrderAnalysis(FrappeTestCase):
-	def create_sales_order(self, transaction_date):
+	def create_sales_order(self, transaction_date, do_not_save=False, do_not_submit=False):
 		item = create_item(item_code="_Test Excavator", is_stock_item=0)
 		so = make_sales_order(
 			transaction_date=transaction_date,
@@ -24,25 +24,31 @@ class TestSalesOrderAnalysis(FrappeTestCase):
 		so.taxes_and_charges = ""
 		so.taxes = ""
 		so.items[0].delivery_date = add_days(transaction_date, 15)
-		so.save()
-		so.submit()
+		if not do_not_save:
+			so.save()
+			if not do_not_submit:
+				so.submit()
 		return item, so
 
-	def create_sales_invoice(self, so):
+	def create_sales_invoice(self, so, do_not_save=False, do_not_submit=False):
 		sinv = make_sales_invoice(so.name)
 		sinv.posting_date = so.transaction_date
 		sinv.taxes_and_charges = ""
 		sinv.taxes = ""
-		sinv.insert()
-		sinv.submit()
+		if not do_not_save:
+			sinv.save()
+			if not do_not_submit:
+				sinv.submit()
 		return sinv
 
-	def create_delivery_note(self, so):
+	def create_delivery_note(self, so, do_not_save=False, do_not_submit=False):
 		dn = make_delivery_note(so.name)
 		dn.set_posting_time = True
 		dn.posting_date = add_days(so.transaction_date, 1)
-		dn.save()
-		dn.submit()
+		if not do_not_save:
+			dn.save()
+			if not do_not_submit:
+				dn.submit()
 		return dn
 
 	def test_01_so_to_deliver_and_bill(self):
@@ -164,3 +170,85 @@ class TestSalesOrderAnalysis(FrappeTestCase):
 		)
 		# SO's from first 4 test cases should be in output
 		self.assertEqual(len(data), 4)
+
+	def test_06_so_pending_delivery_with_multiple_delivery_notes(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+
+		# bill 2 items
+		sinv1 = self.create_sales_invoice(so, do_not_save=True)
+		sinv1.items[0].qty = 2
+		sinv1 = sinv1.save().submit()
+		# deliver 2 items
+		dn1 = self.create_delivery_note(so, do_not_save=True)
+		dn1.items[0].qty = 2
+		dn1 = dn1.save().submit()
+
+		# bill 2 items
+		sinv2 = self.create_sales_invoice(so, do_not_save=True)
+		sinv2.items[0].qty = 2
+		sinv2 = sinv2.save().submit()
+		# deliver 1 item
+		dn2 = self.create_delivery_note(so, do_not_save=True)
+		dn2.items[0].qty = 1
+		dn2 = dn2.save().submit()
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"sales_order": [so.name],
+			}
+		)
+		expected_value = {
+			"status": "To Deliver and Bill",
+			"sales_order": so.name,
+			"delay_days": frappe.utils.date_diff(frappe.utils.datetime.date.today(), so.delivery_date),
+			"qty": 10,
+			"delivered_qty": 3,
+			"pending_qty": 7,
+			"qty_to_bill": 6,
+			"billed_qty": 4,
+			"time_taken_to_deliver": 0,
+		}
+		self.assertEqual(len(data), 1)
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
+
+	def test_07_so_delivered_with_multiple_delivery_notes(self):
+		transaction_date = "2021-06-01"
+		item, so = self.create_sales_order(transaction_date)
+
+		dn1 = self.create_delivery_note(so, do_not_save=True)
+		dn1.items[0].qty = 5
+		dn1 = dn1.save().submit()
+
+		dn2 = self.create_delivery_note(so, do_not_save=True)
+		dn2.items[0].qty = 5
+		dn2 = dn2.save().submit()
+
+		columns, data, message, chart = execute(
+			{
+				"company": "_Test Company",
+				"from_date": "2021-06-01",
+				"to_date": "2021-06-30",
+				"sales_order": [so.name],
+			}
+		)
+		expected_value = {
+			"status": "To Bill",
+			"sales_order": so.name,
+			"delay_days": frappe.utils.date_diff(frappe.utils.datetime.date.today(), so.delivery_date),
+			"qty": 10,
+			"delivered_qty": 10,
+			"pending_qty": 0,
+			"qty_to_bill": 10,
+			"billed_qty": 0,
+			"time_taken_to_deliver": 86400,
+		}
+		self.assertEqual(len(data), 1)
+		for key, val in expected_value.items():
+			with self.subTest(key=key, val=val):
+				self.assertEqual(data[0][key], val)
