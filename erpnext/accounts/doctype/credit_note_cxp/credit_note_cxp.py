@@ -33,14 +33,14 @@ class CreditNoteCXP(Document):
 		if len(suppliers) > 0:
 			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.billing_this_year += self.total
-			supplier.total_unpaid += self.outstanding_amount
+			supplier.total_unpaid -= self.outstanding_amount
 			supplier.save()
 		else:
 			new_doc = frappe.new_doc("Dashboard Supplier")
 			new_doc.supplier = self.supplier
 			new_doc.company = self.company
 			new_doc.billing_this_year = self.total
-			new_doc.total_unpaid = self.outstanding_amount
+			new_doc.total_unpaid -= self.outstanding_amount
 			new_doc.insert()
 	
 	def update_dashboard_supplier_cancel(self):
@@ -49,7 +49,7 @@ class CreditNoteCXP(Document):
 		if len(suppliers) > 0:
 			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
 			supplier.billing_this_year -= self.total
-			supplier.total_unpaid -= self.outstanding_amount
+			supplier.total_unpaid += self.outstanding_amount
 			supplier.save()
 
 	def calculate_total(self):
@@ -93,8 +93,8 @@ class CreditNoteCXP(Document):
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.debit += self.total
-			supplier.remaining_balance += self.total
+			supplier.credit += self.total
+			supplier.remaining_balance -= self.total
 			supplier.save()
 	
 	def update_accounts_status_cancel(self):
