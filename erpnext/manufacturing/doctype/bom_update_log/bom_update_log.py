@@ -56,7 +56,7 @@ class BOMUpdateLog(Document):
 
 		wip_log = frappe.get_all(
 			"BOM Update Log",
-			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress", "Paused"]]},
+			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress"]]},
 			limit_page_length=1,
 		)
 		if wip_log:
@@ -104,10 +104,12 @@ def run_replace_bom_job(
 		frappe.db.commit()  # nosemgrep
 
 
-def process_boms_cost_level_wise(update_doc: "BOMUpdateLog") -> None:
+def process_boms_cost_level_wise(
+	update_doc: "BOMUpdateLog", parent_boms: List[str] = None
+) -> None:
 	"Queue jobs at the start of new BOM Level in 'Update Cost' Jobs."
 
-	current_boms, parent_boms = {}, []
+	current_boms = {}
 	values = {}
 
 	if update_doc.status == "Queued":
@@ -115,26 +117,27 @@ def process_boms_cost_level_wise(update_doc: "BOMUpdateLog") -> None:
 		current_level = 0
 		current_boms = get_leaf_boms()
 		values = {
-			"parent_boms": "[]",
 			"processed_boms": json.dumps({}),
 			"status": "In Progress",
 			"current_level": current_level,
 		}
 	else:
 		# Resume next level. via Cron Job.
+		if not parent_boms:
+			return
+
 		current_level = cint(update_doc.current_level) + 1
-		parent_boms = json.loads(update_doc.parent_boms)
 
 		# Process the next level BOMs. Stage parents as current BOMs.
 		current_boms = parent_boms.copy()
-		values = {"parent_boms": "[]", "current_level": current_level}
+		values = {"current_level": current_level}
 
 	set_values_in_log(update_doc.name, values, commit=True)
 	queue_bom_cost_jobs(current_boms, update_doc, current_level)
 
 
 def queue_bom_cost_jobs(
-	current_boms_list: List, update_doc: "BOMUpdateLog", current_level: int
+	current_boms_list: List[str], update_doc: "BOMUpdateLog", current_level: int
 ) -> None:
 	"Queue batches of 20k BOMs of the same level to process parallelly"
 	batch_no = 0
@@ -147,7 +150,9 @@ def queue_bom_cost_jobs(
 		# update list to exclude 20K (queued) BOMs
 		current_boms_list = current_boms_list[batch_size:] if len(current_boms_list) > batch_size else []
 
-		batch_row = update_doc.append("bom_batches", {"level": current_level, "batch_no": batch_no})
+		batch_row = update_doc.append(
+			"bom_batches", {"level": current_level, "batch_no": batch_no, "status": "Pending"}
+		)
 		batch_row.db_insert()
 
 		frappe.enqueue(
@@ -155,7 +160,7 @@ def queue_bom_cost_jobs(
 			doc=update_doc,
 			bom_list=boms_to_process,
 			batch_name=batch_row.name,
-			timeout=40000,
+			queue="long",
 		)
 
 
@@ -181,9 +186,11 @@ def resume_bom_cost_update_jobs():
 	for log in in_progress_logs:
 		# check if all log batches of current level are processed
 		bom_batches = frappe.db.get_all(
-			"BOM Update Batch", {"parent": log.name, "level": log.current_level}, ["name", "boms_updated"]
+			"BOM Update Batch",
+			{"parent": log.name, "level": log.current_level},
+			["name", "boms_updated", "status"],
 		)
-		incomplete_level = any(not row.get("boms_updated") for row in bom_batches)
+		incomplete_level = any(row.get("status") == "Pending" for row in bom_batches)
 		if not bom_batches or incomplete_level:
 			continue
 
@@ -195,14 +202,15 @@ def resume_bom_cost_update_jobs():
 			log.name,
 			values={
 				"processed_boms": json.dumps(processed_boms),
-				"parent_boms": json.dumps(parent_boms),
 				"status": "Completed" if not parent_boms else "In Progress",
 			},
 			commit=True,
 		)
 
 		if parent_boms:  # there is a next level to process
-			process_boms_cost_level_wise(update_doc=frappe.get_doc("BOM Update Log", log.name))
+			process_boms_cost_level_wise(
+				update_doc=frappe.get_doc("BOM Update Log", log.name), parent_boms=parent_boms
+			)
 
 
 def get_processed_current_boms(

@@ -704,8 +704,11 @@ class BOM(WebsiteGenerator):
 		for item in self.get("items"):
 			if item.bom_no:
 				# Get Item-Rate from Subassembly BOM
-				explosion_items = frappe.db.get_all(
-					"BOM Explosion Item", filters={"parent": item.bom_no}, fields=["item_code", "rate"]
+				explosion_items = frappe.get_all(
+					"BOM Explosion Item",
+					filters={"parent": item.bom_no},
+					fields=["item_code", "rate"],
+					order_by=None,  # to avoid sort index creation at db level (granular change)
 				)
 				explosion_item_rate = {item.item_code: flt(item.rate) for item in explosion_items}
 				rm_rate_map.update(explosion_item_rate)
@@ -925,13 +928,17 @@ def get_bom_item_rate(args, bom_doc):
 
 
 def get_valuation_rate(args):
-	"""Get weighted average of valuation rate from all warehouses"""
+	"""
+	1) Get average valuation rate from all warehouses
+	2) If no value, get last valuation rate from SLE
+	3) If no value, get valuation rate from Item
+	"""
 
-	total_qty, total_value, valuation_rate = 0.0, 0.0, 0.0
-	item_bins = frappe.db.sql(
+	valuation_rate = 0.0
+	item_valuation = frappe.db.sql(
 		"""
 		select
-			bin.actual_qty, bin.stock_value
+			(sum(bin.stock_value) / sum(bin.actual_qty)) as valuation_rate
 		from
 			`tabBin` bin, `tabWarehouse` warehouse
 		where
@@ -940,14 +947,13 @@ def get_valuation_rate(args):
 			and warehouse.company=%(company)s""",
 		{"item": args["item_code"], "company": args["company"]},
 		as_dict=1,
-	)
+	)[0]
 
-	for d in item_bins:
-		total_qty += flt(d.actual_qty)
-		total_value += flt(d.stock_value)
+	valuation_rate = item_valuation.get("valuation_rate")
 
-	if total_qty:
-		valuation_rate = total_value / total_qty
+	if valuation_rate is None:
+		# Explicit null value check. If null, Bins don't exist, neither does SLE
+		return valuation_rate
 
 	if valuation_rate <= 0:
 		last_valuation_rate = frappe.db.sql(

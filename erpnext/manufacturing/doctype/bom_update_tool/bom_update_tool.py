@@ -42,7 +42,7 @@ def auto_update_latest_price_in_all_boms() -> None:
 	if frappe.db.get_single_value("Manufacturing Settings", "update_bom_costs_automatically"):
 		wip_log = frappe.get_all(
 			"BOM Update Log",
-			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress", "Paused"]]},
+			{"update_type": "Update Cost", "status": ["in", ["Queued", "In Progress"]]},
 			limit_page_length=1,
 		)
 		if not wip_log:
