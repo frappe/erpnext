@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "PRC.-.YY.-.MM.-.#####",
  "creation": "2022-01-31 12:46:38.836503",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -33,6 +33,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "options": "Customer",
    "read_only": 1
@@ -41,13 +42,13 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Customer Name",
    "read_only": 1
   },
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Customer Group",
    "options": "Customer Group",
    "read_only": 1
@@ -82,15 +83,17 @@
    "fieldname": "commitment_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Commitment Date",
    "read_only": 1
   },
   {
    "fieldname": "commitment_amount",
    "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Commitment Amount",
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "commitment_to",
@@ -121,6 +124,8 @@
   {
    "fieldname": "total_outstanding",
    "fieldtype": "Currency",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Total Outstanding",
    "read_only": 1
   },
@@ -131,6 +136,8 @@
   {
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher No",
    "options": "voucher_type",
    "read_only": 1
@@ -174,47 +181,38 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-27 17:21:06.722355",
+ "modified": "2022-06-06 10:09:23.325215",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Receivable Commitment",
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "write": 1
+   "share": 1
   },
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts Manager",
-   "share": 1,
-   "write": 1
+   "share": 1
   },
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
  "sort_field": "modified",
