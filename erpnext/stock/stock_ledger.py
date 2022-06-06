@@ -525,13 +525,18 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	### Valution rate for return Warehouse
 	if ware_house_name == warehouse:
-		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
-			where
-			item_code = %s
-			AND valuation_rate > 0
-			AND voucher_no like %s 
-			order by posting_date desc, posting_time desc,batch_no desc, name desc limit 1""", (item_code,"%STE%"))
+		###Custom price for item from site config
+		price_for_gl_entry = get_config_by_name("MIX_CHOORA_FIXED_RETURN_PRICE")
+		if  item_code in price_for_gl_entry:
+			return  price_for_gl_entry[item_code]
+		else:
+			last_valuation_rate = frappe.db.sql("""select valuation_rate
+				from `tabStock Ledger Entry`
+				where
+				item_code = %s
+				AND valuation_rate > 0
+				AND voucher_no like %s 
+				order by posting_date desc, posting_time desc,batch_no desc, name desc limit 1""", (item_code,"%STE%"))
 	else:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
