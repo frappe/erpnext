@@ -166,7 +166,7 @@ class StockController(AccountsController):
 									"against": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"credit": flt(sle.stock_value_difference, precision),
+									"debit": -1 * flt(sle.stock_value_difference, precision),
 									"project": item_row.get("project") or self.get("project"),
 									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 								},
