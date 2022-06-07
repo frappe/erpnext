@@ -346,9 +346,13 @@ def get_columns(invoice_list, additional_table_columns):
 def get_conditions(filters):
 	conditions = ""
 
+	accounting_dimensions = get_accounting_dimensions(as_list=False) or []
+	accounting_dimensions_list = [d.fieldname for d in accounting_dimensions]
+
 	if filters.get("company"):
 		conditions += " and company=%(company)s"
-	if filters.get("customer"):
+
+	if filters.get("customer") and "customer" not in accounting_dimensions_list:
 		conditions += " and customer = %(customer)s"
 
 	if filters.get("from_date"):
@@ -359,32 +363,18 @@ def get_conditions(filters):
 	if filters.get("owner"):
 		conditions += " and owner = %(owner)s"
 
-	if filters.get("mode_of_payment"):
-		conditions += """ and exists(select name from `tabSales Invoice Payment`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+	def get_sales_invoice_item_field_condition(field, table="Sales Invoice Item") -> str:
+		if not filters.get(field) or field in accounting_dimensions_list:
+			return ""
+		return f""" and exists(select name from `tab{table}`
+				where parent=`tabSales Invoice`.name
+					and ifnull(`tab{table}`.{field}, '') = %({field})s)"""
 
-	if filters.get("cost_center"):
-		conditions += """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.cost_center, '') = %(cost_center)s)"""
-
-	if filters.get("warehouse"):
-		conditions += """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
-
-	if filters.get("brand"):
-		conditions += """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
-
-	if filters.get("item_group"):
-		conditions += """ and exists(select name from `tabSales Invoice Item`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
-
-	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	conditions += get_sales_invoice_item_field_condition("mode_of_payments", "Sales Invoice Payment")
+	conditions += get_sales_invoice_item_field_condition("cost_center")
+	conditions += get_sales_invoice_item_field_condition("warehouse")
+	conditions += get_sales_invoice_item_field_condition("brand")
+	conditions += get_sales_invoice_item_field_condition("item_group")
 
 	if accounting_dimensions:
 		common_condition = """
