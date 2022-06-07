@@ -285,8 +285,9 @@ class FollowUp(Document):
 		for i in trans_items:
 			commit_name = ""
 			commit_link = ""
+			remarks = ""
 			comp = frappe.defaults.get_user_default('Company')
-			currency = frappe.db.get_value("Sales Invoice", i["voucher_no"] , "currency")
+			currency, remarks = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["currency", "remarks"])
 			primary_c, full_name = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name"])
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			emails = []
@@ -347,10 +348,28 @@ class FollowUp(Document):
 								<p>{0}</p><br> <a href="{1}">Click here to view Commitment information. </a>  </div>	""".format(comment_v, commit_link)
 				comm.save(ignore_permissions=True)	
 				
-				content = "Dear <b>{2}</b><br><br>Commitment given the following Transcation <br>Commitment given on <b>{0}</b> for Sales Invoice <b>{1}</b><br>".format(str(utils.today()), i["voucher_no"], full_name)
-				content += "Invoice Amount <b>{4} {0}</b> and Outstanding Amount <b>{4} {1}</b> <br>You have given commitment of Amount <b>{4} {2} </b> on <b>{3}</b><br><br>".format(str(i["invoice_amount"]), str(i['outstanding_amount']), str(i["commited_amount"]), str(i["commited_date"]), currency)
-					
+				# content = "Dear <b>{2}</b><br><br>Commitment given the following Transcation <br>Commitment given on <b>{0}</b> for Sales Invoice <b>{1}</b><br>".format(str(utils.today()), i["voucher_no"], full_name)
+				# content += "Invoice Amount <b>{4} {0}</b> and Outstanding Amount <b>{4} {1}</b> <br>You have given commitment of Amount <b>{4} {2} </b> on <b>{3}</b><br><br>".format(str(i["invoice_amount"]), str(i['outstanding_amount']), str(i["commited_amount"]), str(i["commited_date"]), currency)
 
+				content =	"""
+								Dear <b> {0}, </b> <br>
+								<p>We are thankful for your business and want to acknowledge that we hold your commitment, 
+								dated <b>{1}</b> to pay the <b>{2} {3}</b>against an outstanding of <b>{4} {3}</b> against voucher# <b>{5}</b>.<br>
+								Please find the voucher details for your reference:
+								<br>
+								<b>Voucher Type: {6} <br>
+								Voucher Number: {5} <br>
+								Remarks: {7} <br>
+								Currency: {3} <br>
+								Total Amount: {8} <br>
+								Outstanding Amount: {4} </b>
+								<br> <br>
+								Making a payment on time enables us to serve you better and we look forward to provide uninterrupted services to you.</p>
+				
+							""".format(full_name, str(utils.today()), str(i["commited_amount"]), currency, 
+							str(i['outstanding_amount']), i["voucher_no"], i["voucher_type"], remarks, str(i["invoice_amount"]))
+
+				#Adding comment on Customer
 				comm = frappe.new_doc("Comment")
 				comm.subject = "Overdue payment commitment"
 				comm.comment_type = "Comment" 
@@ -367,7 +386,8 @@ class FollowUp(Document):
 
 
 				# Sending email
-				content += "Thank You"
+				content += "Thanks<br> <b> {0} </b> ".format(comp)
+				
 				self.notify({
 					# for post in messages
 					"message": " <div class='ql-editor read-mode'><p> {0} </p></div>".format(content),

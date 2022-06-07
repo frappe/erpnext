@@ -28,7 +28,8 @@
   "show_future_payments",
   "section_break_21",
   "get_follow_up_details",
-  "items"
+  "items",
+  "total_outstanding"
  ],
  "fields": [
   {
@@ -162,13 +163,19 @@
    "fieldtype": "Table",
    "label": "Items",
    "options": "Follow Up Item"
+  },
+  {
+   "fieldname": "total_outstanding",
+   "fieldtype": "Currency",
+   "label": "Total Outstanding",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-30 11:13:41.183524",
+ "modified": "2022-06-06 12:26:42.366241",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up",

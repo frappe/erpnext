@@ -9,6 +9,8 @@ frappe.ui.form.on('Follow Up', {
 		frm.set_value("report_date", frappe.datetime.get_today())
 		frm.refresh_field("report_date")
 		// console.log("one 123",frm.fields_dict['items'].grid.meta.fields[17])
+
+		
 	},
 
 	setup: function(frm) {
@@ -28,6 +30,13 @@ frappe.ui.form.on('Follow Up', {
 				if (r.message) {
 					console.log(" This is get count", r.message)
 					frm.refresh_field("items")
+
+					var total = 0					
+					frm.doc.items.forEach(element => {
+						console.log(" this is element", element.outstanding_amount)
+						total = total + element.outstanding_amount
+					});
+					frm.set_value('total_outstanding', total)
 				}
 			}
 		})
@@ -268,6 +277,20 @@ frappe.ui.form.on("Follow Up Item", {
 						in_list_view: 1,
 						columns: 1,
 						label: __('Customer Name'),
+					},
+					{
+						fieldtype: 'Currency',
+						fieldname: "outstanding",
+						read_only: 1,
+						default: child.outstanding_amount,
+						label: ('Outstanding Amount') 
+					},
+					{
+						fieldtype: 'Link',
+						fieldname: "currency",
+						read_only: 1,
+						default: child.currency,
+						label: ('Currency') 
 					},
 					{
 						fieldtype: 'Column Break'
