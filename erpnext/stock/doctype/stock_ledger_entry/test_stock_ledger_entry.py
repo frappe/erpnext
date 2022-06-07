@@ -24,9 +24,10 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.tests.test_utils import StockTestMixin
 
 
-class TestStockLedgerEntry(FrappeTestCase):
+class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 	def setUp(self):
 		items = create_items()
 		reset("Stock Entry")
@@ -540,30 +541,6 @@ class TestStockLedgerEntry(FrappeTestCase):
 				incoming_rate,
 				"Incorrect 'Incoming Rate' values fetched for DN items",
 			)
-
-	def assertSLEs(self, doc, expected_sles, sle_filters=None):
-		"""Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
-
-		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
-		if sle_filters:
-			filters.update(sle_filters)
-		sles = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["*"],
-			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
-		)
-
-		for exp_sle, act_sle in zip(expected_sles, sles):
-			for k, v in exp_sle.items():
-				act_value = act_sle[k]
-				if k == "stock_queue":
-					act_value = json.loads(act_value)
-					if act_value and act_value[0][0] == 0:
-						# ignore empty fifo bins
-						continue
-
-				self.assertEqual(v, act_value, msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
 
 	def test_batchwise_item_valuation_stock_reco(self):
 		item, warehouses, batches = setup_item_valuation_test()
