@@ -3,7 +3,15 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, get_year_ending, get_year_start, getdate, now_datetime, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	get_last_day,
+	get_year_ending,
+	get_year_start,
+	getdate,
+	nowdate,
+)
 
 from erpnext.hr.doctype.attendance.attendance import (
 	DuplicateAttendanceError,
@@ -138,69 +146,70 @@ class TestAttendance(FrappeTestCase):
 		self.assertEqual(attendance, fetch_attendance)
 
 	def test_unmarked_days(self):
-		now = now_datetime()
-		previous_month = now.month - 1
-		first_day = now.replace(day=1).replace(month=previous_month).date()
+		first_sunday = get_first_sunday(
+			self.holiday_list, for_date=get_last_day(add_months(getdate(), -1))
+		)
+		attendance_date = add_days(first_sunday, 1)
 
 		employee = make_employee(
-			"test_unmarked_days@example.com", date_of_joining=add_days(first_day, -1)
+			"test_unmarked_days@example.com", date_of_joining=add_days(attendance_date, -1)
 		)
 		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
-		first_sunday = get_first_sunday(self.holiday_list, for_date=first_day)
-		mark_attendance(employee, first_day, "Present")
-		month_name = get_month_name(first_day)
+		mark_attendance(employee, attendance_date, "Present")
+		month_name = get_month_name(attendance_date)
 
 		unmarked_days = get_unmarked_days(employee, month_name)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
 		# attendance already marked for the day
-		self.assertNotIn(first_day, unmarked_days)
+		self.assertNotIn(attendance_date, unmarked_days)
 		# attendance unmarked
-		self.assertIn(getdate(add_days(first_day, 1)), unmarked_days)
+		self.assertIn(getdate(add_days(attendance_date, 1)), unmarked_days)
 		# holiday considered in unmarked days
 		self.assertIn(first_sunday, unmarked_days)
 
 	def test_unmarked_days_excluding_holidays(self):
-		now = now_datetime()
-		previous_month = now.month - 1
-		first_day = now.replace(day=1).replace(month=previous_month).date()
+		first_sunday = get_first_sunday(
+			self.holiday_list, for_date=get_last_day(add_months(getdate(), -1))
+		)
+		attendance_date = add_days(first_sunday, 1)
 
 		employee = make_employee(
-			"test_unmarked_days@example.com", date_of_joining=add_days(first_day, -1)
+			"test_unmarked_days@example.com", date_of_joining=add_days(attendance_date, -1)
 		)
 		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
-		first_sunday = get_first_sunday(self.holiday_list, for_date=first_day)
-		mark_attendance(employee, first_day, "Present")
-		month_name = get_month_name(first_day)
+		mark_attendance(employee, attendance_date, "Present")
+		month_name = get_month_name(attendance_date)
 
 		unmarked_days = get_unmarked_days(employee, month_name, exclude_holidays=True)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
 		# attendance already marked for the day
-		self.assertNotIn(first_day, unmarked_days)
+		self.assertNotIn(attendance_date, unmarked_days)
 		# attendance unmarked
-		self.assertIn(getdate(add_days(first_day, 1)), unmarked_days)
+		self.assertIn(getdate(add_days(attendance_date, 1)), unmarked_days)
 		# holidays not considered in unmarked days
 		self.assertNotIn(first_sunday, unmarked_days)
 
 	def test_unmarked_days_as_per_joining_and_relieving_dates(self):
-		now = now_datetime()
-		previous_month = now.month - 1
-		first_day = now.replace(day=1).replace(month=previous_month).date()
+		first_sunday = get_first_sunday(
+			self.holiday_list, for_date=get_last_day(add_months(getdate(), -1))
+		)
+		date = add_days(first_sunday, 1)
 
-		doj = add_days(first_day, 1)
-		relieving_date = add_days(first_day, 5)
+		doj = add_days(date, 1)
+		relieving_date = add_days(date, 5)
 		employee = make_employee(
 			"test_unmarked_days_as_per_doj@example.com", date_of_joining=doj, relieving_date=relieving_date
 		)
 
 		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
-		attendance_date = add_days(first_day, 2)
+		attendance_date = add_days(date, 2)
 		mark_attendance(employee, attendance_date, "Present")
-		month_name = get_month_name(first_day)
+		month_name = get_month_name(attendance_date)
 
 		unmarked_days = get_unmarked_days(employee, month_name)
 		unmarked_days = [getdate(date) for date in unmarked_days]

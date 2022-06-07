@@ -11,6 +11,8 @@ from frappe.utils.data import add_to_date, getdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.stock.doctype.batch.batch import UnableToSelectBatchError, get_batch_no, get_batch_qty
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -27,7 +29,7 @@ class TestBatch(FrappeTestCase):
 		)
 
 	@classmethod
-	def make_batch_item(cls, item_name):
+	def make_batch_item(cls, item_name=None):
 		from erpnext.stock.doctype.item.test_item import make_item
 
 		if not frappe.db.exists(item_name):
@@ -245,7 +247,7 @@ class TestBatch(FrappeTestCase):
 		if not use_naming_series:
 			frappe.set_value("Stock Settings", "Stock Settings", "use_naming_series", 0)
 
-	def make_new_batch(self, item_name, batch_id=None, do_not_insert=0):
+	def make_new_batch(self, item_name=None, batch_id=None, do_not_insert=0):
 		batch = frappe.new_doc("Batch")
 		item = self.make_batch_item(item_name)
 		batch.item = item.name
@@ -406,6 +408,26 @@ class TestBatch(FrappeTestCase):
 		batch.reload()
 
 		self.assertEqual(getdate(batch.expiry_date), getdate(expiry_date))
+
+	def test_autocreation_of_batches(self):
+		"""
+		Test if auto created Serial No excludes existing serial numbers
+		"""
+		item_code = make_item(
+			properties={
+				"has_batch_no": 1,
+				"batch_number_series": "BATCHEXISTING.###",
+				"create_new_batch": 1,
+			}
+		).name
+
+		manually_created_batch = self.make_new_batch(item_code, batch_id="BATCHEXISTING001").name
+
+		pr_1 = make_purchase_receipt(item_code=item_code, qty=1, batch_no=manually_created_batch)
+		pr_2 = make_purchase_receipt(item_code=item_code, qty=1)
+
+		self.assertNotEqual(pr_1.items[0].batch_no, pr_2.items[0].batch_no)
+		self.assertEqual("BATCHEXISTING002", pr_2.items[0].batch_no)
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):

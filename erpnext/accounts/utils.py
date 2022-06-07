@@ -3,10 +3,11 @@
 
 
 from json import loads
+from typing import List, Tuple
 
 import frappe
 import frappe.defaults
-from frappe import _, throw
+from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
 
@@ -14,12 +15,9 @@ import erpnext
 
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency  # noqa
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
-
-
-class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError):
-	pass
 
 
 class FiscalYearError(frappe.ValidationError):
@@ -1126,12 +1124,17 @@ def update_gl_entries_after(
 def repost_gle_for_stock_vouchers(
 	stock_vouchers, posting_date, company=None, warehouse_account=None
 ):
+	if not stock_vouchers:
+		return
+
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql(
 			"""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""",
 			(voucher_type, voucher_no),
 		)
+
+	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
 
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
@@ -1151,6 +1154,27 @@ def repost_gle_for_stock_vouchers(
 				voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
+
+
+def sort_stock_vouchers_by_posting_date(
+	stock_vouchers: List[Tuple[str, str]]
+) -> List[Tuple[str, str]]:
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	voucher_nos = [v[1] for v in stock_vouchers]
+
+	sles = (
+		frappe.qb.from_(sle)
+		.select(sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_time, sle.creation)
+		.where((sle.is_cancelled == 0) & (sle.voucher_no.isin(voucher_nos)))
+		.groupby(sle.voucher_type, sle.voucher_no)
+	).run(as_dict=True)
+	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]
+
+	unknown_vouchers = set(stock_vouchers) - set(sorted_vouchers)
+	if unknown_vouchers:
+		sorted_vouchers.extend(unknown_vouchers)
+
+	return sorted_vouchers
 
 
 def get_future_stock_vouchers(
@@ -1246,47 +1270,6 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 	return matched
 
 
-def check_if_stock_and_account_balance_synced(
-	posting_date, company, voucher_type=None, voucher_no=None
-):
-	if not cint(erpnext.is_perpetual_inventory_enabled(company)):
-		return
-
-	accounts = get_stock_accounts(company, voucher_type, voucher_no)
-	stock_adjustment_account = frappe.db.get_value("Company", company, "stock_adjustment_account")
-
-	for account in accounts:
-		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(
-			account, posting_date, company
-		)
-
-		if abs(account_bal - stock_bal) > 0.1:
-			precision = get_field_precision(
-				frappe.get_meta("GL Entry").get_field("debit"),
-				currency=frappe.get_cached_value("Company", company, "default_currency"),
-			)
-
-			diff = flt(stock_bal - account_bal, precision)
-
-			error_reason = _(
-				"Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}."
-			).format(stock_bal, account_bal, frappe.bold(account), posting_date)
-			error_resolution = _("Please create an adjustment Journal Entry for amount {0} on {1}").format(
-				frappe.bold(diff), frappe.bold(posting_date)
-			)
-
-			frappe.msgprint(
-				msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
-				raise_exception=StockValueAndAccountBalanceOutOfSync,
-				title=_("Values Out Of Sync"),
-				primary_action={
-					"label": _("Make Journal Entry"),
-					"client_action": "erpnext.route_to_adjustment_jv",
-					"args": get_journal_entry(account, stock_adjustment_account, diff),
-				},
-			)
-
-
 def get_stock_accounts(company, voucher_type=None, voucher_no=None):
 	stock_accounts = [
 		d.name
@@ -1363,3 +1346,102 @@ def check_and_delete_linked_reports(report):
 	if icons:
 		for icon in icons:
 			frappe.delete_doc("Desktop Icon", icon)
+
+
+def create_payment_ledger_entry(gl_entries, cancel=0):
+	if gl_entries:
+		ple = None
+
+		# companies
+		account = qb.DocType("Account")
+		companies = list(set([x.company for x in gl_entries]))
+
+		# receivable/payable account
+		accounts_with_types = (
+			qb.from_(account)
+			.select(account.name, account.account_type)
+			.where(
+				(account.account_type.isin(["Receivable", "Payable"]) & (account.company.isin(companies)))
+			)
+			.run(as_dict=True)
+		)
+		receivable_or_payable_accounts = [y.name for y in accounts_with_types]
+
+		def get_account_type(account):
+			for entry in accounts_with_types:
+				if entry.name == account:
+					return entry.account_type
+
+		dr_or_cr = 0
+		account_type = None
+		for gle in gl_entries:
+			if gle.account in receivable_or_payable_accounts:
+				account_type = get_account_type(gle.account)
+				if account_type == "Receivable":
+					dr_or_cr = gle.debit - gle.credit
+					dr_or_cr_account_currency = gle.debit_in_account_currency - gle.credit_in_account_currency
+				elif account_type == "Payable":
+					dr_or_cr = gle.credit - gle.debit
+					dr_or_cr_account_currency = gle.credit_in_account_currency - gle.debit_in_account_currency
+
+				if cancel:
+					dr_or_cr *= -1
+					dr_or_cr_account_currency *= -1
+
+				ple = frappe.get_doc(
+					{
+						"doctype": "Payment Ledger Entry",
+						"posting_date": gle.posting_date,
+						"company": gle.company,
+						"account_type": account_type,
+						"account": gle.account,
+						"party_type": gle.party_type,
+						"party": gle.party,
+						"cost_center": gle.cost_center,
+						"finance_book": gle.finance_book,
+						"due_date": gle.due_date,
+						"voucher_type": gle.voucher_type,
+						"voucher_no": gle.voucher_no,
+						"against_voucher_type": gle.against_voucher_type
+						if gle.against_voucher_type
+						else gle.voucher_type,
+						"against_voucher_no": gle.against_voucher if gle.against_voucher else gle.voucher_no,
+						"currency": gle.currency,
+						"amount": dr_or_cr,
+						"amount_in_account_currency": dr_or_cr_account_currency,
+						"delinked": True if cancel else False,
+					}
+				)
+
+				dimensions_and_defaults = get_dimensions()
+				if dimensions_and_defaults:
+					for dimension in dimensions_and_defaults[0]:
+						ple.set(dimension.fieldname, gle.get(dimension.fieldname))
+
+				if cancel:
+					delink_original_entry(ple)
+				ple.flags.ignore_permissions = 1
+				ple.submit()
+
+
+def delink_original_entry(pl_entry):
+	if pl_entry:
+		ple = qb.DocType("Payment Ledger Entry")
+		query = (
+			qb.update(ple)
+			.set(ple.delinked, True)
+			.set(ple.modified, now())
+			.set(ple.modified_by, frappe.session.user)
+			.where(
+				(ple.company == pl_entry.company)
+				& (ple.account_type == pl_entry.account_type)
+				& (ple.account == pl_entry.account)
+				& (ple.party_type == pl_entry.party_type)
+				& (ple.party == pl_entry.party)
+				& (ple.voucher_type == pl_entry.voucher_type)
+				& (ple.voucher_no == pl_entry.voucher_no)
+				& (ple.against_voucher_type == pl_entry.against_voucher_type)
+				& (ple.against_voucher_no == pl_entry.against_voucher_no)
+			)
+		)
+		query.run()

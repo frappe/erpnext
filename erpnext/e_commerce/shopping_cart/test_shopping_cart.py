@@ -129,6 +129,7 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(quotation.net_total, 20)
 		self.assertEqual(len(quotation.get("items")), 1)
 
+	@unittest.skip("Flaky in CI")
 	def test_tax_rule(self):
 		self.create_tax_rule()
 		self.login_as_customer()
@@ -139,7 +140,7 @@ class TestShoppingCart(unittest.TestCase):
 		tax_rule_master = set_taxes(
 			quotation.party_name,
 			"Customer",
-			quotation.transaction_date,
+			None,
 			quotation.company,
 			customer_group=None,
 			supplier_group=None,

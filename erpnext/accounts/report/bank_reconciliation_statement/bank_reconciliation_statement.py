@@ -198,12 +198,14 @@ def get_loan_entries(filters):
 			amount_field = (loan_doc.disbursed_amount).as_("credit")
 			posting_date = (loan_doc.disbursement_date).as_("posting_date")
 			account = loan_doc.disbursement_account
+			salary_condition = loan_doc.docstatus == 1
 		else:
 			amount_field = (loan_doc.amount_paid).as_("debit")
 			posting_date = (loan_doc.posting_date).as_("posting_date")
 			account = loan_doc.payment_account
+			salary_condition = loan_doc.repay_from_salary == 0
 
-		entries = (
+		query = (
 			frappe.qb.from_(loan_doc)
 			.select(
 				ConstantColumn(doctype).as_("payment_document"),
@@ -214,12 +216,13 @@ def get_loan_entries(filters):
 				posting_date,
 			)
 			.where(loan_doc.docstatus == 1)
+			.where(salary_condition)
 			.where(account == filters.get("account"))
 			.where(posting_date <= getdate(filters.get("report_date")))
 			.where(ifnull(loan_doc.clearance_date, "4000-01-01") > getdate(filters.get("report_date")))
-			.run(as_dict=1)
 		)
 
+		entries = query.run(as_dict=1)
 		loan_docs.extend(entries)
 
 	return loan_docs
@@ -264,15 +267,17 @@ def get_loan_amount(filters):
 			amount_field = Sum(loan_doc.disbursed_amount)
 			posting_date = (loan_doc.disbursement_date).as_("posting_date")
 			account = loan_doc.disbursement_account
+			salary_condition = loan_doc.docstatus == 1
 		else:
 			amount_field = Sum(loan_doc.amount_paid)
 			posting_date = (loan_doc.posting_date).as_("posting_date")
 			account = loan_doc.payment_account
-
+			salary_condition = loan_doc.repay_from_salary == 0
 		amount = (
 			frappe.qb.from_(loan_doc)
 			.select(amount_field)
 			.where(loan_doc.docstatus == 1)
+			.where(salary_condition)
 			.where(account == filters.get("account"))
 			.where(posting_date > getdate(filters.get("report_date")))
 			.where(ifnull(loan_doc.clearance_date, "4000-01-01") <= getdate(filters.get("report_date")))

@@ -396,7 +396,12 @@ class SalesInvoice(SellingController):
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		self.unlink_sales_invoice_from_timesheets()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Payment Ledger Entry",
+		)
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -1051,7 +1056,7 @@ class SalesInvoice(SellingController):
 
 	def make_tax_gl_entries(self, gl_entries):
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
 
 		for tax in self.get("taxes"):
@@ -1097,7 +1102,7 @@ class SalesInvoice(SellingController):
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 		)
 
 		for item in self.get("items"):
@@ -1276,7 +1281,7 @@ class SalesInvoice(SellingController):
 	def enable_discount_accounting(self):
 		if not hasattr(self, "_enable_discount_accounting"):
 			self._enable_discount_accounting = cint(
-				frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
+				frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
 			)
 
 		return self._enable_discount_accounting
@@ -1466,7 +1471,9 @@ class SalesInvoice(SellingController):
 			and self.base_rounding_adjustment
 			and not self.is_internal_transfer()
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(self.company)
+			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+				self.company, "Sales Invoice", self.name
+			)
 
 			gl_entries.append(
 				self.get_gl_dict(

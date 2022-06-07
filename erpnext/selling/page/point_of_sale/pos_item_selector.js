@@ -179,6 +179,25 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 		this.search_field.toggle_label(false);
 		this.item_group_field.toggle_label(false);
+
+		this.attach_clear_btn();
+	}
+
+	attach_clear_btn() {
+		this.search_field.$wrapper.find('.control-input').append(
+			`<span class="link-btn" style="top: 2px;">
+				<a class="btn-open no-decoration" title="${__("Clear")}">
+					${frappe.utils.icon('close', 'sm')}
+				</a>
+			</span>`
+		);
+
+		this.$clear_search_btn = this.search_field.$wrapper.find('.link-btn');
+
+		this.$clear_search_btn.on('click', 'a', () => {
+			this.set_search_value('');
+			this.search_field.set_focus();
+		});
 	}
 
 	set_search_value(value) {
@@ -252,6 +271,16 @@ erpnext.PointOfSale.ItemSelector = class {
 				const search_term = e.target.value;
 				this.filter_items({ search_term });
 			}, 300);
+
+			this.$clear_search_btn.toggle(
+				Boolean(this.search_field.$input.val())
+			);
+		});
+
+		this.search_field.$input.on('focus', () => {
+			this.$clear_search_btn.toggle(
+				Boolean(this.search_field.$input.val())
+			);
 		});
 	}
 
@@ -284,7 +313,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			if (this.items.length == 1) {
 				this.$items_container.find(".item-wrapper").click();
 				frappe.utils.play_sound("submit");
-				$(this.search_field.$input[0]).val("").trigger("input");
+				this.set_search_value('');
 			} else if (this.items.length == 0 && this.barcode_scanned) {
 				// only show alert of barcode is scanned and enter is pressed
 				frappe.show_alert({
@@ -293,7 +322,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				});
 				frappe.utils.play_sound("error");
 				this.barcode_scanned = false;
-				$(this.search_field.$input[0]).val("").trigger("input");
+				this.set_search_value('');
 			}
 		});
 	}
@@ -350,6 +379,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	toggle_component(show) {
-		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
+		this.set_search_value('');
+		this.$component.css('display', show ? 'flex': 'none');
 	}
 };

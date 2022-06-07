@@ -507,7 +507,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 					)
 					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
 				else:
-					additional_conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
+					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

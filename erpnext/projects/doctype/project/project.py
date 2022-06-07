@@ -9,9 +9,9 @@ from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 
+from erpnext import get_default_company
 from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
-from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
@@ -86,6 +86,7 @@ class Project(Document):
 				type=task_details.type,
 				issue=task_details.issue,
 				is_group=task_details.is_group,
+				color=task_details.color,
 			)
 		).insert()
 
@@ -326,21 +327,39 @@ def get_timeline_data(doctype, name):
 def get_project_list(
 	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
 ):
-	return frappe.db.sql(
-		"""select distinct project.*
-		from tabProject project, `tabProject User` project_user
-		where
-			(project_user.user = %(user)s
-			and project_user.parent = project.name)
-			or project.owner = %(user)s
-			order by project.modified desc
-			limit {0}, {1}
-		""".format(
-			limit_start, limit_page_length
-		),
-		{"user": frappe.session.user},
-		as_dict=True,
-		update={"doctype": "Project"},
+	meta = frappe.get_meta(doctype)
+	if not filters:
+		filters = []
+
+	fields = "distinct *"
+
+	or_filters = []
+
+	if txt:
+		if meta.search_fields:
+			for f in meta.get_search_fields():
+				if f == "name" or meta.get_field(f).fieldtype in (
+					"Data",
+					"Text",
+					"Small Text",
+					"Text Editor",
+					"select",
+				):
+					or_filters.append([doctype, f, "like", "%" + txt + "%"])
+		else:
+			if isinstance(filters, dict):
+				filters["name"] = ("like", "%" + txt + "%")
+			else:
+				filters.append([doctype, "name", "like", "%" + txt + "%"])
+
+	return frappe.get_list(
+		doctype,
+		fields=fields,
+		filters=filters,
+		or_filters=or_filters,
+		limit_start=limit_start,
+		limit_page_length=limit_page_length,
+		order_by=order_by,
 	)
 
 
@@ -647,3 +666,17 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
+
+def get_holiday_list(company=None):
+	if not company:
+		company = get_default_company() or frappe.get_all("Company")[0].name
+
+	holiday_list = frappe.get_cached_value("Company", company, "default_holiday_list")
+	if not holiday_list:
+		frappe.throw(
+			_("Please set a default Holiday List for Company {0}").format(
+				frappe.bold(get_default_company())
+			)
+		)
+	return holiday_list

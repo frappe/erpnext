@@ -747,13 +747,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 			update_purchase_receipt_status,
 		)
 
-		pr = make_purchase_receipt()
+		item = make_item()
+
+		pr = make_purchase_receipt(item_code=item.name)
 
 		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
-
-		pr.reload()
-		pr.cancel()
 
 	def test_pr_billing_status(self):
 		"""Flow:
@@ -1286,6 +1285,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 			make_purchase_invoice as create_purchase_invoice,
 		)
+		from erpnext.accounts.party import add_party_account
+
+		add_party_account(
+			"Supplier",
+			"_Test Supplier USD",
+			"_Test Company with perpetual inventory",
+			"_Test Payable USD - TCP1",
+		)
 
 		pi = create_purchase_invoice(
 			company="_Test Company with perpetual inventory",
@@ -1294,6 +1301,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			expense_account="_Test Account Cost for Goods Sold - TCP1",
 			currency="USD",
 			conversion_rate=70,
+			supplier="_Test Supplier USD",
 		)
 
 		pr = create_purchase_receipt(pi.name)

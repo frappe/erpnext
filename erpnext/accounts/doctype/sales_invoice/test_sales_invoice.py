@@ -7,6 +7,7 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate
 
 import erpnext
@@ -1977,6 +1978,13 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_rounding_adjustment_3(self):
+		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+			create_dimension,
+			disable_dimension,
+		)
+
+		create_dimension()
+
 		si = create_sales_invoice(do_not_save=True)
 		si.items = []
 		for d in [(1122, 2), (1122.01, 1), (1122.01, 1)]:
@@ -2004,6 +2012,10 @@ class TestSalesInvoice(unittest.TestCase):
 					"included_in_print_rate": 1,
 				},
 			)
+
+		si.cost_center = "_Test Cost Center 2 - _TC"
+		si.location = "Block 1"
+
 		si.save()
 		si.submit()
 		self.assertEqual(si.net_total, 4007.16)
@@ -2038,6 +2050,18 @@ class TestSalesInvoice(unittest.TestCase):
 			debit_credit_diff += gle.debit - gle.credit
 
 		self.assertEqual(debit_credit_diff, 0)
+
+		round_off_gle = frappe.db.get_value(
+			"GL Entry",
+			{"voucher_type": "Sales Invoice", "voucher_no": si.name, "account": "Round Off - _TC"},
+			["cost_center", "location"],
+			as_dict=1,
+		)
+
+		self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
+		self.assertEqual(round_off_gle.location, "Block 1")
+
+		disable_dimension()
 
 	def test_sales_invoice_with_shipping_rule(self):
 		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
@@ -2239,6 +2263,14 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
+
+	def test_deferred_revenue_missing_account(self):
+		si = create_sales_invoice(posting_date="2019-01-10", do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+
+		self.assertRaises(frappe.ValidationError, si.save)
 
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(
@@ -2616,6 +2648,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		einvoice_settings = frappe.get_doc("E Invoice Settings")
 		einvoice_settings.enable = 0
+		einvoice_settings.save()
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):
@@ -2676,12 +2709,8 @@ class TestSalesInvoice(unittest.TestCase):
 			sales_invoice.items[0].item_tax_template, "_Test Account Excise Duty @ 10 - _TC"
 		)
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
-
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -2697,14 +2726,10 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
-			enable_discount_accounting,
-		)
 
-		enable_discount_accounting()
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -2735,7 +2760,6 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-		enable_discount_accounting(enable=0)
 
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
@@ -3104,7 +3128,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		acc_settings = frappe.get_single("Accounts Settings")
 		acc_settings.book_deferred_entries_via_journal_entry = 0
-		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.submit_journal_entries = 0
 		acc_settings.save()
 
 		frappe.db.set_value("Accounts Settings", None, "acc_frozen_upto", None)
@@ -3115,6 +3139,95 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		si.reload()
 		self.assertTrue(si.items[0].serial_no)
+
+	def test_sales_invoice_with_disabled_account(self):
+		try:
+			account = frappe.get_doc("Account", "VAT 5% - _TC")
+			account.disabled = 1
+			account.save()
+
+			si = create_sales_invoice(do_not_save=True)
+			si.posting_date = add_days(getdate(), 1)
+			si.taxes = []
+
+			si.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": "VAT 5% - _TC",
+					"cost_center": "Main - _TC",
+					"description": "VAT @ 5.0",
+					"rate": 9,
+				},
+			)
+			si.save()
+
+			with self.assertRaises(frappe.ValidationError) as err:
+				si.submit()
+
+			self.assertTrue(
+				"Cannot create accounting entries against disabled accounts" in str(err.exception)
+			)
+
+		finally:
+			account.disabled = 0
+			account.save()
+
+	def test_gain_loss_with_advance_entry(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		unlink_enabled = frappe.db.get_value(
+			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice"
+		)
+
+		frappe.db.set_value(
+			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1
+		)
+
+		jv = make_journal_entry("_Test Receivable USD - _TC", "_Test Bank - _TC", -7000, save=False)
+
+		jv.accounts[0].exchange_rate = 70
+		jv.accounts[0].credit_in_account_currency = 100
+		jv.accounts[0].party_type = "Customer"
+		jv.accounts[0].party = "_Test Customer USD"
+
+		jv.save()
+		jv.submit()
+
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=75,
+			do_not_save=1,
+			rate=100,
+		)
+
+		si.append(
+			"advances",
+			{
+				"reference_type": "Journal Entry",
+				"reference_name": jv.name,
+				"reference_row": jv.accounts[0].name,
+				"advance_amount": 100,
+				"allocated_amount": 100,
+				"ref_exchange_rate": 70,
+			},
+		)
+		si.save()
+		si.submit()
+
+		expected_gle = [
+			["_Test Receivable USD - _TC", 7500.0, 500],
+			["Exchange Gain/Loss - _TC", 500.0, 0.0],
+			["Sales - _TC", 0.0, 7500.0],
+		]
+
+		check_gl_entries(self, si.name, expected_gle, nowdate())
+
+		frappe.db.set_value(
+			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
+		)
 
 
 def get_sales_invoice_for_e_invoice():
