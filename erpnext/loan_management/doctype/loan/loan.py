@@ -59,16 +59,6 @@ class Loan(AccountsController):
 					)
 				)
 
-<<<<<<< HEAD
-=======
-	def validate_cost_center(self):
-		if not self.cost_center and self.rate_of_interest != 0.0:
-			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
-
-			if not self.cost_center:
-				frappe.throw(_("Cost center is mandatory for loans having rate of interest greater than 0"))
-
->>>>>>> 815141bf57 (fix: Close unsecured terms loans)
 	def on_submit(self):
 		self.link_loan_security_pledge()
 		# Interest accrual for backdated term loans
