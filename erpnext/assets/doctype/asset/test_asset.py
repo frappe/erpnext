@@ -191,6 +191,8 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.status, "Partially Depreciated")
 
 	def test_gle_made_by_asset_sale(self):
+		from frappe import _
+
 		asset = create_asset(
 			calculate_depreciation=1,
 			available_for_use_date="2021-06-06",
@@ -204,12 +206,15 @@ class TestAsset(AssetSetup):
 
 		post_depreciation_entries(date="2022-01-01")
 
-		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company", posting_date="2022-04-22")
+		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
 		si.customer = "_Test Customer"
-		# si.posting_date = getdate("2022-04-22")
+		si.posting_date = getdate("2022-04-22")
 		si.due_date = getdate("2022-04-22")
 		si.get("items")[0].rate = 75000
 		si.insert()
+
+		frappe.throw(_("Due Date: {0}, Posting Date: {1}").format(si.due_date, si.posting_date))
+
 		si.submit()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
