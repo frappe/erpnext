@@ -191,8 +191,6 @@ class TestAsset(AssetSetup):
 		self.assertEqual(asset.status, "Partially Depreciated")
 
 	def test_gle_made_by_asset_sale(self):
-		from frappe import _
-
 		asset = create_asset(
 			calculate_depreciation=1,
 			available_for_use_date="2021-06-06",
@@ -216,9 +214,9 @@ class TestAsset(AssetSetup):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 31542.83, 0.0),
+			("_Test Accumulated Depreciations - _TC", 36082.31, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 0.0, 6542.83),
+			("_Test Gain/Loss on Asset Disposal - _TC", 0.0, 11082.31),
 			("Debtors - _TC", 75000.0, 0.0),
 		)
 
