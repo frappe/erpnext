@@ -252,11 +252,14 @@ def notify_errors(exceptions_list):
 	)
 
 	for exception in exceptions_list:
-		exception = json.loads(exception)
-		error_message = """<div class='small text-muted'>{0}</div><br>""".format(
-			_(exception.get("message"))
-		)
-		content += error_message
+		try:
+			exception = json.loads(exception)
+			error_message = """<div class='small text-muted'>{0}</div><br>""".format(
+				_(exception.get("message"))
+			)
+			content += error_message
+		except Exception:
+			pass
 
 	content += _("Regards,") + "<br>" + _("Administrator")
 

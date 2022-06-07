@@ -1139,7 +1139,7 @@ class StockEntry(StockController):
 		if self.job_card:
 			job_doc = frappe.get_doc("Job Card", self.job_card)
 			job_doc.set_transferred_qty(update_status=True)
-			job_doc.set_transferred_qty_in_job_card(self)
+			job_doc.set_transferred_qty_in_job_card_item(self)
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

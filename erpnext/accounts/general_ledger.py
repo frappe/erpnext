@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounts.utils import create_payment_ledger_entry
 
 
 class ClosedAccountingPeriod(frappe.ValidationError):
@@ -34,6 +35,7 @@ def make_gl_entries(
 			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
+				create_payment_ledger_entry(gl_map)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			# Post GL Map proccess there may no be any GL Entries
 			elif gl_map:
@@ -479,6 +481,7 @@ def make_reverse_gl_entries(
 		).run(as_dict=1)
 
 	if gl_entries:
+		create_payment_ledger_entry(gl_entries, cancel=1)
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])

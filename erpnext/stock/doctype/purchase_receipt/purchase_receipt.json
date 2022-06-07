@@ -108,8 +108,6 @@
   "terms_section_break",
   "tc_name",
   "terms",
-  "bill_no",
-  "bill_date",
   "more_info",
   "status",
   "amended_from",
@@ -868,24 +866,6 @@
    "oldfieldtype": "Text Editor"
   },
   {
-   "fieldname": "bill_no",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Bill No",
-   "oldfieldname": "bill_no",
-   "oldfieldtype": "Data",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "bill_date",
-   "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Bill Date",
-   "oldfieldname": "bill_date",
-   "oldfieldtype": "Date",
-   "print_hide": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
@@ -1168,7 +1148,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-26 13:41:32.625197",
+ "modified": "2022-05-27 15:59:18.550583",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

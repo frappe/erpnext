@@ -490,6 +490,7 @@ communication_doctypes = ["Customer", "Supplier"]
 
 accounting_dimension_doctypes = [
 	"GL Entry",
+	"Payment Ledger Entry",
 	"Sales Invoice",
 	"Purchase Invoice",
 	"Payment Entry",

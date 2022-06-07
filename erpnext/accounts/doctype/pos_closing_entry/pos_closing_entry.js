@@ -102,7 +102,9 @@ frappe.ui.form.on('POS Closing Entry', {
 		});
 	},
 
-	before_save: function(frm) {
+	before_save: async function(frm) {
+		frappe.dom.freeze(__('Processing Sales! Please Wait...'));
+
 		frm.set_value("grand_total", 0);
 		frm.set_value("net_total", 0);
 		frm.set_value("total_quantity", 0);
@@ -112,17 +114,23 @@ frappe.ui.form.on('POS Closing Entry', {
 			row.expected_amount = row.opening_amount;
 		}
 
-		for (let row of frm.doc.pos_transactions) {
-			frappe.db.get_doc("POS Invoice", row.pos_invoice).then(doc => {
-				frm.doc.grand_total += flt(doc.grand_total);
-				frm.doc.net_total += flt(doc.net_total);
-				frm.doc.total_quantity += flt(doc.total_qty);
-				refresh_payments(doc, frm);
-				refresh_taxes(doc, frm);
-				refresh_fields(frm);
-				set_html_data(frm);
-			});
+		const pos_inv_promises = frm.doc.pos_transactions.map(
+			row => frappe.db.get_doc("POS Invoice", row.pos_invoice)
+		);
+
+		const pos_invoices = await Promise.all(pos_inv_promises);
+
+		for (let doc of pos_invoices) {
+			frm.doc.grand_total += flt(doc.grand_total);
+			frm.doc.net_total += flt(doc.net_total);
+			frm.doc.total_quantity += flt(doc.total_qty);
+			refresh_payments(doc, frm);
+			refresh_taxes(doc, frm);
+			refresh_fields(frm);
+			set_html_data(frm);
 		}
+
+		frappe.dom.unfreeze();
 	}
 });
 

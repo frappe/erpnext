@@ -29,6 +29,9 @@ from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,
 	create_repayment_entry,
 )
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_term_loans,
+)
 from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
 	get_benefit_component_amount,
@@ -116,10 +119,10 @@ class SalarySlip(TransactionBase):
 		self.update_payment_status_for_gratuity()
 
 	def update_payment_status_for_gratuity(self):
-		add_salary = frappe.db.get_all(
+		additional_salary = frappe.db.get_all(
 			"Additional Salary",
 			filters={
-				"payroll_date": ("BETWEEN", [self.start_date, self.end_date]),
+				"payroll_date": ("between", [self.start_date, self.end_date]),
 				"employee": self.employee,
 				"ref_doctype": "Gratuity",
 				"docstatus": 1,
@@ -128,10 +131,10 @@ class SalarySlip(TransactionBase):
 			limit=1,
 		)
 
-		if len(add_salary):
+		if additional_salary:
 			status = "Paid" if self.docstatus == 1 else "Unpaid"
-			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
-				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
+			if additional_salary[0].name in [entry.additional_salary for entry in self.earnings]:
+				frappe.db.set_value("Gratuity", additional_salary[0].ref_docname, "status", status)
 
 	def on_cancel(self):
 		self.set_status()
@@ -462,37 +465,14 @@ class SalarySlip(TransactionBase):
 		)
 
 		for d in range(working_days):
-			dt = add_days(cstr(getdate(self.start_date)), d)
-			leave = frappe.db.sql(
-				"""
-				SELECT t1.name,
-					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
-					THEN t1.half_day else 0 END,
-					t2.is_ppl,
-					t2.fraction_of_daily_salary_per_leave
-				FROM `tabLeave Application` t1, `tabLeave Type` t2
-				WHERE t2.name = t1.leave_type
-				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
-				AND t1.docstatus = 1
-				AND t1.employee = %(employee)s
-				AND ifnull(t1.salary_slip, '') = ''
-				AND CASE
-					WHEN t2.include_holiday != 1
-						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-					WHEN t2.include_holiday
-						THEN %(dt)s between from_date and to_date
-					END
-				""".format(
-					holidays
-				),
-				{"employee": self.employee, "dt": dt},
-			)
+			date = add_days(cstr(getdate(self.start_date)), d)
+			leave = get_lwp_or_ppl_for_date(date, self.employee, holidays)
 
 			if leave:
 				equivalent_lwp_count = 0
-				is_half_day_leave = cint(leave[0][1])
-				is_partially_paid_leave = cint(leave[0][2])
-				fraction_of_daily_salary_per_leave = flt(leave[0][3])
+				is_half_day_leave = cint(leave[0].is_half_day)
+				is_partially_paid_leave = cint(leave[0].is_ppl)
+				fraction_of_daily_salary_per_leave = flt(leave[0].fraction_of_daily_salary_per_leave)
 
 				equivalent_lwp_count = (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
 
@@ -1364,9 +1344,9 @@ class SalarySlip(TransactionBase):
 			self.total_loan_repayment += payment.total_payment
 
 	def get_loan_details(self):
-		return frappe.get_all(
+		loan_details = frappe.get_all(
 			"Loan",
-			fields=["name", "interest_income_account", "loan_account", "loan_type"],
+			fields=["name", "interest_income_account", "loan_account", "loan_type", "is_term_loan"],
 			filters={
 				"applicant": self.employee,
 				"docstatus": 1,
@@ -1374,6 +1354,15 @@ class SalarySlip(TransactionBase):
 				"company": self.company,
 			},
 		)
+
+		if loan_details:
+			for loan in loan_details:
+				if loan.is_term_loan:
+					process_loan_interest_accrual_for_term_loans(
+						posting_date=self.posting_date, loan_type=loan.loan_type, loan=loan.name
+					)
+
+		return loan_details
 
 	def make_loan_repayment_entry(self):
 		payroll_payable_account = get_payroll_payable_account(self.company, self.payroll_entry)
@@ -1730,3 +1719,46 @@ def eval_tax_slab_condition(condition, eval_globals=None, eval_locals=None):
 	except Exception as e:
 		frappe.throw(_("Error in formula or condition: {0} in Income Tax Slab").format(e))
 		raise
+
+
+def get_lwp_or_ppl_for_date(date, employee, holidays):
+	LeaveApplication = frappe.qb.DocType("Leave Application")
+	LeaveType = frappe.qb.DocType("Leave Type")
+
+	is_half_day = (
+		frappe.qb.terms.Case()
+		.when(
+			(
+				(LeaveApplication.half_day_date == date)
+				| (LeaveApplication.from_date == LeaveApplication.to_date)
+			),
+			LeaveApplication.half_day,
+		)
+		.else_(0)
+	).as_("is_half_day")
+
+	query = (
+		frappe.qb.from_(LeaveApplication)
+		.inner_join(LeaveType)
+		.on((LeaveType.name == LeaveApplication.leave_type))
+		.select(
+			LeaveApplication.name,
+			LeaveType.is_ppl,
+			LeaveType.fraction_of_daily_salary_per_leave,
+			(is_half_day),
+		)
+		.where(
+			(((LeaveType.is_lwp == 1) | (LeaveType.is_ppl == 1)))
+			& (LeaveApplication.docstatus == 1)
+			& (LeaveApplication.status == "Approved")
+			& (LeaveApplication.employee == employee)
+			& ((LeaveApplication.salary_slip.isnull()) | (LeaveApplication.salary_slip == ""))
+			& ((LeaveApplication.from_date <= date) & (date <= LeaveApplication.to_date))
+		)
+	)
+
+	# if it's a holiday only include if leave type has "include holiday" enabled
+	if date in holidays:
+		query = query.where((LeaveType.include_holiday == "1"))
+
+	return query.run(as_dict=True)
