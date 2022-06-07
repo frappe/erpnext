@@ -60,11 +60,11 @@ class Loan(AccountsController):
 				)
 
 	def validate_cost_center(self):
-		if not self.cost_center and self.rate_of_interest != 0:
+		if not self.cost_center and self.rate_of_interest != 0.0:
 			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 
-		if not self.cost_center:
-			frappe.throw(_("Cost center is mandatory for loans having rate of interest greater than 0"))
+			if not self.cost_center:
+				frappe.throw(_("Cost center is mandatory for loans having rate of interest greater than 0"))
 
 	def on_submit(self):
 		self.link_loan_security_pledge()
@@ -340,6 +340,22 @@ def get_loan_application(loan_application):
 	loan = frappe.get_doc("Loan Application", loan_application)
 	if loan:
 		return loan.as_dict()
+
+
+@frappe.whitelist()
+def close_unsecured_term_loan(loan):
+	loan_details = frappe.db.get_value(
+		"Loan", {"name": loan}, ["status", "is_term_loan", "is_secured_loan"], as_dict=1
+	)
+
+	if (
+		loan_details.status == "Loan Closure Requested"
+		and loan_details.is_term_loan
+		and not loan_details.is_secured_loan
+	):
+		frappe.db.set_value("Loan", loan, "status", "Closed")
+	else:
+		frappe.throw(_("Cannot close this loan until full repayment"))
 
 
 def close_loan(loan, total_amount_paid):
