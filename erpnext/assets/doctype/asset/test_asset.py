@@ -211,7 +211,7 @@ class TestAsset(AssetSetup):
 		si.posting_date = getdate("2022-04-22")
 		si.due_date = getdate("2022-04-22")
 		si.get("items")[0].rate = 75000
-		si.insert()
+		# si.insert()
 
 		frappe.throw(_("Due Date: {0}, Posting Date: {1}").format(si.due_date, si.posting_date))
 
