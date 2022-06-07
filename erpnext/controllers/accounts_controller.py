@@ -1463,8 +1463,8 @@ class AccountsController(TransactionBase):
 
 		if not party_gle_currency and (party_account_currency != self.currency):
 			frappe.throw(
-				_("Party Account {0} currency and document currency should be same").format(
-					frappe.bold(party_account)
+				_("Party Account {0} currency ({1}) and document currency ({2}) should be same").format(
+					frappe.bold(party_account), party_account_currency, self.currency
 				)
 			)
 
@@ -2659,7 +2659,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_reserved_qty_for_subcontract()
 			parent.create_raw_materials_supplied("supplied_items")
 			parent.save()
-	else:
+	else:  # Sales Order
+		parent.validate_warehouse()
 		parent.update_reserved_qty()
 		parent.update_project()
 		parent.update_prevdoc_status("submit")

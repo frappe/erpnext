@@ -466,37 +466,14 @@ class SalarySlip(TransactionBase):
 		)
 
 		for d in range(working_days):
-			dt = add_days(cstr(getdate(self.start_date)), d)
-			leave = frappe.db.sql(
-				"""
-				SELECT t1.name,
-					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
-					THEN t1.half_day else 0 END,
-					t2.is_ppl,
-					t2.fraction_of_daily_salary_per_leave
-				FROM `tabLeave Application` t1, `tabLeave Type` t2
-				WHERE t2.name = t1.leave_type
-				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
-				AND t1.docstatus = 1
-				AND t1.employee = %(employee)s
-				AND ifnull(t1.salary_slip, '') = ''
-				AND CASE
-					WHEN t2.include_holiday != 1
-						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-					WHEN t2.include_holiday
-						THEN %(dt)s between from_date and to_date
-					END
-				""".format(
-					holidays
-				),
-				{"employee": self.employee, "dt": dt},
-			)
+			date = add_days(cstr(getdate(self.start_date)), d)
+			leave = get_lwp_or_ppl_for_date(date, self.employee, holidays)
 
 			if leave:
 				equivalent_lwp_count = 0
-				is_half_day_leave = cint(leave[0][1])
-				is_partially_paid_leave = cint(leave[0][2])
-				fraction_of_daily_salary_per_leave = flt(leave[0][3])
+				is_half_day_leave = cint(leave[0].is_half_day)
+				is_partially_paid_leave = cint(leave[0].is_ppl)
+				fraction_of_daily_salary_per_leave = flt(leave[0].fraction_of_daily_salary_per_leave)
 
 				equivalent_lwp_count = (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
 
@@ -1726,3 +1703,46 @@ def get_payroll_payable_account(company, payroll_entry):
 		)
 
 	return payroll_payable_account
+
+
+def get_lwp_or_ppl_for_date(date, employee, holidays):
+	LeaveApplication = frappe.qb.DocType("Leave Application")
+	LeaveType = frappe.qb.DocType("Leave Type")
+
+	is_half_day = (
+		frappe.qb.terms.Case()
+		.when(
+			(
+				(LeaveApplication.half_day_date == date)
+				| (LeaveApplication.from_date == LeaveApplication.to_date)
+			),
+			LeaveApplication.half_day,
+		)
+		.else_(0)
+	).as_("is_half_day")
+
+	query = (
+		frappe.qb.from_(LeaveApplication)
+		.inner_join(LeaveType)
+		.on((LeaveType.name == LeaveApplication.leave_type))
+		.select(
+			LeaveApplication.name,
+			LeaveType.is_ppl,
+			LeaveType.fraction_of_daily_salary_per_leave,
+			(is_half_day),
+		)
+		.where(
+			(((LeaveType.is_lwp == 1) | (LeaveType.is_ppl == 1)))
+			& (LeaveApplication.docstatus == 1)
+			& (LeaveApplication.status == "Approved")
+			& (LeaveApplication.employee == employee)
+			& ((LeaveApplication.salary_slip.isnull()) | (LeaveApplication.salary_slip == ""))
+			& ((LeaveApplication.from_date <= date) & (date <= LeaveApplication.to_date))
+		)
+	)
+
+	# if it's a holiday only include if leave type has "include holiday" enabled
+	if date in holidays:
+		query = query.where((LeaveType.include_holiday == "1"))
+
+	return query.run(as_dict=True)

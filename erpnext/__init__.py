@@ -149,6 +149,7 @@ def allow_regional(fn):
 	return caller
 
 
+@frappe.whitelist()
 def get_last_membership(member):
 	"""Returns last membership if exists"""
 	last_membership = frappe.get_all(
