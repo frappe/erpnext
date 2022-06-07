@@ -9876,3 +9876,6 @@ Allowed Items,Articles autorisés
 Party Specific Item,Restriction d'article disponible
 Restrict Items Based On,Type de critére de restriction
 Based On Value,critére de restriction
+SIREN Number,Num SIREN
+SIRET Number,Num SIRET
+APE NAF Code,Code APE/NAF
