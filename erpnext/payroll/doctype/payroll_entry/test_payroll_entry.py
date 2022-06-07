@@ -5,6 +5,7 @@ import unittest
 
 import frappe
 from dateutil.relativedelta import relativedelta
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_months
 
 import erpnext
@@ -35,7 +36,7 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 test_dependencies = ["Holiday List"]
 
 
-class TestPayrollEntry(unittest.TestCase):
+class TestPayrollEntry(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		frappe.db.set_value(
