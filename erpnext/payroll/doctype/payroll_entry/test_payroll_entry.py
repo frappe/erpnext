@@ -5,6 +5,7 @@ import unittest
 
 import frappe
 from dateutil.relativedelta import relativedelta
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_months
 
 import erpnext
