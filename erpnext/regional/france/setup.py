@@ -4,9 +4,6 @@
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.regional.france import (
-	incoterm,
-)
 
 
 def setup(company=None, patch=True):
