@@ -408,30 +408,6 @@ class DeliveryNote(SellingController):
 									data=eval(j.commision_formula)
 									tot.append(data)
 				self.total_commission=sum(tot)
-	@frappe.whitelist()
-	def calculate_taxes(self):
-		if self.customer:
-			cus = frappe.get_doc("Customer",self.customer)
-			if not cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-			if cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if cus.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=cus.tax_category
-			return self.tax_category
 
 	def make_return_invoice(self):
 		try:
