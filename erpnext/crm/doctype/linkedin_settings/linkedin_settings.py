@@ -72,7 +72,7 @@ class LinkedInSettings(Document):
 			if media_id:
 				return self.post_text(text, title, media_id=media_id)
 			else:
-				frappe.log_error("Failed to upload media.", "LinkedIn Upload Error")
+				self.log_error("LinkedIn: Failed to upload media")
 
 	def upload_image(self, media):
 		media = get_file_path(media)

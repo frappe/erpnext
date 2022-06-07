@@ -783,6 +783,7 @@ class TestSalesOrder(FrappeTestCase):
 
 	def test_auto_insert_price(self):
 		make_item("_Test Item for Auto Price List", {"is_stock_item": 0})
+		make_item("_Test Item for Auto Price List with Discount Percentage", {"is_stock_item": 0})
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 		item_price = frappe.db.get_value(
@@ -802,6 +803,25 @@ class TestSalesOrder(FrappeTestCase):
 				"price_list_rate",
 			),
 			100,
+		)
+
+		make_sales_order(
+			item_code="_Test Item for Auto Price List with Discount Percentage",
+			selling_price_list="_Test Price List",
+			price_list_rate=200,
+			discount_percentage=20,
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Item Price",
+				{
+					"price_list": "_Test Price List",
+					"item_code": "_Test Item for Auto Price List with Discount Percentage",
+				},
+				"price_list_rate",
+			),
+			200,
 		)
 
 		# do not update price list
@@ -1659,7 +1679,9 @@ def make_sales_order(**args):
 				"warehouse": args.warehouse,
 				"qty": args.qty or 10,
 				"uom": args.uom or None,
-				"rate": args.rate or 100,
+				"price_list_rate": args.price_list_rate or None,
+				"discount_percentage": args.discount_percentage or None,
+				"rate": args.rate or (None if args.price_list_rate else 100),
 				"against_blanket_order": args.against_blanket_order,
 			},
 		)

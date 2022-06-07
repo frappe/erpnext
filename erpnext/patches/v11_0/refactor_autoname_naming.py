@@ -69,8 +69,6 @@ doctype_series_map = {
 	"Soil Analysis": "AG-ANA-.YY.-.MM.-.#####",
 	"Soil Texture": "AG-TEX-.YYYY.-.#####",
 	"Stock Ledger Entry": "MAT-SLE-.YYYY.-.#####",
-	"Student Leave Application": "EDU-SLA-.YYYY.-.#####",
-	"Student Log": "EDU-SLOG-.YYYY.-.#####",
 	"Subscription": "ACC-SUB-.YYYY.-.#####",
 	"Task": "TASK-.YYYY.-.#####",
 	"Tax Rule": "ACC-TAX-RULE-.YYYY.-.#####",

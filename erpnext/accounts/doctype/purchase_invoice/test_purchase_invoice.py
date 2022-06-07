@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
 import erpnext
@@ -26,12 +27,13 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	make_purchase_receipt,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
+from erpnext.stock.tests.test_utils import StockTestMixin
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
 
 
-class TestPurchaseInvoice(unittest.TestCase):
+class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 	@classmethod
 	def setUpClass(self):
 		unlink_payment_on_cancel_of_invoice()
@@ -336,8 +338,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
 
 		discount_account = create_account(
 			account_name="Discount Account",
@@ -353,10 +355,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		enable_discount_accounting(enable=0)
 
+	@change_settings("Buying Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
+
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -691,6 +693,80 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
+
+	def test_standalone_return_using_pi(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = self.make_item().name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+
+		make_stock_entry(item_code=item, target=warehouse, qty=50, rate=120)
+
+		return_pi = make_purchase_invoice(
+			is_return=1,
+			item=item,
+			qty=-10,
+			update_stock=1,
+			rate=100,
+			company=company,
+			warehouse=warehouse,
+			cost_center="Main - TCP1",
+		)
+
+		# assert that stock consumption is with actual rate
+		self.assertGLEs(
+			return_pi,
+			[{"credit": 1200, "debit": 0}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
+
+		# assert loss booked in COGS
+		self.assertGLEs(
+			return_pi,
+			[{"credit": 0, "debit": 200}],
+			gle_filters={"account": "Cost of Goods Sold - TCP1"},
+		)
+
+	def test_return_with_lcv(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			create_landed_cost_voucher,
+		)
+
+		item = self.make_item().name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		cost_center = "Main - TCP1"
+
+		pi = make_purchase_invoice(
+			item=item,
+			company=company,
+			warehouse=warehouse,
+			cost_center=cost_center,
+			update_stock=1,
+			qty=10,
+			rate=100,
+		)
+
+		# Create landed cost voucher - will increase valuation of received item by 10
+		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company, charges=100)
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.save().submit()
+
+		# assert that stock consumption is with actual in rate
+		self.assertGLEs(
+			return_pi,
+			[{"credit": 1100, "debit": 0}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
+
+		# assert loss booked in COGS
+		self.assertGLEs(
+			return_pi,
+			[{"credit": 0, "debit": 100}],
+			gle_filters={"account": "Cost of Goods Sold - TCP1"},
+		)
 
 	def test_multi_currency_gle(self):
 		pi = make_purchase_invoice(
@@ -1482,7 +1558,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
 
 	def test_provisional_accounting_entry(self):
-		item = create_item("_Test Non Stock Item", is_stock_item=0)
+		create_item("_Test Non Stock Item", is_stock_item=0)
+
 		provisional_account = create_account(
 			account_name="Provision Account",
 			parent_account="Current Liabilities - _TC",
@@ -1505,6 +1582,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.save()
 		pi.submit()
 
+		self.assertEquals(pr.items[0].provisional_expense_account, "Provision Account - _TC")
+
 		# Check GLE for Purchase Invoice
 		expected_gle = [
 			["Cost of Goods Sold - _TC", 250, 0, add_days(pr.posting_date, -1)],
@@ -1521,6 +1600,18 @@ class TestPurchaseInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+
+		# Cancel purchase invoice to check reverse provisional entry cancellation
+		pi.cancel()
+
+		expected_gle_for_purchase_receipt_post_pi_cancel = [
+			["Provision Account - _TC", 0, 250, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 250, 0, pi.posting_date],
+		]
+
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt_post_pi_cancel, pr.posting_date
+		)
 
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
@@ -1582,12 +1673,6 @@ def update_tax_witholding_category(company, account):
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.unlink_payment_on_cancellation_of_invoice = enable
-	accounts_settings.save()
-
-
-def enable_discount_accounting(enable=1):
-	accounts_settings = frappe.get_doc("Accounts Settings")
-	accounts_settings.enable_discount_accounting = enable
 	accounts_settings.save()
 
 

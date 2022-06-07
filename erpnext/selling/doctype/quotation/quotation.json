@@ -31,6 +31,8 @@
   "col_break98",
   "shipping_address_name",
   "shipping_address",
+  "company_address",
+  "company_address_display",
   "customer_group",
   "territory",
   "currency_and_price_list",
@@ -955,7 +957,18 @@
    "fieldname": "competitors",
    "fieldtype": "Table MultiSelect",
    "label": "Competitors",
-   "options": "Competitor Detail",
+   "options": "Competitor Detail"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address Name",
+   "options": "Address"
+  },
+  {
+   "fieldname": "company_address_display",
+   "fieldtype": "Small Text",
+   "label": "Company Address",
    "read_only": 1
   },
   {

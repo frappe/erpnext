@@ -762,7 +762,7 @@ def get_custom_fields():
 			insert_after="customer",
 			no_copy=1,
 			print_hide=1,
-			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0',
+			depends_on='eval:in_list(["Registered Regular", "Registered Composition", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0',
 		),
 		dict(
 			fieldname="irn_cancelled",
@@ -930,6 +930,7 @@ def get_custom_fields():
 		"Journal Entry": journal_entry_fields,
 		"Sales Order": sales_invoice_gst_fields,
 		"Tax Category": inter_state_gst_field,
+		"Quotation": sales_invoice_gst_fields,
 		"Item": [
 			dict(
 				fieldname="gst_hsn_code",
@@ -1218,7 +1219,7 @@ def make_fixtures(company=None):
 		try:
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
-			doc.insert()
+			doc.insert(ignore_if_duplicate=True)
 		except frappe.NameError:
 			frappe.clear_messages()
 		except frappe.DuplicateEntryError:

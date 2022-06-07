@@ -32,6 +32,9 @@ class Attendance(Document):
 		self.validate_employee_status()
 		self.check_leave_record()
 
+	def on_cancel(self):
+		self.unlink_attendance_from_checkins()
+
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
@@ -126,6 +129,33 @@ class Attendance(Document):
 		)
 		if not emp:
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
+
+	def unlink_attendance_from_checkins(self):
+		EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
+		linked_logs = (
+			frappe.qb.from_(EmployeeCheckin)
+			.select(EmployeeCheckin.name)
+			.where(EmployeeCheckin.attendance == self.name)
+			.for_update()
+			.run(as_dict=True)
+		)
+
+		if linked_logs:
+			(
+				frappe.qb.update(EmployeeCheckin)
+				.set("attendance", "")
+				.where(EmployeeCheckin.attendance == self.name)
+			).run()
+
+			frappe.msgprint(
+				msg=_("Unlinked Attendance record from Employee Checkins: {}").format(
+					", ".join(get_link_to_form("Employee Checkin", log.name) for log in linked_logs)
+				),
+				title=_("Unlinked logs"),
+				indicator="blue",
+				is_minimizable=True,
+				wide=True,
+			)
 
 
 def get_duplicate_attendance_record(employee, attendance_date, shift, name=None):
