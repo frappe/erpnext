@@ -229,7 +229,9 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(gle, expected_gle)
 
+		si.load_from_db()
 		si.cancel()
+
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
 	def test_expense_head(self):
