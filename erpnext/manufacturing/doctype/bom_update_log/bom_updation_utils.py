@@ -63,7 +63,9 @@ def update_cost_in_level(
 		handle_exception(doc)
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0
-		frappe.db.commit()  # nosemgrep
+
+		if not frappe.flags.in_test:
+			frappe.db.commit()  # nosemgrep
 
 
 def get_ancestor_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
@@ -119,8 +121,8 @@ def update_cost_in_boms(bom_list: List[str]) -> None:
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
 		bom_doc.db_update()
 
-		if index % 100 == 0:
-			frappe.db.commit()
+		if (index % 100 == 0) and not frappe.flags.in_test:
+			frappe.db.commit()  # nosemgrep
 
 
 def get_next_higher_level_boms(
@@ -210,7 +212,7 @@ def set_values_in_log(log_name: str, values: Dict[str, Any], commit: bool = Fals
 		query = query.set(key, value)
 	query.run()
 
-	if commit:
+	if commit and not frappe.flags.in_test:
 		frappe.db.commit()  # nosemgrep
 
 

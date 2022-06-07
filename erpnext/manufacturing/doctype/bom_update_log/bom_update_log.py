@@ -1,7 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import frappe
 from frappe import _
@@ -101,12 +101,14 @@ def run_replace_bom_job(
 		handle_exception(doc)
 	finally:
 		frappe.db.auto_commit_on_many_writes = 0
-		frappe.db.commit()  # nosemgrep
+
+		if not frappe.flags.in_test:
+			frappe.db.commit()  # nosemgrep
 
 
 def process_boms_cost_level_wise(
 	update_doc: "BOMUpdateLog", parent_boms: List[str] = None
-) -> None:
+) -> Union[None, Tuple]:
 	"Queue jobs at the start of new BOM Level in 'Update Cost' Jobs."
 
 	current_boms = {}
@@ -133,6 +135,10 @@ def process_boms_cost_level_wise(
 		values = {"current_level": current_level}
 
 	set_values_in_log(update_doc.name, values, commit=True)
+
+	if frappe.flags.in_test:
+		return current_boms, current_level
+
 	queue_bom_cost_jobs(current_boms, update_doc, current_level)
 
 
@@ -154,6 +160,10 @@ def queue_bom_cost_jobs(
 			"bom_batches", {"level": current_level, "batch_no": batch_no, "status": "Pending"}
 		)
 		batch_row.db_insert()
+
+		if frappe.flags.in_test:
+			# skip background jobs in test
+			return boms_to_process, batch_row.name
 
 		frappe.enqueue(
 			method="erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils.update_cost_in_level",
@@ -216,7 +226,10 @@ def resume_bom_cost_update_jobs():
 def get_processed_current_boms(
 	log: Dict[str, Any], bom_batches: Dict[str, Any]
 ) -> Tuple[List[str], Dict[str, Any]]:
-	"Aggregate all BOMs from BOM Update Batch rows into 'processed_boms' field and into current boms list."
+	"""
+	Aggregate all BOMs from BOM Update Batch rows into 'processed_boms' field
+	and into current boms list.
+	"""
 	processed_boms = json.loads(log.processed_boms) if log.processed_boms else {}
 	current_boms = []
 

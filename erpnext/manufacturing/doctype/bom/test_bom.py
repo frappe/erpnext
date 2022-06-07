@@ -11,7 +11,9 @@ from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.bom.bom import item_query, make_variant_bom
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
+from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
+	update_cost_in_all_boms_in_test,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -80,7 +82,7 @@ class TestBOM(FrappeTestCase):
 		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_rate + 10)
 
 		# update cost of all BOMs based on latest valuation rate
-		update_cost()
+		update_cost_in_all_boms_in_test()
 
 		# check if new valuation rate updated in all BOMs
 		for d in frappe.db.sql(
