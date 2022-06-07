@@ -367,8 +367,8 @@ def get_conditions(filters):
 		if not filters.get(field) or field in accounting_dimensions_list:
 			return ""
 		return f""" and exists(select name from `tab{table}`
-			 where parent=`tabSales Invoice`.name
-			 	and ifnull(`tab{table}`.{field}, '') = %({field})s)"""
+				where parent=`tabSales Invoice`.name
+					and ifnull(`tab{table}`.{field}, '') = %({field})s)"""
 
 	conditions += get_sales_invoice_item_field_condition("mode_of_payments", "Sales Invoice Payment")
 	conditions += get_sales_invoice_item_field_condition("cost_center")
