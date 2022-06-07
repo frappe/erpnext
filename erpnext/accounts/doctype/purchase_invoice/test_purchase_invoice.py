@@ -1526,6 +1526,18 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
 
+		# Cancel purchase invoice to check reverse provisional entry cancellation
+		pi.cancel()
+
+		expected_gle_for_purchase_receipt_post_pi_cancel = [
+			["Provision Account - _TC", 0, 250, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 250, 0, pi.posting_date],
+		]
+
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt_post_pi_cancel, pr.posting_date
+		)
+
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
