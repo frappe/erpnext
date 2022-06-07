@@ -3960,7 +3960,7 @@ Purchase Invoice cannot be made against an existing asset {0},La facture d'achat
 Purchase Invoices,Factures d'achat,
 Purchase Orders,Acheter en ligne,
 Purchase Receipt doesn't have any Item for which Retain Sample is enabled.,Le reçu d’achat ne contient aucun élément pour lequel Conserver échantillon est activé.,
-Purchase Return,Retour d'Achat,
+Purchase Return,Retour d&#39;Achat,
 Qty of Finished Goods Item,Quantité de produits finis,
 Qty or Amount is mandatroy for loan security,La quantité ou le montant est obligatoire pour la garantie de prêt,
 Quality Inspection required for Item {0} to submit,Inspection de qualité requise pour que l'élément {0} soit envoyé,
