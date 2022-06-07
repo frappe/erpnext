@@ -316,7 +316,7 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	return data[0]
 
 
-def make_return_doc(doctype, source_name, target_doc=None):
+def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -330,7 +330,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc = frappe.get_doc(target)
 		doc.is_return = 1
 		doc.return_against = source.name
-		doc.ignore_pricing_rule = 1
 		doc.set_warehouse = ""
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
 			doc.is_pos = source.is_pos

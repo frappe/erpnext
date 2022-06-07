@@ -18,7 +18,6 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 )
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
-	check_if_stock_and_account_balance_synced,
 	get_account_currency,
 	get_balance_on,
 	get_stock_accounts,
@@ -88,9 +87,6 @@ class JournalEntry(AccountsController):
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		self.update_status_for_full_and_final_statement()
-		check_if_stock_and_account_balance_synced(
-			self.posting_date, self.company, self.doctype, self.name
-		)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -98,7 +94,7 @@ class JournalEntry(AccountsController):
 
 		unlink_ref_doc_from_payment_entries(self)
 		unlink_ref_doc_from_salary_slip(self.name)
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()

@@ -43,6 +43,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		me.frm.set_query('shipping_address_name', erpnext.queries.address_query);
 		me.frm.set_query('dispatch_address_name', erpnext.queries.dispatch_address_query);
 
+		erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
 		if(this.frm.fields_dict.selling_price_list) {
 			this.frm.set_query("selling_price_list", function() {
@@ -64,7 +65,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer}
+					filters: {'is_sales_item': 1, 'customer': cur_frm.doc.customer, 'has_variants': 0}
 				}
 			});
 		}

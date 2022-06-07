@@ -32,7 +32,7 @@ def order(*args, **kwargs):
 		error_message = (
 			frappe.get_traceback() + "\n\n Request Data: \n" + json.loads(frappe.request.data).__str__()
 		)
-		frappe.log_error(error_message, "WooCommerce Error")
+		frappe.log_error("WooCommerce Error", error_message)
 		raise
 
 

@@ -29,6 +29,9 @@ from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	calculate_amounts,
 	create_repayment_entry,
 )
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+	process_loan_interest_accrual_for_term_loans,
+)
 from erpnext.payroll.doctype.additional_salary.additional_salary import get_additional_salaries
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
 	get_benefit_component_amount,
@@ -116,10 +119,10 @@ class SalarySlip(TransactionBase):
 		self.update_payment_status_for_gratuity()
 
 	def update_payment_status_for_gratuity(self):
-		add_salary = frappe.db.get_all(
+		additional_salary = frappe.db.get_all(
 			"Additional Salary",
 			filters={
-				"payroll_date": ("BETWEEN", [self.start_date, self.end_date]),
+				"payroll_date": ("between", [self.start_date, self.end_date]),
 				"employee": self.employee,
 				"ref_doctype": "Gratuity",
 				"docstatus": 1,
@@ -128,10 +131,10 @@ class SalarySlip(TransactionBase):
 			limit=1,
 		)
 
-		if len(add_salary):
+		if additional_salary:
 			status = "Paid" if self.docstatus == 1 else "Unpaid"
-			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
-				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
+			if additional_salary[0].name in [entry.additional_salary for entry in self.earnings]:
+				frappe.db.set_value("Gratuity", additional_salary[0].ref_docname, "status", status)
 
 	def on_cancel(self):
 		self.set_status()
@@ -375,13 +378,19 @@ class SalarySlip(TransactionBase):
 		if joining_date and (getdate(self.start_date) < joining_date <= getdate(self.end_date)):
 			start_date = joining_date
 			unmarked_days = self.get_unmarked_days_based_on_doj_or_relieving(
-				unmarked_days, include_holidays_in_total_working_days, self.start_date, joining_date
+				unmarked_days,
+				include_holidays_in_total_working_days,
+				self.start_date,
+				add_days(joining_date, -1),
 			)
 
 		if relieving_date and (getdate(self.start_date) <= relieving_date < getdate(self.end_date)):
 			end_date = relieving_date
 			unmarked_days = self.get_unmarked_days_based_on_doj_or_relieving(
-				unmarked_days, include_holidays_in_total_working_days, relieving_date, self.end_date
+				unmarked_days,
+				include_holidays_in_total_working_days,
+				add_days(relieving_date, 1),
+				self.end_date,
 			)
 
 		# exclude days for which attendance has been marked
@@ -407,10 +416,10 @@ class SalarySlip(TransactionBase):
 		from erpnext.hr.doctype.employee.employee import is_holiday
 
 		if include_holidays_in_total_working_days:
-			unmarked_days -= date_diff(end_date, start_date)
+			unmarked_days -= date_diff(end_date, start_date) + 1
 		else:
 			# exclude only if not holidays
-			for days in range(date_diff(end_date, start_date)):
+			for days in range(date_diff(end_date, start_date) + 1):
 				date = add_days(end_date, -days)
 				if not is_holiday(self.employee, date):
 					unmarked_days -= 1
@@ -456,37 +465,14 @@ class SalarySlip(TransactionBase):
 		)
 
 		for d in range(working_days):
-			dt = add_days(cstr(getdate(self.start_date)), d)
-			leave = frappe.db.sql(
-				"""
-				SELECT t1.name,
-					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
-					THEN t1.half_day else 0 END,
-					t2.is_ppl,
-					t2.fraction_of_daily_salary_per_leave
-				FROM `tabLeave Application` t1, `tabLeave Type` t2
-				WHERE t2.name = t1.leave_type
-				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
-				AND t1.docstatus = 1
-				AND t1.employee = %(employee)s
-				AND ifnull(t1.salary_slip, '') = ''
-				AND CASE
-					WHEN t2.include_holiday != 1
-						THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-					WHEN t2.include_holiday
-						THEN %(dt)s between from_date and to_date
-					END
-				""".format(
-					holidays
-				),
-				{"employee": self.employee, "dt": dt},
-			)
+			date = add_days(cstr(getdate(self.start_date)), d)
+			leave = get_lwp_or_ppl_for_date(date, self.employee, holidays)
 
 			if leave:
 				equivalent_lwp_count = 0
-				is_half_day_leave = cint(leave[0][1])
-				is_partially_paid_leave = cint(leave[0][2])
-				fraction_of_daily_salary_per_leave = flt(leave[0][3])
+				is_half_day_leave = cint(leave[0].is_half_day)
+				is_partially_paid_leave = cint(leave[0].is_ppl)
+				fraction_of_daily_salary_per_leave = flt(leave[0].fraction_of_daily_salary_per_leave)
 
 				equivalent_lwp_count = (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
 
@@ -952,8 +938,12 @@ class SalarySlip(TransactionBase):
 		)
 
 		# Structured tax amount
-		total_structured_tax_amount = self.calculate_tax_by_tax_slab(
-			total_taxable_earnings_without_full_tax_addl_components, tax_slab
+		eval_locals = self.get_data_for_eval()
+		total_structured_tax_amount = calculate_tax_by_tax_slab(
+			total_taxable_earnings_without_full_tax_addl_components,
+			tax_slab,
+			self.whitelisted_globals,
+			eval_locals,
 		)
 		current_structured_tax_amount = (
 			total_structured_tax_amount - previous_total_paid_taxes
@@ -962,7 +952,9 @@ class SalarySlip(TransactionBase):
 		# Total taxable earnings with additional earnings with full tax
 		full_tax_on_additional_earnings = 0.0
 		if current_additional_earnings_with_full_tax:
-			total_tax_amount = self.calculate_tax_by_tax_slab(total_taxable_earnings, tax_slab)
+			total_tax_amount = calculate_tax_by_tax_slab(
+				total_taxable_earnings, tax_slab, self.whitelisted_globals, eval_locals
+			)
 			full_tax_on_additional_earnings = total_tax_amount - total_structured_tax_amount
 
 		current_tax_amount = current_structured_tax_amount + full_tax_on_additional_earnings
@@ -1278,50 +1270,6 @@ class SalarySlip(TransactionBase):
 			fields="SUM(amount) as total_amount",
 		)[0].total_amount
 
-	def calculate_tax_by_tax_slab(self, annual_taxable_earning, tax_slab):
-		data = self.get_data_for_eval()
-		data.update({"annual_taxable_earning": annual_taxable_earning})
-		tax_amount = 0
-		for slab in tax_slab.slabs:
-			cond = cstr(slab.condition).strip()
-			if cond and not self.eval_tax_slab_condition(cond, data):
-				continue
-			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
-				continue
-			if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
-			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
-				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * 0.01
-
-		# other taxes and charges on income tax
-		for d in tax_slab.other_taxes_and_charges:
-			if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
-				continue
-
-			if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
-				continue
-
-			tax_amount += tax_amount * flt(d.percent) / 100
-
-		return tax_amount
-
-	def eval_tax_slab_condition(self, condition, data):
-		try:
-			condition = condition.strip()
-			if condition:
-				return frappe.safe_eval(condition, self.whitelisted_globals, data)
-		except NameError as err:
-			frappe.throw(
-				_("{0} <br> This error can be due to missing or deleted field.").format(err),
-				title=_("Name error"),
-			)
-		except SyntaxError as err:
-			frappe.throw(_("Syntax error in condition: {0}").format(err))
-		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}").format(e))
-			raise
-
 	def get_component_totals(self, component_type, depends_on_payment_days=0):
 		joining_date, relieving_date = frappe.get_cached_value(
 			"Employee", self.employee, ["date_of_joining", "relieving_date"]
@@ -1396,9 +1344,9 @@ class SalarySlip(TransactionBase):
 			self.total_loan_repayment += payment.total_payment
 
 	def get_loan_details(self):
-		return frappe.get_all(
+		loan_details = frappe.get_all(
 			"Loan",
-			fields=["name", "interest_income_account", "loan_account", "loan_type"],
+			fields=["name", "interest_income_account", "loan_account", "loan_type", "is_term_loan"],
 			filters={
 				"applicant": self.employee,
 				"docstatus": 1,
@@ -1406,6 +1354,15 @@ class SalarySlip(TransactionBase):
 				"company": self.company,
 			},
 		)
+
+		if loan_details:
+			for loan in loan_details:
+				if loan.is_term_loan:
+					process_loan_interest_accrual_for_term_loans(
+						posting_date=self.posting_date, loan_type=loan.loan_type, loan=loan.name
+					)
+
+		return loan_details
 
 	def make_loan_repayment_entry(self):
 		payroll_payable_account = get_payroll_payable_account(self.company, self.payroll_entry)
@@ -1705,3 +1662,103 @@ def get_payroll_payable_account(company, payroll_entry):
 		)
 
 	return payroll_payable_account
+
+
+def calculate_tax_by_tax_slab(
+	annual_taxable_earning, tax_slab, eval_globals=None, eval_locals=None
+):
+	eval_locals.update({"annual_taxable_earning": annual_taxable_earning})
+	tax_amount = 0
+	for slab in tax_slab.slabs:
+		cond = cstr(slab.condition).strip()
+		if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
+			continue
+		if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
+			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+			continue
+		if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
+			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+		elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
+			tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * 0.01
+
+	# other taxes and charges on income tax
+	for d in tax_slab.other_taxes_and_charges:
+		if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
+			continue
+
+		if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
+			continue
+
+		tax_amount += tax_amount * flt(d.percent) / 100
+
+	return tax_amount
+
+
+def eval_tax_slab_condition(condition, eval_globals=None, eval_locals=None):
+	if not eval_globals:
+		eval_globals = {
+			"int": int,
+			"float": float,
+			"long": int,
+			"round": round,
+			"date": datetime.date,
+			"getdate": getdate,
+		}
+
+	try:
+		condition = condition.strip()
+		if condition:
+			return frappe.safe_eval(condition, eval_globals, eval_locals)
+	except NameError as err:
+		frappe.throw(
+			_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			title=_("Name error"),
+		)
+	except SyntaxError as err:
+		frappe.throw(_("Syntax error in condition: {0} in Income Tax Slab").format(err))
+	except Exception as e:
+		frappe.throw(_("Error in formula or condition: {0} in Income Tax Slab").format(e))
+		raise
+
+
+def get_lwp_or_ppl_for_date(date, employee, holidays):
+	LeaveApplication = frappe.qb.DocType("Leave Application")
+	LeaveType = frappe.qb.DocType("Leave Type")
+
+	is_half_day = (
+		frappe.qb.terms.Case()
+		.when(
+			(
+				(LeaveApplication.half_day_date == date)
+				| (LeaveApplication.from_date == LeaveApplication.to_date)
+			),
+			LeaveApplication.half_day,
+		)
+		.else_(0)
+	).as_("is_half_day")
+
+	query = (
+		frappe.qb.from_(LeaveApplication)
+		.inner_join(LeaveType)
+		.on((LeaveType.name == LeaveApplication.leave_type))
+		.select(
+			LeaveApplication.name,
+			LeaveType.is_ppl,
+			LeaveType.fraction_of_daily_salary_per_leave,
+			(is_half_day),
+		)
+		.where(
+			(((LeaveType.is_lwp == 1) | (LeaveType.is_ppl == 1)))
+			& (LeaveApplication.docstatus == 1)
+			& (LeaveApplication.status == "Approved")
+			& (LeaveApplication.employee == employee)
+			& ((LeaveApplication.salary_slip.isnull()) | (LeaveApplication.salary_slip == ""))
+			& ((LeaveApplication.from_date <= date) & (date <= LeaveApplication.to_date))
+		)
+	)
+
+	# if it's a holiday only include if leave type has "include holiday" enabled
+	if date in holidays:
+		query = query.where((LeaveType.include_holiday == "1"))
+
+	return query.run(as_dict=True)
