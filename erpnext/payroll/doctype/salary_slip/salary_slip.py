@@ -478,6 +478,7 @@ class SalarySlip(TransactionBase):
 				WHERE t2.name = t1.leave_type
 				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
 				AND t1.docstatus = 1
+				AND t1.status = 'Approved'
 				AND t1.employee = %(employee)s
 				AND ifnull(t1.salary_slip, '') = ''
 				AND CASE
