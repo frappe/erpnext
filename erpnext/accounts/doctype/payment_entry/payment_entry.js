@@ -865,24 +865,56 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_unallocated_amount(frm);
 	},
 
-	set_unallocated_amount: function(frm) {
-		var unallocated_amount = 0;
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
-			function(d) { return flt(d.amount) }));
+	// set_unallocated_amount: function(frm) {
+	// 	var unallocated_amount = 0;
+	// 	var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+	// 		function(d) { return flt(d.amount) }));
+	//
+	// 	if(frm.doc.party) {
+	// 		if(frm.doc.payment_type == "Receive"
+	// 			&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
+	// 			&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
+	// 				unallocated_amount = (frm.doc.base_received_amount + total_deductions + frm.doc.base_total_taxes_and_charges
+	// 					- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
+	// 		} else if (frm.doc.payment_type == "Pay"
+	// 			&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
+	// 			&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
+	// 				unallocated_amount = (frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges - (total_deductions
+	// 					+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
+	// 		}
+	// 	}
+	// 	frm.set_value("unallocated_amount", unallocated_amount);
+	// 	frm.trigger("set_difference_amount");
+	// },
 
-		if(frm.doc.party) {
-			if(frm.doc.payment_type == "Receive"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_received_amount + total_deductions + frm.doc.base_total_taxes_and_charges
-						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
-			} else if (frm.doc.payment_type == "Pay"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges - (total_deductions
-						+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
+	set_unallocated_amount: function(frm) {
+		let unallocated_amount = 0;
+		const total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [], (d) => flt(d.amount) ));
+
+		const {
+			party,
+			payment_type,
+			paid_amount,
+			received_amount,
+			target_exchange_rate,
+			source_exchange_rate,
+			total_allocated_amount,
+			base_total_taxes_and_charges,
+		} = frm.doc;
+
+		if (party) {
+			if (payment_type === "Pay") {
+				unallocated_amount = received_amount - total_allocated_amount;
+				unallocated_amount += (base_total_taxes_and_charges / target_exchange_rate);
+				unallocated_amount += (total_deductions / target_exchange_rate);
+			}
+			else if (payment_type === "Receive") {
+				unallocated_amount = paid_amount - total_allocated_amount;
+				unallocated_amount += (base_total_taxes_and_charges / source_exchange_rate);
+				unallocated_amount += (total_deductions / source_exchange_rate);
 			}
 		}
+
 		frm.set_value("unallocated_amount", unallocated_amount);
 		frm.trigger("set_difference_amount");
 	},
@@ -907,6 +939,20 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_value("difference_amount", difference_amount - total_deductions +
 			frm.doc.base_total_taxes_and_charges);
+
+		// If the difference amount equals the un-allocated amount in account currency
+		// then the transaction is balanced.
+		const p = precision("unallocated_amount");
+		if (frm.doc.payment_type === "Pay" &&
+			flt(frm.doc.difference_amount / frm.doc.target_exchange_rate, p) * -1 === flt(frm.doc.unallocated_amount, p)) {
+			frm.set_value("unallocated_amount", 0);
+			frm.set_value("difference_amount", 0);
+		}
+		else if (frm.doc.payment_type === "Receive" &&
+			flt(frm.doc.difference_amount / frm.doc.source_exchange_rate, p)  === flt(frm.doc.unallocated_amount, p)) {
+			frm.set_value("unallocated_amount", 0);
+			frm.set_value("difference_amount", 0);
+		}
 
 		frm.events.hide_unhide_fields(frm);
 	},

@@ -629,26 +629,20 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
 			included_taxes = self.get_included_taxes()
-			if (
-				self.payment_type == "Receive"
-				and self.base_total_allocated_amount < self.base_received_amount + total_deductions
-				and self.total_allocated_amount
-				< self.paid_amount + (total_deductions / self.source_exchange_rate)
-			):
+			if self.payment_type == "Pay":
 				self.unallocated_amount = (
-					self.base_received_amount + total_deductions - self.base_total_allocated_amount
-				) / self.source_exchange_rate
-				self.unallocated_amount -= included_taxes
-			elif (
-				self.payment_type == "Pay"
-				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions)
-				and self.total_allocated_amount
-				< self.received_amount + (total_deductions / self.target_exchange_rate)
-			):
+					self.received_amount
+					- self.total_allocated_amount
+					+ (included_taxes / self.target_exchange_rate)
+					+ (total_deductions / self.target_exchange_rate)
+				)
+			elif self.payment_type == "Receive":
 				self.unallocated_amount = (
-					self.base_paid_amount - (total_deductions + self.base_total_allocated_amount)
-				) / self.target_exchange_rate
-				self.unallocated_amount -= included_taxes
+					self.paid_amount
+					- self.total_allocated_amount
+					+ (included_taxes / self.source_exchange_rate)
+					+ (total_deductions / self.source_exchange_rate)
+				)
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (
@@ -672,6 +666,19 @@ class PaymentEntry(AccountsController):
 		self.difference_amount = flt(
 			self.difference_amount - total_deductions - included_taxes, self.precision("difference_amount")
 		)
+
+		p = self.precision("unallocated_amount")
+		if (
+			self.payment_type == "Pay"
+			and flt(self.difference_amount / self.target_exchange_rate, p) * -1
+			== flt(self.unallocated_amount, p)
+		) or (
+			self.payment_type == "Receive"
+			and flt(self.difference_amount / self.source_exchange_rate, p)
+			== flt(self.unallocated_amount, p)
+		):
+			self.unallocated_amount = 0
+			self.difference_amount = 0
 
 	def get_included_taxes(self):
 		included_taxes = 0
