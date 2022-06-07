@@ -1,11 +1,13 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import copy
+from collections import OrderedDict
 
 import frappe
-from frappe import _
+from frappe import _, qb
+from frappe.query_builder import CustomFunction
+from frappe.query_builder.functions import Max
 from frappe.utils import date_diff, flt, getdate
 
 
@@ -18,11 +20,12 @@ def execute(filters=None):
 	columns = get_columns(filters)
 	conditions = get_conditions(filters)
 	data = get_data(conditions, filters)
+	so_elapsed_time = get_so_elapsed_time(data)
 
 	if not data:
 		return [], [], None, []
 
-	data, chart_data = prepare_data(data, filters)
+	data, chart_data = prepare_data(data, so_elapsed_time, filters)
 
 	return columns, data, None, chart_data
 
@@ -65,7 +68,6 @@ def get_data(conditions, filters):
 			IF(so.status in ('Completed','To Bill'), 0, (SELECT delay_days)) as delay,
 			soi.qty, soi.delivered_qty,
 			(soi.qty - soi.delivered_qty) AS pending_qty,
-			IF((SELECT pending_qty) = 0, (TO_SECONDS(Max(dn.posting_date))-TO_SECONDS(so.transaction_date)), 0) as time_taken_to_deliver,
 			IFNULL(SUM(sii.qty), 0) as billed_qty,
 			soi.base_amount as amount,
 			(soi.delivered_qty * soi.base_rate) as delivered_qty_amount,
@@ -76,13 +78,9 @@ def get_data(conditions, filters):
 			soi.description as description
 		FROM
 			`tabSales Order` so,
-			(`tabSales Order Item` soi
+			`tabSales Order Item` soi
 		LEFT JOIN `tabSales Invoice Item` sii
-			ON sii.so_detail = soi.name and sii.docstatus = 1)
-		LEFT JOIN `tabDelivery Note Item` dni
-			on dni.so_detail = soi.name
-		LEFT JOIN `tabDelivery Note` dn
-			on dni.parent = dn.name and dn.docstatus = 1
+			ON sii.so_detail = soi.name and sii.docstatus = 1
 		WHERE
 			soi.parent = so.name
 			and so.status not in ('Stopped', 'Closed', 'On Hold')
@@ -100,7 +98,48 @@ def get_data(conditions, filters):
 	return data
 
 
-def prepare_data(data, filters):
+def get_so_elapsed_time(data):
+	"""
+	query SO's elapsed time till latest delivery note
+	"""
+	so_elapsed_time = OrderedDict()
+	if data:
+		sales_orders = [x.sales_order for x in data]
+
+		so = qb.DocType("Sales Order")
+		soi = qb.DocType("Sales Order Item")
+		dn = qb.DocType("Delivery Note")
+		dni = qb.DocType("Delivery Note Item")
+
+		to_seconds = CustomFunction("TO_SECONDS", ["date"])
+
+		query = (
+			qb.from_(so)
+			.inner_join(soi)
+			.on(soi.parent == so.name)
+			.left_join(dni)
+			.on(dni.so_detail == soi.name)
+			.left_join(dn)
+			.on(dni.parent == dn.name)
+			.select(
+				so.name.as_("sales_order"),
+				soi.item_code.as_("so_item_code"),
+				(to_seconds(Max(dn.posting_date)) - to_seconds(so.transaction_date)).as_("elapsed_seconds"),
+			)
+			.where((so.name.isin(sales_orders)) & (dn.docstatus == 1))
+			.orderby(so.name, soi.name)
+			.groupby(soi.name)
+		)
+		dn_elapsed_time = query.run(as_dict=True)
+
+		for e in dn_elapsed_time:
+			key = (e.sales_order, e.so_item_code)
+			so_elapsed_time[key] = e.elapsed_seconds
+
+	return so_elapsed_time
+
+
+def prepare_data(data, so_elapsed_time, filters):
 	completed, pending = 0, 0
 
 	if filters.get("group_by_so"):
@@ -115,6 +154,13 @@ def prepare_data(data, filters):
 		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
 
 		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
+
+		row["time_taken_to_deliver"] = (
+			so_elapsed_time.get((row.sales_order, row.item_code))
+			if row["status"] in ("To Bill", "Completed")
+			else 0
+		)
+
 		if filters.get("group_by_so"):
 			so_name = row["sales_order"]
 
