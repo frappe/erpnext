@@ -1202,24 +1202,31 @@ def get_mandatory_approval(doctype):
 
 
 def get_approved_leaves_for_period(employee, leave_type, from_date, to_date):
-	query = """
-		select employee, leave_type, from_date, to_date, total_leave_days
-		from `tabLeave Application`
-		where employee=%(employee)s
-			and docstatus=1
-			and status='Approved'
-			and (from_date between %(from_date)s and %(to_date)s
-				or to_date between %(from_date)s and %(to_date)s
-				or (from_date < %(from_date)s and to_date > %(to_date)s))
-	"""
-	if leave_type:
-		query += "and leave_type=%(leave_type)s"
-
-	leave_applications = frappe.db.sql(
-		query,
-		{"from_date": from_date, "to_date": to_date, "employee": employee, "leave_type": leave_type},
-		as_dict=1,
+	LeaveApplication = frappe.qb.DocType("Leave Application")
+	query = (
+		frappe.qb.from_(LeaveApplication)
+		.select(
+			LeaveApplication.employee,
+			LeaveApplication.leave_type,
+			LeaveApplication.from_date,
+			LeaveApplication.to_date,
+			LeaveApplication.total_leave_days,
+		)
+		.where(
+			(LeaveApplication.employee == employee)
+			& (LeaveApplication.docstatus == 1)
+			& (LeaveApplication.status == "Approved")
+			& (
+				(LeaveApplication.from_date.between(from_date, to_date))
+				| (LeaveApplication.to_date.between(from_date, to_date))
+				| ((LeaveApplication.from_date < from_date) & (LeaveApplication.to_date > to_date))
+			)
+		)
 	)
+
+	if leave_type:
+		query = query.where(LeaveApplication.leave_type == leave_type)
+	leave_applications = query.run(as_dict=True)
 
 	leave_days = 0
 	for leave_app in leave_applications:
