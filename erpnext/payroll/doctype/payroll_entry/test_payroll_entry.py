@@ -35,7 +35,7 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
 test_dependencies = ["Holiday List"]
 
 
-class TestPayrollEntry(unittest.TestCase):
+class TestPayrollEntry(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		frappe.db.set_value(
