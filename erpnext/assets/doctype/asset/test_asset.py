@@ -204,9 +204,9 @@ class TestAsset(AssetSetup):
 
 		post_depreciation_entries(date="2022-01-01")
 
-		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
+		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company", posting_date=getdate("2022-04-22"))
 		si.customer = "_Test Customer"
-		si.posting_date = getdate("2022-04-22")
+		# si.posting_date = getdate("2022-04-22")
 		si.due_date = getdate("2022-04-22")
 		si.get("items")[0].rate = 75000
 		si.insert()
