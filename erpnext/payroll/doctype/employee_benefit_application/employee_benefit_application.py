@@ -207,27 +207,35 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 def calculate_lwp(employee, start_date, holidays, working_days):
 	lwp = 0
 	holidays = "','".join(holidays)
+
 	for d in range(working_days):
 		dt = add_days(cstr(getdate(start_date)), d)
-		leave = frappe.db.sql(
-			"""
-			select t1.name, t1.half_day
-			from `tabLeave Application` t1, `tabLeave Type` t2
-			where t2.name = t1.leave_type
-			and t2.is_lwp = 1
-			and t1.docstatus = 1
-			and t1.status = 'Approved'
-			and t1.employee = %(employee)s
-			and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-			WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
-			END
-			""".format(
-				holidays
-			),
-			{"employee": employee, "dt": dt},
+
+		LeaveApplication = frappe.qb.DocType("Leave Application")
+		LeaveType = frappe.qb.DocType("Leave Type")
+
+		query = (
+			frappe.qb.from_(LeaveApplication)
+			.inner_join(LeaveType)
+			.on((LeaveType.name == LeaveApplication.leave_type))
+			.select(LeaveApplication.name, LeaveApplication.half_day)
+			.where(
+				(LeaveType.is_lwp == 1)
+				& (LeaveApplication.docstatus == 1)
+				& (LeaveApplication.status == "Approved")
+				& (LeaveApplication.employee == employee)
+				& ((LeaveApplication.from_date <= dt) & (dt <= LeaveApplication.to_date))
+			)
 		)
-		if leave:
-			lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+
+		# if it's a holiday only include if leave type has "include holiday" enabled
+		if dt in holidays:
+			query = query.where((LeaveType.include_holiday == "1"))
+		leaves = query.run()
+
+		if leaves:
+			lwp = cint(leaves[0][1]) and (lwp + 0.5) or (lwp + 1)
+
 	return lwp
 
 
