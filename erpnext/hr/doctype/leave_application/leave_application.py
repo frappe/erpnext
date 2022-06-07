@@ -757,22 +757,6 @@ def get_leave_details(employee, date):
 	leave_allocation = {}
 	for d in allocation_records:
 		allocation = allocation_records.get(d, frappe._dict())
-
-		total_allocated_leaves = (
-			frappe.db.get_value(
-				"Leave Allocation",
-				{
-					"from_date": ("<=", date),
-					"to_date": (">=", date),
-					"employee": employee,
-					"leave_type": allocation.leave_type,
-					"docstatus": 1,
-				},
-				"SUM(total_leaves_allocated)",
-			)
-			or 0
-		)
-
 		remaining_leaves = get_leave_balance_on(
 			employee, d, date, to_date=allocation.to_date, consider_all_leaves_in_the_allocation_period=True
 		)
@@ -782,10 +766,11 @@ def get_leave_details(employee, date):
 		leaves_pending = get_leaves_pending_approval_for_period(
 			employee, d, allocation.from_date, end_date
 		)
+		expired_leaves = allocation.total_leaves_allocated - (remaining_leaves + leaves_taken)
 
 		leave_allocation[d] = {
-			"total_leaves": total_allocated_leaves,
-			"expired_leaves": total_allocated_leaves - (remaining_leaves + leaves_taken),
+			"total_leaves": allocation.total_leaves_allocated,
+			"expired_leaves": expired_leaves if expired_leaves > 0 else 0,
 			"leaves_taken": leaves_taken,
 			"leaves_pending_approval": leaves_pending,
 			"remaining_leaves": remaining_leaves,
@@ -830,7 +815,7 @@ def get_leave_balance_on(
 	allocation_records = get_leave_allocation_records(employee, date, leave_type)
 	allocation = allocation_records.get(leave_type, frappe._dict())
 
-	end_date = allocation.to_date if consider_all_leaves_in_the_allocation_period else date
+	end_date = allocation.to_date if cint(consider_all_leaves_in_the_allocation_period) else date
 	cf_expiry = get_allocation_expiry_for_cf_leaves(employee, leave_type, to_date, date)
 
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, end_date)
