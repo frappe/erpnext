@@ -82,7 +82,6 @@ class TestBOM(FrappeTestCase):
 			as_dict=True,
 		)
 		rm_base_rate = bom_rates[0].get("base_rate") if bom_rates else 0
-		rm_rate = bom_rates[0].get("rate") if bom_rates else 0
 
 		# Reset item valuation rate
 		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_base_rate + 10)

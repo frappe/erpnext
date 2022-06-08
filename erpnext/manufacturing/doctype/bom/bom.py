@@ -932,44 +932,46 @@ def get_bom_item_rate(args, bom_doc):
 	return flt(rate)
 
 
-def get_valuation_rate(args):
+def get_valuation_rate(data):
 	"""
 	1) Get average valuation rate from all warehouses
 	2) If no value, get last valuation rate from SLE
 	3) If no value, get valuation rate from Item
 	"""
+	from frappe.query_builder.functions import Sum
 
+	item_code, company = data.get("item_code"), data.get("company")
 	valuation_rate = 0.0
-	item_valuation = frappe.db.sql(
-		"""
-		select
-			(sum(bin.stock_value) / sum(bin.actual_qty)) as valuation_rate
-		from
-			`tabBin` bin, `tabWarehouse` warehouse
-		where
-			bin.item_code=%(item)s
-			and bin.warehouse = warehouse.name
-			and warehouse.company=%(company)s""",
-		{"item": args["item_code"], "company": args["company"]},
-		as_dict=1,
-	)[0]
+
+	bin_table = frappe.qb.DocType("Bin")
+	wh_table = frappe.qb.DocType("Warehouse")
+	item_valuation = (
+		frappe.qb.from_(bin_table)
+		.join(wh_table)
+		.on(bin_table.warehouse == wh_table.name)
+		.select((Sum(bin_table.stock_value) / Sum(bin_table.actual_qty)).as_("valuation_rate"))
+		.where((bin_table.item_code == item_code) & (wh_table.company == company))
+	).run(as_dict=True)[0]
 
 	valuation_rate = item_valuation.get("valuation_rate")
 
 	if (valuation_rate is not None) and valuation_rate <= 0:
 		# Explicit null value check. If None, Bins don't exist, neither does SLE
-		last_valuation_rate = frappe.db.sql(
-			"""select valuation_rate
-			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0 and is_cancelled = 0
-			order by posting_date desc, posting_time desc, creation desc limit 1""",
-			args["item_code"],
-		)
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		last_val_rate = (
+			frappe.qb.from_(sle)
+			.select(sle.valuation_rate)
+			.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
+			.orderby(sle.posting_date, order=frappe.qb.desc)
+			.orderby(sle.posting_time, order=frappe.qb.desc)
+			.orderby(sle.creation, order=frappe.qb.desc)
+			.limit(1)
+		).run(as_dict=True)
 
-		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+		valuation_rate = flt(last_val_rate[0].get("valuation_rate")) if last_val_rate else 0
 
 	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item", args["item_code"], "valuation_rate")
+		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 
 	return flt(valuation_rate)
 
