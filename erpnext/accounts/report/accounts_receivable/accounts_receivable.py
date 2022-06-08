@@ -160,6 +160,8 @@ class ReceivablePayableReport(object):
 			"range3",
 			"range4",
 			"range5",
+			"future_amount",
+			"remaining_balance"
 		]
 
 	def update_voucher_balance(self, gle):
@@ -563,7 +565,7 @@ class ReceivablePayableReport(object):
 				jea.party,
 				jea.party_type,
 				je.posting_date as future_date,
-				sum({0}) as future_amount,
+				sum('{0}') as future_amount,
 				je.cheque_no as future_ref
 			from
 				`tabJournal Entry` as je inner join `tabJournal Entry Account` as jea
