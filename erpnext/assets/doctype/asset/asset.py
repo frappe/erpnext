@@ -257,6 +257,7 @@ class Asset(AccountsController):
 				number_of_pending_depreciations += 1
 
 			skip_row = False
+			should_get_last_day = self.is_last_day_of_the_month(finance_book.depreciation_start_date)
 
 			for n in range(start[finance_book.idx - 1], number_of_pending_depreciations):
 				# If depreciation is already completed (for double declining balance)
@@ -269,6 +270,9 @@ class Asset(AccountsController):
 					schedule_date = add_months(
 						finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
 					)
+
+					if should_get_last_day:
+						schedule_date = get_last_day(schedule_date)
 
 					# schedule date will be a year later from start date
 					# so monthly schedule date is calculated by removing 11 months from it
@@ -404,6 +408,14 @@ class Asset(AccountsController):
 								"finance_book_id": finance_book.idx,
 							},
 						)
+
+	def is_last_day_of_the_month(self, depreciation_start_date):
+		last_day_of_the_month = get_last_day(depreciation_start_date)
+
+		if getdate(last_day_of_the_month) == getdate(depreciation_start_date):
+			return True
+		else:
+			return False
 
 	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
 	# JE: Journal Entry, FB: Finance Book
