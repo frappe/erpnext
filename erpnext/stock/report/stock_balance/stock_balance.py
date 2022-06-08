@@ -56,8 +56,8 @@ def execute(filters=None):
 		return columns, []
 
 	ordered_qty_map = get_item_po_detail(filters)
-	iwb_map = get_item_warehouse_map(filters, sle, ordered_qty_map)
 	item_map = get_item_details(items, sle, filters)
+	iwb_map = get_item_warehouse_map(filters, sle, item_map, ordered_qty_map)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
@@ -243,7 +243,7 @@ def get_stock_ledger_entries(filters, items):
 		order by posting_date, posting_time, creation, actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
-def get_item_warehouse_map(filters, sle, ordered_qty_map=None):
+def get_item_warehouse_map(filters, sle, item_map, ordered_qty_map=None):
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
@@ -304,28 +304,30 @@ def get_item_warehouse_map(filters, sle, ordered_qty_map=None):
 			qty_dict = iwb_map[key]
 			qty_dict.ordered_qty = ordered_qty
 
-	if cint(filters.filter_item_without_transactions):
-		iwb_map = filter_items_with_no_transactions(iwb_map)
+	iwb_map = filter_items_with_no_transactions(filters, iwb_map, item_map)
 
 	if cint(filters.consolidated):
 		iwb_map = consolidate_values(iwb_map)
 
 	return iwb_map
 
-def filter_items_with_no_transactions(iwb_map):
+def filter_items_with_no_transactions(filters, iwb_map, item_map):
 	for (company, item, warehouse) in sorted(iwb_map):
-		qty_dict = iwb_map[(company, item, warehouse)]
+		item_dict = item_map.get(item, {})
 
-		no_transactions = True
-		float_precision = cint(frappe.db.get_default("float_precision")) or 3
-		for key, val in iteritems(qty_dict):
-			val = flt(val, float_precision)
-			qty_dict[key] = val
-			if key != "val_rate" and val:
-				no_transactions = False
+		if cint(filters.filter_item_without_transactions) or item_dict.get('disabled'):
+			qty_dict = iwb_map[(company, item, warehouse)]
+			no_transactions = True
+			float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
-		if no_transactions:
-			iwb_map.pop((company, item, warehouse))
+			for key, val in iteritems(qty_dict):
+				val = flt(val, float_precision)
+				qty_dict[key] = val
+				if key != "val_rate" and val:
+					no_transactions = False
+
+			if no_transactions:
+				iwb_map.pop((company, item, warehouse))
 
 	return iwb_map
 
@@ -380,7 +382,7 @@ def get_item_details(items, sle, filters):
 	res = frappe.db.sql("""
 		select
 			item.name, item.item_name, item.description, item.item_group, item.brand,
-			item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
+			item.stock_uom, item.alt_uom, item.alt_uom_size, item.disabled {cf_field}
 		from
 			`tabItem` item
 			{cf_join}
