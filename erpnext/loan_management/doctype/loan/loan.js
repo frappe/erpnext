@@ -93,6 +93,12 @@ frappe.ui.form.on('Loan', {
 					frm.trigger("make_loan_refund");
 				},__('Create'));
 			}
+
+			if (frm.doc.status == "Loan Closure Requested" && frm.doc.is_term_loan && !frm.doc.is_secured_loan) {
+				frm.add_custom_button(__('Close Loan'), function() {
+					frm.trigger("close_unsecured_term_loan");
+				},__('Status'));
+			}
 		}
 		frm.trigger("toggle_fields");
 	},
@@ -170,6 +176,18 @@ frappe.ui.form.on('Loan', {
 					let doc = frappe.model.sync(r.message)[0];
 					frappe.set_route("Form", doc.doctype, doc.name);
 				}
+			}
+		})
+	},
+
+	close_unsecured_term_loan: function(frm) {
+		frappe.call({
+			args: {
+				"loan": frm.doc.name
+			},
+			method: "erpnext.loan_management.doctype.loan.loan.close_unsecured_term_loan",
+			callback: function () {
+				frm.refresh();
 			}
 		})
 	},
