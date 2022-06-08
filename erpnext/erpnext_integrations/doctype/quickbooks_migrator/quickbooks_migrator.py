@@ -35,12 +35,27 @@ def callback(*args, **kwargs):
 
 class QuickBooksMigrator(Document):
 	def __init__(self, *args, **kwargs):
-		super(QuickBooksMigrator, self).__init__(*args, **kwargs)
-		self.oauth = OAuth2Session(
-			client_id=self.client_id, redirect_uri=self.redirect_url, scope=self.scope
-		)
-		if not self.authorization_url and self.authorization_endpoint:
+		super().__init__(*args, **kwargs)
+
+		if not self.authorization_url:
+			self.set_authorization_url()
+
+	def set_authorization_url(self):
+		if self.authorization_endpoint:
 			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
+
+	@property
+	def oauth(self):
+		if not (oauth := getattr(self, "_oauth", None)):
+			self._oauth = oauth = OAuth2Session(
+				client_id=self.client_id, redirect_uri=self.redirect_url, scope=self.scope
+			)
+
+		return oauth
+
+	def remove_unpicklable_values(self, state):
+		state.pop("_oauth", None)
+		return super().remove_unpicklable_values(state)
 
 	def on_update(self):
 		if self.company:
@@ -51,8 +66,8 @@ class QuickBooksMigrator(Document):
 			)
 			if company_warehouses:
 				self.default_warehouse = company_warehouses[0].name
-		if self.authorization_endpoint:
-			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
+
+		self.set_authorization_url()
 
 	@frappe.whitelist()
 	def migrate(self):
