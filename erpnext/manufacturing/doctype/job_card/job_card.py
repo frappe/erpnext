@@ -621,7 +621,7 @@ class JobCard(Document):
 		self.set_status(update_status)
 
 	def set_status(self, update_status=False):
-		if self.status == "On Hold":
+		if self.status == "On Hold" and self.docstatus == 0:
 			return
 
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
