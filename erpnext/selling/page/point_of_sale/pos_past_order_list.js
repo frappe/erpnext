@@ -16,7 +16,7 @@ erpnext.PointOfSale.PastOrderList = class {
 		this.wrapper.append(
 			`<section class="past-order-list">
 				<div class="filter-section">
-					<div class="label">Recent Orders</div>
+					<div class="label">${__('Recent Orders')}</div>
 					<div class="search-field"></div>
 					<div class="status-field"></div>
 				</div>

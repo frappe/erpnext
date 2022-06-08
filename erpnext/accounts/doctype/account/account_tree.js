@@ -78,6 +78,7 @@ frappe.treeview_settings["Account"] = {
 				const format = (value, currency) => format_currency(Math.abs(value), currency);
 
 				if (account.balance!==undefined) {
+					node.parent && node.parent.find('.balance-area').remove();
 					$('<span class="balance-area pull-right">'
 						+ (account.balance_in_account_currency ?
 							(format(account.balance_in_account_currency, account.account_currency) + " / ") : "")
@@ -159,7 +160,7 @@ frappe.treeview_settings["Account"] = {
 			let root_company = treeview.page.fields_dict.root_company.get_value();
 
 			if(root_company) {
-				frappe.throw(__("Please add the account to root level Company - ") + root_company);
+				frappe.throw(__("Please add the account to root level Company - {0}"), [root_company]);
 			} else {
 				treeview.new_node();
 			}
@@ -175,7 +176,7 @@ frappe.treeview_settings["Account"] = {
 					&& node.expandable && !node.hide_add;
 			},
 			click: function() {
-				var me = frappe.treeview_settings['Account'].treeview;
+				var me = frappe.views.trees['Account'];
 				me.new_node();
 			},
 			btnClass: "hidden-xs"

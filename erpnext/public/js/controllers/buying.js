@@ -81,7 +81,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if (me.frm.doc.is_subcontracted == "Yes") {
+			if (me.frm.doc.is_subcontracted) {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
@@ -90,7 +90,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1 }
+					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1, 'has_variants': 0}
 				}
 			}
 		});
@@ -441,7 +441,7 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 				type: "GET",
 				method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
 				args: {
-					args: {
+					row: {
 						item_code: args.product_bundle,
 						quantity: args.quantity,
 						parenttype: frm.doc.doctype,

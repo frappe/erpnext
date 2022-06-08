@@ -1,9 +1,11 @@
 {
+ "actions": [],
  "creation": "2017-08-29 04:26:36.159247",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "invoice_number",
   "party_type",
   "party",
   "temporary_opening_account",
@@ -103,10 +105,17 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "description": "Reference number of the invoice from the previous system",
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "label": "Invoice Number"
   }
  ],
  "istable": 1,
- "modified": "2019-07-25 15:00:00.460695",
+ "links": [],
+ "modified": "2022-03-21 19:31:45.382656",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",
@@ -115,5 +124,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

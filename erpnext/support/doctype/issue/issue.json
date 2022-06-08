@@ -24,12 +24,10 @@
   "service_level_section",
   "service_level_agreement",
   "response_by",
-  "response_by_variance",
   "reset_service_level_agreement",
   "cb",
   "agreement_status",
   "resolution_by",
-  "resolution_by_variance",
   "service_level_agreement_creation",
   "on_hold_since",
   "total_hold_time",
@@ -123,7 +121,6 @@
    "search_index": 1
   },
   {
-   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -319,22 +316,6 @@
    "label": "Via Customer Portal"
   },
   {
-   "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
-   "fieldname": "response_by_variance",
-   "fieldtype": "Duration",
-   "hide_seconds": 1,
-   "label": "Response By Variance",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
-   "fieldname": "resolution_by_variance",
-   "fieldtype": "Duration",
-   "hide_seconds": 1,
-   "label": "Resolution By Variance",
-   "read_only": 1
-  },
-  {
    "fieldname": "service_level_agreement_creation",
    "fieldtype": "Datetime",
    "hidden": 1,
@@ -391,12 +372,12 @@
    "read_only": 1
   },
   {
-   "default": "Ongoing",
+   "default": "First Response Due",
    "depends_on": "eval: doc.service_level_agreement",
    "fieldname": "agreement_status",
    "fieldtype": "Select",
    "label": "Service Level Agreement Status",
-   "options": "Ongoing\nFulfilled\nFailed",
+   "options": "First Response Due\nResolution Due\nFulfilled\nFailed",
    "read_only": 1
   },
   {
@@ -410,10 +391,11 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2021-06-10 03:22:27.098898",
+ "modified": "2021-11-24 13:13:10.276630",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

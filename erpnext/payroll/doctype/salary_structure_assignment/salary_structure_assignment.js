@@ -40,28 +40,29 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				}
 			}
 		});
+
+		frm.set_query("cost_center", "payroll_cost_centers", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			};
+		});
 	},
 
 	employee: function(frm) {
-		if(frm.doc.employee){
+		if (frm.doc.employee) {
 			frappe.call({
-				method: "frappe.client.get_value",
-				args:{
-					doctype: "Employee",
-					fieldname: "company",
-					filters:{
-						name: frm.doc.employee
-					}
-				},
+				method: "set_payroll_cost_centers",
+				doc: frm.doc,
 				callback: function(data) {
-					if(data.message){
-						frm.set_value("company", data.message.company);
-					}
+					refresh_field("payroll_cost_centers");
 				}
 			});
 		}
-		else{
-			frm.set_value("company", null);
+		else {
+			frm.set_value("payroll_cost_centers", []);
 		}
 	},
 

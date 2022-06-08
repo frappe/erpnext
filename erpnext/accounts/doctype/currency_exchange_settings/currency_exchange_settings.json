@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "creation": "2022-01-10 13:03:26.237081",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "api_details_section",
+  "service_provider",
+  "api_endpoint",
+  "url",
+  "column_break_3",
+  "help",
+  "section_break_2",
+  "req_params",
+  "column_break_4",
+  "result_key"
+ ],
+ "fields": [
+  {
+   "fieldname": "api_details_section",
+   "fieldtype": "Section Break",
+   "label": "API Details"
+  },
+  {
+   "fieldname": "api_endpoint",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API Endpoint",
+   "read_only_depends_on": "eval: doc.service_provider != \"Custom\"",
+   "reqd": 1
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "label": "Example URL",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "help",
+   "fieldtype": "HTML",
+   "label": "Help",
+   "options": "<h3>Currency Exchange Settings Help</h3>\n<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>\n<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>\n<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Request Parameters"
+  },
+  {
+   "fieldname": "req_params",
+   "fieldtype": "Table",
+   "label": "Parameters",
+   "options": "Currency Exchange Settings Details",
+   "read_only_depends_on": "eval: doc.service_provider != \"Custom\"",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "result_key",
+   "fieldtype": "Table",
+   "label": "Result Key",
+   "options": "Currency Exchange Settings Result",
+   "read_only_depends_on": "eval: doc.service_provider != \"Custom\"",
+   "reqd": 1
+  },
+  {
+   "fieldname": "service_provider",
+   "fieldtype": "Select",
+   "label": "Service Provider",
+   "options": "frankfurter.app\nexchangerate.host\nCustom",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-01-10 15:51:14.521174",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Currency Exchange Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
