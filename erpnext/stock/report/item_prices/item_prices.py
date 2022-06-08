@@ -69,7 +69,7 @@ def get_data(filters):
 	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 
 	price_lists, selected_price_list = get_price_lists(filters)
-	price_lists_cond = " and p.price_list in ({0})".format(", ".join([frappe.db.escape(d) for d in price_lists]))
+	price_lists_cond = " and p.price_list in ({0})".format(", ".join([frappe.db.escape(d) for d in price_lists or ['']]))
 
 	item_data = frappe.db.sql("""
 		select item.name as item_code, item.item_name, item.item_group, item.stock_uom, item.sales_uom, item.alt_uom, item.alt_uom_size,
@@ -250,7 +250,7 @@ def get_price_lists(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	conditions = " and ".join(conditions)
+	conditions = "where " + " and ".join(conditions) if conditions else ""
 
 	price_lists = []
 	add_to_price_lists(filters.standard_price_list)
@@ -267,7 +267,7 @@ def get_price_lists(filters):
 		add_to_price_lists(frappe.db.sql_list("""
 			select name
 			from `tabPrice List`
-			where {0}
+			{0}
 			order by creation
 		""".format(conditions)))
 
