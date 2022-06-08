@@ -15,6 +15,9 @@
   "posting_date",
   "due_date",
   "reason_credit_note",
+  "section_break_document",
+  "references",
+  "total_references",
   "section_break_1",
   "total_exempt",
   "taxes",
@@ -233,10 +236,26 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_document",
+   "fieldtype": "Section Break",
+   "label": "Document to which it applies"
+  },
+  {
+   "fieldname": "references",
+   "fieldtype": "Table",
+   "label": "References",
+   "options": "Note References"
+  },
+  {
+   "fieldname": "total_references",
+   "fieldtype": "Currency",
+   "label": "Total References"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-09 16:01:56.235136",
+ "modified": "2022-06-07 22:51:49.587904",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXP",

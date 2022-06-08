@@ -53,6 +53,16 @@ class CreditNoteCXP(Document):
 			supplier.save()
 
 	def calculate_total(self):
+		if not self.get("references"):
+			frappe.throw(_(" Required references"))
+		total_reference = 0
+		for d in self.get("references"):
+			total_reference += d.total_amount
+			self.total_references = total_reference
+		
+		if self.total_exempt > self.total_references:
+			frappe.throw(_("Amount cannot be greater than the total references"))
+			
 		self.calculate_isv()
 		total_base = 0
 		if self.total_exempt != None:
@@ -100,8 +110,8 @@ class CreditNoteCXP(Document):
 	def update_accounts_status_cancel(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.debit -= self.total
-			supplier.remaining_balance -= self.total
+			supplier.credit -= self.total
+			supplier.remaining_balance += self.total
 			supplier.save()
 	
 	def validate_status(self):

@@ -20,6 +20,7 @@ class DebitNoteCXP(Document):
 	
 	def on_cancel(self):
 		self.update_dashboard_supplier_cancel()
+		self.update_accounts_status_cancel()
 	
 	def update_dashboard_supplier(self):
 		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
@@ -123,6 +124,13 @@ class DebitNoteCXP(Document):
 		if supplier:
 			supplier.debit += self.amount_total
 			supplier.remaining_balance += self.amount_total
+			supplier.save()
+	
+	def update_accounts_status_cancel(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.debit -= self.amount_total
+			supplier.remaining_balance -= self.amount_total
 			supplier.save()
 	
 	def apply_gl_entry(self):
