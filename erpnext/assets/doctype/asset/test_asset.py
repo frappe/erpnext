@@ -1275,7 +1275,14 @@ class TestDepreciationBasics(AssetSetup):
 			submit=1,
 		)
 
-		expected_dates = ["2020-02-28", "2020-03-31", "2020-04-30", "2020-05-31", "2020-06-30", "2020-07-15"]
+		expected_dates = [
+			"2020-02-28",
+			"2020-03-31",
+			"2020-04-30",
+			"2020-05-31",
+			"2020-06-30",
+			"2020-07-15",
+		]
 
 		for i, schedule in enumerate(asset.schedules):
 			self.assertEqual(expected_dates[i], schedule.schedule_date)
