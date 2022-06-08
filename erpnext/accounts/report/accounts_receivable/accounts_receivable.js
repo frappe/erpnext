@@ -148,6 +148,12 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Territory"
 		},
 		{
+			"fieldname": "account_currency",
+			"label": __("Account Currency"),
+			"fieldtype": "Link",
+			"options": "Currency"
+		},
+		{
 			"fieldname": "group_by_party",
 			"label": __("Group By Customer"),
 			"fieldtype": "Check"

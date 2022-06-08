@@ -114,6 +114,7 @@ class ReceivablePayableReport(object):
 					party_account=gle.account,
 					posting_date=gle.posting_date,
 					account_currency=gle.account_currency,
+					debit_in_account_currency=gle.debit_in_account_currency,
 					remarks=gle.remarks if self.filters.get("show_remarks") else None,
 					invoiced=0.0,
 					paid=0.0,
@@ -695,7 +696,7 @@ class ReceivablePayableReport(object):
 		self.gl_entries = frappe.db.sql(
 			"""
 			select
-				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
+				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,debit_in_account_currency,
 				against_voucher_type, against_voucher, account_currency, {0}, {1} {remarks}
 			from
 				`tabGL Entry`
@@ -777,6 +778,10 @@ class ReceivablePayableReport(object):
 		if self.filters.get(party_type_field):
 			conditions.append("party=%s")
 			values.append(self.filters.get(party_type_field))
+
+		if self.filters.account_currency:
+			conditions.append("account_currency=%s")
+			values.append(self.filters.account_currency)
 
 		if self.filters.party_account:
 			conditions.append("account =%s")
@@ -899,6 +904,20 @@ class ReceivablePayableReport(object):
 			fieldtype="Link",
 			options="Account",
 			width=180,
+		)
+
+		self.add_column(
+			label=_("Account Currency"),
+			fieldname="account_currency",
+			fieldtype="Link",
+			options="Currency",
+			width=120,
+		)
+		self.add_column(
+			label=_("Currency-Wise Invoice Amount"),
+			fieldname="debit_in_account_currency",
+			fieldtype="Float",
+			width=140,
 		)
 
 		if self.party_naming_by == "Naming Series":
