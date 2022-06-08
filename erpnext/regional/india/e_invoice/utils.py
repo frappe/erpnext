@@ -627,16 +627,14 @@ def make_einvoice(invoice, generate_ewb=False):
 	if (
 		(
 			invoice.transporter
-			or (
-				(invoice.mode_of_transport and invoice.mode_of_transport != "Road")
-				or (invoice.mode_of_transport == "Road" and invoice.vehicle_no)
-			)
+			or (invoice.mode_of_transport and invoice.mode_of_transport != "Road")
+			or (invoice.mode_of_transport == "Road" and invoice.vehicle_no)
 		)
 		and not invoice.is_return
 		and generate_ewb == "true"
 	):
 		if invoice.mode_of_transport == "Road" and not invoice.vehicle_no:
-			frappe.throw(_("Eway Bill : Vehicle No is mandatory if Mode of Transport is Road"))
+			frappe.throw(_("Vehicle No is mandatory to generate Eway Bill if Mode of Transport is Road"))
 		else:
 			eway_bill_details = get_eway_bill_details(invoice)
 
@@ -993,7 +991,7 @@ class GSPConnector:
 					)
 
 			if res.get("info"):
-				info = res.get("info")
+				info = res.get("info", [])
 				"""
     				"info": [
     				    {
@@ -1010,7 +1008,7 @@ class GSPConnector:
 				# right now eway bill errors are shown, we can add more when available using below forloop.
 				for msg in info:
 					if msg.get("InfCd") == "EWBERR":
-						for desc in msg.get("Desc"):
+						for desc in msg.get("Desc", []):
 							frappe.msgprint(
 								_(desc.get("ErrorMessage")),
 								title="E-Way Bill not generated",
