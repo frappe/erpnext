@@ -323,6 +323,7 @@ class PurchaseOrder(BuyingController):
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = "Payment Ledger Entry"
 		super(PurchaseOrder, self).on_cancel()
 
 		if self.is_against_so():
@@ -637,6 +638,8 @@ def make_rm_stock_entry(purchase_order, rm_items):
 						}
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
+
+		stock_entry.set_missing_values()
 		return stock_entry.as_dict()
 	else:
 		frappe.throw(_("No Items selected for transfer"))
@@ -724,7 +727,7 @@ def make_return_stock_entry_for_subcontract(available_materials, po_doc, po_deta
 			add_items_in_ste(ste_doc, value, value.qty, po_details)
 
 	ste_doc.set_stock_entry_type()
-	ste_doc.calculate_rate_and_amount()
+	ste_doc.set_missing_values()
 
 	return ste_doc
 

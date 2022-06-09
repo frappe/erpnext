@@ -34,8 +34,7 @@ def get_data(filters):
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
 
-	query_filters["report_date"] = (">=", filters.get("from_date"))
-	query_filters["report_date"] = ("<=", filters.get("to_date"))
+	query_filters["report_date"] = ["between", [filters.get("from_date"), filters.get("to_date")]]
 
 	return frappe.get_all(
 		"Quality Inspection", fields=fields, filters=query_filters, order_by="report_date asc"

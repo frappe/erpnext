@@ -1,14 +1,24 @@
 import json
+import math
 import re
 
 import frappe
 from frappe import _
 from frappe.model.utils import get_fetch_values
-from frappe.utils import cint, cstr, date_diff, flt, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	date_diff,
+	flt,
+	get_link_to_form,
+	getdate,
+	month_diff,
+)
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
-from erpnext.hr.utils import get_salary_assignment
+from erpnext.hr.utils import get_salary_assignments
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.india import number_state_mapping, state_numbers, states
 
@@ -359,44 +369,56 @@ def calculate_annual_eligible_hra_exemption(doc):
 	basic_component, hra_component = frappe.db.get_value(
 		"Company", doc.company, ["basic_component", "hra_component"]
 	)
+
 	if not (basic_component and hra_component):
-		frappe.throw(_("Please mention Basic and HRA component in Company"))
-	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
+		frappe.throw(
+			_("Please set Basic and HRA component in Company {0}").format(
+				get_link_to_form("Company", doc.company)
+			)
+		)
+
+	annual_exemption = monthly_exemption = hra_amount = basic_amount = 0
+
 	if hra_component and basic_component:
-		assignment = get_salary_assignment(doc.employee, nowdate())
-		if assignment:
-			hra_component_exists = frappe.db.exists(
-				"Salary Detail",
-				{
-					"parent": assignment.salary_structure,
-					"salary_component": hra_component,
-					"parentfield": "earnings",
-					"parenttype": "Salary Structure",
-				},
-			)
+		assignments = get_salary_assignments(doc.employee, doc.payroll_period)
 
-			if hra_component_exists:
-				basic_amount, hra_amount = get_component_amt_from_salary_slip(
-					doc.employee, assignment.salary_structure, basic_component, hra_component
-				)
-				if hra_amount:
-					if doc.monthly_house_rent:
-						annual_exemption = calculate_hra_exemption(
-							assignment.salary_structure,
-							basic_amount,
-							hra_amount,
-							doc.monthly_house_rent,
-							doc.rented_in_metro_city,
-						)
-						if annual_exemption > 0:
-							monthly_exemption = annual_exemption / 12
-						else:
-							annual_exemption = 0
-
-		elif doc.docstatus == 1:
+		if not assignments and doc.docstatus == 1:
 			frappe.throw(
-				_("Salary Structure must be submitted before submission of Tax Ememption Declaration")
+				_("Salary Structure must be submitted before submission of {0}").format(doc.doctype)
 			)
+
+		assignment_dates = [assignment.from_date for assignment in assignments]
+
+		for idx, assignment in enumerate(assignments):
+			if has_hra_component(assignment.salary_structure, hra_component):
+				basic_salary_amt, hra_salary_amt = get_component_amt_from_salary_slip(
+					doc.employee,
+					assignment.salary_structure,
+					basic_component,
+					hra_component,
+					assignment.from_date,
+				)
+				to_date = get_end_date_for_assignment(assignment_dates, idx, doc.payroll_period)
+
+				frequency = frappe.get_value(
+					"Salary Structure", assignment.salary_structure, "payroll_frequency"
+				)
+				basic_amount += get_component_pay(frequency, basic_salary_amt, assignment.from_date, to_date)
+				hra_amount += get_component_pay(frequency, hra_salary_amt, assignment.from_date, to_date)
+
+		if hra_amount:
+			if doc.monthly_house_rent:
+				annual_exemption = calculate_hra_exemption(
+					assignment.salary_structure,
+					basic_amount,
+					hra_amount,
+					doc.monthly_house_rent,
+					doc.rented_in_metro_city,
+				)
+				if annual_exemption > 0:
+					monthly_exemption = annual_exemption / 12
+				else:
+					annual_exemption = 0
 
 	return frappe._dict(
 		{
@@ -407,10 +429,44 @@ def calculate_annual_eligible_hra_exemption(doc):
 	)
 
 
-def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
-	salary_slip = make_salary_slip(
-		salary_structure, employee=employee, for_preview=1, ignore_permissions=True
+def has_hra_component(salary_structure, hra_component):
+	return frappe.db.exists(
+		"Salary Detail",
+		{
+			"parent": salary_structure,
+			"salary_component": hra_component,
+			"parentfield": "earnings",
+			"parenttype": "Salary Structure",
+		},
 	)
+
+
+def get_end_date_for_assignment(assignment_dates, idx, payroll_period):
+	end_date = None
+
+	try:
+		end_date = assignment_dates[idx + 1]
+		end_date = add_days(end_date, -1)
+	except IndexError:
+		pass
+
+	if not end_date:
+		end_date = frappe.db.get_value("Payroll Period", payroll_period, "end_date")
+
+	return end_date
+
+
+def get_component_amt_from_salary_slip(
+	employee, salary_structure, basic_component, hra_component, from_date
+):
+	salary_slip = make_salary_slip(
+		salary_structure,
+		employee=employee,
+		for_preview=1,
+		ignore_permissions=True,
+		posting_date=from_date,
+	)
+
 	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
 		if earning.salary_component == basic_component:
@@ -423,36 +479,37 @@ def get_component_amt_from_salary_slip(employee, salary_structure, basic_compone
 
 
 def calculate_hra_exemption(
-	salary_structure, basic, monthly_hra, monthly_house_rent, rented_in_metro_city
+	salary_structure, annual_basic, annual_hra, monthly_house_rent, rented_in_metro_city
 ):
 	# TODO make this configurable
 	exemptions = []
-	frequency = frappe.get_value("Salary Structure", salary_structure, "payroll_frequency")
 	# case 1: The actual amount allotted by the employer as the HRA.
-	exemptions.append(get_annual_component_pay(frequency, monthly_hra))
-
-	actual_annual_rent = monthly_house_rent * 12
-	annual_basic = get_annual_component_pay(frequency, basic)
+	exemptions.append(annual_hra)
 
 	# case 2: Actual rent paid less 10% of the basic salary.
+	actual_annual_rent = monthly_house_rent * 12
 	exemptions.append(flt(actual_annual_rent) - flt(annual_basic * 0.1))
+
 	# case 3: 50% of the basic salary, if the employee is staying in a metro city (40% for a non-metro city).
 	exemptions.append(annual_basic * 0.5 if rented_in_metro_city else annual_basic * 0.4)
+
 	# return minimum of 3 cases
 	return min(exemptions)
 
 
-def get_annual_component_pay(frequency, amount):
+def get_component_pay(frequency, amount, from_date, to_date):
+	days = date_diff(to_date, from_date) + 1
+
 	if frequency == "Daily":
-		return amount * 365
+		return amount * days
 	elif frequency == "Weekly":
-		return amount * 52
+		return amount * math.floor(days / 7)
 	elif frequency == "Fortnightly":
-		return amount * 26
+		return amount * math.floor(days / 14)
 	elif frequency == "Monthly":
-		return amount * 12
+		return amount * month_diff(to_date, from_date)
 	elif frequency == "Bimonthly":
-		return amount * 6
+		return amount * (month_diff(to_date, from_date) / 2)
 
 
 def validate_house_rent_dates(doc):
@@ -840,6 +897,30 @@ def get_gst_accounts(
 	return gst_accounts
 
 
+def validate_sez_and_export_invoices(doc, method):
+	country = frappe.get_cached_value("Company", doc.company, "country")
+
+	if country != "India":
+		return
+
+	if (
+		doc.get("gst_category") in ("SEZ", "Overseas")
+		and doc.get("export_type") == "Without Payment of Tax"
+	):
+		gst_accounts = get_gst_accounts(doc.company)
+
+		for tax in doc.get("taxes"):
+			for tax in doc.get("taxes"):
+				if (
+					tax.account_head
+					in gst_accounts.get("igst_account", [])
+					+ gst_accounts.get("sgst_account", [])
+					+ gst_accounts.get("cgst_account", [])
+					and tax.tax_amount_after_discount_amount
+				):
+					frappe.throw(_("GST cannot be applied on SEZ or Export invoices without payment of tax"))
+
+
 def validate_reverse_charge_transaction(doc, method):
 	country = frappe.get_cached_value("Company", doc.company, "country")
 
@@ -886,6 +967,8 @@ def validate_reverse_charge_transaction(doc, method):
 			)
 
 			frappe.throw(msg)
+
+		doc.eligibility_for_itc = "ITC on Reverse Charge"
 
 
 def update_itc_availed_fields(doc, method):

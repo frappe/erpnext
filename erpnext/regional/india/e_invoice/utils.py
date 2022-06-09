@@ -55,8 +55,12 @@ def validate_eligibility(doc):
 		return False
 
 	invalid_company = not frappe.db.get_value("E Invoice User", {"company": doc.get("company")})
+	invalid_company_gstin = not frappe.db.get_value(
+		"E Invoice User", {"gstin": doc.get("company_gstin")}
+	)
 	invalid_supply_type = doc.get("gst_category") not in [
 		"Registered Regular",
+		"Registered Composition",
 		"SEZ",
 		"Overseas",
 		"Deemed Export",
@@ -70,6 +74,7 @@ def validate_eligibility(doc):
 
 	if (
 		invalid_company
+		or invalid_company_gstin
 		or invalid_supply_type
 		or company_transaction
 		or no_taxes_applied
@@ -124,24 +129,33 @@ def read_json(name):
 
 def get_transaction_details(invoice):
 	supply_type = ""
-	if invoice.gst_category == "Registered Regular":
+	if (
+		invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition"
+	):
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
-		supply_type = "SEZWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "SEZWOP"
+		else:
+			supply_type = "SEZWP"
 	elif invoice.gst_category == "Overseas":
-		supply_type = "EXPWOP"
+		if invoice.export_type == "Without Payment of Tax":
+			supply_type = "EXPWOP"
+		else:
+			supply_type = "EXPWP"
 	elif invoice.gst_category == "Deemed Export":
 		supply_type = "DEXP"
 
 	if not supply_type:
-		rr, sez, overseas, export = (
+		rr, rc, sez, overseas, export = (
 			bold("Registered Regular"),
+			bold("Registered Composition"),
 			bold("SEZ"),
 			bold("Overseas"),
 			bold("Deemed Export"),
 		)
 		frappe.throw(
-			_("GST category should be one of {}, {}, {}, {}").format(rr, sez, overseas, export),
+			_("GST category should be one of {}, {}, {}, {}, {}").format(rr, rc, sez, overseas, export),
 			title=_("Invalid Supply Type"),
 		)
 
@@ -157,7 +171,12 @@ def get_doc_details(invoice):
 			title=_("Not Allowed"),
 		)
 
-	invoice_type = "CRN" if invoice.is_return else "INV"
+	if invoice.is_return:
+		invoice_type = "CRN"
+	elif invoice.is_debit_note:
+		invoice_type = "DBN"
+	else:
+		invoice_type = "INV"
 
 	invoice_name = invoice.name
 	invoice_date = format_date(invoice.posting_date, "dd/mm/yyyy")
@@ -433,7 +452,7 @@ def get_eway_bill_details(invoice):
 		dict(
 			gstin=invoice.gst_transporter_id,
 			name=invoice.transporter_name,
-			mode_of_transport=mode_of_transport[invoice.mode_of_transport],
+			mode_of_transport=mode_of_transport[invoice.mode_of_transport or ""] or None,
 			distance=invoice.distance or 0,
 			document_name=invoice.lr_no,
 			document_date=format_date(invoice.lr_date, "dd/mm/yyyy"),
@@ -634,6 +653,8 @@ def make_einvoice(invoice):
 	try:
 		einvoice = safe_json_load(einvoice)
 		einvoice = santize_einvoice_fields(einvoice)
+	except json.JSONDecodeError:
+		raise
 	except Exception:
 		show_link_to_error_log(invoice, einvoice)
 
@@ -750,7 +771,9 @@ def safe_json_load(json_string):
 		frappe.throw(
 			_(
 				"Error in input data. Please check for any special characters near following input: <br> {}"
-			).format(snippet)
+			).format(snippet),
+			title=_("Invalid JSON"),
+			exc=e,
 		)
 
 
@@ -782,8 +805,12 @@ class GSPConnector:
 		self.irn_details_url = self.base_url + "/enriched/ei/api/invoice/irn"
 		self.generate_irn_url = self.base_url + "/enriched/ei/api/invoice"
 		self.gstin_details_url = self.base_url + "/enriched/ei/api/master/gstin"
+		# cancel_ewaybill_url will only work if user have bought ewb api from adaequare.
 		self.cancel_ewaybill_url = self.base_url + "/enriched/ewb/ewayapi?action=CANEWB"
+		# ewaybill_details_url + ?irn={irn_number} will provide eway bill number and details.
+		self.ewaybill_details_url = self.base_url + "/enriched/ei/api/ewaybill/irn"
 		self.generate_ewaybill_url = self.base_url + "/enriched/ei/api/ewaybill"
+		self.get_qrcode_url = self.base_url + "/enriched/ei/others/qr/image"
 
 	def set_invoice(self):
 		self.invoice = None
@@ -847,8 +874,8 @@ class GSPConnector:
 		return res
 
 	def auto_refresh_token(self):
-		self.fetch_auth_token()
 		self.token_auto_refreshed = True
+		self.fetch_auth_token()
 
 	def log_request(self, url, headers, data, res):
 		headers.update({"password": self.credentials.password})
@@ -988,6 +1015,56 @@ class GSPConnector:
 
 		return failed
 
+	def fetch_and_attach_qrcode_from_irn(self):
+		is_qrcode_file_attached = self.invoice.qrcode_image and frappe.db.exists(
+			"File",
+			{
+				"attached_to_doctype": "Sales Invoice",
+				"attached_to_name": self.invoice.name,
+				"file_url": self.invoice.qrcode_image,
+				"attached_to_field": "qrcode_image",
+			},
+		)
+		if not is_qrcode_file_attached:
+			if self.invoice.signed_qr_code:
+				self.attach_qrcode_image()
+				frappe.db.set_value(
+					"Sales Invoice", self.invoice.name, "qrcode_image", self.invoice.qrcode_image
+				)
+				frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
+			else:
+				qrcode = self.get_qrcode_from_irn(self.invoice.irn)
+				if qrcode:
+					qrcode_file = self.create_qr_code_file(qrcode)
+					frappe.db.set_value("Sales Invoice", self.invoice.name, "qrcode_image", qrcode_file.file_url)
+					frappe.msgprint(_("QR Code attached to the invoice."), alert=True)
+				else:
+					frappe.msgprint(_("QR Code not found for the IRN"), alert=True)
+		else:
+			frappe.msgprint(_("QR Code is already Attached"), indicator="green", alert=True)
+
+	def get_qrcode_from_irn(self, irn):
+		import requests
+
+		headers = self.get_headers()
+		headers.update({"width": "215", "height": "215", "imgtype": "jpg", "irn": irn})
+
+		try:
+			# using requests.get instead of make_request to avoid parsing the response
+			res = requests.get(self.get_qrcode_url, headers=headers)
+			self.log_request(self.get_qrcode_url, headers, None, None)
+			if res.status_code == 200:
+				return res.content
+			else:
+				raise RequestFailed(str(res.content, "utf-8"))
+
+		except RequestFailed as e:
+			self.raise_error(errors=str(e))
+
+		except Exception:
+			log_error()
+			self.raise_error()
+
 	def get_irn_details(self, irn):
 		headers = self.get_headers()
 
@@ -1103,6 +1180,19 @@ class GSPConnector:
 				self.invoice.eway_bill_validity = res.get("result").get("EwbValidTill")
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
+				if res.get("info"):
+					info = res.get("info")
+					# when we have more features (responses) in eway bill, we can add them using below forloop.
+					for msg in info:
+						if msg.get("InfCd") == "EWBPPD":
+							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
+							frappe.msgprint(
+								_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
+								title="Notification",
+								indicator="green",
+								alert=True,
+							)
+							self.invoice.distance = flt(pin_to_pin_distance)
 				self.invoice.flags.updater_reference = {
 					"doctype": self.invoice.doctype,
 					"docname": self.invoice.name,
@@ -1121,23 +1211,22 @@ class GSPConnector:
 			log_error(data)
 			self.raise_error(True)
 
-	def cancel_eway_bill(self, eway_bill, reason, remark):
+	def get_ewb_details(self):
+		"""
+		Get e-Waybill Details by IRN API documentaion for validation is not added yet.
+		https://einv-apisandbox.nic.in/version1.03/get-ewaybill-details-by-irn.html#validations
+		NOTE: if ewaybill Validity period lapsed or scanned by officer enroute (not tested yet) it will still return status as "ACT".
+		"""
 		headers = self.get_headers()
-		data = json.dumps({"ewbNo": eway_bill, "cancelRsnCode": reason, "cancelRmrk": remark}, indent=4)
-		headers["username"] = headers["user_name"]
-		del headers["user_name"]
-		try:
-			res = self.make_request("post", self.cancel_ewaybill_url, headers, data)
-			if res.get("success"):
-				self.invoice.ewaybill = ""
-				self.invoice.eway_bill_cancelled = 1
-				self.invoice.flags.updater_reference = {
-					"doctype": self.invoice.doctype,
-					"docname": self.invoice.name,
-					"label": _("E-Way Bill Cancelled - {}").format(remark),
-				}
-				self.update_invoice()
+		irn = self.invoice.irn
+		if not irn:
+			frappe.throw(_("IRN is mandatory to get E-Waybill Details. Please generate IRN first."))
 
+		try:
+			params = "?irn={irn}".format(irn=irn)
+			res = self.make_request("get", self.ewaybill_details_url + params, headers)
+			if res.get("success"):
+				return res.get("result")
 			else:
 				raise RequestFailed
 
@@ -1146,8 +1235,64 @@ class GSPConnector:
 			self.raise_error(errors=errors)
 
 		except Exception:
-			log_error(data)
+			log_error()
 			self.raise_error(True)
+
+	def update_ewb_details(self, ewb_details=None):
+		# for any reason user chooses to generate eway bill using portal this will allow to update ewaybill details in the invoice.
+		if not self.invoice.irn:
+			frappe.throw(_("IRN is mandatory to update E-Waybill Details. Please generate IRN first."))
+		if not ewb_details:
+			ewb_details = self.get_ewb_details()
+		if ewb_details:
+			self.invoice.ewaybill = ewb_details.get("EwbNo")
+			self.invoice.eway_bill_validity = ewb_details.get("EwbValidTill")
+			self.invoice.eway_bill_cancelled = 0 if ewb_details.get("Status") == "ACT" else 1
+			self.update_invoice()
+
+	def cancel_eway_bill(self):
+		ewb_details = self.get_ewb_details()
+		if ewb_details:
+			ewb_no = str(ewb_details.get("EwbNo"))
+			ewb_status = ewb_details.get("Status")
+			if ewb_status == "CNL":
+				self.invoice.ewaybill = ""
+				self.invoice.eway_bill_cancelled = 1
+				self.invoice.flags.updater_reference = {
+					"doctype": self.invoice.doctype,
+					"docname": self.invoice.name,
+					"label": _("E-Way Bill Cancelled"),
+				}
+				self.update_invoice()
+				frappe.msgprint(
+					_("E-Way Bill Cancelled successfully"),
+					indicator="green",
+					alert=True,
+				)
+			elif ewb_status == "ACT" and self.invoice.ewaybill == ewb_no:
+				msg = _("E-Way Bill {} is still active.").format(bold(ewb_no))
+				msg += "<br><br>"
+				msg += _(
+					"You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system."
+				)
+				frappe.msgprint(msg)
+			elif ewb_status == "ACT" and self.invoice.ewaybill != ewb_no:
+				# if user cancelled the current eway bill and generated new eway bill using portal, then this will update new ewb number in sales invoice.
+				msg = _("E-Way Bill No. {0} doesn't match {1} saved in the invoice.").format(
+					bold(ewb_no), bold(self.invoice.ewaybill)
+				)
+				msg += "<hr/>"
+				msg += _("E-Way Bill No. {} is updated in the invoice.").format(bold(ewb_no))
+				frappe.msgprint(msg)
+				self.update_ewb_details(ewb_details=ewb_details)
+			else:
+				# this block should not be ever called but added incase there is any change in API.
+				msg = _("Unknown E-Way Status Code {}.").format(ewb_status)
+				msg += "<br><br>"
+				msg += _("Please contact your system administrator.")
+				frappe.throw(msg)
+		else:
+			frappe.msgprint(_("E-Way Bill Details not found for this IRN."))
 
 	def sanitize_error_message(self, message):
 		"""
@@ -1176,8 +1321,6 @@ class GSPConnector:
 		return errors
 
 	def raise_error(self, raise_exception=False, errors=None):
-		if errors is None:
-			errors = []
 		title = _("E Invoice Request Failed")
 		if errors:
 			frappe.throw(errors, title=title, as_list=1)
@@ -1218,13 +1361,17 @@ class GSPConnector:
 
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
+		qr_image = io.BytesIO()
+		url = qrcreate(qrcode, error="L")
+		url.png(qr_image, scale=2, quiet_zone=1)
+		qrcode_file = self.create_qr_code_file(qr_image.getvalue())
+		self.invoice.qrcode_image = qrcode_file.file_url
+
+	def create_qr_code_file(self, qr_image):
 		doctype = self.invoice.doctype
 		docname = self.invoice.name
 		filename = "QRCode_{}.png".format(docname).replace(os.path.sep, "__")
 
-		qr_image = io.BytesIO()
-		url = qrcreate(qrcode, error="L")
-		url.png(qr_image, scale=2, quiet_zone=1)
 		_file = frappe.get_doc(
 			{
 				"doctype": "File",
@@ -1233,12 +1380,12 @@ class GSPConnector:
 				"attached_to_name": docname,
 				"attached_to_field": "qrcode_image",
 				"is_private": 0,
-				"content": qr_image.getvalue(),
+				"content": qr_image,
 			}
 		)
 		_file.save()
 		frappe.db.commit()
-		self.invoice.qrcode_image = _file.file_url
+		return _file
 
 	def update_invoice(self):
 		self.invoice.flags.ignore_validate_update_after_submit = True
@@ -1284,6 +1431,12 @@ def cancel_irn(doctype, docname, irn, reason, remark):
 
 
 @frappe.whitelist()
+def generate_qrcode(doctype, docname):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.fetch_and_attach_qrcode_from_irn()
+
+
+@frappe.whitelist()
 def generate_eway_bill(doctype, docname, **kwargs):
 	gsp_connector = GSPConnector(doctype, docname)
 	gsp_connector.generate_eway_bill(**kwargs)
@@ -1291,12 +1444,22 @@ def generate_eway_bill(doctype, docname, **kwargs):
 
 @frappe.whitelist()
 def cancel_eway_bill(doctype, docname):
-	# TODO: uncomment when eway_bill api from Adequare is enabled
-	# gsp_connector = GSPConnector(doctype, docname)
-	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+	# NOTE: cancel_eway_bill api is disabled by NIC for E-invoice so this will only check if eway bill is canceled or not and update accordingly.
+	# https://einv-apisandbox.nic.in/version1.03/cancel-eway-bill.html#
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.cancel_eway_bill()
 
-	frappe.db.set_value(doctype, docname, "ewaybill", "")
-	frappe.db.set_value(doctype, docname, "eway_bill_cancelled", 1)
+
+@frappe.whitelist()
+def get_ewb_details(doctype, docname):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.get_ewb_details()
+
+
+@frappe.whitelist()
+def update_ewb_details(doctype, docname):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.update_ewb_details()
 
 
 @frappe.whitelist()

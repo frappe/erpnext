@@ -133,7 +133,7 @@ def set_account_currency(filters):
 			else:
 				account_currency = (
 					None
-					if filters.party_type in ["Employee", "Student", "Shareholder", "Member"]
+					if filters.party_type in ["Employee", "Shareholder", "Member"]
 					else frappe.db.get_value(filters.party_type, filters.party[0], "default_currency")
 				)
 
@@ -275,7 +275,7 @@ def get_conditions(filters):
 							)
 							conditions.append("{0} in %({0})s".format(dimension.fieldname))
 						else:
-							conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
+							conditions.append("{0} in %({0})s".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -435,7 +435,13 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				gle_map[group_by_value].entries.append(gle)
 
 			elif group_by_voucher_consolidated:
-				keylist = [gle.get("voucher_type"), gle.get("voucher_no"), gle.get("account")]
+				keylist = [
+					gle.get("voucher_type"),
+					gle.get("voucher_no"),
+					gle.get("account"),
+					gle.get("party_type"),
+					gle.get("party"),
+				]
 				if filters.get("include_dimensions"):
 					for dim in accounting_dimensions:
 						keylist.append(gle.get(dim))

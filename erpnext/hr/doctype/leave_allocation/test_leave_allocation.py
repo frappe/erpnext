@@ -69,21 +69,43 @@ class TestLeaveAllocation(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_validation_for_over_allocation(self):
+		leave_type = create_leave_type(leave_type_name="Test Over Allocation", is_carry_forward=1)
+		leave_type.save()
+
 		doc = frappe.get_doc(
 			{
 				"doctype": "Leave Allocation",
 				"__islocal": 1,
 				"employee": self.employee.name,
 				"employee_name": self.employee.employee_name,
-				"leave_type": "_Test Leave Type",
+				"leave_type": leave_type.name,
 				"from_date": getdate("2015-09-1"),
 				"to_date": getdate("2015-09-30"),
 				"new_leaves_allocated": 35,
+				"carry_forward": 1,
 			}
 		)
 
 		# allocated leave more than period
 		self.assertRaises(OverAllocationError, doc.save)
+
+		leave_type.allow_over_allocation = 1
+		leave_type.save()
+
+		# allows creating a leave allocation with more leave days than period days
+		doc = frappe.get_doc(
+			{
+				"doctype": "Leave Allocation",
+				"__islocal": 1,
+				"employee": self.employee.name,
+				"employee_name": self.employee.employee_name,
+				"leave_type": leave_type.name,
+				"from_date": getdate("2015-09-1"),
+				"to_date": getdate("2015-09-30"),
+				"new_leaves_allocated": 35,
+				"carry_forward": 1,
+			}
+		).insert()
 
 	def test_validation_for_over_allocation_post_submission(self):
 		allocation = frappe.get_doc(

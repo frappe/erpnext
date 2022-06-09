@@ -38,7 +38,7 @@ def is_search_module_loaded():
 		out = cache.execute_command("MODULE LIST")
 
 		parsed_output = " ".join(
-			(" ".join([s.decode() for s in o if not isinstance(s, int)]) for o in out)
+			(" ".join([frappe.as_unicode(s) for s in o if not isinstance(s, int)]) for o in out)
 		)
 		return "search" in parsed_output
 	except Exception:
@@ -245,8 +245,7 @@ def get_fields_indexed():
 
 def raise_redisearch_error():
 	"Create an Error Log and raise error."
-	traceback = frappe.get_traceback()
-	log = frappe.log_error(traceback, frappe._("Redisearch Error"))
+	log = frappe.log_error("Redisearch Error")
 	log_link = frappe.utils.get_link_to_form("Error Log", log.name)
 
 	frappe.throw(

@@ -2648,6 +2648,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		einvoice_settings = frappe.get_doc("E Invoice Settings")
 		einvoice_settings.enable = 0
+		einvoice_settings.save()
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):
@@ -3138,6 +3139,39 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		si.reload()
 		self.assertTrue(si.items[0].serial_no)
+
+	def test_sales_invoice_with_disabled_account(self):
+		try:
+			account = frappe.get_doc("Account", "VAT 5% - _TC")
+			account.disabled = 1
+			account.save()
+
+			si = create_sales_invoice(do_not_save=True)
+			si.posting_date = add_days(getdate(), 1)
+			si.taxes = []
+
+			si.append(
+				"taxes",
+				{
+					"charge_type": "On Net Total",
+					"account_head": "VAT 5% - _TC",
+					"cost_center": "Main - _TC",
+					"description": "VAT @ 5.0",
+					"rate": 9,
+				},
+			)
+			si.save()
+
+			with self.assertRaises(frappe.ValidationError) as err:
+				si.submit()
+
+			self.assertTrue(
+				"Cannot create accounting entries against disabled accounts" in str(err.exception)
+			)
+
+		finally:
+			account.disabled = 0
+			account.save()
 
 	def test_gain_loss_with_advance_entry(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry

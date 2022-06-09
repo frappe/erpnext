@@ -254,7 +254,18 @@ class LeaveAllocation(Document):
 		# Adding a day to include To Date in the difference
 		date_difference = date_diff(self.to_date, self.from_date) + 1
 		if date_difference < self.total_leaves_allocated:
-			frappe.throw(_("Total allocated leaves are more than days in the period"), OverAllocationError)
+			if frappe.db.get_value("Leave Type", self.leave_type, "allow_over_allocation"):
+				frappe.msgprint(
+					_("<b>Total Leaves Allocated</b> are more than the number of days in the allocation period"),
+					indicator="orange",
+					alert=True,
+				)
+			else:
+				frappe.throw(
+					_("<b>Total Leaves Allocated</b> are more than the number of days in the allocation period"),
+					exc=OverAllocationError,
+					title=_("Over Allocation"),
+				)
 
 	def create_leave_ledger_entry(self, submit=True):
 		if self.unused_leaves:
