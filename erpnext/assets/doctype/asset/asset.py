@@ -412,10 +412,7 @@ class Asset(AccountsController):
 	def is_last_day_of_the_month(self, depreciation_start_date):
 		last_day_of_the_month = get_last_day(depreciation_start_date)
 
-		if getdate(last_day_of_the_month) == getdate(depreciation_start_date):
-			return True
-		else:
-			return False
+		return getdate(last_day_of_the_month) == getdate(depreciation_start_date)
 
 	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
 	# JE: Journal Entry, FB: Finance Book
