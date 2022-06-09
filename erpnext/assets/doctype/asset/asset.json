@@ -128,7 +128,6 @@
    "label": "Is Existing Asset"
   },
   {
-   "depends_on": "is_serialized_asset",
    "fieldname": "journal_entry_for_scrap",
    "fieldtype": "Link",
    "label": "Journal Entry for Scrap",
@@ -545,7 +544,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-05-09 18:56:02.359064",
+ "modified": "2022-06-09 20:36:59.783286",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
