@@ -8522,7 +8522,7 @@ Lead Owner Efficiency,Efficacité des Responsables des Prospects,
 Loan Repayment and Closure,Remboursement et clôture de prêts,
 Loan Security Status,État de la sécurité du prêt,
 Lost Opportunity,Occasion perdue,
-Maintenance Schedules,Échéanciers d'Entretien,
+Maintenance Schedules,Échéanciers d&#39;Entretien,
 Material Requests for which Supplier Quotations are not created,Demandes de Matériel dont les Devis Fournisseur ne sont pas créés,
 Monthly Attendance Sheet,Feuille de Présence Mensuelle,
 Open Work Orders,Ordres de travail ouverts,
@@ -9908,3 +9908,4 @@ Delete Transactions,Supprimer les transactions
 Default Payment Discount Account,Compte par défaut des paiements de remise
 Unrealized Profit / Loss Account,Compte de perte
 Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés
+Publish in Website=Publier sur le Site Web
