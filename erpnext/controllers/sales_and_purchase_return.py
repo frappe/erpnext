@@ -349,6 +349,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.qty = -1 * (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
 			target_doc.received_qty = target_doc.qty
 			target_doc.rejected_qty = -1 * source_doc.rejected_qty
+			target_doc.stock_qty = target_doc.qty * target_doc.conversion_factor
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt_item = source_doc.name
 			target_doc.purchase_order_item = source_doc.purchase_order_item
