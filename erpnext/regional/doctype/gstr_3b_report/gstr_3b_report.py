@@ -244,11 +244,10 @@ class GSTR3BReport(Document):
 			)
 
 			for d in item_details:
-				if d.item_code not in self.invoice_items.get(d.parent, {}):
-					self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
-					self.invoice_items[d.parent][d.item_code] += d.get("taxable_value", 0) or d.get(
-						"base_net_amount", 0
-					)
+				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code, 0.0)
+				self.invoice_items[d.parent][d.item_code] += d.get("taxable_value", 0) or d.get(
+					"base_net_amount", 0
+				)
 
 				if d.is_nil_exempt and d.item_code not in self.is_nil_exempt:
 					self.is_nil_exempt.append(d.item_code)
@@ -335,13 +334,15 @@ class GSTR3BReport(Document):
 
 	def set_outward_taxable_supplies(self):
 		inter_state_supply_details = {}
-
+		invoice_list = {}
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			gst_category = self.invoice_detail_map.get(inv, {}).get("gst_category")
 			place_of_supply = (
 				self.invoice_detail_map.get(inv, {}).get("place_of_supply") or "00-Other Territory"
 			)
 			export_type = self.invoice_detail_map.get(inv, {}).get("export_type")
+
+			invoice_list.setdefault(inv, 0.0)
 
 			for rate, items in items_based_on_rate.items():
 				for item_code, taxable_value in self.invoice_items.get(inv).items():
@@ -361,7 +362,6 @@ class GSTR3BReport(Document):
 							else:
 								self.report_dict["sup_details"]["osup_det"]["iamt"] += taxable_value * rate / 100
 								self.report_dict["sup_details"]["osup_det"]["txval"] += taxable_value
-
 								if (
 									gst_category in ["Unregistered", "Registered Composition", "UIN Holders"]
 									and self.gst_details.get("gst_state") != place_of_supply.split("-")[1]
@@ -374,10 +374,12 @@ class GSTR3BReport(Document):
 									inter_state_supply_details[(gst_category, place_of_supply)]["iamt"] += (
 										taxable_value * rate / 100
 									)
+						invoice_list[inv] += taxable_value
 
 			if self.invoice_cess.get(inv):
 				self.report_dict["sup_details"]["osup_det"]["csamt"] += flt(self.invoice_cess.get(inv), 2)
 
+		print({k: v for k, v in sorted(invoice_list.items(), key=lambda item: item[1])})
 		self.set_inter_state_supply(inter_state_supply_details)
 
 	def set_supplies_liable_to_reverse_charge(self):
