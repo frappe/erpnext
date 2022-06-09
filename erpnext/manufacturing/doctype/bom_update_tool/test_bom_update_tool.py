@@ -4,10 +4,10 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import replace_bom
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
 )
+from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -17,6 +17,9 @@ test_records = frappe.get_test_records("BOM")
 class TestBOMUpdateTool(FrappeTestCase):
 	"Test major functions run via BOM Update Tool."
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_replace_bom(self):
 		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
 
@@ -25,15 +28,10 @@ class TestBOMUpdateTool(FrappeTestCase):
 		bom_doc.insert()
 
 		boms = frappe._dict(current_bom=current_bom, new_bom=bom_doc.name)
-		replace_bom(boms)
+		enqueue_replace_bom(boms=boms)
 
 		self.assertFalse(frappe.db.exists("BOM Item", {"bom_no": current_bom, "docstatus": 1}))
 		self.assertTrue(frappe.db.exists("BOM Item", {"bom_no": bom_doc.name, "docstatus": 1}))
-
-		# reverse, as it affects other testcases
-		boms.current_bom = bom_doc.name
-		boms.new_bom = current_bom
-		replace_bom(boms)
 
 	def test_bom_cost(self):
 		for item in ["BOM Cost Test Item 1", "BOM Cost Test Item 2", "BOM Cost Test Item 3"]:

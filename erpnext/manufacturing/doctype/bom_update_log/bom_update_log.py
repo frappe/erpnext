@@ -67,9 +67,6 @@ class BOMUpdateLog(Document):
 			)
 
 	def on_submit(self):
-		if frappe.flags.in_test:
-			return
-
 		if self.update_type == "Replace BOM":
 			boms = {"current_bom": self.current_bom, "new_bom": self.new_bom}
 			frappe.enqueue(
@@ -77,6 +74,7 @@ class BOMUpdateLog(Document):
 				doc=self,
 				boms=boms,
 				timeout=40000,
+				now=frappe.flags.in_test,
 			)
 		else:
 			process_boms_cost_level_wise(self)
@@ -94,7 +92,7 @@ def run_replace_bom_job(
 
 		frappe.db.auto_commit_on_many_writes = 1
 		boms = frappe._dict(boms or {})
-		replace_bom(boms)
+		replace_bom(boms, doc.name)
 
 		doc.db_set("status", "Completed")
 	except Exception:
@@ -135,10 +133,6 @@ def process_boms_cost_level_wise(
 		values = {"current_level": current_level}
 
 	set_values_in_log(update_doc.name, values, commit=True)
-
-	if frappe.flags.in_test:
-		return current_boms, current_level
-
 	queue_bom_cost_jobs(current_boms, update_doc, current_level)
 
 
@@ -161,16 +155,13 @@ def queue_bom_cost_jobs(
 		)
 		batch_row.db_insert()
 
-		if frappe.flags.in_test:
-			# skip background jobs in test
-			return boms_to_process, batch_row.name
-
 		frappe.enqueue(
 			method="erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils.update_cost_in_level",
 			doc=update_doc,
 			bom_list=boms_to_process,
 			batch_name=batch_row.name,
 			queue="long",
+			now=frappe.flags.in_test,
 		)
 
 
@@ -208,10 +199,11 @@ def resume_bom_cost_update_jobs():
 		current_boms, processed_boms = get_processed_current_boms(log, bom_batches)
 		parent_boms = get_next_higher_level_boms(child_boms=current_boms, processed_boms=processed_boms)
 
+		# Unset processed BOMs if log is complete, it is used for next level BOMs
 		set_values_in_log(
 			log.name,
 			values={
-				"processed_boms": json.dumps(processed_boms),
+				"processed_boms": json.dumps([] if not parent_boms else processed_boms),
 				"status": "Completed" if not parent_boms else "In Progress",
 			},
 			commit=True,
