@@ -1,6 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import copy
 import json
 from collections import defaultdict
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -12,7 +13,7 @@ import frappe
 from frappe import _
 
 
-def replace_bom(boms: Dict) -> None:
+def replace_bom(boms: Dict, log_name: str) -> None:
 	"Replace current BOM with new BOM in parent BOMs."
 
 	current_bom = boms.get("current_bom")
@@ -29,13 +30,17 @@ def replace_bom(boms: Dict) -> None:
 		# this is only used for versioning and we do not want
 		# to make separate db calls by using load_doc_before_save
 		# which proves to be expensive while doing bulk replace
-		bom_obj._doc_before_save = bom_obj
+		bom_obj._doc_before_save = copy.deepcopy(bom_obj)
 		bom_obj.update_exploded_items()
 		bom_obj.calculate_cost()
 		bom_obj.update_parent_cost()
 		bom_obj.db_update()
-		if bom_obj.meta.get("track_changes") and not bom_obj.flags.ignore_version:
-			bom_obj.save_version()
+		bom_obj.flags.updater_reference = {
+			"doctype": "BOM Update Log",
+			"docname": log_name,
+			"label": _("via BOM Update Tool"),
+		}
+		bom_obj.save_version()
 
 
 def update_cost_in_level(
@@ -47,8 +52,6 @@ def update_cost_in_level(
 		status = frappe.db.get_value("BOM Update Log", doc.name, "status")
 		if status == "Failed":
 			return
-
-		frappe.db.auto_commit_on_many_writes = 1
 
 		update_cost_in_boms(bom_list=bom_list)  # main updation logic
 
@@ -62,8 +65,6 @@ def update_cost_in_level(
 	except Exception:
 		handle_exception(doc)
 	finally:
-		frappe.db.auto_commit_on_many_writes = 0
-
 		if not frappe.flags.in_test:
 			frappe.db.commit()  # nosemgrep
 
@@ -121,7 +122,7 @@ def update_cost_in_boms(bom_list: List[str]) -> None:
 		bom_doc.calculate_cost(save_updates=True, update_hour_rate=True)
 		bom_doc.db_update()
 
-		if (index % 100 == 0) and not frappe.flags.in_test:
+		if (index % 50 == 0) and not frappe.flags.in_test:
 			frappe.db.commit()  # nosemgrep
 
 
