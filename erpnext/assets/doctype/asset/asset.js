@@ -283,6 +283,20 @@ frappe.ui.form.on("Asset", {
 		});
 	},
 
+	scrap_asset: function (frm) {
+		frappe.confirm(__("Do you really want to scrap this asset?"), function () {
+			frappe.call({
+				args: {
+					"asset_name": frm.doc.name
+				},
+				method: "erpnext.assets.doctype.depreciation_schedule.depreciation_posting.scrap_asset",
+				callback: function () {
+					frm.reload_doc();
+				}
+			})
+		})
+	},
+
 	make_sales_invoice: function (frm) {
 		frappe.call({
 			args: {
@@ -613,20 +627,6 @@ frappe.ui.form.on("Asset Finance Book", {
 		frappe.flags.dont_change_rate = false;
 	},
 });
-
-erpnext.asset.scrap_asset = function (frm) {
-	frappe.confirm(__("Do you really want to scrap this asset?"), function () {
-		frappe.call({
-			args: {
-				"asset_name": frm.doc.name
-			},
-			method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
-			callback: function () {
-				cur_frm.reload_doc();
-			}
-		})
-	})
-};
 
 erpnext.asset.restore_asset = function (frm) {
 	frappe.confirm(__("Do you really want to restore this scrapped asset?"), function () {

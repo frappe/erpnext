@@ -328,6 +328,77 @@ def record_depreciation_posting(parent, depr_entry):
 	)
 
 
+@frappe.whitelist()
+def scrap_asset(asset_name, serial_no=None):
+	docstatus, status, company = get_asset_values(asset_name, serial_no)
+	doctype, docname = get_doctype_and_docname(asset_name, serial_no)
+
+	validate_asset_or_serial_no(docstatus, status, doctype, docname)
+
+	je = create_journal_entry(asset_name, serial_no, company, doctype, docname)
+	update_asset_or_serial_no(doctype, docname, je.name)
+
+	frappe.msgprint(
+		_("{0} scrapped via Journal Entry {1}").format(docname, get_link_to_form(je.doctype, je.name))
+	)
+
+
+def get_asset_values(asset_name, serial_no):
+	if not serial_no:
+		docstatus, status, company = frappe.get_value(
+			"Asset", asset_name, ["docstatus", "status", "company"]
+		)
+	else:
+		docstatus, status = frappe.get_value("Asset Serial No", serial_no, ["docstatus", "status"])
+		company = frappe.get_value("Asset", asset_name, "company")
+
+	return docstatus, status, company
+
+
+def validate_asset_or_serial_no(docstatus, status, doctype, docname):
+	if docstatus != 1:
+		frappe.throw(_("{0} {1} must be submitted").format(doctype, docname))
+	elif status in ("Cancelled", "Sold", "Scrapped"):
+		frappe.throw(
+			_("{0} {1} cannot be scrapped, as it is already {2}").format(doctype, docname, status)
+		)
+
+
+def get_doctype_and_docname(asset_name, serial_no):
+	doctype = "Asset" if not serial_no else "Asset Serial No"
+	docname = asset_name if not serial_no else serial_no
+
+	return doctype, docname
+
+
+def create_journal_entry(asset_name, serial_no, company, doctype, docname):
+	depreciation_series = frappe.get_cached_value("Company", company, "series_for_depreciation_entry")
+
+	je = frappe.new_doc("Journal Entry")
+	je.voucher_type = "Journal Entry"
+	je.naming_series = depreciation_series
+	je.posting_date = today()
+	je.company = company
+	je.remark = "Scrap Entry for {0} {1}".format(doctype, docname)
+
+	for entry in get_gl_entries_on_asset_disposal(asset_name, serial_no):
+		entry.update({"reference_type": doctype, "reference_name": docname})
+		je.append("accounts", entry)
+
+	je.flags.ignore_permissions = True
+	je.submit()
+
+	return je
+
+
+def update_asset_or_serial_no(doctype, docname, journal_entry):
+	frappe.db.set_value(
+		doctype,
+		docname,
+		{"disposal_date": today(), "journal_entry_for_scrap": journal_entry, "status": "Scrapped"},
+	)
+
+
 def get_gl_entries_on_asset_disposal(asset, serial_no=None, selling_amount=0, finance_book=None):
 	(
 		fixed_asset_account,
@@ -346,14 +417,18 @@ def get_gl_entries_on_asset_disposal(asset, serial_no=None, selling_amount=0, fi
 			"credit_in_account_currency": gross_purchase_amount,
 			"credit": gross_purchase_amount,
 			"cost_center": depreciation_cost_center,
-		},
-		{
-			"account": accumulated_depr_account,
-			"debit_in_account_currency": accumulated_depr_amount,
-			"debit": accumulated_depr_amount,
-			"cost_center": depreciation_cost_center,
-		},
+		}
 	]
+
+	if accumulated_depr_amount:
+		gl_entries.append(
+			{
+				"account": accumulated_depr_account,
+				"debit_in_account_currency": accumulated_depr_amount,
+				"debit": accumulated_depr_amount,
+				"cost_center": depreciation_cost_center,
+			}
+		)
 
 	profit_amount = flt(selling_amount) - flt(asset_value)
 	if profit_amount:
@@ -400,7 +475,7 @@ def get_asset_details(asset, serial_no=None, finance_book=None):
 	from erpnext.assets.doctype.asset_revaluation.asset_revaluation import get_current_asset_value
 
 	asset_category, company, cost_center, gross_purchase_amount = frappe.get_value(
-		"Asset", asset, "asset_category", "company", "cost_center", "gross_purchase_amount"
+		"Asset", asset, ["asset_category", "company", "cost_center", "gross_purchase_amount"]
 	)
 
 	fixed_asset_account, accumulated_depr_account = get_asset_accounts(asset_category, company)
