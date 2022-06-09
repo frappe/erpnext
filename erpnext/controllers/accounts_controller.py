@@ -1465,8 +1465,8 @@ class AccountsController(TransactionBase):
 
 		if not party_gle_currency and (party_account_currency != self.currency):
 			frappe.throw(
-				_("Party Account {0} currency and document currency should be same").format(
-					frappe.bold(party_account)
+				_("Party Account {0} currency ({1}) and document currency ({2}) should be same").format(
+					frappe.bold(party_account), party_account_currency, self.currency
 				)
 			)
 
@@ -1866,7 +1866,7 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 def get_taxes_and_charges(master_doctype, master_name):
 	if not master_name:
 		return
-	from frappe.model import default_fields
+	from frappe.model import child_table_fields, default_fields
 
 	tax_master = frappe.get_doc(master_doctype, master_name)
 
@@ -1874,7 +1874,7 @@ def get_taxes_and_charges(master_doctype, master_name):
 	for i, tax in enumerate(tax_master.get("taxes")):
 		tax = tax.as_dict()
 
-		for fieldname in default_fields:
+		for fieldname in default_fields + child_table_fields:
 			if fieldname in tax:
 				del tax[fieldname]
 
@@ -2661,7 +2661,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			parent.update_reserved_qty_for_subcontract()
 			parent.create_raw_materials_supplied("supplied_items")
 			parent.save()
-	else:
+	else:  # Sales Order
+		parent.validate_warehouse()
 		parent.update_reserved_qty()
 		parent.update_project()
 		parent.update_prevdoc_status("submit")

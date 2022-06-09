@@ -231,7 +231,6 @@ erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
 erpnext.patches.v13_0.update_member_email_address
-erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
 erpnext.patches.v13_0.update_pos_closing_entry_in_merge_log
 erpnext.patches.v13_0.add_po_to_global_search
 erpnext.patches.v13_0.update_returned_qty_in_pr_dn
@@ -372,3 +371,6 @@ erpnext.patches.v14_0.discount_accounting_separation
 erpnext.patches.v14_0.delete_employee_transfer_property_doctype
 erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
+execute:frappe.delete_doc("DocType", "Naming Series")
+erpnext.patches.v13_0.set_payroll_entry_status
+erpnext.patches.v13_0.job_card_status_on_hold

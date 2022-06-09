@@ -18,7 +18,7 @@ class BuyingSettings(Document):
 		for key in ["supplier_group", "supp_master_name", "maintain_same_rate", "buying_price_list"]:
 			frappe.db.set_default(key, self.get(key, ""))
 
-		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
+		from erpnext.utilities.naming import set_by_naming_series
 
 		set_by_naming_series(
 			"Supplier",

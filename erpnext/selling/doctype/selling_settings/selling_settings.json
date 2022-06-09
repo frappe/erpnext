@@ -179,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-14 16:01:29.405642",
+ "modified": "2022-05-31 19:39:48.398738",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -191,6 +191,15 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }

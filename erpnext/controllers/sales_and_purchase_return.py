@@ -316,7 +316,7 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	return data[0]
 
 
-def make_return_doc(doctype, source_name, target_doc=None):
+def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
