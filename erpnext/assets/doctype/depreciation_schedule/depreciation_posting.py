@@ -343,6 +343,27 @@ def scrap_asset(asset_name, serial_no=None):
 	)
 
 
+@frappe.whitelist()
+def restore_asset(asset_name, serial_no=None):
+	asset_doc = get_asset_doc(asset_name, serial_no)
+
+	je = asset_doc.journal_entry_for_scrap
+
+	asset_doc.db_set("disposal_date", None)
+	asset_doc.db_set("journal_entry_for_scrap", None)
+
+	frappe.get_doc("Journal Entry", je).cancel()
+
+	asset_doc.set_status()
+
+
+def get_asset_doc(asset_name, serial_no):
+	if not serial_no:
+		return frappe.get_doc("Asset", asset_name)
+	else:
+		return frappe.get_doc("Asset Serial No", serial_no)
+
+
 def get_asset_values(asset_name, serial_no):
 	if not serial_no:
 		docstatus, status, company = frappe.get_value(

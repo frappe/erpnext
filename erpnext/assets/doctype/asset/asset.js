@@ -56,13 +56,13 @@ frappe.ui.form.on("Asset", {
 			if (frm.doc.is_serialized_asset) {
 				frm.trigger("toggle_display_create_serial_nos_button");
 			} else {
-				if (frm.doc.num_of_assets > 1) {
-					frm.add_custom_button(__("Split Asset"), function () {
-						frm.trigger("split_asset");
-					}, __("Manage"));
-				}
-
 				if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
+					if (frm.doc.num_of_assets > 1) {
+						frm.add_custom_button(__("Split Asset"), function () {
+							frm.trigger("split_asset");
+						}, __("Manage"));
+					}
+
 					frm.add_custom_button(__("Transfer Asset"), function () {
 						frm.trigger("transfer_asset");
 					}, __("Manage"));
@@ -74,34 +74,36 @@ frappe.ui.form.on("Asset", {
 					frm.add_custom_button(__("Sell Asset"), function () {
 						frm.trigger("make_sales_invoice");
 					}, __("Manage"));
+
+					if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
+						frm.add_custom_button(__("Maintain Asset"), function () {
+							frm.trigger("create_asset_maintenance");
+						}, __("Manage"));
+					}
+
+					frm.add_custom_button(__("Repair Asset"), function () {
+						frm.trigger("create_asset_repair");
+					}, __("Manage"));
+
+					if (frm.doc.status != "Fully Depreciated") {
+						frm.add_custom_button(__("Revalue Asset"), function () {
+							frm.trigger("create_asset_revaluation");
+						}, __("Manage"));
+					}
+
+					if (!frm.doc.calculate_depreciation) {
+						frm.add_custom_button(__("Create Depreciation Entry"), function () {
+							frm.trigger("create_depreciation_entry");
+						}, __("Manage"));
+					}
 				} else if (frm.doc.status == "Scrapped") {
 					frm.add_custom_button(__("Restore Asset"), function () {
 						frm.trigger("restore_asset");
 					}, __("Manage"));
 				}
 
-				if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
-					frm.add_custom_button(__("Maintain Asset"), function () {
-						frm.trigger("create_asset_maintenance");
-					}, __("Manage"));
-				}
-
-				frm.add_custom_button(__("Repair Asset"), function () {
-					frm.trigger("create_asset_repair");
-				}, __("Manage"));
-
-				if (frm.doc.status != "Fully Depreciated") {
-					frm.add_custom_button(__("Revalue Asset"), function () {
-						frm.trigger("create_asset_revaluation");
-					}, __("Manage"));
-				}
-
 				if (frm.doc.calculate_depreciation) {
 					frm.trigger("setup_chart");
-				} else {
-					frm.add_custom_button(__("Create Depreciation Entry"), function () {
-						frm.trigger("create_depreciation_entry");
-					}, __("Manage"));
 				}
 
 				if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
@@ -290,6 +292,20 @@ frappe.ui.form.on("Asset", {
 					"asset_name": frm.doc.name
 				},
 				method: "erpnext.assets.doctype.depreciation_schedule.depreciation_posting.scrap_asset",
+				callback: function () {
+					frm.reload_doc();
+				}
+			})
+		})
+	},
+
+	restore_asset: function (frm) {
+		frappe.confirm(__("Do you really want to restore this scrapped asset?"), function () {
+			frappe.call({
+				args: {
+					"asset_name": frm.doc.name
+				},
+				method: "erpnext.assets.doctype.depreciation_schedule.depreciation_posting.restore_asset",
 				callback: function () {
 					frm.reload_doc();
 				}
@@ -627,17 +643,3 @@ frappe.ui.form.on("Asset Finance Book", {
 		frappe.flags.dont_change_rate = false;
 	},
 });
-
-erpnext.asset.restore_asset = function (frm) {
-	frappe.confirm(__("Do you really want to restore this scrapped asset?"), function () {
-		frappe.call({
-			args: {
-				"asset_name": frm.doc.name
-			},
-			method: "erpnext.assets.doctype.asset.depreciation.restore_asset",
-			callback: function () {
-				cur_frm.reload_doc();
-			}
-		})
-	})
-};
