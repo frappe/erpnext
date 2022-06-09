@@ -642,12 +642,7 @@ Course,Курс,
 Course Code: ,Код курса:,
 Course Enrollment {0} does not exists,Зачисление на курс {0} не существует,
 Course Schedule,Расписание курса,
-<<<<<<< HEAD
-Course: ,Курс:,
-Cr,Cr,
-=======
 Course: ,Курс: ,
->>>>>>> 2675751d6c (fix: update ru translate (#31200))
 Create,Создать,
 Create BOM,Создать спецификацию,
 Create Delivery Trip,Создать маршрут доставки,
@@ -2882,13 +2877,8 @@ Supplier Invoice No exists in Purchase Invoice {0},Номер счета пос�
 Supplier Name,наименование поставщика,
 Supplier Part No,Деталь поставщика №,
 Supplier Quotation,Предложение поставщика,
-<<<<<<< HEAD
-Supplier Scorecard,Поставщик Scorecard,
-Supplier Warehouse mandatory for sub-contracted Purchase Receipt,Поставщик Склад обязательным для субподрядчиком ТОВАРНЫЙ ЧЕК,
-=======
 Supplier Scorecard,Оценочная карта поставщика,
 Supplier Warehouse mandatory for sub-contracted Purchase Receipt,Наличие склада поставщика обязательно для субподрядной квитанции о покупке,
->>>>>>> 2675751d6c (fix: update ru translate (#31200))
 Supplier database.,База данных поставщиков.,
 Supplier {0} not found in {1},Поставщик {0} не найден в {1},
 Supplier(s),Поставщик (и),
@@ -3321,13 +3311,8 @@ Work Order {0} must be submitted,Порядок работы {0} должен б
 Work Orders Created: {0},Созданы рабочие задания: {0},
 Work Summary for {0},Резюме работы для {0},
 Work-in-Progress Warehouse is required before Submit,Работа-в-Прогресс Склад требуется перед Отправить,
-<<<<<<< HEAD
-Workflow, Рабочий процесс,
-Working,Работающий,
-=======
 Workflow,Рабочий процесс,
 Working,В работе,
->>>>>>> 2675751d6c (fix: update ru translate (#31200))
 Working Hours,Часы работы,
 Workstation,Рабочая станция,
 Workstation is closed on the following dates as per Holiday List: {0},Рабочая станция закрыта в следующие даты согласно списка праздников: {0},
@@ -7995,13 +7980,8 @@ Required only for sample item.,Требуется только для образ
 "If you have created a standard template in Sales Taxes and Charges Template, select one and click on the button below.","Если вы создали стандартный шаблон в шаблонах Налоги с налогами и сбором платежей, выберите его и нажмите кнопку ниже.",
 In Words will be visible once you save the Delivery Note.,По словам будет виден только вы сохраните накладной.,
 In Words (Export) will be visible once you save the Delivery Note.,В Слов (Экспорт) будут видны только вы сохраните накладной.,
-<<<<<<< HEAD
-Transporter Info,Transporter информация,
-Driver Name,Имя драйвера,
-=======
 Transporter Info,Информация для транспортировки,
 Driver Name,Имя водителя,
->>>>>>> 2675751d6c (fix: update ru translate (#31200))
 Track this Delivery Note against any Project,Подписка на Delivery Note против любого проекта,
 Inter Company Reference,Справочник Интер,
 Print Without Amount,Распечатать без суммы,
@@ -8138,13 +8118,8 @@ Synced With Hub,Синхронизированные со ступицей,
 Item Alternative,Пункт Альтернатива,
 Alternative Item Code,Альтернативный код товара,
 Two-way,Двусторонний,
-<<<<<<< HEAD
-Alternative Item Name,Альтернативное название товара,
-Attribute Name,Имя атрибута,
-=======
 Alternative Item Name,Альтернативное название продукта,
 Attribute Name,Название атрибута,
->>>>>>> 2675751d6c (fix: update ru translate (#31200))
 Numeric Values,Числовые значения,
 From Range,От хребта,
 Increment,Приращение,
@@ -9347,15 +9322,9 @@ Error creating membership entry for {0},Ошибка создания запис
 A customer is already linked to this Member,Клиент уже привязан к этому участнику,
 End Date must not be lesser than Start Date,Дата окончания не должна быть меньше даты начала.,
 Employee {0} already has Active Shift {1}: {2},Сотрудник {0} уже имеет активную смену {1}: {2},
-<<<<<<< HEAD
- from {0},от {0},
- to {0},в {0},
-Please select Employee first.,"Пожалуйста, сначала выберите Сотрудник.",
-=======
  from {0}, от {0},
  to {0}, в {0},
 Please select Employee first.,"Пожалуйста, сначала выберите сотрудника.",
->>>>>>> 2675751d6c (fix: update ru translate (#31200))
 Please set {0} for the Employee or for Department: {1},Установите {0} для сотрудника или отдела: {1},
 To Date should be greater than From Date,"Дата до должна быть больше, чем Дата",
 Employee Onboarding: {0} is already for Job Applicant: {1},Прием на работу сотрудника: {0} уже для соискателя: {1},
