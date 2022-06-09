@@ -193,30 +193,30 @@ class TestAsset(AssetSetup):
 	def test_gle_made_by_asset_sale(self):
 		asset = create_asset(
 			calculate_depreciation=1,
-			available_for_use_date="2021-06-06",
-			purchase_date="2021-01-01",
+			available_for_use_date="2020-06-06",
+			purchase_date="2020-01-01",
 			expected_value_after_useful_life=10000,
 			total_number_of_depreciations=3,
 			frequency_of_depreciation=10,
-			depreciation_start_date="2021-12-31",
+			depreciation_start_date="2020-12-31",
 			submit=1,
 		)
-
-		post_depreciation_entries(date="2022-01-01")
+		post_depreciation_entries(date="2021-01-01")
 
 		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
 		si.customer = "_Test Customer"
-		si.posting_date = getdate("2022-04-22")
-		si.due_date = getdate("2022-04-22")
+		si.set_posting_time = 1
+		si.posting_date = "2021-10-31"
+		si.due_date = "2021-10-31"
 		si.get("items")[0].rate = 75000
 		si.submit()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 36082.31, 0.0),
+			("_Test Accumulated Depreciations - _TC", 50490.2, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 0.0, 11082.31),
+			("_Test Gain/Loss on Asset Disposal - _TC", 0.0, 25490.2),
 			("Debtors - _TC", 75000.0, 0.0),
 		)
 
@@ -227,7 +227,10 @@ class TestAsset(AssetSetup):
 			si.name,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		for i, gle_entry in enumerate(gle):
+			self.assertEqual(gle_entry[0], expected_gle[i][0])
+			self.assertEqual(flt(gle_entry[1], 1), flt(expected_gle[i][1], 1))
+			self.assertEqual(flt(gle_entry[2], 1), flt(expected_gle[i][2], 1))
 
 		si.load_from_db()
 		si.cancel()
