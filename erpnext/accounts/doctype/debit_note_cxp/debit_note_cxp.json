@@ -30,6 +30,7 @@
   "isv_15",
   "isv_18",
   "amount_total",
+  "outstanding_amount",
   "amended_from",
   "sectionaccount",
   "account_to_debit",
@@ -247,10 +248,16 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "reqd": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "options": "Currency"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-09 15:50:04.028779",
+ "modified": "2022-06-08 16:11:53.779986",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXP",

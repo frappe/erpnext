@@ -75,6 +75,17 @@ class PaymentEntry(AccountsController):
 				self.update_dashboard_customer()
 			if self.party_type == "Supplier":
 				self.update_dashboard_supplier()
+			self.create_serial()
+	
+	def create_serial(self):
+		serial_split = self.naming_series.split("-")
+		serialString = serial_split[0] + "-" + serial_split[1]
+		serial = frappe.get_all("Secuence Payment Entry", ["*"], filters = {"name": serialString})
+		
+		if len(serial) == 0:
+			doc = frappe.new_doc("Secuence Payment Entry")
+			doc.serial = serialString
+			doc.insert()
 	
 	def update_dashboard_customer(self):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
