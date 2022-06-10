@@ -55,6 +55,9 @@ def validate_eligibility(doc):
 		return False
 
 	invalid_company = not frappe.db.get_value("E Invoice User", {"company": doc.get("company")})
+	invalid_company_gstin = not frappe.db.get_value(
+		"E Invoice User", {"gstin": doc.get("company_gstin")}
+	)
 	invalid_supply_type = doc.get("gst_category") not in [
 		"Registered Regular",
 		"Registered Composition",
@@ -71,6 +74,7 @@ def validate_eligibility(doc):
 
 	if (
 		invalid_company
+		or invalid_company_gstin
 		or invalid_supply_type
 		or company_transaction
 		or no_taxes_applied

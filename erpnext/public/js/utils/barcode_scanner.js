@@ -9,6 +9,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.barcode_field = opts.barcode_field || "barcode";
 		this.serial_no_field = opts.serial_no_field || "serial_no";
 		this.batch_no_field = opts.batch_no_field || "batch_no";
+		this.uom_field = opts.uom_field || "uom";
 		this.qty_field = opts.qty_field || "qty";
 		// field name on row which defines max quantity to be scanned e.g. picklist
 		this.max_qty_field = opts.max_qty_field;
@@ -26,6 +27,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		//     bar_code: "123456", // present if barcode was scanned
 		//     batch_no: "LOT12", // present if batch was scanned
 		//     serial_no: "987XYZ", // present if serial no was scanned
+		//     uom: "Kg", // present if barcode UOM is different from default
 		// }
 		this.scan_api = opts.scan_api || "erpnext.stock.utils.scan_barcode";
 	}
@@ -67,9 +69,9 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return new Promise(resolve => {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
-			const {item_code, barcode, batch_no, serial_no} = data;
+			const {item_code, barcode, batch_no, serial_no, uom} = data;
 
-			let row = this.get_row_to_modify_on_scan(item_code, batch_no);
+			let row = this.get_row_to_modify_on_scan(item_code, batch_no, uom);
 
 			if (!row) {
 				if (this.dont_allow_new_row) {
@@ -90,10 +92,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			}
 
 			frappe.run_serially([
-				() => this.set_selector_trigger_flag(row, data),
+				() => this.set_selector_trigger_flag(data),
 				() => this.set_item(row, item_code).then(qty => {
 					this.show_scan_message(row.idx, row.item_code, qty);
 				}),
+				() => this.set_barcode_uom(row, uom),
 				() => this.set_serial_no(row, serial_no),
 				() => this.set_batch_no(row, batch_no),
 				() => this.set_barcode(row, barcode),
@@ -106,7 +109,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	// batch and serial selector is reduandant when all info can be added by scan
 	// this flag on item row is used by transaction.js to avoid triggering selector
-	set_selector_trigger_flag(row, data) {
+	set_selector_trigger_flag(data) {
 		const {batch_no, serial_no, has_batch_no, has_serial_no} = data;
 
 		const require_selecting_batch = has_batch_no && !batch_no;
@@ -154,6 +157,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
+	async set_barcode_uom(row, uom) {
+		if (uom && frappe.meta.has_field(row.doctype, this.uom_field)) {
+			await frappe.model.set_value(row.doctype, row.name, this.uom_field, uom);
+		}
+	}
+
 	async set_batch_no(row, batch_no) {
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
 			await frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
@@ -184,7 +193,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		return is_duplicate;
 	}
 
-	get_row_to_modify_on_scan(item_code, batch_no) {
+	get_row_to_modify_on_scan(item_code, batch_no, uom) {
 		let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
 		// Check if batch is scanned and table has batch no field
@@ -193,10 +202,12 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 		const matching_row = (row) => {
 			const item_match = row.item_code == item_code;
-			const batch_match = row.batch_no == batch_no;
+			const batch_match = row[this.batch_no_field] == batch_no;
+			const uom_match = !uom || row[this.uom_field] == uom;
 			const qty_in_limit = flt(row[this.qty_field]) < flt(row[this.max_qty_field]);
 
 			return item_match
+				&& uom_match
 				&& (!is_batch_no_scan || batch_match)
 				&& (!check_max_qty || qty_in_limit)
 		}

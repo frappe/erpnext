@@ -148,7 +148,6 @@ class GSTR3BReport(Document):
 			FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
 			WHERE p.docstatus = 1 and p.name = i.parent
 			and p.is_opening = 'No'
-			and p.gst_category != 'Registered Composition'
 			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition') and
 			month(p.posting_date) = %s and year(p.posting_date) = %s
 			and p.company = %s and p.company_gstin = %s

@@ -13,6 +13,10 @@
   "update_type",
   "status",
   "error_log",
+  "progress_section",
+  "current_level",
+  "processed_boms",
+  "bom_batches",
   "amended_from"
  ],
  "fields": [
@@ -63,13 +67,36 @@
    "fieldtype": "Link",
    "label": "Error Log",
    "options": "Error Log"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval: doc.update_type == \"Update Cost\"",
+   "fieldname": "progress_section",
+   "fieldtype": "Section Break",
+   "label": "Progress"
+  },
+  {
+   "fieldname": "processed_boms",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Processed BOMs"
+  },
+  {
+   "fieldname": "bom_batches",
+   "fieldtype": "Table",
+   "options": "BOM Update Batch"
+  },
+  {
+   "fieldname": "current_level",
+   "fieldtype": "Int",
+   "label": "Current Level"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-31 12:51:44.885102",
+ "modified": "2022-06-06 15:15:23.883251",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
