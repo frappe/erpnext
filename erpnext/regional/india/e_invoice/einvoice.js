@@ -21,46 +21,46 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (!irn && !__unsaved) {
 				const show_einvoice = (generate_ewb) => frappe.call({
-				    method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-				    args: { doctype, docname: name, generate_ewb },
-				    freeze: true,
-				    callback: (res) => {
-				        const einvoice = res.message;
-				        show_einvoice_preview(frm, einvoice, generate_ewb);
-				    }
+					method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+					args: { doctype, docname: name, generate_ewb },
+					freeze: true,
+					callback: (res) => {
+						const einvoice = res.message;
+						show_einvoice_preview(frm, einvoice, generate_ewb);
+					}
 				});
 
 				const is_ewb_eligible = async () => {
 
-				    let when_generate_ewb = await frappe.db.get_single_value("E Invoice Settings", "eway_when_generate");
+					let when_generate_ewb = await frappe.db.get_single_value("E Invoice Settings", "eway_when_generate");
 
-				    if (when_generate_ewb == "Above 50000" && frm.doc.rounded_total < 50000) return false;
+					if (when_generate_ewb == "Above 50000" && frm.doc.rounded_total < 50000) return false;
 
-				    return true;
-				}
+					return true;
+				};
 
 				const action = async () => {
 
-				    if (frm.doc.__unsaved) {
-    				    frappe.throw(__('Please save the document to generate IRN.'));
-				    }
+					if (frm.doc.__unsaved) {
+						frappe.throw(__('Please save the document to generate IRN.'));
+					}
 
 					let generate_ewb = false;
 
-				    let auto_generate_ewb = await frappe.db.get_single_value("E Invoice Settings", "eway_auto_generate");
-				    if (auto_generate_ewb == "No") return show_einvoice(generate_ewb);
+					let auto_generate_ewb = await frappe.db.get_single_value("E Invoice Settings", "eway_auto_generate");
+					if (auto_generate_ewb == "No") return show_einvoice(generate_ewb);
 
-				    generate_ewb = await is_ewb_eligible();
+					generate_ewb = await is_ewb_eligible();
 					if (!generate_ewb) return show_einvoice(generate_ewb);
-				    if (auto_generate_ewb == "Yes") return show_einvoice(generate_ewb);
+					if (auto_generate_ewb == "Yes") return show_einvoice(generate_ewb);
 
-				    frappe.confirm('Would you also like to generate E-way bill ?',
+					frappe.confirm('Would you also like to generate E-way bill ?',
 						() => {
-							show_einvoice(generate_ewb)
-						},() => {
-							show_einvoice(generate_ewb=false)
+							show_einvoice(generate_ewb);
+						}, () => {
+							show_einvoice(generate_ewb=false);
 						}
-					)
+					);
 				};
 
 				add_custom_button(__("Generate IRN"), action);
