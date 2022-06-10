@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, cstr, date_diff, getdate, rounded
+from frappe.utils import add_days, cstr, date_diff, flt, getdate, rounded
 
 from erpnext.hr.utils import (
 	get_holiday_dates_for_employee,
@@ -27,11 +27,14 @@ class EmployeeBenefitApplication(Document):
 		validate_active_employee(self.employee)
 		self.validate_duplicate_on_payroll_period()
 		if not self.max_benefits:
-			self.max_benefits = get_max_benefits_remaining(self.employee, self.date, self.payroll_period)
+			self.max_benefits = flt(
+				get_max_benefits_remaining(self.employee, self.date, self.payroll_period),
+				self.precision("max_benefits"),
+			)
 		if self.max_benefits and self.max_benefits > 0:
 			self.validate_max_benefit_for_component()
 			self.validate_prev_benefit_claim()
-			if self.remaining_benefit > 0:
+			if self.remaining_benefit and self.remaining_benefit > 0:
 				self.validate_remaining_benefit_amount()
 		else:
 			frappe.throw(
@@ -110,7 +113,7 @@ class EmployeeBenefitApplication(Document):
 			max_benefit_amount = 0
 			for employee_benefit in self.employee_benefits:
 				self.validate_max_benefit(employee_benefit.earning_component)
-				max_benefit_amount += employee_benefit.amount
+				max_benefit_amount += flt(employee_benefit.amount)
 			if max_benefit_amount > self.max_benefits:
 				frappe.throw(
 					_("Maximum benefit amount of employee {0} exceeds {1}").format(
@@ -125,7 +128,8 @@ class EmployeeBenefitApplication(Document):
 		benefit_amount = 0
 		for employee_benefit in self.employee_benefits:
 			if employee_benefit.earning_component == earning_component_name:
-				benefit_amount += employee_benefit.amount
+				benefit_amount += flt(employee_benefit.amount)
+
 		prev_sal_slip_flexi_amount = get_sal_slip_total_benefit_given(
 			self.employee, frappe.get_doc("Payroll Period", self.payroll_period), earning_component_name
 		)
@@ -207,26 +211,47 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 def calculate_lwp(employee, start_date, holidays, working_days):
 	lwp = 0
 	holidays = "','".join(holidays)
+
 	for d in range(working_days):
-		dt = add_days(cstr(getdate(start_date)), d)
-		leave = frappe.db.sql(
-			"""
-			select t1.name, t1.half_day
-			from `tabLeave Application` t1, `tabLeave Type` t2
-			where t2.name = t1.leave_type
-			and t2.is_lwp = 1
-			and t1.docstatus = 1
-			and t1.employee = %(employee)s
-			and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date
-			WHEN t2.include_holiday THEN %(dt)s between from_date and to_date
-			END
-			""".format(
-				holidays
-			),
-			{"employee": employee, "dt": dt},
+		date = add_days(cstr(getdate(start_date)), d)
+
+		LeaveApplication = frappe.qb.DocType("Leave Application")
+		LeaveType = frappe.qb.DocType("Leave Type")
+
+		is_half_day = (
+			frappe.qb.terms.Case()
+			.when(
+				(
+					(LeaveApplication.half_day_date == date)
+					| (LeaveApplication.from_date == LeaveApplication.to_date)
+				),
+				LeaveApplication.half_day,
+			)
+			.else_(0)
+		).as_("is_half_day")
+
+		query = (
+			frappe.qb.from_(LeaveApplication)
+			.inner_join(LeaveType)
+			.on((LeaveType.name == LeaveApplication.leave_type))
+			.select(LeaveApplication.name, is_half_day)
+			.where(
+				(LeaveType.is_lwp == 1)
+				& (LeaveApplication.docstatus == 1)
+				& (LeaveApplication.status == "Approved")
+				& (LeaveApplication.employee == employee)
+				& ((LeaveApplication.from_date <= date) & (date <= LeaveApplication.to_date))
+			)
 		)
-		if leave:
-			lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+
+		# if it's a holiday only include if leave type has "include holiday" enabled
+		if date in holidays:
+			query = query.where((LeaveType.include_holiday == "1"))
+		leaves = query.run(as_dict=True)
+
+		if leaves:
+			lwp += 0.5 if leaves[0].is_half_day else 1
+
 	return lwp
 
 

@@ -76,7 +76,14 @@ _test_records = [
 
 class TestLeaveApplication(unittest.TestCase):
 	def setUp(self):
-		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Leave Ledger Entry"]:
+		for dt in [
+			"Leave Application",
+			"Leave Allocation",
+			"Salary Slip",
+			"Leave Ledger Entry",
+			"Leave Period",
+			"Leave Policy Assignment",
+		]:
 			frappe.db.delete(dt)
 
 		frappe.set_user("Administrator")
@@ -702,59 +709,24 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(details.leave_balance, 30)
 
 	def test_earned_leaves_creation(self):
-
-		frappe.db.sql("""delete from `tabLeave Period`""")
-		frappe.db.sql("""delete from `tabLeave Policy Assignment`""")
-		frappe.db.sql("""delete from `tabLeave Allocation`""")
-		frappe.db.sql("""delete from `tabLeave Ledger Entry`""")
+		from erpnext.hr.utils import allocate_earned_leaves
 
 		leave_period = get_leave_period()
 		employee = get_employee()
 		leave_type = "Test Earned Leave Type"
-		frappe.delete_doc_if_exists("Leave Type", "Test Earned Leave Type", force=1)
-		frappe.get_doc(
-			dict(
-				leave_type_name=leave_type,
-				doctype="Leave Type",
-				is_earned_leave=1,
-				earned_leave_frequency="Monthly",
-				rounding=0.5,
-				max_leaves_allowed=6,
-			)
-		).insert()
+		make_policy_assignment(employee, leave_type, leave_period)
 
-		leave_policy = frappe.get_doc(
-			{
-				"doctype": "Leave Policy",
-				"title": "Test Leave Policy",
-				"leave_policy_details": [{"leave_type": leave_type, "annual_allocation": 6}],
-			}
-		).insert()
-
-		data = {
-			"assignment_based_on": "Leave Period",
-			"leave_policy": leave_policy.name,
-			"leave_period": leave_period.name,
-		}
-
-		leave_policy_assignments = create_assignment_for_multiple_employees(
-			[employee.name], frappe._dict(data)
-		)
-
-		from erpnext.hr.utils import allocate_earned_leaves
-
-		i = 0
-		while i < 14:
+		for i in range(0, 14):
 			allocate_earned_leaves()
-			i += 1
+
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 6)
 
 		# validate earned leaves creation without maximum leaves
 		frappe.db.set_value("Leave Type", leave_type, "max_leaves_allowed", 0)
-		i = 0
-		while i < 6:
+
+		for i in range(0, 6):
 			allocate_earned_leaves()
-			i += 1
+
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 9)
 
 	# test to not consider current leave in leave balance while submitting
@@ -971,6 +943,54 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(leave_allocation["remaining_leaves"], 26)
 
 	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
+	def test_get_earned_leave_details_for_dashboard(self):
+		from erpnext.hr.utils import allocate_earned_leaves
+
+		leave_period = get_leave_period()
+		employee = get_employee()
+		leave_type = "Test Earned Leave Type"
+		leave_policy_assignments = make_policy_assignment(employee, leave_type, leave_period)
+		allocation = frappe.db.get_value(
+			"Leave Allocation",
+			{"leave_policy_assignment": leave_policy_assignments[0]},
+			"name",
+		)
+		allocation = frappe.get_doc("Leave Allocation", allocation)
+		allocation.new_leaves_allocated = 2
+		allocation.save()
+
+		for i in range(0, 6):
+			allocate_earned_leaves()
+
+		first_sunday = get_first_sunday(self.holiday_list)
+		make_leave_application(
+			employee.name, add_days(first_sunday, 1), add_days(first_sunday, 1), leave_type
+		)
+
+		details = get_leave_details(employee.name, allocation.from_date)
+		leave_allocation = details["leave_allocation"][leave_type]
+		expected = {
+			"total_leaves": 2.0,
+			"expired_leaves": 0.0,
+			"leaves_taken": 1.0,
+			"leaves_pending_approval": 0.0,
+			"remaining_leaves": 1.0,
+		}
+		self.assertEqual(leave_allocation, expected)
+
+		details = get_leave_details(employee.name, getdate())
+		leave_allocation = details["leave_allocation"][leave_type]
+
+		expected = {
+			"total_leaves": 5.0,
+			"expired_leaves": 0.0,
+			"leaves_taken": 1.0,
+			"leaves_pending_approval": 0.0,
+			"remaining_leaves": 4.0,
+		}
+		self.assertEqual(leave_allocation, expected)
+
+	@set_holiday_list("Salary Slip Test Holiday List", "_Test Company")
 	def test_get_leave_allocation_records(self):
 		employee = get_employee()
 		leave_type = create_leave_type(
@@ -1100,3 +1120,36 @@ def get_first_sunday(holiday_list, for_date=None):
 	)[0][0]
 
 	return first_sunday
+
+
+def make_policy_assignment(employee, leave_type, leave_period):
+	frappe.delete_doc_if_exists("Leave Type", leave_type, force=1)
+	frappe.get_doc(
+		dict(
+			leave_type_name=leave_type,
+			doctype="Leave Type",
+			is_earned_leave=1,
+			earned_leave_frequency="Monthly",
+			rounding=0.5,
+			max_leaves_allowed=6,
+		)
+	).insert()
+
+	leave_policy = frappe.get_doc(
+		{
+			"doctype": "Leave Policy",
+			"title": "Test Leave Policy",
+			"leave_policy_details": [{"leave_type": leave_type, "annual_allocation": 6}],
+		}
+	).insert()
+
+	data = {
+		"assignment_based_on": "Leave Period",
+		"leave_policy": leave_policy.name,
+		"leave_period": leave_period.name,
+	}
+
+	leave_policy_assignments = create_assignment_for_multiple_employees(
+		[employee.name], frappe._dict(data)
+	)
+	return leave_policy_assignments
