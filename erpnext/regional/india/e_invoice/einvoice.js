@@ -20,72 +20,47 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			};
 
 			if (!irn && !__unsaved) {
+				const show_einvoice = (generate_ewb) => frappe.call({
+				    method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+				    args: { doctype, docname: name, generate_ewb },
+				    freeze: true,
+				    callback: (res) => {
+				        const einvoice = res.message;
+				        show_einvoice_preview(frm, einvoice, generate_ewb);
+				    }
+				});
+
+				const is_ewb_eligible = async () => {
+
+				    let when_generate_ewb = await frappe.db.get_single_value("E Invoice Settings", "eway_when_generate");
+
+				    if (when_generate_ewb == "Above 50000" && frm.doc.rounded_total < 50000) return false;
+
+				    return true;
+				}
+
 				const action = async () => {
-					let invoice_grand_total = frm.doc.rounded_total;
-					let eway_eligibility = false;
+
+				    if (frm.doc.__unsaved) {
+    				    frappe.throw(__('Please save the document to generate IRN.'));
+				    }
+
 					let generate_ewb = false;
 
-					let eway_auto_generate = await frappe.db.get_single_value("E Invoice Settings", "eway_auto_generate");
+				    let auto_generate_ewb = await frappe.db.get_single_value("E Invoice Settings", "eway_auto_generate");
+				    if (auto_generate_ewb == "No") return show_einvoice(generate_ewb);
 
-					let eway_when_generate = await frappe.db.get_single_value("E Invoice Settings", "eway_when_generate");
+				    generate_ewb = await is_ewb_eligible();
+					if (!generate_ewb) return show_einvoice(generate_ewb);
+				    if (auto_generate_ewb == "Yes") return show_einvoice(generate_ewb);
 
-					if (eway_when_generate != "Above 50000" || (eway_when_generate == "Above 50000" && invoice_grand_total >= 50000)) {
-						eway_eligibility = true;
-					}
-
-					if (frm.doc.__unsaved) {
-						frappe.throw(__('Please save the document to generate IRN.'));
-					}
-					if (eway_auto_generate == "Yes") {
-						if (eway_eligibility) {
-							generate_ewb = true;
+				    frappe.confirm('Would you also like to generate E-way bill ?',
+						() => {
+							show_einvoice(generate_ewb)
+						},() => {
+							show_einvoice(generate_ewb=false)
 						}
-						frappe.call({
-							method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-							args: { doctype, docname: name, generate_ewb },
-							freeze: true,
-							callback: (res) => {
-								const einvoice = res.message;
-								show_einvoice_preview(frm, einvoice, generate_ewb);
-							}
-						});
-					} else if ((eway_auto_generate == "Always Ask" || eway_auto_generate == "") && eway_eligibility) {
-						frappe.confirm('Would you also like to generate E-way bill ?',
-							() => {
-								generate_ewb = true;
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-									args: { doctype, docname: name, generate_ewb },
-									freeze: true,
-									callback: (res) => {
-										const einvoice = res.message;
-										show_einvoice_preview(frm, einvoice, generate_ewb);
-									}
-								});
-							}, () => {
-								generate_ewb = false;
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-									args: { doctype, docname: name, generate_ewb },
-									freeze: true,
-									callback: (res) => {
-										const einvoice = res.message;
-										show_einvoice_preview(frm, einvoice, generate_ewb);
-									}
-								});
-							});
-					} else {
-						generate_ewb = false;
-						frappe.call({
-							method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-							args: { doctype, docname: name, generate_ewb },
-							freeze: true,
-							callback: (res) => {
-								const einvoice = res.message;
-								show_einvoice_preview(frm, einvoice, generate_ewb);
-							}
-						});
-					}
+					)
 				};
 
 				add_custom_button(__("Generate IRN"), action);

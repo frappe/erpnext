@@ -993,33 +993,11 @@ class GSPConnector:
 						"IRN has already been generated for the invoice but cannot fetch details for the it. \
 						Contact ERPNext support to resolve the issue."
 					)
-
-			if res.get("info"):
-				info = res.get("info", [])
-				"""
-    				"info": [
-    				    {
-    				        "InfCd": "EWBERR",
-    				        "Desc": [
-    				            {
-    				                "ErrorCode": "4011",
-    				                "ErrorMessage": "Vehicle number  should be passed in case of transportation mode is Road."
-    				            }
-    				        ]
-    				    }
-    				]
-				"""
-				# right now eway bill errors are shown, we can add more when available using below forloop.
-				for msg in info:
-					if msg.get("InfCd") == "EWBERR":
-						for desc in msg.get("Desc", []):
-							frappe.msgprint(
-								_(desc.get("ErrorMessage")),
-								title="E-Way Bill not generated",
-								indicator="orange",
-							)
 			else:
 				raise RequestFailed
+
+			if res.get("info"):
+				self.parse_info(res)
 
 		except RequestFailed:
 			errors = self.sanitize_error_message(res.get("message"))
@@ -1030,6 +1008,46 @@ class GSPConnector:
 			self.set_failed_status(errors=str(e))
 			log_error(data)
 			self.raise_error(True)
+
+	def parse_info(self, res):
+		info = res.get("info", [])
+		"""
+			"info": [
+				{
+					"InfCd": "EWBERR",
+					"Desc": [
+						{
+							"ErrorCode": "4011",
+							"ErrorMessage": "Vehicle number  should be passed in case of transportation mode is Road."
+						}
+					]
+				}
+			]
+			"info": [
+			        {
+			            "InfCd": "EWBPPD",
+			            "Desc": "Pin-Pin calc distance: 2502KM"
+			        }
+			    ]
+		"""
+		# when we have more features/errors (responses) in eway bill or irn, we can add them using below forloop.
+		for msg in info:
+			if msg.get("InfCd") == "EWBERR":
+				for desc in msg.get("Desc", []):
+					frappe.msgprint(
+						_(desc.get("ErrorMessage")),
+						title="E-Way Bill not generated",
+						indicator="orange",
+					)
+			if msg.get("InfCd") == "EWBPPD":
+				pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
+				frappe.msgprint(
+					_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
+					title="Notification",
+					indicator="green",
+					alert=True,
+				)
+				self.invoice.distance = flt(pin_to_pin_distance)
 
 	@staticmethod
 	def bulk_generate_irn(invoices):
@@ -1216,18 +1234,7 @@ class GSPConnector:
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
 				if res.get("info"):
-					info = res.get("info")
-					# when we have more features (responses) in eway bill, we can add them using below forloop.
-					for msg in info:
-						if msg.get("InfCd") == "EWBPPD":
-							pin_to_pin_distance = int(re.search(r"\d+", msg.get("Desc")).group())
-							frappe.msgprint(
-								_("Auto Calculated Distance is {} KM.").format(str(pin_to_pin_distance)),
-								title="Notification",
-								indicator="green",
-								alert=True,
-							)
-							self.invoice.distance = flt(pin_to_pin_distance)
+					self.parse_info(res)
 				self.invoice.flags.updater_reference = {
 					"doctype": self.invoice.doctype,
 					"docname": self.invoice.name,
