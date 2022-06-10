@@ -2,7 +2,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate
 
-from erpnext.hr.doctype.employee.test_employee import make_employee
+from employee.setup.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.timesheet.test_timesheet import (
 	make_salary_structure_for_timesheet,
 	make_timesheet,

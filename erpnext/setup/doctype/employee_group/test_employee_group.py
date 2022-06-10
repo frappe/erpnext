@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.hr.doctype.employee.test_employee import make_employee
+from employee.setup.doctype.employee.test_employee import make_employee
 
 
 class TestEmployeeGroup(unittest.TestCase):

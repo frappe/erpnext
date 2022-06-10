@@ -7,8 +7,8 @@ from datetime import timedelta
 import frappe
 from frappe.utils import add_months, getdate
 
-from erpnext.hr.doctype.employee.employee_reminders import send_holidays_reminder_in_advance
-from erpnext.hr.doctype.employee.test_employee import make_employee
+from employee.setup.doctype.employee.employee_reminders import send_holidays_reminder_in_advance
+from employee.setup.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.hr_settings.hr_settings import set_proceed_with_frequency_change
 from erpnext.hr.utils import get_holidays_for_employee
 
@@ -16,7 +16,7 @@ from erpnext.hr.utils import get_holidays_for_employee
 class TestEmployeeReminders(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		from erpnext.hr.doctype.holiday_list.test_holiday_list import make_holiday_list
+		from employee.setup.doctype.holiday_list.test_holiday_list import make_holiday_list
 
 		# Create a test holiday list
 		test_holiday_dates = cls.get_test_holiday_dates()
@@ -83,7 +83,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		frappe.db.sql("delete from `tabEmail Queue Recipient`")
 
 	def test_is_holiday(self):
-		from erpnext.hr.doctype.employee.employee import is_holiday
+		from employee.setup.doctype.employee.employee import is_holiday
 
 		self.assertTrue(is_holiday(self.test_employee.name))
 		self.assertTrue(is_holiday(self.test_employee.name, date=self.test_holiday_dates[1]))
@@ -109,7 +109,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		employee.company = "_Test Company"
 		employee.save()
 
-		from erpnext.hr.doctype.employee.employee_reminders import (
+		from employee.setup.doctype.employee.employee_reminders import (
 			get_employees_who_are_born_today,
 			send_birthday_reminders,
 		)
@@ -133,7 +133,7 @@ class TestEmployeeReminders(unittest.TestCase):
 			company="_Test Company",
 		)
 
-		from erpnext.hr.doctype.employee.employee_reminders import (
+		from employee.setup.doctype.employee.employee_reminders import (
 			get_employees_having_an_event_today,
 			send_work_anniversary_reminders,
 		)
@@ -162,7 +162,7 @@ class TestEmployeeReminders(unittest.TestCase):
 			company="_Test Company",
 		)
 
-		from erpnext.hr.doctype.employee.employee_reminders import get_employees_having_an_event_today
+		from employee.setup.doctype.employee.employee_reminders import get_employees_having_an_event_today
 
 		employees_having_work_anniversary = get_employees_having_an_event_today("work_anniversary")
 		employees = employees_having_work_anniversary.get("_Test Company") or []
@@ -190,7 +190,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		self.assertTrue("Holidays this Week." in email_queue[0].message)
 
 	def test_advance_holiday_reminders_monthly(self):
-		from erpnext.hr.doctype.employee.employee_reminders import send_reminders_in_advance_monthly
+		from employee.setup.doctype.employee.employee_reminders import send_reminders_in_advance_monthly
 
 		setup_hr_settings("Monthly")
 
@@ -217,7 +217,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		)
 
 	def test_advance_holiday_reminders_weekly(self):
-		from erpnext.hr.doctype.employee.employee_reminders import send_reminders_in_advance_weekly
+		from employee.setup.doctype.employee.employee_reminders import send_reminders_in_advance_weekly
 
 		setup_hr_settings("Weekly")
 

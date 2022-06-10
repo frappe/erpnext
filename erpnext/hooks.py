@@ -80,7 +80,7 @@ calendars = [
 	"Holiday List",
 ]
 
-website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner", "Job Opening"]
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
 
 website_context = {
 	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
@@ -163,7 +163,6 @@ website_route_rules = [
 		"to_route": "addresses",
 		"defaults": {"doctype": "Address", "parents": [{"label": _("Addresses"), "route": "addresses"}]},
 	},
-	{"from_route": "/jobs", "to_route": "Job Opening"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
 	{"from_route": "/material-requests", "to_route": "Material Request"},
@@ -256,7 +255,7 @@ sounds = [
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
 ]
 
-has_upload_permission = {"Employee": "erpnext.hr.doctype.employee.employee.has_upload_permission"}
+has_upload_permission = {"Employee": "employee.setup.doctype.employee.employee.has_upload_permission"}
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -289,9 +288,9 @@ doc_events = {
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
-		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
+		"validate": "employee.setup.doctype.employee.employee.validate_employee_role",
 		"on_update": [
-			"erpnext.hr.doctype.employee.employee.update_user_permissions",
+			"employee.setup.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role",
 		],
 	},
@@ -420,8 +419,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
-		"erpnext.hr.doctype.employee.employee_reminders.send_work_anniversary_reminders",
-		"erpnext.hr.doctype.employee.employee_reminders.send_birthday_reminders",
+		"employee.setup.doctype.employee.employee_reminders.send_work_anniversary_reminders",
+		"employee.setup.doctype.employee.employee_reminders.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
@@ -452,8 +451,8 @@ scheduler_events = {
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead",
 	],
-	"weekly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"],
-	"monthly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"],
+	"weekly": ["employee.setup.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"],
+	"monthly": ["employee.setup.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_demand_loans",
@@ -591,9 +590,6 @@ global_search_doctypes = {
 		{"doctype": "Material Request", "index": 16},
 		{"doctype": "Delivery Trip", "index": 17},
 		{"doctype": "Pick List", "index": 18},
-		{"doctype": "Salary Slip", "index": 19},
-		{"doctype": "Leave Application", "index": 20},
-		{"doctype": "Expense Claim", "index": 21},
 		{"doctype": "Payment Entry", "index": 22},
 		{"doctype": "Lead", "index": 23},
 		{"doctype": "Opportunity", "index": 24},
@@ -609,13 +605,7 @@ global_search_doctypes = {
 		{"doctype": "Batch", "index": 34},
 		{"doctype": "Branch", "index": 35},
 		{"doctype": "Department", "index": 36},
-		{"doctype": "Employee Grade", "index": 37},
 		{"doctype": "Designation", "index": 38},
-		{"doctype": "Job Opening", "index": 39},
-		{"doctype": "Job Applicant", "index": 40},
-		{"doctype": "Job Offer", "index": 41},
-		{"doctype": "Salary Structure Assignment", "index": 42},
-		{"doctype": "Appraisal", "index": 43},
 		{"doctype": "Loan", "index": 44},
 		{"doctype": "Maintenance Schedule", "index": 45},
 		{"doctype": "Maintenance Visit", "index": 46},

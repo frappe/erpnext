@@ -777,7 +777,7 @@
  "links": [],
  "modified": "2022-06-10 12:28:55.811983",
  "modified_by": "Administrator",
- "module": "HR",
+ "module": "Setup",
  "name": "Employee",
  "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",

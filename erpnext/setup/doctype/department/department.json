@@ -109,7 +109,7 @@
  "links": [],
  "modified": "2020-06-10 12:28:00.563272",
  "modified_by": "Administrator",
- "module": "HR",
+ "module": "Setup",
  "name": "Department",
  "nsm_parent_field": "parent_department",
  "owner": "Administrator",

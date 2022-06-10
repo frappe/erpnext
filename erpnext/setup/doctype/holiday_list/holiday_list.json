@@ -444,7 +444,7 @@
  "max_attachments": 0,
  "modified": "2018-07-03 07:22:46.474096",
  "modified_by": "Administrator",
- "module": "HR",
+ "module": "Setup",
  "name": "Holiday List",
  "owner": "Administrator",
  "permissions": [

@@ -13,7 +13,7 @@ from erpnext import get_default_company
 from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
-from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+from employee.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
