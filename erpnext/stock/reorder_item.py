@@ -52,7 +52,13 @@ def _reorder_item():
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
 
 	def add_to_material_request(
-		item_code, warehouse, reorder_level, reorder_qty, material_request_type, warehouse_group=None
+		item_code,
+		from_warehouse,
+		warehouse,
+		reorder_level,
+		reorder_qty,
+		material_request_type,
+		warehouse_group=None,
 	):
 		if warehouse not in warehouse_company:
 			# a disabled warehouse
@@ -75,7 +81,12 @@ def _reorder_item():
 			company = warehouse_company.get(warehouse) or default_company
 
 			material_requests[material_request_type].setdefault(company, []).append(
-				{"item_code": item_code, "warehouse": warehouse, "reorder_qty": reorder_qty}
+				{
+					"item_code": item_code,
+					"from_warehouse": from_warehouse,
+					"warehouse": warehouse,
+					"reorder_qty": reorder_qty,
+				}
 			)
 
 	for item_code in items_to_consider:
@@ -86,8 +97,14 @@ def _reorder_item():
 
 		if item.get("reorder_levels"):
 			for d in item.get("reorder_levels"):
+				if d.material_request_type == "Transfer":
+					from_warehouse = d.from_warehouse
+				else:
+					from_warehouse = None
+
 				add_to_material_request(
 					item_code,
+					from_warehouse,
 					d.warehouse,
 					d.warehouse_reorder_level,
 					d.warehouse_reorder_qty,
@@ -191,6 +208,7 @@ def create_material_request(material_requests):
 							"qty": qty,
 							"uom": uom,
 							"stock_uom": item.stock_uom,
+							"from_warehouse": d.from_warehouse,
 							"warehouse": d.warehouse,
 							"item_name": item.item_name,
 							"description": item.description,
