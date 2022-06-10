@@ -121,7 +121,7 @@
   }
  ],
  "icon": "fa fa-certificate",
- "modified": "2021-03-12 15:03:02.508849",
+ "modified": "2022-06-10 15:40:18.660253",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Source",
@@ -180,5 +180,6 @@
  "quick_entry": 1,
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }

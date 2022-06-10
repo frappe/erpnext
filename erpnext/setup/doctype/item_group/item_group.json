@@ -307,7 +307,7 @@
  "image_field": "image",
  "is_tree": 1,
  "max_attachments": 3,
- "modified": "2022-04-18 23:20:00.414583",
+ "modified": "2022-06-10 15:40:06.795427",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
@@ -376,5 +376,6 @@
  "search_fields": "parent_item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }
