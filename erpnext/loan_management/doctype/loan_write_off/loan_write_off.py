@@ -42,7 +42,7 @@ class LoanWriteOff(AccountsController):
 
 	def on_cancel(self):
 		self.update_outstanding_amount(cancel=1)
-		self.ignore_linked_doctypes = ["GL Entry"]
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 		self.make_gl_entries(cancel=1)
 
 	def update_outstanding_amount(self, cancel=0):

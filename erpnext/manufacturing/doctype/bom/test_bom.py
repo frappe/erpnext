@@ -11,7 +11,9 @@ from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
+from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
+	update_cost_in_all_boms_in_test,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -69,26 +71,31 @@ class TestBOM(FrappeTestCase):
 
 	def test_update_bom_cost_in_all_boms(self):
 		# get current rate for '_Test Item 2'
-		rm_rate = frappe.db.sql(
-			"""select rate from `tabBOM Item`
-			where parent='BOM-_Test Item Home Desktop Manufactured-001'
-			and item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'"""
+		bom_rates = frappe.db.get_values(
+			"BOM Item",
+			{
+				"parent": "BOM-_Test Item Home Desktop Manufactured-001",
+				"item_code": "_Test Item 2",
+				"docstatus": 1,
+			},
+			fieldname=["rate", "base_rate"],
+			as_dict=True,
 		)
-		rm_rate = rm_rate[0][0] if rm_rate else 0
+		rm_base_rate = bom_rates[0].get("base_rate") if bom_rates else 0
 
 		# Reset item valuation rate
-		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_rate + 10)
+		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_base_rate + 10)
 
 		# update cost of all BOMs based on latest valuation rate
-		update_cost()
+		update_cost_in_all_boms_in_test()
 
 		# check if new valuation rate updated in all BOMs
 		for d in frappe.db.sql(
-			"""select rate from `tabBOM Item`
+			"""select base_rate from `tabBOM Item`
 			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""",
 			as_dict=1,
 		):
-			self.assertEqual(d.rate, rm_rate + 10)
+			self.assertEqual(d.base_rate, rm_base_rate + 10)
 
 	def test_bom_cost(self):
 		bom = frappe.copy_doc(test_records[2])
