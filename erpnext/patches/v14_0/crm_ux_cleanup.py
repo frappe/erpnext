@@ -10,7 +10,14 @@ def execute():
 	try:
 		rename_field("Lead", "designation", "job_title")
 		rename_field("Opportunity", "converted_by", "opportunity_owner")
-		rename_field("Prospect", "prospect_lead", "leads")
+
+		frappe.db.sql(
+			"""
+			update `tabProspect Lead`
+			set parentfield='leads'
+			where parentfield='partner_lead'
+		"""
+		)
 	except Exception as e:
 		if e.args[0] != 1054:
 			raise
