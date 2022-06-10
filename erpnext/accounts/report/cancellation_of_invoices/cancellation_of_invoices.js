@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Supplier Retention"] = {
+frappe.query_reports["Cancellation Of Invoices"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
@@ -19,13 +19,6 @@ frappe.query_reports["Supplier Retention"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"supplier",
-			"label": __("Supplier"),
-			"fieldtype": "Link",
-			"options": "Supplier",
-			"reqd": 1
-		},
-		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
@@ -33,10 +26,10 @@ frappe.query_reports["Supplier Retention"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"reason_for_retention",
-			"label": __("Reason For Retention"),
+			"fieldname":"reason_for_return",
+			"label": __("Reason For Cancellation"),
 			"fieldtype": "Link",
-			"options": "Reason For Retention"
-		},
+			"options": "Reason For Cancellation"
+		}
 	]
 };

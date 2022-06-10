@@ -193,21 +193,15 @@ class ReceivablePayableReport(object):
 					self.append_row(row)
 
 	def append_row(self, row):
-		newrow = True
+		newrow = False
 
-		if row.voucher_type == 'Payment Entry':
+		if row.voucher_type == 'Payment Entry' or row.voucher_type == 'Journal Entry':
 			newrow = False
-		
-		if row.voucher_type == 'Journal Entry':
-			newrow = False
-		
-		if row.voucher_type == 'Supplier Documents':
-			document = frappe.get_doc('Supplier Documents', row.voucher_no)
+		else:		
+			document = frappe.get_doc(row.voucher_type, row.voucher_no)
 
 			if document.docstatus == 1:
 				newrow = True
-			else:
-				newrow = False
 		
 		if newrow:
 			self.allocate_future_payments(row)
