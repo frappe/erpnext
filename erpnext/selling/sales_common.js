@@ -9,12 +9,19 @@ cur_frm.cscript.tax_table = "Sales Taxes and Charges";
 cur_frm.email_field = "contact_email";
 
 frappe.provide("erpnext.selling");
+<<<<<<< HEAD
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	setup: function() {
 		this._super();
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 		this.frm.add_fetch("sales_person", "commission_rate", "commission_rate");
 	},
+=======
+erpnext.selling.SellingController = class SellingController extends erpnext.TransactionController {
+	setup() {
+		super.setup();
+	}
+>>>>>>> 1646fbe478 (refactor: remove add_fetch (#31315))
 
 	onload: function() {
 		this._super();
