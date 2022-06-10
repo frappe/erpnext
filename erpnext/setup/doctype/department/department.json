@@ -13,14 +13,6 @@
   "company",
   "is_group",
   "disabled",
-  "section_break_4",
-  "payroll_cost_center",
-  "column_break_9",
-  "leave_block_list",
-  "approvers",
-  "leave_approvers",
-  "expense_approvers",
-  "shift_request_approver",
   "lft",
   "rgt",
   "old_parent"
@@ -75,38 +67,6 @@
    "show_seconds": 1
   },
   {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "description": "Days for which Holidays are blocked for this department.",
-   "fieldname": "leave_block_list",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Leave Block List",
-   "options": "Leave Block List",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "leave_approvers",
-   "fieldtype": "Table",
-   "label": "Leave Approver",
-   "options": "Department Approver",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "expense_approvers",
-   "fieldtype": "Table",
-   "label": "Expense Approver",
-   "options": "Department Approver",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
    "fieldname": "lft",
    "fieldtype": "Int",
    "hidden": 1,
@@ -141,43 +101,13 @@
    "fieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1
-  },
-  {
-   "fieldname": "payroll_cost_center",
-   "fieldtype": "Link",
-   "label": "Payroll Cost Center",
-   "options": "Cost Center",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "description": "The first Approver in the list will be set as the default Approver.",
-   "fieldname": "approvers",
-   "fieldtype": "Section Break",
-   "label": "Approvers",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "shift_request_approver",
-   "fieldtype": "Table",
-   "label": "Shift Request Approver",
-   "options": "Department Approver",
-   "show_days": 1,
-   "show_seconds": 1
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-06-23 15:42:00.563272",
+ "modified": "2020-06-10 12:28:00.563272",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Department",

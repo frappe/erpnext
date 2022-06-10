@@ -18,7 +18,6 @@
   "last_name",
   "salutation",
   "employee_name",
-  "employment_type",
   "image",
   "column_break1",
   "company",
@@ -37,7 +36,6 @@
   "create_user",
   "create_user_permission",
   "employment_details",
-  "job_applicant",
   "scheduled_confirmation_date",
   "final_confirmation_date",
   "col_break_22",
@@ -49,7 +47,6 @@
   "designation",
   "reports_to",
   "column_break_31",
-  "grade",
   "branch",
   "approvers_section",
   "expense_approver",
@@ -60,7 +57,6 @@
   "attendance_device_id",
   "column_break_44",
   "holiday_list",
-  "default_shift",
   "salary_information",
   "salary_currency",
   "ctc",
@@ -69,9 +65,6 @@
   "column_break_52",
   "bank_name",
   "bank_ac_no",
-  "health_insurance_section",
-  "health_insurance_provider",
-  "health_insurance_no",
   "contact_details",
   "cell_number",
   "prefered_email",
@@ -222,15 +215,6 @@
    "oldfieldtype": "Data"
   },
   {
-   "fieldname": "employment_type",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Employment Type",
-   "oldfieldname": "employment_type",
-   "oldfieldtype": "Link",
-   "options": "Employment Type"
-  },
-  {
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
@@ -315,12 +299,6 @@
    "label": "Joining Details"
   },
   {
-   "fieldname": "job_applicant",
-   "fieldtype": "Link",
-   "label": "Job Applicant",
-   "options": "Job Applicant"
-  },
-  {
    "fieldname": "scheduled_confirmation_date",
    "fieldtype": "Date",
    "label": "Offer Date",
@@ -363,7 +341,7 @@
    "collapsible": 1,
    "fieldname": "job_profile",
    "fieldtype": "Section Break",
-   "label": "Department and Grade"
+   "label": "Department"
   },
   {
    "fieldname": "department",
@@ -397,12 +375,6 @@
   {
    "fieldname": "column_break_31",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "grade",
-   "fieldtype": "Link",
-   "label": "Grade",
-   "options": "Employee Grade"
   },
   {
    "fieldname": "branch",
@@ -453,24 +425,6 @@
    "label": "Bank A/C No.",
    "oldfieldname": "bank_ac_no",
    "oldfieldtype": "Data"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "health_insurance_section",
-   "fieldtype": "Section Break",
-   "label": "Health Insurance"
-  },
-  {
-   "fieldname": "health_insurance_provider",
-   "fieldtype": "Link",
-   "label": "Health Insurance Provider",
-   "options": "Employee Health Insurance"
-  },
-  {
-   "depends_on": "eval:doc.health_insurance_provider",
-   "fieldname": "health_insurance_no",
-   "fieldtype": "Data",
-   "label": "Health Insurance No"
   },
   {
    "collapsible": 1,
@@ -762,12 +716,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "default_shift",
-   "fieldtype": "Link",
-   "label": "Default Shift",
-   "options": "Shift Type"
-  },
-  {
    "fieldname": "leave_approver",
    "fieldtype": "Link",
    "label": "Leave Approver",
@@ -827,7 +775,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-04-22 16:21:55.811983",
+ "modified": "2022-06-10 12:28:55.811983",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
