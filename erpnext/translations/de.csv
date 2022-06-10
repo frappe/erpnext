@@ -783,10 +783,7 @@ Default Activity Cost exists for Activity Type - {0},Es gibt Standard-Aktivität
 Default BOM ({0}) must be active for this item or its template,Standardstückliste ({0}) muss für diesen Artikel oder dessen Vorlage aktiv sein,
 Default BOM for {0} not found,Standardstückliste für {0} nicht gefunden,
 Default BOM not found for Item {0} and Project {1},Standard-Stückliste nicht gefunden für Position {0} und Projekt {1},
-<<<<<<< HEAD
-=======
 Default In-Transit Warehouse,Standard-Durchgangslager,
->>>>>>> 2388d86623 (feat: Add german translations)
 Default Letter Head,Standardbriefkopf,
 Default Tax Template,Standardsteuervorlage,
 Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,"Die Standard-Maßeinheit für Artikel {0} kann nicht direkt geändert werden, weil Sie bereits einige Transaktionen mit einer anderen Maßeinheit durchgeführt haben. Sie müssen einen neuen Artikel erstellen, um eine andere Standard-Maßeinheit verwenden zukönnen.",
