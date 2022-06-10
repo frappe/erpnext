@@ -7,24 +7,19 @@ from frappe import _
 
 def execute(filters=None):
 	if not filters: filters = {}
+	
 	columns = [
 		{
-			"fieldname": "date",
-			"label": _("Date"),
+			"fieldname": "posting_date",
+			"label": _("Posting Date"),
 			"fieldtype": "Data",
 			"width": 240
 		},
 		{
-			"fieldname": "document_number",
-			"label": _("No Document"),
+			"fieldname": "entry",
+			"label": _("Document"),
 			"fieldtype": "Link",
-			"options": "Bank Transactions",
-			"width": 300
-		},
-		{
-			"fieldname": "no_bank_deposit",
-			"label": _("No Bank Deposit"),
-			"fieldtype": "Data",
+			"options": "Cancellation Of Invoices",
 			"width": 300
 		},
 		{
@@ -35,41 +30,33 @@ def execute(filters=None):
 			"width": 120
 		},
 		{
-			"fieldname": "party",
-			"label": _("Party"),
+			"fieldname": "reason_discount",
+			"label": _("Reason Discount"),
 			"fieldtype": "Data",
 			"width": 240
 		},
-
 		{
-			"fieldname": "remarks",
-			"label": _("Remarks"),
-			"fieldtype": "Data",
-			"width": 240
-		},
-
-		{
-			"fieldname": "created_by",
-			"label": _("Created By"),
+			"fieldname": "cashier",
+			"label": _("Cashier"),
 			"fieldtype": "Data",
 			"width": 240
 		},
 	]
 	data = return_data(filters)
+
 	return columns, data
 
 def return_data(filters):
 	data = []
-
 	if filters.get("from_date"): from_date = filters.get("from_date")
 	if filters.get("to_date"): to_date = filters.get("to_date")
-
 	conditions = return_filters(filters, from_date, to_date)
+	cancellations = frappe.get_all("Cancellation Of Invoices", ["*"], filters = conditions)
 
-	payments = frappe.get_all("Bank Transactions", ["*"], filters = conditions)
+	for cancellation in cancellations:
+		invoice = frappe.get_doc("Sales Invoice", cancellation.sale_invoice)
 
-	for pay in payments:
-		row = [pay.deposit_date, pay.name, pay.document, pay.amount_bd, pay.person_name, pay.movement_detail, pay.created_by]
+		row = [invoice.posting_date, invoice.name, invoice.rounded_total, invoice.discount_reason, invoice.cashier]
 		data.append(row)
 
 	return data
@@ -78,11 +65,10 @@ def return_filters(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
-	conditions += '"deposit_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
-	# conditions += ', "company": "{}"'.format(filters.get("company"))
-	conditions += ', "bank_account": "{}"'.format(filters.get("account"))
-	conditions += ', "bank_deposit": 1'
-	# conditions += ', "docstatus": 1'
+	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "docstatus": 1'
+	if filters.get("reason_for_return"): conditions += ', "reason_for_return": "{}"'.format(filters.get("reason_for_return"))
 	conditions += '}'
 
 	return conditions
