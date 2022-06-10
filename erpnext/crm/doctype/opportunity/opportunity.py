@@ -47,6 +47,7 @@ class Opportunity(TransactionBase, CRMNote):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
 		self.map_fields()
+		self.set_exchange_rate()
 
 		if not self.title:
 			self.title = self.customer_name
@@ -63,12 +64,21 @@ class Opportunity(TransactionBase, CRMNote):
 				except Exception:
 					continue
 
+	def set_exchange_rate(self):
+		company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+		if self.currency == company_currency:
+			self.conversion_rate = 1.0
+			return
+
+		if not self.conversion_rate or self.conversion_rate == 1.0:
+			self.conversion_rate = get_exchange_rate(self.currency, company_currency, self.transaction_date)
+
 	def calculate_totals(self):
 		total = base_total = 0
 		for item in self.get("items"):
 			item.amount = flt(item.rate) * flt(item.qty)
-			item.base_rate = flt(self.conversion_rate * item.rate)
-			item.base_amount = flt(self.conversion_rate * item.amount)
+			item.base_rate = flt(self.conversion_rate) * flt(item.rate)
+			item.base_amount = flt(self.conversion_rate) * flt(item.amount)
 			total += item.amount
 			base_total += item.base_amount
 
