@@ -813,7 +813,11 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-06-17 11:31:37.730760",
+=======
+ "modified": "2022-06-10 01:29:32.952091",
+>>>>>>> 6fc32b83c8 (fix: revert show title field on Employee doctype (#31312))
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
