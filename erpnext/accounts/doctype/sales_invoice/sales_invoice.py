@@ -539,7 +539,7 @@ class SalesInvoice(SellingController):
 					outstanding_amount = self.grand_total
 					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 			else:
-				self.outstanding_amount = self.grand_total - self.total_advance
+				self.outstanding_amount = self.grand_total - self.paid_amount
 		
 		self.rounded_total = self.grand_total
 
