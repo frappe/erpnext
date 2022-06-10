@@ -15,7 +15,7 @@ frappe.query_reports["Employee Ledger Summary"] = {
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			"default": frappe.defaults.get_user_default("year_start_date"),
 			"reqd": 1,
 			"width": "60px"
 		},
@@ -23,7 +23,7 @@ frappe.query_reports["Employee Ledger Summary"] = {
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
+			"default": frappe.defaults.get_user_default("year_end_date"),
 			"reqd": 1,
 			"width": "60px"
 		},
@@ -74,5 +74,37 @@ frappe.query_reports["Employee Ledger Summary"] = {
 				}
 			}
 		},
-	]
+		{
+			fieldname: "show_deduction_details",
+			label: __("Show Deduction Details"),
+			fieldtype: "Check",
+			default: 1,
+		}
+	],
+
+	formatter: function (value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (["opening_balance", "closing_balance"].includes(column.fieldname)) {
+			style['font-weight'] = 'bold';
+		}
+
+		if (flt(value) && (column.fieldname == "total_deductions" || column.is_adjustment)) {
+			style['color'] = 'purple';
+		}
+
+		if (flt(value) && column.fieldname == "invoiced_amount") {
+			style['color'] = 'red';
+		}
+
+		if (flt(value) && column.fieldname == "paid_amount") {
+			style['color'] = 'green';
+		}
+
+		if (flt(value) && column.fieldname == "return_amount") {
+			style['color'] = 'blue';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	}
 };

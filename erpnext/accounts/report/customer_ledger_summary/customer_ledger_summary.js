@@ -114,6 +114,38 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"label": __("Customer Name"),
 			"fieldtype": "Data",
 			"hidden": 1
+		},
+		{
+			fieldname: "show_deduction_details",
+			label: __("Show Deduction Details"),
+			fieldtype: "Check",
+			default: 1,
 		}
-	]
+	],
+
+	formatter: function (value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (["opening_balance", "closing_balance"].includes(column.fieldname)) {
+			style['font-weight'] = 'bold';
+		}
+
+		if (flt(value) && (column.fieldname == "total_deductions" || column.is_adjustment)) {
+			style['color'] = 'red';
+		}
+
+		if (flt(value) && column.fieldname == "invoiced_amount") {
+			style['color'] = 'blue';
+		}
+
+		if (flt(value) && column.fieldname == "paid_amount") {
+			style['color'] = 'green';
+		}
+
+		if (flt(value) && column.fieldname == "return_amount") {
+			style['color'] = 'orange';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	}
 };
