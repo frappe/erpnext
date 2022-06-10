@@ -255,7 +255,9 @@ sounds = [
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
 ]
 
-has_upload_permission = {"Employee": "employee.setup.doctype.employee.employee.has_upload_permission"}
+has_upload_permission = {
+	"Employee": "employee.setup.doctype.employee.employee.has_upload_permission"
+}
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -419,8 +421,6 @@ scheduler_events = {
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
-		"employee.setup.doctype.employee.employee_reminders.send_work_anniversary_reminders",
-		"employee.setup.doctype.employee.employee_reminders.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
 		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
@@ -451,8 +451,6 @@ scheduler_events = {
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead",
 	],
-	"weekly": ["employee.setup.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"],
-	"monthly": ["employee.setup.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_demand_loans",

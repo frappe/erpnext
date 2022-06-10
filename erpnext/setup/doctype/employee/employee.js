@@ -1,8 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.hr");
-erpnext.hr.EmployeeController = class EmployeeController extends frappe.ui.form.Controller {
+frappe.provide("erpnext.setup");
+erpnext.setup.EmployeeController = class EmployeeController extends frappe.ui.form.Controller {
 	setup() {
 		this.frm.fields_dict.user_id.get_query = function(doc, cdt, cdn) {
 			return {
@@ -115,7 +115,7 @@ frappe.ui.form.on('Employee', {
 	}
 });
 
-cur_frm.cscript = new erpnext.hr.EmployeeController({
+cur_frm.cscript = new erpnext.setup.EmployeeController({
 	frm: cur_frm
 });
 
