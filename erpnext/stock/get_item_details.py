@@ -67,8 +67,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		doc = json.loads(doc)
 
 	if doc:
-		args["posting_date"] = doc.get("posting_date")
-		args["transaction_date"] = doc.get("transaction_date")
+		args["transaction_date"] = doc.get("transaction_date") or doc.get("posting_date")
 
 		if doc.get("doctype") == "Purchase Invoice":
 			args["bill_date"] = doc.get("bill_date")
@@ -377,7 +376,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"last_purchase_rate": item.last_purchase_rate
 			if args.get("doctype") in ["Purchase Order"]
 			else 0,
-			"transaction_date": args.get("transaction_date") or args.get("posting_date"),
+			"transaction_date": args.get("transaction_date"),
 			"against_blanket_order": args.get("against_blanket_order"),
 			"bom_no": item.get("default_bom"),
 			"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
@@ -595,9 +594,7 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 			if tax.valid_from or tax.maximum_net_rate:
 				# In purchase Invoice first preference will be given to supplier invoice date
 				# if supplier date is not present then posting date
-				validation_date = (
-					args.get("transaction_date") or args.get("bill_date") or args.get("posting_date")
-				)
+				validation_date = args.get("bill_date") or args.get("transaction_date")
 
 				if getdate(tax.valid_from) <= getdate(validation_date) and is_within_valid_range(args, tax):
 					taxes_with_validity.append(tax)
@@ -890,10 +887,6 @@ def get_item_price(args, item_code, ignore_party=False):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
-	if args.get("posting_date"):
-		conditions += """ and %(posting_date)s between
-			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
-
 	return frappe.db.sql(
 		""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
@@ -920,7 +913,6 @@ def get_price_list_rate_for(args, item_code):
 		"supplier": args.get("supplier"),
 		"uom": args.get("uom"),
 		"transaction_date": args.get("transaction_date"),
-		"posting_date": args.get("posting_date"),
 		"batch_no": args.get("batch_no"),
 	}
 
