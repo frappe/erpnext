@@ -4514,7 +4514,7 @@ Mandatory For Profit and Loss Account,Обязательно для счета �
 Accounting Period,Период учета,
 Period Name,Название периода,
 Closed Documents,Закрытые документы,
-Accounts Settings,Настройки аккаунта,
+Accounts Settings,Настройка счетов,
 Settings for Accounts,Настройки для счетов,
 Make Accounting Entry For Every Stock Movement,Создавать бухгалтерские проводки при каждом перемещении запасов,
 Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,"Пользователи с этой ролью могут замороживать счета, а также создавать / изменять бухгалтерские проводки замороженных счетов",
