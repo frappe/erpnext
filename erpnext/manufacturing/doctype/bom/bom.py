@@ -1,11 +1,11 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import functools
 import re
 from collections import deque
 from operator import itemgetter
-from typing import List
+from typing import Dict, List
 
 import frappe
 from frappe import _
@@ -189,6 +189,7 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
+		self.update_exploded_items(save=False)
 		self.calculate_cost()
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate=False, save=False)
@@ -386,39 +387,13 @@ class BOM(WebsiteGenerator):
 
 		existing_bom_cost = self.total_cost
 
-		for d in self.get("items"):
-			if not d.item_code:
-				continue
-
-			rate = self.get_rm_rate(
-				{
-					"company": self.company,
-					"item_code": d.item_code,
-					"bom_no": d.bom_no,
-					"qty": d.qty,
-					"uom": d.uom,
-					"stock_uom": d.stock_uom,
-					"conversion_factor": d.conversion_factor,
-					"sourced_by_supplier": d.sourced_by_supplier,
-				}
-			)
-
-			if rate:
-				d.rate = rate
-			d.amount = flt(d.rate) * flt(d.qty)
-			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
-			d.base_amount = flt(d.amount) * flt(self.conversion_rate)
-
-			if save:
-				d.db_update()
-
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
-			self.calculate_cost(update_hour_rate)
+
+		self.calculate_cost(save_updates=save, update_hour_rate=update_hour_rate)
+
 		if save:
 			self.db_update()
-
-		self.update_exploded_items(save=save)
 
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
@@ -608,11 +583,15 @@ class BOM(WebsiteGenerator):
 		bom_list.reverse()
 		return bom_list
 
-	def calculate_cost(self, update_hour_rate=False):
+	def calculate_cost(self, save_updates=False, update_hour_rate=False):
 		"""Calculate bom totals"""
 		self.calculate_op_cost(update_hour_rate)
-		self.calculate_rm_cost()
-		self.calculate_sm_cost()
+		self.calculate_rm_cost(save=save_updates)
+		self.calculate_sm_cost(save=save_updates)
+		if save_updates:
+			# not via doc event, table is not regenerated and needs updation
+			self.calculate_exploded_cost()
+
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = (
 			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
@@ -654,12 +633,26 @@ class BOM(WebsiteGenerator):
 		if update_hour_rate:
 			row.db_update()
 
-	def calculate_rm_cost(self):
+	def calculate_rm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
+			old_rate = d.rate
+			d.rate = self.get_rm_rate(
+				{
+					"company": self.company,
+					"item_code": d.item_code,
+					"bom_no": d.bom_no,
+					"qty": d.qty,
+					"uom": d.uom,
+					"stock_uom": d.stock_uom,
+					"conversion_factor": d.conversion_factor,
+					"sourced_by_supplier": d.sourced_by_supplier,
+				}
+			)
+
 			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
 			d.amount = flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty"))
 			d.base_amount = d.amount * flt(self.conversion_rate)
@@ -669,11 +662,13 @@ class BOM(WebsiteGenerator):
 
 			total_rm_cost += d.amount
 			base_total_rm_cost += d.base_amount
+			if save and (old_rate != d.rate):
+				d.db_update()
 
 		self.raw_material_cost = total_rm_cost
 		self.base_raw_material_cost = base_total_rm_cost
 
-	def calculate_sm_cost(self):
+	def calculate_sm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_sm_cost = 0
 		base_total_sm_cost = 0
@@ -688,9 +683,44 @@ class BOM(WebsiteGenerator):
 			)
 			total_sm_cost += d.amount
 			base_total_sm_cost += d.base_amount
+			if save:
+				d.db_update()
 
 		self.scrap_material_cost = total_sm_cost
 		self.base_scrap_material_cost = base_total_sm_cost
+
+	def calculate_exploded_cost(self):
+		"Set exploded row cost from it's parent BOM."
+		rm_rate_map = self.get_rm_rate_map()
+
+		for row in self.get("exploded_items"):
+			old_rate = flt(row.rate)
+			row.rate = rm_rate_map.get(row.item_code)
+			row.amount = flt(row.stock_qty) * flt(row.rate)
+
+			if old_rate != row.rate:
+				# Only db_update if changed
+				row.db_update()
+
+	def get_rm_rate_map(self) -> Dict[str, float]:
+		"Create Raw Material-Rate map for Exploded Items. Fetch rate from Items table or Subassembly BOM."
+		rm_rate_map = {}
+
+		for item in self.get("items"):
+			if item.bom_no:
+				# Get Item-Rate from Subassembly BOM
+				explosion_items = frappe.get_all(
+					"BOM Explosion Item",
+					filters={"parent": item.bom_no},
+					fields=["item_code", "rate"],
+					order_by=None,  # to avoid sort index creation at db level (granular change)
+				)
+				explosion_item_rate = {item.item_code: flt(item.rate) for item in explosion_items}
+				rm_rate_map.update(explosion_item_rate)
+			else:
+				rm_rate_map[item.item_code] = flt(item.base_rate) / flt(item.conversion_factor or 1.0)
+
+		return rm_rate_map
 
 	def update_exploded_items(self, save=True):
 		"""Update Flat BOM, following will be correct data"""
@@ -902,44 +932,46 @@ def get_bom_item_rate(args, bom_doc):
 	return flt(rate)
 
 
-def get_valuation_rate(args):
-	"""Get weighted average of valuation rate from all warehouses"""
+def get_valuation_rate(data):
+	"""
+	1) Get average valuation rate from all warehouses
+	2) If no value, get last valuation rate from SLE
+	3) If no value, get valuation rate from Item
+	"""
+	from frappe.query_builder.functions import Sum
 
-	total_qty, total_value, valuation_rate = 0.0, 0.0, 0.0
-	item_bins = frappe.db.sql(
-		"""
-		select
-			bin.actual_qty, bin.stock_value
-		from
-			`tabBin` bin, `tabWarehouse` warehouse
-		where
-			bin.item_code=%(item)s
-			and bin.warehouse = warehouse.name
-			and warehouse.company=%(company)s""",
-		{"item": args["item_code"], "company": args["company"]},
-		as_dict=1,
-	)
+	item_code, company = data.get("item_code"), data.get("company")
+	valuation_rate = 0.0
 
-	for d in item_bins:
-		total_qty += flt(d.actual_qty)
-		total_value += flt(d.stock_value)
+	bin_table = frappe.qb.DocType("Bin")
+	wh_table = frappe.qb.DocType("Warehouse")
+	item_valuation = (
+		frappe.qb.from_(bin_table)
+		.join(wh_table)
+		.on(bin_table.warehouse == wh_table.name)
+		.select((Sum(bin_table.stock_value) / Sum(bin_table.actual_qty)).as_("valuation_rate"))
+		.where((bin_table.item_code == item_code) & (wh_table.company == company))
+	).run(as_dict=True)[0]
 
-	if total_qty:
-		valuation_rate = total_value / total_qty
+	valuation_rate = item_valuation.get("valuation_rate")
 
-	if valuation_rate <= 0:
-		last_valuation_rate = frappe.db.sql(
-			"""select valuation_rate
-			from `tabStock Ledger Entry`
-			where item_code = %s and valuation_rate > 0 and is_cancelled = 0
-			order by posting_date desc, posting_time desc, creation desc limit 1""",
-			args["item_code"],
-		)
+	if (valuation_rate is not None) and valuation_rate <= 0:
+		# Explicit null value check. If None, Bins don't exist, neither does SLE
+		sle = frappe.qb.DocType("Stock Ledger Entry")
+		last_val_rate = (
+			frappe.qb.from_(sle)
+			.select(sle.valuation_rate)
+			.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
+			.orderby(sle.posting_date, order=frappe.qb.desc)
+			.orderby(sle.posting_time, order=frappe.qb.desc)
+			.orderby(sle.creation, order=frappe.qb.desc)
+			.limit(1)
+		).run(as_dict=True)
 
-		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+		valuation_rate = flt(last_val_rate[0].get("valuation_rate")) if last_val_rate else 0
 
 	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item", args["item_code"], "valuation_rate")
+		valuation_rate = frappe.db.get_value("Item", item_code, "valuation_rate")
 
 	return flt(valuation_rate)
 
@@ -1123,39 +1155,6 @@ def get_children(parent=None, is_root=False, **filters):
 			bom_item.image = frappe.db.escape(bom_item.image)
 
 		return bom_items
-
-
-def get_boms_in_bottom_up_order(bom_no=None):
-	def _get_parent(bom_no):
-		return frappe.db.sql_list(
-			"""
-			select distinct bom_item.parent from `tabBOM Item` bom_item
-			where bom_item.bom_no = %s and bom_item.docstatus=1 and bom_item.parenttype='BOM'
-				and exists(select bom.name from `tabBOM` bom where bom.name=bom_item.parent and bom.is_active=1)
-		""",
-			bom_no,
-		)
-
-	count = 0
-	bom_list = []
-	if bom_no:
-		bom_list.append(bom_no)
-	else:
-		# get all leaf BOMs
-		bom_list = frappe.db.sql_list(
-			"""select name from `tabBOM` bom
-			where docstatus=1 and is_active=1
-				and not exists(select bom_no from `tabBOM Item`
-					where parent=bom.name and ifnull(bom_no, '')!='')"""
-		)
-
-	while count < len(bom_list):
-		for child_bom in _get_parent(bom_list[count]):
-			if child_bom not in bom_list:
-				bom_list.append(child_bom)
-		count += 1
-
-	return bom_list
 
 
 def add_additional_cost(stock_entry, work_order):
