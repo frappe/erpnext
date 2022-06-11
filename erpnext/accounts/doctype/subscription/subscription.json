@@ -11,6 +11,12 @@
   "cb_1",
   "company",
   "status",
+  "contact_section",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "column_break_12",
   "subscription_period",
   "start_date",
   "end_date",
@@ -260,14 +266,54 @@
    "fieldname": "submit_invoice",
    "fieldtype": "Check",
    "label": "Submit Invoice Automatically"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "label": "Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Small Text",
+   "label": "Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-04-19 15:24:27.550797",
+ "modified": "2022-06-11 15:52:07.903157",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -309,5 +355,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

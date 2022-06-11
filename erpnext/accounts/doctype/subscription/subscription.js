@@ -18,6 +18,9 @@ frappe.ui.form.on('Subscription', {
 				}
 			};
 		});
+
+		frm.email_field = 'contact_email';
+		frm.set_query('contact_person', erpnext.queries.contact_query);
 	},
 
 	refresh: function(frm) {
@@ -39,6 +42,12 @@ frappe.ui.form.on('Subscription', {
 				);
 			}
 		}
+
+		frappe.dynamic_link = {
+			doc: frm.doc,
+			fieldname: 'party',
+			doctype: frm.doc.party_type
+		};
 	},
 
 	cancel_this_subscription: function(frm) {
@@ -92,5 +101,13 @@ frappe.ui.form.on('Subscription', {
 				}
 			}
 		});
+	},
+
+	party_type: function(frm) {
+		frappe.dynamic_link.doctype = frm.doc.party_type;
+	},
+
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
 	}
 });
