@@ -63,18 +63,17 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
-	out = get_basic_details(args, item, overwrite_warehouse)
-
 	if isinstance(doc, str):
 		doc = json.loads(doc)
-
-	if doc and doc.get("doctype") == "Purchase Invoice":
-		args["bill_date"] = doc.get("bill_date")
 
 	if doc:
 		args["posting_date"] = doc.get("posting_date")
 		args["transaction_date"] = doc.get("transaction_date")
 
+		if doc.get("doctype") == "Purchase Invoice":
+			args["bill_date"] = doc.get("bill_date")
+
+	out = get_basic_details(args, item, overwrite_warehouse)
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -378,7 +377,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"last_purchase_rate": item.last_purchase_rate
 			if args.get("doctype") in ["Purchase Order"]
 			else 0,
-			"transaction_date": args.get("transaction_date"),
+			"transaction_date": args.get("transaction_date") or args.get("posting_date"),
 			"against_blanket_order": args.get("against_blanket_order"),
 			"bom_no": item.get("default_bom"),
 			"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
