@@ -295,8 +295,8 @@ frappe.ui.form.on("Asset", {
 				callback: function () {
 					frm.reload_doc();
 				}
-			})
-		})
+			});
+		});
 	},
 
 	restore_asset: function (frm) {
@@ -309,8 +309,8 @@ frappe.ui.form.on("Asset", {
 				callback: function () {
 					frm.reload_doc();
 				}
-			})
-		})
+			});
+		});
 	},
 
 	make_sales_invoice: function (frm) {
