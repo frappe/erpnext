@@ -341,6 +341,8 @@ class TestAsset(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, split_asset, asset, 10)
 
 	def test_copies_of_depr_schedules_are_created_during_asset_split(self):
+		enable_finance_books(enable=False)
+
 		asset = create_asset(calculate_depreciation=1, is_serialized_asset=0, num_of_assets=5, submit=1)
 		split_asset(asset, 2)
 
