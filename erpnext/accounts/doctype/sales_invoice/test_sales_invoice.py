@@ -19,8 +19,10 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 )
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 from erpnext.accounts.utils import PaymentEntryUnlinkError
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
+	post_all_depreciation_entries,
+)
 from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
@@ -2768,7 +2770,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		create_asset_data()
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
-		post_depreciation_entries(getdate("2021-09-30"))
+		post_all_depreciation_entries(getdate("2021-09-30"))
 
 		create_sales_invoice(
 			item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30")
@@ -2803,7 +2805,7 @@ class TestSalesInvoice(unittest.TestCase):
 			submit=1,
 		)
 
-		post_depreciation_entries(getdate("2021-09-30"))
+		post_all_depreciation_entries(getdate("2021-09-30"))
 
 		create_sales_invoice(
 			item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-12-31")
@@ -2823,7 +2825,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		create_asset_data()
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
-		post_depreciation_entries(getdate("2021-09-30"))
+		post_all_depreciation_entries(getdate("2021-09-30"))
 
 		si = create_sales_invoice(
 			item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30")
