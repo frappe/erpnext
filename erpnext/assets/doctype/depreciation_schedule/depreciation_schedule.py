@@ -300,7 +300,7 @@ def delete_existing_schedules(asset, finance_book=None):
 
 	filters = {"asset": asset, "serial_no": serial_no, "status": "Draft"}
 
-	if finance_book:
+	if finance_book and finance_book.get("finance_book"):
 		filters.update({"finance_book": finance_book.finance_book})
 
 	depr_schedules = frappe.get_all("Depreciation Schedule", filters=filters, pluck="name")
