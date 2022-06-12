@@ -58,6 +58,9 @@ class AssetMovement(Document):
 			frappe.throw(_("Row {0}: Enter Serial No for Asset {1}").format(asset.idx, asset.asset))
 
 	def validate_num_of_assets(self, asset, num_of_assets):
+		if not asset.num_of_assets:
+			asset.num_of_assets = num_of_assets
+
 		if asset.num_of_assets > num_of_assets:
 			frappe.throw(
 				_("Row {0}: Number of Assets cannot be greater than {1}").format(
