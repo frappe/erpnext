@@ -898,7 +898,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
 		assets = frappe.db.get_all("Asset", filters={"purchase_receipt": pr.name})
 
-		self.assertEqual(len(assets), 3)
+		self.assertEqual(len(assets), 1)
 
 		location = frappe.db.get_value("Asset", assets[0].name, "location")
 		self.assertEqual(location, "Test Location")
