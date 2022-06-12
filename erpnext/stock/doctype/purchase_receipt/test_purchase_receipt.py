@@ -856,44 +856,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		asset_item = "Test Asset Item"
 
 		if not frappe.db.exists("Item", asset_item):
-			asset_category = frappe.get_all("Asset Category")
-
-			if asset_category:
-				asset_category = asset_category[0].name
-
-			if not asset_category:
-				doc = frappe.get_doc(
-					{
-						"doctype": "Asset Category",
-						"asset_category_name": "Test Asset Category",
-						"depreciation_method": "Straight Line",
-						"total_number_of_depreciations": 12,
-						"frequency_of_depreciation": 1,
-						"accounts": [
-							{
-								"company_name": "_Test Company",
-								"fixed_asset_account": "_Test Fixed Asset - _TC",
-								"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
-								"depreciation_expense_account": "_Test Depreciations - _TC",
-							}
-						],
-					}
-				).insert()
-
-				asset_category = doc.name
-
-			item_data = make_item(
-				asset_item,
-				{
-					"is_stock_item": 0,
-					"stock_uom": "Box",
-					"is_fixed_asset": 1,
-					"auto_create_assets": 1,
-					"asset_category": asset_category,
-					"asset_naming_series": "ABC.###",
-				},
-			)
-			asset_item = item_data.item_code
+			create_fixed_asset_item(asset_item)
 
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
 		assets = frappe.db.get_all("Asset", filters={"purchase_receipt": pr.name})
@@ -908,7 +871,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_purchase_return_with_submitted_asset(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
-		pr = make_purchase_receipt(item_code="Test Asset Item", qty=1)
+		asset_item = "Test Asset Item"
+
+		if not frappe.db.exists("Item", asset_item):
+			create_fixed_asset_item(asset_item)
+
+		pr = make_purchase_receipt(item_code=asset_item, qty=1)
 
 		asset = frappe.get_doc("Asset", {"purchase_receipt": pr.name})
 		asset.available_for_use_date = frappe.utils.nowdate()
@@ -926,14 +894,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		pr_return = make_purchase_return(pr.name)
 		self.assertRaises(frappe.exceptions.ValidationError, pr_return.submit)
-
-		asset.load_from_db()
-		asset.cancel()
-
-		pr_return.submit()
-
-		pr_return.cancel()
-		pr.cancel()
 
 	def test_purchase_receipt_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
@@ -1608,3 +1568,43 @@ def create_subcontracted_item(**args):
 
 test_dependencies = ["BOM", "Item Price", "Location"]
 test_records = frappe.get_test_records("Purchase Receipt")
+
+
+def create_fixed_asset_item(asset_item):
+	asset_category = frappe.get_all("Asset Category")
+
+	if asset_category:
+		asset_category = asset_category[0].name
+
+	if not asset_category:
+		doc = frappe.get_doc(
+			{
+				"doctype": "Asset Category",
+				"asset_category_name": "Test Asset Category",
+				"depreciation_method": "Straight Line",
+				"total_number_of_depreciations": 12,
+				"frequency_of_depreciation": 1,
+				"accounts": [
+					{
+						"company_name": "_Test Company",
+						"fixed_asset_account": "_Test Fixed Asset - _TC",
+						"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
+						"depreciation_expense_account": "_Test Depreciations - _TC",
+					}
+				],
+			}
+		).insert()
+
+		asset_category = doc.name
+
+	item_data = make_item(
+		asset_item,
+		{
+			"is_stock_item": 0,
+			"stock_uom": "Box",
+			"is_fixed_asset": 1,
+			"auto_create_assets": 1,
+			"asset_category": asset_category,
+			"asset_naming_series": "ABC.###",
+		},
+	)
