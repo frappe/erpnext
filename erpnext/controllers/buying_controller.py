@@ -682,6 +682,7 @@ class BuyingController(StockController, Subcontracting):
 				"naming_series": item_data.get("asset_naming_series") or "AST",
 				"asset_category": item_data.get("asset_category"),
 				"location": row.asset_location if not item_data.get("is_serialized_asset") else None,
+				"asset_owner": "Company",
 				"company": self.company,
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
