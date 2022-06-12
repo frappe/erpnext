@@ -105,7 +105,7 @@ class TestAsset(unittest.TestCase):
 	def test_item_exists(self):
 		asset = create_asset(item_code="MacBook", do_not_save=1)
 
-		self.assertRaises(frappe.DoesNotExistError, asset.save)
+		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_validate_item(self):
 		asset = create_asset(item_code="MacBook Pro", do_not_save=1)
