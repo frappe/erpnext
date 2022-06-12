@@ -515,7 +515,7 @@ accounting_dimension_doctypes = [
 	"Purchase Taxes and Charges",
 	"Shipping Rule",
 	"Landed Cost Item",
-	"Asset Value Adjustment",
+	"Asset Revaluation",
 	"Loyalty Program",
 	"Stock Reconciliation",
 	"Travel Request",

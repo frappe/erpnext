@@ -326,7 +326,7 @@ class JournalEntry(AccountsController):
 
 	def unlink_asset_adjustment_entry(self):
 		frappe.db.sql(
-			""" update `tabAsset Value Adjustment`
+			""" update `tabAsset Revaluation`
 			set journal_entry = null where journal_entry = %s""",
 			self.name,
 		)

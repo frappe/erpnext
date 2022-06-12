@@ -6,7 +6,7 @@ def get_data():
 		"fieldname": "finance_book",
 		"non_standard_fieldnames": {"Asset": "default_finance_book", "Company": "default_finance_book"},
 		"transactions": [
-			{"label": _("Assets"), "items": ["Asset", "Asset Value Adjustment"]},
+			{"label": _("Assets"), "items": ["Asset", "Asset Revaluation"]},
 			{"items": ["Company"]},
 			{"items": ["Journal Entry"]},
 		],
