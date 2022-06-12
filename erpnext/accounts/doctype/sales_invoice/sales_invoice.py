@@ -1109,12 +1109,12 @@ class SalesInvoice(SellingController):
 						)
 						asset_doc.db_set("disposal_date", None)
 
-						if asset.calculate_depreciation:
+						if self.is_depreciable_asset(asset_doc):
 							self.reverse_depreciation_entries_made_after_sale(asset, serial_no, item.finance_book)
 							self.reset_depreciation_schedules(asset, serial_no, asset_doc)
 
 					else:
-						if asset.calculate_depreciation:
+						if self.is_depreciable_asset(asset_doc):
 							self.depreciate_asset(asset, serial_no, asset_doc)
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
@@ -1181,6 +1181,12 @@ class SalesInvoice(SellingController):
 			frappe.throw(
 				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
 			)
+
+	def is_depreciable_asset(self, asset_doc):
+		if asset_doc.doctype == "Asset":
+			return asset_doc.calculate_depreciation
+		else:
+			return frappe.db.get_value("Asset", asset_doc.asset, "calculate_depreciation")
 
 	def depreciate_asset(self, asset_name, serial_no, asset_doc):
 		from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
