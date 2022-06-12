@@ -162,9 +162,9 @@ class TestAssetSerialNo(unittest.TestCase):
 		asset_serial_no.available_for_use_date = getdate("2021-10-1")
 		asset_serial_no.depreciation_posting_start_date = getdate("2021-12-1")
 
-		asset_serial_no.finance_books[
-			0
-		].depreciation_template = "Straight Line Method Annually for 5 Years"
+		asset_serial_no.append(
+			"finance_books", {"depreciation_template": "Straight Line Method Annually for 5 Years"}
+		)
 		asset_serial_no.save()
 
 		template_values = asset_serial_no.finance_books[0]
