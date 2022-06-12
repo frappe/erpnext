@@ -723,7 +723,11 @@ class BaseAsset(AccountsController):
 			gross_purchase_amount = self.asset_values["gross_purchase_amount"]
 			cost_center = self.asset_values["cost_center"]
 
-		if purchase_document and gross_purchase_amount and self.available_for_use_date <= getdate():
+		if (
+			purchase_document
+			and gross_purchase_amount
+			and getdate(self.available_for_use_date) <= getdate()
+		):
 
 			gl_entries.append(
 				self.get_gl_dict(
