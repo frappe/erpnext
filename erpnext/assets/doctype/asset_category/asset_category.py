@@ -5,23 +5,14 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form
+from frappe.utils import get_link_to_form
 
 
 class AssetCategory(Document):
 	def validate(self):
-		self.validate_finance_books()
 		self.validate_account_types()
 		self.validate_account_currency()
 		self.valide_cwip_account()
-
-	def validate_finance_books(self):
-		for d in self.finance_books:
-			for field in ("Total Number of Depreciations", "Frequency of Depreciation"):
-				if cint(d.get(frappe.scrub(field))) < 1:
-					frappe.throw(
-						_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError
-					)
 
 	def validate_account_currency(self):
 		account_types = [
