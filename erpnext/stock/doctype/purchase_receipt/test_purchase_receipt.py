@@ -1597,7 +1597,7 @@ def create_fixed_asset_item(asset_item):
 
 		asset_category = doc.name
 
-	item_data = make_item(
+	make_item(
 		asset_item,
 		{
 			"is_stock_item": 0,
