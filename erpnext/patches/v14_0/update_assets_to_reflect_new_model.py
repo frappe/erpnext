@@ -29,7 +29,7 @@ def execute():
 
 	fix_gross_purchase_amount()
 
-	if frappe.db.has_column("Asset", "asset_value"):
+	if frappe.db.has_column("Asset", "asset_value") and frappe.db.table_exists("Asset Repair"):
 		set_asset_value_for_non_depreciable_assets()
 
 	if frappe.db.table_exists("Asset Finance Book") and frappe.db.count("Asset Finance Book"):
@@ -63,17 +63,18 @@ def make_all_assets_non_serialized():
 def set_num_of_assets_for_non_grouped_assets():
 	grouped_assets = get_grouped_assets()
 
-	frappe.db.sql(
-		"""
-		UPDATE
-			`tabAsset`
-		SET
-			num_of_assets = 1
-		WHERE
-			name not in %s
-		""",
-		grouped_assets,
-	)
+	if grouped_assets:
+		frappe.db.sql(
+			"""
+			UPDATE
+				`tabAsset`
+			SET
+				num_of_assets = 1
+			WHERE
+				name not in %s
+			""",
+			grouped_assets,
+		)
 
 
 def get_grouped_assets():
@@ -105,18 +106,70 @@ def set_asset_value_for_non_depreciable_assets():
 	frappe.db.sql(
 		"""
 		UPDATE
-			`tabAsset` asset, `tab Asset Repair` asr
+			`tabAsset`
 		SET
-			asset.asset_value = asset.gross_purchase_amount + asr.repair_cost
+			asset_value = gross_purchase_amount
 		WHERE
-			asset.status != "Draft"
-			and asset.calculate_depreciation = 0
-			and asr.repair_status = "Completed"
-			and asr.asset = asset.name
-			and asr.capitalize_repair_cost = 1
-			and asr.repair_cost > 0
+			status != "Draft"
+			and calculate_depreciation = 0
 		"""
 	)
+
+	if frappe.db.count("Asset Repair", {"capitalize_repair_cost": 1}):
+		repair_cost_map = get_total_repair_cost_for_all_assets()
+		updated_asset_values = get_updated_asset_values(repair_cost_map)
+
+		conditions = ",".join(updated_asset_values)
+		frappe.db.sql(
+			"""
+			INSERT INTO `tabAsset` (name, asset_value) VALUES {}
+			ON DUPLICATE KEY UPDATE name = VALUES(name), asset_value = VALUES(asset_value)
+		""".format(
+				conditions
+			)
+		)
+
+
+def get_total_repair_cost_for_all_assets():
+	non_depreciable_assets = frappe.get_all(
+		"Asset", filters={"calculate_depreciation": 0}, pluck="name"
+	)
+
+	asset_repairs = frappe.get_all(
+		"Asset Repair",
+		filters={
+			"asset": ["in", non_depreciable_assets],
+			"repair_status": "Completed",
+			"capitalize_repair_cost": 1,
+			"repair_cost": [">", 0],
+		},
+		fields=["asset", "repair_cost"],
+		order_by="asset",
+	)
+
+	repair_cost_map = {}
+	for repair in asset_repairs:
+		if repair.asset in repair_cost_map:
+			repair_cost_map[repair.asset] += repair.repair_cost
+		else:
+			repair_cost_map[repair.asset] = repair.repair_cost
+
+	return repair_cost_map
+
+
+def get_updated_asset_values(repair_cost_map):
+	assets = list(repair_cost_map.keys())
+	current_asset_values = frappe.get_all(
+		"Asset", filters={"name": ["in", assets]}, fields=["name", "asset_value"]
+	)
+
+	updated_asset_values = []
+	for asset in current_asset_values:
+		updated_asset_values.append(
+			"({0}, {1})".format(asset.name, (asset.asset_value + repair_cost_map[asset.name]))
+		)
+
+	return updated_asset_values
 
 
 def set_salvage_value_and_depreciation_posting_start_date():
