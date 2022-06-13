@@ -1013,7 +1013,7 @@ class TestPaymentEntry(FrappeTestCase):
 		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
 		create_payment_entry(party_type="Employee", party=employee, save=True)
 
-	def test_payment_entry_over_allocate_amount(self):
+	def test_duplicate_payment_entry_allocate_amount(self):
 		si = create_sales_invoice()
 
 		pe_draft = get_payment_entry("Sales Invoice", si.name)
