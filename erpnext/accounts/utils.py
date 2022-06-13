@@ -9,7 +9,10 @@ import frappe
 import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.utils import DocType
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
+from pypika import Order
+from pypika.terms import ExistsCriterion
 
 import erpnext
 
@@ -42,36 +45,31 @@ def get_fiscal_years(
 
 	if not fiscal_years:
 		# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
-		cond = ""
-		if fiscal_year:
-			cond += " and fy.name = {0}".format(frappe.db.escape(fiscal_year))
-		if company:
-			cond += """
-				and (not exists (select name
-					from `tabFiscal Year Company` fyc
-					where fyc.parent = fy.name)
-				or exists(select company
-					from `tabFiscal Year Company` fyc
-					where fyc.parent = fy.name
-					and fyc.company=%(company)s)
-				)
-			"""
+		FY = DocType("Fiscal Year")
 
-		fiscal_years = frappe.db.sql(
-			"""
-			select
-				fy.name, fy.year_start_date, fy.year_end_date
-			from
-				`tabFiscal Year` fy
-			where
-				disabled = 0 {0}
-			order by
-				fy.year_start_date desc""".format(
-				cond
-			),
-			{"company": company},
-			as_dict=True,
+		query = (
+			frappe.qb.from_(FY)
+			.select(FY.name, FY.year_start_date, FY.year_end_date)
+			.where(FY.disabled == 0)
 		)
+
+		if fiscal_year:
+			query = query.where(FY.name == fiscal_year)
+
+		if company:
+			FYC = DocType("Fiscal Year Company")
+			query = query.where(
+				ExistsCriterion(frappe.qb.from_(FYC).select(FYC.name).where(FYC.parent == FY.name)).negate()
+				| ExistsCriterion(
+					frappe.qb.from_(FYC)
+					.select(FYC.company)
+					.where(FYC.parent == FY.name)
+					.where(FYC.company == company)
+				)
+			)
+
+		query = query.orderby(FY.year_start_date, Order.desc)
+		fiscal_years = query.run(as_dict=True)
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
