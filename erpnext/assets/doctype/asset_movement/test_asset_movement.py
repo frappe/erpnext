@@ -246,6 +246,8 @@ class TestAssetMovement(unittest.TestCase):
 		asset = create_asset(custodian="EMP-00001", submit=1)
 		to_employee = make_employee("assetmovement2@abc.com", company="_Test Company 2")
 
+		self.assertEqual(frappe.db.get_value("Employee", to_employee, "company"), "_Test Company 2")
+
 		asset_movement = create_asset_movement(
 			purpose="Issue",
 			company=asset.company,
