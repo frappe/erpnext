@@ -1037,6 +1037,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
+
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
 	payment_entry.company = args.get("company") or "_Test Company"
