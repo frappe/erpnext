@@ -101,7 +101,6 @@ class JournalEntry(AccountsController):
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
-		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
 		self.update_status_for_full_and_final_statement()
 
@@ -323,13 +322,6 @@ class JournalEntry(AccountsController):
 				"",
 			)
 			frappe.db.set_value("Journal Entry", self.name, "inter_company_journal_entry_reference", "")
-
-	def unlink_asset_adjustment_entry(self):
-		frappe.db.sql(
-			""" update `tabAsset Revaluation`
-			set journal_entry = null where journal_entry = %s""",
-			self.name,
-		)
 
 	def validate_party(self):
 		for d in self.get("accounts"):
