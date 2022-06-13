@@ -50,7 +50,15 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldtype": "Link",
 				"options": "Fiscal Year",
 				"default": frappe.defaults.get_user_default("fiscal_year"),
-				"reqd": 1
+				"reqd": 1,
+				on_change: () => {
+					frappe.model.with_doc("Fiscal Year", frappe.query_report.get_filter_value('from_fiscal_year'), function(r) {
+						let year_start_date = frappe.model.get_value("Fiscal Year", frappe.query_report.get_filter_value('from_fiscal_year'), "year_start_date");
+						frappe.query_report.set_filter_value({
+							period_start_date: year_start_date
+						});
+					});
+				}
 			},
 			{
 				"fieldname":"to_fiscal_year",
@@ -58,7 +66,15 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldtype": "Link",
 				"options": "Fiscal Year",
 				"default": frappe.defaults.get_user_default("fiscal_year"),
-				"reqd": 1
+				"reqd": 1,
+				on_change: () => {
+					frappe.model.with_doc("Fiscal Year", frappe.query_report.get_filter_value('to_fiscal_year'), function(r) {
+						let year_end_date = frappe.model.get_value("Fiscal Year", frappe.query_report.get_filter_value('to_fiscal_year'), "year_end_date");
+						frappe.query_report.set_filter_value({
+							period_end_date: year_end_date
+						});
+					});
+				}
 			},
 			{
 				"fieldname":"finance_book",
