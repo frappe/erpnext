@@ -199,16 +199,32 @@ def get_fee_components(fee_structure):
 
 
 @frappe.whitelist()
-def get_fee_schedule(program, student_category=None):
+def get_fee_schedule(program, student_category=None, academic_year=None):
 	"""Returns Fee Schedule.
-
 	:param program: Program.
-	:param student_category: Student Category
+	:param student_category: Student Category.
+	:param academic_year: Academic Year.
 	"""
-	fs = frappe.get_all(
-		"Program Fee",
-		fields=["academic_term", "fee_structure", "due_date", "amount"],
-		filters={"parent": program, "student_category": student_category},
+	filters = {}
+	if program:
+		filters = {"program": program}
+
+	if student_category:
+		filters["student_category"] = student_category
+
+	if academic_year:
+		filters["academic_year"] = academic_year
+
+	fs = frappe.db.get_list(
+		"Fee Schedule",
+		filters=filters,
+		fields=[
+			"academic_term",
+			"fee_structure",
+			"student_category",
+			"due_date",
+			"total_amount as amount",
+		],
 		order_by="idx",
 	)
 	return fs
