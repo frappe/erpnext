@@ -115,4 +115,5 @@ jobs:
           echo "Updating to latest version"
           git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
+          bench setup requirements --python
           bench --site test_site migrate
