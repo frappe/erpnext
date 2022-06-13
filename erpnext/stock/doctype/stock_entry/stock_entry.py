@@ -1979,23 +1979,30 @@ class StockEntry(StockController):
 		):
 
 			# Get PO Supplied Items Details
-			item_wh = frappe._dict(
-				frappe.db.sql(
-					"""
-				select rm_item_code, reserve_warehouse
-				from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-				where po.name = poitemsup.parent
-				and po.name = %s""",
-					self.purchase_order,
-				)
+			po_supplied_items = frappe.db.get_all(
+				"Purchase Order Item Supplied",
+				filters={"parent": self.purchase_order},
+				fields=["name", "rm_item_code", "reserve_warehouse"],
 			)
 
+			# Get Items Supplied in Stock Entries against PO
 			supplied_items = get_supplied_items(self.purchase_order)
-			for name, item in supplied_items.items():
-				frappe.db.set_value("Purchase Order Item Supplied", name, item)
 
-			# Update reserved sub contracted quantity in bin based on Supplied Item Details and
+			for row in po_supplied_items:
+				key, item = row.name, {}
+				if not supplied_items.get(key):
+					# no stock transferred against PO Supplied Items row
+					item = {"supplied_qty": 0, "returned_qty": 0, "total_supplied_qty": 0}
+				else:
+					item = supplied_items.get(key)
+
+				frappe.db.set_value("Purchase Order Item Supplied", row.name, item)
+
+			# RM Item-Reserve Warehouse Dict
+			item_wh = {x.get("rm_item_code"): x.get("reserve_warehouse") for x in po_supplied_items}
+
 			for d in self.get("items"):
+				# Update reserved sub contracted quantity in bin based on Supplied Item Details and
 				item_code = d.get("original_item") or d.get("item_code")
 				reserve_warehouse = item_wh.get(item_code)
 				if not (reserve_warehouse and item_code):
