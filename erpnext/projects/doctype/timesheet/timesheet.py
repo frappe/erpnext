@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours
 
 from erpnext.controllers.queries import get_match_cond
-from erpnext.hr.utils import validate_active_employee
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -24,8 +23,6 @@ class OverWorkLoggedError(frappe.ValidationError):
 
 class Timesheet(Document):
 	def validate(self):
-		if self.employee:
-			validate_active_employee(self.employee)
 		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
