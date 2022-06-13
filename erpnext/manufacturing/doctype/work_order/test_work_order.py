@@ -417,7 +417,7 @@ class TestWorkOrder(FrappeTestCase):
 					"doctype": "Item Price",
 					"item_code": "_Test FG Non Stock Item",
 					"price_list_rate": 1000,
-					"price_list": "Standard Buying",
+					"price_list": "_Test Price List India",
 				}
 			).insert(ignore_permissions=True)
 
@@ -426,8 +426,17 @@ class TestWorkOrder(FrappeTestCase):
 			item_code="_Test FG Item", target="_Test Warehouse - _TC", qty=1, basic_rate=100
 		)
 
-		if not frappe.db.get_value("BOM", {"item": fg_item}):
-			make_bom(item=fg_item, rate=1000, raw_materials=["_Test FG Item", "_Test FG Non Stock Item"])
+		if not frappe.db.get_value("BOM", {"item": fg_item, "docstatus": 1}):
+			bom = make_bom(
+				item=fg_item,
+				rate=1000,
+				raw_materials=["_Test FG Item", "_Test FG Non Stock Item"],
+				do_not_save=True,
+			)
+			bom.rm_cost_as_per = "Price List"  # non stock item won't have valuation rate
+			bom.buying_price_list = "_Test Price List India"
+			bom.currency = "INR"
+			bom.save()
 
 		wo = make_wo_order_test_record(production_item=fg_item)
 
