@@ -367,3 +367,4 @@ erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
 erpnext.patches.v13_0.update_employee_advance_status
 erpnext.patches.v13_0.job_card_status_on_hold
+erpnext.patches.v13_0.add_cost_center_in_loans
