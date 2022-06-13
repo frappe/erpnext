@@ -2520,7 +2520,7 @@ def get_all_mode_of_payments(doc):
 
 
 def get_mode_of_payments_info(mode_of_payments, company):
-    	data = frappe.db.sql(
+	data = frappe.db.sql(
 		"""
 		select
 			mpa.default_account, mpa.parent as mop, mp.type as type
