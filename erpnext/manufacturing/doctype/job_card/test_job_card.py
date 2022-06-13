@@ -344,6 +344,30 @@ class TestJobCard(FrappeTestCase):
 		cost_after_cancel = self.work_order.total_operating_cost
 		self.assertEqual(cost_after_cancel, original_cost)
 
+	def test_job_card_statuses(self):
+		def assertStatus(status):
+			jc.set_status()
+			self.assertEqual(jc.status, status)
+
+		jc = frappe.new_doc("Job Card")
+		jc.for_quantity = 2
+		jc.transferred_qty = 1
+		jc.total_completed_qty = 0
+		assertStatus("Open")
+
+		jc.transferred_qty = jc.for_quantity
+		assertStatus("Material Transferred")
+
+		jc.append("time_logs", {})
+		assertStatus("Work In Progress")
+
+		jc.docstatus = 1
+		jc.total_completed_qty = jc.for_quantity
+		assertStatus("Completed")
+
+		jc.docstatus = 2
+		assertStatus("Cancelled")
+
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"

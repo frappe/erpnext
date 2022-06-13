@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:PLE-{YY}-{MM}-{######}",
  "creation": "2022-05-09 19:35:03.334361",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -138,11 +137,10 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-19 18:04:44.609115",
+ "modified": "2022-05-30 19:04:55.532171",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",
- "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

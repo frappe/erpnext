@@ -798,7 +798,6 @@ def make_bom(**args):
 
 	for item in args.raw_materials:
 		item_doc = frappe.get_doc("Item", item)
-
 		bom.append(
 			"items",
 			{

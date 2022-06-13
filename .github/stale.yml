@@ -23,3 +23,5 @@ pulls:
     activity occurs, but it only takes a comment to keep a contribution alive
     :) Also, even if it is closed, you can always reopen the PR when you're
     ready. Thank you for contributing.
+
+only: pulls

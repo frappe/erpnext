@@ -84,6 +84,9 @@ class Supplier(TransactionBase):
 		self.save()
 
 	def validate_internal_supplier(self):
+		if not self.is_internal_supplier:
+			self.represents_company = ""
+
 		internal_supplier = frappe.db.get_value(
 			"Supplier",
 			{
