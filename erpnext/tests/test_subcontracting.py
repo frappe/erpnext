@@ -909,7 +909,7 @@ class TestSubcontracting(unittest.TestCase):
 
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
 		po = create_purchase_order(
-			rm_items=items, is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC"
+			rm_items=items, is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC"
 		)
 
 		for d in rm_items:
