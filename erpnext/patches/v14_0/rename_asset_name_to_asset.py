@@ -7,5 +7,7 @@ from frappe.model.utils.rename_field import rename_field
 
 
 def execute():
+	frappe.reload_doc("assets", "doctype", "asset_maintenance")
+
 	if frappe.db.has_column("Asset Maintenance", "asset_name"):
 		rename_field("Asset Maintenance", "asset_name", "asset")
