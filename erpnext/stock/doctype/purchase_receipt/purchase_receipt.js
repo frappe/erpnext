@@ -47,8 +47,6 @@ frappe.ui.form.on("Purchase Receipt", {
 			return erpnext.queries.warehouse(frm.doc);
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-
 	},
 
 	// new code for TASK - TASK-2022-00015

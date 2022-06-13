@@ -230,7 +230,7 @@ def get_work_anniversary_reminder_text_and_message(anniversary_persons):
 		persons_name = anniversary_person
 		# Number of years completed at the company
 		completed_years = getdate().year - anniversary_persons[0]["date_of_joining"].year
-		anniversary_person += f" completed {completed_years} year(s)"
+		anniversary_person += f" completed {get_pluralized_years(completed_years)}"
 	else:
 		person_names_with_years = []
 		names = []
@@ -239,7 +239,7 @@ def get_work_anniversary_reminder_text_and_message(anniversary_persons):
 			names.append(person_text)
 			# Number of years completed at the company
 			completed_years = getdate().year - person["date_of_joining"].year
-			person_text += f" completed {completed_years} year(s)"
+			person_text += f" completed {get_pluralized_years(completed_years)}"
 			person_names_with_years.append(person_text)
 
 		# converts ["Jim", "Rim", "Dim"] to Jim, Rim & Dim
@@ -252,6 +252,12 @@ def get_work_anniversary_reminder_text_and_message(anniversary_persons):
 	message += _("Everyone, let’s congratulate {0} on their work anniversary!").format(persons_name)
 
 	return reminder_text, message
+
+
+def get_pluralized_years(years):
+	if years == 1:
+		return "1 year"
+	return f"{years} years"
 
 
 def send_work_anniversary_reminder(recipients, reminder_text, anniversary_persons, message):
