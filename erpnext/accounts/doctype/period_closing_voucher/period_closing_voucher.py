@@ -54,8 +54,8 @@ class PeriodClosingVoucher(AccountsController):
 
 		pce = frappe.db.sql(
 			"""select name from `tabPeriod Closing Voucher`
-			where posting_date > %s and fiscal_year = %s and docstatus = 1""",
-			(self.posting_date, self.fiscal_year),
+			where posting_date > %s and fiscal_year = %s and docstatus = 1 and company = %s""",
+			(self.posting_date, self.fiscal_year, self.company),
 		)
 		if pce and pce[0][0]:
 			frappe.throw(

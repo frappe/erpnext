@@ -81,7 +81,7 @@ frappe.ui.form.on("BOM", {
 			}
 		)
 
-		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
+		if (!frm.is_new() && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
 				frm.events.update_cost(frm, true);
 			});
@@ -90,6 +90,13 @@ frappe.ui.form.on("BOM", {
 					"bom": frm.doc.name
 				};
 				frappe.set_route("Tree", "BOM");
+			});
+		}
+
+		if (!frm.is_new() && !frm.doc.docstatus == 0) {
+			frm.add_custom_button(__("New Version"), function() {
+				let new_bom = frappe.model.copy_doc(frm.doc);
+				frappe.set_route("Form", "BOM", new_bom.name);
 			});
 		}
 

@@ -558,7 +558,7 @@ def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
 	barcode_data = frappe.db.get_value(
 		"Item Barcode",
 		{"barcode": search_value},
-		["barcode", "parent as item_code"],
+		["barcode", "parent as item_code", "uom"],
 		as_dict=True,
 	)
 	if barcode_data:

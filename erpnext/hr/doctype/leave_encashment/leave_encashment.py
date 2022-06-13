@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate
 
-from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
+from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 from erpnext.hr.utils import set_employee_name, validate_active_employee
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
@@ -107,7 +107,10 @@ class LeaveEncashment(Document):
 		self.leave_balance = (
 			allocation.total_leaves_allocated
 			- allocation.carry_forwarded_leaves_count
-			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
+			# adding this because the function returns a -ve number
+			+ get_leaves_for_period(
+				self.employee, self.leave_type, allocation.from_date, self.encashment_date
+			)
 		)
 
 		encashable_days = self.leave_balance - frappe.db.get_value(
@@ -126,14 +129,25 @@ class LeaveEncashment(Document):
 		return True
 
 	def get_leave_allocation(self):
-		leave_allocation = frappe.db.sql(
-			"""select name, to_date, total_leaves_allocated, carry_forwarded_leaves_count from `tabLeave Allocation` where '{0}'
-		between from_date and to_date and docstatus=1 and leave_type='{1}'
-		and employee= '{2}'""".format(
-				self.encashment_date or getdate(nowdate()), self.leave_type, self.employee
-			),
-			as_dict=1,
-		)  # nosec
+		date = self.encashment_date or getdate()
+
+		LeaveAllocation = frappe.qb.DocType("Leave Allocation")
+		leave_allocation = (
+			frappe.qb.from_(LeaveAllocation)
+			.select(
+				LeaveAllocation.name,
+				LeaveAllocation.from_date,
+				LeaveAllocation.to_date,
+				LeaveAllocation.total_leaves_allocated,
+				LeaveAllocation.carry_forwarded_leaves_count,
+			)
+			.where(
+				((LeaveAllocation.from_date <= date) & (date <= LeaveAllocation.to_date))
+				& (LeaveAllocation.docstatus == 1)
+				& (LeaveAllocation.leave_type == self.leave_type)
+				& (LeaveAllocation.employee == self.employee)
+			)
+		).run(as_dict=True)
 
 		return leave_allocation[0] if leave_allocation else None
 
