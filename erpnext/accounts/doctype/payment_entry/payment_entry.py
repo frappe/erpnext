@@ -151,9 +151,7 @@ class PaymentEntry(AccountsController):
 		if self.payment_type == "Internal Transfer":
 			return
 
-		fail_message = _(
-			"Row #{0}: Allocated Amount cannot be greater than outstanding amount. You may need to reload your payment references."
-		)
+		fail_message = _("Row #{0}: Allocated Amount cannot be greater than outstanding amount.")
 
 		latest_references = get_outstanding_reference_documents(
 			{
@@ -178,8 +176,9 @@ class PaymentEntry(AccountsController):
 
 			# The reference has already been allocated.
 			if not latest:
-				self.remove(d)
-				continue
+				frappe.throw(
+					_("{0} {1}, has already been allocated.").format(d.reference_doctype, d.reference_name)
+				)
 
 			d.outstanding_amount = latest.outstanding_amount
 

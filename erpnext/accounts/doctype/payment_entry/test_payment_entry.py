@@ -1022,8 +1022,7 @@ class TestPaymentEntry(FrappeTestCase):
 		pe = get_payment_entry("Sales Invoice", si.name)
 		pe.submit()
 
-		pe_draft.validate()
-		pe_draft.submit()
+		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
 		si.load_from_db()
 		self.assertEqual(si.outstanding_amount, 0)
