@@ -174,10 +174,10 @@ class PaymentEntry(AccountsController):
 		for d in self.get("references").copy():
 			latest = latest_lookup.get((d.reference_doctype, d.reference_name))
 
-			# The reference has already been allocated.
-			if not latest:
+			# The reference has already been allocated, or partially allocated.
+			if not latest or d.outstanding_amount != latest.outstanding_amount:
 				frappe.throw(
-					_("{0} {1}, has already been allocated.").format(d.reference_doctype, d.reference_name)
+					_("{0} {1}, has already been allocated after the creation of Payment Entry {2}.").format(d.reference_doctype, d.reference_name, self.name)
 				)
 
 			d.outstanding_amount = latest.outstanding_amount
