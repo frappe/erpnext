@@ -1024,9 +1024,6 @@ class TestPaymentEntry(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
-		si.load_from_db()
-		self.assertEqual(si.outstanding_amount, 0)
-
 	def test_duplicate_payment_entry_partial_allocate_amount(self):
 		si = create_sales_invoice()
 
