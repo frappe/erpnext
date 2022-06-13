@@ -84,6 +84,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Cancellation Of Invoices",
+					"doctype": "Cancellation Of Invoices",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Advances Applied Customer",
 					"doctype": "Payment Entry",
 					"is_query_report": True
@@ -129,6 +135,12 @@ def get_data():
 					"name": "Delivered Items To Be Billed",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Customer Documents",
+					"doctype": "Customer Documents",
+					"is_query_report": True
 				},
 			]
 		},
@@ -202,6 +214,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Supplier Retention",
+					"doctype": "Supplier Retention",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Accounts Payable Summary",
 					"doctype": "Purchase Invoice",
 					"is_query_report": True
@@ -234,7 +252,31 @@ def get_data():
 					"type": "report",
 					"name": "Provider Withholding Vouchers",
 					"is_query_report": True
-				}
+				},
+				{
+					"type": "report",
+					"name": "Suplier Documents",
+					"doctype": "Supplier Documents",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Payment Entry",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Unallocated Payment Entry",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Payment Entry Applied",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
 			]
 		},
 		{
