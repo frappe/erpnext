@@ -39,6 +39,7 @@
   "section_break_1",
   "rate",
   "amount",
+  "mix_choora_return_rate",
   "col_break3",
   "base_rate",
   "base_amount",
@@ -731,12 +732,18 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "mix_choora_return_rate",
+   "fieldtype": "Currency",
+   "label": "Mix Choora Return Rate",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-08-20 11:18:33.131672",
+ "modified": "2022-06-08 17:51:34.520457",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

@@ -121,8 +121,16 @@ class StockController(AccountsController):
 		return process_gl_map(gl_list)
 
 	def update_stock_ledger_entries(self, sle):
-		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
-			self.doctype, self.name, currency=self.company_currency, company=self.company)
+		
+		### assign GL valution rate for Mix choora 
+		if self.is_return and sle.item_code == 'SM007':
+				for items in self.items:
+					if(items.item_code == 'SM007'):
+						sle.valuation_rate = items.mix_choora_return_rate
+						break
+		else:
+			sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
+				self.doctype, self.name, currency=self.company_currency, company=self.company)
 
 		sle.stock_value = flt(sle.qty_after_transaction) * flt(sle.valuation_rate)
 		sle.stock_value_difference = flt(sle.actual_qty) * flt(sle.valuation_rate)

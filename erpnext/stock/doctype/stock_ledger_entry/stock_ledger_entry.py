@@ -37,7 +37,7 @@ class StockLedgerEntry(Document):
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
-		## Disable Funtion on warehouse wastage
+		## Disable Funtion on warehouse wastages
 		if 'Wastage' not in self.warehouse:
 			self.actual_amt_check()
 
