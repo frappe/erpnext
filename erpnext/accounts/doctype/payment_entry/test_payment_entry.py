@@ -758,6 +758,46 @@ class TestPaymentEntry(unittest.TestCase):
 
 		self.assertTrue("is on hold" in str(err.exception).lower())
 
+	def test_payment_entry_unallocated_amount_usd_inr(self):
+		# Create random invoices with difference conversion rates
+		invoices = []
+		for cr in (78.16, 78.18, 79.87, 77.82, 76.54):
+			invoices.append(
+				create_sales_invoice(
+					currency="USD",
+					conversion_rate=cr,
+					rate=2500,
+					customer="_Test Customer USD",
+					debit_to="_Test Receivable USD - _TC",
+				)
+			)
+
+		owing = sum([d.outstanding_amount for d in invoices])
+		pe = create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party=invoices[0].customer,
+			paid_from="_Test Receivable USD - _TC",
+			paid_amount=owing,
+		)
+		pe.insert()
+
+		for invoice in invoices:
+			pe.append(
+				"references",
+				{
+					"reference_doctype": invoice.doctype,
+					"reference_name": invoice.name,
+					"total_amount": invoice.total,
+					"outstanding_amount": invoice.outstanding_amount,
+					"exchange_rate": invoice.conversion_rate,
+					"allocated_amount": invoice.outstanding_amount,
+				},
+			)
+			pe.save()
+			owing = owing - invoice.outstanding_amount
+			self.assertEqual(pe.unallocated_amount, owing)
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
