@@ -728,17 +728,7 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
-//	before_save:function(frm){
-//		frm.call({
-//			method:"get_commision",
-//			doc:frm.doc,
-//			callback: function(r)
-//			{
-//
-//				frm.refresh_field("total_commission")
-//			}
-//		});
-//	 },
+
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {
 		if (frm.doc.company) {
@@ -757,6 +747,7 @@ frappe.ui.form.on('Sales Invoice', {
 			})
 		}
 	},
+<<<<<<< HEAD
 	tax_category:function(frm){
 		frm.call({
 			method:"calculate_taxes",
@@ -879,6 +870,20 @@ frappe.ui.form.on('Sales Invoice', {
 	// 		frm.refresh();
 	// 	}
 	// },
+=======
+	project: function (frm) {
+		if (!frm.doc.is_return) {
+			frm.call({
+				method: "add_timesheet_data",
+				doc: frm.doc,
+				callback: function (r, rt) {
+					refresh_field(['timesheets'])
+				}
+			})
+			frm.refresh();
+		}
+	},
+>>>>>>> 06a7fb73f69e3273590ed0739005f139b167ba61
 
 	onload: function (frm) {
 		frm.redemption_conversion_factor = null;

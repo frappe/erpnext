@@ -377,31 +377,6 @@ class SalesOrder(SellingController):
 			project.update_sales_amount()
 			project.db_update()
 
-	@frappe.whitelist()
-	def calculate_taxes(self):
-		if self.customer:
-			cus = frappe.get_doc("Customer",self.customer)
-			if not cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-			if cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if cus.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=cus.tax_category
-			return self.tax_category
-
 	def check_credit_limit(self):
 		# if bypass credit limit check is set to true (1) at sales order level,
 		# then we need not to check credit limit and vise versa
