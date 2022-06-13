@@ -248,7 +248,6 @@ execute:frappe.delete_doc("Report", "Quoted Item Comparison")
 erpnext.patches.v13_0.update_member_email_address
 erpnext.patches.v13_0.update_custom_fields_for_shopify
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
-erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
 erpnext.patches.v13_0.update_pos_closing_entry_in_merge_log
 erpnext.patches.v13_0.add_po_to_global_search
 erpnext.patches.v13_0.update_returned_qty_in_pr_dn
@@ -367,4 +366,4 @@ erpnext.patches.v13_0.requeue_recoverable_reposts
 erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
 erpnext.patches.v13_0.update_employee_advance_status
-
+erpnext.patches.v13_0.job_card_status_on_hold
