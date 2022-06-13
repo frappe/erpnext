@@ -12,15 +12,14 @@ def execute():
 	doctypes = ["Asset Repair", "Asset Maintenance", "Asset Revaluation", "Asset Movement Item"]
 
 	for doctype in doctypes:
-		if frappe.db.count(doctype):
+		if frappe.db.table_exists(doctype) and frappe.db.count(doctype):
 			frappe.reload_doctype(doctype)
 
 			frappe.db.sql(
-				"""
+				f"""
 				UPDATE
-					`tab%s`
+					`tab{doctype}`
 				SET
 					num_of_assets = 1
-				""",
-				doctype,
+				"""
 			)
