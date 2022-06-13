@@ -879,6 +879,55 @@ class TestSubcontracting(unittest.TestCase):
 		for key, value in get_supplied_items(pr1).items():
 			self.assertEqual(value.qty, 2)
 
+	def test_po_supplied_qty(self):
+		"""
+		Check if 'Supplied Qty' in PO's Supplied Items table is reset on submit/cancel.
+		"""
+		set_backflush_based_on("Material Transferred for Subcontract")
+		items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Item SA1",
+				"qty": 5,
+				"rate": 100,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Item SA5",
+				"qty": 6,
+				"rate": 100,
+			},
+		]
+
+		rm_items = [
+			{"item_code": "Subcontracted SRM Item 1", "qty": 5, "main_item_code": "Subcontracted Item SA1"},
+			{"item_code": "Subcontracted SRM Item 2", "qty": 5, "main_item_code": "Subcontracted Item SA1"},
+			{"item_code": "Subcontracted SRM Item 3", "qty": 5, "main_item_code": "Subcontracted Item SA1"},
+			{"item_code": "Subcontracted SRM Item 5", "qty": 6, "main_item_code": "Subcontracted Item SA5"},
+			{"item_code": "Subcontracted SRM Item 4", "qty": 6, "main_item_code": "Subcontracted Item SA5"},
+		]
+
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		po = create_purchase_order(
+			rm_items=items, is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC"
+		)
+
+		for d in rm_items:
+			d["po_detail"] = po.items[0].name if d.get("qty") == 5 else po.items[1].name
+
+		se = make_stock_transfer_entry(
+			po_no=po.name, rm_items=rm_items, itemwise_details=copy.deepcopy(itemwise_details)
+		)
+
+		po.reload()
+		for row in po.get("supplied_items"):
+			self.assertIn(row.supplied_qty, [5.0, 6.0])
+
+		se.cancel()
+		po.reload()
+		for row in po.get("supplied_items"):
+			self.assertEqual(row.supplied_qty, 0.0)
+
 
 def add_second_row_in_pr(pr):
 	item_dict = {}
