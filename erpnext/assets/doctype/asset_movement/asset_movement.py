@@ -257,9 +257,7 @@ class AssetMovement(Document):
 		if latest_movement_entry:
 			return latest_movement_entry[0][0], latest_movement_entry[0][1]
 		else:
-			frappe.throw(
-				_("Unable to update Custodian and Location for Asset {0}").format(frappe.bold(args["asset"]))
-			)
+			return None, None
 
 	def record_asset_movements(self):
 		for asset in self.assets:
