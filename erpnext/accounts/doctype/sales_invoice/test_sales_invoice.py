@@ -19,7 +19,11 @@ from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 )
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 from erpnext.accounts.utils import PaymentEntryUnlinkError
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset.test_asset import (
+	create_asset,
+	create_asset_data,
+	get_linked_depreciation_schedules,
+)
 from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
 	post_all_depreciation_entries,
 )
@@ -2765,11 +2769,13 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
-		Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
+		Tests if an Asset set to depreciate yearly on June 6, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
 		"""
 
 		create_asset_data()
-		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+		asset = create_asset(
+			item_code="Macbook Pro", enable_finance_books=1, calculate_depreciation=1, submit=1
+		)
 		post_all_depreciation_entries(getdate("2021-09-30"))
 
 		create_sales_invoice(
@@ -2778,16 +2784,18 @@ class TestSalesInvoice(unittest.TestCase):
 		asset.load_from_db()
 
 		expected_values = [
-			["2020-06-30", 1366.12, 1366.12],
-			["2021-06-30", 20000.0, 21366.12],
-			["2021-09-30", 5041.1, 26407.22],
+			["2021-06-06", 20043.811610077, 20043.811610077],
+			["2021-09-30", 6352.683461117, 26396.495071194],
 		]
 
-		for i, schedule in enumerate(asset.schedules):
+		schedule_linked_with_asset = get_linked_depreciation_schedules(asset.name)[0]
+		depr_schedule = frappe.get_doc("Depreciation Schedule", schedule_linked_with_asset.name)
+
+		for i, schedule in enumerate(depr_schedule.depreciation_schedule):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
-			self.assertTrue(schedule.journal_entry)
+			self.assertTrue(schedule.depreciation_entry)
 
 	def test_asset_depreciation_on_sale_without_pro_rata(self):
 		"""
@@ -2797,11 +2805,13 @@ class TestSalesInvoice(unittest.TestCase):
 		create_asset_data()
 		asset = create_asset(
 			item_code="Macbook Pro",
+			enable_finance_books=1,
 			calculate_depreciation=1,
-			available_for_use_date=getdate("2019-12-31"),
+			purchase_date=getdate("2020-01-01"),
+			available_for_use_date=getdate("2020-01-01"),
 			total_number_of_depreciations=3,
 			expected_value_after_useful_life=10000,
-			depreciation_start_date=getdate("2020-12-31"),
+			depreciation_posting_start_date=getdate("2020-12-31"),
 			submit=1,
 		)
 
@@ -2812,42 +2822,55 @@ class TestSalesInvoice(unittest.TestCase):
 		)
 		asset.load_from_db()
 
-		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
+		expected_values = [
+			["2020-12-31", 20032.840722496, 20032.840722496],
+			["2021-12-31", 19978.106185003, 40010.946907499],
+		]
 
-		for i, schedule in enumerate(asset.schedules):
+		schedule_linked_with_asset = get_linked_depreciation_schedules(asset.name)[0]
+		depr_schedule = frappe.get_doc("Depreciation Schedule", schedule_linked_with_asset.name)
+
+		for i, schedule in enumerate(depr_schedule.depreciation_schedule):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
-			self.assertTrue(schedule.journal_entry)
+			self.assertTrue(schedule.depreciation_entry)
 
 	def test_depreciation_on_return_of_sold_asset(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-
 		create_asset_data()
-		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
+		asset = create_asset(
+			item_code="Macbook Pro", enable_finance_books=1, calculate_depreciation=1, submit=1
+		)
 		post_all_depreciation_entries(getdate("2021-09-30"))
 
 		si = create_sales_invoice(
 			item_code="Macbook Pro", asset=asset.name, qty=1, rate=90000, posting_date=getdate("2021-09-30")
 		)
-		return_si = make_return_doc("Sales Invoice", si.name)
-		return_si.submit()
+		create_sales_invoice(
+			is_return=1,
+			return_against=si.name,
+			item_code="Macbook Pro",
+			asset=asset.name,
+			qty=-1,
+			rate=90000,
+		)
 		asset.load_from_db()
 
 		expected_values = [
-			["2020-06-30", 1366.12, 1366.12, True],
-			["2021-06-30", 20000.0, 21366.12, True],
-			["2022-06-30", 20000.0, 41366.12, False],
-			["2023-06-30", 20000.0, 61366.12, False],
-			["2024-06-30", 20000.0, 81366.12, False],
-			["2025-06-06", 18633.88, 100000.0, False],
+			["2021-06-06", 20043.811610077, 20043.811610077],
+			["2022-06-06", 19989.047097481, 40032.858707558],
+			["2023-06-06", 19989.047097481, 60021.905805038],
+			["2024-06-06", 20043.811610077, 80065.717415115],
+			["2025-06-05", 19934.282584885, 100000.0],
 		]
 
-		for i, schedule in enumerate(asset.schedules):
+		schedule_linked_with_asset = get_linked_depreciation_schedules(asset.name)[0]
+		depr_schedule = frappe.get_doc("Depreciation Schedule", schedule_linked_with_asset.name)
+
+		for i, schedule in enumerate(depr_schedule.depreciation_schedule):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
-			self.assertEqual(schedule.journal_entry, schedule.journal_entry)
 
 	def test_sales_invoice_against_supplier(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
