@@ -62,8 +62,8 @@ class TestUtils(unittest.TestCase):
 		stock_entry = {"item": item, "to_warehouse": "_Test Warehouse - _TC", "qty": 1, "rate": 10}
 
 		se1 = make_stock_entry(posting_date="2022-01-01", **stock_entry)
-		se2 = make_stock_entry(posting_date="2022-02-01", **stock_entry)
 		se3 = make_stock_entry(posting_date="2022-03-01", **stock_entry)
+		se2 = make_stock_entry(posting_date="2022-02-01", **stock_entry)
 
 		for doc in (se1, se2, se3):
 			vouchers.append((doc.doctype, doc.name))
