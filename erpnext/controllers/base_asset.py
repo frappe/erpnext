@@ -317,7 +317,9 @@ class BaseAsset(AccountsController):
 		freq_of_depr = get_frequency_of_depreciation_in_months(frequency_of_depreciation)
 		latest_possible_depr_posting_start_date = add_months(self.available_for_use_date, freq_of_depr)
 
-		if getdate(self.depreciation_posting_start_date) > latest_possible_depr_posting_start_date:
+		if getdate(self.depreciation_posting_start_date) > getdate(
+			latest_possible_depr_posting_start_date
+		):
 			message = _(
 				"Depreciation Posting Start Date cannot be after {0} as the Available for Use Date is {1} and the Frequency of Depreciation is {2}"
 			).format(
