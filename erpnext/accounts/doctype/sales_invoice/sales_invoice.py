@@ -1216,6 +1216,7 @@ class SalesInvoice(SellingController):
 
 			depr_schedule = frappe.copy_doc(cancelled_schedule)
 			depr_schedule.creation_date = getdate()
+			depr_schedule.docstatus = 0  # tests fail otherwise
 			depr_schedule.save()
 
 			asset_doc.submit_depreciation_schedules(
