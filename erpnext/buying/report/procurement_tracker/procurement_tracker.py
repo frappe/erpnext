@@ -252,7 +252,7 @@ def get_mapped_pi_records():
 		ON pi_item.`purchase_order` = po.`name`
 		WHERE
 			pi_item.docstatus = 1
-			AND po.status not in ("Closed","Completed","Cancelled")
+			AND po.status not in ('Closed','Completed','Cancelled')
 			AND pi_item.po_detail IS NOT NULL
 		"""
 		)
@@ -271,7 +271,7 @@ def get_mapped_pr_records():
 			pr.docstatus=1
 			AND pr.name=pr_item.parent
 			AND pr_item.purchase_order_item IS NOT NULL
-			AND pr.status not in  ("Closed","Completed","Cancelled")
+			AND pr.status not in  ('Closed','Completed','Cancelled')
 		"""
 		)
 	)
@@ -302,7 +302,7 @@ def get_po_entries(conditions):
 		WHERE
 			parent.docstatus = 1
 			AND parent.name = child.parent
-			AND parent.status not in  ("Closed","Completed","Cancelled")
+			AND parent.status not in  ('Closed','Completed','Cancelled')
 			{conditions}
 		GROUP BY
 			parent.name, child.item_code

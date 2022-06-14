@@ -94,7 +94,7 @@ class Task(NestedSet):
 			self.status = "Template"
 		if self.status != self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
+				if frappe.db.get_value("Task", d.task, "status") not in ('Completed', 'Cancelled'):
 					frappe.throw(
 						_(
 							"Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled."

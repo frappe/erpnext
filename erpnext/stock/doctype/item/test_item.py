@@ -382,7 +382,7 @@ class TestItem(FrappeTestCase):
 
 		frappe.db.sql(
 			'''delete from `tabItem Variant Attribute`
-			where attribute="Test Item Length"'''
+			where attribute='Test Item Length' '''
 		)
 
 		frappe.flags.attribute_values = None

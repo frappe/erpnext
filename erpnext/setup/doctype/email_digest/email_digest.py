@@ -198,7 +198,7 @@ class EmailDigest(Document):
 
 		todo_list = frappe.db.sql(
 			"""select *
-			from `tabToDo` where (owner=%s or assigned_by=%s) and status="Open"
+			from `tabToDo` where (owner=%s or assigned_by=%s) and status='Open'
 			order by field(priority, 'High', 'Medium', 'Low') asc, date asc limit 20""",
 			(user_id, user_id),
 			as_dict=True,

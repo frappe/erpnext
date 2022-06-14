@@ -2039,7 +2039,7 @@ def get_advance_journal_entries(
 	journal_entries = frappe.db.sql(
 		"""
 		select
-			"Journal Entry" as reference_type, t1.name as reference_name,
+			'Journal Entry' as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
 			t2.reference_name as against_order, t2.exchange_rate
 		from
@@ -2094,7 +2094,7 @@ def get_advance_payment_entries(
 		payment_entries_against_order = frappe.db.sql(
 			"""
 			select
-				"Payment Entry" as reference_type, t1.name as reference_name,
+				'Payment Entry' as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
 				t1.{0} as currency, t1.{4} as exchange_rate
@@ -2114,7 +2114,7 @@ def get_advance_payment_entries(
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql(
 			"""
-				select "Payment Entry" as reference_type, name as reference_name, posting_date,
+				select 'Payment Entry' as reference_type, name as reference_name, posting_date,
 				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency
 				from `tabPayment Entry`
 				where
@@ -2172,7 +2172,7 @@ def update_invoice_status():
 			& (invoice.outstanding_amount > 0)
 			& (invoice.status.like("Unpaid%") | invoice.status.like("Partly Paid%"))
 			& (
-				((invoice.is_pos & invoice.due_date < today) | is_overdue)
+				((invoice.is_pos != 0 & invoice.due_date < today) | is_overdue)
 				if doctype == "Sales Invoice"
 				else is_overdue
 			)

@@ -1057,7 +1057,7 @@ def get_bom_items_as_dict(
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
 				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """,
+				bom_item.description, bom_item.base_rate""",
 		)
 		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 
@@ -1305,7 +1305,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not field in searchfields
 	]
 
-	query_filters = {"disabled": 0, "ifnull(end_of_life, '5050-50-50')": (">", today())}
+	query_filters = {"disabled": 0, "end_of_life": (">", today())}
 
 	or_cond_filters = {}
 	if txt:

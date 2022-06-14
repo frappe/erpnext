@@ -28,52 +28,40 @@ def get_columns():
 			"label": _("VAT Amount (AED)"),
 			"fieldtype": "Currency",
 			"width": 150,
-		},
+		}
 	]
 
-
-def get_data(filters=None):
+def get_data(filters = None):
 	"""Returns the list of dictionaries. Each dictionary is a row in the datatable and chart data."""
 	data = []
 	emirates, amounts_by_emirate = append_vat_on_sales(data, filters)
 	append_vat_on_expenses(data, filters)
 	return data, emirates, amounts_by_emirate
 
-
 def append_vat_on_sales(data, filters):
 	"""Appends Sales and All Other Outputs."""
-	append_data(data, "", _("VAT on Sales and All Other Outputs"), "", "")
+	append_data(data, '', _('VAT on Sales and All Other Outputs'), '', '')
 
 	emirates, amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
 
-	append_data(
-		data,
-		"2",
-		_("Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme"),
-		frappe.format((-1) * get_tourist_tax_return_total(filters), "Currency"),
-		frappe.format((-1) * get_tourist_tax_return_tax(filters), "Currency"),
-	)
+	append_data(data, '2',
+		 _('Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme'),
+		frappe.format((-1) * get_tourist_tax_return_total(filters), 'Currency'),
+		frappe.format((-1) * get_tourist_tax_return_tax(filters), 'Currency'))
 
-	append_data(
-		data,
-		"3",
-		_("Supplies subject to the reverse charge provision"),
-		frappe.format(get_reverse_charge_total(filters), "Currency"),
-		frappe.format(get_reverse_charge_tax(filters), "Currency"),
-	)
+	append_data(data, '3', _('Supplies subject to the reverse charge provision'),
+		frappe.format(get_reverse_charge_total(filters), 'Currency'),
+		frappe.format(get_reverse_charge_tax(filters), 'Currency'))
 
-	append_data(
-		data, "4", _("Zero Rated"), frappe.format(get_zero_rated_total(filters), "Currency"), "-"
-	)
+	append_data(data, '4', _('Zero Rated'),
+		frappe.format(get_zero_rated_total(filters), 'Currency'), "-")
 
-	append_data(
-		data, "5", _("Exempt Supplies"), frappe.format(get_exempt_total(filters), "Currency"), "-"
-	)
+	append_data(data, '5', _('Exempt Supplies'),
+		frappe.format(get_exempt_total(filters), 'Currency'),"-")
 
-	append_data(data, "", "", "", "")
+	append_data(data, '', '', '', '')
 
 	return emirates, amounts_by_emirate
-
 
 def standard_rated_expenses_emiratewise(data, filters):
 	"""Append emiratewise standard rated expenses and vat."""
@@ -391,25 +379,15 @@ def get_exempt_total(filters):
 			where
 				s.docstatus = 1 and  i.is_exempt = 1
 				{where_conditions} ;
-			""".format(
-					where_conditions=conditions
-				),
-				filters,
-			)[0][0]
-			or 0
-		)
+			""".format(where_conditions=conditions), filters)[0][0] or 0
 	except (IndexError, TypeError):
 		return 0
-
-
 def get_conditions(filters):
 	"""The conditions to be used to filter data to calculate the total sale."""
 	conditions = ""
-	for opts in (
-		("company", " and company=%(company)s"),
+	for opts in (("company", " and company=%(company)s"),
 		("from_date", " and posting_date>=%(from_date)s"),
-		("to_date", " and posting_date<=%(to_date)s"),
-	):
+		("to_date", " and posting_date<=%(to_date)s")):
 		if filters.get(opts[0]):
 			conditions += opts[1]
 	return conditions

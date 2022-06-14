@@ -340,12 +340,12 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 	fields = get_fields("Project", ["name", "project_name"])
 	searchfields = frappe.get_meta("Project").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+	searchfields = " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql(
 		"""select {fields} from `tabProject`
 		where
-			`tabProject`.status not in ("Completed", "Cancelled")
+			`tabProject`.status not in ('Completed', 'Cancelled')
 			and {cond} {scond} {match_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
@@ -374,7 +374,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
 			`tabDelivery Note`.docstatus = 1
-			and status not in ("Stopped", "Closed") %(fcond)s
+			and status not in ('Stopped', 'Closed') %(fcond)s
 			and (
 				(`tabDelivery Note`.is_return = 0 and `tabDelivery Note`.per_billed < 100)
 				or (`tabDelivery Note`.grand_total = 0 and `tabDelivery Note`.per_billed < 100)
@@ -654,7 +654,7 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	filter_dict = get_doctype_wise_filters(filters)
 
 	query = """select `tabWarehouse`.name,
-		CONCAT_WS(" : ", "Actual Qty", ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
+		CONCAT_WS(' : ', 'Actual Qty', ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
 		from `tabWarehouse` left join `tabBin`
 		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
 		where
