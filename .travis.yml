@@ -16,11 +16,11 @@ jobs:
   include:
   - name: "Python 2.7 Server Side Test"
     python: 2.7
-    script: bench --site test_site run-tests --app erpnext --coverage
+    script: bench --site test_site run-tests --app erpnext
 
   - name: "Python 3.6 Server Side Test"
     python: 3.6
-    script: bench --site test_site run-tests --app erpnext --coverage
+    script: bench --site test_site run-tests --app erpnext
 
   - name: "Python 2.7 Patch Test"
     python: 2.7
@@ -74,8 +74,3 @@ install:
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench start &
   - bench --site test_site reinstall --yes
-
-after_script:
-  - pip install coverage==4.5.4
-  - pip install python-coveralls
-  - coveralls -b apps/erpnext -d ../../sites/.coverage

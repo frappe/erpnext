@@ -368,7 +368,7 @@ class update_entries_after(object):
 				batch = self.stock_queue[index]
 				if qty_to_pop >= batch[0]:
 					# consume current batch
-					qty_to_pop = qty_to_pop - batch[0]
+					qty_to_pop = _round_off_if_near_zero(qty_to_pop - batch[0])
 					self.stock_queue.pop(index)
 					if not self.stock_queue and qty_to_pop:
 						# stock finished, qty still remains to be withdrawn
@@ -382,8 +382,8 @@ class update_entries_after(object):
 					batch[0] = batch[0] - qty_to_pop
 					qty_to_pop = 0
 
-		stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
-		stock_qty = sum((flt(batch[0]) for batch in self.stock_queue))
+		stock_value = _round_off_if_near_zero(sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue)))
+		stock_qty = _round_off_if_near_zero(sum((flt(batch[0]) for batch in self.stock_queue)))
 
 		if stock_qty:
 			self.valuation_rate = stock_value / flt(stock_qty)
@@ -549,3 +549,12 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate
+
+def _round_off_if_near_zero(number, precision = 7):
+	"""Rounds off the number to zero only if number is close to zero for decimal
+	specified in precision. Precision defaults to 7.
+	"""
+	if abs(0.0 - flt(number)) < (1.0 / (10**precision)):
+		return 0.0
+
+	return flt(number)
