@@ -1233,16 +1233,16 @@ class SalesInvoice(SellingController):
 	def get_latest_cancelled_schedules(self, asset, serial_no):
 		return frappe.get_all(
 			"Depreciation Schedule",
-			filters={"asset": asset.name, "serial_no": serial_no if serial_no else "", "docstatus": 2},
+			filters={"asset": asset, "serial_no": serial_no if serial_no else "", "docstatus": 2},
 			order_by="creation desc",
-			limit=self.get_number_of_active_schedules(),
+			limit=self.get_number_of_active_schedules(asset, serial_no),
 			pluck="name",
 		)
 
 	def get_number_of_active_schedules(self, asset, serial_no):
 		return frappe.db.count(
 			"Depreciation Schedule",
-			filters={"asset": asset.name, "serial_no": serial_no if serial_no else "", "status": "Active"},
+			filters={"asset": asset, "serial_no": serial_no if serial_no else "", "status": "Active"},
 		)
 
 	def reverse_depreciation_entries_made_after_sale(self, asset, serial_no, finance_book):
@@ -1284,7 +1284,12 @@ class SalesInvoice(SellingController):
 	def get_schedule_cancelled_on_sale(self, asset, serial_no, finance_book):
 		return frappe.get_all(
 			"Depreciation Schedule",
-			filters={"asset": asset, "serial_no": serial_no, "finance_book": finance_book, "docstatus": 2},
+			filters={
+				"asset": asset,
+				"serial_no": serial_no if serial_no else "",
+				"finance_book": finance_book if finance_book else "",
+				"docstatus": 2,
+			},
 			pluck="name",
 			order_by="creation_date desc",
 			limit=1,
