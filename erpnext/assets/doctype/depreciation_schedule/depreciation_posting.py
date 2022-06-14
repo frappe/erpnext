@@ -59,6 +59,10 @@ def post_depreciation_entries(schedule_name, date=None):
 		date = today()
 
 	depr_schedule = frappe.get_doc("Depreciation Schedule", schedule_name)
+
+	if depr_schedule.status != "Active":
+		return
+
 	asset = frappe.get_doc("Asset", depr_schedule.asset)
 	parent = get_parent(depr_schedule, asset)
 
