@@ -9,7 +9,11 @@ def execute():
 	if not frappe.db.table_exists("Asset") or not frappe.db.table_exists("Asset Finance Book"):
 		return
 
-	if not frappe.db.count("Asset") or not frappe.db.count("Asset Finance Book"):
+	if (
+		not frappe.db.count("Asset")
+		or not frappe.db.count("Asset Finance Book")
+		or frappe.db.count("Depreciation Template")
+	):
 		return
 
 	fb_rows = frappe.db.sql(
