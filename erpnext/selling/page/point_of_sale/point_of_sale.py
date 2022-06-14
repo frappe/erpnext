@@ -107,7 +107,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		ORDER BY
 			item.name asc
 		LIMIT
-			{page_len} offset {start}""".format(
+			{page_length} offset {start}""".format(
 			start=start,
 			page_length=page_length,
 			lft=lft,
