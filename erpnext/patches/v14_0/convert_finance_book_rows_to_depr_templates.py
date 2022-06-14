@@ -53,7 +53,7 @@ def execute():
 
 def create_new_depr_template(fb, count, frequency_in_months):
 	template = frappe.new_doc("Depreciation Template")
-	template.template_name = "Depreciation Template " + count
+	template.template_name = "Depreciation Template " + str(count)
 	template.depreciation_method = fb.depreciation_method
 	template.frequency_of_depreciation = frequency_in_months[fb.frequency_of_depreciation]
 	template.asset_life, template.asset_life_unit = get_asset_life(fb)
