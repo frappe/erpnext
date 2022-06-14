@@ -22,6 +22,7 @@
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
+  "has_variants",
   "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
@@ -66,7 +67,6 @@
   "has_serial_no",
   "serial_no_series",
   "variants_section",
-  "has_variants",
   "variant_based_on",
   "attributes",
   "accounting",
@@ -477,9 +477,9 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "attributes",
-   "depends_on": "eval:!doc.is_fixed_asset",
+   "depends_on": "eval:!doc.is_fixed_asset && doc.has_variants",
    "fieldname": "variants_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Variants"
   },
   {
@@ -909,7 +909,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-08 11:35:20.094546",
+ "modified": "2022-06-14 17:33:07.290638",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
