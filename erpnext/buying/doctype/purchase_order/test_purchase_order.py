@@ -330,7 +330,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		else:
 			# update valid from
 			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURDATE()
+				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
 				where parent = %(item)s and item_tax_template = %(tax)s""",
 				{"item": item, "tax": tax_template},
 			)

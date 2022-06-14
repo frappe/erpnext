@@ -190,12 +190,12 @@ def auto_close_tickets():
 		frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
 	)
 
-	issues = frappe.db.sql(
-		""" select name from tabIssue where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """,
-		(auto_close_after_days),
-		as_dict=True,
-	)
+	issues = frappe.db.multisql({
+		'mariadb': """ select name from tabIssue where status='Replied' and
+		modified<DATE_SUB(CURRENT_DATE, INTERVAL %s DAY) """,
+		'postgres': """ select name from `tabIssue` where status='Replied' and
+		modified < (CURRENT_DATE - INTERVAL '%s DAY') """
+		}, (auto_close_after_days), as_dict=True)
 
 	for issue in issues:
 		doc = frappe.get_doc("Issue", issue.get("name"))
