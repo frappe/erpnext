@@ -197,7 +197,7 @@ class PurchaseOrder(BuyingController):
 				if not item.fg_item:
 					frappe.throw(
 						_("Row #{0}: Finished Good Item is not specified for service item {1}").format(
-							 item.idx, item.item_code
+							item.idx, item.item_code
 						)
 					)
 				else:

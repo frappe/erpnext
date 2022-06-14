@@ -328,7 +328,7 @@ def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 			ts.status in ('Submitted', 'Payslip') and tsd.parent = ts.name and
 			tsd.docstatus = 1 and ts.total_billable_amount > 0
 			and tsd.parent LIKE %(txt)s {condition}
-			order by tsd.parent limit %(start)s, %(page_len)s""".format(
+			order by tsd.parent limit %(page_len)s offset %(start)s""".format(
 			condition=condition
 		),
 		{
@@ -515,7 +515,7 @@ def get_timesheets_list(
 					tsd.project IN %(projects)s
 				)
 			ORDER BY `end_date` ASC
-			LIMIT {0}, {1}
+			LIMIT {1} offset {0}
 		""".format(
 				limit_start, limit_page_length
 			),

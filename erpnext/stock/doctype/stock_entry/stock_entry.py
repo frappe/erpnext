@@ -2005,24 +2005,30 @@ class StockEntry(StockController):
 		):
 
 			# Get SCO Supplied Items Details
-			parent = frappe.qb.DocType("Subcontracting Order")
-			child = frappe.qb.DocType("Subcontracting Order Supplied Item")
-			item_wh = (
-				frappe.qb.from_(parent)
-				.inner_join(child)
-				.on(parent.name == child.parent)
-				.select(child.rm_item_code, child.reserve_warehouse)
-				.where(parent.name == self.subcontracting_order)
-			).run(as_list=True)
+			sco_supplied_items = frappe.db.get_all(
+				"Subcontracting Order Supplied Item",
+				filters={"parent": self.subcontracting_order},
+				fields=["name", "rm_item_code", "reserve_warehouse"],
+			)
 
-			item_wh = frappe._dict(item_wh)
-
+			# Get Items Supplied in Stock Entries against SCO
 			supplied_items = get_supplied_items(self.subcontracting_order)
-			for name, item in supplied_items.items():
-				frappe.db.set_value("Subcontracting Order Supplied Item", name, item)
 
-			# Update reserved sub contracted quantity in bin based on Supplied Item Details and
+			for row in sco_supplied_items:
+				key, item = row.name, {}
+				if not supplied_items.get(key):
+					# no stock transferred against SCO Supplied Items row
+					item = {"supplied_qty": 0, "returned_qty": 0, "total_supplied_qty": 0}
+				else:
+					item = supplied_items.get(key)
+
+				frappe.db.set_value("Subcontracting Order Supplied Item", row.name, item)
+
+			# RM Item-Reserve Warehouse Dict
+			item_wh = {x.get("rm_item_code"): x.get("reserve_warehouse") for x in sco_supplied_items}
+
 			for d in self.get("items"):
+				# Update reserved sub contracted quantity in bin based on Supplied Item Details and
 				item_code = d.get("original_item") or d.get("item_code")
 				reserve_warehouse = item_wh.get(item_code)
 				if not (reserve_warehouse and item_code):

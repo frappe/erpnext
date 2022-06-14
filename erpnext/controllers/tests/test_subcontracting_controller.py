@@ -724,6 +724,57 @@ class TestSubcontractingController(FrappeTestCase):
 			self.assertEqual(value.qty, details.qty)
 			self.assertEqual(value.batch_no, details.batch_no)
 
+	def test_sco_supplied_qty(self):
+		"""
+		Check if 'Supplied Qty' in SCO's Supplied Items table is reset on submit/cancel.
+		"""
+		set_backflush_based_on("Material Transferred for Subcontract")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA1",
+				"fg_item_qty": 5,
+			},
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 5",
+				"qty": 6,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA5",
+				"fg_item_qty": 6,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = [
+			{"item_code": "Subcontracted SRM Item 1", "qty": 5, "main_item_code": "Subcontracted Item SA1"},
+			{"item_code": "Subcontracted SRM Item 2", "qty": 5, "main_item_code": "Subcontracted Item SA1"},
+			{"item_code": "Subcontracted SRM Item 3", "qty": 5, "main_item_code": "Subcontracted Item SA1"},
+			{"item_code": "Subcontracted SRM Item 5", "qty": 6, "main_item_code": "Subcontracted Item SA5"},
+			{"item_code": "Subcontracted SRM Item 4", "qty": 6, "main_item_code": "Subcontracted Item SA5"},
+		]
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		for item in rm_items:
+			item["sco_rm_detail"] = sco.items[0].name if item.get("qty") == 5 else sco.items[1].name
+
+		se = make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		sco.reload()
+		for item in sco.get("supplied_items"):
+			self.assertIn(item.supplied_qty, [5.0, 6.0])
+
+		se.cancel()
+		sco.reload()
+		for item in sco.get("supplied_items"):
+			self.assertEqual(item.supplied_qty, 0.0)
+
 
 def add_second_row_in_scr(scr):
 	item_dict = {}
