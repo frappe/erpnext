@@ -33,17 +33,16 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
 			idx desc,
 			name, employee_name
-		limit %(page_len)s offset %(start)s""".format(**{
-			'fields': ", ".join(fields),
-			'key': searchfield,
-			'fcond': get_filters_cond(doctype, filters, conditions),
-			'mcond': get_match_cond(doctype)
-		}), {
-			'txt': "%%%s%%" % txt,
-			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
-})
+		limit %(page_len)s offset %(start)s""".format(
+			**{
+				"fields": ", ".join(fields),
+				"key": searchfield,
+				"fcond": get_filters_cond(doctype, filters, conditions),
+				"mcond": get_match_cond(doctype),
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+	)
 
 
 # searches for leads which are not converted
@@ -66,16 +65,11 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, company_name), locate(%(_txt)s, company_name), 99999),
 			idx desc,
 			name, lead_name
-		limit %(page_len)s offset %(start)s""".format(**{
-			'fields': ", ".join(fields),
-			'key': searchfield,
-			'mcond':get_match_cond(doctype)
-		}), {
-			'txt': "%%%s%%" % txt,
-			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
-})
+		limit %(page_len)s offset %(start)s""".format(
+			**{"fields": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+	)
 
 	# searches for customer
 
@@ -106,17 +100,16 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, customer_name), locate(%(_txt)s, customer_name), 99999),
 			idx desc,
 			name, customer_name
-		limit %(page_len)s offset %(start)s""".format(**{
-			"fields": ", ".join(fields),
-			"scond": searchfields,
-			"mcond": get_match_cond(doctype),
-			"fcond": get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
-		}), {
-			'txt': "%%%s%%" % txt,
-			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
-})
+		limit %(page_len)s offset %(start)s""".format(
+			**{
+				"fields": ", ".join(fields),
+				"scond": searchfields,
+				"mcond": get_match_cond(doctype),
+				"fcond": get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
+			}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+	)
 
 
 # searches for supplier
@@ -144,16 +137,11 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
 			idx desc,
 			name, supplier_name
-		limit %(page_len)s offset %(start)s""".format(**{
-			'field': ', '.join(fields),
-			'key': searchfield,
-			'mcond':get_match_cond(doctype)
-		}), {
-			'txt': "%%%s%%" % txt,
-			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len
-})
+		limit %(page_len)s offset %(start)s""".format(
+			**{"field": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
+		),
+		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+	)
 
 
 @frappe.whitelist()
@@ -364,7 +352,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			idx desc,
 			`tabProject`.name asc
 		limit {page_len} offset {start}""".format(
-			fields=", ".join(['`tabProject`.{0}'.format(f) for f in fields]),
+			fields=", ".join(["`tabProject`.{0}".format(f) for f in fields]),
 			cond=cond,
 			scond=searchfields,
 			match_cond=get_match_cond(doctype),

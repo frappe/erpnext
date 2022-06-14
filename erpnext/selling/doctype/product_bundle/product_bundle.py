@@ -78,6 +78,7 @@ def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(
 		"""select name, item_name, description from tabItem
 		where is_stock_item=0 and name not in (select name from `tabProduct Bundle`)
-		and %s like %s %s limit %s offset %s""" % (searchfield, "%s",
-		get_match_cond(doctype),"%s", "%s"),
-		("%%%s%%" % txt, page_len, start))
+		and %s like %s %s limit %s offset %s"""
+		% (searchfield, "%s", get_match_cond(doctype), "%s", "%s"),
+		("%%%s%%" % txt, page_len, start),
+	)
