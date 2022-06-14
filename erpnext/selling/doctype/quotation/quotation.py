@@ -70,8 +70,32 @@ class Quotation(SellingController):
 					title=_("Unpublished Item"),
 				)
 
-	def has_sales_order(self):
-		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
+	def get_ordered_status(self):
+		ordered_items = frappe._dict(
+			frappe.db.get_all(
+				"Sales Order Item",
+				{"prevdoc_docname": self.name, "docstatus": 1},
+				["item_code", "sum(qty)"],
+				group_by="item_code",
+				as_list=1,
+			)
+		)
+
+		status = "Open"
+		if ordered_items:
+			status = "Ordered"
+
+			for item in self.get("items"):
+				if item.qty > ordered_items.get(item.item_code, 0.0):
+					status = "Partially Ordered"
+
+		return status
+
+	def is_fully_ordered(self):
+		return self.get_ordered_status() == "Ordered"
+
+	def is_partially_ordered(self):
+		return self.get_ordered_status() == "Partially Ordered"
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
