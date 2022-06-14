@@ -196,21 +196,21 @@ class PurchaseOrder(BuyingController):
 			for item in self.items:
 				if not item.fg_item:
 					frappe.throw(
-						_("Finished Good Item is not specified for service item {0} at row {1}").format(
-							item.item_code, item.idx
+						_("Row #{0}: Finished Good Item is not specified for service item {1}").format(
+							 item.idx, item.item_code
 						)
 					)
 				else:
 					if not frappe.get_value("Item", item.fg_item, "is_sub_contracted_item"):
 						frappe.throw(
 							_(
-								"Finished Good Item {0} must be a sub-contracted item for service item {1} at row {2}"
-							).format(item.fg_item, item.item_code, item.idx)
+								"Row #{0}: Finished Good Item {1} must be a sub-contracted item for service item {2}"
+							).format(item.idx, item.fg_item, item.item_code)
 						)
 				if not item.fg_item_qty:
 					frappe.throw(
-						_("Finished Good Item Qty is not specified for service item {0} at row {1}").format(
-							item.item_code, item.idx
+						_("Row #{0}: Finished Good Item Qty is not specified for service item {0}").format(
+							item.idx, item.item_code
 						)
 					)
 
