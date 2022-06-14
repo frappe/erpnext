@@ -1174,11 +1174,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-03-23 16:49:36.297403",
-=======
  "modified": "2022-06-11 20:35:32.635804",
->>>>>>> 118c786e63 (fix: Partially Ordered status for quotation)
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
