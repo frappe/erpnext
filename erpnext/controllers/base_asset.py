@@ -1266,6 +1266,9 @@ def get_serialized_assets_that_need_cwip_booking(asset_categories):
 
 
 def get_linked_depreciation_schedules(asset, serial_no):
+	if not serial_no:
+		serial_no = ""
+
 	return frappe.get_all(
 		"Depreciation Schedule", filters={"asset": asset, "serial_no": serial_no}, pluck="name"
 	)
