@@ -9,6 +9,8 @@ import frappe
 import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
+from frappe.query_builder import AliasedQuery, Criterion, Table
+from frappe.query_builder.functions import Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	cint,
@@ -816,7 +818,11 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
+def get_outstanding_invoices(
+	party_type, party, account, common_filter=None, min_outstanding=None, max_outstanding=None
+):
+
+	ple = qb.DocType("Payment Ledger Entry")
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -829,76 +835,30 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	else:
 		party_account_type = erpnext.get_party_account_type(party_type)
 
-	if party_account_type == "Receivable":
-		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
-		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
-	else:
-		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
-		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
-
 	held_invoices = get_held_invoices(party_type, party)
 
-	invoice_list = frappe.db.sql(
-		"""
-		select
-			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
-			account_currency as currency
-		from
-			`tabGL Entry`
-		where
-			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
-			and is_cancelled=0
-			{condition}
-			and ((voucher_type = 'Journal Entry'
-					and (against_voucher = '' or against_voucher is null))
-				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no
-		order by posting_date, name""".format(
-			dr_or_cr=dr_or_cr, condition=condition or ""
-		),
-		{
-			"party_type": party_type,
-			"party": party,
-			"account": account,
-		},
-		as_dict=True,
-	)
+	common_filter = common_filter or []
+	common_filter.append(ple.account_type == party_account_type)
+	common_filter.append(ple.account == account)
+	common_filter.append(ple.party_type == party_type)
+	common_filter.append(ple.party == party)
 
-	payment_entries = frappe.db.sql(
-		"""
-		select against_voucher_type, against_voucher,
-			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
-		from `tabGL Entry`
-		where party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s
-			and {payment_dr_or_cr} > 0
-			and against_voucher is not null and against_voucher != ''
-			and is_cancelled=0
-		group by against_voucher_type, against_voucher
-	""".format(
-			payment_dr_or_cr=payment_dr_or_cr
-		),
-		{"party_type": party_type, "party": party, "account": account},
-		as_dict=True,
+	ple_query = QueryPaymentLedger()
+	invoice_list = ple_query.get_voucher_outstandings(
+		common_filter=common_filter,
+		min_outstanding=min_outstanding,
+		max_outstanding=max_outstanding,
+		get_invoices=True,
 	)
-
-	pe_map = frappe._dict()
-	for d in payment_entries:
-		pe_map.setdefault((d.against_voucher_type, d.against_voucher), d.payment_amount)
 
 	for d in invoice_list:
-		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
-		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
+		payment_amount = d.invoice_amount - d.outstanding
+		outstanding_amount = d.outstanding
 		if outstanding_amount > 0.5 / (10**precision):
 			if (
-				filters
-				and filters.get("outstanding_amt_greater_than")
-				and not (
-					outstanding_amount >= filters.get("outstanding_amt_greater_than")
-					and outstanding_amount <= filters.get("outstanding_amt_less_than")
-				)
+				min_outstanding
+				and max_outstanding
+				and not (outstanding_amount >= min_outstanding and outstanding_amount <= max_outstanding)
 			):
 				continue
 
