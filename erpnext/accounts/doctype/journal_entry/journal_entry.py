@@ -1239,7 +1239,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 			AND jv.docstatus = 1
 			AND jv.`{0}` LIKE %(txt)s
 		ORDER BY jv.name DESC
-		LIMIT %(offset)s, %(limit)s
+		LIMIT %(limit)s offset %(offset)s
 		""".format(
 			searchfield
 		),

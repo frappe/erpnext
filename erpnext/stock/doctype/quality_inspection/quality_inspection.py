@@ -232,7 +232,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					FROM `tab{doc}`
 					WHERE parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
 					{qi_condition} {cond} {mcond}
-					ORDER BY item_code limit {start}, {page_len}
+					ORDER BY item_code limit {page_len} offset {start}
 				""".format(
 					doc=filters.get("from"),
 					cond=cond,
@@ -252,7 +252,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					WHERE name = %(reference_name)s and docstatus < 2 and production_item like %(txt)s
 					{qi_condition} {cond} {mcond}
 					ORDER BY production_item
-					LIMIT {start}, {page_len}
+					limit {page_len} offset {start}
 				""".format(
 					doc=filters.get("from"),
 					cond=cond,

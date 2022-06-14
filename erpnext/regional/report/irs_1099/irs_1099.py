@@ -10,7 +10,7 @@ from frappe.utils.data import fmt_money
 from frappe.utils.jinja import render_template
 from frappe.utils.pdf import get_pdf
 from frappe.utils.print_format import read_multi_pdf
-from PyPDF2 import PdfFileWriter
+from PyPDF2 import PdfWriter
 
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -106,7 +106,7 @@ def irs_1099_print(filters):
 
 	columns, data = execute(filters)
 	template = frappe.get_doc("Print Format", "IRS 1099 Form").html
-	output = PdfFileWriter()
+	output = PdfWriter()
 
 	for row in data:
 		row["fiscal_year"] = fiscal_year
