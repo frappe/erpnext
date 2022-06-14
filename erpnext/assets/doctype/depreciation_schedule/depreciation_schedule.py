@@ -165,8 +165,8 @@ def make_depreciation_schedule_for_slm(
 		schedule_date = add_months(schedule_date, frequency_of_depr)
 
 	# for the final row
-	depr_amount = get_depr_amount_for_slm(schedule_date, depr_start_date, depr_in_one_day)
-	create_depreciation_entry(depr_schedule, schedule_date, depr_amount)
+	depr_amount = get_depr_amount_for_slm(depr_end_date, depr_start_date, depr_in_one_day)
+	create_depreciation_entry(depr_schedule, depr_end_date, depr_amount)
 
 
 def make_depreciation_schedule_for_ddb_and_wdv(
