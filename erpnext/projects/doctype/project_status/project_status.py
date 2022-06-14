@@ -14,7 +14,7 @@ class ProjectStatus(Document):
 	def on_change(self):
 		clear_project_status_cache()
 
-	def after_rename(self):
+	def after_rename(self, old_name, new_name, merge):
 		clear_project_status_cache()
 
 
