@@ -7,7 +7,6 @@ import itertools
 import json
 import erpnext
 import frappe
-import copy
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
 		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
@@ -100,8 +99,7 @@ class Item(WebsiteGenerator):
 	def after_insert(self):
 		'''set opening stock and item price'''
 		if self.standard_rate:
-			for default in self.item_defaults or [frappe._dict()]:
-				self.add_price(default.default_price_list)
+			self.add_price()
 
 		if self.opening_stock:
 			self.set_opening_stock()
@@ -119,7 +117,6 @@ class Item(WebsiteGenerator):
 		self.validate_naming_series()
 		self.check_for_active_boms()
 		self.fill_customer_code()
-		self.check_item_tax()
 		self.validate_barcode()
 		self.validate_warehouse_for_reorder()
 		self.update_bom_item_desc()
@@ -135,7 +132,6 @@ class Item(WebsiteGenerator):
 		self.validate_fixed_asset()
 		self.validate_retain_sample()
 		self.validate_uom_conversion_factor()
-		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.validate_applicable_to()
@@ -636,16 +632,6 @@ class Item(WebsiteGenerator):
 			cust_code.append(d.ref_code)
 		self.customer_code = ','.join(cust_code)
 
-	def check_item_tax(self):
-		"""Check whether Tax Rate is not entered twice for same Tax Type"""
-		check_list = []
-		for d in self.get('taxes'):
-			if d.item_tax_template:
-				if d.item_tax_template in check_list:
-					frappe.throw(_("{0} entered twice in Item Tax").format(d.item_tax_template))
-				else:
-					check_list.append(d.item_tax_template)
-
 	def validate_item_name(self):
 		if not self.item_name:
 			self.item_name = self.item_code
@@ -862,12 +848,6 @@ class Item(WebsiteGenerator):
 					template_item.flags.dont_update_variants = True
 					template_item.flags.ignore_permissions = True
 					template_item.save()
-
-	def validate_item_defaults(self):
-		companies = list(set([row.company for row in self.item_defaults]))
-
-		if len(companies) != len(self.item_defaults):
-			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
@@ -1249,35 +1229,6 @@ def check_stock_uom_with_bin(item, stock_uom):
 	if not matched:
 		frappe.throw(
 			_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
-
-def get_item_defaults(item_code, company):
-	item = frappe.get_cached_doc('Item', item_code)
-
-	out = item.as_dict()
-
-	for d in item.item_defaults:
-		if d.company == company:
-			row = copy.deepcopy(d.as_dict())
-			row.pop("name")
-
-			for k, v in row.items():
-				if v:
-					out[k] = v
-	return out
-
-def set_item_default(item_code, company, fieldname, value):
-	item = frappe.get_cached_doc('Item', item_code)
-
-	for d in item.item_defaults:
-		if d.company == company:
-			if not d.get(fieldname):
-				frappe.db.set_value(d.doctype, d.name, fieldname, value)
-			return
-
-	# no row found, add a new row for the company
-	d = item.append('item_defaults', {fieldname: value, "company": company})
-	d.db_insert()
-	item.clear_cache()
 
 @frappe.whitelist()
 def get_uom_conv_factor(from_uom, to_uom):

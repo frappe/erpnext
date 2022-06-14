@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 from frappe.model.document import Document
-import copy
+from erpnext.setup.doctype.item_default_rule.item_default_rule import get_item_default_values
 import json
 from six import string_types
 
@@ -15,20 +15,6 @@ class TransactionType(Document):
 	def validate(self):
 		if not self.buying and not self.selling:
 			frappe.throw(_("Transaction Type must be at least one of Selling or Buying type"))
-
-
-@frappe.whitelist()
-def get_transaction_type_defaults(transaction_type, company, fieldname='item_defaults'):
-	if transaction_type:
-		tranction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
-		if tranction_type_doc:
-			for d in tranction_type_doc.get(fieldname) or []:
-				if d.company == company:
-					row = copy.deepcopy(d.as_dict())
-					row.pop("name")
-					return row
-
-	return frappe._dict()
 
 
 @frappe.whitelist()
@@ -72,7 +58,7 @@ def get_transaction_type_details(args, items):
 			out.doc.calculate_tax_on_company_currency = cint(transaction_type_doc.calculate_tax_on_company_currency == "Yes")
 
 		if args.company:
-			transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
+			transaction_type_defaults = get_item_default_values({}, args)
 			if transaction_type_defaults.get('default_warehouse'):
 				out.doc.set_warehouse = transaction_type_defaults.get('default_warehouse')
 

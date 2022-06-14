@@ -286,14 +286,8 @@ def get_item_conditions(filters, for_item_dt):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
 
 	if filters.get("supplier") and for_item_dt:
-		supplier_conditions = []
 		if frappe.get_meta("Item").has_field("default_supplier"):
-			supplier_conditions.append("item.default_supplier = %(supplier)s")
-
-		supplier_conditions.append("""exists (select id.name from `tabItem Default` id
-			where id.parent = item.name and id.parenttype = 'Item' and id.default_supplier = %(supplier)s)""")
-
-		conditions.append("({0})".format(" or ".join(supplier_conditions)))
+			conditions.append("item.default_supplier = %(supplier)s")
 
 	return " and " + " and ".join(conditions) if conditions else ""
 

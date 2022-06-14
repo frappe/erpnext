@@ -350,7 +350,7 @@ class Company(NestedSet):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
-		for doctype in ["Mode of Payment Account", "Item Default"]:
+		for doctype in ["Mode of Payment Account", "Item Default Rule"]:
 			frappe.db.sql("delete from `tab{0}` where company = %s".format(doctype), self.name)
 
 		# clear default accounts, warehouses from item

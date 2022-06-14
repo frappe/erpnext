@@ -12,11 +12,7 @@ from erpnext.accounts.utils import get_company_default
 from erpnext.stock.utils import get_stock_balance, get_incoming_rate
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, validate_serial_no_ledger
 from erpnext.stock.doctype.batch.batch import get_batch_qty_on
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
-from erpnext.stock.get_item_details import get_default_cost_center, get_conversion_factor
+from erpnext.stock.get_item_details import get_default_cost_center, get_conversion_factor, get_default_warehouse
 from frappe.model.meta import get_field_precision
 import json
 from six import string_types
@@ -459,10 +455,6 @@ def get_item_details(args):
 		return out
 
 	item = frappe.get_cached_doc("Item", args.item_code)
-	item_defaults = get_item_defaults(item.name, args.company)
-	item_group_defaults = get_item_group_defaults(item.name, args.company)
-	brand_defaults = get_brand_defaults(item.name, args.company)
-	item_source_defaults = get_item_source_defaults(item.name, args.company)
 
 	out.item_code = args.item_code
 	out.item_name = args.item_name or item.item_name
@@ -477,17 +469,10 @@ def get_item_details(args):
 	if args.warehouse:
 		out.warehouse = args.warehouse
 	else:
-		from frappe.defaults import get_user_default_as_list
-		user_default_warehouse_list = get_user_default_as_list('Warehouse')
-		user_default_warehouse = user_default_warehouse_list[0] \
-			if len(user_default_warehouse_list) == 1 else ""
-
-		out.warehouse = user_default_warehouse or item_defaults.get("default_warehouse") or\
-			item_group_defaults.get("default_warehouse")
+		out.warehouse = get_default_warehouse(item, args, True)
 		args.warehouse = out.warehouse
 
-	out.cost_center = get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
-		company=args.company)
+	out.cost_center = get_default_cost_center(item, args)
 
 	if args.item_code and args.warehouse:
 		out.current_qty, out.current_valuation_rate, out.current_amount, out.current_serial_no = get_stock_balance_for(args.item_code,

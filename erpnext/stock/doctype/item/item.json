@@ -79,9 +79,6 @@
   "sec_applicable_to",
   "applicable_to",
   "applicable_to_all",
-  "column_break_66",
-  "bill_only_to_customer",
-  "bill_only_to_customer_name",
   "applicable_items_section",
   "applicable_items",
   "variants_section",
@@ -104,8 +101,6 @@
   "serial_nos_and_batches",
   "retain_sample",
   "sample_quantity",
-  "defaults",
-  "item_defaults",
   "purchase_details",
   "min_order_qty",
   "safety_stock",
@@ -123,19 +118,15 @@
   "customs_tariff_number",
   "deferred_revenue",
   "deferred_revenue_account",
+  "no_of_months",
   "enable_deferred_revenue",
   "column_break_85",
-  "no_of_months",
-  "deferred_expense_section",
   "deferred_expense_account",
-  "enable_deferred_expense",
-  "column_break_88",
   "no_of_months_exp",
+  "enable_deferred_expense",
   "customer_details",
   "customer_items",
   "customer_code",
-  "item_tax_section_break",
-  "taxes",
   "inspection_criteria",
   "inspection_required_before_purchase",
   "inspection_required_before_delivery",
@@ -302,7 +293,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
-   "label": "Valuation Rate"
+   "label": "Default Valuation Rate"
   },
   {
    "bold": 1,
@@ -378,7 +369,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "is_stock_item",
    "depends_on": "is_stock_item",
    "fieldname": "inventory_section",
    "fieldtype": "Section Break",
@@ -461,6 +451,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "uom_conversion_graph",
    "fieldname": "unit_of_measure_conversion",
    "fieldtype": "Section Break",
    "label": "Units of Measure"
@@ -477,7 +468,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.has_batch_no || doc.has_serial_no || doc.is_fixed_asset",
    "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
@@ -548,7 +538,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.variant_of || doc.has_variants || doc.attributes",
+   "collapsible_depends_on": "eval:doc.variant_of || doc.has_variants || (doc.attributes && doc.attributes.len)",
    "fieldname": "variants_section",
    "fieldtype": "Section Break",
    "label": "Variants"
@@ -579,17 +569,6 @@
    "label": "Attributes",
    "no_copy": 1,
    "options": "Item Variant Attribute"
-  },
-  {
-   "fieldname": "defaults",
-   "fieldtype": "Section Break",
-   "label": "Sales, Purchase, Accounting Defaults"
-  },
-  {
-   "fieldname": "item_defaults",
-   "fieldtype": "Table",
-   "label": "Item Defaults",
-   "options": "Item Default"
   },
   {
    "collapsible": 1,
@@ -723,9 +702,10 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.enable_deferred_revenue || doc.enable_deferred_expense",
    "fieldname": "deferred_revenue",
    "fieldtype": "Section Break",
-   "label": "Deferred Revenue"
+   "label": "Deferred Revenue & Expense"
   },
   {
    "depends_on": "enable_deferred_revenue",
@@ -752,12 +732,6 @@
    "label": "No of Months"
   },
   {
-   "collapsible": 1,
-   "fieldname": "deferred_expense_section",
-   "fieldtype": "Section Break",
-   "label": "Deferred Expense"
-  },
-  {
    "depends_on": "enable_deferred_expense",
    "fieldname": "deferred_expense_account",
    "fieldtype": "Link",
@@ -770,10 +744,6 @@
    "fieldname": "enable_deferred_expense",
    "fieldtype": "Check",
    "label": "Enable Deferred Expense"
-  },
-  {
-   "fieldname": "column_break_88",
-   "fieldtype": "Column Break"
   },
   {
    "depends_on": "enable_deferred_expense",
@@ -792,24 +762,6 @@
    "fieldtype": "Table",
    "label": "Customer Items",
    "options": "Item Customer Detail"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "taxes",
-   "fieldname": "item_tax_section_break",
-   "fieldtype": "Section Break",
-   "label": "Item Tax",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-money"
-  },
-  {
-   "description": "Will also apply for variants",
-   "fieldname": "taxes",
-   "fieldtype": "Table",
-   "label": "Taxes",
-   "oldfieldname": "item_tax",
-   "oldfieldtype": "Table",
-   "options": "Item Tax"
   },
   {
    "collapsible": 1,
@@ -1201,10 +1153,6 @@
    "label": "Applicable to All Items"
   },
   {
-   "fieldname": "column_break_66",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "is_vehicle",
    "fieldname": "vehicle_details_section",
    "fieldtype": "Section Break",
@@ -1269,20 +1217,6 @@
    "label": "Quotation Validity Days"
   },
   {
-   "fieldname": "bill_only_to_customer",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Bill Only To Customer",
-   "options": "Customer"
-  },
-  {
-   "fetch_from": "bill_only_to_customer.customer_name",
-   "fieldname": "bill_only_to_customer_name",
-   "fieldtype": "Data",
-   "label": "Bill Only To Customer Name",
-   "read_only": 1
-  },
-  {
    "depends_on": "has_variants",
    "fieldname": "variant_item_code_format",
    "fieldtype": "Data",
@@ -1318,7 +1252,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2022-04-18 23:20:01.802847",
+ "modified": "2022-06-14 16:39:02.834494",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

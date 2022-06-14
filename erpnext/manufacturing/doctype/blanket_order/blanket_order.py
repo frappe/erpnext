@@ -6,9 +6,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate
+from erpnext.stock.get_item_details import get_default_warehouse
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.doctype.item.item import get_item_defaults
 
 
 class BlanketOrder(Document):
@@ -39,7 +39,7 @@ def make_sales_order(source_name):
 	def update_item(source, target, source_parent, target_parent):
 		target_qty = source.get("qty") - source.get("ordered_qty")
 		target.qty = target_qty if not flt(target_qty) < 0 else 0
-		item = get_item_defaults(target.item_code, source_parent.company)
+		item = frappe.get_cached_doc("Item", target.item_code) if target.item_code else None
 		if item:
 			target.item_name = item.get("item_name")
 			target.description = item.get("description")
@@ -65,12 +65,12 @@ def make_purchase_order(source_name):
 	def update_item(source, target, source_parent, target_parent):
 		target_qty = source.get("qty") - source.get("ordered_qty")
 		target.qty = target_qty if not flt(target_qty) < 0 else 0
-		item = get_item_defaults(target.item_code, source_parent.company)
+		item = frappe.get_cached_doc("Item", target.item_code) if target.item_code else None
 		if item:
 			target.item_name = item.get("item_name")
 			target.description = item.get("description")
 			target.uom = item.get("stock_uom")
-			target.warehouse = item.get("default_warehouse")
+			target.warehouse = get_default_warehouse(item, {'company': source_parent.company}, True)
 
 	target_doc = get_mapped_doc("Blanket Order", source_name, {
 		"Blanket Order": {

@@ -9,11 +9,7 @@ from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.get_item_details import get_price_list_rate
-from erpnext.stock.get_item_details import get_item_warehouse, get_default_expense_account, get_default_cost_center
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
+from erpnext.stock.get_item_details import get_default_warehouse, get_default_cost_center
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.utils import get_fetch_values
 
@@ -704,17 +700,12 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				item.image,
 				bom.project,
 				item.stock_uom,
-				item.allow_alternative_item,
-				item_default.default_warehouse,
-				item_default.expense_account as expense_account,
-				item_default.buying_cost_center as cost_center
+				item.allow_alternative_item
 				{select_columns}
 			from
 				`tab{table}` bom_item
 				JOIN `tabBOM` bom ON bom_item.parent = bom.name
 				JOIN `tabItem` item ON item.name = bom_item.item_code
-				LEFT JOIN `tabItem Default` item_default
-					ON item_default.parent = item.name and item_default.company = %(company)s
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
@@ -763,17 +754,8 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		item_doc = frappe.get_cached_doc("Item", item)
 		defaults_args = frappe._dict({"company": company})
 
-		item_defaults = get_item_defaults(item_doc.name, company)
-		item_group_defaults = get_item_group_defaults(item_doc.name, company)
-		brand_defaults = get_brand_defaults(item_doc.name, company)
-		item_source_defaults = get_item_source_defaults(item_doc.name, company)
-
-		item_details.default_warehouse = get_item_warehouse(item_doc, defaults_args, True,
-			item_defaults, item_group_defaults, brand_defaults, item_source_defaults)
-		item_details.expense_account = get_default_expense_account(defaults_args,
-			item_defaults, item_group_defaults, brand_defaults, item_source_defaults, frappe._dict())
-		item_details.cost_center = get_default_cost_center(defaults_args,
-			item_defaults, item_group_defaults, brand_defaults, item_source_defaults, frappe._dict())
+		item_details.default_warehouse = get_default_warehouse(item_doc, defaults_args)
+		item_details.cost_center = get_default_cost_center(item_doc, defaults_args)
 
 	for item, item_details in item_dict.items():
 		for d in [["Account", "expense_account", "stock_adjustment_account"],

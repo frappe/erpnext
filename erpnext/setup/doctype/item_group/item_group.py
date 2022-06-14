@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-import copy
 from frappe import _
 from frappe.utils import nowdate, cint, cstr
 from frappe.utils.nestedset import NestedSet
@@ -12,7 +11,6 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
-from six import iteritems
 from six.moves.urllib.parse import quote
 
 
@@ -237,25 +235,6 @@ def invalidate_cache_for(doc, item_group=None):
 		item_group_name = frappe.db.get_value("Item Group", d.get('name'))
 		if item_group_name:
 			clear_cache(frappe.db.get_value('Item Group', item_group_name, 'route'))
-
-
-def get_item_group_defaults(item, company):
-	item = frappe.get_cached_doc("Item", item)
-	item_group = frappe.get_cached_doc("Item Group", item.item_group)
-
-	item_defaults = frappe._dict()
-
-	while item_group:
-		for d in item_group.item_group_defaults or []:
-			if d.company == company:
-				for k, v in iteritems(d.as_dict()):
-					if not item_defaults.get(k) and k != 'name':
-						item_defaults[k] = v
-				break
-
-		item_group = frappe.get_cached_doc("Item Group", item_group.parent_item_group) if item_group.parent_item_group else None
-
-	return item_defaults
 
 
 def get_item_group_print_heading(item_group):

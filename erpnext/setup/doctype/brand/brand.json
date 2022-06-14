@@ -10,7 +10,6 @@
   "brand",
   "is_vehicle_maker",
   "column_break_2",
-  "show_item_code",
   "description_section",
   "description",
   "item_override_settings_section",
@@ -24,9 +23,7 @@
   "has_batch_no",
   "column_break_16",
   "is_vehicle",
-  "has_variants",
-  "defaults",
-  "brand_defaults"
+  "has_variants"
  ],
  "fields": [
   {
@@ -49,17 +46,6 @@
    "width": "300px"
   },
   {
-   "fieldname": "defaults",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "brand_defaults",
-   "fieldtype": "Table",
-   "label": "Brand Defaults",
-   "options": "Item Default"
-  },
-  {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
   },
@@ -74,12 +60,6 @@
    "fieldname": "item_naming_series",
    "fieldtype": "Select",
    "label": "Naming Series"
-  },
-  {
-   "fieldname": "show_item_code",
-   "fieldtype": "Select",
-   "label": "Show Item Code",
-   "options": "\nNo\nYes"
   },
   {
    "collapsible": 1,
@@ -151,7 +131,7 @@
  ],
  "icon": "fa fa-certificate",
  "idx": 1,
- "modified": "2022-06-10 15:40:12.239473",
+ "modified": "2022-06-14 14:32:05.932733",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",

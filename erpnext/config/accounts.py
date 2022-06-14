@@ -434,6 +434,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Transaction Type",
 				},
+				{
+					"type": "doctype",
+					"name": "Item Default Rule",
+				},
 			]
 		},
 		{

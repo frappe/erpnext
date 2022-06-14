@@ -6,7 +6,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe.utils import cstr, flt
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import get_item_details, get_default_warehouse
 from frappe.model.document import Document
 
 class PackedItem(Document):
@@ -18,11 +18,9 @@ def get_product_bundle_items(item_code):
 		where t2.new_item_code=%s and t1.parent = t2.name order by t1.idx""", item_code, as_dict=1)
 
 def get_packing_item_details(item, company):
-	return frappe.db.sql("""
-		select i.item_name, i.is_stock_item, i.description, i.stock_uom, id.default_warehouse
-		from `tabItem` i LEFT JOIN `tabItem Default` id ON id.parent=i.name and id.company=%s
-		where i.name = %s""",
-		(company, item), as_dict = 1)[0]
+	item_details = frappe.get_cached_doc("Item", item).as_dict()
+	item_details.default_warehouse = get_default_warehouse(item, {'company': company})
+	return item_details
 
 def get_bin_qty(item, warehouse):
 	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`

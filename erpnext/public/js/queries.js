@@ -126,9 +126,13 @@ $.extend(erpnext.queries, {
 
 	warehouse: function(doc, get_warehouse_filters) {
 		let filters = [
-			["Warehouse", "company", "in", ["", cstr(doc.company)]],
 			["Warehouse", "is_group", "=",0]
 		];
+
+		if (doc.company) {
+			filters.push(["Warehouse", "company", "in", [cstr(doc.company), ""]]);
+		}
+
 		if (get_warehouse_filters) {
 			get_warehouse_filters(filters);
 		}

@@ -140,20 +140,6 @@ frappe.ui.form.on("Item", {
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
-	gst_hsn_code: function(frm) {
-		if(!frm.doc.taxes || !frm.doc.taxes.length) {
-			frappe.db.get_doc("GST HSN Code", frm.doc.gst_hsn_code).then(hsn_doc => {
-				$.each(hsn_doc.taxes || [], function(i, tax) {
-					let a = frappe.model.add_child(frm.doc, 'Item Tax', 'taxes');
-					a.item_tax_template = tax.item_tax_template;
-					a.tax_category = tax.tax_category;
-					a.valid_from = tax.valid_from;
-					frm.refresh_field('taxes');
-				});
-			});
-		}
-	},
-
 	is_fixed_asset: function(frm) {
 		// set serial no to false & toggles its visibility
 		frm.set_value('has_serial_no', 0);
@@ -276,53 +262,6 @@ var set_customer_group = function(frm, cdt, cdn) {
 
 $.extend(erpnext.item, {
 	setup_queries: function(frm) {
-		frm.fields_dict["item_defaults"].grid.get_field("expense_account").get_query = function(doc, cdt, cdn) {
-			const row = locals[cdt][cdn];
-			return {
-				query: "erpnext.controllers.queries.get_expense_account",
-				filters: { company: row.company }
-			}
-		}
-
-		frm.fields_dict["item_defaults"].grid.get_field("income_account").get_query = function(doc, cdt, cdn) {
-			const row = locals[cdt][cdn];
-			return {
-				query: "erpnext.controllers.queries.get_income_account",
-				filters: { company: row.company }
-			}
-		}
-
-		frm.fields_dict["item_defaults"].grid.get_field("buying_cost_center").get_query = function(doc, cdt, cdn) {
-			const row = locals[cdt][cdn];
-			return {
-				filters: {
-					"is_group": 0,
-					"company": row.company
-				}
-			}
-		}
-
-		frm.fields_dict["item_defaults"].grid.get_field("selling_cost_center").get_query = function(doc, cdt, cdn) {
-			const row = locals[cdt][cdn];
-			return {
-				filters: {
-					"is_group": 0,
-					"company": row.company
-				}
-			}
-		}
-
-
-		frm.fields_dict['taxes'].grid.get_field("tax_type").get_query = function(doc, cdt, cdn) {
-			return {
-				filters: [
-					['Account', 'account_type', 'in',
-						'Tax, Chargeable, Income Account, Expense Account'],
-					['Account', 'docstatus', '!=', 2]
-				]
-			}
-		}
-
 		frm.fields_dict['item_group'].get_query = function(doc, cdt, cdn) {
 			return {
 				filters: [
@@ -365,16 +304,6 @@ $.extend(erpnext.item, {
 
 		frm.fields_dict.supplier_items.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
 			return { query: "erpnext.controllers.queries.supplier_query" }
-		}
-
-		frm.fields_dict["item_defaults"].grid.get_field("default_warehouse").get_query = function(doc, cdt, cdn) {
-			const row = locals[cdt][cdn];
-			return {
-				filters: {
-					"is_group": 0,
-					"company": row.company
-				}
-			}
 		}
 
 		frm.fields_dict.reorder_levels.grid.get_field("warehouse_group").get_query = function(doc, cdt, cdn) {

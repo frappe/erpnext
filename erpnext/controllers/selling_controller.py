@@ -9,7 +9,6 @@ from frappe.model.utils import get_fetch_values
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
-from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
 from frappe.contacts.doctype.address.address import get_address_display
 
@@ -555,10 +554,3 @@ class SellingController(StockController):
 			doc.set_gross_margin(update=True)
 			doc.set_status(update=True)
 			doc.notify_update()
-
-
-def set_default_income_account_for_item(obj):
-	for d in obj.get("items"):
-		if d.item_code:
-			if getattr(d, "income_account", None):
-				set_item_default(d.item_code, obj.company, 'income_account', d.income_account)

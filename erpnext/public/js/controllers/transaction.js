@@ -2228,12 +2228,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		$.each(me.frm.doc.items || [], function(i, item) {
 			if(item.item_code && items_dict.hasOwnProperty(item.name)) {
-				$.each(items_dict[item.name] || {}, function (k ,v) {
-					item[k] = v;
-				});
+				frappe.model.set_value(item.doctype, item.name, items_dict[item.name]);
 			}
 		});
-		me.frm.refresh_field('items');
 	},
 
 	transaction_type: function() {
@@ -2405,28 +2402,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			return {
 				query : "erpnext.controllers.queries.get_batch_no",
-				filters: filters
-			}
-		}
-	},
-
-	set_query_for_item_tax_template: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		if(!item.item_code) {
-			frappe.throw(__("Please enter Item Code to get item taxes"));
-		} else {
-
-			let filters = {
-				'item_code': item.item_code,
-				'valid_from': ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
-				'item_group': item.item_group,
-			}
-
-			if (doc.tax_category)
-				filters['tax_category'] = doc.tax_category;
-
-			return {
-				query: "erpnext.controllers.queries.get_tax_template",
 				filters: filters
 			}
 		}

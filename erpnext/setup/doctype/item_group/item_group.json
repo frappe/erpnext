@@ -14,7 +14,6 @@
   "is_group",
   "image",
   "column_break_5",
-  "show_item_code",
   "is_print_heading",
   "override_item_settings_section",
   "item_naming_by",
@@ -28,14 +27,6 @@
   "column_break_18",
   "is_vehicle",
   "has_variants",
-  "billing_section",
-  "bill_only_to_customer",
-  "column_break_23",
-  "bill_only_to_customer_name",
-  "defaults",
-  "item_group_defaults",
-  "sec_break_taxes",
-  "taxes",
   "sb9",
   "show_in_website",
   "route",
@@ -94,28 +85,6 @@
   {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "defaults",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "item_group_defaults",
-   "fieldtype": "Table",
-   "label": "Item Group Defaults",
-   "options": "Item Default"
-  },
-  {
-   "fieldname": "sec_break_taxes",
-   "fieldtype": "Section Break",
-   "label": "Item Tax"
-  },
-  {
-   "fieldname": "taxes",
-   "fieldtype": "Table",
-   "label": "Taxes",
-   "options": "Item Tax"
   },
   {
    "fieldname": "sb9",
@@ -211,12 +180,6 @@
    "label": "Naming Series"
   },
   {
-   "fieldname": "show_item_code",
-   "fieldtype": "Select",
-   "label": "Show Item Code",
-   "options": "\nNo\nYes"
-  },
-  {
    "fieldname": "override_item_settings_section",
    "fieldtype": "Section Break",
    "label": "Override Item Settings"
@@ -275,31 +238,6 @@
    "fieldname": "is_print_heading",
    "fieldtype": "Check",
    "label": "Is Print Heading"
-  },
-  {
-   "fieldname": "bill_only_to_customer",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Bill Only To Customer",
-   "options": "Customer"
-  },
-  {
-   "fetch_from": "bill_only_to_customer.customer_name",
-   "fieldname": "bill_only_to_customer_name",
-   "fieldtype": "Data",
-   "label": "Bill Only To Customer Name",
-   "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "bill_only_to_customer",
-   "fieldname": "billing_section",
-   "fieldtype": "Section Break",
-   "label": "Billing"
-  },
-  {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -307,7 +245,7 @@
  "image_field": "image",
  "is_tree": 1,
  "max_attachments": 3,
- "modified": "2022-06-10 15:40:06.795427",
+ "modified": "2022-06-14 14:31:58.184265",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

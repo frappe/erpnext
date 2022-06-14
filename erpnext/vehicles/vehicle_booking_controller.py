@@ -10,11 +10,8 @@ from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.crm.doctype.lead.lead import get_lead_contact_details
-from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier, get_default_terms
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
+from erpnext.stock.get_item_details import get_default_warehouse, get_item_price, get_default_supplier, get_default_terms
+from erpnext.setup.doctype.item_default_rule.item_default_rule import get_item_default_values
 from erpnext.vehicles.doctype.vehicle_allocation_period.vehicle_allocation_period import get_delivery_period
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
 from erpnext.vehicles.utils import validate_vehicle_item
@@ -454,20 +451,13 @@ def get_item_details(args):
 	out.variant_of = item.variant_of
 	out.variant_of_name = frappe.get_cached_value("Item", item.variant_of, "item_name") if item.variant_of else None
 
-	item_defaults = get_item_defaults(item.name, args.company)
-	item_group_defaults = get_item_group_defaults(item.name, args.company)
-	brand_defaults = get_brand_defaults(item.name, args.company)
-	item_source_defaults = get_item_source_defaults(item.name, args.company)
-
 	if not args.supplier:
-		out.supplier = get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
+		out.supplier = get_default_supplier(item, args)
 
 	if not args.warehouse:
-		out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
-			brand_defaults=brand_defaults, item_source_defaults=item_source_defaults)
+		out.warehouse = get_default_warehouse(item, args)
 
-	out.vehicle_price_list = args.vehicle_price_list or get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
-		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults)
+	out.vehicle_price_list = args.vehicle_price_list or get_default_price_list(item, args)
 
 	fni_price_list_settings = frappe.get_cached_value("Vehicles Settings", None, "fni_price_list")
 	if fni_price_list_settings:
@@ -498,7 +488,7 @@ def get_item_details(args):
 			if not out.tc_name:
 				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_quotation_terms")
 		else:
-			out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
+			out.tc_name = get_default_terms(item, args)
 			if not out.tc_name:
 				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
 
@@ -570,13 +560,7 @@ def get_vehicle_default_supplier(item_code, company):
 
 	item = frappe.get_cached_doc("Item", item_code)
 
-	item_defaults = get_item_defaults(item.name, company)
-	item_group_defaults = get_item_group_defaults(item.name, company)
-	brand_defaults = get_brand_defaults(item.name, company)
-	item_source_defaults = get_item_source_defaults(item.name, company)
-
-	default_supplier = get_default_supplier(frappe._dict({"item_code": item_code, "company": company}),
-		item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
+	default_supplier = get_default_supplier(item, {"company": company})
 
 	return default_supplier
 
@@ -622,19 +606,15 @@ def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=Non
 	return out
 
 
-def get_default_price_list(item, args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults):
-		price_list = (item_defaults.get('default_price_list')
-			or item_source_defaults.get('default_price_list')
-			or brand_defaults.get('default_price_list')
-			or item_group_defaults.get('default_price_list')
-			or args.get('price_list')
-		)
+def get_default_price_list(item, args):
+	default_values = get_item_default_values(item, args)
+	price_list = default_values.get('default_price_list') or args.get('price_list')
 
-		if not price_list:
-			price_list = frappe.get_cached_value("Vehicles Settings", None, "vehicle_price_list")
-		if not price_list:
-			price_list = frappe.get_cached_value("Buying Settings", None, "buying_price_list")
-		if not price_list:
-			price_list = frappe.get_cached_value("Selling Settings", None, "selling_price_list")
+	if not price_list:
+		price_list = frappe.get_cached_value("Vehicles Settings", None, "vehicle_price_list")
+	if not price_list:
+		price_list = frappe.get_cached_value("Buying Settings", None, "buying_price_list")
+	if not price_list:
+		price_list = frappe.get_cached_value("Selling Settings", None, "selling_price_list")
 
-		return price_list
+	return price_list

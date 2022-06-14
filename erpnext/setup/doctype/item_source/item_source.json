@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "item_source_name",
-  "show_item_code",
   "item_override_settings_section",
   "item_naming_by",
   "item_naming_series",
@@ -20,9 +19,7 @@
   "has_batch_no",
   "column_break_12",
   "is_vehicle",
-  "has_variants",
-  "defaults",
-  "item_source_defaults"
+  "has_variants"
  ],
  "fields": [
   {
@@ -35,23 +32,6 @@
    "oldfieldtype": "Data",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "defaults",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "item_source_defaults",
-   "fieldtype": "Table",
-   "label": "Item Source Defaults",
-   "options": "Item Default"
-  },
-  {
-   "fieldname": "show_item_code",
-   "fieldtype": "Select",
-   "label": "Show Item Code",
-   "options": "\nNo\nYes"
   },
   {
    "fieldname": "item_override_settings_section",
@@ -121,7 +101,7 @@
   }
  ],
  "icon": "fa fa-certificate",
- "modified": "2022-06-10 15:40:18.660253",
+ "modified": "2022-06-14 14:32:13.446005",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Source",

@@ -1,0 +1,413 @@
+{
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:item_default_rule_name",
+ "creation": "2022-06-10 15:52:17.247320",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "item_default_rule_name",
+  "filters_section",
+  "item_code",
+  "item_name",
+  "transaction_type",
+  "cb_6",
+  "item_group",
+  "brand",
+  "column_break_9",
+  "item_source",
+  "company",
+  "stock_defaults_section",
+  "default_warehouse",
+  "column_break_14",
+  "force_default_warehouse",
+  "column_break_6",
+  "allow_zero_valuation_rate",
+  "column_break_18",
+  "target_warehouse_validation",
+  "accounting_defaults_section",
+  "income_account",
+  "expense_account",
+  "column_break_12",
+  "selling_cost_center",
+  "buying_cost_center",
+  "column_break_15",
+  "selling_apply_discount_after_taxes",
+  "buying_apply_discount_after_taxes",
+  "billing_defaults_section",
+  "bill_only_to_customer",
+  "column_break_29",
+  "bill_only_to_customer_name",
+  "other_defaults_section",
+  "default_supplier",
+  "column_break_20",
+  "default_price_list",
+  "column_break_22",
+  "default_terms",
+  "column_break_39",
+  "show_item_code",
+  "item_tax_section",
+  "taxes"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_default_rule_name",
+   "fieldtype": "Data",
+   "label": "Item Default Rule Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "force_default_warehouse",
+   "fieldtype": "Select",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Force Default Warehouse",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "default_price_list",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "default_terms",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Terms and Conditions",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "allow_zero_valuation_rate",
+   "fieldtype": "Select",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Allow Zero Valuation Rate",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "target_warehouse_validation",
+   "fieldtype": "Select",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Target Warehouse Validation",
+   "options": "\nMandatory\nNot Allowed"
+  },
+  {
+   "fieldname": "buying_cost_center",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Buying Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "default_supplier",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "buying_apply_discount_after_taxes",
+   "fieldtype": "Select",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Apply Discount After Taxes For Purchase",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "selling_cost_center",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Selling Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Default Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "selling_apply_discount_after_taxes",
+   "fieldtype": "Select",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Apply Discount After Taxes For Sales",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "stock_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Defaults"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Defaults"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Other Defaults"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Brand",
+   "options": "Brand"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_source",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Item Source",
+   "options": "Item Source"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_tax_section",
+   "fieldtype": "Section Break",
+   "label": "Item Tax"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Taxes",
+   "options": "Item Tax"
+  },
+  {
+   "fieldname": "billing_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Billing Defaults"
+  },
+  {
+   "fieldname": "bill_only_to_customer",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Bill Only To Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "bill_only_to_customer.customer_name",
+   "fieldname": "bill_only_to_customer_name",
+   "fieldtype": "Data",
+   "label": "Bill Only To Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_item_code",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Show Item Code",
+   "options": "\nNo\nYes"
+  }
+ ],
+ "modified": "2022-06-14 12:10:54.641659",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Item Default Rule",
+ "name_case": "Title Case",
+ "nsm_parent_field": "parent_item_group",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

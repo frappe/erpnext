@@ -14,7 +14,7 @@ from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
-from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_default_supplier
 from six import string_types
 
 
@@ -323,7 +323,7 @@ def make_purchase_order(source_name, target_doc=None):
 			# items only for given default supplier
 			supplier_items = []
 			for d in target_doc.items:
-				default_supplier = get_item_defaults(d.item_code, target_doc.company).get('default_supplier')
+				default_supplier = get_default_supplier(frappe.get_cached_doc("Item", d.item_code), {'company': target_doc.company})
 				if frappe.flags.args.default_supplier == default_supplier:
 					supplier_items.append(d)
 			target_doc.items = supplier_items
@@ -436,8 +436,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 
 
 def get_material_requests_based_on_supplier(supplier):
-	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
-		{"default_supplier": supplier}, 'parent')]
+	supplier_items = [d.name for d in frappe.db.get_all("Item", {"default_supplier": supplier}, 'name')]
 	if not supplier_items:
 		frappe.throw(_("{0} is not the default supplier for any items.".format(supplier)))
 
@@ -449,7 +448,7 @@ def get_material_requests_based_on_supplier(supplier):
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'
-		order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
+		order by mr_item.item_code""" % ', '.join(['%s']*len(supplier_items)),
 		tuple(supplier_items))
 
 	return material_requests, supplier_items
@@ -459,23 +458,12 @@ def get_material_requests_based_on_supplier(supplier):
 @frappe.validate_and_sanitize_search_inputs
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
-	item_list = []
-	for d in doc.items:
-		item_list.append(d.item_code)
 
 	suppliers = []
-	if item_list:
-		suppliers += frappe.db.sql_list("""
-			select distinct default_supplier
-			from `tabItem Default`
-			where parent in %s and ifnull(default_supplier, '') != ''
-		""", [item_list])
-
-		suppliers += frappe.db.sql_list("""
-			select distinct default_supplier
-			from `tabItem`
-			where name in %s and ifnull(default_supplier, '') != ''
-		""", [item_list])
+	for d in doc.items:
+		default_supplier = get_default_supplier(d.item_code, doc)
+		if default_supplier not in suppliers:
+			suppliers.append(default_supplier)
 
 	return [[d] for d in suppliers]
 

@@ -765,35 +765,6 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
-
-	item_doc = frappe.get_cached_doc('Item', filters.get('item_code'))
-	item_group = filters.get('item_group')
-	taxes = item_doc.taxes or []
-
-	while item_group:
-		item_group_doc = frappe.get_cached_doc('Item Group', item_group)
-		taxes += item_group_doc.taxes or []
-		item_group = item_group_doc.parent_item_group
-
-	if not taxes:
-		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` """)
-	else:
-		valid_from = filters.get('valid_from')
-		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
-
-		args = {
-			'item_code': filters.get('item_code'),
-			'posting_date': valid_from,
-			'tax_category': filters.get('tax_category')
-		}
-
-		taxes = _get_item_tax_template(args, taxes, for_validate=True)
-		return [(d,) for d in set(taxes)]
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
 def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 

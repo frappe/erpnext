@@ -301,8 +301,6 @@ def create_delivery_note(source_name, target_doc=None):
 			dn_item.batch_no = location.batch_no
 			dn_item.serial_no = location.serial_no
 
-			update_delivery_note_item(source_doc, dn_item, delivery_note)
-
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
@@ -378,27 +376,6 @@ def get_item_details(item_code, uom=None):
 		details.update(get_conversion_factor(item_code, uom))
 
 	return details
-
-
-def update_delivery_note_item(source, target, delivery_note):
-	cost_center = frappe.db.get_value('Project', delivery_note.project, 'cost_center')
-	if not cost_center:
-		cost_center = get_cost_center(source.item_code, 'Item', delivery_note.company)
-
-	if not cost_center:
-		cost_center = get_cost_center(source.item_group, 'Item Group', delivery_note.company)
-
-	target.cost_center = cost_center
-
-def get_cost_center(for_item, from_doctype, company):
-	'''Returns Cost Center for Item or Item Group'''
-	return frappe.db.get_value('Item Default',
-		fieldname=['buying_cost_center'],
-		filters={
-			'parent': for_item,
-			'parenttype': from_doctype,
-			'company': company
-		})
 
 def set_delivery_note_missing_values(target):
 	target.run_method('set_missing_values')

@@ -12,7 +12,7 @@ from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and, now_date
 from frappe.utils.csvutils import build_csv_response
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.get_item_details import get_default_warehouse
 
 class ProductionPlan(Document):
 	def validate(self):
@@ -449,21 +449,19 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 	for d in frappe.db.sql("""select bei.item_code, item.default_bom as bom,
 			ifnull(sum(bei.stock_qty/ifnull(bom.quantity, 1)), 0)*%s as qty, item.item_name,
 			bei.description, bei.stock_uom, item.min_order_qty, bei.source_warehouse,
-			item.default_material_request_type, item.min_order_qty, item_default.default_warehouse,
+			item.default_material_request_type, item.min_order_qty,
 			item.purchase_uom, item_uom.conversion_factor
 		from
 			`tabBOM Explosion Item` bei
 			JOIN `tabBOM` bom ON bom.name = bei.parent
 			JOIN `tabItem` item ON item.name = bei.item_code
-			LEFT JOIN `tabItem Default` item_default
-				ON item_default.parent = item.name and item_default.company=%s
 			LEFT JOIN `tabUOM Conversion Detail` item_uom
 				ON item.name = item_uom.parent and item_uom.uom = item.purchase_uom
 		where
 			bei.docstatus < 2
 			and bom.name=%s and item.is_stock_item in (1, {0})
 		group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
-		(planned_qty, company, bom_no), as_dict=1):
+		(planned_qty, bom_no), as_dict=1):
 			item_details.setdefault(d.get('item_code'), d)
 	return item_details
 
@@ -476,13 +474,11 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 			item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
 			item.default_bom as default_bom, bom_item.description as description,
 			bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty,
-			item_default.default_warehouse, item.purchase_uom, item_uom.conversion_factor
+			item.purchase_uom, item_uom.conversion_factor
 		FROM
 			`tabBOM Item` bom_item
 			JOIN `tabBOM` bom ON bom.name = bom_item.parent
 			JOIN tabItem item ON bom_item.item_code = item.name
-			LEFT JOIN `tabItem Default` item_default
-				ON item.name = item_default.parent and item_default.company = %(company)s
 			LEFT JOIN `tabUOM Conversion Detail` item_uom
 				ON item.name = item_uom.parent and item_uom.uom = item.purchase_uom
 		where
@@ -517,9 +513,8 @@ def get_material_request_items(row, sales_order,
 
 	total_qty = row['qty']
 
-	item_group_defaults = get_item_group_defaults(row.item_code, company)
-	warehouse = warehouse or row.get('source_warehouse') \
-		or row.get('default_warehouse') or item_group_defaults.get("default_warehouse")
+	default_warehouse = get_default_warehouse(frappe.get_cached_doc("Item", row.item_code), {'company': company})
+	warehouse = warehouse or row.get('source_warehouse') or row.get('default_warehouse') or default_warehouse
 
 	required_qty = 0
 	projected_qty = bin_dict.get("projected_qty", 0)
@@ -687,7 +682,7 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 					'item_name' : item_master.item_name,
 					'default_bom' : doc.bom,
 					'purchase_uom' : purchase_uom,
-					'default_warehouse': item_master.default_warehouse,
+					'default_warehouse': get_default_warehouse(item_master, {'company': company}),
 					'min_order_qty' : item_master.min_order_qty,
 					'default_material_request_type' : item_master.default_material_request_type,
 					'qty': planned_qty or 1,

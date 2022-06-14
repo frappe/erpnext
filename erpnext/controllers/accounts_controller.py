@@ -20,7 +20,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse
+from erpnext.stock.get_item_details import get_default_warehouse
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from collections import OrderedDict
 
@@ -1947,7 +1947,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	else:
 		warehouse_args = p_doc.as_dict()
 		warehouse_args.transaction_type_name = warehouse_args.get('transaction_type')
-		child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+		child_item.warehouse = get_default_warehouse(item, p_doc)
 
 	if not child_item.warehouse:
 		frappe.throw(_("Cannot find {0} for item {1}. Please set the same in Item Master or Stock Settings.")

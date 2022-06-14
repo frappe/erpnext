@@ -27,8 +27,6 @@
   "dn_required",
   "po_required",
   "pr_required",
-  "sec_break_1",
-  "item_defaults",
   "sec_billing_defaults",
   "accounts"
  ],
@@ -66,17 +64,6 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "sec_break_1",
-   "fieldtype": "Section Break",
-   "label": "Item Defaults"
-  },
-  {
-   "fieldname": "item_defaults",
-   "fieldtype": "Table",
-   "label": "Item Defaults",
-   "options": "Item Default"
   },
   {
    "fieldname": "sec_billing_defaults",
@@ -183,7 +170,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-04-05 16:48:48.308961",
+ "modified": "2022-06-14 14:29:27.913937",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",

@@ -312,38 +312,15 @@ def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_ye
 	return annual_budget * accumulated_percentage / 100
 
 def get_item_details(args):
+	from erpnext.stock.get_item_details import get_default_expense_account, get_default_cost_center
+
 	cost_center, expense_account = None, None
 
 	if not args.get('company'):
 		return cost_center, expense_account
 
 	if args.item_code:
-		item_defaults = frappe.db.get_value('Item Default',
-			{'parent': args.item_code, 'company': args.get('company')},
-			['buying_cost_center', 'expense_account'])
-		if item_defaults:
-			cost_center, expense_account = item_defaults
-
-	if not (cost_center and expense_account):
-		for doctype in ['Item Group', 'Company']:
-			data = get_expense_cost_center(doctype, args)
-
-			if not cost_center and data:
-				cost_center = data[0]
-
-			if not expense_account and data:
-				expense_account = data[1]
-
-			if cost_center and expense_account:
-				return cost_center, expense_account
+		expense_account = get_default_expense_account(args.item_code, args)
+		cost_center = get_default_cost_center(args.item_code, args, selling_or_buying='buying')
 
 	return cost_center, expense_account
-
-def get_expense_cost_center(doctype, args):
-	if doctype == 'Item Group':
-		return frappe.db.get_value('Item Default',
-			{'parent': args.get(frappe.scrub(doctype)), 'company': args.get('company')},
-			['buying_cost_center', 'expense_account'])
-	else:
-		return frappe.db.get_value(doctype, args.get(frappe.scrub(doctype)),\
-			['cost_center', 'default_expense_account'])

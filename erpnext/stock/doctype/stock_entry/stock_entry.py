@@ -5,16 +5,12 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
 from frappe import _
-from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
+from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
+from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
 from erpnext.stock.get_item_details import get_bin_details, get_default_cost_center, get_conversion_factor,\
-	get_reserved_qty_for_so, get_hide_item_code
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
+	get_reserved_qty_for_so, get_hide_item_code, get_default_warehouse
 from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
-from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
 from frappe.model.mapper import get_mapped_doc
@@ -283,26 +279,35 @@ class StockEntry(StockController):
 			project.notify_update()
 
 	def validate_item(self):
+		from erpnext.stock.doctype.item.item import validate_end_of_life
+
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
-		for item in self.get("items"):
-			if flt(item.qty) and flt(item.qty) < 0:
+
+		for d in self.get("items"):
+			item = frappe.get_cached_value("Item", d.item_code, ['has_variants', 'end_of_life', 'disabled'], as_dict=1)
+			validate_end_of_life(d.item_code, end_of_life=item.end_of_life, disabled=item.disabled)
+
+			if cint(item.has_variants):
+				frappe.throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+
+			if d.item_code not in stock_items:
+				frappe.throw(_("{0} is not a stock Item").format(d.item_code))
+
+			if flt(d.qty) and flt(d.qty) < 0:
 				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
-					.format(item.idx, frappe.bold(item.item_code)))
+					.format(d.idx, frappe.bold(d.item_code)))
 
-			if item.item_code not in stock_items:
-				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
+			self.set_missing_item_values(d)
 
-			self.set_missing_item_values(item)
-
-			if not item.transfer_qty and item.qty:
-				item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
-				self.precision("transfer_qty", item))
+			if not d.transfer_qty and d.qty:
+				d.transfer_qty = flt(flt(d.qty) * flt(d.conversion_factor),
+				self.precision("transfer_qty", d))
 
 			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
-				and not item.serial_no
-				and item.item_code in serialized_items):
-				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
+				and not d.serial_no
+				and d.item_code in serialized_items):
+				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(d.idx, d.item_code),
 					frappe.MandatoryError)
 
 	def set_missing_item_values(self, item):
@@ -931,23 +936,10 @@ class StockEntry(StockController):
 			pro_doc.notify_update()
 
 	def get_item_details(self, args=None, for_update=False):
-		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
-				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.is_vehicle, i.allow_alternative_item,
-				id.expense_account, id.buying_cost_center,
-				i.alt_uom, i.alt_uom_size, i.show_item_code
-			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
-			where i.name=%s
-				and i.disabled=0
-				and (i.end_of_life is null or i.end_of_life='0000-00-00' or i.end_of_life > %s)""",
-			(self.company, args.get('item_code'), nowdate()), as_dict = 1)
+		if not args.get('item_code'):
+			frappe.throw(_("Item Code not provided"))
 
-		if not item:
-			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
-
-		item = item[0]
-		item_group_defaults = get_item_group_defaults(item.name, self.company)
-		brand_defaults = get_brand_defaults(item.name, self.company)
-		item_source_defaults = get_item_source_defaults(item.name, self.company)
+		item = frappe.get_cached_doc("Item", args.get('item_code'))
 
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
@@ -955,8 +947,8 @@ class StockEntry(StockController):
 			'description'		  	: cstr(item.description).strip(),
 			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
-			'hide_item_code'		: get_hide_item_code(args, item),
-			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults, item_source_defaults, company=self.company),
+			'hide_item_code'		: get_hide_item_code(item, args),
+			'cost_center'			: get_default_cost_center(item, args),
 			'qty'					: args.get("qty"),
 			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,
@@ -1144,11 +1136,11 @@ class StockEntry(StockController):
 			item_code = frappe.db.get_value("BOM", self.bom_no, "item")
 			to_warehouse = self.to_warehouse
 
-		item = get_item_defaults(item_code, self.company)
+		item = frappe.get_cached_doc("Item", item_code)
 
 		if not self.work_order and not to_warehouse:
 			# in case of BOM
-			to_warehouse = item.get("default_warehouse")
+			to_warehouse = get_default_warehouse(item, {'company': self.company}, True)
 
 		self.add_to_stock_entry_detail({
 			item.name: {
@@ -1202,13 +1194,12 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "uom", "required_qty", "consumed_qty"]
+			fields=["item_code", "uom", "stock_uom", "required_qty", "consumed_qty"]
 			)
 
 		for item in wo_items:
 			qty = item.required_qty
 
-			item_account_details = get_item_defaults(item.item_code, self.company)
 			# Take into account consumption if there are any.
 			if self.purpose == 'Manufacture':
 				req_qty_each = flt(item.required_qty / wo.qty)
@@ -1232,7 +1223,7 @@ class StockEntry(StockController):
 						"uom": item.uom,
 						"item_name": item.item_name,
 						"description": item.description,
-						"stock_uom": item_account_details.stock_uom,
+						"stock_uom": item.stock_uom,
 					}
 				})
 

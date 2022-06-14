@@ -8,7 +8,7 @@ from frappe.utils import flt,cint, cstr, getdate
 from frappe.model.utils import get_fetch_values
 from six import iteritems
 from erpnext.accounts.party import get_party_details
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_conversion_factor, get_default_supplier, get_default_warehouse
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
@@ -102,17 +102,11 @@ class BuyingController(StockController):
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
 			for d in self.get("items"):
-				supplier = frappe.db.get_value("Item Default",
-					{"parent": d.item_code, "company": self.company}, "default_supplier")
-				if supplier:
-					self.supplier = supplier
-				else:
-					item_group = frappe.db.get_value("Item", d.item_code, "item_group")
-					supplier = frappe.db.get_value("Item Default",
-					{"parent": item_group, "company": self.company}, "default_supplier")
-					if supplier:
-						self.supplier = supplier
-					break
+				if d.item_code:
+					default_supplier = get_default_supplier(d.item_code, self)
+					if default_supplier:
+						self.supplier = default_supplier
+						break
 
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
@@ -450,16 +444,11 @@ class BuyingController(StockController):
 			used_alternative_items = get_used_alternative_items(purchase_order = item.purchase_order)
 
 		raw_materials_cost = 0
-		items = list(set([d.item_code for d in bom_items]))
-		item_wh = frappe._dict(frappe.db.sql("""select i.item_code, id.default_warehouse
-			from `tabItem` i, `tabItem Default` id
-			where id.parent=i.name and id.company=%s and i.name in ({0})"""
-			.format(", ".join(["%s"] * len(items))), [self.company] + items))
 
 		for bom_item in bom_items:
 			if self.doctype == "Purchase Order":
-				reserve_warehouse = bom_item.source_warehouse or item_wh.get(bom_item.item_code)
-				if frappe.db.get_value("Warehouse", reserve_warehouse, "company") != self.company:
+				reserve_warehouse = bom_item.source_warehouse or get_default_warehouse(bom_item.item_code, self)
+				if reserve_warehouse and frappe.db.get_value("Warehouse", reserve_warehouse, "company") != self.company:
 					reserve_warehouse = None
 
 			conversion_factor = item.conversion_factor
