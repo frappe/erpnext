@@ -192,6 +192,7 @@ def repost_gl_entries(doc):
 		directly_dependent_transactions + list(repost_affected_transaction),
 		doc.posting_date,
 		doc.company,
+		repost_doc=doc,
 	)
 
 
