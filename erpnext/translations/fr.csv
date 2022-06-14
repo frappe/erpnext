@@ -1352,11 +1352,11 @@ Item Description,Description de l'Article,
 Item Group,Groupe d'Article,
 Item Group Tree,Arborescence de Groupe d'Article,
 Item Group not mentioned in item master for item {0},Le Groupe d'Articles n'est pas mentionné dans la fiche de l'article pour l'article {0},
-Item Name,Nom de l&#39;article,
+Item Name,Nom de l'article,
 Item Price added for {0} in Price List {1},Prix de l'Article ajouté pour {0} dans la Liste de Prix {1},
-"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.","Le prix de l&#39;article apparaît plusieurs fois en fonction de la liste de prix, du fournisseur / client, de la devise, de l&#39;article, de l&#39;unité de mesure, de la quantité et des dates.",
+"Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.","Le prix de l'article apparaît plusieurs fois en fonction de la liste de prix, du fournisseur / client, de la devise, de l'article, de l'unité de mesure, de la quantité et des dates.",
 Item Price updated for {0} in Price List {1},Prix de l'Article mis à jour pour {0} dans la Liste des Prix {1},
-Item Row {0}: {1} {2} does not exist in above '{1}' table,Ligne d&#39;objet {0}: {1} {2} n&#39;existe pas dans la table &#39;{1}&#39; ci-dessus,
+Item Row {0}: {1} {2} does not exist in above '{1}' table,Ligne d'objet {0}: {1} {2} n'existe pas dans la table '{1}' ci-dessus,
 Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,La Ligne de Taxe d'Article {0} doit indiquer un compte de type Taxes ou Produit ou Charge ou Facturable,
 Item Template,Modèle d'article,
 Item Variant Settings,Paramètres de Variante d'Article,
@@ -3661,7 +3661,7 @@ Chart,Graphique,
 Choose a corresponding payment,Choisissez un paiement correspondant,
 Click on the link below to verify your email and confirm the appointment,Cliquez sur le lien ci-dessous pour vérifier votre email et confirmer le rendez-vous,
 Close,Fermer,
-Communication,la communication,
+Communication,Communication,
 Compact Item Print,Impression de l'Article Compacté,
 Company,Société,
 Company of asset {0} and purchase document {1} doesn't matches.,La société de l'actif {0} et le document d'achat {1} ne correspondent pas.,
@@ -3969,7 +3969,7 @@ Quantity to Manufacture can not be zero for the operation {0},La quantité à fa
 Quarterly,Trimestriel,
 Queued,File d'Attente,
 Quick Entry,Écriture Rapide,
-Quiz {0} does not exist,Le questionnaire {0} n&#39;existe pas,
+Quiz {0} does not exist,Le questionnaire {0} n'existe pas,
 Quotation Amount,Montant du devis,
 Rate or Discount is required for the price discount.,Le taux ou la remise est requis pour la remise de prix.,
 Reason,Raison,
@@ -4071,7 +4071,7 @@ Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and 
 Stores - {0},Magasins - {0},
 Student with email {0} does not exist,Étudiant avec le courrier électronique {0} n'existe pas,
 Submit Review,Poster un commentaire,
-Submitted,Soumis,
+Submitted,Valider,
 Supplier Addresses And Contacts,Adresses et contacts des fournisseurs,
 Synchronize this account,Synchroniser ce compte,
 Tag,Étiquette,
@@ -9872,8 +9872,42 @@ Show Barcode Field in Stock Transactions,Afficher le champ Code Barre dans les t
 Convert Item Description to Clean HTML in Transactions,Convertir les descriptions d'articles en HTML valide lors des transactions
 Have Default Naming Series for Batch ID?,Nom de série par défaut pour les Lots ou Séries
 "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units","Le pourcentage de quantité que vous pourrez réceptionner en plus de la quantité commandée. Par exemple, vous avez commandé 100 unités, votre pourcentage de dépassement est de 10%, vous pourrez réceptionner 110 unités"
-Unit Of Measure (UOM),Unité de mesure (UDM),
 Allowed Items,Articles autorisés
 Party Specific Item,Restriction d'article disponible
 Restrict Items Based On,Type de critére de restriction
 Based On Value,critére de restriction
+Unit of Measure (UOM),Unité de mesure (UDM),
+Unit Of Measure (UOM),Unité de mesure (UDM),
+CRM Settings,Paramètres CRM
+Do Not Explode,Ne pas décomposer
+Quick Access, Accés rapides
+{}  Available,{} Disponible.s
+{} Pending,{} En attente.s
+{} To Bill,{} à facturer
+{}  To Receive,{} A recevoir
+{} Active,{} Actif.ve(s)
+{} Open,{} Ouvert.e(s)
+Incorrect Data Report,Rapport de données incohérentes
+Incorrect Serial No Valuation,Valorisation inccorecte par Num. Série / Lots
+Incorrect Balance Qty After Transaction,Equilibre des quantités aprés une transaction
+Interview Type,Type d'entretien
+Interview Round,Cycle d'entretien
+Interview,Entretien
+Interview Feedback,Retour d'entretien
+Journal Energy Point,Historique des points d'énergies
+Billing Address Details,Adresse de facturation (détails)
+Supplier Address Details,Adresse Fournisseur (détails)
+Retail,Commerce
+Users,Utilisateurs
+Permission Manager,Gestion des permissions
+Fetch Timesheet,Récuprer les temps saisis
+Get Supplier Group Details,Appliquer les informations depuis le Groupe de fournisseur
+Quality Inspection(s),Inspection(s) Qualité
+Set Advances and Allocate (FIFO),Affecter les encours au réglement
+Apply Putaway Rule,Appliquer la régle de routage d'entrepot
+Delete Transactions,Supprimer les transactions
+Default Payment Discount Account,Compte par défaut des paiements de remise
+Unrealized Profit / Loss Account,Compte de perte
+Enable Provisional Accounting For Non Stock Items,Activer la provision pour les articles non stockés
+Publish in Website,Publier sur le Site Web
+List View,Vue en liste

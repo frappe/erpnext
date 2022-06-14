@@ -1113,23 +1113,23 @@ class SalesInvoice(SellingController):
 					asset = self.get_asset(item)
 
 					if self.is_return:
+						if asset.calculate_depreciation:
+							self.reverse_depreciation_entry_made_after_sale(asset)
+							self.reset_depreciation_schedule(asset)
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", None)
 
-						if asset.calculate_depreciation:
-							self.reverse_depreciation_entry_made_after_sale(asset)
-							self.reset_depreciation_schedule(asset)
-
 					else:
+						if asset.calculate_depreciation:
+							self.depreciate_asset(asset)
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", self.posting_date)
-
-						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1198,6 +1198,7 @@ class SalesInvoice(SellingController):
 		asset.save()
 
 		make_depreciation_entry(asset.name, self.posting_date)
+		asset.load_from_db()
 
 	def reset_depreciation_schedule(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
@@ -1207,6 +1208,7 @@ class SalesInvoice(SellingController):
 
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
 		asset.save()
+		asset.load_from_db()
 
 	def modify_depreciation_schedule_for_asset_repairs(self, asset):
 		asset_repairs = frappe.get_all(

@@ -1790,6 +1790,8 @@
    "width": "50%"
   },
   {
+   "fetch_from": "sales_partner.commission_rate",
+   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "hide_days": 1,
@@ -2038,7 +2040,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-03-08 16:08:53.517903",
+ "modified": "2022-06-10 03:52:51.409913",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
