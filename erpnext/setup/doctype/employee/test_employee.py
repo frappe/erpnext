@@ -7,7 +7,7 @@ import frappe
 import frappe.utils
 
 import erpnext
-from employee.setup.doctype.employee.employee import InactiveEmployeeStatusError
+from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 
 test_records = frappe.get_test_records("Employee")
 

@@ -256,7 +256,7 @@ sounds = [
 ]
 
 has_upload_permission = {
-	"Employee": "employee.setup.doctype.employee.employee.has_upload_permission"
+	"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"
 }
 
 has_website_permission = {
@@ -290,9 +290,9 @@ doc_events = {
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
-		"validate": "employee.setup.doctype.employee.employee.validate_employee_role",
+		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",
 		"on_update": [
-			"employee.setup.doctype.employee.employee.update_user_permissions",
+			"erpnext.setup.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role",
 		],
 	},

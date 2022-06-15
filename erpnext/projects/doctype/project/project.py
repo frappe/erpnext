@@ -4,7 +4,6 @@
 
 import frappe
 from email_reply_parser import EmailReplyParser
-from employee.setup.doctype.holiday_list.holiday_list import is_holiday
 from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
@@ -13,6 +12,7 @@ from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime
 from erpnext import get_default_company
 from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
+from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):

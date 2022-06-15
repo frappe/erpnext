@@ -3,11 +3,11 @@ import unittest
 import frappe
 from frappe.utils.make_random import get_random
 
-from employee.setup.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.projects.report.employee_hours_utilization_based_on_timesheet.employee_hours_utilization_based_on_timesheet import (
 	execute,
 )
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
 class TestEmployeeUtilization(unittest.TestCase):

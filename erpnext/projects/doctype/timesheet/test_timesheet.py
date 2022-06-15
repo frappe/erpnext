@@ -8,7 +8,6 @@ import frappe
 from frappe.utils import add_months, add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from employee.setup.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
 	make_deduction_salary_component,
 	make_earning_salary_component,
@@ -22,6 +21,7 @@ from erpnext.projects.doctype.timesheet.timesheet import (
 	make_salary_slip,
 	make_sales_invoice,
 )
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
 class TestTimesheet(unittest.TestCase):
