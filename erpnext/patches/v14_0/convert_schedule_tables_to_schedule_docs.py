@@ -32,7 +32,7 @@ def execute():
 			depr_schedule = frappe.new_doc("Depreciation Schedule")
 			depr_schedule.asset = parent
 			depr_schedule.finance_book = row.finance_book
-			depr_schedule.creation_date = row.creation.date
+			depr_schedule.creation_date = row.creation.date()
 
 		depreciation_entry = None
 		if row.journal_entry:
