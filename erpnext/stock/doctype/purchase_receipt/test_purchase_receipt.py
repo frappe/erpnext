@@ -276,7 +276,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			get_multiple_items=True,
 			get_taxes_and_charges=True,
 		)
@@ -486,13 +486,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 		)
 
 		return_pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			is_return=1,
 			return_against=pr.name,
 			qty=-2,
@@ -573,13 +573,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 		)
 
 		return_pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			is_return=1,
 			return_against=pr.name,
 			qty=-5,
@@ -615,7 +615,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			qty=2,
 			rejected_qty=2,
 			rejected_warehouse=rejected_warehouse,
@@ -624,7 +624,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		return_pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			is_return=1,
 			return_against=pr.name,
 			qty=-2,
@@ -911,7 +911,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			cost_center=cost_center,
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 		)
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
@@ -935,7 +935,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 		)
 
 		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)

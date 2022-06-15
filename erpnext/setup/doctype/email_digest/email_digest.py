@@ -854,7 +854,7 @@ class EmailDigest(Document):
 
 		sql_po = """select {fields} from `tabPurchase Order Item`
 			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
-			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
+			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and CURRENT_DATE > `tabPurchase Order Item`.schedule_date
 			and received_qty < qty order by `tabPurchase Order Item`.parent DESC,
 			`tabPurchase Order Item`.schedule_date DESC""".format(
 			fields=fields_po
@@ -862,7 +862,7 @@ class EmailDigest(Document):
 
 		sql_poi = """select {fields} from `tabPurchase Order Item`
 			left join `tabPurchase Order` on `tabPurchase Order`.name = `tabPurchase Order Item`.parent
-			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and curdate() > `tabPurchase Order Item`.schedule_date
+			where status<>'Closed' and `tabPurchase Order Item`.docstatus=1 and CURRENT_DATE > `tabPurchase Order Item`.schedule_date
 			and received_qty < qty order by `tabPurchase Order Item`.idx""".format(
 			fields=fields_poi
 		)
