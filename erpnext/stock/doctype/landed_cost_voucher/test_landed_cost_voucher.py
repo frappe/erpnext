@@ -24,7 +24,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			get_multiple_items=True,
 			get_taxes_and_charges=True,
 		)
@@ -195,7 +195,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			get_multiple_items=True,
 			get_taxes_and_charges=True,
 			do_not_submit=True,
@@ -280,7 +280,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			do_not_save=True,
 		)
 		pr.items[0].cost_center = "Main - TCP1"
