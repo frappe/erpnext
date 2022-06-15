@@ -29,7 +29,6 @@ from erpnext.controllers.accounts_controller import (
 	get_supplier_block_status,
 	validate_taxes_and_charges,
 )
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -88,7 +87,6 @@ class PaymentEntry(AccountsController):
 		if self.difference_amount:
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
-		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_payment_schedule()
@@ -97,7 +95,6 @@ class PaymentEntry(AccountsController):
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		self.make_gl_entries(cancel=1)
-		self.update_expense_claim()
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.delink_advance_entry_references()
@@ -984,16 +981,6 @@ class PaymentEntry(AccountsController):
 					"Gratuity",
 				):
 					frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
-
-	def update_expense_claim(self):
-		if self.payment_type in ("Pay") and self.party:
-			for d in self.get("references"):
-				if d.reference_doctype == "Expense Claim" and d.reference_name:
-					doc = frappe.get_doc("Expense Claim", d.reference_name)
-					if self.docstatus == 2:
-						update_reimbursed_amount(doc, -1 * d.allocated_amount)
-					else:
-						update_reimbursed_amount(doc, d.allocated_amount)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.reference_no = reference_doc.name

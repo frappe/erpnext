@@ -24,7 +24,6 @@ from erpnext.accounts.utils import (
 	get_stock_and_account_balance,
 )
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError):
@@ -66,7 +65,6 @@ class JournalEntry(AccountsController):
 			self.set_against_account()
 		self.create_remarks()
 		self.set_print_format_fields()
-		self.validate_expense_claim()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
@@ -83,21 +81,17 @@ class JournalEntry(AccountsController):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 		self.update_status_for_full_and_final_statement()
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		from erpnext.payroll.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 
 		unlink_ref_doc_from_payment_entries(self)
-		unlink_ref_doc_from_salary_slip(self.name)
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		self.make_gl_entries(1)
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
@@ -931,29 +925,6 @@ class JournalEntry(AccountsController):
 				self.company,
 				as_dict=True,
 			)
-
-	def update_expense_claim(self):
-		for d in self.accounts:
-			if d.reference_type == "Expense Claim" and d.reference_name:
-				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				if self.docstatus == 2:
-					update_reimbursed_amount(doc, -1 * d.debit)
-				else:
-					update_reimbursed_amount(doc, d.debit)
-
-	def validate_expense_claim(self):
-		for d in self.accounts:
-			if d.reference_type == "Expense Claim":
-				sanctioned_amount, reimbursed_amount = frappe.db.get_value(
-					"Expense Claim", d.reference_name, ("total_sanctioned_amount", "total_amount_reimbursed")
-				)
-				pending_amount = flt(sanctioned_amount) - flt(reimbursed_amount)
-				if d.debit > pending_amount:
-					frappe.throw(
-						_(
-							"Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2}"
-						).format(d.idx, d.reference_name, pending_amount)
-					)
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:
