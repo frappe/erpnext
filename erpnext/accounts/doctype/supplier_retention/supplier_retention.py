@@ -35,7 +35,7 @@ class SupplierRetention(Document):
 			new_doc.supplier = self.supplier
 			new_doc.company = self.company
 			new_doc.billing_this_year = 0
-			new_doc.total_unpaid -= self.total_withheld
+			new_doc.total_unpaid = self.total_withheld * -1
 			new_doc.insert()
 	
 	def update_dashboard_supplier_cancel(self):
