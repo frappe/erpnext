@@ -14,7 +14,6 @@
   "details",
   "naming_series",
   "item_code",
-  "variant_of",
   "item_name",
   "item_group",
   "stock_uom",
@@ -67,6 +66,7 @@
   "has_serial_no",
   "serial_no_series",
   "variants_section",
+  "variant_of",
   "variant_based_on",
   "attributes",
   "accounting",
@@ -112,8 +112,8 @@
   "quality_inspection_template",
   "inspection_required_before_delivery",
   "manufacturing",
-  "default_bom",
   "is_sub_contracted_item",
+  "default_bom",
   "column_break_74",
   "customer_code",
   "default_item_manufacturer",
@@ -477,7 +477,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "attributes",
-   "depends_on": "eval:!doc.is_fixed_asset && doc.has_variants",
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "variants_section",
    "fieldtype": "Tab Break",
    "label": "Variants"
@@ -504,7 +504,8 @@
    "fieldname": "attributes",
    "fieldtype": "Table",
    "hidden": 1,
-   "label": "Attributes",
+   "label": "Variant Attributes",
+   "mandatory_depends_on": "has_variants",
    "options": "Item Variant Attribute"
   },
   {
@@ -909,7 +910,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-14 17:33:07.290638",
+ "modified": "2022-06-15 09:02:06.177691",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
