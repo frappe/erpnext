@@ -7,7 +7,6 @@ import frappe
 import frappe.utils
 
 import erpnext
-from erpnext.setup.doctype.employee.employee import InactiveEmployeeStatusError
 
 test_records = frappe.get_test_records("Employee")
 
@@ -24,35 +23,6 @@ class TestEmployee(unittest.TestCase):
 		employee1_doc.reload()
 		employee1_doc.status = "Left"
 		self.assertRaises(InactiveEmployeeStatusError, employee1_doc.save)
-
-	def test_employee_status_inactive(self):
-		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
-		from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
-		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
-
-		employee = make_employee("test_employee_status@company.com")
-		employee_doc = frappe.get_doc("Employee", employee)
-		employee_doc.status = "Inactive"
-		employee_doc.save()
-		employee_doc.reload()
-
-		make_holiday_list()
-		frappe.db.set_value(
-			"Company", employee_doc.company, "default_holiday_list", "Salary Slip Test Holiday List"
-		)
-
-		frappe.db.sql(
-			"""delete from `tabSalary Structure` where name='Test Inactive Employee Salary Slip'"""
-		)
-		salary_structure = make_salary_structure(
-			"Test Inactive Employee Salary Slip",
-			"Monthly",
-			employee=employee_doc.name,
-			company=employee_doc.company,
-		)
-		salary_slip = make_salary_slip(salary_structure.name, employee=employee_doc.name)
-
-		self.assertRaises(InactiveEmployeeStatusError, salary_slip.save)
 
 	def tearDown(self):
 		frappe.db.rollback()
