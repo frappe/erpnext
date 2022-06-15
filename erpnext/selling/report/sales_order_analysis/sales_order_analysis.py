@@ -57,7 +57,8 @@ def get_conditions(filters):
 
 
 def get_data(conditions, filters):
-	data = frappe.db.sql("""
+	data = frappe.db.sql(
+		"""
 		SELECT
 			so.transaction_date as date,
 			soi.delivery_date as delivery_date,

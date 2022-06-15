@@ -398,12 +398,16 @@ def auto_close_opportunity():
 		frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
 	)
 
-	opportunities = frappe.db.multisql({
-		'mariadb': """ select name from tabOpportunity where status='Replied' and
+	opportunities = frappe.db.multisql(
+		{
+			"mariadb": """ select name from tabOpportunity where status='Replied' and
 		modified<DATE_SUB(CURRENT_DATE, INTERVAL %s DAY) """,
-		'postgres': """ select name from tabOpportunity where status='Replied' and
-		modified < (CURRENT_DATE - INTERVAL '%s DAY') """
-		}, (auto_close_after_days), as_dict=True)
+			"postgres": """ select name from tabOpportunity where status='Replied' and
+		modified < (CURRENT_DATE - INTERVAL '%s DAY') """,
+		},
+		(auto_close_after_days),
+		as_dict=True,
+	)
 
 	for opportunity in opportunities:
 		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
