@@ -569,10 +569,6 @@ class Item(WebsiteGenerator):
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
 
-		# add item taxes from template
-		for d in template.get("taxes"):
-			self.append("taxes", {"item_tax_template": d.item_tax_template})
-
 		# copy re-order table if empty
 		if not self.get("reorder_levels"):
 			for d in template.get("reorder_levels"):
