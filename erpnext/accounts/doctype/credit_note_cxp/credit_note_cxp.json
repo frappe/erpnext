@@ -21,8 +21,8 @@
   "references",
   "total_references",
   "section_break_1",
-  "total_exempt",
   "taxes",
+  "total_taxed",
   "section_break_3",
   "affects_purchases_book",
   "affects_purchases_month",
@@ -179,17 +179,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "total_exempt",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Total Exempt",
-   "options": "Currency",
-   "reqd": 1
-  },
-  {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Amount Total",
+   "label": "Total Exempt",
    "options": "Currency",
    "read_only": 1
   },
@@ -244,7 +236,8 @@
   {
    "fieldname": "total_references",
    "fieldtype": "Currency",
-   "label": "Total References"
+   "label": "Total References",
+   "read_only": 1
   },
   {
    "fetch_from": "company.tax_id",
@@ -252,10 +245,18 @@
    "fieldtype": "Data",
    "label": "Company RTN",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_taxed",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Taxed",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-06-08 16:14:19.124082",
+ "modified": "2022-06-15 14:34:08.142321",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXP",
