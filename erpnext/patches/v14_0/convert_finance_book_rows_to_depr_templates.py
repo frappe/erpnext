@@ -68,7 +68,7 @@ def create_new_depr_template(fb, count, frequency_in_months):
 
 
 def get_asset_life(fb):
-	asset_life = fb.frequency_of_depreciation * fb.total_number_of_depreciations
+	asset_life = int(fb.frequency_of_depreciation) * int(fb.total_number_of_depreciations)
 
 	if asset_life % 12 == 0:
 		return asset_life / 12, "Years"
