@@ -27,18 +27,18 @@ def execute():
 
 	count = 0
 	frequency_in_months = {
-		1: "Monthly",
-		2: "Every 2 months",
-		3: "Quarterly",
-		4: "Every 4 months",
-		5: "Every 5 months",
-		6: "Half-Yearly",
-		7: "Every 7 months",
-		8: "Every 8 months",
-		9: "Every 9 months",
-		10: "Every 10 months",
-		11: "Every 11 months",
-		12: "Yearly",
+		"1": "Monthly",
+		"2": "Every 2 months",
+		"3": "Quarterly",
+		"4": "Every 4 months",
+		"5": "Every 5 months",
+		"6": "Half-Yearly",
+		"7": "Every 7 months",
+		"8": "Every 8 months",
+		"9": "Every 9 months",
+		"10": "Every 10 months",
+		"11": "Every 11 months",
+		"12": "Yearly",
 	}
 
 	parent = ""
