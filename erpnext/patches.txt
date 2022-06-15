@@ -339,7 +339,7 @@ erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v14_0.delete_healthcare_doctypes
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
-erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v14_0.delete_agriculture_doctypes # 15-06-2022
 erpnext.patches.v14_0.delete_education_doctypes
 erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
