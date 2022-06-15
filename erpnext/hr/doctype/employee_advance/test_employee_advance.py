@@ -216,7 +216,7 @@ def make_payment_entry(advance):
 def make_employee_advance(employee_name, args=None):
 	doc = frappe.new_doc("Employee Advance")
 	doc.employee = employee_name
-	doc.company = "_Test company"
+	doc.company = "_Test Company"
 	doc.purpose = "For site visit"
 	doc.currency = erpnext.get_company_currency("_Test company")
 	doc.exchange_rate = 1
