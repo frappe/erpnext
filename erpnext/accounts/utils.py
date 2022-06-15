@@ -1175,7 +1175,9 @@ def repost_gle_for_stock_vouchers(
 					voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 			else:
 				_delete_gl_entries(voucher_type, voucher_no)
-		frappe.db.commit()
+
+		if not frappe.flags.in_test:
+			frappe.db.commit()
 
 		if repost_doc:
 			repost_doc.db_set(
