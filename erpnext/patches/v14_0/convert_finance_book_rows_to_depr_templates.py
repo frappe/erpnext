@@ -17,7 +17,7 @@ def execute():
 		return
 
 	fb_rows = frappe.db.sql(
-		"""select parent, finance_book, depreciation_method, total_number_of_depreciations, frequency_of_depreciation, rate_of_depreciation
+		"""select parent, parenttype, finance_book, depreciation_method, total_number_of_depreciations, frequency_of_depreciation, rate_of_depreciation
 		from `tabAsset Finance Book`
 		order by parent
 		""",
@@ -44,13 +44,13 @@ def execute():
 	parent = ""
 	for fb in fb_rows:
 		if fb.parent != parent:
-			parent = fb["parent"]
-			asset = frappe.get_doc("Asset", parent)
-			asset.finance_books = []
+			parent = fb.parent
+			asset_or_category = frappe.get_doc(fb.parenttype, parent)
+			asset_or_category.finance_books = []
 
 		count += 1
 		template = create_new_depr_template(fb, count, frequency_in_months)
-		asset.append(
+		asset_or_category.append(
 			"finance_books", {"finance_book": fb.finance_book, "depreciation_template": template}
 		)
 
