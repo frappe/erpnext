@@ -49,7 +49,9 @@ def get_rows(filters):
 						`tabSalary Slip Timesheet` as sst join `tabTimesheet` on `tabTimesheet`.name = sst.time_sheet
 						join `tabSales Invoice Timesheet` as sit on sit.time_sheet = `tabTimesheet`.name
 						join `tabSales Invoice` as si on si.name = sit.parent and si.status != 'Cancelled'
-						join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != 'Cancelled' """.format(standard_working_hours)
+						join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != 'Cancelled' """.format(
+		standard_working_hours
+	)
 	if conditions:
 		sql += """
 				WHERE
@@ -82,10 +84,14 @@ def get_conditions(filters):
 		conditions.append("si.customer_name={0}".format(frappe.db.escape(filters.get("customer_name"))))
 
 	if filters.get("employee"):
-		conditions.append("`tabTimesheet`.employee={0}".format(frappe.db.escape(filters.get("employee"))))
+		conditions.append(
+			"`tabTimesheet`.employee={0}".format(frappe.db.escape(filters.get("employee")))
+		)
 
 	if filters.get("project"):
-		conditions.append("`tabTimesheet`.parent_project={0}".format(frappe.db.escape(filters.get("project"))))
+		conditions.append(
+			"`tabTimesheet`.parent_project={0}".format(frappe.db.escape(filters.get("project")))
+		)
 
 	conditions = " and ".join(conditions)
 	return conditions

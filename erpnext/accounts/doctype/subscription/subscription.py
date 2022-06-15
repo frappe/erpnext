@@ -148,8 +148,9 @@ class Subscription(Document):
 		billing_info = frappe.db.sql(
 			"select distinct `billing_interval`, `billing_interval_count` "
 			"from `tabSubscription Plan` "
-			'where name in {plan_names}'.format(plan_names = "('" + "','".join(plan_names) + "')"), as_dict=1)
-		
+			"where name in {plan_names}".format(plan_names="('" + "','".join(plan_names) + "')"),
+			as_dict=1,
+		)
 
 		return billing_info
 

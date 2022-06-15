@@ -352,9 +352,9 @@ class StatusUpdater(Document):
 		for args in self.status_updater:
 			# condition to include current record (if submit or no if cancel)
 			if self.docstatus == 1:
-				args['cond'] = " or parent='%s'" % self.name.replace('"', '\"')
+				args["cond"] = " or parent='%s'" % self.name.replace('"', '"')
 			else:
-				args['cond'] = " and parent!='%s'" % self.name.replace('"', '\"')
+				args["cond"] = " and parent!='%s'" % self.name.replace('"', '"')
 
 			self._update_children(args, update_modified)
 

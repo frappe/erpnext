@@ -179,7 +179,7 @@ def get_sales_invoice_data(filters):
 def get_mode_of_payments(filters):
 	mode_of_payments = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join("'" + invoice['name'] + "'" for invoice in invoice_list)
+	invoice_list_names = ",".join("'" + invoice["name"] + "'" for invoice in invoice_list)
 	if invoice_list:
 		inv_mop = frappe.db.sql(
 			"""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
@@ -228,7 +228,7 @@ def get_invoices(filters):
 def get_mode_of_payment_details(filters):
 	mode_of_payment_details = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join("'" + invoice['name'] + "'" for invoice in invoice_list)
+	invoice_list_names = ",".join("'" + invoice["name"] + "'" for invoice in invoice_list)
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql(
 			"""
