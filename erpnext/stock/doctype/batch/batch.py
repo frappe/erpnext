@@ -335,7 +335,7 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
 		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
 			and `tabStock Ledger Entry`.is_cancelled = 0
-			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
+			and (`tabBatch`.expiry_date >= CURRENT_DATE or `tabBatch`.expiry_date IS NULL) {0}
 		group by batch_id
 		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
 	""".format(
