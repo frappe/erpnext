@@ -4,6 +4,7 @@
 
 import frappe
 from email_reply_parser import EmailReplyParser
+from employee.setup.doctype.holiday_list.holiday_list import is_holiday
 from frappe import _
 from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
@@ -12,8 +13,6 @@ from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime
 from erpnext import get_default_company
 from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
-from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
-from employee.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
@@ -680,3 +679,7 @@ def get_holiday_list(company=None):
 			)
 		)
 	return holiday_list
+
+
+def get_users_email(doc):
+	return [d.email for d in doc.users if frappe.db.get_value("User", d.user, "enabled")]
