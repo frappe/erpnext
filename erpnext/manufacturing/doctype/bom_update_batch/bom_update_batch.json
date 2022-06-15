@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "autoincrement",
+ "autoname": "hash",
  "creation": "2022-05-31 17:34:39.825537",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -46,7 +46,6 @@
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Batch",
- "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
