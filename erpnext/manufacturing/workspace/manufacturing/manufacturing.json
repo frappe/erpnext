@@ -402,7 +402,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-06-14 15:16:33.533259",
+ "modified": "2022-06-15 15:18:57.062935",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -419,6 +419,7 @@
    "doc_view": "List",
    "label": "BOM",
    "link_to": "BOM",
+   "stats_filter": "{\"is_active\":[\"=\",1]}",
    "type": "DocType"
   },
   {
@@ -426,13 +427,7 @@
    "doc_view": "List",
    "label": "Production Plan",
    "link_to": "Production Plan",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Job Card",
-   "link_to": "Job Card",
+   "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
    "type": "DocType"
   },
   {
@@ -440,6 +435,15 @@
    "doc_view": "List",
    "label": "Work Order",
    "link_to": "Work Order",
+   "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Job Card",
+   "link_to": "Job Card",
+   "stats_filter": "{\"status\":[\"not in\",[\"Cancelled\",\"Completed\",null]]}",
    "type": "DocType"
   },
   {
