@@ -41,15 +41,17 @@ class TestDepreciationSchedule(unittest.TestCase):
 			calculate_depreciation=1,
 			enable_finance_books=0,
 			depreciation_template="Test SLM Template",
+			available_for_use_date="2020-06-07",
+			depreciation_posting_start_date="2020-06-06",
 		)
 
 		depr_schedule = get_linked_depreciation_schedules(asset.name)[0]
 		depr_schedule = frappe.get_doc("Depreciation Schedule", depr_schedule["name"])
 
 		expected_results = [
-			["2021-06-06", 3342.465753425, 3342.465753425],
-			["2022-06-06", 3333.333333333, 6675.799086758],
-			["2023-06-06", 3333.333333333, 10009.132420091],
+			["2021-06-06", 3333.333333333, 3333.333333333],
+			["2022-06-06", 3333.333333333, 6666.666666667],
+			["2023-06-06", 3333.333333333, 10000.0],
 		]
 
 		self.compare_depr_schedules(depr_schedule.depreciation_schedule, expected_results)
