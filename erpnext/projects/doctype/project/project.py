@@ -391,7 +391,7 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, full_name), locate(%(_txt)s, full_name), 99999),
 			idx desc,
 			name, full_name
-		limit %(start)s, %(page_len)s""".format(
+		limit %(page_len)s offset %(start)s""".format(
 			**{
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions),

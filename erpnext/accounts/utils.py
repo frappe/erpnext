@@ -2,14 +2,18 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import itertools
 from json import loads
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import frappe
 import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
+from frappe.query_builder.utils import DocType
 from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
+from pypika import Order
+from pypika.terms import ExistsCriterion
 
 import erpnext
 
@@ -19,6 +23,9 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
 
+if TYPE_CHECKING:
+	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
+
 
 class FiscalYearError(frappe.ValidationError):
 	pass
@@ -26,6 +33,9 @@ class FiscalYearError(frappe.ValidationError):
 
 class PaymentEntryUnlinkError(frappe.ValidationError):
 	pass
+
+
+GL_REPOSTING_CHUNK = 100
 
 
 @frappe.whitelist()
@@ -42,36 +52,31 @@ def get_fiscal_years(
 
 	if not fiscal_years:
 		# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
-		cond = ""
-		if fiscal_year:
-			cond += " and fy.name = {0}".format(frappe.db.escape(fiscal_year))
-		if company:
-			cond += """
-				and (not exists (select name
-					from `tabFiscal Year Company` fyc
-					where fyc.parent = fy.name)
-				or exists(select company
-					from `tabFiscal Year Company` fyc
-					where fyc.parent = fy.name
-					and fyc.company=%(company)s)
-				)
-			"""
+		FY = DocType("Fiscal Year")
 
-		fiscal_years = frappe.db.sql(
-			"""
-			select
-				fy.name, fy.year_start_date, fy.year_end_date
-			from
-				`tabFiscal Year` fy
-			where
-				disabled = 0 {0}
-			order by
-				fy.year_start_date desc""".format(
-				cond
-			),
-			{"company": company},
-			as_dict=True,
+		query = (
+			frappe.qb.from_(FY)
+			.select(FY.name, FY.year_start_date, FY.year_end_date)
+			.where(FY.disabled == 0)
 		)
+
+		if fiscal_year:
+			query = query.where(FY.name == fiscal_year)
+
+		if company:
+			FYC = DocType("Fiscal Year Company")
+			query = query.where(
+				ExistsCriterion(frappe.qb.from_(FYC).select(FYC.name).where(FYC.parent == FY.name)).negate()
+				| ExistsCriterion(
+					frappe.qb.from_(FYC)
+					.select(FYC.company)
+					.where(FYC.parent == FY.name)
+					.where(FYC.company == company)
+				)
+			)
+
+		query = query.orderby(FY.year_start_date, Order.desc)
+		fiscal_years = query.run(as_dict=True)
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
@@ -1122,7 +1127,11 @@ def update_gl_entries_after(
 
 
 def repost_gle_for_stock_vouchers(
-	stock_vouchers, posting_date, company=None, warehouse_account=None
+	stock_vouchers: List[Tuple[str, str]],
+	posting_date: str,
+	company: Optional[str] = None,
+	warehouse_account=None,
+	repost_doc: Optional["RepostItemValuation"] = None,
 ):
 
 	from erpnext.accounts.general_ledger import toggle_debit_credit_if_negative
@@ -1130,40 +1139,50 @@ def repost_gle_for_stock_vouchers(
 	if not stock_vouchers:
 		return
 
-	def _delete_gl_entries(voucher_type, voucher_no):
-		frappe.db.sql(
-			"""delete from `tabGL Entry`
-			where voucher_type=%s and voucher_no=%s""",
-			(voucher_type, voucher_no),
-		)
-
-	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
-
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
+	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
+	if repost_doc and repost_doc.gl_reposting_index:
+		# Restore progress
+		stock_vouchers = stock_vouchers[cint(repost_doc.gl_reposting_index) :]
+
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit")) or 2
 
-	gle = get_voucherwise_gl_entries(stock_vouchers, posting_date)
-	for idx, (voucher_type, voucher_no) in enumerate(stock_vouchers):
-		existing_gle = gle.get((voucher_type, voucher_no), [])
-		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
-		# Some transactions post credit as negative debit, this is handled while posting GLE
-		# but while comparing we need to make sure it's flipped so comparisons are accurate
-		expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))
-		if expected_gle:
-			if not existing_gle or not compare_existing_and_expected_gle(
-				existing_gle, expected_gle, precision
-			):
-				_delete_gl_entries(voucher_type, voucher_no)
-				voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
-		else:
-			_delete_gl_entries(voucher_type, voucher_no)
+	stock_vouchers_iterator = iter(stock_vouchers)
 
-		if idx % 20 == 0:
-			# Commit every 20 documents to avoid losing progress
-			# and reducing memory usage
-			frappe.db.commit()
+	while stock_vouchers_chunk := list(itertools.islice(stock_vouchers_iterator, GL_REPOSTING_CHUNK)):
+		gle = get_voucherwise_gl_entries(stock_vouchers_chunk, posting_date)
+
+		for voucher_type, voucher_no in stock_vouchers_chunk:
+			existing_gle = gle.get((voucher_type, voucher_no), [])
+			voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+			# Some transactions post credit as negative debit, this is handled while posting GLE
+			# but while comparing we need to make sure it's flipped so comparisons are accurate
+			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))
+			if expected_gle:
+				if not existing_gle or not compare_existing_and_expected_gle(
+					existing_gle, expected_gle, precision
+				):
+					_delete_gl_entries(voucher_type, voucher_no)
+					voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
+			else:
+				_delete_gl_entries(voucher_type, voucher_no)
+		frappe.db.commit()
+
+		if repost_doc:
+			repost_doc.db_set(
+				"gl_reposting_index",
+				cint(repost_doc.gl_reposting_index) + GL_REPOSTING_CHUNK,
+			)
+
+
+def _delete_gl_entries(voucher_type, voucher_no):
+	frappe.db.sql(
+		"""delete from `tabGL Entry`
+		where voucher_type=%s and voucher_no=%s""",
+		(voucher_type, voucher_no),
+	)
 
 
 def sort_stock_vouchers_by_posting_date(
@@ -1177,6 +1196,9 @@ def sort_stock_vouchers_by_posting_date(
 		.select(sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_time, sle.creation)
 		.where((sle.is_cancelled == 0) & (sle.voucher_no.isin(voucher_nos)))
 		.groupby(sle.voucher_type, sle.voucher_no)
+		.orderby(sle.posting_date)
+		.orderby(sle.posting_time)
+		.orderby(sle.creation)
 	).run(as_dict=True)
 	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]
 

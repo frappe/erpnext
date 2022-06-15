@@ -296,7 +296,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.quotaion_to=='Customer' && doc.party_name",
+   "depends_on": "eval:doc.quotation_to=='Customer' && doc.party_name",
    "fieldname": "col_break98",
    "fieldtype": "Column Break",
    "width": "50%"
@@ -316,7 +316,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.quotaion_to=='Customer' && doc.party_name",
+   "depends_on": "eval:doc.quotation_to=='Customer' && doc.party_name",
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "hidden": 1,
@@ -897,7 +897,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Draft\nOpen\nReplied\nOrdered\nLost\nCancelled\nExpired",
+   "options": "Draft\nOpen\nReplied\nPartially Ordered\nOrdered\nLost\nCancelled\nExpired",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -986,7 +986,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-07 11:01:31.157084",
+ "modified": "2022-06-11 20:35:32.635804",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
