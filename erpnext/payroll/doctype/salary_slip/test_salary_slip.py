@@ -49,7 +49,7 @@ class TestSalarySlip(unittest.TestCase):
 		"Payroll Settings", {"payroll_based_on": "Attendance", "daily_wages_fraction_for_half_day": 0.75}
 	)
 	def test_payment_days_based_on_attendance(self):
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 
 		emp_id = make_employee("test_payment_days_based_on_attendance@salary.com")
 		frappe.db.set_value("Employee", emp_id, {"relieving_date": None, "status": "Active"})
@@ -128,7 +128,7 @@ class TestSalarySlip(unittest.TestCase):
 		},
 	)
 	def test_payment_days_for_mid_joinee_including_holidays(self):
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
 
 		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
@@ -196,7 +196,7 @@ class TestSalarySlip(unittest.TestCase):
 		# tests mid month joining and relieving along with unmarked days
 		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
 
 		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
@@ -236,7 +236,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_payment_days_for_mid_joinee_excluding_holidays(self):
 		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 		month_start_date, month_end_date = get_first_day(nowdate()), get_last_day(nowdate())
 
 		new_emp_id = make_employee("test_payment_days_based_on_joining_date@salary.com")
@@ -267,7 +267,7 @@ class TestSalarySlip(unittest.TestCase):
 
 	@change_settings("Payroll Settings", {"payroll_based_on": "Leave"})
 	def test_payment_days_based_on_leave_application(self):
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 
 		emp_id = make_employee("test_payment_days_based_on_leave_application@salary.com")
 		frappe.db.set_value("Employee", emp_id, {"relieving_date": None, "status": "Active"})
@@ -366,7 +366,7 @@ class TestSalarySlip(unittest.TestCase):
 		salary_slip.submit()
 		salary_slip.reload()
 
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 		days_in_month = no_of_days[0]
 		no_of_holidays = no_of_days[1]
 
@@ -441,7 +441,7 @@ class TestSalarySlip(unittest.TestCase):
 
 	@change_settings("Payroll Settings", {"include_holidays_in_total_working_days": 1})
 	def test_salary_slip_with_holidays_included(self):
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 		make_employee("test_salary_slip_with_holidays_included@salary.com")
 		frappe.db.set_value(
 			"Employee",
@@ -473,7 +473,7 @@ class TestSalarySlip(unittest.TestCase):
 
 	@change_settings("Payroll Settings", {"include_holidays_in_total_working_days": 0})
 	def test_salary_slip_with_holidays_excluded(self):
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 		make_employee("test_salary_slip_with_holidays_excluded@salary.com")
 		frappe.db.set_value(
 			"Employee",
@@ -510,7 +510,7 @@ class TestSalarySlip(unittest.TestCase):
 			create_salary_structure_assignment,
 		)
 
-		no_of_days = self.get_no_of_days()
+		no_of_days = get_no_of_days()
 
 		# set joinng date in the same month
 		employee = make_employee("test_payment_days@salary.com")
@@ -984,17 +984,18 @@ class TestSalarySlip(unittest.TestCase):
 		activity_type.wage_rate = 25
 		activity_type.save()
 
-	def get_no_of_days(self):
-		no_of_days_in_month = calendar.monthrange(getdate(nowdate()).year, getdate(nowdate()).month)
-		no_of_holidays_in_month = len(
-			[
-				1
-				for i in calendar.monthcalendar(getdate(nowdate()).year, getdate(nowdate()).month)
-				if i[6] != 0
-			]
-		)
 
-		return [no_of_days_in_month[1], no_of_holidays_in_month]
+def get_no_of_days():
+	no_of_days_in_month = calendar.monthrange(getdate(nowdate()).year, getdate(nowdate()).month)
+	no_of_holidays_in_month = len(
+		[
+			1
+			for i in calendar.monthcalendar(getdate(nowdate()).year, getdate(nowdate()).month)
+			if i[6] != 0
+		]
+	)
+
+	return [no_of_days_in_month[1], no_of_holidays_in_month]
 
 
 def make_employee_salary_slip(user, payroll_frequency, salary_structure=None, posting_date=None):
@@ -1136,6 +1137,7 @@ def make_earning_salary_component(
 					"pay_against_benefit_claim": 0,
 					"type": "Earning",
 					"max_benefit_amount": 15000,
+					"depends_on_payment_days": 1,
 				},
 			]
 		)
