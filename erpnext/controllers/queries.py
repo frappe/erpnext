@@ -96,7 +96,6 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			and ({scond}) and disabled=0
 			{fcond} {mcond}
 		order by
-			order by
 			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
 			(case when locate(%(_txt)s, customer_name) > 0 then locate(%(_txt)s, customer_name) else 99999 end),
 			idx desc,
