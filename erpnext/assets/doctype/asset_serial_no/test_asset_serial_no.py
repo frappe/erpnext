@@ -97,6 +97,7 @@ class TestAssetSerialNo(unittest.TestCase):
 		enable_finance_books()
 
 		asset_category = frappe.get_doc("Asset Category", "Computers")
+		asset_category.enable_cwip_accounting = False
 		asset_category.append(
 			"finance_books", {"depreciation_template": "Straight Line Method Annually for 5 Years"}
 		)
