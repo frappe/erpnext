@@ -970,7 +970,7 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 		and name not in
 			(select reference_name from `tabJournal Entry Account`
 				where reference_type="Payroll Entry")
-		order by name limit %(start)s, %(page_len)s""".format(
+		order by name limit %(page_len)s offset %(start)s""".format(
 			key=searchfield
 		),
 		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len},
@@ -1039,7 +1039,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
 			idx desc,
 			name, employee_name
-		limit %(start)s, %(page_len)s""".format(
+		limit %(page_len)s offset %(start)s""".format(
 			**{
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions),
