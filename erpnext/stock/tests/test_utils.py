@@ -26,6 +26,7 @@ class StockTestMixin:
 			filters=filters,
 			order_by="timestamp(posting_date, posting_time), creation",
 		)
+		self.assertGreaterEqual(len(sles), len(expected_sles))
 
 		for exp_sle, act_sle in zip(expected_sles, sles):
 			for k, v in exp_sle.items():
@@ -49,7 +50,7 @@ class StockTestMixin:
 			filters=filters,
 			order_by=order_by or "posting_date, creation",
 		)
-
+		self.assertGreaterEqual(len(actual_gles), len(expected_gles))
 		for exp_gle, act_gle in zip(expected_gles, actual_gles):
 			for k, exp_value in exp_gle.items():
 				act_value = act_gle[k]
