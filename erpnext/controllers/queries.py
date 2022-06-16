@@ -343,7 +343,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql(
-		"""select {fields} from `tabProject`, `tabBOM`
+		"""select {fields} from `tabProject`
 		where
 			`tabProject`.status not in ("Completed", "Cancelled")
 			and {cond} {scond} {match_cond}
