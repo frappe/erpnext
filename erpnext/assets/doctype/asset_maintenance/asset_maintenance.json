@@ -22,7 +22,7 @@
     ],
     "fields": [
         {
-            "fetch_from": "asset_name.asset_category",
+            "fetch_from": "asset.asset_category",
             "fieldname": "asset_category",
             "fieldtype": "Read Only",
             "label": "Asset Category"

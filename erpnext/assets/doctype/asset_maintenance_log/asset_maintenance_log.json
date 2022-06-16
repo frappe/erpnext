@@ -43,7 +43,7 @@
             "reqd": 1
         },
         {
-            "fetch_from": "asset_maintenance.asset_name",
+            "fetch_from": "asset_maintenance.asset",
             "fieldname": "asset_name",
             "fieldtype": "Read Only",
             "label": "Asset Name"
