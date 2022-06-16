@@ -23,7 +23,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDate
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
 
 
@@ -1229,6 +1229,46 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			order_by="timestamp(posting_date, posting_time), creation",
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_negative_qty_with_precision(self):
+		"Test if system precision is respected while validating negative qty."
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.utils import get_stock_balance
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=559.8327, rate=100)
+
+		make_stock_entry(item_code=item_code, source=warehouse, qty=470.84, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 88.9927)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
+		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+
+		# See if delivery note goes through
+		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			do_not_submit=True,
+		)
+		dn.submit()
+
+		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
 
 
 def create_repack_entry(**args):
