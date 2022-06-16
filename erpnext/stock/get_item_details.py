@@ -63,13 +63,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
-<<<<<<< HEAD
-	out = get_basic_details(args, item, overwrite_warehouse)
-
 	if isinstance(doc, string_types):
-=======
-	if isinstance(doc, str):
->>>>>>> 1a3997a566 (fix: transaction date gets unset in material request (#31327))
 		doc = json.loads(doc)
 
 	if doc:
