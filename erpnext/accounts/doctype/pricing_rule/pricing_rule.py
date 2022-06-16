@@ -37,6 +37,9 @@ class PricingRule(Document):
 	def validate_duplicate_apply_on(self):
 		if self.apply_on != "Transaction":
 			field = apply_on_dict.get(self.apply_on)
+			if not field:
+				return
+
 			values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field) if d]
 			if len(values) != len(set(values)):
 				frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
