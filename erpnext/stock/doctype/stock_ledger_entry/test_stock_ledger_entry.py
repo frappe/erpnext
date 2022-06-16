@@ -23,7 +23,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDate
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle
+from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.tests.test_utils import StockTestMixin
 
 
@@ -41,6 +41,9 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		frappe.db.sql(
 			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
 		)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -1269,6 +1272,53 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		dn.submit()
 
 		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_future_negative_qty_with_precision(self):
+		"""
+		Ledger:
+		| Voucher | Qty		| Balance
+		-------------------
+		| Reco	  | 559.8327| 559.8327
+		| SE	  | -470.84	| [Backdated] (new bal: 88.9927)
+		| SE	  | 11.007	| 570.8397 (new bal: 99.9997)
+		| DN	  | -100	| 470.8397 (new bal: -0.0003)
+
+		Check if future negative qty is asserted as per precision 3.
+		-0.0003 should be considered as 0.000
+		"""
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=559.8327,
+			rate=100,
+			posting_date=add_days(today(), -2),
+		)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+		)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# Make backdated SE and make sure SE goes through as per precision (no negative qty error)
+		make_stock_entry(
+			item_code=item_code, source=warehouse, qty=470.84, rate=100, posting_date=add_days(today(), -1)
+		)
 
 
 def create_repack_entry(**args):
