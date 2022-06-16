@@ -22,6 +22,7 @@ from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
+	enable_finance_books,
 	get_linked_depreciation_schedules,
 )
 from erpnext.assets.doctype.depreciation_schedule.depreciation_posting import (
@@ -2773,6 +2774,8 @@ class TestSalesInvoice(unittest.TestCase):
 		"""
 
 		create_asset_data()
+		enable_finance_books()
+
 		asset = create_asset(
 			item_code="Macbook Pro", enable_finance_books=1, calculate_depreciation=1, submit=1
 		)
@@ -2797,12 +2800,16 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 			self.assertTrue(schedule.depreciation_entry)
 
+		enable_finance_books(enable=False)
+
 	def test_asset_depreciation_on_sale_without_pro_rata(self):
 		"""
 		Tests if an Asset set to depreciate yearly on Dec 31, that gets sold on Dec 31 after two years, created an additional depreciation entry on its date of sale.
 		"""
 
 		create_asset_data()
+		enable_finance_books()
+
 		asset = create_asset(
 			item_code="Macbook Pro",
 			enable_finance_books=1,
@@ -2836,8 +2843,12 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
 			self.assertTrue(schedule.depreciation_entry)
 
+		enable_finance_books(enable=False)
+
 	def test_depreciation_on_return_of_sold_asset(self):
 		create_asset_data()
+		enable_finance_books()
+
 		asset = create_asset(
 			item_code="Macbook Pro", enable_finance_books=1, calculate_depreciation=1, submit=1
 		)
@@ -2871,6 +2882,8 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
+
+		enable_finance_books(enable=False)
 
 	def test_sales_invoice_against_supplier(self):
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
