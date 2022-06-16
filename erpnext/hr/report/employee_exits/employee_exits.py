@@ -111,7 +111,7 @@ def get_data(filters):
 		)
 		.distinct()
 		.where(
-			(fn.ifnull(fn.Cast(employee.relieving_date, "char"), "") != "")
+			(fn.coalesce(fn.Cast(employee.relieving_date, "char"), "") != "")
 			& ((interview.name.isnull()) | ((interview.name.isnotnull()) & (interview.docstatus != 2)))
 			& ((fnf.name.isnull()) | ((fnf.name.isnotnull()) & (fnf.docstatus != 2)))
 		)
