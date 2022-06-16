@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, call
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
-from frappe.utils.data import today
+from frappe.utils.data import add_to_date, today
 
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
@@ -17,10 +17,11 @@ from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError
 
 
-class TestRepostItemValuation(FrappeTestCase):
+class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 	def tearDown(self):
 		frappe.flags.dont_execute_stock_reposts = False
 
@@ -225,3 +226,49 @@ class TestRepostItemValuation(FrappeTestCase):
 		repost_gle_for_stock_vouchers(stock_vouchers=vouchers, posting_date=posting_date, repost_doc=doc)
 
 		self.assertNotIn(call("gl_reposting_index", 1), doc.db_set.mock_calls)
+
+	def test_gl_complete_gl_reposting(self):
+		from erpnext.accounts import utils
+
+		# lower numbers to simplify test
+		orig_chunk_size = utils.GL_REPOSTING_CHUNK
+		utils.GL_REPOSTING_CHUNK = 2
+		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
+
+		item = self.make_item().name
+
+		company = "_Test Company with perpetual inventory"
+
+		for _ in range(10):
+			make_stock_entry(item=item, company=company, qty=1, rate=10, target="Stores - TCP1")
+
+		# consume
+		consumption = make_stock_entry(item=item, company=company, qty=1, source="Stores - TCP1")
+
+		self.assertGLEs(
+			consumption,
+			[{"credit": 10, "debit": 0}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
+
+		# backdated receipt
+		backdated_receipt = make_stock_entry(
+			item=item,
+			company=company,
+			qty=1,
+			rate=50,
+			target="Stores - TCP1",
+			posting_date=add_to_date(today(), days=-1),
+		)
+		self.assertGLEs(
+			backdated_receipt,
+			[{"credit": 0, "debit": 50}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
+
+		# check that original consumption GLe is updated
+		self.assertGLEs(
+			consumption,
+			[{"credit": 50, "debit": 0}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)

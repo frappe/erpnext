@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import itertools
 from json import loads
 from typing import TYPE_CHECKING, List, Optional, Tuple
 
@@ -11,7 +10,17 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.utils import DocType
-from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
+from frappe.utils import (
+	cint,
+	create_batch,
+	cstr,
+	flt,
+	formatdate,
+	get_number_format_info,
+	getdate,
+	now,
+	nowdate,
+)
 from pypika import Order
 from pypika.terms import ExistsCriterion
 
@@ -1149,9 +1158,7 @@ def repost_gle_for_stock_vouchers(
 
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit")) or 2
 
-	stock_vouchers_iterator = iter(stock_vouchers)
-
-	while stock_vouchers_chunk := list(itertools.islice(stock_vouchers_iterator, GL_REPOSTING_CHUNK)):
+	for stock_vouchers_chunk in create_batch(stock_vouchers, GL_REPOSTING_CHUNK):
 		gle = get_voucherwise_gl_entries(stock_vouchers_chunk, posting_date)
 
 		for voucher_type, voucher_no in stock_vouchers_chunk:
@@ -1168,12 +1175,14 @@ def repost_gle_for_stock_vouchers(
 					voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 			else:
 				_delete_gl_entries(voucher_type, voucher_no)
-		frappe.db.commit()
+
+		if not frappe.flags.in_test:
+			frappe.db.commit()
 
 		if repost_doc:
 			repost_doc.db_set(
 				"gl_reposting_index",
-				cint(repost_doc.gl_reposting_index) + GL_REPOSTING_CHUNK,
+				cint(repost_doc.gl_reposting_index) + len(stock_vouchers_chunk),
 			)
 
 
