@@ -7,6 +7,7 @@ from typing import Optional, Set, Tuple
 
 import frappe
 from frappe import _
+from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
 
@@ -382,7 +383,9 @@ class update_entries_after(object):
 
 	def set_precision(self):
 		self.flt_precision = cint(frappe.db.get_default("float_precision")) or 2
-		self.currency_precision = cint(frappe.db.get_default("currency_precision")) or 2
+		self.currency_precision = get_field_precision(
+			frappe.get_meta("Stock Ledger Entry").get_field("stock_value")
+		)
 
 	def initialize_previous_data(self, args):
 		"""
