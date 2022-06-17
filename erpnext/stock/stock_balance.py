@@ -3,7 +3,11 @@
 
 
 import frappe
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
+from frappe.query_builder.utils import Table
 from frappe.utils import cstr, flt, now, nowdate, nowtime
+from pypika.queries import QueryBuilder
 
 from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 
@@ -94,57 +98,84 @@ def get_balance_qty_from_sle(item_code, warehouse):
 
 
 def get_reserved_qty(item_code, warehouse):
-	reserved_qty = frappe.db.sql(
-		"""
-		select
-			sum(dnpi_qty * ((so_item_qty - so_item_delivered_qty - so_item_returned_qty) / so_item_qty))
-		from
-			(
-				(select
-					qty as dnpi_qty,
+	SalesOrder = DocType("Sales Order")
+	SalesOrderItem = DocType("Sales Order Item")
+	PackedItem = DocType("Packed Item")
+
+	def append_open_so_query(q: QueryBuilder, child_table: Table) -> QueryBuilder:
+		return (
+			q.inner_join(SalesOrder)
+			.on(SalesOrder.name == child_table.parent)
+			.where(SalesOrder.docstatus == 1)
+			.where(SalesOrder.status != "Closed")
+		)
+
+	tab = (
+		frappe.qb.from_(SalesOrderItem)
+		.select(
+			SalesOrderItem.stock_qty.as_("dnpi_qty"),
+			SalesOrderItem.qty.as_("so_item_qty"),
+			SalesOrderItem.delivered_qty.as_("so_item_delivered_qty"),
+			SalesOrderItem.returned_qty.as_("so_item_returned_qty"),
+			SalesOrderItem.parent,
+			SalesOrderItem.name,
+		)
+		.where(SalesOrderItem.item_code == item_code)
+		.where(SalesOrderItem.warehouse == warehouse)
+	)
+	tab = append_open_so_query(tab, SalesOrderItem)
+
+	dnpi = (
+		frappe.qb.from_(PackedItem)
+		.select(PackedItem.qty, PackedItem.parent_detail_docname, PackedItem.parent, PackedItem.name)
+		.where(PackedItem.item_code == item_code)
+		.where(PackedItem.warehouse == warehouse)
+	)
+	dnpi = append_open_so_query(dnpi, PackedItem)
+
+	qty_queries = {}
+	for key, so_item_field in [
+		("so_item_qty", "qty"),
+		("so_item_delivered_qty", "delivered_qty"),
+		("so_item_returned_qty", "returned_qty"),
+	]:
+		qty_queries.update(
+			{
+				key: (
+					frappe.qb.from_(SalesOrderItem)
+					.select(SalesOrderItem[so_item_field])
+					.where(SalesOrderItem.name == dnpi.parent_detail_docname)
+					.where(SalesOrderItem.delivered_by_supplier == 0)
+				)
+			}
+		)
+
+	dnpi_parent = frappe.qb.from_(dnpi).select(dnpi.qty.as_("dnpi_qty"))
+	for key, query in qty_queries.items():
+		dnpi_parent = dnpi_parent.select(query.as_(key))
+	dnpi_parent = dnpi_parent.select(dnpi.parent, dnpi.name)
+
+	dnpi_parent = dnpi_parent + tab
+
+	q = (
+		frappe.qb.from_(dnpi_parent)
+		.select(
+			Sum(
+				dnpi_parent.dnpi_qty
+				* (
 					(
-						select qty from `tabSales Order Item`
-						where name = dnpi.parent_detail_docname
-						and (delivered_by_supplier is null or delivered_by_supplier = 0)
-					) as so_item_qty,
-					(
-						select delivered_qty from `tabSales Order Item`
-						where name = dnpi.parent_detail_docname
-						and delivered_by_supplier = 0
-					) as so_item_delivered_qty,
-					(
-						select returned_qty from `tabSales Order Item`
-						where name = dnpi.parent_detail_docname
-						and delivered_by_supplier = 0
-					) as so_item_returned_qty,
-					parent, name
-				from
-				(
-					select qty, parent_detail_docname, parent, name
-					from `tabPacked Item` dnpi_in
-					where item_code = %s and warehouse = %s
-					and parenttype="Sales Order"
-					and item_code != parent_item
-					and exists (select * from `tabSales Order` so
-					where name = dnpi_in.parent and docstatus = 1 and status != 'Closed')
-				) dnpi)
-			union
-				(select stock_qty as dnpi_qty, qty as so_item_qty,
-					delivered_qty as so_item_delivered_qty,
-					returned_qty as so_item_returned_qty, parent, name
-				from `tabSales Order Item` so_item
-				where item_code = %s and warehouse = %s
-				and (so_item.delivered_by_supplier is null or so_item.delivered_by_supplier = 0)
-				and exists(select * from `tabSales Order` so
-					where so.name = so_item.parent and so.docstatus = 1
-					and so.status != 'Closed'))
-			) tab
-		where
-			so_item_qty >= so_item_delivered_qty
-	""",
-		(item_code, warehouse, item_code, warehouse),
+						dnpi_parent.so_item_qty
+						- dnpi_parent.so_item_delivered_qty
+						- dnpi_parent.so_item_returned_qty
+					)
+					/ dnpi_parent.so_item_qty
+				)
+			)
+		)
+		.where(dnpi_parent.so_item_qty >= dnpi_parent.so_item_delivered_qty)
 	)
 
+	reserved_qty = q.run()
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 
 
