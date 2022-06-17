@@ -37,13 +37,13 @@ def execute(filters=None):
         ("Gate In") + "::120",
         ("Gate Out") + "::120",
         ("First Weight") + "::120",
-        ("Secnd Weight") + "::150",
+        ("Second Weight") + "::150",
         ("Net Weight") + "::120",
         ("DN Total Net Weight") + "::120",
         ("Differnce") + "::150",
         ("Sale Invoice") + "::150",
         ("Freight Amount") + "::150",
-        ("Freight Per Net") + "::120",
+        ("Freight Per Pet") + "::120",
     ]
 	
 	data = []
