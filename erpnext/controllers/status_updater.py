@@ -352,9 +352,9 @@ class StatusUpdater(Document):
 		for args in self.status_updater:
 			# condition to include current record (if submit or no if cancel)
 			if self.docstatus == 1:
-				args["cond"] = ' or parent="%s"' % self.name.replace('"', '"')
+				args["cond"] = " or parent='%s'" % self.name.replace('"', '"')
 			else:
-				args["cond"] = ' and parent!="%s"' % self.name.replace('"', '"')
+				args["cond"] = " and parent!='%s'" % self.name.replace('"', '"')
 
 			self._update_children(args, update_modified)
 
@@ -384,7 +384,7 @@ class StatusUpdater(Document):
 				args["second_source_condition"] = frappe.db.sql(
 					""" select ifnull((select sum(%(second_source_field)s)
 					from `tab%(second_source_dt)s`
-					where `%(second_join_field)s`="%(detail_id)s"
+					where `%(second_join_field)s`='%(detail_id)s'
 					and (`tab%(second_source_dt)s`.docstatus=1)
 					%(second_source_extra_cond)s), 0) """
 					% args
@@ -398,7 +398,7 @@ class StatusUpdater(Document):
 					frappe.db.sql(
 						"""
 						(select ifnull(sum(%(source_field)s), 0)
-							from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
+							from `tab%(source_dt)s` where `%(join_field)s`='%(detail_id)s'
 							and (docstatus=1 %(cond)s) %(extra_cond)s)
 				"""
 						% args
@@ -445,7 +445,7 @@ class StatusUpdater(Document):
 					ifnull((select
 						ifnull(sum(if(abs(%(target_ref_field)s) > abs(%(target_field)s), abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
+					from `tab%(target_dt)s` where parent='%(name)s' having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
 				where name='%(name)s'"""
 				% args

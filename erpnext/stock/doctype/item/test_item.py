@@ -381,8 +381,8 @@ class TestItem(FrappeTestCase):
 		frappe.delete_doc_if_exists("Item Attribute", "Test Item Length")
 
 		frappe.db.sql(
-			'''delete from `tabItem Variant Attribute`
-			where attribute="Test Item Length"'''
+			"""delete from `tabItem Variant Attribute`
+			where attribute='Test Item Length' """
 		)
 
 		frappe.flags.attribute_values = None

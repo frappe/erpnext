@@ -39,17 +39,17 @@ def get_rows(filters):
 			FROM
 				(SELECT
 					si.customer_name,si.base_grand_total,
-					si.name as voucher_no,tabTimesheet.employee,
-					tabTimesheet.title as employee_name,tabTimesheet.parent_project as project,
-					tabTimesheet.start_date,tabTimesheet.end_date,
-					tabTimesheet.total_billed_hours,tabTimesheet.name as timesheet,
+					si.name as voucher_no,`tabTimesheet`.employee,
+					`tabTimesheet`.title as employee_name,`tabTimesheet`.parent_project as project,
+					`tabTimesheet`.start_date,`tabTimesheet`.end_date,
+					`tabTimesheet`.total_billed_hours,`tabTimesheet`.name as timesheet,
 					ss.base_gross_pay,ss.total_working_days,
-					tabTimesheet.total_billed_hours/(ss.total_working_days * {0}) as utilization
+					`tabTimesheet`.total_billed_hours/(ss.total_working_days * {0}) as utilization
 					FROM
-						`tabSalary Slip Timesheet` as sst join `tabTimesheet` on tabTimesheet.name = sst.time_sheet
-						join `tabSales Invoice Timesheet` as sit on sit.time_sheet = tabTimesheet.name
-						join `tabSales Invoice` as si on si.name = sit.parent and si.status != "Cancelled"
-						join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != "Cancelled" """.format(
+						`tabSalary Slip Timesheet` as sst join `tabTimesheet` on `tabTimesheet`.name = sst.time_sheet
+						join `tabSales Invoice Timesheet` as sit on sit.time_sheet = `tabTimesheet`.name
+						join `tabSales Invoice` as si on si.name = sit.parent and si.status != 'Cancelled'
+						join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != 'Cancelled' """.format(
 		standard_working_hours
 	)
 	if conditions:
@@ -72,23 +72,25 @@ def get_conditions(filters):
 	conditions = []
 
 	if filters.get("company"):
-		conditions.append("tabTimesheet.company={0}".format(frappe.db.escape(filters.get("company"))))
+		conditions.append("`tabTimesheet`.company={0}".format(frappe.db.escape(filters.get("company"))))
 
 	if filters.get("start_date"):
-		conditions.append("tabTimesheet.start_date>='{0}'".format(filters.get("start_date")))
+		conditions.append("`tabTimesheet`.start_date>='{0}'".format(filters.get("start_date")))
 
 	if filters.get("end_date"):
-		conditions.append("tabTimesheet.end_date<='{0}'".format(filters.get("end_date")))
+		conditions.append("`tabTimesheet`.end_date<='{0}'".format(filters.get("end_date")))
 
 	if filters.get("customer_name"):
 		conditions.append("si.customer_name={0}".format(frappe.db.escape(filters.get("customer_name"))))
 
 	if filters.get("employee"):
-		conditions.append("tabTimesheet.employee={0}".format(frappe.db.escape(filters.get("employee"))))
+		conditions.append(
+			"`tabTimesheet`.employee={0}".format(frappe.db.escape(filters.get("employee")))
+		)
 
 	if filters.get("project"):
 		conditions.append(
-			"tabTimesheet.parent_project={0}".format(frappe.db.escape(filters.get("project")))
+			"`tabTimesheet`.parent_project={0}".format(frappe.db.escape(filters.get("project")))
 		)
 
 	conditions = " and ".join(conditions)
