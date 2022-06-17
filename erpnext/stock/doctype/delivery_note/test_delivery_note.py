@@ -1064,6 +1064,38 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[0].rate, rate)
 
+	def test_reserved_qty(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+		from erpnext.stock.stock_balance import get_reserved_qty
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+		qty_to_reserve = 5
+
+		so = make_sales_order(item_code=item, qty=qty_to_reserve)
+
+		# Make qty avl for test.
+		make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		# Test that item qty has been reserved on submit of sales order.
+		self.assertEqual(get_reserved_qty(item, warehouse), qty_to_reserve)
+
+		dn = make_delivery_note(so.name)
+		dn.save().submit()
+
+		# Test that item qty is no longer reserved since qty has been delivered.
+		self.assertEqual(get_reserved_qty(item, warehouse), 0)
+
+		dn_return = make_return_doc("Delivery Note", dn.name)
+		dn_return.save().submit()
+
+		returned = frappe.get_doc("Delivery Note", dn_return.name)
+		returned.update_prevdoc_status()
+
+		# Test that item qty is not reserved on sales return.
+		self.assertEqual(get_reserved_qty(item, warehouse), 0)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
