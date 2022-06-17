@@ -174,6 +174,7 @@ def get_reserved_qty(item_code, warehouse):
 			)
 		)
 		.where(dnpi_parent.so_item_qty >= dnpi_parent.so_item_delivered_qty)
+	)
 
 	reserved_qty = q.run()
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
