@@ -674,7 +674,7 @@ def get_filter_condition(filters):
 
 def get_joining_relieving_condition(start_date, end_date):
 	cond = """
-		and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
+		and ifnull(t1.date_of_joining, '1900-01-01') <= '%(end_date)s'
 		and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
 	""" % {
 		"start_date": start_date,

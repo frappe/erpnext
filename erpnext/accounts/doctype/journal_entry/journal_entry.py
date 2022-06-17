@@ -416,7 +416,7 @@ class JournalEntry(AccountsController):
 				against_entries = frappe.db.sql(
 					"""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
-					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
+					and (reference_type is null or reference_type in ('', 'Sales Order', 'Purchase Order'))
 					""",
 					(d.account, d.reference_name),
 					as_dict=True,

@@ -399,7 +399,7 @@ class LeaveApplication(Document):
 			select
 				name, leave_type, posting_date, from_date, to_date, total_leave_days, half_day_date
 			from `tabLeave Application`
-			where employee = %(employee)s and docstatus < 2 and status in ("Open", "Approved")
+			where employee = %(employee)s and docstatus < 2 and status in ('Open', 'Approved')
 			and to_date >= %(from_date)s and from_date <= %(to_date)s
 			and name != %(name)s""",
 			{
@@ -439,7 +439,7 @@ class LeaveApplication(Document):
 			"""select count(name) from `tabLeave Application`
 			where employee = %(employee)s
 			and docstatus < 2
-			and status in ("Open", "Approved")
+			and status in ('Open', 'Approved')
 			and half_day = 1
 			and half_day_date = %(half_day_date)s
 			and name != %(name)s""",
@@ -456,7 +456,7 @@ class LeaveApplication(Document):
 	def validate_attendance(self):
 		attendance = frappe.db.sql(
 			"""select name from `tabAttendance` where employee = %s and (attendance_date between %s and %s)
-					and status = "Present" and docstatus = 1""",
+					and status = 'Present' and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date),
 		)
 		if attendance:
