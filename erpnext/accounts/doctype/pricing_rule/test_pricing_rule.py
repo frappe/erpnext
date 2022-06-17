@@ -752,7 +752,7 @@ class TestPricingRule(unittest.TestCase):
 			title="_Test Pricing Rule with Min Qty - 2",
 		)
 
-		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1, currency="USD")
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1)
 		item = si.items[0]
 		item.stock_qty = 1
 		si.save()

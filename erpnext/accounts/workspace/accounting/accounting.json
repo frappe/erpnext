@@ -508,18 +508,6 @@
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "DATEV Export",
-   "link_count": 0,
-   "link_to": "DATEV",
-   "link_type": "Report",
-   "onboard": 0,
-   "only_for": "Germany",
-   "type": "Link"
-  },
-  {
-   "dependencies": "GL Entry",
-   "hidden": 0,
-   "is_query_report": 1,
    "label": "UAE VAT 201",
    "link_count": 0,
    "link_to": "UAE VAT 201",
@@ -1024,16 +1012,16 @@
    "type": "Link"
   },
   {
-    "dependencies": "Cost Center",
-    "hidden": 0,
-    "is_query_report": 0,
-    "label": "Cost Center Allocation",
-    "link_count": 0,
-    "link_to": "Cost Center Allocation",
-    "link_type": "DocType",
-    "onboard": 0,
-    "type": "Link"
-   },
+   "dependencies": "Cost Center",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cost Center Allocation",
+   "link_count": 0,
+   "link_to": "Cost Center Allocation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
   {
    "dependencies": "Cost Center",
    "hidden": 0,
@@ -1235,13 +1223,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:25:09.835345",
+ "modified": "2022-06-10 15:49:42.990860",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 2.0,

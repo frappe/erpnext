@@ -897,3 +897,18 @@ def get_default_contact(doctype, name):
 			return None
 	else:
 		return None
+
+
+def add_party_account(party_type, party, company, account):
+	doc = frappe.get_doc(party_type, party)
+	account_exists = False
+	for d in doc.get("accounts"):
+		if d.account == account:
+			account_exists = True
+
+	if not account_exists:
+		accounts = {"company": company, "account": account}
+
+		doc.append("accounts", accounts)
+
+		doc.save()
