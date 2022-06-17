@@ -800,9 +800,7 @@ class JournalEntry(AccountsController):
 
 		self.total_amount_in_words = money_in_words(amt, currency)
 
-	def make_gl_entries(self, cancel=0, adv_adj=0):
-		from erpnext.accounts.general_ledger import make_gl_entries
-
+	def build_gl_map(self):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
@@ -838,7 +836,12 @@ class JournalEntry(AccountsController):
 						item=d,
 					)
 				)
+		return gl_map
 
+	def make_gl_entries(self, cancel=0, adv_adj=0):
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		gl_map = self.build_gl_map()
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			update_outstanding = "No"
 		else:
