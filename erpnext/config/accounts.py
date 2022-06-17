@@ -454,6 +454,12 @@ def get_data():
 					"doctype": "Bank Transactions",
 					"is_query_report": True,
 				},
+				{
+					"type": "report",
+					"name": "Bank Deposit",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
 			]
 		},
 		{
