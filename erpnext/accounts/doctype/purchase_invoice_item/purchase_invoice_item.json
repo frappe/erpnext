@@ -196,6 +196,7 @@
    "label": "Rejected Qty"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -215,6 +216,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
@@ -223,6 +225,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Accepted Qty in Stock UOM",
@@ -880,7 +883,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-05-06 15:01:34.431670",
+ "modified": "2022-06-17 05:31:10.520171",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

@@ -253,6 +253,7 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -266,6 +267,7 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "Conversion Factor",
@@ -548,6 +550,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Accepted Qty in Stock UOM",
@@ -879,7 +882,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "returned_qty",
+   "depends_on": "doc.returned_qty",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "label": "Returned Qty in Stock UOM",
@@ -888,6 +891,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "received_stock_qty",
    "fieldtype": "Float",
    "label": "Received Qty in Stock UOM",
@@ -1003,7 +1007,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-05-06 15:07:23.498066",
+ "modified": "2022-06-17 05:32:16.483178",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
