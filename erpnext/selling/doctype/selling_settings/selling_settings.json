@@ -20,6 +20,7 @@
   "editable_price_list_rate",
   "validate_selling_price",
   "editable_bundle_item_rates",
+  "dont_reserve_sales_order_qty_on_sales_return",
   "sales_transactions_settings_section",
   "so_required",
   "dn_required",
@@ -172,6 +173,12 @@
    "fieldname": "enable_discount_accounting",
    "fieldtype": "Check",
    "label": "Enable Discount Accounting for Selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_reserve_sales_order_qty_on_sales_return",
+   "fieldtype": "Check",
+   "label": "Don't Reserve Sales Order Qty on Sales Return"
   }
  ],
  "icon": "fa fa-cog",
@@ -179,7 +186,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-05-31 19:39:48.398738",
+ "modified": "2022-06-17 12:30:57.221570",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

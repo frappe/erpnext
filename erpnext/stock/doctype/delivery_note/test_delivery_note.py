@@ -1064,10 +1064,22 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[0].rate, rate)
 
-	def test_reserved_qty(self):
+	def test_reserve_qty_on_sales_return(self):
+		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
+		self.reserved_qty_check()
+
+	def test_dont_reserve_qty_on_sales_return(self):
+		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 1)
+		self.reserved_qty_check()
+
+	def reserved_qty_check(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 		from erpnext.stock.stock_balance import get_reserved_qty
+
+		dont_reserve_qty = frappe.db.get_single_value(
+			"Selling Settings", "dont_reserve_sales_order_qty_on_sales_return"
+		)
 
 		item = make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -1093,8 +1105,8 @@ class TestDeliveryNote(FrappeTestCase):
 		returned = frappe.get_doc("Delivery Note", dn_return.name)
 		returned.update_prevdoc_status()
 
-		# Test that item qty is not reserved on sales return.
-		self.assertEqual(get_reserved_qty(item, warehouse), 0)
+		# Test that item qty is not reserved on sales return, if selling setting don't reserve qty is checked.
+		self.assertEqual(get_reserved_qty(item, warehouse), 0 if dont_reserve_qty else qty_to_reserve)
 
 
 def create_delivery_note(**args):

@@ -98,10 +98,6 @@ def get_balance_qty_from_sle(item_code, warehouse):
 
 
 def get_reserved_qty(item_code, warehouse):
-	SalesOrder = DocType("Sales Order")
-	SalesOrderItem = DocType("Sales Order Item")
-	PackedItem = DocType("Packed Item")
-
 	def append_open_so_query(q: QueryBuilder, child_table: Table) -> QueryBuilder:
 		return (
 			q.inner_join(SalesOrder)
@@ -110,19 +106,29 @@ def get_reserved_qty(item_code, warehouse):
 			.where(SalesOrder.status != "Closed")
 		)
 
+	SalesOrder = DocType("Sales Order")
+	SalesOrderItem = DocType("Sales Order Item")
+	PackedItem = DocType("Packed Item")
+
+	dont_reserve_qty_on_sales_return = frappe.db.get_single_value(
+		"Selling Settings", "dont_reserve_sales_order_qty_on_sales_return"
+	)
+
 	tab = (
 		frappe.qb.from_(SalesOrderItem)
-		.select(
-			SalesOrderItem.stock_qty.as_("dnpi_qty"),
-			SalesOrderItem.qty.as_("so_item_qty"),
-			SalesOrderItem.delivered_qty.as_("so_item_delivered_qty"),
-			SalesOrderItem.returned_qty.as_("so_item_returned_qty"),
-			SalesOrderItem.parent,
-			SalesOrderItem.name,
-		)
 		.where(SalesOrderItem.item_code == item_code)
 		.where(SalesOrderItem.warehouse == warehouse)
 	)
+	for field, cond in [
+		(SalesOrderItem.stock_qty.as_("dnpi_qty"), 1),
+		(SalesOrderItem.qty.as_("so_item_qty"), 1),
+		(SalesOrderItem.delivered_qty.as_("so_item_delivered_qty"), 1),
+		(SalesOrderItem.returned_qty.as_("so_item_returned_qty"), dont_reserve_qty_on_sales_return),
+		(SalesOrderItem.parent, 1),
+		(SalesOrderItem.name, 1),
+	]:
+		if cond:
+			tab = tab.select(field)
 	tab = append_open_so_query(tab, SalesOrderItem)
 
 	dnpi = (
@@ -131,28 +137,23 @@ def get_reserved_qty(item_code, warehouse):
 		.where(PackedItem.item_code == item_code)
 		.where(PackedItem.warehouse == warehouse)
 	)
-	dnpi = append_open_so_query(dnpi, PackedItem)
+	append_open_so_query(dnpi, PackedItem)
 
-	qty_queries = {}
-	for key, so_item_field in [
-		("so_item_qty", "qty"),
-		("so_item_delivered_qty", "delivered_qty"),
-		("so_item_returned_qty", "returned_qty"),
+	dnpi_parent = frappe.qb.from_(dnpi).select(dnpi.qty.as_("dnpi_qty"))
+	for key, so_item_field, cond in [
+		("so_item_qty", "qty", 1),
+		("so_item_delivered_qty", "delivered_qty", 1),
+		("so_item_returned_qty", "returned_qty", dont_reserve_qty_on_sales_return),
 	]:
-		qty_queries.update(
-			{
-				key: (
+		if cond:
+			dnpi_parent = dnpi_parent.select(
+				(
 					frappe.qb.from_(SalesOrderItem)
 					.select(SalesOrderItem[so_item_field])
 					.where(SalesOrderItem.name == dnpi.parent_detail_docname)
 					.where(SalesOrderItem.delivered_by_supplier == 0)
-				)
-			}
-		)
-
-	dnpi_parent = frappe.qb.from_(dnpi).select(dnpi.qty.as_("dnpi_qty"))
-	for key, query in qty_queries.items():
-		dnpi_parent = dnpi_parent.select(query.as_(key))
+				).as_(key)
+			)
 	dnpi_parent = dnpi_parent.select(dnpi.parent, dnpi.name)
 
 	dnpi_parent = dnpi_parent + tab
@@ -166,7 +167,7 @@ def get_reserved_qty(item_code, warehouse):
 					(
 						dnpi_parent.so_item_qty
 						- dnpi_parent.so_item_delivered_qty
-						- dnpi_parent.so_item_returned_qty
+						- (dnpi_parent.so_item_returned_qty if dont_reserve_qty_on_sales_return else 0)
 					)
 					/ dnpi_parent.so_item_qty
 				)
