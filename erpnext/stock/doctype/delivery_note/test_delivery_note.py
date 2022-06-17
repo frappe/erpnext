@@ -1108,6 +1108,9 @@ class TestDeliveryNote(FrappeTestCase):
 		# Test that item qty is not reserved on sales return, if selling setting don't reserve qty is checked.
 		self.assertEqual(get_reserved_qty(item, warehouse), 0 if dont_reserve_qty else qty_to_reserve)
 
+	def tearDown(self):
+		frappe.db.set_single_value("Selling Settings", "dont_reserve_sales_order_qty_on_sales_return", 0)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
