@@ -137,7 +137,7 @@ def get_reserved_qty(item_code, warehouse):
 		.where(PackedItem.item_code == item_code)
 		.where(PackedItem.warehouse == warehouse)
 	)
-	append_open_so_query(dnpi, PackedItem)
+	dnpi = append_open_so_query(dnpi, PackedItem)
 
 	dnpi_parent = frappe.qb.from_(dnpi).select(dnpi.qty.as_("dnpi_qty"))
 	for key, so_item_field, cond in [
