@@ -141,7 +141,8 @@
   "party_account_currency",
   "is_internal_supplier",
   "represents_company",
-  "inter_company_order_reference"
+  "inter_company_order_reference",
+  "is_old_subcontracting_flow"
  ],
  "fields": [
   {
@@ -1161,13 +1162,21 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_old_subcontracting_flow",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Old Subcontracting Flow",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-26 18:46:58.863174",
+ "modified": "2022-06-15 15:40:58.527065",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
