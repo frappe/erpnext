@@ -315,7 +315,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			idx desc, name
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
-			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
 			mcond=get_match_cond(doctype).replace("%", "%%"),
 			key=searchfield,
 		),

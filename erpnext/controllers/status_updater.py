@@ -458,8 +458,9 @@ class StatusUpdater(Document):
 					set %(status_field)s = (case when %(target_parent_field)s<0.001 then 'Not %(keyword)s'
 					else case when %(target_parent_field)s>=99.999999 then 'Fully %(keyword)s'
 					else 'Partly %(keyword)s' end end)
-					where name='%(name)s'""" % args
-					)
+					where name='%(name)s'"""
+					% args
+				)
 
 			if update_modified:
 				target = frappe.get_doc(args["target_parent_dt"], args["name"])
