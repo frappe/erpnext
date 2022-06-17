@@ -548,7 +548,8 @@
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
    "label": "Is Subcontracted",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "items_section",
