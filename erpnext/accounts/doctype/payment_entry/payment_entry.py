@@ -1444,7 +1444,7 @@ def get_negative_outstanding_invoices(
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
-		supplier_condition = "and (release_date is null or release_date <= CURDATE())"
+		supplier_condition = "and (release_date is null or release_date <= CURRENT_DATE)"
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
 		rounded_total_field = "base_rounded_total"
