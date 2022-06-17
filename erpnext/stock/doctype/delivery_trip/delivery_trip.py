@@ -263,9 +263,9 @@ def get_default_contact(out, name):
 			FROM
 				`tabDynamic Link` dl
 			WHERE
-				dl.link_doctype="Customer"
+				dl.link_doctype='Customer'
 				AND dl.link_name=%s
-				AND dl.parenttype = "Contact"
+				AND dl.parenttype = 'Contact'
 		""",
 		(name),
 		as_dict=1,
@@ -289,9 +289,9 @@ def get_default_address(out, name):
 			FROM
 				`tabDynamic Link` dl
 			WHERE
-				dl.link_doctype="Customer"
+				dl.link_doctype='Customer'
 				AND dl.link_name=%s
-				AND dl.parenttype = "Address"
+				AND dl.parenttype = 'Address'
 		""",
 		(name),
 		as_dict=1,
@@ -388,7 +388,7 @@ def notify_customers(delivery_trip):
 
 	if email_recipients:
 		frappe.msgprint(_("Email sent to {0}").format(", ".join(email_recipients)))
-		delivery_trip.db_set("email_notification_sent", True)
+		delivery_trip.db_set("email_notification_sent", 1)
 	else:
 		frappe.msgprint(_("No contacts with email IDs found."))
 

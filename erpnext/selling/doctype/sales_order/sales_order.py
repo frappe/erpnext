@@ -25,6 +25,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_default_bom
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -423,8 +424,9 @@ class SalesOrder(SellingController):
 
 		for table in [self.items, self.packed_items]:
 			for i in table:
-				bom = get_default_bom_item(i.item_code)
+				bom = get_default_bom(i.item_code)
 				stock_qty = i.qty if i.doctype == "Packed Item" else i.stock_qty
+
 				if not for_raw_material_request:
 					total_work_order_qty = flt(
 						frappe.db.sql(
@@ -438,32 +440,19 @@ class SalesOrder(SellingController):
 					pending_qty = stock_qty
 
 				if pending_qty and i.item_code not in product_bundle_parents:
-					if bom:
-						items.append(
-							dict(
-								name=i.name,
-								item_code=i.item_code,
-								description=i.description,
-								bom=bom,
-								warehouse=i.warehouse,
-								pending_qty=pending_qty,
-								required_qty=pending_qty if for_raw_material_request else 0,
-								sales_order_item=i.name,
-							)
+					items.append(
+						dict(
+							name=i.name,
+							item_code=i.item_code,
+							description=i.description,
+							bom=bom or "",
+							warehouse=i.warehouse,
+							pending_qty=pending_qty,
+							required_qty=pending_qty if for_raw_material_request else 0,
+							sales_order_item=i.name,
 						)
-					else:
-						items.append(
-							dict(
-								name=i.name,
-								item_code=i.item_code,
-								description=i.description,
-								bom="",
-								warehouse=i.warehouse,
-								pending_qty=pending_qty,
-								required_qty=pending_qty if for_raw_material_request else 0,
-								sales_order_item=i.name,
-							)
-						)
+					)
+
 		return items
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
@@ -1165,13 +1154,6 @@ def make_work_orders(items, sales_order, company, project=None):
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name)
 	so.update_status(status)
-
-
-def get_default_bom_item(item_code):
-	bom = frappe.get_all("BOM", dict(item=item_code, is_active=True), order_by="is_default desc")
-	bom = bom[0].name if bom else None
-
-	return bom
 
 
 @frappe.whitelist()

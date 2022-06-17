@@ -238,7 +238,7 @@ def get_stock_ledger_entries(filters, items):
 	sl_entries = frappe.db.sql(
 		"""
 		SELECT
-			concat_ws(" ", posting_date, posting_time) AS date,
+			concat_ws(' ', posting_date, posting_time) AS date,
 			item_code,
 			warehouse,
 			actual_qty,

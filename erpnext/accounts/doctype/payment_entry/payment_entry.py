@@ -6,7 +6,7 @@ import json
 from functools import reduce
 
 import frappe
-from frappe import ValidationError, _, scrub, throw
+from frappe import ValidationError, _, qb, scrub, throw
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 
 import erpnext
@@ -785,7 +785,7 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
-	def make_gl_entries(self, cancel=0, adv_adj=0):
+	def build_gl_map(self):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
 
@@ -794,7 +794,10 @@ class PaymentEntry(AccountsController):
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
+		return gl_entries
 
+	def make_gl_entries(self, cancel=0, adv_adj=0):
+		gl_entries = self.build_gl_map()
 		gl_entries = process_gl_map(gl_entries)
 		make_gl_entries(gl_entries, cancel=cancel, adv_adj=adv_adj)
 
@@ -1195,6 +1198,9 @@ def get_outstanding_reference_documents(args):
 	if args.get("party_type") == "Member":
 		return
 
+	ple = qb.DocType("Payment Ledger Entry")
+	common_filter = []
+
 	# confirm that Supplier is not blocked
 	if args.get("party_type") == "Supplier":
 		supplier_status = get_supplier_block_status(args["party"])
@@ -1216,10 +1222,13 @@ def get_outstanding_reference_documents(args):
 		condition = " and voucher_type={0} and voucher_no={1}".format(
 			frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"])
 		)
+		common_filter.append(ple.voucher_type == args["voucher_type"])
+		common_filter.append(ple.voucher_no == args["voucher_no"])
 
 	# Add cost center condition
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
+		common_filter.append(ple.cost_center == args.get("cost_center"))
 
 	date_fields_dict = {
 		"posting_date": ["from_posting_date", "to_posting_date"],
@@ -1231,16 +1240,19 @@ def get_outstanding_reference_documents(args):
 			condition += " and {0} between '{1}' and '{2}'".format(
 				fieldname, args.get(date_fields[0]), args.get(date_fields[1])
 			)
+			common_filter.append(ple[fieldname][args.get(date_fields[0]) : args.get(date_fields[1])])
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
+		common_filter.append(ple.company == args.get("company"))
 
 	outstanding_invoices = get_outstanding_invoices(
 		args.get("party_type"),
 		args.get("party"),
 		args.get("party_account"),
-		filters=args,
-		condition=condition,
+		common_filter=common_filter,
+		min_outstanding=args.get("outstanding_amt_greater_than"),
+		max_outstanding=args.get("outstanding_amt_less_than"),
 	)
 
 	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
@@ -1444,7 +1456,7 @@ def get_negative_outstanding_invoices(
 	voucher_type = "Sales Invoice" if party_type == "Customer" else "Purchase Invoice"
 	supplier_condition = ""
 	if voucher_type == "Purchase Invoice":
-		supplier_condition = "and (release_date is null or release_date <= CURDATE())"
+		supplier_condition = "and (release_date is null or release_date <= CURRENT_DATE)"
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"
 		rounded_total_field = "base_rounded_total"

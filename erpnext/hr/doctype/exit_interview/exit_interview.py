@@ -88,7 +88,7 @@ def send_exit_questionnaire(interviews):
 				reference_doctype=interview.doctype,
 				reference_name=interview.name,
 			)
-			interview.db_set("questionnaire_email_sent", True)
+			interview.db_set("questionnaire_email_sent", 1)
 			interview.notify_update()
 			email_success.append(email)
 		else:
