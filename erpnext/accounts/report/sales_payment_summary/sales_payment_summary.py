@@ -261,7 +261,7 @@ def get_mode_of_payment_details(filters):
 				and a.docstatus = 1
 				and b.reference_type = "Sales Invoice"
 				and b.reference_name in ({invoice_list_names})
-				group by a.owner, a.posting_date, mode_of_payment
+				group by a.owner, a.posting_date, mode_of_payment, a.voucher_type
 			) t
 			group by t.owner, t.posting_date, t.mode_of_payment
 			""".format(

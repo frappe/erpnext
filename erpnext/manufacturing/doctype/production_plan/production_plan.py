@@ -858,7 +858,9 @@ def get_subitems(
 			bom.name = %(bom)s
 			and bom_item.docstatus < 2
 			and item.is_stock_item in (1, {0})
-		group by bom_item.item_code""".format(
+		group by bom_item.item_code, default_material_request_type, item.item_name, item.is_sub_contracted_item, bom_item.source_warehouse,
+			item.default_bom, bom_item.description, bom_item.stock_uom, item.min_order_qty, item.safety_stock, item_default.default_warehouse,
+			item.purchase_uom, item_uom.conversion_factor""".format(
 			0 if include_non_stock_items else 1
 		),
 		{"bom": bom_no, "parent_qty": parent_qty, "planned_qty": planned_qty, "company": company},

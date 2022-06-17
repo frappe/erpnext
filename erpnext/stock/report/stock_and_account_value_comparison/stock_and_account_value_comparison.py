@@ -90,7 +90,7 @@ def get_gl_data(report_filters, filters):
 			"voucher_no",
 			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as account_value",
 		],
-		group_by="voucher_type, voucher_no",
+		group_by="name, voucher_type, voucher_no",
 	)
 
 	voucher_wise_gl_data = {}

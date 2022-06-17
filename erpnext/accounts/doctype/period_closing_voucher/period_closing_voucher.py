@@ -169,7 +169,7 @@ class PeriodClosingVoucher(AccountsController):
 			where t1.is_cancelled = 0 and t1.account = t2.name and t2.report_type = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
-			group by t1.account, {dimension_fields}
+			group by t1.account, t2.account_currency, {dimension_fields}
 		""".format(
 				dimension_fields=", ".join(dimension_fields)
 			),

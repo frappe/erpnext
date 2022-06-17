@@ -687,7 +687,7 @@ def get_emp_list(sal_struct, cond, end_date, payroll_payable_account):
 	return frappe.db.sql(
 		"""
 			select
-				distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
+				distinct t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.from_date
 			from
 				`tabEmployee` t1, `tabSalary Structure Assignment` t2
 			where

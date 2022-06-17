@@ -305,7 +305,7 @@ def get_po_entries(conditions):
 			AND parent.status not in  ("Closed","Completed","Cancelled")
 			{conditions}
 		GROUP BY
-			parent.name, child.item_code
+			parent.name, child.item_code, child.name
 		""".format(
 			conditions=conditions
 		),

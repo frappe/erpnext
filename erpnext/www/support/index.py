@@ -44,7 +44,7 @@ def get_favorite_articles_by_page_view():
 				`tabWeb Page View` AS t2
 			ON t1.route = t2.path
 			WHERE t1.published = 1
-			GROUP BY route
+			GROUP BY route, t1.name, t1.title, t1.content, t1.route, t1.category
 			ORDER BY count DESC
 			LIMIT 6;
 			""",

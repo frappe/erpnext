@@ -1021,8 +1021,8 @@ def get_bom_items_as_dict(
 				and ifnull(item.has_variants, 0) = 0
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
-				group by item_code, stock_uom
-				order by idx"""
+				group by bom_item.item_code, bom_item.idx, item.item_name, item.image, bom.project, bom_item.rate, item.stock_uom, item.item_group, item.allow_alternative_item, item_default.default_warehouse, item_default.expense_account, item_default.buying_cost_center {select_columns}
+				order by bom_item.idx"""
 
 	is_stock_item = 0 if include_non_stock_items else 1
 	if cint(fetch_exploded):
@@ -1033,7 +1033,7 @@ def get_bom_items_as_dict(
 			qty_field="stock_qty",
 			select_columns=""", bom_item.source_warehouse, bom_item.operation,
 				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
-				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""",
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1)""",
 		)
 
 		items = frappe.db.sql(

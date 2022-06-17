@@ -1665,7 +1665,7 @@ class StockEntry(StockController):
 			where
 				se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture'
 				and se.work_order= %s and ifnull(sed.t_warehouse, '') != ''
-			group by sed.item_code, sed.t_warehouse
+			group by sed.item_code, sed.t_warehouse, sed.item_name, sed.original_item, sed.description, sed.stock_uom, sed.expense_account, sed.cost_center
 		""",
 			self.work_order,
 			as_dict=1,

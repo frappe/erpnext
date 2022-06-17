@@ -1329,6 +1329,7 @@ class AccountsController(TransactionBase):
 			where
 				against_voucher_type = %s and against_voucher = %s and party=%s
 				and docstatus = 1
+				group by account_currency
 		""".format(
 				dr_or_cr=dr_or_cr, rev_dr_cr=rev_dr_or_cr
 			),

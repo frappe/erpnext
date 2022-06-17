@@ -639,7 +639,7 @@ def get_items_for_stock_reco(warehouse, company):
 			and i.has_variants = 0
 			and IFNULL(i.disabled, 0) = 0
 			and id.company = %s
-		group by i.name
+		group by i.name, i.item_name, id.default_warehouse, i.has_serial_no, i.has_batch_no
 	""",
 		(lft, rgt, company),
 		as_dict=1,

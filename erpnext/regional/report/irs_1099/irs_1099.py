@@ -52,7 +52,7 @@ def execute(filters=None):
 				{conditions}
 
 		GROUP BY
-			gl.party
+			gl.party, s.supplier_group, s.tax_id
 
 		ORDER BY
 			gl.party DESC""".format(

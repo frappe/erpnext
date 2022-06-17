@@ -500,7 +500,7 @@ class Item(Document):
 			FROM `tabStock Reconciliation Item`
 			WHERE item_code = %s and docstatus = 1
 			GROUP By item_code, warehouse, parent
-			HAVING records > 1
+			HAVING COUNT(*) > 1
 		""",
 			new_name,
 			as_dict=1,

@@ -122,8 +122,8 @@ def get_items(filters):
 			and `tabSales Invoice Item`.gst_hsn_code is not NULL
 			and `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name %s %s
 		group by
-			`tabSales Invoice Item`.parent,
-			`tabSales Invoice Item`.item_code
+			`tabSales Invoice Item`.parent, `tabSales Invoice Item`.item_code, `tabSales Invoice Item`.gst_hsn_code, `tabSales Invoice Item`.stock_uom,
+			`tabGST HSN Code`.description
 		"""
 		% (conditions, match_conditions),
 		filters,
