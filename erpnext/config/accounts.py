@@ -277,6 +277,12 @@ def get_data():
 					"doctype": "Payment Entry",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name": "Accounts Payable Analisis",
+					"doctype": "Supplier",
+					"is_query_report": True,
+				},
 			]
 		},
 		{
@@ -457,6 +463,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Bank Deposit",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Bank Book",
 					"doctype": "Bank Transactions",
 					"is_query_report": True,
 				},
