@@ -19,7 +19,7 @@ def execute(filters=None):
 			"fieldname": "entry",
 			"label": _("Document"),
 			"fieldtype": "Link",
-			"options": "Cancellation Of Invoices",
+			"options": "Sales Invoice",
 			"width": 300
 		},
 		{
