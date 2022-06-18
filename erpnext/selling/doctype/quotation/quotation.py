@@ -115,17 +115,8 @@ class Quotation(SellingController):
 		opp.set_status(status=status, update=True)
 
 	@frappe.whitelist()
-<<<<<<< HEAD
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
-		if not self.has_sales_order():
-=======
-	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
-<<<<<<< HEAD
-		if not self.is_fully_ordered() or self.is_partially_ordered():
->>>>>>> 02f9441e1a (fix: Quotation lost update)
-=======
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
->>>>>>> e457288dba (chore: fix condition)
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			frappe.db.set(self, "status", "Lost")
