@@ -325,7 +325,7 @@ class PartyLedgerSummaryReport(object):
 				voucher_type not in ('Sales Invoice', 'Purchase Invoice')
 				and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle, `tabAccount` acc
-					where acc.name = gle.account and acc.root_type in ('Income', 'Expense')
+					where acc.name = gle.account and (acc.root_type in ('Income', 'Expense') or acc.account_type = 'Tax')
 					and gle.posting_date between %(from_date)s and %(to_date)s
 				) and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle
@@ -354,10 +354,13 @@ def get_adjustment_details(adjustment_voucher_entries, invoice_dr_or_cr, reverse
 		parties = {}
 		vouchers = {}
 		adj_accounts = {}
+		total_adj_amount = 0
 		has_irrelevant_entry = False
 
 		# build voucher's party, voucher and adjustment accounts map
 		for gle in voucher_gl_entries:
+			account_root_type, account_type = frappe.get_cached_value("Account", gle.account, ["root_type", "account_type"])
+
 			if gle.party:
 				parties.setdefault(gle.party, 0)
 				parties[gle.party] += gle.get(reverse_dr_or_cr) - gle.get(invoice_dr_or_cr)
@@ -367,9 +370,10 @@ def get_adjustment_details(adjustment_voucher_entries, invoice_dr_or_cr, reverse
 					vouchers.setdefault(voucher_tuple, 0)
 					vouchers[voucher_tuple] += gle.get(reverse_dr_or_cr) - gle.get(invoice_dr_or_cr)
 
-			elif frappe.get_cached_value("Account", gle.account, "root_type") in ("Income", "Expense"):
+			elif account_root_type in ("Income", "Expense") or account_type == "Tax":
 				adj_accounts.setdefault(gle.account, 0)
 				adj_accounts[gle.account] += gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
+				total_adj_amount += gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
 			elif frappe.get_cached_value("Account", gle.account, "account_type") not in ("Bank", "Cash"):
 				has_irrelevant_entry = True
 
@@ -377,49 +381,53 @@ def get_adjustment_details(adjustment_voucher_entries, invoice_dr_or_cr, reverse
 		if parties and adj_accounts:
 			if len(parties) == 1:
 				party = list(parties.keys())[0]
-				for adj_account, amount in iteritems(adj_accounts):
-					if amount <= 0:
+				for adj_account, adj_amount in iteritems(adj_accounts):
+					if adj_amount <= 0:
 						continue
 
 					adjustment_details.accounts.add(adj_account)
 					adjustment_details.parties.setdefault(party, {})
 					adjustment_details.parties[party].setdefault(adj_account, 0)
-					adjustment_details.parties[party][adj_account] += amount
+					adjustment_details.parties[party][adj_account] += adj_amount
 
 			elif len(adj_accounts) == 1 and not has_irrelevant_entry:
 				adj_account = list(adj_accounts.keys())[0]
-				for party, amount in iteritems(parties):
-					if amount <= 0:
+				party_sum = sum(parties.values())
+
+				for party, party_amount in iteritems(parties):
+					if total_adj_amount <= 0:
 						continue
 
 					adjustment_details.accounts.add(adj_account)
 					adjustment_details.parties.setdefault(party, {})
 					adjustment_details.parties[party].setdefault(adj_account, 0)
-					adjustment_details.parties[party][adj_account] += amount
+					adjustment_details.parties[party][adj_account] += total_adj_amount * (party_amount / party_sum)
 
 		# voucher wise adjustments
 		if vouchers and adj_accounts:
 			if len(vouchers) == 1:
 				voucher = list(vouchers.keys())[0]
-				for adj_account, amount in iteritems(adj_accounts):
-					if amount <= 0:
+				for adj_account, adj_amount in iteritems(adj_accounts):
+					if adj_amount <= 0:
 						continue
 
 					adjustment_details.accounts.add(adj_account)
 					adjustment_details.vouchers.setdefault(voucher, {})
 					adjustment_details.vouchers[voucher].setdefault(adj_account, 0)
-					adjustment_details.vouchers[voucher][adj_account] += amount
+					adjustment_details.vouchers[voucher][adj_account] += adj_amount
 
 			elif len(adj_accounts) == 1 and not has_irrelevant_entry:
 				adj_account = list(adj_accounts.keys())[0]
-				for voucher, amount in iteritems(vouchers):
-					if amount <= 0:
+				vouchers_sum = sum(vouchers.values())
+
+				for voucher, voucher_amount in iteritems(vouchers):
+					if total_adj_amount <= 0:
 						continue
 
 					adjustment_details.accounts.add(adj_account)
 					adjustment_details.vouchers.setdefault(voucher, {})
 					adjustment_details.vouchers[voucher].setdefault(adj_account, 0)
-					adjustment_details.vouchers[voucher][adj_account] += amount
+					adjustment_details.vouchers[voucher][adj_account] += total_adj_amount * (voucher_amount / vouchers_sum)
 
 			# distribute adjustment accounts using ratio of against voucher amounts
 			elif len(parties) == 1:

@@ -7,9 +7,15 @@
  "field_order": [
   "sales_person",
   "contact_no",
+  "column_break_3",
   "allocated_percentage",
+  "column_break_5",
   "allocated_amount",
+  "section_break_7",
+  "sales_commission_category",
+  "column_break_9",
   "commission_rate",
+  "column_break_11",
   "incentives"
  ],
  "fields": [
@@ -82,12 +88,40 @@
    "label": "Incentives",
    "oldfieldname": "incentives",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "sales_commission_category",
+   "fieldtype": "Link",
+   "label": "Sales Commission Category",
+   "options": "Sales Commission Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-02 13:35:22.505581",
+ "modified": "2022-06-15 14:15:00.550271",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Team",

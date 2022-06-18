@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
 from erpnext import get_default_currency
+from erpnext.selling.doctype.sales_commission_category.sales_commission_category import get_commission_rate
+
 
 class SalesPerson(NestedSet):
 	nsm_parent_field = 'parent_sales_person'
@@ -126,3 +128,17 @@ def get_sales_person_from_user():
 	""", frappe.session.user)
 
 	return sales_person[0][0] if sales_person else None
+
+
+@frappe.whitelist()
+def get_sales_person_commission_details(sales_person):
+	out = frappe._dict()
+
+	if sales_person:
+		out.sales_commission_category = frappe.get_cached_value("Sales Person", sales_person, 'sales_commission_category')
+	else:
+		out.sales_commission_category = None
+
+	out.commission_rate = get_commission_rate(out.sales_commission_category)
+
+	return out

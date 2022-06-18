@@ -165,8 +165,6 @@ def get_default_values_dict(applicable_rules, filter_sort=None):
 		filter_sort = ['company', 'transaction_type', 'item_code', 'item_source', 'brand', 'item_group']
 
 	applicable_rules = sorted(applicable_rules, key=lambda d: sorting_function(d))
-	for d in applicable_rules:
-		print("{}: {}".format(d.item_default_rule_name, sorting_function(d)))
 
 	rule_meta = frappe.get_meta("Item Default Rule")
 	values = frappe._dict()

@@ -15,6 +15,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_company_currency
+from erpnext.setup.doctype.sales_person.sales_person import get_sales_person_commission_details
 
 from six import iteritems, string_types
 
@@ -94,11 +95,16 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 		party_details["currency"] = currency
 
 	# sales team
-	if party_type=="Customer" and party.get("sales_team"):
-		party_details["sales_team"] = [{
-			"sales_person": d.sales_person,
-			"allocated_percentage": d.allocated_percentage or None
-		} for d in party.get("sales_team")]
+	if party_type == "Customer" and party.get("sales_team"):
+		party_details["sales_team"] = []
+		for d in party.get("sales_team"):
+			sales_person_details = frappe._dict({
+				"sales_person": d.sales_person,
+				"allocated_percentage": d.allocated_percentage or None
+			})
+			sales_person_details.update(get_sales_person_commission_details(d.sales_person))
+
+			party_details["sales_team"].append(sales_person_details)
 
 	if doctype == "Sales Order":
 		from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding

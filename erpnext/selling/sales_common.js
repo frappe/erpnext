@@ -310,8 +310,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	allocated_percentage: function() {
 		this.calculate_sales_team_contribution();
 	},
-	sales_person: function() {
-		this.calculate_sales_team_contribution();
+	sales_person: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		this.get_sales_person_details(row);
 	},
 
 	warehouse: function(doc, cdt, cdn) {
@@ -372,6 +373,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.doc.total_commission = flt(this.frm.doc.base_net_total * this.frm.doc.commission_rate / 100.0,
 				precision("total_commission"));
 		}
+	},
+
+	get_sales_person_details: function (row) {
+		var me = this;
+
+		if (!row) {
+			return;
+		}
+
+		return frappe.call({
+			method: 'erpnext.setup.doctype.sales_person.sales_person.get_sales_person_commission_details',
+			args: {
+				sales_person: row.sales_person
+			},
+			callback: function (r) {
+				if (r.message) {
+					frappe.model.set_value(row.doctype, row.name, r.message);
+					me.calculate_sales_team_contribution();
+				}
+			}
+		});
 	},
 
 	calculate_sales_team_contribution: function(do_not_refresh) {

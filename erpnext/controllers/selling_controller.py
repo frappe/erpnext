@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, cstr, comma_or
 from frappe import _, throw
-from frappe.model.utils import get_fetch_values
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
 from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.setup.doctype.sales_person.sales_person import get_sales_person_commission_details
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -65,6 +65,7 @@ class SellingController(StockController):
 
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
+		self.set_sales_person_details()
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
 	def set_missing_lead_customer_details(self):
@@ -114,6 +115,11 @@ class SellingController(StockController):
 			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company), force_fields=force_party_fields)
+
+	def set_sales_person_details(self):
+		sales_team = self.get("sales_team", [])
+		for d in sales_team:
+			d.update(get_sales_person_commission_details(d.sales_person))
 
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")

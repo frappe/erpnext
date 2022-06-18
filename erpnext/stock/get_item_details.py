@@ -14,6 +14,7 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor, convert_item_uo
 from erpnext.setup.doctype.item_default_rule.item_default_rule import get_item_default_values
 from erpnext.stock.doctype.price_list.price_list import get_price_list_details
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
+from erpnext.selling.doctype.sales_commission_category.sales_commission_category import get_commission_rate
 
 from six import string_types, iteritems
 
@@ -315,6 +316,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	out.alt_uom_size = item.alt_uom_size if out.alt_uom else 1.0
 	out.alt_uom_qty = out.stock_qty * out.alt_uom_size
 
+	# Sales Commission Category
+	out.sales_commission_category = get_sales_commission_category(item, args)
+	out.commission_rate = get_commission_rate(out.sales_commission_category)
+
 	# calculate last purchase rate
 	if args.get('doctype') in purchase_doctypes:
 		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
@@ -602,6 +607,11 @@ def get_hide_item_code(item, args):
 	default_values = get_item_default_values(item, args)
 	show_item_code = item.get("show_item_code") or default_values.get("show_item_code")
 	return cint(show_item_code != "Yes" if show_item_code else args.get('hide_item_code'))
+
+
+def get_sales_commission_category(item, args):
+	default_values = get_item_default_values(item, args)
+	return default_values.get('sales_commission_category')
 
 
 def get_depreciation_percentage(item, args):

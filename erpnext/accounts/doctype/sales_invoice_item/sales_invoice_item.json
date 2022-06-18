@@ -118,7 +118,6 @@
   "warehouse",
   "force_default_warehouse",
   "is_stock_item",
-  "item_tax_template",
   "target_warehouse",
   "quality_inspection",
   "column_break_21",
@@ -143,9 +142,14 @@
   "base_returned_amount",
   "column_break_107",
   "actual_qty",
+  "item_sales_commission_section",
+  "sales_commission_category",
+  "column_break_139",
+  "commission_rate",
   "accounting_dimension_section",
   "income_account",
   "expense_account",
+  "item_tax_template",
   "dimension_col_break",
   "cost_center",
   "project",
@@ -1393,11 +1397,40 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "sales_commission_category",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Sales Commission Category",
+   "no_copy": 1,
+   "oldfieldname": "delivery_note",
+   "oldfieldtype": "Link",
+   "options": "Sales Commission Category",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "sales_commission_category",
+   "fieldname": "item_sales_commission_section",
+   "fieldtype": "Section Break",
+   "label": "Item Sales Commission"
+  },
+  {
+   "fieldname": "column_break_139",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commission_rate",
+   "fieldtype": "Percent",
+   "label": "Commission Rate",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-01-22 15:27:56.767524",
+ "modified": "2022-06-15 00:19:54.757965",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

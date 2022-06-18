@@ -190,6 +190,10 @@ def get_data():
 						"selling": 1
 					}
 				},
+				{
+					"type": "doctype",
+					"name": "Sales Commission Category",
+				},
 			]
 		},
 		{
@@ -197,19 +201,19 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"label": _("Territory"),
-					"name": "Territory",
-					"icon": "fa fa-sitemap",
-					"link": "Tree/Territory",
-					"description": _("Manage Territory Tree."),
-				},
-				{
-					"type": "doctype",
 					"label": _("Sales Person"),
 					"name": "Sales Person",
 					"icon": "fa fa-sitemap",
 					"link": "Tree/Sales Person",
 					"description": _("Manage Sales Person Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Territory"),
+					"name": "Territory",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Territory",
+					"description": _("Manage Territory Tree."),
 				},
 				{
 					"type": "doctype",
@@ -247,6 +251,14 @@ def get_data():
 					"type": "doctype",
 					"name": "Campaign",
 					"description": _("Sales campaigns."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Sales Person Commission Summary"),
+					"name": "Sales Person Commission Summary",
+					"doctype": "Sales Person",
+					"dependencies": ["Sales Person"],
 				},
 			]
 		},

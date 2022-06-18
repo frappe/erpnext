@@ -11,7 +11,7 @@
   "name_and_employee_id",
   "sales_person_name",
   "parent_sales_person",
-  "commission_rate",
+  "sales_commission_category",
   "is_group",
   "enabled",
   "cb0",
@@ -50,13 +50,6 @@
    "oldfieldname": "parent_sales_person",
    "oldfieldtype": "Link",
    "options": "Sales Person"
-  },
-  {
-   "fieldname": "commission_rate",
-   "fieldtype": "Percent",
-   "label": "Commission Rate",
-   "permlevel": 1,
-   "print_hide": 1
   },
   {
    "default": "0",
@@ -149,12 +142,20 @@
    "fieldtype": "Data",
    "label": "Employee Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_commission_category",
+   "fieldtype": "Link",
+   "label": "Sales Commission Category",
+   "options": "Sales Commission Category",
+   "permlevel": 1,
+   "print_hide": 1
   }
  ],
  "icon": "icon-user",
  "idx": 1,
  "is_tree": 1,
- "modified": "2022-06-10 14:11:01.327364",
+ "modified": "2022-06-15 13:41:23.144873",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",

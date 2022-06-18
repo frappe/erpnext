@@ -18,14 +18,6 @@
   "column_break_9",
   "item_source",
   "company",
-  "stock_defaults_section",
-  "default_warehouse",
-  "column_break_14",
-  "force_default_warehouse",
-  "column_break_6",
-  "allow_zero_valuation_rate",
-  "column_break_18",
-  "target_warehouse_validation",
   "accounting_defaults_section",
   "income_account",
   "expense_account",
@@ -35,20 +27,30 @@
   "column_break_15",
   "selling_apply_discount_after_taxes",
   "buying_apply_discount_after_taxes",
+  "stock_defaults_section",
+  "default_warehouse",
+  "column_break_14",
+  "force_default_warehouse",
+  "column_break_6",
+  "allow_zero_valuation_rate",
+  "column_break_18",
+  "target_warehouse_validation",
+  "item_tax_section",
+  "taxes",
   "billing_defaults_section",
-  "bill_only_to_customer",
+  "default_supplier",
+  "default_supplier_name",
   "column_break_29",
+  "bill_only_to_customer",
   "bill_only_to_customer_name",
   "other_defaults_section",
-  "default_supplier",
+  "show_item_code",
   "column_break_20",
   "default_price_list",
   "column_break_22",
-  "default_terms",
+  "sales_commission_category",
   "column_break_39",
-  "show_item_code",
-  "item_tax_section",
-  "taxes"
+  "default_terms"
  ],
  "fields": [
   {
@@ -200,7 +202,7 @@
   {
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
-   "label": "Filters"
+   "label": "Filter Criteria"
   },
   {
    "fieldname": "item_code",
@@ -286,7 +288,7 @@
   {
    "fieldname": "billing_defaults_section",
    "fieldtype": "Section Break",
-   "label": "Billing Defaults"
+   "label": "Party Defaults"
   },
   {
    "fieldname": "bill_only_to_customer",
@@ -325,9 +327,25 @@
    "in_standard_filter": 1,
    "label": "Show Item Code",
    "options": "\nNo\nYes"
+  },
+  {
+   "depends_on": "eval:doc.default_supplier && doc.default_supplier_name != doc.default_supplier",
+   "fetch_from": "default_supplier.supplier_name",
+   "fieldname": "default_supplier_name",
+   "fieldtype": "Data",
+   "label": "Default Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_commission_category",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Commission Category",
+   "options": "Sales Commission Category"
   }
  ],
- "modified": "2022-06-14 12:10:54.641659",
+ "modified": "2022-06-15 00:05:25.074172",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Default Rule",

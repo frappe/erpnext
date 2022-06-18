@@ -1,0 +1,115 @@
+{
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:commission_category_name",
+ "creation": "2022-06-10 14:10:52.769123",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "commission_category_name",
+  "commission_rate",
+  "column_break_3",
+  "not_payable_if_outstanding",
+  "consider_deductions",
+  "section_break_6",
+  "late_payment_deduction"
+ ],
+ "fields": [
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "commission_category_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Commission Category Name",
+   "oldfieldname": "sales_person_name",
+   "oldfieldtype": "Data",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "commission_rate",
+   "fieldtype": "Percent",
+   "label": "Commission Rate",
+   "permlevel": 1,
+   "print_hide": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "0",
+   "fieldname": "not_payable_if_outstanding",
+   "fieldtype": "Check",
+   "label": "Not Payable if Outstanding"
+  },
+  {
+   "default": "0",
+   "fieldname": "consider_deductions",
+   "fieldtype": "Check",
+   "label": "Deduct Commission for Payment Deductions"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "late_payment_deduction",
+   "fieldtype": "Table",
+   "label": "Late Payment Deduction",
+   "options": "Commission Category Late Payment"
+  }
+ ],
+ "icon": "icon-user",
+ "modified": "2022-06-16 22:52:40.673508",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Commission Category",
+ "nsm_parent_field": "parent_sales_person",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "commission_rate",
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

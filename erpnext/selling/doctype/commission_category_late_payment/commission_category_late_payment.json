@@ -1,0 +1,37 @@
+{
+ "creation": "2022-06-16 22:51:55.548607",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "days",
+  "deduction_percent"
+ ],
+ "fields": [
+  {
+   "fieldname": "days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Later Than Days",
+   "reqd": 1
+  },
+  {
+   "fieldname": "deduction_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Deduction (%)",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-06-16 22:53:13.736714",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Commission Category Late Payment",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

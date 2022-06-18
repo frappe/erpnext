@@ -13,6 +13,17 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			reqd: 1,
 		},
 		{
+			fieldname: "date_type",
+			label: __("Which Date"),
+			fieldtype: "Select",
+			options: [
+				'Invoice Date',
+				'Clearing Date'
+			],
+			default: "Invoice Date",
+			reqd: 1,
+		},
+		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
@@ -30,7 +41,8 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			fieldname: "sales_person",
 			label: __("Sales Person"),
 			fieldtype: "Link",
-			options: "Sales Person"
+			options: "Sales Person",
+			bold: 1,
 		},
 		{
 			fieldname: "territory",
@@ -45,21 +57,51 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			options: "Customer",
 		},
 		{
+			fieldname: "name",
+			label: __("Sales Invoice"),
+			fieldtype: "Link",
+			options: "Sales Invoice",
+			filters: {
+				"docstatus": 1,
+			}
+		},
+		{
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type"
+		},
+		{
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Cost Center', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
+			}
+		},
+		{
 			fieldname: "exclude_unpaid_invoices",
 			label: __("Exclude Unpaid Invoices"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "exclude_zero_commission",
+			label: __("Exclude Zero Commission Rate"),
 			fieldtype: "Check",
 		},
 		{
 			fieldname: "show_deduction_details",
 			label: __("Show Deduction Details"),
 			fieldtype: "Check",
-		}
+		},
 	],
 
 	formatter: function (value, row, column, data, default_formatter) {
 		var style = {};
 
-		if (column.fieldname == "allocated_amount") {
+		if (["net_contribution_amount", "commission_amount"].includes(column.fieldname)) {
 			style['font-weight'] = 'bold';
 		}
 
@@ -83,8 +125,15 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			style['color'] = 'blue';
 		}
 
-		if (data && flt(data.base_net_total) < 0 && ['name', 'base_net_total', 'allocated_amount', 'grand_total'].includes(column.fieldname)) {
+		if (flt(value) && column.fieldname == "late_payment_deduction_percent") {
 			style['color'] = 'red';
+		}
+
+		if (data && flt(data.base_net_amount) < 0) {
+			if (['name', 'base_net_amount', 'contribution_amount', 'net_contribution_amount', 'commission_amount',
+					'base_grand_total'].includes(column.fieldname)) {
+				style['color'] = 'red';
+			}
 		}
 
 		return default_formatter(value, row, column, data, {css: style});
