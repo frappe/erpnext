@@ -103,7 +103,7 @@ def return_data(filters):
 	payment_entries = frappe.get_all("Payment Entry", ["*"], filters = condition_payment_entry, order_by = "name asc")
 
 	for payment_entry in payment_entries:
-		row = [payment_entry.posting_date, payment_entry.party, "Payment Entry", payment_entry.name, payment_entry.company, payment_entry.mode_of_payment, payment_entry.total_allocated_amount, payment_entry.paid_amount, payment_entry.unallocated_amount, payment_entry.paid_to_account_currency]
+		row = [payment_entry.posting_date, payment_entry.party, "Payment Entry", payment_entry.name, payment_entry.company, payment_entry.mode_of_payment, 0, payment_entry.paid_amount, payment_entry.unallocated_amount, payment_entry.paid_to_account_currency]
 		data.append(row)
 	
 	condition_credit_note = return_filters(filters, from_date, to_date)
