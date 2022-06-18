@@ -119,7 +119,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		        receive more than the required qty in the SCO.
 		Expected Result: Error Raised for Over Receipt against SCO.
 		"""
-		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+		from erpnext.controllers.subcontracting_controller import (
 			make_rm_stock_entry as make_subcontract_transfer_entry,
 		)
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
@@ -188,8 +188,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, scr2.submit)
 
 	def test_subcontracted_scr_for_multi_transfer_batches(self):
+		from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-			make_rm_stock_entry,
 			make_subcontracting_receipt,
 		)
 

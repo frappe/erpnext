@@ -5,6 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
+from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_subcontracting_order,
 	make_service_item,
@@ -21,7 +22,6 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-	make_rm_stock_entry,
 	make_subcontracting_receipt,
 )
 

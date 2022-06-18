@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.budget.budget import validate_expense_against_budg
 from erpnext.accounts.party import get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
-from erpnext.controllers.stock_controller import StockController
+from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.utils import get_incoming_rate
 
@@ -20,7 +20,10 @@ class QtyMismatchError(ValidationError):
 	pass
 
 
-class BuyingController(StockController):
+class BuyingController(SubcontractingController):
+	def __setup__(self):
+		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
+
 	def get_feed(self):
 		if self.get("supplier_name"):
 			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency, self.grand_total)
@@ -51,6 +54,8 @@ class BuyingController(StockController):
 
 			# sub-contracting
 			self.validate_for_subcontracting()
+			if self.get("is_old_subcontracting_flow"):
+				self.create_raw_materials_supplied()
 			self.set_landed_cost_voucher_amount()
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
@@ -251,9 +256,18 @@ class BuyingController(StockController):
 					)
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				item.valuation_rate = (
-					item.base_net_amount + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
-				) / qty_in_stock_uom
+				if self.get("is_old_subcontracting_flow"):
+					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
+					item.valuation_rate = (
+						item.base_net_amount
+						+ item.item_tax_amount
+						+ item.rm_supp_cost
+						+ flt(item.landed_cost_voucher_amount)
+					) / qty_in_stock_uom
+				else:
+					item.valuation_rate = (
+						item.base_net_amount + item.item_tax_amount + flt(item.landed_cost_voucher_amount)
+					) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0
 
@@ -312,6 +326,19 @@ class BuyingController(StockController):
 		if self.is_subcontracted:
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
+
+			if self.get("is_old_subcontracting_flow"):
+				for item in self.get("items"):
+					if item in self.sub_contracted_items and not item.bom:
+						frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
+
+				if self.doctype != "Purchase Order":
+					return
+
+				for row in self.get("supplied_items"):
+					if not row.reserve_warehouse:
+						msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
+						frappe.throw(_(msg))
 		else:
 			for item in self.get("items"):
 				if item.get("bom"):
@@ -440,7 +467,9 @@ class BuyingController(StockController):
 						sle.update(
 							{
 								"incoming_rate": incoming_rate,
-								"recalculate_rate": 1 if (self.is_subcontracted and d.fg_item) or d.from_warehouse else 0,
+								"recalculate_rate": 1
+								if (self.is_subcontracted and (d.bom or d.fg_item)) or d.from_warehouse
+								else 0,
 							}
 						)
 					sl_entries.append(sle)
@@ -468,6 +497,8 @@ class BuyingController(StockController):
 					)
 				)
 
+		if self.get("is_old_subcontracting_flow"):
+			self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(
 			sl_entries,
 			allow_negative_stock=allow_negative_stock,
@@ -494,6 +525,8 @@ class BuyingController(StockController):
 					)
 
 				po_obj.update_ordered_qty(po_item_rows)
+				if self.get("is_old_subcontracting_flow"):
+					po_obj.update_reserved_qty_for_subcontract()
 
 	def on_submit(self):
 		if self.get("is_return"):
@@ -718,7 +751,10 @@ class BuyingController(StockController):
 		if self.doctype == "Material Request":
 			return
 
-		validate_item_type(self, "is_purchase_item", "purchase")
+		if self.get("is_old_subcontracting_flow"):
+			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
+		else:
+			validate_item_type(self, "is_purchase_item", "purchase")
 
 
 def get_asset_item_details(asset_items):

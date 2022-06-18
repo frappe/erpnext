@@ -9,13 +9,15 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.controllers.subcontracting_controller import (
+	get_materials_from_supplier,
+	make_rm_stock_entry,
+)
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-	get_materials_from_supplier,
-	make_rm_stock_entry,
 	make_subcontracting_receipt,
 )
 

@@ -616,11 +616,13 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
    "options": "BOM",
-   "read_only": 1
+   "read_only": 1,
+   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
   },
   {
    "default": "0",
@@ -872,7 +874,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-15 17:04:07.191013",
+ "modified": "2022-06-15 16:02:15.196835",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
@@ -880,5 +882,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

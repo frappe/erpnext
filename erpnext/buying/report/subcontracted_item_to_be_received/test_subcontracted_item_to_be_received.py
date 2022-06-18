@@ -50,6 +50,7 @@ class TestSubcontractedItemToBeReceived(FrappeTestCase):
 		col, data = execute(
 			filters=frappe._dict(
 				{
+					"order_type": "Subcontracting Order",
 					"supplier": sco.supplier,
 					"from_date": frappe.utils.get_datetime(
 						frappe.utils.add_to_date(sco.transaction_date, days=-10)
@@ -60,7 +61,7 @@ class TestSubcontractedItemToBeReceived(FrappeTestCase):
 		)
 		self.assertEqual(data[0]["pending_qty"], 5)
 		self.assertEqual(data[0]["received_qty"], 5)
-		self.assertEqual(data[0]["subcontracting_order"], sco.name)
+		self.assertEqual(data[0]["subcontract_order"], sco.name)
 		self.assertEqual(data[0]["supplier"], sco.supplier)
 
 

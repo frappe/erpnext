@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, getdate, nowdate
 
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 
@@ -78,7 +78,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status()
-		self.set_consumed_qty_in_sco()
+		self.set_consumed_qty_in_subcontract_order()
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
@@ -97,7 +97,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
-		self.set_consumed_qty_in_sco()
+		self.set_consumed_qty_in_subcontract_order()
 		self.set_subcontracting_order_status()
 		self.update_status()
 
@@ -161,17 +161,6 @@ class SubcontractingReceipt(SubcontractingController):
 			for item in self.items:
 				if not item.expense_account:
 					item.expense_account = expense_account
-
-	@frappe.whitelist()
-	def get_current_stock(self):
-		for item in self.get("supplied_items"):
-			if self.supplier_warehouse:
-				actual_qty = frappe.db.get_value(
-					"Bin",
-					{"item_code": item.rm_item_code, "warehouse": self.supplier_warehouse},
-					"actual_qty",
-				)
-				item.current_stock = flt(actual_qty) or 0
 
 	def update_status(self, status=None, update_modified=False):
 		if self.docstatus >= 1 and not status:

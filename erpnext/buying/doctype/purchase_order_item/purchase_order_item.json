@@ -574,18 +574,20 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
    "options": "BOM",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
   },
   {
    "default": "0",
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Include Exploded Items",
    "print_hide": 1
   },
@@ -849,27 +851,27 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:parent.is_subcontracted",
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
    "fieldname": "fg_item",
    "fieldtype": "Link",
    "label": "Finished Good Item",
-   "mandatory_depends_on": "eval:parent.is_subcontracted",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
    "options": "Item"
   },
   {
    "default": "1",
-   "depends_on": "eval:parent.is_subcontracted",
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
    "fieldname": "fg_item_qty",
    "fieldtype": "Float",
    "label": "Finished Good Item Qty",
-   "mandatory_depends_on": "eval:parent.is_subcontracted"
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-07 14:53:16.684010",
+ "modified": "2022-06-16 06:00:01.624317",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

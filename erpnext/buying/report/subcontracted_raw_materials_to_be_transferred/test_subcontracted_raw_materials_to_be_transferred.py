@@ -9,14 +9,12 @@ from frappe.tests.utils import FrappeTestCase
 from erpnext.buying.report.subcontracted_raw_materials_to_be_transferred.subcontracted_raw_materials_to_be_transferred import (
 	execute,
 )
+from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_subcontracting_order,
 	make_service_item,
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
-	make_rm_stock_entry,
-)
 
 
 class TestSubcontractedItemToBeTransferred(FrappeTestCase):
@@ -45,6 +43,7 @@ class TestSubcontractedItemToBeTransferred(FrappeTestCase):
 		col, data = execute(
 			filters=frappe._dict(
 				{
+					"order_type": "Subcontracting Order",
 					"supplier": sco.supplier,
 					"from_date": frappe.utils.get_datetime(
 						frappe.utils.add_to_date(sco.transaction_date, days=-10)
@@ -55,12 +54,12 @@ class TestSubcontractedItemToBeTransferred(FrappeTestCase):
 		)
 		sco.reload()
 
-		sco_data = [row for row in data if row.get("subcontracting_order") == sco.name]
+		sco_data = [row for row in data if row.get("subcontract_order") == sco.name]
 		# Alphabetically sort to be certain of order
 		sco_data = sorted(sco_data, key=lambda i: i["rm_item_code"])
 
 		self.assertEqual(len(sco_data), 2)
-		self.assertEqual(sco_data[0]["subcontracting_order"], sco.name)
+		self.assertEqual(sco_data[0]["subcontract_order"], sco.name)
 
 		self.assertEqual(sco_data[0]["rm_item_code"], "_Test Item")
 		self.assertEqual(sco_data[0]["p_qty"], 8)

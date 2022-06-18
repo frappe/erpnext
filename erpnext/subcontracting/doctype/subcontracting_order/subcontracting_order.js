@@ -24,7 +24,8 @@ frappe.ui.form.on('Subcontracting Order', {
 			return {
 				filters: {
 					docstatus: 1,
-					is_subcontracted: 1
+					is_subcontracted: 1,
+					is_old_subcontracting_flow: 0
 				}
 			};
 		});
@@ -115,10 +116,14 @@ frappe.ui.form.on('Subcontracting Order', {
 		if (sco_rm_details && sco_rm_details.length) {
 			frm.add_custom_button(__('Return of Components'), () => {
 				frm.call({
-					method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.get_materials_from_supplier',
+					method: 'erpnext.controllers.subcontracting_controller.get_materials_from_supplier',
 					freeze: true,
 					freeze_message: __('Creating Stock Entry'),
-					args: { subcontracting_order: frm.doc.name, sco_rm_details: sco_rm_details },
+					args: {
+						subcontract_order: frm.doc.name,
+						rm_details: sco_rm_details,
+						order_doctype: cur_frm.doc.doctype
+					},
 					callback: function (r) {
 						if (r && r.message) {
 							const doc = frappe.model.sync(r.message);
@@ -306,10 +311,11 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 
 	make_rm_stock_entry(rm_items) {
 		frappe.call({
-			method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_rm_stock_entry',
+			method: 'erpnext.controllers.subcontracting_controller.make_rm_stock_entry',
 			args: {
-				subcontracting_order: cur_frm.doc.name,
-				rm_items: rm_items
+				subcontract_order: cur_frm.doc.name,
+				rm_items: rm_items,
+				order_doctype: cur_frm.doc.doctype
 			},
 			callback: (r) => {
 				var doclist = frappe.model.sync(r.message);
