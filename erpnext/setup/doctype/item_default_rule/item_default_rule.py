@@ -233,14 +233,11 @@ def get_item_default_rule_docs():
 
 
 def get_item_default_rule_names():
-	names = frappe.cache().get('item_default_rule_names')
-	if names:
-		names = json.loads(names)
-	else:
+	def generator():
 		names = [d.name for d in frappe.get_all('Item Default Rule')]
-		frappe.cache().set('item_default_rule_names', json.dumps(names))
+		return names
 
-	return names
+	return frappe.local_cache("item_default_rule_names", None, generator, regenerate_if_none=True)
 
 
 def clear_item_default_rule_cache():
