@@ -2,8 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-
-
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
@@ -14,8 +12,7 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		sq = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_purchase_order,
-			sq.name)
+		self.assertRaises(frappe.ValidationError, make_purchase_order, sq.name)
 
 		sq = frappe.get_doc("Supplier Quotation", sq.name)
 		sq.submit()
@@ -32,4 +29,5 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		po.insert()
 
-test_records = frappe.get_test_records('Supplier Quotation')
+
+test_records = frappe.get_test_records("Supplier Quotation")

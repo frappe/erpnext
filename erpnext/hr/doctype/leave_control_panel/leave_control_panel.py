@@ -18,8 +18,12 @@ class LeaveControlPanel(Document):
 
 		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
 
-		e = frappe.db.sql("select name from tabEmployee where status='Active' {condition}"
-			.format(condition=condition_str), tuple(values))
+		e = frappe.db.sql(
+			"select name from tabEmployee where status='Active' {condition}".format(
+				condition=condition_str
+			),
+			tuple(values),
+		)
 
 		return e
 
@@ -27,7 +31,7 @@ class LeaveControlPanel(Document):
 		for f in ["from_date", "to_date", "leave_type", "no_of_days"]:
 			if not self.get(f):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(f)))
-		self.validate_from_to_dates('from_date', 'to_date')
+		self.validate_from_to_dates("from_date", "to_date")
 
 	@frappe.whitelist()
 	def allocate_leave(self):
@@ -39,10 +43,10 @@ class LeaveControlPanel(Document):
 
 		for d in self.get_employees():
 			try:
-				la = frappe.new_doc('Leave Allocation')
+				la = frappe.new_doc("Leave Allocation")
 				la.set("__islocal", 1)
 				la.employee = cstr(d[0])
-				la.employee_name = frappe.db.get_value('Employee',cstr(d[0]),'employee_name')
+				la.employee_name = frappe.db.get_value("Employee", cstr(d[0]), "employee_name")
 				la.leave_type = self.leave_type
 				la.from_date = self.from_date
 				la.to_date = self.to_date

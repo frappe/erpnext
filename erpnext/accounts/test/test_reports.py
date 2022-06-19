@@ -8,18 +8,18 @@ DEFAULT_FILTERS = {
 	"from_date": "2010-01-01",
 	"to_date": "2030-01-01",
 	"period_start_date": "2010-01-01",
-	"period_end_date": "2030-01-01"
+	"period_end_date": "2030-01-01",
 }
 
 
 REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
-	("General Ledger", {"group_by": "Group by Voucher (Consolidated)"} ),
-	("General Ledger", {"group_by": "Group by Voucher (Consolidated)", "include_dimensions": 1} ),
+	("General Ledger", {"group_by": "Group by Voucher (Consolidated)"}),
+	("General Ledger", {"group_by": "Group by Voucher (Consolidated)", "include_dimensions": 1}),
 	("Accounts Payable", {"range1": 30, "range2": 60, "range3": 90, "range4": 120}),
 	("Accounts Receivable", {"range1": 30, "range2": 60, "range3": 90, "range4": 120}),
-	("Consolidated Financial Statement", {"report": "Balance Sheet"} ),
-	("Consolidated Financial Statement", {"report": "Profit and Loss Statement"} ),
-	("Consolidated Financial Statement", {"report": "Cash Flow"} ),
+	("Consolidated Financial Statement", {"report": "Balance Sheet"}),
+	("Consolidated Financial Statement", {"report": "Profit and Loss Statement"}),
+	("Consolidated Financial Statement", {"report": "Cash Flow"}),
 	("Gross Profit", {"group_by": "Invoice"}),
 	("Gross Profit", {"group_by": "Item Code"}),
 	("Gross Profit", {"group_by": "Item Group"}),
@@ -28,8 +28,12 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("Item-wise Sales Register", {}),
 	("Item-wise Purchase Register", {}),
 	("Sales Register", {}),
+	("Sales Register", {"item_group": "All Item Groups"}),
 	("Purchase Register", {}),
-	("Tax Detail", {"mode": "run", "report_name": "Tax Detail"},),
+	(
+		"Tax Detail",
+		{"mode": "run", "report_name": "Tax Detail"},
+	),
 ]
 
 OPTIONAL_FILTERS = {}

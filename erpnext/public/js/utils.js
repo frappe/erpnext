@@ -125,7 +125,7 @@ $.extend(erpnext.utils, {
 	},
 
 	add_indicator_for_multicompany: function(frm, info) {
-		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
 		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
 
@@ -213,8 +213,10 @@ $.extend(erpnext.utils, {
 						filters.splice(index, 0, {
 							"fieldname": dimension["fieldname"],
 							"label": __(dimension["label"]),
-							"fieldtype": "Link",
-							"options": dimension["document_type"]
+							"fieldtype": "MultiSelectList",
+							get_data: function(txt) {
+								return frappe.db.get_link_options(dimension["document_type"], txt);
+							},
 						});
 					}
 				});
@@ -483,7 +485,7 @@ erpnext.utils.update_child_items = function(opts) {
 			if (frm.doc.doctype == 'Sales Order') {
 				filters = {"is_sales_item": 1};
 			} else if (frm.doc.doctype == 'Purchase Order') {
-				if (frm.doc.is_subcontracted == "Yes") {
+				if (frm.doc.is_subcontracted) {
 					filters = {"is_sub_contracted_item": 1};
 				} else {
 					filters = {"is_purchase_item": 1};

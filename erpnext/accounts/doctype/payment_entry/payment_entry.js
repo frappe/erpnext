@@ -112,8 +112,6 @@ frappe.ui.form.on('Payment Entry', {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
 			} else if (frm.doc.party_type == "Employee") {
 				var doctypes = ["Expense Claim", "Journal Entry"];
-			} else if (frm.doc.party_type == "Student") {
-				var doctypes = ["Fees"];
 			} else {
 				var doctypes = ["Journal Entry"];
 			}
@@ -224,10 +222,7 @@ frappe.ui.form.on('Payment Entry', {
 			(frm.doc.total_allocated_amount > party_amount)));
 
 		frm.toggle_display("set_exchange_gain_loss",
-			(frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount &&
-				((frm.doc.paid_from_account_currency != company_currency ||
-					frm.doc.paid_to_account_currency != company_currency) &&
-					frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency)));
+			frm.doc.paid_amount && frm.doc.received_amount && frm.doc.difference_amount);
 
 		frm.refresh_fields();
 	},
@@ -346,6 +341,8 @@ frappe.ui.form.on('Payment Entry', {
 			}
 			frm.set_party_account_based_on_party = true;
 
+			let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_details",
 				args: {
@@ -379,7 +376,11 @@ frappe.ui.form.on('Payment Entry', {
 								if (r.message.bank_account) {
 									frm.set_value("bank_account", r.message.bank_account);
 								}
-							}
+							},
+							() => frm.events.set_current_exchange_rate(frm, "source_exchange_rate",
+									frm.doc.paid_from_account_currency, company_currency),
+							() => frm.events.set_current_exchange_rate(frm, "target_exchange_rate",
+									frm.doc.paid_to_account_currency, company_currency)
 						]);
 					}
 				}
@@ -483,14 +484,14 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_from_account_currency: function(frm) {
-		if(!frm.doc.paid_from_account_currency) return;
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		if(!frm.doc.paid_from_account_currency || !frm.doc.company) return;
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		if (frm.doc.paid_from_account_currency == company_currency) {
 			frm.set_value("source_exchange_rate", 1);
 		} else if (frm.doc.paid_from){
 			if (in_list(["Internal Transfer", "Pay"], frm.doc.payment_type)) {
-				var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+				let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 				frappe.call({
 					method: "erpnext.setup.utils.get_exchange_rate",
 					args: {
@@ -510,8 +511,8 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	paid_to_account_currency: function(frm) {
-		if(!frm.doc.paid_to_account_currency) return;
-		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+		if(!frm.doc.paid_to_account_currency || !frm.doc.company) return;
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
 		frm.events.set_current_exchange_rate(frm, "target_exchange_rate",
 			frm.doc.paid_to_account_currency, company_currency);
@@ -526,7 +527,8 @@ frappe.ui.form.on('Payment Entry', {
 				to_currency: to_currency
 			},
 			callback: function(r, rt) {
-				frm.set_value(exchange_rate_field, r.message);
+				const ex_rate = flt(r.message, frm.get_field(exchange_rate_field).get_precision());
+				frm.set_value(exchange_rate_field, ex_rate);
 			}
 		})
 	},
@@ -751,8 +753,7 @@ frappe.ui.form.on('Payment Entry', {
 					if(
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier")  ||
-						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
-						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
+						(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
 							if (!frm.doc.paid_amount)
@@ -794,8 +795,7 @@ frappe.ui.form.on('Payment Entry', {
 		if (
 				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Customer") ||
 				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Supplier") ||
-				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee") ||
-				(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
+				(frm.doc.payment_type=="Pay" && frm.doc.party_type=="Employee")
 			) {
 				if(total_positive_outstanding_including_order > paid_amount) {
 					var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;

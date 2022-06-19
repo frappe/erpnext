@@ -19,21 +19,20 @@ class TrainingEvent(Document):
 		self.set_status_for_attendees()
 
 	def set_employee_emails(self):
-		self.employee_emails = ', '.join(get_employee_emails([d.employee
-			for d in self.employees]))
+		self.employee_emails = ", ".join(get_employee_emails([d.employee for d in self.employees]))
 
 	def validate_period(self):
 		if time_diff_in_seconds(self.end_time, self.start_time) <= 0:
-			frappe.throw(_('End time cannot be before start time'))
+			frappe.throw(_("End time cannot be before start time"))
 
 	def set_status_for_attendees(self):
-		if self.event_status == 'Completed':
+		if self.event_status == "Completed":
 			for employee in self.employees:
-				if employee.attendance == 'Present' and employee.status != 'Feedback Submitted':
-					employee.status = 'Completed'
+				if employee.attendance == "Present" and employee.status != "Feedback Submitted":
+					employee.status = "Completed"
 
-		elif self.event_status == 'Scheduled':
+		elif self.event_status == "Scheduled":
 			for employee in self.employees:
-				employee.status = 'Open'
+				employee.status = "Open"
 
 		self.db_update_all()

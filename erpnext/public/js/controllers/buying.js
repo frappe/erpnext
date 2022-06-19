@@ -74,6 +74,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 		me.frm.set_query('supplier_address', erpnext.queries.address_query);
 
 		me.frm.set_query('billing_address', erpnext.queries.company_address_query);
+		erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
 		if(this.frm.fields_dict.supplier) {
 			this.frm.set_query("supplier", function() {
@@ -81,7 +82,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if (me.frm.doc.is_subcontracted == "Yes") {
+			if (me.frm.doc.is_subcontracted) {
 				return{
 					query: "erpnext.controllers.queries.item_query",
 					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
@@ -90,7 +91,7 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1 }
+					filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1, 'has_variants': 0}
 				}
 			}
 		});

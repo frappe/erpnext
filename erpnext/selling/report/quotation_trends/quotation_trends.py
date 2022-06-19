@@ -8,7 +8,8 @@ from erpnext.controllers.trends import get_columns, get_data
 
 
 def execute(filters=None):
-	if not filters: filters ={}
+	if not filters:
+		filters = {}
 	data = []
 	conditions = get_columns(filters, "Quotation")
 	data = get_data(filters, conditions)
@@ -16,6 +17,7 @@ def execute(filters=None):
 	chart_data = get_chart_data(data, conditions, filters)
 
 	return conditions["columns"], data, None, chart_data
+
 
 def get_chart_data(data, conditions, filters):
 	if not (data and conditions):
@@ -29,32 +31,28 @@ def get_chart_data(data, conditions, filters):
 
 	# fetch only periodic columns as labels
 	columns = conditions.get("columns")[start:-2][1::2]
-	labels = [column.split(':')[0] for column in columns]
+	labels = [column.split(":")[0] for column in columns]
 	datapoints = [0] * len(labels)
 
 	for row in data:
 		# If group by filter, don't add first row of group (it's already summed)
-		if not row[start-1]:
+		if not row[start - 1]:
 			continue
 		# Remove None values and compute only periodic data
 		row = [x if x else 0 for x in row[start:-2]]
-		row  = row[1::2]
+		row = row[1::2]
 
 		for i in range(len(row)):
 			datapoints[i] += row[i]
 
 	return {
-		"data" : {
-			"labels" : labels,
-			"datasets" : [
-				{
-					"name" : _("{0}").format(filters.get("period")) + _(" Quoted Amount"),
-					"values" : datapoints
-				}
-			]
+		"data": {
+			"labels": labels,
+			"datasets": [
+				{"name": _(filters.get("period")) + " " + _("Quoted Amount"), "values": datapoints}
+			],
 		},
-		"type" : "line",
-		"lineOptions": {
-			"regionFill": 1
-		}
+		"type": "line",
+		"lineOptions": {"regionFill": 1},
+		"fieldtype": "Currency",
 	}

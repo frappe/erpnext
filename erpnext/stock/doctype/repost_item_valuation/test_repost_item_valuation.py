@@ -1,20 +1,30 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
+
+from unittest.mock import MagicMock, call
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
+from frappe.utils.data import add_to_date, today
 
+from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
+from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import (
 	in_configured_timeslot,
 )
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.tests.test_utils import StockTestMixin
 from erpnext.stock.utils import PendingRepostingError
 
 
-class TestRepostItemValuation(unittest.TestCase):
+class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
+	def tearDown(self):
+		frappe.flags.dont_execute_stock_reposts = False
+
 	def test_repost_time_slot(self):
 		repost_settings = frappe.get_doc("Stock Reposting Settings")
 
@@ -153,7 +163,7 @@ class TestRepostItemValuation(unittest.TestCase):
 			posting_date=today,
 			posting_time="00:01:00",
 		)
-		riv.flags.dont_run_in_test = True # keep it queued
+		riv.flags.dont_run_in_test = True  # keep it queued
 		riv.submit()
 
 		stock_settings = frappe.get_doc("Stock Settings")
@@ -162,3 +172,103 @@ class TestRepostItemValuation(unittest.TestCase):
 		self.assertRaises(PendingRepostingError, stock_settings.save)
 
 		riv.set_status("Skipped")
+
+	def test_prevention_of_cancelled_transaction_riv(self):
+		frappe.flags.dont_execute_stock_reposts = True
+
+		item = make_item()
+		warehouse = "_Test Warehouse - _TC"
+		old = make_stock_entry(item_code=item.name, to_warehouse=warehouse, qty=2, rate=5)
+		_new = make_stock_entry(item_code=item.name, to_warehouse=warehouse, qty=5, rate=10)
+
+		old.cancel()
+
+		riv = frappe.get_last_doc(
+			"Repost Item Valuation", {"voucher_type": old.doctype, "voucher_no": old.name}
+		)
+		self.assertRaises(frappe.ValidationError, riv.cancel)
+
+		riv.db_set("status", "Skipped")
+		riv.reload()
+		riv.cancel()  # it should cancel now
+
+	def test_queue_progress_serialization(self):
+		# Make sure set/tuple -> list behaviour is retained.
+		self.assertEqual(
+			[["a", "b"], ["c", "d"]],
+			sorted(frappe.parse_json(frappe.as_json(set([("a", "b"), ("c", "d")])))),
+		)
+
+	def test_gl_repost_progress(self):
+		from erpnext.accounts import utils
+
+		# lower numbers to simplify test
+		orig_chunk_size = utils.GL_REPOSTING_CHUNK
+		utils.GL_REPOSTING_CHUNK = 1
+		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
+
+		doc = frappe.new_doc("Repost Item Valuation")
+		doc.db_set = MagicMock()
+
+		vouchers = []
+		company = "_Test Company with perpetual inventory"
+		posting_date = today()
+
+		for _ in range(3):
+			se = make_stock_entry(company=company, qty=1, rate=2, target="Stores - TCP1")
+			vouchers.append((se.doctype, se.name))
+
+		repost_gle_for_stock_vouchers(stock_vouchers=vouchers, posting_date=posting_date, repost_doc=doc)
+		self.assertIn(call("gl_reposting_index", 1), doc.db_set.mock_calls)
+		doc.db_set.reset_mock()
+
+		doc.gl_reposting_index = 1
+		repost_gle_for_stock_vouchers(stock_vouchers=vouchers, posting_date=posting_date, repost_doc=doc)
+
+		self.assertNotIn(call("gl_reposting_index", 1), doc.db_set.mock_calls)
+
+	def test_gl_complete_gl_reposting(self):
+		from erpnext.accounts import utils
+
+		# lower numbers to simplify test
+		orig_chunk_size = utils.GL_REPOSTING_CHUNK
+		utils.GL_REPOSTING_CHUNK = 2
+		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
+
+		item = self.make_item().name
+
+		company = "_Test Company with perpetual inventory"
+
+		for _ in range(10):
+			make_stock_entry(item=item, company=company, qty=1, rate=10, target="Stores - TCP1")
+
+		# consume
+		consumption = make_stock_entry(item=item, company=company, qty=1, source="Stores - TCP1")
+
+		self.assertGLEs(
+			consumption,
+			[{"credit": 10, "debit": 0}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
+
+		# backdated receipt
+		backdated_receipt = make_stock_entry(
+			item=item,
+			company=company,
+			qty=1,
+			rate=50,
+			target="Stores - TCP1",
+			posting_date=add_to_date(today(), days=-1),
+		)
+		self.assertGLEs(
+			backdated_receipt,
+			[{"credit": 0, "debit": 50}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
+
+		# check that original consumption GLe is updated
+		self.assertGLEs(
+			consumption,
+			[{"credit": 50, "debit": 0}],
+			gle_filters={"account": "Stock In Hand - TCP1"},
+		)
