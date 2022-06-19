@@ -323,7 +323,6 @@ doc_events = {
 		"validate": [
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.validate_returns",
-			"erpnext.regional.india.utils.update_taxable_values",
 		]
 	},
 	"Payment Entry": {
