@@ -139,23 +139,13 @@ class UOMConversionGraph:
 
 def get_conversion_map():
 	def generator():
-		conversion_map_json = frappe.cache().get('uom_conversion_factor_map')
-		if conversion_map_json:
-			conversion_map = json.loads(conversion_map_json)
-		else:
-			conversion_map = make_conversion_map()
-			conversion_map_json = json.dumps(conversion_map)
-			frappe.cache().set('uom_conversion_factor_map', conversion_map_json)
+		return make_conversion_map()
 
-		return conversion_map
-
-	return frappe.local_cache("uom_conversion_factor_map", None, generator, regenerate_if_none=True)
+	return frappe.cache().get_value('uom_conversion_factor_map', generator)
 
 
 def clear_conversion_factor_cache():
-	if 'uom_conversion_factor_map' in frappe.local.cache:
-		frappe.local.cache['uom_conversion_factor_map'][None] = None
-	frappe.cache().delete('uom_conversion_factor_map')
+	frappe.cache().delete_value('uom_conversion_factor_map')
 
 
 def make_conversion_map(validate_not_convertible=False, validate_multiple_conversion=False, raise_exception=False):

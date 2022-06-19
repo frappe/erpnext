@@ -19,18 +19,14 @@ class ProjectStatus(Document):
 
 
 def clear_project_status_cache():
-	frappe.cache().delete('project_status_names')
+	frappe.cache().delete_value('project_status_names')
 
 
 def get_project_status_names():
-	names = frappe.cache().get('project_status_names')
-	if names:
-		names = json.loads(names)
-	else:
-		names = [d.name for d in frappe.get_all('Project Status', filters={'disabled': 0}, order_by="sorting_index, name")]
-		frappe.cache().set('project_status_names', json.dumps(names))
+	def generator():
+		return [d.name for d in frappe.get_all('Project Status', filters={'disabled': 0}, order_by="sorting_index, name")]
 
-	return names
+	return frappe.cache().get_value('project_status_names', generator)
 
 
 def get_project_status_docs():
