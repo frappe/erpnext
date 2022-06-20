@@ -611,7 +611,7 @@ def get_items_for_stock_reco(warehouse, company):
 		select
 			i.name as item_code, i.item_name, bin.warehouse as warehouse, i.has_serial_no, i.has_batch_no
 		from
-			tabBin bin, tabItem i
+			`tabBin` bin, `tabItem` i
 		where
 			i.name = bin.item_code
 			and IFNULL(i.disabled, 0) = 0
@@ -629,7 +629,7 @@ def get_items_for_stock_reco(warehouse, company):
 		select
 			i.name as item_code, i.item_name, id.default_warehouse as warehouse, i.has_serial_no, i.has_batch_no
 		from
-			tabItem i, `tabItem Default` id
+			`tabItem` i, `tabItem Default` id
 		where
 			i.name = id.parent
 			and exists(

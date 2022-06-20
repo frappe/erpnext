@@ -49,7 +49,7 @@ class TestJobOffer(unittest.TestCase):
 		frappe.db.set_value("HR Settings", None, "check_vacancies", 1)
 
 	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabJob Offer` WHERE 1")
+		frappe.db.sql("DELETE FROM `tabJob Offer`")
 
 
 def create_job_offer(**args):

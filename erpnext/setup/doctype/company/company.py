@@ -464,7 +464,7 @@ class Company(NestedSet):
 
 		# reset default company
 		frappe.db.sql(
-			"""update `tabSingles` set value=""
+			"""update `tabSingles` set value=''
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""",
 			self.name,
@@ -472,7 +472,7 @@ class Company(NestedSet):
 
 		# reset default company
 		frappe.db.sql(
-			"""update `tabSingles` set value=""
+			"""update `tabSingles` set value=''
 			where doctype='Chart of Accounts Importer' and field='company'
 			and value=%s""",
 			self.name,
