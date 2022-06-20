@@ -90,7 +90,7 @@ frappe.ui.form.on('Payment Entry', {
 			if (frm.doc.party_type=="Customer") {
 				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", "Customer Documents"];
 			} else if (frm.doc.party_type=="Supplier") {
-				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry", "Credit Note CXP", 'Supplier Documents'];
+				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry", "Debit Note CXP", 'Supplier Documents'];
 			} else if (frm.doc.party_type=="Employee") {
 				var doctypes = ["Expense Claim", "Journal Entry"];
 			} else if (frm.doc.party_type=="Student") {
@@ -108,15 +108,18 @@ frappe.ui.form.on('Payment Entry', {
 			const child = locals[cdt][cdn];
 			var filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
-				'Purchase Order', 'Expense Claim', 'Fees', 'Debit Note CXC', 'Credit Note CXP', "Customer Documents", "Supplier Documents"];
+				'Purchase Order', 'Expense Claim', 'Fees', 'Debit Note CXC', 'Debit Note CXP', "Customer Documents", "Supplier Documents"];
 			if(child.reference_doctype == "Purchase Invoice"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]], "supplier": doc.party};
 			}
 			if(child.reference_doctype == "Sales Invoice" || child.reference_doctype == "Customer Documents"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]], "customer": doc.party};
 			}
-			if(child.reference_doctype == "Supplier Documents" || child.reference_doctype == "Credit Note CXP"){
+			if(child.reference_doctype == "Supplier Documents"){
 				filters = {"docstatus": 1, "company": doc.company, "status": ["in", ["Unpaid", "Overdue"]]};
+			}
+			if(child.reference_doctype == "Debit Note CXP"){
+				filters = {"docstatus": 1, "company": doc.company, "outstanding_amount": [">", "0"]};
 			}
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.party;
@@ -647,7 +650,7 @@ frappe.ui.form.on('Payment Entry', {
 						} else {
 							c.exchange_rate = 1;
 						}
-						if (in_list(['Sales Invoice', 'Purchase Invoice', "Credit Note CXP", "Customer Documents", "Expense Claim", "Fees"], d.reference_doctype)){
+						if (in_list(['Sales Invoice', 'Purchase Invoice', "Debit Note CXP", "Customer Documents", "Expense Claim", "Fees"], d.reference_doctype)){
 							c.due_date = d.due_date;
 						}
 					});
@@ -840,7 +843,7 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(frm.doc.party_type=="Supplier" &&
-				!in_list(["Purchase Order", "Purchase Invoice", "Journal Entry", "Credit Note CXP", 'Supplier Documents'], row.reference_doctype)
+				!in_list(["Purchase Order", "Purchase Invoice", "Journal Entry", "Debit Note CXP", 'Supplier Documents'], row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry", [row.idx]));
