@@ -561,8 +561,8 @@ def get_default_cost_center(item, args, selling_or_buying=None):
 		if default_fieldname:
 			cost_center = default_values.get(default_fieldname)
 
-	if not cost_center and args.company:
-		cost_center = frappe.get_cached_value("Company", args.company, "cost_center")
+	if not cost_center and args.get('company'):
+		cost_center = frappe.get_cached_value("Company", args.get('company'), "cost_center")
 
 	cost_center = cost_center or args.get("cost_center")
 
