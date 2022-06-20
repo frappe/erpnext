@@ -145,7 +145,7 @@ frappe.ui.form.on("Item", {
 				new_item.description = null;
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
-		});
+		},__("Actions"));
 
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
