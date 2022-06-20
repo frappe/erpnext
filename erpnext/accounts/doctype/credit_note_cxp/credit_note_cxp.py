@@ -98,14 +98,14 @@ class CreditNoteCXP(Document):
 
 		if len(suppliers) > 0:
 			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
-			supplier.total_unpaid -= self.outstanding_amount
+			supplier.total_unpaid -= self.total
 			supplier.save()
 		else:
 			new_doc = frappe.new_doc("Dashboard Supplier")
 			new_doc.supplier = self.supplier
 			new_doc.company = self.company
 			new_doc.billing_this_year = 0
-			new_doc.total_unpaid = self.outstanding_amount * -1
+			new_doc.total_unpaid = self.total * -1
 			new_doc.insert()
 	
 	def update_dashboard_supplier_cancel(self):
@@ -113,7 +113,7 @@ class CreditNoteCXP(Document):
 
 		if len(suppliers) > 0:
 			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
-			supplier.total_unpaid += self.outstanding_amount
+			supplier.total_unpaid += self.total
 			supplier.save()
 	
 	def update_accounts_status(self):
