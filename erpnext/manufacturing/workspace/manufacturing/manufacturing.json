@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order Summary\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Plan\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Work Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Job Card\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Forecasting\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"BOM Stock Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Planning Report\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Production\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bill of Materials\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Tools\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
  "creation": "2020-03-02 17:11:37.032604",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -402,7 +402,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-05-31 22:08:19.408223",
+ "modified": "2022-06-15 15:18:57.062935",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -415,50 +415,40 @@
  "sequence_id": 17.0,
  "shortcuts": [
   {
-   "color": "Green",
-   "format": "{} Active",
-   "label": "Item",
-   "link_to": "Item",
-   "restrict_to_domain": "Manufacturing",
-   "stats_filter": "{\n    \"disabled\": 0\n}",
-   "type": "DocType"
-  },
-  {
-   "color": "Green",
-   "format": "{} Active",
+   "color": "Grey",
+   "doc_view": "List",
    "label": "BOM",
    "link_to": "BOM",
-   "restrict_to_domain": "Manufacturing",
-   "stats_filter": "{\n    \"is_active\": 1\n}",
+   "stats_filter": "{\"is_active\":[\"=\",1]}",
    "type": "DocType"
   },
   {
-   "color": "Yellow",
-   "format": "{} Open",
-   "label": "Work Order",
-   "link_to": "Work Order",
-   "restrict_to_domain": "Manufacturing",
-   "stats_filter": "{ \n    \"status\": [\"in\", \n        [\"Draft\", \"Not Started\", \"In Process\"]\n    ]\n}",
-   "type": "DocType"
-  },
-  {
-   "color": "Yellow",
-   "format": "{} Open",
+   "color": "Grey",
+   "doc_view": "List",
    "label": "Production Plan",
    "link_to": "Production Plan",
-   "restrict_to_domain": "Manufacturing",
-   "stats_filter": "{ \n    \"status\": [\"not in\", [\"Completed\"]]\n}",
+   "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Work Order",
+   "link_to": "Work Order",
+   "stats_filter": "{\"status\":[\"not in\",[\"Closed\",\"Cancelled\",\"Completed\"]]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Job Card",
+   "link_to": "Job Card",
+   "stats_filter": "{\"status\":[\"not in\",[\"Cancelled\",\"Completed\",null]]}",
    "type": "DocType"
   },
   {
    "label": "Forecasting",
    "link_to": "Exponential Smoothing Forecasting",
-   "type": "Report"
-  },
-  {
-   "label": "Work Order Summary",
-   "link_to": "Work Order Summary",
-   "restrict_to_domain": "Manufacturing",
    "type": "Report"
   },
   {
@@ -470,12 +460,6 @@
    "label": "Production Planning Report",
    "link_to": "Production Planning Report",
    "type": "Report"
-  },
-  {
-   "label": "Dashboard",
-   "link_to": "Manufacturing",
-   "restrict_to_domain": "Manufacturing",
-   "type": "Dashboard"
   }
  ],
  "title": "Manufacturing"

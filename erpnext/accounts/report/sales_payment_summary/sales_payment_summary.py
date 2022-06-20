@@ -179,7 +179,7 @@ def get_sales_invoice_data(filters):
 def get_mode_of_payments(filters):
 	mode_of_payments = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join('"' + invoice["name"] + '"' for invoice in invoice_list)
+	invoice_list_names = ",".join("'" + invoice["name"] + "'" for invoice in invoice_list)
 	if invoice_list:
 		inv_mop = frappe.db.sql(
 			"""select a.owner,a.posting_date, ifnull(b.mode_of_payment, '') as mode_of_payment
@@ -200,7 +200,7 @@ def get_mode_of_payments(filters):
 			from `tabJournal Entry` a, `tabJournal Entry Account` b
 			where a.name = b.parent
 			and a.docstatus = 1
-			and b.reference_type = "Sales Invoice"
+			and b.reference_type = 'Sales Invoice'
 			and b.reference_name in ({invoice_list_names})
 			""".format(
 				invoice_list_names=invoice_list_names
@@ -228,7 +228,7 @@ def get_invoices(filters):
 def get_mode_of_payment_details(filters):
 	mode_of_payment_details = {}
 	invoice_list = get_invoices(filters)
-	invoice_list_names = ",".join('"' + invoice["name"] + '"' for invoice in invoice_list)
+	invoice_list_names = ",".join("'" + invoice["name"] + "'" for invoice in invoice_list)
 	if invoice_list:
 		inv_mop_detail = frappe.db.sql(
 			"""
@@ -259,7 +259,7 @@ def get_mode_of_payment_details(filters):
 				from `tabJournal Entry` a, `tabJournal Entry Account` b
 				where a.name = b.parent
 				and a.docstatus = 1
-				and b.reference_type = "Sales Invoice"
+				and b.reference_type = 'Sales Invoice'
 				and b.reference_name in ({invoice_list_names})
 				group by a.owner, a.posting_date, mode_of_payment
 			) t
