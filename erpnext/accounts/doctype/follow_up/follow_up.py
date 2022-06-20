@@ -61,7 +61,7 @@ class FollowUp(Document):
 		if a:	
 			for i in a :
 				if i.party == name:
-					print(" a thi is aaaaaaaaaaaaaaa", i)
+					# print(" a thi is aaaaaaaaaaaaaaa", i)
 					new_acc.append(i)
 
 		fresh_acc = []
@@ -70,12 +70,17 @@ class FollowUp(Document):
 		# print("Length of new_acc is ",len(new_acc))
 			#  Checking for log avaibality for voucher number
 			v_no = frappe.db.get_value("Follow Up Logs", {"voucher_no": i.voucher_no, "level_called": i.follow_up}, ["posting_date"])
-			if not v_no:
+			allow_after = frappe.db.get_value("Follow Up Level", i.follow_up , "allow_after")
+			if not v_no or allow_after == 1:
 				# v_no = frappe.db.get_value("Follow Up Logs", {"voucher_no": n.voucher_no, "level_called": n.follow_up}, ["posting_date"])
 				fresh_acc.append(i)
 		
 		self.data.clear()
-		return fresh_acc
+		print("this is lengtjh", len(fresh_acc))
+		if len(fresh_acc) > 0:
+			return fresh_acc
+		else:
+			frappe.msgprint(" No transcations available for follow-up ")	
 
 	# On Dynamic button click on Dialog Box 
 	@frappe.whitelist()
