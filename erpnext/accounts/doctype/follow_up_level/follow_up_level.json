@@ -39,7 +39,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Enabling this will keep the transaction on the follow-up list even after follow-up is successfully taken",
    "fieldname": "no_of_days",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -139,6 +138,7 @@
   },
   {
    "default": "0",
+   "description": "Enabling this will keep the transaction on the follow-up list even after follow-up is successfully taken",
    "fieldname": "allow_after",
    "fieldtype": "Check",
    "label": "Allow After Follow Up Called"
@@ -146,7 +146,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-20 10:04:44.788703",
+ "modified": "2022-06-20 10:33:32.665126",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Level",
