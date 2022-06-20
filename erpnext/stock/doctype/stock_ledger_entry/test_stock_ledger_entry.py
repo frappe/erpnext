@@ -40,7 +40,9 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
 		)
 
-<<<<<<< HEAD
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def assertSLEs(self, doc, expected_sles, sle_filters=None):
 		"""Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
 
@@ -64,10 +66,6 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 						continue
 
 				self.assertEqual(v, act_value, msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
-=======
-	def tearDown(self):
-		frappe.db.rollback()
->>>>>>> d6078aa911 (fix: Respect system precision for user facing balance qty values (#30837))
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
