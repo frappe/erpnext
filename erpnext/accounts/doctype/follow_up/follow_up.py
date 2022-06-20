@@ -292,7 +292,8 @@ class FollowUp(Document):
 			commit_link = ""
 			remarks = ""
 			comp = frappe.defaults.get_user_default('Company')
-			currency, remarks = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["currency", "remarks"])
+			currency = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["currency"])
+			remarks = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["remarks"])
 			primary_c, full_name = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name"])
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			emails = []
