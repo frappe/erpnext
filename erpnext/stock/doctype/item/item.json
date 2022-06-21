@@ -1040,6 +1040,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "item_source",
    "fieldtype": "Link",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Source",
    "options": "Item Source"
@@ -1252,7 +1253,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2022-06-14 16:39:02.834494",
+ "modified": "2022-06-21 12:51:06.606317",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
