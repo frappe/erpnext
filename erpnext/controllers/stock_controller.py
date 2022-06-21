@@ -123,7 +123,7 @@ class StockController(AccountsController):
 	def update_stock_ledger_entries(self, sle):
 		
 		### assign GL valution rate for Mix choora 
-		if self.is_return and sle.item_code == 'SM007':
+		if self.get('is_return') and sle.item_code == 'SM007':
 				for items in self.items:
 					if(items.item_code == 'SM007'):
 						sle.valuation_rate = items.mix_choora_return_rate
