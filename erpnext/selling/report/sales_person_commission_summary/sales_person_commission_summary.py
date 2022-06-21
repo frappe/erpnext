@@ -93,7 +93,7 @@ class SalesPersonCommissionSummary(object):
 
 	def process_data(self):
 		for d in self.data:
-			d.group = "'Detail'"
+			d.group = "'{0} | {1}'".format(d.sales_person, d.sales_commission_category or 'No Category')
 
 			d.invoice_portion = flt(d.base_net_amount) / flt(d.base_net_total) * 100 if d.base_net_total else 100
 			d.contribution_amount = flt(d.base_net_amount) * flt(d.allocated_percentage) / 100
@@ -342,20 +342,6 @@ class SalesPersonCommissionSummary(object):
 				"width": 100
 			},
 			{
-				"label": _("Sales Invoice"),
-				"fieldname": "name",
-				"fieldtype": "Link",
-				"options": "Sales Invoice",
-				"width": 140
-			},
-			{
-				"label": _("Customer"),
-				"fieldname": "customer",
-				"fieldtype": "Link",
-				"options": "Customer",
-				"width": 140
-			},
-			{
 				"label": _("Net Amount"),
 				"fieldname": "base_net_amount",
 				"fieldtype": "Currency",
@@ -402,6 +388,20 @@ class SalesPersonCommissionSummary(object):
 				"fieldname": "commission_amount",
 				"fieldtype": "Currency",
 				"width": 110
+			},
+			{
+				"label": _("Sales Invoice"),
+				"fieldname": "name",
+				"fieldtype": "Link",
+				"options": "Sales Invoice",
+				"width": 140
+			},
+			{
+				"label": _("Customer"),
+				"fieldname": "customer",
+				"fieldtype": "Link",
+				"options": "Customer",
+				"width": 140
 			},
 			{
 				"label": _("Invoice Date"),
@@ -495,5 +495,4 @@ def execute(filters=None):
 # TODO
 # Credit Note Cases
 # No negative commission on more deduction than net
-# Group By
 # Write Off penalty
