@@ -7184,13 +7184,8 @@ Blanket Order Item,Элемент заказа одеяла,
 Ordered Quantity,Заказанное количество,
 Item to be manufactured or repacked,Продукт должен быть произведен или переупакован,
 Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Количество пункта получены после изготовления / переупаковка от заданных величин сырья,
-<<<<<<< HEAD
-Set rate of sub-assembly item based on BOM,Установить скорость элемента подзаголовки на основе спецификации,
-Allow Alternative Item,Разрешить альтернативный элемент,
-=======
 Set rate of sub-assembly item based on BOM,Установить скорость сборки на основе спецификации,
 Allow Alternative Item,Разрешить альтернативный продукт,
->>>>>>> ce1b4e40a1 (fix: update ru translate (#31404))
 Item UOM,Единиц продукта,
 Conversion Rate,Коэффициент конверсии,
 Rate Of Materials Based On,Оценить материалов на основе,
@@ -8358,11 +8353,7 @@ Automatically Set Serial Nos based on FIFO,Автоматически устан
 Auto Material Request,Автоматический запрос материалов,
 Inter Warehouse Transfer Settings,Настройки передачи между складами,
 Freeze Stock Entries,Замораживание поступления запасов,
-<<<<<<< HEAD
-Stock Frozen Upto,Фото Замороженные До,
-=======
 Stock Frozen Upto,Остатки заморожены до,
->>>>>>> ce1b4e40a1 (fix: update ru translate (#31404))
 Batch Identification,Идентификация партии,
 Use Naming Series,Использовать Идентификаторы по Имени,
 Naming Series Prefix,Префикс Идентификации по Имени,
