@@ -125,7 +125,7 @@ class SalesPersonCommissionSummary(object):
 			# Deduct Payment Deductions
 			d.deduction_on_contribution_amount = 0
 			if commission_category_details.consider_deductions:
-				d.deduction_on_contribution_amount = d.total_deductions * d.invoice_portion / 100
+				d.deduction_on_contribution_amount = d.total_deductions * (d.invoice_portion / 100) * (d.allocated_percentage / 100)
 
 			# Commission Calculation
 			d.net_contribution_amount = d.contribution_amount - d.deduction_on_contribution_amount
@@ -219,6 +219,9 @@ class SalesPersonCommissionSummary(object):
 
 		if self.filters.get('transaction_type'):
 			conditions.append("inv.transaction_type = %(transaction_type)s")
+
+		if self.filters.get('sales_commission_category'):
+			conditions.append("IF(i.sales_commission_category IS NULL or i.sales_commission_category = '', sp.sales_commission_category, i.sales_commission_category) = %(sales_commission_category)s")
 
 		if self.filters.get("cost_center"):
 			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
@@ -410,3 +413,5 @@ def execute(filters=None):
 # TODO
 # Credit Note Cases
 # No negative commission on more deduction than net
+# Group By
+# Write Off penalty

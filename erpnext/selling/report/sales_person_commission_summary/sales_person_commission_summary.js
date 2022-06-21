@@ -34,7 +34,7 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
+			default: frappe.defaults.get_user_default("year_end_date"),
 			reqd: 1,
 		},
 		{
@@ -64,6 +64,12 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			filters: {
 				"docstatus": 1,
 			}
+		},
+		{
+			fieldname: "sales_commission_category",
+			label: __("Sales Commission Category"),
+			fieldtype: "Link",
+			options: "Sales Commission Category"
 		},
 		{
 			fieldname: "transaction_type",
