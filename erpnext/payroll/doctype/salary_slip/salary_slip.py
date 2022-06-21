@@ -499,7 +499,7 @@ class SalarySlip(TransactionBase):
 		
 
 			# return self.present_days
-
+		num_days=0
 		if not self.days_in_month:
 			from calendar import monthrange
 			a = getdate(self.start_date).year
@@ -520,7 +520,7 @@ class SalarySlip(TransactionBase):
 			print("$$$$$$$$$$$$$$$$$$$$$$holiday",holiday1)
 			print("$$$$$$$$$$$$$$$$$$$$$$wd",self.total_working_days)
 			self.net_present_days = num_days - sum(lt) - holiday1
-				
+			print("*********************************",self.net_present_days)
 
 		#Paid Holidays
 		if not self.paid_holidays:

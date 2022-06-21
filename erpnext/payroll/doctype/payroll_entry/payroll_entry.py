@@ -745,7 +745,7 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 		days_in_month = num_days
 
 		leaveA = frappe.db.get_all("Leave Application",{'employee':emp,'from_date':[">=",start_date],'to_date':["<=",end_date]},['total_leave_days'])
-		
+		net_present_days=0
 		holidays = get_holidays_for_employee(emp,start_date,end_date)
 		holiday1= len(holidays)
 		if leaveA :
@@ -753,6 +753,7 @@ def create_salary_slips_for_employees(employees, args,end_date,start_date,payrol
 			for i in leaveA:
 				lt.append(i.get("total_leave_days"))
 			net_present_days = days_in_month - sum(lt) - holiday1
+			
 
 		#Paid Holidays
 		paid_holidays=0
