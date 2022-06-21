@@ -58,16 +58,20 @@ class GLEntry(Document):
 			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
 
-			# Update outstanding amt on against voucher
-			if (
-				self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees"]
-				and self.against_voucher
-				and self.flags.update_outstanding == "Yes"
-				and not frappe.flags.is_reverse_depr_entry
-			):
-				update_outstanding_amt(
-					self.account, self.party_type, self.party, self.against_voucher_type, self.against_voucher
-				)
+			if frappe.db.get_value("Account", self.account, "account_type") not in [
+				"Receivable",
+				"Payable",
+			]:
+				# Update outstanding amt on against voucher
+				if (
+					self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees"]
+					and self.against_voucher
+					and self.flags.update_outstanding == "Yes"
+					and not frappe.flags.is_reverse_depr_entry
+				):
+					update_outstanding_amt(
+						self.account, self.party_type, self.party, self.against_voucher_type, self.against_voucher
+					)
 
 	def check_mandatory(self):
 		mandatory = ["account", "voucher_type", "voucher_no", "company"]
