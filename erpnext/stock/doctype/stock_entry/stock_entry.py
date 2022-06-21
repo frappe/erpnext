@@ -590,7 +590,7 @@ class StockEntry(StockController):
 					)
 					+ "<br><br>"
 					+ _("Available quantity is {0}, you need {1}").format(
-						frappe.bold(d.actual_qty), frappe.bold(d.transfer_qty)
+						frappe.bold(flt(d.actual_qty, d.precision("actual_qty"))), frappe.bold(d.transfer_qty)
 					),
 					NegativeStockError,
 					title=_("Insufficient Stock"),
