@@ -467,10 +467,12 @@ def get_lr_matching_query(bank_account, amount_condition, filters):
 			loan_repayment.posting_date,
 		)
 		.where(loan_repayment.docstatus == 1)
-		.where(loan_repayment.repay_from_salary == 0)
 		.where(loan_repayment.clearance_date.isnull())
 		.where(loan_repayment.payment_account == bank_account)
 	)
+
+	if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
+		query = query.where((loan_repayment.repay_from_salary == 0))
 
 	if amount_condition:
 		query.where(loan_repayment.amount_paid == filters.get("amount"))

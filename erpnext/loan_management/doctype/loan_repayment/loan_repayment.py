@@ -396,7 +396,7 @@ class LoanRepayment(AccountsController):
 		else:
 			remarks = _("Repayment against Loan:") + " " + self.against_loan
 
-		if self.repay_from_salary:
+		if hasattr(self, "repay_from_salary") and self.repay_from_salary:
 			payment_account = self.payroll_payable_account
 		else:
 			payment_account = self.payment_account
@@ -674,7 +674,9 @@ def get_amounts(amounts, against_loan, posting_date):
 
 		if (
 			no_of_late_days > 0
-			and (not against_loan_doc.repay_from_salary)
+			and (
+				not (hasattr(against_loan_doc, "repay_from_salary") and against_loan_doc.repay_from_salary)
+			)
 			and entry.accrual_type == "Regular"
 		):
 			penalty_amount += (
