@@ -41,7 +41,7 @@ class LoanRepayment(AccountsController):
 		self.check_future_accruals()
 		self.update_repayment_schedule(cancel=1)
 		self.mark_as_unpaid()
-		self.ignore_linked_doctypes = ["GL Entry"]
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 		self.make_gl_entries(cancel=1)
 
 	def set_missing_values(self, amounts):

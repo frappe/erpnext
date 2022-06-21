@@ -77,7 +77,7 @@ def get_alternative_items(doctype, txt, searchfield, start, page_len, filters):
 		union
 			(select item_code from `tabItem Alternative`
 			where alternative_item_code = %(item_code)s and item_code like %(txt)s
-			and two_way = 1) limit {0}, {1}
+			and two_way = 1) limit {1} offset {0}
 		""".format(
 			start, page_len
 		),
