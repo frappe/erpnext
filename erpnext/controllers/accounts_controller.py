@@ -1848,6 +1848,17 @@ class AccountsController(TransactionBase):
 		jv.save()
 		jv.submit()
 
+	def check_conversion_rate(self):
+		default_currency = erpnext.get_company_currency(self.company)
+		if not default_currency:
+			throw(_("Please enter default currency in Company Master"))
+		if (
+			(self.currency == default_currency and flt(self.conversion_rate) != 1.00)
+			or not self.conversion_rate
+			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
+		):
+			throw(_("Conversion rate cannot be 0 or 1"))
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
