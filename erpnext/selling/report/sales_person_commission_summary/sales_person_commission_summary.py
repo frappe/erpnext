@@ -3,10 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, scrub
+from frappe import _, scrub, unscrub
 from frappe.utils import getdate, nowdate, flt, cint, date_diff, cstr
 from erpnext.accounts.report.customer_ledger_summary.customer_ledger_summary import get_adjustment_details
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
+from frappe.desk.query_report import group_report_data
 
 
 class SalesPersonCommissionSummary(object):
@@ -22,9 +23,10 @@ class SalesPersonCommissionSummary(object):
 		self.get_adjustment_data()
 		self.process_data()
 
+		data = self.get_grouped_data()
 		columns = self.get_columns()
 
-		return columns, self.data
+		return columns, data
 
 	def get_invoice_data(self):
 		conditions, having = self.get_conditions()
@@ -91,6 +93,8 @@ class SalesPersonCommissionSummary(object):
 
 	def process_data(self):
 		for d in self.data:
+			d.group = "'Detail'"
+
 			d.invoice_portion = flt(d.base_net_amount) / flt(d.base_net_total) * 100 if d.base_net_total else 100
 			d.contribution_amount = flt(d.base_net_amount) * flt(d.allocated_percentage) / 100
 
@@ -236,8 +240,107 @@ class SalesPersonCommissionSummary(object):
 		return "and " + " and ".join(conditions) if conditions else "",\
 			"having " + " and ".join(having_condition) if having_condition else ""
 
+	def get_grouped_data(self):
+		data = self.data
+
+		self.group_by = [None]
+		for i in range(2):
+			group_label = self.filters.get("group_by_" + str(i + 1), "").replace("Group by ", "")
+
+			if not group_label or group_label == "Ungrouped":
+				continue
+
+			if group_label == "Invoice":
+				group_field = "name"
+			else:
+				group_field = scrub(group_label)
+
+			self.group_by.append(group_field)
+
+		if len(self.group_by) <= 1:
+			return data
+
+		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals,
+			totals_only=self.filters.totals_only)
+
+	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
+		total_fields = [
+			'contribution_amount', 'deduction_on_contribution_amount', 'net_contribution_amount', 'commission_amount'
+		]
+
+		totals = frappe._dict()
+
+		# Copy grouped by into total row
+		for f, g in grouped_by.items():
+			totals[f] = g
+
+		# Set zeros
+		for f in total_fields:
+			totals[f] = 0
+
+		# Add totals
+		for d in data:
+			for f in total_fields:
+				totals[f] += flt(d[f])
+
+		# Set group values
+		if data:
+			if 'name' in grouped_by:
+				totals['posting_date'] = data[0].get('posting_date')
+				totals['customer'] = data[0].get('customer')
+				totals['sales_person'] = data[0].get('sales_person')
+
+			if group_field in ('name', 'customer'):
+				totals['customer_name'] = data[0].get("customer_name")
+
+		# Set reference field
+		group_reference_doctypes = {
+			"customer": "Customer",
+			"name": "Sales Invoice",
+			"item_code": "Item",
+		}
+
+		reference_field = group_field[0] if isinstance(group_field, (list, tuple)) else group_field
+		reference_dt = group_reference_doctypes.get(reference_field, unscrub(cstr(reference_field)))
+		totals['doc_type'] = reference_dt
+		totals['group'] = grouped_by.get(reference_field) if group_field else "'Total'"
+
+		return totals
+
 	def get_columns(self):
-		columns = [
+		columns = []
+
+		if len(self.group_by) > 1:
+			columns.append({
+				"label": _("Group"),
+				"fieldtype": "Dynamic Link",
+				"fieldname": "group",
+				"options": "doc_type",
+				"width": 180
+			})
+
+		columns += [
+			{
+				"label": _("Sales Person"),
+				"fieldname": "sales_person",
+				"fieldtype": "Link",
+				"options": "Sales Person",
+				"width": 140
+			},
+			{
+				"label": _("Territory"),
+				"options": "Territory",
+				"fieldname": "territory",
+				"fieldtype": "Link",
+				"width": 100
+			},
+			{
+				"label": _("Category"),
+				"fieldname": "sales_commission_category",
+				"fieldtype": "Link",
+				"options": "Sales Commission Category",
+				"width": 100
+			},
 			{
 				"label": _("Sales Invoice"),
 				"fieldname": "name",
@@ -251,27 +354,6 @@ class SalesPersonCommissionSummary(object):
 				"fieldtype": "Link",
 				"options": "Customer",
 				"width": 140
-			},
-			{
-				"label": _("Sales Person"),
-				"fieldname": "sales_person",
-				"fieldtype": "Link",
-				"options": "Sales Person",
-				"width": 140
-			},
-			{
-				"label": _("Category"),
-				"fieldname": "sales_commission_category",
-				"fieldtype": "Link",
-				"options": "Sales Commission Category",
-				"width": 100
-			},
-			{
-				"label": _("Territory"),
-				"options": "Territory",
-				"fieldname": "territory",
-				"fieldtype": "Link",
-				"width": 100
 			},
 			{
 				"label": _("Net Amount"),

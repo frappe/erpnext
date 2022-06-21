@@ -2,6 +2,11 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
+const group_by_options_spcs = [
+	"Ungrouped", "Group by Sales Person", "Group by Territory", "Group by Sales Commission Category",
+	"Group by Invoice", "Group by Customer"
+]
+
 frappe.query_reports["Sales Person Commission Summary"] = {
 	"filters": [
 		{
@@ -88,6 +93,26 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			}
 		},
 		{
+			fieldname: "group_by_1",
+			label: __("Group By Level 1"),
+			fieldtype: "Select",
+			options: group_by_options_spcs,
+			default: "Ungrouped"
+		},
+		{
+			fieldname: "group_by_2",
+			label: __("Group By Level 2"),
+			fieldtype: "Select",
+			options: group_by_options_spcs,
+			default: "Ungrouped"
+		},
+		{
+			fieldname: "totals_only",
+			label: __("Group Totals Only"),
+			fieldtype: "Check",
+			default: 0
+		},
+		{
 			fieldname: "exclude_unpaid_invoices",
 			label: __("Exclude Unpaid Invoices"),
 			fieldtype: "Check",
@@ -143,5 +168,6 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 		}
 
 		return default_formatter(value, row, column, data, {css: style});
-	}
+	},
+	"initial_depth": 1,
 }
