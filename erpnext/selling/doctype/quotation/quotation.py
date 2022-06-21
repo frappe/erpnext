@@ -127,7 +127,7 @@ class Quotation(SellingController):
 
 	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, competitors, detailed_reason=None):
-		if not self.has_sales_order():
+		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			frappe.db.set(self, "status", "Lost")
@@ -267,7 +267,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 def set_expired_status():
 	# filter out submitted non expired quotations whose validity has been ended
-	cond = "qo.docstatus = 1 and qo.status != 'Expired' and qo.valid_till < %s"
+	cond = "`tabQuotation`.docstatus = 1 and `tabQuotation`.status != 'Expired' and `tabQuotation`.valid_till < %s"
 	# check if those QUO have SO against it
 	so_against_quo = """
 		SELECT
@@ -275,13 +275,18 @@ def set_expired_status():
 		WHERE
 			so_item.docstatus = 1 and so.docstatus = 1
 			and so_item.parent = so.name
-			and so_item.prevdoc_docname = qo.name"""
+			and so_item.prevdoc_docname = `tabQuotation`.name"""
 
 	# if not exists any SO, set status as Expired
-	frappe.db.sql(
-		"""UPDATE `tabQuotation` qo SET qo.status = 'Expired' WHERE {cond} and not exists({so_against_quo})""".format(
-			cond=cond, so_against_quo=so_against_quo
-		),
+	frappe.db.multisql(
+		{
+			"mariadb": """UPDATE `tabQuotation`  SET `tabQuotation`.status = 'Expired' WHERE {cond} and not exists({so_against_quo})""".format(
+				cond=cond, so_against_quo=so_against_quo
+			),
+			"postgres": """UPDATE `tabQuotation` SET status = 'Expired' FROM `tabSales Order`, `tabSales Order Item` WHERE {cond} and not exists({so_against_quo})""".format(
+				cond=cond, so_against_quo=so_against_quo
+			),
+		},
 		(nowdate()),
 	)
 

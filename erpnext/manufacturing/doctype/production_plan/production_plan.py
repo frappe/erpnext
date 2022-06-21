@@ -849,7 +849,7 @@ def get_subitems(
 		FROM
 			`tabBOM Item` bom_item
 			JOIN `tabBOM` bom ON bom.name = bom_item.parent
-			JOIN tabItem item ON bom_item.item_code = item.name
+			JOIN `tabItem` item ON bom_item.item_code = item.name
 			LEFT JOIN `tabItem Default` item_default
 				ON item.name = item_default.parent and item_default.company = %(company)s
 			LEFT JOIN `tabUOM Conversion Detail` item_uom
@@ -979,7 +979,7 @@ def get_sales_orders(self):
 		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
-			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
+			and so.docstatus = 1 and so.status not in ('Stopped', 'Closed')
 			and so.company = %(company)s
 			and so_item.qty > so_item.work_order_qty {so_filter} {item_filter}
 			and (exists (select name from `tabBOM` bom where {bom_item}

@@ -1848,6 +1848,17 @@ class AccountsController(TransactionBase):
 		jv.save()
 		jv.submit()
 
+	def check_conversion_rate(self):
+		default_currency = erpnext.get_company_currency(self.company)
+		if not default_currency:
+			throw(_("Please enter default currency in Company Master"))
+		if (
+			(self.currency == default_currency and flt(self.conversion_rate) != 1.00)
+			or not self.conversion_rate
+			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
+		):
+			throw(_("Conversion rate cannot be 0 or 1"))
+
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
@@ -2049,7 +2060,7 @@ def get_advance_journal_entries(
 	journal_entries = frappe.db.sql(
 		"""
 		select
-			"Journal Entry" as reference_type, t1.name as reference_name,
+			'Journal Entry' as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
 			t2.reference_name as against_order, t2.exchange_rate
 		from
@@ -2104,7 +2115,7 @@ def get_advance_payment_entries(
 		payment_entries_against_order = frappe.db.sql(
 			"""
 			select
-				"Payment Entry" as reference_type, t1.name as reference_name,
+				'Payment Entry' as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
 				t1.{0} as currency, t1.{4} as exchange_rate
@@ -2124,7 +2135,7 @@ def get_advance_payment_entries(
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql(
 			"""
-				select "Payment Entry" as reference_type, name as reference_name, posting_date,
+				select 'Payment Entry' as reference_type, name as reference_name, posting_date,
 				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency
 				from `tabPayment Entry`
 				where
