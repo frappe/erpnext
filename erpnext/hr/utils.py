@@ -428,7 +428,7 @@ def generate_leave_encashment():
 		create_leave_encashment(leave_allocation=leave_allocation)
 
 
-def allocate_earned_leaves(ignore_duplicates=False):
+def allocate_earned_leaves():
 	"""Allocate earned leaves to Employees"""
 	e_leave_types = get_earned_leaves()
 	today = getdate()
@@ -464,14 +464,10 @@ def allocate_earned_leaves(ignore_duplicates=False):
 			if check_effective_date(
 				from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining
 			):
-				update_previous_leave_allocation(
-					allocation, annual_allocation, e_leave_type, ignore_duplicates
-				)
+				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
 
 
-def update_previous_leave_allocation(
-	allocation, annual_allocation, e_leave_type, ignore_duplicates=False
-):
+def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
 	earned_leaves = get_monthly_earned_leave(
 		annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding
 	)
@@ -485,20 +481,19 @@ def update_previous_leave_allocation(
 	if new_allocation != allocation.total_leaves_allocated:
 		today_date = today()
 
-		if ignore_duplicates or not is_earned_leave_already_allocated(allocation, annual_allocation):
-			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
-			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+		allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
+		create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
 
-			if e_leave_type.based_on_date_of_joining:
-				text = _("allocated {0} leave(s) via scheduler on {1} based on the date of joining").format(
-					frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
-				)
-			else:
-				text = _("allocated {0} leave(s) via scheduler on {1}").format(
-					frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
-				)
+		if e_leave_type.based_on_date_of_joining:
+			text = _("allocated {0} leave(s) via scheduler on {1} based on the date of joining").format(
+				frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
+			)
+		else:
+			text = _("allocated {0} leave(s) via scheduler on {1}").format(
+				frappe.bold(earned_leaves), frappe.bold(formatdate(today_date))
+			)
 
-			allocation.add_comment(comment_type="Info", text=text)
+		allocation.add_comment(comment_type="Info", text=text)
 
 
 def get_monthly_earned_leave(annual_leaves, frequency, rounding):
@@ -603,20 +598,18 @@ def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining
 	return False
 
 
-def get_salary_assignment(employee, date):
-	assignment = frappe.db.sql(
-		"""
-		select * from `tabSalary Structure Assignment`
-		where employee=%(employee)s
-		and docstatus = 1
-		and %(on_date)s >= from_date order by from_date desc limit 1""",
-		{
-			"employee": employee,
-			"on_date": date,
-		},
-		as_dict=1,
+def get_salary_assignments(employee, payroll_period):
+	start_date, end_date = frappe.db.get_value(
+		"Payroll Period", payroll_period, ["start_date", "end_date"]
 	)
-	return assignment[0] if assignment else None
+	assignments = frappe.db.get_all(
+		"Salary Structure Assignment",
+		filters={"employee": employee, "docstatus": 1, "from_date": ["between", (start_date, end_date)]},
+		fields=["*"],
+		order_by="from_date",
+	)
+
+	return assignments
 
 
 def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):

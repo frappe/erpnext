@@ -145,7 +145,7 @@ frappe.ui.form.on("Item", {
 				new_item.description = null;
 			}
 			frappe.set_route('Form', 'Item', new_item.name);
-		});
+		},__("Actions"));
 
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
@@ -590,8 +590,7 @@ $.extend(erpnext.item, {
 								["parent","=", d.attribute]
 							],
 							fields: ["attribute_value"],
-							limit_start: 0,
-							limit_page_length: 500,
+							limit_page_length: 0,
 							parent: "Item Attribute",
 							order_by: "idx"
 						}

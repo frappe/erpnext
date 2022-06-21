@@ -43,8 +43,6 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
-
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	apply_tds: function(frm) {
@@ -57,115 +55,6 @@ frappe.ui.form.on("Purchase Order", {
 
 	refresh: function(frm) {
 		frm.trigger('get_materials_from_supplier');
-	},
-	tax_category:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-                frm.refresh_field("items")
-			}
-		});
-	},
-	shipping_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                frm.refresh_field("tax_category")
-			}
-		});
-	},
-	supplier_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	customer_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	billing_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	branch:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	location:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	cost_center:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				
-				frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
 	},
 	get_materials_from_supplier: function(frm) {
 		let po_details = [];

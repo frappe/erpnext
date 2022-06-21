@@ -211,31 +211,6 @@ class PurchaseOrder(BuyingController):
 				)
 
 	@frappe.whitelist()
-	def calculate_taxes(self):
-		if self.supplier:
-			sup = frappe.get_doc("Supplier",self.supplier)
-			if not sup.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template						
-			if sup.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if sup.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=sup.tax_category
-			return self.tax_category
-			
-	@frappe.whitelist()
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
 
@@ -662,6 +637,8 @@ def make_rm_stock_entry(purchase_order, rm_items):
 						}
 					}
 					stock_entry.add_to_stock_entry_detail(items_dict)
+
+		stock_entry.set_missing_values()
 		return stock_entry.as_dict()
 	else:
 		frappe.throw(_("No Items selected for transfer"))
@@ -749,7 +726,7 @@ def make_return_stock_entry_for_subcontract(available_materials, po_doc, po_deta
 			add_items_in_ste(ste_doc, value, value.qty, po_details)
 
 	ste_doc.set_stock_entry_type()
-	ste_doc.calculate_rate_and_amount()
+	ste_doc.set_missing_values()
 
 	return ste_doc
 

@@ -245,13 +245,6 @@ class SalesInvoice(SellingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
-	# def set_last_sales_invoice(self):
-	# 	if self.name:
-	# 		s = str(self.name[:3]) + '%'
-	# 		query = frappe.db.sql("""select name from `tabSales Invoice` where name != %s and name like %s order by creation desc limit 1""",(self.name,s),as_list=1)
-	# 		if query:
-	# 			self.previous_sales_invoice = query[0][0]
-	# 			self.db_update()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
@@ -343,30 +336,6 @@ class SalesInvoice(SellingController):
 
 		self.process_common_party_accounting()
 
-	@frappe.whitelist()
-	def calculate_taxes(self):
-		if self.customer:
-			cus = frappe.get_doc("Customer",self.customer)
-			if not cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-			if cus.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if cus.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=cus.tax_category
-			return self.tax_category
 
 	def validate_pos_return(self):
 		if self.is_consolidated:
@@ -2559,17 +2528,18 @@ def get_mode_of_payments_info(mode_of_payments, company):
 			`tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where
 			mpa.parent = mp.name and
-			mpa.company = '{0}' and
+			mpa.company = %s and
 			mp.enabled = 1 and
-			mp.name in {1}
+			mp.name in %s
 		group by
 			mp.name
 		""",
-		(company, tuple(mode_of_payments)),
+		(company, mode_of_payments),
 		as_dict=1,
 	)
 
 	return {row.get("mop"): row for row in data}
+
 
 
 

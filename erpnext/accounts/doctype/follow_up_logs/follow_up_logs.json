@@ -1,6 +1,6 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "autoname": "FUL.-.YY.-.MM.-.#####",
  "creation": "2022-01-25 12:54:10.597952",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -23,37 +23,52 @@
   {
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name"
+   "in_standard_filter": 1,
+   "label": "Customer Name",
+   "read_only": 1
   },
   {
    "fieldname": "voucher_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher Type",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher No",
-   "options": "voucher_type"
+   "options": "voucher_type",
+   "read_only": 1
   },
   {
    "fieldname": "level_called",
    "fieldtype": "Link",
    "label": "Follow Up Level Called",
-   "options": "Follow Up Level"
+   "options": "Follow Up Level",
+   "read_only": 1
   },
   {
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
-   "label": "Outstanding Amount"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Outstanding Amount",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_7",
@@ -63,48 +78,53 @@
    "default": "Today",
    "fieldname": "submitted_date",
    "fieldtype": "Date",
-   "label": "Submitted Date"
+   "label": "Submitted Date",
+   "read_only": 1
   },
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Posting Date",
+   "read_only": 1
   },
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
-   "label": "Due Date"
+   "label": "Due Date",
+   "read_only": 1
   },
   {
    "fieldname": "follow_up_date",
    "fieldtype": "Date",
-   "label": "Follow Up Date"
+   "label": "Follow Up Date",
+   "read_only": 1
   },
   {
    "fieldname": "age",
    "fieldtype": "Int",
-   "label": "Age"
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Age",
+   "read_only": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-06 11:02:42.745051",
+ "modified": "2022-06-06 10:08:46.823650",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Logs",
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "write": 1
+   "share": 1
   }
  ],
  "sort_field": "modified",

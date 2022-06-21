@@ -55,7 +55,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.refresh_fields();
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
-		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function (doc, dt, dn) {
@@ -475,7 +474,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				let row = frappe.get_doc(d.doctype, d.name)
 				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
 			});
-			frm.trigger("calculate_timesheet_totals");
+			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
 });
@@ -728,17 +727,7 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
-//	before_save:function(frm){
-//		frm.call({
-//			method:"get_commision",
-//			doc:frm.doc,
-//			callback: function(r)
-//			{
-//
-//				frm.refresh_field("total_commission")
-//			}
-//		});
-//	 },
+
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {
 		if (frm.doc.company) {
@@ -756,115 +745,6 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			})
 		}
-	},
-	tax_category:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-				frm.refresh_field("tax_category")
-                frm.refresh_field("items")
-			}
-		});
-	},
-	shipping_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                frm.refresh_field("tax_category")
-			}
-		});
-	},
-	supplier_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	customer_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	company_address:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-                frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	branch:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-				frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	location:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-				frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
-	},
-	cost_center:function(frm){
-		frm.call({
-			method:"calculate_taxes",
-			doc:frm.doc,
-			callback: function(r)
-			{
-
-				frm.set_value("tax_category","");
-				frm.refresh_field("tax_category")
-                frm.set_value("tax_category",r.message);
-                refresh_field("tax_category")
-			}
-		});
 	},
 	project: function (frm) {
 		if (!frm.doc.is_return) {
@@ -1026,34 +906,53 @@ frappe.ui.form.on('Sales Invoice', {
 
 	set_timesheet_data: function(frm, timesheets) {
 		frm.clear_table("timesheets")
-		timesheets.forEach(timesheet => {
+		timesheets.forEach(async (timesheet) => {
 			if (frm.doc.currency != timesheet.currency) {
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: timesheet.currency,
-						to_currency: frm.doc.currency
-					},
-					callback: function(r) {
-						if (r.message) {
-							exchange_rate = r.message;
-							frm.events.append_time_log(frm, timesheet, exchange_rate);
-						}
-					}
-				});
+				const exchange_rate = await frm.events.get_exchange_rate(
+					frm, timesheet.currency, frm.doc.currency
+				)
+				frm.events.append_time_log(frm, timesheet, exchange_rate)
 			} else {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		})
 	},
-	add_timesheet_row: function (frm, row, exchange_rate) {
-		frm.add_child('timesheets', {
-			'activity_type': row.activity_type,
-			'description': row.description,
-			'time_sheet': row.parent,
-			'billing_hours': row.billing_hours,
-			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
-			'timesheet_detail': row.name
+
+	// code commented for task #PRE00533 June 09 2022
+	// add_timesheet_row: function (frm, row, exchange_rate) {
+	// 	frm.add_child('timesheets', {
+	// 		'activity_type': row.activity_type,
+	// 		'description': row.description,
+	// 		'time_sheet': row.parent,
+	// 		'billing_hours': row.billing_hours,
+	// 		'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
+	// 		'timesheet_detail': row.name
+	// 	});
+	// },
+
+	async get_exchange_rate(frm, from_currency, to_currency) {
+		if (
+			frm.exchange_rates
+			&& frm.exchange_rates[from_currency]
+			&& frm.exchange_rates[from_currency][to_currency]
+		) {
+			return frm.exchange_rates[from_currency][to_currency];
+		}
+
+		return frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				from_currency,
+				to_currency
+			},
+			callback: function(r) {
+				if (r.message) {
+					// cache exchange rates
+					frm.exchange_rates = frm.exchange_rates || {};
+					frm.exchange_rates[from_currency] = frm.exchange_rates[from_currency] || {};
+					frm.exchange_rates[from_currency][to_currency] = r.message;
+				}
+			}
 		});
 	},
 
@@ -1067,7 +966,7 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_hours = time_log.billing_hours;
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
-    row.project_name = time_log.project_name;
+		row.project_name = time_log.project_name;
 
 		frm.refresh_field("timesheets");
 		frm.trigger("calculate_timesheet_totals");
@@ -1170,40 +1069,42 @@ frappe.ui.form.on("Sales Invoice Timesheet", {
 		frm.trigger("calculate_timesheet_totals");
 	}
 })
-frappe.ui.form.on('Sales Invoice Timesheet', {
-	time_sheet: function (frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.time_sheet) {
-			frappe.call({
-				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
-				args: {
-					'name': d.time_sheet,
-					'project': frm.doc.project || null
-				},
-				callback: function (r, rt) {
-					if (r.message) {
-						let data = r.message;
-						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
-						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
-						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
-						calculate_total_billing_amount(frm)
-					}
-				}
-			})
-		}
-	}
-})
 
-var calculate_total_billing_amount = function (frm) {
-	var doc = frm.doc;
+// code commented for task #PRE00533 June 09 2022
+// frappe.ui.form.on('Sales Invoice Timesheet', {
+// 	time_sheet: function (frm, cdt, cdn) {
+// 		var d = locals[cdt][cdn];
+// 		if (d.time_sheet) {
+// 			frappe.call({
+// 				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
+// 				args: {
+// 					'name': d.time_sheet,
+// 					'project': frm.doc.project || null
+// 				},
+// 				callback: function (r, rt) {
+// 					if (r.message) {
+// 						let data = r.message;
+// 						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
+// 						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
+// 						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
+// 						calculate_total_billing_amount(frm)
+// 					}
+// 				}
+// 			})
+// 		}
+// 	}
+// })
 
-	doc.total_billing_amount = 0.0
-	if (doc.timesheets) {
-		$.each(doc.timesheets, function (index, data) {
-			doc.total_billing_amount += data.billing_amount
-		})
-	}
-}
+// var calculate_total_billing_amount = function (frm) {
+// 	var doc = frm.doc;
+
+// 	doc.total_billing_amount = 0.0
+// 	if (doc.timesheets) {
+// 		$.each(doc.timesheets, function (index, data) {
+// 			doc.total_billing_amount += data.billing_amount
+// 		})
+// 	}
+// }
 
 
 var set_timesheet_detail_rate = function(cdt, cdn, currency, timelog) {

@@ -30,6 +30,19 @@ frappe.query_reports['Employee Leave Balance Summary'] = {
 			label: __('Department'),
 			fieldtype: 'Link',
 			options: 'Department',
+		},
+		{
+			fieldname: "employee_status",
+			label: __("Employee Status"),
+			fieldtype: "Select",
+			options: [
+				"",
+				{ "value": "Active", "label": __("Active") },
+				{ "value": "Inactive", "label": __("Inactive") },
+				{ "value": "Suspended", "label": __("Suspended") },
+				{ "value": "Left", "label": __("Left") },
+			],
+			default: "Active",
 		}
 	]
 };

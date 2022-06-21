@@ -58,6 +58,7 @@ class ShopifySettings(unittest.TestCase):
 				"warehouse": "_Test Warehouse - _TC",
 				"cash_bank_account": "Cash - _TC",
 				"account": "Cash - _TC",
+				"company": "_Test Company",
 				"customer_group": "_Test Customer Group",
 				"cost_center": "Main - _TC",
 				"taxes": [{"shopify_tax": "International Shipping", "tax_account": "Legal Expenses - _TC"}],

@@ -175,31 +175,6 @@ class PurchaseInvoice(BuyingController):
 		):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
-	@frappe.whitelist()
-	def calculate_taxes(self):
-		if self.supplier:
-			sup = frappe.get_doc("Supplier",self.supplier)
-			if not sup.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if self.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template						
-			if sup.tax_category:
-				if self.tax_category:
-					for i in self.items:
-						if i.item_code:
-							doc=frappe.get_doc("Item",i.item_code)
-							for j in doc.taxes:
-								if sup.tax_category==j.tax_category:
-									if j.item_tax_template:
-										i.item_tax_template=j.item_tax_template
-				self.tax_category=sup.tax_category
-			return self.tax_category
-
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -576,7 +551,16 @@ class PurchaseInvoice(BuyingController):
 					from_repost=from_repost,
 				)
 			elif self.docstatus == 2:
+				provisional_entries = [a for a in gl_entries if a.voucher_type == "Purchase Receipt"]
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+				if provisional_entries:
+					for entry in provisional_entries:
+						frappe.db.set_value(
+							"GL Entry",
+							{"voucher_type": "Purchase Receipt", "voucher_detail_no": entry.voucher_detail_no},
+							"is_cancelled",
+							1,
+						)
 
 			if update_outstanding == "No":
 				update_outstanding_amt(

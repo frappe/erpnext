@@ -27,7 +27,7 @@ form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"
 
 class MaterialRequest(BuyingController):
 	def get_feed(self):
-		return _("{0}: {1}").format(self.status, self.material_request_type)
+		return
 
 	def check_if_already_pulled(self):
 		pass
@@ -726,7 +726,7 @@ def make_stock_entry(source_name, target_doc=None):
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
 
-		target.run_method("calculate_rate_and_amount")
+		target.set_missing_values()
 		target.set_stock_entry_type()
 		target.set_job_card_data()
 

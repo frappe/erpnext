@@ -36,6 +36,9 @@ class Warehouse(NestedSet):
 				self.set_onload("account", account)
 		load_address_and_contact(self)
 
+	def validate(self):
+		self.warn_about_multiple_warehouse_account()
+
 	def on_update(self):
 		self.update_nsm_model()
 
@@ -69,6 +72,53 @@ class Warehouse(NestedSet):
 		frappe.db.delete("Bin", filters={"warehouse": self.name})
 		self.update_nsm_model()
 		self.unlink_from_items()
+
+	def warn_about_multiple_warehouse_account(self):
+		"If Warehouse value is split across multiple accounts, warn."
+
+		def get_accounts_where_value_is_booked(name):
+			sle = frappe.qb.DocType("Stock Ledger Entry")
+			gle = frappe.qb.DocType("GL Entry")
+			ac = frappe.qb.DocType("Account")
+
+			return (
+				frappe.qb.from_(sle)
+				.join(gle)
+				.on(sle.voucher_no == gle.voucher_no)
+				.join(ac)
+				.on(ac.name == gle.account)
+				.select(gle.account)
+				.distinct()
+				.where((sle.warehouse == name) & (ac.account_type == "Stock"))
+				.orderby(sle.creation)
+				.run(as_dict=True)
+			)
+
+		if self.is_new():
+			return
+
+		old_wh_account = frappe.db.get_value("Warehouse", self.name, "account")
+
+		# WH account is being changed or set get all accounts against which wh value is booked
+		if self.account != old_wh_account:
+			accounts = get_accounts_where_value_is_booked(self.name)
+			accounts = [d.account for d in accounts]
+
+			if not accounts or (len(accounts) == 1 and self.account in accounts):
+				# if same singular account has stock value booked ignore
+				return
+
+			warning = _("Warehouse's Stock Value has already been booked in the following accounts:")
+			account_str = "<br>" + ", ".join(frappe.bold(ac) for ac in accounts)
+			reason = "<br><br>" + _(
+				"Booking stock value across multiple accounts will make it harder to track stock and account value."
+			)
+
+			frappe.msgprint(
+				warning + account_str + reason,
+				title=_("Multiple Warehouse Accounts"),
+				indicator="orange",
+			)
 
 	def check_if_sle_exists(self):
 		return frappe.db.exists("Stock Ledger Entry", {"warehouse": self.name})

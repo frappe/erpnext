@@ -65,9 +65,10 @@ frappe.ui.form.on('Employee Advance', {
 			);
 		}
 
-		if (frm.doc.docstatus === 1 &&
-			(flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount) && flt(frm.doc.paid_amount) != flt(frm.doc.return_amount))) {
-
+		if (
+			frm.doc.docstatus === 1
+			&& (flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount) - flt(frm.doc.return_amount))
+		) {
 			if (frm.doc.repay_unclaimed_amount_from_salary == 0 && frappe.model.can_create("Journal Entry")) {
 				frm.add_custom_button(__("Return"), function() {
 					frm.trigger('make_return_entry');

@@ -13,6 +13,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, add_months, add_years, get_link_to_form, getdate, nowdate
 
 import erpnext
+from erpnext import get_company_currency
 from erpnext.non_profit.doctype.member.member import create_member
 
 
@@ -61,10 +62,6 @@ class Membership(Document):
 				frappe.throw(_("You can only renew if your membership expires within 30 days"))
 
 			self.from_date = add_days(last_membership.to_date, 1)
-		elif frappe.session.user == "Administrator":
-			self.from_date = self.from_date
-		else:
-			self.from_date = nowdate()
 
 		if frappe.db.get_single_value("Non Profit Settings", "billing_cycle") == "Yearly":
 			self.to_date = add_years(self.from_date, 1)
@@ -207,7 +204,7 @@ def make_invoice(membership, member, plan, settings):
 			"doctype": "Sales Invoice",
 			"customer": member.customer,
 			"debit_to": settings.membership_debit_account,
-			"currency": membership.currency,
+			"currency": membership.currency or get_company_currency(settings.company),
 			"company": settings.company,
 			"is_pos": 0,
 			"items": [{"item_code": plan.linked_item, "rate": membership.amount, "qty": 1}],
