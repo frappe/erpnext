@@ -23,7 +23,7 @@ def execute(filters=None):
 
 	columns = [
 		("Company") + "::120",
-		("DN Number") + "::100",
+		("DN Number") + ":Link/Delivery Note:100",
 		("Customer") + ":Link/Delivery Note:120",
 		("Customer Name") + "::120",
 		("DN Qty") + "::120",
@@ -37,13 +37,13 @@ def execute(filters=None):
         ("Gate In") + "::120",
         ("Gate Out") + "::120",
         ("First Weight") + "::120",
-        ("Secnd Weight") + "::150",
+        ("Second Weight") + "::150",
         ("Net Weight") + "::120",
         ("DN Total Net Weight") + "::120",
         ("Differnce") + "::150",
         ("Sale Invoice") + "::150",
         ("Freight Amount") + "::150",
-        ("Freight Per Net") + "::120",
+        ("Freight Per Pet") + "::120",
     ]
 	
 	data = []
@@ -77,7 +77,7 @@ def execute(filters=None):
 		LEFT JOIN `tabGate Pass` GPOUT ON 
 			GPIN.name = GPOUT.reference_gate_pass and GPOUT.type = 'OUT'
 		LEFT JOIN `tabSupplier` SU ON 
-			SU.name = GPOUT.supplier
+			SU.name = GPIN.supplier
 		LEFT OUTER JOIN `tabSales Invoice Item` as SII ON 
 			DN.name = SII.delivery_note
 		LEFT JOIN `tabSales Taxes and Charges` as STC ON 
