@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import DocType, Interval
+from frappe.query_builder.functions import Now
 from frappe.utils import cint, cstr
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
@@ -22,6 +24,17 @@ class BOMMissingError(frappe.ValidationError):
 
 
 class BOMUpdateLog(Document):
+	@staticmethod
+	def clear_old_logs(days=None):
+		days = days or 90
+		table = DocType("BOM Update Log")
+		frappe.db.delete(
+			table,
+			filters=(
+				(table.modified < (Now() - Interval(days=days))) & (table.update_type == "Update Cost")
+			),
+		)
+
 	def validate(self):
 		if self.update_type == "Replace BOM":
 			self.validate_boms_are_specified()
