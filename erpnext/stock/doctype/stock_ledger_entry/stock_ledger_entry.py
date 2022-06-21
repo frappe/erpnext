@@ -12,7 +12,7 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.accounts.utils import get_fiscal_year
 
 class StockFreezeError(frappe.ValidationError): pass
-
+from nrp_manufacturing.utils import get_config_by_name
 exclude_from_linked_with = True
 
 class StockLedgerEntry(Document):
@@ -38,8 +38,14 @@ class StockLedgerEntry(Document):
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		## Disable Funtion on warehouse wastages
-		if 'Wastage' not in self.warehouse:
-			self.actual_amt_check()
+		## Check site configration
+		warehouse_site = get_config_by_name("RETURN_NOTE_WAREHOUSE")
+		warehouse_list = []
+		for warehouse in warehouse_site:
+			warehouse_list.append(warehouse_site[warehouse])
+		if warehouse_list:
+			if self.warehouse not in warehouse_list:
+				self.actual_amt_check()
 
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
