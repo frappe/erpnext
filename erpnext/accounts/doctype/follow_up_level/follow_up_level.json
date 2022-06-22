@@ -10,6 +10,7 @@
   "level",
   "column_break_2",
   "no_of_days",
+  "allow_after",
   "actions_section",
   "send_email",
   "email_subject",
@@ -134,11 +135,18 @@
    "fieldtype": "Data",
    "label": "Email Subject",
    "mandatory_depends_on": "send_email"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this will keep the transaction on the follow-up list even after follow-up is successfully taken",
+   "fieldname": "allow_after",
+   "fieldtype": "Check",
+   "label": "Allow After Follow Up Called"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-12 10:50:55.742304",
+ "modified": "2022-06-20 10:33:32.665126",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up Level",
