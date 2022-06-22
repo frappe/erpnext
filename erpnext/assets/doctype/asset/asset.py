@@ -252,6 +252,7 @@ class Asset(AccountsController):
 			number_of_pending_depreciations += 1
 
 		skip_row = False
+		should_get_last_day = is_last_day_of_the_month(finance_book.depreciation_start_date)
 
 		for n in range(start[finance_book.idx - 1], number_of_pending_depreciations):
 			# If depreciation is already completed (for double declining balance)
@@ -264,6 +265,9 @@ class Asset(AccountsController):
 				schedule_date = add_months(
 					finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
 				)
+
+				if should_get_last_day:
+					schedule_date = get_last_day(schedule_date)
 
 				# schedule date will be a year later from start date
 				# so monthly schedule date is calculated by removing 11 months from it
@@ -859,14 +863,6 @@ class Asset(AccountsController):
 		days = date_diff(to_date, from_date)
 		months = month_diff(to_date, from_date)
 		total_days = get_total_days(to_date, row.frequency_of_depreciation)
-
-		print("\n"*10)
-		print("from_date: ", from_date)
-		print("to_date: ", to_date)
-		print("\n")
-		print("days: ", days)
-		print("total_days: ", total_days)
-		print("\n"*10)
 
 		return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
