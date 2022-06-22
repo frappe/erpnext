@@ -253,8 +253,13 @@ class Asset(AccountsController):
 
 			has_pro_rata = self.check_is_pro_rata(finance_book)
 
+<<<<<<< HEAD
 			if has_pro_rata:
 				number_of_pending_depreciations += 1
+=======
+		skip_row = False
+		should_get_last_day = is_last_day_of_the_month(finance_book.depreciation_start_date)
+>>>>>>> 154e258ad0 (fix: Get last day of the monthif depr posting date is the last day of its month)
 
 			skip_row = False
 
@@ -265,10 +270,19 @@ class Asset(AccountsController):
 
 				depreciation_amount = get_depreciation_amount(self, value_after_depreciation, finance_book)
 
+<<<<<<< HEAD
 				if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
 					schedule_date = add_months(
 						finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
 					)
+=======
+				if should_get_last_day:
+					schedule_date = get_last_day(schedule_date)
+
+				# schedule date will be a year later from start date
+				# so monthly schedule date is calculated by removing 11 months from it
+				monthly_schedule_date = add_months(schedule_date, -finance_book.frequency_of_depreciation + 1)
+>>>>>>> 154e258ad0 (fix: Get last day of the monthif depr posting date is the last day of its month)
 
 					# schedule date will be a year later from start date
 					# so monthly schedule date is calculated by removing 11 months from it
@@ -855,14 +869,6 @@ class Asset(AccountsController):
 		days = date_diff(to_date, from_date)
 		months = month_diff(to_date, from_date)
 		total_days = get_total_days(to_date, row.frequency_of_depreciation)
-
-		print("\n"*10)
-		print("from_date: ", from_date)
-		print("to_date: ", to_date)
-		print("\n")
-		print("days: ", days)
-		print("total_days: ", total_days)
-		print("\n"*10)
 
 		return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
