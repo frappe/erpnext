@@ -1,0 +1,189 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:dimension_name",
+ "creation": "2022-06-17 13:04:16.554051",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dimension_details_tab",
+  "dimension_name",
+  "reference_document",
+  "disabled",
+  "section_break_7",
+  "field_mapping_section",
+  "source_fieldname",
+  "target_fieldname",
+  "column_break_9",
+  "map_with_existing_field",
+  "stock_ledger_dimension",
+  "applicable_for_documents_tab",
+  "apply_to_all_doctypes",
+  "document_type",
+  "istable",
+  "type_of_transaction",
+  "column_break_16",
+  "condition"
+ ],
+ "fields": [
+  {
+   "fieldname": "dimension_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dimension Details"
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference Document",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dimension_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dimension Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "applicable_for_documents_tab",
+   "fieldtype": "Tab Break",
+   "label": "Applicable For Documents"
+  },
+  {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Applicable to Document",
+   "mandatory_depends_on": "eval:!doc.apply_to_all_doctypes",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.apply_to_all_doctypes && doc.document_type",
+   "fetch_from": "document_type.istable",
+   "fieldname": "istable",
+   "fieldtype": "Check",
+   "label": " Is Child Table",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Applicable Condition"
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_to_all_doctypes",
+   "fieldtype": "Check",
+   "label": "Apply to All Document Types"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "target_fieldname",
+   "fieldtype": "Data",
+   "label": "Target Fieldname (Stock Ledger Entry)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_fieldname",
+   "fieldtype": "Data",
+   "label": "Source Fieldname",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "field_mapping_section",
+   "fieldtype": "Section Break",
+   "label": "Field Mapping"
+  },
+  {
+   "default": "0",
+   "fieldname": "map_with_existing_field",
+   "fieldtype": "Check",
+   "label": "Map with existing field"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "map_with_existing_field",
+   "fieldname": "stock_ledger_dimension",
+   "fieldtype": "Select",
+   "label": "Stock Ledger Dimension"
+  },
+  {
+   "fieldname": "type_of_transaction",
+   "fieldtype": "Select",
+   "label": "Type of Transaction",
+   "options": "\nInward\nOutward"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-06-22 10:56:43.753713",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Inventory Dimension",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

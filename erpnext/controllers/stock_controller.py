@@ -18,6 +18,9 @@ from erpnext.accounts.general_ledger import (
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+	get_evaluated_inventory_dimension,
+)
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
@@ -364,7 +367,15 @@ class StockController(AccountsController):
 		)
 
 		sl_dict.update(args)
+		if self.docstatus == 1:
+			self.update_inventory_dimensions(d, sl_dict)
+
 		return sl_dict
+
+	def update_inventory_dimensions(self, row, sl_dict) -> None:
+		dimension = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
+		if dimension:
+			sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries

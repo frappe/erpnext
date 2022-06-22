@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
 from erpnext.stock.utils import (
@@ -17,7 +18,7 @@ from erpnext.stock.utils import (
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
-	columns = get_columns()
+	columns = get_columns(filters)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
@@ -33,12 +34,14 @@ def execute(filters=None):
 	actual_qty = stock_value = 0
 
 	available_serial_nos = {}
+	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(filters)
+
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
 
-		if filters.get("batch_no"):
+		if filters.get("batch_no") or inventory_dimension_filters_applied:
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
 
@@ -88,7 +91,7 @@ def update_available_serial_nos(available_serial_nos, sle):
 	sle.balance_serial_no = "\n".join(existing_serial_no)
 
 
-def get_columns():
+def get_columns(filters):
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
 		{
@@ -216,14 +219,28 @@ def get_columns():
 			"options": "Project",
 			"width": 100,
 		},
+	]
+
+	for dimension in get_inventory_dimensions():
+		columns.append(
+			{
+				"label": _(dimension.label),
+				"fieldname": dimension.fieldname,
+				"fieldtype": "Link",
+				"options": dimension.doctype,
+				"width": 110,
+			}
+		)
+
+	columns.append(
 		{
 			"label": _("Company"),
 			"fieldname": "company",
 			"fieldtype": "Link",
 			"options": "Company",
 			"width": 110,
-		},
-	]
+		}
+	)
 
 	return columns
 
@@ -252,7 +269,7 @@ def get_stock_ledger_entries(filters, items):
 			serial_no,
 			company,
 			project,
-			stock_value_difference
+			stock_value_difference {get_dimension_fields}
 		FROM
 			`tabStock Ledger Entry` sle
 		WHERE
@@ -263,13 +280,24 @@ def get_stock_ledger_entries(filters, items):
 		ORDER BY
 			posting_date asc, posting_time asc, creation asc
 		""".format(
-			sle_conditions=get_sle_conditions(filters), item_conditions_sql=item_conditions_sql
+			sle_conditions=get_sle_conditions(filters),
+			item_conditions_sql=item_conditions_sql,
+			get_dimension_fields=get_dimension_fields(),
 		),
 		filters,
 		as_dict=1,
 	)
 
 	return sl_entries
+
+
+def get_dimension_fields() -> str:
+	fields = ""
+
+	for dimension in get_inventory_dimensions():
+		fields += f", {dimension.fieldname}"
+
+	return fields
 
 
 def get_items(filters):
@@ -341,6 +369,10 @@ def get_sle_conditions(filters):
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
 
+	for dimension in get_inventory_dimensions():
+		if filters.get(dimension.fieldname):
+			conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
+
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
@@ -401,3 +433,11 @@ def get_item_group_condition(item_group):
 		)
 
 	return ""
+
+
+def check_inventory_dimension_filters_applied(filters) -> bool:
+	for dimension in get_inventory_dimensions():
+		if dimension.fieldname in filters and filters.get(dimension.fieldname):
+			return True
+
+	return False
