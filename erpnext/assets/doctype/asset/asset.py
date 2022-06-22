@@ -847,7 +847,6 @@ class Asset(AccountsController):
 
 			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
 
-			# square root of flt(salvage_value) / flt(asset_cost)
 			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
 
 			return 100 * (1 - flt(depreciation_rate, float_precision))
