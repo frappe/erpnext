@@ -273,7 +273,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			},
 			always: function(){
 				frappe.ui.form.is_saving = false;
-                frappe.throw("Called submit acction")
+                frappe.throw("The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage")
                 return false;
             }
 		})
