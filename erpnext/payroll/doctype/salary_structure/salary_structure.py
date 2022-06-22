@@ -253,6 +253,7 @@ def make_salary_slip(
 	source_name,
 	target_doc=None,
 	employee=None,
+	posting_date=None,
 	as_print=False,
 	print_format=None,
 	for_preview=0,
@@ -276,6 +277,9 @@ def make_salary_slip(
 				target.payroll_cost_center = frappe.db.get_value(
 					"Department", target.department, "payroll_cost_center"
 				)
+
+			if posting_date:
+				target.posting_date = posting_date
 
 		target.run_method("process_salary_structure", for_preview=for_preview)
 

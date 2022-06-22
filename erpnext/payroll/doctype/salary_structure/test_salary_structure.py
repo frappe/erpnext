@@ -208,9 +208,12 @@ def create_salary_structure_assignment(
 	company=None,
 	currency=erpnext.get_default_currency(),
 	payroll_period=None,
+	base=None,
+	allow_duplicate=False,
 ):
-
-	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
+	if not allow_duplicate and frappe.db.exists(
+		"Salary Structure Assignment", {"employee": employee}
+	):
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""", (employee))
 
 	if not payroll_period:
@@ -223,7 +226,7 @@ def create_salary_structure_assignment(
 
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
 	salary_structure_assignment.employee = employee
-	salary_structure_assignment.base = 50000
+	salary_structure_assignment.base = base or 50000
 	salary_structure_assignment.variable = 5000
 
 	if not from_date:
