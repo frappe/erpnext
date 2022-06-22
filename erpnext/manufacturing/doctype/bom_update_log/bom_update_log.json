@@ -7,11 +7,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "current_bom",
-  "new_bom",
-  "column_break_3",
   "update_type",
   "status",
+  "column_break_3",
+  "current_bom",
+  "new_bom",
   "error_log",
   "progress_section",
   "current_level",
@@ -37,6 +37,7 @@
    "options": "BOM"
   },
   {
+   "depends_on": "eval:doc.update_type === \"Replace BOM\"",
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -87,6 +88,7 @@
    "options": "BOM Update Batch"
   },
   {
+   "depends_on": "eval:doc.status !== \"Completed\"",
    "fieldname": "current_level",
    "fieldtype": "Int",
    "label": "Current Level"
@@ -96,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-06 15:15:23.883251",
+ "modified": "2022-06-20 15:43:55.696388",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
