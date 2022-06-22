@@ -856,6 +856,14 @@ class Asset(AccountsController):
 		months = month_diff(to_date, from_date)
 		total_days = get_total_days(to_date, row.frequency_of_depreciation)
 
+		print("\n"*10)
+		print("from_date: ", from_date)
+		print("to_date: ", to_date)
+		print("\n")
+		print("days: ", days)
+		print("total_days: ", total_days)
+		print("\n"*10)
+
 		return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
 
@@ -1098,7 +1106,15 @@ def is_cwip_accounting_enabled(asset_category):
 def get_total_days(date, frequency):
 	period_start_date = add_months(date, cint(frequency) * -1)
 
+	if is_last_day_of_the_month(date):
+		period_start_date = get_last_day(period_start_date)
+
 	return date_diff(date, period_start_date)
+
+def is_last_day_of_the_month(date):
+	last_day_of_the_month = get_last_day(date)
+
+	return getdate(last_day_of_the_month) == getdate(date)
 
 
 @erpnext.allow_regional
