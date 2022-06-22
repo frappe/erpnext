@@ -83,6 +83,10 @@ frappe.ui.form.on("Delivery Note", {
 	},
 
 	refresh: function(frm) {
+        if (frm.doc.queue_status == 'Queued'){
+            $('.primary-action').hide();
+        }
+
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Credit Note'), function() {
 				frappe.model.open_mapped_doc({
@@ -258,7 +262,22 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	reopen_delivery_note : function() {
 		this.update_status("Submitted")
 	},
-
+    before_submit : function(){
+		var me = this;
+		frappe.ui.form.is_saving = true;
+		frappe.call({
+			method:"nrp_manufacturing.modules.gourmet.delivery_note.delivery_note.enqueue_doc",
+			args: {docname: me.frm.doc.name, status: status},
+			callback: function(r){
+                me.frm.reload_doc();
+			},
+			always: function(){
+				frappe.ui.form.is_saving = false;
+                frappe.throw("Called submit acction")
+                return false;
+            }
+		})
+    },
 	update_status: function(status) {
 		var me = this;
 		frappe.ui.form.is_saving = true;
@@ -292,6 +311,7 @@ frappe.ui.form.on('Delivery Note', {
 		if(frm.doc.company) {
 			frm.trigger("unhide_account_head");
 		}
+
 	},
 
 	company: function(frm) {

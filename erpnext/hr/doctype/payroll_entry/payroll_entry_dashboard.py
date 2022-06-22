@@ -7,11 +7,11 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
-            'Payment Advice': 'payroll_reference'
+            'Payment Advice': 'payroll_reference',
 		},
 		'transactions': [
-			{
-				'items': ['Salary Slip', 'Journal Entry', 'Payment Advice']
+			{                
+				'items': ['Salary Slip','Journal Entry','Payment Advice']
 			}
 		]
 	}

@@ -187,9 +187,9 @@ class DeliveryNote(SellingController):
 				if bin_qty:
 					d.actual_qty = flt(bin_qty.actual_qty)
 					d.projected_qty = flt(bin_qty.projected_qty)
-	def submit(self):
-		time.sleep(1)
-		self.queue_action('submit',queue_name="dn_queue")
+	# def submit(self):
+	# 	time.sleep(1)
+	# 	self.queue_action('submit',queue_name="dn_queue")
 	
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -217,6 +217,8 @@ class DeliveryNote(SellingController):
 		time.sleep(1)
 		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",stock_entry_name=stock_gl.stock_entry,queue="se_gl_queue",enqueue_after_commit=True)
 		# self.make_gl_entries()
+		frappe.db.sql("UPDATE `tabDelivery Note` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
+			
 
 	def on_cancel(self):
 		super(DeliveryNote, self).on_cancel()
