@@ -445,6 +445,7 @@ class BOM(WebsiteGenerator):
 			and self.is_active
 		):
 			frappe.db.set(self, "is_default", 1)
+			frappe.db.set_value("Item", self.item, "default_bom", self.name)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
