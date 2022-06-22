@@ -635,6 +635,39 @@ class TestDepreciationMethods(AssetSetup):
 
 		self.assertEqual(schedules, expected_schedules)
 
+	def test_monthly_depreciation_by_wdv_method(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2022-02-15",
+			purchase_date="2022-02-15",
+			depreciation_method="Written Down Value",
+			gross_purchase_amount=10000,
+			expected_value_after_useful_life=5000,
+			depreciation_start_date="2022-02-28",
+			total_number_of_depreciations=5,
+			frequency_of_depreciation=1,
+		)
+
+		expected_schedules = [
+			["2022-02-28", 645.0, 645.0],
+			["2022-03-31", 1206.8, 1851.8],
+			["2022-04-30", 1051.12, 2902.92],
+			["2022-05-31", 915.52, 3818.44],
+			["2022-06-30", 797.42, 4615.86],
+			["2022-07-15", 384.14, 5000.0]
+		]
+
+		schedules = [
+			[
+				cstr(d.schedule_date),
+				flt(d.depreciation_amount, 2),
+				flt(d.accumulated_depreciation_amount, 2),
+			]
+			for d in asset.get("schedules")
+		]
+
+		self.assertEqual(schedules, expected_schedules)
+
 	def test_discounted_wdv_depreciation_rate_for_indian_region(self):
 		# set indian company
 		company_flag = frappe.flags.company
