@@ -306,7 +306,6 @@ class SalesInvoice(SellingController):
 				if self.paid_amount > 0:
 					outstanding_amount = self.rounded_total - self.paid_amount
 					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
-				
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
