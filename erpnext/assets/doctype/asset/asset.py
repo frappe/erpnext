@@ -1109,6 +1109,7 @@ def get_total_days(date, frequency):
 
 	return date_diff(date, period_start_date)
 
+
 def is_last_day_of_the_month(date):
 	last_day_of_the_month = get_last_day(date)
 
