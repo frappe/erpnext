@@ -30,8 +30,8 @@ def execute(filters=None):
 			"width": 120
 		},
 		{
-			"fieldname": "reason_discount",
-			"label": _("Reason Discount"),
+			"fieldname": "reason_for_return",
+			"label": _("Reason For Cancellation"),
 			"fieldtype": "Data",
 			"width": 240
 		},
@@ -56,7 +56,7 @@ def return_data(filters):
 	for cancellation in cancellations:
 		invoice = frappe.get_doc("Sales Invoice", cancellation.sale_invoice)
 
-		row = [invoice.posting_date, invoice.name, invoice.rounded_total, invoice.discount_reason, invoice.cashier]
+		row = [invoice.posting_date, invoice.name, invoice.rounded_total, cancellation.reason_for_return, invoice.cashier]
 		data.append(row)
 
 	return data

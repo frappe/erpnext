@@ -70,6 +70,12 @@ class SupplierRetention(Document):
 				outstanding_amount = sales_invoice.outstanding_amount
 				outstanding_amount -= total
 				sales_invoice.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+			
+			if document.reference_doctype == "Sales Invoice":
+				sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
+				outstanding_amount = sales_invoice.outstanding_amount
+				outstanding_amount -= total
+				sales_invoice.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 			if document.reference_doctype == "Supplier Documents":
 				supllier_document = frappe.get_doc("Supplier Documents", document.reference_name)

@@ -29,7 +29,7 @@ def get_data():
 			},
 			{
 				'label': _('Returns'),
-				'items': ['Purchase Invoice', 'Debit Note CXP']
+				'items': ['Purchase Invoice']
 			},
 			{
 				'label': _('Subscription'),
