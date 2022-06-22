@@ -213,6 +213,9 @@ class PaymentEntry(AccountsController):
 			self.update_dashboard_customer_cancel()
 		if self.party_type == "Supplier":
 			self.update_dashboard_supplier_cancel()
+		self.paid_supplier_documents_cancel()
+		self.paid_credit_note_cxp_cancel()
+		self.paid_customer_documents_cancel()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
@@ -254,6 +257,38 @@ class PaymentEntry(AccountsController):
 			if document.reference_doctype == "Debit Note CXP":
 				doc = frappe.get_doc("Debit Note CXP", document.reference_name)
 				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+	
+	def paid_supplier_documents_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Supplier Documents":
+				doc = frappe.get_doc("Supplier Documents", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+				doc.db_set('status', "Unpaid", update_modified=False)
+	
+	def paid_customer_documents_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Customer Documents":
+				doc = frappe.get_doc("Customer Documents", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+				doc.db_set('status', "Unpaid", update_modified=False)
+	
+	def paid_credit_note_cxp_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Debit Note CXP":
+				doc = frappe.get_doc("Debit Note CXP", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
 
 				doc.db_set('outstanding_amount', outstanding, update_modified=False)
 

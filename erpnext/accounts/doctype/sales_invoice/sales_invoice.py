@@ -292,6 +292,21 @@ class SalesInvoice(SellingController):
 
 			self.update_dashboard_customer()
 			# self.create_dispatch_control()
+			if self.grand_total == self.paid_amount:
+				self.db_set('outstanding_amount', 0, update_modified=False)	
+			else:
+				outstanding_amount = 0
+				
+				self.db_set('outstanding_amount', self.rounded_total, update_modified=False)
+
+				if self.total_advance > 0:
+					outstanding_amount = self.rounded_total - self.total_advance
+					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+				if self.paid_amount > 0:
+					outstanding_amount = self.rounded_total - self.paid_amount
+					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+				
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
