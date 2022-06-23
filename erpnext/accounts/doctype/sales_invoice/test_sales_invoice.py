@@ -1612,6 +1612,17 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertTrue(gle)
 
+	def test_invoice_exchange_rate(self):
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=1,
+			do_not_save=1,
+		)
+
+		self.assertRaises(frappe.ValidationError, si.save)
+
 	def test_invalid_currency(self):
 		# Customer currency = USD
 
