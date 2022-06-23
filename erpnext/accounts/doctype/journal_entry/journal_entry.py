@@ -83,7 +83,6 @@ class JournalEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
-		self.update_status_for_full_and_final_statement()
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -97,7 +96,6 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
-		self.update_status_for_full_and_final_statement()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -106,20 +104,12 @@ class JournalEntry(AccountsController):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
 			if d.is_advance:
-				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
+				if d.reference_type in frappe.get_hooks("advance_payment_doctypes"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
 		for voucher_type, order_list in advance_paid.items():
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
-
-	def update_status_for_full_and_final_statement(self):
-		for entry in self.accounts:
-			if entry.reference_type == "Full and Final Statement":
-				if self.docstatus == 1:
-					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Paid")
-				elif self.docstatus == 2:
-					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Unpaid")
 
 	def validate_inter_company_accounts(self):
 		if (

@@ -472,6 +472,19 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
+advance_payment_doctypes = ["Sales Order", "Purchase Order"]
+
+invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
+
+period_closing_doctypes = [
+	"Sales Invoice",
+	"Purchase Invoice",
+	"Journal Entry",
+	"Bank Clearance",
+	"Asset",
+	"Stock Entry",
+]
+
 accounting_dimension_doctypes = [
 	"GL Entry",
 	"Payment Ledger Entry",
@@ -479,12 +492,8 @@ accounting_dimension_doctypes = [
 	"Purchase Invoice",
 	"Payment Entry",
 	"Asset",
-	"Expense Claim",
-	"Expense Claim Detail",
-	"Expense Taxes and Charges",
 	"Stock Entry",
 	"Budget",
-	"Payroll Entry",
 	"Delivery Note",
 	"Sales Invoice Item",
 	"Purchase Invoice Item",
