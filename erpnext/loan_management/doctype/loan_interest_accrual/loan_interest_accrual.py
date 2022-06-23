@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, date_diff, flt, get_datetime, getdate, nowdate
 
-import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -41,6 +40,8 @@ class LoanInterestAccrual(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
 
+		cost_center = frappe.db.get_value("Loan", self.loan, "cost_center")
+
 		if self.interest_amount:
 			gle_map.append(
 				self.get_gl_dict(
@@ -56,7 +57,7 @@ class LoanInterestAccrual(AccountsController):
 						"remarks": _("Interest accrued from {0} to {1} against loan: {2}").format(
 							self.last_accrual_date, self.posting_date, self.loan
 						),
-						"cost_center": erpnext.get_default_cost_center(self.company),
+						"cost_center": cost_center,
 						"posting_date": self.posting_date,
 					}
 				)
@@ -74,7 +75,7 @@ class LoanInterestAccrual(AccountsController):
 						"remarks": ("Interest accrued from {0} to {1} against loan: {2}").format(
 							self.last_accrual_date, self.posting_date, self.loan
 						),
-						"cost_center": erpnext.get_default_cost_center(self.company),
+						"cost_center": cost_center,
 						"posting_date": self.posting_date,
 					}
 				)

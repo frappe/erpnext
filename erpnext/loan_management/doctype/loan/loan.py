@@ -26,6 +26,7 @@ class Loan(AccountsController):
 		self.set_loan_amount()
 		self.validate_loan_amount()
 		self.set_missing_fields()
+		self.validate_cost_center()
 		self.validate_accounts()
 		self.check_sanctioned_amount_limit()
 		self.validate_repay_from_salary()
@@ -58,6 +59,13 @@ class Loan(AccountsController):
 						frappe.bold(self.get(fieldname)), frappe.bold(self.company)
 					)
 				)
+
+	def validate_cost_center(self):
+		if not self.cost_center and self.rate_of_interest != 0.0:
+			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+
+			if not self.cost_center:
+				frappe.throw(_("Cost center is mandatory for loans having rate of interest greater than 0"))
 
 	def on_submit(self):
 		self.link_loan_security_pledge()

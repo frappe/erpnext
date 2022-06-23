@@ -1198,6 +1198,8 @@
   },
   {
    "depends_on": "eval:!doc.commission_based_on_target_lines",
+   "fetch_from": "sales_partner.commission_rate",
+   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "label": "Commission Rate (%)",
@@ -1369,7 +1371,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-26 14:48:08.781837",
+ "modified": "2022-06-10 03:52:04.197415",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -4297,7 +4297,7 @@ Fetch Serial Numbers based on FIFO,إحضار الأرقام المسلسلة ب
 "To allow different rates, disable the {0} checkbox in {1}.",للسماح بمعدلات مختلفة ، قم بتعطيل مربع الاختيار {0} في {1}.,
 Current Odometer Value should be greater than Last Odometer Value {0},يجب أن تكون قيمة عداد المسافات الحالية أكبر من قيمة آخر عداد المسافات {0},
 No additional expenses has been added,لم يتم إضافة مصاريف إضافية,
-Asset{} {assets_link} created for {},الأصل {} {asset_link} الذي تم إنشاؤه لـ {},
+Asset{} {assets_link} created for {},الأصل {} {assets_link} الذي تم إنشاؤه لـ {},
 Row {}: Asset Naming Series is mandatory for the auto creation for item {},الصف {}: سلسلة تسمية الأصول إلزامية للإنشاء التلقائي للعنصر {},
 Assets not created for {0}. You will have to create asset manually.,لم يتم إنشاء الأصول لـ {0}. سيكون عليك إنشاء الأصل يدويًا.,
 {0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.,{0} يحتوي {1} على إدخالات محاسبية بالعملة {2} للشركة {3}. الرجاء تحديد حساب مستحق أو دائن بالعملة {2}.,

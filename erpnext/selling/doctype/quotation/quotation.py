@@ -59,8 +59,32 @@ class Quotation(SellingController):
 					title=_("Unpublished Item"),
 				)
 
-	def has_sales_order(self):
-		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
+	def get_ordered_status(self):
+		ordered_items = frappe._dict(
+			frappe.db.get_all(
+				"Sales Order Item",
+				{"prevdoc_docname": self.name, "docstatus": 1},
+				["item_code", "sum(qty)"],
+				group_by="item_code",
+				as_list=1,
+			)
+		)
+
+		status = "Open"
+		if ordered_items:
+			status = "Ordered"
+
+			for item in self.get("items"):
+				if item.qty > ordered_items.get(item.item_code, 0.0):
+					status = "Partially Ordered"
+
+		return status
+
+	def is_fully_ordered(self):
+		return self.get_ordered_status() == "Ordered"
+
+	def is_partially_ordered(self):
+		return self.get_ordered_status() == "Partially Ordered"
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
@@ -92,7 +116,7 @@ class Quotation(SellingController):
 
 	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
-		if not self.has_sales_order():
+		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
 			frappe.db.set(self, "status", "Lost")
