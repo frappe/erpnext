@@ -3,7 +3,7 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2013-03-07 11:55:07",
+ "creation": "2022-06-23 12:59:40.339174",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -261,7 +261,8 @@
    "fieldtype": "Section Break",
    "label": "Costing and Billing",
    "oldfieldtype": "Section Break",
-   "options": "fa fa-money"
+   "options": "fa fa-money",
+   "permlevel": 1
   },
   {
    "fieldname": "estimated_costing",
@@ -331,6 +332,7 @@
    "fieldtype": "Section Break",
    "label": "Margin",
    "oldfieldtype": "Column Break",
+   "permlevel": 1,
    "width": "50%"
   },
   {
@@ -470,16 +472,22 @@
    "write": 1
   },
   {
-   "permlevel": 1,
-   "read": 1,
-   "report": 1,
-   "role": "All"
-  },
-  {
    "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
    "print": 1,
    "read": 1,
    "report": 1,
