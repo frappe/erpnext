@@ -43,7 +43,7 @@ def get_columns():
 			"options": "Account",
 			"width": 170,
 		},
-		{"label": _("Amount"), "fieldname": "amount", "width": 120},
+		{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 120},
 	]
 
 	return columns
