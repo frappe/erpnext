@@ -1126,31 +1126,53 @@ class PurchaseInvoice(BuyingController):
 		if (
 			self.update_stock
 			and voucher_wise_stock_value.get((item.name, item.warehouse))
-			and warehouse_debit_amount
-			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
+			and (
+				(
+					warehouse_debit_amount
+					!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
+				)
+				or (warehouse_debit_amount != item.base_net_amount)
+			)
 		):
 
 			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
+			rounding_loss = flt(warehouse_debit_amount - item.base_net_amount, net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": cost_of_goods_sold_account,
-						"against": item.expense_account,
-						"debit": stock_adjustment_amt,
-						"remarks": self.get("remarks") or _("Stock Adjustment"),
-						"cost_center": item.cost_center,
-						"project": item.project or self.project,
-					},
-					account_currency,
-					item=item,
+			if stock_adjustment_amt:
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": cost_of_goods_sold_account,
+							"against": item.expense_account,
+							"debit": stock_adjustment_amt,
+							"remarks": self.get("remarks") or _("Stock Adjustment"),
+							"cost_center": item.cost_center,
+							"project": item.project or self.project,
+						},
+						account_currency,
+						item=item,
+					)
 				)
-			)
 
-			warehouse_debit_amount = stock_amount
+				warehouse_debit_amount = stock_amount
 
+			if rounding_loss:
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": cost_of_goods_sold_account,
+							"against": item.expense_account,
+							"credit": rounding_loss,
+							"remarks": self.get("remarks") or _("Stock Adjustment"),
+							"cost_center": item.cost_center,
+							"project": item.project or self.project,
+						},
+						account_currency,
+						item=item,
+					)
+				)
 		return warehouse_debit_amount
 
 	def make_tax_gl_entries(self, gl_entries):
