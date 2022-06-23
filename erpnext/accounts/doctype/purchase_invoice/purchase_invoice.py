@@ -1137,7 +1137,6 @@ class PurchaseInvoice(BuyingController):
 
 			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
-			rounding_loss = flt(warehouse_debit_amount - item.base_net_amount, net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
 			if stock_adjustment_amt:
@@ -1158,6 +1157,7 @@ class PurchaseInvoice(BuyingController):
 
 				warehouse_debit_amount = stock_amount
 
+			rounding_loss = flt(warehouse_debit_amount - item.base_net_amount, net_amt_precision)
 			if rounding_loss:
 				gl_entries.append(
 					self.get_gl_dict(
