@@ -129,7 +129,7 @@ frappe.tour['Employee'] = [
 	{
 		fieldname: "company",
 		title: "Company",
-		description: __("Select a Company this Employee belongs to. Other HR features like Payroll. Expense Claims and Leaves for this Employee will be created for a given company only.")
+		description: __("Select a Company this Employee belongs to.")
 	},
 	{
 		fieldname: "date_of_birth",
@@ -142,18 +142,8 @@ frappe.tour['Employee'] = [
 		description: __("Select Date of joining. It will have impact on the first salary calculation, Leave allocation on pro-rata bases.")
 	},
 	{
-		fieldname: "holiday_list",
-		title: "Holiday List",
-		description: __("Select a default Holiday List for this Employee. The days listed in Holiday List will not be counted in Leave Application.")
-	},
-	{
 		fieldname: "reports_to",
 		title: "Reports To",
 		description: __("Here, you can select a senior of this Employee. Based on this, Organization Chart will be populated.")
-	},
-	{
-		fieldname: "leave_approver",
-		title: "Leave Approver",
-		description: __("Select  Leave Approver for an employee. The user one who will look after his/her Leave application")
 	},
 ];

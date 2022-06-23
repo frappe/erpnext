@@ -211,26 +211,20 @@ class Project(Document):
 			self.status = "Completed"
 
 	def update_costing(self):
-		from_time_sheet = frappe.db.sql(
-			"""select
-			sum(costing_amount) as costing_amount,
-			sum(billing_amount) as billing_amount,
-			min(from_time) as start_date,
-			max(to_time) as end_date,
-			sum(hours) as time
-			from `tabTimesheet Detail` where project = %s and docstatus = 1""",
-			self.name,
-			as_dict=1,
-		)[0]
+		from frappe.query_builder.functions import Max, Min, Sum
 
-		from_expense_claim = frappe.db.sql(
-			"""select
-			sum(total_sanctioned_amount) as total_sanctioned_amount
-			from `tabExpense Claim` where project = %s
-			and docstatus = 1""",
-			self.name,
-			as_dict=1,
-		)[0]
+		TimesheetDetail = frappe.qb.DocType("Timesheet Detail")
+		from_time_sheet = (
+			frappe.qb.from_(TimesheetDetail)
+			.select(
+				Sum(TimesheetDetail.costing_amount).as_("costing_amount"),
+				Sum(TimesheetDetail.billing_amount).as_("billing_amount"),
+				Min(TimesheetDetail.from_time).as_("start_date"),
+				Max(TimesheetDetail.to_time).as_("end_date"),
+				Sum(TimesheetDetail.hours).as_("time"),
+			)
+			.where((TimesheetDetail.project == self.name) & (TimesheetDetail.docstatus == 1))
+		).run(as_dict=True)[0]
 
 		self.actual_start_date = from_time_sheet.start_date
 		self.actual_end_date = from_time_sheet.end_date
@@ -239,7 +233,6 @@ class Project(Document):
 		self.total_billable_amount = from_time_sheet.billing_amount
 		self.actual_time = from_time_sheet.time
 
-		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
 		self.update_purchase_costing()
 		self.update_sales_amount()
 		self.update_billed_amount()
