@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Collection Commitment vs Payment"] = {
+frappe.query_reports["Failed Commitment"] = {
 	"filters": [
 
 		{

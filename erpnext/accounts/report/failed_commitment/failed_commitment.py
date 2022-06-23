@@ -17,7 +17,7 @@ def get_conditions(filters):
 	return conditions	
 
 def get_columns(filters):
-	print(" Columns are here ")	
+	# print(" Columns are here ")	
 	column_lst =[
 		{
 			"fieldname": "customer",
@@ -50,35 +50,36 @@ def get_columns(filters):
 			"width": 100,
 			"fieldtype": "Currency"
 		},
-		{
-			"fieldname": "company",
-			"label": "Company",
-			"width": 200,
-			"fieldtype": "Link",
-			"options": "Company"
-		}]
+		]
 	
 	return column_lst
 def get_data(conditions, filters):	
 	from_date = filters.get("from_date") 
 	to_date = filters.get("to_date")
-	print(" In get Data", conditions)
+	# print(" In get Data", conditions)
 	query = frappe.db.sql("""
 							Select prc.customer as customer, prc.customer_name as customer_name, prc.commitment_date as c_date, sum(prc.commitment_amount) as c_amount, 
 							IF ( (Select sum(pe.paid_amount) from `tabPayment Entry` pe 
 									where pe.party = prc.customer and pe.payment_type ="Receive" 
-									and pe.posting_date <= '{0}' ),
+									and pe.posting_date <= '{0}' ) < sum(prc.commitment_amount),
 								
 								(Select sum(pe.paid_amount) from `tabPayment Entry` pe 
 									where pe.party = prc.customer and pe.payment_type ="Receive" 
 									and pe.posting_date <= '{0}'), 0) as col_amount, prc.company
 							from `tabPayment Receivable Commitment` prc 
 							where prc.company = '{2}' and prc.commitment_status ="Active" 
+							
 							and prc.commitment_date <= '{0}'  {1}
 							
 							group by prc.customer
-						""".format(to_date, conditions, filters.get("company")))
+						""".format(to_date, conditions, filters.get("company")), as_dict= 1)
 
-	return query					
+	data = []
+	for q in query:
+		if q.get("col_amount") > 0:
+			data.append(q)
+			# print(" q ",q)
+	return data	
+
 
 
