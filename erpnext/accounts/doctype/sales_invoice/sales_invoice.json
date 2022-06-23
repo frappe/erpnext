@@ -2057,9 +2057,10 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-
  "modified": "2022-04-19 19:13:28.089594",
+ "modified_by": "Administrator",
  "module": "Accounts",
+ "name": "Sales Invoice",
  "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
