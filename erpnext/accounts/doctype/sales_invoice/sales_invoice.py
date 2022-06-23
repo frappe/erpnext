@@ -295,17 +295,15 @@ class SalesInvoice(SellingController):
 			if self.grand_total == self.paid_amount:
 				self.db_set('outstanding_amount', 0, update_modified=False)	
 			else:
-				outstanding_amount = 0
-				
-				self.db_set('outstanding_amount', self.rounded_total, update_modified=False)
+				outstanding_amount = self.rounded_total
 
 				if self.total_advance > 0:
 					outstanding_amount = self.rounded_total - self.total_advance
-					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 				if self.paid_amount > 0:
 					outstanding_amount = self.rounded_total - self.paid_amount
-					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+				
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 				
 
 		# if self.docstatus == 0:
@@ -1029,6 +1027,19 @@ class SalesInvoice(SellingController):
 		if self.docstatus == 1:
 			self.create_dispatch_control()
 		self.reload()
+		
+		if self.grand_total == self.paid_amount:
+				self.db_set('outstanding_amount', 0, update_modified=False)	
+			else:
+				outstanding_amount = self.rounded_total
+
+				if self.total_advance > 0:
+					outstanding_amount = self.rounded_total - self.total_advance
+
+				if self.paid_amount > 0:
+					outstanding_amount = self.rounded_total - self.paid_amount
+				
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
