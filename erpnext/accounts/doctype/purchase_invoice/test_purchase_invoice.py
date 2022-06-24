@@ -1474,10 +1474,23 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
+		company = "_Test Company"
+
+		tds_account_args = {
+			"doctype": "Account",
+			"account_name": "TDS Payable",
+			"account_type": "Tax",
+			"parent_account": frappe.db.get_value(
+				"Account", {"account_name": "Duties and Taxes", "company": company}
+			),
+			"company": company,
+		}
+
+		tds_account = create_account(**tds_account_args)
+		tax_withholding_category = "Test TDS - 194 - Dividends - Individual"
+
 		# Update tax withholding category with current fiscal year and rate details
-		tax_withholding_category = create_tax_witholding_category(
-			"Test TDS - 194 - Dividends - Individual", "_Test Company", "TDS Payable - _TC"
-		).name
+		create_tax_witholding_category(tax_withholding_category, company, tds_account)
 
 		# create a new supplier to test
 		supplier = create_supplier(
@@ -1508,7 +1521,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		expected_gle = [
 			["Cash - _TC", 0, 27000],
 			["Creditors - _TC", 30000, 0],
-			["TDS Payable - _TC", 0, 3000],
+			[tds_account, 0, 3000],
 		]
 
 		gl_entries = frappe.db.sql(
@@ -1534,7 +1547,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		purchase_invoice.submit()
 
 		# Check GLE for Purchase Invoice
-		# Zero net effect on final TDS Payable on invoice
+		# Zero net effect on final TDS payable on invoice
 		expected_gle = [["_Test Account Cost for Goods Sold - _TC", 30000], ["Creditors - _TC", -30000]]
 
 		gl_entries = frappe.db.sql(
