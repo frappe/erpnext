@@ -302,6 +302,7 @@ erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.non_profit_deprecation_warning
 erpnext.patches.v13_0.enable_ksa_vat_docs #1
+erpnext.patches.v13_0.remove_india_deprecation_warning
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -344,3 +345,4 @@ execute:frappe.delete_doc("DocType", "Naming Series")
 erpnext.patches.v13_0.set_payroll_entry_status
 erpnext.patches.v13_0.job_card_status_on_hold
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.patches.v14_0.delete_regional_india_doctypes
