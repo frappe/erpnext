@@ -506,6 +506,10 @@ accounting_dimension_doctypes = [
 ]
 
 regional_overrides = {
+	"India": {
+		"erpnext.hr.utils.calculate_annual_eligible_hra_exemption": "erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption",
+		"erpnext.hr.utils.calculate_hra_exemption_for_period": "erpnext.regional.india.utils.calculate_hra_exemption_for_period",
+	},
 	"France": {
 		"erpnext.tests.test_regional.test_method": "erpnext.regional.france.utils.test_method"
 	},
