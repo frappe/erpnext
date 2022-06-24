@@ -158,8 +158,9 @@
   {
    "fieldname": "accrual_type",
    "fieldtype": "Select",
+   "in_filter": 1,
    "label": "Accrual Type",
-   "options": "Regular\nRepayment\nDisbursement\nInterest Credit\nInterest Debit\nRefund"
+   "options": "Regular\nRepayment\nDisbursement\nCredit Adjustment\nDebit Adjustment\nRefund"
   },
   {
    "fieldname": "penalty_amount",
@@ -185,7 +186,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-28 14:46:38.131536",
+ "modified": "2022-06-24 15:45:07.014679",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
