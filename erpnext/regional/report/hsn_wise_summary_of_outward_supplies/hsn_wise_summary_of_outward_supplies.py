@@ -83,7 +83,7 @@ def get_conditions(filters):
 		("gst_hsn_code", " and gst_hsn_code=%(gst_hsn_code)s"),
 		("company_gstin", " and company_gstin=%(company_gstin)s"),
 		("from_date", " and posting_date >= %(from_date)s"),
-		("to_date", "and posting_date <= %(to_date)s"),
+		("to_date", " and posting_date <= %(to_date)s"),
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]

@@ -47,7 +47,7 @@ def execute(filters=None):
 			s.name = gl.party
 				AND s.irs_1099 = 1
 				AND gl.fiscal_year = %(fiscal_year)s
-				AND gl.party_type = "Supplier"
+				AND gl.party_type = 'Supplier'
 				AND gl.company = %(company)s
 				{conditions}
 

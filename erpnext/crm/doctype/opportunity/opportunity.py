@@ -8,7 +8,8 @@ import frappe
 from frappe import _
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder import DocType
+from frappe.query_builder import DocType, Interval
+from frappe.query_builder.functions import Now
 from frappe.utils import cint, flt, get_fullname
 
 from erpnext.crm.utils import add_link_in_communication, copy_comments
@@ -398,15 +399,17 @@ def auto_close_opportunity():
 		frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days") or 15
 	)
 
-	opportunities = frappe.db.sql(
-		""" select name from tabOpportunity where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """,
-		(auto_close_after_days),
-		as_dict=True,
-	)
+	table = frappe.qb.DocType("Opportunity")
+	opportunities = (
+		frappe.qb.from_(table)
+		.select(table.name)
+		.where(
+			(table.modified < (Now() - Interval(days=auto_close_after_days))) & (table.status == "Replied")
+		)
+	).run(pluck=True)
 
 	for opportunity in opportunities:
-		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
+		doc = frappe.get_doc("Opportunity", opportunity)
 		doc.status = "Closed"
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True

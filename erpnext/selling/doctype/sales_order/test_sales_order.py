@@ -329,7 +329,7 @@ class TestSalesOrder(FrappeTestCase):
 
 	def test_sales_order_on_hold(self):
 		so = make_sales_order(item_code="_Test Product Bundle Item")
-		so.db_set("Status", "On Hold")
+		so.db_set("status", "On Hold")
 		si = make_sales_invoice(so.name)
 		self.assertRaises(frappe.ValidationError, create_dn_against_so, so.name)
 		self.assertRaises(frappe.ValidationError, si.submit)
@@ -644,7 +644,7 @@ class TestSalesOrder(FrappeTestCase):
 		else:
 			# update valid from
 			frappe.db.sql(
-				"""UPDATE `tabItem Tax` set valid_from = CURDATE()
+				"""UPDATE `tabItem Tax` set valid_from = CURRENT_DATE
 				where parent = %(item)s and item_tax_template = %(tax)s""",
 				{"item": item, "tax": tax_template},
 			)
@@ -1379,6 +1379,59 @@ class TestSalesOrder(FrappeTestCase):
 			so_doc.cancel()
 		except Exception:
 			self.fail("Can not cancel sales order with linked cancelled payment entry")
+
+	def test_work_order_pop_up_from_sales_order(self):
+		"Test `get_work_order_items` in Sales Order picks the right BOM for items to manufacture."
+
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		make_item(  # template item
+			"Test-WO-Tshirt",
+			{
+				"has_variant": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": "Test Colour"}],
+			},
+		)
+		make_item("Test-RM-Cotton")  # RM for BOM
+
+		for colour in (
+			"Red",
+			"Green",
+		):
+			variant = create_variant("Test-WO-Tshirt", {"Test Colour": colour})
+			variant.save()
+
+		template_bom = make_bom(item="Test-WO-Tshirt", rate=100, raw_materials=["Test-RM-Cotton"])
+		red_var_bom = make_bom(item="Test-WO-Tshirt-R", rate=100, raw_materials=["Test-RM-Cotton"])
+
+		so = make_sales_order(
+			**{
+				"item_list": [
+					{
+						"item_code": "Test-WO-Tshirt-R",
+						"qty": 1,
+						"rate": 1000,
+						"warehouse": "_Test Warehouse - _TC",
+					},
+					{
+						"item_code": "Test-WO-Tshirt-G",
+						"qty": 1,
+						"rate": 1000,
+						"warehouse": "_Test Warehouse - _TC",
+					},
+				]
+			}
+		)
+		wo_items = so.get_work_order_items()
+
+		self.assertEqual(wo_items[0].get("item_code"), "Test-WO-Tshirt-R")
+		self.assertEqual(wo_items[0].get("bom"), red_var_bom.name)
+
+		# Must pick Template Item BOM for Test-WO-Tshirt-G as it has no BOM
+		self.assertEqual(wo_items[1].get("item_code"), "Test-WO-Tshirt-G")
+		self.assertEqual(wo_items[1].get("bom"), template_bom.name)
 
 	def test_request_for_raw_materials(self):
 		item = make_item(
