@@ -1475,12 +1475,14 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 		# Update tax withholding category with current fiscal year and rate details
-		update_tax_witholding_category("_Test Company", "TDS Payable - _TC")
+		tax_withholding_category = create_tax_witholding_category(
+			"Test TDS - 194 - Dividends - Individual", "_Test Company", "TDS Payable - _TC"
+		).name
 
 		# create a new supplier to test
 		supplier = create_supplier(
 			supplier_name="_Test TDS Advance Supplier",
-			tax_withholding_category="TDS - 194 - Dividends - Individual",
+			tax_withholding_category=tax_withholding_category,
 		)
 
 		# Create Purchase Order with TDS applied
@@ -1498,7 +1500,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		payment_entry = get_payment_entry(dt="Purchase Order", dn=po.name)
 		payment_entry.paid_from = "Cash - _TC"
 		payment_entry.apply_tax_withholding_amount = 1
-		payment_entry.tax_withholding_category = "TDS - 194 - Dividends - Individual"
+		payment_entry.tax_withholding_category = tax_withholding_category
 		payment_entry.save()
 		payment_entry.submit()
 
@@ -1654,40 +1656,28 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 
-def update_tax_witholding_category(company, account):
+def create_tax_witholding_category(category_name, company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
 	fiscal_year = get_fiscal_year(date=nowdate())
 
-	if not frappe.db.get_value(
-		"Tax Withholding Rate",
+	return frappe.get_doc(
 		{
-			"parent": "TDS - 194 - Dividends - Individual",
-			"from_date": (">=", fiscal_year[1]),
-			"to_date": ("<=", fiscal_year[2]),
-		},
-	):
-		tds_category = frappe.get_doc("Tax Withholding Category", "TDS - 194 - Dividends - Individual")
-		tds_category.set("rates", [])
-
-		tds_category.append(
-			"rates",
-			{
-				"from_date": fiscal_year[1],
-				"to_date": fiscal_year[2],
-				"tax_withholding_rate": 10,
-				"single_threshold": 2500,
-				"cumulative_threshold": 0,
-			},
-		)
-		tds_category.save()
-
-	if not frappe.db.get_value(
-		"Tax Withholding Account", {"parent": "TDS - 194 - Dividends - Individual", "account": account}
-	):
-		tds_category = frappe.get_doc("Tax Withholding Category", "TDS - 194 - Dividends - Individual")
-		tds_category.append("accounts", {"company": company, "account": account})
-		tds_category.save()
+			"doctype": "Tax Withholding Category",
+			"name": category_name,
+			"category_name": category_name,
+			"accounts": [{"company": company, "account": account}],
+			"rates": [
+				{
+					"from_date": fiscal_year[1],
+					"to_date": fiscal_year[2],
+					"tax_withholding_rate": 10,
+					"single_threshold": 2500,
+					"cumulative_threshold": 0,
+				}
+			],
+		}
+	).insert(ignore_if_duplicate=True)
 
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
