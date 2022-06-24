@@ -3060,7 +3060,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_sales_invoice_with_disabled_account(self):
 		try:
-			account = frappe.get_doc("Account", "VAT 5% - _TC")
+			account_name = "Sales Expenses - _TC"
+			account = frappe.get_doc("Account", account_name)
 			account.disabled = 1
 			account.save()
 
@@ -3072,10 +3073,10 @@ class TestSalesInvoice(unittest.TestCase):
 				"taxes",
 				{
 					"charge_type": "On Net Total",
-					"account_head": "VAT 5% - _TC",
+					"account_head": account_name,
 					"cost_center": "Main - _TC",
-					"description": "VAT @ 5.0",
-					"rate": 9,
+					"description": "Commission",
+					"rate": 5,
 				},
 			)
 			si.save()
