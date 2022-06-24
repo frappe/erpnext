@@ -6,6 +6,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import DocType, Interval
+from frappe.query_builder.functions import Now
 from frappe.utils import cint, cstr
 
 from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
@@ -22,6 +24,17 @@ class BOMMissingError(frappe.ValidationError):
 
 
 class BOMUpdateLog(Document):
+	@staticmethod
+	def clear_old_logs(days=None):
+		days = days or 90
+		table = DocType("BOM Update Log")
+		frappe.db.delete(
+			table,
+			filters=(
+				(table.modified < (Now() - Interval(days=days))) & (table.update_type == "Update Cost")
+			),
+		)
+
 	def validate(self):
 		if self.update_type == "Replace BOM":
 			self.validate_boms_are_specified()
@@ -77,7 +90,11 @@ class BOMUpdateLog(Document):
 				now=frappe.flags.in_test,
 			)
 		else:
-			process_boms_cost_level_wise(self)
+			frappe.enqueue(
+				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.process_boms_cost_level_wise",
+				update_doc=self,
+				now=frappe.flags.in_test,
+			)
 
 
 def run_replace_bom_job(
@@ -112,28 +129,31 @@ def process_boms_cost_level_wise(
 	current_boms = {}
 	values = {}
 
-	if update_doc.status == "Queued":
-		# First level yet to process. On Submit.
-		current_level = 0
-		current_boms = get_leaf_boms()
-		values = {
-			"processed_boms": json.dumps({}),
-			"status": "In Progress",
-			"current_level": current_level,
-		}
-	else:
-		# Resume next level. via Cron Job.
-		if not parent_boms:
-			return
+	try:
+		if update_doc.status == "Queued":
+			# First level yet to process. On Submit.
+			current_level = 0
+			current_boms = get_leaf_boms()
+			values = {
+				"processed_boms": json.dumps({}),
+				"status": "In Progress",
+				"current_level": current_level,
+			}
+		else:
+			# Resume next level. via Cron Job.
+			if not parent_boms:
+				return
 
-		current_level = cint(update_doc.current_level) + 1
+			current_level = cint(update_doc.current_level) + 1
 
-		# Process the next level BOMs. Stage parents as current BOMs.
-		current_boms = parent_boms.copy()
-		values = {"current_level": current_level}
+			# Process the next level BOMs. Stage parents as current BOMs.
+			current_boms = parent_boms.copy()
+			values = {"current_level": current_level}
 
-	set_values_in_log(update_doc.name, values, commit=True)
-	queue_bom_cost_jobs(current_boms, update_doc, current_level)
+		set_values_in_log(update_doc.name, values, commit=True)
+		queue_bom_cost_jobs(current_boms, update_doc, current_level)
+	except Exception:
+		handle_exception(update_doc)
 
 
 def queue_bom_cost_jobs(
@@ -199,15 +219,21 @@ def resume_bom_cost_update_jobs():
 		current_boms, processed_boms = get_processed_current_boms(log, bom_batches)
 		parent_boms = get_next_higher_level_boms(child_boms=current_boms, processed_boms=processed_boms)
 
-		# Unset processed BOMs if log is complete, it is used for next level BOMs
+		# Unset processed BOMs (it is used for next level BOMs) & change status if log is complete
+		status = "Completed" if not parent_boms else "In Progress"
+		processed_boms = json.dumps([] if not parent_boms else processed_boms)
 		set_values_in_log(
 			log.name,
 			values={
-				"processed_boms": json.dumps([] if not parent_boms else processed_boms),
-				"status": "Completed" if not parent_boms else "In Progress",
+				"processed_boms": processed_boms,
+				"status": status,
 			},
 			commit=True,
 		)
+
+		# clear progress section
+		if status == "Completed":
+			frappe.db.delete("BOM Update Batch", {"parent": log.name})
 
 		if parent_boms:  # there is a next level to process
 			process_boms_cost_level_wise(
