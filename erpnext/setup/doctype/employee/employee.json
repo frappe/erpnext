@@ -48,11 +48,6 @@
   "reports_to",
   "column_break_31",
   "branch",
-  "approvers_section",
-  "expense_approver",
-  "leave_approver",
-  "column_break_45",
-  "shift_request_approver",
   "attendance_and_leave_details",
   "attendance_device_id",
   "column_break_44",
@@ -60,7 +55,6 @@
   "salary_information",
   "salary_currency",
   "ctc",
-  "salary_mode",
   "payroll_cost_center",
   "column_break_52",
   "bank_name",
@@ -716,47 +710,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "leave_approver",
-   "fieldtype": "Link",
-   "label": "Leave Approver",
-   "options": "User"
-  },
-  {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "department.payroll_cost_center",
-   "fetch_if_empty": 1,
-   "fieldname": "payroll_cost_center",
-   "fieldtype": "Link",
-   "label": "Payroll Cost Center",
-   "options": "Cost Center"
-  },
-  {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "expense_approver",
-   "fieldtype": "Link",
-   "label": "Expense Approver",
-   "options": "User"
-  },
-  {
-   "fieldname": "approvers_section",
-   "fieldtype": "Section Break",
-   "label": "Approvers"
-  },
-  {
-   "fieldname": "column_break_45",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "shift_request_approver",
-   "fieldtype": "Link",
-   "label": "Shift Request Approver",
-   "options": "User"
   },
   {
    "fieldname": "salary_currency",
@@ -775,7 +734,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-06-10 22:28:55.811983",
+ "modified": "2022-06-23 22:28:55.811983",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

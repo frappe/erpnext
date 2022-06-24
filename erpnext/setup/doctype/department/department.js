@@ -1,19 +1,10 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Department', {
+frappe.ui.form.on("Department", {
 	onload: function(frm) {
-		frm.set_query("parent_department", function(){
+		frm.set_query("parent_department", function() {
 			return {"filters": [["Department", "is_group", "=", 1]]};
-		});
-
-		frm.set_query("payroll_cost_center", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"is_group": 0
-				}
-			};
 		});
 	},
 	refresh: function(frm) {

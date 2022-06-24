@@ -38,25 +38,7 @@ erpnext.setup.EmployeeController = class EmployeeController extends frappe.ui.fo
 
 };
 
-frappe.ui.form.on('Employee', {
-	setup: function (frm) {
-		frm.set_query("leave_policy", function() {
-			return {
-				"filters": {
-					"docstatus": 1
-				}
-			};
-		});
-
-		frm.set_query("payroll_cost_center", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"is_group": 0
-				}
-			};
-		});
-	},
+frappe.ui.form.on("Employee", {
 	onload: function (frm) {
 		frm.set_query("department", function() {
 			return {
