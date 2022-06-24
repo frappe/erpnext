@@ -202,11 +202,9 @@ erpnext.patches.v12_0.update_item_tax_template_company
 erpnext.patches.v13_0.move_branch_code_to_bank_account
 erpnext.patches.v13_0.add_standard_navbar_items #2021-03-24
 erpnext.patches.v13_0.stock_entry_enhancements
-erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
 erpnext.patches.v13_0.drop_razorpay_payload_column
 erpnext.patches.v13_0.update_start_end_date_for_old_shift_assignment
-erpnext.patches.v13_0.setting_custom_roles_for_some_regional_reports
 erpnext.patches.v13_0.rename_issue_doctype_fields
 erpnext.patches.v13_0.change_default_pos_print_format
 erpnext.patches.v13_0.set_youtube_video_id
@@ -227,11 +225,9 @@ erpnext.patches.v13_0.set_company_in_leave_ledger_entry
 erpnext.patches.v13_0.convert_qi_parameter_to_link_field
 erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
 erpnext.patches.v13_0.update_payment_terms_outstanding
-erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v13_0.update_vehicle_no_reqd_condition
-erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
 erpnext.patches.v13_0.setup_uae_vat_fields
@@ -278,7 +274,6 @@ erpnext.patches.v13_0.replace_supplier_item_group_with_party_specific_item
 erpnext.patches.v13_0.update_dates_in_tax_withholding_category
 erpnext.patches.v14_0.update_opportunity_currency_fields
 erpnext.patches.v13_0.create_accounting_dimensions_in_pos_doctypes
-erpnext.patches.v13_0.trim_sales_invoice_custom_field_length
 erpnext.patches.v13_0.create_custom_field_for_finance_book
 erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries #2
 erpnext.patches.v13_0.fix_additional_cost_in_mfg_stock_entry
