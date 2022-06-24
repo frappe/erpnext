@@ -1474,14 +1474,14 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
+		# Update tax withholding category with current fiscal year and rate details
+		update_tax_witholding_category("_Test Company", "TDS Payable - _TC")
+
 		# create a new supplier to test
 		supplier = create_supplier(
 			supplier_name="_Test TDS Advance Supplier",
 			tax_withholding_category="TDS - 194 - Dividends - Individual",
 		)
-
-		# Update tax withholding category with current fiscal year and rate details
-		update_tax_witholding_category("_Test Company", "TDS Payable - _TC")
 
 		# Create Purchase Order with TDS applied
 		po = create_purchase_order(
