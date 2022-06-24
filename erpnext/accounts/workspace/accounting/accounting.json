@@ -1021,6 +1021,17 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Lower Deduction Certificate",
+   "link_count": 0,
+   "link_to": "Lower Deduction Certificate",
+   "link_type": "DocType",
+   "onboard": 0,
+   "only_for": "India",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "KSA VAT Setting",
    "link_count": 0,
    "link_to": "KSA VAT Setting",
@@ -1082,7 +1093,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-06-10 15:49:42.990860",
+ "modified": "2022-06-24 05:41:09.236458",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
