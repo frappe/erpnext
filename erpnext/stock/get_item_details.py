@@ -1332,10 +1332,10 @@ def get_price_list_currency_and_exchange_rate(args):
 
 
 @frappe.whitelist()
-def get_default_bom(item_code=None):
+def get_default_bom(item_code=None, company = None):
 	def _get_bom(item):
 		bom = frappe.get_all(
-			"BOM", dict(item=item, is_active=True, is_default=True, docstatus=1), limit=1
+			"BOM", dict(item=item, is_active=True, is_default=True, docstatus=1, company = company), limit=1
 		)
 		return bom[0].name if bom else None
 
