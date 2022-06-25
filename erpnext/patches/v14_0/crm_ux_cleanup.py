@@ -4,7 +4,7 @@ from frappe.utils import add_months, cstr, today
 
 
 def execute():
-	for doctype in ("Lead", "Opportunity", "Prospect", "Prospect Lead"):
+	for doctype in ("CRM Note", "Lead", "Opportunity", "Prospect", "Prospect Lead"):
 		frappe.reload_doc("crm", "doctype", doctype)
 
 	try:
@@ -28,11 +28,16 @@ def execute():
 
 def add_calendar_event_for_leads():
 	# create events based on next contact date
-	leads = frappe.get_all(
-		"Lead",
-		{"contact_date": [">=", add_months(today(), -1)]},
-		["name", "contact_date", "contact_by", "ends_on", "lead_name", "lead_owner"],
+	leads = frappe.db.sql(
+		"""
+		select name, contact_date, contact_by, ends_on, lead_name, lead_owner
+		from tabLead
+		where contact_date >= %s
+	""",
+		add_months(today(), -1),
+		as_dict=1,
 	)
+
 	for d in leads:
 		event = frappe.get_doc(
 			{
@@ -55,19 +60,17 @@ def add_calendar_event_for_leads():
 
 def add_calendar_event_for_opportunities():
 	# create events based on next contact date
-	opportunities = frappe.get_all(
-		"Opportunity",
-		{"contact_date": [">=", add_months(today(), -1)]},
-		[
-			"name",
-			"contact_date",
-			"contact_by",
-			"to_discuss",
-			"party_name",
-			"opportunity_owner",
-			"contact_person",
-		],
+	opportunities = frappe.db.sql(
+		"""
+		select name, contact_date, contact_by, to_discuss,
+			party_name, opportunity_owner, contact_person
+		from tabOpportunity
+		where contact_date >= %s
+	""",
+		add_months(today(), -1),
+		as_dict=1,
 	)
+
 	for d in opportunities:
 		event = frappe.get_doc(
 			{
