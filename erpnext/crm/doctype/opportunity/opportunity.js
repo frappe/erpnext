@@ -32,13 +32,6 @@ frappe.ui.form.on("Opportunity", {
 		}
 	},
 
-	contact_date: function(frm) {
-		if(frm.doc.contact_date < frappe.datetime.now_datetime()){
-			frm.set_value("contact_date", "");
-			frappe.throw(__("Next follow up date should be greater than now."))
-		}
-	},
-
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
@@ -129,6 +122,13 @@ frappe.ui.form.on("Opportunity", {
 					frm.save();
 				});
 			}
+		}
+
+		if (!frm.is_new()) {
+			frappe.contacts.render_address_and_contact(frm);
+			// frm.trigger('render_contact_day_html');
+		} else {
+			frappe.contacts.clear_address_and_contact(frm);
 		}
 	},
 
@@ -227,8 +227,7 @@ frappe.ui.form.on("Opportunity", {
 			'total': flt(total),
 			'base_total': flt(base_total)
 		});
-	}
-
+	},
 });
 frappe.ui.form.on("Opportunity Item", {
 	calculate: function(frm, cdt, cdn) {
@@ -264,12 +263,13 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		this.frm.trigger('currency');
 	}
 
+	refresh() {
+		this.show_notes();
+		this.show_activities();
+	}
+
 	setup_queries() {
 		var me = this;
-
-		if(this.frm.fields_dict.contact_by.df.options.match(/^User/)) {
-			this.frm.set_query("contact_by", erpnext.queries.user);
-		}
 
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
 
@@ -287,6 +287,14 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		}
 		else if (me.frm.doc.opportunity_from == "Customer") {
 			me.frm.set_query('party_name', erpnext.queries['customer']);
+		} else if (me.frm.doc.opportunity_from == "Prospect") {
+			me.frm.set_query('party_name', function() {
+				return {
+					filters: {
+						"company": me.frm.doc.company
+					}
+				};
+			});
 		}
 	}
 
@@ -302,6 +310,24 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_customer",
 			frm: cur_frm
 		})
+	}
+
+	show_notes() {
+		const crm_notes = new erpnext.utils.CRMNotes({
+			frm: this.frm,
+			notes_wrapper: $(this.frm.fields_dict.notes_html.wrapper),
+		});
+		crm_notes.refresh();
+	}
+
+	show_activities() {
+		const crm_activities = new erpnext.utils.CRMActivities({
+			frm: this.frm,
+			open_activities_wrapper: $(this.frm.fields_dict.open_activities_html.wrapper),
+			all_activities_wrapper: $(this.frm.fields_dict.all_activities_html.wrapper),
+			form_wrapper: $(this.frm.wrapper),
+		});
+		crm_activities.refresh();
 	}
 };
 
