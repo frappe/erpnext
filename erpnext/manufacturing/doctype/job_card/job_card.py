@@ -621,19 +621,20 @@ class JobCard(Document):
 		self.set_status(update_status)
 
 	def set_status(self, update_status=False):
-		if self.status == "On Hold":
+		if self.status == "On Hold" and self.docstatus == 0:
 			return
 
 		self.status = {0: "Open", 1: "Submitted", 2: "Cancelled"}[self.docstatus or 0]
 
-		if self.for_quantity <= self.transferred_qty:
-			self.status = "Material Transferred"
+		if self.docstatus < 2:
+			if self.for_quantity <= self.transferred_qty:
+				self.status = "Material Transferred"
 
-		if self.time_logs:
-			self.status = "Work In Progress"
+			if self.time_logs:
+				self.status = "Work In Progress"
 
-		if self.docstatus == 1 and (self.for_quantity <= self.total_completed_qty or not self.items):
-			self.status = "Completed"
+			if self.docstatus == 1 and (self.for_quantity <= self.total_completed_qty or not self.items):
+				self.status = "Completed"
 
 		if update_status:
 			self.db_set("status", self.status)

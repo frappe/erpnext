@@ -161,17 +161,6 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
-	def check_conversion_rate(self):
-		default_currency = erpnext.get_company_currency(self.company)
-		if not default_currency:
-			throw(_("Please enter default currency in Company Master"))
-		if (
-			(self.currency == default_currency and flt(self.conversion_rate) != 1.00)
-			or not self.conversion_rate
-			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
-		):
-			throw(_("Conversion rate cannot be 0 or 1"))
-
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -540,7 +529,16 @@ class PurchaseInvoice(BuyingController):
 					from_repost=from_repost,
 				)
 			elif self.docstatus == 2:
+				provisional_entries = [a for a in gl_entries if a.voucher_type == "Purchase Receipt"]
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+				if provisional_entries:
+					for entry in provisional_entries:
+						frappe.db.set_value(
+							"GL Entry",
+							{"voucher_type": "Purchase Receipt", "voucher_detail_no": entry.voucher_detail_no},
+							"is_cancelled",
+							1,
+						)
 
 			if update_outstanding == "No":
 				update_outstanding_amt(
@@ -1078,7 +1076,7 @@ class PurchaseInvoice(BuyingController):
 		# Stock ledger value is not matching with the warehouse amount
 		if (
 			self.update_stock
-			and voucher_wise_stock_value.get(item.name)
+			and voucher_wise_stock_value.get((item.name, item.warehouse))
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):

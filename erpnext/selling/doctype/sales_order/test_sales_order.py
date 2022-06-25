@@ -777,6 +777,7 @@ class TestSalesOrder(FrappeTestCase):
 
 	def test_auto_insert_price(self):
 		make_item("_Test Item for Auto Price List", {"is_stock_item": 0})
+		make_item("_Test Item for Auto Price List with Discount Percentage", {"is_stock_item": 0})
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 		item_price = frappe.db.get_value(
@@ -796,6 +797,25 @@ class TestSalesOrder(FrappeTestCase):
 				"price_list_rate",
 			),
 			100,
+		)
+
+		make_sales_order(
+			item_code="_Test Item for Auto Price List with Discount Percentage",
+			selling_price_list="_Test Price List",
+			price_list_rate=200,
+			discount_percentage=20,
+		)
+
+		self.assertEqual(
+			frappe.db.get_value(
+				"Item Price",
+				{
+					"price_list": "_Test Price List",
+					"item_code": "_Test Item for Auto Price List with Discount Percentage",
+				},
+				"price_list_rate",
+			),
+			200,
 		)
 
 		# do not update price list
@@ -1354,6 +1374,59 @@ class TestSalesOrder(FrappeTestCase):
 		except Exception:
 			self.fail("Can not cancel sales order with linked cancelled payment entry")
 
+	def test_work_order_pop_up_from_sales_order(self):
+		"Test `get_work_order_items` in Sales Order picks the right BOM for items to manufacture."
+
+		from erpnext.controllers.item_variant import create_variant
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		make_item(  # template item
+			"Test-WO-Tshirt",
+			{
+				"has_variant": 1,
+				"variant_based_on": "Item Attribute",
+				"attributes": [{"attribute": "Test Colour"}],
+			},
+		)
+		make_item("Test-RM-Cotton")  # RM for BOM
+
+		for colour in (
+			"Red",
+			"Green",
+		):
+			variant = create_variant("Test-WO-Tshirt", {"Test Colour": colour})
+			variant.save()
+
+		template_bom = make_bom(item="Test-WO-Tshirt", rate=100, raw_materials=["Test-RM-Cotton"])
+		red_var_bom = make_bom(item="Test-WO-Tshirt-R", rate=100, raw_materials=["Test-RM-Cotton"])
+
+		so = make_sales_order(
+			**{
+				"item_list": [
+					{
+						"item_code": "Test-WO-Tshirt-R",
+						"qty": 1,
+						"rate": 1000,
+						"warehouse": "_Test Warehouse - _TC",
+					},
+					{
+						"item_code": "Test-WO-Tshirt-G",
+						"qty": 1,
+						"rate": 1000,
+						"warehouse": "_Test Warehouse - _TC",
+					},
+				]
+			}
+		)
+		wo_items = so.get_work_order_items()
+
+		self.assertEqual(wo_items[0].get("item_code"), "Test-WO-Tshirt-R")
+		self.assertEqual(wo_items[0].get("bom"), red_var_bom.name)
+
+		# Must pick Template Item BOM for Test-WO-Tshirt-G as it has no BOM
+		self.assertEqual(wo_items[1].get("item_code"), "Test-WO-Tshirt-G")
+		self.assertEqual(wo_items[1].get("bom"), template_bom.name)
+
 	def test_request_for_raw_materials(self):
 		item = make_item(
 			"_Test Finished Item",
@@ -1587,7 +1660,9 @@ def make_sales_order(**args):
 				"warehouse": args.warehouse,
 				"qty": args.qty or 10,
 				"uom": args.uom or None,
-				"rate": args.rate or 100,
+				"price_list_rate": args.price_list_rate or None,
+				"discount_percentage": args.discount_percentage or None,
+				"rate": args.rate or (None if args.price_list_rate else 100),
 				"against_blanket_order": args.against_blanket_order,
 			},
 		)

@@ -53,7 +53,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.refresh_fields();
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
-		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc, dt, dn) {

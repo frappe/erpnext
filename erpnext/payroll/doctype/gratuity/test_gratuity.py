@@ -29,7 +29,9 @@ class TestGratuity(FrappeTestCase):
 		frappe.db.delete("Salary Slip")
 		frappe.db.delete("Additional Salary", {"ref_doctype": "Gratuity"})
 
-		make_earning_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
+		make_earning_salary_component(
+			setup=True, test_tax=True, company_list=["_Test Company"], include_flexi_benefits=True
+		)
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=["_Test Company"])
 		make_holiday_list()
 
