@@ -19,6 +19,7 @@ def execute():
 			"GST E-Invoice",
 			"GST Purchase Invoice",
 			"GST Tax Invoice",
+			"GST POS Invoice",
 		],
 		"Report": [
 			"E-Invoice Summary",
