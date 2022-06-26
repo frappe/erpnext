@@ -34,10 +34,20 @@ def execute():
 	}
 
 	for doctype, names in to_delete.items():
-		frappe.delete_doc(doctype, names, ignore_missing=True, force=True)
+		frappe.delete_doc(
+			doctype,
+			names,
+			force=True,
+			ignore_permissions=True,
+			ignore_missing=True,
+		)
+
+	if not frappe.db.exists("Company", {"country": "India"}):
+		return
 
 	click.secho(
-		"Regional India is moved to a separate app and is removed from ERPNext.\n"
-		"Please install the app to continue using the module: https://github.com/resilient-tech/india-compliance",
+		"India-specific regional features have been moved to a separate app."
+		" Please install India Compliance to continue using these features:"
+		" https://github.com/resilient-tech/india-compliance",
 		fg="yellow",
 	)
