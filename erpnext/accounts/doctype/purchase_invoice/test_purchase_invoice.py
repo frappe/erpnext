@@ -1616,6 +1616,26 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
+	def test_item_less_defaults(self):
+
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.supplier = "_Test Supplier"
+		pi.company = "_Test Company"
+		pi.append(
+			"items",
+			{
+				"item_name": "Opening item",
+				"qty": 1,
+				"uom": "Tonne",
+				"stock_uom": "Kg",
+				"rate": 1000,
+				"expense_account": "Stock Received But Not Billed - _TC",
+			},
+		)
+
+		pi.save()
+		self.assertEqual(pi.items[0].conversion_factor, 1000)
+
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(

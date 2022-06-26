@@ -939,7 +939,7 @@ class WorkOrder(Document):
 				from `tabStock Entry` entry, `tabStock Entry Detail` detail
 				where
 					entry.work_order = %(name)s
-					and entry.purpose = "Material Transfer for Manufacture"
+					and entry.purpose = 'Material Transfer for Manufacture'
 					and entry.docstatus = 1
 					and detail.parent = entry.name
 					and (detail.item_code = %(item)s or detail.original_item = %(item)s)""",

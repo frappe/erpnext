@@ -445,6 +445,7 @@ class BOM(WebsiteGenerator):
 			and self.is_active
 		):
 			frappe.db.set(self, "is_default", 1)
+			frappe.db.set_value("Item", self.item, "default_bom", self.name)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
@@ -1305,7 +1306,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not field in searchfields
 	]
 
-	query_filters = {"disabled": 0, "ifnull(end_of_life, '5050-50-50')": (">", today())}
+	query_filters = {"disabled": 0, "end_of_life": (">", today())}
 
 	or_cond_filters = {}
 	if txt:

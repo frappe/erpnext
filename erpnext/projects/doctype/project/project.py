@@ -387,11 +387,11 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 				or full_name like %(txt)s)
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, full_name), locate(%(_txt)s, full_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, full_name) > 0 then locate(%(_txt)s, full_name) else 99999 end)
 			idx desc,
 			name, full_name
-		limit %(start)s, %(page_len)s""".format(
+		limit %(page_len)s offset %(start)s""".format(
 			**{
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions),
