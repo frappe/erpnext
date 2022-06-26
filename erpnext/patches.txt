@@ -344,4 +344,5 @@ execute:frappe.delete_doc("DocType", "Naming Series")
 erpnext.patches.v13_0.set_payroll_entry_status
 erpnext.patches.v13_0.job_card_status_on_hold
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.delete_regional_india_doctypes
