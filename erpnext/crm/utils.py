@@ -1,6 +1,7 @@
 import frappe
 from frappe.model.document import Document
-from frappe.utils import cstr, now
+from frappe.utils import cstr, now, today
+from pypika import functions
 
 
 def update_lead_phone_numbers(contact, method):
@@ -175,6 +176,27 @@ def get_open_events(ref_doctype, ref_docname):
 	data = query.run(as_dict=True)
 
 	return data
+
+
+def open_leads_opportunities_based_on_todays_event():
+	event = frappe.qb.DocType("Event")
+	event_link = frappe.qb.DocType("Event Participants")
+
+	query = (
+		frappe.qb.from_(event)
+		.join(event_link)
+		.on(event_link.parent == event.name)
+		.select(event_link.reference_doctype, event_link.reference_docname)
+		.where(
+			(event_link.reference_doctype.isin(["Lead", "Opportunity"]))
+			& (event.status == "Open")
+			& (functions.Date(event.starts_on) == today())
+		)
+	)
+	data = query.run(as_dict=True)
+
+	for d in data:
+		frappe.db.set_value(d.reference_doctype, d.reference_docname, "status", "Open")
 
 
 class CRMNote(Document):
