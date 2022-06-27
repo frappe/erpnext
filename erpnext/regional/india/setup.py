@@ -27,7 +27,6 @@ def setup_company_independent_fixtures(patch=False):
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue("erpnext.regional.india.setup.add_hsn_sac_codes", now=frappe.flags.in_test)
-	create_gratuity_rule()
 	add_print_formats()
 	update_accounts_settings_for_taxes()
 
@@ -76,17 +75,6 @@ def add_custom_roles_for_reports():
 					doctype="Custom Role",
 					report=report_name,
 					roles=[dict(role="Accounts User"), dict(role="Accounts Manager")],
-				)
-			).insert()
-
-	for report_name in ("Professional Tax Deductions", "Provident Fund Deductions"):
-
-		if not frappe.db.get_value("Custom Role", dict(report=report_name)):
-			frappe.get_doc(
-				dict(
-					doctype="Custom Role",
-					report=report_name,
-					roles=[dict(role="HR User"), dict(role="HR Manager"), dict(role="Employee")],
 				)
 			).insert()
 
@@ -959,194 +947,6 @@ def get_custom_fields():
 		"Purchase Receipt Item": [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		"Purchase Invoice Item": [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		"Material Request Item": [hsn_sac_field, nil_rated_exempt, is_non_gst],
-		"Salary Component": [
-			dict(
-				fieldname="component_type",
-				label="Component Type",
-				fieldtype="Select",
-				insert_after="description",
-				options="\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax",
-				depends_on='eval:doc.type == "Deduction"',
-			)
-		],
-		"Employee": [
-			dict(
-				fieldname="ifsc_code",
-				label="IFSC Code",
-				fieldtype="Data",
-				insert_after="bank_ac_no",
-				print_hide=1,
-				depends_on='eval:doc.salary_mode == "Bank"',
-			),
-			dict(
-				fieldname="pan_number",
-				label="PAN Number",
-				fieldtype="Data",
-				insert_after="payroll_cost_center",
-				print_hide=1,
-			),
-			dict(
-				fieldname="micr_code",
-				label="MICR Code",
-				fieldtype="Data",
-				insert_after="ifsc_code",
-				print_hide=1,
-				depends_on='eval:doc.salary_mode == "Bank"',
-			),
-			dict(
-				fieldname="provident_fund_account",
-				label="Provident Fund Account",
-				fieldtype="Data",
-				insert_after="pan_number",
-			),
-		],
-		"Company": [
-			dict(
-				fieldname="hra_section",
-				label="HRA Settings",
-				fieldtype="Section Break",
-				insert_after="asset_received_but_not_billed",
-				collapsible=1,
-			),
-			dict(
-				fieldname="basic_component",
-				label="Basic Component",
-				fieldtype="Link",
-				options="Salary Component",
-				insert_after="hra_section",
-			),
-			dict(
-				fieldname="hra_component",
-				label="HRA Component",
-				fieldtype="Link",
-				options="Salary Component",
-				insert_after="basic_component",
-			),
-			dict(fieldname="hra_column_break", fieldtype="Column Break", insert_after="hra_component"),
-			dict(
-				fieldname="arrear_component",
-				label="Arrear Component",
-				fieldtype="Link",
-				options="Salary Component",
-				insert_after="hra_column_break",
-			),
-		],
-		"Employee Tax Exemption Declaration": [
-			dict(
-				fieldname="hra_section",
-				label="HRA Exemption",
-				fieldtype="Section Break",
-				insert_after="declarations",
-			),
-			dict(
-				fieldname="monthly_house_rent",
-				label="Monthly House Rent",
-				fieldtype="Currency",
-				insert_after="hra_section",
-			),
-			dict(
-				fieldname="rented_in_metro_city",
-				label="Rented in Metro City",
-				fieldtype="Check",
-				insert_after="monthly_house_rent",
-				depends_on="monthly_house_rent",
-			),
-			dict(
-				fieldname="salary_structure_hra",
-				label="HRA as per Salary Structure",
-				fieldtype="Currency",
-				insert_after="rented_in_metro_city",
-				read_only=1,
-				depends_on="monthly_house_rent",
-			),
-			dict(
-				fieldname="hra_column_break",
-				fieldtype="Column Break",
-				insert_after="salary_structure_hra",
-				depends_on="monthly_house_rent",
-			),
-			dict(
-				fieldname="annual_hra_exemption",
-				label="Annual HRA Exemption",
-				fieldtype="Currency",
-				insert_after="hra_column_break",
-				read_only=1,
-				depends_on="monthly_house_rent",
-			),
-			dict(
-				fieldname="monthly_hra_exemption",
-				label="Monthly HRA Exemption",
-				fieldtype="Currency",
-				insert_after="annual_hra_exemption",
-				read_only=1,
-				depends_on="monthly_house_rent",
-			),
-		],
-		"Employee Tax Exemption Proof Submission": [
-			dict(
-				fieldname="hra_section",
-				label="HRA Exemption",
-				fieldtype="Section Break",
-				insert_after="tax_exemption_proofs",
-			),
-			dict(
-				fieldname="house_rent_payment_amount",
-				label="House Rent Payment Amount",
-				fieldtype="Currency",
-				insert_after="hra_section",
-			),
-			dict(
-				fieldname="rented_in_metro_city",
-				label="Rented in Metro City",
-				fieldtype="Check",
-				insert_after="house_rent_payment_amount",
-				depends_on="house_rent_payment_amount",
-			),
-			dict(
-				fieldname="rented_from_date",
-				label="Rented From Date",
-				fieldtype="Date",
-				insert_after="rented_in_metro_city",
-				depends_on="house_rent_payment_amount",
-			),
-			dict(
-				fieldname="rented_to_date",
-				label="Rented To Date",
-				fieldtype="Date",
-				insert_after="rented_from_date",
-				depends_on="house_rent_payment_amount",
-			),
-			dict(
-				fieldname="hra_column_break",
-				fieldtype="Column Break",
-				insert_after="rented_to_date",
-				depends_on="house_rent_payment_amount",
-			),
-			dict(
-				fieldname="monthly_house_rent",
-				label="Monthly House Rent",
-				fieldtype="Currency",
-				insert_after="hra_column_break",
-				read_only=1,
-				depends_on="house_rent_payment_amount",
-			),
-			dict(
-				fieldname="monthly_hra_exemption",
-				label="Monthly Eligible Amount",
-				fieldtype="Currency",
-				insert_after="monthly_house_rent",
-				read_only=1,
-				depends_on="house_rent_payment_amount",
-			),
-			dict(
-				fieldname="total_eligible_hra_exemption",
-				label="Total Eligible HRA Exemption",
-				fieldtype="Currency",
-				insert_after="monthly_hra_exemption",
-				read_only=1,
-				depends_on="house_rent_payment_amount",
-			),
-		],
 		"Supplier": [
 			{"fieldname": "pan", "label": "PAN", "fieldtype": "Data", "insert_after": "supplier_type"},
 			{
@@ -1212,7 +1012,6 @@ def make_fixtures(company=None):
 	docs = []
 	company = company or frappe.db.get_value("Global Defaults", None, "default_company")
 
-	set_salary_components(docs)
 	set_tds_account(docs, company)
 
 	for d in docs:
@@ -1291,55 +1090,6 @@ def add_accounts_in_gst_settings(
 				"is_reverse_charge_account": is_reverse_charge,
 			},
 		)
-
-
-def set_salary_components(docs):
-	docs.extend(
-		[
-			{
-				"doctype": "Salary Component",
-				"salary_component": "Professional Tax",
-				"description": "Professional Tax",
-				"type": "Deduction",
-				"exempted_from_income_tax": 1,
-			},
-			{
-				"doctype": "Salary Component",
-				"salary_component": "Provident Fund",
-				"description": "Provident fund",
-				"type": "Deduction",
-				"is_tax_applicable": 1,
-			},
-			{
-				"doctype": "Salary Component",
-				"salary_component": "House Rent Allowance",
-				"description": "House Rent Allowance",
-				"type": "Earning",
-				"is_tax_applicable": 1,
-			},
-			{
-				"doctype": "Salary Component",
-				"salary_component": "Basic",
-				"description": "Basic",
-				"type": "Earning",
-				"is_tax_applicable": 1,
-			},
-			{
-				"doctype": "Salary Component",
-				"salary_component": "Arrear",
-				"description": "Arrear",
-				"type": "Earning",
-				"is_tax_applicable": 1,
-			},
-			{
-				"doctype": "Salary Component",
-				"salary_component": "Leave Encashment",
-				"description": "Leave Encashment",
-				"type": "Earning",
-				"is_tax_applicable": 1,
-			},
-		]
-	)
 
 
 def set_tax_withholding_category(company):
@@ -1830,25 +1580,6 @@ def get_tds_details(accounts, fiscal_year_details):
 			],
 		),
 	]
-
-
-def create_gratuity_rule():
-	# Standard Indain Gratuity Rule
-	if not frappe.db.exists("Gratuity Rule", "Indian Standard Gratuity Rule"):
-		rule = frappe.new_doc("Gratuity Rule")
-		rule.name = "Indian Standard Gratuity Rule"
-		rule.calculate_gratuity_amount_based_on = "Current Slab"
-		rule.work_experience_calculation_method = "Round Off Work Experience"
-		rule.minimum_year_for_gratuity = 5
-
-		fraction = 15 / 26
-		rule.append(
-			"gratuity_rule_slabs",
-			{"from_year": 0, "to_year": 0, "fraction_of_applicable_earnings": fraction},
-		)
-
-		rule.flags.ignore_mandatory = True
-		rule.save()
 
 
 def update_accounts_settings_for_taxes():
