@@ -6,7 +6,7 @@ import frappe
 
 
 def execute():
-	frappe.reload_doc("hr", "doctype", "employee")
+	frappe.reload_doc("setup", "doctype", "employee")
 
 	if frappe.db.has_column("Employee", "reason_for_resignation"):
 		frappe.db.sql(
