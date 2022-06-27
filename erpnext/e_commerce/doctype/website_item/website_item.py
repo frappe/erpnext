@@ -116,11 +116,15 @@ class WebsiteItem(WebsiteGenerator):
 		if frappe.flags.in_import:
 			return
 
+<<<<<<< HEAD
 		auto_set_website_image = False
 		if not self.website_image and self.image:
 			auto_set_website_image = True
 			self.website_image = self.image
 
+=======
+		"""Validate if the website image is a public file"""
+>>>>>>> 9541354ec7 (chore: Make `image` field obsolete in Website Item (redundant))
 		if not self.website_image:
 			return
 
@@ -137,18 +141,16 @@ class WebsiteItem(WebsiteGenerator):
 			file_doc = file_doc[0]
 
 		if not file_doc:
-			if not auto_set_website_image:
-				frappe.msgprint(
-					_("Website Image {0} attached to Item {1} cannot be found").format(
-						self.website_image, self.name
-					)
+			frappe.msgprint(
+				_("Website Image {0} attached to Item {1} cannot be found").format(
+					self.website_image, self.name
 				)
+			)
 
 			self.website_image = None
 
 		elif file_doc.is_private:
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image should be a public file or website URL"))
+			frappe.msgprint(_("Website Image should be a public file or website URL"))
 
 			self.website_image = None
 
@@ -159,9 +161,8 @@ class WebsiteItem(WebsiteGenerator):
 
 		import requests.exceptions
 
-		if not self.is_new() and self.website_image != frappe.db.get_value(
-			self.doctype, self.name, "website_image"
-		):
+		db_website_image = frappe.db.get_value(self.doctype, self.name, "website_image")
+		if not self.is_new() and self.website_image != db_website_image:
 			self.thumbnail = None
 
 		if self.website_image and not self.thumbnail:
@@ -457,13 +458,15 @@ def make_website_item(doc, save=True):
 		"item_group",
 		"stock_uom",
 		"brand",
-		"image",
 		"has_variants",
 		"variant_of",
 		"description",
 	]
 	for field in fields_to_map:
 		website_item.update({field: doc.get(field)})
+
+	if doc.get("image") and not website_item.website_image:
+		website_item.website_image = doc.get("image")
 
 	if not save:
 		return website_item
