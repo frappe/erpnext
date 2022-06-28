@@ -18,15 +18,6 @@ erpnext.setup.EmployeeController = class EmployeeController extends frappe.ui.fo
 		erpnext.toggle_naming_series();
 	}
 
-	date_of_birth() {
-		return cur_frm.call({
-			method: "get_retirement_date",
-			args: {
-				date_of_birth: this.frm.doc.date_of_birth
-			}
-		});
-	}
-
 	salutation() {
 		if (this.frm.doc.salutation) {
 			this.frm.set_value("gender", {

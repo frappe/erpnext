@@ -10,7 +10,7 @@ from frappe.permissions import (
 	remove_user_permission,
 	set_user_permission_if_allowed,
 )
-from frappe.utils import add_years, cstr, getdate, today, validate_email_address
+from frappe.utils import cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
 from erpnext.utilities.transaction_base import delete_events
@@ -28,18 +28,7 @@ class Employee(NestedSet):
 	nsm_parent_field = "reports_to"
 
 	def autoname(self):
-		naming_method = frappe.db.get_value("HR Settings", None, "emp_created_by")
-		if not naming_method:
-			throw(_("Please setup Employee Naming System in Human Resource > HR Settings"))
-		else:
-			if naming_method == "Naming Series":
-				set_name_by_naming_series(self)
-			elif naming_method == "Employee Number":
-				self.name = self.employee_number
-			elif naming_method == "Full Name":
-				self.set_employee_name()
-				self.name = self.employee_name
-
+		set_name_by_naming_series(self)
 		self.employee = self.name
 
 	def validate(self):
@@ -54,8 +43,6 @@ class Employee(NestedSet):
 		self.validate_status()
 		self.validate_reports_to()
 		self.validate_preferred_email()
-		if self.job_applicant:
-			self.validate_onboarding_process()
 
 		if self.user_id:
 			self.validate_user_details()
@@ -248,29 +235,10 @@ class Employee(NestedSet):
 	def on_trash(self):
 		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
-		if frappe.db.exists("Employee Transfer", {"new_employee_id": self.name, "docstatus": 1}):
-			emp_transfer = frappe.get_doc(
-				"Employee Transfer", {"new_employee_id": self.name, "docstatus": 1}
-			)
-			emp_transfer.db_set("new_employee_id", "")
 
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
 			frappe.msgprint(_("Please enter {0}").format(self.prefered_contact_email))
-
-	def validate_onboarding_process(self):
-		employee_onboarding = frappe.get_all(
-			"Employee Onboarding",
-			filters={
-				"job_applicant": self.job_applicant,
-				"docstatus": 1,
-				"boarding_status": ("!=", "Completed"),
-			},
-		)
-		if employee_onboarding:
-			doc = frappe.get_doc("Employee Onboarding", employee_onboarding[0].name)
-			doc.validate_employee_creation()
-			doc.db_set("employee", self.name)
 
 	def reset_employee_emails_cache(self):
 		prev_doc = self.get_doc_before_save() or {}
@@ -279,35 +247,6 @@ class Employee(NestedSet):
 		if cell_number != prev_number or self.get("user_id") != prev_doc.get("user_id"):
 			frappe.cache().hdel("employees_with_number", cell_number)
 			frappe.cache().hdel("employees_with_number", prev_number)
-
-
-def get_timeline_data(doctype, name):
-	"""Return timeline for attendance"""
-	return dict(
-		frappe.db.sql(
-			"""select unix_timestamp(attendance_date), count(*)
-		from `tabAttendance` where employee=%s
-			and attendance_date > date_sub(curdate(), interval 1 year)
-			and status in ('Present', 'Half Day')
-			group by attendance_date""",
-			name,
-		)
-	)
-
-
-@frappe.whitelist()
-def get_retirement_date(date_of_birth=None):
-	ret = {}
-	if date_of_birth:
-		try:
-			retirement_age = int(frappe.db.get_single_value("HR Settings", "retirement_age") or 60)
-			dt = add_years(getdate(date_of_birth), retirement_age)
-			ret = {"date_of_retirement": dt.strftime("%Y-%m-%d")}
-		except ValueError:
-			# invalid date
-			ret = {}
-
-	return ret
 
 
 def validate_employee_role(doc, method):
