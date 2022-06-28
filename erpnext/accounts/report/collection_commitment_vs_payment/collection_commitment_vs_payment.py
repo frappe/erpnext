@@ -1,4 +1,4 @@
-# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2022, Dexciss Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -33,6 +33,12 @@ def get_columns(filters):
 			"fieldtype": "Data"
 		},
 		{
+			"fieldname": "c_date",
+			"label": "Commitment Date",
+			"width": 100,
+			"fieldtype": "Date"
+		},
+		{
 			"fieldname": "c_amount",
 			"label": "Committed Amount",
 			"width": 100,
@@ -58,20 +64,20 @@ def get_data(conditions, filters):
 	to_date = filters.get("to_date")
 	print(" In get Data", conditions)
 	query = frappe.db.sql("""
-							Select prc.customer , prc.customer_name, sum(prc.commitment_amount) as c_amount, 
+							Select prc.customer as customer, prc.customer_name as customer_name, prc.commitment_date as c_date, sum(prc.commitment_amount) as c_amount, 
 							IF ( (Select sum(pe.paid_amount) from `tabPayment Entry` pe 
 									where pe.party = prc.customer and pe.payment_type ="Receive" 
-									and pe.posting_date between '{0}' and '{1}'),
+									and pe.posting_date <= '{0}' ),
 								
 								(Select sum(pe.paid_amount) from `tabPayment Entry` pe 
 									where pe.party = prc.customer and pe.payment_type ="Receive" 
-									and pe.posting_date between '{0}' and '{1}'), 0) as col_amount, prc.company
+									and pe.posting_date <= '{0}'), 0) as col_amount, prc.company
 							from `tabPayment Receivable Commitment` prc 
-							where prc.company = '{3}' and prc.commitment_status ="Active" 
-							and prc.commitment_date between '{0}' and '{1}' {2}
+							where prc.company = '{2}' and prc.commitment_status ="Active" 
+							and prc.commitment_date <= '{0}'  {1}
 							
 							group by prc.customer
-						""".format(from_date, to_date, conditions, filters.get("company")))
+						""".format(to_date, conditions, filters.get("company")))
 
 	return query					
 

@@ -492,15 +492,6 @@
    "type": "Link"
   },
   {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Trial Balance for Party Without Cancellation Entry",
-   "link_to": "Trial Balance for Party Without Cancellation Entry",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
@@ -527,6 +518,17 @@
    "link_to": "Collection Commitment vs Payment",
    "link_type": "Report",
    "onboard": 0,
+   "only_for": "",
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Failed Commitment",
+   "link_to": "Failed Commitment",
+   "link_type": "Report",
+   "onboard": 0,
+   "only_for": "",
    "type": "Link"
   },
   {
@@ -534,6 +536,7 @@
    "is_query_report": 0,
    "label": "Financial Statements",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -591,6 +594,7 @@
    "is_query_report": 0,
    "label": "Multi Currency",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -628,6 +632,7 @@
    "is_query_report": 0,
    "label": "Settings",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -751,6 +756,7 @@
    "is_query_report": 0,
    "label": "Subscription Management",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -926,6 +932,7 @@
    "is_query_report": 0,
    "label": "Share Management",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -973,6 +980,7 @@
    "is_query_report": 0,
    "label": "Cost Center and Budgeting",
    "onboard": 0,
+   "only_for": "",
    "type": "Card Break"
   },
   {
@@ -1205,7 +1213,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-04-27 17:58:52.193061",
+ "modified": "2022-06-23 10:57:45.979165",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
