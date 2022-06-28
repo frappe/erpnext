@@ -92,7 +92,6 @@
    "default": "0",
    "fieldname": "make_payment_via_journal_entry",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Make Payment via Journal Entry"
   },
   {
@@ -282,7 +281,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-11 17:42:36.427699",
+ "modified": "2022-06-18 14:25:26.300592",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

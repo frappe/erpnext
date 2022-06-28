@@ -167,17 +167,12 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
 	},
-	
-	
-
 
 	validate_company: (frm) => {
 		if (!frm.doc.company){
 			frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
 		}
 	},
-	
-
 
 	company: function(frm) {
 		frm.events.hide_unhide_fields(frm);
@@ -540,9 +535,10 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		})
 	},
-	
 
-
+	posting_date: function(frm) {
+		frm.events.paid_from_account_currency(frm);
+	},
 
 	source_exchange_rate: function(frm) {
 		if (frm.doc.paid_amount) {

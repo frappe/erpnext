@@ -11,13 +11,9 @@
   "year",
   "disabled",
   "is_short_year",
-  "section_break_4",
   "year_start_date",
   "year_end_date",
-  "column_break_7",
-  "section_break_10",
   "companies",
-  "auto_created",
   "auto_created"
  ],
  "fields": [
@@ -81,22 +77,12 @@
    "fieldtype": "Check",
    "label": "Is Short Year",
    "set_only_once": 1
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
-
  "modified": "2021-07-22 15:04:13.724137",
-
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",

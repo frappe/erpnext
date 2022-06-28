@@ -120,9 +120,6 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
 
-	# def after_insert(self):
-	# 	self.set_last_purchase_invoice()
-		
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
 			frappe.throw(_("Release date must be in the future"))
@@ -164,17 +161,6 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
-	def check_conversion_rate(self):
-		default_currency = erpnext.get_company_currency(self.company)
-		if not default_currency:
-			throw(_("Please enter default currency in Company Master"))
-		if (
-			(self.currency == default_currency and flt(self.conversion_rate) != 1.00)
-			or not self.conversion_rate
-			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
-		):
-			throw(_("Conversion rate cannot be 0 or 1"))
-
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -202,14 +188,6 @@ class PurchaseInvoice(BuyingController):
 			)
 
 		self.party_account_currency = account.account_currency
-
-	# def set_last_purchase_invoice(self):
-	# 	if self.name:
-	# 		s = str(self.name[:3]) + '%'
-	# 		query = frappe.db.sql("""select name from `tabPurchase Invoice` where name != %s and name like %s order by creation desc limit 1""",(self.name,s),as_list=1)
-	# 		if query:
-	# 			self.previous_purchase_invoice_ = query[0][0]
-	# 			self.db_update()
 
 	def check_on_hold_or_closed_status(self):
 		check_list = []
@@ -1098,7 +1076,7 @@ class PurchaseInvoice(BuyingController):
 		# Stock ledger value is not matching with the warehouse amount
 		if (
 			self.update_stock
-			and voucher_wise_stock_value.get(item.name)
+			and voucher_wise_stock_value.get((item.name, item.warehouse))
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):

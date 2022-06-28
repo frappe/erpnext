@@ -212,7 +212,7 @@ def set_address_details(
 	else:
 		party_details.update(get_company_address(company))
 
-	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order"]:
+	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order", "Quotation"]:
 		if party_details.company_address:
 			party_details.update(
 				get_fetch_values(doctype, "company_address", party_details.company_address)
@@ -855,7 +855,7 @@ def get_partywise_advanced_payment_amount(
 			cond = "posting_date <= '{0}'".format(posting_date)
 
 	if company:
-		cond += " and company = {0}".format(frappe.db.escape(company))
+		cond += "and company = {0}".format(frappe.db.escape(company))
 
 	data = frappe.db.sql(
 		""" SELECT party, sum({0}) as amount

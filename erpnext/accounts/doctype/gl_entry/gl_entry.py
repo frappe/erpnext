@@ -9,8 +9,6 @@ from frappe.model.meta import get_field_precision
 from frappe.model.naming import set_name_from_naming_options
 from frappe.utils import flt, fmt_money
 from six import iteritems
-import datetime
-from datetime import timedelta
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -44,14 +42,13 @@ class GLEntry(Document):
 		self.flags.ignore_submit_comment = True
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
+
 		if not self.flags.from_repost:
 			self.check_mandatory()
 			self.validate_cost_center()
 			self.check_pl_account()
 			self.validate_party()
 			self.validate_currency()
-		company = frappe.db.get_single_value("System Settings",'country')
-		
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
@@ -109,15 +106,16 @@ class GLEntry(Document):
 			return
 
 		if frappe.get_cached_value("Account", self.account, "report_type") == "Profit and Loss":
-			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
-				msg = _("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}.").format(
-					self.voucher_type, self.voucher_no, self.account)
-				msg += " "
-				msg += _("Please set the cost center field in {0} or setup a default Cost Center for the Company.").format(
-					self.voucher_type)
+			msg = _("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}.").format(
+				self.voucher_type, self.voucher_no, self.account
+			)
+			msg += " "
+			msg += _(
+				"Please set the cost center field in {0} or setup a default Cost Center for the Company."
+			).format(self.voucher_type)
 
-				frappe.throw(msg, title=_("Missing Cost Center"))
-	
+			frappe.throw(msg, title=_("Missing Cost Center"))
+
 	def validate_dimensions_for_pl_and_bs(self):
 		account_type = frappe.db.get_value("Account", self.account, "report_type")
 

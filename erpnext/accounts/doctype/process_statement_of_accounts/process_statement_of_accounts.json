@@ -17,7 +17,6 @@
   "finance_book",
   "currency",
   "project",
-  "show_net_values_in_party_account",
   "section_break_3",
   "customer_collection",
   "collection_name",
@@ -285,16 +284,10 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
-  },
-  {
-   "default": "0",
-   "fieldname": "show_net_values_in_party_account",
-   "fieldtype": "Check",
-   "label": "Show Net Values In Party Account"
   }
  ],
  "links": [],
- "modified": "2022-04-20 10:09:51.748480",
+ "modified": "2021-09-06 21:00:45.732505",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

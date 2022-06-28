@@ -59,6 +59,5 @@ frappe.ui.form.on('Asset Value Adjustment', {
 				}
 			});
 		}
-	},
-	
+	}
 });

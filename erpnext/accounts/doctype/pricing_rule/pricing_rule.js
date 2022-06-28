@@ -23,6 +23,7 @@ frappe.ui.form.on('Pricing Rule', {
 			};
 		})
 	},
+
 	onload: function(frm) {
 		if(frm.doc.__islocal && !frm.doc.applicable_for && (frm.doc.customer || frm.doc.supplier)) {
 			if(frm.doc.customer) {

@@ -83,8 +83,7 @@ frappe.ui.form.on('Asset Movement', {
 			});
 		});
 		frm.refresh_field('assets');
-	},
-
+	}
 });
 
 frappe.ui.form.on('Asset Movement Item', {

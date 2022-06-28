@@ -129,6 +129,7 @@
   },
   {
    "bold": 1,
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,

@@ -103,7 +103,6 @@ frappe.ui.form.on("Journal Entry", {
 		$.each(frm.doc.accounts || [], function(i, row) {
 			erpnext.journal_entry.set_exchange_rate(frm, row.doctype, row.name);
 		})
-		
 	},
 
 	company: function(frm) {

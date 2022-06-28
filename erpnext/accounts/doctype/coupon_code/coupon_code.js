@@ -11,7 +11,6 @@ frappe.ui.form.on('Coupon Code', {
 			};
 		});
 	},
-
 	coupon_name:function(frm){
 		if (frm.doc.__islocal===1) {
 			frm.trigger("make_coupon_code");

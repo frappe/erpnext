@@ -15,24 +15,13 @@
 	</div>
 	<h2 class="text-center">{{ _("STATEMENTS OF ACCOUNTS") }}</h2>
 	<div>
-		{% set s=frappe.get_doc("Customer",filters.party[0]) %}
-		<h5 style="text-align:left;">{{ _("Customer Name: ") }} <b>{{s.customer_name }}</b></h5>
-		<h5 style="float: left;">{{ _("Customer: ") }} <b>{{filters.party[0] }}</b></h5><br>		
-
+		<h5 style="float: left;">{{ _("Customer: ") }} <b>{{filters.party[0] }}</b></h5>
 		<h5 style="float: right;">
 			{{ _("Date: ") }}
 			<b>{{ frappe.format(filters.from_date, 'Date')}}
 			{{ _("to") }}
 			{{ frappe.format(filters.to_date, 'Date')}}</b>
 			</h5>
-		<br>
-		
-		
-		
-	</div>
-	<div>
-		<h5 style="text-align:left;">{{ _("Address: ") }} <b>{{s.primary_address }}</b></h5><br>
-
 	</div>
 	<br>
 

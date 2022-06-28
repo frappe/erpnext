@@ -26,12 +26,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			};
 		});
 	},
-	company: function() {
-		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-	},
-	
 
-	
 	onload: function() {
 		this._super();
 
@@ -164,7 +159,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 	},
-	
+
 	unblock_invoice: function() {
 		const me = this;
 		frappe.call({
@@ -173,6 +168,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			'callback': (r) => me.frm.reload_doc()
 		});
 	},
+
 	block_invoice: function() {
 		this.make_comment_dialog_and_block_invoice();
 	},
@@ -180,7 +176,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	change_release_date: function() {
 		this.make_dialog_and_set_release_date();
 	},
-	
+
 	can_change_release_date: function(date) {
 		const diff = frappe.datetime.get_diff(date, frappe.datetime.nowdate());
 		if (diff < 0) {
@@ -271,7 +267,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.change_release_date',
 			'args': data,
 			'callback': (r) => this.frm.reload_doc()
-		});	
+		});
 	},
 
 	supplier: function() {
@@ -521,16 +517,6 @@ frappe.ui.form.on("Purchase Invoice", {
 			return {
 				filters: {
 					'root_type': 'Asset',
-					'company': doc.company,
-					"is_group": 0
-				}
-			}
-		}
-
-		frm.fields_dict['items'].grid.get_field('discount_account').get_query = function(doc) {
-			return {
-				filters: {
-					'report_type': 'Profit and Loss',
 					'company': doc.company,
 					"is_group": 0
 				}
