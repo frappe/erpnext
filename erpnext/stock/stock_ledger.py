@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import copy
@@ -360,7 +360,7 @@ class update_entries_after(object):
 			self.args["name"] = self.args.sle_id
 
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
-		self.get_precision()
+		self.set_precision()
 		self.valuation_method = get_valuation_method(self.item_code)
 
 		self.new_items_found = False
@@ -371,10 +371,10 @@ class update_entries_after(object):
 		self.initialize_previous_data(self.args)
 		self.build()
 
-	def get_precision(self):
-		company_base_currency = frappe.get_cached_value("Company", self.company, "default_currency")
-		self.precision = get_field_precision(
-			frappe.get_meta("Stock Ledger Entry").get_field("stock_value"), currency=company_base_currency
+	def set_precision(self):
+		self.flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		self.currency_precision = get_field_precision(
+			frappe.get_meta("Stock Ledger Entry").get_field("stock_value")
 		)
 
 	def initialize_previous_data(self, args):
@@ -571,7 +571,7 @@ class update_entries_after(object):
 					)
 
 		# rounding as per precision
-		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.precision)
+		self.wh_data.stock_value = flt(self.wh_data.stock_value, self.currency_precision)
 		if not self.wh_data.qty_after_transaction:
 			self.wh_data.stock_value = 0.0
 		stock_value_difference = self.wh_data.stock_value - self.wh_data.prev_stock_value
@@ -595,6 +595,7 @@ class update_entries_after(object):
 		will not consider cancelled entries
 		"""
 		diff = self.wh_data.qty_after_transaction + flt(sle.actual_qty)
+		diff = flt(diff, self.flt_precision)  # respect system precision
 
 		if diff < 0 and abs(diff) > 0.0001:
 			# negative stock!
@@ -1347,7 +1348,8 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 		return
 
 	neg_sle = get_future_sle_with_negative_qty(args)
-	if neg_sle:
+
+	if is_negative_with_precision(neg_sle):
 		message = _(
 			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 		).format(
@@ -1365,7 +1367,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 		return
 
 	neg_batch_sle = get_future_sle_with_negative_batch_qty(args)
-	if neg_batch_sle:
+	if is_negative_with_precision(neg_batch_sle, is_batch=True):
 		message = _(
 			"{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 		).format(
@@ -1377,6 +1379,22 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 			frappe.get_desk_link(neg_batch_sle[0]["voucher_type"], neg_batch_sle[0]["voucher_no"]),
 		)
 		frappe.throw(message, NegativeStockError, title=_("Insufficient Stock for Batch"))
+
+
+def is_negative_with_precision(neg_sle, is_batch=False):
+	"""
+	Returns whether system precision rounded qty is insufficient.
+	E.g: -0.0003 in precision 3 (0.000) is sufficient for the user.
+	"""
+
+	if not neg_sle:
+		return False
+
+	field = "cumulative_total" if is_batch else "qty_after_transaction"
+	precision = cint(frappe.db.get_default("float_precision")) or 2
+	qty_deficit = flt(neg_sle[0][field], precision)
+
+	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
 def get_future_sle_with_negative_qty(args):
