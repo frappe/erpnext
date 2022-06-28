@@ -1064,6 +1064,33 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(dn.items[0].rate, rate)
 
+	def test_internal_transfer_precision_gle(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+		item = make_item(properties={"valuation_method": "Moving Average"}).name
+		company = "_Test Company with perpetual inventory"
+		warehouse = "Stores - TCP1"
+		target = "Finished Goods - TCP1"
+		customer = create_internal_customer(represents_company=company)
+
+		# average rate = 128.015
+		rates = [101.45, 150.46, 138.25, 121.9]
+
+		for rate in rates:
+			make_stock_entry(item_code=item, target=warehouse, qty=1, rate=rate)
+
+		dn = create_delivery_note(
+			item_code=item,
+			company=company,
+			customer=customer,
+			qty=4,
+			warehouse=warehouse,
+			target_warehouse=target,
+		)
+		self.assertFalse(
+			frappe.db.exists("GL Entry", {"voucher_no": dn.name, "voucher_type": dn.doctype})
+		)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

@@ -84,7 +84,9 @@ class TestTimesheet(unittest.TestCase):
 		emp = make_employee("test_employee_6@salary.com")
 
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
-		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer")
+		sales_invoice = make_sales_invoice(
+			timesheet.name, "_Test Item", "_Test Customer", currency="INR"
+		)
 		sales_invoice.due_date = nowdate()
 		sales_invoice.submit()
 		timesheet = frappe.get_doc("Timesheet", timesheet.name)

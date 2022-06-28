@@ -24,31 +24,39 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		this.frm.set_query("lead_owner", function (doc, cdt, cdn) {
 			return { query: "frappe.core.doctype.user.user.user_query" }
 		});
-
-		this.frm.set_query("contact_by", function (doc, cdt, cdn) {
-			return { query: "frappe.core.doctype.user.user.user_query" }
-		});
 	}
 
 	refresh () {
+		var me = this;
 		let doc = this.frm.doc;
 		erpnext.toggle_naming_series();
-		frappe.dynamic_link = { doc: doc, fieldname: 'name', doctype: 'Lead' }
+		frappe.dynamic_link = {
+			doc: doc,
+			fieldname: 'name',
+			doctype: 'Lead'
+		};
 
 		if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.make_customer, __("Create"));
-			this.frm.add_custom_button(__("Opportunity"), this.make_opportunity, __("Create"));
+			this.frm.add_custom_button(__("Opportunity"), function() {
+				me.frm.trigger("make_opportunity");
+			}, __("Create"));
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Create"));
-			this.frm.add_custom_button(__("Prospect"), this.make_prospect, __("Create"));
-			this.frm.add_custom_button(__('Add to Prospect'), this.add_lead_to_prospect, __('Action'));
+			if (!doc.__onload.linked_prospects.length) {
+				this.frm.add_custom_button(__("Prospect"), this.make_prospect, __("Create"));
+				this.frm.add_custom_button(__('Add to Prospect'), this.add_lead_to_prospect, __('Action'));
+			}
 		}
 
 		if (!this.frm.is_new()) {
 			frappe.contacts.render_address_and_contact(this.frm);
-			cur_frm.trigger('render_contact_day_html');
 		} else {
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
+
+		this.frm.dashboard.links_area.hide();
+		this.show_notes();
+		this.show_activities();
 	}
 
 	add_lead_to_prospect () {
@@ -74,7 +82,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 					}
 				},
 				freeze: true,
-				freeze_message: __('...Adding Lead to Prospect')
+				freeze_message: __('Adding Lead to Prospect...')
 			});
 		}, __('Add Lead to Prospect'), __('Add'));
 	}
@@ -82,13 +90,6 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	make_customer () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
-			frm: cur_frm
-		})
-	}
-
-	make_opportunity () {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.lead.lead.make_opportunity",
 			frm: cur_frm
 		})
 	}
@@ -111,9 +112,10 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			prospect.fax = cur_frm.doc.fax;
 			prospect.website = cur_frm.doc.website;
 			prospect.prospect_owner = cur_frm.doc.lead_owner;
+			prospect.notes = cur_frm.doc.notes;
 
-			let lead_prospect_row = frappe.model.add_child(prospect, 'prospect_lead');
-			lead_prospect_row.lead = cur_frm.doc.name;
+			let leads_row = frappe.model.add_child(prospect, 'leads');
+			leads_row.lead = cur_frm.doc.name;
 
 			frappe.set_route("Form", "Prospect", prospect.name);
 		});
@@ -125,26 +127,109 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		}
 	}
 
-	contact_date () {
-		if (this.frm.doc.contact_date) {
-			let d = moment(this.frm.doc.contact_date);
-			d.add(1, "day");
-			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
-		}
+	show_notes() {
+		if (this.frm.doc.docstatus == 1) return;
+
+		const crm_notes = new erpnext.utils.CRMNotes({
+			frm: this.frm,
+			notes_wrapper: $(this.frm.fields_dict.notes_html.wrapper),
+		});
+		crm_notes.refresh();
 	}
 
-	render_contact_day_html() {
-		if (cur_frm.doc.contact_date) {
-			let contact_date = frappe.datetime.obj_to_str(cur_frm.doc.contact_date);
-			let diff_days = frappe.datetime.get_day_diff(contact_date, frappe.datetime.get_today());
-			let color = diff_days > 0 ? "orange" : "green";
-			let message = diff_days > 0 ? __("Next Contact Date") : __("Last Contact Date");
-			let html = `<div class="col-xs-12">
-						<span class="indicator whitespace-nowrap ${color}"><span> ${message} : ${frappe.datetime.global_date_format(contact_date)}</span></span>
-					</div>` ;
-			cur_frm.dashboard.set_headline_alert(html);
-		}
+	show_activities() {
+		if (this.frm.doc.docstatus == 1) return;
+
+		const crm_activities = new erpnext.utils.CRMActivities({
+			frm: this.frm,
+			open_activities_wrapper: $(this.frm.fields_dict.open_activities_html.wrapper),
+			all_activities_wrapper: $(this.frm.fields_dict.all_activities_html.wrapper),
+			form_wrapper: $(this.frm.wrapper),
+		});
+		crm_activities.refresh();
 	}
 };
 
+
 extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
+
+frappe.ui.form.on("Lead", {
+	make_opportunity: async function(frm) {
+		let existing_prospect = (await frappe.db.get_value("Prospect Lead",
+			{
+				"lead": frm.doc.name
+			},
+			"name", null, "Prospect"
+		)).message.name;
+
+		if (!existing_prospect) {
+			var fields = [
+				{
+					"label": "Create Prospect",
+					"fieldname": "create_prospect",
+					"fieldtype": "Check",
+					"default": 1
+				},
+				{
+					"label": "Prospect Name",
+					"fieldname": "prospect_name",
+					"fieldtype": "Data",
+					"default": frm.doc.company_name,
+					"depends_on": "create_prospect"
+				}
+			];
+		}
+		let existing_contact = (await frappe.db.get_value("Contact",
+			{
+				"first_name": frm.doc.first_name || frm.doc.lead_name,
+				"last_name": frm.doc.last_name
+			},
+			"name"
+		)).message.name;
+
+		if (!existing_contact) {
+			fields.push(
+				{
+					"label": "Create Contact",
+					"fieldname": "create_contact",
+					"fieldtype": "Check",
+					"default": "1"
+				}
+			);
+		}
+
+		if (fields) {
+			var d = new frappe.ui.Dialog({
+				title: __('Create Opportunity'),
+				fields: fields,
+				primary_action: function() {
+					var data = d.get_values();
+					frappe.call({
+						method: 'create_prospect_and_contact',
+						doc: frm.doc,
+						args: {
+							data: data,
+						},
+						freeze: true,
+						callback: function(r) {
+							if (!r.exc) {
+								frappe.model.open_mapped_doc({
+									method: "erpnext.crm.doctype.lead.lead.make_opportunity",
+									frm: frm
+								});
+							}
+							d.hide();
+						}
+					});
+				},
+				primary_action_label: __('Create')
+			});
+			d.show();
+		} else {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.crm.doctype.lead.lead.make_opportunity",
+				frm: frm
+			});
+		}
+	}
+});
