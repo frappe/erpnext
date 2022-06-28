@@ -43,6 +43,7 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		frm.trigger("toggle_fields");
 		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
 		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);

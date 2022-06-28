@@ -8,19 +8,24 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "letter_head",
+  "payroll_frequency",
   "column_break1",
   "is_active",
-  "payroll_frequency",
   "is_default",
+  "letter_head",
   "time_sheet_earning_detail",
+  "hour_rate",
   "salary_slip_based_on_timesheet",
   "column_break_17",
   "salary_component",
-  "hour_rate",
-  "leave_encashment_amount_per_day",
+  "column_break_12",
   "max_benefits",
-  "earning_deduction",
+  "leave_encashment_section",
+  "leave_encashment_amount_per_day",
+  "leave_encashment_formula",
+  "leave_encashment_based_on_formula",
+  "cb_17",
+  "leave_encashment_condition",
   "earning",
   "earnings",
   "deduction",
@@ -115,6 +120,8 @@
    "options": "Company:company:default_currency"
   },
   {
+   "allow_on_submit": 1,
+   "depends_on": "eval:!doc.leave_encashment_based_on_formula",
    "fieldname": "leave_encashment_amount_per_day",
    "fieldtype": "Currency",
    "label": "Leave Encashment Amount Per Day",
@@ -125,14 +132,6 @@
    "fieldtype": "Currency",
    "label": "Max Benefits (Amount)",
    "options": "Company:company:default_currency"
-  },
-  {
-   "description": "Salary breakup based on Earning and Deduction.",
-   "fieldname": "earning_deduction",
-   "fieldtype": "Section Break",
-   "oldfieldname": "earning_deduction",
-   "oldfieldtype": "Section Break",
-   "precision": "2"
   },
   {
    "fieldname": "earning",
@@ -233,12 +232,45 @@
    "options": "Salary Structure",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leave_encashment_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Encashment"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "leave_encashment_based_on_formula",
+   "fieldname": "leave_encashment_formula",
+   "fieldtype": "Code",
+   "label": "Leave Encashment Formula"
+  },
+  {
+   "fieldname": "cb_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "leave_encashment_based_on_formula",
+   "fieldtype": "Check",
+   "label": "Leave Encashment Based on Formula"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "leave_encashment_condition",
+   "fieldtype": "Code",
+   "label": "Leave Encashment Condition"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:34:52.951133",
+ "modified": "2022-06-28 16:00:31.771191",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Structure",
