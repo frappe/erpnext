@@ -257,7 +257,6 @@ def install(country=None):
 		{"doctype": "Issue Priority", "name": _("High")},
 		{"doctype": "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
 		{"doctype": "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
-		{"doctype": "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
 		{"doctype": "Party Type", "party_type": "Customer", "account_type": "Receivable"},
 		{"doctype": "Party Type", "party_type": "Supplier", "account_type": "Payable"},
 		{"doctype": "Party Type", "party_type": "Employee", "account_type": "Payable"},
