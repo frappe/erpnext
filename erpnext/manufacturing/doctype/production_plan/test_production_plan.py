@@ -679,15 +679,23 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertFalse(pp.all_items_completed())
 
 	def test_production_plan_planned_qty(self):
-		pln = create_production_plan(item_code="_Test FG Item", planned_qty=0.55)
-		pln.make_work_order()
-		work_order = frappe.db.get_value("Work Order", {"production_plan": pln.name}, "name")
-		wo_doc = frappe.get_doc("Work Order", work_order)
-		wo_doc.update(
-			{"wip_warehouse": "Work In Progress - _TC", "fg_warehouse": "Finished Goods - _TC"}
+		# Case 1: When Planned Qty is non-integer and UOM is integer.
+		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+
+		self.assertRaises(
+			UOMMustBeIntegerError, create_production_plan, item_code="_Test FG Item", planned_qty=0.55
 		)
-		wo_doc.submit()
-		self.assertEqual(wo_doc.qty, 0.55)
+
+		# Case 2: When Planned Qty is non-integer and UOM is also non-integer.
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
+		bom_item = make_item().name
+
+		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(item_code=fg_item, planned_qty=0.55, stock_uom="_Test UOM 1")
+		self.assertEqual(pln.po_items[0].planned_qty, 0.55)
 
 	def test_temporary_name_relinking(self):
 
@@ -751,6 +759,7 @@ def create_production_plan(**args):
 				"bom_no": frappe.db.get_value("Item", args.item_code, "default_bom"),
 				"planned_qty": args.planned_qty or 1,
 				"planned_start_date": args.planned_start_date or now_datetime(),
+				"stock_uom": args.stock_uom or "Nos",
 			},
 		)
 
@@ -798,7 +807,6 @@ def make_bom(**args):
 
 	for item in args.raw_materials:
 		item_doc = frappe.get_doc("Item", item)
-
 		bom.append(
 			"items",
 			{

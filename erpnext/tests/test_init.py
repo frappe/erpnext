@@ -45,3 +45,8 @@ class TestInit(unittest.TestCase):
 		from frappe.tests.test_translate import verify_translation_files
 
 		verify_translation_files("erpnext")
+
+	def test_patches(self):
+		from frappe.tests.test_patches import check_patch_files
+
+		check_patch_files("erpnext")

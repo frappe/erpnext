@@ -118,7 +118,7 @@ def get_reserved_qty(item_code, warehouse):
 					select qty, parent_detail_docname, parent, name
 					from `tabPacked Item` dnpi_in
 					where item_code = %s and warehouse = %s
-					and parenttype="Sales Order"
+					and parenttype='Sales Order'
 					and item_code != parent_item
 					and exists (select * from `tabSales Order` so
 					where name = dnpi_in.parent and docstatus = 1 and status != 'Closed')
@@ -194,7 +194,7 @@ def get_planned_qty(item_code, warehouse):
 	planned_qty = frappe.db.sql(
 		"""
 		select sum(qty - produced_qty) from `tabWork Order`
-		where production_item = %s and fg_warehouse = %s and status not in ("Stopped", "Completed", "Closed")
+		where production_item = %s and fg_warehouse = %s and status not in ('Stopped', 'Completed', 'Closed')
 		and docstatus=1 and qty > produced_qty""",
 		(item_code, warehouse),
 	)

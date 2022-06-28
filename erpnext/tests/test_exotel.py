@@ -59,7 +59,6 @@ class TestExotel(FrappeAPITestCase):
 			f"/api/method/erpnext.erpnext_integrations.exotel_integration.{api_method}",
 			data=frappe.as_json(data),
 			content_type="application/json",
-			as_tuple=True,
 		)
 		# restart db connection to get latest data
 		frappe.connect()

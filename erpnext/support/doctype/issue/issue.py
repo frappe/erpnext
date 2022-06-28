@@ -11,6 +11,8 @@ from frappe.core.utils import get_parent_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Now
 from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
 from frappe.utils.user import is_website_user
 
@@ -190,15 +192,17 @@ def auto_close_tickets():
 		frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
 	)
 
-	issues = frappe.db.sql(
-		""" select name from tabIssue where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """,
-		(auto_close_after_days),
-		as_dict=True,
-	)
+	table = frappe.qb.DocType("Issue")
+	issues = (
+		frappe.qb.from_(table)
+		.select(table.name)
+		.where(
+			(table.modified < (Now() - Interval(days=auto_close_after_days))) & (table.status == "Replied")
+		)
+	).run(pluck=True)
 
 	for issue in issues:
-		doc = frappe.get_doc("Issue", issue.get("name"))
+		doc = frappe.get_doc("Issue", issue)
 		doc.status = "Closed"
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True

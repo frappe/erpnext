@@ -300,7 +300,11 @@ doc_events = {
 		"on_update": [
 			"erpnext.support.doctype.service_level_agreement.service_level_agreement.on_communication_update",
 			"erpnext.support.doctype.issue.issue.set_first_response_time",
-		]
+		],
+		"after_insert": "erpnext.crm.utils.link_communications_with_prospect",
+	},
+	"Event": {
+		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
 	"Sales Taxes and Charges Template": {
 		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
@@ -391,9 +395,12 @@ auto_cancel_exempted_doctypes = [
 
 scheduler_events = {
 	"cron": {
+		"0/5 * * * *": [
+			"erpnext.manufacturing.doctype.bom_update_log.bom_update_log.resume_bom_cost_update_jobs",
+		],
 		"0/30 * * * *": [
 			"erpnext.utilities.doctype.video.video.update_youtube_data",
-		]
+		],
 	},
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
@@ -439,7 +446,7 @@ scheduler_events = {
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.auto_update_latest_price_in_all_boms",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
-		"erpnext.crm.doctype.lead.lead.daily_open_lead",
+		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",

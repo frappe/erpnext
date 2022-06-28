@@ -303,7 +303,7 @@ erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v14_0.delete_healthcare_doctypes
 erpnext.patches.v14_0.delete_hub_doctypes
 erpnext.patches.v14_0.delete_hospitality_doctypes # 20-01-2022
-erpnext.patches.v14_0.delete_agriculture_doctypes
+erpnext.patches.v14_0.delete_agriculture_doctypes # 15-06-2022
 erpnext.patches.v14_0.delete_education_doctypes
 erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.rearrange_company_fields
@@ -333,4 +333,6 @@ erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
 execute:frappe.delete_doc("DocType", "Naming Series")
 erpnext.patches.v13_0.job_card_status_on_hold
+erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.delete_hr_payroll_doctypes
