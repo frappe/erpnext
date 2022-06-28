@@ -14,7 +14,9 @@ def execute():
 	for print_format in print_formats:
 		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
 
-	reports = frappe.get_all("Report", {"module": ("in", ["HR", "Payroll"]), "is_standard": "Yes"}, pluck="name")
+	reports = frappe.get_all(
+		"Report", {"module": ("in", ["HR", "Payroll"]), "is_standard": "Yes"}, pluck="name"
+	)
 	for report in reports:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 
@@ -28,16 +30,22 @@ def execute():
 	]:
 		frappe.delete_doc("Report", report, ignore_missing=True)
 
-	dashboards = frappe.get_all("Dashboard", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name")
+	dashboards = frappe.get_all(
+		"Dashboard", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
+	)
 	for dashboard in dashboards:
 		frappe.delete_doc("Dashboard", dashboard, ignore_missing=True, force=True)
 
-	doctypes = frappe.get_all("DocType", {"module": ("in", ["HR", "Payroll"]), "custom": 0}, pluck="name")
+	doctypes = frappe.get_all(
+		"DocType", {"module": ("in", ["HR", "Payroll"]), "custom": 0}, pluck="name"
+	)
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
 	frappe.delete_doc("Loan Management", "Salary Slip Loan", ignore_missing=True)
 
-	notifications = frappe.get_all("Notification", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name")
+	notifications = frappe.get_all(
+		"Notification", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
+	)
 	for notifcation in notifications:
 		frappe.delete_doc("Notification", notifcation, ignore_missing=True)
