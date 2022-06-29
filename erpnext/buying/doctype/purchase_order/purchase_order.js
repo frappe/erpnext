@@ -425,7 +425,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: me.frm.doc.company
 					},
 					allow_child_item_selection: true,
-					child_fielname: "items",
+					child_fieldname: "items",
 					child_columns: ["item_code", "qty"]
 				})
 			}, __("Get Items From"));
