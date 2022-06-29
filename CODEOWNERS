@@ -32,4 +32,4 @@ erpnext/patches/                @deepeshgarg007 @nextchamp-saqib @marination @an
 erpnext/public/                 @nextchamp-saqib @marination
 
 .github/                        @ankush
-requirements.txt                @gavindsouza
+pyproject.toml                  @gavindsouza @ankush
