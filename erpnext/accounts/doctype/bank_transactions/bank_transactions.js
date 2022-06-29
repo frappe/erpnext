@@ -44,11 +44,24 @@ frappe.ui.form.on('Bank Transactions', {
 
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+		if (frm.doc.docstatus == 4) {
+			frm.add_custom_button(__("Return Transit"),
+				() => frm.events.transit(frm), __('Create'));
+
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
 	},
 
 	prereconciled: function (frm) {
 		frappe.call({
 			method: "prereconciled",
+			doc: frm.doc,
+		});
+	},
+
+	transit: function (frm) {
+		frappe.call({
+			method: "transit",
 			doc: frm.doc,
 		});
 	},
