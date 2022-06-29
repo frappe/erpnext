@@ -49,6 +49,7 @@
   "total_principal_paid",
   "written_off_amount",
   "refund_amount",
+  "adjustment_amount",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
@@ -388,12 +389,20 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
-  }
+  },
+  {
+    "fieldname": "adjustment_amount",
+    "fieldtype": "Currency",
+    "label": "Adjustment amount",
+    "no_copy": 1,
+    "options": "Company:company:default_currency",
+    "read_only": 1
+   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-24 16:17:57.018272",
+ "modified": "2022-06-29 13:17:57.018272",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

@@ -115,12 +115,13 @@
             "read_only": 1
         },
         {
+            "fetch_from": "loan.payment_account",
             "fieldname": "adjustment_account",
             "fieldtype": "Link",
             "in_list_view": 1,
             "label": "Adjustment Account",
             "options": "Account",
-            "reqd": 1
+            "read_only": 1
         },
         {
             "fieldname": "amount",
@@ -128,6 +129,14 @@
             "label": "Amount",
             "options": "Company:company:default_currency",
             "reqd": 1
+        },
+        {
+            "fetch_from": "loan.loan_account",
+            "fieldname": "loan_account",
+            "fieldtype": "Link",
+            "label": "Loan Account",
+            "options": "Account",
+            "read_only": 1
         },
         {
             "fieldname": "adjustment_type",

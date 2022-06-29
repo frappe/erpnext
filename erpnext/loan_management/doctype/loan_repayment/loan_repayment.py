@@ -623,6 +623,7 @@ def get_pending_principal_amount(loan):
 	if loan.status in ("Disbursed", "Closed") or loan.disbursed_amount >= loan.loan_amount:
 		pending_principal_amount = (
 			flt(loan.total_payment)
+			+ flt(loan.adjustment_amount)
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
@@ -630,6 +631,7 @@ def get_pending_principal_amount(loan):
 	else:
 		pending_principal_amount = (
 			flt(loan.disbursed_amount)
+			+ flt(loan.adjustment_amount)
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
