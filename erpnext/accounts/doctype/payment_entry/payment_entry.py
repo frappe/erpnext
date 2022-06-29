@@ -151,6 +151,14 @@ class PaymentEntry(AccountsController):
 	def on_update(self):
 		if self.docstatus == 0:
 			self.concatenate_reference()
+
+	def prereconciled(self):
+		self.db_set('prereconcilied', 1, update_modified=False)
+		self.reload()
+	
+	def transit(self):
+		self.db_set('prereconcilied', 0, update_modified=False)
+		self.reload()
 	
 	def concatenate_reference(self):
 		references = frappe.get_all("Payment Entry Reference", "*", filters = {"parent": self.name})
