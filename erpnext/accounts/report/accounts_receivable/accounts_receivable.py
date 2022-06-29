@@ -128,6 +128,7 @@ class ReceivablePayableReport(object):
 					credit_note_in_account_currency=0.0,
 					outstanding_in_account_currency=0.0,
 				)
+			self.get_invoices(ple)
 
 			if self.filters.get("group_by_party"):
 				self.init_subtotal_row(ple.party)
