@@ -114,6 +114,12 @@ class BankTransactions(Document):
 		self.db_set('status', "Pre-reconciled", update_modified=False)
 		self.reload()
 	
+	def transit(self):
+		self.set_transaction_data()
+		self.db_set('docstatus', 3, update_modified=False)
+		self.db_set('status', "Transit", update_modified=False)
+		self.reload()
+	
 	def set_transaction_data(self):
 		if self.check:
 			self.db_set('transaction_data', "Bank Check", update_modified=False)

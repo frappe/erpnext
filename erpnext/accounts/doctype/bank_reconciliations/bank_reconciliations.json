@@ -7,9 +7,16 @@
  "field_order": [
   "naming_series",
   "date",
+  "company",
   "bank_account",
   "detail",
   "payment_entry_detail",
+  "bank_check_amount",
+  "credit_note_amount",
+  "debit_note_amount",
+  "bank_deposit_amount",
+  "wire_transfer_amount",
+  "bank_check_transit_amount",
   "bank_amount",
   "transaction_amount",
   "defference_amount",
@@ -65,6 +72,8 @@
   {
    "fieldname": "bank_account",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Bank Account",
    "options": "Bank Account",
    "reqd": 1
@@ -75,10 +84,49 @@
    "label": "PAyment Entry Detail",
    "options": "Bank reconciliations payment entry Table",
    "reqd": 1
+  },
+  {
+   "fieldname": "bank_check_amount",
+   "fieldtype": "Currency",
+   "label": "Bank CHeck Amount"
+  },
+  {
+   "fieldname": "credit_note_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Note Amount"
+  },
+  {
+   "fieldname": "debit_note_amount",
+   "fieldtype": "Currency",
+   "label": "Debit Note Amount"
+  },
+  {
+   "fieldname": "bank_deposit_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Deposit Amount"
+  },
+  {
+   "fieldname": "wire_transfer_amount",
+   "fieldtype": "Currency",
+   "label": "Wire Transfer Amount"
+  },
+  {
+   "fieldname": "bank_check_transit_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Check Transit Amount"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-09 16:01:04.950023",
+ "modified": "2022-06-28 14:54:42.362051",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations",
