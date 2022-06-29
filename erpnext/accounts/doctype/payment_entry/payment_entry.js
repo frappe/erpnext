@@ -136,10 +136,40 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	refresh: function(frm) {
+		frm.events.make_custom_buttons(frm);
 		erpnext.hide_company();
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+	},
+
+	make_custom_buttons: function (frm) {
+		if (frm.doc.prereconcilied == 0) {
+			frm.add_custom_button(__("Pre-reconciled"),
+				() => frm.events.prereconciled(frm), __('Create'));
+
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+		if (frm.doc.prereconcilied == 1) {
+			frm.add_custom_button(__("Return Pre-reconciled"),
+				() => frm.events.transit(frm), __('Create'));
+
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+	},
+
+	prereconciled: function (frm) {
+		frappe.call({
+			method: "prereconciled",
+			doc: frm.doc,
+		});
+	},
+
+	transit: function (frm) {
+		frappe.call({
+			method: "transit",
+			doc: frm.doc,
+		});
 	},
 
 	company: function(frm) {

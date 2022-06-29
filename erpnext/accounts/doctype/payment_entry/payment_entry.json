@@ -26,6 +26,7 @@
   "party_bank_account",
   "contact_person",
   "contact_email",
+  "prereconcilied",
   "reconciled",
   "payment_accounts_section",
   "party_balance",
@@ -626,10 +627,16 @@
    "hidden": 1,
    "label": "Debit Note CXP",
    "options": "Debit Note CXP"
+  },
+  {
+   "default": "0",
+   "fieldname": "prereconcilied",
+   "fieldtype": "Check",
+   "label": "Pre-reconciled"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-06-15 16:46:36.335749",
+ "modified": "2022-06-29 14:21:22.564666",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
