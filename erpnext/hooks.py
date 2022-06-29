@@ -524,7 +524,6 @@ accounting_dimension_doctypes = [
 	"Asset Value Adjustment",
 	"Loyalty Program",
 	"Stock Reconciliation",
-	"Travel Request",
 	"POS Profile",
 	"Opening Invoice Creation Tool",
 	"Opening Invoice Creation Tool Item",
