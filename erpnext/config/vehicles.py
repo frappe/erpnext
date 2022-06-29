@@ -98,6 +98,14 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Service Summary",
+					"doctype": "Project",
+					"dependencies": ["Project"],
+					"onboard": 1,
+				},
+				{
 					"type": "doctype",
 					"name": "Vehicle Service Receipt",
 					"dependencies": ["Vehicle", "Project"],

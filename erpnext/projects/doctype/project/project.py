@@ -6,7 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
-from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days, ceil
+from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days, ceil, getdate
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -92,6 +92,7 @@ class Project(StatusUpdater):
 
 		self.set_percent_complete()
 		self.set_vehicle_status()
+		self.set_project_date()
 		self.set_billing_and_delivery_status()
 		self.set_costing()
 
@@ -864,6 +865,8 @@ class Project(StatusUpdater):
 		self.vehicle_delivered_date = vehicle_gate_pass.posting_date
 		self.vehicle_delivered_time = vehicle_gate_pass.posting_time
 
+		self.set_project_date()
+
 		if not self.get('applies_to_vehicle'):
 			self.vehicle_status = "Not Applicable"
 		elif not vehicle_service_receipt:
@@ -880,7 +883,16 @@ class Project(StatusUpdater):
 				"vehicle_delivered_date": self.vehicle_delivered_date,
 				"vehicle_delivered_time": self.vehicle_delivered_time,
 				"vehicle_status": self.vehicle_status,
+				"project_date": self.project_date
 			}, update_modified=update_modified)
+
+	def set_project_date(self):
+		self.project_date = getdate(
+			self.get('vehicle_received_date')
+			or self.actual_start_date
+			or self.expected_start_date
+			or self.creation
+		)
 
 	def after_rename(self, old_name, new_name, merge=False):
 		if old_name == self.copied_from:

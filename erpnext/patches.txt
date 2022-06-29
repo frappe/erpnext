@@ -753,3 +753,4 @@ erpnext.patches.v12_0.set_uom_in_landed_cost_voucher
 erpnext.patches.v12_0.resetup_vehicle_domain #30-04-2022
 erpnext.patches.v12_0.reset_returned_qty_sales_invoice
 erpnext.patches.v12_0.create_item_default_rules
+erpnext.patches.v12_0.set_project_date

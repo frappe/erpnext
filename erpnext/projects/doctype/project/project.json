@@ -19,6 +19,7 @@
   "column_break_10",
   "priority",
   "percent_complete",
+  "project_date",
   "more_info",
   "more_info_cb_1",
   "more_info_cb_2",
@@ -1114,12 +1115,21 @@
   {
    "fieldname": "column_break_133",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "project_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Project Date",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-05-12 15:22:55.038106",
+ "modified": "2022-06-29 21:21:03.071722",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

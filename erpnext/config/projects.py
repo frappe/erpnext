@@ -76,9 +76,16 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Project Sales Summary",
+					"doctype": "Project",
+					"dependencies": ["Project"],
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Daily Timesheet Summary",
 					"doctype": "Timesheet",
-					"onboard": 1,
 					"dependencies": ["Timesheet"],
 				},
 				{
@@ -97,5 +104,4 @@ def get_data():
 				},
 			]
 		},
-		
 	]
