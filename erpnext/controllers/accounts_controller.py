@@ -2438,7 +2438,7 @@ def update_bin_on_delete(row, doctype):
 		update_bin_qty(row.item_code, row.warehouse, qty_dict)
 
 
-def validate_and_delete_children(parent, data):
+def validate_and_delete_children(parent, data) -> bool:
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
@@ -2456,6 +2456,8 @@ def validate_and_delete_children(parent, data):
 
 	for d in deleted_children:
 		update_bin_on_delete(d, parent.doctype)
+
+	return bool(deleted_children)
 
 
 @frappe.whitelist()
@@ -2520,13 +2522,38 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		):
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
+	def should_update_supplied_items(doc) -> bool:
+		"""Subcontracted PO can allow following changes *after submit*:
+
+		1. Change rate of subcontracting - regardless of other changes.
+		2. Change qty and/or add new items and/or remove items
+		        Exception: Transfer/Consumption is already made, qty change not allowed.
+		"""
+
+		supplied_items_processed = any(
+			item.supplied_qty or item.consumed_qty or item.returned_qty for item in doc.supplied_items
+		)
+
+		update_supplied_items = (
+			any_qty_changed or items_added_or_removed or any_conversion_factor_changed
+		)
+		if update_supplied_items and supplied_items_processed:
+			frappe.throw(_("Item qty can not be updated as raw materials are already processed."))
+
+		return update_supplied_items
+
 	data = json.loads(trans_items)
+
+	any_qty_changed = False  # updated to true if any item's qty changes
+	items_added_or_removed = False  # updated to true if any new item is added or removed
+	any_conversion_factor_changed = False
 
 	sales_doctypes = ["Sales Order", "Sales Invoice", "Delivery Note", "Quotation"]
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
 	check_doc_permissions(parent, "write")
-	validate_and_delete_children(parent, data)
+	_removed_items = validate_and_delete_children(parent, data)
+	items_added_or_removed |= _removed_items
 
 	for d in data:
 		new_child_flag = False
@@ -2537,6 +2564,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 		if not d.get("docname"):
 			new_child_flag = True
+			items_added_or_removed = True
 			check_doc_permissions(parent, "create")
 			child_item = get_new_child_item(d)
 		else:
@@ -2559,6 +2587,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			qty_unchanged = prev_qty == new_qty
 			uom_unchanged = prev_uom == new_uom
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
+			any_conversion_factor_changed |= not conversion_factor_unchanged
 			date_unchanged = (
 				prev_date == getdate(new_date) if prev_date and new_date else False
 			)  # in case of delivery note etc
@@ -2572,6 +2601,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				continue
 
 		validate_quantity(child_item, d)
+		if flt(child_item.get("qty")) != flt(d.get("qty")):
+			any_qty_changed = True
 
 		child_item.qty = flt(d.get("qty"))
 		rate_precision = child_item.precision("rate") or 2
@@ -2677,8 +2708,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_ordered_and_reserved_qty()
 		parent.update_receiving_percentage()
 		if parent.is_subcontracted == "Yes":
-			parent.update_reserved_qty_for_subcontract()
-			parent.create_raw_materials_supplied("supplied_items")
+			if should_update_supplied_items(parent):
+				parent.update_reserved_qty_for_subcontract()
+				parent.create_raw_materials_supplied("supplied_items")
 			parent.save()
 	else:  # Sales Order
 		parent.validate_warehouse()
