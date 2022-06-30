@@ -10,12 +10,10 @@
   "campaign_naming_by",
   "allow_lead_duplication_based_on_emails",
   "column_break_4",
-  "create_event_on_next_contact_date",
   "auto_creation_of_contact",
   "opportunity_section",
   "close_opportunity_after_days",
   "column_break_9",
-  "create_event_on_next_contact_date_opportunity",
   "quotation_section",
   "default_valid_till",
   "section_break_13",
@@ -56,12 +54,6 @@
    "label": "Auto Creation of Contact"
   },
   {
-   "default": "1",
-   "fieldname": "create_event_on_next_contact_date",
-   "fieldtype": "Check",
-   "label": "Create Event on Next Contact Date"
-  },
-  {
    "fieldname": "opportunity_section",
    "fieldtype": "Section Break",
    "label": "Opportunity"
@@ -72,12 +64,6 @@
    "fieldname": "close_opportunity_after_days",
    "fieldtype": "Int",
    "label": "Close Replied Opportunity After Days"
-  },
-  {
-   "default": "1",
-   "fieldname": "create_event_on_next_contact_date_opportunity",
-   "fieldtype": "Check",
-   "label": "Create Event on Next Contact Date"
   },
   {
    "fieldname": "column_break_4",
@@ -105,7 +91,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-12-20 12:51:38.894252",
+ "modified": "2022-06-06 11:22:08.464253",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -143,5 +129,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
