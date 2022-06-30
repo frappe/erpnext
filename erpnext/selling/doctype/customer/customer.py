@@ -179,7 +179,7 @@ class Customer(TransactionBase):
 			)
 
 	def create_primary_contact(self):
-		if not self.customer_primary_contact and not self.lead_name:
+		if not self.customer_primary_contact and not self.lead_name and not self.is_import:
 			if self.mobile_no or self.email_id:
 				contact = make_contact(self)
 				self.db_set("customer_primary_contact", contact.name)
