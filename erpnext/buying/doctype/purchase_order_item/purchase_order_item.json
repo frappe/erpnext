@@ -213,6 +213,7 @@
    "width": "60px"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -242,6 +243,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
@@ -593,6 +595,7 @@
    "label": "Billed, Received & Returned"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Qty in Stock UOM",
@@ -851,7 +854,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-02 13:10:18.398976",
+ "modified": "2022-06-17 05:29:40.602349",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
