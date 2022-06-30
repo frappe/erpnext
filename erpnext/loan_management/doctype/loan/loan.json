@@ -49,12 +49,13 @@
   "total_principal_paid",
   "written_off_amount",
   "refund_amount",
+  "debit_adjustment_amount",
+  "credit_adjustment_amount",
+  "is_npa",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
-  "amended_from",
-  "credit_adjustment_amount",
-  "debit_adjustment_amount"
+  "amended_from"
  ],
  "fields": [
   {
@@ -402,12 +403,19 @@
    "fieldtype": "Currency",
    "label": "Debit Adjustment Amount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "description": "Mark Loan as a Nonperforming asset",
+   "fieldname": "is_npa",
+   "fieldtype": "Check",
+   "label": "Is NPA"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-30 11:27:54.281113",
+ "modified": "2022-06-30 12:04:13.728880",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
