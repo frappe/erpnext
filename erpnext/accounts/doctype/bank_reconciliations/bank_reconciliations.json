@@ -12,11 +12,11 @@
   "detail",
   "payment_entry_detail",
   "bank_check_amount",
+  "bank_check_transit_amount",
   "credit_note_amount",
   "debit_note_amount",
   "bank_deposit_amount",
   "wire_transfer_amount",
-  "bank_check_transit_amount",
   "bank_amount",
   "transaction_amount",
   "defference_amount",
@@ -67,7 +67,7 @@
    "fieldtype": "Table",
    "label": "Bank reconciliations Detail",
    "options": "Bank reconciliations Table",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "bank_account",
@@ -83,37 +83,43 @@
    "fieldtype": "Table",
    "label": "PAyment Entry Detail",
    "options": "Bank reconciliations payment entry Table",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "bank_check_amount",
    "fieldtype": "Currency",
-   "label": "Bank CHeck Amount"
+   "label": "Bank CHeck Amount",
+   "read_only": 1
   },
   {
    "fieldname": "credit_note_amount",
    "fieldtype": "Currency",
-   "label": "Credit Note Amount"
+   "label": "Credit Note Amount",
+   "read_only": 1
   },
   {
    "fieldname": "debit_note_amount",
    "fieldtype": "Currency",
-   "label": "Debit Note Amount"
+   "label": "Debit Note Amount",
+   "read_only": 1
   },
   {
    "fieldname": "bank_deposit_amount",
    "fieldtype": "Currency",
-   "label": "Bank Deposit Amount"
+   "label": "Bank Deposit Amount",
+   "read_only": 1
   },
   {
    "fieldname": "wire_transfer_amount",
    "fieldtype": "Currency",
-   "label": "Wire Transfer Amount"
+   "label": "Wire Transfer Amount",
+   "read_only": 1
   },
   {
    "fieldname": "bank_check_transit_amount",
    "fieldtype": "Currency",
-   "label": "Bank Check Transit Amount"
+   "label": "Bank Check Transit Amount",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -126,7 +132,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-06-28 14:54:42.362051",
+ "modified": "2022-06-30 15:26:18.292169",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations",
