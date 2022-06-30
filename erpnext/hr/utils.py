@@ -458,7 +458,7 @@ def get_salary_assignments(employee, payroll_period):
 def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 	total_given_benefit_amount = 0
 	query = """
-	select sum(sd.amount) as 'total_amount'
+	select sum(sd.amount) as total_amount
 	from `tabSalary Slip` ss, `tabSalary Detail` sd
 	where ss.employee=%(employee)s
 	and ss.docstatus = 1 and ss.name = sd.parent
