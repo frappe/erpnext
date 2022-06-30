@@ -386,15 +386,19 @@ class LoanRepayment(AccountsController):
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
-
 		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}.<br>Repayment against Loan: {1}").format(
+			remarks = "Shortfall repayment of {0}.<br>Repayment against loan {1}".format(
 				self.shortfall_amount, self.against_loan
 			)
 		elif self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
+			remarks = "Shortfall repayment of {0} against loan {1}".format(
+				self.shortfall_amount, self.against_loan
+			)
 		else:
-			remarks = _("Repayment against Loan:") + " " + self.against_loan
+			remarks = "Repayment against loan " + self.against_loan
+		
+		if self.reference_number:
+			remarks += "with reference no. {}".format(self.reference_number)
 
 		if self.repay_from_salary:
 			payment_account = self.payroll_payable_account
@@ -445,7 +449,7 @@ class LoanRepayment(AccountsController):
 					"debit_in_account_currency": self.amount_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
 				}
@@ -463,7 +467,7 @@ class LoanRepayment(AccountsController):
 					"credit_in_account_currency": self.amount_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
 				}
