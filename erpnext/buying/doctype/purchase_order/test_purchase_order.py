@@ -140,6 +140,43 @@ class TestPurchaseOrder(FrappeTestCase):
 		# ordered qty decreases as ordered qty is 0 (deleted row)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty - 10)  # 0
 
+	def test_supplied_items_validations_on_po_update_after_submit(self):
+		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted=1, qty=5, rate=100)
+		item = po.items[0]
+
+		original_supplied_items = {po.name: po.required_qty for po in po.supplied_items}
+
+		# Just update rate
+		trans_item = [
+			{
+				"item_code": "_Test FG Item",
+				"rate": 20,
+				"qty": 5,
+				"conversion_factor": 1.0,
+				"docname": item.name,
+			}
+		]
+		update_child_qty_rate("Purchase Order", json.dumps(trans_item), po.name)
+		po.reload()
+
+		new_supplied_items = {po.name: po.required_qty for po in po.supplied_items}
+		self.assertEqual(set(original_supplied_items.keys()), set(new_supplied_items.keys()))
+
+		# Update qty to 2x
+		trans_item[0]["qty"] *= 2
+		update_child_qty_rate("Purchase Order", json.dumps(trans_item), po.name)
+		po.reload()
+
+		new_supplied_items = {po.name: po.required_qty for po in po.supplied_items}
+		self.assertEqual(2 * sum(original_supplied_items.values()), sum(new_supplied_items.values()))
+
+		# Set transfer qty and attempt to update qty, shouldn't be allowed
+		po.supplied_items[0].supplied_qty = 2
+		po.supplied_items[0].db_update()
+		trans_item[0]["qty"] *= 2
+		with self.assertRaises(frappe.ValidationError):
+			update_child_qty_rate("Purchase Order", json.dumps(trans_item), po.name)
+
 	def test_update_child(self):
 		mr = make_material_request(qty=10)
 		po = make_purchase_order(mr.name)
