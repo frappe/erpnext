@@ -61,27 +61,28 @@ class LoanBalanceAdjustment(AccountsController):
         else:
             adjustment_amount = self.get_values_on_submit(loan_details)
 
+        if self.adjustment_type == "Credit Adjustment":
+            adj_field = "credit_adjustment_amount"
+        elif self.adjustment_type == "Debit Adjustment":
+            adj_field = "debit_adjustment_amount"
+
         frappe.db.set_value(
-            "Loan",
-            self.loan,
-            {
-                "adjustment_amount": adjustment_amount,
-            },
+            "Loan", self.loan, {adj_field: adjustment_amount}
         )
 
     def get_values_on_cancel(self, loan_details):
         if self.adjustment_type == "Credit Adjustment":
-            adjustment_amount = loan_details.adjustment_amount - self.amount
+            adjustment_amount = loan_details.credit_adjustment_amount - self.amount
         elif self.adjustment_type == "Debit Adjustment":
-            adjustment_amount = loan_details.adjustment_amount + self.amount
+            adjustment_amount = loan_details.debit_adjustment_amount - self.amount
 
         return adjustment_amount
 
     def get_values_on_submit(self, loan_details):
         if self.adjustment_type == "Credit Adjustment":
-            adjustment_amount = loan_details.adjustment_amount + self.amount
+            adjustment_amount = loan_details.credit_adjustment_amount + self.amount
         elif self.adjustment_type == "Debit Adjustment":
-            adjustment_amount = loan_details.adjustment_amount - self.amount
+            adjustment_amount = loan_details.debit_adjustment_amount + self.amount
 
         if (
             loan_details.status in ("Disbursed", "Partially Disbursed")
@@ -98,8 +99,10 @@ class LoanBalanceAdjustment(AccountsController):
     def make_gl_entries(self, cancel=0, adv_adj=0):
         gle_map = []
 
+        loan_account = frappe.db.get_value("Loan", self.loan, "loan_account")
+
         loan_entry = {
-            "account": self.loan_account,
+            "account": loan_account,
             "against": self.adjustment_account,
             "against_voucher_type": "Loan",
             "against_voucher": self.loan,
@@ -111,7 +114,7 @@ class LoanBalanceAdjustment(AccountsController):
         }
         company_entry = {
             "account": self.adjustment_account,
-            "against": self.loan_account,
+            "against": loan_account,
             "against_voucher_type": "Loan",
             "against_voucher": self.loan,
             "remarks": _("{} against loan:".format(self.adjustment_type)) + self.loan,
