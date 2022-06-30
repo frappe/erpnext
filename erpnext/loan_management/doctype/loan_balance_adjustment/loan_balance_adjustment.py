@@ -100,13 +100,18 @@ class LoanBalanceAdjustment(AccountsController):
         gle_map = []
 
         loan_account = frappe.db.get_value("Loan", self.loan, "loan_account")
+        remarks = "{} against loan {}".format(
+            self.adjustment_type.capitalize(), self.loan
+        )
+		if self.reference_number:
+			remarks += "with reference no. {}".format(self.reference_number)
 
         loan_entry = {
             "account": loan_account,
             "against": self.adjustment_account,
             "against_voucher_type": "Loan",
             "against_voucher": self.loan,
-            "remarks": _("{} against loan:".format(self.adjustment_type)) + self.loan,
+            "remarks": _(remarks),
             "cost_center": self.cost_center,
             "party_type": self.applicant_type,
             "party": self.applicant,
@@ -117,7 +122,7 @@ class LoanBalanceAdjustment(AccountsController):
             "against": loan_account,
             "against_voucher_type": "Loan",
             "against_voucher": self.loan,
-            "remarks": _("{} against loan:".format(self.adjustment_type)) + self.loan,
+            "remarks": _(remarks),
             "cost_center": self.cost_center,
             "posting_date": self.posting_date,
         }
