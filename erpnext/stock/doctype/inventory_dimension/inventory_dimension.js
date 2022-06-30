@@ -32,25 +32,15 @@ frappe.ui.form.on('Inventory Dimension', {
 		frm.trigger('render_traget_field');
 	},
 
-	map_with_existing_field(frm) {
-		frm.trigger('render_traget_field');
-	},
+	refresh(frm) {
+		if (frm.doc.__onload && frm.doc.__onload.has_stock_ledger
+			&& frm.doc.__onload.has_stock_ledger.length) {
+			let msg = __('Stock transactions exists against this dimension, user can not update document.');
+			frm.dashboard.add_comment(msg, 'blue', true);
 
-	render_traget_field(frm) {
-		if (frm.doc.map_with_existing_field && !frm.doc.disabled) {
-			frappe.call({
-				method: 'erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_source_fieldnames',
-				args: {
-					reference_document: frm.doc.reference_document,
-					ignore_document: frm.doc.name
-				},
-				callback: function(r) {
-					if (r.message && r.message.length) {
-						frm.set_df_property('stock_ledger_dimension', 'options', r.message);
-					} else {
-						frm.set_value("map_with_existing_field", 0);
-						frappe.msgprint(__('Inventory Dimensions not found'));
-					}
+			frm.fields.forEach((field) => {
+				if (field.df.fieldname !== 'disabled') {
+					frm.set_df_property(field.df.fieldname, "read_only", "1");
 				}
 			});
 		}

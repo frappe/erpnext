@@ -2,36 +2,67 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _, scrub
+from frappe import _, bold, scrub
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.model.document import Document
 
 
+class DoNotChangeError(frappe.ValidationError):
+	pass
+
+
 class InventoryDimension(Document):
+	def onload(self):
+		if not self.is_new() and frappe.db.has_column("Stock Ledger Entry", self.target_fieldname):
+			self.set_onload("has_stock_ledger", self.has_stock_ledger())
+
+	def has_stock_ledger(self) -> str:
+		if not self.target_fieldname:
+			return
+
+		return frappe.get_all(
+			"Stock Ledger Entry", filters={self.target_fieldname: ("is", "set"), "is_cancelled": 0}, limit=1
+		)
+
 	def validate(self):
+		self.do_not_update_document()
 		self.reset_value()
 		self.validate_reference_document()
 		self.set_source_and_target_fieldname()
 
+	def do_not_update_document(self):
+		if self.is_new() or not self.has_stock_ledger():
+			return
+
+		old_doc = self._doc_before_save
+		for field in frappe.get_meta("Inventory Dimension").fields:
+			if field.fieldname != "disabled" and old_doc.get(field.fieldname) != self.get(field.fieldname):
+				msg = f"""The user can not change value of the field {bold(field.label)} because
+					stock transactions exists against the dimension {bold(self.name)}."""
+
+				frappe.throw(_(msg), DoNotChangeError)
+
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
 			self.istable = 0
-			for field in ["document_type", "parent_field", "condition", "type_of_transaction"]:
+			for field in ["document_type", "condition"]:
 				self.set(field, None)
 
 	def validate_reference_document(self):
 		if frappe.get_cached_value("DocType", self.reference_document, "istable") == 1:
-			frappe.throw(_(f"The reference document {self.reference_document} can not be child table."))
+			msg = f"The reference document {self.reference_document} can not be child table."
+			frappe.throw(_(msg))
 
 		if self.reference_document in ["Batch", "Serial No", "Warehouse", "Item"]:
-			frappe.throw(
-				_(f"The reference document {self.reference_document} can not be an Inventory Dimension.")
-			)
+			msg = f"The reference document {self.reference_document} can not be an Inventory Dimension."
+			frappe.throw(_(msg))
 
-	def set_source_and_target_fieldname(self):
-		self.source_fieldname = scrub(self.dimension_name)
-		if not self.map_with_existing_field:
-			self.target_fieldname = self.source_fieldname
+	def set_source_and_target_fieldname(self) -> None:
+		if not self.source_fieldname:
+			self.source_fieldname = scrub(self.dimension_name)
+
+		if not self.target_fieldname:
+			self.target_fieldname = scrub(self.reference_document)
 
 	def on_update(self):
 		self.add_custom_fields()
@@ -107,7 +138,11 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None) -> dict:
 		) and sl_dict.actual_qty > 0:
 			continue
 
-		if frappe.safe_eval(row.condition, {"doc": doc, "parent_doc": parent_doc}):
+		evals = {"doc": doc}
+		if parent_doc:
+			evals["parent"] = parent_doc
+
+		if frappe.safe_eval(row.condition, evals):
 			return row
 
 
@@ -115,7 +150,7 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 	if not hasattr(frappe.local, "document_wise_inventory_dimensions"):
 		frappe.local.document_wise_inventory_dimensions = {}
 
-	if doctype not in frappe.local.document_wise_inventory_dimensions:
+	if not frappe.local.document_wise_inventory_dimensions.get(doctype):
 		dimensions = frappe.get_all(
 			"Inventory Dimension",
 			fields=["name", "source_fieldname", "condition", "target_fieldname", "type_of_transaction"],
@@ -129,20 +164,6 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 
 
 @frappe.whitelist()
-def get_source_fieldnames(reference_document, ignore_document):
-	return frappe.get_all(
-		"Inventory Dimension",
-		fields=["source_fieldname as value", "dimension_name as label"],
-		filters={
-			"disabled": 0,
-			"map_with_existing_field": 0,
-			"name": ("!=", ignore_document),
-			"reference_document": reference_document,
-		},
-	)
-
-
-@frappe.whitelist()
 def get_inventory_dimensions():
 	if not hasattr(frappe.local, "inventory_dimensions"):
 		frappe.local.inventory_dimensions = {}
@@ -152,10 +173,9 @@ def get_inventory_dimensions():
 			"Inventory Dimension",
 			fields=[
 				"distinct target_fieldname as fieldname",
-				"dimension_name as label",
 				"reference_document as doctype",
 			],
-			filters={"disabled": 0, "map_with_existing_field": 0},
+			filters={"disabled": 0},
 		)
 
 		frappe.local.inventory_dimensions = dimensions

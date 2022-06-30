@@ -146,7 +146,7 @@ def get_columns(filters: StockBalanceFilter):
 	for dimension in get_inventory_dimensions():
 		columns.append(
 			{
-				"label": _(dimension.label),
+				"label": _(dimension.doctype),
 				"fieldname": dimension.fieldname,
 				"fieldtype": "Link",
 				"options": dimension.doctype,
@@ -320,9 +320,8 @@ def get_stock_ledger_entries(filters: StockBalanceFilter, items: List[str]) -> L
 
 	inventory_dimension_fields = get_inventory_dimension_fields()
 	if inventory_dimension_fields:
-		query = query.select(", ".join(inventory_dimension_fields))
-
 		for fieldname in inventory_dimension_fields:
+			query = query.select(fieldname)
 			if fieldname in filters and filters.get(fieldname):
 				query = query.where(sle[fieldname].isin(filters.get(fieldname)))
 
@@ -347,7 +346,7 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 	inventory_dimensions = get_inventory_dimension_fields()
 
 	for d in sle:
-		group_by_key = get_group_by_key(d, inventory_dimensions)
+		group_by_key = get_group_by_key(d, filters, inventory_dimensions)
 		if group_by_key not in iwb_map:
 			iwb_map[group_by_key] = frappe._dict(
 				{
@@ -399,16 +398,18 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 	return iwb_map
 
 
-def get_group_by_key(row, inventory_dimension_fields) -> tuple:
+def get_group_by_key(row, filters, inventory_dimension_fields) -> tuple:
 	group_by_key = [row.company, row.item_code, row.warehouse]
 
 	for fieldname in inventory_dimension_fields:
-		group_by_key.append(row.get(fieldname))
+		if filters.get(fieldname):
+			group_by_key.append(row.get(fieldname))
 
 	return tuple(group_by_key)
 
 
 def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory_dimensions: list):
+	pop_keys = []
 	for group_by_key in iwb_map:
 		qty_dict = iwb_map[group_by_key]
 
@@ -423,7 +424,10 @@ def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory
 				no_transactions = False
 
 		if no_transactions:
-			iwb_map.pop(group_by_key)
+			pop_keys.append(group_by_key)
+
+	for key in pop_keys:
+		iwb_map.pop(key)
 
 	return iwb_map
 

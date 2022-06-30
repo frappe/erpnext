@@ -367,14 +367,13 @@ class StockController(AccountsController):
 		)
 
 		sl_dict.update(args)
-		if self.docstatus == 1:
-			self.update_inventory_dimensions(d, sl_dict)
+		self.update_inventory_dimensions(d, sl_dict)
 
 		return sl_dict
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
 		dimension = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
-		if dimension:
+		if dimension and row.get(dimension.source_fieldname):
 			sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):

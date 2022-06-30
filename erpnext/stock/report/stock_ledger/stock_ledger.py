@@ -224,7 +224,7 @@ def get_columns(filters):
 	for dimension in get_inventory_dimensions():
 		columns.append(
 			{
-				"label": _(dimension.label),
+				"label": _(dimension.doctype),
 				"fieldname": dimension.fieldname,
 				"fieldtype": "Link",
 				"options": dimension.doctype,
