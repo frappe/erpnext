@@ -461,6 +461,7 @@ def install_post_company_fixtures(args=None):
 			"department_name": _("All Departments"),
 			"is_group": 1,
 			"parent_department": "",
+			"company": args.company_name,
 		},
 		{
 			"doctype": "Department",
