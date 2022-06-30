@@ -49,11 +49,12 @@
   "total_principal_paid",
   "written_off_amount",
   "refund_amount",
-  "adjustment_amount",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
-  "amended_from"
+  "amended_from",
+  "credit_adjustment_amount",
+  "debit_adjustment_amount"
  ],
  "fields": [
   {
@@ -391,18 +392,22 @@
    "read_only": 1
   },
   {
-    "fieldname": "adjustment_amount",
-    "fieldtype": "Currency",
-    "label": "Adjustment amount",
-    "no_copy": 1,
-    "options": "Company:company:default_currency",
-    "read_only": 1
-   }
+   "fieldname": "credit_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Adjustment Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "debit_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Debit Adjustment Amount",
+   "options": "Company:company:default_currency"
+  }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-29 13:17:57.018272",
+ "modified": "2022-06-30 11:27:54.281113",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
