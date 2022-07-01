@@ -323,22 +323,19 @@ class BuyingController(SubcontractingController):
 					d.margin_rate_or_amount = 0.0
 
 	def validate_for_subcontracting(self):
-		if self.is_subcontracted:
+		if self.is_subcontracted and self.get("is_old_subcontracting_flow"):
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
 
-			if self.get("is_old_subcontracting_flow"):
-				for item in self.get("items"):
-					if item in self.sub_contracted_items and not item.bom:
-						frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
-
-				if self.doctype != "Purchase Order":
-					return
-
-				for row in self.get("supplied_items"):
-					if not row.reserve_warehouse:
-						msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
-						frappe.throw(_(msg))
+			for item in self.get("items"):
+				if item in self.sub_contracted_items and not item.bom:
+					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
+			if self.doctype != "Purchase Order":
+				return
+			for row in self.get("supplied_items"):
+				if not row.reserve_warehouse:
+					msg = f"Reserved Warehouse is mandatory for the Item {frappe.bold(row.rm_item_code)} in Raw Materials supplied"
+					frappe.throw(_(msg))
 		else:
 			for item in self.get("items"):
 				if item.get("bom"):
