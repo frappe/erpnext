@@ -19,11 +19,6 @@ frappe.ui.form.on("Company", {
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
-		frm.set_query("hra_component", function(){
-			return {
-				filters: {"type": "Earning"}
-			}
-		});
 
 		frm.set_query("parent_company", function() {
 			return {
