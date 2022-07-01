@@ -498,6 +498,15 @@ period_closing_doctypes = [
 	"Stock Entry",
 ]
 
+bank_reconciliation_doctypes = [
+	"Payment Entry",
+	"Journal Entry",
+	"Purchase Invoice",
+	"Sales Invoice",
+	"Loan Repayment",
+	"Loan Disbursement",
+]
+
 accounting_dimension_doctypes = [
 	"GL Entry",
 	"Payment Ledger Entry",
@@ -535,6 +544,11 @@ accounting_dimension_doctypes = [
 	"Purchase Receipt",
 	"Sales Order",
 ]
+
+# get matching queries for Bank Reconciliation
+get_matching_queries = (
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
+)
 
 regional_overrides = {
 	"France": {

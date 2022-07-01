@@ -28,8 +28,8 @@ frappe.ui.form.on("Authorization Rule", {
 		}
 	},
 	transaction: function(frm) {
-		unhide_field(['system_role', 'system_user','value', 'based_on']);
-		hide_field(['to_emp','to_designation']);
+		unhide_field(['system_role', 'system_user', 'value', 'based_on']);
+		hide_field(['to_emp', 'to_designation']);
 	}
 })
 
@@ -41,8 +41,8 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	else
 		unhide_field('value');
 
-	unhide_field(['system_role', 'system_user','value']);
-	hide_field(['to_emp','to_designation']);
+	unhide_field(['system_role', 'system_user', 'value']);
+	hide_field(['to_emp', 'to_designation']);
 }
 
 cur_frm.fields_dict.system_user.get_query = function(doc, cdt, cdn) {
