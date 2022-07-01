@@ -98,6 +98,9 @@ class CancellationOfInvoices(Document):
 	def set_valuation_rate(self, item):		
 		stock = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"item_code": item.item_code})
 
+		if len(stock) == 0:
+			frappe.throw(_("{} no exist in Stock Ledger Entry".format(item.item_code)))
+
 		valuation_rate = stock[0].valuation_rate
 
 		return valuation_rate
