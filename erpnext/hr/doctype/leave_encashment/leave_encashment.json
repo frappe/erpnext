@@ -20,12 +20,18 @@
   "date_of_joining",
   "amended_from",
   "payroll",
+  "total_leaves_allocated",
+  "column_break_15",
+  "leaves_taken",
+  "column_break_16",
   "leave_balance",
+  "column_break_19",
   "encashable_days",
-  "additional_salary",
   "column_break_18",
   "leave_encashment_amount_per_day",
-  "encashment_amount"
+  "column_break_21",
+  "encashment_amount",
+  "additional_salary"
  ],
  "fields": [
   {
@@ -96,7 +102,7 @@
   {
    "fieldname": "payroll",
    "fieldtype": "Section Break",
-   "label": "Payroll"
+   "label": "Leaves"
   },
   {
    "fieldname": "encashment_amount",
@@ -152,7 +158,8 @@
   },
   {
    "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
+   "fieldtype": "Section Break",
+   "label": "Payroll"
   },
   {
    "fetch_from": "employee.date_of_joining",
@@ -164,10 +171,40 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leaves_taken",
+   "fieldtype": "Float",
+   "label": "Leaves Taken",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_leaves_allocated",
+   "fieldtype": "Float",
+   "label": "Leaves Allocated",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-06-28 23:04:27.346401",
+ "modified": "2022-07-02 11:43:44.201058",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",

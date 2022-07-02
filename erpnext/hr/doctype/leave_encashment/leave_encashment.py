@@ -11,7 +11,7 @@ from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure,\
 	get_salary_structure_assignment
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
-from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
+from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
 import datetime
 
 
@@ -85,8 +85,9 @@ class LeaveEncashment(Document):
 		if not allocation:
 			frappe.throw(_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
 
-		self.leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count\
-			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
+		self.total_leaves_allocated = allocation.total_leaves_allocated
+		self.leaves_taken = -1 * get_leaves_for_period(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
+		self.leave_balance = self.total_leaves_allocated - allocation.carry_forwarded_leaves_count - self.leaves_taken
 
 		encashable_days = self.leave_balance - frappe.db.get_value('Leave Type', self.leave_type, 'encashment_threshold_days')
 		self.encashable_days = encashable_days if encashable_days > 0 else 0
@@ -99,7 +100,7 @@ class LeaveEncashment(Document):
 
 	def get_leave_allocation(self):
 		leave_allocation = frappe.db.sql("""
-			select name, to_date, total_leaves_allocated, carry_forwarded_leaves_count
+			select name, from_date, to_date, total_leaves_allocated, carry_forwarded_leaves_count
 			from `tabLeave Allocation`
 			where %s between from_date and to_date and docstatus = 1 and leave_type = %s and employee = %s
 		""", (self.encashment_date or getdate(nowdate()), self.leave_type, self.employee), as_dict=1)
