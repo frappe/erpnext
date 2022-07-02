@@ -1499,48 +1499,46 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	_set_values_for_item_list(children) {
-		var me = this;
-		var items_rule_dict = {};
+		const items_rule_dict = {};
 
-		for(var i=0, l=children.length; i<l; i++) {
-			var d = children[i] ;
-			let item_row = frappe.get_doc(d.doctype, d.name);
-			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rules");
-			for(var k in d) {
-				var v = d[k];
-				if (["doctype", "name"].indexOf(k)===-1) {
-					if(k=="price_list_rate") {
-						item_row['rate'] = v;
+		for (const child of children) {
+			const existing_pricing_rule = frappe.model.get_value(child.doctype, child.name, "pricing_rules");
+
+			for (const [key, value] of Object.entries(child)) {
+				if (!["doctype", "name"].includes(key)) {
+					if (key === "price_list_rate") {
+						frappe.model.set_value(child.doctype, child.name, "rate", value);
 					}
 
-					if (k !== 'free_item_data') {
-						item_row[k] = v;
+					if (key !== "free_item_data") {
+						frappe.model.set_value(child.doctype, child.name, key, value);
 					}
 				}
 			}
 
-			frappe.model.round_floats_in(item_row, ["price_list_rate", "discount_percentage"]);
+			frappe.model.round_floats_in(
+				frappe.get_doc(child.doctype, child.name),
+				["price_list_rate", "discount_percentage"],
+			);
 
 			// if pricing rule set as blank from an existing value, apply price_list
-			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rules) {
-				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
-			} else if(!d.pricing_rules) {
-				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
+			if (!this.frm.doc.ignore_pricing_rule && existing_pricing_rule && !child.pricing_rules) {
+				this.apply_price_list(frappe.get_doc(child.doctype, child.name));
+			} else if (!child.pricing_rules) {
+				this.remove_pricing_rule(frappe.get_doc(child.doctype, child.name));
 			}
 
-			if (d.free_item_data.length > 0) {
-				me.apply_product_discount(d);
+			if (child.free_item_data.length > 0) {
+				this.apply_product_discount(child);
 			}
 
-			if (d.apply_rule_on_other_items) {
-				items_rule_dict[d.name] = d;
+			if (child.apply_rule_on_other_items) {
+				items_rule_dict[child.name] = child;
 			}
 		}
 
-		me.frm.refresh_field('items');
-		me.apply_rule_on_other_items(items_rule_dict);
-
-		me.calculate_taxes_and_totals();
+		this.apply_rule_on_other_items(items_rule_dict);
+		this.calculate_taxes_and_totals();
 	}
 
 	apply_rule_on_other_items(args) {
