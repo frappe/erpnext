@@ -127,7 +127,7 @@ class Supplier(TransactionBase):
 			self.db_set("primary_address", address_display)
 
 	def on_trash(self):
-		if self.supplier_primary_contact:
+		if self.supplier_primary_contact or self.supplier_primary_address:
 			frappe.db.sql(
 				"""
 				UPDATE `tabSupplier`
