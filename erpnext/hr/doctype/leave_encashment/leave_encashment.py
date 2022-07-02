@@ -186,7 +186,7 @@ def generate_leave_encashment(date=None):
 		from `tabLeave Allocation` la
 		inner join `tabEmployee` emp on emp.name = la.employee
 		inner join `tabLeave Type` lt on lt.name = la.leave_type
-		where la.to_date = %(date)s and lt.allow_encashment = 1
+		where la.to_date = %(date)s and lt.allow_encashment = 1 and la.docstatus = 1
 			and (ifnull(emp.relieving_date, '0000-00-00') = '0000-00-00' or emp.relieving_date <= %(date)s)
 	""", {'date': date}, as_dict=1)
 
