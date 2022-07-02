@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
+from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
 from erpnext.stock.utils import get_bin
@@ -36,7 +37,15 @@ class SubcontractingOrder(SubcontractingController):
 
 	def validate_purchase_order_for_subcontracting(self):
 		if self.purchase_order:
+			if is_subcontracting_order_created(self.purchase_order):
+				frappe.throw(
+					_(
+						"Only one Subcontracting Order can be created against a Purchase Order, cancel the existing Subcontracting Order to create a new one."
+					)
+				)
+
 			po = frappe.get_doc("Purchase Order", self.purchase_order)
+
 			if not po.is_subcontracted:
 				frappe.throw(_("Please select a valid Purchase Order that is configured for Subcontracting."))
 
