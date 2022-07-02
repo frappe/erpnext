@@ -274,10 +274,6 @@ def get_item_list(invoice):
 
 		if invoice.get("apply_discount_on"):
 			item.discount_amount = item.base_amount - item.base_net_amount
-		elif item.discount_amount > 0:
-			item.discount_amount = item.discount_amount
-		else:
-			item.discount_amount = 0
 
 		item.unit_rate = abs(item.taxable_value - item.discount_amount) / item.qty
 
@@ -361,7 +357,7 @@ def get_invoice_value_details(invoice):
 		and invoice.discount_amount
 		and invoice.get("is_cash_or_non_trade_discount")
 	):
-		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+		invoice_value_details.invoice_discount_amt = invoice.discount_amount
 	else:
 		invoice_value_details.invoice_discount_amt = 0
 
