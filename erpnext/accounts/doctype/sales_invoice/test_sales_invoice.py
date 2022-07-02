@@ -2620,6 +2620,63 @@ class TestSalesInvoice(unittest.TestCase):
 		einvoice = make_einvoice(si)
 		validate_totals(einvoice)
 
+	def test_einvoice_discounts(self):
+		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
+
+		# Normal Itemized Discount
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = ""
+		si.items[0].discount_amount = 4000
+		si.items[1].discount_amount = 300
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 4000)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 300)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		# Invoice Discount on net total
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 400
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 316.83)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 83.17)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		# Invoice Discount on grand total (Itemized Discount)
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = "Grand Total"
+		si.discount_amount = 400
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 268.5)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 70.48)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		# Invoice Discount on grand total (Cash/Non-Trade Discount)
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = "Grand Total"
+		si.is_cash_or_non_trade_discount = 1
+		si.discount_amount = 400
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 400)
+
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
 
