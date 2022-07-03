@@ -1030,7 +1030,7 @@ class SalesInvoice(SellingController):
 		)
 
 		if grand_total and not self.is_internal_transfer():
-			# Didnot use base_grand_total to book rounding loss gle
+			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -1051,6 +1051,22 @@ class SalesInvoice(SellingController):
 						"project": self.project,
 					},
 					self.party_account_currency,
+					item=self,
+				)
+			)
+
+		if self.apply_discount_on == "Grand Total" and self.get("is_cash_or_discount_account"):
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.additional_discount_account,
+						"against": self.debit_to,
+						"debit": self.base_discount_amount,
+						"debit_in_account_currency": self.discount_amount,
+						"cost_center": self.cost_center,
+						"project": self.project,
+					},
+					self.currency,
 					item=self,
 				)
 			)
