@@ -597,7 +597,9 @@ class calculate_taxes_and_totals(object):
 			if not self.doc.apply_discount_on:
 				frappe.throw(_("Please select Apply Discount On"))
 
-			if self.doc.apply_discount_on == "Grand Total" and self.doc.is_cash_or_non_trade_discount:
+			if self.doc.apply_discount_on == "Grand Total" and self.doc.get(
+				"is_cash_or_non_trade_discount"
+			):
 				self.discount_amount_applied = True
 				return
 
