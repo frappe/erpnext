@@ -260,6 +260,16 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 	}
 
 	dialog.set_primary_action(__('Create Stock Entry'), function () {
+		if (source && (dialog.get_value("qty") == 0 || dialog.get_value("qty") > actual_qty)) {
+			frappe.msgprint(__("Quantity must be greater than zero, and less or equal to {0}", [actual_qty]));
+			return;
+		}
+
+		if (dialog.get_value("source") === dialog.get_value("target")) {
+			frappe.msgprint(__("Source and target warehouse must be different"));
+			return;
+		}
+
 		frappe.model.with_doctype('Stock Entry', function () {
 			let doc = frappe.model.get_new_doc('Stock Entry');
 			doc.from_warehouse = dialog.get_value('source');
