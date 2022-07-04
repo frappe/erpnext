@@ -271,14 +271,14 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-		if flt(item.qty) != 0.0:
-			item.unit_rate = abs(item.taxable_value / item.qty)
-		else:
-			item.unit_rate = abs(item.taxable_value)
-		item.gross_amount = abs(item.taxable_value)
-		item.taxable_value = abs(item.taxable_value)
-		item.discount_amount = 0
 
+		if invoice.get("apply_discount_on"):
+			item.discount_amount = item.base_amount - item.base_net_amount
+
+		item.unit_rate = abs(item.taxable_value - item.discount_amount) / item.qty
+
+		item.gross_amount = abs(item.taxable_value) + item.discount_amount
+		item.taxable_value = abs(item.taxable_value)
 		item.is_service_item = "Y" if item.gst_hsn_code and item.gst_hsn_code[:2] == "99" else "N"
 		item.serial_no = ""
 
@@ -352,7 +352,14 @@ def update_item_taxes(invoice, item):
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
 	invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get("items")]))
-	invoice_value_details.invoice_discount_amt = 0
+	if (
+		invoice.apply_discount_on == "Grand Total"
+		and invoice.discount_amount
+		and invoice.get("is_cash_or_non_trade_discount")
+	):
+		invoice_value_details.invoice_discount_amt = invoice.discount_amount
+	else:
+		invoice_value_details.invoice_discount_amt = 0
 
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(
