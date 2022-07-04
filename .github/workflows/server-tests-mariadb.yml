@@ -61,6 +61,14 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v2
         with:

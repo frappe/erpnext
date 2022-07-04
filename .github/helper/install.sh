@@ -2,13 +2,6 @@
 
 set -e
 
-# Check for merge conflicts before proceeding
-python -m compileall -f "${GITHUB_WORKSPACE}"
-if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
-    then echo "Found merge conflicts"
-    exit 1
-fi
-
 cd ~ || exit
 
 sudo apt update && sudo apt install redis-server libcups2-dev
