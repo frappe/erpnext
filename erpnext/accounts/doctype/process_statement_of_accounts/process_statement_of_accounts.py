@@ -77,7 +77,6 @@ def get_report_pdf(doc, consolidated=True):
 
 			letter_head = get_letter_head(doc, 0)
 
-		# Added show_net_values_in_party_account for Task- PRE00317
 		filters = frappe._dict(
 			{
 				"from_date": doc.from_date,
@@ -95,7 +94,6 @@ def get_report_pdf(doc, consolidated=True):
 				"show_opening_entries": 0,
 				"include_default_book_entries": 0,
 				"tax_id": tax_id if tax_id else None,
-				"show_net_values_in_party_account" : doc.show_net_values_in_party_account
 			}
 		)
 		col, res = get_soa(filters)

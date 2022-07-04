@@ -264,9 +264,9 @@ class PurchaseReceipt(BuyingController):
 		for row in self.items:
 			print("row.nature_of_job_work_done -------------",row.nature_of_job_work_done )
 			str_nature = row.nature_of_job_work_done
-			if row.is_subcontracted == "Yes" and not row.challan_number_issues_by_job_worker and not row.challan_date_issues_by_job_worker and not str_nature:
-					frappe.throw("Challan Number Issues by Job Worker, Challan Date Issues by Job Worker"
-								 "and Nature of Job Work Done Is Mandatory at row "+str(row.idx))
+			# if row.is_subcontracted == "Yes" and not row.challan_number_issues_by_job_worker and not row.challan_date_issues_by_job_worker and not str_nature:
+			# 		frappe.throw("Challan Number Issues by Job Worker, Challan Date Issues by Job Worker"
+			# 					 "and Nature of Job Work Done Is Mandatory at row "+str(row.idx))
 
 	def validate_cwip_accounts(self):
 		for item in self.get("items"):

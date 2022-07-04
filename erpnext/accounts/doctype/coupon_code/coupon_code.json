@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "field:coupon_name",
  "creation": "2018-01-22 14:34:39.701832",
@@ -116,7 +115,6 @@
    "read_only": 1
   }
  ],
- "links": [],
  "modified": "2021-07-16 14:23:31.677645",
  "modified_by": "Administrator",
  "module": "Accounts",

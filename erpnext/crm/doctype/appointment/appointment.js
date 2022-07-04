@@ -22,6 +22,5 @@ frappe.ui.form.on('Appointment', {
 				}
 			};
 		});
-	},
-	
+	}
 });

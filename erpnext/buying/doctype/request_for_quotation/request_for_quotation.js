@@ -227,8 +227,6 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 
 })
 
-
-
 erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		var me = this;
@@ -439,4 +437,3 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
-

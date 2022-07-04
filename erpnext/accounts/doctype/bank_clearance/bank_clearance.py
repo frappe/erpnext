@@ -58,8 +58,7 @@ class BankClearance(Document):
 				reference_no as cheque_number, reference_date as cheque_date,
 				if(paid_from=%(account)s, paid_amount, 0) as credit,
 				if(paid_from=%(account)s, 0, received_amount) as debit,
-				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account,
-				ifnull(party_name,if(paid_from=%(account)s,paid_to,paid_from)) as party, clearance_date,
+				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
 				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
 			from `tabPayment Entry`
 			where
@@ -133,7 +132,7 @@ class BankClearance(Document):
 				"""
 				select
 					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
-					si.posting_date, si.customer as against_account,si.customer_name as party ,sip.clearance_date,
+					si.posting_date, si.customer as against_account, sip.clearance_date,
 					account.account_currency, 0 as credit
 				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
 				where
@@ -150,7 +149,7 @@ class BankClearance(Document):
 				"""
 				select
 					"Purchase Invoice" as payment_document, pi.name as payment_entry, pi.paid_amount as credit,
-					pi.posting_date, pi.supplier as against_account,pi.supplier_name as party,pi.clearance_date,
+					pi.posting_date, pi.supplier as against_account, pi.clearance_date,
 					account.account_currency, 0 as debit
 				from `tabPurchase Invoice` pi, `tabAccount` account
 				where

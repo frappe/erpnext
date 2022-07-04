@@ -13,7 +13,8 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 
 		this._super();
 	},
-	refresh: function(doc) {
+
+	refresh: function() {
 		var me = this;
 		this._super();
 

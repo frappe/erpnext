@@ -58,17 +58,8 @@ class BuyingController(StockController, Subcontracting):
 			self.create_raw_materials_supplied("supplied_items")
 			self.set_landed_cost_voucher_amount()
 
-			if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
-				self.update_valuation_rate()
-
-	# def before_insert(self):
-	# 	# self.validate_for_subcontracting()
-	# 	self.create_raw_materials_supplied("supplied_items")
-	# 	self.set_landed_cost_voucher_amount()
-		
-	# 	if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
-	# 		self.update_valuation_rate()
-
+		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
+			self.update_valuation_rate()
 
 	def onload(self):
 		super(BuyingController, self).onload()
