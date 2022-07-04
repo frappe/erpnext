@@ -2,6 +2,9 @@ import frappe
 
 
 def execute():
+	if "hrms" in frappe.get_installed_apps():
+		return
+
 	frappe.delete_doc("Module Def", "HR", ignore_missing=True, force=True)
 	frappe.delete_doc("Module Def", "Payroll", ignore_missing=True, force=True)
 
