@@ -621,13 +621,14 @@ def validate_mobile_pakistan_in_contact(doc, method):
 
 	for d in doc.phone_nos:
 		if d.is_primary_mobile_no:
-			validate_mobile_pakistan(d.phone)
+			if not validate_mobile_pakistan(d.phone, throw=False):
+				d.is_primary_mobile_no = 0
 
 def validate_cnic_in_contact(doc, method):
 	if doc.get('tax_cnic'):
 		validate_ntn_cnic_strn(cnic=doc.tax_cnic)
 
-def validate_mobile_pakistan(mobile_no):
+def validate_mobile_pakistan(mobile_no, throw=True):
 	if not mobile_no:
 		return
 
@@ -639,7 +640,12 @@ def validate_mobile_pakistan(mobile_no):
 	mobile_regex = re.compile(r'^03\d\d-\d\d\d\d\d\d\d$')
 
 	if not mobile_regex.match(mobile_no):
-		frappe.throw(_("Invalid Mobile No. Pakistani Mobile Nos must be in the format 03##-#######"))
+		if throw:
+			frappe.throw(_("Invalid Mobile No. Pakistani Mobile Nos must be in the format 03##-#######"))
+
+		return False
+
+	return True
 
 @frappe.whitelist()
 def validate_duplicate_tax_id(doctype, fieldname, value, exclude=None, throw=False):
