@@ -53,7 +53,7 @@ frappe.ui.form.on("Purchase Receipt", {
 			frm.trigger("toggle_display_account_head");
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
+		/* if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Debit Note'), function() {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
@@ -61,21 +61,21 @@ frappe.ui.form.on("Purchase Receipt", {
 				})
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
-		}
+		} */
 
-		if (frm.doc.docstatus === 1 && frm.doc.is_internal_supplier && !frm.doc.inter_company_reference) {
+		/* if (frm.doc.docstatus === 1 && frm.doc.is_internal_supplier && !frm.doc.inter_company_reference) {
 			frm.add_custom_button(__('Delivery Note'), function() {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_inter_company_delivery_note',
 					frm: cur_frm,
 				})
 			}, __('Create'));
-		}
+		} */
 
-		frm.events.add_custom_buttons(frm);
+		// frm.events.add_custom_buttons(frm);
 	},
 
-	add_custom_buttons: function(frm) {
+	/* add_custom_buttons: function(frm) {
 		if (frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Purchase Invoice'), function () {
 				if (!frm.doc.supplier) {
@@ -99,7 +99,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				})
 			}, __("Get Items From"));
 		}
-	},
+	}, */
 
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
@@ -109,7 +109,44 @@ frappe.ui.form.on("Purchase Receipt", {
 	toggle_display_account_head: function(frm) {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);
+	},
+
+		/////////////delete items total and total_qty update
+		set_total_allocated_amount: function(frm) {
+			var total = 0.0;
+			var base_total = 0.0;
+			$.each(frm.doc.items || [], function(i, row) {
+				if (row.amount) {
+					total += flt(row.amount);
+					base_total += flt(flt(row.amount)*flt(row.exchange_rate));
+				}
+			});
+			frm.set_value("total", Math.abs(total));
+			console.log("total_allocated_amount",total)
+
+		},
+		set_total_quantity: function(frm) {
+			var total_qty = 0.0;
+			var base_total = 0.0;
+			$.each(frm.doc.items || [], function(i, row) {
+				if (row.qty) {
+					total_qty += flt(row.qty);
+				}
+				row.total_qty= flt(row.qty) - flt(row.total_qty);
+				frm.refresh_field("total_qty",total_qty);
+			});
+			frm.set_value("total_qty", Math.abs(total_qty));
+			console.log("total_allocated_amount 3",total_qty)
+		},
+			/////////////delete items, total and total_qty update
+});
+
+frappe.ui.form.on("Purchase Receipt Item", {
+	items_remove: function(frm) {
+		frm.events.set_total_allocated_amount(frm);
+		frm.events.set_total_quantity(frm);
 	}
+
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
@@ -124,25 +161,25 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			//removed for temporary
-			this.show_general_ledger();
+			// this.show_general_ledger();
 
-			this.frm.add_custom_button(__('Asset'), function() {
+			/* this.frm.add_custom_button(__('Asset'), function() {
 				frappe.route_options = {
 					purchase_receipt: me.frm.doc.name,
 				};
 				frappe.set_route("List", "Asset");
-			}, __("View"));
+			}, __("View")); */
 
-			this.frm.add_custom_button(__('Asset Movement'), function() {
+			/* this.frm.add_custom_button(__('Asset Movement'), function() {
 				frappe.route_options = {
 					reference_name: me.frm.doc.name,
 				};
 				frappe.set_route("List", "Asset Movement");
-			}, __("View"));
+			}, __("View")); */
 		}
 
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
-			if (this.frm.doc.docstatus == 0) {
+			/* if (this.frm.doc.docstatus == 0) {
 				this.frm.add_custom_button(__('Purchase Order'),
 					function () {
 						if (!me.frm.doc.supplier) {
@@ -167,38 +204,51 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 							}
 						})
 					}, __("Get Items From"));
-			}
+			} */
 
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {
-				if (this.frm.has_perm("submit")) {
+				/* if (this.frm.has_perm("submit")) {
 					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
-				}
+				} */
 
-				cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __('Create'));
+				// cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __('Create'));
 
-				cur_frm.add_custom_button(__('Make Stock Entry'), cur_frm.cscript['Make Stock Entry'], __('Create'));
+				// cur_frm.add_custom_button(__('Make Stock Entry'), cur_frm.cscript['Make Stock Entry'], __('Create'));
 
-				if(flt(this.frm.doc.per_billed) < 100) {
+				/* if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __('Create'));
-				}
-				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
+				} */
+				// cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
 
-				if(!this.frm.doc.auto_repeat) {
+				/* if(!this.frm.doc.auto_repeat) {
 					cur_frm.add_custom_button(__('Subscription'), function() {
 						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
 					}, __('Create'))
-				}
+				} */
 
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+
+				// ***** MAKE LOGISITIC NOTICE BUTTON ***** //
+				// if(flt(this.frm.doc.per_received) < 100 && allow_receipt) {// ** need to add condition**//
+				// }
+				cur_frm.add_custom_button(__('Logistic Notice'), this.make_logistic_notice, __('Create'));
 			}
 		}
 
 
-		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
+		/* if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
 			cur_frm.add_custom_button(__('Reopen'), this.reopen_purchase_receipt, __("Status"))
-		}
+		} */
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+	},
+
+	make_logistic_notice: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_logistic_notice",
+			frm: cur_frm,
+			// freeze_message: __("Creating Logistic Notice ...")
+		})
 	},
 
 	make_purchase_invoice: function() {

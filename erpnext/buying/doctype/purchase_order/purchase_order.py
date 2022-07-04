@@ -322,6 +322,13 @@ class PurchaseOrder(BuyingController):
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
+		# create account payable form
+		acc_payble_data = frappe.new_doc("Account Payable")
+		acc_payble_data.po_number = self.name
+		acc_payble_data.total = self.total
+		acc_payble_data.total_payable_after_revision = self.total
+		acc_payble_data.insert(ignore_mandatory=True)
+
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
 

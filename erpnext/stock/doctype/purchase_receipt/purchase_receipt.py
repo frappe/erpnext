@@ -16,6 +16,7 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -940,6 +941,104 @@ def make_purchase_invoice(source_name, target_doc=None):
 	doclist.set_onload("ignore_price_list", True)
 	return doclist
 
+
+@frappe.whitelist()
+def make_logistic_notice(source_name, target_doc=None):
+	# from erpnext.accounts.party import get_payment_terms_template
+	doc = frappe.get_doc("Purchase Receipt", source_name)
+	returned_qty_map = get_returned_qty_map(source_name)
+	invoiced_qty_map = get_invoiced_qty_map(source_name)
+	for d in doc.get("items"):
+		available_quty = get_batch_qty(d.batch_no, d.warehouse, d.item_code)
+
+	def set_missing_values(source, target):
+		if len(target.get("items")) == 0:
+			frappe.throw(_("All products have already been Shipped"))
+
+		doc = frappe.get_doc(target)
+		# doc.payment_terms_template = get_payment_terms_template(
+		# 	source.supplier, "Supplier", source.company
+		# )
+		doc.run_method("onload")
+		doc.run_method("set_missing_values")
+		doc.run_method("calculate_taxes_and_totals")
+
+	def update_item(source_doc, target_doc, source_parent):
+
+		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		if frappe.db.get_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+		):
+			target_doc.rejected_qty = 0
+		target_doc.stock_qty = flt(target_doc.qty) * flt(
+			target_doc.conversion_factor, target_doc.precision("conversion_factor")
+		)
+		returned_qty_map[source_doc.name] = returned_qty
+
+		# filters = {"item_code": source_doc.batch_no, "warehouse": source_doc.warehouse, "batch_no": source_doc.item_code}
+		target_doc.available_qty = get_batch_qty(source_doc.batch_no, source_doc.warehouse, source_doc.item_code)
+		target_doc.qty = target_doc.available_qty
+		# target.qty = flt(obj.qty) - flt(obj.received_qty)
+
+		# available_batch_qty = get_batch_qty(item.batch_no, item.warehouse, item.item_code)
+		# reserved_batch_qty = get_pos_reserved_batch_qty(filters)
+
+	def get_pending_qty(item_row):
+		qty = item_row.qty
+		if frappe.db.get_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+		):
+			qty = item_row.received_qty
+		pending_qty = qty - invoiced_qty_map.get(item_row.name, 0)
+		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
+		if returned_qty:
+			if returned_qty >= pending_qty:
+				pending_qty = 0
+				returned_qty -= pending_qty
+			else:
+				pending_qty -= returned_qty
+				returned_qty = 0
+		return pending_qty, returned_qty
+
+	doclist = get_mapped_doc(
+		"Purchase Receipt",
+		source_name,
+		{
+			"Purchase Receipt": {
+				"doctype": "Logistic Notice",
+				"field_map": {
+					"supplier_warehouse": "supplier_warehouse",
+					"is_return": "is_return",
+					"bill_date": "bill_date",
+					"po_number": "purchase_order"
+				},
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+			"Purchase Receipt Item": {
+				"doctype": "Logistic Notice Item",
+				"field_map": {
+					"name": "pr_detail",
+					"parent": "purchase_receipt",
+					"purchase_order_item": "po_detail",
+					"batch_no": "batch_no",
+					"purchase_receipt": "purchase_receipt",
+					"is_fixed_asset": "is_fixed_asset",
+					"asset_location": "asset_location",
+					"asset_category": "asset_category",
+				},
+				"postprocess": update_item,
+				"filter": lambda d: get_batch_qty(d.batch_no, "Supplier - U", d.item_code) == 0,
+			},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+		},
+		target_doc,
+		set_missing_values,
+	)
+
+	doclist.set_onload("ignore_price_list", True)
+	return doclist
 
 def get_invoiced_qty_map(purchase_receipt):
 	"""returns a map: {pr_detail: invoiced_qty}"""

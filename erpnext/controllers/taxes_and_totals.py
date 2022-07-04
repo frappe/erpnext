@@ -142,6 +142,7 @@ class calculate_taxes_and_totals(object):
 					"Purchase Invoice Item",
 					"Purchase Order Item",
 					"Purchase Receipt Item",
+					"Shipping Note Item",
 				]:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
@@ -516,6 +517,7 @@ class calculate_taxes_and_totals(object):
 			"Delivery Note",
 			"Sales Invoice",
 			"POS Invoice",
+			"Shipping Notice Instruction",
 		]:
 			self.doc.base_grand_total = (
 				flt(self.doc.grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total"))
