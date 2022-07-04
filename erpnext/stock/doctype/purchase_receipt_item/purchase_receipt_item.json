@@ -544,7 +544,8 @@
    "oldfieldname": "schedule_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "hidden": 1
   },
   {
    "fieldname": "stock_qty",

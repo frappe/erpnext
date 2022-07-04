@@ -11,16 +11,16 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "disabled",
   "name_and_description_section",
   "naming_series",
   "item_code",
   "variant_of",
   "item_name",
+  "brand",
+  "stock_uom",
   "item_group",
   "is_item_from_hub",
-  "stock_uom",
-  "column_break0",
-  "disabled",
   "allow_alternative_item",
   "is_stock_item",
   "include_item_in_manufacturing",
@@ -31,13 +31,12 @@
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
+  "sb_barcodes",
   "over_delivery_receipt_allowance",
   "over_billing_allowance",
   "image",
   "section_break_11",
-  "brand",
   "description",
-  "sb_barcodes",
   "barcodes",
   "inventory_section",
   "shelf_life_in_days",
@@ -184,7 +183,6 @@
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -204,10 +202,6 @@
    "oldfieldtype": "Link",
    "options": "UOM",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -296,7 +290,7 @@
   },
   {
    "fieldname": "brand",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Brand",
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
@@ -950,12 +944,13 @@
    "label": "Grant Commission"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-04-28 04:52:10.272256",
+ "modified": "2022-07-01 08:51:38.610280",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
