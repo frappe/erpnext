@@ -93,20 +93,29 @@ class FollowUp(Document):
 		log_name = ""
 		details_list = []
 		# Creating logs
-		for i in trans_items:
-			print("thi is i ", type(trans_items) , i.keys())
-			
+		for i in trans_items:			
 			print(" In sidde follow up button click", i.get("follow_up"),  follow_up)
+
+			outstanding = 0
 
 			if i["__checked"] == 1 and i["follow_up"] == follow_up :
 			# if i["__checked"] == 1 and i["follow_up"] == follow_up and "due_date" in i.keys():
 				print(" In sidde follow up button click", i.get("follow_up", follow_up))
 				if "due_date" in i.keys() and i["voucher_no"]:
+					if i["voucher_type"] == "Sales Invoice":
+						print(" this is sales Invoice ............. SI")
+						si_cur = frappe.get_value("Sales Invoice", i["voucher_no"], "currency")
+						if si_cur == frappe.defaults.get_global_default('currency'):
+							print(" this is currency")
+							outstanding = i["outstanding_amount"]
+						else: 
+							c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
+							outstanding =	i["outstanding_amount"] / c_rate
 					comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + i["due_date"] + "    " + str(i["outstanding_amount"]) +" \n "
 					detail_dict = {"voucher_type": i["voucher_type"],
 									"voucher_no": i["voucher_no"] if i["voucher_no"] else "",
 									"due_date": i["due_date"],
-									"outstanding_amount" :i["outstanding_amount"],
+									"outstanding_amount" : outstanding,
 									"invoice_amount" : i["invoice_amount"],
 									"date": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "posting_date"),
 									"age": i["age"],
@@ -120,13 +129,13 @@ class FollowUp(Document):
 				# 					"outstanding_amount" :i["outstanding_amount"]}
 				# 	details_list.append(detail_dict)
 
-				total_due += i["outstanding_amount"]
+				total_due += outstanding
 				# print(" i[__checked]", i["__checked"], i["voucher_type"] )
 				new_log = frappe.new_doc("Follow Up Logs")
 				new_log.customer = customer
 				new_log.voucher_type = i["voucher_type"]
 				new_log.voucher_no = i["voucher_no"]
-				new_log.outstanding_amount = i["outstanding_amount"]
+				new_log.outstanding_amount = outstanding
 				new_log.posting_date = t_date
 				new_log.due_date = i["due_date"] if "due_date" in i.keys() else utils.today()
 				new_log.age = i["age"]
@@ -291,13 +300,19 @@ class FollowUp(Document):
 			commit_name = ""
 			commit_link = ""
 			remarks = ""
+			outstanding = 0
 			comp = frappe.defaults.get_user_default('Company')
 			currency = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["currency"])
 			remarks = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["remarks"])
 			primary_c, full_name = frappe.db.get_value('Customer', customer, ["customer_primary_contact", "customer_name"])
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
 			emails = []
-			
+
+			if currency == frappe.defaults.get_global_default('currency'):
+				outstanding = i["outstanding_amount"]
+			else:	
+				c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
+				outstanding = i["outstanding_amount"] / c_rate
 			
 
 			comm_email = ""
@@ -327,7 +342,7 @@ class FollowUp(Document):
 				prc.commitment_to = frappe.session.user
 				prc.voucher_type = i["voucher_type"]
 				prc.invoice_amount = i["invoice_amount"]
-				prc.total_outstanding = i["outstanding_amount"]
+				prc.total_outstanding = outstanding
 				prc.voucher_no = i["voucher_no"]
 				prc.total_due = i["total_due"]
 				prc.age = i["age"]
@@ -373,7 +388,7 @@ class FollowUp(Document):
 								Making a payment on time enables us to serve you better and we look forward to provide uninterrupted services to you.</p>
 				
 							""".format(full_name, str(utils.today()), str(i["commited_amount"]), currency, 
-							str(i['outstanding_amount']), i["voucher_no"], i["voucher_type"], remarks, str(i["invoice_amount"]))
+							str(outstanding), i["voucher_no"], i["voucher_type"], remarks, str(i["invoice_amount"]))
 
 				#Adding comment on Customer
 				comm = frappe.new_doc("Comment")
