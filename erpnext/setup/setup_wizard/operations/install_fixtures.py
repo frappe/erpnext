@@ -104,6 +104,22 @@ def install(country=None):
 			"name": "Material Consumption for Manufacture",
 			"purpose": "Material Consumption for Manufacture",
 		},
+		# Designation
+		{"doctype": "Designation", "designation_name": _("CEO")},
+		{"doctype": "Designation", "designation_name": _("Manager")},
+		{"doctype": "Designation", "designation_name": _("Analyst")},
+		{"doctype": "Designation", "designation_name": _("Engineer")},
+		{"doctype": "Designation", "designation_name": _("Accountant")},
+		{"doctype": "Designation", "designation_name": _("Secretary")},
+		{"doctype": "Designation", "designation_name": _("Associate")},
+		{"doctype": "Designation", "designation_name": _("Administrative Officer")},
+		{"doctype": "Designation", "designation_name": _("Business Development Manager")},
+		{"doctype": "Designation", "designation_name": _("HR Manager")},
+		{"doctype": "Designation", "designation_name": _("Project Manager")},
+		{"doctype": "Designation", "designation_name": _("Head of Marketing and Sales")},
+		{"doctype": "Designation", "designation_name": _("Software Developer")},
+		{"doctype": "Designation", "designation_name": _("Designer")},
+		{"doctype": "Designation", "designation_name": _("Researcher")},
 		# territory: with two default territories, one for home country and one named Rest of the World
 		{
 			"doctype": "Territory",
