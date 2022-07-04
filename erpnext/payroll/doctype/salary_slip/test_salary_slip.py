@@ -1119,6 +1119,7 @@ def make_earning_salary_component(
 			"formula": "BS*.5",
 			"type": "Earning",
 			"amount_based_on_formula": 1,
+			"depends_on_payment_days": 0,
 		},
 		{"salary_component": "Leave Encashment", "abbr": "LE", "type": "Earning"},
 	]
