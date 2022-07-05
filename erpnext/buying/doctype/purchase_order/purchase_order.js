@@ -112,6 +112,16 @@ frappe.ui.form.on("Purchase Order Item", {
 				set_schedule_date(frm);
 			}
 		}
+	},
+
+	qty: function(frm, cdt, cdn) {
+		if (frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
+			var row = locals[cdt][cdn];
+
+			if (row.qty) {
+				row.fg_item_qty = row.qty;
+			}
+		}
 	}
 });
 
