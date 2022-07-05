@@ -790,10 +790,6 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		}
 
-		// India related fields
-		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
-		else hide_field(['c_form_applicable', 'c_form_no']);
-
 		frm.refresh_fields();
 	},
 
