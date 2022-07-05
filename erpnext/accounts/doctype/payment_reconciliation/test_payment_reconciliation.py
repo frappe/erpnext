@@ -151,7 +151,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=100, posting_date=nowdate()):
+	def create_payment_entry(self, amount=100, posting_date=nowdate(), customer=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
@@ -159,7 +159,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 			company=self.company,
 			payment_type="Receive",
 			party_type="Customer",
-			party=self.customer,
+			party=customer or self.customer,
 			paid_from=self.debit_to,
 			paid_to=self.bank,
 			paid_amount=amount,
@@ -529,10 +529,13 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		cr_note.cancel()
 
-		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-
-		pay = get_payment_entry(si.doctype, si.name)
-		pay.references.clear()
+		pay = self.create_payment_entry(
+			amount=amount, posting_date=transaction_date, customer=self.customer3
+		)
+		pay.paid_from = self.debtors_eur
+		pay.paid_from_account_currency = "EUR"
+		pay.source_exchange_rate = exchange_rate
+		pay.received_amount = exchange_rate * amount
 		pay = pay.save().submit()
 
 		pr.get_unreconciled_entries()
