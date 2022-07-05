@@ -151,7 +151,6 @@ class SalesInvoice(SellingController):
 			)
 
 		self.set_against_income_account()
-		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		if not self.is_return:
@@ -365,8 +364,6 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.update_serial_no(in_cancel=True)
-
-		self.validate_c_form_on_cancel()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -814,25 +811,6 @@ class SalesInvoice(SellingController):
 	def validate_account_for_change_amount(self):
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
-
-	def validate_c_form(self):
-		"""Blank C-form no if C-form applicable marked as 'No'"""
-		if self.amended_from and self.c_form_applicable == "No" and self.c_form_no:
-			frappe.db.sql(
-				"""delete from `tabC-Form Invoice Detail` where invoice_no = %s
-					and parent = %s""",
-				(self.amended_from, self.c_form_no),
-			)
-
-			frappe.db.set(self, "c_form_no", "")
-
-	def validate_c_form_on_cancel(self):
-		"""Display message if C-Form no exists on cancellation of Sales Invoice"""
-		if self.c_form_applicable == "Yes" and self.c_form_no:
-			msgprint(
-				_("Please remove this Invoice {0} from C-Form {1}").format(self.name, self.c_form_no),
-				raise_exception=1,
-			)
 
 	def validate_dropship_item(self):
 		for item in self.items:
@@ -1528,9 +1506,7 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
-		for fieldname in ("c_form_applicable", "c_form_no", "write_off_amount"):
-			self.set(fieldname, reference_doc.get(fieldname))
-
+		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.due_date = None
 
 	def update_serial_no(self, in_cancel=False):
