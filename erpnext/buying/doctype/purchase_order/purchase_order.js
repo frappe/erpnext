@@ -45,8 +45,17 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	refresh: function(frm) {
-		if(frm.doc.is_old_subcontracting_flow)
+		if(frm.doc.is_old_subcontracting_flow) {
 			frm.trigger('get_materials_from_supplier');
+
+			$('a.grey-link').each(function () {
+				var id = $(this).children(':first-child').attr('data-label');
+				if (id == 'Duplicate') {
+					$(this).remove();
+					return false;
+				}
+			});
+		}
 	},
 
 	get_materials_from_supplier: function(frm) {
