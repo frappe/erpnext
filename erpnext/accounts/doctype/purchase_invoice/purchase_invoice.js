@@ -539,7 +539,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	add_custom_buttons: function(frm) {
-		if (frm.doc.per_received < 100) {
+		if (frm.doc.docstatus == 1 && frm.doc.per_received < 100) {
 			frm.add_custom_button(__('Purchase Receipt'), () => {
 				frm.events.make_purchase_receipt(frm);
 			}, __('Create'));
