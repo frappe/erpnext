@@ -96,6 +96,12 @@ class TestSubcontractingOrder(FrappeTestCase):
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Completed")
 
+		# Partially Received (scr cancelled)
+		scr.load_from_db()
+		scr.cancel()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partially Received")
+
 	def test_make_rm_stock_entry(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)

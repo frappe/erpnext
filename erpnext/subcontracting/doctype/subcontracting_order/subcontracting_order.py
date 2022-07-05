@@ -192,10 +192,11 @@ class SubcontractingOrder(SubcontractingController):
 						status = "Partial Material Transferred"
 						if total_supplied_qty >= total_required_qty:
 							status = "Material Transferred"
+					else:
+						status = "Open"
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
-		if status:
 			frappe.db.set_value("Subcontracting Order", self.name, "status", status, update_modified)
 
 
