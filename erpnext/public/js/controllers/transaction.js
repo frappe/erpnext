@@ -780,21 +780,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var item = frappe.get_doc(cdt, cdn);
 
 		var update_stock = 0;
-		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
+		if(['Sales Invoice'].includes(me.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 		}
 
 		// clear barcode if setting item (else barcode will take priority)
-		if(!this.frm.from_barcode) {
+		if(!me.frm.from_barcode) {
 			item.barcode = null;
 		}
 
-		this.frm.from_barcode = false;
+		me.frm.from_barcode = false;
 		if(item.item_code || item.barcode || item.serial_no || item.vehicle) {
-			if(!this.validate_company_and_party()) {
-				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+			if(!me.validate_company_and_party()) {
+				me.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
-				return this.frm.call({
+				return me.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
 					child: item,
 					args: {

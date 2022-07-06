@@ -60,7 +60,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	if doc:
 		args['posting_date'] = doc.get('posting_date')
-		args['transaction_date'] = doc.get('transaction_date')
+		args['transaction_date'] = doc.get('transaction_date') or doc.get('posting_date')
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
@@ -857,12 +857,12 @@ def get_price_list_rate_for(args, item_code):
 		:param transaction_date: Date of the price
 	"""
 	item_price_args = {
-			"item_code": item_code,
-			"price_list": args.get('price_list'),
-			"customer": args.get('customer'),
-			"supplier": args.get('supplier'),
-			"uom": args.get('uom'),
-			"transaction_date": args.get('transaction_date'),
+		"item_code": item_code,
+		"price_list": args.get('price_list'),
+		"customer": args.get('customer'),
+		"supplier": args.get('supplier'),
+		"uom": args.get('uom'),
+		"transaction_date": args.get('transaction_date') or args.get('transaction_date'),
 	}
 
 	item_price_data = 0
