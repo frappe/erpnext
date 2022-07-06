@@ -102,7 +102,7 @@ class CancellationOfInvoices(Document):
 			valuation_rate = 0
 		else:
 			valuation_rate = stock[0].valuation_rate
-			
+
 		return valuation_rate
 
 	def create_stock_ledger_entry(self, item, qty, delete, allow_negative_stock=False, via_landed_cost_voucher=False, is_amended=None):
