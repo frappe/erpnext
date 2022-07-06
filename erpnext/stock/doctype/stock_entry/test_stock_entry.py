@@ -5,12 +5,8 @@
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-<<<<<<< HEAD
-from frappe.utils import flt, nowdate, nowtime
-from six import iteritems
-=======
 from frappe.utils import add_days, flt, nowdate, nowtime
->>>>>>> 78c8bb251e (fix: timeout error while reposting)
+from six import iteritems
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
