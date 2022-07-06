@@ -2003,7 +2003,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"qty": item.qty,
 					"description": item.description,
 					"serial_no": item.serial_no,
-					"batch_no": item.batch_no
+					"batch_no": item.batch_no,
+					"sample_size": item.sample_quantity
 				});
 				dialog_items.grid.refresh();
 			}
