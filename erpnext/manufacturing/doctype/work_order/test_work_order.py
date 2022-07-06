@@ -1243,7 +1243,7 @@ class TestWorkOrder(FrappeTestCase):
 		ste_doc.insert()
 		ste_doc.submit()
 
-		batch_list = [row.batch_no for row in ste_doc.items]
+		batch_list = sorted([row.batch_no for row in ste_doc.items])
 
 		wo_doc = make_wo_order_test_record(production_item=fg_item, qty=4)
 		transferred_ste_doc = frappe.get_doc(
