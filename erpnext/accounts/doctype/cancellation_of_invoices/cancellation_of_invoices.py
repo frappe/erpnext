@@ -99,10 +99,10 @@ class CancellationOfInvoices(Document):
 		stock = frappe.get_all("Stock Ledger Entry", ["*"], filters = {"item_code": item.item_code})
 
 		if len(stock) == 0:
-			frappe.throw(_("{} no exist in Stock Ledger Entry".format(item.item_code)))
-
-		valuation_rate = stock[0].valuation_rate
-
+			valuation_rate = 0
+		else:
+			valuation_rate = stock[0].valuation_rate
+			
 		return valuation_rate
 
 	def create_stock_ledger_entry(self, item, qty, delete, allow_negative_stock=False, via_landed_cost_voucher=False, is_amended=None):
