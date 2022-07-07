@@ -18,11 +18,6 @@ frappe.ui.form.CustomerQuickEntryForm = class CustomerQuickEntryForm extends fra
 			collapsible: 1
 		},
 		{
-			label: __("Email Id"),
-			fieldname: "email_id",
-			fieldtype: "Data"
-		},
-		{
 			fieldtype: "Column Break"
 		},
 		{
