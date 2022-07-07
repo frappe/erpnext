@@ -12,6 +12,7 @@ def execute():
 			"E Invoice Settings",
 			"E Invoice User",
 			"GST HSN Code",
+			"HSN Tax Rate",
 			"GST Settings",
 			"GSTR 3B Report",
 		],
