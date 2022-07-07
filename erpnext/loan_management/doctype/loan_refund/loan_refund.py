@@ -1,13 +1,20 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint, flt, getdate
+
+import erpnext
+from erpnext.accounts.general_ledger import make_gl_entries
+
 
 class LoanRefund(Document):
 	"""
 	Add refund if total repayment is more than that is owed.
 	"""
+
 	def validate(self):
 		self.set_missing_values()
 		self.validate_refund_amount()
@@ -30,10 +37,7 @@ class LoanRefund(Document):
 		)
 
 		if self.refund_amount > excess_amount:
-			frappe.throw(_(
-				"Refund amount cannot be greater than excess amount {}".format(
-					excess_amount
-			)))
+			frappe.throw(_("Refund amount cannot be greater than excess amount {}".format(excess_amount)))
 
 	def on_submit(self):
 		self.update_outstanding_amount()
