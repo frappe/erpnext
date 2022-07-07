@@ -1726,7 +1726,8 @@ class StockEntry(StockController):
 				qty = frappe.utils.ceil(qty)
 
 			if row.batch_details:
-				for batch_no, batch_qty in row.batch_details.items():
+				batches = sorted(row.batch_details.items(), key=lambda x: x[0])
+				for batch_no, batch_qty in batches:
 					if qty <= 0 or batch_qty <= 0:
 						continue
 
