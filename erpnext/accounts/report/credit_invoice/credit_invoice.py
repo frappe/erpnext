@@ -10,6 +10,12 @@ import datetime
 def execute(filters=None):
 	if not filters: filters = {}
 	columns = [
+
+		{
+   			"fieldname": "date",
+  			"fieldtype": "Data",
+  			"label": "Date",
+  		},
 		{
 			"label": _("Invoice"),
 			"fieldname": "invoice",
@@ -25,8 +31,24 @@ def execute(filters=None):
 			"width": 120
 		},
 		{
+   			"fieldname": "rtn",
+  			"fieldtype": "Data",
+  			"label": "Customer RTN",
+  		},
+		{
+   			"fieldname": "cai",
+  			"fieldtype": "Data",
+  			"label": "CAI",
+  		},
+		{
 			"label": _("Patient"),
 			"fieldname": "patient",
+			"width": 120
+		},
+		{
+			"label": _("Discount Amount"),
+			"fieldname": "discount_amount",
+			"fieldtype": "Currency",
 			"width": 120
 		},
 		{
@@ -46,7 +68,12 @@ def execute(filters=None):
 			"fieldtype": "Link",
 			"options": "Terms and Conditions",
 			"width": 120
-		}
+		},
+		{
+			"label": _("User"),
+			"fieldname": "user",
+			"width": 120
+		},
 	]
 	data = return_data(filters)
 	return columns, data
@@ -61,7 +88,7 @@ def return_data(filters):
 	salary_slips = frappe.get_all("Sales Invoice", ["*"], filters = conditions,  order_by = "name asc")
 
 	for salary_slip in salary_slips:		
-		row = [salary_slip.name, salary_slip.customer, salary_slip.patient_name, salary_slip.grand_total, _(salary_slip.status), salary_slip.tc_name]
+		row = [salary_slip.posting_date, salary_slip.name, salary_slip.customer, salary_slip.rtn, salary_slip.cai, salary_slip.discount_amount, salary_slip.patient_name, salary_slip.grand_total, _(salary_slip.status), salary_slip.tc_name, salary_slip.cashier]
 		data.append(row)
 
 	return data
