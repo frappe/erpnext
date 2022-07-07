@@ -174,7 +174,6 @@ def create_shipment_customer(customer_name):
 	customer.customer_type = "Company"
 	customer.customer_group = "All Customer Groups"
 	customer.territory = "All Territories"
-	customer.gst_category = "Unregistered"
 	customer.insert()
 	return customer
 
