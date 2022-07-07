@@ -69,6 +69,7 @@
   "warehouse_and_reference",
   "warehouse",
   "target_warehouse",
+  "prevdoc_doctype",
   "prevdoc_docname",
   "col_break4",
   "against_blanket_order",
@@ -524,12 +525,12 @@
   },
   {
    "fieldname": "prevdoc_docname",
-   "fieldtype": "Link",
-   "label": "Quotation",
+   "fieldtype": "Dynamic Link",
+   "label": "Previous Docname",
    "no_copy": 1,
    "oldfieldname": "prevdoc_docname",
    "oldfieldtype": "Link",
-   "options": "Quotation",
+   "options": "prevdoc_doctype",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
@@ -809,12 +810,18 @@
    "label": "Picked Qty (in Stock UOM)",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "prevdoc_doctype",
+   "fieldtype": "Link",
+   "label": "Previous Doctype",
+   "options": "DocType"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-17 05:27:41.603006",
+ "modified": "2022-07-07 10:41:38.145062",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

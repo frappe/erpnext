@@ -11,6 +11,7 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
+from frappe.query_builder import DocType
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -126,15 +127,20 @@ class SalesOrder(SellingController):
 		)
 		return ret
 
-	def validate_sales_mntc_quotation(self):
+	def validate_sales_order_type(self):
 		for d in self.get("items"):
 			if d.prevdoc_docname:
-				res = frappe.db.sql(
-					"select name from `tabQuotation` where name=%s and order_type = %s",
-					(d.prevdoc_docname, self.order_type),
-				)
+				dt = DocType(d.prevdoc_doctype)
+				res = (
+					frappe.qb.from_(dt)
+					.select(dt.name)
+					.where(dt.name == d.prevdoc_docname)
+					.where(dt.order_type == self.order_type)
+				).run()
 				if not res:
-					frappe.msgprint(_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type))
+					frappe.msgprint(
+						_("{0} {1} not of type {2}").format(d.prevdoc_doctype, d.prevdoc_docname, self.order_type)
+					)
 
 	def validate_delivery_date(self):
 		if self.order_type == "Sales" and not self.skip_delivery_note:
@@ -157,7 +163,7 @@ class SalesOrder(SellingController):
 			else:
 				frappe.throw(_("Please enter Delivery Date"))
 
-		self.validate_sales_mntc_quotation()
+		self.validate_sales_order_type()
 
 	def validate_proj_cust(self):
 		if self.project and self.customer_name:
@@ -188,8 +194,9 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_with_previous_doc(self):
+		(prev_doctype,) = set([item.prevdoc_doctype for item in self.items])
 		super(SalesOrder, self).validate_with_previous_doc(
-			{"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
+			{prev_doctype: {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
 		)
 
 	def update_enquiry_status(self, prevdoc, flag):
@@ -201,11 +208,11 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s", (flag, enq[0][0]))
 
 	def update_prevdoc_status(self, flag=None):
-		for quotation in set(d.prevdoc_docname for d in self.get("items")):
-			if quotation:
-				doc = frappe.get_doc("Quotation", quotation)
+		for dt, dn in set((d.prevdoc_doctype, d.prevdoc_docname) for d in self.get("items")):
+			if dn:
+				doc = frappe.get_doc(dt, dn)
 				if doc.docstatus == 2:
-					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
+					frappe.throw(_("{0} {1} is cancelled").format(dt, dn))
 
 				doc.set_status(update=True)
 

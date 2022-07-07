@@ -63,7 +63,7 @@ class Quotation(SellingController):
 		ordered_items = frappe._dict(
 			frappe.db.get_all(
 				"Sales Order Item",
-				{"prevdoc_docname": self.name, "docstatus": 1},
+				{"prevdoc_doctype": "Quotation", "prevdoc_docname": self.name, "docstatus": 1},
 				["item_code", "sum(qty)"],
 				group_by="item_code",
 				as_list=1,
@@ -210,7 +210,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	ordered_items = frappe._dict(
 		frappe.db.get_all(
 			"Sales Order Item",
-			{"prevdoc_docname": source_name, "docstatus": 1},
+			{"prevdoc_doctype": "Quotation", "prevdoc_docname": source_name, "docstatus": 1},
 			["item_code", "sum(qty)"],
 			group_by="item_code",
 			as_list=1,
@@ -247,7 +247,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			"Quotation": {"doctype": "Sales Order", "validation": {"docstatus": ["=", 1]}},
 			"Quotation Item": {
 				"doctype": "Sales Order Item",
-				"field_map": {"parent": "prevdoc_docname"},
+				"field_map": {"parent": "prevdoc_docname", "parenttype": "prevdoc_doctype"},
 				"postprocess": update_item,
 				"condition": lambda doc: doc.qty > 0,
 			},
