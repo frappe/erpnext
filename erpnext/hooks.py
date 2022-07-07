@@ -87,6 +87,7 @@ website_context = {
 	"splash_image": "/assets/erpnext/images/erpnext-logo.svg",
 }
 
+# nosemgrep
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
 	{

@@ -6,6 +6,7 @@ from frappe import _
 from frappe.utils import cstr, getdate
 
 
+# nosemgrep
 def set_default_settings(args):
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)

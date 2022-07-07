@@ -52,33 +52,18 @@ def get_abbreviated_name(name, company):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	condition = ""
-	var_dict = {
-		"name": get_root_of("Department"),
-		"parent": parent,
-		"company": company,
-	}
-	if company == parent:
-		condition = "name=%(name)s"
-	elif company:
-		condition = "parent_department=%(parent)s and company=%(company)s"
-	else:
-		condition = "parent_department = %(parent)s"
+	fields = ["name as value", "is_group as expandable"]
+	filters = {}
 
-	return frappe.db.sql(
-		"""
-		select
-			name as value,
-			is_group as expandable
-		from `tab{doctype}`
-		where
-			{condition}
-		order by name""".format(
-			doctype=doctype, condition=condition
-		),
-		var_dict,
-		as_dict=1,
-	)
+	if company == parent:
+		filters["name"] = get_root_of("Department")
+	elif company:
+		filters["parent_department"] = parent
+		filters["company"] = company
+	else:
+		filters["parent_department"] = parent
+
+	return frappe.get_all(doctype, fields=fields, filters=filters, order_by="name")
 
 
 @frappe.whitelist()

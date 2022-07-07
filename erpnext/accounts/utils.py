@@ -420,7 +420,7 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args):
+def reconcile_against_document(args):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""

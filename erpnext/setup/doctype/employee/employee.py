@@ -217,14 +217,19 @@ class Employee(NestedSet):
 			frappe.throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
 
 	def validate_duplicate_user_id(self):
-		employee = frappe.db.sql_list(
-			"""select name from `tabEmployee` where
-			user_id=%s and status='Active' and name!=%s""",
-			(self.user_id, self.name),
-		)
+		Employee = frappe.qb.DocType("Employee")
+		employee = (
+			frappe.qb.from_(Employee)
+			.select(Employee.name)
+			.where(
+				(Employee.user_id == self.user_id)
+				& (Employee.status == "Active")
+				& (Employee.name != self.name)
+			)
+		).run()
 		if employee:
 			throw(
-				_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]),
+				_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0][0]),
 				frappe.DuplicateEntryError,
 			)
 

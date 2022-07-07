@@ -1175,8 +1175,8 @@ def validate_inclusive_tax(tax, doc):
 
 
 @frappe.whitelist()
+# nosemgrep
 def get_outstanding_reference_documents(args):
-
 	if isinstance(args, str):
 		args = json.loads(args)
 
