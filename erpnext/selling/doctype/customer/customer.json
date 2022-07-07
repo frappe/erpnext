@@ -313,8 +313,9 @@
   {
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
-   "label": "Email Id"
+   "fieldtype": "Data",
+   "label": "Email Id",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_26",
@@ -511,7 +512,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 20:32:34.000304",
+ "modified": "2022-07-06 16:31:58.099355",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
