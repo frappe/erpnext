@@ -621,7 +621,8 @@ def validate_mobile_pakistan_in_contact(doc, method):
 
 	for d in doc.phone_nos:
 		if d.is_primary_mobile_no:
-			validate_mobile_pakistan(d.phone)
+			if not validate_mobile_pakistan(d.phone, throw=False):
+				d.is_primary_mobile_no = 0
 
 def validate_cnic_in_contact(doc, method):
 	if doc.get('tax_cnic'):
