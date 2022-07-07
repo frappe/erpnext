@@ -261,12 +261,16 @@ class ReceivablePayableReport(object):
 
 	def get_invoice_details(self):
 		self.invoice_details = frappe._dict()
+		date_type = "posting_date"
+		if self.filters.ageing_based_on == "Due Date":
+			date_type = "due_date"
+			
 		if self.party_type == "Customer":
 			si_list = frappe.db.sql("""
 				select name, due_date, po_no
 				from `tabSales Invoice`
-				where posting_date <= %s
-			""",self.filters.report_date, as_dict=1)
+				where %s <= %s
+			""",(date_type, self.filters.report_date), as_dict=1)
 			for d in si_list:
 				self.invoice_details.setdefault(d.name, d)
 
@@ -285,8 +289,8 @@ class ReceivablePayableReport(object):
 			for pi in frappe.db.sql("""
 				select name, due_date, bill_no, bill_date
 				from `tabPurchase Invoice`
-				where posting_date <= %s
-			""", self.filters.report_date, as_dict=1):
+				where %s <= %s
+			""",(date_type, self.filters.report_date), as_dict=1):
 				self.invoice_details.setdefault(pi.name, pi)
 
 		# Invoices booked via Journal Entries
