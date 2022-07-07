@@ -346,3 +346,4 @@ erpnext.patches.v13_0.job_card_status_on_hold
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.remove_india_localisation
+erpnext.patches.v14_0.update_sales_order_item_prevdoc_doctype
