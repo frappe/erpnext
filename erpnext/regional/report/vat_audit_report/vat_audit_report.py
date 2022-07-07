@@ -65,7 +65,7 @@ class VATAuditReport(object):
 				`tab{doctype}`
 			WHERE
 				docstatus = 1 {where_conditions}
-				and is_opening = "No"
+				and is_opening = 'No'
 			ORDER BY
 				posting_date DESC
 			""".format(

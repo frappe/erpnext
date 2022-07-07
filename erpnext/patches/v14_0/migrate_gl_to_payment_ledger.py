@@ -1,6 +1,6 @@
 import frappe
 from frappe import qb
-from frappe.query_builder import Case
+from frappe.query_builder import Case, CustomFunction
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import IfNull
 
@@ -87,6 +87,7 @@ def execute():
 
 		gl = qb.DocType("GL Entry")
 		account = qb.DocType("Account")
+		ifelse = CustomFunction("IF", ["condition", "then", "else"])
 
 		gl_entries = (
 			qb.from_(gl)
@@ -96,8 +97,12 @@ def execute():
 				gl.star,
 				ConstantColumn(1).as_("docstatus"),
 				account.account_type.as_("account_type"),
-				IfNull(gl.against_voucher_type, gl.voucher_type).as_("against_voucher_type"),
-				IfNull(gl.against_voucher, gl.voucher_no).as_("against_voucher_no"),
+				IfNull(
+					ifelse(gl.against_voucher_type == "", None, gl.against_voucher_type), gl.voucher_type
+				).as_("against_voucher_type"),
+				IfNull(ifelse(gl.against_voucher == "", None, gl.against_voucher), gl.voucher_no).as_(
+					"against_voucher_no"
+				),
 				# convert debit/credit to amount
 				Case()
 				.when(account.account_type == "Receivable", gl.debit - gl.credit)

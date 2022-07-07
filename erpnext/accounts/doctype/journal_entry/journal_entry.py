@@ -416,7 +416,7 @@ class JournalEntry(AccountsController):
 				against_entries = frappe.db.sql(
 					"""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
-					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
+					and (reference_type is null or reference_type in ('', 'Sales Order', 'Purchase Order'))
 					""",
 					(d.account, d.reference_name),
 					as_dict=True,
@@ -800,9 +800,7 @@ class JournalEntry(AccountsController):
 
 		self.total_amount_in_words = money_in_words(amt, currency)
 
-	def make_gl_entries(self, cancel=0, adv_adj=0):
-		from erpnext.accounts.general_ledger import make_gl_entries
-
+	def build_gl_map(self):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
@@ -838,7 +836,12 @@ class JournalEntry(AccountsController):
 						item=d,
 					)
 				)
+		return gl_map
 
+	def make_gl_entries(self, cancel=0, adv_adj=0):
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		gl_map = self.build_gl_map()
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			update_outstanding = "No"
 		else:
@@ -1199,24 +1202,6 @@ def get_payment_entry(ref_doc, args):
 	je.set_total_debit_credit()
 
 	return je if args.get("journal_entry") else je.as_dict()
-
-
-@frappe.whitelist()
-def get_opening_accounts(company):
-	"""get all balance sheet accounts for opening entry"""
-	accounts = frappe.db.sql_list(
-		"""select
-			name from tabAccount
-		where
-			is_group=0 and report_type='Balance Sheet' and company={0} and
-			name not in (select distinct account from tabWarehouse where
-			account is not null and account != '')
-		order by name asc""".format(
-			frappe.db.escape(company)
-		)
-	)
-
-	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
 
 @frappe.whitelist()

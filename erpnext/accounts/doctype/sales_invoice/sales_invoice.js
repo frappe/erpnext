@@ -476,6 +476,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
+
+	is_cash_or_non_trade_discount() {
+		this.frm.set_df_property("additional_discount_account", "hidden", 1 - this.frm.doc.is_cash_or_non_trade_discount);
+		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.set_value("additional_discount_account", "");
+		}
+	}
 };
 
 // for backward compatibility: combine new and previous states
@@ -782,10 +789,6 @@ frappe.ui.form.on('Sales Invoice', {
 				if(!docfield.hidden) unhide_field(parent_fields[i]);
 			}
 		}
-
-		// India related fields
-		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
-		else hide_field(['c_form_applicable', 'c_form_no']);
 
 		frm.refresh_fields();
 	},

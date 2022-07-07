@@ -499,7 +499,7 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 
 def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, voucher_detail_no):
 	outgoing_rate = frappe.db.sql(
-		"""SELECT abs(stock_value_difference / actual_qty)
+		"""SELECT CASE WHEN actual_qty = 0 THEN 0 ELSE abs(stock_value_difference / actual_qty) END
 		FROM `tabStock Ledger Entry`
 		WHERE voucher_type = %s and voucher_no = %s
 			and item_code = %s and voucher_detail_no = %s

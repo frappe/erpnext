@@ -87,6 +87,7 @@ class RepostItemValuation(Document):
 		self.current_index = 0
 		self.distinct_item_and_warehouse = None
 		self.items_to_be_repost = None
+		self.gl_reposting_index = 0
 		self.db_update()
 
 	def deduplicate_similar_repost(self):
