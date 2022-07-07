@@ -117,7 +117,7 @@ class SellingController(StockController):
 				company=self.company), force_fields=force_party_fields)
 
 	def set_sales_person_details(self):
-		sales_team = self.get("sales_team", [])
+		sales_team = self.get("sales_team") or []
 		for d in sales_team:
 			d.update(get_sales_person_commission_details(d.sales_person))
 

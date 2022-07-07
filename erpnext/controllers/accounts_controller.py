@@ -1544,7 +1544,7 @@ class AccountsController(TransactionBase):
 
 		net_total = flt(net_total)
 		total_allocated_percentage = 0.0
-		sales_team = self.get("sales_team", [])
+		sales_team = self.get("sales_team") or []
 
 		for sales_person in sales_team:
 			self.round_floats_in(sales_person)
