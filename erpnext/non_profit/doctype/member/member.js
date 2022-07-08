@@ -23,8 +23,7 @@ frappe.ui.form.on('Member', {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				if (frm.doc.customer) {
 					frappe.set_route('query-report', 'General Ledger', {party_type: 'Customer', party: frm.doc.customer});
-				}
-				else {
+				} else {
 					frappe.set_route('query-report', 'Accounts Receivable', {party_type: 'Member', party: frm.doc.name});
 				}
 			});
