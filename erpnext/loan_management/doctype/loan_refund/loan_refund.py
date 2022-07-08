@@ -4,10 +4,13 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+	get_pending_principal_amount,
+)
 
 
 class LoanRefund(Document):
@@ -31,10 +34,12 @@ class LoanRefund(Document):
 			["total_payment", "total_principal_paid", "total_interest_payable", "written_off_amount"],
 		)
 
-		excess_amount = flt(
-			flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount),
-			precision,
-		)
+		loan = frappe.get_doc("Loan", self.loan)
+		pending_amount = get_pending_principal_amount(loan)
+		if pending_amount >= 0:
+			frappe.throw(_("No excess amount to refund."))
+		else:
+			excess_amount = pending_amount * -1
 
 		if self.refund_amount > excess_amount:
 			frappe.throw(_("Refund amount cannot be greater than excess amount {}".format(excess_amount)))
