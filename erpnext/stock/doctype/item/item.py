@@ -958,13 +958,13 @@ class Item(Document):
 				):
 					return linked_doc
 
-			elif linked_doc := frappe.db.get_value(
-				doctype,
-				filters,
-				["parent as docname", "parenttype as doctype"],
-				as_dict=True,
-			):
-				return linked_doc
+				elif linked_doc := frappe.db.get_value(
+					doctype,
+					filters,
+					["parent as docname", "parenttype as doctype"],
+					as_dict=True,
+				):
+					return linked_doc
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
 		if self.reorder_levels:
