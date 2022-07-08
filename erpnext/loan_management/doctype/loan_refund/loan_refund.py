@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.model.document import Document
+from erpnext.controllers.accounts_controller import AccountsController
 from frappe.utils import cint, getdate
 
 import erpnext
@@ -13,7 +13,7 @@ from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 )
 
 
-class LoanRefund(Document):
+class LoanRefund(AccountsController):
 	"""
 	Add refund if total repayment is more than that is owed.
 	"""
@@ -50,7 +50,7 @@ class LoanRefund(Document):
 
 	def on_cancel(self):
 		self.update_outstanding_amount(cancel=1)
-		self.ignore_linked_doctypes = ["GL Entry"]
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 		self.make_gl_entries(cancel=1)
 
 	def update_outstanding_amount(self, cancel=0):
