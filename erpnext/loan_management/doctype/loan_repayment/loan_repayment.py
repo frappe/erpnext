@@ -396,7 +396,7 @@ class LoanRepayment(AccountsController):
 			)
 		else:
 			remarks = "Repayment against loan " + self.against_loan
-		
+
 		if self.reference_number:
 			remarks += "with reference no. {}".format(self.reference_number)
 
@@ -632,6 +632,7 @@ def get_pending_principal_amount(loan):
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
+			+ flt(loan.refund_amount)
 		)
 	else:
 		pending_principal_amount = (
@@ -641,6 +642,7 @@ def get_pending_principal_amount(loan):
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
+			+ flt(loan.refund_amount)
 		)
 
 	return pending_principal_amount
