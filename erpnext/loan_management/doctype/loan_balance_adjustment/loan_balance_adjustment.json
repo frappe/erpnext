@@ -132,7 +132,7 @@
    "fieldname": "adjustment_type",
    "fieldtype": "Select",
    "label": "Adjustment Type",
-   "options": "Credit\nDebit",
+   "options": "Credit Adjustment\nDebit Adjustment",
    "reqd": 1
   },
   {
@@ -144,7 +144,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-30 11:38:16.631994",
+ "modified": "2022-07-08 16:48:54.480066",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Balance Adjustment",
