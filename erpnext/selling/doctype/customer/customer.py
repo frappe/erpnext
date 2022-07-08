@@ -15,6 +15,7 @@ from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 from frappe.model.rename_doc import update_linked_doctypes
+from frappe.sessions import get
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
@@ -24,6 +25,8 @@ from erpnext.accounts.party import (  # noqa
 	validate_party_accounts,
 )
 from erpnext.utilities.transaction_base import TransactionBase
+from pymysql import NULL
+from traitlets import Undefined
 
 
 class Customer(TransactionBase):
@@ -312,6 +315,18 @@ class Customer(TransactionBase):
 					frappe.bold(self.customer_name)
 				)
 			)
+	def before_save(self):
+		for d in self.get("customer_selling_price"):
+			if d.is_new():
+				if d.get("selling_price") != Undefined and d.get("selling_price") != 0.00:
+					selling_price_data = frappe.new_doc("Item Price")
+					selling_price_data.price_list = "Standard Selling"
+					selling_price_data.item_code = d.get("product_name")
+					selling_price_data.price_list_rate= d.get("selling_price")
+					selling_price_data.customer = self.name
+					selling_price_data.insert(ignore_mandatory=True) 
+				else:
+					frappe.throw(_("Selling Price is 0, Enter Valid Selling Price"))
 
 
 def create_contact(contact, party_type, party, email):
