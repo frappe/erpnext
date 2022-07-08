@@ -265,6 +265,23 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	has_unsupplied_items: function() {
 		return this.frm.doc['supplied_items'].some(item => item.required_qty > item.supplied_qty)
 	},
+	//---------select frist supplier..not select frist product------
+	validate_company_and_party: function() {
+		var me = this;
+		var valid = true;
+
+		$.each(["company", "supplier"], function(i, fieldname) {
+			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) && me.frm.doc.doctype == "Purchase Order") {
+				if (!me.frm.doc[fieldname]) {
+					frappe.msgprint(__("Please specify") + ": " +
+						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +
+						". " + __("It is needed to fetch Item Details."));
+					valid = false;
+				}
+			}
+		});
+		return valid;
+	},
 
 	make_stock_entry: function() {
 		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });

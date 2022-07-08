@@ -286,6 +286,7 @@
    "collapsible": 1,
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Description"
   },
   {
@@ -950,7 +951,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-01 08:51:38.610280",
+ "modified": "2022-07-08 06:40:47.513133",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
