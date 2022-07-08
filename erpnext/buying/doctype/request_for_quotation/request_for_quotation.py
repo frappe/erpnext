@@ -181,6 +181,7 @@ class RequestforQuotation(BuyingController):
 		doc_args.update({"supplier": data.get("supplier"), "supplier_name": data.get("supplier_name")})
 
 		# Get Contact Full Name
+		supplier_name = None
 		if data.get("contact"):
 			contact_name = frappe.db.get_value(
 				"Contact", data.get("contact"), ["first_name", "middle_name", "last_name"]
