@@ -2709,10 +2709,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_ordered_qty()
 		parent.update_ordered_and_reserved_qty()
 		parent.update_receiving_percentage()
-		if parent.is_subcontracted:
+		if parent.is_old_subcontracting_flow:
 			if should_update_supplied_items(parent):
 				parent.update_reserved_qty_for_subcontract()
-				parent.create_raw_materials_supplied("supplied_items")
+				parent.create_raw_materials_supplied()
 			parent.save()
 	else:  # Sales Order
 		parent.validate_warehouse()
