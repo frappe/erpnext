@@ -46,7 +46,8 @@ class LoanBalanceAdjustment(AccountsController):
 			"Loan",
 			fields=[
 				"loan_amount",
-				"adjustment_amount",
+				"credit_adjustment_amount",
+				"debit_adjustment_amount",
 				"total_payment",
 				"total_principal_paid",
 				"total_interest_payable",
