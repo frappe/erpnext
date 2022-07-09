@@ -470,37 +470,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
 
-	def test_purchase_invoice_with_subcontracted_item(self):
-		wrapper = frappe.copy_doc(test_records[0])
-		wrapper.get("items")[0].item_code = "_Test FG Item"
-		wrapper.insert()
-		wrapper.load_from_db()
-
-		expected_values = [["_Test FG Item", 90, 59], ["_Test Item Home Desktop 200", 135, 177]]
-		for i, item in enumerate(wrapper.get("items")):
-			self.assertEqual(item.item_code, expected_values[i][0])
-			self.assertEqual(item.item_tax_amount, expected_values[i][1])
-			self.assertEqual(item.valuation_rate, expected_values[i][2])
-
-		self.assertEqual(wrapper.base_net_total, 1250)
-
-		# tax amounts
-		expected_values = [
-			["_Test Account Shipping Charges - _TC", 100, 1350],
-			["_Test Account Customs Duty - _TC", 125, 1350],
-			["_Test Account Excise Duty - _TC", 140, 1490],
-			["_Test Account Education Cess - _TC", 2.8, 1492.8],
-			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
-			["_Test Account CST - _TC", 29.88, 1524.08],
-			["_Test Account VAT - _TC", 156.25, 1680.33],
-			["_Test Account Discount - _TC", 168.03, 1512.30],
-		]
-
-		for i, tax in enumerate(wrapper.get("taxes")):
-			self.assertEqual(tax.account_head, expected_values[i][0])
-			self.assertEqual(tax.tax_amount, expected_values[i][1])
-			self.assertEqual(tax.total, expected_values[i][2])
-
 	def test_purchase_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
@@ -960,30 +929,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.reload()
 		pi.cancel()
 		self.assertEqual(actual_qty_0, get_qty_after_transaction())
-
-	def test_subcontracting_via_purchase_invoice(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import update_backflush_based_on
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-
-		update_backflush_based_on("BOM")
-		make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100
-		)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse 1 - _TC",
-			qty=100,
-			basic_rate=100,
-		)
-
-		pi = make_purchase_invoice(
-			item_code="_Test FG Item", qty=10, rate=500, update_stock=1, is_subcontracted=1
-		)
-
-		self.assertEqual(len(pi.get("supplied_items")), 2)
-
-		rm_supp_cost = sum(d.amount for d in pi.get("supplied_items"))
-		self.assertEqual(flt(pi.get("items")[0].rm_supp_cost, 2), flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(
@@ -1474,14 +1419,29 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 	def test_purchase_invoice_advance_taxes(self):
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
+		company = "_Test Company"
+
+		tds_account_args = {
+			"doctype": "Account",
+			"account_name": "TDS Payable",
+			"account_type": "Tax",
+			"parent_account": frappe.db.get_value(
+				"Account", {"account_name": "Duties and Taxes", "company": company}
+			),
+			"company": company,
+		}
+
+		tds_account = create_account(**tds_account_args)
+		tax_withholding_category = "Test TDS - 194 - Dividends - Individual"
+
+		# Update tax withholding category with current fiscal year and rate details
+		create_tax_witholding_category(tax_withholding_category, company, tds_account)
+
 		# create a new supplier to test
 		supplier = create_supplier(
 			supplier_name="_Test TDS Advance Supplier",
-			tax_withholding_category="TDS - 194 - Dividends - Individual",
+			tax_withholding_category=tax_withholding_category,
 		)
-
-		# Update tax withholding category with current fiscal year and rate details
-		update_tax_witholding_category("_Test Company", "TDS Payable - _TC")
 
 		# Create Purchase Order with TDS applied
 		po = create_purchase_order(
@@ -1498,7 +1458,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		payment_entry = get_payment_entry(dt="Purchase Order", dn=po.name)
 		payment_entry.paid_from = "Cash - _TC"
 		payment_entry.apply_tax_withholding_amount = 1
-		payment_entry.tax_withholding_category = "TDS - 194 - Dividends - Individual"
+		payment_entry.tax_withholding_category = tax_withholding_category
 		payment_entry.save()
 		payment_entry.submit()
 
@@ -1506,7 +1466,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		expected_gle = [
 			["Cash - _TC", 0, 27000],
 			["Creditors - _TC", 30000, 0],
-			["TDS Payable - _TC", 0, 3000],
+			[tds_account, 0, 3000],
 		]
 
 		gl_entries = frappe.db.sql(
@@ -1532,7 +1492,7 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		purchase_invoice.submit()
 
 		# Check GLE for Purchase Invoice
-		# Zero net effect on final TDS Payable on invoice
+		# Zero net effect on final TDS payable on invoice
 		expected_gle = [["_Test Account Cost for Goods Sold - _TC", 30000], ["Creditors - _TC", -30000]]
 
 		gl_entries = frappe.db.sql(
@@ -1616,6 +1576,26 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		company.enable_provisional_accounting_for_non_stock_items = 0
 		company.save()
 
+	def test_item_less_defaults(self):
+
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.supplier = "_Test Supplier"
+		pi.company = "_Test Company"
+		pi.append(
+			"items",
+			{
+				"item_name": "Opening item",
+				"qty": 1,
+				"uom": "Tonne",
+				"stock_uom": "Kg",
+				"rate": 1000,
+				"expense_account": "Stock Received But Not Billed - _TC",
+			},
+		)
+
+		pi.save()
+		self.assertEqual(pi.items[0].conversion_factor, 1000)
+
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
@@ -1634,40 +1614,28 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 
-def update_tax_witholding_category(company, account):
+def create_tax_witholding_category(category_name, company, account):
 	from erpnext.accounts.utils import get_fiscal_year
 
 	fiscal_year = get_fiscal_year(date=nowdate())
 
-	if not frappe.db.get_value(
-		"Tax Withholding Rate",
+	return frappe.get_doc(
 		{
-			"parent": "TDS - 194 - Dividends - Individual",
-			"from_date": (">=", fiscal_year[1]),
-			"to_date": ("<=", fiscal_year[2]),
-		},
-	):
-		tds_category = frappe.get_doc("Tax Withholding Category", "TDS - 194 - Dividends - Individual")
-		tds_category.set("rates", [])
-
-		tds_category.append(
-			"rates",
-			{
-				"from_date": fiscal_year[1],
-				"to_date": fiscal_year[2],
-				"tax_withholding_rate": 10,
-				"single_threshold": 2500,
-				"cumulative_threshold": 0,
-			},
-		)
-		tds_category.save()
-
-	if not frappe.db.get_value(
-		"Tax Withholding Account", {"parent": "TDS - 194 - Dividends - Individual", "account": account}
-	):
-		tds_category = frappe.get_doc("Tax Withholding Category", "TDS - 194 - Dividends - Individual")
-		tds_category.append("accounts", {"company": company, "account": account})
-		tds_category.save()
+			"doctype": "Tax Withholding Category",
+			"name": category_name,
+			"category_name": category_name,
+			"accounts": [{"company": company, "account": account}],
+			"rates": [
+				{
+					"from_date": fiscal_year[1],
+					"to_date": fiscal_year[2],
+					"tax_withholding_rate": 10,
+					"single_threshold": 2500,
+					"cumulative_threshold": 0,
+				}
+			],
+		}
+	).insert(ignore_if_duplicate=True)
 
 
 def unlink_payment_on_cancel_of_invoice(enable=1):

@@ -141,6 +141,9 @@ class Customer(TransactionBase):
 				)
 
 	def validate_internal_customer(self):
+		if not self.is_internal_customer:
+			self.represents_company = ""
+
 		internal_customer = frappe.db.get_value(
 			"Customer",
 			{

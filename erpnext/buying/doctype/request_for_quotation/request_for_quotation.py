@@ -285,7 +285,7 @@ def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 		"""select `tabContact`.name from `tabContact`, `tabDynamic Link`
 		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s
 		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
-		limit %(start)s, %(page_len)s""",
+		limit %(page_len)s offset %(start)s""",
 		{"start": start, "page_len": page_len, "txt": "%%%s%%" % txt, "name": filters.get("supplier")},
 	)
 

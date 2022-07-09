@@ -707,35 +707,26 @@ class TestDepreciationMethods(AssetSetup):
 
 		self.assertEqual(schedules, expected_schedules)
 
-	def test_discounted_wdv_depreciation_rate_for_indian_region(self):
-		# set indian company
-		company_flag = frappe.flags.company
-		frappe.flags.company = "_Test Company"
-
-		finance_book = frappe.new_doc("Finance Book")
-		finance_book.finance_book_name = "Income Tax"
-		finance_book.for_income_tax = 1
-		finance_book.insert(ignore_if_duplicate=True)
-
+	def test_monthly_depreciation_by_wdv_method(self):
 		asset = create_asset(
 			calculate_depreciation=1,
-			available_for_use_date="2030-07-12",
-			purchase_date="2030-01-01",
-			finance_book=finance_book.name,
+			available_for_use_date="2022-02-15",
+			purchase_date="2022-02-15",
 			depreciation_method="Written Down Value",
-			expected_value_after_useful_life=12500,
-			depreciation_start_date="2030-12-31",
-			total_number_of_depreciations=3,
-			frequency_of_depreciation=12,
+			gross_purchase_amount=10000,
+			expected_value_after_useful_life=5000,
+			depreciation_start_date="2022-02-28",
+			total_number_of_depreciations=5,
+			frequency_of_depreciation=1,
 		)
 
-		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
-
 		expected_schedules = [
-			["2030-12-31", 11849.32, 11849.32],
-			["2031-12-31", 44075.34, 55924.66],
-			["2032-12-31", 22037.67, 77962.33],
-			["2033-07-12", 9537.67, 87500.0],
+			["2022-02-28", 645.0, 645.0],
+			["2022-03-31", 1206.8, 1851.8],
+			["2022-04-30", 1051.12, 2902.92],
+			["2022-05-31", 915.52, 3818.44],
+			["2022-06-30", 797.42, 4615.86],
+			["2022-07-15", 384.14, 5000.0],
 		]
 
 		schedules = [
@@ -748,9 +739,6 @@ class TestDepreciationMethods(AssetSetup):
 		]
 
 		self.assertEqual(schedules, expected_schedules)
-
-		# reset indian company
-		frappe.flags.company = company_flag
 
 
 class TestDepreciationBasics(AssetSetup):
@@ -838,7 +826,7 @@ class TestDepreciationBasics(AssetSetup):
 		expected_values = [["2020-12-31", 30000.0], ["2021-12-31", 30000.0], ["2022-12-31", 30000.0]]
 
 		for i, schedule in enumerate(asset.schedules):
-			self.assertEqual(expected_values[i][0], schedule.schedule_date)
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 
 	def test_set_accumulated_depreciation(self):
@@ -1332,6 +1320,32 @@ class TestDepreciationBasics(AssetSetup):
 
 		asset.cost_center = "Main - _TC"
 		asset.submit()
+
+	def test_depreciation_on_final_day_of_the_month(self):
+		"""Tests if final day of the month is picked each time, if the depreciation start date is the last day of the month."""
+
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-02-15",
+			depreciation_start_date="2020-02-29",
+			frequency_of_depreciation=1,
+			total_number_of_depreciations=5,
+			submit=1,
+		)
+
+		expected_dates = [
+			"2020-02-29",
+			"2020-03-31",
+			"2020-04-30",
+			"2020-05-31",
+			"2020-06-30",
+			"2020-07-15",
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_dates[i]), getdate(schedule.schedule_date))
 
 
 def create_asset_data():

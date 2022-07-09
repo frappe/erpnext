@@ -508,7 +508,7 @@ class SalarySlip(TransactionBase):
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
 			WHERE
-				status in ("Absent", "Half Day", "On leave")
+				status in ('Absent', 'Half Day', 'On leave')
 				AND employee = %s
 				AND docstatus = 1
 				AND attendance_date between %s and %s
@@ -624,7 +624,7 @@ class SalarySlip(TransactionBase):
 		data = self.get_data_for_eval()
 		for struct_row in self._salary_structure_doc.get(component_type):
 			amount = self.eval_condition_and_formula(struct_row, data)
-			if amount and struct_row.statistical_component == 0:
+			if amount is not None and struct_row.statistical_component == 0:
 				self.update_component_row(struct_row, amount, component_type)
 
 	def get_data_for_eval(self):
@@ -853,6 +853,10 @@ class SalarySlip(TransactionBase):
 		component_row.amount = self.get_amount_based_on_payment_days(
 			component_row, joining_date, relieving_date
 		)[0]
+
+		# remove 0 valued components that have been updated later
+		if component_row.amount == 0:
+			self.remove(component_row)
 
 	def set_precision_for_component_amounts(self):
 		for component_type in ("earnings", "deductions"):

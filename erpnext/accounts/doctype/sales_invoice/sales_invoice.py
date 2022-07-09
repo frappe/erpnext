@@ -114,6 +114,7 @@ class SalesInvoice(SellingController):
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
 		self.validate_income_account()
+		self.check_conversion_rate()
 
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
@@ -150,7 +151,6 @@ class SalesInvoice(SellingController):
 			)
 
 		self.set_against_income_account()
-		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		if not self.is_return:
@@ -364,8 +364,6 @@ class SalesInvoice(SellingController):
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.update_serial_no(in_cancel=True)
-
-		self.validate_c_form_on_cancel()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -814,25 +812,6 @@ class SalesInvoice(SellingController):
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
-	def validate_c_form(self):
-		"""Blank C-form no if C-form applicable marked as 'No'"""
-		if self.amended_from and self.c_form_applicable == "No" and self.c_form_no:
-			frappe.db.sql(
-				"""delete from `tabC-Form Invoice Detail` where invoice_no = %s
-					and parent = %s""",
-				(self.amended_from, self.c_form_no),
-			)
-
-			frappe.db.set(self, "c_form_no", "")
-
-	def validate_c_form_on_cancel(self):
-		"""Display message if C-Form no exists on cancellation of Sales Invoice"""
-		if self.c_form_applicable == "Yes" and self.c_form_no:
-			msgprint(
-				_("Please remove this Invoice {0} from C-Form {1}").format(self.name, self.c_form_no),
-				raise_exception=1,
-			)
-
 	def validate_dropship_item(self):
 		for item in self.items:
 			if item.sales_order:
@@ -1029,7 +1008,7 @@ class SalesInvoice(SellingController):
 		)
 
 		if grand_total and not self.is_internal_transfer():
-			# Didnot use base_grand_total to book rounding loss gle
+			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -1050,6 +1029,22 @@ class SalesInvoice(SellingController):
 						"project": self.project,
 					},
 					self.party_account_currency,
+					item=self,
+				)
+			)
+
+		if self.apply_discount_on == "Grand Total" and self.get("is_cash_or_discount_account"):
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.additional_discount_account,
+						"against": self.debit_to,
+						"debit": self.base_discount_amount,
+						"debit_in_account_currency": self.discount_amount,
+						"cost_center": self.cost_center,
+						"project": self.project,
+					},
+					self.currency,
 					item=self,
 				)
 			)
@@ -1511,9 +1506,7 @@ class SalesInvoice(SellingController):
 			frappe.get_doc("Delivery Note", dn).update_billing_percentage(update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
-		for fieldname in ("c_form_applicable", "c_form_no", "write_off_amount"):
-			self.set(fieldname, reference_doc.get(fieldname))
-
+		self.set("write_off_amount", reference_doc.get("write_off_amount"))
 		self.due_date = None
 
 	def update_serial_no(self, in_cancel=False):
@@ -2116,6 +2109,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
 
+	received_items = get_received_items(source_name, target_doctype, target_detail_field)
+
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
@@ -2180,12 +2175,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				shipping_address_name=target_doc.shipping_address_name,
 			)
 
+	def update_item(source, target, source_parent):
+		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
+
 	item_field_map = {
 		"doctype": target_doctype + " Item",
 		"field_no_map": ["income_account", "expense_account", "cost_center", "warehouse"],
 		"field_map": {
 			"rate": "rate",
 		},
+		"postprocess": update_item,
+		"condition": lambda doc: doc.qty > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -2221,6 +2221,28 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+def get_received_items(reference_name, doctype, reference_fieldname):
+	target_doctypes = frappe.get_all(
+		doctype,
+		filters={"inter_company_invoice_reference": reference_name, "docstatus": 1},
+		as_list=True,
+	)
+
+	if target_doctypes:
+		target_doctypes = list(target_doctypes[0])
+
+	received_items_map = frappe._dict(
+		frappe.get_all(
+			doctype + " Item",
+			filters={"parent": ("in", target_doctypes)},
+			fields=[reference_fieldname, "qty"],
+			as_list=1,
+		)
+	)
+
+	return received_items_map
 
 
 def set_purchase_references(doc):

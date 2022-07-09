@@ -165,17 +165,6 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
-	def check_conversion_rate(self):
-		default_currency = erpnext.get_company_currency(self.company)
-		if not default_currency:
-			throw(_("Please enter default currency in Company Master"))
-		if (
-			(self.currency == default_currency and flt(self.conversion_rate) != 1.00)
-			or not self.conversion_rate
-			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
-		):
-			throw(_("Conversion rate cannot be 0 or 1"))
-
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -513,7 +502,10 @@ class PurchaseInvoice(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
-			self.set_consumed_qty_in_po()
+
+			if self.is_old_subcontracting_flow:
+				self.set_consumed_qty_in_subcontract_order()
+
 			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 
 			update_serial_nos_after_submit(self, "items")
@@ -1416,7 +1408,9 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.update_stock_ledger()
 			self.delete_auto_created_batches()
-			self.set_consumed_qty_in_po()
+
+			if self.is_old_subcontracting_flow:
+				self.set_consumed_qty_in_subcontract_order()
 
 		self.make_gl_entries_on_cancel()
 

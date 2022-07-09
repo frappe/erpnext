@@ -486,7 +486,11 @@ erpnext.utils.update_child_items = function(opts) {
 				filters = {"is_sales_item": 1};
 			} else if (frm.doc.doctype == 'Purchase Order') {
 				if (frm.doc.is_subcontracted) {
-					filters = {"is_sub_contracted_item": 1};
+					if (frm.doc.is_old_subcontracting_flow) {
+						filters = {"is_sub_contracted_item": 1};
+					} else {
+						filters = {"is_stock_item": 0};
+					}
 				} else {
 					filters = {"is_purchase_item": 1};
 				}
@@ -713,7 +717,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
-			child_fieldname: opts.child_fielname,
+			child_fieldname: opts.child_fieldname,
 			child_columns: opts.child_columns,
 			size: opts.size,
 			action: function(selections, args) {

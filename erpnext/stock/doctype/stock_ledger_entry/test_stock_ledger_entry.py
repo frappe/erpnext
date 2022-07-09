@@ -42,6 +42,9 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
 		)
 
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
 
@@ -403,61 +406,6 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		# Cleanup data
 		return_dn.cancel()
 		dn.cancel()
-		lcv.cancel()
-		pr.cancel()
-
-	def test_sub_contracted_item_costing(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		company = "_Test Company"
-		rm_item_code = "_Test Item for Reposting"
-		subcontracted_item = "_Test Subcontracted Item for Reposting"
-
-		frappe.db.set_value(
-			"Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM"
-		)
-		make_bom(item=subcontracted_item, raw_materials=[rm_item_code], currency="INR")
-
-		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
-		pr = make_purchase_receipt(
-			company=company,
-			posting_date="2020-04-10",
-			warehouse="Stores - _TC",
-			item_code=rm_item_code,
-			qty=10,
-			rate=100,
-		)
-
-		# Purchase Receipt for subcontracted item
-		pr1 = make_purchase_receipt(
-			company=company,
-			posting_date="2020-04-20",
-			warehouse="Finished Goods - _TC",
-			supplier_warehouse="Stores - _TC",
-			item_code=subcontracted_item,
-			qty=10,
-			rate=20,
-			is_subcontracted=1,
-		)
-
-		self.assertEqual(pr1.items[0].valuation_rate, 120)
-
-		# Update raw material's valuation via LCV, Additional cost = 50
-		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-
-		pr1.reload()
-		self.assertEqual(pr1.items[0].valuation_rate, 125)
-
-		# check outgoing_rate for DN after reposting
-		incoming_rate = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_type": "Purchase Receipt", "voucher_no": pr1.name, "item_code": subcontracted_item},
-			"incoming_rate",
-		)
-		self.assertEqual(incoming_rate, 125)
-
-		# cleanup data
-		pr1.cancel()
 		lcv.cancel()
 		pr.cancel()
 
@@ -1229,6 +1177,93 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			order_by="timestamp(posting_date, posting_time), creation",
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_negative_qty_with_precision(self):
+		"Test if system precision is respected while validating negative qty."
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.utils import get_stock_balance
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=559.8327, rate=100)
+
+		make_stock_entry(item_code=item_code, source=warehouse, qty=470.84, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 88.9927)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
+		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+
+		# See if delivery note goes through
+		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			do_not_submit=True,
+		)
+		dn.submit()
+
+		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_future_negative_qty_with_precision(self):
+		"""
+		Ledger:
+		| Voucher | Qty		| Balance
+		-------------------
+		| Reco	  | 559.8327| 559.8327
+		| SE	  | -470.84	| [Backdated] (new bal: 88.9927)
+		| SE	  | 11.007	| 570.8397 (new bal: 99.9997)
+		| DN	  | -100	| 470.8397 (new bal: -0.0003)
+
+		Check if future negative qty is asserted as per precision 3.
+		-0.0003 should be considered as 0.000
+		"""
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=559.8327,
+			rate=100,
+			posting_date=add_days(today(), -2),
+		)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+		)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# Make backdated SE and make sure SE goes through as per precision (no negative qty error)
+		make_stock_entry(
+			item_code=item_code, source=warehouse, qty=470.84, rate=100, posting_date=add_days(today(), -1)
+		)
 
 
 def create_repack_entry(**args):

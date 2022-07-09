@@ -106,6 +106,7 @@
   "loyalty_redemption_cost_center",
   "section_break_49",
   "apply_discount_on",
+  "is_cash_or_non_trade_discount",
   "base_discount_amount",
   "additional_discount_account",
   "column_break_51",
@@ -174,8 +175,6 @@
   "debit_to",
   "party_account_currency",
   "is_opening",
-  "c_form_applicable",
-  "c_form_no",
   "column_break8",
   "unrealized_profit_loss_account",
   "remarks",
@@ -1717,28 +1716,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "c_form_applicable",
-   "fieldtype": "Select",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "C-Form Applicable",
-   "length": 4,
-   "no_copy": 1,
-   "options": "No\nYes",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "c_form_no",
-   "fieldtype": "Link",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "C-Form No",
-   "no_copy": 1,
-   "options": "C-Form",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break8",
    "fieldtype": "Column Break",
    "hide_days": 1,
@@ -1988,7 +1965,7 @@
   {
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
-   "label": "Additional Discount Account",
+   "label": "Discount Account",
    "options": "Account"
   },
   {
@@ -2026,6 +2003,13 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.apply_discount_on == \"Grand Total\"",
+   "fieldname": "is_cash_or_non_trade_discount",
+   "fieldtype": "Check",
+   "label": "Is Cash or Non Trade Discount"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2038,7 +2022,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-03-08 16:08:53.517903",
+ "modified": "2022-06-16 16:22:44.870575",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
