@@ -12,6 +12,7 @@ class TestAccountsReceivable(unittest.TestCase):
 	def test_accounts_receivable(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")
+		frappe.db.sql("delete from `tabPayment Ledger Entry` where company='_Test Company 2'")
 
 		filters = {
 			"company": "_Test Company 2",

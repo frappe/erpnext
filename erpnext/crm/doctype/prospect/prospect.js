@@ -27,5 +27,26 @@ frappe.ui.form.on('Prospect', {
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
+		frm.trigger("show_notes");
+		frm.trigger("show_activities");
+	},
+
+	show_notes (frm) {
+		const crm_notes = new erpnext.utils.CRMNotes({
+			frm: frm,
+			notes_wrapper: $(frm.fields_dict.notes_html.wrapper),
+		});
+		crm_notes.refresh();
+	},
+
+	show_activities (frm) {
+		const crm_activities = new erpnext.utils.CRMActivities({
+			frm: frm,
+			open_activities_wrapper: $(frm.fields_dict.open_activities_html.wrapper),
+			all_activities_wrapper: $(frm.fields_dict.all_activities_html.wrapper),
+			form_wrapper: $(frm.wrapper),
+		});
+		crm_activities.refresh();
 	}
+
 });

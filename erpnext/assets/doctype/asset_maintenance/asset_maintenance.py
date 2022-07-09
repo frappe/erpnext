@@ -47,17 +47,19 @@ def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, nex
 	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
 		"doctype": "Asset Maintenance",
-		"assign_to": [team_member],
+		"assign_to": team_member,
 		"name": asset_maintenance_name,
 		"description": maintenance_task,
 		"date": next_due_date,
 	}
 	if not frappe.db.sql(
 		"""select owner from `tabToDo`
-		where reference_type=%(doctype)s and reference_name=%(name)s and status="Open"
+		where reference_type=%(doctype)s and reference_name=%(name)s and status='Open'
 		and owner=%(assign_to)s""",
 		args,
 	):
+		# assign_to function expects a list
+		args["assign_to"] = [args["assign_to"]]
 		assign_to.add(args)
 
 

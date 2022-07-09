@@ -375,6 +375,12 @@ def create_internal_customer(
 	if not allowed_to_interact_with:
 		allowed_to_interact_with = represents_company
 
+	exisiting_representative = frappe.db.get_value(
+		"Customer", {"represents_company": represents_company}
+	)
+	if exisiting_representative:
+		return exisiting_representative
+
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc(
 			{

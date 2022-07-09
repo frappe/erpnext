@@ -10,8 +10,9 @@ from frappe import _
 from frappe.cache_manager import clear_defaults_cache
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cint, formatdate, get_timestamp, today
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
@@ -150,9 +151,7 @@ class Company(NestedSet):
 			self.create_default_tax_template()
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
-			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
-
-			install_post_company_fixtures(frappe._dict({"company_name": self.name}))
+			self.create_default_departments()
 
 		if not frappe.local.flags.ignore_chart_of_accounts:
 			self.set_default_accounts()
@@ -223,6 +222,104 @@ class Company(NestedSet):
 				"Account", {"company": self.name, "account_type": "Payable", "is_group": 0}
 			),
 		)
+
+	def create_default_departments(self):
+		records = [
+			# Department
+			{
+				"doctype": "Department",
+				"department_name": _("All Departments"),
+				"is_group": 1,
+				"parent_department": "",
+				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Accounts"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Marketing"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Sales"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Purchase"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Operations"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Production"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Dispatch"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Customer Service"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Human Resources"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Management"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Quality Management"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Research & Development"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+			{
+				"doctype": "Department",
+				"department_name": _("Legal"),
+				"parent_department": _("All Departments"),
+				"company": self.name,
+			},
+		]
+
+		# Make root department with NSM updation
+		make_records(records[:1])
+
+		frappe.local.flags.ignore_update_nsm = True
+		make_records(records)
+		frappe.local.flags.ignore_update_nsm = False
+		rebuild_tree("Department", "parent_department")
 
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":
@@ -464,7 +561,7 @@ class Company(NestedSet):
 
 		# reset default company
 		frappe.db.sql(
-			"""update `tabSingles` set value=""
+			"""update `tabSingles` set value=''
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""",
 			self.name,
@@ -472,7 +569,7 @@ class Company(NestedSet):
 
 		# reset default company
 		frappe.db.sql(
-			"""update `tabSingles` set value=""
+			"""update `tabSingles` set value=''
 			where doctype='Chart of Accounts Importer' and field='company'
 			and value=%s""",
 			self.name,

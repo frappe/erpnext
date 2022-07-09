@@ -68,6 +68,7 @@
   "against_stock_entry",
   "ste_detail",
   "po_detail",
+  "sco_rm_detail",
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
@@ -233,6 +234,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "Conversion Factor",
@@ -242,6 +244,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -253,6 +256,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "transfer_qty",
    "fieldtype": "Float",
    "label": "Qty as per Stock UOM",
@@ -494,6 +498,15 @@
    "read_only": 1
   },
   {
+    "fieldname": "sco_rm_detail",
+    "fieldtype": "Data",
+    "hidden": 1,
+    "label": "SCO Supplied Item",
+    "no_copy": 1,
+    "print_hide": 1,
+    "read_only": 1
+   },
+  {
    "default": "0",
    "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
    "fieldname": "set_basic_rate_manually",
@@ -556,7 +569,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-02-26 00:51:24.963653",
+ "modified": "2022-06-17 05:06:33.621264",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

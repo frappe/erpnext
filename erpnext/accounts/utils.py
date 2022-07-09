@@ -3,13 +3,28 @@
 
 
 from json import loads
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Optional, Tuple
 
 import frappe
 import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt, formatdate, get_number_format_info, getdate, now, nowdate
+from frappe.query_builder import AliasedQuery, Criterion, Table
+from frappe.query_builder.functions import Sum
+from frappe.query_builder.utils import DocType
+from frappe.utils import (
+	cint,
+	create_batch,
+	cstr,
+	flt,
+	formatdate,
+	get_number_format_info,
+	getdate,
+	now,
+	nowdate,
+)
+from pypika import Order
+from pypika.terms import ExistsCriterion
 
 import erpnext
 
@@ -19,6 +34,9 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.utils import get_stock_value_on
 
+if TYPE_CHECKING:
+	from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
+
 
 class FiscalYearError(frappe.ValidationError):
 	pass
@@ -26,6 +44,9 @@ class FiscalYearError(frappe.ValidationError):
 
 class PaymentEntryUnlinkError(frappe.ValidationError):
 	pass
+
+
+GL_REPOSTING_CHUNK = 100
 
 
 @frappe.whitelist()
@@ -42,36 +63,31 @@ def get_fiscal_years(
 
 	if not fiscal_years:
 		# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
-		cond = ""
-		if fiscal_year:
-			cond += " and fy.name = {0}".format(frappe.db.escape(fiscal_year))
-		if company:
-			cond += """
-				and (not exists (select name
-					from `tabFiscal Year Company` fyc
-					where fyc.parent = fy.name)
-				or exists(select company
-					from `tabFiscal Year Company` fyc
-					where fyc.parent = fy.name
-					and fyc.company=%(company)s)
-				)
-			"""
+		FY = DocType("Fiscal Year")
 
-		fiscal_years = frappe.db.sql(
-			"""
-			select
-				fy.name, fy.year_start_date, fy.year_end_date
-			from
-				`tabFiscal Year` fy
-			where
-				disabled = 0 {0}
-			order by
-				fy.year_start_date desc""".format(
-				cond
-			),
-			{"company": company},
-			as_dict=True,
+		query = (
+			frappe.qb.from_(FY)
+			.select(FY.name, FY.year_start_date, FY.year_end_date)
+			.where(FY.disabled == 0)
 		)
+
+		if fiscal_year:
+			query = query.where(FY.name == fiscal_year)
+
+		if company:
+			FYC = DocType("Fiscal Year Company")
+			query = query.where(
+				ExistsCriterion(frappe.qb.from_(FYC).select(FYC.name).where(FYC.parent == FY.name)).negate()
+				| ExistsCriterion(
+					frappe.qb.from_(FYC)
+					.select(FYC.company)
+					.where(FYC.parent == FY.name)
+					.where(FYC.company == company)
+				)
+			)
+
+		query = query.orderby(FY.year_start_date, Order.desc)
+		fiscal_years = query.run(as_dict=True)
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
@@ -423,7 +439,8 @@ def reconcile_against_document(args):
 		# cancel advance entry
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
-		doc.make_gl_entries(cancel=1, adv_adj=1)
+		gl_map = doc.build_gl_map()
+		create_payment_ledger_entry(gl_map, cancel=1, adv_adj=1)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -438,7 +455,9 @@ def reconcile_against_document(args):
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
-		doc.make_gl_entries(cancel=0, adv_adj=1)
+		gl_map = doc.build_gl_map()
+		create_payment_ledger_entry(gl_map, cancel=0, adv_adj=1)
+
 		frappe.flags.ignore_party_validation = False
 
 		if entry.voucher_type in ("Payment Entry", "Journal Entry"):
@@ -461,7 +480,7 @@ def check_if_advance_entry_modified(args):
 			select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where t1.name = t2.parent and t2.account = %(account)s
 			and t2.party_type = %(party_type)s and t2.party = %(party)s
-			and (t2.reference_type is null or t2.reference_type in ("", "Sales Order", "Purchase Order"))
+			and (t2.reference_type is null or t2.reference_type in ('', 'Sales Order', 'Purchase Order'))
 			and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 			and t1.docstatus=1 """.format(
 				dr_or_cr=args.get("dr_or_cr")
@@ -481,7 +500,7 @@ def check_if_advance_entry_modified(args):
 					t1.name = t2.parent and t1.docstatus = 1
 					and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 					and t1.party_type = %(party_type)s and t1.party = %(party)s and t1.{0} = %(account)s
-					and t2.reference_doctype in ("", "Sales Order", "Purchase Order")
+					and t2.reference_doctype in ('', 'Sales Order', 'Purchase Order')
 					and t2.allocated_amount = %(unreconciled_amount)s
 			""".format(
 					party_account_field
@@ -802,7 +821,11 @@ def get_held_invoices(party_type, party):
 	return held_invoices
 
 
-def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
+def get_outstanding_invoices(
+	party_type, party, account, common_filter=None, min_outstanding=None, max_outstanding=None
+):
+
+	ple = qb.DocType("Payment Ledger Entry")
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
@@ -815,76 +838,30 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	else:
 		party_account_type = erpnext.get_party_account_type(party_type)
 
-	if party_account_type == "Receivable":
-		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
-		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
-	else:
-		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
-		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
-
 	held_invoices = get_held_invoices(party_type, party)
 
-	invoice_list = frappe.db.sql(
-		"""
-		select
-			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
-			account_currency as currency
-		from
-			`tabGL Entry`
-		where
-			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
-			and is_cancelled=0
-			{condition}
-			and ((voucher_type = 'Journal Entry'
-					and (against_voucher = '' or against_voucher is null))
-				or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		group by voucher_type, voucher_no
-		order by posting_date, name""".format(
-			dr_or_cr=dr_or_cr, condition=condition or ""
-		),
-		{
-			"party_type": party_type,
-			"party": party,
-			"account": account,
-		},
-		as_dict=True,
-	)
+	common_filter = common_filter or []
+	common_filter.append(ple.account_type == party_account_type)
+	common_filter.append(ple.account == account)
+	common_filter.append(ple.party_type == party_type)
+	common_filter.append(ple.party == party)
 
-	payment_entries = frappe.db.sql(
-		"""
-		select against_voucher_type, against_voucher,
-			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
-		from `tabGL Entry`
-		where party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s
-			and {payment_dr_or_cr} > 0
-			and against_voucher is not null and against_voucher != ''
-			and is_cancelled=0
-		group by against_voucher_type, against_voucher
-	""".format(
-			payment_dr_or_cr=payment_dr_or_cr
-		),
-		{"party_type": party_type, "party": party, "account": account},
-		as_dict=True,
+	ple_query = QueryPaymentLedger()
+	invoice_list = ple_query.get_voucher_outstandings(
+		common_filter=common_filter,
+		min_outstanding=min_outstanding,
+		max_outstanding=max_outstanding,
+		get_invoices=True,
 	)
-
-	pe_map = frappe._dict()
-	for d in payment_entries:
-		pe_map.setdefault((d.against_voucher_type, d.against_voucher), d.payment_amount)
 
 	for d in invoice_list:
-		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
-		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
+		payment_amount = d.invoice_amount_in_account_currency - d.outstanding_in_account_currency
+		outstanding_amount = d.outstanding_in_account_currency
 		if outstanding_amount > 0.5 / (10**precision):
 			if (
-				filters
-				and filters.get("outstanding_amt_greater_than")
-				and not (
-					outstanding_amount >= filters.get("outstanding_amt_greater_than")
-					and outstanding_amount <= filters.get("outstanding_amt_less_than")
-				)
+				min_outstanding
+				and max_outstanding
+				and not (outstanding_amount >= min_outstanding and outstanding_amount <= max_outstanding)
 			):
 				continue
 
@@ -895,7 +872,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 							"voucher_no": d.voucher_no,
 							"voucher_type": d.voucher_type,
 							"posting_date": d.posting_date,
-							"invoice_amount": flt(d.invoice_amount),
+							"invoice_amount": flt(d.invoice_amount_in_account_currency),
 							"payment_amount": payment_amount,
 							"outstanding_amount": outstanding_amount,
 							"due_date": d.due_date,
@@ -1122,38 +1099,62 @@ def update_gl_entries_after(
 
 
 def repost_gle_for_stock_vouchers(
-	stock_vouchers, posting_date, company=None, warehouse_account=None
+	stock_vouchers: List[Tuple[str, str]],
+	posting_date: str,
+	company: Optional[str] = None,
+	warehouse_account=None,
+	repost_doc: Optional["RepostItemValuation"] = None,
 ):
+
+	from erpnext.accounts.general_ledger import toggle_debit_credit_if_negative
+
 	if not stock_vouchers:
 		return
-
-	def _delete_gl_entries(voucher_type, voucher_no):
-		frappe.db.sql(
-			"""delete from `tabGL Entry`
-			where voucher_type=%s and voucher_no=%s""",
-			(voucher_type, voucher_no),
-		)
-
-	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
 
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
+	stock_vouchers = sort_stock_vouchers_by_posting_date(stock_vouchers)
+	if repost_doc and repost_doc.gl_reposting_index:
+		# Restore progress
+		stock_vouchers = stock_vouchers[cint(repost_doc.gl_reposting_index) :]
+
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit")) or 2
 
-	gle = get_voucherwise_gl_entries(stock_vouchers, posting_date)
-	for voucher_type, voucher_no in stock_vouchers:
-		existing_gle = gle.get((voucher_type, voucher_no), [])
-		voucher_obj = frappe.get_cached_doc(voucher_type, voucher_no)
-		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
-		if expected_gle:
-			if not existing_gle or not compare_existing_and_expected_gle(
-				existing_gle, expected_gle, precision
-			):
+	for stock_vouchers_chunk in create_batch(stock_vouchers, GL_REPOSTING_CHUNK):
+		gle = get_voucherwise_gl_entries(stock_vouchers_chunk, posting_date)
+
+		for voucher_type, voucher_no in stock_vouchers_chunk:
+			existing_gle = gle.get((voucher_type, voucher_no), [])
+			voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+			# Some transactions post credit as negative debit, this is handled while posting GLE
+			# but while comparing we need to make sure it's flipped so comparisons are accurate
+			expected_gle = toggle_debit_credit_if_negative(voucher_obj.get_gl_entries(warehouse_account))
+			if expected_gle:
+				if not existing_gle or not compare_existing_and_expected_gle(
+					existing_gle, expected_gle, precision
+				):
+					_delete_gl_entries(voucher_type, voucher_no)
+					voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
+			else:
 				_delete_gl_entries(voucher_type, voucher_no)
-				voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
-		else:
-			_delete_gl_entries(voucher_type, voucher_no)
+
+		if not frappe.flags.in_test:
+			frappe.db.commit()
+
+		if repost_doc:
+			repost_doc.db_set(
+				"gl_reposting_index",
+				cint(repost_doc.gl_reposting_index) + len(stock_vouchers_chunk),
+			)
+
+
+def _delete_gl_entries(voucher_type, voucher_no):
+	frappe.db.sql(
+		"""delete from `tabGL Entry`
+		where voucher_type=%s and voucher_no=%s""",
+		(voucher_type, voucher_no),
+	)
 
 
 def sort_stock_vouchers_by_posting_date(
@@ -1167,6 +1168,9 @@ def sort_stock_vouchers_by_posting_date(
 		.select(sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_time, sle.creation)
 		.where((sle.is_cancelled == 0) & (sle.voucher_no.isin(voucher_nos)))
 		.groupby(sle.voucher_type, sle.voucher_no)
+		.orderby(sle.posting_date)
+		.orderby(sle.posting_time)
+		.orderby(sle.creation)
 	).run(as_dict=True)
 	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]
 
@@ -1348,7 +1352,9 @@ def check_and_delete_linked_reports(report):
 			frappe.delete_doc("Desktop Icon", icon)
 
 
-def create_payment_ledger_entry(gl_entries, cancel=0):
+def create_payment_ledger_entry(
+	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0
+):
 	if gl_entries:
 		ple = None
 
@@ -1406,7 +1412,7 @@ def create_payment_ledger_entry(gl_entries, cancel=0):
 						if gle.against_voucher_type
 						else gle.voucher_type,
 						"against_voucher_no": gle.against_voucher if gle.against_voucher else gle.voucher_no,
-						"currency": gle.currency,
+						"account_currency": gle.account_currency,
 						"amount": dr_or_cr,
 						"amount_in_account_currency": dr_or_cr_account_currency,
 						"delinked": True if cancel else False,
@@ -1421,7 +1427,40 @@ def create_payment_ledger_entry(gl_entries, cancel=0):
 				if cancel:
 					delink_original_entry(ple)
 				ple.flags.ignore_permissions = 1
+				ple.flags.adv_adj = adv_adj
+				ple.flags.from_repost = from_repost
+				ple.flags.update_outstanding = update_outstanding
 				ple.submit()
+
+
+def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, party):
+	ple = frappe.qb.DocType("Payment Ledger Entry")
+	vouchers = [frappe._dict({"voucher_type": voucher_type, "voucher_no": voucher_no})]
+	common_filter = []
+	if account:
+		common_filter.append(ple.account == account)
+
+	if party_type:
+		common_filter.append(ple.party_type == party_type)
+
+	if party:
+		common_filter.append(ple.party == party)
+
+	ple_query = QueryPaymentLedger()
+
+	# on cancellation outstanding can be an empty list
+	voucher_outstanding = ple_query.get_voucher_outstandings(vouchers, common_filter=common_filter)
+	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"] and voucher_outstanding:
+		outstanding = voucher_outstanding[0]
+		ref_doc = frappe.get_doc(voucher_type, voucher_no)
+
+		# Didn't use db_set for optimisation purpose
+		ref_doc.outstanding_amount = outstanding["outstanding_in_account_currency"]
+		frappe.db.set_value(
+			voucher_type, voucher_no, "outstanding_amount", outstanding["outstanding_in_account_currency"]
+		)
+
+		ref_doc.set_status(update=True)
 
 
 def delink_original_entry(pl_entry):
@@ -1445,3 +1484,196 @@ def delink_original_entry(pl_entry):
 			)
 		)
 		query.run()
+
+
+class QueryPaymentLedger(object):
+	"""
+	Helper Class for Querying Payment Ledger Entry
+	"""
+
+	def __init__(self):
+		self.ple = qb.DocType("Payment Ledger Entry")
+
+		# query result
+		self.voucher_outstandings = []
+
+		# query filters
+		self.vouchers = []
+		self.common_filter = []
+		self.min_outstanding = None
+		self.max_outstanding = None
+
+	def reset(self):
+		# clear filters
+		self.vouchers.clear()
+		self.common_filter.clear()
+		self.min_outstanding = self.max_outstanding = None
+
+		# clear result
+		self.voucher_outstandings.clear()
+
+	def query_for_outstanding(self):
+		"""
+		Database query to fetch voucher amount and voucher outstanding using Common Table Expression
+		"""
+
+		ple = self.ple
+
+		filter_on_voucher_no = []
+		filter_on_against_voucher_no = []
+		if self.vouchers:
+			voucher_types = set([x.voucher_type for x in self.vouchers])
+			voucher_nos = set([x.voucher_no for x in self.vouchers])
+
+			filter_on_voucher_no.append(ple.voucher_type.isin(voucher_types))
+			filter_on_voucher_no.append(ple.voucher_no.isin(voucher_nos))
+
+			filter_on_against_voucher_no.append(ple.against_voucher_type.isin(voucher_types))
+			filter_on_against_voucher_no.append(ple.against_voucher_no.isin(voucher_nos))
+
+		# build outstanding amount filter
+		filter_on_outstanding_amount = []
+		if self.min_outstanding:
+			if self.min_outstanding > 0:
+				filter_on_outstanding_amount.append(
+					Table("outstanding").amount_in_account_currency >= self.min_outstanding
+				)
+			else:
+				filter_on_outstanding_amount.append(
+					Table("outstanding").amount_in_account_currency <= self.min_outstanding
+				)
+		if self.max_outstanding:
+			if self.max_outstanding > 0:
+				filter_on_outstanding_amount.append(
+					Table("outstanding").amount_in_account_currency <= self.max_outstanding
+				)
+			else:
+				filter_on_outstanding_amount.append(
+					Table("outstanding").amount_in_account_currency >= self.max_outstanding
+				)
+
+		# build query for voucher amount
+		query_voucher_amount = (
+			qb.from_(ple)
+			.select(
+				ple.account,
+				ple.voucher_type,
+				ple.voucher_no,
+				ple.party_type,
+				ple.party,
+				ple.posting_date,
+				ple.due_date,
+				ple.account_currency.as_("currency"),
+				Sum(ple.amount).as_("amount"),
+				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
+			)
+			.where(ple.delinked == 0)
+			.where(Criterion.all(filter_on_voucher_no))
+			.where(Criterion.all(self.common_filter))
+			.groupby(ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
+		)
+
+		# build query for voucher outstanding
+		query_voucher_outstanding = (
+			qb.from_(ple)
+			.select(
+				ple.account,
+				ple.against_voucher_type.as_("voucher_type"),
+				ple.against_voucher_no.as_("voucher_no"),
+				ple.party_type,
+				ple.party,
+				ple.posting_date,
+				ple.due_date,
+				ple.account_currency.as_("currency"),
+				Sum(ple.amount).as_("amount"),
+				Sum(ple.amount_in_account_currency).as_("amount_in_account_currency"),
+			)
+			.where(ple.delinked == 0)
+			.where(Criterion.all(filter_on_against_voucher_no))
+			.where(Criterion.all(self.common_filter))
+			.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
+		)
+
+		# build CTE for combining voucher amount and outstanding
+		self.cte_query_voucher_amount_and_outstanding = (
+			qb.with_(query_voucher_amount, "vouchers")
+			.with_(query_voucher_outstanding, "outstanding")
+			.from_(AliasedQuery("vouchers"))
+			.left_join(AliasedQuery("outstanding"))
+			.on(
+				(AliasedQuery("vouchers").account == AliasedQuery("outstanding").account)
+				& (AliasedQuery("vouchers").voucher_type == AliasedQuery("outstanding").voucher_type)
+				& (AliasedQuery("vouchers").voucher_no == AliasedQuery("outstanding").voucher_no)
+				& (AliasedQuery("vouchers").party_type == AliasedQuery("outstanding").party_type)
+				& (AliasedQuery("vouchers").party == AliasedQuery("outstanding").party)
+			)
+			.select(
+				Table("vouchers").account,
+				Table("vouchers").voucher_type,
+				Table("vouchers").voucher_no,
+				Table("vouchers").party_type,
+				Table("vouchers").party,
+				Table("vouchers").posting_date,
+				Table("vouchers").amount.as_("invoice_amount"),
+				Table("vouchers").amount_in_account_currency.as_("invoice_amount_in_account_currency"),
+				Table("outstanding").amount.as_("outstanding"),
+				Table("outstanding").amount_in_account_currency.as_("outstanding_in_account_currency"),
+				(Table("vouchers").amount - Table("outstanding").amount).as_("paid_amount"),
+				(
+					Table("vouchers").amount_in_account_currency - Table("outstanding").amount_in_account_currency
+				).as_("paid_amount_in_account_currency"),
+				Table("vouchers").due_date,
+				Table("vouchers").currency,
+			)
+			.where(Criterion.all(filter_on_outstanding_amount))
+		)
+
+		# build CTE filter
+		# only fetch invoices
+		if self.get_invoices:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.having(
+					qb.Field("outstanding_in_account_currency") > 0
+				)
+			)
+		# only fetch payments
+		elif self.get_payments:
+			self.cte_query_voucher_amount_and_outstanding = (
+				self.cte_query_voucher_amount_and_outstanding.having(
+					qb.Field("outstanding_in_account_currency") < 0
+				)
+			)
+
+		# execute SQL
+		self.voucher_outstandings = self.cte_query_voucher_amount_and_outstanding.run(as_dict=True)
+
+	def get_voucher_outstandings(
+		self,
+		vouchers=None,
+		common_filter=None,
+		min_outstanding=None,
+		max_outstanding=None,
+		get_payments=False,
+		get_invoices=False,
+	):
+		"""
+		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
+
+		vouchers - dict of vouchers to get
+		common_filter - array of criterions
+		min_outstanding - filter on minimum total outstanding amount
+		max_outstanding - filter on maximum total  outstanding amount
+		get_invoices - only fetch vouchers(ledger entries with +ve outstanding)
+		get_payments - only fetch payments(ledger entries with -ve outstanding)
+		"""
+
+		self.reset()
+		self.vouchers = vouchers
+		self.common_filter = common_filter or []
+		self.min_outstanding = min_outstanding
+		self.max_outstanding = max_outstanding
+		self.get_payments = get_payments
+		self.get_invoices = get_invoices
+		self.query_for_outstanding()
+
+		return self.voucher_outstandings

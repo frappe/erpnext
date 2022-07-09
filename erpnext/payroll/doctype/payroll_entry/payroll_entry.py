@@ -674,7 +674,7 @@ def get_filter_condition(filters):
 
 def get_joining_relieving_condition(start_date, end_date):
 	cond = """
-		and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
+		and ifnull(t1.date_of_joining, '1900-01-01') <= '%(end_date)s'
 		and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
 	""" % {
 		"start_date": start_date,
@@ -970,7 +970,7 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 		and name not in
 			(select reference_name from `tabJournal Entry Account`
 				where reference_type="Payroll Entry")
-		order by name limit %(start)s, %(page_len)s""".format(
+		order by name limit %(page_len)s offset %(start)s""".format(
 			key=searchfield
 		),
 		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len},
@@ -1035,11 +1035,11 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			{emp_cond}
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, employee_name) > 0 then locate(%(_txt)s, employee_name) else 99999 end),
 			idx desc,
 			name, employee_name
-		limit %(start)s, %(page_len)s""".format(
+		limit %(page_len)s offset %(start)s""".format(
 			**{
 				"key": searchfield,
 				"fcond": get_filters_cond(doctype, filters, conditions),

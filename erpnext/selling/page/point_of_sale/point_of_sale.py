@@ -107,7 +107,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		ORDER BY
 			item.name asc
 		LIMIT
-			{start}, {page_length}""".format(
+			{page_length} offset {start}""".format(
 			start=start,
 			page_length=page_length,
 			lft=lft,
@@ -204,7 +204,7 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql(
 		""" select distinct name from `tabItem Group`
-			where {condition} and (name like %(txt)s) limit {start}, {page_len}""".format(
+			where {condition} and (name like %(txt)s) limit {page_len} offset {start}""".format(
 			condition=cond, start=start, page_len=page_len
 		),
 		{"txt": "%%%s%%" % txt},
