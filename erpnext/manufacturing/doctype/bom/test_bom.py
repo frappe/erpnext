@@ -501,7 +501,6 @@ class TestBOM(FrappeTestCase):
 		bom.submit()
 		self.assertEqual(bom.items[0].rate, 42)
 
-<<<<<<< HEAD
 	def test_exclude_exploded_items_from_bom(self):
 		bom_no = get_default_bom()
 		new_bom = frappe.copy_doc(frappe.get_doc("BOM", bom_no))
@@ -519,7 +518,7 @@ class TestBOM(FrappeTestCase):
 				self.assertFalse(row.bom_no)
 
 		new_bom.delete()
-=======
+
 	def test_set_default_bom_for_item_having_single_bom(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -555,7 +554,6 @@ class TestBOM(FrappeTestCase):
 		bom.save()
 		bom.reload()
 		self.assertEqual(frappe.get_value("Item", fg_item.item_code, "default_bom"), bom.name)
->>>>>>> dc2830da4d (fix: set default_bom for item)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
