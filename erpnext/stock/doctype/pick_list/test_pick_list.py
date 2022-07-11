@@ -658,3 +658,57 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(dn.items[0].rate, 42)
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
+
+	def test_pick_list_picks_default_location_first(self):
+		item = make_item()
+		first_location = frappe.get_doc({
+			"doctype": "Warehouse",
+			"company": "_Test Company",
+			"warehouse_name": "_Test First Pick Location"
+		})
+		second_location = frappe.get_doc({
+			"doctype": "Warehouse",
+			"company": "_Test Company",
+			"warehouse_name": "_Test Second Pick Location"
+		})
+		first_location.insert()
+		second_location.insert()
+
+		for to_warehouse in (first_location.name, second_location.name):
+			make_stock_entry(
+				item_code=item.name,
+				purpose="Material Receipt",
+				qty=10,
+				rate=10.00,
+				company="_Test Company",
+				to_warehouse=to_warehouse
+			)
+
+		so = make_sales_order(
+			company="_Test Company",
+			item_code=item.name
+		)
+
+		# Test first location as default.
+		item.item_defaults = []
+		item.append("item_defaults", {
+			"company": "_Test Company",
+			"default_warehouse": first_location.name
+		})
+		item.save()
+
+		pi1 = create_pick_list(so.name)
+		pi1_warehouse = pi1.locations[0].warehouse
+		self.assertEqual(pi1_warehouse, first_location.name)
+
+		# Test second location as default.
+		item.item_defaults = []
+		item.append("item_defaults", {
+			"company": "_Test Company",
+			"default_warehouse": second_location.name
+		})
+		item.save()
+
+		pi2 = create_pick_list(so.name)
+		pi2_warehouse = pi2.locations[0].warehouse
+		self.assertEqual(pi2_warehouse, second_location.name)
