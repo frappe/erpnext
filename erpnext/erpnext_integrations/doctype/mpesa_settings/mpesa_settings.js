@@ -7,8 +7,8 @@ frappe.ui.form.on('Mpesa Settings', {
 	},
 
 	validate: function(frm) {
-		if (frm.doc.paybill_number==1 && frm.doc.buy_goods_number==1) {
-			frappe.msgprint('Kindly Select either Paybill or Buygoods Only');
+		if (frm.doc.mpesa_express==1 && frm.doc.customer_to_business_c2b==1) {
+			frappe.msgprint('Kindly Select Only One M-pesa Product');
 			frappe.validated = false;
 		}
 	},
