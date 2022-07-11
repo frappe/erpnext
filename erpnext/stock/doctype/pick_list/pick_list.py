@@ -372,6 +372,15 @@ def get_available_item_locations(
 			item_code, from_warehouses, required_qty, company
 		)
 
+	default_warehouse = get_item_defaults(item_code, company).get("default_warehouse")
+	# Sort item_locations so default_warehouse is at the beginning.
+	if default_warehouse and default_warehouse in [loc["warehouse"] for loc in locations]:
+		default_idx = next(
+			(idx for (idx, loc) in enumerate(locations) if loc["warehouse"] == default_warehouse)
+		)
+		swap = locations.pop(default_idx)
+		locations.insert(0, swap)
+
 	total_qty_available = sum(location.get("qty") for location in locations)
 
 	remaining_qty = required_qty - total_qty_available
@@ -489,7 +498,6 @@ def get_available_item_locations_for_serial_and_batched_item(
 def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company):
 	# gets all items available in different warehouses
 	warehouses = [x.get("name") for x in frappe.get_list("Warehouse", {"company": company}, "name")]
-	default_warehouse = get_item_defaults(item_code, company).get("default_warehouse")
 
 	filters = frappe._dict(
 		{"item_code": item_code, "warehouse": ["in", warehouses], "actual_qty": [">", 0]}
@@ -505,14 +513,6 @@ def get_available_item_locations_for_other_item(item_code, from_warehouses, requ
 		limit=required_qty,
 		order_by="creation",
 	)
-
-	# Sort item_locations so default_warehouse is at the beginning.
-	if default_warehouse and default_warehouse in [loc["warehouse"] for loc in item_locations]:
-		default_idx = next(
-			(idx for (idx, loc) in enumerate(item_locations) if loc["warehouse"] == default_warehouse)
-		)
-		swap = item_locations.pop(default_idx)
-		item_locations.insert(0, swap)
 
 	return item_locations
 
