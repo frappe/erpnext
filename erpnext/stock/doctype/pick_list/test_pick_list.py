@@ -661,16 +661,20 @@ class TestPickList(FrappeTestCase):
 
 	def test_pick_list_picks_default_location_first(self):
 		item = make_item()
-		first_location = frappe.get_doc({
-			"doctype": "Warehouse",
-			"company": "_Test Company",
-			"warehouse_name": "_Test First Pick Location"
-		})
-		second_location = frappe.get_doc({
-			"doctype": "Warehouse",
-			"company": "_Test Company",
-			"warehouse_name": "_Test Second Pick Location"
-		})
+		first_location = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"company": "_Test Company",
+				"warehouse_name": "_Test First Pick Location",
+			}
+		)
+		second_location = frappe.get_doc(
+			{
+				"doctype": "Warehouse",
+				"company": "_Test Company",
+				"warehouse_name": "_Test Second Pick Location",
+			}
+		)
 		first_location.insert()
 		second_location.insert()
 
@@ -681,20 +685,16 @@ class TestPickList(FrappeTestCase):
 				qty=10,
 				rate=10.00,
 				company="_Test Company",
-				to_warehouse=to_warehouse
+				to_warehouse=to_warehouse,
 			)
 
-		so = make_sales_order(
-			company="_Test Company",
-			item_code=item.name
-		)
+		so = make_sales_order(company="_Test Company", item_code=item.name)
 
 		# Test first location as default.
 		item.item_defaults = []
-		item.append("item_defaults", {
-			"company": "_Test Company",
-			"default_warehouse": first_location.name
-		})
+		item.append(
+			"item_defaults", {"company": "_Test Company", "default_warehouse": first_location.name}
+		)
 		item.save()
 
 		pi1 = create_pick_list(so.name)
@@ -703,10 +703,9 @@ class TestPickList(FrappeTestCase):
 
 		# Test second location as default.
 		item.item_defaults = []
-		item.append("item_defaults", {
-			"company": "_Test Company",
-			"default_warehouse": second_location.name
-		})
+		item.append(
+			"item_defaults", {"company": "_Test Company", "default_warehouse": second_location.name}
+		)
 		item.save()
 
 		pi2 = create_pick_list(so.name)

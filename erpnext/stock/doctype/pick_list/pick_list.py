@@ -16,8 +16,8 @@ from frappe.utils.nestedset import get_descendants_of
 from erpnext.selling.doctype.sales_order.sales_order import (
 	make_delivery_note as create_delivery_note_from_sales_order,
 )
-from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.get_item_details import get_conversion_factor
 
 # TODO: Prioritize SO or WO group warehouse
 
@@ -508,7 +508,9 @@ def get_available_item_locations_for_other_item(item_code, from_warehouses, requ
 
 	# Sort item_locations so default_warehouse is at the beginning.
 	if default_warehouse and default_warehouse in [loc["warehouse"] for loc in item_locations]:
-		default_idx = next((idx for (idx, loc) in enumerate(item_locations) if loc["warehouse"] == default_warehouse))
+		default_idx = next(
+			(idx for (idx, loc) in enumerate(item_locations) if loc["warehouse"] == default_warehouse)
+		)
 		swap = item_locations.pop(default_idx)
 		item_locations.insert(0, swap)
 
