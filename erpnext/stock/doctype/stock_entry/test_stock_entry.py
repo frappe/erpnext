@@ -5,7 +5,7 @@
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import flt, nowdate, nowtime
+from frappe.utils import add_days, flt, nowdate, nowtime
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
@@ -1456,6 +1456,138 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertEqual(se.items[0].item_name, item.item_name)
 		self.assertEqual(se.items[0].stock_uom, item.stock_uom)
+
+	def test_reposting_for_depedent_warehouse(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_sl_entries
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		# Inward at WH1 warehouse (Component)
+		# 1st Repack (Component (WH1) - Subcomponent (WH2))
+		# 2nd Repack (Subcomponent (WH2) - FG Item (WH3))
+		# Material Transfer of FG Item -> WH 3 -> WH2 -> Wh1 (Two transfer entries)
+		# Backdated transction which should update valuation rate in repack as well trasfer entries
+
+		for item_code in ["FG Item 1", "Sub Component 1", "Component 1"]:
+			create_item(item_code)
+
+		for warehouse in ["WH 1", "WH 2", "WH 3"]:
+			create_warehouse(warehouse)
+
+		make_stock_entry(
+			item_code="Component 1",
+			rate=100,
+			purpose="Material Receipt",
+			qty=10,
+			to_warehouse="WH 1 - _TC",
+			posting_date=add_days(nowdate(), -10),
+		)
+
+		repack1 = make_stock_entry(
+			item_code="Component 1",
+			purpose="Repack",
+			do_not_save=True,
+			qty=10,
+			from_warehouse="WH 1 - _TC",
+			posting_date=add_days(nowdate(), -9),
+		)
+
+		repack1.append(
+			"items",
+			{
+				"item_code": "Sub Component 1",
+				"qty": 10,
+				"t_warehouse": "WH 2 - _TC",
+				"transfer_qty": 10,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+			},
+		)
+
+		repack1.save()
+		repack1.submit()
+
+		self.assertEqual(repack1.items[1].basic_rate, 100)
+		self.assertEqual(repack1.items[1].amount, 1000)
+
+		repack2 = make_stock_entry(
+			item_code="Sub Component 1",
+			purpose="Repack",
+			do_not_save=True,
+			qty=10,
+			from_warehouse="WH 2 - _TC",
+			posting_date=add_days(nowdate(), -8),
+		)
+
+		repack2.append(
+			"items",
+			{
+				"item_code": "FG Item 1",
+				"qty": 10,
+				"t_warehouse": "WH 3 - _TC",
+				"transfer_qty": 10,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1.0,
+			},
+		)
+
+		repack2.save()
+		repack2.submit()
+
+		self.assertEqual(repack2.items[1].basic_rate, 100)
+		self.assertEqual(repack2.items[1].amount, 1000)
+
+		transfer1 = make_stock_entry(
+			item_code="FG Item 1",
+			purpose="Material Transfer",
+			qty=10,
+			from_warehouse="WH 3 - _TC",
+			to_warehouse="WH 2 - _TC",
+			posting_date=add_days(nowdate(), -7),
+		)
+
+		self.assertEqual(transfer1.items[0].basic_rate, 100)
+		self.assertEqual(transfer1.items[0].amount, 1000)
+
+		transfer2 = make_stock_entry(
+			item_code="FG Item 1",
+			purpose="Material Transfer",
+			qty=10,
+			from_warehouse="WH 2 - _TC",
+			to_warehouse="WH 1 - _TC",
+			posting_date=add_days(nowdate(), -6),
+		)
+
+		self.assertEqual(transfer2.items[0].basic_rate, 100)
+		self.assertEqual(transfer2.items[0].amount, 1000)
+
+		# Backdated transaction
+		receipt2 = make_stock_entry(
+			item_code="Component 1",
+			rate=200,
+			purpose="Material Receipt",
+			qty=10,
+			to_warehouse="WH 1 - _TC",
+			posting_date=add_days(nowdate(), -15),
+		)
+
+		self.assertEqual(receipt2.items[0].basic_rate, 200)
+		self.assertEqual(receipt2.items[0].amount, 2000)
+
+		repost_name = frappe.db.get_value(
+			"Repost Item Valuation", {"voucher_no": receipt2.name, "docstatus": 1}, "name"
+		)
+
+		doc = frappe.get_doc("Repost Item Valuation", repost_name)
+		repost_sl_entries(doc)
+
+		for obj in [repack1, repack2, transfer1, transfer2]:
+			obj.load_from_db()
+
+			index = 1 if obj.purpose == "Repack" else 0
+			self.assertEqual(obj.items[index].basic_rate, 200)
+			self.assertEqual(obj.items[index].basic_amount, 2000)
 
 
 def make_serialized_item(**args):

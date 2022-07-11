@@ -25,6 +25,7 @@ from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_childr
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
 class ProductionPlan(Document):
@@ -33,6 +34,7 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 		self.set_status()
 		self._rename_temporary_references()
+		validate_uom_is_integer(self, "stock_uom", "planned_qty")
 
 	def set_pending_qty_in_row_without_reference(self):
 		"Set Pending Qty in independent rows (not from SO or MR)."
@@ -506,7 +508,7 @@ class ProductionPlan(Document):
 			po.is_subcontracted = 1
 			for row in po_list:
 				po_data = {
-					"item_code": row.production_item,
+					"fg_item": row.production_item,
 					"warehouse": row.fg_warehouse,
 					"production_plan_sub_assembly_item": row.name,
 					"bom": row.bom_no,
@@ -516,9 +518,6 @@ class ProductionPlan(Document):
 				for field in [
 					"schedule_date",
 					"qty",
-					"uom",
-					"stock_uom",
-					"item_name",
 					"description",
 					"production_plan_item",
 				]:
