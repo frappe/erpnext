@@ -42,9 +42,10 @@ class LoanBalanceAdjustment(AccountsController):
 			self.cost_center = erpnext.get_default_cost_center(self.company)
 
 	def set_status_and_amounts(self, cancel=0):
-		loan_details = frappe.get_all(
+		loan_details = frappe.db.get_value(
 			"Loan",
-			fields=[
+			self.loan,
+			[
 				"loan_amount",
 				"credit_adjustment_amount",
 				"debit_adjustment_amount",
@@ -55,8 +56,8 @@ class LoanBalanceAdjustment(AccountsController):
 				"is_term_loan",
 				"is_secured_loan",
 			],
-			filters={"name": self.loan},
-		)[0]
+			as_dict=1,
+		)
 
 		if cancel:
 			adjustment_amount = self.get_values_on_cancel(loan_details)
