@@ -35,7 +35,7 @@ class LoanRefund(AccountsController):
 			excess_amount = pending_amount * -1
 
 		if self.refund_amount > excess_amount:
-			frappe.throw(_("Refund amount cannot be greater than excess amount {}".format(excess_amount)))
+			frappe.throw(_("Refund amount cannot be greater than excess amount {0}").format(excess_amount))
 
 	def on_submit(self):
 		self.update_outstanding_amount()
