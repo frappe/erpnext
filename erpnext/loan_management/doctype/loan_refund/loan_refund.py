@@ -3,11 +3,11 @@
 
 import frappe
 from frappe import _
-from erpnext.controllers.accounts_controller import AccountsController
-from frappe.utils import cint, getdate
+from frappe.utils import getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
 	get_pending_principal_amount,
 )
@@ -27,13 +27,6 @@ class LoanRefund(AccountsController):
 			self.cost_center = erpnext.get_default_cost_center(self.company)
 
 	def validate_refund_amount(self):
-		precision = cint(frappe.db.get_default("currency_precision")) or 2
-		total_payment, principal_paid, interest_payable, written_off_amount = frappe.get_value(
-			"Loan",
-			self.loan,
-			["total_payment", "total_principal_paid", "total_interest_payable", "written_off_amount"],
-		)
-
 		loan = frappe.get_doc("Loan", self.loan)
 		pending_amount = get_pending_principal_amount(loan)
 		if pending_amount >= 0:
