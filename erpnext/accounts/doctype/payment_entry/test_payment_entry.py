@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice_against_cost_center,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 test_dependencies = ["Item"]
 
@@ -735,6 +736,10 @@ class TestPaymentEntry(FrappeTestCase):
 			pe.save()
 
 		self.assertTrue("is on hold" in str(err.exception).lower())
+
+	def test_payment_entry_for_employee(self):
+		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
+		create_payment_entry(party_type="Employee", party=employee, save=True)
 
 
 def create_payment_entry(**args):
