@@ -31,7 +31,7 @@ class Gstr1Report(object):
 			base_grand_total,
 			base_rounded_total,
 			NULLIF(billing_address_gstin, '') as billing_address_gstin,
-			place_of_supply,
+			if(place_of_supply,place_of_supply,'97-Other Territory' ) as place_of_supply,
 			ecommerce_gstin,
 			reverse_charge,
 			return_against,
@@ -90,7 +90,7 @@ class Gstr1Report(object):
 				or entry.account_head in self.gst_accounts.sgst_account
 			):
 				advances_data.setdefault((entry.place_of_supply, entry.rate), [0.0, 0.0])
-				advances_data[(entry.place_of_supply, entry.rate)][0] += entry.amount * 100 / entry.rate
+				advances_data[(entry.place_of_supply, entry.rate)][0] += (entry.amount * 100 / entry.rate) if entry.rate else 0 #empty if rate is set as 0
 			elif entry.account_head in self.gst_accounts.cess_account:
 				advances_data[(entry.place_of_supply, entry.rate)][1] += entry.amount
 
