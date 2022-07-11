@@ -90,7 +90,7 @@ class Gstr1Report(object):
 				or entry.account_head in self.gst_accounts.sgst_account
 			):
 				advances_data.setdefault((entry.place_of_supply, entry.rate), [0.0, 0.0])
-				advances_data[(entry.place_of_supply, entry.rate)][0] += (entry.amount * 100 / entry.rate) if entry.rate else 0 #empty if rate is set as 0
+				advances_data[(entry.place_of_supply, entry.rate)][0] += (entry.amount * 100 / entry.rate) if entry.rate else 0 # empty if rate is set as 0
 			elif entry.account_head in self.gst_accounts.cess_account:
 				advances_data[(entry.place_of_supply, entry.rate)][1] += entry.amount
 
