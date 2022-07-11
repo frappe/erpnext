@@ -1,0 +1,475 @@
+{
+    "actions": [],
+    "autoname": "hash",
+    "creation": "2022-04-13 16:05:55.395695",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "item_code",
+        "column_break_2",
+        "item_name",
+        "section_break_4",
+        "description",
+        "brand",
+        "image_column",
+        "image",
+        "image_view",
+        "received_and_accepted",
+        "received_qty",
+        "qty",
+        "rejected_qty",
+        "returned_qty",
+        "col_break2",
+        "stock_uom",
+        "conversion_factor",
+        "tracking_section",
+        "col_break_tracking_section",
+        "rate_and_amount",
+        "rate",
+        "amount",
+        "column_break_19",
+        "rm_cost_per_qty",
+        "service_cost_per_qty",
+        "additional_cost_per_qty",
+        "rm_supp_cost",
+        "warehouse_and_reference",
+        "warehouse",
+        "rejected_warehouse",
+        "subcontracting_order",
+        "column_break_40",
+        "schedule_date",
+        "quality_inspection",
+        "subcontracting_order_item",
+        "subcontracting_receipt_item",
+        "section_break_45",
+        "bom",
+        "serial_no",
+        "col_break5",
+        "batch_no",
+        "rejected_serial_no",
+        "expense_account",
+        "manufacture_details",
+        "manufacturer",
+        "column_break_16",
+        "manufacturer_part_no",
+        "accounting_dimensions_section",
+        "project",
+        "dimension_col_break",
+        "cost_center",
+        "section_break_80",
+        "page_break"
+    ],
+    "fields": [
+        {
+            "bold": 1,
+            "columns": 3,
+            "fieldname": "item_code",
+            "fieldtype": "Link",
+            "in_global_search": 1,
+            "in_list_view": 1,
+            "label": "Item Code",
+            "options": "Item",
+            "print_width": "100px",
+            "reqd": 1,
+            "search_index": 1,
+            "width": "100px"
+        },
+        {
+            "fieldname": "column_break_2",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "in_global_search": 1,
+            "label": "Item Name",
+            "print_hide": 1,
+            "reqd": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "section_break_4",
+            "fieldtype": "Section Break",
+            "label": "Description"
+        },
+        {
+            "fieldname": "description",
+            "fieldtype": "Text Editor",
+            "label": "Description",
+            "print_width": "300px",
+            "reqd": 1,
+            "width": "300px"
+        },
+        {
+            "fieldname": "image",
+            "fieldtype": "Attach",
+            "hidden": 1,
+            "label": "Image"
+        },
+        {
+            "fieldname": "image_view",
+            "fieldtype": "Image",
+            "label": "Image View",
+            "options": "image",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "received_and_accepted",
+            "fieldtype": "Section Break",
+            "label": "Received and Accepted"
+        },
+        {
+            "bold": 1,
+            "default": "0",
+            "fieldname": "received_qty",
+            "fieldtype": "Float",
+            "label": "Received Quantity",
+            "no_copy": 1,
+            "print_hide": 1,
+            "print_width": "100px",
+            "read_only": 1,
+            "reqd": 1,
+            "width": "100px"
+        },
+        {
+            "columns": 2,
+            "fieldname": "qty",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Accepted Quantity",
+            "no_copy": 1,
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "columns": 1,
+            "fieldname": "rejected_qty",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Rejected Quantity",
+            "no_copy": 1,
+            "print_hide": 1,
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "fieldname": "col_break2",
+            "fieldtype": "Column Break",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "stock_uom",
+            "fieldtype": "Link",
+            "label": "Stock UOM",
+            "options": "UOM",
+            "print_hide": 1,
+            "print_width": "100px",
+            "read_only": 1,
+            "reqd": 1,
+            "width": "100px"
+        },
+        {
+            "default": "1",
+            "fieldname": "conversion_factor",
+            "fieldtype": "Float",
+            "hidden": 1,
+            "label": "Conversion Factor",
+            "read_only": 1
+        },
+        {
+            "fieldname": "rate_and_amount",
+            "fieldtype": "Section Break",
+            "label": "Rate and Amount"
+        },
+        {
+            "bold": 1,
+            "columns": 2,
+            "fieldname": "rate",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Rate",
+            "options": "currency",
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "fieldname": "amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Amount",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_19",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "rm_cost_per_qty",
+            "fieldtype": "Currency",
+            "label": "Raw Material Cost Per Qty",
+            "no_copy": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "service_cost_per_qty",
+            "fieldtype": "Currency",
+            "label": "Service Cost Per Qty",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "additional_cost_per_qty",
+            "fieldtype": "Currency",
+            "label": "Additional Cost Per Qty",
+            "read_only": 1
+        },
+        {
+            "fieldname": "warehouse_and_reference",
+            "fieldtype": "Section Break",
+            "label": "Warehouse and Reference"
+        },
+        {
+            "bold": 1,
+            "fieldname": "warehouse",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Accepted Warehouse",
+            "options": "Warehouse",
+            "print_hide": 1,
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "fieldname": "rejected_warehouse",
+            "fieldtype": "Link",
+            "label": "Rejected Warehouse",
+            "no_copy": 1,
+            "options": "Warehouse",
+            "print_hide": 1,
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "depends_on": "eval:!doc.__islocal",
+            "fieldname": "quality_inspection",
+            "fieldtype": "Link",
+            "label": "Quality Inspection",
+            "no_copy": 1,
+            "options": "Quality Inspection",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "column_break_40",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "subcontracting_order",
+            "fieldtype": "Link",
+            "label": "Subcontracting Order",
+            "no_copy": 1,
+            "options": "Subcontracting Order",
+            "print_width": "150px",
+            "read_only": 1,
+            "search_index": 1,
+            "width": "150px"
+        },
+        {
+            "fieldname": "schedule_date",
+            "fieldtype": "Date",
+            "label": "Required By",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_45",
+            "fieldtype": "Section Break"
+        },
+        {
+            "depends_on": "eval:!doc.is_fixed_asset",
+            "fieldname": "serial_no",
+            "fieldtype": "Small Text",
+            "in_list_view": 1,
+            "label": "Serial No",
+            "no_copy": 1
+        },
+        {
+            "depends_on": "eval:!doc.is_fixed_asset",
+            "fieldname": "batch_no",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Batch No",
+            "no_copy": 1,
+            "options": "Batch",
+            "print_hide": 1
+        },
+        {
+            "depends_on": "eval:!doc.is_fixed_asset",
+            "fieldname": "rejected_serial_no",
+            "fieldtype": "Small Text",
+            "label": "Rejected Serial No",
+            "no_copy": 1,
+            "print_hide": 1
+        },
+        {
+            "fieldname": "subcontracting_order_item",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Subcontracting Order Item",
+            "no_copy": 1,
+            "print_hide": 1,
+            "print_width": "150px",
+            "read_only": 1,
+            "search_index": 1,
+            "width": "150px"
+        },
+        {
+            "fieldname": "col_break5",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "bom",
+            "fieldtype": "Link",
+            "label": "BOM",
+            "no_copy": 1,
+            "options": "BOM",
+            "print_hide": 1
+        },
+        {
+            "fetch_from": "item_code.brand",
+            "fieldname": "brand",
+            "fieldtype": "Link",
+            "hidden": 1,
+            "label": "Brand",
+            "options": "Brand",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "rm_supp_cost",
+            "fieldtype": "Currency",
+            "hidden": 1,
+            "label": "Raw Materials Supplied Cost",
+            "no_copy": 1,
+            "options": "Company:company:default_currency",
+            "print_hide": 1,
+            "print_width": "150px",
+            "read_only": 1,
+            "width": "150px"
+        },
+        {
+            "fieldname": "expense_account",
+            "fieldtype": "Link",
+            "hidden": 1,
+            "label": "Expense Account",
+            "options": "Account",
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "manufacture_details",
+            "fieldtype": "Section Break",
+            "label": "Manufacture"
+        },
+        {
+            "fieldname": "manufacturer",
+            "fieldtype": "Link",
+            "label": "Manufacturer",
+            "options": "Manufacturer"
+        },
+        {
+            "fieldname": "column_break_16",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "manufacturer_part_no",
+            "fieldtype": "Data",
+            "label": "Manufacturer Part Number"
+        },
+        {
+            "fieldname": "subcontracting_receipt_item",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Subcontracting Receipt Item",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "image_column",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "tracking_section",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "col_break_tracking_section",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "accounting_dimensions_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting Dimensions"
+        },
+        {
+            "fieldname": "project",
+            "fieldtype": "Link",
+            "label": "Project",
+            "options": "Project",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "dimension_col_break",
+            "fieldtype": "Column Break"
+        },
+        {
+            "default": ":Company",
+            "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+            "fieldname": "cost_center",
+            "fieldtype": "Link",
+            "label": "Cost Center",
+            "options": "Cost Center",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "section_break_80",
+            "fieldtype": "Section Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "default": "0",
+            "fieldname": "page_break",
+            "fieldtype": "Check",
+            "label": "Page Break",
+            "print_hide": 1
+        },
+        {
+            "depends_on": "returned_qty",
+            "fieldname": "returned_qty",
+            "fieldtype": "Float",
+            "label": "Returned Qty",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "idx": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2022-04-21 12:07:55.899701",
+    "modified_by": "Administrator",
+    "module": "Subcontracting",
+    "name": "Subcontracting Receipt Item",
+    "naming_rule": "Random",
+    "owner": "Administrator",
+    "permissions": [],
+    "quick_entry": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": []
+}
