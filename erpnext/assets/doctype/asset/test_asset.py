@@ -201,23 +201,23 @@ class TestAsset(AssetSetup):
 			depreciation_start_date="2020-12-31",
 			submit=1,
 		)
-
 		post_depreciation_entries(date="2021-01-01")
 
 		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
 		si.customer = "_Test Customer"
-		si.due_date = nowdate()
-		si.get("items")[0].rate = 25000
-		si.insert()
+		si.set_posting_time = 1
+		si.posting_date = "2021-10-31"
+		si.due_date = "2021-10-31"
+		si.get("items")[0].rate = 75000
 		si.submit()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 20490.2, 0.0),
+			("_Test Accumulated Depreciations - _TC", 50490.2, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 54509.8, 0.0),
-			("Debtors - _TC", 25000.0, 0.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 0.0, 25490.2),
+			("Debtors - _TC", 75000.0, 0.0),
 		)
 
 		gle = frappe.db.sql(
@@ -227,9 +227,14 @@ class TestAsset(AssetSetup):
 			si.name,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		for i, gle_entry in enumerate(gle):
+			self.assertEqual(gle_entry[0], expected_gle[i][0])
+			self.assertEqual(flt(gle_entry[1], 1), flt(expected_gle[i][1], 1))
+			self.assertEqual(flt(gle_entry[2], 1), flt(expected_gle[i][2], 1))
 
+		si.load_from_db()
 		si.cancel()
+
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
 	def test_expense_head(self):
@@ -696,6 +701,39 @@ class TestDepreciationMethods(AssetSetup):
 		asset.reload()
 		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
 
+	def test_monthly_depreciation_by_wdv_method(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2022-02-15",
+			purchase_date="2022-02-15",
+			depreciation_method="Written Down Value",
+			gross_purchase_amount=10000,
+			expected_value_after_useful_life=5000,
+			depreciation_start_date="2022-02-28",
+			total_number_of_depreciations=5,
+			frequency_of_depreciation=1,
+		)
+
+		expected_schedules = [
+			["2022-02-28", 645.0, 645.0],
+			["2022-03-31", 1206.8, 1851.8],
+			["2022-04-30", 1051.12, 2902.92],
+			["2022-05-31", 915.52, 3818.44],
+			["2022-06-30", 797.42, 4615.86],
+			["2022-07-15", 384.14, 5000.0],
+		]
+
+		schedules = [
+			[
+				cstr(d.schedule_date),
+				flt(d.depreciation_amount, 2),
+				flt(d.accumulated_depreciation_amount, 2),
+			]
+			for d in asset.get("schedules")
+		]
+
+		self.assertEqual(schedules, expected_schedules)
+
 
 class TestDepreciationBasics(AssetSetup):
 	def test_depreciation_without_pro_rata(self):
@@ -782,7 +820,7 @@ class TestDepreciationBasics(AssetSetup):
 		expected_values = [["2020-12-31", 30000.0], ["2021-12-31", 30000.0], ["2022-12-31", 30000.0]]
 
 		for i, schedule in enumerate(asset.schedules):
-			self.assertEqual(expected_values[i][0], schedule.schedule_date)
+			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 
 	def test_set_accumulated_depreciation(self):
@@ -1255,6 +1293,32 @@ class TestDepreciationBasics(AssetSetup):
 
 		asset.cost_center = "Main - _TC"
 		asset.submit()
+
+	def test_depreciation_on_final_day_of_the_month(self):
+		"""Tests if final day of the month is picked each time, if the depreciation start date is the last day of the month."""
+
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-02-15",
+			depreciation_start_date="2020-02-29",
+			frequency_of_depreciation=1,
+			total_number_of_depreciations=5,
+			submit=1,
+		)
+
+		expected_dates = [
+			"2020-02-29",
+			"2020-03-31",
+			"2020-04-30",
+			"2020-05-31",
+			"2020-06-30",
+			"2020-07-15",
+		]
+
+		for i, schedule in enumerate(asset.schedules):
+			self.assertEqual(getdate(expected_dates[i]), getdate(schedule.schedule_date))
 
 
 def create_asset_data():

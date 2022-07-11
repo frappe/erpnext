@@ -449,7 +449,7 @@ class Gstr1Report(object):
 					hsn_code = self.item_hsn_map.get(item_code)
 					tax_rate = 0
 					taxable_value = items.get(item_code)
-					for rates in hsn_wise_tax_rate.get(hsn_code):
+					for rates in hsn_wise_tax_rate.get(hsn_code, []):
 						if taxable_value > rates.get("minimum_taxable_value"):
 							tax_rate = rates.get("tax_rate")
 
@@ -1156,8 +1156,11 @@ def get_company_gstins(company):
 		.inner_join(links)
 		.on(address.name == links.parent)
 		.select(address.gstin)
+		.distinct()
 		.where(links.link_doctype == "Company")
 		.where(links.link_name == company)
+		.where(address.gstin.isnotnull())
+		.where(address.gstin != "")
 		.run(as_dict=1)
 	)
 

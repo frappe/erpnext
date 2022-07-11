@@ -116,6 +116,7 @@ class SalesInvoice(SellingController):
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
 		self.validate_income_account()
+		self.check_conversion_rate()
 
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
@@ -1039,7 +1040,7 @@ class SalesInvoice(SellingController):
 		)
 
 		if grand_total and not self.is_internal_transfer():
-			# Didnot use base_grand_total to book rounding loss gle
+			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -1060,6 +1061,22 @@ class SalesInvoice(SellingController):
 						"project": self.project,
 					},
 					self.party_account_currency,
+					item=self,
+				)
+			)
+
+		if self.apply_discount_on == "Grand Total" and self.get("is_cash_or_discount_account"):
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.additional_discount_account,
+						"against": self.debit_to,
+						"debit": self.base_discount_amount,
+						"debit_in_account_currency": self.discount_amount,
+						"cost_center": self.cost_center,
+						"project": self.project,
+					},
+					self.currency,
 					item=self,
 				)
 			)
@@ -1113,23 +1130,23 @@ class SalesInvoice(SellingController):
 					asset = self.get_asset(item)
 
 					if self.is_return:
+						if asset.calculate_depreciation:
+							self.reverse_depreciation_entry_made_after_sale(asset)
+							self.reset_depreciation_schedule(asset)
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", None)
 
-						if asset.calculate_depreciation:
-							self.reverse_depreciation_entry_made_after_sale(asset)
-							self.reset_depreciation_schedule(asset)
-
 					else:
+						if asset.calculate_depreciation:
+							self.depreciate_asset(asset)
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", self.posting_date)
-
-						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1198,6 +1215,7 @@ class SalesInvoice(SellingController):
 		asset.save()
 
 		make_depreciation_entry(asset.name, self.posting_date)
+		asset.load_from_db()
 
 	def reset_depreciation_schedule(self, asset):
 		asset.flags.ignore_validate_update_after_submit = True
@@ -1207,6 +1225,7 @@ class SalesInvoice(SellingController):
 
 		self.modify_depreciation_schedule_for_asset_repairs(asset)
 		asset.save()
+		asset.load_from_db()
 
 	def modify_depreciation_schedule_for_asset_repairs(self, asset):
 		asset_repairs = frappe.get_all(
@@ -2160,6 +2179,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
 
+	received_items = get_received_items(source_name, target_doctype, target_detail_field)
+
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
 
@@ -2224,12 +2245,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				shipping_address_name=target_doc.shipping_address_name,
 			)
 
+	def update_item(source, target, source_parent):
+		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
+
 	item_field_map = {
 		"doctype": target_doctype + " Item",
 		"field_no_map": ["income_account", "expense_account", "cost_center", "warehouse"],
 		"field_map": {
 			"rate": "rate",
 		},
+		"postprocess": update_item,
+		"condition": lambda doc: doc.qty > 0,
 	}
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
@@ -2265,6 +2291,28 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	return doclist
+
+
+def get_received_items(reference_name, doctype, reference_fieldname):
+	target_doctypes = frappe.get_all(
+		doctype,
+		filters={"inter_company_invoice_reference": reference_name, "docstatus": 1},
+		as_list=True,
+	)
+
+	if target_doctypes:
+		target_doctypes = list(target_doctypes[0])
+
+	received_items_map = frappe._dict(
+		frappe.get_all(
+			doctype + " Item",
+			filters={"parent": ("in", target_doctypes)},
+			fields=[reference_fieldname, "qty"],
+			as_list=1,
+		)
+	)
+
+	return received_items_map
 
 
 def set_purchase_references(doc):

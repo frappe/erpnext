@@ -63,18 +63,16 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
-	out = get_basic_details(args, item, overwrite_warehouse)
-
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
 
-	if doc and doc.get("doctype") == "Purchase Invoice":
-		args["bill_date"] = doc.get("bill_date")
-
 	if doc:
-		args["posting_date"] = doc.get("posting_date")
-		args["transaction_date"] = doc.get("transaction_date")
+		args["transaction_date"] = doc.get("transaction_date") or doc.get("posting_date")
 
+		if doc.get("doctype") == "Purchase Invoice":
+			args["bill_date"] = doc.get("bill_date")
+
+	out = get_basic_details(args, item, overwrite_warehouse)
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -343,6 +341,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"has_batch_no": item.has_batch_no,
 			"batch_no": args.get("batch_no"),
 			"uom": args.uom,
+			"stock_uom": item.stock_uom,
 			"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 			"qty": flt(args.qty) or 1.0,
 			"stock_qty": flt(args.qty) or 1.0,
@@ -355,7 +354,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"net_rate": 0.0,
 			"net_amount": 0.0,
 			"discount_percentage": 0.0,
-			"discount_amount": 0.0,
+			"discount_amount": flt(args.discount_amount) or 0.0,
 			"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults),
 			"update_stock": args.get("update_stock")
 			if args.get("doctype") in ["Sales Invoice", "Purchase Invoice"]
@@ -585,9 +584,7 @@ def _get_item_tax_template(args, taxes, out=None, for_validate=False):
 			if tax.valid_from or tax.maximum_net_rate:
 				# In purchase Invoice first preference will be given to supplier invoice date
 				# if supplier date is not present then posting date
-				validation_date = (
-					args.get("transaction_date") or args.get("bill_date") or args.get("posting_date")
-				)
+				validation_date = args.get("bill_date") or args.get("transaction_date")
 
 				if getdate(tax.valid_from) <= getdate(validation_date) and is_within_valid_range(args, tax):
 					taxes_with_validity.append(tax)
@@ -813,7 +810,9 @@ def insert_item_price(args):
 	):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (
-				args.rate / args.get("conversion_factor") if args.get("conversion_factor") else args.rate
+				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				if args.get("conversion_factor")
+				else (args.rate + args.discount_amount)
 			)
 
 			item_price = frappe.db.get_value(
@@ -839,6 +838,7 @@ def insert_item_price(args):
 						"item_code": args.item_code,
 						"currency": args.currency,
 						"price_list_rate": price_list_rate,
+						"uom": args.stock_uom,
 					}
 				)
 				item_price.insert()
@@ -877,10 +877,6 @@ def get_item_price(args, item_code, ignore_party=False):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
-	if args.get("posting_date"):
-		conditions += """ and %(posting_date)s between
-			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
-
 	return frappe.db.sql(
 		""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
@@ -907,7 +903,6 @@ def get_price_list_rate_for(args, item_code):
 		"supplier": args.get("supplier"),
 		"uom": args.get("uom"),
 		"transaction_date": args.get("transaction_date"),
-		"posting_date": args.get("posting_date"),
 		"batch_no": args.get("batch_no"),
 	}
 
@@ -1338,12 +1333,22 @@ def get_price_list_currency_and_exchange_rate(args):
 
 @frappe.whitelist()
 def get_default_bom(item_code=None):
-	if item_code:
-		bom = frappe.db.get_value(
-			"BOM", {"docstatus": 1, "is_default": 1, "is_active": 1, "item": item_code}
+	def _get_bom(item):
+		bom = frappe.get_all(
+			"BOM", dict(item=item, is_active=True, is_default=True, docstatus=1), limit=1
 		)
-		if bom:
-			return bom
+		return bom[0].name if bom else None
+
+	if not item_code:
+		return
+
+	bom_name = _get_bom(item_code)
+
+	template_item = frappe.db.get_value("Item", item_code, "variant_of")
+	if not bom_name and template_item:
+		bom_name = _get_bom(template_item)
+
+	return bom_name
 
 
 @frappe.whitelist()

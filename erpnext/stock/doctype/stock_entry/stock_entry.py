@@ -299,19 +299,17 @@ class StockEntry(StockController):
 				for_update=True,
 			)
 
-			for f in (
-				"uom",
-				"stock_uom",
-				"description",
-				"item_name",
-				"expense_account",
-				"cost_center",
-				"conversion_factor",
-			):
-				if f == "stock_uom" or not item.get(f):
-					item.set(f, item_details.get(f))
-				if f == "conversion_factor" and item.uom == item_details.get("stock_uom"):
-					item.set(f, item_details.get(f))
+			reset_fields = ("stock_uom", "item_name")
+			for field in reset_fields:
+				item.set(field, item_details.get(field))
+
+			update_fields = ("uom", "description", "expense_account", "cost_center", "conversion_factor")
+
+			for field in update_fields:
+				if not item.get(field):
+					item.set(field, item_details.get(field))
+				if field == "conversion_factor" and item.uom == item_details.get("stock_uom"):
+					item.set(field, item_details.get(field))
 
 			if not item.transfer_qty and item.qty:
 				item.transfer_qty = flt(
@@ -592,7 +590,7 @@ class StockEntry(StockController):
 					)
 					+ "<br><br>"
 					+ _("Available quantity is {0}, you need {1}").format(
-						frappe.bold(d.actual_qty), frappe.bold(d.transfer_qty)
+						frappe.bold(flt(d.actual_qty, d.precision("actual_qty"))), frappe.bold(d.transfer_qty)
 					),
 					NegativeStockError,
 					title=_("Insufficient Stock"),
@@ -1139,7 +1137,7 @@ class StockEntry(StockController):
 		if self.job_card:
 			job_doc = frappe.get_doc("Job Card", self.job_card)
 			job_doc.set_transferred_qty(update_status=True)
-			job_doc.set_transferred_qty_in_job_card(self)
+			job_doc.set_transferred_qty_in_job_card_item(self)
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
@@ -1981,23 +1979,30 @@ class StockEntry(StockController):
 		):
 
 			# Get PO Supplied Items Details
-			item_wh = frappe._dict(
-				frappe.db.sql(
-					"""
-				select rm_item_code, reserve_warehouse
-				from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
-				where po.name = poitemsup.parent
-				and po.name = %s""",
-					self.purchase_order,
-				)
+			po_supplied_items = frappe.db.get_all(
+				"Purchase Order Item Supplied",
+				filters={"parent": self.purchase_order},
+				fields=["name", "rm_item_code", "reserve_warehouse"],
 			)
 
+			# Get Items Supplied in Stock Entries against PO
 			supplied_items = get_supplied_items(self.purchase_order)
-			for name, item in supplied_items.items():
-				frappe.db.set_value("Purchase Order Item Supplied", name, item)
 
-			# Update reserved sub contracted quantity in bin based on Supplied Item Details and
+			for row in po_supplied_items:
+				key, item = row.name, {}
+				if not supplied_items.get(key):
+					# no stock transferred against PO Supplied Items row
+					item = {"supplied_qty": 0, "returned_qty": 0, "total_supplied_qty": 0}
+				else:
+					item = supplied_items.get(key)
+
+				frappe.db.set_value("Purchase Order Item Supplied", row.name, item)
+
+			# RM Item-Reserve Warehouse Dict
+			item_wh = {x.get("rm_item_code"): x.get("reserve_warehouse") for x in po_supplied_items}
+
 			for d in self.get("items"):
+				# Update reserved sub contracted quantity in bin based on Supplied Item Details and
 				item_code = d.get("original_item") or d.get("item_code")
 				reserve_warehouse = item_wh.get(item_code)
 				if not (reserve_warehouse and item_code):

@@ -81,7 +81,7 @@ frappe.ui.form.on("BOM", {
 			}
 		)
 
-		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
+		if (!frm.is_new() && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
 				frm.events.update_cost(frm, true);
 			});
@@ -90,6 +90,13 @@ frappe.ui.form.on("BOM", {
 					"bom": frm.doc.name
 				};
 				frappe.set_route("Tree", "BOM");
+			});
+		}
+
+		if (!frm.is_new() && !frm.doc.docstatus == 0) {
+			frm.add_custom_button(__("New Version"), function() {
+				let new_bom = frappe.model.copy_doc(frm.doc);
+				frappe.set_route("Form", "BOM", new_bom.name);
 			});
 		}
 
@@ -331,7 +338,7 @@ frappe.ui.form.on("BOM", {
 			});
 		});
 
-		if (has_template_rm) {
+		if (has_template_rm && has_template_rm.length) {
 			dialog.fields_dict.items.grid.refresh();
 		}
 	},
@@ -467,7 +474,8 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 				"uom": d.uom,
 				"stock_uom": d.stock_uom,
 				"conversion_factor": d.conversion_factor,
-				"sourced_by_supplier": d.sourced_by_supplier
+				"sourced_by_supplier": d.sourced_by_supplier,
+				"do_not_explode": d.do_not_explode
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
@@ -639,6 +647,13 @@ frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
 		}
 	});
 });
+
+frappe.ui.form.on("BOM Item", {
+	do_not_explode: function(frm, cdt, cdn) {
+		get_bom_material_detail(frm.doc, cdt, cdn, false);
+	}
+})
+
 
 frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];

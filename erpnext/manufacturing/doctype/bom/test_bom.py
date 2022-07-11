@@ -10,8 +10,10 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.manufacturing.doctype.bom.bom import item_query
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
+from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query
+from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
+	update_cost_in_all_boms_in_test,
+)
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -69,26 +71,31 @@ class TestBOM(FrappeTestCase):
 
 	def test_update_bom_cost_in_all_boms(self):
 		# get current rate for '_Test Item 2'
-		rm_rate = frappe.db.sql(
-			"""select rate from `tabBOM Item`
-			where parent='BOM-_Test Item Home Desktop Manufactured-001'
-			and item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'"""
+		bom_rates = frappe.db.get_values(
+			"BOM Item",
+			{
+				"parent": "BOM-_Test Item Home Desktop Manufactured-001",
+				"item_code": "_Test Item 2",
+				"docstatus": 1,
+			},
+			fieldname=["rate", "base_rate"],
+			as_dict=True,
 		)
-		rm_rate = rm_rate[0][0] if rm_rate else 0
+		rm_base_rate = bom_rates[0].get("base_rate") if bom_rates else 0
 
 		# Reset item valuation rate
-		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_rate + 10)
+		reset_item_valuation_rate(item_code="_Test Item 2", qty=200, rate=rm_base_rate + 10)
 
 		# update cost of all BOMs based on latest valuation rate
-		update_cost()
+		update_cost_in_all_boms_in_test()
 
 		# check if new valuation rate updated in all BOMs
 		for d in frappe.db.sql(
-			"""select rate from `tabBOM Item`
+			"""select base_rate from `tabBOM Item`
 			where item_code='_Test Item 2' and docstatus=1 and parenttype='BOM'""",
 			as_dict=1,
 		):
-			self.assertEqual(d.rate, rm_rate + 10)
+			self.assertEqual(d.base_rate, rm_base_rate + 10)
 
 	def test_bom_cost(self):
 		bom = frappe.copy_doc(test_records[2])
@@ -259,43 +266,36 @@ class TestBOM(FrappeTestCase):
 
 	def test_bom_recursion_1st_level(self):
 		"""BOM should not allow BOM item again in child"""
-		item_code = "_Test BOM Recursion"
-		make_item(item_code, {"is_stock_item": 1})
+		item_code = make_item(properties={"is_stock_item": 1}).name
 
 		bom = frappe.new_doc("BOM")
 		bom.item = item_code
 		bom.append("items", frappe._dict(item_code=item_code))
-		with self.assertRaises(frappe.ValidationError) as err:
+		bom.save()
+		with self.assertRaises(BOMRecursionError):
+			bom.items[0].bom_no = bom.name
 			bom.save()
 
-		self.assertTrue("recursion" in str(err.exception).lower())
-		frappe.delete_doc("BOM", bom.name, ignore_missing=True)
-
 	def test_bom_recursion_transitive(self):
-		item1 = "_Test BOM Recursion"
-		item2 = "_Test BOM Recursion 2"
-		make_item(item1, {"is_stock_item": 1})
-		make_item(item2, {"is_stock_item": 1})
+		item1 = make_item(properties={"is_stock_item": 1}).name
+		item2 = make_item(properties={"is_stock_item": 1}).name
 
 		bom1 = frappe.new_doc("BOM")
 		bom1.item = item1
 		bom1.append("items", frappe._dict(item_code=item2))
 		bom1.save()
-		bom1.submit()
 
 		bom2 = frappe.new_doc("BOM")
 		bom2.item = item2
 		bom2.append("items", frappe._dict(item_code=item1))
+		bom2.save()
 
-		with self.assertRaises(frappe.ValidationError) as err:
+		bom2.items[0].bom_no = bom1.name
+		bom1.items[0].bom_no = bom2.name
+
+		with self.assertRaises(BOMRecursionError):
+			bom1.save()
 			bom2.save()
-			bom2.submit()
-
-		self.assertTrue("recursion" in str(err.exception).lower())
-
-		bom1.cancel()
-		frappe.delete_doc("BOM", bom1.name, ignore_missing=True, force=True)
-		frappe.delete_doc("BOM", bom2.name, ignore_missing=True, force=True)
 
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
@@ -500,6 +500,24 @@ class TestBOM(FrappeTestCase):
 		bom.save()
 		bom.submit()
 		self.assertEqual(bom.items[0].rate, 42)
+
+	def test_exclude_exploded_items_from_bom(self):
+		bom_no = get_default_bom()
+		new_bom = frappe.copy_doc(frappe.get_doc("BOM", bom_no))
+		for row in new_bom.items:
+			if row.item_code == "_Test Item Home Desktop Manufactured":
+				self.assertTrue(row.bom_no)
+				row.do_not_explode = True
+
+		new_bom.docstatus = 0
+		new_bom.save()
+		new_bom.load_from_db()
+
+		for row in new_bom.items:
+			if row.item_code == "_Test Item Home Desktop Manufactured" and row.do_not_explode:
+				self.assertFalse(row.bom_no)
+
+		new_bom.delete()
 
 
 def get_default_bom(item_code="_Test FG Item 2"):

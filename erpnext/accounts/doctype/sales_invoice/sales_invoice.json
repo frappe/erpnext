@@ -106,6 +106,7 @@
   "loyalty_redemption_cost_center",
   "section_break_49",
   "apply_discount_on",
+  "is_cash_or_non_trade_discount",
   "base_discount_amount",
   "additional_discount_account",
   "column_break_51",
@@ -1988,7 +1989,7 @@
   {
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
-   "label": "Additional Discount Account",
+   "label": "Discount Account",
    "options": "Account"
   },
   {
@@ -2026,6 +2027,13 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.apply_discount_on == \"Grand Total\"",
+   "fieldname": "is_cash_or_non_trade_discount",
+   "fieldtype": "Check",
+   "label": "Is Cash or Non Trade Discount"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2038,7 +2046,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-03-08 16:08:53.517903",
+ "modified": "2022-06-16 16:22:44.870575",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

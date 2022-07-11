@@ -468,6 +468,7 @@ class PurchaseReceipt(BuyingController):
 				and not d.is_fixed_asset
 				and flt(d.qty)
 				and provisional_accounting_for_non_stock_items
+				and d.get("provisional_expense_account")
 			):
 				self.add_provisional_gl_entry(
 					d, gl_entries, self.posting_date, d.get("provisional_expense_account")
