@@ -301,6 +301,7 @@ erpnext.patches.v13_0.create_accounting_dimensions_in_orders
 erpnext.patches.v13_0.set_per_billed_in_return_delivery_note
 execute:frappe.delete_doc("DocType", "Naming Series")
 erpnext.patches.v13_0.job_card_status_on_hold
+erpnext.patches.v14_0.copy_is_subcontracted_value_to_is_old_subcontracting_flow
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.remove_india_localisation
