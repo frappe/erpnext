@@ -126,9 +126,9 @@ def generate_stk_push(**kwargs):
 
 		mpesa_settings = frappe.get_doc("Mpesa Settings", args.payment_gateway[6:])
 		env = "production" if not mpesa_settings.sandbox else "sandbox"
-		# for sandbox, business shortcode is same as till number
-		business_shortcode = (
-			mpesa_settings.business_shortcode if env == "production" else mpesa_settings.till_number
+		# for sandbox, Buy Goods Shortcode is same as till number
+		buy_goods_shortcode = (
+			mpesa_settings.buy_goods_shortcode
 		)
 
 		connector = MpesaConnector(
@@ -139,12 +139,12 @@ def generate_stk_push(**kwargs):
 
 		mobile_number = sanitize_mobile_number(args.sender)
 
-		response = connector.stk_push(
-			business_shortcode=business_shortcode,
+		response = connector.mpesa_express(
+			buy_goods_shortcode=buy_goods_shortcode,
 			amount=args.request_amount,
 			passcode=mpesa_settings.get_password("online_passkey"),
 			callback_url=callback_url,
-			reference_code=mpesa_settings.till_number,
+			reference_code=mpesa_settings.buy_goods_shortcode,
 			phone_number=mobile_number,
 			description="POS Payment",
 		)
