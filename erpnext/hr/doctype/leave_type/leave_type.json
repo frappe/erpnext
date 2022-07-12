@@ -12,6 +12,7 @@
   "max_leaves_allowed",
   "applicable_after",
   "max_continuous_days_allowed",
+  "color",
   "column_break_3",
   "is_carry_forward",
   "is_lwp",
@@ -219,12 +220,17 @@
    "fieldname": "allow_over_allocation",
    "fieldtype": "Check",
    "label": "Allow Over Allocation"
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2022-05-09 05:01:38.957545",
+ "modified": "2022-07-12 20:26:48.158102",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
