@@ -47,24 +47,24 @@ class MpesaConnector:
 		queue_timeout_url=None,
 		result_url=None,
 	):
-		"""
-		This method uses Mpesa's Account Balance API to to enquire the balance on a M-Pesa BuyGoods (Till Number).
+	"""
+	This method uses Mpesa's Account Balance API to to enquire the balance on a M-Pesa BuyGoods (Till Number).
 
-		Args:
-				initiator (str): Username used to authenticate the transaction.
-				security_credential (str): Generate from developer portal.
-				command_id (str): AccountBalance.
-				party_a (int): Till number being queried.
-				identifier_type (int): Type of organization receiving the transaction. (MSISDN/Till Number/Organization short code)
-				remarks (str): Comments that are sent along with the transaction(maximum 100 characters).
-				queue_timeout_url (str): The url that handles information of timed out transactions.
-				result_url (str): The url that receives results from M-Pesa api call.
+	Args:
+			initiator (str): Username used to authenticate the transaction.
+			security_credential (str): Generate from developer portal.
+			command_id (str): AccountBalance.
+			party_a (int): Till number being queried.
+			identifier_type (int): Type of organization receiving the transaction. (MSISDN/Till Number/Organization short code)
+			remarks (str): Comments that are sent along with the transaction(maximum 100 characters).
+			queue_timeout_url (str): The url that handles information of timed out transactions.
+			result_url (str): The url that receives results from M-Pesa api call.
 
-		Returns:
-				OriginatorConverstionID (str): The unique request ID for tracking a transaction.
-				ConversationID (str): The unique request ID returned by mpesa for each request made
-				ResponseDescription (str): Response Description message
-		"""
+	Returns:
+			OriginatorConverstionID (str): The unique request ID for tracking a transaction.
+			ConversationID (str): The unique request ID returned by mpesa for each request made
+			ResponseDescription (str): Response Description message
+	"""
 
 		payload = {
 			"Initiator": initiator,
@@ -94,30 +94,30 @@ class MpesaConnector:
 			phone_number=None,
 			description=None,
 		):
-			"""
-			This method uses Mpesa's Express API to initiate online payment on behalf of a customer.
+		"""
+		This method uses Mpesa's Express API to initiate online payment on behalf of a customer.
 
-			Args:
-					buy_goods_shortcode (int): The short code of the organization.
-					passcode (str): Get from developer portal
-					amount (int): The amount being transacted
-					callback_url (str): A CallBack URL is a valid secure URL that is used to receive notifications from M-Pesa API.
-					reference_code(str): Account Reference: This is an Alpha-Numeric parameter that is defined by your system as an Identifier of the transaction for CustomerPayBillOnline transaction type.
-					phone_number(int): The Mobile Number to receive the STK Pin Prompt.
-					description(str): This is any additional information/comment that can be sent along with the request from your system. MAX 13 characters
+		Args:
+				buy_goods_shortcode (int): The short code of the organization.
+				passcode (str): Get from developer portal
+				amount (int): The amount being transacted
+				callback_url (str): A CallBack URL is a valid secure URL that is used to receive notifications from M-Pesa API.
+				reference_code(str): Account Reference: This is an Alpha-Numeric parameter that is defined by your system as an Identifier of the transaction for CustomerPayBillOnline transaction type.
+				phone_number(int): The Mobile Number to receive the STK Pin Prompt.
+				description(str): This is any additional information/comment that can be sent along with the request from your system. MAX 13 characters
 
-			Success Response:
-					CustomerMessage(str): Messages that customers can understand.
-					CheckoutRequestID(str): This is a global unique identifier of the processed checkout transaction request.
-					ResponseDescription(str): Describes Success or failure
-					MerchantRequestID(str): This is a global unique Identifier for any submitted payment request.
-					ResponseCode(int): 0 means success all others are error codes. e.g.404.001.03
+		Success Response:
+				CustomerMessage(str): Messages that customers can understand.
+				CheckoutRequestID(str): This is a global unique identifier of the processed checkout transaction request.
+				ResponseDescription(str): Describes Success or failure
+				MerchantRequestID(str): This is a global unique Identifier for any submitted payment request.
+				ResponseCode(int): 0 means success all others are error codes. e.g.404.001.03
 
-			Error Reponse:
-					requestId(str): This is a unique requestID for the payment request
-					errorCode(str): This is a predefined code that indicates the reason for request failure.
-					errorMessage(str): This is a predefined code that indicates the reason for request failure.
-			"""
+		Error Reponse:
+				requestId(str): This is a unique requestID for the payment request
+				errorCode(str): This is a predefined code that indicates the reason for request failure.
+				errorMessage(str): This is a predefined code that indicates the reason for request failure.
+		"""
 
 			time = (
 				str(datetime.datetime.now()).split(".")[0].replace("-", "").replace(" ", "").replace(":", "")
