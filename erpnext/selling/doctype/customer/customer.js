@@ -202,22 +202,6 @@ frappe.ui.form.on("Customer", {
 		});
 		dialog.show();
 	},
-	// validate: frm => {
-	// 	if (frm.doc.customer_selling_price.length > 0) {
-	// 		const product_name = new Set(frm.doc.customer_selling_price.map(row => row.product_name))
-	// 		var prod = frm.doc.customer_selling_price
-	// 		let k = []
-	// 		for (var i = 0; i < frm.doc.customer_selling_price.length; i++) {
-	// 			k[i] = prod[i]['product_name']
-	// 		}
-	// 		const myset = new Set(k)
-	// 		if (myset.size < frm.doc.customer_selling_price.length) {
-	// 			frappe.msgprint("Duplicate Item Name")
-	// 		} else {
-	// 			frappe.msgprint("save data")
-	// 		}
-	// 	}
-	// }
 });
 
 
@@ -246,11 +230,7 @@ frappe.ui.form.on("Customer", "after_save", function (frm) {
 						`Do you want to update the price do item ${v.item_name} of ${price_list_rate} for ${v.selling_price} in the price list  ?`, //ask something to update price
 						function () {
 							frappe.db.set_value("Item Price", item_code, "price_list_rate", v.selling_price)
-						},
-						function () {
-
 						}
-
 					)
 				}
 			}
@@ -258,12 +238,9 @@ frappe.ui.form.on("Customer", "after_save", function (frm) {
 	})
 })
 
-
-
 frappe.ui.form.on("Customer Product", "product_name", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	frappe.db.get_value("Item Price", { "item_code": d.product_name, "price_list": "Standard Buying" }, "price_list_rate", function (value) {
 		frappe.model.set_value(d.doctype, d.name, "pack_price", value.price_list_rate)
 	});
 });
-
