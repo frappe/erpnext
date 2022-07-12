@@ -9,34 +9,34 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "company",
   "employee",
   "employee_name",
   "column_break_4",
+  "posting_date",
   "leave_type",
   "department",
-  "leave_balance",
+  "color",
   "section_break_5",
   "from_date",
   "to_date",
+  "description",
+  "column_break1",
+  "leave_balance",
+  "total_leave_days",
   "half_day",
   "half_day_date",
-  "total_leave_days",
-  "column_break1",
-  "description",
   "section_break_7",
   "leave_approver",
   "leave_approver_name",
   "column_break_18",
   "status",
-  "salary_slip",
   "sb10",
-  "posting_date",
-  "follow_via_email",
-  "color",
-  "column_break_17",
-  "company",
   "letter_head",
-  "amended_from"
+  "salary_slip",
+  "amended_from",
+  "column_break_17",
+  "follow_via_email"
  ],
  "fields": [
   {
@@ -60,6 +60,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -190,12 +191,10 @@
    "reqd": 1
   },
   {
-   "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },
@@ -229,6 +228,8 @@
   },
   {
    "allow_on_submit": 1,
+   "fetch_from": "leave_type.color",
+   "fetch_if_empty": 1,
    "fieldname": "color",
    "fieldtype": "Color",
    "label": "Color",
@@ -250,10 +251,11 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-05-18 13:00:41.577327",
+ "modified": "2022-07-12 20:51:09.229245",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -333,6 +335,7 @@
  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "employee",
  "title_field": "employee_name"
 }

@@ -1,9 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.add_fetch('employee', 'employee_name', 'employee_name');
-cur_frm.add_fetch('employee', 'company', 'company');
-
 frappe.ui.form.on("Leave Application", {
 	setup: function(frm) {
 		frm.set_query("leave_approver", function() {
@@ -16,7 +13,14 @@ frappe.ui.form.on("Leave Application", {
 			};
 		});
 
-		frm.set_query("employee", erpnext.queries.employee);
+		frm.set_query("employee", function(doc) {
+			return {
+				query: "erpnext.controllers.queries.employee_query",
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
 	},
 	onload: function(frm) {
 		// Ignore cancellation of doctype on cancel all.
