@@ -147,12 +147,18 @@ frappe.ui.form.on("Leave Application", {
 		frm.trigger("make_dashboard");
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
+		frm.fields_dict.to_date.datepicker.update({
+			minDate: frm.doc.from_date ? new Date(frm.doc.from_date) : null
+		});
 	},
 
 	to_date: function(frm) {
 		frm.trigger("make_dashboard");
 		frm.trigger("half_day_datepicker");
 		frm.trigger("calculate_total_days");
+		frm.fields_dict.from_date.datepicker.update({
+			maxDate: frm.doc.to_date ? new Date(frm.doc.to_date) : null
+		});
 	},
 
 	half_day_date(frm) {
