@@ -79,7 +79,8 @@
    "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
-   "label": "Manufacturing Date"
+   "label": "Manufacturing Date",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -90,7 +91,8 @@
    "fieldtype": "Date",
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "reqd": 1
   },
   {
    "fieldname": "source",
@@ -193,7 +195,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2021-07-08 16:22:01.343105",
+ "modified": "2022-07-12 07:25:40.328451",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

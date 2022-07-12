@@ -245,8 +245,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Edit Posting Date and Time",
+   "label": "Edit Date",
    "print_hide": 1
   },
   {
@@ -584,6 +583,7 @@
   {
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Total Net Weight",
    "print_hide": 1,
    "read_only": 1
@@ -1192,7 +1192,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-08 07:35:56.080988",
+ "modified": "2022-07-12 07:47:50.937666",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

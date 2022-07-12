@@ -248,6 +248,7 @@
    "depends_on": "eval:doc.docstatus===1",
    "fieldname": "order_confirmation_no",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Order Confirmation No"
   },
   {
@@ -589,6 +590,7 @@
   {
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Total Net Weight",
    "print_hide": 1,
    "read_only": 1
@@ -639,6 +641,7 @@
    "collapsible": 1,
    "fieldname": "sec_tax_breakup",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Tax Breakup"
   },
   {
@@ -653,6 +656,7 @@
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -902,6 +906,7 @@
    "options": "fa fa-legal"
   },
   {
+   "default": "Standard Operating Procedure for Shipping ( SOP)",
    "fieldname": "tc_name",
    "fieldtype": "Link",
    "label": "Terms",
@@ -1195,11 +1200,12 @@
    "label": "Supplier Code"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-08 07:51:34.222349",
+ "modified": "2022-07-12 07:34:37.799039",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
