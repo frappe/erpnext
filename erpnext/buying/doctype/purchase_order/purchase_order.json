@@ -9,11 +9,10 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
-  "title",
   "naming_series",
-  "supplier",
+  "section_break_3",
+  "title",
   "get_items_from_open_material_requests",
-  "supplier_name",
   "apply_tds",
   "tax_withholding_category",
   "column_break1",
@@ -36,6 +35,9 @@
   "customer_contact_mobile",
   "customer_contact_email",
   "section_addresses",
+  "supplier",
+  "supplier_name",
+  "supplier_code",
   "supplier_address",
   "address_display",
   "contact_person",
@@ -148,6 +150,7 @@
   {
    "fieldname": "supplier_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "options": "fa fa-user"
   },
   {
@@ -161,15 +164,16 @@
    "print_hide": 1
   },
   {
+   "default": ".supplier_code.-.##.-.YYYY.",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "PUR-ORD-.YYYY.-",
+   "options": "PUR-ORD-.YYYY.-\n.supplier_code.-.##.-.YYYY.",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -191,13 +195,14 @@
    "description": "Fetch items based on Default Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
+   "hidden": 1,
    "label": "Get Items from Open Material Requests"
   },
   {
-   "bold": 1,
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "Supplier Name",
    "read_only": 1
@@ -205,14 +210,12 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Company",
    "oldfieldname": "company",
    "oldfieldtype": "Link",
    "options": "Company",
    "print_hide": 1,
-   "remember_last_selected_value": 1,
-   "reqd": 1
+   "remember_last_selected_value": 1
   },
   {
    "fieldname": "column_break1",
@@ -225,17 +228,19 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
-   "reqd": 1,
    "search_index": 1
   },
   {
    "allow_on_submit": 1,
+   "default": "2099-12-31",
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Required By"
   },
   {
@@ -319,8 +324,7 @@
   {
    "collapsible": 1,
    "fieldname": "section_addresses",
-   "fieldtype": "Section Break",
-   "label": "Address and Contact"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "supplier_address",
@@ -385,6 +389,7 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Currency and Price List",
    "options": "fa fa-tag"
   },
@@ -446,12 +451,14 @@
   {
    "fieldname": "sec_warehouse",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Subcontracting"
   },
   {
    "description": "Sets 'Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse",
    "print_hide": 1
@@ -464,7 +471,6 @@
    "default": "No",
    "fieldname": "is_subcontracted",
    "fieldtype": "Select",
-   "in_standard_filter": 1,
    "label": "Supply Raw Materials",
    "options": "No\nYes",
    "print_hide": 1
@@ -486,6 +492,7 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Scan Barcode",
    "options": "Barcode"
   },
@@ -493,7 +500,7 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Items",
+   "label": "Product",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Purchase Order Item",
@@ -589,6 +596,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
@@ -608,6 +616,7 @@
   {
    "fieldname": "shipping_rule",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shipping Rule",
    "options": "Shipping Rule",
    "print_hide": 1
@@ -615,6 +624,7 @@
   {
    "fieldname": "section_break_52",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_border": 1
   },
   {
@@ -721,6 +731,7 @@
    "collapsible_depends_on": "apply_discount_on",
    "fieldname": "discount_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Additional Discount"
   },
   {
@@ -759,6 +770,7 @@
   {
    "fieldname": "totals_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Totals"
   },
   {
@@ -864,7 +876,7 @@
    "collapsible": 1,
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
-   "label": "Payment Terms"
+   "label": "Terms Of Payments"
   },
   {
    "fieldname": "payment_terms_template",
@@ -909,6 +921,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "oldfieldtype": "Section Break"
   },
@@ -916,7 +929,6 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
-   "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "oldfieldname": "status",
@@ -983,6 +995,7 @@
    "collapsible": 1,
    "fieldname": "column_break5",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Printing Settings",
    "oldfieldtype": "Column Break",
    "print_hide": 1,
@@ -1033,6 +1046,7 @@
    "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Subscription Section"
   },
   {
@@ -1074,6 +1088,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -1088,6 +1103,7 @@
    "collapsible": 1,
    "fieldname": "tracking_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Order Status"
   },
   {
@@ -1108,7 +1124,8 @@
   },
   {
    "fieldname": "before_items_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "items_col_break",
@@ -1134,6 +1151,7 @@
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Apply Tax Withholding Amount"
   },
   {
@@ -1147,6 +1165,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions "
   },
   {
@@ -1164,17 +1183,26 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "supplier.supplier_code",
+   "fieldname": "supplier_code",
+   "fieldtype": "Data",
+   "label": "Supplier Code"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-26 12:16:38.694276",
+ "modified": "2022-07-08 07:51:34.222349",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1221,7 +1249,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1
