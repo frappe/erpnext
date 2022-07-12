@@ -665,8 +665,12 @@ class TestPickList(FrappeTestCase):
 		pick_list = create_pick_list(so.name)
 
 		pick_list.scan_mode = 0
-		pick_list.submit()
 
+		pick_list.locations[0].picked_qty = so_qty + 1
+		self.assertRaises(frappe.ValidationError, pick_list.submit)
+
+		pick_list.locations[0].picked_qty = 0
+		pick_list.submit()
 		self.assertEqual(pick_list.locations[0].picked_qty, so_qty)
 
 	def test_picked_qty_scan_mode(self):
