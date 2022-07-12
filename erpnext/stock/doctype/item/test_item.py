@@ -778,6 +778,22 @@ class TestItem(FrappeTestCase):
 			item.has_batch_no = 1
 			item.save()
 
+	def test_update_is_stock_item(self):
+		# Step - 1: Create an Item
+		item = make_item(properties={"is_stock_item": 1})
+
+		# Step - 2: Set is_stock_item = 0
+		item.is_stock_item = 0
+		item.save()
+		item.reload()
+		self.assertEqual(item.is_stock_item, 0)
+
+		# Step - 3: Again set is_stock_item = 1
+		item.is_stock_item = 1
+		item.save()
+		item.reload()
+		self.assertEqual(item.is_stock_item, 1)
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
