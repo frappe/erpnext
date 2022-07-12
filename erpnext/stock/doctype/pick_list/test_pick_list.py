@@ -658,3 +658,24 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(dn.items[0].rate, 42)
 		so.reload()
 		self.assertEqual(so.per_delivered, 100)
+
+	def test_picked_qty_non_scan_mode(self):
+		so = make_sales_order()
+		so_qty = so.items[0].qty
+		pick_list = create_pick_list(so.name)
+
+		pick_list.scan_mode = 0
+		pick_list.submit()
+
+		self.assertEqual(pick_list.locations[0].picked_qty, so_qty)
+
+	def test_picked_qty_scan_mode(self):
+		so = make_sales_order()
+		so_qty = so.items[0].qty
+		pick_list = create_pick_list(so.name)
+
+		pick_list.scan_mode = 1
+		self.assertRaises(frappe.ValidationError, pick_list.submit)
+
+		pick_list.locations[0].picked_qty = so_qty
+		pick_list.submit()
