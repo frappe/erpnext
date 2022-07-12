@@ -181,12 +181,20 @@ class RequestforQuotation(BuyingController):
 		doc_args = self.as_dict()
 		doc_args.update({"supplier": data.get("supplier"), "supplier_name": data.get("supplier_name")})
 
+		# Get Contact Full Name
+		supplier_name = None
+		if data.get("contact"):
+			contact_name = frappe.db.get_value(
+				"Contact", data.get("contact"), ["first_name", "middle_name", "last_name"]
+			)
+			supplier_name = (" ").join(x for x in contact_name if x)  # remove any blank values
+
 		args = {
 			"update_password_link": update_password_link,
 			"message": frappe.render_template(self.message_for_supplier, doc_args),
 			"rfq_link": rfq_link,
 			"user_fullname": full_name,
-			"supplier_name": data.get("supplier_name"),
+			"supplier_name": supplier_name or data.get("supplier_name"),
 			"supplier_salutation": self.salutation or "Dear Mx.",
 		}
 
