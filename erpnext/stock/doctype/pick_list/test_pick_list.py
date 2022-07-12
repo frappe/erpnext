@@ -128,8 +128,8 @@ class TestPickList(FrappeTestCase):
 			}
 		)
 
+		pick_list.set_item_locations()
 		pick_list.locations[0].picked_qty = 1
-
 		pick_list.set_item_locations()
 
 		self.assertEqual(pick_list.locations[0].item_code, "_Test Item Warehouse Group Wise Reorder")
