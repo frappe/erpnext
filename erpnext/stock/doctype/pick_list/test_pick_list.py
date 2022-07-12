@@ -128,15 +128,19 @@ class TestPickList(FrappeTestCase):
 			}
 		)
 
+		pick_list.locations[0].picked_qty = 1
+
 		pick_list.set_item_locations()
 
 		self.assertEqual(pick_list.locations[0].item_code, "_Test Item Warehouse Group Wise Reorder")
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse Group-C1 - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
+		self.assertEqual(pick_list.locations[0].picked_qty, 1)
 
 		self.assertEqual(pick_list.locations[1].item_code, "_Test Item Warehouse Group Wise Reorder")
 		self.assertEqual(pick_list.locations[1].warehouse, "_Test Warehouse 2 - _TC")
 		self.assertEqual(pick_list.locations[1].qty, 10)
+		self.assertEqual(pick_list.locations[1].picked_qty, 0)
 
 	def test_pick_list_shows_serial_no_for_serialized_item(self):
 
