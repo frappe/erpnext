@@ -25,7 +25,6 @@ from erpnext.accounts.party import (  # noqa
 	validate_party_accounts,
 )
 from erpnext.utilities.transaction_base import TransactionBase
-from pymysql import NULL
 from traitlets import Undefined
 
 
@@ -327,7 +326,6 @@ class Customer(TransactionBase):
 					selling_price_data.insert(ignore_mandatory=True) 
 				else:
 					frappe.throw(_("Selling Price is 0, Enter Valid Selling Price"))
-
 
 def create_contact(contact, party_type, party, email):
 	"""Create contact based on given contact name"""
