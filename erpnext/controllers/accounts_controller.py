@@ -1591,7 +1591,7 @@ class AccountsController(TransactionBase):
 				)
 				for item in data:
 					self.append("payment_schedule", item)
-			elif self.doctype not in ["Purchase Receipt"]:
+			elif self.doctype not in ["Purchase Receipt", "Quotation"]:
 				data = dict(
 					due_date=due_date,
 					invoice_portion=100,
