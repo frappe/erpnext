@@ -55,7 +55,7 @@
    "fieldname": "item",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Item",
+   "label": "Product",
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -150,12 +150,13 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Item Name",
+   "label": "Product Name",
    "read_only": 1
   },
   {
    "fieldname": "batch_qty",
    "fieldtype": "Float",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Batch Quantity",
    "read_only": 1
@@ -164,6 +165,7 @@
    "fetch_from": "item.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Batch UOM",
    "options": "UOM",
    "read_only": 1
@@ -171,6 +173,7 @@
   {
    "fieldname": "manufacturing_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Manufacturing"
   },
   {
@@ -190,12 +193,13 @@
    "read_only": 1
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-archive",
  "idx": 1,
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2022-07-12 07:25:40.328451",
+ "modified": "2022-07-13 01:39:19.303785",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
