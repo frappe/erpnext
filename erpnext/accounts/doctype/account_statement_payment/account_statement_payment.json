@@ -236,7 +236,8 @@
   },
   {
    "fieldname": "total_without_medical_fees",
-   "fieldtype": "Currency",
+   "fieldtype": "Data",
+   "hidden": 1,
    "label": "Total Without Medical Fees",
    "read_only": 1
   },
@@ -255,7 +256,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-11 16:44:00.636512",
+ "modified": "2022-07-12 19:44:32.931062",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
