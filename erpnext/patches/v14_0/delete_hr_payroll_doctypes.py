@@ -45,7 +45,8 @@ def execute():
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True)
 
-	frappe.delete_doc("Loan Management", "Salary Slip Loan", ignore_missing=True)
+	frappe.delete_doc("DocType", "Salary Slip Loan", ignore_missing=True)
+	frappe.delete_doc("DocType", "Salary Component Account", ignore_missing=True)
 
 	notifications = frappe.get_all(
 		"Notification", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
