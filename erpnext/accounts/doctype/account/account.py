@@ -81,6 +81,8 @@ class Account(NestedSet):
 				)
 
 	def set_root_and_report_type(self):
+		account = frappe.qb.DocType("Account")
+
 		if self.parent_account:
 			par = frappe.db.get_value(
 				"Account", self.parent_account, ["report_type", "root_type"], as_dict=1
@@ -95,14 +97,12 @@ class Account(NestedSet):
 			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
 			if db_value:
 				if self.report_type != db_value.report_type:
-					frappe.db.sql(
-						"update `tabAccount` set report_type=%s where lft > %s and rgt < %s",
-						(self.report_type, self.lft, self.rgt),
+					frappe.qb.update(account).set(account.report_type, self.report_type).where(
+						(account.lft > self.lft) & (account.rgt < self.rgt)
 					)
 				if self.root_type != db_value.root_type:
-					frappe.db.sql(
-						"update `tabAccount` set root_type=%s where lft > %s and rgt < %s",
-						(self.root_type, self.lft, self.rgt),
+					frappe.qb.update(account).set(account.report_type, self.root_type).where(
+						(account.lft > self.lft) & (account.rgt < self.rgt)
 					)
 
 		if self.root_type and not self.report_type:
@@ -295,11 +295,13 @@ class Account(NestedSet):
 		return frappe.db.get_value("GL Entry", {"account": self.name})
 
 	def check_if_child_exists(self):
-		return frappe.db.sql(
-			"""select name from `tabAccount` where parent_account = %s
-			and docstatus != 2""",
-			self.name,
-		)
+		account = frappe.qb.DocType("Account")
+
+		return (
+			frappe.qb.from_(account)
+			.select(account.name)
+			.where((account.parent_account == self.name) & (account.docstatus != 2))
+		).run()
 
 	def validate_mandatory(self):
 		if not self.root_type:
@@ -319,14 +321,22 @@ class Account(NestedSet):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		"""select name from tabAccount
-		where is_group = 1 and docstatus != 2 and company = %s
-		and %s like %s order by name limit %s offset %s"""
-		% ("%s", searchfield, "%s", "%s", "%s"),
-		(filters["company"], "%%%s%%" % txt, page_len, start),
-		as_list=1,
-	)
+	account = frappe.qb.DocType("Account")
+	search_text = "%%%s%%" % txt
+
+	return (
+		frappe.qb.from_(account)
+		.select(account.name)
+		.where(
+			(account.is_group == 1)
+			& (account.docstatus != 2)
+			& (account.company == filters["company"])
+			& (account[searchfield].like(search_text))
+		)
+		.orderby(account.nane)
+		.limit(page_len)
+		.offset(start)
+	).run()
 
 
 def get_account_currency(account):

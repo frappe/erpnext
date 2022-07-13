@@ -111,7 +111,7 @@ def get_total_allocated_amount(payment_entry):
 	bank_transaction_payments = frappe.db.DocType("Bank Transaction Payments")
 
 	return (
-		frappe.qb.form_(bank_transaction)
+		frappe.qb.from_(bank_transaction)
 		.left_join(bank_transaction_payments)
 		.on(bank_transaction.name == bank_transaction_payments.parent)
 		.select(Sum(bank_transaction_payments.allocated_amount), bank_transaction.name)
