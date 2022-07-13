@@ -12,8 +12,9 @@
   "supplier_section",
   "title",
   "naming_series",
-  "section_break_3",
   "column_break0",
+  "purchase_order_no",
+  "section_break_3",
   "supplier",
   "supplier_name",
   "supplier_delivery_note",
@@ -418,10 +419,10 @@
   },
   {
    "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break",
-   "hidden": 1
+   "fieldtype": "Section Break"
   },
   {
+   "default": "Supplier - U",
    "description": "Sets 'Accepted Warehouse' in each row of the items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
@@ -1153,6 +1154,7 @@
    "read_only": 1
   },
   {
+   "default": "Supplier - U",
    "depends_on": "eval: doc.is_internal_supplier",
    "description": "Sets 'From Warehouse' in each row of the items table.",
    "fieldname": "set_from_warehouse",
@@ -1185,6 +1187,12 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_order_no",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order"
   }
  ],
  "hide_toolbar": 1,
@@ -1192,7 +1200,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-12 07:47:50.937666",
+ "modified": "2022-07-13 06:28:34.009988",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1256,7 +1264,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
 }
