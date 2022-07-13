@@ -313,6 +313,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address and Contacts",
    "oldfieldtype": "Column Break",
    "options": "fa fa-map-marker"
@@ -339,6 +340,7 @@
    "collapsible_depends_on": "accounts",
    "fieldname": "default_payable_accounts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Default Payable Accounts"
   },
   {
@@ -359,6 +361,7 @@
    "collapsible_depends_on": "supplier_details",
    "fieldname": "column_break2",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "width": "50%"
   },
@@ -455,7 +458,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-08 07:22:00.873175",
+ "modified": "2022-07-12 08:06:59.863323",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

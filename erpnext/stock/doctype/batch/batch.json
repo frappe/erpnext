@@ -55,7 +55,7 @@
    "fieldname": "item",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Item",
+   "label": "Product",
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
@@ -79,7 +79,8 @@
    "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
-   "label": "Manufacturing Date"
+   "label": "Manufacturing Date",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -90,7 +91,8 @@
    "fieldtype": "Date",
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
-   "oldfieldtype": "Date"
+   "oldfieldtype": "Date",
+   "reqd": 1
   },
   {
    "fieldname": "source",
@@ -148,12 +150,13 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Item Name",
+   "label": "Product Name",
    "read_only": 1
   },
   {
    "fieldname": "batch_qty",
    "fieldtype": "Float",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Batch Quantity",
    "read_only": 1
@@ -162,6 +165,7 @@
    "fetch_from": "item.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Batch UOM",
    "options": "UOM",
    "read_only": 1
@@ -169,6 +173,7 @@
   {
    "fieldname": "manufacturing_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Manufacturing"
   },
   {
@@ -188,12 +193,13 @@
    "read_only": 1
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-archive",
  "idx": 1,
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2021-07-08 16:22:01.343105",
+ "modified": "2022-07-13 01:39:19.303785",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

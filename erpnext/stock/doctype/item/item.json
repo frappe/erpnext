@@ -144,6 +144,8 @@
    "fieldname": "item_code",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Data",
@@ -156,7 +158,6 @@
    "fieldname": "variant_of",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
    "label": "Variant Of",
    "options": "Item",
    "read_only": 1,
@@ -176,9 +177,8 @@
   {
    "fieldname": "item_group",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "hidden": 1,
    "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Item Group",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
@@ -190,6 +190,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_item_from_hub",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Item from Hub",
    "read_only": 1
   },
@@ -213,6 +214,7 @@
    "default": "0",
    "fieldname": "allow_alternative_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Alternative Item"
   },
   {
@@ -221,6 +223,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select"
@@ -230,6 +233,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Include Item In Manufacturing"
   },
   {
@@ -237,12 +241,14 @@
    "depends_on": "eval:(doc.__islocal&&doc.is_stock_item && !doc.has_serial_no && !doc.has_batch_no)",
    "fieldname": "opening_stock",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Opening Stock"
   },
   {
    "depends_on": "is_stock_item",
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Valuation Rate"
   },
   {
@@ -250,12 +256,14 @@
    "depends_on": "eval:doc.__islocal",
    "fieldname": "standard_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Standard Selling Rate"
   },
   {
    "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Fixed Asset",
    "set_only_once": 1
   },
@@ -292,6 +300,7 @@
   {
    "fieldname": "brand",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Brand",
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
@@ -309,11 +318,13 @@
   {
    "fieldname": "sb_barcodes",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Barcodes"
   },
   {
    "fieldname": "barcodes",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Barcodes",
    "options": "Item Barcode"
   },
@@ -323,6 +334,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "inventory_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Inventory",
    "oldfieldtype": "Section Break",
    "options": "fa fa-truck"
@@ -390,6 +402,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "reorder_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Auto re-order",
    "options": "fa fa-rss"
   },
@@ -404,6 +417,7 @@
    "collapsible": 1,
    "fieldname": "unit_of_measure_conversion",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Units of Measure"
   },
   {
@@ -421,6 +435,7 @@
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Serial Nos and Batches"
   },
   {
@@ -496,6 +511,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "variants_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Variants"
   },
   {
@@ -504,7 +520,6 @@
    "description": "If this item has variants, then it cannot be selected in sales orders etc.",
    "fieldname": "has_variants",
    "fieldtype": "Check",
-   "in_standard_filter": 1,
    "label": "Has Variants"
   },
   {
@@ -527,6 +542,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "defaults",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales, Purchase, Accounting Defaults"
   },
   {
@@ -539,6 +555,7 @@
    "collapsible": 1,
    "fieldname": "purchase_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Purchase, Replenishment Details",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
@@ -609,6 +626,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "supplier_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Supplier Details"
   },
   {
@@ -634,6 +652,7 @@
    "collapsible": 1,
    "fieldname": "foreign_trade_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Foreign Trade Details"
   },
   {
@@ -656,6 +675,7 @@
    "collapsible": 1,
    "fieldname": "sales_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Details",
    "oldfieldtype": "Section Break",
    "options": "fa fa-tag"
@@ -689,6 +709,7 @@
    "collapsible": 1,
    "fieldname": "deferred_revenue",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Deferred Revenue"
   },
   {
@@ -719,6 +740,7 @@
    "collapsible": 1,
    "fieldname": "deferred_expense_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Deferred Expense"
   },
   {
@@ -750,6 +772,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "customer_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Customer Details"
   },
   {
@@ -763,6 +786,7 @@
    "collapsible_depends_on": "taxes",
    "fieldname": "item_tax_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Item Tax",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -781,6 +805,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "inspection_criteria",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Inspection Criteria",
    "oldfieldtype": "Section Break",
    "options": "fa fa-search"
@@ -811,6 +836,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "manufacturing",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Manufacturing",
    "oldfieldtype": "Section Break",
    "options": "fa fa-cogs"
@@ -860,6 +886,7 @@
    "depends_on": "eval:(!doc.is_item_from_hub && !doc.is_fixed_asset)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Hub Publishing Details"
   },
   {
@@ -928,6 +955,7 @@
    "collapsible": 1,
    "fieldname": "more_information_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information"
   },
   {
@@ -951,7 +979,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-08 06:40:47.513133",
+ "modified": "2022-07-12 23:55:19.941471",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
