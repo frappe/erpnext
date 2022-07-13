@@ -9916,3 +9916,5 @@ Add Corrective Operation Cost in Finished Good Valuation,Ajouter des opérations
 Make Serial No / Batch from Work Order,Générer des numéros de séries / lots depuis les Ordres de Fabrications
 System will automatically create the serial numbers / batch for the Finished Good on submission of work order,le systéme va créer des numéros de séries / lots à la validation des produit finis depuis les Ordres de Fabrications
 Allow material consumptions without immediately manufacturing finished goods against a Work Order,Autoriser la consommation sans immédiatement fabriqué les produit fini dans les ordres de fabrication
+Quality Inspection Parameter,Paramétre des Inspection Qualité
+Parameter Group,Groupe de paramétre
