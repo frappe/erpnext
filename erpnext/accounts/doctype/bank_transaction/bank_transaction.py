@@ -5,6 +5,7 @@
 from functools import reduce
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 from erpnext.controllers.status_updater import StatusUpdater
@@ -106,24 +107,20 @@ def get_reconciled_bank_transactions(payment_entry):
 
 
 def get_total_allocated_amount(payment_entry):
-	return frappe.db.sql(
-		"""
-		SELECT
-			SUM(btp.allocated_amount) as allocated_amount,
-			bt.name
-		FROM
-			`tabBank Transaction Payments` as btp
-		LEFT JOIN
-			`tabBank Transaction` bt ON bt.name=btp.parent
-		WHERE
-			btp.payment_document = %s
-		AND
-			btp.payment_entry = %s
-		AND
-			bt.docstatus = 1""",
-		(payment_entry.payment_document, payment_entry.payment_entry),
-		as_dict=True,
-	)
+	bank_transaction = frappe.db.DocType("Bank Transaction")
+	bank_transaction_payments = frappe.db.DocType("Bank Transaction Payments")
+
+	return (
+		frappe.qb.form_(bank_transaction)
+		.left_join(bank_transaction_payments)
+		.on(bank_transaction.name == bank_transaction_payments.parent)
+		.select(Sum(bank_transaction_payments.allocated_amount), bank_transaction.name)
+		.where(
+			(bank_transaction_payments.payment_document == payment_entry.payment_document)
+			& (bank_transaction_payments.payment_entry == payment_entry.payment_entry)
+			& (bank_transaction.docstatus == 1)
+		)
+	).run(as_dict=1)
 
 
 def get_paid_amount(payment_entry, currency, bank_account):

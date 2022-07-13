@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import flt
 
 
@@ -17,14 +18,19 @@ class CashierClosing(Document):
 		self.make_calculations()
 
 	def get_outstanding(self):
-		values = frappe.db.sql(
-			"""
-			select sum(outstanding_amount)
-			from `tabSales Invoice`
-			where posting_date=%s and posting_time>=%s and posting_time<=%s and owner=%s
-		""",
-			(self.date, self.from_time, self.time, self.user),
-		)
+		sales_invoice = frappe.qb.DocType("Sales Invoice")
+
+		values = (
+			frappe.qb.from_(sales_invoice)
+			.select(Sum(sales_invoice.outstanding_amount))
+			.where(
+				(sales_invoice.owner != self.user)
+				& (sales_invoice.posting_date == self.date)
+				& (sales_invoice.posting_time >= self.from_time)
+				& (sales_invoice.posting_time <= self.time)
+			)
+		).run()
+
 		self.outstanding_amount = flt(values[0][0] if values else 0)
 
 	def make_calculations(self):
