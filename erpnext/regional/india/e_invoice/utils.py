@@ -65,6 +65,7 @@ def validate_eligibility(doc):
 		"SEZ",
 		"Overseas",
 		"Deemed Export",
+		"UIN Holders",
 	]
 	company_transaction = doc.get("billing_address_gstin") == doc.get("company_gstin")
 
@@ -130,9 +131,7 @@ def read_json(name):
 
 def get_transaction_details(invoice):
 	supply_type = ""
-	if (
-		invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition"
-	):
+	if invoice.gst_category in ("Registered Regular", "Registered Composition", "UIN Holders"):
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
 		if invoice.export_type == "Without Payment of Tax":
@@ -148,15 +147,18 @@ def get_transaction_details(invoice):
 		supply_type = "DEXP"
 
 	if not supply_type:
-		rr, rc, sez, overseas, export = (
+		rr, rc, sez, overseas, export, uin = (
 			bold("Registered Regular"),
 			bold("Registered Composition"),
 			bold("SEZ"),
 			bold("Overseas"),
 			bold("Deemed Export"),
+			bold("UIN Holders"),
 		)
 		frappe.throw(
-			_("GST category should be one of {}, {}, {}, {}, {}").format(rr, rc, sez, overseas, export),
+			_("GST category should be one of {}, {}, {}, {}, {}, {}").format(
+				rr, rc, sez, overseas, export, uin
+			),
 			title=_("Invalid Supply Type"),
 		)
 
