@@ -6,8 +6,6 @@ import frappe
 from frappe import _
 from frappe.utils.dashboard import cache_source
 
-from erpnext.stock.utils import get_stock_value_from_bin
-
 
 @frappe.whitelist()
 @cache_source
@@ -38,7 +36,7 @@ def get(
 		fields=["warehouse", "stock_value"],
 		filters={"warehouse": ["IN", warehouses], "stock_value": [">", 0]},
 		order_by="stock_value DESC",
-		limit_page_length=10
+		limit_page_length=10,
 	)
 
 	if not warehouses:
