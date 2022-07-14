@@ -110,43 +110,43 @@ frappe.ui.form.on("Purchase Receipt", {
 		var enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["cost_center"], enabled);
 	},
-
-		/////////////delete items total and total_qty update
-		set_total_allocated_amount: function(frm) {
-			var total = 0.0;
-			var base_total = 0.0;
-			$.each(frm.doc.items || [], function(i, row) {
-				if (row.amount) {
-					total += flt(row.amount);
-					base_total += flt(flt(row.amount)*flt(row.exchange_rate));
-				}
-			});
-			frm.set_value("total", Math.abs(total));
-			console.log("total_allocated_amount",total)
-
-		},
-		set_total_quantity: function(frm) {
-			var total_qty = 0.0;
-			var base_total = 0.0;
-			$.each(frm.doc.items || [], function(i, row) {
-				if (row.qty) {
-					total_qty += flt(row.qty);
-				}
-				row.total_qty= flt(row.qty) - flt(row.total_qty);
-				frm.refresh_field("total_qty",total_qty);
-			});
-			frm.set_value("total_qty", Math.abs(total_qty));
-			console.log("total_allocated_amount 3",total_qty)
-		},
-			/////////////delete items, total and total_qty update
+	/////////////delete items total and total_qty update
+	set_total_allocated_amount: function (frm) {
+		var total = 0.0;
+		var base_total = 0.0;
+		$.each(frm.doc.items || [], function (i, row) {
+			if (row.amount) {
+				total += flt(row.amount);
+				base_total += flt(flt(row.amount) * flt(row.exchange_rate));
+			}
+		});
+		frm.set_value("total", Math.abs(total));	
+	},
+	set_total_quantity: function (frm) {
+		var total_qty = 0.0;
+		$.each(frm.doc.items || [], function (i, row) {
+			if (row.qty) {
+				total_qty += flt(row.qty);
+			}
+			row.total_qty = flt(row.qty) - flt(row.total_qty);
+			frm.refresh_field("total_qty", total_qty);
+		});
+		frm.set_value("total_qty", Math.abs(total_qty));
+	}
 });
 
 frappe.ui.form.on("Purchase Receipt Item", {
-	items_remove: function(frm) {
+	item_code: function (frm, cdt, cdn) {
+		var item = locals[cdt][cdn];
+		if (!item.item_code && (item.qty || item.rate || item.amount)) {
+			cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+			cur_frm.refresh_fields();
+		}
+	},
+	items_remove: function (frm) {
 		frm.events.set_total_allocated_amount(frm);
 		frm.events.set_total_quantity(frm);
-	}
-
+	},
 });
 
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({

@@ -84,20 +84,54 @@ frappe.ui.form.on("Purchase Order", {
 				});
 			}, __('Create'));
 		} */
+	},
+	/////////////delete items total and total_qty update
+	set_total_allocated_amount: function (frm) {
+		var total = 0.0;
+		var base_total = 0.0;
+		$.each(frm.doc.items || [], function (i, row) {
+			if (row.amount) {
+				total += flt(row.amount);
+				base_total += flt(flt(row.amount) * flt(row.exchange_rate));
+			}
+		});
+		frm.set_value("total", Math.abs(total));
+	},
+	set_total_quantity: function (frm) {
+		var total_qty = 0.0;
+		$.each(frm.doc.items || [], function (i, row) {
+			if (row.qty) {
+				total_qty += flt(row.qty);
+			}
+			row.total_qty = flt(row.qty) - flt(row.total_qty);
+			frm.refresh_field("total_qty", total_qty);
+		});
+		frm.set_value("total_qty", Math.abs(total_qty));
 	}
 });
 
 frappe.ui.form.on("Purchase Order Item", {
-	schedule_date: function(frm, cdt, cdn) {
+	schedule_date: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
-			if(!frm.doc.schedule_date) {
+			if (!frm.doc.schedule_date) {
 				erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
 			} else {
 				set_schedule_date(frm);
 			}
 		}
-	}
+	},
+	item_code: function (frm, cdt, cdn) {
+		var item = locals[cdt][cdn];
+		if (!item.item_code && (item.qty || item.rate || item.amount)) {
+			cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+			cur_frm.refresh_fields();
+		}
+	},
+	items_remove: function (frm) {
+		frm.events.set_total_allocated_amount(frm);
+		frm.events.set_total_quantity(frm);
+	},
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
