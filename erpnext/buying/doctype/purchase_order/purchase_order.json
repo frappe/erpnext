@@ -16,6 +16,8 @@
   "supplier_name",
   "apply_tds",
   "tax_withholding_category",
+  "is_subcontracted",
+  "supplier_warehouse",
   "column_break1",
   "company",
   "transaction_date",
@@ -55,10 +57,7 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
-  "sec_warehouse",
-  "is_subcontracted",
-  "col_break_warehouse",
-  "supplier_warehouse",
+  "section_break_45",
   "before_items_section",
   "scan_barcode",
   "items_col_break",
@@ -142,7 +141,8 @@
   "party_account_currency",
   "is_internal_supplier",
   "represents_company",
-  "inter_company_order_reference"
+  "inter_company_order_reference",
+  "is_old_subcontracting_flow"
  ],
  "fields": [
   {
@@ -158,7 +158,8 @@
    "hidden": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "naming_series",
@@ -444,11 +445,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break",
-   "label": "Subcontracting"
-  },
-  {
    "description": "Sets 'Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
@@ -457,14 +453,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "col_break_warehouse",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "is_subcontracted",
    "fieldtype": "Check",
-   "in_standard_filter": 1,
    "label": "Is Subcontracted",
    "print_hide": 1
   },
@@ -1143,6 +1134,10 @@
    "options": "Tax Withholding Category"
   },
   {
+   "fieldname": "section_break_45",
+   "fieldtype": "Section Break"
+  },
+  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -1163,13 +1158,21 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_old_subcontracting_flow",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Old Subcontracting Flow",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-26 12:16:38.694276",
+ "modified": "2022-06-15 15:40:58.527065",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
