@@ -48,6 +48,10 @@
   "total_payment",
   "total_principal_paid",
   "written_off_amount",
+  "refund_amount",
+  "debit_adjustment_amount",
+  "credit_adjustment_amount",
+  "is_npa",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
@@ -379,12 +383,39 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "refund_amount",
+   "fieldtype": "Currency",
+   "label": "Refund amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Adjustment Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "debit_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Debit Adjustment Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "description": "Mark Loan as a Nonperforming asset",
+   "fieldname": "is_npa",
+   "fieldtype": "Check",
+   "label": "Is NPA"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-10 11:50:31.957360",
+ "modified": "2022-06-30 12:04:13.728880",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
