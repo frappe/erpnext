@@ -344,6 +344,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.supplier",
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Supplier Address",
@@ -506,7 +507,6 @@
    "options": "Barcode"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Product",
@@ -1207,7 +1207,9 @@
    "fetch_from": "supplier.supplier_code",
    "fieldname": "supplier_code",
    "fieldtype": "Data",
-   "label": "Supplier Code"
+   "hidden": 1,
+   "label": "Supplier Code",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,

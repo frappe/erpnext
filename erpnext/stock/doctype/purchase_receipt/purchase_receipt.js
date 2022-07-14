@@ -52,6 +52,8 @@ frappe.ui.form.on("Purchase Receipt", {
 		if(frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
+		//------Remove Add Row button in child table in logistic notice
+		frm.set_df_property('items', 'cannot_add_rows', true);
 
 		/* if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Debit Note'), function() {
