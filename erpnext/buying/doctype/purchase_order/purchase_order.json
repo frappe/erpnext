@@ -181,6 +181,7 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
@@ -204,6 +205,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Supplier Name",
    "read_only": 1
   },
@@ -273,6 +275,7 @@
   {
    "fieldname": "drop_ship",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Drop Ship"
   },
   {
@@ -331,14 +334,13 @@
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "hidden": 1,
-   "label": "Supplier Address link",
+   "label": "Supplier Address",
    "options": "Address",
    "print_hide": 1
   },
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Supplier Contact",
    "options": "Contact",
    "print_hide": 1
@@ -347,13 +349,12 @@
    "depends_on": "eval:doc.supplier",
    "fieldname": "address_display",
    "fieldtype": "Small Text",
-   "label": "Supplier Address",
+   "label": "Supplier Address Details",
    "read_only": 1
   },
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "in_global_search": 1,
    "label": "Contact Name",
    "read_only": 1
@@ -361,14 +362,12 @@
   {
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Contact Mobile No",
    "read_only": 1
   },
   {
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Contact Email",
    "options": "Email",
    "print_hide": 1,
@@ -381,7 +380,6 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company Shipping Address",
    "options": "Address",
    "print_hide": 1
@@ -389,7 +387,6 @@
   {
    "fieldname": "shipping_address_display",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Shipping Address Details",
    "print_hide": 1,
    "read_only": 1
@@ -485,7 +482,6 @@
    "print_hide": 1
   },
   {
-   "default": "Supplier - U",
    "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
@@ -788,6 +784,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Grand Total (Company Currency)",
    "no_copy": 1,
    "oldfieldname": "grand_total",
@@ -1126,14 +1123,12 @@
   {
    "fieldname": "billing_address",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company Billing Address",
    "options": "Address"
   },
   {
    "fieldname": "billing_address_display",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Billing Address Details",
    "read_only": 1
   },
@@ -1201,7 +1196,8 @@
   },
   {
    "fieldname": "section_break_3",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fetch_from": "supplier.supplier_code",
@@ -1217,7 +1213,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-13 06:16:51.788712",
+ "modified": "2022-07-14 04:58:08.742426",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1267,6 +1263,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "timeline_field": "supplier",
+ "title_field": "supplier_name",
  "track_changes": 1
 }
