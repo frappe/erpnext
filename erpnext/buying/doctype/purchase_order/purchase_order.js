@@ -437,8 +437,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		})
 	},
 
-	add_from_mappers: function() {
-		var me = this;
+	// add_from_mappers: function() {
+	// 	var me = this;
 		/* this.frm.add_custom_button(__('Material Request'),
 			function() {
 				erpnext.utils.map_current_doc({
@@ -546,7 +546,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			});
 		}, __("Tools")); */
-	},
+	// },
 
 	tc_name: function() {
 		this.get_terms();

@@ -15,6 +15,7 @@
   "section_break_3",
   "column_break0",
   "supplier",
+  "purchase_order",
   "supplier_name",
   "supplier_delivery_note",
   "column_break1",
@@ -162,14 +163,14 @@
    "print_hide": 1
   },
   {
-   "default": ".purchase_order_no.-PRO-.##.",
+   "default": ".purchase_order.-PRO-.##.",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-PRE-.YYYY.-\nMAT-PR-RET-.YYYY.-\n.purchase_order_no.-PRO-.##.",
+   "options": "MAT-PRE-.YYYY.-\nMAT-PR-RET-.YYYY.-\n.purchase_order.-PRO-.##.",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -474,7 +475,6 @@
    "options": "fa fa-shopping-cart"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Product",
@@ -1185,6 +1185,13 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Order",
+   "options": "Purchase Order"
   }
  ],
  "hide_toolbar": 1,
@@ -1192,7 +1199,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-12 07:47:50.937666",
+ "modified": "2022-07-14 02:42:07.982642",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

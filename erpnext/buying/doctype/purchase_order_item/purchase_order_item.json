@@ -455,6 +455,7 @@
    "label": "Warehouse and Reference"
   },
   {
+   "default": "Supplier - U",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "hidden": 1,
@@ -883,7 +884,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-12 07:41:32.391764",
+ "modified": "2022-07-14 01:31:50.781940",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

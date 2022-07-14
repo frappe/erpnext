@@ -120,7 +120,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		if(this.frm.doc.docstatus==0 &&
 			(this.frm.doctype==="Purchase Order" || this.frm.doctype==="Material Request")) {
-			this.set_from_product_bundle();
+			// this.set_from_product_bundle();
 		}
 
 		this.toggle_subcontracting_fields();
