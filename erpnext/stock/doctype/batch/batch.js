@@ -162,3 +162,11 @@ frappe.ui.form.on('Batch', 'manufacturing_date', function (frm){
 		}
 	})
 })
+
+//Expiry Date Cannot Be Select Before Manufacturing Date
+frappe.ui.form.on('Batch', 'validate', function (frm) {
+	if (frm.doc.manufacturing_date > frm.doc.expiry_date) {
+		msgprint(__("Expiry Date Cannot Be Select Before Manufacturing Date"));
+		validated = false;
+	}
+});

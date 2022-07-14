@@ -116,29 +116,29 @@ frappe.ui.form.on("Customer", {
 			frappe.contacts.render_address_and_contact(frm);
 
 			// custom buttons
-
+/* 
 			frm.add_custom_button(__('Accounts Receivable'), function () {
 				frappe.set_route('query-report', 'Accounts Receivable', {customer:frm.doc.name});
-			}, __('View'));
-
+			}, __('View')); */
+/* 
 			frm.add_custom_button(__('Accounting Ledger'), function () {
 				frappe.set_route('query-report', 'General Ledger',
 					{party_type: 'Customer', party: frm.doc.name});
-			}, __('View'));
-
+			}, __('View')); */
+/* 
 			frm.add_custom_button(__('Pricing Rule'), function () {
 				erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name);
-			}, __('Create'));
-
+			}, __('Create')); */
+/* 
 			frm.add_custom_button(__('Get Customer Group Details'), function () {
 				frm.trigger("get_customer_group_details");
 			}, __('Actions'));
-
-			if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
+ */
+		/* 	if (cint(frappe.defaults.get_default("enable_common_party_accounting"))) {
 				frm.add_custom_button(__('Link with Supplier'), function () {
 					frm.trigger('show_party_link_dialog');
 				}, __('Actions'));
-			}
+			} */
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);
@@ -201,6 +201,46 @@ frappe.ui.form.on("Customer", {
 			primary_action_label: __('Create Link')
 		});
 		dialog.show();
-	}
+	},
 });
 
+
+frappe.ui.form.on("Customer", "after_save", function (frm) {
+	$.each(cur_frm.doc.customer_selling_price || [], function (i, v) {
+		var price_list_rate;
+		frappe.call({
+			method: "frappe.client.get_list",
+			args: {
+				doctype: "Item Price",
+				filters: [
+					['price_list', "=", "Standard Selling"],
+					["item_code", "=", v.product_name],
+					["customer", "=", frm.doc.name],
+				],
+				fields: [
+					"price_list_rate",
+					"name",
+				]
+			},
+			callback: function (r) {
+				price_list_rate = (r.message[0].price_list_rate);
+				var item_code = r.message[0].name
+				if (price_list_rate && price_list_rate != v.selling_price) {
+					frappe.confirm(
+						`Do you want to update the price do item ${v.item_name} of ${price_list_rate} for ${v.selling_price} in the price list  ?`, //ask something to update price
+						function () {
+							frappe.db.set_value("Item Price", item_code, "price_list_rate", v.selling_price)
+						}
+					)
+				}
+			}
+		});
+	})
+})
+
+frappe.ui.form.on("Customer Product", "product_name", function (frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	frappe.db.get_value("Item Price", { "item_code": d.product_name, "price_list": "Standard Buying" }, "price_list_rate", function (value) {
+		frappe.model.set_value(d.doctype, d.name, "pack_price", value.price_list_rate)
+	});
+});
