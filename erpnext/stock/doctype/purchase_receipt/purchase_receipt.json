@@ -12,9 +12,8 @@
   "supplier_section",
   "title",
   "naming_series",
-  "column_break0",
-  "purchase_order_no",
   "section_break_3",
+  "column_break0",
   "supplier",
   "purchase_order",
   "supplier_name",
@@ -420,10 +419,10 @@
   },
   {
    "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
-   "default": "Supplier - U",
    "description": "Sets 'Accepted Warehouse' in each row of the items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
@@ -772,6 +771,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Grand Total (Company Currency)",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
@@ -1154,7 +1154,6 @@
    "read_only": 1
   },
   {
-   "default": "Supplier - U",
    "depends_on": "eval: doc.is_internal_supplier",
    "description": "Sets 'From Warehouse' in each row of the items table.",
    "fieldname": "set_from_warehouse",
@@ -1201,7 +1200,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-14 02:42:07.982642",
+ "modified": "2022-07-14 04:56:36.888683",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1265,6 +1264,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "title",
  "track_changes": 1
 }

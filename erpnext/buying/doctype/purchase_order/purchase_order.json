@@ -181,6 +181,7 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
@@ -204,6 +205,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Supplier Name",
    "read_only": 1
   },
@@ -782,6 +784,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Grand Total (Company Currency)",
    "no_copy": 1,
    "oldfieldname": "grand_total",
@@ -1210,7 +1213,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-14 04:36:43.241297",
+ "modified": "2022-07-14 04:58:08.742426",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1260,7 +1263,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1
 }
