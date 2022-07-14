@@ -51,7 +51,6 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Period End Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -228,7 +227,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2021-10-20 16:19:25.340565",
+ "modified": "2022-07-14 12:15:25.340565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

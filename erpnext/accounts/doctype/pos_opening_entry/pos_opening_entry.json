@@ -179,6 +179,7 @@
    "write": 1
   }
  ],
+ "search_fields": "status,user,period_start_date",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

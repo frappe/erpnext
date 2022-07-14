@@ -397,7 +397,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 			for _invoices in split_invoices(invoices):
 				merge_log = frappe.new_doc("POS Invoice Merge Log")
 				merge_log.posting_date = (
-					getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
+					getdate(closing_entry.get("period_end_date")) if closing_entry else nowdate()
 				)
 				merge_log.customer = customer
 				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
