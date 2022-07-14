@@ -88,14 +88,21 @@ frappe.ui.form.on("Purchase Order", {
 });
 
 frappe.ui.form.on("Purchase Order Item", {
-	schedule_date: function(frm, cdt, cdn) {
+	schedule_date: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
-			if(!frm.doc.schedule_date) {
+			if (!frm.doc.schedule_date) {
 				erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
 			} else {
 				set_schedule_date(frm);
 			}
+		}
+	},
+	item_code: function (frm, cdt, cdn) {
+		var item = locals[cdt][cdn];
+		if (!item.item_code && (item.qty || item.rate || item.amount)) {
+			cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+			cur_frm.refresh_fields();
 		}
 	}
 });
