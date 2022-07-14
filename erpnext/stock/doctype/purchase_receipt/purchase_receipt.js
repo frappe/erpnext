@@ -120,13 +120,10 @@ frappe.ui.form.on("Purchase Receipt", {
 				base_total += flt(flt(row.amount) * flt(row.exchange_rate));
 			}
 		});
-		frm.set_value("total", Math.abs(total));
-		console.log("total_allocated_amount", total)
-	
+		frm.set_value("total", Math.abs(total));	
 	},
 	set_total_quantity: function (frm) {
 		var total_qty = 0.0;
-		var base_total = 0.0;
 		$.each(frm.doc.items || [], function (i, row) {
 			if (row.qty) {
 				total_qty += flt(row.qty);
@@ -135,7 +132,6 @@ frappe.ui.form.on("Purchase Receipt", {
 			frm.refresh_field("total_qty", total_qty);
 		});
 		frm.set_value("total_qty", Math.abs(total_qty));
-		console.log("total_allocated_amount 3", total_qty)
 	}
 });
 
