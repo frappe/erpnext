@@ -273,21 +273,26 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 
-		if invoice.get("apply_discount_on"):
-			item.discount_amount = item.base_amount - item.base_net_amount
+		if invoice.get("apply_discount_on") and (invoice.get("base_discount_amount") > 0.00):
+			# TODO: need to handle case when tax included in basic rate is checked.
+			item.discount_amount = (item.discount_amount * item.qty) + (
+				item.base_amount - item.base_net_amount
+			)
+		else:
+			item.discount_amount = item.discount_amount * item.qty
 
 		if invoice.get("is_return") or invoice.get("is_debit_note"):
-			item.unit_rate = abs(item.taxable_value - item.discount_amount) / (
+			item.unit_rate = abs(item.taxable_value + item.discount_amount) / (
 				1 if (item.qty == 0) else item.qty
 			)
 		else:
 			try:
-				item.unit_rate = abs(item.taxable_value - item.discount_amount) / item.qty
+				item.unit_rate = abs(item.taxable_value + item.discount_amount) / item.qty
 			except ZeroDivisionError:
 				# This will never run but added as safety measure
 				frappe.throw(
-					title="Error: Qty is Zero",
-					msg="Quantity can't be zero unless it's Credit/Debit Note.",
+					title=_("Error: Qty is Zero"),
+					msg=_("Quantity can't be zero unless it's Credit/Debit Note."),
 				)
 
 		item.gross_amount = abs(item.taxable_value) + item.discount_amount
