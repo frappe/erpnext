@@ -4,6 +4,11 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+	CanNotBeChildDoc,
+	CanNotBeDefaultDimension,
+	DoNotChangeError,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
@@ -12,11 +17,36 @@ class TestInventoryDimension(FrappeTestCase):
 	def setUp(self):
 		prepare_test_data()
 
+	def test_validate_inventory_dimension(self):
+		# Can not be child doc
+		inv_dim1 = create_inventory_dimension(
+			reference_document="Stock Entry Detail",
+			type_of_transaction="Outward",
+			dimension_name="Stock Entry",
+			apply_to_all_doctypes=0,
+			istable=0,
+			document_type="Stock Entry",
+			do_not_save=True,
+		)
+
+		self.assertRaises(CanNotBeChildDoc, inv_dim1.insert)
+
+		inv_dim1 = create_inventory_dimension(
+			reference_document="Batch",
+			type_of_transaction="Outward",
+			dimension_name="Batch",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			do_not_save=True,
+		)
+
+		self.assertRaises(CanNotBeDefaultDimension, inv_dim1.insert)
+
 	def test_inventory_dimension(self):
 		warehouse = "Shelf Warehouse - _TC"
 		item_code = "_Test Item"
 
-		create_inventory_dimension(
+		inv_dim1 = create_inventory_dimension(
 			reference_document="Shelf",
 			type_of_transaction="Outward",
 			dimension_name="Shelf",
@@ -47,7 +77,6 @@ class TestInventoryDimension(FrappeTestCase):
 		inward.save()
 		inward.submit()
 		inward.load_from_db()
-		print(inward.name)
 
 		sle_data = frappe.db.get_value(
 			"Stock Ledger Entry", {"voucher_no": inward.name}, ["shelf", "warehouse"], as_dict=1
@@ -73,6 +102,12 @@ class TestInventoryDimension(FrappeTestCase):
 
 		sle_shelf = frappe.db.get_value("Stock Ledger Entry", {"voucher_no": outward.name}, "shelf")
 		self.assertEqual(sle_shelf, "Shelf 1")
+
+		inv_dim1.load_from_db()
+		inv_dim1.apply_to_all_doctypes = 1
+
+		self.assertTrue(inv_dim1.has_stock_ledger())
+		self.assertRaises(DoNotChangeError, inv_dim1.save)
 
 
 def prepare_test_data():
@@ -107,6 +142,8 @@ def create_inventory_dimension(**args):
 
 	doc = frappe.new_doc("Inventory Dimension")
 	doc.update(args)
-	doc.insert(ignore_permissions=True)
+
+	if not args.do_not_save:
+		doc.insert(ignore_permissions=True)
 
 	return doc

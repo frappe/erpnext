@@ -85,7 +85,7 @@
    "default": "0",
    "fieldname": "apply_to_all_doctypes",
    "fieldtype": "Check",
-   "label": "Apply to All Document Types"
+   "label": "Apply to All Inventory Document Types"
   },
   {
    "default": "0",
@@ -144,7 +144,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-05 15:33:37.270373",
+ "modified": "2022-07-19 21:06:11.824976",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",

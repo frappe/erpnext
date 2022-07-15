@@ -329,7 +329,7 @@ def get_stock_ledger_entries(filters: StockBalanceFilter, items: List[str]) -> L
 		query = query.where(sle.item_code.isin(items))
 
 	query = apply_conditions(query, filters)
-	return query.run(as_dict=True, debug=1)
+	return query.run(as_dict=True)
 
 
 def get_inventory_dimension_fields():

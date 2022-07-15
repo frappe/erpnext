@@ -4,7 +4,9 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cint, flt
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -70,7 +72,7 @@ def update_available_serial_nos(available_serial_nos, sle):
 	key = (sle.item_code, sle.warehouse)
 	if key not in available_serial_nos:
 		stock_balance = get_stock_balance_for(
-			sle.item_code, sle.warehouse, sle.date.split(" ")[0], sle.date.split(" ")[1]
+			sle.item_code, sle.warehouse, sle.posting_date, sle.posting_time
 		)
 		serials = get_serial_nos(stock_balance["serial_nos"]) if stock_balance["serial_nos"] else []
 		available_serial_nos.setdefault(key, serials)
@@ -109,116 +111,6 @@ def get_columns(filters):
 			"options": "UOM",
 			"width": 90,
 		},
-		{
-			"label": _("In Qty"),
-			"fieldname": "in_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Out Qty"),
-			"fieldname": "out_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Balance Qty"),
-			"fieldname": "qty_after_transaction",
-			"fieldtype": "Float",
-			"width": 100,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Voucher #"),
-			"fieldname": "voucher_no",
-			"fieldtype": "Dynamic Link",
-			"options": "voucher_type",
-			"width": 150,
-		},
-		{
-			"label": _("Warehouse"),
-			"fieldname": "warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"width": 150,
-		},
-		{
-			"label": _("Item Group"),
-			"fieldname": "item_group",
-			"fieldtype": "Link",
-			"options": "Item Group",
-			"width": 100,
-		},
-		{
-			"label": _("Brand"),
-			"fieldname": "brand",
-			"fieldtype": "Link",
-			"options": "Brand",
-			"width": 100,
-		},
-		{"label": _("Description"), "fieldname": "description", "width": 200},
-		{
-			"label": _("Incoming Rate"),
-			"fieldname": "incoming_rate",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-			"convertible": "rate",
-		},
-		{
-			"label": _("Valuation Rate"),
-			"fieldname": "valuation_rate",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-			"convertible": "rate",
-		},
-		{
-			"label": _("Balance Value"),
-			"fieldname": "stock_value",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-		},
-		{
-			"label": _("Value Change"),
-			"fieldname": "stock_value_difference",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-		},
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
-		{
-			"label": _("Voucher #"),
-			"fieldname": "voucher_no",
-			"fieldtype": "Dynamic Link",
-			"options": "voucher_type",
-			"width": 100,
-		},
-		{
-			"label": _("Batch"),
-			"fieldname": "batch_no",
-			"fieldtype": "Link",
-			"options": "Batch",
-			"width": 100,
-		},
-		{
-			"label": _("Serial No"),
-			"fieldname": "serial_no",
-			"fieldtype": "Link",
-			"options": "Serial No",
-			"width": 100,
-		},
-		{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
-		{
-			"label": _("Project"),
-			"fieldname": "project",
-			"fieldtype": "Link",
-			"options": "Project",
-			"width": 100,
-		},
 	]
 
 	for dimension in get_inventory_dimensions():
@@ -232,72 +124,197 @@ def get_columns(filters):
 			}
 		)
 
-	columns.append(
-		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 110,
-		}
+	columns.extend(
+		[
+			{
+				"label": _("In Qty"),
+				"fieldname": "in_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Out Qty"),
+				"fieldname": "out_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Balance Qty"),
+				"fieldname": "qty_after_transaction",
+				"fieldtype": "Float",
+				"width": 100,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Voucher #"),
+				"fieldname": "voucher_no",
+				"fieldtype": "Dynamic Link",
+				"options": "voucher_type",
+				"width": 150,
+			},
+			{
+				"label": _("Warehouse"),
+				"fieldname": "warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 150,
+			},
+			{
+				"label": _("Item Group"),
+				"fieldname": "item_group",
+				"fieldtype": "Link",
+				"options": "Item Group",
+				"width": 100,
+			},
+			{
+				"label": _("Brand"),
+				"fieldname": "brand",
+				"fieldtype": "Link",
+				"options": "Brand",
+				"width": 100,
+			},
+			{"label": _("Description"), "fieldname": "description", "width": 200},
+			{
+				"label": _("Incoming Rate"),
+				"fieldname": "incoming_rate",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Valuation Rate"),
+				"fieldname": "valuation_rate",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Balance Value"),
+				"fieldname": "stock_value",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+			},
+			{
+				"label": _("Value Change"),
+				"fieldname": "stock_value_difference",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+			},
+			{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
+			{
+				"label": _("Voucher #"),
+				"fieldname": "voucher_no",
+				"fieldtype": "Dynamic Link",
+				"options": "voucher_type",
+				"width": 100,
+			},
+			{
+				"label": _("Batch"),
+				"fieldname": "batch_no",
+				"fieldtype": "Link",
+				"options": "Batch",
+				"width": 100,
+			},
+			{
+				"label": _("Serial No"),
+				"fieldname": "serial_no",
+				"fieldtype": "Link",
+				"options": "Serial No",
+				"width": 100,
+			},
+			{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
+			{
+				"label": _("Project"),
+				"fieldname": "project",
+				"fieldtype": "Link",
+				"options": "Project",
+				"width": 100,
+			},
+			{
+				"label": _("Company"),
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+				"width": 110,
+			},
+		]
 	)
 
 	return columns
 
 
 def get_stock_ledger_entries(filters, items):
-	item_conditions_sql = ""
-	if items:
-		item_conditions_sql = "and sle.item_code in ({})".format(
-			", ".join(frappe.db.escape(i) for i in items)
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			CombineDatetime(sle.posting_date, sle.posting_time).as_("date"),
+			sle.warehouse,
+			sle.posting_date,
+			sle.posting_time,
+			sle.actual_qty,
+			sle.incoming_rate,
+			sle.valuation_rate,
+			sle.company,
+			sle.voucher_type,
+			sle.qty_after_transaction,
+			sle.stock_value_difference,
+			sle.voucher_no,
+			sle.stock_value,
+			sle.batch_no,
+			sle.serial_no,
+			sle.project,
 		)
-
-	sl_entries = frappe.db.sql(
-		"""
-		SELECT
-			concat_ws(' ', posting_date, posting_time) AS date,
-			item_code,
-			warehouse,
-			actual_qty,
-			qty_after_transaction,
-			incoming_rate,
-			valuation_rate,
-			stock_value,
-			voucher_type,
-			voucher_no,
-			batch_no,
-			serial_no,
-			company,
-			project,
-			stock_value_difference {get_dimension_fields}
-		FROM
-			`tabStock Ledger Entry` sle
-		WHERE
-			company = %(company)s
-				AND is_cancelled = 0 AND posting_date BETWEEN %(from_date)s AND %(to_date)s
-				{sle_conditions}
-				{item_conditions_sql}
-		ORDER BY
-			posting_date asc, posting_time asc, creation asc
-		""".format(
-			sle_conditions=get_sle_conditions(filters),
-			item_conditions_sql=item_conditions_sql,
-			get_dimension_fields=get_dimension_fields(),
-		),
-		filters,
-		as_dict=1,
+		.where(
+			(sle.docstatus < 2)
+			& (sle.is_cancelled == 0)
+			& (sle.posting_date[filters.from_date : filters.to_date])
+		)
+		.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+		.orderby(sle.creation)
 	)
 
-	return sl_entries
+	inventory_dimension_fields = get_inventory_dimension_fields()
+	if inventory_dimension_fields:
+		for fieldname in inventory_dimension_fields:
+			query = query.select(fieldname)
+			if fieldname in filters and filters.get(fieldname):
+				query = query.where(sle[fieldname].isin(filters.get(fieldname)))
+
+	if items:
+		query = query.where(sle.item_code.isin(items))
+
+	for field in ["voucher_no", "batch_no", "project", "company"]:
+		if filters.get(field):
+			query = query.where(sle[field] == filters.get(field))
+
+	if warehouse := filters.get("warehouse"):
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+
+		warehouse_table = frappe.qb.DocType("Warehouse")
+		chilren_subquery = (
+			frappe.qb.from_(warehouse_table)
+			.select(warehouse_table.name)
+			.where(
+				(warehouse_table.lft >= lft)
+				& (warehouse_table.rgt <= rgt)
+				& (warehouse_table.name == sle.warehouse)
+			)
+		)
+		query = query.where(ExistsCriterion(chilren_subquery))
+
+	return query.run(as_dict=True)
 
 
-def get_dimension_fields() -> str:
-	fields = ""
-
-	for dimension in get_inventory_dimensions():
-		fields += f", {dimension.fieldname}"
-
-	return fields
+def get_inventory_dimension_fields():
+	return [dimension.fieldname for dimension in get_inventory_dimensions()]
 
 
 def get_items(filters):
@@ -395,7 +412,7 @@ def get_opening_balance(filters, columns, sl_entries):
 	for sle in sl_entries:
 		if (
 			sle.get("voucher_type") == "Stock Reconciliation"
-			and sle.get("date").split()[0] == filters.from_date
+			and sle.posting_date == filters.from_date
 			and frappe.db.get_value("Stock Reconciliation", sle.voucher_no, "purpose") == "Opening Stock"
 		):
 			last_entry = sle

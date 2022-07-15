@@ -11,6 +11,14 @@ class DoNotChangeError(frappe.ValidationError):
 	pass
 
 
+class CanNotBeChildDoc(frappe.ValidationError):
+	pass
+
+
+class CanNotBeDefaultDimension(frappe.ValidationError):
+	pass
+
+
 class InventoryDimension(Document):
 	def onload(self):
 		if not self.is_new() and frappe.db.has_column("Stock Ledger Entry", self.target_fieldname):
@@ -51,11 +59,11 @@ class InventoryDimension(Document):
 	def validate_reference_document(self):
 		if frappe.get_cached_value("DocType", self.reference_document, "istable") == 1:
 			msg = f"The reference document {self.reference_document} can not be child table."
-			frappe.throw(_(msg))
+			frappe.throw(_(msg), CanNotBeChildDoc)
 
 		if self.reference_document in ["Batch", "Serial No", "Warehouse", "Item"]:
 			msg = f"The reference document {self.reference_document} can not be an Inventory Dimension."
-			frappe.throw(_(msg))
+			frappe.throw(_(msg), CanNotBeDefaultDimension)
 
 	def set_source_and_target_fieldname(self) -> None:
 		if not self.source_fieldname:
@@ -122,8 +130,9 @@ def get_inventory_documents(
 	)
 
 
-def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None) -> dict:
+def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 	dimensions = get_document_wise_inventory_dimensions(doc.doctype)
+	filter_dimensions = []
 	for row in dimensions:
 		if (
 			row.type_of_transaction == "Inward"
@@ -142,8 +151,12 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None) -> dict:
 		if parent_doc:
 			evals["parent"] = parent_doc
 
-		if frappe.safe_eval(row.condition, evals):
-			return row
+		if row.condition and frappe.safe_eval(row.condition, evals):
+			filter_dimensions.append(row)
+		else:
+			filter_dimensions.append(row)
+
+	return filter_dimensions
 
 
 def get_document_wise_inventory_dimensions(doctype) -> dict:

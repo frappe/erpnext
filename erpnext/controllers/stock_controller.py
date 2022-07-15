@@ -372,9 +372,10 @@ class StockController(AccountsController):
 		return sl_dict
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
-		dimension = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
-		if dimension and row.get(dimension.source_fieldname):
-			sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
+		dimensions = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
+		for dimension in dimensions:
+			if dimension and row.get(dimension.source_fieldname):
+				sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
