@@ -60,7 +60,7 @@
   "company_representative",
   "representative_name",
   "representative_contact",
-  "representative_phone_",
+  "representative_phone",
   "column_break_51",
   "representative_email_id",
   "identity_proof",
@@ -483,11 +483,6 @@
    "label": "Company Representative Name"
   },
   {
-   "fieldname": "representative_phone_",
-   "fieldtype": "Data",
-   "label": "Contact Number"
-  },
-  {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break"
   },
@@ -515,6 +510,11 @@
    "fieldname": "representative_contact",
    "fieldtype": "Data",
    "label": "Representative Contact"
+  },
+  {
+   "fieldname": "representative_phone",
+   "fieldtype": "Data",
+   "label": "Contact Number"
   }
  ],
  "hide_toolbar": 1,
@@ -528,7 +528,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-15 01:38:14.342626",
+ "modified": "2022-07-15 01:49:45.905549",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
