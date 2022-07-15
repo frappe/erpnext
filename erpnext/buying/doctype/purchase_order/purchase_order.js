@@ -536,7 +536,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						cur_frm.refresh_field("material_request_check")
 						cur_frm.set_value("material_request_check", 0)
 						cur_frm.refresh_field("material_request_check")
-						cur_frm.save()
+						// cur_frm.save()
 					}
 					
 					refresh_field("items");
