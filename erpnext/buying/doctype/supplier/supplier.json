@@ -55,12 +55,12 @@
   "primary_address_and_contact_detail_section",
   "supplier_primary_contact",
   "supplier_primary_address",
+  "representative_phone",
   "column_break_44",
   "primary_address",
   "company_representative",
   "representative_name",
   "representative_contact",
-  "representative_phone",
   "column_break_51",
   "representative_email_id",
   "identity_proof",
@@ -528,7 +528,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-15 01:49:45.905549",
+ "modified": "2022-07-15 04:38:05.520796",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
