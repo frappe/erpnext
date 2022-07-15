@@ -97,6 +97,7 @@ frappe.ui.form.on("Purchase Order Item", {
 			}
 		}
 	},
+
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -503,7 +504,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 								d.qty = d.qty  - my_qty;
 								me.frm.doc.items[i].stock_qty = my_qty * me.frm.doc.items[i].conversion_factor;
 								me.frm.doc.items[i].qty = my_qty;
-
+								
 								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + me.frm.doc.items[i].idx + ")");
 								if (qty > 0) {
 									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
@@ -524,11 +525,31 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						});
 						i++;
 					}
+					
+					console.log("this is refresh items", cur_frm.doc.items)
+					var count = 0
+					$.each(cur_frm.doc.items, (idx, row) => {
+						console.log(" this is row", row.material_request)
+						if(row.material_request){
+							count = count + 1
+							console.log(" this is item", cur_frm.doc.currency)						
+						}
+					});
+					if (count > 0){
+						cur_frm.set_value("material_request_check", 1)
+						cur_frm.refresh_field("material_request_check")
+						cur_frm.set_value("material_request_check", 0)
+						cur_frm.refresh_field("material_request_check")
+						cur_frm.save()
+					}
+					
 					refresh_field("items");
 				}
 			});
 		}, __("Tools"));
 	},
+
+	
 
 	tc_name: function() {
 		this.get_terms();
