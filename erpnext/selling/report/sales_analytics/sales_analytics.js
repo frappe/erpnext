@@ -129,11 +129,16 @@ frappe.query_reports["Sales Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets,
 					};
+<<<<<<< HEAD
 					chart_options = {
 						data: new_data,
 						type: "line",
 					};
 					frappe.query_report.render_chart(chart_options);
+=======
+					const new_options = Object.assign({}, frappe.query_report.chart_options, {data: new_data});
+					frappe.query_report.render_chart(new_options);
+>>>>>>> ceeea6180e (fix: dont override default report options in charts)
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
