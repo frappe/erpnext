@@ -90,9 +90,9 @@ class AccountStatementPayment(Document):
 						row.net_pay = product.net_pay
 						row.sale_amount = product.sale_amount
 						row.reference = product.reference
-						if x == 1: row.history = _("Hospital Expenses")
+						if x == 1: row.history = _("Hospital Outgoings")
 						if x == 2: row.history = _("Inventory Requisition")
-						if x == 3: row.history = _("Laboratory Expenses")
+						if x == 3: row.history = _("Laboratory and image")
 						if x == 4: row.history = _("Medical Honorarium")
 						row.no_order = x
 			
