@@ -109,11 +109,8 @@ frappe.query_reports["Sales Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets,
 					};
-
-					frappe.query_report.render_chart({
-						data: new_data,
-						type: "line",
-					});
+					const new_options = Object.assign({}, frappe.query_report.chart_options, {data: new_data});
+					frappe.query_report.render_chart(new_options);
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
