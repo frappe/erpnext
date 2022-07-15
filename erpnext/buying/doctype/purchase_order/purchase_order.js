@@ -525,14 +525,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						});
 						i++;
 					}
-					
-					console.log("this is refresh items", cur_frm.doc.items)
 					var count = 0
 					$.each(cur_frm.doc.items, (idx, row) => {
-						console.log(" this is row", row.material_request)
 						if(row.material_request){
-							count = count + 1
-							console.log(" this is item", cur_frm.doc.currency)						
+							count = count + 1						
 						}
 					});
 					if (count > 0){
