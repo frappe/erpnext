@@ -302,7 +302,7 @@ data_map = {
 		"order_by": "name",
 		"links": {
 			"practitioner": ["Healthcare Practitioner", "name"],
-			"appointment_type": ["Appointment Type", "name"]
+			"appointment_type": ["Patient Appointment Type", "name"]
 		}
 	},
 	"Healthcare Practitioner": {
@@ -313,7 +313,7 @@ data_map = {
 		}
 
 	},
-	"Appointment Type": {
+	"Patient Appointment Type": {
 		"columns": ["name"],
 		"order_by": "name"
 	},

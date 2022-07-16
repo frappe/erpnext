@@ -124,8 +124,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Appointment Type",
-					"label": _("Appointment Type"),
+					"name": "Patient Appointment Type",
+					"label": _("Patient Appointment Type"),
 				},
 				{
 					"type": "doctype",

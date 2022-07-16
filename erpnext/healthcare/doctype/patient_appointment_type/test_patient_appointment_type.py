@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import unittest
 
-# test_records = frappe.get_test_records('Appointment Type')
+# test_records = frappe.get_test_records('Patient Patient Appointment Type')
 
-class TestAppointmentType(unittest.TestCase):
+class TestPatientAppointmentType(unittest.TestCase):
 	pass

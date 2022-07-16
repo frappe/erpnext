@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2018-07-16 13:11:08.626316", 
+ "modified": "2018-07-16 13:11:08.626317",
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "patient-appointments", 
@@ -91,7 +91,7 @@
    "label": "Type", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Appointment Type", 
+   "options": "Patient Appointment Type",
    "read_only": 0, 
    "reqd": 0
   }, 

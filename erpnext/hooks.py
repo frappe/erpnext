@@ -452,7 +452,7 @@ global_search_doctypes = {
 		{'doctype': 'Inpatient Record', 'index': 12},
 		{'doctype': 'Sample Collection', 'index': 13},
 		{'doctype': 'Patient Medical Record', 'index': 14},
-		{'doctype': 'Appointment Type', 'index': 15},
+		{'doctype': 'Patient Appointment Type', 'index': 15},
 		{'doctype': 'Fee Validity', 'index': 16},
 		{'doctype': 'Practitioner Schedule', 'index': 17},
 		{'doctype': 'Dosage Form', 'index': 18},

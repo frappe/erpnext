@@ -82,7 +82,7 @@
    "ignore_user_permissions": 1,
    "label": "Type",
    "no_copy": 1,
-   "options": "Appointment Type",
+   "options": "Patient Appointment Type",
    "print_hide": 1,
    "report_hide": 1
   },
@@ -296,7 +296,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-03 13:09:24.620710",
+ "modified": "2021-11-03 13:09:24.620711",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

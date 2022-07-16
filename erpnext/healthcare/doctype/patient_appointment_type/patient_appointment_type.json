@@ -57,7 +57,7 @@
  "modified": "2020-03-03 15:41:57.546545",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Appointment Type",
+ "name": "Patient Appointment Type",
  "owner": "Administrator",
  "permissions": [
   {
