@@ -2626,15 +2626,15 @@ class TestSalesInvoice(unittest.TestCase):
 		# Normal Itemized Discount
 		si = get_sales_invoice_for_e_invoice()
 		si.apply_discount_on = ""
-		si.items[0].discount_amount = 4000
-		si.items[1].discount_amount = 300
+		si.items[0].discount_amount = 2
+		si.items[1].discount_amount = 5
 		si.save()
 
 		einvoice = make_einvoice(si)
 		validate_totals(einvoice)
 
 		self.assertEqual(einvoice["ItemList"][0]["Discount"], 4000)
-		self.assertEqual(einvoice["ItemList"][1]["Discount"], 300)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 2100)
 		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
 
 		# Invoice Discount on net total

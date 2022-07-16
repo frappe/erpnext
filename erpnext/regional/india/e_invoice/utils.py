@@ -273,7 +273,7 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 
-		if invoice.get("apply_discount_on") and (abs(invoice.get("base_discount_amount")) > 0.00):
+		if invoice.get("apply_discount_on") and (abs(invoice.get("base_discount_amount") or 0.0) > 0.0):
 			# TODO: need to handle case when tax included in basic rate is checked.
 			item.discount_amount = (item.discount_amount * item.qty) + (
 				abs(item.base_amount) - abs(item.base_net_amount)
