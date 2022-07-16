@@ -81,18 +81,17 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date, time, tz, contact):
 	format_string = '%Y-%m-%d %H:%M:%S'
-	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
+	scheduled_dt = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
-	scheduled_time = scheduled_time.replace(tzinfo = None)
-	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
-	scheduled_time = scheduled_time.replace(tzinfo = None)
+	scheduled_dt = scheduled_dt.replace(tzinfo = None)
+	scheduled_dt = convert_to_system_timezone(tz, scheduled_dt)
+	scheduled_dt = scheduled_dt.replace(tzinfo = None)
 	# Create a appointment document from form
 	appointment = frappe.new_doc('Appointment')
-	appointment.scheduled_time = scheduled_time
+	appointment.scheduled_dt = scheduled_dt
 	contact = json.loads(contact)
 	appointment.customer_name = contact.get('name', None)
 	appointment.customer_phone_number = contact.get('number', None)
-	appointment.customer_skype = contact.get('skype', None)
 	appointment.customer_details = contact.get('notes', None)
 	appointment.customer_email = contact.get('email', None)
 	appointment.status = 'Open'
@@ -122,7 +121,7 @@ def convert_to_system_timezone(guest_tz,datetimeobject):
 	return datetimeobject
 
 def check_availabilty(timeslot, settings):
-	return frappe.db.count('Appointment', {'scheduled_time': timeslot}) < settings.number_of_agents
+	return frappe.db.count('Appointment', {'scheduled_dt': timeslot}) < settings.number_of_agents
 
 def _is_holiday(date, holiday_list):
 	for holiday in holiday_list.holidays:

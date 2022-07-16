@@ -1,6 +1,8 @@
 import frappe
 
 from frappe.utils.verified_command import verify_request
+
+
 @frappe.whitelist(allow_guest=True)
 def get_context(context):
 	if not verify_request():
@@ -11,8 +13,10 @@ def get_context(context):
 	appointment_name = frappe.form_dict['appointment']
 
 	if email and appointment_name:
-		appointment = frappe.get_doc('Appointment',appointment_name)
+		appointment = frappe.get_doc('Appointment', appointment_name)
 		appointment.set_verified(email)
+		appointment.save(ignore_permissions=True)
+		frappe.db.commit()
 		context.success = True
 		return context
 	else:

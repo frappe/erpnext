@@ -1,16 +1,18 @@
 {
- "autoname": "format:APMT-{customer_name}-{####}",
+ "autoname": "APPT-.#####",
  "creation": "2019-08-27 10:48:27.926283",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "scheduled_date",
   "scheduled_time",
+  "column_break_3",
   "status",
+  "scheduled_dt",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
-  "customer_skype",
   "customer_email",
   "col_br_2",
   "customer_details",
@@ -38,19 +40,14 @@
    "label": "Phone Number"
   },
   {
-   "fieldname": "customer_skype",
-   "fieldtype": "Data",
-   "label": "Skype ID"
-  },
-  {
    "fieldname": "customer_details",
    "fieldtype": "Long Text",
    "label": "Details"
   },
   {
    "fieldname": "scheduled_time",
-   "fieldtype": "Datetime",
-   "in_list_view": 1,
+   "fieldtype": "Time",
+   "in_standard_filter": 1,
    "label": "Scheduled Time",
    "reqd": 1
   },
@@ -80,8 +77,7 @@
   {
    "fieldname": "customer_email",
    "fieldtype": "Data",
-   "label": "Email",
-   "reqd": 1
+   "label": "Email"
   },
   {
    "fieldname": "linked_docs_section",
@@ -91,13 +87,31 @@
   {
    "fieldname": "col_br_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scheduled_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Scheduled Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scheduled_dt",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Scheduled Date/Time",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
- "modified": "2020-03-03 15:36:31.079838",
+ "modified": "2022-07-16 15:26:59.359147",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
- "name_case": "UPPER CASE",
  "owner": "Administrator",
  "permissions": [
   {
@@ -111,16 +125,6 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   },
   {
    "create": 1,
@@ -144,10 +148,22 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Guest",
+   "share": 1
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "scheduled_dt",
  "sort_order": "DESC",
- "track_changes": 1
+ "title_field": "customer_name",
+ "track_changes": 1,
+ "track_seen": 1
 }

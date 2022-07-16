@@ -23,7 +23,7 @@ def create_test_lead():
 
 def create_test_appointments():
     test_appointment = frappe.db.exists(
-        {'doctype': 'Appointment', 'scheduled_time':datetime.datetime.now(),'email':'test@example.com'})
+        {'doctype': 'Appointment', 'scheduled_dt':datetime.datetime.now(),'email':'test@example.com'})
     if test_appointment:
         return frappe.get_doc('Appointment', test_appointment[0][0])
     test_appointment = frappe.get_doc({
@@ -32,9 +32,8 @@ def create_test_appointments():
         'status': 'Open',
         'customer_name': 'Test Lead',
         'customer_phone_number': '666',
-        'customer_skype': 'test',
         'customer_email': 'test@example.com',
-        'scheduled_time': datetime.datetime.now()
+        'scheduled_dt': datetime.datetime.now()
     })
     test_appointment.insert()
     return test_appointment
@@ -51,7 +50,7 @@ class TestAppointment(unittest.TestCase):
         cal_event = frappe.get_doc(
             'Event', self.test_appointment.calendar_event)
         self.assertEqual(cal_event.starts_on,
-                         self.test_appointment.scheduled_time)
+                         self.test_appointment.scheduled_dt)
 
     def test_lead_linked(self):
         lead = frappe.get_doc('Lead', self.test_lead.name)
