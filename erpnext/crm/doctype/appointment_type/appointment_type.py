@@ -8,6 +8,7 @@ import datetime
 from frappe import _
 from frappe.utils import getdate, combine_datetime, cint, get_datetime
 from frappe.model.document import Document
+from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
 
 
 class AppointmentType(Document):
@@ -109,6 +110,20 @@ class AppointmentType(Document):
 		timeslot_range = [(combine_datetime(date, d.from_time), combine_datetime(date, d.to_time)) for d in timeslot_rows]
 
 		return timeslot_range
+
+	def is_holiday(self, date, company):
+		from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+		date = getdate(date)
+		holiday_list = self.get_holiday_list(company)
+		return is_holiday(holiday_list, date)
+
+	def get_holiday_list(self, company):
+		if self.get('holiday_list'):
+			return self.holiday_list
+		elif company:
+			return get_default_holiday_list(company)
+		else:
+			return None
 
 
 def time_in_range(start, end, x):

@@ -84,6 +84,13 @@ class Appointment(Document):
 
 		appointment_type_doc = frappe.get_cached_doc("Appointment Type", self.appointment_type)
 
+		# check if holiday
+		holiday = appointment_type_doc.is_holiday(self.scheduled_dt, self.company)
+		if holiday:
+			frappe.msgprint(_("{0} is a holiday: {1}")
+				.format(frappe.bold(formatdate(self.scheduled_dt, "EEEE, d MMMM, Y")), holiday),
+				raise_exception=appointment_type_doc.validate_availability)
+
 		# check if already booked
 		appointments_in_same_slot = count_appointments_in_same_slot(self.scheduled_dt, self.end_dt,
 			appointment=self.name if not self.is_new() else None)
@@ -316,7 +323,7 @@ def get_employee_from_user(user):
 
 
 @frappe.whitelist()
-def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None):
+def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None, company=None):
 	if not scheduled_date:
 		frappe.throw(_("Schedule Date not provided"))
 	if not appointment_type:
@@ -324,7 +331,11 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 
 	scheduled_date = getdate(scheduled_date)
 	appointment_type_doc = frappe.get_cached_doc("Appointment Type", appointment_type)
-	out = []
+
+	out = frappe._dict({
+		'holiday': appointment_type_doc.is_holiday(scheduled_date, company=company),
+		'timeslots': []
+	})
 
 	timeslots = appointment_type_doc.get_timeslots(scheduled_date)
 	no_of_agents = cint(appointment_type_doc.number_of_agents)
@@ -340,9 +351,10 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 			'booked': appointments_in_same_slots,
 			'available': max(0, no_of_agents - appointments_in_same_slots)
 		}
-		out.append(timeslot_data)
+		out.timeslots.append(timeslot_data)
 
 	return out
+
 
 def count_appointments_in_same_slot(start_dt, end_dt, appointment=None):
 	start_dt = get_datetime(start_dt)

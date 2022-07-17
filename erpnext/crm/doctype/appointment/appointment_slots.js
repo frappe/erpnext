@@ -16,10 +16,11 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 		me.frm = frm;
 
 		me.wrapper = $(wrapper);
+		me.message_wrapper = $(`<div class="text-center"></div>`).appendTo(me.wrapper);
 		me.slot_picker_wrapper = $(`<div class="row slot-picker"></div>`).appendTo(me.wrapper);
-		me.message_wrapper = $(`<div></div>`).appendTo(me.wrapper);
 
 		me.timeslots = [];
+		me.holiday = null;
 		me.load_slots_and_render();
 		me.bind();
 	},
@@ -34,22 +35,32 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 					scheduled_date: me.frm.doc.scheduled_date,
 					appointment_type: me.frm.doc.appointment_type,
 					appointment: me.frm.is_new() ? null : me.frm.doc.name,
+					company: me.frm.doc.company,
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
-						me.timeslots = r.message;
+						me.timeslots = r.message.timeslots;
+						me.holiday = r.message.holiday;
 						me.render_slot_picker();
 					}
 				}
 			});
 		} else {
 			me.timeslots = [];
+			me.holiday = null;
 			me.render_slot_picker();
 		}
 	},
 
 	render_slot_picker: function () {
+		this.clear();
+
 		if (this.frm.doc.scheduled_date && this.frm.doc.appointment_type) {
+			if (this.holiday) {
+				this.render_message(__("{0} is a holiday: {1}",
+					[moment(this.frm.doc.scheduled_date).format('dddd, D MMMM, YYYY'), this.holiday]));
+			}
+
 			if (this.timeslots && this.timeslots.length) {
 				this.render_slots();
 			} else if (this.timeslots) {
@@ -66,7 +77,6 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 
 	render_slots: function() {
 		var me = this;
-		me.clear();
 
 		var container = $(`<div class='container-fluid'></div>`).appendTo(me.slot_picker_wrapper);
 		var row = $(`<div class='row'></div>`).appendTo(container);
@@ -139,8 +149,7 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 	},
 
 	render_message: function (message) {
-		this.clear();
-		this.message_wrapper.text(message);
+		$(`<div style="margin-bottom: 10px;">${message}</div>`).appendTo(this.message_wrapper);
 	},
 
 	clear: function () {
