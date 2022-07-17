@@ -2623,6 +2623,8 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_einvoice_discounts(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
 
+		frappe.db.set_single_value("E Invoice Settings", "dont_show_discounts_in_e_invoice", False)
+
 		# Normal Itemized Discount
 		si = get_sales_invoice_for_e_invoice()
 		si.apply_discount_on = ""
