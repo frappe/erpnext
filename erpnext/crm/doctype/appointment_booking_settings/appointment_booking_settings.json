@@ -4,89 +4,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "enable_scheduling",
-  "agent_detail_section",
-  "availability_of_slots",
-  "number_of_agents",
-  "agent_list",
+  "enable_online_booking",
   "holiday_list",
-  "appointment_details_section",
-  "appointment_duration",
-  "email_reminders",
-  "advance_booking_days",
   "success_details",
   "success_redirect_url"
  ],
  "fields": [
   {
-   "fieldname": "availability_of_slots",
-   "fieldtype": "Table",
-   "label": "Availability Of Slots",
-   "options": "Appointment Booking Slots",
-   "reqd": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "number_of_agents",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Number of Concurrent Appointments",
-   "read_only": 1,
-   "reqd": 1
-  },
-  {
    "fieldname": "holiday_list",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Holiday List",
-   "options": "Holiday List",
-   "reqd": 1
-  },
-  {
-   "default": "60",
-   "fieldname": "appointment_duration",
-   "fieldtype": "Int",
-   "label": "Appointment Duration (In Minutes)",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "description": "Notify customer and agent via email on the day of the appointment.",
-   "fieldname": "email_reminders",
-   "fieldtype": "Check",
-   "label": "Notify Via Email"
-  },
-  {
-   "default": "7",
-   "fieldname": "advance_booking_days",
-   "fieldtype": "Int",
-   "label": "Number of days appointments can be booked in advance",
-   "reqd": 1
-  },
-  {
-   "fieldname": "agent_list",
-   "fieldtype": "Table MultiSelect",
-   "label": "Agents",
-   "options": "Assignment Rule User",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_scheduling",
-   "fieldtype": "Check",
-   "label": "Enable Appointment Scheduling",
-   "reqd": 1
-  },
-  {
-   "fieldname": "agent_detail_section",
-   "fieldtype": "Section Break",
-   "label": "Agent Details"
-  },
-  {
-   "fieldname": "appointment_details_section",
-   "fieldtype": "Section Break",
-   "label": "Appointment Details"
+   "label": "Default Holiday List",
+   "options": "Holiday List"
   },
   {
    "fieldname": "success_details",
@@ -98,10 +27,16 @@
    "fieldname": "success_redirect_url",
    "fieldtype": "Data",
    "label": "Success Redirect URL"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_online_booking",
+   "fieldtype": "Check",
+   "label": "Enable Online Booking"
   }
  ],
  "issingle": 1,
- "modified": "2020-03-03 15:34:46.358984",
+ "modified": "2022-07-16 22:01:13.583476",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",

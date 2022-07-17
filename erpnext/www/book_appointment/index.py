@@ -10,7 +10,7 @@ no_cache = 1
 
 
 def get_context(context):
-	is_enabled = frappe.db.get_single_value('Appointment Booking Settings', 'enable_scheduling')
+	is_enabled = frappe.db.get_single_value('Appointment Booking Settings', 'enable_online_booking')
 	if is_enabled:
 		return context
 	else:

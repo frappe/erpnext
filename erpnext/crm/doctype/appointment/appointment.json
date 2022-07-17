@@ -5,11 +5,20 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "scheduled_date",
-  "scheduled_time",
+  "appointment_type",
   "column_break_3",
   "status",
+  "appointment_time_section",
+  "scheduled_date",
+  "scheduled_time",
+  "column_break_7",
+  "scheduled_day_of_week",
+  "appointment_duration",
+  "column_break_10",
   "scheduled_dt",
+  "end_dt",
+  "time_slots_section",
+  "appointment_slot_picker_html",
   "customer_details_section",
   "customer_name",
   "customer_phone_number",
@@ -52,9 +61,13 @@
    "reqd": 1
   },
   {
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "Open\nUnverified\nClosed",
    "reqd": 1
   },
@@ -103,12 +116,65 @@
    "fieldname": "scheduled_dt",
    "fieldtype": "Datetime",
    "in_list_view": 1,
-   "label": "Scheduled Date/Time",
+   "label": "Start Date/Time",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "appointment_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Appointment Type",
+   "options": "Appointment Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "appointment_time_section",
+   "fieldtype": "Section Break",
+   "label": "Appointment Time"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_dt",
+   "fieldtype": "Datetime",
+   "label": "End Date/Time",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "appointment_type.appointment_duration",
+   "fetch_if_empty": 1,
+   "fieldname": "appointment_duration",
+   "fieldtype": "Int",
+   "label": "Duration (in Minutes)"
+  },
+  {
+   "fieldname": "appointment_slot_picker_html",
+   "fieldtype": "HTML",
+   "label": "Appointment Slot Picker"
+  },
+  {
+   "fieldname": "time_slots_section",
+   "fieldtype": "Section Break",
+   "label": "Time Slots"
+  },
+  {
+   "fieldname": "scheduled_day_of_week",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Day Of Week",
+   "options": "\nMonday\nTuesday\nWednesday\nThursday\nFriday\nSaturday\nSunday",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-07-16 15:26:59.359147",
+ "modified": "2022-07-17 21:54:23.269060",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -160,7 +226,6 @@
    "share": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "scheduled_dt",
  "sort_order": "DESC",
  "title_field": "customer_name",

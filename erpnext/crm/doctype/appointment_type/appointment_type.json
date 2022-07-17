@@ -1,0 +1,171 @@
+{
+ "autoname": "field:appointment_type_name",
+ "creation": "2022-07-16 21:59:01.053126",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "appointment_type_name",
+  "enable_online_booking",
+  "create_calendar_event",
+  "email_reminders",
+  "column_break_4",
+  "validate_availability",
+  "auto_assign_agent",
+  "availability_section",
+  "number_of_agents",
+  "holiday_list",
+  "column_break_8",
+  "appointment_duration",
+  "advance_booking_days",
+  "slots_section",
+  "availability_of_slots",
+  "agents_section",
+  "agent_list",
+  "column_break_15"
+ ],
+ "fields": [
+  {
+   "fieldname": "appointment_type_name",
+   "fieldtype": "Data",
+   "label": "Appointment Type Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_online_booking",
+   "fieldtype": "Check",
+   "label": "Enable Online Booking"
+  },
+  {
+   "fieldname": "availability_section",
+   "fieldtype": "Section Break",
+   "label": "Availability"
+  },
+  {
+   "fieldname": "availability_of_slots",
+   "fieldtype": "Table",
+   "label": "Availability Of Slots",
+   "options": "Appointment Booking Slots"
+  },
+  {
+   "default": "1",
+   "fieldname": "number_of_agents",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Number of Available Agents"
+  },
+  {
+   "fieldname": "agent_list",
+   "fieldtype": "Table MultiSelect",
+   "label": "Agents",
+   "options": "Assignment Rule User"
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Holiday List",
+   "options": "Holiday List"
+  },
+  {
+   "default": "60",
+   "fieldname": "appointment_duration",
+   "fieldtype": "Int",
+   "label": "Appointment Duration (In Minutes)"
+  },
+  {
+   "default": "0",
+   "description": "Notify customer and agent via email on the day of the appointment.",
+   "fieldname": "email_reminders",
+   "fieldtype": "Check",
+   "label": "Send Email Reminders"
+  },
+  {
+   "default": "7",
+   "fieldname": "advance_booking_days",
+   "fieldtype": "Int",
+   "label": "Number of Days Appointments Can Be Booked in Advance"
+  },
+  {
+   "fieldname": "slots_section",
+   "fieldtype": "Section Break",
+   "label": "Slots"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_availability",
+   "fieldtype": "Check",
+   "label": "Validate Availability"
+  },
+  {
+   "fieldname": "agents_section",
+   "fieldtype": "Section Break",
+   "label": "Agent Assignment"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_assign_agent",
+   "fieldtype": "Check",
+   "label": "Auto Assign Agent"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "create_calendar_event",
+   "fieldtype": "Check",
+   "label": "Create Calendar Event"
+  }
+ ],
+ "modified": "2022-07-17 22:50:28.072692",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Appointment Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
