@@ -7,6 +7,7 @@
  "field_order": [
   "appointment_type",
   "column_break_3",
+  "company",
   "status",
   "appointment_time_section",
   "scheduled_date",
@@ -172,9 +173,19 @@
   {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
   }
  ],
- "modified": "2022-07-17 21:54:23.269060",
+ "modified": "2022-07-17 23:02:51.903111",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

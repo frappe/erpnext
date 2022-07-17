@@ -7,8 +7,12 @@ frappe.provide("erpnext.crm");
 
 erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 	refresh: function() {
+		erpnext.hide_company();
 		this.make_appointment_slot_picker();
+		this.setup_buttons();
+	},
 
+	setup_buttons: function () {
 		if (this.frm.doc.lead) {
 			this.frm.add_custom_button(this.frm.doc.lead, () => {
 				frappe.set_route("Form", "Lead", this.frm.doc.lead);
