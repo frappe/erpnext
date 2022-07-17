@@ -86,12 +86,16 @@ def get_events(start, end, filters=None):
 		update={"allDay": 1})
 
 
-def is_holiday(holiday_list, date=today()):
+def is_holiday(holiday_list, date=None):
 	"""Returns true if the given date is a holiday in the given holiday list
 	"""
+	if not date:
+		date = today()
+
+	date = getdate(date)
+
 	if holiday_list:
-		return bool(frappe.get_all('Holiday List',
-			dict(name=holiday_list, holiday_date=date)))
+		return frappe.db.get_value("Holiday", filters={"parent": holiday_list, "holiday_date": date}, fieldname='description')
 	else:
 		return False
 
