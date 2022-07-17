@@ -89,7 +89,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "description": "Enabling this will directly report net rates in e-Invoice post discounts",
    "fieldname": "dont_show_discounts_in_e_invoice",
    "fieldtype": "Check",
@@ -104,7 +104,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-07-16 09:45:23.862046",
+ "modified": "2022-07-17 14:57:50.783517",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",
