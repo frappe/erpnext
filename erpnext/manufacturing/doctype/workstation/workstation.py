@@ -45,7 +45,8 @@ class Workstation(Document):
 
 @frappe.whitelist()
 def get_default_holiday_list():
-	return frappe.get_cached_value('Company',  frappe.defaults.get_user_default("Company"),  "default_holiday_list")
+	from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
+	return get_default_holiday_list(frappe.defaults.get_user_default("Company"))
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	if from_datetime and to_datetime:

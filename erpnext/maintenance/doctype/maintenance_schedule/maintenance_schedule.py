@@ -99,13 +99,15 @@ class MaintenanceSchedule(TransactionBase):
 		return schedule_list
 
 	def validate_schedule_date_for_holiday_list(self, schedule_date, sales_person):
+		from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
+
 		validated = False
 
 		employee = frappe.db.get_value("Sales Person", sales_person, "employee")
 		if employee:
 			holiday_list = get_holiday_list_for_employee(employee)
 		else:
-			holiday_list = frappe.get_cached_value('Company',  self.company,  "default_holiday_list")
+			holiday_list = get_default_holiday_list(self.company)
 
 		holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday` where parent=%s''', holiday_list)
 

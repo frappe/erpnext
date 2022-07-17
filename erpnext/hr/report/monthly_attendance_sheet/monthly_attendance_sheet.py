@@ -5,8 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _, scrub
 from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today, formatdate
+from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
 from calendar import monthrange
 import datetime
+
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -191,7 +193,7 @@ def get_conditions(filters):
 	filters["from_date"] = datetime.date(year=filters.year, month=filters.month, day=1)
 	filters["to_date"] = get_last_day(filters["from_date"])
 
-	filters["default_holiday_list"] = frappe.get_cached_value('Company', filters.company, "default_holiday_list")
+	filters["default_holiday_list"] = get_default_holiday_list(filters.company)
 
 	conditions = " and month(attendance_date) = %(month)s and year(attendance_date) = %(year)s"
 

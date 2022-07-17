@@ -94,3 +94,10 @@ def is_holiday(holiday_list, date=today()):
 			dict(name=holiday_list, holiday_date=date)))
 	else:
 		return False
+
+
+def get_default_holiday_list(company):
+	if company:
+		return frappe.get_cached_value('Company', company, "default_holiday_list")
+
+	return None

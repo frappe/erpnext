@@ -8,6 +8,8 @@ from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, form
 from erpnext.hr.utils import get_holiday_description
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
 	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list
+from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
+
 
 def execute(filters=None):
 	filters = frappe._dict(filters)
@@ -126,7 +128,7 @@ def validate_filters(filters):
 	if not filters.company:
 		frappe.throw(_("Please select Company"))
 
-	filters.default_holiday_list = frappe.get_cached_value('Company', filters.company, "default_holiday_list")
+	filters.default_holiday_list = get_default_holiday_list(filters.company)
 
 
 def get_employee_checkin_map(filters):
