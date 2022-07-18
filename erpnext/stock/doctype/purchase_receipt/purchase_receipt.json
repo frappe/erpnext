@@ -529,6 +529,7 @@
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Quantity",
+   "precision": "0",
    "read_only": 1
   },
   {
@@ -1193,7 +1194,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-15 04:51:40.098197",
+ "modified": "2022-07-18 07:04:07.271551",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
