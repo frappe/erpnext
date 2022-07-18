@@ -49,7 +49,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		expected_gle = (
 			("Cost of Goods Sold - TPC", 0.0, 600.0),
-			(surplus_account, 600.0, 400.0),
+			(surplus_account, 200.0, 0.0),
 			("Sales - TPC", 400.0, 0.0),
 		)
 
@@ -59,7 +59,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		""",
 			(pcv.name),
 		)
-
 		self.assertEqual(pcv_gle, expected_gle)
 
 	def test_cost_center_wise_posting(self):
