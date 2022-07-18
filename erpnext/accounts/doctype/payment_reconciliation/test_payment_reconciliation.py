@@ -283,6 +283,46 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.get("invoices")), 2)
 		self.assertEqual(len(pr.get("payments")), 2)
 
+	def test_filter_posting_date_case2(self):
+		"""
+		Test invoices closed before the from_invoice_date and from_payment_date
+		don't get retrieved when looking for outstanding invoices.
+		"""
+		from_date = add_days(nowdate(), -59)
+		to_date = nowdate()
+		for add in range(3):
+			self.create_payment_entry(amount=25, posting_date=add_days(from_date, add)).submit()
+			self.create_sales_invoice(rate=25, qty=1, posting_date=to_date)
+
+		pr = self.create_payment_reconciliation()
+		pr.from_invoice_date = pr.from_payment_date = from_date
+		pr.to_invoice_date = pr.to_payment_date = to_date
+		pr.get_unreconciled_entries()
+
+		# Assert only payments and invoices for this test are in range.
+		self.assertEqual(len(pr.invoices), 3)
+		self.assertEqual(len(pr.payments), 3)
+
+		invoices = [x.as_dict() for x in pr.invoices[0:2]]
+		payments = [x.as_dict() for x in pr.payments[0:2]]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		pr.get_unreconciled_entries()
+
+		# Assert two of three payments where reconciled against two of three invoices
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		from_date = add_days(from_date, 30)
+		pr.from_invoice_date = pr.from_payment_date = from_date
+		pr.to_invoice_date = pr.to_payment_date = to_date
+
+		pr.get_unreconciled_entries()
+
+		# Assert that invoices closed previous to filter date don't show.
+		self.assertEqual(len(pr.invoices), 1)
+
 	def test_filter_invoice_limit(self):
 		# check filter condition - invoice limit
 		transaction_date = nowdate()
