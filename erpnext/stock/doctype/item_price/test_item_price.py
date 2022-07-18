@@ -164,4 +164,13 @@ class TestItemPrice(FrappeTestCase):
 		self.assertEqual(price, 21)
 
 
+def make_item_price(item_code, price_list, price_list_rate):
+	item_price = frappe.new_doc("Item Price")
+	item_price.price_list = price_list
+	item_price.item_code = item_code
+	item_price.price_list_rate = price_list_rate
+	item_price.insert()
+	return item_price
+
+
 test_records = frappe.get_test_records("Item Price")
