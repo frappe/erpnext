@@ -14,23 +14,49 @@
   "disabled",
   "name_and_description_section",
   "naming_series",
-  "item_code",
   "variant_of",
   "item_name",
+  "price_list_rate",
+  "dossiers",
+  "shelf_life",
+  "product_brand",
   "brand",
+  "column_break_11",
   "stock_uom",
+  "item_code",
+  "supplier",
+  "otc_product",
+  "pharmacopeia_data",
+  "color_band",
+  "column_break_19",
+  "pack_size",
+  "product_label",
+  "barcode",
+  "type_of_packing",
+  "section_break_34",
+  "physical_parameter",
+  "column_break_25",
+  "additioanl_description",
+  "product_artwork_doc_section",
+  "product_artwork_doc",
+  "product_pack_insert_doc_section",
+  "product_pack_insert_doc",
+  "product_registration_doc_section",
+  "product_registration_doc",
+  "product_marketing_doc_section",
+  "product_marketing_doc",
+  "is_stock_item",
   "item_group",
   "is_item_from_hub",
   "allow_alternative_item",
-  "is_stock_item",
   "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
   "is_fixed_asset",
+  "asset_naming_series",
   "auto_create_assets",
   "asset_category",
-  "asset_naming_series",
   "sb_barcodes",
   "over_delivery_receipt_allowance",
   "over_billing_allowance",
@@ -146,7 +172,7 @@
    "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Item Code",
+   "label": "Product Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Data",
    "reqd": 1,
@@ -169,7 +195,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Item Name",
+   "label": "Product Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
    "search_index": 1
@@ -197,12 +223,12 @@
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
+   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Default Unit of Measure",
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Link",
-   "options": "UOM",
-   "reqd": 1
+   "options": "UOM"
   },
   {
    "default": "0",
@@ -971,6 +997,141 @@
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission"
+  },
+  {
+   "fieldname": "price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Pack Price",
+   "options": "Currency",
+   "precision": "0"
+  },
+  {
+   "fieldname": "dossiers",
+   "fieldtype": "Data",
+   "label": "Dossiers"
+  },
+  {
+   "fieldname": "shelf_life",
+   "fieldtype": "Data",
+   "label": "Shelf Life"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "otc_product",
+   "fieldtype": "Select",
+   "label": "OTC",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "pharmacopeia_data",
+   "fieldtype": "Data",
+   "label": "Pharmacopeia"
+  },
+  {
+   "fieldname": "color_band",
+   "fieldtype": "Data",
+   "label": "Color Band"
+  },
+  {
+   "fieldname": "product_brand",
+   "fieldtype": "Data",
+   "label": "Product Brand"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pack_size",
+   "fieldtype": "Link",
+   "label": "Pack Size",
+   "options": "Pack Size"
+  },
+  {
+   "fieldname": "product_label",
+   "fieldtype": "Data",
+   "label": "Label"
+  },
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Data",
+   "label": "Barcode"
+  },
+  {
+   "fieldname": "type_of_packing",
+   "fieldtype": "Data",
+   "label": "Type Of Packing"
+  },
+  {
+   "fieldname": "section_break_34",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "physical_parameter",
+   "fieldtype": "Small Text",
+   "label": "Physical Parameter"
+  },
+  {
+   "fieldname": "additioanl_description",
+   "fieldtype": "Small Text",
+   "label": "H2K Additional Description"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "product_artwork_doc_section",
+   "fieldtype": "Section Break",
+   "label": "Upload Product Artwork"
+  },
+  {
+   "fieldname": "product_artwork_doc",
+   "fieldtype": "Table",
+   "label": "Product Artwork",
+   "options": "Documents"
+  },
+  {
+   "fieldname": "product_pack_insert_doc_section",
+   "fieldtype": "Section Break",
+   "label": "Upload Product Pack Insert"
+  },
+  {
+   "fieldname": "product_pack_insert_doc",
+   "fieldtype": "Table",
+   "label": "Product Pack Insert",
+   "options": "Documents"
+  },
+  {
+   "fieldname": "product_registration_doc_section",
+   "fieldtype": "Section Break",
+   "label": "Upload Product Registration"
+  },
+  {
+   "fieldname": "product_registration_doc",
+   "fieldtype": "Table",
+   "label": "Product Registration",
+   "options": "Documents"
+  },
+  {
+   "fieldname": "product_marketing_doc_section",
+   "fieldtype": "Section Break",
+   "label": "Upload Product Marketing"
+  },
+  {
+   "fieldname": "product_marketing_doc",
+   "fieldtype": "Table",
+   "label": "Product Marketing",
+   "options": "Documents"
   }
  ],
  "hide_toolbar": 1,
@@ -979,7 +1140,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-12 23:55:19.941471",
+ "modified": "2022-07-15 03:55:06.817360",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

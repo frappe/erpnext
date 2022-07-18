@@ -7,12 +7,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "barcode",
   "section_break_2",
+  "barcode",
+  "section_break_3",
   "item_code",
+  "batch_no",
+  "column_break_5",
+  "manufacturing_date",
+  "column_break_2",
+  "expiry_date",
   "product_bundle",
   "supplier_part_no",
-  "column_break_2",
   "item_name",
   "section_break_4",
   "description",
@@ -23,7 +28,6 @@
   "image_view",
   "received_and_accepted",
   "received_qty",
-  "qty",
   "rejected_qty",
   "col_break2",
   "uom",
@@ -49,9 +53,12 @@
   "discount_amount",
   "base_rate_with_margin",
   "sec_break1",
-  "rate",
+  "qty",
   "col_break4",
+  "rate",
+  "section_break_50",
   "amount",
+  "column_break_49",
   "base_rate",
   "base_amount",
   "pricing_rules",
@@ -94,7 +101,6 @@
   "serial_no",
   "col_break5",
   "include_exploded_items",
-  "batch_no",
   "rejected_serial_no",
   "expense_account",
   "item_tax_rate",
@@ -123,11 +129,12 @@
   },
   {
    "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -150,7 +157,8 @@
   },
   {
    "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hidden": 1
   },
   {
    "fieldname": "item_name",
@@ -219,6 +227,7 @@
    "label": " Quantity Yield",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency",
+   "precision": "0",
    "print_width": "100px",
    "width": "100px"
   },
@@ -336,7 +345,7 @@
   },
   {
    "bold": 1,
-   "columns": 2,
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -348,6 +357,7 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -477,6 +487,7 @@
   {
    "fieldname": "warehouse_and_reference",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Warehouse and Reference"
   },
   {
@@ -1001,12 +1012,44 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "batch_no.manufacturing_date",
+   "fieldname": "manufacturing_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Manufacturing Date"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "batch_no.expiry_date",
+   "fieldname": "expiry_date",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Expiry Date"
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_50",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-13 07:11:33.921096",
+ "modified": "2022-07-15 05:57:18.706042",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

@@ -36,10 +36,11 @@
   "customer_contact_email",
   "section_addresses",
   "supplier",
+  "column_break_29",
+  "address_display",
   "supplier_name",
   "supplier_code",
   "supplier_address",
-  "address_display",
   "contact_person",
   "contact_display",
   "contact_mobile",
@@ -49,6 +50,8 @@
   "shipping_address_display",
   "billing_address",
   "billing_address_display",
+  "proposed_ready_date",
+  "po_status",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -204,8 +207,6 @@
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "hidden": 1,
-   "in_global_search": 1,
-   "in_standard_filter": 1,
    "label": "Supplier Name",
    "read_only": 1
   },
@@ -341,6 +342,7 @@
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Supplier Contact",
    "options": "Contact",
    "print_hide": 1
@@ -355,6 +357,7 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "Contact Name",
    "read_only": 1
@@ -380,6 +383,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company Shipping Address",
    "options": "Address",
    "print_hide": 1
@@ -939,6 +943,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Status",
    "no_copy": 1,
    "oldfieldname": "status",
@@ -1123,6 +1128,7 @@
   {
    "fieldname": "billing_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Company Billing Address",
    "options": "Address"
   },
@@ -1205,7 +1211,30 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Supplier Code",
-   "read_only": 1
+   "translatable": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Open",
+   "fieldname": "po_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "PO Status",
+   "options": "Open\nProposed Ready Date\nReady\nShipped"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:(doc.po_status==\"Proposed Ready Date\" || doc.po_status==\"Ready\") && doc.docstatus == 1 ",
+   "fieldname": "proposed_ready_date",
+   "fieldtype": "Date",
+   "label": "Proposed Ready Date",
+   "mandatory_depends_on": "eval:doc.po_status==\"Proposed Ready Date\" && doc.docstatus == 1",
+   "read_only_depends_on": "eval:doc.po_status==\"Ready\""
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -1213,7 +1242,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-14 04:58:08.742426",
+ "modified": "2022-07-15 05:54:35.147014",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1263,6 +1292,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "supplier_name",
  "track_changes": 1
 }
