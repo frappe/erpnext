@@ -1569,7 +1569,6 @@ class QueryPaymentLedger(object):
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_voucher_no))
-			.where(Criterion.all(self.common_filter))
 			.groupby(ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
 		)
 
@@ -1590,7 +1589,6 @@ class QueryPaymentLedger(object):
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_against_voucher_no))
-			.where(Criterion.all(self.common_filter))
 			.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
 		)
 
@@ -1606,6 +1604,14 @@ class QueryPaymentLedger(object):
 				& (AliasedQuery("vouchers").voucher_no == AliasedQuery("outstanding").voucher_no)
 				& (AliasedQuery("vouchers").party_type == AliasedQuery("outstanding").party_type)
 				& (AliasedQuery("vouchers").party == AliasedQuery("outstanding").party)
+			)
+			.inner_join(ple)
+			.on(
+				(ple.account == AliasedQuery("vouchers").account)
+				& (ple.voucher_type == AliasedQuery("vouchers").voucher_type)
+				& (ple.voucher_no == AliasedQuery("vouchers").voucher_no)
+				& (ple.party_type == AliasedQuery("vouchers").party_type)
+				& (ple.party == AliasedQuery("vouchers").party)
 			)
 			.select(
 				Table("vouchers").account,
@@ -1626,6 +1632,7 @@ class QueryPaymentLedger(object):
 				Table("vouchers").currency,
 			)
 			.where(Criterion.all(filter_on_outstanding_amount))
+			.where(Criterion.all(self.common_filter))
 		)
 
 		# build CTE filter
