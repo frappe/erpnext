@@ -14,6 +14,8 @@
   "naming_series",
   "salutation",
   "customer_name",
+  "customer_code",
+  "date",
   "gender",
   "customer_type",
   "pan",
@@ -24,6 +26,7 @@
   "image",
   "column_break0",
   "account_manager",
+  "contact",
   "customer_group",
   "territory",
   "tax_id",
@@ -53,8 +56,12 @@
   "column_break_26",
   "default_receivable_accounts",
   "accounts",
+  "reference",
+  "reference_type",
   "credit_limit_section",
   "payment_terms",
+  "customer_selling_price_section",
+  "customer_selling_price",
   "credit_limits",
   "more_info",
   "customer_details",
@@ -101,6 +108,7 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Customer Name",
    "no_copy": 1,
    "oldfieldname": "customer_name",
@@ -167,8 +175,6 @@
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "hidden": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Customer Group",
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
@@ -179,8 +185,6 @@
    "fieldname": "territory",
    "fieldtype": "Link",
    "hidden": 1,
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Territory",
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
@@ -319,12 +323,14 @@
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Mobile No"
   },
   {
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
+   "hidden": 1,
    "label": "Email Id"
   },
   {
@@ -526,6 +532,47 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
+  },
+  {
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "contact",
+   "fieldtype": "Data",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "customer_selling_price_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Selling Price"
+  },
+  {
+   "fieldname": "customer_selling_price",
+   "fieldtype": "Table",
+   "options": "Customer Product"
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType"
   }
  ],
  "hide_toolbar": 1,
@@ -540,7 +587,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-13 00:25:30.113924",
+ "modified": "2022-07-15 07:28:39.753515",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -619,7 +666,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
+ "search_fields": "customer_name, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
