@@ -2623,19 +2623,33 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_einvoice_discounts(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
 
+		frappe.db.set_single_value("E Invoice Settings", "dont_show_discounts_in_e_invoice", False)
+
 		# Normal Itemized Discount
 		si = get_sales_invoice_for_e_invoice()
 		si.apply_discount_on = ""
-		si.items[0].discount_amount = 4000
-		si.items[1].discount_amount = 300
+		si.items[0].price_list_rate = 12
+		si.items[0].discount_percentage = 16.6666666667
+		si.items[0].rate = 10
+
+		si.items[1].price_list_rate = 15
+		si.items[1].discount_amount = 5
+		si.items[1].rate = 10
 		si.save()
 
 		einvoice = make_einvoice(si)
 		validate_totals(einvoice)
 
 		self.assertEqual(einvoice["ItemList"][0]["Discount"], 4000)
-		self.assertEqual(einvoice["ItemList"][1]["Discount"], 300)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 2100)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 222)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 5555)
 		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 12)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 15)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 20)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 10)
 
 		# Invoice Discount on net total
 		si = get_sales_invoice_for_e_invoice()
@@ -2646,9 +2660,16 @@ class TestSalesInvoice(unittest.TestCase):
 		einvoice = make_einvoice(si)
 		validate_totals(einvoice)
 
-		self.assertEqual(einvoice["ItemList"][0]["Discount"], 316.83)
-		self.assertEqual(einvoice["ItemList"][1]["Discount"], 83.17)
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 253.61)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 66.57)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 243.11)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 5613.71)
 		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 12)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 15)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 20)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 10)
 
 		# Invoice Discount on grand total (Itemized Discount)
 		si = get_sales_invoice_for_e_invoice()
@@ -2659,9 +2680,16 @@ class TestSalesInvoice(unittest.TestCase):
 		einvoice = make_einvoice(si)
 		validate_totals(einvoice)
 
-		self.assertEqual(einvoice["ItemList"][0]["Discount"], 268.5)
-		self.assertEqual(einvoice["ItemList"][1]["Discount"], 70.48)
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 214.93)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 56.42)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 239.89)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 5604.75)
 		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 12)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 15)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 20)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 10)
 
 		# Invoice Discount on grand total (Cash/Non-Trade Discount)
 		si = get_sales_invoice_for_e_invoice()
@@ -2675,7 +2703,106 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(einvoice["ItemList"][0]["Discount"], 0)
 		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 222.0)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 5555.0)
 		self.assertEqual(einvoice["ValDtls"]["Discount"], 400)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 12)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 15)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 20)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 10)
+
+	def test_einvoice_without_discounts(self):
+		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
+
+		frappe.db.set_single_value("E Invoice Settings", "dont_show_discounts_in_e_invoice", True)
+
+		# Normal Itemized Discount
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = ""
+		si.items[0].price_list_rate = 12
+		si.items[0].discount_percentage = 16.6666666667
+		si.items[0].rate = 10
+
+		si.items[1].price_list_rate = 15
+		si.items[1].discount_amount = 5
+		si.items[1].rate = 10
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 0)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 10)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 10)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 18)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 5)
+
+		# Invoice Discount on net total
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 400
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 0)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 11.87)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 14.84)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 17.81)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 4.95)
+
+		# Invoice Discount on grand total (Itemized Discount)
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = "Grand Total"
+		si.discount_amount = 400
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 0)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 0)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 11.89)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 14.87)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 17.84)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 4.96)
+
+		# Invoice Discount on grand total (Cash/Non-Trade Discount)
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = "Grand Total"
+		si.is_cash_or_non_trade_discount = 1
+		si.discount_amount = 400
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][0]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][2]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][3]["Discount"], 0)
+		self.assertEqual(einvoice["ValDtls"]["Discount"], 400)
+
+		self.assertEqual(einvoice["ItemList"][0]["UnitPrice"], 12)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 15)
+		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 18)
+		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 5)
 
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
@@ -3270,6 +3397,36 @@ def get_sales_invoice_for_e_invoice():
 			"warehouse": "_Test Warehouse - _TC",
 			"qty": 420,
 			"rate": 15,
+			"income_account": "Sales - _TC",
+			"expense_account": "Cost of Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+		},
+	)
+
+	si.append(
+		"items",
+		{
+			"item_code": "_Test Item",
+			"uom": "Nos",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 111,
+			"price_list_rate": 20,
+			"discount_percentage": 10,
+			"income_account": "Sales - _TC",
+			"expense_account": "Cost of Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+		},
+	)
+
+	si.append(
+		"items",
+		{
+			"item_code": "_Test Item 2",
+			"uom": "Nos",
+			"warehouse": "_Test Warehouse - _TC",
+			"qty": 1111,
+			"price_list_rate": 10,
+			"rate": 5,
 			"income_account": "Sales - _TC",
 			"expense_account": "Cost of Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
