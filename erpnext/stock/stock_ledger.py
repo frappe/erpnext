@@ -247,15 +247,10 @@ def repost_future_sle(
 				data.sle_changed = False
 		i += 1
 
-		if doc and i % 2 == 0:
+		if doc:
 			update_args_in_repost_item_valuation(
 				doc, i, args, distinct_item_warehouses, affected_transactions
 			)
-
-	if doc and args:
-		update_args_in_repost_item_valuation(
-			doc, i, args, distinct_item_warehouses, affected_transactions
-		)
 
 
 def update_args_in_repost_item_valuation(
@@ -491,7 +486,8 @@ class update_entries_after(object):
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
 			return entries_to_fix
 		else:
-			return self.append_future_sle_for_dependant(dependant_sle, entries_to_fix)
+			self.append_future_sle_for_dependant(dependant_sle, entries_to_fix)
+			return entries_to_fix
 
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)
@@ -510,14 +506,11 @@ class update_entries_after(object):
 
 	def append_future_sle_for_dependant(self, dependant_sle, entries_to_fix):
 		self.initialize_previous_data(dependant_sle)
-
-		args = self.data[dependant_sle.warehouse].previous_sle or frappe._dict(
-			{"item_code": self.item_code, "warehouse": dependant_sle.warehouse}
+		self.distinct_item_warehouses[(self.item_code, dependant_sle.warehouse)] = frappe._dict(
+			{"sle": dependant_sle}
 		)
-		future_sle_for_dependant = list(self.get_sle_after_datetime(args))
 
-		entries_to_fix.extend(future_sle_for_dependant)
-		return sorted(entries_to_fix, key=lambda k: k["timestamp"])
+		self.new_items_found = True
 
 	def process_sle(self, sle):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
