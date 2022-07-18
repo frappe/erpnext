@@ -13,7 +13,6 @@
   "title",
   "naming_series",
   "section_break_3",
-  "column_break0",
   "supplier",
   "purchase_order",
   "supplier_name",
@@ -146,13 +145,6 @@
    "options": "fa fa-user"
   },
   {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_width": "50%",
-   "width": "50%"
-  },
-  {
    "allow_on_submit": 1,
    "default": "{supplier_name}",
    "fieldname": "title",
@@ -197,6 +189,7 @@
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_global_search": 1,
    "label": "Supplier Name",
    "read_only": 1
@@ -1200,7 +1193,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-14 04:56:36.888683",
+ "modified": "2022-07-15 04:51:40.098197",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
