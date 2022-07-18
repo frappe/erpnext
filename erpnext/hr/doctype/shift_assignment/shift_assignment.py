@@ -294,7 +294,18 @@ def get_shift_details(shift_type_name, for_date=None):
 		return None
 	if not for_date:
 		for_date = nowdate()
-	shift_type = frappe.get_doc("Shift Type", shift_type_name)
+	shift_type = frappe.db.get_value(
+		"Shift Type",
+		shift_type_name,
+		[
+			"name",
+			"start_time",
+			"end_time",
+			"begin_check_in_before_shift_start_time",
+			"allow_check_out_after_shift_end_time",
+		],
+		as_dict=1,
+	)
 	start_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.start_time
 	for_date = (
 		for_date + timedelta(days=1) if shift_type.start_time > shift_type.end_time else for_date
