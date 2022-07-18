@@ -212,6 +212,7 @@
    "label": "Quantity",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency",
+   "precision": "0",
    "print_width": "60px",
    "reqd": 1,
    "width": "60px"
@@ -618,6 +619,7 @@
    "hidden": 1,
    "label": "Qty in Stock UOM",
    "no_copy": 1,
+   "precision": "0",
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
@@ -631,6 +633,7 @@
    "no_copy": 1,
    "oldfieldname": "received_qty",
    "oldfieldtype": "Currency",
+   "precision": "0",
    "print_hide": 1,
    "read_only": 1
   },
@@ -640,6 +643,7 @@
    "fieldtype": "Float",
    "label": "Returned Qty",
    "no_copy": 1,
+   "precision": "0",
    "print_hide": 1,
    "read_only": 1
   },
@@ -915,7 +919,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-15 06:24:01.495649",
+ "modified": "2022-07-18 07:02:59.461402",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

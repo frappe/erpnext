@@ -52,8 +52,8 @@
   "primary_address_and_contact_detail",
   "customer_primary_contact",
   "customer_primary_address",
+  "column_break_43",
   "primary_address",
-  "column_break_26",
   "default_receivable_accounts",
   "accounts",
   "reference",
@@ -334,10 +334,6 @@
    "label": "Email Id"
   },
   {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
-  },
-  {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
@@ -566,6 +562,7 @@
   {
    "fieldname": "reference",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Reference"
   },
   {
@@ -573,6 +570,10 @@
    "fieldtype": "Link",
    "label": "Reference Type",
    "options": "DocType"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -587,7 +588,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-15 07:28:39.753515",
+ "modified": "2022-07-18 07:20:17.914547",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
