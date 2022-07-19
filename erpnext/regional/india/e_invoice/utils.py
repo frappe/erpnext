@@ -273,19 +273,17 @@ def get_item_list(invoice):
 		item.sr_no = d.idx
 		item.description = sanitize_for_json(d.item_name)
 
-		item.qty = abs(item.qty)
+		item.qty = abs(item.qty) or 1
+		item.discount_amount = abs(item.discount_amount)
+		item.taxable_value = abs(item.taxable_value)
 
 		hide_discount_in_einvoice = cint(
 			frappe.db.get_single_value("E Invoice Settings", "dont_show_discounts_in_e_invoice")
 		)
 
 		if hide_discount_in_einvoice:
-			if flt(item.qty) != 0.0:
-				item.unit_rate = abs(item.taxable_value / item.qty)
-			else:
-				item.unit_rate = abs(item.taxable_value)
-			item.gross_amount = abs(item.taxable_value)
-			item.taxable_value = abs(item.taxable_value)
+			item.unit_rate = item.taxable_value / item.qty
+			item.gross_amount = item.taxable_value
 			item.discount_amount = 0
 
 		else:
@@ -298,12 +296,10 @@ def get_item_list(invoice):
 				item.discount_amount = item.discount_amount * item.qty
 
 			if invoice.get("is_return") or invoice.get("is_debit_note"):
-				item.unit_rate = (abs(item.taxable_value) + item.discount_amount) / (
-					1 if (item.qty == 0) else item.qty
-				)
+				item.unit_rate = (item.taxable_value + item.discount_amount) / item.qty
 			else:
 				try:
-					item.unit_rate = abs(item.taxable_value + item.discount_amount) / item.qty
+					item.unit_rate = (item.taxable_value + item.discount_amount) / item.qty
 				except ZeroDivisionError:
 					# This will never run but added as safety measure
 					frappe.throw(
@@ -311,8 +307,8 @@ def get_item_list(invoice):
 						msg=_("Quantity can't be zero unless it's Credit/Debit Note."),
 					)
 
-		item.gross_amount = abs(item.taxable_value) + item.discount_amount
-		item.taxable_value = abs(item.taxable_value)
+		item.gross_amount = item.taxable_value + item.discount_amount
+		item.taxable_value = item.taxable_value
 		item.is_service_item = "Y" if item.gst_hsn_code and item.gst_hsn_code[:2] == "99" else "N"
 		item.serial_no = ""
 
