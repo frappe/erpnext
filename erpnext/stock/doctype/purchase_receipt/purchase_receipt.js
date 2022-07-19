@@ -397,3 +397,16 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 		});
 	}
 };
+
+// ----------Fetch manufacturing_date,expiry_date depends on Batch
+frappe.ui.form.on("Purchase Receipt Item", "batch_no", function (frm, cdt, cdn) {
+    var d = locals[cdt][cdn];
+    frappe.db.get_value("Batch", { "batch_id": d.batch_no}, "manufacturing_date", function (value){
+        frappe.model.set_value(d.doctype, d.name, "manufacturing_date", value.manufacturing_date)
+        refresh_field('manufacturing_date')
+    });
+    frappe.db.get_value("Batch", { "batch_id": d.batch_no}, "expiry_date", function (value){
+        frappe.model.set_value(d.doctype, d.name, "expiry_date", value.expiry_date)
+        refresh_field('expiry_date')
+    });
+});
