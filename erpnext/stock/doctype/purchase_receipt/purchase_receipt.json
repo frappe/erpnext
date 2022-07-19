@@ -52,8 +52,8 @@
   "set_from_warehouse",
   "is_subcontracted",
   "supplier_warehouse",
-  "items_section",
   "scan_barcode",
+  "items_section",
   "items",
   "section_break0",
   "total_qty",
@@ -416,6 +416,7 @@
    "hidden": 1
   },
   {
+   "default": "Supplier - U",
    "description": "Sets 'Accepted Warehouse' in each row of the items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
@@ -1194,7 +1195,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-18 07:04:07.271551",
+ "modified": "2022-07-19 06:37:35.267884",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
