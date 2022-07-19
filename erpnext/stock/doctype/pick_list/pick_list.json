@@ -162,17 +162,26 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
+<<<<<<< HEAD
    "label": "Customer Name"
 >>>>>>> 0a633a212d (fix: display customer name on picking list)
+=======
+   "label": "Customer Name",
+   "read_only": 1
+>>>>>>> 7083b3148b (fix: make customer_name field read only.)
   }
  ],
  "is_submittable": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-04-21 07:56:40.646473",
 =======
  "modified": "2022-07-12 13:03:04.442174",
 >>>>>>> 0a633a212d (fix: display customer name on picking list)
+=======
+ "modified": "2022-07-19 11:03:04.442174",
+>>>>>>> 7083b3148b (fix: make customer_name field read only.)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
