@@ -1,0 +1,326 @@
+{
+    "actions": [],
+    "autoname": "hash",
+    "creation": "2022-04-01 19:26:31.475015",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "item_code",
+        "item_name",
+        "bom",
+        "include_exploded_items",
+        "column_break_3",
+        "schedule_date",
+        "expected_delivery_date",
+        "description_section",
+        "description",
+        "column_break_8",
+        "image",
+        "image_view",
+        "quantity_and_rate_section",
+        "qty",
+        "received_qty",
+        "returned_qty",
+        "column_break_13",
+        "stock_uom",
+        "conversion_factor",
+        "section_break_16",
+        "rate",
+        "amount",
+        "column_break_19",
+        "rm_cost_per_qty",
+        "service_cost_per_qty",
+        "additional_cost_per_qty",
+        "warehouse_section",
+        "warehouse",
+        "accounting_details_section",
+        "expense_account",
+        "manufacture_section",
+        "manufacturer",
+        "manufacturer_part_no",
+        "section_break_34",
+        "page_break"
+    ],
+    "fields": [
+        {
+            "bold": 1,
+            "columns": 2,
+            "fieldname": "item_code",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "Item Code",
+            "options": "Item",
+            "read_only": 1,
+            "reqd": 1,
+            "search_index": 1
+        },
+        {
+            "fetch_from": "item_code.item_name",
+            "fetch_if_empty": 1,
+            "fieldname": "item_name",
+            "fieldtype": "Data",
+            "in_global_search": 1,
+            "label": "Item Name",
+            "print_hide": 1,
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_3",
+            "fieldtype": "Column Break"
+        },
+        {
+            "bold": 1,
+            "columns": 2,
+            "fieldname": "schedule_date",
+            "fieldtype": "Date",
+            "label": "Required By",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "bold": 1,
+            "fieldname": "expected_delivery_date",
+            "fieldtype": "Date",
+            "label": "Expected Delivery Date",
+            "search_index": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "description_section",
+            "fieldtype": "Section Break",
+            "label": "Description"
+        },
+        {
+            "fetch_from": "item_code.description",
+            "fetch_if_empty": 1,
+            "fieldname": "description",
+            "fieldtype": "Text Editor",
+            "label": "Description",
+            "print_width": "300px",
+            "reqd": 1,
+            "width": "300px"
+        },
+        {
+            "fieldname": "column_break_8",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "image",
+            "fieldtype": "Attach",
+            "hidden": 1,
+            "label": "Image"
+        },
+        {
+            "fieldname": "image_view",
+            "fieldtype": "Image",
+            "label": "Image View",
+            "options": "image",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "quantity_and_rate_section",
+            "fieldtype": "Section Break",
+            "label": "Quantity and Rate"
+        },
+        {
+            "bold": 1,
+            "columns": 1,
+            "default": "1",
+            "fieldname": "qty",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Quantity",
+            "print_width": "60px",
+            "read_only": 1,
+            "reqd": 1,
+            "width": "60px"
+        },
+        {
+            "fieldname": "column_break_13",
+            "fieldtype": "Column Break",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "stock_uom",
+            "fieldtype": "Link",
+            "label": "Stock UOM",
+            "options": "UOM",
+            "print_width": "100px",
+            "read_only": 1,
+            "reqd": 1,
+            "width": "100px"
+        },
+        {
+            "default": "1",
+            "fieldname": "conversion_factor",
+            "fieldtype": "Float",
+            "hidden": 1,
+            "label": "Conversion Factor",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_16",
+            "fieldtype": "Section Break"
+        },
+        {
+            "bold": 1,
+            "columns": 2,
+            "fetch_from": "item_code.standard_rate",
+            "fetch_if_empty": 1,
+            "fieldname": "rate",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Rate",
+            "options": "currency",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_19",
+            "fieldtype": "Column Break"
+        },
+        {
+            "columns": 2,
+            "fieldname": "amount",
+            "fieldtype": "Currency",
+            "in_list_view": 1,
+            "label": "Amount",
+            "options": "currency",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "fieldname": "warehouse_section",
+            "fieldtype": "Section Break",
+            "label": "Warehouse Details"
+        },
+        {
+            "fieldname": "warehouse",
+            "fieldtype": "Link",
+            "label": "Warehouse",
+            "options": "Warehouse",
+            "print_hide": 1,
+            "reqd": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "accounting_details_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting Details"
+        },
+        {
+            "fieldname": "expense_account",
+            "fieldtype": "Link",
+            "label": "Expense Account",
+            "options": "Account",
+            "print_hide": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "manufacture_section",
+            "fieldtype": "Section Break",
+            "label": "Manufacture"
+        },
+        {
+            "fieldname": "manufacturer",
+            "fieldtype": "Link",
+            "label": "Manufacturer",
+            "options": "Manufacturer"
+        },
+        {
+            "fieldname": "manufacturer_part_no",
+            "fieldtype": "Data",
+            "label": "Manufacturer Part Number"
+        },
+        {
+            "depends_on": "item_code",
+            "fetch_from": "item_code.default_bom",
+            "fieldname": "bom",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "label": "BOM",
+            "options": "BOM",
+            "print_hide": 1,
+            "reqd": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "include_exploded_items",
+            "fieldtype": "Check",
+            "label": "Include Exploded Items",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "service_cost_per_qty",
+            "fieldtype": "Currency",
+            "label": "Service Cost Per Qty",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "additional_cost_per_qty",
+            "fieldtype": "Currency",
+            "label": "Additional Cost Per Qty",
+            "read_only": 1
+        },
+        {
+            "fieldname": "rm_cost_per_qty",
+            "fieldtype": "Currency",
+            "label": "Raw Material Cost Per Qty",
+            "no_copy": 1,
+            "read_only": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "default": "0",
+            "fieldname": "page_break",
+            "fieldtype": "Check",
+            "label": "Page Break",
+            "no_copy": 1,
+            "print_hide": 1
+        },
+        {
+            "fieldname": "section_break_34",
+            "fieldtype": "Section Break"
+        },
+        {
+            "depends_on": "received_qty",
+            "fieldname": "received_qty",
+            "fieldtype": "Float",
+            "label": "Received Qty",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "depends_on": "returned_qty",
+            "fieldname": "returned_qty",
+            "fieldtype": "Float",
+            "label": "Returned Qty",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        }
+    ],
+    "idx": 1,
+    "index_web_pages_for_search": 1,
+    "istable": 1,
+    "links": [],
+    "modified": "2022-04-11 21:28:06.585338",
+    "modified_by": "Administrator",
+    "module": "Subcontracting",
+    "name": "Subcontracting Order Item",
+    "naming_rule": "Random",
+    "owner": "Administrator",
+    "permissions": [],
+    "quick_entry": 1,
+    "search_fields": "item_name",
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "track_changes": 1
+}

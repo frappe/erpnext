@@ -3,7 +3,10 @@ import frappe
 
 
 def execute():
-	if not frappe.db.exists("Company", {"country": "India"}):
+	if (
+		not frappe.db.exists("Company", {"country": "India"})
+		or "india_compliance" in frappe.get_installed_apps()
+	):
 		return
 
 	click.secho(
