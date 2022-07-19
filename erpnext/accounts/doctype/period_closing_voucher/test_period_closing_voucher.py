@@ -92,7 +92,6 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		)
 
 		pcv = self.make_period_closing_voucher(submit=False)
-		pcv.cost_center_wise_pnl = 1
 		pcv.save()
 		pcv.submit()
 		surplus_account = pcv.closing_account_head
@@ -114,6 +113,16 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		)
 
 		self.assertEqual(pcv_gle, expected_gle)
+
+		pcv.reload()
+		pcv.cancel()
+
+		self.assertFalse(
+			frappe.db.get_value(
+				"GL Entry",
+				{"voucher_type": "Period Closing Voucher", "voucher_no": pcv.name, "is_cancelled": 0},
+			)
+		)
 
 	def test_period_closing_with_finance_book_entries(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
