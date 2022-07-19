@@ -19,11 +19,11 @@ class PeriodClosingVoucher(AccountsController):
 		self.validate_posting_date()
 
 	def on_submit(self):
-		self.status = "In Progress"
+		self.db_set("status", "In Progress")
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.status = "In Progress"
+		self.db_set("status", "In Progress")
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		gle_count = frappe.db.count(
 			"GL Entry",
