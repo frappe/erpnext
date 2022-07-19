@@ -1,0 +1,30 @@
+name: Semantic Commits
+
+on:
+  pull_request: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: commitcheck-erpnext-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  commitlint:
+    name: Check Commit Titles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 200
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 14
+          check-latest: true
+
+      - name: Check commit titles
+        run: |
+          npm install @commitlint/cli @commitlint/config-conventional
+          npx commitlint --verbose --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
