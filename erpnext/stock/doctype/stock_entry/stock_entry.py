@@ -500,15 +500,11 @@ class StockEntry(StockController):
 				if row.t_warehouse and not row.s_warehouse])
 
 		if self.purpose in ["Manufacture", "Repack"]:
-			# getting scrap warehouse from work order
-			if self.get('work_order') != None:
-				scrap_warehouse_workorder = frappe.get_value('Work Order',self.work_order,'scrap_warehouse')
-			else:
-				scrap_warehouse_workorder = ''
 			for d in self.get("items"):
 				if d.set_basic_rate_manually: continue
+
 				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
-					and (scrap_warehouse_workorder != d.t_warehouse)):
+					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
 
 					if (self.work_order and self.purpose == "Manufacture"
 						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption")):
