@@ -148,7 +148,7 @@ def update_net_values(entry):
 def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
-	
+
 	for entry in gl_map:
 		# if there is already an entry in this account then just add it
 		# to that entry
@@ -221,6 +221,7 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding, from_repost)
+
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle = frappe.new_doc("GL Entry")

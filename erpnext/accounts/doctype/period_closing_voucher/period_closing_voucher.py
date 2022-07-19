@@ -8,7 +8,6 @@ from frappe.utils import flt
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
-	get_dimensions,
 )
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
@@ -27,17 +26,19 @@ class PeriodClosingVoucher(AccountsController):
 		self.status = "In Progress"
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		gle_count = frappe.db.count(
-			"GL Entry", 
-			{
-				"voucher_type": "Period Closing Voucher",
-				"voucher_no": self.name,
-				"is_cancelled": 0
-			}
+			"GL Entry",
+			{"voucher_type": "Period Closing Voucher", "voucher_no": self.name, "is_cancelled": 0},
 		)
 		if gle_count > 5000:
-			frappe.enqueue(make_reverse_gl_entries, voucher_type="Period Closing Voucher",
-				voucher_no=self.name, queue="long")
-			frappe.msgprint(_("The GL Entries will be cancelled in the background, it can take a few minutes."), alert=True)
+			frappe.enqueue(
+				make_reverse_gl_entries,
+				voucher_type="Period Closing Voucher",
+				voucher_no=self.name,
+				queue="long",
+			)
+			frappe.msgprint(
+				_("The GL Entries will be cancelled in the background, it can take a few minutes."), alert=True
+			)
 		else:
 			make_reverse_gl_entries(voucher_type="Period Closing Voucher", voucher_no=self.name)
 
@@ -76,13 +77,16 @@ class PeriodClosingVoucher(AccountsController):
 					pce[0][0], self.posting_date
 				)
 			)
-	
+
 	def make_gl_entries(self):
 		gl_entries = self.get_gl_entries()
 		if gl_entries:
 			if len(gl_entries) > 5000:
 				frappe.enqueue(process_gl_entries, gl_entries=gl_entries, queue="long")
-				frappe.msgprint(_("The GL Entries will be processed in the background, it can take a few minutes."), alert=True)
+				frappe.msgprint(
+					_("The GL Entries will be processed in the background, it can take a few minutes."),
+					alert=True,
+				)
 			else:
 				process_gl_entries(gl_entries)
 
@@ -91,7 +95,7 @@ class PeriodClosingVoucher(AccountsController):
 
 		# pl account
 		for acc in self.get_pl_balances_based_on_dimensions(group_by_account=True):
-			if flt(acc.bal_in_company_currency):	
+			if flt(acc.bal_in_company_currency):
 				gl_entries.append(self.get_gle_for_pl_account(acc))
 
 		# closing liability account
@@ -100,7 +104,7 @@ class PeriodClosingVoucher(AccountsController):
 				gl_entries.append(self.get_gle_for_closing_account(acc))
 
 		return gl_entries
-	
+
 	def get_gle_for_pl_account(self, acc):
 		gl_entry = self.get_gl_dict(
 			{
@@ -109,23 +113,19 @@ class PeriodClosingVoucher(AccountsController):
 				"finance_book": acc.finance_book,
 				"account_currency": acc.account_currency,
 				"debit_in_account_currency": abs(flt(acc.bal_in_account_currency))
-					if flt(acc.bal_in_account_currency) < 0
-					else 0,
-				"debit": abs(flt(acc.bal_in_company_currency))
-					if flt(acc.bal_in_company_currency) < 0
-					else 0,
+				if flt(acc.bal_in_account_currency) < 0
+				else 0,
+				"debit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) < 0 else 0,
 				"credit_in_account_currency": abs(flt(acc.bal_in_account_currency))
-					if flt(acc.bal_in_account_currency) > 0
-					else 0,
-				"credit": abs(flt(acc.bal_in_company_currency))
-					if flt(acc.bal_in_company_currency) > 0
-					else 0,
+				if flt(acc.bal_in_account_currency) > 0
+				else 0,
+				"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) > 0 else 0,
 			},
 			item=acc,
 		)
 		self.update_default_dimensions(gl_entry, acc)
 		return gl_entry
-	
+
 	def get_gle_for_closing_account(self, acc):
 		gl_entry = self.get_gl_dict(
 			{
@@ -136,15 +136,11 @@ class PeriodClosingVoucher(AccountsController):
 				"debit_in_account_currency": abs(flt(acc.bal_in_account_currency))
 				if flt(acc.bal_in_account_currency) > 0
 				else 0,
-				"debit": abs(flt(acc.bal_in_company_currency))
-				if flt(acc.bal_in_company_currency) > 0
-				else 0,
+				"debit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) > 0 else 0,
 				"credit_in_account_currency": abs(flt(acc.bal_in_account_currency))
 				if flt(acc.bal_in_account_currency) < 0
 				else 0,
-				"credit": abs(flt(acc.bal_in_company_currency))
-				if flt(acc.bal_in_company_currency) < 0
-				else 0,
+				"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) < 0 else 0,
 			},
 			item=acc,
 		)
@@ -162,7 +158,7 @@ class PeriodClosingVoucher(AccountsController):
 		"""Get balance for dimension-wise pl accounts"""
 
 		dimension_fields = ["t1.cost_center", "t1.finance_book"]
-		
+
 		self.accounting_dimensions = get_accounting_dimensions()
 		for dimension in self.accounting_dimensions:
 			dimension_fields.append("t1.{0}".format(dimension))
@@ -170,7 +166,8 @@ class PeriodClosingVoucher(AccountsController):
 		if group_by_account:
 			dimension_fields.append("t1.account")
 
-		return frappe.db.sql("""
+		return frappe.db.sql(
+			"""
 			select
 				t2.account_currency,
 				{dimension_fields},
@@ -192,22 +189,30 @@ class PeriodClosingVoucher(AccountsController):
 			as_dict=1,
 		)
 
+
 def process_gl_entries(gl_entries):
 	from erpnext.accounts.general_ledger import make_gl_entries
+
 	try:
 		make_gl_entries(gl_entries, merge_entries=False)
-		frappe.db.set_value("Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Completed")
+		frappe.db.set_value(
+			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Completed"
+		)
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
-		frappe.db.set_value("Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Failed")
+		frappe.db.set_value(
+			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Failed"
+		)
+
 
 def make_reverse_gl_entries(voucher_type, voucher_no):
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
 	try:
 		make_reverse_gl_entries(voucher_type=voucher_type, voucher_no=voucher_no)
 		frappe.db.set_value("Period Closing Voucher", voucher_no, "status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
-		frappe.db.set_value("Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Failed")
+		frappe.db.set_value("Period Closing Voucher", voucher_no, "status", "Failed")
