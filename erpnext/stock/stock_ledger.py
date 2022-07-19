@@ -207,8 +207,12 @@ def repost_future_sle(
 	allow_negative_stock=None,
 	via_landed_cost_voucher=False,
 ):
-	if not args and voucher_type and voucher_no:
-		args = get_items_to_be_repost(voucher_type, voucher_no, doc)
+
+	items_to_be_repost = get_items_to_be_repost(
+		voucher_type=voucher_type, voucher_no=voucher_no, doc=doc
+	)
+	if items_to_be_repost:
+		args = items_to_be_repost
 
 	distinct_item_warehouses = get_distinct_item_warehouse(args, doc)
 	affected_transactions = get_affected_transactions(doc)
@@ -275,17 +279,21 @@ def update_args_in_repost_item_valuation(
 	)
 
 
-def get_items_to_be_repost(voucher_type, voucher_no, doc=None):
+def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None):
+	items_to_be_repost = []
 	if doc and doc.items_to_be_repost:
-		return json.loads(doc.items_to_be_repost) or []
+		items_to_be_repost = json.loads(doc.items_to_be_repost) or []
 
-	return frappe.db.get_all(
-		"Stock Ledger Entry",
-		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
-		order_by="creation asc",
-		group_by="item_code, warehouse",
-	)
+	if not items_to_be_repost and voucher_type and voucher_no:
+		items_to_be_repost = frappe.db.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
+			fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
+			order_by="creation asc",
+			group_by="item_code, warehouse",
+		)
+
+	return items_to_be_repost
 
 
 def get_distinct_item_warehouse(args=None, doc=None):
@@ -485,7 +493,8 @@ class update_entries_after(object):
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
 			return entries_to_fix
 		else:
-			self.append_future_sle_for_dependant(dependant_sle, entries_to_fix)
+			self.initialize_previous_data(dependant_sle)
+			self.update_distinct_item_warehouses(dependant_sle)
 			return entries_to_fix
 
 	def update_distinct_item_warehouses(self, dependant_sle):
@@ -502,14 +511,6 @@ class update_entries_after(object):
 				val.sle_changed = True
 				self.distinct_item_warehouses[key] = val
 				self.new_items_found = True
-
-	def append_future_sle_for_dependant(self, dependant_sle, entries_to_fix):
-		self.initialize_previous_data(dependant_sle)
-		self.distinct_item_warehouses[(self.item_code, dependant_sle.warehouse)] = frappe._dict(
-			{"sle": dependant_sle}
-		)
-
-		self.new_items_found = True
 
 	def process_sle(self, sle):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
