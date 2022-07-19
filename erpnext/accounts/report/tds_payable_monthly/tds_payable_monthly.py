@@ -8,11 +8,11 @@ from frappe import _
 
 def execute(filters=None):
 	validate_filters(filters)
-	tds_docs, tds_accounts, tax_category_map = get_tds_docs(filters)
+	tds_docs, tds_accounts, tax_category_map, journal_entry_party_map = get_tds_docs(filters)
 
 	columns = get_columns(filters)
 
-	res = get_result(filters, tds_docs, tds_accounts, tax_category_map)
+	res = get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map)
 	return columns, res
 
 
@@ -22,10 +22,11 @@ def validate_filters(filters):
 		frappe.throw(_("From Date must be before To Date"))
 
 
-def get_result(filters, tds_docs, tds_accounts, tax_category_map):
+def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map):
 	supplier_map = get_supplier_pan_map()
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
+	print(journal_entry_party_map)
 
 	out = []
 	for name, details in gle_map.items():
@@ -37,6 +38,11 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map):
 			supplier = entry.party or entry.against
 			posting_date = entry.posting_date
 			voucher_type = entry.voucher_type
+
+			if voucher_type == "Journal Entry":
+				suppliers = journal_entry_party_map.get(name)
+				if suppliers:
+					supplier = suppliers[0]
 
 			if not tax_withholding_category:
 				tax_withholding_category = supplier_map.get(supplier, {}).get("tax_withholding_category")
@@ -176,6 +182,7 @@ def get_tds_docs(filters):
 	journal_entries = []
 	tax_category_map = {}
 	or_filters = {}
+	journal_entry_party_map = {}
 	bank_accounts = frappe.get_all("Account", {"is_group": 0, "account_type": "Bank"}, pluck="name")
 
 	tds_accounts = frappe.get_all(
@@ -218,9 +225,24 @@ def get_tds_docs(filters):
 		get_tax_category_map(payment_entries, "Payment Entry", tax_category_map)
 
 	if journal_entries:
+		journal_entry_party_map = get_journal_entry_party_map(journal_entries)
 		get_tax_category_map(journal_entries, "Journal Entry", tax_category_map)
 
-	return tds_documents, tds_accounts, tax_category_map
+	return tds_documents, tds_accounts, tax_category_map, journal_entry_party_map
+
+
+def get_journal_entry_party_map(journal_entries):
+	journal_entry_party_map = {}
+	for d in frappe.db.get_all(
+		"Journal Entry Account",
+		{"parent": ("in", journal_entries), "party_type": "Supplier", "party": ("is", "set")},
+		["parent", "party"],
+	):
+		if d.parent not in journal_entry_party_map:
+			journal_entry_party_map[d.parent] = []
+		journal_entry_party_map[d.parent].append(d.party)
+
+	return journal_entry_party_map
 
 
 def get_tax_category_map(vouchers, doctype, tax_category_map):

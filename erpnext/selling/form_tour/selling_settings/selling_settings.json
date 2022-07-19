@@ -4,7 +4,7 @@
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2021-06-29 20:49:01.359489",
+ "modified": "2022-07-11 20:49:01.359489",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -33,7 +33,7 @@
    "is_table_field": 0,
    "label": "Is Sales Order Required for Sales Invoice & Delivery Note Creation?",
    "parent_field": "",
-   "position": "Left",
+   "position": "Right",
    "title": "Sales Order Required for Sales Invoice & Delivery Note Creation"
   },
   {
@@ -45,7 +45,7 @@
    "is_table_field": 0,
    "label": "Is Delivery Note Required for Sales Invoice Creation?",
    "parent_field": "",
-   "position": "Left",
+   "position": "Right",
    "title": "Delivery Note Required for Sales Invoice Creation"
   },
   {
