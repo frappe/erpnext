@@ -166,12 +166,13 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name"
+   "label": "Customer Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-07-12 13:03:04.442174",
+ "modified": "2022-07-19 11:03:04.442174",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
