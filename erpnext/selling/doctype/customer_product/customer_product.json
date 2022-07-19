@@ -1,0 +1,47 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-05-11 06:00:07.457574",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "product_name",
+  "pack_price",
+  "selling_price"
+ ],
+ "fields": [
+  {
+   "fieldname": "product_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Product Name",
+   "options": "Item"
+  },
+  {
+   "fieldname": "pack_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Pack Price ",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "selling_price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Selling Price"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-07-19 05:44:32.678568",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer Product",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
