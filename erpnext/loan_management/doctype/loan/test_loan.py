@@ -29,11 +29,8 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import (
 	create_process_loan_security_shortfall,
 )
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
-	make_employee,
-	make_salary_structure,
-)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
 class TestLoan(unittest.TestCase):
@@ -93,13 +90,6 @@ class TestLoan(unittest.TestCase):
 		)
 
 		self.applicant1 = make_employee("robert_loan@loan.com")
-		make_salary_structure(
-			"Test Salary Structure Loan",
-			"Monthly",
-			employee=self.applicant1,
-			currency="INR",
-			company="_Test Company",
-		)
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict("_Test Loan Customer")).insert(ignore_permissions=True)
 

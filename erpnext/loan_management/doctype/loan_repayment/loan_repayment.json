@@ -15,9 +15,7 @@
   "posting_date",
   "clearance_date",
   "rate_of_interest",
-  "payroll_payable_account",
   "is_term_loan",
-  "repay_from_salary",
   "payment_details_section",
   "due_date",
   "pending_principal_amount",
@@ -253,21 +251,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.repay_from_salary",
-   "fieldname": "payroll_payable_account",
-   "fieldtype": "Link",
-   "label": "Payroll Payable Account",
-   "mandatory_depends_on": "eval:doc.repay_from_salary",
-   "options": "Account"
-  },
-  {
-   "default": "0",
-   "fetch_from": "against_loan.repay_from_salary",
-   "fieldname": "repay_from_salary",
-   "fieldtype": "Check",
-   "label": "Repay From Salary"
-  },
-  {
    "fieldname": "clearance_date",
    "fieldtype": "Date",
    "label": "Clearance Date",
@@ -311,7 +294,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-18 19:10:07.742298",
+ "modified": "2022-06-21 10:10:07.742298",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
