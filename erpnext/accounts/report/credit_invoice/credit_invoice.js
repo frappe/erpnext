@@ -26,6 +26,12 @@ frappe.query_reports["Credit Invoice"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"prefix",
+			"label": __("Prefix"),
+			"fieldtype": "Link",
+			"options": "Prefix sales for days"
+		},
+		{
 			"fieldname":"tc_name",
 			"label": __("Terms and Conditions"),
 			"fieldtype": "Link",

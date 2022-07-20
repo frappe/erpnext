@@ -80,7 +80,6 @@ def execute(filters=None):
 
 def return_data(filters):
 	data = []
-	dates = []
 	if filters.get("from_date"): from_date = filters.get("from_date")
 	if filters.get("to_date"): to_date = filters.get("to_date")
 	conditions = return_filters(filters, from_date, to_date)
@@ -101,6 +100,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += ', "company": "{}"'.format(filters.get("company"))
 	if filters.get("tc_name"): conditions += ', "tc_name": "{}"'.format(filters.get("tc_name"))
 	if filters.get("customer"): conditions += ', "customer": "{}"'.format(filters.get("customer"))
+	if filters.get("prefix"): conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
 	conditions += '}'
 
 	return conditions
