@@ -46,7 +46,34 @@ class ReceivablePayableReport(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
+		self.customer_documents()
 		return self.columns, self.data, None, self.chart
+	
+	def customer_documents(self):
+		report_date = self.filters.get("report_date")
+		conditions = self.return_filters_customer_documents(report_date)
+		documents = frappe.get_all("Customer Documents", ["*"], filters = conditions)
+
+		for document in documents:
+			paid = document.total - document.outstanding_amount
+			row = [document.posting_date, document.customer, _("Customer Documents"), document.name, "", document.due_date, "", document.posting_date, document.total, paid, 0.0, document.outstanding_amount, 0, 0.0, 0.0, 0.0, 0.0, 0.0, "HNL", "", "No hay observaciones"]
+			self.data.append(row)
+
+	def return_filters_customer_documents(self, report_date):
+		conditions = ''	
+
+		conditions += "{"
+
+		if self.filters.get("ageing_based_on") == "Due Date":
+			conditions += '"due_date": ["<=", "{}"]'.format(report_date)
+		else:
+			conditions += '"posting_date": ["<=", "{}"]'.format(report_date)
+
+		conditions += ', "company": "{}"'.format(self.filters.get("company"))
+		conditions += ', "outstanding_amount": [">", 0]'
+		conditions += '}'
+
+		return conditions
 
 	def set_defaults(self):
 		if not self.filters.get("company"):
