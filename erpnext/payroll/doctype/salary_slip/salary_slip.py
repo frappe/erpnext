@@ -779,8 +779,8 @@ class SalarySlip(TransactionBase):
 		data = self.get_data_for_eval()
 		for struct_row in self._salary_structure_doc.get(component_type):
 			amount = self.eval_condition_and_formula(struct_row, data)
-			if amount and struct_row.statistical_component == 0:
-				self.update_component_row(struct_row, amount, component_type)
+			if amount is not None and struct_row.statistical_component == 0:
+				self.update_component_row(struct_row, amount, component_type, data=data)
 
 	def get_data_for_eval(self):
 		"""Returns data for evaluating formula"""
@@ -934,7 +934,7 @@ class SalarySlip(TransactionBase):
 			self.update_component_row(tax_row, tax_amount, "deductions")
 
 	def update_component_row(
-		self, component_data, amount, component_type, additional_salary=None, is_recurring=0
+		self, component_data, amount, component_type, additional_salary=None, is_recurring=0, data=None
 	):
 		component_row = None
 		for d in self.get(component_type):
@@ -1004,12 +1004,18 @@ class SalarySlip(TransactionBase):
 		component_row.amount = amount
 
 		self.update_component_amount_based_on_payment_days(component_row)
+		if data:
+			data[component_row.abbr] = component_row.amount
 
 	def update_component_amount_based_on_payment_days(self, component_row):
 		joining_date, relieving_date = self.get_joining_and_relieving_dates()
 		component_row.amount = self.get_amount_based_on_payment_days(
 			component_row, joining_date, relieving_date
 		)[0]
+
+		# remove 0 valued components that have been updated later
+		if component_row.amount == 0:
+			self.remove(component_row)
 
 	def set_precision_for_component_amounts(self):
 		for component_type in ("earnings", "deductions"):

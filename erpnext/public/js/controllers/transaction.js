@@ -1223,9 +1223,25 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	is_a_mapped_document(item) {
+		const mapped_item_field_map = {
+			"Delivery Note Item": ["si_detail", "so_detail", "dn_detail"],
+			"Sales Invoice Item": ["dn_detail", "so_detail", "sales_invoice_item"],
+			"Purchase Receipt Item": ["purchase_order_item", "purchase_invoice_item", "purchase_receipt_item"],
+			"Purchase Invoice Item": ["purchase_order_item", "pr_detail", "po_detail"],
+		};
+		const mappped_fields = mapped_item_field_map[item.doctype] || [];
+
+		return mappped_fields
+			.map((field) => item[field])
+			.filter(Boolean).length > 0;
+	},
+
 	batch_no: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		this.apply_price_list(item, true);
+		if (!this.is_a_mapped_document(item)) {
+			this.apply_price_list(item, true);
+		}
 	},
 
 	toggle_conversion_factor: function(item) {

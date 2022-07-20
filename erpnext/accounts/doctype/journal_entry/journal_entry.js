@@ -149,22 +149,6 @@ frappe.ui.form.on("Journal Entry", {
 					}
 				});
 			}
-			else if(frm.doc.voucher_type=="Opening Entry") {
-				return frappe.call({
-					type:"GET",
-					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
-					args: {
-						"company": frm.doc.company
-					},
-					callback: function(r) {
-						frappe.model.clear_table(frm.doc, "accounts");
-						if(r.message) {
-							update_jv_details(frm.doc, r.message);
-						}
-						cur_frm.set_value("is_opening", "Yes");
-					}
-				});
-			}
 		}
 	},
 
