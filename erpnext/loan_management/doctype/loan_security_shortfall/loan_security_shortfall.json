@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "loan",
+  "applicant_type",
+  "applicant",
   "status",
   "column_break_3",
   "shortfall_time",
@@ -23,6 +25,8 @@
   {
    "fieldname": "loan",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Loan ",
    "options": "Loan",
    "read_only": 1
@@ -91,17 +95,35 @@
   {
    "fieldname": "shortfall_percentage",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "Shortfall Percentage",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan.applicant_type",
+   "fieldname": "applicant_type",
+   "fieldtype": "Select",
+   "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer"
+  },
+  {
+   "fetch_from": "loan.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Applicant",
+   "options": "applicant_type"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-04-01 08:13:43.263772",
+ "modified": "2022-06-30 11:57:09.378089",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Shortfall",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -132,5 +154,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
