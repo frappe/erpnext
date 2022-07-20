@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+import math
 import frappe
 import json
 import frappe.utils
@@ -165,6 +166,30 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
+    
+	def before_save(self):	
+		from nrp_manufacturing.utils import returnable_items
+		returnables = returnable_items(self.items,self.company)
+		self.returnable_items = {} # reset		
+		for returnable in returnables:
+			ordered_qty = 0
+			for item in self.items:
+				if item.item_code == returnable.item:
+					ordered_qty = item.qty
+					break
+			if ordered_qty == 0:
+				frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
+			if returnable.returnable_qty == 1:
+				qty = ordered_qty / returnable.item_qty
+			else:
+				res = returnable.item_qty / returnable.returnable_qty
+				qty = ordered_qty * res
+			qty = math.ceil(qty)
+			temp_item = self.append('returnable_items',{})
+			temp_item.item_code = returnable.returnable_item
+			temp_item.item_name = returnable.returnable_item_name
+			temp_item.rate = returnable.sale_price
+			temp_item.qty = qty
 
 	def on_submit(self):
 		self.check_credit_limit()
