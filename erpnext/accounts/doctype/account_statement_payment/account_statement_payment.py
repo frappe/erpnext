@@ -81,20 +81,21 @@ class AccountStatementPayment(Document):
 		if self.products_table != None:
 			for x in range(1,5):
 				for product in self.get("products_table"):
-					if int(product.no_order) == x:
-						row = self.append("products_detail", {})
-						row.item = product.item
-						row.item_name = product.item_name
-						row.quantity = product.quantity
-						row.price = product.price
-						row.net_pay = product.net_pay
-						row.sale_amount = product.sale_amount
-						row.reference = product.reference
-						if x == 1: row.history = _("Hospital Outgoings")
-						if x == 2: row.history = _("Inventory Requisition")
-						if x == 3: row.history = _("Laboratory and image")
-						if x == 4: row.history = _("Medical Honorarium")
-						row.no_order = x
+					if product.no_order != None:
+						if int(product.no_order) == x:
+							row = self.append("products_detail", {})
+							row.item = product.item
+							row.item_name = product.item_name
+							row.quantity = product.quantity
+							row.price = product.price
+							row.net_pay = product.net_pay
+							row.sale_amount = product.sale_amount
+							row.reference = product.reference
+							if x == 1: row.history = _("Hospital Outgoings")
+							if x == 2: row.history = _("Inventory Requisition")
+							if x == 3: row.history = _("Laboratory and image")
+							if x == 4: row.history = _("Medical Honorarium")
+							row.no_order = x
 			
 			for product in self.get("products_table"):
 				if product.no_order == None:
