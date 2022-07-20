@@ -899,12 +899,10 @@
   },
   {
    "columns": 1,
-   "fetch_from": "item_code.product_label",
    "fieldname": "product_label",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Label",
-   "read_only": 1
+   "label": "Label"
   },
   {
    "fieldname": "column_break_2",
@@ -919,7 +917,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-18 07:02:59.461402",
+ "modified": "2022-07-20 00:05:49.400446",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

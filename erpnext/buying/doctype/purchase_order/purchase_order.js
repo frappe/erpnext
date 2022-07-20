@@ -704,3 +704,11 @@ frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
 		erpnext.buying.get_default_bom(frm);
 	}
 });
+// Fetch Label Field dependas on Batch
+frappe.ui.form.on("Purchase Order Item", "item_code", function (frm, cdt, cdn) {
+    var d = locals[cdt][cdn];
+    frappe.db.get_value("Item", { "item_code": d.item_code}, "product_label", function (value){
+        frappe.model.set_value(d.doctype, d.name, "product_label", value.product_label)
+        refresh_field('product_label')
+    })
+});
