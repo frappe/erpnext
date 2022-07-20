@@ -19,6 +19,7 @@
   "price_list",
   "customer",
   "supplier",
+  "column_break_14",
   "batch_no",
   "buying",
   "selling",
@@ -89,7 +90,6 @@
   {
    "fieldname": "price_list_details",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Price List",
    "options": "fa fa-tags"
   },
@@ -159,7 +159,7 @@
    "in_filter": 1,
    "in_global_search": 1,
    "in_list_view": 1,
-   "label": "Pack Price",
+   "label": "Price",
    "oldfieldname": "ref_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
@@ -212,6 +212,10 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -219,7 +223,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-18 07:13:23.288876",
+ "modified": "2022-07-20 08:38:00.584962",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
