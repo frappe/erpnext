@@ -208,6 +208,8 @@ def repost_future_sle(
 	via_landed_cost_voucher=False,
 	doc=None,
 ):
+	if not args:
+		args = []  # set args to empty list if None to avoid enumerate error
 
 	items_to_be_repost = get_items_to_be_repost(
 		voucher_type=voucher_type, voucher_no=voucher_no, doc=doc
@@ -303,7 +305,7 @@ def get_items_to_be_repost(voucher_type=None, voucher_no=None, doc=None):
 			group_by="item_code, warehouse",
 		)
 
-	return items_to_be_repost
+	return items_to_be_repost or []
 
 
 def get_distinct_item_warehouse(args=None, doc=None):
