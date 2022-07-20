@@ -1193,24 +1193,6 @@ def get_payment_entry(ref_doc, args):
 
 
 @frappe.whitelist()
-def get_opening_accounts(company):
-	"""get all balance sheet accounts for opening entry"""
-	accounts = frappe.db.sql_list(
-		"""select
-			name from tabAccount
-		where
-			is_group=0 and report_type='Balance Sheet' and company={0} and
-			name not in (select distinct account from tabWarehouse where
-			account is not null and account != '')
-		order by name asc""".format(
-			frappe.db.escape(company)
-		)
-	)
-
-	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
-
-
-@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if not frappe.db.has_column("Journal Entry", searchfield):

@@ -500,6 +500,9 @@ class calculate_taxes_and_totals(object):
 		else:
 			self.doc.grand_total = flt(self.doc.net_total)
 
+		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
+			self.doc.grand_total -= self.doc.discount_amount
+
 		if self.doc.get("taxes"):
 			self.doc.total_taxes_and_charges = flt(
 				self.doc.grand_total - self.doc.net_total - flt(self.doc.rounding_adjustment),
@@ -593,6 +596,12 @@ class calculate_taxes_and_totals(object):
 		if self.doc.discount_amount:
 			if not self.doc.apply_discount_on:
 				frappe.throw(_("Please select Apply Discount On"))
+
+			if self.doc.apply_discount_on == "Grand Total" and self.doc.get(
+				"is_cash_or_non_trade_discount"
+			):
+				self.discount_amount_applied = True
+				return
 
 			self.doc.base_discount_amount = flt(
 				self.doc.discount_amount * self.doc.conversion_rate, self.doc.precision("base_discount_amount")

@@ -7,7 +7,7 @@ import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, add_to_date, today
+from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -39,6 +39,9 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		frappe.db.sql(
 			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
 		)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def assertSLEs(self, doc, expected_sles, sle_filters=None):
 		"""Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
@@ -753,6 +756,93 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			order_by="timestamp(posting_date, posting_time), creation",
 		)
 		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_negative_qty_with_precision(self):
+		"Test if system precision is respected while validating negative qty."
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.utils import get_stock_balance
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=559.8327, rate=100)
+
+		make_stock_entry(item_code=item_code, source=warehouse, qty=470.84, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 88.9927)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
+		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+
+		# See if delivery note goes through
+		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			do_not_submit=True,
+		)
+		dn.submit()
+
+		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_future_negative_qty_with_precision(self):
+		"""
+		Ledger:
+		| Voucher | Qty		| Balance
+		-------------------
+		| Reco	  | 559.8327| 559.8327
+		| SE	  | -470.84	| [Backdated] (new bal: 88.9927)
+		| SE	  | 11.007	| 570.8397 (new bal: 99.9997)
+		| DN	  | -100	| 470.8397 (new bal: -0.0003)
+
+		Check if future negative qty is asserted as per precision 3.
+		-0.0003 should be considered as 0.000
+		"""
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=559.8327,
+			rate=100,
+			posting_date=add_days(today(), -2),
+		)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+		)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# Make backdated SE and make sure SE goes through as per precision (no negative qty error)
+		make_stock_entry(
+			item_code=item_code, source=warehouse, qty=470.84, rate=100, posting_date=add_days(today(), -1)
+		)
 
 
 def create_repack_entry(**args):
