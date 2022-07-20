@@ -614,7 +614,7 @@
    "fieldname": "reason_payment",
    "fieldtype": "Select",
    "label": "Reason For Payment",
-   "options": "Advance\nAdvancement\nCancellation"
+   "options": "Payment\nAdvancement"
   },
   {
    "fieldname": "references_nos",
@@ -636,7 +636,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-06-29 14:21:22.564666",
+ "modified": "2022-07-20 13:58:46.126899",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

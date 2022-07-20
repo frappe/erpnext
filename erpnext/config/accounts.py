@@ -97,7 +97,6 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Payment Entry CXC",
-					"doctype": "Debit Note CXC",
 					"is_query_report": True
 				},
 				{
@@ -203,7 +202,6 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Payment Entry CXP",
-					"doctype": "Debit Note CXP",
 					"is_query_report": True
 				},
 				{
