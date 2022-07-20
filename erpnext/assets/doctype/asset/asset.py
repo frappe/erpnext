@@ -353,61 +353,16 @@ class Asset(AccountsController):
 					skip_row = True
 
 				if depreciation_amount > 0:
-					# With monthly depreciation, each depreciation is divided by months remaining until next date
-					if self.allow_monthly_depreciation:
-						# month range is 1 to 12
-						# In pro rata case, for first and last depreciation, month range would be different
-						if (has_pro_rata and n == 0 and not self.number_of_depreciations_booked) or (
-							has_pro_rata and n == cint(number_of_pending_depreciations) - 1
-						):
-							month_range = months
-						else:
-							month_range = finance_book.frequency_of_depreciation
-
-						for r in range(month_range):
-							if has_pro_rata and n == 0 and not self.number_of_depreciations_booked:
-								# For first entry of monthly depr
-								if r == 0:
-									days_until_first_depr = date_diff(monthly_schedule_date, self.available_for_use_date) + 1
-									per_day_amt = depreciation_amount / days
-									depreciation_amount_for_current_month = per_day_amt * days_until_first_depr
-									depreciation_amount -= depreciation_amount_for_current_month
-									date = monthly_schedule_date
-									amount = depreciation_amount_for_current_month
-								else:
-									date = add_months(monthly_schedule_date, r)
-									amount = depreciation_amount / (month_range - 1)
-							elif (has_pro_rata and n == cint(number_of_pending_depreciations) - 1) and r == cint(
-								month_range
-							) - 1:
-								# For last entry of monthly depr
-								date = last_schedule_date
-								amount = depreciation_amount / month_range
-							else:
-								date = add_months(monthly_schedule_date, r)
-								amount = depreciation_amount / month_range
-
-							self.append(
-								"schedules",
-								{
-									"schedule_date": date,
-									"depreciation_amount": amount,
-									"depreciation_method": finance_book.depreciation_method,
-									"finance_book": finance_book.finance_book,
-									"finance_book_id": finance_book.idx,
-								},
-							)
-					else:
-						self.append(
-							"schedules",
-							{
-								"schedule_date": schedule_date,
-								"depreciation_amount": depreciation_amount,
-								"depreciation_method": finance_book.depreciation_method,
-								"finance_book": finance_book.finance_book,
-								"finance_book_id": finance_book.idx,
-							},
-						)
+					self.append(
+						"schedules",
+						{
+							"schedule_date": schedule_date,
+							"depreciation_amount": depreciation_amount,
+							"depreciation_method": finance_book.depreciation_method,
+							"finance_book": finance_book.finance_book,
+							"finance_book_id": finance_book.idx,
+						},
+					)
 
 	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
 	# JE: Journal Entry, FB: Finance Book
@@ -853,7 +808,7 @@ class Asset(AccountsController):
 
 			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
 
-			return 100 * (1 - flt(depreciation_rate, float_precision))
+			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
 		days = date_diff(to_date, from_date)

@@ -65,6 +65,7 @@ def validate_eligibility(doc):
 		"SEZ",
 		"Overseas",
 		"Deemed Export",
+		"UIN Holders",
 	]
 	company_transaction = doc.get("billing_address_gstin") == doc.get("company_gstin")
 
@@ -130,9 +131,7 @@ def read_json(name):
 
 def get_transaction_details(invoice):
 	supply_type = ""
-	if (
-		invoice.gst_category == "Registered Regular" or invoice.gst_category == "Registered Composition"
-	):
+	if invoice.gst_category in ("Registered Regular", "Registered Composition", "UIN Holders"):
 		supply_type = "B2B"
 	elif invoice.gst_category == "SEZ":
 		if invoice.export_type == "Without Payment of Tax":
@@ -148,15 +147,18 @@ def get_transaction_details(invoice):
 		supply_type = "DEXP"
 
 	if not supply_type:
-		rr, rc, sez, overseas, export = (
+		rr, rc, sez, overseas, export, uin = (
 			bold("Registered Regular"),
 			bold("Registered Composition"),
 			bold("SEZ"),
 			bold("Overseas"),
 			bold("Deemed Export"),
+			bold("UIN Holders"),
 		)
 		frappe.throw(
-			_("GST category should be one of {}, {}, {}, {}, {}").format(rr, rc, sez, overseas, export),
+			_("GST category should be one of {}, {}, {}, {}, {}, {}").format(
+				rr, rc, sez, overseas, export, uin
+			),
 			title=_("Invalid Supply Type"),
 		)
 
@@ -272,45 +274,43 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
+		item_qty = item.qty
+
+		item.discount_amount = abs(item.discount_amount)
+		item.taxable_value = abs(item.taxable_value)
+
+		if invoice.get("is_return") or invoice.get("is_debit_note"):
+			item_qty = item_qty or 1
 
 		hide_discount_in_einvoice = cint(
 			frappe.db.get_single_value("E Invoice Settings", "dont_show_discounts_in_e_invoice")
 		)
 
 		if hide_discount_in_einvoice:
-			if flt(item.qty) != 0.0:
-				item.unit_rate = abs(item.taxable_value / item.qty)
-			else:
-				item.unit_rate = abs(item.taxable_value)
-			item.gross_amount = abs(item.taxable_value)
-			item.taxable_value = abs(item.taxable_value)
+			item.unit_rate = item.taxable_value / item_qty
+			item.gross_amount = item.taxable_value
 			item.discount_amount = 0
 
 		else:
 			if invoice.get("apply_discount_on") and (abs(invoice.get("base_discount_amount") or 0.0) > 0.0):
 				# TODO: need to handle case when tax included in basic rate is checked.
-				item.discount_amount = (item.discount_amount * item.qty) + (
+				item.discount_amount = (item.discount_amount * item_qty) + (
 					abs(item.base_amount) - abs(item.base_net_amount)
 				)
 			else:
-				item.discount_amount = item.discount_amount * item.qty
+				item.discount_amount = item.discount_amount * item_qty
 
-			if invoice.get("is_return") or invoice.get("is_debit_note"):
-				item.unit_rate = (abs(item.taxable_value) + item.discount_amount) / (
-					1 if (item.qty == 0) else item.qty
+			try:
+				item.unit_rate = (item.taxable_value + item.discount_amount) / item_qty
+			except ZeroDivisionError:
+				# This will never run but added as safety measure
+				frappe.throw(
+					title=_("Error: Qty is Zero"),
+					msg=_("Quantity can't be zero unless it's Credit/Debit Note."),
 				)
-			else:
-				try:
-					item.unit_rate = abs(item.taxable_value + item.discount_amount) / item.qty
-				except ZeroDivisionError:
-					# This will never run but added as safety measure
-					frappe.throw(
-						title=_("Error: Qty is Zero"),
-						msg=_("Quantity can't be zero unless it's Credit/Debit Note."),
-					)
 
-		item.gross_amount = abs(item.taxable_value) + item.discount_amount
-		item.taxable_value = abs(item.taxable_value)
+		item.gross_amount = item.taxable_value + item.discount_amount
+		item.taxable_value = item.taxable_value
 		item.is_service_item = "Y" if item.gst_hsn_code and item.gst_hsn_code[:2] == "99" else "N"
 		item.serial_no = ""
 
