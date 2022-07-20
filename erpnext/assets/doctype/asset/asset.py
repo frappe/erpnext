@@ -335,6 +335,7 @@ class Asset(AccountsController):
 					schedule_date = add_days(schedule_date, days)
 					last_schedule_date = schedule_date
 
+<<<<<<< HEAD
 				if not depreciation_amount:
 					continue
 				value_after_depreciation -= flt(depreciation_amount, self.precision("gross_purchase_amount"))
@@ -408,6 +409,52 @@ class Asset(AccountsController):
 								"finance_book_id": finance_book.idx,
 							},
 						)
+=======
+			# Adjust depreciation amount in the last period based on the expected value after useful life
+			if finance_book.expected_value_after_useful_life and (
+				(
+					n == cint(number_of_pending_depreciations) - 1
+					and value_after_depreciation != finance_book.expected_value_after_useful_life
+				)
+				or value_after_depreciation < finance_book.expected_value_after_useful_life
+			):
+				depreciation_amount += value_after_depreciation - finance_book.expected_value_after_useful_life
+				skip_row = True
+
+			if depreciation_amount > 0:
+				self._add_depreciation_row(
+					schedule_date,
+					depreciation_amount,
+					finance_book.depreciation_method,
+					finance_book.finance_book,
+					finance_book.idx,
+				)
+
+	def _add_depreciation_row(
+		self, schedule_date, depreciation_amount, depreciation_method, finance_book, finance_book_id
+	):
+		self.append(
+			"schedules",
+			{
+				"schedule_date": schedule_date,
+				"depreciation_amount": depreciation_amount,
+				"depreciation_method": depreciation_method,
+				"finance_book": finance_book,
+				"finance_book_id": finance_book_id,
+			},
+		)
+
+	def _get_value_after_depreciation(self, finance_book):
+		# value_after_depreciation - current Asset value
+		if self.docstatus == 1 and finance_book.value_after_depreciation:
+			value_after_depreciation = flt(finance_book.value_after_depreciation)
+		else:
+			value_after_depreciation = flt(self.gross_purchase_amount) - flt(
+				self.opening_accumulated_depreciation
+			)
+
+		return value_after_depreciation
+>>>>>>> 6c29146c91 (fix: Removed 'Allow Monthly Depreciation' checkbox)
 
 	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
 	# JE: Journal Entry, FB: Finance Book
@@ -850,10 +897,8 @@ class Asset(AccountsController):
 				return args.get("rate_of_depreciation")
 
 			value = flt(args.get("expected_value_after_useful_life")) / flt(self.gross_purchase_amount)
-
 			depreciation_rate = math.pow(value, 1.0 / flt(args.get("total_number_of_depreciations"), 2))
-
-			return 100 * (1 - flt(depreciation_rate, float_precision))
+			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
 		days = date_diff(to_date, from_date)
