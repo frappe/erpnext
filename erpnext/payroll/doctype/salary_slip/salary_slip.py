@@ -1730,15 +1730,15 @@ class SalarySlip(TransactionBase):
 		self.year_to_date = year_to_date
 		self.gross_year_to_date = gross_year_to_date
 
-	@frappe.whitelist()
-	def leave_type_encasement_days(self):
-		if self.employee and self.start_date and self.end_date:
-			sick_leave = frappe.db.sql("""select sum(encashable_days) as result 
-			from `tabLeave Encashment`  where employee = '{0}' and
-						encashment_date between '{1}' and '{2}' and docstatus=1 
-						 """.format(self.employee, self.start_date, self.end_date), as_dict=1)
+	# @frappe.whitelist()
+	# def leave_type_encasement_days(self):
+	# 	if self.employee and self.start_date and self.end_date:
+	# 		sick_leave = frappe.db.sql("""select sum(encashable_days) as result 
+	# 		from `tabLeave Encashment`  where employee = '{0}' and
+	# 					encashment_date between '{1}' and '{2}' and docstatus=1 
+	# 					 """.format(self.employee, self.start_date, self.end_date), as_dict=1)
 
-			self.encashment_days = sick_leave[0]['result']
+	# 		self.encashment_days = sick_leave[0]['result']
 
 			
 

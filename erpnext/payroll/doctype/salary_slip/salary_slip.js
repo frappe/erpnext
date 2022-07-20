@@ -165,7 +165,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields, false);
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		frm.trigger("set_dynamic_labels");
-
+	
 
 		// frm.add_custom_button(__('Calculate leave fields'), function () {
 			if(frm.doc.start_date && !frm.doc.check) {
@@ -180,17 +180,17 @@ frappe.ui.form.on("Salary Slip", {
 					}
 				});
 			}
-		if(frm.doc.start_date && !frm.doc.check){
-			frappe.call({
-				method: 'leave_type_encasement_days',
-				doc:frm.doc,
-				callback: function(r) {
-					if(r.message) {
-					frm.refresh_field("encashment_days");
-					}
-				}
-			});
-		}
+		// if(frm.doc.start_date && !frm.doc.check && !frm.doc.encashment_days){
+		// 	frappe.call({
+		// 		method: 'leave_type_encasement_days',
+		// 		doc:frm.doc,
+		// 		callback: function(r) {
+		// 			if(r.message) {
+		// 			frm.refresh_field("encashment_days");
+		// 			}
+		// 		}
+			// });
+		// }
 		if(frm.doc.start_date && !frm.doc.check){
 			frappe.call({
 				method: 'set_days',
