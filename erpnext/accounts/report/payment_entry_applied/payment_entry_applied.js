@@ -31,12 +31,6 @@ frappe.query_reports["Payment Entry Applied"] = {
 			"fieldtype": "Link",
 			"options": "Secuence Payment Entry",
 			"reqd": 1
-		},
-		{
-			"fieldname":"reason_payment",
-			"label": __("Reason For Payment"),
-			"fieldtype": "Select",
-			"options": "Advance\nAdvancement\nCancellation"
-		},
+		}
 	]
 };
