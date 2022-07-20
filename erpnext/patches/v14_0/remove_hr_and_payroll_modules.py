@@ -33,12 +33,6 @@ def execute():
 	]:
 		frappe.delete_doc("Report", report, ignore_missing=True)
 
-	dashboards = frappe.get_all(
-		"Dashboard", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
-	)
-	for dashboard in dashboards:
-		frappe.delete_doc("Dashboard", dashboard, ignore_missing=True, force=True)
-
 	doctypes = frappe.get_all(
 		"DocType", {"module": ("in", ["HR", "Payroll"]), "custom": 0}, pluck="name"
 	)
@@ -53,3 +47,50 @@ def execute():
 	)
 	for notifcation in notifications:
 		frappe.delete_doc("Notification", notifcation, ignore_missing=True)
+
+	frappe.delete_doc("User Type", "Employee Self Service", ignore_missing=True, force=True)
+
+	for dt in ["Web Form", "Dashboard", "Dashboard Chart", "Number Card"]:
+		records = frappe.get_all(
+			dt, {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
+		)
+		for record in records:
+			frappe.delete_doc(dt, record, ignore_missing=True, force=True)
+
+	custom_fields = {
+		"Salary Component": ["component_type"],
+		"Employee": ["ifsc_code", "pan_number", "micr_code", "provident_fund_account"],
+		"Company": [
+			"hra_section",
+			"basic_component",
+			"hra_component",
+			"hra_column_break",
+			"arrear_component",
+		],
+		"Employee Tax Exemption Declaration": [
+			"hra_section",
+			"monthly_house_rent",
+			"rented_in_metro_city",
+			"salary_structure_hra",
+			"hra_column_break",
+			"annual_hra_exemption",
+			"monthly_hra_exemption",
+		],
+		"Employee Tax Exemption Proof Submission": [
+			"hra_section",
+			"house_rent_payment_amount",
+			"rented_in_metro_city",
+			"rented_from_date",
+			"rented_to_date",
+			"hra_column_break",
+			"monthly_house_rent",
+			"monthly_hra_exemption",
+			"total_eligible_hra_exemption",
+		],
+	}
+
+	for doc, fields in custom_fields.items():
+		filters = {"dt": doc, "fieldname": ["in", fields]}
+		records = frappe.get_all("Custom Field", filters=filters, pluck="name")
+		for record in records:
+			frappe.delete_doc("Custom Field", record, ignore_missing=True, force=True)
