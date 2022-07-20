@@ -213,6 +213,32 @@ $.extend(erpnext.utils, {
 		});
 	},
 
+	add_inventory_dimensions: function(report_name, index) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		frappe.call({
+			method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			callback: function(r) {
+				if (r.message && r.message.length) {
+					r.message.forEach((dimension) => {
+						let found = filters.some(el => el.fieldname === dimension['fieldname']);
+
+						if (!found) {
+							filters.splice(index, 0, {
+								"fieldname": dimension["fieldname"],
+								"label": __(dimension["label"]),
+								"fieldtype": "MultiSelectList",
+								get_data: function(txt) {
+									return frappe.db.get_link_options(dimension["doctype"], txt);
+								},
+							});
+						}
+					});
+				}
+			}
+		});
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
