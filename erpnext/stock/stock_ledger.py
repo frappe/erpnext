@@ -207,6 +207,8 @@ def repost_future_sle(
 	allow_negative_stock=None,
 	via_landed_cost_voucher=False,
 ):
+	if not args:
+		args = []  # set args to empty list if None to avoid enumerate error
 
 	items_to_be_repost = get_items_to_be_repost(
 		voucher_type=voucher_type, voucher_no=voucher_no, doc=doc
