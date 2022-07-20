@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, nowdate, random_string
 
 from erpnext.accounts.doctype.account.test_account import create_account
@@ -14,9 +15,18 @@ test_dependencies = ["Employee"]
 company_name = "_Test Company 3"
 
 
-class TestExpenseClaim(unittest.TestCase):
-	def tearDown(self):
-		frappe.db.rollback()
+class TestExpenseClaim(FrappeTestCase):
+	def setUp(self):
+		if not frappe.db.get_value("Cost Center", {"company": company_name}):
+			frappe.get_doc(
+				{
+					"doctype": "Cost Center",
+					"cost_center_name": "_Test Cost Center 3",
+					"parent_cost_center": "_Test Company 3 - _TC3",
+					"is_group": 0,
+					"company": company_name,
+				}
+			).insert()
 
 	def test_total_expense_claim_for_project(self):
 		frappe.db.sql("""delete from `tabTask`""")
@@ -58,12 +68,7 @@ class TestExpenseClaim(unittest.TestCase):
 			payable_account, 300, 200, company_name, "Travel Expenses - _TC3"
 		)
 
-		je_dict = make_bank_entry("Expense Claim", expense_claim.name)
-		je = frappe.get_doc(je_dict)
-		je.posting_date = nowdate()
-		je.cheque_no = random_string(5)
-		je.cheque_date = nowdate()
-		je.submit()
+		je = make_journal_entry(expense_claim)
 
 		expense_claim = frappe.get_doc("Expense Claim", expense_claim.name)
 		self.assertEqual(expense_claim.status, "Paid")
@@ -272,6 +277,24 @@ class TestExpenseClaim(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 		self.assertEqual(total_amount_reimbursed, 5500)
 
+	def test_journal_entry_against_expense_claim(self):
+		payable_account = get_payable_account(company_name)
+		taxes = generate_taxes()
+		expense_claim = make_expense_claim(
+			payable_account,
+			300,
+			200,
+			company_name,
+			"Travel Expenses - _TC3",
+			do_not_submit=True,
+			taxes=taxes,
+		)
+		expense_claim.submit()
+
+		je = make_journal_entry(expense_claim)
+
+		self.assertEqual(je.accounts[0].debit_in_account_currency, expense_claim.grand_total)
+
 
 def get_payable_account(company):
 	return frappe.get_cached_value("Company", company, "default_payable_account")
@@ -370,3 +393,14 @@ def make_payment_entry(expense_claim, payable_account, amt):
 	pe.references[0].allocated_amount = amt
 	pe.insert()
 	pe.submit()
+
+
+def make_journal_entry(expense_claim):
+	je_dict = make_bank_entry("Expense Claim", expense_claim.name)
+	je = frappe.get_doc(je_dict)
+	je.posting_date = nowdate()
+	je.cheque_no = random_string(5)
+	je.cheque_date = nowdate()
+	je.submit()
+
+	return je
