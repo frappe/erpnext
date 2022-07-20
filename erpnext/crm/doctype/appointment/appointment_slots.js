@@ -16,7 +16,7 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 		me.frm = frm;
 
 		me.wrapper = $(wrapper);
-		me.message_wrapper = $(`<div class="text-center"></div>`).appendTo(me.wrapper);
+		me.message_wrapper = $(`<div></div>`).appendTo(me.wrapper);
 		me.slot_picker_wrapper = $(`<div class="row slot-picker"></div>`).appendTo(me.wrapper);
 
 		me.timeslots = [];
