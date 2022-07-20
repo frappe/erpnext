@@ -59,6 +59,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		""",
 			(pcv.name),
 		)
+		pcv.reload()
+		self.assertEqual(pcv.gle_processing_status, "Completed")
 		self.assertEqual(pcv_gle, expected_gle)
 
 	def test_cost_center_wise_posting(self):

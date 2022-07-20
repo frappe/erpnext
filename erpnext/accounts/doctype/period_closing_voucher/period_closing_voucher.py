@@ -19,11 +19,11 @@ class PeriodClosingVoucher(AccountsController):
 		self.validate_posting_date()
 
 	def on_submit(self):
-		self.db_set("status", "In Progress")
+		self.db_set("gle_processing_status", "In Progress")
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		self.db_set("status", "In Progress")
+		self.db_set("gle_processing_status", "In Progress")
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		gle_count = frappe.db.count(
 			"GL Entry",
@@ -196,13 +196,13 @@ def process_gl_entries(gl_entries):
 	try:
 		make_gl_entries(gl_entries, merge_entries=False)
 		frappe.db.set_value(
-			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Completed"
+			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "gle_processing_status", "Completed"
 		)
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
 		frappe.db.set_value(
-			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "status", "Failed"
+			"Period Closing Voucher", gl_entries[0].get("voucher_no"), "gle_processing_status", "Failed"
 		)
 
 
@@ -211,8 +211,8 @@ def make_reverse_gl_entries(voucher_type, voucher_no):
 
 	try:
 		make_reverse_gl_entries(voucher_type=voucher_type, voucher_no=voucher_no)
-		frappe.db.set_value("Period Closing Voucher", voucher_no, "status", "Completed")
+		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
-		frappe.db.set_value("Period Closing Voucher", voucher_no, "status", "Failed")
+		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Failed")
