@@ -81,14 +81,11 @@ def return_data(filters):
 	entries = frappe.get_all("Payment Entry", ["*"], filters = conditions)
 
 	for entry in entries:	
-		is_serial, applies 	= verificate_serial(filters, entry.naming_series, entry.name)
+		is_serial, references = verificate_serial(filters, entry.naming_series, entry.name)
 		if is_serial:
-			for apply in applies:
-				references = frappe.get_all("Apply Payment Entries Without References Detail", ["*"], filters = {"parent": apply.name})
-
-				for reference in references:
-					row = [entry.name, filters.get("serial"), entry.party, "Sales Invoice", reference.reference_name, entry.company, reference.allocated, entry.mode_of_payment, entry.reason_payment]
-					data.append(row)
+			for reference in references:
+				row = [entry.name, entry.naming_series, entry.party, reference.reference_doctype, reference.reference_name, entry.company, reference.allocated_amount, entry.mode_of_payment, entry.reason_payment]
+				data.append(row)
 
 	return data
 
@@ -97,13 +94,13 @@ def verificate_serial(filters, naming_series, name):
 	serialString = serial_split[0] + "-" + serial_split[1]
 
 	is_serial = False
-	applies = frappe.get_all("Apply Payment Entries Without References", ["payment_entry", "name"], filters = {"payment_entry": name})
+	references =  frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": name})
 		
 	if serialString == filters.get("secuence"):
-		if len(applies) > 0:
+		if len(references) > 0:
 			is_serial = True
 		
-	return is_serial, applies
+	return is_serial, references
 
 def return_filters(filters, from_date, to_date):
 	conditions = ''	
@@ -112,7 +109,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += ', "docstatus": 1'
-	if filters.get("reason_payment"): conditions += ', "reason_payment": "{}"'.format(filters.get("reason_payment"))
+	conditions += ', "reason_payment": "Advancement"'
 	conditions += '}'
 
 	return conditions
