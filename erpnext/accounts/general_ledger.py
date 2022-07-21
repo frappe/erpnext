@@ -168,6 +168,7 @@ def get_cost_center_allocation_data(company, posting_date):
 def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
+
 	for entry in gl_map:
 		# if there is already an entry in this account then just add it
 		# to that entry
@@ -298,9 +299,10 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.flags.from_repost = from_repost
 	gle.flags.adv_adj = adv_adj
 	gle.flags.update_outstanding = update_outstanding or "Yes"
+	gle.flags.notify_update = False
 	gle.submit()
 
-	if not from_repost:
+	if not from_repost and gle.voucher_type != "Period Closing Voucher":
 		validate_expense_against_budget(args)
 
 
