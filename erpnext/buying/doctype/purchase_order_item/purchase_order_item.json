@@ -11,6 +11,8 @@
   "supplier_part_no",
   "item_name",
   "product_bundle",
+  "fg_item",
+  "fg_item_qty",
   "column_break_4",
   "schedule_date",
   "expected_delivery_date",
@@ -574,16 +576,18 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.is_subcontracted",
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.is_subcontracted",
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "label": "Include Exploded Items",
@@ -848,6 +852,22 @@
    "label": "Sales Order Packed Item",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item",
+   "fieldtype": "Link",
+   "label": "Finished Good Item",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "options": "Item"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Item Qty",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
   }
  ],
  "idx": 1,

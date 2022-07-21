@@ -470,7 +470,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							cost_center: item.cost_center,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template,
-							child_docname: item.name
+							child_docname: item.name,
+							is_old_subcontracting_flow: me.frm.doc.is_old_subcontracting_flow,
 						}
 					},
 
@@ -2003,7 +2004,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"qty": item.qty,
 					"description": item.description,
 					"serial_no": item.serial_no,
-					"batch_no": item.batch_no
+					"batch_no": item.batch_no,
+					"sample_size": item.sample_quantity
 				});
 				dialog_items.grid.refresh();
 			}
