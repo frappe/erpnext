@@ -12,7 +12,7 @@
 'To Date' is required,'Data Final' é necessária,
 'Total',';Total';,
 'Update Stock' can not be checked because items are not delivered via {0},'Atualização do Estoque' não pode ser verificado porque os itens não são entregues via {0},
-'Update Stock' cannot be checked for fixed asset sale,"'Atualizar Estoque"" não pode ser selecionado para venda de ativo fixo",
+'Update Stock' cannot be checked for fixed asset sale,"'Atualizar Estoque' não pode ser selecionado para venda de ativo fixo",
 ) for {0},) para {0},
 1 exact match.,1 correspondência exata.,
 90-Above,Acima de 90,
