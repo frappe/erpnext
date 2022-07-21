@@ -38,7 +38,6 @@
   "project_details",
   "estimated_costing",
   "total_costing_amount",
-  "total_expense_claim",
   "total_purchase_cost",
   "company",
   "column_break_28",
@@ -280,12 +279,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "total_expense_claim",
-   "fieldtype": "Currency",
-   "label": "Total Expense Claim (via Expense Claims)",
-   "read_only": 1
-  },
-  {
    "fieldname": "total_purchase_cost",
    "fieldtype": "Currency",
    "label": "Total Purchase Cost (via Purchase Invoice)",
@@ -458,7 +451,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2022-05-25 22:45:06.108499",
+ "modified": "2022-06-23 16:45:06.108499",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
