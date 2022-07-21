@@ -24,13 +24,15 @@ frappe.ui.form.on('Member', {
 				if (frm.doc.customer) {
 					frappe.set_route('query-report', 'General Ledger', {party_type: 'Customer', party: frm.doc.customer});
 				} else {
-					frappe.set_route('query-report', 'Accounts Receivable', {party_type: 'Member', party: frm.doc.name});
+					frappe.set_route('query-report', 'General Ledger', {party_type: 'Member', party: frm.doc.name});
 				}
 			});
-
-			frm.add_custom_button(__('Accounts Receivable'), function() {
-				frappe.set_route('query-report', 'Accounts Receivable', {customer: frm.doc.customer});
-			});
+			
+			if (frm.doc.customer) {
+				frm.add_custom_button(__('Accounts Receivable'), function() {
+					frappe.set_route('query-report', 'Accounts Receivable', {customer: frm.doc.customer});
+				});
+			}
 
 			if (!frm.doc.customer) {
 				frm.add_custom_button(__('Create Customer'), () => {
