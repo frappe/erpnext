@@ -2,7 +2,7 @@ import frappe
 from frappe.contacts.doctype.contact.test_contact import create_contact
 from frappe.tests.test_api import FrappeAPITestCase
 
-from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
 class TestExotel(FrappeAPITestCase):
