@@ -81,7 +81,7 @@ frappe.ui.form.on("Delivery Note", {
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
 	},
-
+	
 	refresh: function(frm) {
         if (frm.doc.queue_status == 'Queued'){
             $('.primary-action').hide();
@@ -107,7 +107,14 @@ frappe.ui.form.on("Delivery Note Item", {
 	cost_center: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows('items', 'cost_center', d.cost_center);
-	}
+	},
+	before_items_remove: function(frm, cdt, cdn) {
+	var deleted_row = frappe.get_doc(cdt, cdn);
+	let filterreturnitems = frm.doc.returnable_items.filter((item) => item.item_reference != deleted_row.item_code);		
+	frm.doc.returnable_items = filterreturnitems
+	frm.refresh_field("returnable_items")
+
+}
 });
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({

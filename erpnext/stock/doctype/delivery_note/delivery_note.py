@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 from datetime import datetime
-
+import math
 import frappe
 import frappe.defaults
 from erpnext.controllers.selling_controller import SellingController
@@ -190,7 +190,44 @@ class DeliveryNote(SellingController):
 	# def submit(self):
 	# 	time.sleep(1)
 	# 	self.queue_action('submit',queue_name="dn_queue")
-	
+	##caclute returnables
+	def before_save(self):
+
+		## check if returanable manage manullay
+		if not self.get('manually_manage_return_items'):
+			from nrp_manufacturing.utils import returnable_items
+			returnables = returnable_items(self.items,self.company)			
+			for returnable in returnables:
+				ordered_qty = 0
+				for item in self.items:
+					if item.item_code == returnable.item:
+						ordered_qty = item.qty
+						break
+				if ordered_qty == 0:
+					frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
+				if returnable.returnable_qty == 1:
+					qty = ordered_qty / returnable.item_qty
+				else:
+					res = returnable.item_qty / returnable.returnable_qty
+					qty = ordered_qty * res
+				qty = math.ceil(qty)
+				if len(self.get('returnable_items')) != len(returnables):
+					temp_item = self.append('returnable_items',{})
+					temp_item.item_code = returnable.returnable_item
+					temp_item.item_name = returnable.returnable_item_name
+					temp_item.rate = returnable.sale_price
+					temp_item.actual_qty = qty
+					temp_item.so_qty = qty
+				else:
+					for ritems in self.get('returnable_items'):
+						if ritems.item_reference == returnable.item:
+							ritems.actual_qty = qty
+							break
+						
+		## unset returnable items
+		if self.get('remove_return_items'):
+			self.set("returnable_items", [])
+		
 	def on_submit(self):
 		self.validate_packed_qty()
 
@@ -611,3 +648,7 @@ def make_sales_return(source_name, target_doc=None):
 def update_delivery_note_status(docname, status):
 	dn = frappe.get_doc("Delivery Note", docname)
 	dn.update_status(status)
+
+@frappe.whitelist()
+def delete_returnable(self,arg):
+	print('test')

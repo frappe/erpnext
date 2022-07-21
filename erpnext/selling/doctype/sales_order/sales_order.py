@@ -189,7 +189,6 @@ class SalesOrder(SellingController):
 			temp_item.item_code = returnable.returnable_item
 			temp_item.item_name = returnable.returnable_item_name
 			temp_item.rate = returnable.sale_price
-			temp_item.item_reference = returnable.item
 			temp_item.qty = qty
 
 	def on_submit(self):
@@ -643,7 +642,16 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		}
-
+		mapper["Sale Order Returnable Item"] = {
+			"doctype": "Delivery Note Returnable Item",
+			"field_map": {
+				"item_code": "item_code",
+				"item_name": "item_name",
+				"rate": "rate",
+				"qty": "so_qty",
+				"item_reference": "item_reference",
+			},
+		}
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
 	return target_doc
