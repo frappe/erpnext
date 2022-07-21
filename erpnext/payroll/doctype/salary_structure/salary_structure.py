@@ -1,6 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+import re
 
 import frappe
 from frappe import _
@@ -18,6 +19,7 @@ class SalaryStructure(Document):
 		self.strip_condition_and_formula_fields()
 		self.validate_max_benefits_with_flexi()
 		self.validate_component_based_on_tax_slab()
+		self.validate_payment_days_based_dependent_component()
 
 	def set_missing_values(self):
 		overwritten_fields = [
@@ -57,6 +59,35 @@ class SalaryStructure(Document):
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:
 			frappe.throw(_("Net pay cannot be negative"))
+
+	def validate_payment_days_based_dependent_component(self):
+		abbreviations = self.get_component_abbreviations()
+		for component_type in ("earnings", "deductions"):
+			for row in self.get(component_type):
+				if (
+					row.formula
+					and row.depends_on_payment_days
+					# check if the formula contains any of the payment days components
+					and any(re.search(r"\b" + abbr + r"\b", row.formula) for abbr in abbreviations)
+				):
+					message = _("Row #{0}: The {1} Component has the options {2} and {3} enabled.").format(
+						row.idx,
+						frappe.bold(row.salary_component),
+						frappe.bold("Amount based on formula"),
+						frappe.bold("Depends On Payment Days"),
+					)
+					message += "<br><br>" + _(
+						"Disable {0} for the {1} component, to prevent the amount from being deducted twice, as its formula already uses a payment-days-based component."
+					).format(
+						frappe.bold("Depends On Payment Days"), frappe.bold(row.salary_component)
+					)
+					frappe.throw(message, title=_("Payment Days Dependency"))
+
+	def get_component_abbreviations(self):
+		abbr = [d.abbr for d in self.earnings if d.depends_on_payment_days]
+		abbr += [d.abbr for d in self.deductions if d.depends_on_payment_days]
+
+		return abbr
 
 	def strip_condition_and_formula_fields(self):
 		# remove whitespaces from condition and formula fields

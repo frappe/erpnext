@@ -369,3 +369,5 @@ erpnext.patches.v13_0.update_employee_advance_status
 erpnext.patches.v13_0.job_card_status_on_hold
 erpnext.patches.v13_0.add_cost_center_in_loans
 erpnext.patches.v13_0.show_india_localisation_deprecation_warning
+erpnext.patches.v13_0.fix_number_and_frequency_for_monthly_depreciation
+erpnext.patches.v13_0.reset_corrupt_defaults
