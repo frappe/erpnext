@@ -110,8 +110,6 @@ frappe.ui.form.on('Payment Entry', {
 				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"];
 			} else if (frm.doc.party_type == "Supplier") {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
-			} else if (frm.doc.party_type == "Employee") {
-				var doctypes = ["Expense Claim", "Journal Entry"];
 			} else {
 				var doctypes = ["Journal Entry"];
 			}
@@ -140,15 +138,10 @@ frappe.ui.form.on('Payment Entry', {
 			const child = locals[cdt][cdn];
 			const filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
-				'Purchase Order', 'Expense Claim', 'Fees', 'Dunning'];
+				'Purchase Order', 'Dunning'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.party;
-			}
-
-			if(child.reference_doctype == "Expense Claim") {
-				filters["docstatus"] = 1;
-				filters["is_paid"] = 0;
 			}
 
 			return {
@@ -730,7 +723,7 @@ frappe.ui.form.on('Payment Entry', {
 						c.payment_term = d.payment_term;
 						c.allocated_amount = d.allocated_amount;
 
-						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim", "Fees"], d.voucher_type)) {
+						if(!in_list(frm.events.get_order_doctypes(frm), d.voucher_type)) {
 							if(flt(d.outstanding_amount) > 0)
 								total_positive_outstanding += flt(d.outstanding_amount);
 							else
@@ -745,7 +738,7 @@ frappe.ui.form.on('Payment Entry', {
 						} else {
 							c.exchange_rate = 1;
 						}
-						if (in_list(['Sales Invoice', 'Purchase Invoice', "Expense Claim", "Fees"], d.reference_doctype)){
+						if (in_list(frm.events.get_invoice_doctypes(frm), d.reference_doctype)){
 							c.due_date = d.due_date;
 						}
 					});
@@ -774,6 +767,14 @@ frappe.ui.form.on('Payment Entry', {
 
 			}
 		});
+	},
+
+	get_order_doctypes: function(frm) {
+		return ["Sales Order", "Purchase Order"];
+	},
+
+	get_invoice_doctypes: function(frm) {
+		return ["Sales Invoice", "Purchase Invoice"];
 	},
 
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount, paid_amount_change) {
@@ -944,14 +945,6 @@ frappe.ui.form.on('Payment Entry', {
 			) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry", [row.idx]));
-				return false;
-			}
-
-			if(frm.doc.party_type=="Employee" &&
-				!in_list(["Expense Claim", "Journal Entry"], row.reference_doctype)
-			) {
-				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
-				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Expense Claim or Journal Entry", [row.idx]));
 				return false;
 			}
 		}
