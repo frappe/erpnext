@@ -19,6 +19,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.create_company()
 		self.create_item()
 		self.create_customer()
+		self.create_account()
 		self.clear_old_entries()
 
 	def tearDown(self):
@@ -89,6 +90,38 @@ class TestPaymentReconciliation(FrappeTestCase):
 			customer.save()
 			self.customer2 = customer.name
 
+		if frappe.db.exists("Customer", "_Test PR Customer 3"):
+			self.customer3 = "_Test PR Customer 3"
+		else:
+			customer = frappe.new_doc("Customer")
+			customer.customer_name = "_Test PR Customer 3"
+			customer.type = "Individual"
+			customer.default_currency = "EUR"
+			customer.save()
+			self.customer3 = customer.name
+
+	def create_account(self):
+		account_name = "Debtors EUR"
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": account_name, "company": self.company}
+		):
+			acc = frappe.new_doc("Account")
+			acc.account_name = account_name
+			acc.parent_account = "Accounts Receivable - _PR"
+			acc.company = self.company
+			acc.account_currency = "EUR"
+			acc.account_type = "Receivable"
+			acc.insert()
+		else:
+			name = frappe.db.get_value(
+				"Account",
+				filters={"account_name": account_name, "company": self.company},
+				fieldname="name",
+				pluck=True,
+			)
+			acc = frappe.get_doc("Account", name)
+		self.debtors_eur = acc.name
+
 	def create_sales_invoice(
 		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
 	):
@@ -118,7 +151,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=100, posting_date=nowdate()):
+	def create_payment_entry(self, amount=100, posting_date=nowdate(), customer=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
@@ -126,7 +159,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 			company=self.company,
 			payment_type="Receive",
 			party_type="Customer",
-			party=self.customer,
+			party=customer or self.customer,
 			paid_from=self.debit_to,
 			paid_to=self.bank,
 			paid_amount=amount,
@@ -454,3 +487,59 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.get("payments")), 1)
 		self.assertEqual(pr.get("invoices")[0].outstanding_amount, 20)
 		self.assertEqual(pr.get("payments")[0].amount, 20)
+
+	def test_pr_output_foreign_currency_and_amount(self):
+		# test for currency and amount invoices and payments
+		transaction_date = nowdate()
+		# In EUR
+		amount = 100
+		exchange_rate = 80
+
+		si = self.create_sales_invoice(
+			qty=1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+		)
+		si.customer = self.customer3
+		si.currency = "EUR"
+		si.conversion_rate = exchange_rate
+		si.debit_to = self.debtors_eur
+		si = si.save().submit()
+
+		cr_note = self.create_sales_invoice(
+			qty=-1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+		)
+		cr_note.customer = self.customer3
+		cr_note.is_return = 1
+		cr_note.currency = "EUR"
+		cr_note.conversion_rate = exchange_rate
+		cr_note.debit_to = self.debtors_eur
+		cr_note = cr_note.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.party = self.customer3
+		pr.receivable_payable_account = self.debtors_eur
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		self.assertEqual(pr.invoices[0].amount, amount)
+		self.assertEqual(pr.invoices[0].currency, "EUR")
+		self.assertEqual(pr.payments[0].amount, amount)
+		self.assertEqual(pr.payments[0].currency, "EUR")
+
+		cr_note.cancel()
+
+		pay = self.create_payment_entry(
+			amount=amount, posting_date=transaction_date, customer=self.customer3
+		)
+		pay.paid_from = self.debtors_eur
+		pay.paid_from_account_currency = "EUR"
+		pay.source_exchange_rate = exchange_rate
+		pay.received_amount = exchange_rate * amount
+		pay = pay.save().submit()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(pr.payments[0].amount, amount)
+		self.assertEqual(pr.payments[0].currency, "EUR")

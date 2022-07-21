@@ -164,8 +164,6 @@
   "debit_to",
   "party_account_currency",
   "is_opening",
-  "c_form_applicable",
-  "c_form_no",
   "column_break8",
   "remarks",
   "sales_team_section_break",
@@ -1398,23 +1396,6 @@
    "oldfieldtype": "Select",
    "options": "No\nYes",
    "print_hide": 1
-  },
-  {
-   "fieldname": "c_form_applicable",
-   "fieldtype": "Select",
-   "label": "C-Form Applicable",
-   "no_copy": 1,
-   "options": "No\nYes",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "c_form_no",
-   "fieldtype": "Link",
-   "label": "C-Form No",
-   "no_copy": 1,
-   "options": "C-Form",
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "fieldname": "column_break8",

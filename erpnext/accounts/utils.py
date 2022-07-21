@@ -420,7 +420,7 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args):
+def reconcile_against_document(args):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -461,7 +461,8 @@ def reconcile_against_document(args):
 		frappe.flags.ignore_party_validation = False
 
 		if entry.voucher_type in ("Payment Entry", "Journal Entry"):
-			doc.update_expense_claim()
+			if hasattr(doc, "update_expense_claim"):
+				doc.update_expense_claim()
 
 
 def check_if_advance_entry_modified(args):
@@ -855,8 +856,8 @@ def get_outstanding_invoices(
 	)
 
 	for d in invoice_list:
-		payment_amount = d.invoice_amount - d.outstanding
-		outstanding_amount = d.outstanding
+		payment_amount = d.invoice_amount_in_account_currency - d.outstanding_in_account_currency
+		outstanding_amount = d.outstanding_in_account_currency
 		if outstanding_amount > 0.5 / (10**precision):
 			if (
 				min_outstanding
@@ -872,7 +873,7 @@ def get_outstanding_invoices(
 							"voucher_no": d.voucher_no,
 							"voucher_type": d.voucher_type,
 							"posting_date": d.posting_date,
-							"invoice_amount": flt(d.invoice_amount),
+							"invoice_amount": flt(d.invoice_amount_in_account_currency),
 							"payment_amount": payment_amount,
 							"outstanding_amount": outstanding_amount,
 							"due_date": d.due_date,
@@ -1412,7 +1413,7 @@ def create_payment_ledger_entry(
 						if gle.against_voucher_type
 						else gle.voucher_type,
 						"against_voucher_no": gle.against_voucher if gle.against_voucher else gle.voucher_no,
-						"currency": gle.currency,
+						"account_currency": gle.account_currency,
 						"amount": dr_or_cr,
 						"amount_in_account_currency": dr_or_cr_account_currency,
 						"delinked": True if cancel else False,

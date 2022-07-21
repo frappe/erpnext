@@ -16,7 +16,6 @@
   "company",
   "posting_date",
   "status",
-  "repay_from_salary",
   "section_break_8",
   "loan_type",
   "loan_amount",
@@ -48,6 +47,10 @@
   "total_payment",
   "total_principal_paid",
   "written_off_amount",
+  "refund_amount",
+  "debit_adjustment_amount",
+  "credit_adjustment_amount",
+  "is_npa",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
@@ -123,13 +126,6 @@
    "no_copy": 1,
    "options": "Sanctioned\nPartially Disbursed\nDisbursed\nLoan Closure Requested\nClosed",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.applicant_type==\"Employee\"",
-   "fieldname": "repay_from_salary",
-   "fieldtype": "Check",
-   "label": "Repay From Salary"
   },
   {
    "fieldname": "section_break_8",
@@ -379,12 +375,39 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "refund_amount",
+   "fieldtype": "Currency",
+   "label": "Refund amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Adjustment Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "debit_adjustment_amount",
+   "fieldtype": "Currency",
+   "label": "Debit Adjustment Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "description": "Mark Loan as a Nonperforming asset",
+   "fieldname": "is_npa",
+   "fieldtype": "Check",
+   "label": "Is NPA"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-10 11:50:31.957360",
+ "modified": "2022-07-12 11:50:31.957360",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

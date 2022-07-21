@@ -721,12 +721,12 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2022-02-28", 645.0, 645.0],
-			["2022-03-31", 1206.8, 1851.8],
-			["2022-04-30", 1051.12, 2902.92],
-			["2022-05-31", 915.52, 3818.44],
-			["2022-06-30", 797.42, 4615.86],
-			["2022-07-15", 384.14, 5000.0],
+			["2022-02-28", 647.25, 647.25],
+			["2022-03-31", 1210.71, 1857.96],
+			["2022-04-30", 1053.99, 2911.95],
+			["2022-05-31", 917.55, 3829.5],
+			["2022-06-30", 798.77, 4628.27],
+			["2022-07-15", 371.73, 5000.0],
 		]
 
 		schedules = [
@@ -737,53 +737,7 @@ class TestDepreciationMethods(AssetSetup):
 			]
 			for d in asset.get("schedules")
 		]
-
 		self.assertEqual(schedules, expected_schedules)
-
-	def test_discounted_wdv_depreciation_rate_for_indian_region(self):
-		# set indian company
-		company_flag = frappe.flags.company
-		frappe.flags.company = "_Test Company"
-
-		finance_book = frappe.new_doc("Finance Book")
-		finance_book.finance_book_name = "Income Tax"
-		finance_book.for_income_tax = 1
-		finance_book.insert(ignore_if_duplicate=True)
-
-		asset = create_asset(
-			calculate_depreciation=1,
-			available_for_use_date="2030-07-12",
-			purchase_date="2030-01-01",
-			finance_book=finance_book.name,
-			depreciation_method="Written Down Value",
-			expected_value_after_useful_life=12500,
-			depreciation_start_date="2030-12-31",
-			total_number_of_depreciations=3,
-			frequency_of_depreciation=12,
-		)
-
-		self.assertEqual(asset.finance_books[0].rate_of_depreciation, 50.0)
-
-		expected_schedules = [
-			["2030-12-31", 11849.32, 11849.32],
-			["2031-12-31", 44075.34, 55924.66],
-			["2032-12-31", 22037.67, 77962.33],
-			["2033-07-12", 9537.67, 87500.0],
-		]
-
-		schedules = [
-			[
-				cstr(d.schedule_date),
-				flt(d.depreciation_amount, 2),
-				flt(d.accumulated_depreciation_amount, 2),
-			]
-			for d in asset.get("schedules")
-		]
-
-		self.assertEqual(schedules, expected_schedules)
-
-		# reset indian company
-		frappe.flags.company = company_flag
 
 
 class TestDepreciationBasics(AssetSetup):
