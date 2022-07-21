@@ -91,7 +91,7 @@ class Appointment(Document):
 
 		# check if already booked
 		appointments_in_same_slot = count_appointments_in_same_slot(self.scheduled_dt, self.end_dt,
-			appointment=self.name if not self.is_new() else None)
+			self.appointment_type, appointment=self.name if not self.is_new() else None)
 		no_of_agents = cint(appointment_type_doc.number_of_agents)
 
 		if no_of_agents and appointments_in_same_slot >= no_of_agents:
@@ -361,7 +361,8 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 	no_of_agents = cint(appointment_type_doc.number_of_agents)
 
 	for timeslot_start, timeslot_end in timeslots:
-		appointments_in_same_slots = count_appointments_in_same_slot(timeslot_start, timeslot_end, appointment)
+		appointments_in_same_slots = count_appointments_in_same_slot(timeslot_start, timeslot_end, appointment_type,
+			appointment)
 
 		timeslot_data = {
 			'timeslot_start': timeslot_start,
@@ -376,12 +377,12 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 	return out
 
 
-def count_appointments_in_same_slot(start_dt, end_dt, appointment=None):
-	appointments = get_appointments_in_same_slot(start_dt, end_dt, appointment=appointment)
+def count_appointments_in_same_slot(start_dt, end_dt, appointment_type, appointment=None):
+	appointments = get_appointments_in_same_slot(start_dt, end_dt, appointment_type, appointment=appointment)
 	return len(appointments) if appointments else 0
 
 
-def get_appointments_in_same_slot(start_dt, end_dt, appointment=None):
+def get_appointments_in_same_slot(start_dt, end_dt, appointment_type, appointment=None):
 	start_dt = get_datetime(start_dt)
 	end_dt = get_datetime(end_dt)
 
@@ -392,10 +393,12 @@ def get_appointments_in_same_slot(start_dt, end_dt, appointment=None):
 	appointments = frappe.db.sql("""
 		select name, _assign
 		from `tabAppointment`
-		where %(start_dt)s < end_dt AND %(end_dt)s > scheduled_dt and status = 'Open' {0}
+		where status = 'Open' and appointment_type = %(appointment_type)s
+			and %(start_dt)s < end_dt AND %(end_dt)s > scheduled_dt {0}
 	""".format(exclude_condition), {
 		'start_dt': start_dt,
 		'end_dt': end_dt,
+		'appointment_type': appointment_type,
 		'appointment': appointment
 	}, as_dict=1)
 
