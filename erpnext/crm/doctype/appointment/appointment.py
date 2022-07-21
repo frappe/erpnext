@@ -4,38 +4,37 @@
 
 from __future__ import unicode_literals
 
-from collections import Counter
-
 import frappe
 import datetime
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_url, getdate, get_time, get_datetime, combine_datetime, cint, format_datetime, formatdate
 from frappe.utils.verified_command import get_signed_params
+from erpnext.hr.doctype.employee.employee import get_employee_from_user
+from frappe.desk.form.assign_to import add as add_assignemnt, clear as clear_assignments, close_all_assignments
 
 
 class Appointment(Document):
 	def validate(self):
 		self.set_missing_values()
-		self.set_scheduled_date_time()
-		self.validate_timeslot_validity()
-		self.validate_timeslot_availability()
+		if self.status in ['Open', 'Unconfirmed']:
+			self.validate_timeslot_validity()
+			self.validate_timeslot_availability()
 
-	def after_insert(self):
-		if self.lead:
-			self.auto_assign()
-			self.create_calendar_event(update=True)
+	def on_update(self):
+		self.auto_assign()
+		self.auto_unassign()
+
+		if self.calendar_event:
+			self.sync_calendar_event()
 		else:
-			self.status = 'Unverified'
-			self.send_confirmation_email()
-
-	def on_change(self):
-		self.sync_calendar_event()
+			self.create_calendar_event(update=True)
 
 	def set_missing_values(self):
-		self.set_appointment_type_values()
+		self.set_missing_duration()
+		self.set_scheduled_date_time()
 
-	def set_appointment_type_values(self):
+	def set_missing_duration(self):
 		if self.get('appointment_type'):
 			appointment_type_doc = frappe.get_cached_doc("Appointment Type", self.appointment_type)
 			if cint(self.appointment_duration) <= 0:
@@ -64,7 +63,6 @@ class Appointment(Document):
 			self.scheduled_day_of_week = formatdate(self.scheduled_date, "EEEE")
 		else:
 			self.scheduled_day_of_week = None
-
 
 	def validate_timeslot_validity(self):
 		if not self.appointment_type:
@@ -102,23 +100,6 @@ class Appointment(Document):
 				.format(timeslot_str, frappe.bold(appointments_in_same_slot), self.appointment_type),
 				raise_exception=appointment_type_doc.validate_availability)
 
-	def get_timeslot_str(self):
-		if self.scheduled_dt == self.end_dt:
-			timeslot_str = frappe.bold(self.get_formatted_dt())
-		elif getdate(self.scheduled_dt) == getdate(self.end_dt):
-			timeslot_str = _("{0} {1} till {2}").format(
-				frappe.bold(format_datetime(self.scheduled_dt, "EEEE, d MMMM, Y")),
-				frappe.bold(format_datetime(self.scheduled_dt, "hh:mm:ss a")),
-				frappe.bold(format_datetime(self.end_dt, "hh:mm:ss a"))
-			)
-		else:
-			timeslot_str = _("{0} till {1}").format(
-				frappe.bold(self.get_formatted('scheduled_dt')),
-				frappe.bold(self.get_formatted('end_dt'))
-			)
-
-		return timeslot_str
-
 	def create_lead_and_link(self, update=False):
 		if self.lead:
 			return
@@ -137,6 +118,8 @@ class Appointment(Document):
 			self.db_set('lead', self.lead)
 
 	def create_calendar_event(self, update=False):
+		if self.status != "Open":
+			return
 		if self.calendar_event:
 			return
 		if not self.appointment_type:
@@ -146,15 +129,21 @@ class Appointment(Document):
 		if not appointment_type_doc.create_calendar_event:
 			return
 
+		event_participants = []
+		if self.get('customer'):
+			event_participants.append({"reference_doctype": "Customer", "reference_docname": self.customer})
+		elif self.get('lead'):
+			event_participants.append({"reference_doctype": "Lead", "reference_docname": self.lead})
+
 		appointment_event = frappe.get_doc({
 			'doctype': 'Event',
 			'subject': ' '.join(['Appointment with', self.customer_name]),
 			'starts_on': self.scheduled_dt,
-			'ends_on': self.ends_on,
+			'ends_on': self.end_dt,
 			'status': 'Open',
 			'type': 'Public',
 			'send_reminder': appointment_type_doc.email_reminders,
-			'event_participants': [dict(reference_doctype='Lead', reference_docname=self.lead)]
+			'event_participants': event_participants
 		})
 
 		employee = get_employee_from_user(self._assign)
@@ -179,6 +168,8 @@ class Appointment(Document):
 		cal_event.save(ignore_permissions=True)
 
 	def send_confirmation_email(self):
+		if self.status != "Unconfirmed":
+			return
 		if not self.customer_email:
 			return
 
@@ -209,18 +200,27 @@ class Appointment(Document):
 		return get_url(verify_route + '?' + get_signed_params(params))
 
 	def set_verified(self, email):
+		if self.status not in ['Open', 'Unconfirmed']:
+			frappe.throw(_("Appointment is {0}").format(self.status))
 		if email != self.customer_email:
-			frappe.throw('Email verification failed.')
+			frappe.throw(_('Email verification failed.'))
 
-		self.status = 'Open'
-
+		self.db_set('status', 'Open')
 		self.create_lead_and_link(update=True)
-		self.auto_assign()
 		self.create_calendar_event(update=True)
+		self.auto_assign()
+
+	def auto_unassign(self):
+		if self.status == "Closed":
+			close_all_assignments(self.doctype, self.name)
+		elif self.status in ["Cancelled", "Rescheduled"]:
+			clear_assignments(self.doctype, self.name)
 
 	def auto_assign(self):
-		from frappe.desk.form.assign_to import add as add_assignemnt
-
+		if self.status != 'Open':
+			return
+		if self._assign:
+			return
 		if not self.appointment_type:
 			return
 
@@ -230,8 +230,6 @@ class Appointment(Document):
 
 		existing_assignee = self.get_assignee_from_latest_opportunity()
 		if existing_assignee:
-			# If the latest opportunity is assigned to someone
-			# Assign the appointment to the same
 			add_assignemnt({
 				'doctype': self.doctype,
 				'name': self.name,
@@ -239,20 +237,16 @@ class Appointment(Document):
 			})
 			return
 
-		if self._assign:
-			return
-
-		available_agents = get_agents_sorted_by_asc_workload(getdate(self.scheduled_dt))
+		available_agents = get_agents_sorted_by_asc_workload(getdate(self.scheduled_dt), self.appointment_type)
 
 		for agent in available_agents:
-			if check_agent_availability(agent, self.scheduled_dt):
-				agent = agent[0]
+			if check_agent_availability(agent, self.scheduled_dt, self.end_dt):
 				add_assignemnt({
 					'doctype': self.doctype,
 					'name': self.name,
 					'assign_to': agent
 				})
-			break
+				break
 
 	def get_assignee_from_latest_opportunity(self):
 		if not self.lead:
@@ -260,18 +254,35 @@ class Appointment(Document):
 		if not frappe.db.exists('Lead', self.lead):
 			return None
 
-		opporutnities = frappe.get_list('Opportunity', filters={'party_name': self.lead},
-			ignore_permissions=True, order_by='creation desc')
-		if not opporutnities:
+		latest_opportunity = frappe.get_all('Opportunity', filters={'opportunity_from': 'Lead', 'party_name': self.lead},
+			order_by='creation desc', fields=['name', '_assign'])
+		if not latest_opportunity:
 			return None
 
-		latest_opportunity = frappe.get_doc('Opportunity', opporutnities[0].name)
+		latest_opportunity = latest_opportunity[0]
 		assignee = latest_opportunity._assign
 		if not assignee:
 			return None
 
 		assignee = frappe.parse_json(assignee)[0]
 		return assignee
+
+	def get_timeslot_str(self):
+		if self.scheduled_dt == self.end_dt:
+			timeslot_str = frappe.bold(self.get_formatted_dt())
+		elif getdate(self.scheduled_dt) == getdate(self.end_dt):
+			timeslot_str = _("{0} {1} till {2}").format(
+				frappe.bold(format_datetime(self.scheduled_dt, "EEEE, d MMMM, Y")),
+				frappe.bold(format_datetime(self.scheduled_dt, "hh:mm:ss a")),
+				frappe.bold(format_datetime(self.end_dt, "hh:mm:ss a"))
+			)
+		else:
+			timeslot_str = _("{0} till {1}").format(
+				frappe.bold(self.get_formatted('scheduled_dt')),
+				frappe.bold(self.get_formatted('end_dt'))
+			)
+
+		return timeslot_str
 
 	def get_formatted_dt(self, dt=None):
 		if not dt:
@@ -283,43 +294,52 @@ class Appointment(Document):
 			return ""
 
 
-def get_agents_sorted_by_asc_workload(date):
-	appointments = frappe.db.get_list('Appointment', fields='*')
-	agent_list = get_agent_list_as_strings()
+def get_agents_sorted_by_asc_workload(date, appointment_type):
+	date = getdate(date)
+
+	agents = get_agents_list(appointment_type)
+	if not agents:
+		return []
+
+	appointments = frappe.get_all('Appointment', fields=['name', '_assign'],
+		filters={'scheduled_date': date, 'status': ['in', ['Open', 'Closed']]})
 	if not appointments:
-		return agent_list
-	appointment_counter = Counter(agent_list)
+		return agents
+
+	agent_booked_dict = {agent: 0 for agent in agents}
+
 	for appointment in appointments:
-		assigned_to = frappe.parse_json(appointment._assign)
+		assigned_to = frappe.parse_json(appointment._assign or '[]')
 		if not assigned_to:
 			continue
-		if (assigned_to[0] in agent_list) and getdate(appointment.scheduled_dt) == date:
-			appointment_counter[assigned_to[0]] += 1
-	sorted_agent_list = appointment_counter.most_common()
-	sorted_agent_list.reverse()
-	return sorted_agent_list
+
+		assigned_to = assigned_to[0]
+		if assigned_to not in agents:
+			continue
+
+		agent_booked_dict[assigned_to] += 1
+
+	agent_booked_list = list(agent_booked_dict.items())
+	sorted_agent_booked_list = sorted(agent_booked_list, key=lambda d: d[1])
+	return [d[0] for d in sorted_agent_booked_list]
 
 
-def get_agent_list_as_strings():
-	agent_list_as_strings = []
-	agent_list = frappe.get_doc('Appointment Booking Settings').agent_list
-	for agent in agent_list:
-		agent_list_as_strings.append(agent.user)
-	return agent_list_as_strings
+def get_agents_list(appointment_type):
+	if not appointment_type:
+		return []
+
+	appointment_type_doc = frappe.get_cached_doc('Appointment Type')
+	return appointment_type_doc.get_agents()
 
 
-def check_agent_availability(agent_email, scheduled_dt):
-	appointemnts_at_scheduled_time = frappe.get_list(
-		'Appointment', filters={'scheduled_dt': scheduled_dt})
-	for appointment in appointemnts_at_scheduled_time:
-		if appointment._assign == agent_email:
+def check_agent_availability(agent, scheduled_dt, end_dt):
+	appointments = get_appointments_in_same_slot(scheduled_dt, end_dt)
+	for appointment in appointments:
+		assignments = frappe.parse_json(appointment._assign or '[]')
+		if agent in assignments:
 			return False
+
 	return True
-
-
-def get_employee_from_user(user):
-	employee_docname = frappe.db.get_value('Employee', filters={'user_id': user})
-	return employee_docname
 
 
 @frappe.whitelist()
@@ -357,6 +377,11 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 
 
 def count_appointments_in_same_slot(start_dt, end_dt, appointment=None):
+	appointments = get_appointments_in_same_slot(start_dt, end_dt, appointment=appointment)
+	return len(appointments) if appointments else 0
+
+
+def get_appointments_in_same_slot(start_dt, end_dt, appointment=None):
 	start_dt = get_datetime(start_dt)
 	end_dt = get_datetime(end_dt)
 
@@ -364,14 +389,14 @@ def count_appointments_in_same_slot(start_dt, end_dt, appointment=None):
 	if appointment:
 		exclude_condition = "and name != %(appointment)s"
 
-	count = frappe.db.sql("""
-		select count(*)
+	appointments = frappe.db.sql("""
+		select name, _assign
 		from `tabAppointment`
-		where %(start_dt)s < end_dt AND %(end_dt)s > scheduled_dt {0}
+		where %(start_dt)s < end_dt AND %(end_dt)s > scheduled_dt and status = 'Open' {0}
 	""".format(exclude_condition), {
 		'start_dt': start_dt,
 		'end_dt': end_dt,
 		'appointment': appointment
-	})
+	}, as_dict=1)
 
-	return cint(count[0][0]) if count else 0
+	return appointments

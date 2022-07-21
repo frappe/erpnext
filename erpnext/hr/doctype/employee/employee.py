@@ -450,3 +450,8 @@ def has_user_permission_for_employee(user_name, employee_name):
 		'allow': 'Employee',
 		'for_value': employee_name
 	})
+
+
+def get_employee_from_user(user):
+	employee_docname = frappe.db.get_value('Employee', filters={'user_id': user})
+	return employee_docname

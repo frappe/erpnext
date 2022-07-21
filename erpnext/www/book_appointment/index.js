@@ -204,7 +204,7 @@ async function submit() {
             'tz':window.selected_timezone
         },
         callback: (response)=>{
-            if (response.message.status == "Unverified") {
+            if (response.message.status == "Unconfirmed") {
                 frappe.show_alert("Please check your email to confirm the appointment")
             } else {
                 frappe.show_alert("Appointment Created Successfully");

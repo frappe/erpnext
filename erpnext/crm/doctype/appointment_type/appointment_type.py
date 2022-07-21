@@ -125,6 +125,9 @@ class AppointmentType(Document):
 		else:
 			return None
 
+	def get_agents(self):
+		return [agent.user for agent in self.agent_list]
+
 
 def time_in_range(start, end, x):
 	"""Return true if x is in the range [start, end]"""
