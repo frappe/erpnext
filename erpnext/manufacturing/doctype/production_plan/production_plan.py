@@ -508,7 +508,7 @@ class ProductionPlan(Document):
 			po.is_subcontracted = 1
 			for row in po_list:
 				po_data = {
-					"item_code": row.production_item,
+					"fg_item": row.production_item,
 					"warehouse": row.fg_warehouse,
 					"production_plan_sub_assembly_item": row.name,
 					"bom": row.bom_no,
@@ -518,9 +518,6 @@ class ProductionPlan(Document):
 				for field in [
 					"schedule_date",
 					"qty",
-					"uom",
-					"stock_uom",
-					"item_name",
 					"description",
 					"production_plan_item",
 				]:

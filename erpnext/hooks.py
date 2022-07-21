@@ -80,13 +80,14 @@ calendars = [
 	"Holiday List",
 ]
 
-website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner", "Job Opening"]
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
 
 website_context = {
 	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
 	"splash_image": "/assets/erpnext/images/erpnext-logo.svg",
 }
 
+# nosemgrep
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
 	{
@@ -163,7 +164,6 @@ website_route_rules = [
 		"to_route": "addresses",
 		"defaults": {"doctype": "Address", "parents": [{"label": _("Addresses"), "route": "addresses"}]},
 	},
-	{"from_route": "/jobs", "to_route": "Job Opening"},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
 	{"from_route": "/material-requests", "to_route": "Material Request"},
@@ -256,7 +256,9 @@ sounds = [
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
 ]
 
-has_upload_permission = {"Employee": "erpnext.hr.doctype.employee.employee.has_upload_permission"}
+has_upload_permission = {
+	"Employee": "erpnext.setup.doctype.employee.employee.has_upload_permission"
+}
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
@@ -289,9 +291,9 @@ doc_events = {
 	},
 	"User": {
 		"after_insert": "frappe.contacts.doctype.contact.contact.update_contact",
-		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
+		"validate": "erpnext.setup.doctype.employee.employee.validate_employee_role",
 		"on_update": [
-			"erpnext.hr.doctype.employee.employee.update_user_permissions",
+			"erpnext.setup.doctype.employee.employee.update_user_permissions",
 			"erpnext.portal.utils.set_default_role",
 		],
 	},
@@ -366,8 +368,6 @@ auto_cancel_exempted_doctypes = [
 	"Payment Entry",
 ]
 
-after_migrate = ["erpnext.setup.install.update_select_perm_after_install"]
-
 scheduler_events = {
 	"cron": {
 		"0/5 * * * *": [
@@ -387,16 +387,13 @@ scheduler_events = {
 	},
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
-		"erpnext.hr.doctype.interview.interview.send_interview_reminder",
 		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts",
 	],
 	"hourly": [
-		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails",
 		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
-		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
 	],
 	"hourly_long": [
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
@@ -407,11 +404,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
-		"erpnext.hr.doctype.employee.employee_reminders.send_work_anniversary_reminders",
-		"erpnext.hr.doctype.employee.employee_reminders.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",
 		"erpnext.assets.doctype.asset.depreciation.post_depreciation_entries",
-		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.send_summary",
 		"erpnext.stock.doctype.serial_no.serial_no.update_maintenance_status",
 		"erpnext.buying.doctype.supplier_scorecard.supplier_scorecard.refresh_scorecards",
 		"erpnext.setup.doctype.company.company.cache_companies_monthly_sales_history",
@@ -427,20 +421,14 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
-		"erpnext.hr.doctype.interview.interview.send_daily_feedback_reminder",
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.auto_update_latest_price_in_all_boms",
-		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
-		"erpnext.hr.utils.generate_leave_encashment",
-		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
 	],
-	"weekly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"],
-	"monthly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_demand_loans",
@@ -472,6 +460,28 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
+advance_payment_doctypes = ["Sales Order", "Purchase Order"]
+
+invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
+
+period_closing_doctypes = [
+	"Sales Invoice",
+	"Purchase Invoice",
+	"Journal Entry",
+	"Bank Clearance",
+	"Asset",
+	"Stock Entry",
+]
+
+bank_reconciliation_doctypes = [
+	"Payment Entry",
+	"Journal Entry",
+	"Purchase Invoice",
+	"Sales Invoice",
+	"Loan Repayment",
+	"Loan Disbursement",
+]
+
 accounting_dimension_doctypes = [
 	"GL Entry",
 	"Payment Ledger Entry",
@@ -479,12 +489,8 @@ accounting_dimension_doctypes = [
 	"Purchase Invoice",
 	"Payment Entry",
 	"Asset",
-	"Expense Claim",
-	"Expense Claim Detail",
-	"Expense Taxes and Charges",
 	"Stock Entry",
 	"Budget",
-	"Payroll Entry",
 	"Delivery Note",
 	"Sales Invoice Item",
 	"Purchase Invoice Item",
@@ -502,7 +508,6 @@ accounting_dimension_doctypes = [
 	"Asset Value Adjustment",
 	"Loyalty Program",
 	"Stock Reconciliation",
-	"Travel Request",
 	"POS Profile",
 	"Opening Invoice Creation Tool",
 	"Opening Invoice Creation Tool Item",
@@ -515,13 +520,14 @@ accounting_dimension_doctypes = [
 	"Sales Order",
 ]
 
+# get matching queries for Bank Reconciliation
+get_matching_queries = (
+	"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_matching_queries"
+)
+
 regional_overrides = {
 	"France": {
 		"erpnext.tests.test_regional.test_method": "erpnext.regional.france.utils.test_method"
-	},
-	"India": {
-		"erpnext.hr.utils.calculate_annual_eligible_hra_exemption": "erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption",
-		"erpnext.hr.utils.calculate_hra_exemption_for_period": "erpnext.regional.india.utils.calculate_hra_exemption_for_period",
 	},
 	"United Arab Emirates": {
 		"erpnext.controllers.taxes_and_totals.update_itemised_tax_data": "erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data",
@@ -570,9 +576,6 @@ global_search_doctypes = {
 		{"doctype": "Material Request", "index": 16},
 		{"doctype": "Delivery Trip", "index": 17},
 		{"doctype": "Pick List", "index": 18},
-		{"doctype": "Salary Slip", "index": 19},
-		{"doctype": "Leave Application", "index": 20},
-		{"doctype": "Expense Claim", "index": 21},
 		{"doctype": "Payment Entry", "index": 22},
 		{"doctype": "Lead", "index": 23},
 		{"doctype": "Opportunity", "index": 24},
@@ -588,13 +591,7 @@ global_search_doctypes = {
 		{"doctype": "Batch", "index": 34},
 		{"doctype": "Branch", "index": 35},
 		{"doctype": "Department", "index": 36},
-		{"doctype": "Employee Grade", "index": 37},
 		{"doctype": "Designation", "index": 38},
-		{"doctype": "Job Opening", "index": 39},
-		{"doctype": "Job Applicant", "index": 40},
-		{"doctype": "Job Offer", "index": 41},
-		{"doctype": "Salary Structure Assignment", "index": 42},
-		{"doctype": "Appraisal", "index": 43},
 		{"doctype": "Loan", "index": 44},
 		{"doctype": "Maintenance Schedule", "index": 45},
 		{"doctype": "Maintenance Visit", "index": 46},
