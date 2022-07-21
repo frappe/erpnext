@@ -8,7 +8,8 @@ import frappe
 import datetime
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import get_url, getdate, get_time, get_datetime, combine_datetime, cint, format_datetime, formatdate
+from frappe.utils import cint, today, getdate, get_time, get_datetime, combine_datetime, date_diff,\
+	format_datetime, formatdate, get_url
 from frappe.utils.verified_command import get_signed_params
 from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignemnt, clear as clear_assignments, close_all_assignments
@@ -69,6 +70,18 @@ class Appointment(Document):
 			return
 
 		appointment_type_doc = frappe.get_cached_doc("Appointment Type", self.appointment_type)
+
+		# check if in past
+		if self.status in ["Open", "Unconfirmed"]:
+			if getdate(self.scheduled_dt) < getdate(today()):
+				frappe.msgprint(_("Warning: Scheduled Date {0} is in the past")
+					.format(frappe.bold(frappe.format(getdate(self.scheduled_date)))), indicator="orange")
+
+			advance_days = date_diff(getdate(self.scheduled_dt), today())
+			if cint(appointment_type_doc.advance_booking_days) and advance_days > cint(appointment_type_doc.advance_booking_days):
+				frappe.msgprint(_("Scheduled Date {0} is {1} days in advance")
+					.format(frappe.bold(frappe.format(getdate(self.scheduled_date))), frappe.bold(advance_days)),
+					raise_exception=appointment_type_doc.validate_availability)
 
 		# check if in valid timeslot
 		if not appointment_type_doc.is_in_timeslot(self.scheduled_dt, self.end_dt):
