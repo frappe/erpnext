@@ -263,8 +263,8 @@ class CancellationOfInvoices(Document):
 		# 	product.db_set('amount', 0, update_modified=False)
 
 		doc = frappe.get_doc("Sales Invoice", self.sale_invoice)
-		doc.db_set('status', "Canceled", update_modified=False)
-		doc.db_set('docstatus', 10, update_modified=False)
+		doc.db_set('status', "Cancelled", update_modified=False)
+		doc.db_set('docstatus', 9, update_modified=False)
 		# doc.db_set('partial_discount', 0, update_modified=False)
 		# doc.db_set('discount_amount', 0, update_modified=False)
 		# doc.db_set('base_discount_amount', 0, update_modified=False)
