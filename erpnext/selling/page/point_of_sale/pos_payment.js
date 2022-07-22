@@ -161,7 +161,8 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
 			const contact = frm.doc.contact_mobile;
-			const request_button = $(this.request_for_payment_field?.$input[0]);
+			if (!this.request_for_payment_field) return;
+			const request_button = $(this.request_for_payment_field.$input[0]);
 			if (contact) {
 				request_button.removeClass('btn-default').addClass('btn-primary');
 			} else {
