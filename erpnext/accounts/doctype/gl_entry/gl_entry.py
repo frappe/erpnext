@@ -367,6 +367,8 @@ def update_outstanding_amt(
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 
 		# Didn't use db_set for optimisation purpose
+		precision = ref_doc.precision("outstanding_amount")
+		bal = flt(bal, precision)
 		ref_doc.outstanding_amount = bal
 		frappe.db.set_value(against_voucher_type, against_voucher, "outstanding_amount", bal)
 
