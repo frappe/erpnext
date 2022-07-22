@@ -49,7 +49,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		expected_gle = (
 			("Cost of Goods Sold - TPC", 0.0, 600.0),
-			(surplus_account, 600.0, 400.0),
+			(surplus_account, 200.0, 0.0),
 			("Sales - TPC", 400.0, 0.0),
 		)
 
@@ -59,7 +59,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		""",
 			(pcv.name),
 		)
-
+		pcv.reload()
+		self.assertEqual(pcv.gle_processing_status, "Completed")
 		self.assertEqual(pcv_gle, expected_gle)
 
 	def test_cost_center_wise_posting(self):
@@ -78,6 +79,8 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			expense_account="Cost of Goods Sold - TPC",
 			rate=400,
 			debit_to="Debtors - TPC",
+			currency="USD",
+			customer="_Test Customer USD",
 		)
 		create_sales_invoice(
 			company=company,
@@ -86,10 +89,11 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 			expense_account="Cost of Goods Sold - TPC",
 			rate=200,
 			debit_to="Debtors - TPC",
+			currency="USD",
+			customer="_Test Customer USD",
 		)
 
 		pcv = self.make_period_closing_voucher(submit=False)
-		pcv.cost_center_wise_pnl = 1
 		pcv.save()
 		pcv.submit()
 		surplus_account = pcv.closing_account_head
@@ -112,6 +116,16 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 
 		self.assertEqual(pcv_gle, expected_gle)
 
+		pcv.reload()
+		pcv.cancel()
+
+		self.assertFalse(
+			frappe.db.get_value(
+				"GL Entry",
+				{"voucher_type": "Period Closing Voucher", "voucher_no": pcv.name, "is_cancelled": 0},
+			)
+		)
+
 	def test_period_closing_with_finance_book_entries(self):
 		frappe.db.sql("delete from `tabGL Entry` where company='Test PCV Company'")
 
@@ -119,14 +133,17 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		surplus_account = create_account()
 		cost_center = create_cost_center("Test Cost Center 1")
 
-		create_sales_invoice(
+		si = create_sales_invoice(
 			company=company,
 			income_account="Sales - TPC",
 			expense_account="Cost of Goods Sold - TPC",
 			cost_center=cost_center,
 			rate=400,
 			debit_to="Debtors - TPC",
+			currency="USD",
+			customer="_Test Customer USD",
 		)
+
 		jv = make_journal_entry(
 			account1="Cash - TPC",
 			account2="Sales - TPC",

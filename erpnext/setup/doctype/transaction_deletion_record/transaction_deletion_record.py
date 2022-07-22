@@ -42,7 +42,7 @@ class TransactionDeletionRecord(Document):
 
 	def delete_bins(self):
 		frappe.db.sql(
-			"""delete from tabBin where warehouse in
+			"""delete from `tabBin` where warehouse in
 				(select name from tabWarehouse where company=%s)""",
 			self.company,
 		)
@@ -64,7 +64,7 @@ class TransactionDeletionRecord(Document):
 				addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
 
 				frappe.db.sql(
-					"""delete from tabAddress where name in ({addresses}) and
+					"""delete from `tabAddress` where name in ({addresses}) and
 					name not in (select distinct dl1.parent from `tabDynamic Link` dl1
 					inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
 					and dl1.link_doctype<>dl2.link_doctype)""".format(
@@ -80,7 +80,7 @@ class TransactionDeletionRecord(Document):
 				)
 
 			frappe.db.sql(
-				"""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(
+				"""update `tabCustomer` set lead_name=NULL where lead_name in ({leads})""".format(
 					leads=",".join(leads)
 				)
 			)
@@ -178,7 +178,7 @@ class TransactionDeletionRecord(Document):
 		else:
 			last = 0
 
-		frappe.db.sql("""update tabSeries set current = %s where name=%s""", (last, prefix))
+		frappe.db.sql("""update `tabSeries` set current = %s where name=%s""", (last, prefix))
 
 	def delete_version_log(self, doctype, company_fieldname):
 		frappe.db.sql(
@@ -222,6 +222,5 @@ def get_doctypes_to_be_ignored():
 		"Item Default",
 		"Customer",
 		"Supplier",
-		"GST Account",
 	]
 	return doctypes_to_be_ignored_list

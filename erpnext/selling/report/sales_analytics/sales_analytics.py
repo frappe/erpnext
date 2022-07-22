@@ -415,3 +415,8 @@ class Analytics(object):
 		else:
 			labels = [d.get("label") for d in self.columns[1 : length - 1]]
 		self.chart = {"data": {"labels": labels, "datasets": []}, "type": "line"}
+
+		if self.filters["value_quantity"] == "Value":
+			self.chart["fieldtype"] = "Currency"
+		else:
+			self.chart["fieldtype"] = "Float"

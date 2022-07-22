@@ -1,3 +1,35 @@
+[project]
+name = "erpnext"
+authors = [
+    { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
+]
+description = "Open Source ERP"
+requires-python = ">=3.10"
+readme = "README.md"
+dynamic = ["version"]
+dependencies = [
+    # Core dependencies
+    "pycountry~=20.7.3",
+    "python-stdnum~=1.16",
+    "Unidecode~=1.2.0",
+    "redisearch~=2.1.0",
+
+    # integration dependencies
+    "gocardless-pro~=1.22.0",
+    "googlemaps",
+    "plaid-python~=7.2.1",
+    "python-youtube~=0.8.0",
+    "taxjar~=1.9.2",
+    "tweepy~=3.10.0",
+]
+
+[build-system]
+requires = ["flit_core >=3.4,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.bench.dev-dependencies]
+hypothesis = "~=6.31.0"
+
 [tool.black]
 line-length = 99
 

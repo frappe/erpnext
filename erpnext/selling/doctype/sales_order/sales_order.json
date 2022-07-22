@@ -1359,6 +1359,8 @@
    "width": "50%"
   },
   {
+   "fetch_from": "sales_partner.commission_rate",
+   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "hide_days": 1,
@@ -1547,7 +1549,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-26 14:38:18.350207",
+ "modified": "2022-06-10 03:52:22.212953",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

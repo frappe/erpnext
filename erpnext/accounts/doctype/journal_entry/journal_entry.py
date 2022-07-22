@@ -24,7 +24,6 @@ from erpnext.accounts.utils import (
 	get_stock_and_account_balance,
 )
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError):
@@ -66,7 +65,6 @@ class JournalEntry(AccountsController):
 			self.set_against_account()
 		self.create_remarks()
 		self.set_print_format_fields()
-		self.validate_expense_claim()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
@@ -83,27 +81,21 @@ class JournalEntry(AccountsController):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
-		self.update_status_for_full_and_final_statement()
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		from erpnext.payroll.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 
 		unlink_ref_doc_from_payment_entries(self)
-		unlink_ref_doc_from_salary_slip(self.name)
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
+		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
 		self.make_gl_entries(1)
 		self.update_advance_paid()
-		self.update_expense_claim()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
-		self.update_status_for_full_and_final_statement()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -112,20 +104,12 @@ class JournalEntry(AccountsController):
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
 			if d.is_advance:
-				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
+				if d.reference_type in frappe.get_hooks("advance_payment_doctypes"):
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
 		for voucher_type, order_list in advance_paid.items():
 			for voucher_no in list(set(order_list)):
 				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
-
-	def update_status_for_full_and_final_statement(self):
-		for entry in self.accounts:
-			if entry.reference_type == "Full and Final Statement":
-				if self.docstatus == 1:
-					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Paid")
-				elif self.docstatus == 2:
-					frappe.db.set_value("Full and Final Statement", entry.reference_name, "status", "Unpaid")
 
 	def validate_inter_company_accounts(self):
 		if (
@@ -416,7 +400,7 @@ class JournalEntry(AccountsController):
 				against_entries = frappe.db.sql(
 					"""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
-					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
+					and (reference_type is null or reference_type in ('', 'Sales Order', 'Purchase Order'))
 					""",
 					(d.account, d.reference_name),
 					as_dict=True,
@@ -800,9 +784,7 @@ class JournalEntry(AccountsController):
 
 		self.total_amount_in_words = money_in_words(amt, currency)
 
-	def make_gl_entries(self, cancel=0, adv_adj=0):
-		from erpnext.accounts.general_ledger import make_gl_entries
-
+	def build_gl_map(self):
 		gl_map = []
 		for d in self.get("accounts"):
 			if d.debit or d.credit:
@@ -838,7 +820,12 @@ class JournalEntry(AccountsController):
 						item=d,
 					)
 				)
+		return gl_map
 
+	def make_gl_entries(self, cancel=0, adv_adj=0):
+		from erpnext.accounts.general_ledger import make_gl_entries
+
+		gl_map = self.build_gl_map()
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			update_outstanding = "No"
 		else:
@@ -931,29 +918,6 @@ class JournalEntry(AccountsController):
 				self.company,
 				as_dict=True,
 			)
-
-	def update_expense_claim(self):
-		for d in self.accounts:
-			if d.reference_type == "Expense Claim" and d.reference_name:
-				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				if self.docstatus == 2:
-					update_reimbursed_amount(doc, -1 * d.debit)
-				else:
-					update_reimbursed_amount(doc, d.debit)
-
-	def validate_expense_claim(self):
-		for d in self.accounts:
-			if d.reference_type == "Expense Claim":
-				sanctioned_amount, reimbursed_amount = frappe.db.get_value(
-					"Expense Claim", d.reference_name, ("total_sanctioned_amount", "total_amount_reimbursed")
-				)
-				pending_amount = flt(sanctioned_amount) - flt(reimbursed_amount)
-				if d.debit > pending_amount:
-					frappe.throw(
-						_(
-							"Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2}"
-						).format(d.idx, d.reference_name, pending_amount)
-					)
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:
@@ -1202,24 +1166,6 @@ def get_payment_entry(ref_doc, args):
 
 
 @frappe.whitelist()
-def get_opening_accounts(company):
-	"""get all balance sheet accounts for opening entry"""
-	accounts = frappe.db.sql_list(
-		"""select
-			name from tabAccount
-		where
-			is_group=0 and report_type='Balance Sheet' and company={0} and
-			name not in (select distinct account from tabWarehouse where
-			account is not null and account != '')
-		order by name asc""".format(
-			frappe.db.escape(company)
-		)
-	)
-
-	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
-
-
-@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if not frappe.db.has_column("Journal Entry", searchfield):
@@ -1239,7 +1185,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 			AND jv.docstatus = 1
 			AND jv.`{0}` LIKE %(txt)s
 		ORDER BY jv.name DESC
-		LIMIT %(offset)s, %(limit)s
+		LIMIT %(limit)s offset %(offset)s
 		""".format(
 			searchfield
 		),

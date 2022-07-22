@@ -14,6 +14,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.accounts.utils import create_payment_ledger_entry
 
 
 class ClosedAccountingPeriod(frappe.ValidationError):
@@ -31,8 +32,16 @@ def make_gl_entries(
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
+			validate_disabled_accounts(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
+				create_payment_ledger_entry(
+					gl_map,
+					cancel=0,
+					adv_adj=adv_adj,
+					update_outstanding=update_outstanding,
+					from_repost=from_repost,
+				)
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			# Post GL Map proccess there may no be any GL Entries
 			elif gl_map:
@@ -43,6 +52,26 @@ def make_gl_entries(
 				)
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
+
+def validate_disabled_accounts(gl_map):
+	accounts = [d.account for d in gl_map if d.account]
+
+	Account = frappe.qb.DocType("Account")
+
+	disabled_accounts = (
+		frappe.qb.from_(Account)
+		.where(Account.name.isin(accounts) & Account.disabled == 1)
+		.select(Account.name, Account.disabled)
+	).run(as_dict=True)
+
+	if disabled_accounts:
+		account_list = "<br>"
+		account_list += ", ".join([frappe.bold(d.name) for d in disabled_accounts])
+		frappe.throw(
+			_("Cannot create accounting entries against disabled accounts: {0}").format(account_list),
+			title=_("Disabled Account Selected"),
+		)
 
 
 def validate_accounting_period(gl_map):
@@ -103,7 +132,7 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
 			for sub_cost_center, percentage in cost_center_allocation.get(cost_center, {}).items():
 				gle = copy.deepcopy(d)
 				gle.cost_center = sub_cost_center
-				for field in ("debit", "credit", "debit_in_account_currency", "credit_in_company_currency"):
+				for field in ("debit", "credit", "debit_in_account_currency", "credit_in_account_currency"):
 					gle[field] = flt(flt(d.get(field)) * percentage / 100, precision)
 				new_gl_map.append(gle)
 		else:
@@ -139,6 +168,7 @@ def get_cost_center_allocation_data(company, posting_date):
 def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
+
 	for entry in gl_map:
 		# if there is already an entry in this account then just add it
 		# to that entry
@@ -269,9 +299,10 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.flags.from_repost = from_repost
 	gle.flags.adv_adj = adv_adj
 	gle.flags.update_outstanding = update_outstanding or "Yes"
+	gle.flags.notify_update = False
 	gle.submit()
 
-	if not from_repost:
+	if not from_repost and gle.voucher_type != "Period Closing Voucher":
 		validate_expense_against_budget(args)
 
 
@@ -458,6 +489,10 @@ def make_reverse_gl_entries(
 		).run(as_dict=1)
 
 	if gl_entries:
+		create_payment_ledger_entry(gl_entries, cancel=1)
+		create_payment_ledger_entry(
+			gl_entries, cancel=1, adv_adj=adv_adj, update_outstanding=update_outstanding
+		)
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 		set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])

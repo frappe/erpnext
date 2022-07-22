@@ -20,15 +20,12 @@ from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpled
 
 class Loan(AccountsController):
 	def validate(self):
-		if self.applicant_type == "Employee" and self.repay_from_salary:
-			validate_employee_currency_with_company_currency(self.applicant, self.company)
 		self.set_loan_amount()
 		self.validate_loan_amount()
 		self.set_missing_fields()
 		self.validate_cost_center()
 		self.validate_accounts()
 		self.check_sanctioned_amount_limit()
-		self.validate_repay_from_salary()
 
 		if self.is_term_loan:
 			validate_repayment_method(
@@ -60,18 +57,20 @@ class Loan(AccountsController):
 				)
 
 	def validate_cost_center(self):
-		if not self.cost_center and self.rate_of_interest != 0:
+		if not self.cost_center and self.rate_of_interest != 0.0:
 			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 
-		if not self.cost_center:
-			frappe.throw(_("Cost center is mandatory for loans having rate of interest greater than 0"))
+			if not self.cost_center:
+				frappe.throw(_("Cost center is mandatory for loans having rate of interest greater than 0"))
 
 	def on_submit(self):
 		self.link_loan_security_pledge()
+		# Interest accrual for backdated term loans
+		self.accrue_loan_interest()
 
 	def on_cancel(self):
 		self.unlink_loan_security_pledge()
-		self.ignore_linked_doctypes = ["GL Entry"]
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -103,10 +102,6 @@ class Loan(AccountsController):
 					self.applicant_type, frappe.bold(self.applicant)
 				)
 			)
-
-	def validate_repay_from_salary(self):
-		if not self.is_term_loan and self.repay_from_salary:
-			frappe.throw(_("Repay From Salary can be selected only for term loans"))
 
 	def make_repayment_schedule(self):
 		if not self.repayment_start_date:
@@ -186,6 +181,16 @@ class Loan(AccountsController):
 				)
 
 				self.db_set("maximum_loan_amount", maximum_loan_value)
+
+	def accrue_loan_interest(self):
+		from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+			process_loan_interest_accrual_for_term_loans,
+		)
+
+		if getdate(self.repayment_start_date) < getdate() and self.is_term_loan:
+			process_loan_interest_accrual_for_term_loans(
+				posting_date=getdate(), loan_type=self.loan_type, loan=self.name
+			)
 
 	def unlink_loan_security_pledge(self):
 		pledges = frappe.get_all("Loan Security Pledge", fields=["name"], filters={"loan": self.name})
@@ -330,6 +335,22 @@ def get_loan_application(loan_application):
 		return loan.as_dict()
 
 
+@frappe.whitelist()
+def close_unsecured_term_loan(loan):
+	loan_details = frappe.db.get_value(
+		"Loan", {"name": loan}, ["status", "is_term_loan", "is_secured_loan"], as_dict=1
+	)
+
+	if (
+		loan_details.status == "Loan Closure Requested"
+		and loan_details.is_term_loan
+		and not loan_details.is_secured_loan
+	):
+		frappe.db.set_value("Loan", loan, "status", "Closed")
+	else:
+		frappe.throw(_("Cannot close this loan until full repayment"))
+
+
 def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "total_amount_paid", total_amount_paid)
 	frappe.db.set_value("Loan", loan, "status", "Closed")
@@ -461,25 +482,6 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 			unpledge_request.append("securities", {"loan_security": security, "qty": qty})
 
 	return unpledge_request
-
-
-def validate_employee_currency_with_company_currency(applicant, company):
-	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
-		get_employee_currency,
-	)
-
-	if not applicant:
-		frappe.throw(_("Please select Applicant"))
-	if not company:
-		frappe.throw(_("Please select Company"))
-	employee_currency = get_employee_currency(applicant)
-	company_currency = erpnext.get_company_currency(company)
-	if employee_currency != company_currency:
-		frappe.throw(
-			_(
-				"Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}"
-			).format(applicant, employee_currency)
-		)
 
 
 @frappe.whitelist()

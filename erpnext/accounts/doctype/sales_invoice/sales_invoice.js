@@ -52,7 +52,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			me.frm.refresh_fields();
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
-		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
 
 	refresh(doc, dt, dn) {
@@ -477,6 +476,13 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
+
+	is_cash_or_non_trade_discount() {
+		this.frm.set_df_property("additional_discount_account", "hidden", 1 - this.frm.doc.is_cash_or_non_trade_discount);
+		if (!this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.set_value("additional_discount_account", "");
+		}
+	}
 };
 
 // for backward compatibility: combine new and previous states
@@ -784,10 +790,6 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		}
 
-		// India related fields
-		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
-		else hide_field(['c_form_applicable', 'c_form_no']);
-
 		frm.refresh_fields();
 	},
 
@@ -861,23 +863,40 @@ frappe.ui.form.on('Sales Invoice', {
 
 	set_timesheet_data: function(frm, timesheets) {
 		frm.clear_table("timesheets")
-		timesheets.forEach(timesheet => {
+		timesheets.forEach(async (timesheet) => {
 			if (frm.doc.currency != timesheet.currency) {
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: timesheet.currency,
-						to_currency: frm.doc.currency
-					},
-					callback: function(r) {
-						if (r.message) {
-							exchange_rate = r.message;
-							frm.events.append_time_log(frm, timesheet, exchange_rate);
-						}
-					}
-				});
+				const exchange_rate = await frm.events.get_exchange_rate(
+					frm, timesheet.currency, frm.doc.currency
+				)
+				frm.events.append_time_log(frm, timesheet, exchange_rate)
 			} else {
 				frm.events.append_time_log(frm, timesheet, 1.0);
+			}
+		});
+	},
+
+	async get_exchange_rate(frm, from_currency, to_currency) {
+		if (
+			frm.exchange_rates
+			&& frm.exchange_rates[from_currency]
+			&& frm.exchange_rates[from_currency][to_currency]
+		) {
+			return frm.exchange_rates[from_currency][to_currency];
+		}
+
+		return frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				from_currency,
+				to_currency
+			},
+			callback: function(r) {
+				if (r.message) {
+					// cache exchange rates
+					frm.exchange_rates = frm.exchange_rates || {};
+					frm.exchange_rates[from_currency] = frm.exchange_rates[from_currency] || {};
+					frm.exchange_rates[from_currency][to_currency] = r.message;
+				}
 			}
 		});
 	},
@@ -892,7 +911,7 @@ frappe.ui.form.on('Sales Invoice', {
 		row.billing_hours = time_log.billing_hours;
 		row.billing_amount = flt(time_log.billing_amount) * flt(exchange_rate);
 		row.timesheet_detail = time_log.name;
-    row.project_name = time_log.project_name;
+		row.project_name = time_log.project_name;
 
 		frm.refresh_field("timesheets");
 		frm.trigger("calculate_timesheet_totals");

@@ -160,14 +160,12 @@ def get_rootwise_opening_balances(filters, report_type):
 	if filters.project:
 		additional_conditions += " and project = %(project)s"
 
-	if filters.finance_book:
-		fb_conditions = " AND finance_book = %(finance_book)s"
-		if filters.include_default_book_entries:
-			fb_conditions = (
-				" AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
-			)
-
-		additional_conditions += fb_conditions
+	if filters.get("include_default_book_entries"):
+		additional_conditions += (
+			" AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
+		)
+	else:
+		additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -188,9 +186,9 @@ def get_rootwise_opening_balances(filters, report_type):
 					filters[dimension.fieldname] = get_dimension_with_children(
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
-					additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
+					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
 				else:
-					additional_conditions += "and {0} in (%({0})s)".format(dimension.fieldname)
+					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
 
 				query_filters.update({dimension.fieldname: filters.get(dimension.fieldname)})
 

@@ -447,15 +447,16 @@ class SellingController(StockController):
 						rate = flt(d.incoming_rate * d.conversion_factor, d.precision("rate"))
 						if d.rate != rate:
 							d.rate = rate
+							frappe.msgprint(
+								_(
+									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+								).format(d.idx),
+								alert=1,
+							)
 
-						d.discount_percentage = 0
-						d.discount_amount = 0
-						frappe.msgprint(
-							_(
-								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-							).format(d.idx),
-							alert=1,
-						)
+						d.discount_percentage = 0.0
+						d.discount_amount = 0.0
+						d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
@@ -614,13 +615,13 @@ class SellingController(StockController):
 				stock_items = [d.item_code, d.description, d.warehouse, ""]
 				non_stock_items = [d.item_code, d.description]
 
+			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
+			duplicate_items_msg += "<br><br>"
+			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+				frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
+				get_link_to_form("Selling Settings", "Selling Settings"),
+			)
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
-				duplicate_items_msg += "<br><br>"
-				duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
-					frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
-					get_link_to_form("Selling Settings", "Selling Settings"),
-				)
 				if stock_items in check_list:
 					frappe.throw(duplicate_items_msg)
 				else:

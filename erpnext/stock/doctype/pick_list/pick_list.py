@@ -41,8 +41,15 @@ class PickList(Document):
 	def before_submit(self):
 		update_sales_orders = set()
 		for item in self.locations:
-			# if the user has not entered any picked qty, set it to stock_qty, before submit
-			if item.picked_qty == 0:
+			if self.scan_mode and item.picked_qty < item.stock_qty:
+				frappe.throw(
+					_(
+						"Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
+					).format(item.idx, item.stock_qty - item.picked_qty, item.stock_uom),
+					title=_("Pick List Incomplete"),
+				)
+			elif not self.scan_mode and item.picked_qty == 0:
+				# if the user has not entered any picked qty, set it to stock_qty, before submit
 				item.picked_qty = item.stock_qty
 
 			if item.sales_order_item:
@@ -672,8 +679,7 @@ def create_stock_entry(pick_list):
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
 
-	stock_entry.set_actual_qty()
-	stock_entry.calculate_rate_and_amount()
+	stock_entry.set_missing_values()
 
 	return stock_entry.as_dict()
 
@@ -693,7 +699,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			AND `company` = %(company)s
 			AND `name` like %(txt)s
 		ORDER BY
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999), name
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end) name
 		LIMIT
 			%(start)s, %(page_length)s""",
 		{

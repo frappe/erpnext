@@ -211,7 +211,7 @@ def set_address_details(
 	else:
 		party_details.update(get_company_address(company))
 
-	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order"]:
+	if doctype and doctype in ["Delivery Note", "Sales Invoice", "Sales Order", "Quotation"]:
 		if party_details.company_address:
 			party_details.update(
 				get_fetch_values(doctype, "company_address", party_details.company_address)
@@ -897,3 +897,18 @@ def get_default_contact(doctype, name):
 			return None
 	else:
 		return None
+
+
+def add_party_account(party_type, party, company, account):
+	doc = frappe.get_doc(party_type, party)
+	account_exists = False
+	for d in doc.get("accounts"):
+		if d.account == account:
+			account_exists = True
+
+	if not account_exists:
+		accounts = {"company": company, "account": account}
+
+		doc.append("accounts", accounts)
+
+		doc.save()

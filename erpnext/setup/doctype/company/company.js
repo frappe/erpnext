@@ -19,11 +19,6 @@ frappe.ui.form.on("Company", {
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
-		frm.set_query("hra_component", function(){
-			return {
-				filters: {"type": "Earning"}
-			}
-		});
 
 		frm.set_query("parent_company", function() {
 			return {
@@ -210,17 +205,15 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payable_account", {"account_type": "Payable"}],
 		["default_expense_account", {"root_type": "Expense"}],
 		["default_income_account", {"root_type": "Income"}],
-		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
 		["default_deferred_expense_account", {}],
 		["default_deferred_revenue_account", {}],
-		["default_expense_claim_payable_account", {}],
 		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],
-		["exchange_gain_loss_account", {"root_type": "Expense"}],
-		["unrealized_exchange_gain_loss_account", {"root_type": "Expense"}],
+		["exchange_gain_loss_account", {"root_type": ["in", ["Expense", "Income"]]}],
+		["unrealized_exchange_gain_loss_account", {"root_type": ["in", ["Expense", "Income"]]}],
 		["accumulated_depreciation_account",
 			{"root_type": "Asset", "account_type": "Accumulated Depreciation"}],
 		["depreciation_expense_account", {"root_type": "Expense", "account_type": "Depreciation"}],
@@ -229,7 +222,6 @@ erpnext.company.setup_queries = function(frm) {
 		["cost_center", {}],
 		["round_off_cost_center", {}],
 		["depreciation_cost_center", {}],
-		["default_employee_advance_account", {"root_type": "Asset"}],
 		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
 		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],

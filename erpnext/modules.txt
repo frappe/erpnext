@@ -4,7 +4,6 @@ Buying
 Projects
 Selling
 Setup
-HR
 Manufacturing
 Stock
 Support
@@ -17,7 +16,7 @@ ERPNext Integrations
 Quality Management
 Communication
 Loan Management
-Payroll
 Telephony
 Bulk Transaction
 E-commerce
+Subcontracting

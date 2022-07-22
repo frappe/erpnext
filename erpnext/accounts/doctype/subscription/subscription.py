@@ -145,13 +145,14 @@ class Subscription(Document):
 		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
 		"""
 		plan_names = [plan.plan for plan in self.plans]
-		billing_info = frappe.db.sql(
-			"select distinct `billing_interval`, `billing_interval_count` "
-			"from `tabSubscription Plan` "
-			"where name in %s",
-			(plan_names,),
-			as_dict=1,
-		)
+
+		subscription_plan = frappe.qb.DocType("Subscription Plan")
+		billing_info = (
+			frappe.qb.from_(subscription_plan)
+			.select(subscription_plan.billing_interval, subscription_plan.billing_interval_count)
+			.distinct()
+			.where(subscription_plan.name.isin(plan_names))
+		).run(as_dict=1)
 
 		return billing_info
 

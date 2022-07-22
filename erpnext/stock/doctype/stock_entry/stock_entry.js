@@ -470,7 +470,9 @@ frappe.ui.form.on('Stock Entry', {
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						$.extend(child, r.message);
+						["actual_qty", "basic_rate"].forEach((field) => {
+							frappe.model.set_value(cdt, cdn, field, (r.message[field] || 0.0));
+						});
 						frm.events.calculate_basic_amount(frm, child);
 					}
 				}
@@ -611,7 +613,25 @@ frappe.ui.form.on('Stock Entry', {
 
 	apply_putaway_rule: function (frm) {
 		if (frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(frm, frm.doc.purpose);
-	}
+	},
+
+	purchase_order: (frm) => {
+		if (frm.doc.purchase_order) {
+			frm.set_value("subcontracting_order", "");
+		}
+	},
+
+	subcontracting_order: (frm) => {
+		if (frm.doc.subcontracting_order) {
+			frm.set_value("purchase_order", "");
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontracting_order',
+				source_name: frm.doc.subcontracting_order,
+				target_doc: frm,
+				freeze: true,
+			});
+		}
+	},
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -778,7 +798,16 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return {
 				"filters": {
 					"docstatus": 1,
-					"is_subcontracted": 1,
+					"is_old_subcontracting_flow": 1,
+					"company": me.frm.doc.company
+				}
+			};
+		});
+
+		this.frm.set_query("subcontracting_order", function() {
+			return {
+				"filters": {
+					"docstatus": 1,
 					"company": me.frm.doc.company
 				}
 			};
@@ -799,7 +828,12 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			}
 		}
 
-		this.frm.add_fetch("purchase_order", "supplier", "supplier");
+		if (me.frm.doc.purchase_order) {
+			this.frm.add_fetch("purchase_order", "supplier", "supplier");
+		}
+		else {
+			this.frm.add_fetch("subcontracting_order", "supplier", "supplier");
+		}
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
 		this.frm.set_query("supplier_address", erpnext.queries.address_query)
@@ -1057,8 +1091,8 @@ function attach_bom_items(bom_no) {
 
 function check_should_not_attach_bom_items(bom_no) {
   return (
-    bom_no === undefined ||
-    (erpnext.stock.bom && erpnext.stock.bom.name === bom_no)
+	bom_no === undefined ||
+	(erpnext.stock.bom && erpnext.stock.bom.name === bom_no)
   );
 }
 

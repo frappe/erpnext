@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
@@ -18,13 +19,16 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
-from erpnext.hr.doctype.expense_claim.test_expense_claim import make_expense_claim
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 test_dependencies = ["Item"]
 
 
-class TestPaymentEntry(unittest.TestCase):
+class TestPaymentEntry(FrappeTestCase):
+	def tearDown(self):
+		frappe.db.rollback()
+
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")
@@ -292,31 +296,6 @@ class TestPaymentEntry(unittest.TestCase):
 		)
 		self.assertEqual(flt(outstanding_amount), 250)
 		self.assertEqual(status, "Unpaid")
-
-	def test_payment_entry_against_ec(self):
-
-		payable = frappe.get_cached_value("Company", "_Test Company", "default_payable_account")
-		ec = make_expense_claim(payable, 300, 300, "_Test Company", "Travel Expenses - _TC")
-		pe = get_payment_entry(
-			"Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300
-		)
-		pe.reference_no = "1"
-		pe.reference_date = "2016-01-01"
-		pe.source_exchange_rate = 1
-		pe.paid_to = payable
-		pe.insert()
-		pe.submit()
-
-		expected_gle = dict(
-			(d[0], d) for d in [[payable, 300, 0, ec.name], ["_Test Bank USD - _TC", 0, 300, None]]
-		)
-
-		self.validate_gl_entries(pe.name, expected_gle)
-
-		outstanding_amount = flt(
-			frappe.db.get_value("Expense Claim", ec.name, "total_sanctioned_amount")
-		) - flt(frappe.db.get_value("Expense Claim", ec.name, "total_amount_reimbursed"))
-		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_si_usd_to_inr(self):
 		si = create_sales_invoice(
@@ -742,6 +721,25 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(
 			flt(payment_entry.total_taxes_and_charges, 2), flt(10 / payment_entry.target_exchange_rate, 2)
 		)
+
+	def test_payment_entry_against_onhold_purchase_invoice(self):
+		pi = make_purchase_invoice()
+
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+
+		# block invoice after creating payment entry
+		# since `get_payment_entry` will not attach blocked invoice to payment
+		pi.block_invoice()
+		with self.assertRaises(frappe.ValidationError) as err:
+			pe.save()
+
+		self.assertTrue("is on hold" in str(err.exception).lower())
+
+	def test_payment_entry_for_employee(self):
+		employee = make_employee("test_payment_entry@salary.com", company="_Test Company")
+		create_payment_entry(party_type="Employee", party=employee, save=True)
 
 
 def create_payment_entry(**args):

@@ -135,8 +135,8 @@ class AuthorizationControl(TransactionBase):
 			price_list_rate, base_rate = 0, 0
 			for d in doc_obj.get("items"):
 				if d.base_rate:
-					price_list_rate += flt(d.base_price_list_rate) or flt(d.base_rate)
-					base_rate += flt(d.base_rate)
+					price_list_rate += (flt(d.base_price_list_rate) or flt(d.base_rate)) * flt(d.qty)
+					base_rate += flt(d.base_rate) * flt(d.qty)
 			if doc_obj.get("discount_amount"):
 				base_rate -= flt(doc_obj.discount_amount)
 
@@ -248,61 +248,3 @@ class AuthorizationControl(TransactionBase):
 			)
 
 		return rule
-
-	# related to payroll module only
-	def get_approver_name(self, doctype_name, total, doc_obj=""):
-		app_user = []
-		app_specific_user = []
-		rule = {}
-
-		if doc_obj:
-			if doctype_name == "Expense Claim":
-				rule = self.get_value_based_rule(
-					doctype_name, doc_obj.employee, doc_obj.total_claimed_amount, doc_obj.company
-				)
-			elif doctype_name == "Appraisal":
-				rule = frappe.db.sql(
-					"""select name, to_emp, to_designation, approving_role, approving_user
-					from `tabAuthorization Rule` where transaction=%s
-					and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
-					and company = %s and docstatus!=2""",
-					(doctype_name, doc_obj.employee, doc_obj.employee, doc_obj.company),
-					as_dict=1,
-				)
-
-				if not rule:
-					rule = frappe.db.sql(
-						"""select name, to_emp, to_designation, approving_role, approving_user
-						from `tabAuthorization Rule`
-						where transaction=%s and (to_emp=%s or
-							to_designation IN (select designation from `tabEmployee` where name=%s))
-							and ifnull(company,'') = '' and docstatus!=2""",
-						(doctype_name, doc_obj.employee, doc_obj.employee),
-						as_dict=1,
-					)
-
-			if rule:
-				for m in rule:
-					if m["to_emp"] or m["to_designation"]:
-						if m["approving_user"]:
-							app_specific_user.append(m["approving_user"])
-						elif m["approving_role"]:
-							user_lst = [
-								z[0]
-								for z in frappe.db.sql(
-									"""select distinct t1.name
-								from `tabUser` t1, `tabHas Role` t2 where t2.role=%s
-								and t2.parent=t1.name and t1.name !='Administrator'
-								and t1.name != 'Guest' and t1.docstatus !=2""",
-									m["approving_role"],
-								)
-							]
-
-							for x in user_lst:
-								if not x in app_user:
-									app_user.append(x)
-
-			if len(app_specific_user) > 0:
-				return app_specific_user
-			else:
-				return app_user

@@ -41,7 +41,7 @@ class LoanRepayment(AccountsController):
 		self.check_future_accruals()
 		self.update_repayment_schedule(cancel=1)
 		self.mark_as_unpaid()
-		self.ignore_linked_doctypes = ["GL Entry"]
+		self.ignore_linked_doctypes = ["GL Entry", "Payment Ledger Entry"]
 		self.make_gl_entries(cancel=1)
 
 	def set_missing_values(self, amounts):
@@ -264,6 +264,7 @@ class LoanRepayment(AccountsController):
 			regenerate_repayment_schedule(self.against_loan, cancel)
 
 	def allocate_amounts(self, repayment_details):
+		precision = cint(frappe.db.get_default("currency_precision")) or 2
 		self.set("repayment_details", [])
 		self.principal_amount_paid = 0
 		self.total_penalty_paid = 0
@@ -278,9 +279,9 @@ class LoanRepayment(AccountsController):
 
 		if interest_paid > 0:
 			if self.penalty_amount and interest_paid > self.penalty_amount:
-				self.total_penalty_paid = self.penalty_amount
+				self.total_penalty_paid = flt(self.penalty_amount, precision)
 			elif self.penalty_amount:
-				self.total_penalty_paid = interest_paid
+				self.total_penalty_paid = flt(interest_paid, precision)
 
 			interest_paid -= self.total_penalty_paid
 
@@ -385,17 +386,21 @@ class LoanRepayment(AccountsController):
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
-
 		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}.<br>Repayment against Loan: {1}").format(
+			remarks = "Shortfall repayment of {0}.<br>Repayment against loan {1}".format(
 				self.shortfall_amount, self.against_loan
 			)
 		elif self.shortfall_amount:
-			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
+			remarks = "Shortfall repayment of {0} against loan {1}".format(
+				self.shortfall_amount, self.against_loan
+			)
 		else:
-			remarks = _("Repayment against Loan:") + " " + self.against_loan
+			remarks = "Repayment against loan " + self.against_loan
 
-		if self.repay_from_salary:
+		if self.reference_number:
+			remarks += "with reference no. {}".format(self.reference_number)
+
+		if hasattr(self, "repay_from_salary") and self.repay_from_salary:
 			payment_account = self.payroll_payable_account
 		else:
 			payment_account = self.payment_account
@@ -444,11 +449,9 @@ class LoanRepayment(AccountsController):
 					"debit_in_account_currency": self.amount_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
-					"party_type": self.applicant_type if self.repay_from_salary else "",
-					"party": self.applicant if self.repay_from_salary else "",
 				}
 			)
 		)
@@ -464,7 +467,7 @@ class LoanRepayment(AccountsController):
 					"credit_in_account_currency": self.amount_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": remarks,
+					"remarks": _(remarks),
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date),
 				}
@@ -624,16 +627,22 @@ def get_pending_principal_amount(loan):
 	if loan.status in ("Disbursed", "Closed") or loan.disbursed_amount >= loan.loan_amount:
 		pending_principal_amount = (
 			flt(loan.total_payment)
+			+ flt(loan.debit_adjustment_amount)
+			- flt(loan.credit_adjustment_amount)
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
+			+ flt(loan.refund_amount)
 		)
 	else:
 		pending_principal_amount = (
 			flt(loan.disbursed_amount)
+			+ flt(loan.debit_adjustment_amount)
+			- flt(loan.credit_adjustment_amount)
 			- flt(loan.total_principal_paid)
 			- flt(loan.total_interest_payable)
 			- flt(loan.written_off_amount)
+			+ flt(loan.refund_amount)
 		)
 
 	return pending_principal_amount
@@ -675,7 +684,9 @@ def get_amounts(amounts, against_loan, posting_date):
 
 		if (
 			no_of_late_days > 0
-			and (not against_loan_doc.repay_from_salary)
+			and (
+				not (hasattr(against_loan_doc, "repay_from_salary") and against_loan_doc.repay_from_salary)
+			)
 			and entry.accrual_type == "Regular"
 		):
 			penalty_amount += (

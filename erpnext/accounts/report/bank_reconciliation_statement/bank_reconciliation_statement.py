@@ -219,8 +219,8 @@ def get_loan_entries(filters):
 			.where(ifnull(loan_doc.clearance_date, "4000-01-01") > getdate(filters.get("report_date")))
 		)
 
-		if doctype == "Loan Repayment":
-			query.where(loan_doc.repay_from_salary == 0)
+		if doctype == "Loan Repayment" and frappe.db.has_column("Loan Repayment", "repay_from_salary"):
+			query = query.where((loan_doc.repay_from_salary == 0))
 
 		entries = query.run(as_dict=1)
 		loan_docs.extend(entries)
@@ -272,16 +272,19 @@ def get_loan_amount(filters):
 			posting_date = (loan_doc.posting_date).as_("posting_date")
 			account = loan_doc.payment_account
 
-		amount = (
+		query = (
 			frappe.qb.from_(loan_doc)
 			.select(amount_field)
 			.where(loan_doc.docstatus == 1)
 			.where(account == filters.get("account"))
 			.where(posting_date > getdate(filters.get("report_date")))
 			.where(ifnull(loan_doc.clearance_date, "4000-01-01") <= getdate(filters.get("report_date")))
-			.run()[0][0]
 		)
 
+		if doctype == "Loan Repayment" and frappe.db.has_column("Loan Repayment", "repay_from_salary"):
+			query = query.where((loan_doc.repay_from_salary == 0))
+
+		amount = query.run()[0][0]
 		total_amount += flt(amount)
 
 	return total_amount

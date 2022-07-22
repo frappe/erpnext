@@ -4,7 +4,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_to_date, flt, now
+from frappe.utils import add_days, add_to_date, flt, now
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -24,7 +24,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			get_multiple_items=True,
 			get_taxes_and_charges=True,
 		)
@@ -120,6 +120,61 @@ class TestLandedCostVoucher(FrappeTestCase):
 					expected_values[gle.account][1], gle.credit, msg=f"incorrect credit for {gle.account}"
 				)
 
+	def test_landed_cost_voucher_stock_impact(self):
+		"Test impact of LCV on future stock balances."
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item("LCV Stock Item", {"is_stock_item": 1})
+		warehouse = "Stores - _TC"
+
+		pr1 = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=500,
+			rate=80,
+			posting_date=add_days(frappe.utils.nowdate(), -2),
+		)
+		pr2 = make_purchase_receipt(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=100,
+			rate=80,
+			posting_date=frappe.utils.nowdate(),
+		)
+
+		last_sle = frappe.db.get_value(  # SLE of second PR
+			"Stock Ledger Entry",
+			{
+				"voucher_type": pr2.doctype,
+				"voucher_no": pr2.name,
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+			},
+			fieldname=["qty_after_transaction", "stock_value"],
+			as_dict=1,
+		)
+
+		create_landed_cost_voucher("Purchase Receipt", pr1.name, pr1.company)
+
+		last_sle_after_landed_cost = frappe.db.get_value(  # SLE of second PR after LCV's effect
+			"Stock Ledger Entry",
+			{
+				"voucher_type": pr2.doctype,
+				"voucher_no": pr2.name,
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+			},
+			fieldname=["qty_after_transaction", "stock_value"],
+			as_dict=1,
+		)
+
+		self.assertEqual(
+			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
+		)
+		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
+
 	def test_landed_cost_voucher_against_purchase_invoice(self):
 
 		pi = make_purchase_invoice(
@@ -195,7 +250,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			get_multiple_items=True,
 			get_taxes_and_charges=True,
 			do_not_submit=True,
@@ -219,11 +274,11 @@ class TestLandedCostVoucher(FrappeTestCase):
 		landed costs, this should be allowed for serial nos too.
 
 		Case:
-		        - receipt a serial no @ X rate
-		        - delivery the serial no @ X rate
-		        - add LCV to receipt X + Y
-		        - LCV should be successful
-		        - delivery should reflect X+Y valuation.
+		                - receipt a serial no @ X rate
+		                - delivery the serial no @ X rate
+		                - add LCV to receipt X + Y
+		                - LCV should be successful
+		                - delivery should reflect X+Y valuation.
 		"""
 		serial_no = "LCV_TEST_SR_NO"
 		item_code = "_Test Serialized Item"
@@ -280,7 +335,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
-			supplier_warehouse="Work in Progress - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
 			do_not_save=True,
 		)
 		pr.items[0].cost_center = "Main - TCP1"

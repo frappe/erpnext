@@ -8,9 +8,8 @@ import frappe
 from frappe.core.page.permission_manager.permission_manager import reset
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.query_builder.functions import CombineDatetime
-from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, today
-from frappe.utils.data import add_to_date
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, add_to_date, flt, today
 
 from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -25,9 +24,10 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 	create_stock_reconciliation,
 )
 from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.tests.test_utils import StockTestMixin
 
 
-class TestStockLedgerEntry(FrappeTestCase):
+class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 	def setUp(self):
 		items = create_items()
 		reset("Stock Entry")
@@ -41,6 +41,9 @@ class TestStockLedgerEntry(FrappeTestCase):
 		frappe.db.sql(
 			"delete from `tabBin` where item_code in (%s)" % (", ".join(["%s"] * len(items))), items
 		)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company"
@@ -406,61 +409,6 @@ class TestStockLedgerEntry(FrappeTestCase):
 		lcv.cancel()
 		pr.cancel()
 
-	def test_sub_contracted_item_costing(self):
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-
-		company = "_Test Company"
-		rm_item_code = "_Test Item for Reposting"
-		subcontracted_item = "_Test Subcontracted Item for Reposting"
-
-		frappe.db.set_value(
-			"Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM"
-		)
-		make_bom(item=subcontracted_item, raw_materials=[rm_item_code], currency="INR")
-
-		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
-		pr = make_purchase_receipt(
-			company=company,
-			posting_date="2020-04-10",
-			warehouse="Stores - _TC",
-			item_code=rm_item_code,
-			qty=10,
-			rate=100,
-		)
-
-		# Purchase Receipt for subcontracted item
-		pr1 = make_purchase_receipt(
-			company=company,
-			posting_date="2020-04-20",
-			warehouse="Finished Goods - _TC",
-			supplier_warehouse="Stores - _TC",
-			item_code=subcontracted_item,
-			qty=10,
-			rate=20,
-			is_subcontracted=1,
-		)
-
-		self.assertEqual(pr1.items[0].valuation_rate, 120)
-
-		# Update raw material's valuation via LCV, Additional cost = 50
-		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-
-		pr1.reload()
-		self.assertEqual(pr1.items[0].valuation_rate, 125)
-
-		# check outgoing_rate for DN after reposting
-		incoming_rate = frappe.db.get_value(
-			"Stock Ledger Entry",
-			{"voucher_type": "Purchase Receipt", "voucher_no": pr1.name, "item_code": subcontracted_item},
-			"incoming_rate",
-		)
-		self.assertEqual(incoming_rate, 125)
-
-		# cleanup data
-		pr1.cancel()
-		lcv.cancel()
-		pr.cancel()
-
 	def test_back_dated_entry_not_allowed(self):
 		# Back dated stock transactions are only allowed to stock managers
 		frappe.db.set_value(
@@ -541,30 +489,6 @@ class TestStockLedgerEntry(FrappeTestCase):
 				incoming_rate,
 				"Incorrect 'Incoming Rate' values fetched for DN items",
 			)
-
-	def assertSLEs(self, doc, expected_sles, sle_filters=None):
-		"""Compare sorted SLEs, useful for vouchers that create multiple SLEs for same line"""
-
-		filters = {"voucher_no": doc.name, "voucher_type": doc.doctype, "is_cancelled": 0}
-		if sle_filters:
-			filters.update(sle_filters)
-		sles = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["*"],
-			filters=filters,
-			order_by="timestamp(posting_date, posting_time), creation",
-		)
-
-		for exp_sle, act_sle in zip(expected_sles, sles):
-			for k, v in exp_sle.items():
-				act_value = act_sle[k]
-				if k == "stock_queue":
-					act_value = json.loads(act_value)
-					if act_value and act_value[0][0] == 0:
-						# ignore empty fifo bins
-						continue
-
-				self.assertEqual(v, act_value, msg=f"{k} doesn't match \n{exp_sle}\n{act_sle}")
 
 	def test_batchwise_item_valuation_stock_reco(self):
 		item, warehouses, batches = setup_item_valuation_test()
@@ -1182,6 +1106,164 @@ class TestStockLedgerEntry(FrappeTestCase):
 
 		backdated.cancel()
 		self.assertEqual([1], ordered_qty_after_transaction())
+
+	def test_timestamp_clash(self):
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reciept = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="01:00:00",
+		)
+
+		consumption = make_stock_entry(
+			item_code=item,
+			from_warehouse=warehouse,
+			qty=50,
+			posting_date="2021-01-01",
+			posting_time="02:00:00.1234",  # ms are possible when submitted without editing posting time
+		)
+
+		backdated_receipt = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			posting_date="2021-01-01",
+			rate=10,
+			posting_time="02:00:00",  # same posting time as consumption but ms part stripped
+		)
+
+		try:
+			backdated_receipt.cancel()
+		except Exception as e:
+			self.fail("Double processing of qty for clashing timestamp.")
+
+	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
+	def test_transfer_invariants(self):
+		"""Extact stock value should be transferred."""
+
+		item = make_item(
+			properties={
+				"valuation_method": "Moving Average",
+				"stock_uom": "Kg",
+			}
+		).name
+		source_warehouse = "Stores - TCP1"
+		target_warehouse = "Finished Goods - TCP1"
+
+		make_purchase_receipt(
+			item=item,
+			warehouse=source_warehouse,
+			qty=20,
+			conversion_factor=1000,
+			uom="Tonne",
+			rate=156_526.0,
+			company="_Test Company with perpetual inventory",
+		)
+		transfer = make_stock_entry(
+			item=item, from_warehouse=source_warehouse, to_warehouse=target_warehouse, qty=1_728.0
+		)
+
+		filters = {"voucher_no": transfer.name, "voucher_type": transfer.doctype, "is_cancelled": 0}
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["*"],
+			filters=filters,
+			order_by="timestamp(posting_date, posting_time), creation",
+		)
+		self.assertEqual(abs(sles[0].stock_value_difference), sles[1].stock_value_difference)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_negative_qty_with_precision(self):
+		"Test if system precision is respected while validating negative qty."
+		from erpnext.stock.doctype.item.test_item import create_item
+		from erpnext.stock.utils import get_stock_balance
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=559.8327, rate=100)
+
+		make_stock_entry(item_code=item_code, source=warehouse, qty=470.84, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 88.9927)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# To deliver 100 qty we fall short of 11.0073 qty (11.007 with precision 3)
+		# Stock up with 11.007 (balance in db becomes 99.9997, on UI it will show as 100)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		self.assertEqual(get_stock_balance(item_code, warehouse), 99.9997)
+
+		# See if delivery note goes through
+		# Negative qty error should not be raised as 99.9997 is 100 with precision 3 (system precision)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			do_not_submit=True,
+		)
+		dn.submit()
+
+		self.assertEqual(flt(get_stock_balance(item_code, warehouse), 3), 0.000)
+
+	@change_settings("System Settings", {"float_precision": 4})
+	def test_future_negative_qty_with_precision(self):
+		"""
+		Ledger:
+		| Voucher | Qty		| Balance
+		-------------------
+		| Reco	  | 559.8327| 559.8327
+		| SE	  | -470.84	| [Backdated] (new bal: 88.9927)
+		| SE	  | 11.007	| 570.8397 (new bal: 99.9997)
+		| DN	  | -100	| 470.8397 (new bal: -0.0003)
+
+		Check if future negative qty is asserted as per precision 3.
+		-0.0003 should be considered as 0.000
+		"""
+		from erpnext.stock.doctype.item.test_item import create_item
+
+		item_code = "ItemPrecisionTest"
+		warehouse = "_Test Warehouse - _TC"
+		create_item(item_code, is_stock_item=1, stock_uom="Kg")
+
+		create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=559.8327,
+			rate=100,
+			posting_date=add_days(today(), -2),
+		)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=11.007, rate=100)
+		create_delivery_note(
+			item_code=item_code,
+			qty=100,
+			rate=150,
+			warehouse=warehouse,
+			company="_Test Company",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+		)
+
+		settings = frappe.get_doc("System Settings")
+		settings.float_precision = 3
+		settings.save()
+
+		# Make backdated SE and make sure SE goes through as per precision (no negative qty error)
+		make_stock_entry(
+			item_code=item_code, source=warehouse, qty=470.84, rate=100, posting_date=add_days(today(), -1)
+		)
 
 
 def create_repack_entry(**args):

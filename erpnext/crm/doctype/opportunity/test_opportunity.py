@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import now_datetime, random_string, today
+from frappe.utils import add_days, now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
@@ -77,26 +77,6 @@ class TestOpportunity(unittest.TestCase):
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 		create_communication(opp_doc.doctype, opp_doc.name, opp_doc.contact_email)
 
-		quotation_doc = make_quotation(opp_doc.name)
-		quotation_doc.append("items", {"item_code": "_Test Item", "qty": 1})
-		quotation_doc.run_method("set_missing_values")
-		quotation_doc.run_method("calculate_taxes_and_totals")
-		quotation_doc.save()
-
-		quotation_comment_count = frappe.db.count(
-			"Comment",
-			{
-				"reference_doctype": quotation_doc.doctype,
-				"reference_name": quotation_doc.name,
-				"comment_type": "Comment",
-			},
-		)
-		quotation_communication_count = len(
-			get_linked_communication_list(quotation_doc.doctype, quotation_doc.name)
-		)
-		self.assertEqual(quotation_comment_count, 4)
-		self.assertEqual(quotation_communication_count, 4)
-
 
 def make_opportunity_from_lead():
 	new_lead_email_id = "new{}@example.com".format(random_string(5))
@@ -123,7 +103,6 @@ def make_opportunity(**args):
 			"opportunity_from": args.opportunity_from or "Customer",
 			"opportunity_type": "Sales",
 			"conversion_rate": 1.0,
-			"with_items": args.with_items or 0,
 			"transaction_date": today(),
 		}
 	)
