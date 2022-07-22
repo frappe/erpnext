@@ -388,7 +388,6 @@ class SellingController(StockController):
 						"valuation_rate":return_rate,
 						"stock_value_difference": flt(d.qty*return_rate)
 					}))
-
 		self.make_sl_entries(sl_entries)
 
 	def set_po_nos(self, for_validate=False):

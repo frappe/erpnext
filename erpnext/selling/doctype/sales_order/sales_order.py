@@ -189,6 +189,7 @@ class SalesOrder(SellingController):
 			temp_item.item_code = returnable.returnable_item
 			temp_item.item_name = returnable.returnable_item_name
 			temp_item.rate = returnable.sale_price
+			temp_item.item_reference = returnable.item
 			temp_item.qty = qty
 
 	def on_submit(self):

@@ -32,6 +32,9 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
+				if sle.get('allow_negative_stock'):
+					allow_negative_stock = sle.get('allow_negative_stock')
+					sle.pop('allow_negative_stock')
 				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle.copy()
