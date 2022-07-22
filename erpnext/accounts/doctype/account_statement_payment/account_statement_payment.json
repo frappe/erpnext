@@ -101,7 +101,8 @@
    "fieldtype": "Table",
    "hidden": 1,
    "label": "Products Table",
-   "options": "Account Statement Payment Item"
+   "options": "Account Statement Payment Item",
+   "print_hide": 1
   },
   {
    "fieldname": "totals_section",
@@ -256,7 +257,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-12 19:44:32.931062",
+ "modified": "2022-07-22 14:37:38.618784",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
