@@ -395,7 +395,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			vehicle_field.get_route_options_for_new_doc = function () {
 				return {
 					"item_code": me.frm.doc.applies_to_item,
-					"item_name": me.frm.doc.applies_to_item_name
+					"item_name": me.frm.doc.applies_to_item_name,
+					"unregistered": me.frm.doc.vehicle_unregistered,
+					"license_plate": me.frm.doc.vehicle_license_plate,
+					"chassis_no": me.frm.doc.vehicle_chassis_no,
+					"engine_no": me.frm.doc.vehicle_engine_no,
+					"color": me.frm.doc.vehicle_color,
 				}
 			}
 		}
