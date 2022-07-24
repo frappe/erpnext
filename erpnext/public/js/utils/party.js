@@ -362,3 +362,79 @@ erpnext.utils.get_shipping_address = function(frm, callback){
 		frappe.msgprint(__("Select company first"));
 	}
 }
+
+erpnext.utils.make_customer_from_lead = function (frm, lead) {
+	if (!lead) {
+		return;
+	}
+
+	var dialog = new frappe.ui.Dialog({
+		title: __("Convert Lead to Customer"),
+		fields: [
+			{
+				label: __("Lead"),
+				fieldname: "lead",
+				fieldtype: "Link",
+				options: "Lead",
+				read_only: 1,
+				reqd: 1,
+				default: lead,
+			},
+			{
+				label: __("Existing Customer"),
+				fieldname: "customer",
+				fieldtype: "Link",
+				options: "Customer",
+				only_select: 1,
+				description: __("Select Existing Customer to link or leave empty to create a new Customer"),
+				get_query: () => erpnext.queries.customer(),
+				onchange: () => {
+					let customer = dialog.get_value('customer');
+					if (customer) {
+						frappe.db.get_value("Customer", customer, ['customer_name'], (r) => {
+							if (r) {
+								dialog.set_values(r);
+							}
+						});
+					} else {
+						dialog.set_value('customer_name', '');
+					}
+				}
+			},
+			{
+				label: __("Existing Customer Name"),
+				fieldname: "customer_name",
+				fieldtype: "Data",
+				read_only: 1,
+				fetch_from: "customer.customer_name",
+			},
+		]
+	});
+
+	dialog.set_primary_action(__("Convert"), function () {
+		var existing_customer = dialog.get_value('customer');
+		if (existing_customer) {
+			return frappe.call({
+				method: "erpnext.crm.doctype.lead.lead.set_lead_for_customer",
+				args: {
+					lead: lead,
+					customer: existing_customer,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						dialog.hide();
+					}
+				}
+			})
+		} else {
+			dialog.hide();
+			return frappe.model.open_mapped_doc({
+				method: "erpnext.crm.doctype.lead.lead.make_customer",
+				frm: frm,
+				source_name: lead
+			});
+		}
+	});
+
+	dialog.show();
+};

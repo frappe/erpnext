@@ -58,13 +58,13 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 				});
 			}
 
-			if(!customer) {
+			if (!customer) {
 				this.frm.add_custom_button(__('Customer'), () => {
-					this.create_customer(this.frm.doc.party_name);
+					erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.party_name);
 				}, __('Create'));
 			}
 
-			if(is_valid) {
+			if (is_valid) {
 				this.frm.add_custom_button(__('Vehicle Booking Order'), () => this.make_vehicle_booking_order(), __('Create'));
 			}
 
@@ -98,16 +98,6 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 			method: "erpnext.vehicles.doctype.vehicle_quotation.vehicle_quotation.make_vehicle_booking_order",
 			frm: this.frm
 		});
-	},
-
-	create_customer: function (lead) {
-		if (lead) {
-			frappe.model.open_mapped_doc({
-				method: "erpnext.crm.doctype.lead.lead.make_customer",
-				frm: this.frm,
-				source_name: lead
-			});
-		}
 	},
 });
 

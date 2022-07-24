@@ -168,9 +168,11 @@ class Lead(SellingController):
 
 			self.lead_name = self.company_name
 
+
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
 	return _make_customer(source_name, target_doc)
+
 
 def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
@@ -183,17 +185,44 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 
 		target.customer_group = frappe.db.get_default("Customer Group")
 
-	doclist = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	doclist = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Customer",
 			"field_map": {
 				"name": "lead_name",
 				"company_name": "customer_name",
 				"lead_name": "contact_first_name",
 			}
-		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
+		}
+	}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	return doclist
+
+
+def get_customer_from_lead(lead, throw=True):
+	customer = frappe.db.get_value("Customer", {"lead_name": lead})
+	if not customer and throw:
+		frappe.throw(_("Please convert Lead to Customer first"))
+
+	return customer
+
+
+@frappe.whitelist()
+def set_lead_for_customer(lead, customer):
+	doc = frappe.get_doc("Customer", customer)
+
+	# check if customer linked to another lead
+	if doc.lead_name and doc.lead_name != lead:
+		frappe.throw(_("{0} is already linked to another {1}")
+			.format(frappe.get_desk_link("Customer", customer), frappe.get_desk_link("Lead", lead)))
+
+	doc.lead_name = lead
+	doc.save()
+
+	frappe.msgprint(_("{0} converted to {1}")
+		.format(frappe.get_desk_link("Lead", lead), frappe.get_desk_link("Customer", customer)),
+		indicator="green")
+
 
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
@@ -216,6 +245,7 @@ def make_opportunity(source_name, target_doc=None):
 
 	return target_doc
 
+
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
@@ -233,6 +263,7 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
+
 
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
@@ -253,6 +284,7 @@ def make_vehicle_quotation(source_name, target_doc=None):
 
 	return target_doc
 
+
 def _set_missing_values(source, target):
 	address = frappe.get_all('Dynamic Link', {
 			'link_doctype': source.doctype,
@@ -271,6 +303,7 @@ def _set_missing_values(source, target):
 
 	if contact:
 		target.contact_person = contact[0].parent
+
 
 @frappe.whitelist()
 def get_lead_details(lead, posting_date=None, company=None):
@@ -304,6 +337,7 @@ def get_lead_contact_details(lead):
 
 	lead_doc = frappe.get_doc("Lead", lead)
 	return _get_lead_contact_details(lead_doc)
+
 
 def _get_lead_contact_details(lead):
 	out = frappe._dict({
@@ -348,6 +382,7 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 
 	link_communication_to_document(doc, "Lead", lead_name, ignore_communication_links)
 	return lead_name
+
 
 def get_lead_with_phone_number(number):
 	if not number: return

@@ -57,6 +57,14 @@ class Quotation(SellingController):
 		self.update_opportunity()
 		self.update_lead()
 
+	def onload(self):
+		super(Quotation, self).onload()
+		if self.quotation_to == "Customer":
+			self.set_onload('customer', self.party_name)
+		elif self.quotation_to == "Lead":
+			customer = frappe.db.get_value("Customer", {"lead_name": self.party_name})
+			self.set_onload('customer', customer)
+
 	def set_indicator(self):
 		if self.docstatus == 1:
 			self.indicator_color = 'blue'
@@ -190,15 +198,16 @@ def make_sales_order(source_name, target_doc=None):
 
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
-	customer = _make_customer(source_name, ignore_permissions)
-
 	def set_missing_values(source, target):
+		customer = get_customer(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
+
 		if source.referral_sales_partner:
 			target.sales_partner=source.referral_sales_partner
 			target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
+
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -261,12 +270,12 @@ def make_sales_invoice(source_name, target_doc=None):
 
 
 def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
-	customer = _make_customer(source_name, ignore_permissions)
-
 	def set_missing_values(source, target):
+		customer = get_customer(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
+
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
@@ -317,47 +326,12 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 
-def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation",
-		source_name, ["order_type", "party_name", "customer_name"], as_dict=1)
-
+def get_customer(quotation):
 	if quotation and quotation.get('party_name'):
-		if not frappe.db.exists("Customer", quotation.get("party_name")):
-			lead_name = quotation.get("party_name")
-			customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
-				["name", "customer_name"], as_dict=True)
-			if not customer_name:
-				from erpnext.crm.doctype.lead.lead import _make_customer
-				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
-				customer = frappe.get_doc(customer_doclist)
-				customer.flags.ignore_permissions = ignore_permissions
-				if quotation.get("party_name") == "Shopping Cart":
-					customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
-						"default_customer_group")
+		if quotation.get('quotation_to') == 'Lead':
+			from erpnext.crm.doctype.lead.lead import get_customer_from_lead
+			customer = get_customer_from_lead(quotation.get("party_name"))
+			return frappe.get_cached_doc("Customer", customer)
 
-				try:
-					customer.insert()
-					return customer
-				except frappe.NameError:
-					if frappe.defaults.get_global_default('cust_master_name') == "Customer Name":
-						customer.run_method("autoname")
-						customer.name += "-" + lead_name
-						customer.insert()
-						return customer
-					else:
-						raise
-				except frappe.MandatoryError as e:
-					mandatory_fields = e.args[0].split(':')[1].split(',')
-					mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
-
-					frappe.local.message_log = []
-					lead_link = frappe.utils.get_link_to_form("Lead", lead_name)
-					message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
-					message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
-					message += _("Please create Customer from Lead {0}.").format(lead_link)
-
-					frappe.throw(message, title=_("Mandatory Missing"))
-			else:
-				return customer_name
-		else:
-			return frappe.get_doc("Customer", quotation.get("party_name"))
+		elif quotation.get('quotation_to') == 'Customer':
+			return frappe.get_cached_doc("Customer", quotation.get("party_name"))

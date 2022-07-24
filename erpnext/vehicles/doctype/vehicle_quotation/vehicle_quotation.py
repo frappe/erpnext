@@ -108,8 +108,10 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 
 
 def _make_vehicle_booking_order(source_name, target_doc=None, ignore_permissions=False):
+	from erpnext.selling.doctype.quotation.quotation import get_customer
+
 	def set_missing_values(source, target):
-		customer = _make_customer(source, ignore_permissions)
+		customer = get_customer(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
@@ -147,38 +149,6 @@ def _make_vehicle_booking_order(source_name, target_doc=None, ignore_permissions
 	}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
 
 	return doclist
-
-
-def _make_customer(quotation, ignore_permissions=False):
-	if quotation and quotation.get('party_name'):
-		if quotation.get('quotation_to') == 'Lead':
-			lead_name = quotation.get("party_name")
-			customer_id = frappe.db.get_value("Customer", {"lead_name": lead_name})
-
-			if not customer_id:
-				from erpnext.crm.doctype.lead.lead import _make_customer
-				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
-				customer = frappe.get_doc(customer_doclist)
-				customer.flags.ignore_permissions = ignore_permissions
-
-				try:
-					customer.insert()
-					return customer
-				except frappe.MandatoryError as e:
-					mandatory_fields = e.args[0].split(':')[1].split(',')
-					mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
-
-					frappe.local.message_log = []
-					lead_link = frappe.utils.get_link_to_form("Lead", lead_name)
-					message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
-					message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
-					message += _("Please create Customer from Lead {0}.").format(lead_link)
-
-					frappe.throw(message, title=_("Mandatory Missing"))
-			else:
-				return frappe.get_cached_doc("Customer", customer_id)
-		else:
-			return frappe.get_cached_doc("Customer", quotation.get("party_name"))
 
 
 def set_expired_status():
