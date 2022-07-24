@@ -335,6 +335,7 @@ data = {
 		"Material Request": applies_to_transaction_fields + material_request_service_person_fields,
 		"Project": project_fields + applies_to_project_fields + project_change_vehicle_details_fields +
 			project_vehicle_reading_fields + project_service_person_fields,
+		"Appointment": applies_to_transaction_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,

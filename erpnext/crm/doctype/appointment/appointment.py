@@ -13,6 +13,19 @@ from frappe.utils import cint, today, getdate, get_time, get_datetime, combine_d
 from frappe.utils.verified_command import get_signed_params
 from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignemnt, clear as clear_assignments, close_all_assignments
+from six import string_types
+from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from erpnext.crm.doctype.lead.lead import _get_lead_contact_details
+from erpnext.stock.get_item_details import get_applies_to_details
+import json
+
+
+force_fields = ['customer_name', 'tax_id', 'tax_cnic', 'tax_strn',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	"vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
+	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name"
+]
 
 
 class Appointment(Document):
@@ -34,6 +47,8 @@ class Appointment(Document):
 	def set_missing_values(self):
 		self.set_missing_duration()
 		self.set_scheduled_date_time()
+		self.set_customer_details()
+		self.set_applies_to_details()
 
 	def set_missing_duration(self):
 		if self.get('appointment_type'):
@@ -64,6 +79,20 @@ class Appointment(Document):
 			self.scheduled_day_of_week = formatdate(self.scheduled_date, "EEEE")
 		else:
 			self.scheduled_day_of_week = None
+
+	def set_customer_details(self):
+		customer_details = get_customer_details(self.as_dict())
+		for k, v in customer_details.items():
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+				self.set(k, v)
+
+	def set_applies_to_details(self):
+		args = self.as_dict()
+		applies_to_details = get_applies_to_details(args, for_validate=True)
+
+		for k, v in applies_to_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_fields:
+				self.set(k, v)
 
 	def validate_timeslot_validity(self):
 		if not self.appointment_type:
@@ -113,22 +142,21 @@ class Appointment(Document):
 				.format(timeslot_str, frappe.bold(appointments_in_same_slot), self.appointment_type),
 				raise_exception=appointment_type_doc.validate_availability)
 
-	def create_lead_and_link(self, update=False):
-		if self.lead:
+	def create_lead_and_link(self):
+		if self.party_name:
 			return
 
 		lead = frappe.get_doc({
 			'doctype': 'Lead',
 			'lead_name': self.customer_name,
-			'email_id': self.customer_email,
-			'notes': self.customer_details,
-			'phone': self.customer_phone_number,
+			'email_id': self.contact_email,
+			'notes': self.description,
+			'mobile_no': self.contact_mobile,
 		})
 		lead.insert(ignore_permissions=True)
 
-		self.lead = lead.name
-		if update:
-			self.db_set('lead', self.lead)
+		self.appointment_for = "Lead"
+		self.party_name = lead.name
 
 	def create_calendar_event(self, update=False):
 		if self.status != "Open":
@@ -143,10 +171,8 @@ class Appointment(Document):
 			return
 
 		event_participants = []
-		if self.get('customer'):
-			event_participants.append({"reference_doctype": "Customer", "reference_docname": self.customer})
-		elif self.get('lead'):
-			event_participants.append({"reference_doctype": "Lead", "reference_docname": self.lead})
+		if self.get('appointment_for') and self.get('party_name'):
+			event_participants.append({"reference_doctype": self.appointment_for, "reference_docname": self.party_name})
 
 		appointment_event = frappe.get_doc({
 			'doctype': 'Event',
@@ -183,7 +209,7 @@ class Appointment(Document):
 	def send_confirmation_email(self):
 		if self.status != "Unconfirmed":
 			return
-		if not self.customer_email:
+		if not self.contact_email:
 			return
 
 		verify_url = self.get_verify_url()
@@ -194,7 +220,7 @@ class Appointment(Document):
 			"full_name": self.customer_name,
 		}
 
-		frappe.sendmail(recipients=[self.customer_email],
+		frappe.sendmail(recipients=[self.contact_email],
 			template=template,
 			args=args,
 			subject=_('Appointment Confirmation'))
@@ -207,7 +233,7 @@ class Appointment(Document):
 	def get_verify_url(self):
 		verify_route = '/book_appointment/verify'
 		params = {
-			'email': self.customer_email,
+			'email': self.contact_email,
 			'appointment': self.name
 		}
 		return get_url(verify_route + '?' + get_signed_params(params))
@@ -215,11 +241,10 @@ class Appointment(Document):
 	def set_verified(self, email):
 		if self.status not in ['Open', 'Unconfirmed']:
 			frappe.throw(_("Appointment is {0}").format(self.status))
-		if email != self.customer_email:
+		if email != self.contact_email:
 			frappe.throw(_('Email verification failed.'))
 
 		self.db_set('status', 'Open')
-		self.create_lead_and_link(update=True)
 		self.create_calendar_event(update=True)
 		self.auto_assign()
 
@@ -262,12 +287,11 @@ class Appointment(Document):
 				break
 
 	def get_assignee_from_latest_opportunity(self):
-		if not self.lead:
-			return None
-		if not frappe.db.exists('Lead', self.lead):
+		if not self.appointment_for or not self.party_name:
 			return None
 
-		latest_opportunity = frappe.get_all('Opportunity', filters={'opportunity_from': 'Lead', 'party_name': self.lead},
+		latest_opportunity = frappe.get_all('Opportunity',
+			filters={'opportunity_from': self.appointment_for, 'party_name': self.party_name},
 			order_by='creation desc', fields=['name', '_assign'])
 		if not latest_opportunity:
 			return None
@@ -416,3 +440,44 @@ def get_appointments_in_same_slot(start_dt, end_dt, appointment_type, appointmen
 	}, as_dict=1)
 
 	return appointments
+
+
+@frappe.whitelist()
+def get_customer_details(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+	out = frappe._dict()
+
+	if not args.appointment_for or not args.party_name:
+		frappe.throw(_("Party is mandatory"))
+
+	if args.appointment_for not in ['Customer', 'Lead']:
+		frappe.throw(_("Appointment For must be either Customer or Lead"))
+
+	party = frappe.get_cached_doc(args.appointment_for, args.party_name)
+
+	# Customer Name
+	if party.doctype == "Lead":
+		out.customer_name = party.company_name or party.lead_name
+	else:
+		out.customer_name = party.customer_name
+
+	# Tax IDs
+	out.tax_id = party.get('tax_id')
+	out.tax_cnic = party.get('tax_cnic')
+	out.tax_strn = party.get('tax_strn')
+
+	# Address
+	out.customer_address = args.customer_address or get_default_address(party.doctype, party.name)
+	out.address_display = get_address_display(out.customer_address)
+
+	# Contact
+	out.contact_person = args.contact_person or get_default_contact(party.doctype, party.name)
+	if party.doctype == "Lead" and not out.contact_person:
+		out.update(_get_lead_contact_details(party))
+	else:
+		out.update(get_contact_details(out.contact_person))
+
+	return out

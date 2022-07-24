@@ -5,7 +5,7 @@ erpnext.crm.make_appointment_slot_picker = function (frm, wrapper, title) {
 	if (title) {
 		$(`<label class="control-label">${title}</label>`).appendTo(wrapper);
 	}
-	var slotpicker_area = $('<div></div>').appendTo(wrapper);
+	var slotpicker_area = $('<div style="margin-bottom: -10px;"></div>').appendTo(wrapper);
 	return new erpnext.crm.AppointmentSlotPicker(frm, slotpicker_area);
 };
 

@@ -307,9 +307,10 @@ def get_lead_contact_details(lead):
 
 def _get_lead_contact_details(lead):
 	out = frappe._dict({
-		"contact_email": lead.email_id,
-		"contact_mobile": lead.mobile_no,
-		"contact_phone": lead.phone,
+		"contact_email": lead.get('email_id'),
+		"contact_mobile": lead.get('mobile_no'),
+		"contact_mobile_2": lead.get('mobile_no_2'),
+		"contact_phone": lead.get('phone'),
 	})
 
 	if cint(lead.organization_lead):

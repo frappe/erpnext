@@ -21,14 +21,29 @@
   "time_slots_section",
   "appointment_slot_picker_html",
   "customer_details_section",
+  "appointment_for",
+  "party_name",
   "customer_name",
-  "customer_phone_number",
-  "customer_email",
+  "tax_cnic",
+  "tax_id",
   "col_br_2",
-  "customer_details",
-  "linked_docs_section",
-  "lead",
-  "col_br_3",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "column_break_25",
+  "customer_address",
+  "address_display",
+  "sec_applies_to",
+  "applies_to_variant_of",
+  "applies_to_variant_of_name",
+  "applies_to_item",
+  "col_break_applies_to",
+  "applies_to_item_name",
+  "details_section",
+  "voice_of_customer",
+  "description",
+  "more_information_section",
   "calendar_event"
  ],
  "fields": [
@@ -41,18 +56,8 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Name",
-   "reqd": 1
-  },
-  {
-   "fieldname": "customer_phone_number",
-   "fieldtype": "Data",
-   "label": "Phone Number"
-  },
-  {
-   "fieldname": "customer_details",
-   "fieldtype": "Long Text",
-   "label": "Details"
+   "label": "Customer Name",
+   "read_only": 1
   },
   {
    "fieldname": "scheduled_time",
@@ -73,12 +78,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "lead",
-   "fieldtype": "Link",
-   "label": "Lead",
-   "options": "Lead"
-  },
-  {
    "fieldname": "calendar_event",
    "fieldtype": "Link",
    "label": "Calendar Event",
@@ -86,20 +85,6 @@
   },
   {
    "fieldname": "col_br_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "customer_email",
-   "fieldtype": "Data",
-   "label": "Email"
-  },
-  {
-   "fieldname": "linked_docs_section",
-   "fieldtype": "Section Break",
-   "label": "Linked Documents"
-  },
-  {
-   "fieldname": "col_br_3",
    "fieldtype": "Column Break"
   },
   {
@@ -183,9 +168,147 @@
    "print_hide": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "appointment_for",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Appointment For",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Dynamic Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "appointment_for",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Contact Person",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Data",
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Email",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Appointment Details"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Link",
+   "label": "Customer Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Customer Address Display",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID",
+   "read_only": 1
+  },
+  {
+   "collapsible_depends_on": "applies_to_item",
+   "fieldname": "sec_applies_to",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Applies To"
+  },
+  {
+   "fetch_from": "applies_to_item.variant_of",
+   "fieldname": "applies_to_variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Applies to Template",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "applies_to_variant_of.item_name",
+   "fieldname": "applies_to_variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Applies to Template Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Applies to Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "col_break_applies_to",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
+   "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "label": "Applies to Item Name"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "voice_of_customer",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Voice of Customer"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
   }
  ],
- "modified": "2022-07-21 15:11:50.130784",
+ "modified": "2022-07-24 13:48:04.359858",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -223,6 +346,17 @@
    "read": 1,
    "report": 1,
    "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
    "share": 1,
    "write": 1
   },

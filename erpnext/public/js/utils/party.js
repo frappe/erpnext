@@ -315,20 +315,18 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 erpnext.utils.get_contact_details = function(frm) {
 	if (frm.updating_party_details) return;
 
-	if (frm.doc["contact_person"]) {
-		return frappe.call({
-			method: "erpnext.accounts.party.get_contact_details",
-			args: {
-				contact: frm.doc.contact_person,
-				project: frm.doc.project,
-			},
-			callback: function(r) {
-				if (r.message) {
-					return frm.set_value(r.message);
-				}
+	return frappe.call({
+		method: "erpnext.accounts.party.get_contact_details",
+		args: {
+			contact: frm.doc.contact_person || "",
+			project: frm.doc.project,
+		},
+		callback: function(r) {
+			if (r.message) {
+				return frm.set_value(r.message);
 			}
-		});
-	}
+		}
+	});
 }
 
 erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
