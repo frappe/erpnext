@@ -47,6 +47,8 @@
   "customer_address",
   "address_display",
   "sec_applies_to",
+  "applies_to_variant_of",
+  "applies_to_variant_of_name",
   "applies_to_item",
   "col_break_applies_to",
   "applies_to_item_name",
@@ -1124,12 +1126,30 @@
    "label": "Project Date",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fetch_from": "applies_to_item.variant_of",
+   "fieldname": "applies_to_variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Applies to Template",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "applies_to_variant_of.item_name",
+   "fieldname": "applies_to_variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Applies to Template Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-06-29 21:21:03.071722",
+ "modified": "2022-07-24 11:48:21.009411",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -29,12 +29,6 @@ def get_field(fieldname, field_list):
 
 # Vehicle Details / Applies To
 applies_to_fields = [
-	{"label": "Applies to Model", "fieldname": "applies_to_variant_of", "fieldtype": "Link", "options": "Item",
-		"insert_after": "sec_applies_to", "in_standard_filter": 1, "hidden": 1, "read_only": 1,
-		"fetch_from": "applies_to_item.variant_of"},
-	{"label": "Applies to Model Name", "fieldname": "applies_to_variant_of_name", "fieldtype": "Data",
-		"insert_after": "applies_to_variant_of", "hidden": 1, "read_only": 1, "fetch_from": "applies_to_variant_of.item_name"},
-
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
 		"insert_after": "applies_to_variant_of_name", "in_standard_filter": 1},
 
@@ -258,61 +252,42 @@ item_fields = [
 ]
 
 # Set Translatable = 0
-for d in applies_to_fields:
-	d['translatable'] = 0
-for d in applies_to_transaction_fields:
-	d['translatable'] = 0
-for d in applies_to_project_fields:
-	d['translatable'] = 0
-for d in project_vehicle_reading_fields:
-	d['translatable'] = 0
-for d in vehicle_owner_fields:
-	d['translatable'] = 0
-for d in sales_invoice_vehicle_owner_fields:
-	d['translatable'] = 0
-for d in service_person_fields:
-	d['translatable'] = 0
-for d in material_request_service_person_fields:
-	d['translatable'] = 0
-for d in accounting_dimension_fields:
-	d['translatable'] = 0
-for d in accounting_dimension_table_fields:
-	d['translatable'] = 0
-for d in item_fields:
-	d['translatable'] = 0
-for d in project_fields:
-	d['translatable'] = 0
-for d in project_type_fields:
-	d['translatable'] = 0
-for d in project_change_vehicle_details_fields:
-	d['translatable'] = 0
-for d in project_template_fields:
-	d['translatable'] = 0
-for d in project_template_category_fields:
-	d['translatable'] = 0
+field_lists = [applies_to_fields, applies_to_transaction_fields, applies_to_project_fields, project_vehicle_reading_fields,
+	vehicle_owner_fields, sales_invoice_vehicle_owner_fields, service_person_fields, material_request_service_person_fields,
+	accounting_dimension_fields, accounting_dimension_table_fields, item_fields, project_fields, project_type_fields,
+	project_change_vehicle_details_fields, project_template_fields, project_template_category_fields]
+
+for field_list in field_lists:
+	for d in field_list:
+		d['translatable'] = 0
 
 common_properties = [
-	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
-		{"fieldname": "vehicle", "property": "in_standard_filter", "value": 0}],
-
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
+	# Unhide Vehicle Details Section
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
 		{"fieldname": "sec_applies_to", "property": "hidden", "value": 0}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
+	# Vehicle Details Section Label
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
 		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
+	# Vehicle Details Collapsible
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
 		{"fieldname": "sec_applies_to", "property": "collapsible_depends_on",
 			"value": "eval:doc.applies_to_item || doc.applies_to_vehicle || doc.vehicle_license_plate || doc.vehicle_chassis_no || doc.vehicle_engine_no"}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request'),
-		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
+	# Applies to Model label
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+		{"fieldname": "applies_to_variant_of", "property": "label", "value": "Applies to Model"}],
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+		{"fieldname": "applies_to_variant_of_name", "property": "label", "value": "Applies to Model Name"}],
 
+	# Customer (User) Label
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project', 'Material Request'),
 		{"fieldname": "customer", "property": "label", "value": "Customer (User)"}],
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project', 'Material Request'),
 		{"fieldname": "customer_name", "property": "label", "value": "Customer Name (User)"}],
 
+	# Unhide Insurance Section
 	[('Sales Invoice', 'Quotation', 'Project'),
 		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}],
 
@@ -344,8 +319,8 @@ data = {
 		{"doctype": "Project", "fieldname": "bill_to", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "sec_warranty", "property": "hidden", "value": 0},
 		{"doctype": "Project", "fieldname": "previous_project", "property": "label", "value": "Previous Repair Order"},
-		{"doctype": "Project Type", "fieldname": "previous_project_mandatory", "property": "label", "value": "Previous Repair Order Mandatory"},
 		{"doctype": "Project", "fieldname": "project_name", "property": "label", "value": "Voice of Customer"},
+		{"doctype": "Project Type", "fieldname": "previous_project_mandatory", "property": "label", "value": "Previous Repair Order Mandatory"},
 		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
 	],
 	'custom_fields': {
