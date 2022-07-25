@@ -610,6 +610,19 @@ class SellingController(StockController):
 					d.description,
 					d.against_sales_order or d.against_sales_invoice,
 				]
+				elif self.doctype == "Shipping Notice Instruction":
+				stock_items = [
+					d.item_code,
+					d.description,
+					d.warehouse,
+					d.against_sales_order or d.against_sales_invoice,
+					d.batch_no or "",
+				]
+				non_stock_items = [
+					d.item_code,
+					d.description,
+					d.against_sales_order or d.against_sales_invoice,
+				]
 			elif self.doctype in ["Sales Order", "Quotation"]:
 				stock_items = [d.item_code, d.description, d.warehouse, ""]
 				non_stock_items = [d.item_code, d.description]
