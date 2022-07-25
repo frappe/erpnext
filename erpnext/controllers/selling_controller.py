@@ -610,7 +610,7 @@ class SellingController(StockController):
 					d.description,
 					d.against_sales_order or d.against_sales_invoice,
 				]
-				elif self.doctype == "Shipping Notice Instruction":
+			elif self.doctype == "Shipping Notice Instruction":
 				stock_items = [
 					d.item_code,
 					d.description,
