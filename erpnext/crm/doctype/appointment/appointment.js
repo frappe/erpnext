@@ -6,6 +6,13 @@ frappe.provide("erpnext.crm");
 {% include 'erpnext/crm/doctype/appointment/appointment_slots.js' %};
 
 erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
+	setup: function () {
+		this.frm.custom_make_buttons = {
+			'Project': 'Project',
+			'Customer': 'Customer'
+		}
+	},
+
 	refresh: function() {
 		erpnext.hide_company();
 		this.make_appointment_slot_picker();
@@ -25,6 +32,25 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 			this.frm.add_custom_button(__(this.frm.doc.calendar_event), () => {
 				frappe.set_route("Form", "Event", this.frm.doc.calendar_event);
 			});
+		}
+
+		var customer;
+		if (this.frm.doc.appointment_for == "Customer") {
+			customer = this.frm.doc.party_name;
+		} else if (this.frm.doc.appointment_for == "Lead") {
+			customer = this.frm.doc.__onload && this.frm.doc.__onload.customer;
+		}
+
+		if(!['Cancelled', 'Rescheduled'].includes(this.frm.doc.status)) {
+			if (!customer) {
+				this.frm.add_custom_button(__('Customer'), () => {
+					erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.party_name);
+				}, __('Create'));
+			}
+
+			this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
+
+			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 	},
 
@@ -270,6 +296,14 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 			if (me.frm.fields_dict[f]) {
 				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
 			}
+		});
+	},
+
+	make_project: function () {
+		this.frm.check_if_unsaved();
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.appointment.appointment.make_project",
+			frm: this.frm
 		});
 	},
 });

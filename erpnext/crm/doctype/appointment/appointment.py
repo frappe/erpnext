@@ -18,6 +18,7 @@ from frappe.contacts.doctype.address.address import get_address_display, get_def
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.crm.doctype.lead.lead import _get_lead_contact_details
 from erpnext.stock.get_item_details import get_applies_to_details
+from frappe.model.mapper import get_mapped_doc
 import json
 
 
@@ -29,6 +30,9 @@ force_fields = ['customer_name', 'tax_id', 'tax_cnic', 'tax_strn',
 
 
 class Appointment(Document):
+	def get_feed(self):
+		return _("For {0}").format(self.get("customer_name") or self.get('party_name'))
+
 	def validate(self):
 		self.set_missing_values()
 		if self.status in ['Open', 'Unconfirmed']:
@@ -43,6 +47,13 @@ class Appointment(Document):
 			self.sync_calendar_event()
 		else:
 			self.create_calendar_event(update=True)
+
+	def onload(self):
+		if self.appointment_for == "Customer":
+			self.set_onload('customer', self.party_name)
+		elif self.appointment_for == "Lead":
+			customer = frappe.db.get_value("Customer", {"lead_name": self.party_name})
+			self.set_onload('customer', customer)
 
 	def set_missing_values(self):
 		self.set_missing_duration()
@@ -257,7 +268,7 @@ class Appointment(Document):
 	def auto_assign(self):
 		if self.status != 'Open':
 			return
-		if self._assign:
+		if self.get('_assign'):
 			return
 		if not self.appointment_type:
 			return
@@ -481,3 +492,38 @@ def get_customer_details(args):
 		out.update(get_contact_details(out.contact_person))
 
 	return out
+
+
+@frappe.whitelist()
+def make_project(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		customer = get_customer(source)
+		if customer:
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
+
+		target.run_method("set_missing_values")
+
+	doclist = get_mapped_doc("Appointment", source_name, {
+		"Appointment": {
+			"doctype": "Project",
+			"field_map": {
+				"name": "appointment",
+				"voice_of_customer": "project_name",
+				"description": "description",
+			}
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
+
+
+def get_customer(appointment):
+	if appointment and appointment.get('party_name'):
+		if appointment.get('appointment_for') == 'Lead':
+			from erpnext.crm.doctype.lead.lead import get_customer_from_lead
+			customer = get_customer_from_lead(appointment.get("party_name"))
+			return frappe.get_cached_doc("Customer", customer)
+
+		elif appointment.get('appointment_for') == 'Customer':
+			return frappe.get_cached_doc("Customer", appointment.get("party_name"))
