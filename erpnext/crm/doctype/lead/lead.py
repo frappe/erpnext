@@ -29,7 +29,7 @@ class Lead(SellingController):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)
 
 	def onload(self):
-		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
+		customer = get_customer_from_lead(self.name)
 		self.get("__onload").is_customer = customer
 		load_address_and_contact(self)
 
@@ -199,7 +199,10 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 
-def get_customer_from_lead(lead, throw=True):
+def get_customer_from_lead(lead, throw=False):
+	if not lead:
+		return None
+
 	customer = frappe.db.get_value("Customer", {"lead_name": lead})
 	if not customer and throw:
 		frappe.throw(_("Please convert Lead to Customer first"))

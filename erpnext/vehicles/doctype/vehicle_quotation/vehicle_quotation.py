@@ -8,6 +8,8 @@ from frappe import _
 from frappe.utils import getdate, nowdate, add_days, cint, date_diff
 from frappe.model.mapper import get_mapped_doc
 from erpnext.vehicles.vehicle_booking_controller import VehicleBookingController
+from erpnext.crm.doctype.lead.lead import get_customer_from_lead
+
 
 class VehicleQuotation(VehicleBookingController):
 	def __init__(self, *args, **kwargs):
@@ -48,8 +50,7 @@ class VehicleQuotation(VehicleBookingController):
 		if self.quotation_to == "Customer":
 			self.set_onload('customer', self.party_name)
 		elif self.quotation_to == "Lead":
-			customer = frappe.db.get_value("Customer", {"lead_name": self.party_name})
-			self.set_onload('customer', customer)
+			self.set_onload('customer', get_customer_from_lead(self.party_name))
 
 	def before_print(self):
 		super(VehicleQuotation, self).before_print()
@@ -108,10 +109,10 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 
 
 def _make_vehicle_booking_order(source_name, target_doc=None, ignore_permissions=False):
-	from erpnext.selling.doctype.quotation.quotation import get_customer
+	from erpnext.selling.doctype.quotation.quotation import get_customer_from_quotation
 
 	def set_missing_values(source, target):
-		customer = get_customer(source)
+		customer = get_customer_from_quotation(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name

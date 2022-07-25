@@ -6,6 +6,7 @@ import frappe
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, nowdate, getdate
 from frappe import _
+from erpnext.crm.doctype.lead.lead import get_customer_from_lead
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -62,8 +63,7 @@ class Quotation(SellingController):
 		if self.quotation_to == "Customer":
 			self.set_onload('customer', self.party_name)
 		elif self.quotation_to == "Lead":
-			customer = frappe.db.get_value("Customer", {"lead_name": self.party_name})
-			self.set_onload('customer', customer)
+			self.set_onload('customer', get_customer_from_lead(self.party_name))
 
 	def set_indicator(self):
 		if self.docstatus == 1:
@@ -199,7 +199,7 @@ def make_sales_order(source_name, target_doc=None):
 
 def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
-		customer = get_customer(source)
+		customer = get_customer_from_quotation(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
@@ -271,7 +271,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
-		customer = get_customer(source)
+		customer = get_customer_from_quotation(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
@@ -326,11 +326,10 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 
-def get_customer(quotation):
+def get_customer_from_quotation(quotation):
 	if quotation and quotation.get('party_name'):
 		if quotation.get('quotation_to') == 'Lead':
-			from erpnext.crm.doctype.lead.lead import get_customer_from_lead
-			customer = get_customer_from_lead(quotation.get("party_name"))
+			customer = get_customer_from_lead(quotation.get("party_name"), throw=True)
 			return frappe.get_cached_doc("Customer", customer)
 
 		elif quotation.get('quotation_to') == 'Customer':
