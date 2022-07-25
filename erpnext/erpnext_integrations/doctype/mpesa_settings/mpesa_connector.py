@@ -48,6 +48,7 @@ class MpesaConnector:
 		queue_timeout_url=None,
 		result_url=None,
 	):
+		
 		"""
 		This method uses Mpesa's Account Balance API to to enquire the balance on a M-Pesa BuyGoods (Till Number).
 
@@ -66,7 +67,6 @@ class MpesaConnector:
 				ConversationID (str): The unique request ID returned by mpesa for each request made
 				ResponseDescription (str): Response Description message
 		"""
-
 		payload = {
 			"Initiator": initiator,
 			"SecurityCredential": security_credential,
@@ -96,6 +96,7 @@ class MpesaConnector:
 			phone_number=None,
 			description=None,
 		):
+		
 			"""
 			This method uses Mpesa's Express API to initiate online payment on behalf of a customer.
 

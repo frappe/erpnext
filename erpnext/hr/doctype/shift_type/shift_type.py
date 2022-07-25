@@ -107,7 +107,7 @@ class ShiftType(Document):
 		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
 		The Absent is marked starting from 'process_attendance_after' or employee creation date.
 		"""
-		date_of_joining, relieving_date, employee_creation = frappe.db.get_value(
+		date_of_joining, relieving_date, employee_creation = frappe.get_cached_value(
 			"Employee", employee, ["date_of_joining", "relieving_date", "creation"]
 		)
 		if not date_of_joining:
@@ -156,21 +156,19 @@ class ShiftType(Document):
 		if not from_date:
 			del filters["start_date"]
 
-		assigned_employees = frappe.get_all("Shift Assignment", "employee", filters, as_list=True)
-		assigned_employees = [x[0] for x in assigned_employees]
+		assigned_employees = frappe.get_all("Shift Assignment", filters, pluck="employee")
 
 		if consider_default_shift:
 			filters = {"default_shift": self.name, "status": ["!=", "Inactive"]}
-			default_shift_employees = frappe.get_all("Employee", "name", filters, as_list=True)
-			default_shift_employees = [x[0] for x in default_shift_employees]
+			default_shift_employees = frappe.get_all("Employee", filters, pluck="name")
 			return list(set(assigned_employees + default_shift_employees))
 		return assigned_employees
 
 
 def process_auto_attendance_for_all_shifts():
-	shift_list = frappe.get_all("Shift Type", "name", {"enable_auto_attendance": "1"}, as_list=True)
+	shift_list = frappe.get_all("Shift Type", filters={"enable_auto_attendance": "1"}, pluck="name")
 	for shift in shift_list:
-		doc = frappe.get_doc("Shift Type", shift[0])
+		doc = frappe.get_cached_doc("Shift Type", shift)
 		doc.process_auto_attendance()
 
 

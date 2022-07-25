@@ -144,7 +144,7 @@ class GSTR3BReport(Document):
 	def get_inward_nil_exempt(self, state):
 		inward_nil_exempt = frappe.db.sql(
 			"""
-			SELECT p.place_of_supply, p.supplier_address,
+			SELECT p.name, p.place_of_supply, p.supplier_address, p.gst_category,
 			i.base_amount, i.is_nil_exempt, i.is_non_gst
 			FROM `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
 			WHERE p.docstatus = 1 and p.name = i.parent
