@@ -1,6 +1,5 @@
 import base64
 import datetime
-import json
 
 import requests
 from requests.auth import HTTPBasicAuth
