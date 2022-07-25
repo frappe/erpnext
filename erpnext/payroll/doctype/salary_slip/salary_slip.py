@@ -841,6 +841,8 @@ class SalarySlip(TransactionBase):
 				additional_salary.deduct_full_tax_on_selected_payroll_date
 			)
 		else:
+			if amount != component_row.amount and component_data.allow_overwrite:
+				return
 			component_row.default_amount = amount
 			component_row.additional_amount = 0
 			component_row.deduct_full_tax_on_selected_payroll_date = (

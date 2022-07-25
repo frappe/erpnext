@@ -647,7 +647,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-08 11:48:47.098248",
+ "modified": "2022-07-25 17:42:36.996827",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
@@ -687,5 +687,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "employee",
- "title_field": "employee_name"
+ "title_field": "employee_name",
+ "track_changes": 1
 }
