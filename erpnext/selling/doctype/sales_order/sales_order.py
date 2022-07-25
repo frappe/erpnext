@@ -185,6 +185,13 @@ class SalesOrder(SellingController):
 				res = returnable.item_qty / returnable.returnable_qty
 				qty = ordered_qty * res
 			qty = math.ceil(qty)
+            # check if item is ordered then please adjust the RI quantity
+			minus_qty = 0
+			for i in self.items:
+				if i.item_code == returnable.returnable_item:
+					minus_qty = i.qty
+					break
+			qty -= minus_qty
 			temp_item = self.append('returnable_items',{})
 			temp_item.item_code = returnable.returnable_item
 			temp_item.item_name = returnable.returnable_item_name
