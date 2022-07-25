@@ -63,6 +63,7 @@ sed -i 's/schedule:/# schedule:/g' Procfile
 sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
+bench get-app payments
 bench get-app erpnext "${GITHUB_WORKSPACE}"
 
 if [ "$TYPE" == "server" ]; then bench setup requirements --dev; fi

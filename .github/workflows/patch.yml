@@ -105,7 +105,6 @@ jobs:
               echo "Updating to v$version"
               branch_name="version-$version-hotfix"
 
-
               git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
               git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
 
@@ -114,6 +113,7 @@ jobs:
 
               rm -rf ~/frappe-bench/env
               bench setup env
+              bench pip install -e ./apps/payments
               bench pip install -e ./apps/erpnext
 
               bench --site test_site migrate
@@ -127,6 +127,8 @@ jobs:
           pyenv global $(pyenv versions | grep '3.10')
           rm -rf ~/frappe-bench/env
           bench -v setup env
+          bench pip install -e ./apps/payments
           bench pip install -e ./apps/erpnext
 
           bench --site test_site migrate
+          bench --site test_site install-app payments
