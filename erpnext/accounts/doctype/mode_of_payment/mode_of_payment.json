@@ -48,7 +48,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-25 11:53:46.381822",
+ "modified": "2022-07-25 11:55:20.942898",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",
@@ -56,7 +56,6 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
