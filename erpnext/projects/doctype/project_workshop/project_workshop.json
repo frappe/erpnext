@@ -1,19 +1,19 @@
 {
  "allow_rename": 1,
- "autoname": "field:vehicle_workshop_name",
+ "autoname": "field:workshop_name",
  "creation": "2022-04-03 21:58:49.480874",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "vehicle_workshop_name",
+  "workshop_name",
   "service_manager"
  ],
  "fields": [
   {
-   "fieldname": "vehicle_workshop_name",
+   "fieldname": "workshop_name",
    "fieldtype": "Data",
-   "label": "Vehicle Workshop Name",
+   "label": "Workshop Name",
    "unique": 1
   },
   {
@@ -24,10 +24,10 @@
    "options": "Sales Person"
   }
  ],
- "modified": "2022-04-05 00:27:57.097991",
+ "modified": "2022-07-25 16:15:10.196559",
  "modified_by": "Administrator",
- "module": "Vehicles",
- "name": "Vehicle Workshop",
+ "module": "Projects",
+ "name": "Project Workshop",
  "owner": "Administrator",
  "permissions": [
   {
@@ -88,7 +88,7 @@
    "share": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "idx",
  "sort_order": "DESC",
  "track_changes": 1
 }

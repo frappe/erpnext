@@ -483,7 +483,7 @@ class Project(StatusUpdater):
 		has_vehicle_log = self.has_vehicle_log()
 		return frappe._dict({
 			'applies_to_vehicle': vehicle_received or has_vehicle_log,
-			'vehicle_workshop': vehicle_received,
+			'project_workshop': vehicle_received,
 			'customer': has_sales_transaction,
 			'bill_to': has_sales_transaction and self.is_warranty_claim,
 			'is_warranty_claim': has_sales_transaction and self.is_warranty_claim,
@@ -638,8 +638,8 @@ class Project(StatusUpdater):
 		if not self.get('applies_to_item'):
 			format_vehicle_fields(self)
 
-		if self.get('applies_to_item') and not self.get('vehicle_workshop'):
-			frappe.throw(_("Vehicle Workshop is mandatory when Applies to Item is set"))
+		if self.get('applies_to_item') and not self.get('project_workshop'):
+			frappe.throw(_("Project Workshop is mandatory when Applies to Item is set"))
 
 	def set_project_in_sales_order_and_quotation(self):
 		if self.sales_order:

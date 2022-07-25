@@ -73,7 +73,7 @@ class VehicleGatePass(VehicleTransactionController):
 	def validate_vehicle_received(self):
 		vehicle_service_receipt = frappe.db.get_value("Vehicle Service Receipt",
 			fieldname=['name', 'timestamp(posting_date, posting_time) as posting_dt'],
-			filters={"project": self.project, "vehicle": self.vehicle, "vehicle_workshop": self.vehicle_workshop, "docstatus": 1},
+			filters={"project": self.project, "vehicle": self.vehicle, "project_workshop": self.project_workshop, "docstatus": 1},
 			order_by='posting_date, posting_time, creation', as_dict=1)
 
 		if vehicle_service_receipt:
@@ -82,5 +82,5 @@ class VehicleGatePass(VehicleTransactionController):
 				frappe.throw(_("Vehicle Gate Pass Delivery Date/Time cannot be before Received Date/Time {0}")
 					.format(frappe.bold(frappe.format(vehicle_service_receipt.posting_dt))))
 		else:
-			frappe.throw(_("Vehicle has not been received in Vehicle Workshop {0} for {1} yet")
-				.format(self.vehicle_workshop, frappe.get_desk_link("Project", self.project)))
+			frappe.throw(_("Vehicle has not been received in Project Workshop {0} for {1} yet")
+				.format(self.project_workshop, frappe.get_desk_link("Project", self.project)))

@@ -12,7 +12,7 @@
   "naming_series",
   "company",
   "project",
-  "vehicle_workshop",
+  "project_workshop",
   "column_break_8",
   "sales_invoice",
   "service_advisor",
@@ -90,15 +90,6 @@
    "label": "Project",
    "no_copy": 1,
    "options": "Project",
-   "reqd": 1
-  },
-  {
-   "fieldname": "vehicle_workshop",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Vehicle Workshop",
-   "options": "Vehicle Workshop",
    "reqd": 1
   },
   {
@@ -356,12 +347,21 @@
    "label": "Sales Invoice",
    "no_copy": 1,
    "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "project_workshop",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Project Workshop",
+   "options": "Project Workshop",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-05-09 18:40:22.998203",
+ "modified": "2022-07-25 16:48:00.945781",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Gate Pass",

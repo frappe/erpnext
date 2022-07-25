@@ -37,7 +37,7 @@ class VehicleServiceTrackingReport(object):
 		conditions = self.get_conditions()
 
 		self.data = frappe.db.sql("""
-			select p.name as project, p.project_name, p.project_type, p.vehicle_workshop, p.company,
+			select p.name as project, p.project_name, p.project_type, p.project_workshop, p.company,
 				p.customer, p.customer_name, p.contact_mobile, p.contact_mobile_2, p.contact_phone,
 				p.insurance_company, p.insurance_company_name,
 				p.applies_to_vehicle, p.service_advisor, p.service_manager,
@@ -142,8 +142,8 @@ class VehicleServiceTrackingReport(object):
 		if self.filters.from_date:
 			conditions.append("(ifnull(p.vehicle_delivered_date, '0000-00-00') = '0000-00-00' or p.vehicle_delivered_date >= %(from_date)s)")
 
-		if self.filters.vehicle_workshop:
-			conditions.append("p.vehicle_workshop = %(vehicle_workshop)s")
+		if self.filters.project_workshop:
+			conditions.append("p.project_workshop = %(project_workshop)s")
 
 		if self.filters.service_advisor:
 			conditions.append("p.service_advisor = %(service_advisor)s")

@@ -733,22 +733,22 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.frm.get_field("sales_summary_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.sales_summary_html || '');
 	},
 
-	vehicle_workshop: function () {
-		this.get_vehicle_workshop_details();
+	project_workshop: function () {
+		this.get_project_workshop_details();
 	},
 
 	project_type: function () {
 		this.get_project_type_defaults();
 	},
 
-	get_vehicle_workshop_details: function () {
+	get_project_workshop_details: function () {
 		var me = this;
 
-		if (me.frm.doc.vehicle_workshop) {
+		if (me.frm.doc.project_workshop) {
 			return frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_workshop.vehicle_workshop.get_vehicle_workshop_details",
+				method: "erpnext.projects.doctype.project_workshop.project_workshop.get_project_workshop_details",
 				args: {
-					vehicle_workshop: me.frm.doc.vehicle_workshop
+					project_workshop: me.frm.doc.project_workshop
 				},
 				callback: function (r) {
 					if (!r.exc) {

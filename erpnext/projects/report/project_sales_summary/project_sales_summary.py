@@ -25,13 +25,13 @@ class ProjectSalesSummaryReport(object):
 
 		extra_rows = ""
 		if self.is_vehicle_service:
-			extra_rows = """, p.service_advisor, p.service_manager, p.vehicle_workshop,
+			extra_rows = """, p.service_advisor, p.service_manager,
 				p.applies_to_variant_of, p.applies_to_variant_of_name,
 				p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered
 			"""
 
 		self.data = frappe.db.sql("""
-			select p.name as project, p.project_type, p.project_status, p.project_name, p.project_date,
+			select p.name as project, p.project_type, p.project_workshop, p.project_status, p.project_name, p.project_date,
 				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,
 				p.customer, p.customer_name, p.company,
 				p.applies_to_item, p.applies_to_item_name {0}
@@ -74,8 +74,8 @@ class ProjectSalesSummaryReport(object):
 		if self.filters.get("applies_to_item"):
 			conditions.append("p.applies_to_item = %(applies_to_item)s")
 
-		if self.filters.vehicle_workshop:
-			conditions.append("p.vehicle_workshop = %(vehicle_workshop)s")
+		if self.filters.project_workshop:
+			conditions.append("p.project_workshop = %(project_workshop)s")
 
 		if self.filters.service_advisor:
 			conditions.append("p.service_advisor = %(service_advisor)s")

@@ -31,10 +31,10 @@ frappe.query_reports["Vehicle Service Summary"] = {
 			options: "Project Type",
 		},
 		{
-			fieldname: "vehicle_workshop",
-			label: __("Vehicle Workshop"),
+			fieldname: "project_workshop",
+			label: __("Project Workshop"),
 			fieldtype: "Link",
-			options: "Vehicle Workshop"
+			options: "Project Workshop"
 		},
 		{
 			fieldname: "service_advisor",

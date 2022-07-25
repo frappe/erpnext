@@ -19,10 +19,10 @@ frappe.query_reports["Vehicle Tracking Sheet"] = {
 			default: frappe.datetime.get_today()
 		},
 		{
-			fieldname: "vehicle_workshop",
-			label: __("Vehicle Workshop"),
+			fieldname: "project_workshop",
+			label: __("Project Workshop"),
 			fieldtype: "Link",
-			options: "Vehicle Workshop"
+			options: "Project Workshop"
 		},
 		{
 			fieldname: "service_advisor",

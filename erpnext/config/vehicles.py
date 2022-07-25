@@ -184,7 +184,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Vehicle Workshop"
+					"name": "Project Workshop"
 				},
 			]
 		},

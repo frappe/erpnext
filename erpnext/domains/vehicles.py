@@ -83,9 +83,6 @@ material_request_service_person_fields = deepcopy(service_person_fields)
 
 # Project fields
 project_fields = [
-	{"label": "Vehicle Workshop", "fieldname": "vehicle_workshop", "fieldtype": "Link", "options": "Vehicle Workshop",
-		"insert_after": "project_type", "bold": 1, "allow_in_quick_entry": 1, "in_standard_filter": 1},
-
 	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
 		"insert_after": "cb_warranty_1"},
 

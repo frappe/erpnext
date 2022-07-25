@@ -711,7 +711,7 @@ def get_vehicle_invoice_delivery(source):
 
 def get_pdi_repair_order(source):
 	from erpnext.projects.doctype.project_type.project_type import get_project_type_defaults
-	from erpnext.vehicles.doctype.vehicle_workshop.vehicle_workshop import get_vehicle_workshop_details
+	from erpnext.projects.doctype.project_workshop.project_workshop import get_project_workshop_details
 	from erpnext.projects.doctype.project_template.project_template import guess_project_template
 
 	if not frappe.has_permission("Project", "create"):
@@ -739,10 +739,10 @@ def get_pdi_repair_order(source):
 	if target.project_type:
 		target.update(get_project_type_defaults(target.project_type))
 
-	# Vehicle Workshop
-	target.vehicle_workshop = vehicles_settings.pdi_vehicle_workshop
-	if target.vehicle_workshop:
-		target.update(get_vehicle_workshop_details(target.vehicle_workshop))
+	# Project Workshop
+	target.project_workshop = vehicles_settings.pdi_vehicle_workshop
+	if target.project_workshop:
+		target.update(get_project_workshop_details(target.project_workshop))
 
 	# Project Template
 	if target.applies_to_item and vehicles_settings.pdi_project_template_category:

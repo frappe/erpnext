@@ -283,7 +283,7 @@ class VehicleTransactionController(StockController):
 	def validate_project(self):
 		if self.get('project'):
 			project = frappe.db.get_value("Project", self.project,
-				['customer', 'applies_to_item', 'applies_to_vehicle', 'service_advisor', 'vehicle_workshop'], as_dict=1)
+				['customer', 'applies_to_item', 'applies_to_vehicle', 'service_advisor', 'project_workshop'], as_dict=1)
 
 			if not project:
 				frappe.throw(_("Project {0} does not exist").format(self.project))
@@ -313,9 +313,9 @@ class VehicleTransactionController(StockController):
 					frappe.throw(_("Service Manager does not match in {0}")
 						.format(frappe.get_desk_link("Project", self.project)))
 
-			if self.get('vehicle_workshop'):
-				if project.vehicle_workshop and self.vehicle_workshop != project.vehicle_workshop:
-					frappe.throw(_("Vehicle Workshop does not match in {0}")
+			if self.get('project_workshop'):
+				if project.project_workshop and self.project_workshop != project.project_workshop:
+					frappe.throw(_("Project Workshop does not match in {0}")
 						.format(frappe.get_desk_link("Project", self.project)))
 
 	def validate_vehicle_registration_order(self, doc=None):
@@ -774,7 +774,7 @@ def get_project_details(args):
 			[
 				'customer', 'customer_name', 'contact_person', 'customer_address',
 				'contact_mobile', 'contact_mobile_2', 'contact_phone', 'contact_email', 'address_display',
-				'applies_to_vehicle', 'applies_to_item', 'vehicle_workshop',
+				'applies_to_vehicle', 'applies_to_item', 'project_workshop',
 				'fuel_level', 'keys', 'vehicle_first_odometer', 'vehicle_last_odometer',
 				'service_advisor', 'service_manager',
 			], as_dict=1)
@@ -800,7 +800,7 @@ def get_project_details(args):
 			out.vehicle = None
 			out.item_code = project_details.applies_to_item
 
-		out.vehicle_workshop = project_details.vehicle_workshop
+		out.project_workshop = project_details.project_workshop
 		out.service_advisor = project_details.service_advisor
 		out.service_manager = project_details.service_manager
 		out.fuel_level = project_details.fuel_level
