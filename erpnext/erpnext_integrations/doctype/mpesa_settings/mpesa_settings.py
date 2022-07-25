@@ -15,8 +15,6 @@ from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_custom_fields imp
 	create_custom_pos_fields,
 )
 from erpnext.erpnext_integrations.utils import create_mode_of_payment
-from frappe.integrations.utils import json_handler
-
 
 class MpesaSettings(Document):
 	supported_currencies = ["KES"]
