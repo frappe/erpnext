@@ -34,6 +34,14 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
+
       - name: Setup Python
         uses: "gabrielfalcao/pyenv-action@v9"
         with:
