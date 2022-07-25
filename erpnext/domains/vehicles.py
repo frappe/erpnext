@@ -81,20 +81,16 @@ material_request_service_person_fields = deepcopy(service_person_fields)
 [d for d in material_request_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'more_info_cb_1'
 [d for d in material_request_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'more_info_cb_2'
 
-project_service_person_fields = deepcopy(service_person_fields)
-[d for d in project_service_person_fields if d['fieldname'] == 'service_advisor'][0]['insert_after'] = 'project_type'
-[d for d in project_service_person_fields if d['fieldname'] == 'service_manager'][0]['insert_after'] = 'service_advisor'
-
 # Project fields
 project_fields = [
 	{"label": "Vehicle Workshop", "fieldname": "vehicle_workshop", "fieldtype": "Link", "options": "Vehicle Workshop",
-		"insert_after": "reference_no", "bold": 1, "allow_in_quick_entry": 1, "in_standard_filter": 1},
+		"insert_after": "project_type", "bold": 1, "allow_in_quick_entry": 1, "in_standard_filter": 1},
 
 	{"label": "FQR No", "fieldname": "fqr_no", "fieldtype": "Data", "no_copy": 1,
 		"insert_after": "cb_warranty_1"},
 
 	{"label": "Is Periodic Maintenance", "fieldname": "is_periodic_maintenance", "fieldtype": "Check",
-		"insert_after": "project_name"},
+		"insert_after": "cb_work_details_2"},
 	{"label": "Is General Repair", "fieldname": "is_general_repair", "fieldtype": "Check",
 		"insert_after": "is_periodic_maintenance"},
 
@@ -334,7 +330,7 @@ data = {
 		"Purchase Invoice": applies_to_transaction_fields,
 		"Material Request": applies_to_transaction_fields + material_request_service_person_fields,
 		"Project": project_fields + applies_to_project_fields + project_change_vehicle_details_fields +
-			project_vehicle_reading_fields + project_service_person_fields,
+			project_vehicle_reading_fields,
 		"Appointment": applies_to_transaction_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
