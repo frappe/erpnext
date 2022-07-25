@@ -13,6 +13,7 @@ from frappe.utils.nestedset import get_descendants_of
 from pypika.terms import ExistsCriterion
 
 import erpnext
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
 
@@ -66,9 +67,14 @@ def execute(filters: Optional[StockBalanceFilter] = None):
 	_func = itemgetter(1)
 
 	to_date = filters.get("to_date")
-	for (company, item, warehouse) in sorted(iwb_map):
+
+	for group_by_key in iwb_map:
+		item = group_by_key[1]
+		warehouse = group_by_key[2]
+		company = group_by_key[0]
+
 		if item_map.get(item):
-			qty_dict = iwb_map[(company, item, warehouse)]
+			qty_dict = iwb_map[group_by_key]
 			item_reorder_level = 0
 			item_reorder_qty = 0
 			if item + warehouse in item_reorder_detail_map:
@@ -135,87 +141,103 @@ def get_columns(filters: StockBalanceFilter):
 			"options": "Warehouse",
 			"width": 100,
 		},
-		{
-			"label": _("Stock UOM"),
-			"fieldname": "stock_uom",
-			"fieldtype": "Link",
-			"options": "UOM",
-			"width": 90,
-		},
-		{
-			"label": _("Balance Qty"),
-			"fieldname": "bal_qty",
-			"fieldtype": "Float",
-			"width": 100,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Balance Value"),
-			"fieldname": "bal_val",
-			"fieldtype": "Currency",
-			"width": 100,
-			"options": "currency",
-		},
-		{
-			"label": _("Opening Qty"),
-			"fieldname": "opening_qty",
-			"fieldtype": "Float",
-			"width": 100,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Opening Value"),
-			"fieldname": "opening_val",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "currency",
-		},
-		{
-			"label": _("In Qty"),
-			"fieldname": "in_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty",
-		},
-		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
-		{
-			"label": _("Out Qty"),
-			"fieldname": "out_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty",
-		},
-		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
-		{
-			"label": _("Valuation Rate"),
-			"fieldname": "val_rate",
-			"fieldtype": "Currency",
-			"width": 90,
-			"convertible": "rate",
-			"options": "currency",
-		},
-		{
-			"label": _("Reorder Level"),
-			"fieldname": "reorder_level",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Reorder Qty"),
-			"fieldname": "reorder_qty",
-			"fieldtype": "Float",
-			"width": 80,
-			"convertible": "qty",
-		},
-		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 100,
-		},
 	]
+
+	for dimension in get_inventory_dimensions():
+		columns.append(
+			{
+				"label": _(dimension.doctype),
+				"fieldname": dimension.fieldname,
+				"fieldtype": "Link",
+				"options": dimension.doctype,
+				"width": 110,
+			}
+		)
+
+	columns.extend(
+		[
+			{
+				"label": _("Stock UOM"),
+				"fieldname": "stock_uom",
+				"fieldtype": "Link",
+				"options": "UOM",
+				"width": 90,
+			},
+			{
+				"label": _("Balance Qty"),
+				"fieldname": "bal_qty",
+				"fieldtype": "Float",
+				"width": 100,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Balance Value"),
+				"fieldname": "bal_val",
+				"fieldtype": "Currency",
+				"width": 100,
+				"options": "currency",
+			},
+			{
+				"label": _("Opening Qty"),
+				"fieldname": "opening_qty",
+				"fieldtype": "Float",
+				"width": 100,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Opening Value"),
+				"fieldname": "opening_val",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "currency",
+			},
+			{
+				"label": _("In Qty"),
+				"fieldname": "in_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
+			{
+				"label": _("Out Qty"),
+				"fieldname": "out_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
+			{
+				"label": _("Valuation Rate"),
+				"fieldname": "val_rate",
+				"fieldtype": "Currency",
+				"width": 90,
+				"convertible": "rate",
+				"options": "currency",
+			},
+			{
+				"label": _("Reorder Level"),
+				"fieldname": "reorder_level",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Reorder Qty"),
+				"fieldname": "reorder_qty",
+				"fieldtype": "Float",
+				"width": 80,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Company"),
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+				"width": 100,
+			},
+		]
+	)
 
 	if filters.get("show_stock_ageing_data"):
 		columns += [
@@ -296,11 +318,22 @@ def get_stock_ledger_entries(filters: StockBalanceFilter, items: List[str]) -> L
 		.orderby(sle.actual_qty)
 	)
 
+	inventory_dimension_fields = get_inventory_dimension_fields()
+	if inventory_dimension_fields:
+		for fieldname in inventory_dimension_fields:
+			query = query.select(fieldname)
+			if fieldname in filters and filters.get(fieldname):
+				query = query.where(sle[fieldname].isin(filters.get(fieldname)))
+
 	if items:
 		query = query.where(sle.item_code.isin(items))
 
 	query = apply_conditions(query, filters)
 	return query.run(as_dict=True)
+
+
+def get_inventory_dimension_fields():
+	return [dimension.fieldname for dimension in get_inventory_dimensions()]
 
 
 def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
@@ -310,10 +343,12 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
+	inventory_dimensions = get_inventory_dimension_fields()
+
 	for d in sle:
-		key = (d.company, d.item_code, d.warehouse)
-		if key not in iwb_map:
-			iwb_map[key] = frappe._dict(
+		group_by_key = get_group_by_key(d, filters, inventory_dimensions)
+		if group_by_key not in iwb_map:
+			iwb_map[group_by_key] = frappe._dict(
 				{
 					"opening_qty": 0.0,
 					"opening_val": 0.0,
@@ -327,7 +362,9 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 				}
 			)
 
-		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
+		qty_dict = iwb_map[group_by_key]
+		for field in inventory_dimensions:
+			qty_dict[field] = d.get(field)
 
 		if d.voucher_type == "Stock Reconciliation" and not d.batch_no:
 			qty_diff = flt(d.qty_after_transaction) - flt(qty_dict.bal_qty)
@@ -356,24 +393,41 @@ def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-	iwb_map = filter_items_with_no_transactions(iwb_map, float_precision)
+	iwb_map = filter_items_with_no_transactions(iwb_map, float_precision, inventory_dimensions)
 
 	return iwb_map
 
 
-def filter_items_with_no_transactions(iwb_map, float_precision: float):
-	for (company, item, warehouse) in sorted(iwb_map):
-		qty_dict = iwb_map[(company, item, warehouse)]
+def get_group_by_key(row, filters, inventory_dimension_fields) -> tuple:
+	group_by_key = [row.company, row.item_code, row.warehouse]
+
+	for fieldname in inventory_dimension_fields:
+		if filters.get(fieldname):
+			group_by_key.append(row.get(fieldname))
+
+	return tuple(group_by_key)
+
+
+def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory_dimensions: list):
+	pop_keys = []
+	for group_by_key in iwb_map:
+		qty_dict = iwb_map[group_by_key]
 
 		no_transactions = True
 		for key, val in qty_dict.items():
+			if key in inventory_dimensions:
+				continue
+
 			val = flt(val, float_precision)
 			qty_dict[key] = val
 			if key != "val_rate" and val:
 				no_transactions = False
 
 		if no_transactions:
-			iwb_map.pop((company, item, warehouse))
+			pop_keys.append(group_by_key)
+
+	for key in pop_keys:
+		iwb_map.pop(key)
 
 	return iwb_map
 
