@@ -1,5 +1,6 @@
 import base64
 import datetime
+import json
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -86,9 +87,10 @@ class MpesaConnector:
 
 	def mpesa_express(
 			self,
-			buy_goods_shortcode=None,
+			head_office_number=None,
 			passcode=None,
 			amount=None,
+			till_number=None,
 			callback_url=None,
 			reference_code=None,
 			phone_number=None,
@@ -98,7 +100,8 @@ class MpesaConnector:
 			This method uses Mpesa's Express API to initiate online payment on behalf of a customer.
 
 			Args:
-					buy_goods_shortcode (int): The short code of the organization.
+					Head Office Number (int): The short code of the organization.
+					Till Number (int): The short code for organization receiving the funds
 					passcode (str): Get from developer portal
 					amount (int): The amount being transacted
 					callback_url (str): A CallBack URL is a valid secure URL that is used to receive notifications from M-Pesa API.
@@ -122,22 +125,22 @@ class MpesaConnector:
 			time = (
 				str(datetime.datetime.now()).split(".")[0].replace("-", "").replace(" ", "").replace(":", "")
 			)
-			password = "{0}{1}{2}".format(str(buy_goods_shortcode), str(passcode), time)
+			password = "{0}{1}{2}".format(str(head_office_number), str(passcode), time)
 			encoded = base64.b64encode(bytes(password, encoding="utf8"))
 			payload = {
-				"BusinessShortCode": buy_goods_shortcode,
+				"BusinessShortCode": head_office_number,
 				"Password": encoded.decode("utf-8"),
 				"Timestamp": time,
 				"Amount": amount,
 				"PartyA": int(phone_number),
-				"PartyB": reference_code,
+				"PartyB": till_number,
 				"PhoneNumber": int(phone_number),
 				"CallBackURL": callback_url,
 				"AccountReference": reference_code,
 				"TransactionDesc": description,
 				"TransactionType": "CustomerPayBillOnline"
 				if self.env == "sandbox"
-				else "CustomerBuyGoodsOnline",
+				else "CustomerBuyGoodsOnline",			
 			}
 			headers = {
 				"Authorization": "Bearer {0}".format(self.authentication_token),
@@ -147,3 +150,5 @@ class MpesaConnector:
 			saf_url = "{0}{1}".format(self.base_url, "/mpesa/stkpush/v1/processrequest")
 			r = requests.post(saf_url, headers=headers, json=payload)
 			return r.json()
+
+			

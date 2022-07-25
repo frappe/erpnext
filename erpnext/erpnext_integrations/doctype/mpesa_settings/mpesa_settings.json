@@ -1,14 +1,12 @@
 {
  "actions": [],
  "autoname": "field:payment_gateway_name",
- "creation": "2020-09-10 13:21:27.398088",
+ "creation": "2022-07-19 12:26:04.234382",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "mpesa_products_section",
-  "mpesa_express",
-  "customer_to_business_c2b",
+  "mpesa_products",
   "payment_gateway_name",
   "consumer_key",
   "consumer_secret",
@@ -16,7 +14,8 @@
   "transaction_limit",
   "sandbox",
   "column_break_4",
-  "buy_goods_shortcode",
+  "head_office_number",
+  "till_number",
   "business_shortcode",
   "online_passkey",
   "security_credential",
@@ -24,18 +23,6 @@
   "account_balance"
  ],
  "fields": [
-  {
-   "default": "0",
-   "fieldname": "mpesa_express",
-   "fieldtype": "Check",
-   "label": "M-Pesa Express"
-  },
-  {
-   "default": "0",
-   "fieldname": "customer_to_business_c2b",
-   "fieldtype": "Check",
-   "label": "Customer To Business (C2B)"
-  },
   {
    "fieldname": "payment_gateway_name",
    "fieldtype": "Data",
@@ -63,7 +50,7 @@
    "label": "Initiator Name"
   },
   {
-   "default": "150000",
+   "default": "300000",
    "fieldname": "transaction_limit",
    "fieldtype": "Float",
    "label": "Transaction Limit",
@@ -71,7 +58,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:((doc.mpesa_express==1) || (doc.customer_to_business_c2b==1))",
+   "depends_on": "eval:((doc.mpesa_products ==\"Customer To Business (C2B)\") || (doc.mpesa_products==\"M-pesa Express\"))",
    "fieldname": "sandbox",
    "fieldtype": "Check",
    "label": "Sandbox"
@@ -79,6 +66,22 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:(doc.mpesa_products==\"M-pesa Express\")",
+   "fieldname": "till_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Till Number",
+   "mandatory_depends_on": "eval:(doc.mpesa_products==\"M-pesa Express\")"
+  },
+  {
+   "depends_on": "eval:(doc.mpesa_products ==\"Customer To Business (C2B)\")",
+   "fieldname": "business_shortcode",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Business Shortcode",
+   "mandatory_depends_on": "eval:(doc.mpesa_products ==\"Customer To Business (C2B)\")"
   },
   {
    "fieldname": "online_passkey",
@@ -104,28 +107,24 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:(doc.customer_to_business_c2b==1)",
-   "fieldname": "business_shortcode",
-   "fieldtype": "Data",
-   "label": "Business Shortcode",
-   "mandatory_depends_on": "eval:(doc.customer_to_business_c2b==1)"
+   "bold": 1,
+   "fieldname": "mpesa_products",
+   "fieldtype": "Select",
+   "label": "M-pesa Products",
+   "options": "\nM-pesa Express\nCustomer To Business (C2B)",
+   "reqd": 1
   },
   {
-   "depends_on": "eval:(doc.mpesa_express==1)",
-   "fieldname": "buy_goods_shortcode",
+   "depends_on": "eval:(doc.mpesa_products==\"M-pesa Express\")",
+   "fieldname": "head_office_number",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Buy Goods Shortcode",
-   "mandatory_depends_on": "eval:(doc.mpesa_express==1)"
-  },
-  {
-   "fieldname": "mpesa_products_section",
-   "fieldtype": "Section Break",
-   "label": "M-pesa Products"
+   "label": "Head Office Number",
+   "mandatory_depends_on": "eval:(doc.mpesa_products==\"M-pesa Express\")"
   }
  ],
  "links": [],
- "modified": "2022-07-11 13:54:40.932823",
+ "modified": "2022-07-19 13:37:33.175120",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Mpesa Settings",

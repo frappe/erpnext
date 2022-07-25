@@ -5,14 +5,7 @@ frappe.ui.form.on('Mpesa Settings', {
 	onload_post_render: function(frm) {
 		frm.events.setup_account_balance_html(frm);
 	},
-
-	validate: function(frm) {
-		if (frm.doc.mpesa_express==1 && frm.doc.customer_to_business_c2b==1) {
-			frappe.msgprint('Kindly Select Only One M-pesa Product');
-			frappe.validated = false;
-		}
-	},
-
+	
 	refresh: function(frm) {
 		frappe.realtime.on("refresh_mpesa_dashboard", function(){
 			frm.reload_doc();

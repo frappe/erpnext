@@ -3,6 +3,8 @@
 
 
 from json import dumps, loads
+import json
+from multiprocessing import context
 
 import frappe
 from frappe import _
@@ -15,6 +17,7 @@ from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_custom_fields imp
 	create_custom_pos_fields,
 )
 from erpnext.erpnext_integrations.utils import create_mode_of_payment
+from frappe.integrations.utils import json_handler
 
 
 class MpesaSettings(Document):
@@ -126,9 +129,9 @@ def generate_stk_push(**kwargs):
 
 		mpesa_settings = frappe.get_doc("Mpesa Settings", args.payment_gateway[6:])
 		env = "production" if not mpesa_settings.sandbox else "sandbox"
-		# for sandbox, Buy Goods Shortcode is same as till number
-		buy_goods_shortcode = (
-			mpesa_settings.buy_goods_shortcode
+		# for sandbox, Head Office Number is same as till number
+		head_office_number = (
+			mpesa_settings.head_office_number
 		)
 
 		connector = MpesaConnector(
@@ -140,11 +143,12 @@ def generate_stk_push(**kwargs):
 		mobile_number = sanitize_mobile_number(args.sender)
 
 		response = connector.mpesa_express(
-			buy_goods_shortcode=buy_goods_shortcode,
+			head_office_number=head_office_number,
+			till_number=mpesa_settings.till_number,
 			amount=args.request_amount,
 			passcode=mpesa_settings.get_password("online_passkey"),
 			callback_url=callback_url,
-			reference_code=mpesa_settings.buy_goods_shortcode,
+			reference_code=mpesa_settings.head_office_number,
 			phone_number=mobile_number,
 			description="POS Payment",
 		)
