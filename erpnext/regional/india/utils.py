@@ -40,13 +40,12 @@ def validate_gstin_for_india(doc, method):
 
 	gst_category = []
 
-	if hasattr(doc, "gst_category"):
-		if len(doc.links):
-			link_doctype = doc.links[0].get("link_doctype")
-			link_name = doc.links[0].get("link_name")
+	if len(doc.links):
+		link_doctype = doc.links[0].get("link_doctype")
+		link_name = doc.links[0].get("link_name")
 
-			if link_doctype in ["Customer", "Supplier"]:
-				gst_category = frappe.db.get_value(link_doctype, {"name": link_name}, ["gst_category"])
+		if link_doctype in ["Customer", "Supplier"]:
+			gst_category = frappe.db.get_value(link_doctype, {"name": link_name}, ["gst_category"])
 
 	doc.gstin = doc.gstin.upper().strip()
 	if not doc.gstin or doc.gstin == "NA":
@@ -581,7 +580,7 @@ def get_ewb_data(dt, dn):
 
 		if dt == "Delivery Note":
 			data.subSupplyType = 1
-		elif doc.gst_category in ["Registered Regular", "SEZ"]:
+		elif doc.gst_category in ["Unregistered", "Registered Regular", "SEZ"]:
 			data.subSupplyType = 1
 		elif doc.gst_category in ["Overseas", "Deemed Export"]:
 			data.subSupplyType = 3

@@ -33,7 +33,7 @@ def _execute(filters=None):
 	added_item = []
 	for d in item_list:
 		if (d.parent, d.item_code) not in added_item:
-			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty, d.tax_rate]
+			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty, d.tax_rate or 0]
 			total_tax = 0
 			for tax in tax_columns:
 				item_tax = itemised_tax.get((d.parent, d.item_code), {}).get(tax, {})
@@ -100,31 +100,51 @@ def get_items(filters):
 
 	items = frappe.db.sql(
 		"""
-		select
+		SELECT
 			`tabSales Invoice Item`.gst_hsn_code,
 			`tabSales Invoice Item`.stock_uom,
-			sum(`tabSales Invoice Item`.stock_qty) as stock_qty,
-			sum(`tabSales Invoice Item`.base_net_amount) as base_net_amount,
-			sum(`tabSales Invoice Item`.base_price_list_rate) as base_price_list_rate,
+		sum(
+			`tabSales Invoice Item`.stock_qty
+			) as stock_qty,
+		sum(
+			`tabSales Invoice Item`.base_net_amount
+			) as base_net_amount,
+		sum(
+			`tabSales Invoice Item`.base_price_list_rate
+			) as base_price_list_rate,
+
 			`tabSales Invoice Item`.parent,
 			`tabSales Invoice Item`.item_code,
 			`tabGST HSN Code`.description,
-			json_extract(`tabSales Taxes and Charges`.item_wise_tax_detail,
-			concat('$."' , `tabSales Invoice Item`.item_code, '"[0]')) * count(distinct `tabSales Taxes and Charges`.name) as tax_rate
-		from
-			`tabSales Invoice`,
-			`tabSales Invoice Item`,
-			`tabGST HSN Code`,
-			`tabSales Taxes and Charges`
-		where
-			`tabSales Invoice`.name = `tabSales Invoice Item`.parent
-			and `tabSales Taxes and Charges`.parent = `tabSales Invoice`.name
-			and `tabSales Invoice`.docstatus = 1
-			and `tabSales Invoice Item`.gst_hsn_code is not NULL
-			and `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name %s %s
-		group by
+		json_extract(
+			`tabSales Taxes and Charges`.item_wise_tax_detail,
+			concat(
+					'$."', `tabSales Invoice Item`.item_code,
+					'"[0]'
+				)
+			) * count(
+					distinct `tabSales Taxes and Charges`.name
+				) as tax_rate
+		FROM
+			`tabSales Invoice`
+		INNER JOIN
+			`tabSales Invoice Item` ON `tabSales Invoice`.name = `tabSales Invoice Item`.parent
+		INNER JOIN
+			`tabGST HSN Code` ON `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name % s % s
+		LEFT JOIN
+			`tabSales Taxes and Charges` ON `tabSales Taxes and Charges`.parent = `tabSales Invoice`.name
+		WHERE
+			`tabSales Invoice`.docstatus = 1
+		AND
+			`tabSales Invoice Item`.gst_hsn_code is not NULL
+		GROUP BY
 			`tabSales Invoice Item`.parent,
-			`tabSales Invoice Item`.item_code
+			`tabSales Invoice Item`.item_code,
+			`tabSales Invoice Item`.gst_hsn_code,
+			`tabSales Invoice Item`.uom
+		ORDER BY
+			`tabSales Invoice Item`.gst_hsn_code,
+			`tabSales Invoice Item`.uom
 		"""
 		% (conditions, match_conditions),
 		filters,
