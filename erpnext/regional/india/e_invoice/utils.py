@@ -285,7 +285,7 @@ def get_item_list(invoice):
 		if invoice.get("is_return") or invoice.get("is_debit_note"):
 			item_qty = item_qty or 1
 
-		if hide_discount_in_einvoice or invoice.is_internal_customer or (item.discount_amount <= 0):
+		if hide_discount_in_einvoice or invoice.is_internal_customer or item.discount_amount < 0:
 			item.unit_rate = item.taxable_value / item_qty
 			item.gross_amount = item.taxable_value
 			item.discount_amount = 0
