@@ -18,13 +18,13 @@ frappe.listview_settings['Issue'] = {
 	},
 	get_indicator: function(doc) {
 		if (doc.status === 'Open') {
-			if (!doc.priority) doc.priority = 'Medium';
+			var priority = doc.priority || 'Medium';
 			const color = {
 				'Low': 'yellow',
 				'Medium': 'orange',
 				'High': 'red'
 			};
-			return [__(doc.status), color[doc.priority] || 'red', `status,=,Open`];
+			return [__(doc.status), color[priority] || 'red', `status,=,Open`];
 		} else if (doc.status === 'Closed') {
 			return [__(doc.status), "green", "status,=," + doc.status];
 		} else {

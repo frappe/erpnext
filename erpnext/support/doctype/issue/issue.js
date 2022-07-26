@@ -38,6 +38,7 @@ frappe.ui.form.on("Issue", {
 	},
 
 	refresh: function (frm) {
+		erpnext.hide_company();
 
 		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
 			if (frm.doc.service_level_agreement) {

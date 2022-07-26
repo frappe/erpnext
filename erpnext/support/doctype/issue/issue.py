@@ -25,9 +25,6 @@ class Issue(Document):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
 
-		if not self.raised_by:
-			self.raised_by = frappe.session.user
-
 		self.change_service_level_agreement_and_priority()
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
@@ -224,6 +221,7 @@ class Issue(Document):
 		self.agreement_fulfilled = "Ongoing"
 		self.save()
 
+
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
 	expected_time = current_date_time
@@ -292,6 +290,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 	return current_date_time
 
+
 def set_service_level_agreement_variance(issue=None):
 	current_time = frappe.flags.current_time or now_datetime()
 
@@ -313,6 +312,7 @@ def set_service_level_agreement_variance(issue=None):
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
 				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
+
 
 def get_list_context(context=None):
 	return {
@@ -356,11 +356,13 @@ def set_multiple_status(names, status):
 	for name in names:
 		set_status(name, status)
 
+
 @frappe.whitelist()
 def set_status(name, status):
 	st = frappe.get_doc("Issue", name)
 	st.status = status
 	st.save()
+
 
 def auto_close_tickets():
 	"""Auto-close replied support tickets after 7 days"""
@@ -376,23 +378,28 @@ def auto_close_tickets():
 		doc.flags.ignore_mandatory = True
 		doc.save()
 
+
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
 
 	return permission_based_on_customer or doc.raised_by==user
 
+
 def update_issue(contact, method):
 	"""Called when Contact is deleted"""
 	frappe.db.sql("""UPDATE `tabIssue` set contact='' where contact=%s""", contact.name)
+
 
 def get_holidays(holiday_list_name):
 	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
 	holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
 	return holidays
 
+
 def is_holiday(date, holidays):
 	return getdate(date) in holidays
+
 
 @frappe.whitelist()
 def make_task(source_name, target_doc=None):
@@ -401,6 +408,7 @@ def make_task(source_name, target_doc=None):
 			"doctype": "Task"
 		}
 	}, target_doc)
+
 
 @frappe.whitelist()
 def make_issue_from_communication(communication, ignore_communication_links=False):
@@ -418,6 +426,7 @@ def make_issue_from_communication(communication, ignore_communication_links=Fals
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 
 	return issue.name
+
 
 def get_time_in_timedelta(time):
 	"""

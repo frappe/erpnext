@@ -10,15 +10,33 @@
   "subject_section",
   "naming_series",
   "subject",
-  "customer",
-  "raised_by",
+  "issue_type",
+  "project",
   "cb00",
   "status",
   "priority",
-  "issue_type",
   "issue_split_from",
+  "column_break_10",
+  "company",
+  "opening_date",
+  "opening_time",
+  "resolution_date",
+  "customer_details_section",
+  "customer",
+  "customer_name",
+  "column_break_13",
+  "contact",
+  "column_break_20",
+  "raised_by",
+  "lead",
   "sb_details",
   "description",
+  "column_break_24",
+  "resolution_details",
+  "response",
+  "mins_to_first_response",
+  "column_break_25",
+  "first_responded_on",
   "service_level_section",
   "service_level_agreement",
   "response_by",
@@ -29,23 +47,9 @@
   "resolution_by",
   "resolution_by_variance",
   "service_level_agreement_creation",
-  "response",
-  "mins_to_first_response",
-  "first_responded_on",
   "additional_info",
-  "lead",
-  "contact",
   "email_account",
   "column_break_16",
-  "customer_name",
-  "project",
-  "company",
-  "section_break_19",
-  "resolution_details",
-  "column_break1",
-  "opening_date",
-  "opening_time",
-  "resolution_date",
   "content_type",
   "attachment",
   "via_customer_portal"
@@ -88,12 +92,8 @@
    "search_index": 1
   },
   {
-   "bold": 1,
-   "depends_on": "eval:doc.__islocal",
    "fieldname": "raised_by",
    "fieldtype": "Data",
-   "in_global_search": 1,
-   "in_list_view": 1,
    "label": "Raised By (Email)",
    "oldfieldname": "raised_by",
    "oldfieldtype": "Data",
@@ -114,10 +114,10 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Open\nReplied\nHold\nClosed",
+   "reqd": 1,
    "search_index": 1
   },
   {
-   "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -127,12 +127,14 @@
   {
    "fieldname": "issue_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Issue Type",
    "options": "Issue Type"
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.status!=\"Closed\"",
+   "collapsible_depends_on": "eval:true",
    "fieldname": "sb_details",
    "fieldtype": "Section Break",
    "label": "Details"
@@ -142,7 +144,7 @@
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_global_search": 1,
-   "label": "Description",
+   "label": "Issue Description",
    "oldfieldname": "problem_description",
    "oldfieldtype": "Text"
   },
@@ -178,7 +180,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "response",
    "fieldtype": "Section Break",
    "label": "Response"
@@ -228,8 +229,10 @@
   {
    "bold": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Customer Name",
    "oldfieldname": "customer_name",
    "oldfieldtype": "Data",
@@ -249,26 +252,12 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_19",
-   "fieldtype": "Section Break",
-   "label": "Resolution"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
    "fieldname": "resolution_details",
    "fieldtype": "Text Editor",
    "label": "Resolution Details",
    "no_copy": 1,
    "oldfieldname": "resolution_details",
    "oldfieldtype": "Text"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "column_break1",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "read_only": 1
   },
   {
    "default": "Today",
@@ -281,6 +270,7 @@
    "read_only": 1
   },
   {
+   "default": "Now",
    "fieldname": "opening_time",
    "fieldtype": "Time",
    "label": "Opening Time",
@@ -361,11 +351,36 @@
    "label": "Issue Split From",
    "options": "Issue",
    "read_only": 1
+  },
+  {
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2020-10-31 02:15:24.714481",
+ "modified": "2022-07-26 12:14:35.661737",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
