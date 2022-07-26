@@ -118,6 +118,24 @@ def get_data():
 			],
 		},
 		{
+			"label": _("Vehicle Pre Service"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Appointment",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Appointment Sheet",
+					"doctype": "Appointment",
+					"dependencies": ["Appointment"],
+					"onboard": 1,
+				},
+			],
+		},
+		{
 			"label": _("Vehicle Registration"),
 			"items": [
 				{
