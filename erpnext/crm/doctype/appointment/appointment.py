@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 import datetime
 from frappe import _
-from frappe.model.document import Document
+from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import cint, today, getdate, get_time, get_datetime, combine_datetime, date_diff,\
 	format_datetime, formatdate, get_url
 from frappe.utils.verified_command import get_signed_params
@@ -29,24 +29,24 @@ force_fields = ['customer_name', 'tax_id', 'tax_cnic', 'tax_strn',
 ]
 
 
-class Appointment(Document):
+class Appointment(StatusUpdater):
 	def get_feed(self):
 		return _("For {0}").format(self.get("customer_name") or self.get('party_name'))
 
 	def validate(self):
 		self.set_missing_values()
-		if self.status in ['Open', 'Unconfirmed']:
-			self.validate_timeslot_validity()
-			self.validate_timeslot_availability()
+		self.validate_timeslot_validity()
+		self.validate_timeslot_availability()
+		self.set_status()
 
-	def on_update(self):
+	def on_submit(self):
 		self.auto_assign()
-		self.auto_unassign()
+		self.create_calendar_event(update=True)
 
-		if self.calendar_event:
-			self.sync_calendar_event()
-		else:
-			self.create_calendar_event(update=True)
+	def on_cancel(self):
+		self.validate_on_cancel()
+		self.db_set('status', 'Cancelled')
+		self.auto_unassign()
 
 	def onload(self):
 		self.set_onload('customer', self.get_customer())
@@ -116,16 +116,15 @@ class Appointment(Document):
 		appointment_type_doc = frappe.get_cached_doc("Appointment Type", self.appointment_type)
 
 		# check if in past
-		if self.status in ["Open", "Unconfirmed"]:
-			if getdate(self.scheduled_dt) < getdate(today()):
-				frappe.msgprint(_("Warning: Scheduled Date {0} is in the past")
-					.format(frappe.bold(frappe.format(getdate(self.scheduled_date)))), indicator="orange")
+		if getdate(self.scheduled_dt) < getdate(today()):
+			frappe.msgprint(_("Warning: Scheduled Date {0} is in the past")
+				.format(frappe.bold(frappe.format(getdate(self.scheduled_date)))), indicator="orange")
 
-			advance_days = date_diff(getdate(self.scheduled_dt), today())
-			if cint(appointment_type_doc.advance_booking_days) and advance_days > cint(appointment_type_doc.advance_booking_days):
-				frappe.msgprint(_("Scheduled Date {0} is {1} days in advance")
-					.format(frappe.bold(frappe.format(getdate(self.scheduled_date))), frappe.bold(advance_days)),
-					raise_exception=appointment_type_doc.validate_availability)
+		advance_days = date_diff(getdate(self.scheduled_dt), today())
+		if cint(appointment_type_doc.advance_booking_days) and advance_days > cint(appointment_type_doc.advance_booking_days):
+			frappe.msgprint(_("Scheduled Date {0} is {1} days in advance")
+				.format(frappe.bold(frappe.format(getdate(self.scheduled_date))), frappe.bold(advance_days)),
+				raise_exception=appointment_type_doc.validate_availability)
 
 		# check if in valid timeslot
 		if not appointment_type_doc.is_in_timeslot(self.scheduled_dt, self.end_dt):
@@ -222,7 +221,7 @@ class Appointment(Document):
 		cal_event.save(ignore_permissions=True)
 
 	def send_confirmation_email(self):
-		if self.status != "Unconfirmed":
+		if self.docstatus != 0:
 			return
 		if not self.contact_email:
 			return
@@ -254,20 +253,18 @@ class Appointment(Document):
 		return get_url(verify_route + '?' + get_signed_params(params))
 
 	def set_verified(self, email):
-		if self.status not in ['Open', 'Unconfirmed']:
-			frappe.throw(_("Appointment is {0}").format(self.status))
+		if self.docstatus != 0:
+			frappe.throw(_("Appointment is already {0}").format(self.status))
 		if email != self.contact_email:
 			frappe.throw(_('Email verification failed.'))
 
-		self.db_set('status', 'Open')
-		self.create_calendar_event(update=True)
-		self.auto_assign()
+		self.submit()
 
 	def auto_unassign(self):
-		if self.status == "Closed":
-			close_all_assignments(self.doctype, self.name)
-		elif self.status in ["Cancelled", "Rescheduled"]:
+		if self.docstatus == 2 or self.status == "Rescheduled":
 			clear_assignments(self.doctype, self.name)
+		elif self.status == "Closed":
+			close_all_assignments(self.doctype, self.name)
 
 	def auto_assign(self):
 		if self.status != 'Open':
@@ -319,6 +316,49 @@ class Appointment(Document):
 		assignee = frappe.parse_json(assignee)[0]
 		return assignee
 
+	def set_status(self, update=False, status=None, update_modified=True):
+		previous_status = self.status
+		previous_is_closed = self.is_closed
+
+		if self.docstatus == 0:
+			self.status = "Draft"
+		elif self.docstatus == 1:
+
+			if status == "Open":
+				self.is_closed = 0
+			elif status == "Closed":
+				self.is_closed = 1
+
+			if self.get_rescheduled_by():
+				self.status = "Rescheduled"
+			elif self.is_closed or self.get_linked_project():
+				self.status = "Closed"
+			else:
+				self.status = "Open"
+		else:
+			self.status = "Cancelled"
+
+		self.add_status_comment(previous_status)
+
+		if update:
+			if previous_status != self.status or previous_is_closed != self.is_closed:
+				self.db_set({
+					'status': self.status,
+					'is_closed': self.is_closed,
+				}, update_modified=update_modified)
+
+	def get_rescheduled_by(self):
+		return frappe.db.get_value("Appointment", {'previous_appointment': self.name, 'docstatus': 1})
+
+	def get_linked_project(self):
+		return frappe.db.get_value("Project", {'appointment': self.name})
+
+	def validate_on_cancel(self):
+		project = self.get_linked_project()
+		if project:
+			frappe.throw(_("Cannot cancel appointment because it is closed by {0}")
+				.format(frappe.get_desk_link("Project", project)))
+
 	def get_timeslot_str(self):
 		if self.scheduled_dt == self.end_dt:
 			timeslot_str = frappe.bold(self.get_formatted_dt())
@@ -354,7 +394,7 @@ def get_agents_sorted_by_asc_workload(date, appointment_type):
 		return []
 
 	appointments = frappe.get_all('Appointment', fields=['name', '_assign'],
-		filters={'scheduled_date': date, 'status': ['in', ['Open', 'Closed']]})
+		filters={'scheduled_date': date, 'docstatus': 1, 'status': ['!=', 'Rescheduled']})
 	if not appointments:
 		return agents
 
@@ -445,7 +485,7 @@ def get_appointments_in_same_slot(start_dt, end_dt, appointment_type, appointmen
 	appointments = frappe.db.sql("""
 		select name, _assign
 		from `tabAppointment`
-		where status = 'Open' and appointment_type = %(appointment_type)s
+		where docstatus = 1 and status != 'Rescheduled' and appointment_type = %(appointment_type)s
 			and %(start_dt)s < end_dt AND %(end_dt)s > scheduled_dt {0}
 	""".format(exclude_condition), {
 		'start_dt': start_dt,
@@ -524,3 +564,11 @@ def get_project(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+@frappe.whitelist()
+def update_status(appointment, status):
+	doc = frappe.get_doc("Appointment", appointment)
+	doc.check_permission('write')
+	doc.set_status(update=True, status=status)
+	doc.notify_update()

@@ -824,7 +824,8 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 					only_select: 1,
 					get_query: () => {
 						var filters = {
-							'status': ['in', ['Open', 'Unconfirmed']]
+							'docstatus': 1,
+							'status': ['!=', 'Rescheduled']
 						};
 						if (dialog.get_value('scheduled_date')) {
 							filters['scheduled_date'] = dialog.get_value('scheduled_date');
@@ -871,6 +872,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				}
 			});
 		} else {
+			me.frm.dirty();
 			return me.frm.set_value({
 				"appointment": null,
 				"appointment_dt": null,

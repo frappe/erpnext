@@ -41,14 +41,23 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 			customer = this.frm.doc.__onload && this.frm.doc.__onload.customer;
 		}
 
-		if(!['Cancelled', 'Rescheduled'].includes(this.frm.doc.status)) {
+		if(this.frm.doc.docstatus == 1) {
+			if (this.frm.doc.status == "Open") {
+				this.frm.add_custom_button(__('Closed'), () => this.update_status("Closed"),
+					__("Set Status"));
+			} else if (this.frm.doc.status == "Closed" && this.frm.doc.is_closed) {
+				this.frm.add_custom_button(__('Reopen'), () => this.update_status("Open"),
+					__("Set Status"));
+			}
+
 			if (!customer) {
 				this.frm.add_custom_button(__('Customer'), () => {
 					erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.party_name);
 				}, __('Create'));
 			}
 
-			this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
+			this.frm.add_custom_button(__('Project'), () => this.make_project(),
+				__('Create'));
 
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
@@ -133,6 +142,7 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 			this.frm.refresh_field('scheduled_date');
 			this.frm.refresh_field('scheduled_time');
 			this.frm.refresh_field('appointment_duration');
+			this.frm.dirty();
 
 			this.set_scheduled_date_time();
 			if (this.frm.doc.scheduled_date != previous_date) {
@@ -304,6 +314,22 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.appointment.appointment.get_project",
 			frm: this.frm
+		});
+	},
+
+	update_status: function(status) {
+		var me = this;
+		me.frm.check_if_unsaved();
+
+		frappe.call({
+			method: "erpnext.crm.doctype.appointment.appointment.update_status",
+			args: {
+				appointment: me.frm.doc.name,
+				status: status
+			},
+			callback: function(r) {
+				me.frm.reload_doc();
+			},
 		});
 	},
 });

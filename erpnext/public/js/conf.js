@@ -56,7 +56,8 @@ $.extend(frappe.breadcrumbs.preferred, {
 
 if (frappe.boot.active_domains.includes("Vehicles")) {
 	$.extend(frappe.breadcrumbs.preferred, {
-		"Project": "Vehicles"
+		"Project": "Vehicles",
+		"Appointment": "Vehicles",
 	});
 }
 

@@ -105,12 +105,19 @@ class Project(StatusUpdater):
 
 		self.send_welcome_email()
 
+		self._previous_appointment = self.db_get('appointment')
+
 	def on_update(self):
+		self.update_appointment()
 		if 'Vehicles' in frappe.get_active_domains():
 			self.update_odometer()
 
 	def after_insert(self):
 		self.set_project_in_sales_order_and_quotation()
+
+	def after_delete(self):
+		self.update_appointment()
+		self.update_vehicle_booking_order_pdi_status()
 
 	def set_title(self):
 		if self.project_name:
@@ -560,14 +567,33 @@ class Project(StatusUpdater):
 
 	def validate_appointment(self):
 		if self.get('appointment'):
-			appointment_details = frappe.db.get_value("Appointment", self.appointment, ['name', 'status'], as_dict=1)
+			appointment_details = frappe.db.get_value("Appointment", self.appointment,
+				['name', 'status', 'docstatus'], as_dict=1)
 
 			if not appointment_details:
 				frappe.throw(_("Appointment {0} does not exist").format(self.appointment))
 
-			if appointment_details.status not in ['Open', 'Unconfirmed']:
+			if appointment_details.docstatus == 0:
+				frappe.throw(_("{0} is not submitted").format(frappe.get_desk_link("Appointment", self.appointment)))
+			if appointment_details.docstatus == 2:
+				frappe.throw(_("{0} is cancelled").format(frappe.get_desk_link("Appointment", self.appointment)))
+			if appointment_details.status == "Rescheduled":
 				frappe.throw(_("{0} is {1}")
 					.format(frappe.get_desk_link("Appointment", self.appointment), frappe.bold(appointment_details.status)))
+
+	def update_appointment(self):
+		appointments = []
+		if self.appointment:
+			appointments.append(self.appointment)
+
+		previous_appointment = self.get('_previous_appointment')
+		if previous_appointment and previous_appointment not in appointments:
+			appointments.append(previous_appointment)
+
+		for appointment in appointments:
+			doc = frappe.get_doc("Appointment", appointment)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def update_vehicle_booking_order_pdi_status(self):
 		if self.get('vehicle_booking_order'):

@@ -15,7 +15,6 @@ def get_context(context):
 	if email and appointment_name:
 		appointment = frappe.get_doc('Appointment', appointment_name)
 		appointment.set_verified(email)
-		appointment.save(ignore_permissions=True)
 		frappe.db.commit()
 		context.success = True
 		return context

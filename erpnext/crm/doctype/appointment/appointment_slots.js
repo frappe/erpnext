@@ -17,12 +17,19 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 
 		me.wrapper = $(wrapper);
 		me.message_wrapper = $(`<div></div>`).appendTo(me.wrapper);
-		me.slot_picker_wrapper = $(`<div class="row slot-picker"></div>`).appendTo(me.wrapper);
+		me.slot_picker_wrapper = $(`<div class="row appointment-slot-picker"></div>`).appendTo(me.wrapper);
+		if (me.is_editable()) {
+			me.slot_picker_wrapper.addClass('editable');
+		}
 
 		me.timeslots = [];
 		me.holiday = null;
 		me.load_slots_and_render();
 		me.bind();
+	},
+
+	is_editable: function () {
+		return this.frm.doc.docstatus == 0;
 	},
 
 	load_slots_and_render: function () {
@@ -34,7 +41,7 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 				args: {
 					scheduled_date: me.frm.doc.scheduled_date,
 					appointment_type: me.frm.doc.appointment_type,
-					appointment: me.frm.is_new() ? null : me.frm.doc.name,
+					appointment: !me.frm.is_new() && me.frm.doc.docstatus == 0 ? me.frm.doc.name: null,
 					company: me.frm.doc.company,
 				},
 				callback: function (r) {
@@ -168,9 +175,12 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 
 	bind: function () {
 		var me = this;
-		me.slot_picker_wrapper.on("click", ".appointment-timeslot", function () {
-			me.on_timeslot_click(this);
-		});
+
+		if (me.is_editable()) {
+			me.slot_picker_wrapper.on("click", ".appointment-timeslot", function () {
+				me.on_timeslot_click(this);
+			});
+		}
 	},
 
 	on_timeslot_click: function (el) {
