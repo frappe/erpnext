@@ -25,7 +25,10 @@
   "customer",
   "customer_name",
   "column_break_13",
-  "contact",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
   "column_break_20",
   "raised_by",
   "lead",
@@ -211,12 +214,6 @@
    "options": "Lead"
   },
   {
-   "fieldname": "contact",
-   "fieldtype": "Link",
-   "label": "Contact",
-   "options": "Contact"
-  },
-  {
    "fieldname": "email_account",
    "fieldtype": "Link",
    "label": "Email Account",
@@ -376,11 +373,36 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_display",
+   "fieldtype": "Data",
+   "label": "Contact Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_mobile",
+   "fieldtype": "Data",
+   "label": "Contact Mobile No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_email",
+   "fieldtype": "Data",
+   "label": "Contact Email",
+   "options": "Email",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Contact Person",
+   "options": "Contact"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2022-07-26 12:14:35.661737",
+ "modified": "2022-07-26 15:50:02.035646",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

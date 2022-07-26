@@ -13,6 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from frappe.email.inbox import link_communication_to_document
+from frappe.contacts.doctype.contact.contact import get_contact_details
 
 sender_field = "raised_by"
 
@@ -28,6 +29,7 @@ class Issue(Document):
 		self.change_service_level_agreement_and_priority()
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
+		self.set_contact_details()
 
 	def on_update(self):
 		# Add a communication in the issue timeline
@@ -43,16 +45,23 @@ class Issue(Document):
 			if not self.lead:
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
 
-			if not self.contact and not self.customer:
-				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
+			if not self.contact_person and not self.customer:
+				self.contact_person = frappe.db.get_value("Contact", {"email_id": email_id})
 
-				if self.contact:
-					contact = frappe.get_doc('Contact', self.contact)
+				if self.contact_person:
+					contact = frappe.get_doc('Contact', self.contact_person)
 					self.customer = contact.get_link_for('Customer')
 
 			if not self.company:
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
 					frappe.db.get_default("Company")
+
+	def set_contact_details(self):
+		if self.contact_person:
+			contact_details = get_contact_details(self.contact_person)
+			for k, v in contact_details.items():
+				if self.meta.has_field(k):
+					self.set(k, v)
 
 	def update_status(self):
 		status = frappe.db.get_value("Issue", self.name, "status")

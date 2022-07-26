@@ -35,6 +35,17 @@ frappe.ui.form.on("Issue", {
 				}
 			});
 		}
+
+		frm.set_query('contact_person', () => {
+			if (frm.doc.customer) {
+				frappe.dynamic_link = {
+					doc: frm.doc,
+					fieldname: 'customer',
+					doctype: 'Customer'
+				};
+				return erpnext.queries.contact_query(frm.doc);
+			}
+		});
 	},
 
 	refresh: function (frm) {
@@ -78,6 +89,10 @@ frappe.ui.form.on("Issue", {
 				frm.save();
 			});
 		}
+	},
+
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
 	},
 
 	reset_service_level_agreement: function(frm) {
