@@ -337,7 +337,8 @@
    "no_copy": 1,
    "oldfieldname": "project_value",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "permlevel": 1
   },
   {
    "fieldname": "total_expense_claim",
@@ -345,6 +346,7 @@
    "label": "Total Expense Claims",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -353,6 +355,7 @@
    "label": "Total Purchase Value",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -372,6 +375,7 @@
    "label": "Total Sales Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -380,6 +384,7 @@
    "label": "Total Billable Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -388,6 +393,7 @@
    "label": "Total Billed Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -396,13 +402,15 @@
    "label": "Consumed Material Cost",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Default Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
@@ -419,6 +427,7 @@
    "oldfieldname": "gross_margin_value",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -431,6 +440,7 @@
    "label": "Gross Margin %",
    "oldfieldname": "per_gross_margin",
    "oldfieldtype": "Currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -971,6 +981,7 @@
    "label": "Service Sales Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -979,6 +990,7 @@
    "label": "Material Sales Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -987,6 +999,7 @@
    "label": "Timesheets Billable Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -995,6 +1008,7 @@
    "label": "Timesheets Costing Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -1008,6 +1022,7 @@
    "label": "Customer Billable Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -1194,7 +1209,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-07-26 10:35:15.443067",
+ "modified": "2022-07-26 11:35:29.530084",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -1280,8 +1295,12 @@
   {
    "permlevel": 1,
    "read": 1,
-   "report": 1,
-   "role": "All"
+   "role": "Sales User"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "quick_entry": 1,

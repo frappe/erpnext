@@ -797,7 +797,6 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 				"base_grand_total": d.base_grand_total
 			})
 
-
 	company_wise_total_unpaid = frappe._dict(frappe.db.sql("""
 		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
@@ -819,17 +818,24 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 			loyalty_points = loyalty_point_details.get(d.company)
 
 		info = {}
-		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
 		info["currency"] = party_account_currency
-		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
 		info["company"] = d.company
 
 		if party_type == "Customer" and loyalty_point_details:
 			info["loyalty_points"] = loyalty_points
 
-		if party_type == "Supplier":
-			info["billing_this_year"] = -1 * info["billing_this_year"]
-			info["total_unpaid"] = -1 * info["total_unpaid"]
+		has_permission = False
+		if party_type == "Customer" and (frappe.has_permission("Sales Order") or frappe.has_permission("Sales Invoice")):
+			has_permission = True
+		if party_type == "Supplier" and (frappe.has_permission("Purchase Order") or frappe.has_permission("Purchase Invoice")):
+			has_permission = True
+
+		if has_permission:
+			info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
+			info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
+			if party_type == "Supplier":
+				info["billing_this_year"] = -1 * info["billing_this_year"]
+				info["total_unpaid"] = -1 * info["total_unpaid"]
 
 		company_wise_info.append(info)
 

@@ -332,26 +332,36 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 			}
 		}
 
-		var biling_items = [
+		var billing_items = [
 			{
 				contents: __('Billing Status: {0}', [me.frm.doc.billing_status]),
 				indicator: billing_status_color
 			},
-			{
+		]
+
+		if (me.frm.fields_dict.total_billable_amount && me.frm.fields_dict.total_billable_amount.disp_status != "None") {
+			billing_items.push({
 				contents: __('Total Billable: {0}', [format_currency(me.frm.doc.total_billable_amount, company_currency)]),
 				indicator: total_billable_color
-			},
-			{
+			});
+		}
+
+
+		if (me.frm.fields_dict.customer_billable_amount && me.frm.fields_dict.customer_billable_amount.disp_status != "None") {
+			billing_items.push({
 				contents: __('Customer Billable: {0}', [format_currency(me.frm.doc.customer_billable_amount, company_currency)]),
 				indicator: customer_billable_color
-			},
-			{
+			});
+		}
+
+		if (me.frm.fields_dict.total_billed_amount && me.frm.fields_dict.total_billed_amount.disp_status != "None") {
+			billing_items.push({
 				contents: __('Billed Amount: {0}', [format_currency(me.frm.doc.total_billed_amount, company_currency)]),
 				indicator: billed_amount_color
-			},
-		];
+			});
+		}
 
-		me.add_indicator_section(__("Billing"), biling_items);
+		me.add_indicator_section(__("Billing"), billing_items);
 	},
 
 	add_indicator_section: function (title, items) {
