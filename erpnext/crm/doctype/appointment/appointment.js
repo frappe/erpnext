@@ -9,7 +9,7 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
 			'Project': 'Project',
-			'Customer': 'Customer'
+			'Appointment': 'Reschedule',
 		}
 	},
 
@@ -44,6 +44,8 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 		if(this.frm.doc.docstatus == 1) {
 			if (this.frm.doc.status == "Open") {
 				this.frm.add_custom_button(__('Closed'), () => this.update_status("Closed"),
+					__("Set Status"));
+				this.frm.add_custom_button(__('Reschedule'), () => this.reschedule_appointment(),
 					__("Set Status"));
 			} else if (this.frm.doc.status == "Closed" && this.frm.doc.is_closed) {
 				this.frm.add_custom_button(__('Reopen'), () => this.update_status("Open"),
@@ -313,6 +315,14 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 		this.frm.check_if_unsaved();
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.appointment.appointment.get_project",
+			frm: this.frm
+		});
+	},
+
+	reschedule_appointment: function () {
+		this.frm.check_if_unsaved();
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.appointment.appointment.get_rescheduled_appointment",
 			frm: this.frm
 		});
 	},

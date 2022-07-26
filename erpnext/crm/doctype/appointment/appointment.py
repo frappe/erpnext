@@ -35,20 +35,26 @@ class Appointment(StatusUpdater):
 
 	def validate(self):
 		self.set_missing_values()
+		self.validate_previous_appointment()
 		self.validate_timeslot_validity()
 		self.validate_timeslot_availability()
 		self.set_status()
 
 	def on_submit(self):
+		self.update_previous_appointment()
 		self.auto_assign()
 		self.create_calendar_event(update=True)
 
 	def on_cancel(self):
-		self.validate_on_cancel()
 		self.db_set('status', 'Cancelled')
+		self.validate_on_cancel()
+		self.update_previous_appointment()
 		self.auto_unassign()
 
 	def onload(self):
+		if self.docstatus == 0:
+			self.set_missing_values()
+
 		self.set_onload('customer', self.get_customer())
 
 	def get_customer(self, throw=False):
@@ -60,10 +66,15 @@ class Appointment(StatusUpdater):
 			return None
 
 	def set_missing_values(self):
+		self.set_previous_appointment_details()
 		self.set_missing_duration()
 		self.set_scheduled_date_time()
 		self.set_customer_details()
 		self.set_applies_to_details()
+
+	def set_previous_appointment_details(self):
+		if self.previous_appointment:
+			self.previous_appointment_dt = frappe.db.get_value("Appointment", self.previous_appointment, "scheduled_dt")
 
 	def set_missing_duration(self):
 		if self.get('appointment_type'):
@@ -155,6 +166,34 @@ class Appointment(StatusUpdater):
 			frappe.msgprint(_('Time slot {0} is already booked by {1} other appointments for appointment type {2}')
 				.format(timeslot_str, frappe.bold(appointments_in_same_slot), self.appointment_type),
 				raise_exception=appointment_type_doc.validate_availability)
+
+	def validate_previous_appointment(self):
+		if self.previous_appointment:
+			previous_appointment = frappe.db.get_value("Appointment", self.previous_appointment,
+				['docstatus', 'status'], as_dict=1)
+			if not previous_appointment:
+				frappe.throw(_("Previous Appointment {0} does not exist").format(self.previous_appointment))
+
+			if previous_appointment.docstatus == 0:
+				frappe.throw(_("Previous {0} is not submitted")
+					.format(frappe.get_desk_link("Appointment", self.previous_appointment)))
+			if previous_appointment.docstatus == 2:
+				frappe.throw(_("Previous {0} is cancelled")
+					.format(frappe.get_desk_link("Appointment", self.previous_appointment)))
+			if previous_appointment.status != "Open":
+				frappe.throw(_("Previous {0} is not open. Only open appointments can be resheduled")
+					.format(frappe.get_desk_link("Appointment", self.previous_appointment)))
+
+	def update_previous_appointment(self):
+		if self.previous_appointment:
+			doc = frappe.get_doc("Appointment", self.previous_appointment)
+			doc.set_status(update=True)
+
+			if self.docstatus == 2:
+				doc.validate_timeslot_availability()
+
+			doc.auto_unassign()
+			doc.notify_update()
 
 	def create_lead_and_link(self):
 		if self.party_name:
@@ -322,19 +361,23 @@ class Appointment(StatusUpdater):
 
 		if self.docstatus == 0:
 			self.status = "Draft"
-		elif self.docstatus == 1:
 
+		elif self.docstatus == 1:
 			if status == "Open":
 				self.is_closed = 0
 			elif status == "Closed":
 				self.is_closed = 1
 
-			if self.get_rescheduled_by():
+			# Submitted or cancelled rescheduled appointment
+			is_rescheduled = frappe.get_all("Appointment", filters={'previous_appointment': self.name, 'docstatus': ['>', 0]})
+
+			if is_rescheduled:
 				self.status = "Rescheduled"
 			elif self.is_closed or self.get_linked_project():
 				self.status = "Closed"
 			else:
 				self.status = "Open"
+
 		else:
 			self.status = "Cancelled"
 
@@ -346,9 +389,6 @@ class Appointment(StatusUpdater):
 					'status': self.status,
 					'is_closed': self.is_closed,
 				}, update_modified=update_modified)
-
-	def get_rescheduled_by(self):
-		return frappe.db.get_value("Appointment", {'previous_appointment': self.name, 'docstatus': 1})
 
 	def get_linked_project(self):
 		return frappe.db.get_value("Project", {'appointment': self.name})
@@ -567,8 +607,43 @@ def get_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
+def get_rescheduled_appointment(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+	doclist = get_mapped_doc("Appointment", source_name, {
+		"Appointment": {
+			"doctype": "Appointment",
+			"field_no_map": [
+				'scheduled_date',
+				'scheduled_time',
+				'scheduled_day_of_week',
+				'scheduled_dt',
+				'end_dt',
+			],
+			"field_map": {
+				"name": "previous_appointment",
+				"scheduled_dt": "previous_appointment_dt",
+				"appointment_duration": "appointment_duration",
+				"appointment_type": "appointment_type",
+				"appointment_for": "appointment_for",
+				"party_name": "party_name",
+				"contact_person": "contact_person",
+				"customer_address": "customer_address",
+				"applies_to_vehicle": "applies_to_vehicle",
+				"voice_of_customer": "voice_of_customer",
+				"description": "description",
+			}
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
+
+
+@frappe.whitelist()
 def update_status(appointment, status):
 	doc = frappe.get_doc("Appointment", appointment)
 	doc.check_permission('write')
 	doc.set_status(update=True, status=status)
+	doc.auto_unassign()
 	doc.notify_update()
