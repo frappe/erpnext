@@ -84,6 +84,7 @@ class Project(StatusUpdater):
 			self.set_missing_values()
 
 		self.validate_vehicle_booking_order()
+		self.validate_appointment()
 		self.validate_phone_nos()
 		self.validate_project_type()
 		self.validate_applies_to()
@@ -557,6 +558,17 @@ class Project(StatusUpdater):
 			if self.get('applies_to_item') and self.applies_to_item != vehicle_booking_order.item_code:
 				frappe.throw(_("Vehicle Variant Code does not match with Vehicle Booking Order {0}").format(self.vehicle_booking_order))
 
+	def validate_appointment(self):
+		if self.get('appointment'):
+			appointment_details = frappe.db.get_value("Appointment", self.appointment, ['name', 'status'], as_dict=1)
+
+			if not appointment_details:
+				frappe.throw(_("Appointment {0} does not exist").format(self.appointment))
+
+			if appointment_details.status not in ['Open', 'Unconfirmed']:
+				frappe.throw(_("{0} is {1}")
+					.format(frappe.get_desk_link("Appointment", self.appointment), frappe.bold(appointment_details.status)))
+
 	def update_vehicle_booking_order_pdi_status(self):
 		if self.get('vehicle_booking_order'):
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
@@ -571,6 +583,7 @@ class Project(StatusUpdater):
 			self.contact_mobile_2 = ''
 
 	def set_missing_values(self):
+		self.set_appointment_details()
 		self.set_customer_details()
 		self.set_applies_to_details()
 		self.set_missing_checklist()
@@ -617,6 +630,23 @@ class Project(StatusUpdater):
 		for d in self.project_templates:
 			if d.project_template and not d.project_template_name:
 				d.project_template_name = frappe.get_cached_value("Project Template", d.project_template, "project_template_name")
+
+	def set_appointment_details(self):
+		if self.appointment:
+			appointment_doc = frappe.get_doc("Appointment", self.appointment)
+
+			self.appointment_dt = appointment_doc.scheduled_dt
+
+			if not self.customer:
+				customer = appointment_doc.get_customer()
+				if customer:
+					self.customer = customer
+
+			if self.meta.has_field('applies_to_vehicle') and not self.get('applies_to_vehicle'):
+				if appointment_doc.get('applies_to_vehicle'):
+					self.applies_to_vehicle = appointment_doc.get('applies_to_vehicle')
+		else:
+			self.appointment_dt = None
 
 	def set_material_and_service_item_groups(self):
 		settings = frappe.get_cached_doc("Projects Settings", None)
@@ -1840,7 +1870,7 @@ def get_sales_order(project_name, items_type=None):
 	project = frappe.get_doc("Project", project_name)
 	project_details = get_project_details(project, "Sales Order")
 
-	# Create Sales Invoice
+	# Create Sales Order
 	target_doc = frappe.new_doc("Sales Order")
 	target_doc.company = project.company
 	target_doc.project = project.name

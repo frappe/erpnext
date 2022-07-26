@@ -17,11 +17,11 @@
   "service_advisor",
   "service_manager",
   "column_break_10",
+  "project_date",
   "project_number",
   "reference_no",
   "copied_from",
   "priority",
-  "project_date",
   "work_details_section",
   "expected_delivery_date",
   "expected_delivery_time",
@@ -38,10 +38,13 @@
   "section_break0",
   "description",
   "more_info",
-  "department",
+  "appointment",
   "more_info_cb_1",
+  "appointment_dt",
   "more_info_cb_2",
+  "sales_order",
   "more_info_cb_3",
+  "department",
   "customer_details_section",
   "customer",
   "customer_name",
@@ -51,7 +54,6 @@
   "col_break_customer_details_2",
   "bill_to",
   "bill_to_name",
-  "sales_order",
   "address_and_contact_section",
   "contact_person",
   "contact_display",
@@ -266,7 +268,8 @@
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "label": "Sales Order",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1118,7 +1121,6 @@
    "default": "Today",
    "fieldname": "project_date",
    "fieldtype": "Date",
-   "hidden": 1,
    "label": "Project Date",
    "read_only": 1,
    "search_index": 1
@@ -1172,12 +1174,27 @@
    "in_standard_filter": 1,
    "label": "Project Workshop",
    "options": "Project Workshop"
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "label": "Appointment",
+   "no_copy": 1,
+   "options": "Appointment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "appointment_dt",
+   "fieldtype": "Datetime",
+   "label": "Appointment Date/Time",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-07-25 17:46:56.334109",
+ "modified": "2022-07-26 10:35:15.443067",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

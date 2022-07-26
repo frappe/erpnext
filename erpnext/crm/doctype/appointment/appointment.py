@@ -499,13 +499,14 @@ def get_customer_details(args):
 
 
 @frappe.whitelist()
-def make_project(source_name, target_doc=None):
+def get_project(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		customer = source.get_customer(throw=True)
 		if customer:
-			customer_doc = frappe.get_cached_doc("Customer", customer)
-			target.customer = customer_doc.name
-			target.customer_name = customer_doc.customer_name
+			target.customer = customer
+			target.contact_mobile = source.get('contact_mobile')
+			target.contact_mobile_2 = source.get('contact_mobile_2')
+			target.contact_phone = source.get('contact_phone')
 
 		target.run_method("set_missing_values")
 
@@ -514,8 +515,10 @@ def make_project(source_name, target_doc=None):
 			"doctype": "Project",
 			"field_map": {
 				"name": "appointment",
+				"scheduled_dt": "appointment_dt",
 				"voice_of_customer": "project_name",
 				"description": "description",
+				"applies_to_vehicle": "applies_to_vehicle",
 			}
 		}
 	}, target_doc, set_missing_values)

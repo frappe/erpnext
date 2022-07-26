@@ -302,7 +302,7 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 	make_project: function () {
 		this.frm.check_if_unsaved();
 		frappe.model.open_mapped_doc({
-			method: "erpnext.crm.doctype.appointment.appointment.make_project",
+			method: "erpnext.crm.doctype.appointment.appointment.get_project",
 			frm: this.frm
 		});
 	},

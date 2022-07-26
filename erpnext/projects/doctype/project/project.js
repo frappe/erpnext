@@ -162,6 +162,12 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup_buttons: function() {
 		var me = this;
 
+		if (me.frm.doc.status == "Open") {
+			me.frm.add_custom_button(__('Select Appointment'), () => {
+				me.select_appointment();
+			});
+		}
+
 		if (!me.frm.is_new()) {
 			// Set Status
 			if (!me.frm.doc.ready_to_close && !['Cancelled', 'Closed'].includes(me.frm.doc.status)) {
@@ -787,6 +793,79 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 				this.frm.set_value('service_advisor', sales_person);
 			}
 		});
+	},
+
+	select_appointment: function () {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Select Appointment"),
+			fields: [
+				{
+					label: __("Appointment Date"),
+					fieldname: "scheduled_date",
+					fieldtype: "Date",
+					default: me.frm.doc.project_date || frappe.datetime.get_today(),
+				},
+				{
+					label: __("Appointment"),
+					fieldname: "appointment",
+					fieldtype: "Link",
+					options: "Appointment",
+					only_select: 1,
+					get_query: () => {
+						var filters = {
+							'status': ['in', ['Open', 'Unconfirmed']]
+						};
+						if (dialog.get_value('scheduled_date')) {
+							filters['scheduled_date'] = dialog.get_value('scheduled_date');
+						}
+						if (dialog.get_value('customer')) {
+							filters['appointment_for'] = "Customer";
+							filters['party_name'] = dialog.get_value('customer');
+						}
+						return {
+							filters: filters
+						}
+					},
+				},
+			]
+		});
+
+		dialog.set_primary_action(__("Select"), function () {
+			var appointment = dialog.get_value('appointment');
+			me.get_appointment_details(appointment).then(() => {
+				dialog.hide();
+			})
+		});
+
+		dialog.show();
+	},
+
+	get_appointment_details: function (appointment) {
+		var me = this;
+
+		if (appointment) {
+			return frappe.call({
+				method: "erpnext.crm.doctype.appointment.appointment.get_project",
+				args: {
+					source_name: appointment,
+					target_doc: me.frm.doc,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						frappe.model.sync(r.message);
+						me.frm.dirty();
+						me.get_all_contact_nos();
+						me.frm.refresh_fields();
+					}
+				}
+			});
+		} else {
+			return me.frm.set_value({
+				"appointment": null,
+				"appointment_dt": null,
+			});
+		}
 	},
 
 	collect_progress: function() {

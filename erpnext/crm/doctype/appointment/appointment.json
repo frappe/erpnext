@@ -308,7 +308,7 @@
    "label": "Description"
   }
  ],
- "modified": "2022-07-24 13:48:04.359858",
+ "modified": "2022-07-26 09:55:59.193548",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -371,6 +371,7 @@
    "share": 1
   }
  ],
+ "search_fields": "party_name, customer_name, scheduled_dt",
  "sort_field": "scheduled_dt",
  "sort_order": "DESC",
  "title_field": "customer_name",
