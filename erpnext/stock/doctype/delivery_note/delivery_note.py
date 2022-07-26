@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from copy import copy
 from datetime import datetime
 import math
 import frappe
@@ -192,41 +193,59 @@ class DeliveryNote(SellingController):
 	# 	self.queue_action('submit',queue_name="dn_queue")
 	##caclute returnables
 	def before_save(self):
-
+		## unset returnable items
+		if self.get('remove_return_items'):
+			self.set("returnable_items", [])        
 		## check if returanable manage manullay
-		if not self.get('manually_manage_return_items'):
-			from nrp_manufacturing.utils import returnable_items
-			returnables = returnable_items(self.items,self.company)			
-			for returnable in returnables:
-				ordered_qty = 0
+		elif not self.get('manually_manage_return_items'):
+			if self.is_new() == True:
+				self.returnable_items = {}
+				from nrp_manufacturing.utils import returnable_items
+				club_items = []
 				for item in self.items:
-					if item.item_code == returnable.item:
-						ordered_qty = item.qty
-						break
-				if ordered_qty == 0:
-					frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
-				if returnable.returnable_qty == 1:
-					qty = ordered_qty / returnable.item_qty
-				else:
-					res = returnable.item_qty / returnable.returnable_qty
-					qty = ordered_qty * res
-				qty = math.ceil(qty)
-				if len(self.get('returnable_items')) != len(returnables):
+					is_add = True
+					for ci in club_items:
+						if ci.item_code == item.item_code:
+							ci.qty += item.qty
+							is_add = False
+							break
+					if is_add == True:
+						_item = copy(item)
+						club_items.append(_item)
+
+				returnables = returnable_items(club_items,self.company)			
+				for returnable in returnables:
+					ordered_qty = 0
+					for item in club_items:
+						if item.item_code == returnable.item:
+							ordered_qty = item.qty
+							break
+					if ordered_qty == 0:
+						frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
+					if returnable.returnable_qty == 1:
+						qty = ordered_qty / returnable.item_qty
+					else:
+						res = returnable.item_qty / returnable.returnable_qty
+						qty = ordered_qty * res
+					qty = math.ceil(qty)
 					temp_item = self.append('returnable_items',{})
 					temp_item.item_code = returnable.returnable_item
 					temp_item.item_name = returnable.returnable_item_name
 					temp_item.rate = returnable.sale_price
 					temp_item.actual_qty = qty
 					temp_item.so_qty = qty
-				else:
-					for ritems in self.get('returnable_items'):
-						if ritems.item_reference == returnable.item:
-							ritems.actual_qty = qty
-							break
-						
-		## unset returnable items
-		if self.get('remove_return_items'):
-			self.set("returnable_items", [])
+					# if len(self.get('returnable_items')) != len(returnables): # need to change
+					# 	temp_item = self.append('returnable_items',{})
+					# 	temp_item.item_code = returnable.returnable_item
+					# 	temp_item.item_name = returnable.returnable_item_name
+					# 	temp_item.rate = returnable.sale_price
+					# 	temp_item.actual_qty = qty
+					# 	temp_item.so_qty = qty
+					# else:
+					# 	for ritems in self.get('returnable_items'):
+					# 		if ritems.item_reference == returnable.item:
+					# 			ritems.actual_qty = qty
+					# 			break
 		
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -247,6 +266,8 @@ class DeliveryNote(SellingController):
 			savedoc.submit()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
+		from nrp_manufacturing.modules.gourmet.delivery_note.delivery_note import update_stock_ledger
+		DeliveryNote.update_stock_ledger = update_stock_ledger
 		self.update_stock_ledger()
 		stock_gl = frappe.new_doc('Stock GL Queue')
 		stock_gl.stock_entry = self.name
