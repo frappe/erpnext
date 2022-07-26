@@ -12,7 +12,7 @@ from frappe.utils import cint, today, getdate, get_time, get_datetime, combine_d
 	format_datetime, formatdate, get_url
 from frappe.utils.verified_command import get_signed_params
 from erpnext.hr.doctype.employee.employee import get_employee_from_user
-from frappe.desk.form.assign_to import add as add_assignemnt, clear as clear_assignments, close_all_assignments
+from frappe.desk.form.assign_to import add as add_assignment, clear as clear_assignments, close_all_assignments
 from six import string_types
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
@@ -283,7 +283,7 @@ class Appointment(Document):
 
 		existing_assignee = self.get_assignee_from_latest_opportunity()
 		if existing_assignee:
-			add_assignemnt({
+			add_assignment({
 				'doctype': self.doctype,
 				'name': self.name,
 				'assign_to': existing_assignee
@@ -294,7 +294,7 @@ class Appointment(Document):
 
 		for agent in available_agents:
 			if check_agent_availability(agent, self.scheduled_dt, self.end_dt):
-				add_assignemnt({
+				add_assignment({
 					'doctype': self.doctype,
 					'name': self.name,
 					'assign_to': agent
