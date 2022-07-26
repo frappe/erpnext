@@ -5,7 +5,11 @@
 {% block content %}
 <main>
 	{% if homepage.hero_section_based_on == 'Default' %}
-	<section class="hero-section border-bottom {%if homepage.hero_image%}hero-image{%endif%}">
+	<section class="hero-section border-bottom {%if homepage.hero_image%}hero-image{%endif%}"
+		{% if homepage.hero_image %}
+		style="background-image: url('{{ homepage.hero_image }}');"
+		{%- endif %}
+	>
 		<div class="container py-5">
 			<h1 class="d-none d-sm-block display-4">{{ homepage.tag_line }}</h1>
 			<h1 class="d-block d-sm-none">{{ homepage.tag_line }}</h1>
