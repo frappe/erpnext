@@ -13,7 +13,7 @@
    "label": "Description"
   }
  ],
- "modified": "2020-03-03 15:37:26.255407",
+ "modified": "2022-07-26 18:30:08.671297",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue Priority",
@@ -28,6 +28,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Support Team",
    "share": 1,
    "write": 1
   }
