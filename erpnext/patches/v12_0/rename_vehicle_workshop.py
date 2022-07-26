@@ -14,6 +14,10 @@ def execute():
 	frappe.delete_doc_if_exists("DocType", "Vehicle Workshop")
 	frappe.delete_doc_if_exists("Custom Field", "Project-vehicle_workshop")
 
+	frappe.reload_doc("vehicles", "doctype", "vehicle_service_receipt")
+	frappe.reload_doc("vehicles", "doctype", "vehicle_gate_pass")
+	frappe.reload_doc("projects", "doctype", "project")
+
 	if frappe.db.has_column("Vehicle Service Receipt", "vehicle_workshop"):
 		rename_field("Vehicle Service Receipt", "vehicle_workshop", "project_workshop")
 	if frappe.db.has_column("Vehicle Gate Pass", "vehicle_workshop"):
