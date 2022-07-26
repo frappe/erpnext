@@ -482,7 +482,6 @@ class ProductionPlan(Document):
 			"bom_no",
 			"stock_uom",
 			"bom_level",
-			"production_plan_item",
 			"schedule_date",
 		]:
 			if row.get(field):
