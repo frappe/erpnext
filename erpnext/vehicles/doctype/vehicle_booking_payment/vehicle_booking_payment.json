@@ -192,7 +192,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-03 13:09:23.628929",
+ "modified": "2022-07-26 12:57:00.258934",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Payment",
@@ -208,7 +208,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales User",
+   "role": "Sales Admin",
    "share": 1,
    "submit": 1,
    "write": 1
@@ -227,6 +227,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
   },
   {
    "email": 1,

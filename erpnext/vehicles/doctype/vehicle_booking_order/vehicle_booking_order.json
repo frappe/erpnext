@@ -1164,7 +1164,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-04-21 13:34:39.598450",
+ "modified": "2022-07-26 12:55:55.914535",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
@@ -1180,7 +1180,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales User",
+   "role": "Sales Admin",
    "share": 1,
    "submit": 1,
    "write": 1
@@ -1209,6 +1209,15 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "share": 1
   },
   {
