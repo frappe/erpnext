@@ -96,7 +96,7 @@ project_fields = [
 		"default": "Not Applicable", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
 
 	{"label": "Vehicle Booking Order", "fieldname": "vehicle_booking_order", "fieldtype": "Link",
-		"insert_after": "applies_to_item", "options": "Vehicle Booking Order", "read_only": 1, "no_copy": 1, "in_standard_filter": 1}
+		"insert_after": "service_manager", "options": "Vehicle Booking Order", "read_only": 1, "no_copy": 1, "in_standard_filter": 1}
 ]
 
 # Applies To Project Fields
