@@ -45,6 +45,9 @@ class ProjectSalesSummaryReport(object):
 	def get_conditions(self):
 		conditions = []
 
+		if self.filters.get("company"):
+			conditions.append("p.company = %(company)s")
+
 		if self.filters.get("from_date"):
 			conditions.append("p.project_date >= %(from_date)s")
 
