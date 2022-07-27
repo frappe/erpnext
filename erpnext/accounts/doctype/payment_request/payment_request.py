@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_url, nowdate
 from frappe.utils.background_jobs import enqueue
+from payments.utils import get_payment_gateway_controller
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_company_defaults,
@@ -18,8 +19,6 @@ from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_pla
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
-
-from payments.utils import get_payment_gateway_controller
 
 
 class PaymentRequest(Document):
