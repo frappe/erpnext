@@ -2237,7 +2237,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-07-24 11:48:25.666908",
+ "modified": "2022-07-27 12:31:21.487325",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2316,17 +2316,13 @@
    "write": 1
   },
   {
-   "email": 1,
    "export": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User"
   },
   {
-   "email": 1,
    "export": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
