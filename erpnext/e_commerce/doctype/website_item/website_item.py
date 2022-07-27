@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
-=======
-# -*- coding: utf-8 -*-
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
->>>>>>> af38baeb3b (fix: Map `Item` image to `Website Item` website_image only if published via UI (v13))
 # For license information, please see license.txt
 
 import json
@@ -125,15 +120,6 @@ class WebsiteItem(WebsiteGenerator):
 		if frappe.flags.in_import:
 			return
 
-<<<<<<< HEAD
-		auto_set_website_image = False
-		if not self.website_image and self.image:
-			auto_set_website_image = True
-			self.website_image = self.image
-
-=======
-		"""Validate if the website image is a public file"""
->>>>>>> 9541354ec7 (chore: Make `image` field obsolete in Website Item (redundant))
 		if not self.website_image:
 			return
 
