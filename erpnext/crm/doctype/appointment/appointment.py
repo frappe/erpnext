@@ -33,12 +33,26 @@ class Appointment(StatusUpdater):
 	def get_feed(self):
 		return _("For {0}").format(self.get("customer_name") or self.get('party_name'))
 
+	def onload(self):
+		if self.docstatus == 0:
+			self.set_missing_values()
+		elif self.docstatus == 1:
+			self.set_onload('disallow_on_submit', self.get_disallow_on_submit_fields())
+
+		self.set_onload('customer', self.get_customer())
+
 	def validate(self):
 		self.set_missing_values()
 		self.validate_previous_appointment()
 		self.validate_timeslot_validity()
 		self.validate_timeslot_availability()
 		self.set_status()
+
+	def before_update_after_submit(self):
+		self.set_customer_details()
+		self.set_applies_to_details()
+		self.set_status()
+		self.get_disallow_on_submit_fields()
 
 	def on_submit(self):
 		self.update_previous_appointment()
@@ -51,11 +65,11 @@ class Appointment(StatusUpdater):
 		self.update_previous_appointment()
 		self.auto_unassign()
 
-	def onload(self):
-		if self.docstatus == 0:
-			self.set_missing_values()
+	def get_disallow_on_submit_fields(self):
+		if self.status in ["Closed", "Rescheduled"]:
+			self.flags.disallow_on_submit = self.get_fields_for_disallow_on_submit()
 
-		self.set_onload('customer', self.get_customer())
+		return self.flags.disallow_on_submit or []
 
 	def get_customer(self, throw=False):
 		if self.appointment_for == "Customer":
@@ -607,6 +621,10 @@ def get_project(source_name, target_doc=None):
 			target.contact_mobile = source.get('contact_mobile')
 			target.contact_mobile_2 = source.get('contact_mobile_2')
 			target.contact_phone = source.get('contact_phone')
+
+		if target.applies_to_item and frappe.get_cached_value("Item", target.applies_to_item, "has_variants"):
+			target.applies_to_item = None
+			target.applies_to_variant_of = None
 
 		target.run_method("set_missing_values")
 

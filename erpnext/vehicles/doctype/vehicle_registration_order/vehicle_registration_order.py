@@ -86,13 +86,7 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 				excluding_fields.append('margin_amount')
 				excluding_fields.append('status')
 
-			disallowed_fields = [(df.fieldname, None) for df in self.meta.fields if df.allow_on_submit
-				and df.fieldname not in excluding_fields]
-
-			table_fields = self.meta.get_table_fields()
-			for table_df in table_fields:
-				table_meta = frappe.get_meta(table_df.options)
-				disallowed_fields += [(df.fieldname, table_df.fieldname) for df in table_meta.fields if df.get('allow_on_submit')]
+			disallowed_fields = self.get_fields_for_disallow_on_submit(excluding_fields)
 
 		else:
 			if self.agent_gl_entry_exists():

@@ -78,6 +78,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -186,6 +187,8 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
+   "default": "Customer",
    "fieldname": "appointment_for",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -194,6 +197,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "party_name",
    "fieldtype": "Dynamic Link",
    "in_global_search": 1,
@@ -204,24 +208,28 @@
    "search_index": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
    "options": "Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Data",
    "label": "Contact Name",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
    "label": "Contact Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
@@ -238,24 +246,28 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "label": "Customer Address",
    "options": "Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Customer Address Display",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
    "label": "CNIC",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "label": "Tax ID",
@@ -269,6 +281,7 @@
    "label": "Applies To"
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "applies_to_item.variant_of",
    "fieldname": "applies_to_variant_of",
    "fieldtype": "Link",
@@ -279,6 +292,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fetch_from": "applies_to_variant_of.item_name",
    "fieldname": "applies_to_variant_of_name",
    "fieldtype": "Data",
@@ -287,6 +301,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "applies_to_item",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -298,6 +313,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
    "fetch_from": "applies_to_item.item_name",
    "fetch_if_empty": 1,
@@ -312,6 +328,7 @@
    "label": "More Information"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "voice_of_customer",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -319,6 +336,7 @@
    "label": "Voice of Customer"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description"
@@ -365,6 +383,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_closed",
    "fieldtype": "Check",
@@ -374,12 +393,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_phone",
    "fieldtype": "Data",
    "label": "Contact Phone No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_missed",
    "fieldtype": "Check",
@@ -390,7 +411,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-27 13:09:12.435561",
+ "modified": "2022-07-27 22:55:36.872969",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

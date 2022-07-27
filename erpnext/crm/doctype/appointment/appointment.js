@@ -21,6 +21,7 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 		this.set_dynamic_link();
 		this.setup_route_options();
 		this.set_applies_to_read_only();
+		this.frm.trigger('set_disallow_on_submit_fields_read_only');
 	},
 
 	onload: function () {

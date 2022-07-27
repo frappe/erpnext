@@ -56,6 +56,10 @@ applies_to_transaction_fields = deepcopy(applies_to_fields)
 vehicle_last_odometer = {"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int"}
 insert_field_after('vehicle_color', vehicle_last_odometer, applies_to_transaction_fields)
 
+applies_to_appointment_fields = deepcopy(applies_to_transaction_fields)
+for f in applies_to_appointment_fields:
+	f['allow_on_submit'] = 1
+
 # Vehicle Owner
 vehicle_owner_fields = [
 	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
@@ -245,10 +249,11 @@ item_fields = [
 ]
 
 # Set Translatable = 0
-field_lists = [applies_to_fields, applies_to_transaction_fields, applies_to_project_fields, project_vehicle_reading_fields,
-	vehicle_owner_fields, sales_invoice_vehicle_owner_fields, service_person_fields, material_request_service_person_fields,
-	accounting_dimension_fields, accounting_dimension_table_fields, item_fields, project_fields, project_type_fields,
-	project_change_vehicle_details_fields, project_template_fields, project_template_category_fields]
+field_lists = [applies_to_fields, applies_to_transaction_fields, applies_to_project_fields, applies_to_appointment_fields,
+	project_vehicle_reading_fields, vehicle_owner_fields, sales_invoice_vehicle_owner_fields, service_person_fields,
+	material_request_service_person_fields, accounting_dimension_fields, accounting_dimension_table_fields,
+	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
+	project_template_fields, project_template_category_fields]
 
 for field_list in field_lists:
 	for d in field_list:
@@ -328,7 +333,7 @@ data = {
 		"Material Request": applies_to_transaction_fields + material_request_service_person_fields,
 		"Project": project_fields + applies_to_project_fields + project_change_vehicle_details_fields +
 			project_vehicle_reading_fields,
-		"Appointment": applies_to_transaction_fields,
+		"Appointment": applies_to_appointment_fields,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,

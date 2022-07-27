@@ -578,7 +578,7 @@ class Project(StatusUpdater):
 			if appointment_details.docstatus == 2:
 				frappe.throw(_("{0} is cancelled").format(frappe.get_desk_link("Appointment", self.appointment)))
 			if appointment_details.status == "Rescheduled":
-				frappe.throw(_("{0} is {1}")
+				frappe.throw(_("{0} is {1}. Please select newer appointment instead")
 					.format(frappe.get_desk_link("Appointment", self.appointment), frappe.bold(appointment_details.status)))
 
 	def update_appointment(self):

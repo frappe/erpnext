@@ -18,21 +18,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 	refresh: function () {
 		this._super();
 		this.setup_buttons();
-		this.frm.trigger('set_fields_read_only');
-	},
-
-	set_fields_read_only: function (doc, cdt, cdn) {
-		var me = this;
-
-		if (!me.frm.doc.__onload || !me.frm.doc.__onload.disallow_on_submit || me.frm.doc.docstatus != 1) {
-			return;
-		}
-
-		$.each(me.frm.doc.__onload.disallow_on_submit, function (i, d) {
-			var fieldname = d[0];
-			var parentfield = d[1];
-			me.frm.set_df_property(fieldname, 'read_only', 1, parentfield ? cdn : null, parentfield);
-		});
+		this.frm.trigger('set_disallow_on_submit_fields_read_only');
 	},
 
 	setup_queries: function () {
