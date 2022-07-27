@@ -10,7 +10,8 @@ from datetime import datetime, timedelta, date
 
 class AccountStatementPayment(Document):
 	def validate(self):
-		self.add_products_detail()
+		if self.update_table:
+			self.add_products_detail()
 
 		if self.docstatus == 0 and self.discount_check:
 			self.calculate_discount()
