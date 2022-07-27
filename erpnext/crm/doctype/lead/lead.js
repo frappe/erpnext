@@ -85,8 +85,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			d.add(1, "day");
 			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
 		}
-	},
-	
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));

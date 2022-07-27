@@ -57,24 +57,22 @@ form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 class SalesInvoice(SellingController):
 	def __init__(self, *args, **kwargs):
 		super(SalesInvoice, self).__init__(*args, **kwargs)
-		self.status_updater = [{
-			'source_dt': 'Sales Invoice Item',
-			'target_field': 'billed_amt',
-			'target_ref_field': 'amount',
-			'target_dt': 'Sales Order Item',
-			'join_field': 'so_detail',
-			'target_parent_dt': 'Sales Order',
-			'target_parent_field': 'per_billed',
-			'source_field': 'amount',
-			'percent_join_field': 'sales_order',
-			'status_field': 'billing_status',
-			'keyword': 'Billed',
-			'overflow_type': 'billing'
-		}]
-		
-	def before_save(self):
-		self.get_commision()
-
+		self.status_updater = [
+			{
+				"source_dt": "Sales Invoice Item",
+				"target_field": "billed_amt",
+				"target_ref_field": "amount",
+				"target_dt": "Sales Order Item",
+				"join_field": "so_detail",
+				"target_parent_dt": "Sales Order",
+				"target_parent_field": "per_billed",
+				"source_field": "amount",
+				"percent_join_field": "sales_order",
+				"status_field": "billing_status",
+				"keyword": "Billed",
+				"overflow_type": "billing",
+			}
+		]
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
@@ -95,10 +93,8 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
-
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-		self.get_commision()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -166,8 +162,7 @@ class SalesInvoice(SellingController):
 			self.timesheets = []
 		self.update_packing_list()
 		self.set_billing_hours_and_amount()
-		if self.task:
-			self.update_timesheet_billing_for_project()
+		self.update_timesheet_billing_for_project()
 		self.set_status()
 		if self.is_pos and not self.is_return:
 			self.verify_payment_amount_is_positive()
@@ -246,7 +241,6 @@ class SalesInvoice(SellingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
-
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -320,23 +314,7 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_submit")
 
-	@frappe.whitelist()
-	def get_commision(self):
-		tot=[]
-		if self.sales_partner:
-			doc=frappe.get_doc("Sales Partner",self.sales_partner)
-			if self.commission_based_on_target_lines==1:
-				for i in self.items:
-					for j in doc.item_target_details:
-						if i.item_code==j.item_code:
-							if self.customer_name==j.customer_name:
-								if j.commision_formula:
-									data=eval(j.commision_formula)
-									tot.append(data)
-				self.total_commission=sum(tot)
-
 		self.process_common_party_accounting()
-
 
 	def validate_pos_return(self):
 		if self.is_consolidated:
@@ -715,7 +693,6 @@ class SalesInvoice(SellingController):
 			and amount = 0""",
 			self.name,
 		)
-
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc(
@@ -1632,8 +1609,6 @@ class SalesInvoice(SellingController):
 			if entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 
-
-
 	def verify_payment_amount_is_negative(self):
 		for entry in self.payments:
 			if entry.amount > 0:
@@ -1896,6 +1871,7 @@ def is_overdue(doc, total):
 	)
 
 	return (total - outstanding_amount) < payable_amount
+
 
 def get_discounting_status(sales_invoice):
 	status = None
@@ -2587,8 +2563,6 @@ def get_mode_of_payments_info(mode_of_payments, company):
 	)
 
 	return {row.get("mop"): row for row in data}
-
-
 
 
 def get_mode_of_payment_info(mode_of_payment, company):
