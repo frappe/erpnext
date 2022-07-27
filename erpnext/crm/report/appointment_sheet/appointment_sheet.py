@@ -94,10 +94,11 @@ class AppointmentSheetReport(object):
 		if self.is_vehicle_service:
 			columns += [
 				{"label": _("Reg No"), "fieldname": "vehicle_license_plate", "fieldtype": "Data", "width": 80},
+				{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
 			]
 
 		columns += [
-			{"label": _("Voice of Customer"), "fieldname": "voice_of_customer", "fieldtype": "Data", "width": 150},
+			{"label": _("Voice of Customer"), "fieldname": "voice_of_customer", "fieldtype": "Data", "width": 200},
 		]
 
 		return columns

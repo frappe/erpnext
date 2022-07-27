@@ -1,0 +1,67 @@
+<style>
+@media screen {
+	.print-format {
+		padding: 8mm;
+	}
+}
+</style>
+
+<h2 class="text-center">
+	{%= __("Appointment Sheet") %}
+</h2>
+<h4 class="text-center">
+	{% if (filters.from_date == filters.to_date) { %}
+		{%= moment(filters.from_date).format('dddd, D MMMM, YYYY') %}
+	{% } else { %}
+		{%= frappe.datetime.str_to_user(filters.from_date) %}
+		{%= __("to") %}
+		{%= frappe.datetime.str_to_user(filters.to_date) %}
+	{% } %}
+</h4>
+
+<div class="clearfix">
+	{% if filters.appointment_type %}
+	<div class="pull-left"><b>Appointment Type:</b> {%= filters.appointment_type %}</div>
+	{% endif %}
+	<div class="pull-right"><b>Print Date/Time:</b> {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</div>
+</div>
+
+<table class="table table-bordered" style="margin-bottom: 2px; margin-top: 5px;">
+	<thead>
+		<tr>
+			<th class="text-center">#</th>
+			<th class="text-center">{%= __("Appointment") %}</th>
+			<th class="text-center">{%= __("Time") %}</th>
+			<th>{%= __("Customer Name") %}</th>
+			<th>{%= __("Contact #") %}</th>
+			<th>{%= __("Item") %}</th>
+			<th class="text-center">{%= __("Reg #") %}</th>
+			<th>{%= __("Voice") %}</th>
+			<th style="width: 20%;">Remarks</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+				<td class="text-center">{%= i+1 %}</td>
+
+				<td class="text-center">{%= data[i].appointment %}</td>
+
+				<td class="text-center">{%= data[i].scheduled_time_fmt %}</td>
+
+				<td>{%= data[i].customer_name %}</td>
+
+				<td>{%= [data[i].contact_mobile, data[i].contact_mobile_2].filter(d=>d).join(" / ") %}</td>
+
+				<td>{%= data[i].applies_to_variant_of_name %}</td>
+
+				<td class="text-center">{%= data[i].vehicle_license_plate %}</td>
+
+				<td>{%= data[i].voice_of_customer %}</td>
+
+				<td>&nbsp;</td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>
