@@ -41,17 +41,28 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 			customer = this.frm.doc.__onload && this.frm.doc.__onload.customer;
 		}
 
-		if(this.frm.doc.docstatus == 1) {
-			if (this.frm.doc.status == "Open") {
-				this.frm.add_custom_button(__('Closed'), () => this.update_status("Closed"),
-					__("Set Status"));
+		if(this.frm.doc.docstatus == 1 && this.frm.doc.status != "Rescheduled") {
+			if (["Open", "Missed"].includes(this.frm.doc.status)) {
 				this.frm.add_custom_button(__('Reschedule'), () => this.reschedule_appointment(),
-					__("Set Status"));
-			} else if (this.frm.doc.status == "Closed" && this.frm.doc.is_closed) {
-				this.frm.add_custom_button(__('Reopen'), () => this.update_status("Open"),
 					__("Set Status"));
 			}
 
+			if (this.frm.doc.status != "Missed") {
+				this.frm.add_custom_button(__('Missed'), () => this.update_status("Missed"),
+					__("Set Status"));
+			}
+
+			if (this.frm.doc.status != "Closed") {
+				this.frm.add_custom_button(__('Closed'), () => this.update_status("Closed"),
+					__("Set Status"));
+			}
+
+			if ((this.frm.doc.status == "Closed" && this.frm.doc.is_closed) || this.frm.doc.status == "Missed") {
+				this.frm.add_custom_button(__('Re-Open'), () => this.update_status("Open"),
+					__("Set Status"));
+			}
+
+			// Create Buttons
 			if (!customer) {
 				this.frm.add_custom_button(__('Customer'), () => {
 					erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.party_name);

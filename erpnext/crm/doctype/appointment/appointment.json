@@ -52,7 +52,8 @@
   "calendar_event",
   "column_break_41",
   "status",
-  "is_closed"
+  "is_closed",
+  "is_missed"
  ],
  "fields": [
   {
@@ -61,6 +62,7 @@
    "label": "Customer Details"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -83,7 +85,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nOpen\nClosed\nRescheduled\nCancelled",
+   "options": "Draft\nOpen\nClosed\nRescheduled\nMissed\nCancelled",
    "read_only": 1,
    "reqd": 1
   },
@@ -375,6 +377,15 @@
    "fieldname": "contact_phone",
    "fieldtype": "Data",
    "label": "Contact Phone No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_missed",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Marked Missed",
+   "no_copy": 1,
    "read_only": 1
   }
  ],

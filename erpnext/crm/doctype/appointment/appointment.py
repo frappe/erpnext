@@ -180,9 +180,9 @@ class Appointment(StatusUpdater):
 			if previous_appointment.docstatus == 2:
 				frappe.throw(_("Previous {0} is cancelled")
 					.format(frappe.get_desk_link("Appointment", self.previous_appointment)))
-			if previous_appointment.status != "Open":
-				frappe.throw(_("Previous {0} is not open. Only open appointments can be resheduled")
-					.format(frappe.get_desk_link("Appointment", self.previous_appointment)))
+			if previous_appointment.status not in ["Open", "Missed"]:
+				frappe.throw(_("Previous {0} is {1}. Only Open and Missed appointments can be resheduled")
+					.format(frappe.get_desk_link("Appointment", self.previous_appointment)), previous_appointment.status)
 
 	def update_previous_appointment(self):
 		if self.previous_appointment:
@@ -365,8 +365,13 @@ class Appointment(StatusUpdater):
 		elif self.docstatus == 1:
 			if status == "Open":
 				self.is_closed = 0
+				self.is_missed = 0
 			elif status == "Closed":
 				self.is_closed = 1
+				self.is_missed = 0
+			elif status == "Missed":
+				self.is_missed = 1
+				self.is_closed = 0
 
 			# Submitted or cancelled rescheduled appointment
 			is_rescheduled = frappe.get_all("Appointment", filters={'previous_appointment': self.name, 'docstatus': ['>', 0]})
@@ -375,6 +380,8 @@ class Appointment(StatusUpdater):
 				self.status = "Rescheduled"
 			elif self.is_closed or self.get_linked_project():
 				self.status = "Closed"
+			elif self.is_missed or getdate(today()) > getdate(self.scheduled_date):
+				self.status = "Missed"
 			else:
 				self.status = "Open"
 
@@ -538,6 +545,16 @@ def get_appointments_in_same_slot(start_dt, end_dt, appointment_type, appointmen
 	}, as_dict=1)
 
 	return appointments
+
+
+def auto_mark_missed():
+	auto_mark_missed_days = cint(frappe.get_cached_value("Appointment Booking Settings", None, "auto_mark_missed_days"))
+	if auto_mark_missed_days > 0:
+		frappe.db.sql("""
+			update `tabAppointment`
+			set status = 'Missed'
+			where docstatus = 1 and status = 'Open' and DATEDIFF(CURDATE(), scheduled_date) >= %s
+		""", auto_mark_missed_days)
 
 
 @frappe.whitelist()

@@ -1,20 +1,16 @@
 frappe.listview_settings['Appointment'] = {
 	add_fields: ["status", "docstatus"],
 	get_indicator: function (doc) {
-		if (doc.docstatus == 2) {
-			return [__(doc.status), "darkgrey", "docstatus,=," + doc.docstatus];
-		} else if (doc.status == "Cancelled") {
-			return [__(doc.status), "darkgrey", "status,=," + doc.status];
-		} else if (doc.status == "Open") {
+		 if (doc.status == "Open") {
 			return [__(doc.status), "orange", "status,=," + doc.status];
 		} else if (doc.status == "Rescheduled") {
-			return [__(doc.status), "blue", "status,=," + doc.status];
+			 return [__(doc.status), "lightblue", "status,=," + doc.status];
+		 } else if (doc.status == "Missed") {
+			return [__(doc.status), "darkgrey", "status,=," + doc.status];
 		} else if (doc.status == "Closed") {
 			return [__(doc.status), "green", "status,=," + doc.status];
 		}
 	},
-
-	has_indicator_for_cancelled: 1,
 
 	onload: function(listview) {
 		if (listview.page.fields_dict.appointment_for) {
