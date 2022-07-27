@@ -39,7 +39,7 @@ class ProjectSalesSummaryReport(object):
 			left join `tabItem` im on im.name = p.applies_to_item
 			left join `tabCustomer` c on c.name = p.customer
 			where status != 'Cancelled' {1}
-			order by p.project_date
+			order by p.project_date, p.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
 
 	def get_conditions(self):
