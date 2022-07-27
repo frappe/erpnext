@@ -220,6 +220,9 @@ class Analytics(object):
 		if self.filters.get("order_type"):
 			conditions.append("s.order_type=%(order_type)s")
 
+		if self.filters.get("transaction_type"):
+			conditions.append("s.transaction_type = %(transaction_type)s")
+
 		if self.filters.get("cost_center"):
 			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
 

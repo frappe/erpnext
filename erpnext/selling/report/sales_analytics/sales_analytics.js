@@ -9,7 +9,7 @@ frappe.query_reports["Sales Analytics"] = {
 			label: __("Tree Type"),
 			fieldtype: "Select",
 			options: ["Customer Group","Customer","Item Group","Item","Brand","Territory","Sales Person"],
-			default: "Customer",
+			default: "Item",
 			reqd: 1
 		},
 		{
@@ -19,12 +19,6 @@ frappe.query_reports["Sales Analytics"] = {
 			options: ["Sales Order","Delivery Note","Sales Invoice"],
 			default: "Sales Invoice",
 			reqd: 1
-		},
-		{
-			fieldname: "order_type",
-			label: __("Order Type"),
-			fieldtype: "Select",
-			options: "\nSales\nMaintenance\nShopping Cart"
 		},
 		{
 			fieldname: "value_field",
@@ -49,14 +43,6 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "company",
-			label: __("Company"),
-			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
-		},
-		{
 			fieldname: "range",
 			label: __("Range"),
 			fieldtype: "Select",
@@ -68,6 +54,20 @@ frappe.query_reports["Sales Analytics"] = {
 			],
 			default: "Monthly",
 			reqd: 1
+		},
+		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1
+		},
+		{
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type",
 		},
 		{
 			fieldname: "customer",
