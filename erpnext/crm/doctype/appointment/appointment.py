@@ -492,19 +492,22 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 	timeslots = appointment_type_doc.get_timeslots(scheduled_date)
 	no_of_agents = cint(appointment_type_doc.number_of_agents)
 
-	for timeslot_start, timeslot_end in timeslots:
-		appointments_in_same_slots = count_appointments_in_same_slot(timeslot_start, timeslot_end, appointment_type,
-			appointment)
+	if timeslots:
+		for timeslot_start, timeslot_end in timeslots:
+			appointments_in_same_slots = count_appointments_in_same_slot(timeslot_start, timeslot_end, appointment_type,
+				appointment)
 
-		timeslot_data = {
-			'timeslot_start': timeslot_start,
-			'timeslot_end': timeslot_end,
-			'timeslot_duration': round((timeslot_end - timeslot_start) / datetime.timedelta(minutes=1)),
-			'number_of_agents': no_of_agents,
-			'booked': appointments_in_same_slots,
-			'available': max(0, no_of_agents - appointments_in_same_slots)
-		}
-		out.timeslots.append(timeslot_data)
+			timeslot_data = {
+				'timeslot_start': timeslot_start,
+				'timeslot_end': timeslot_end,
+				'timeslot_duration': round((timeslot_end - timeslot_start) / datetime.timedelta(minutes=1)),
+				'number_of_agents': no_of_agents,
+				'booked': appointments_in_same_slots,
+				'available': max(0, no_of_agents - appointments_in_same_slots)
+			}
+			out.timeslots.append(timeslot_data)
+	else:
+		out.timeslots = None
 
 	return out
 

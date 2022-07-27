@@ -34,6 +34,7 @@
   "contact_person",
   "contact_display",
   "contact_mobile",
+  "contact_phone",
   "contact_email",
   "column_break_25",
   "customer_address",
@@ -215,13 +216,13 @@
   {
    "fieldname": "contact_mobile",
    "fieldtype": "Data",
-   "label": "Mobile No",
+   "label": "Contact Mobile No",
    "read_only": 1
   },
   {
    "fieldname": "contact_email",
    "fieldtype": "Data",
-   "label": "Email",
+   "label": "Contact Email",
    "options": "Email",
    "read_only": 1
   },
@@ -369,10 +370,16 @@
    "label": "Is Manually Closed",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Contact Phone No",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-27 00:54:56.956969",
+ "modified": "2022-07-27 13:09:12.435561",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
