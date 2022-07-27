@@ -22,6 +22,5 @@ frappe.ui.form.on("Vehicle Log", {
 				frappe.set_route('Form', 'Expense Claim', r.message.name);
 			}
 		});
-	},
-	
+	}
 });

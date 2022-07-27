@@ -5,7 +5,7 @@ frappe.provide("erpnext.job_offer");
 
 frappe.ui.form.on("Job Offer", {
 	onload: function (frm) {
-		frm.set_query("select_terms", function () {
+		frm.set_query("select_terms", function() {
 			return { filters: { hr: 1 } };
 		});
 	},
@@ -32,15 +32,14 @@ frappe.ui.form.on("Job Offer", {
 			);
 		}
 
-		if (frm.doc.__onload && frm.doc.__onload.employee) {
+		if(frm.doc.__onload && frm.doc.__onload.employee) {
 			frm.add_custom_button(__('Show Employee'),
 				function () {
 					frappe.set_route("Form", "Employee", frm.doc.__onload.employee);
 				}
 			);
 		}
-	},
-
+	}
 
 });
 

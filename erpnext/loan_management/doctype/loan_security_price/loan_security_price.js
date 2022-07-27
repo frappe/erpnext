@@ -5,5 +5,4 @@ frappe.ui.form.on('Loan Security Price', {
 	// refresh: function(frm) {
 
 	// }
-	
 });

@@ -21,7 +21,6 @@ frappe.ui.form.on('Loan Write Off', {
 			}
 		});
 	},
-
 	show_pending_principal_amount: function(frm) {
 		if (frm.doc.loan && frm.doc.docstatus === 0) {
 			frappe.db.get_value('Loan', frm.doc.loan, ['total_payment', 'total_interest_payable',

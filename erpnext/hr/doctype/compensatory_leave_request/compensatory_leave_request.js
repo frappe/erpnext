@@ -18,5 +18,5 @@ frappe.ui.form.on('Compensatory Leave Request', {
 		else{
 			frm.set_df_property('half_day_date', 'reqd', false);
 		}
-	},
+	}
 });

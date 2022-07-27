@@ -11,6 +11,7 @@ frappe.ui.form.on("Employee Attendance Tool", {
 	date: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},
+
 	department: function(frm) {
 		erpnext.employee_attendance_tool.load_employees(frm);
 	},

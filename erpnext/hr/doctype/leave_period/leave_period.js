@@ -17,5 +17,4 @@ frappe.ui.form.on('Leave Period', {
 			};
 		});
 	},
-	
 });

@@ -27,5 +27,4 @@ frappe.ui.form.on('Appointment Letter', {
 			});
 		}
 	},
-
 });

@@ -428,7 +428,6 @@ class SellingController(StockController):
 							"posting_time": self.get("posting_time") or nowtime(),
 							"qty": qty if cint(self.get("is_return")) else (-1 * qty),
 							"serial_no": d.get("serial_no"),
-							"batch_no": d.get("batch_no"),
 							"company": self.company,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
@@ -615,13 +614,13 @@ class SellingController(StockController):
 				stock_items = [d.item_code, d.description, d.warehouse, ""]
 				non_stock_items = [d.item_code, d.description]
 
-			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
-			duplicate_items_msg += "<br><br>"
-			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
-				frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
-				get_link_to_form("Selling Settings", "Selling Settings"),
-			)
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+				duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
+				duplicate_items_msg += "<br><br>"
+				duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+					frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
+					get_link_to_form("Selling Settings", "Selling Settings"),
+				)
 				if stock_items in check_list:
 					frappe.throw(duplicate_items_msg)
 				else:

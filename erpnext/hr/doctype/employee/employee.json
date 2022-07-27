@@ -181,6 +181,7 @@
    "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
+   "hidden": 1,
    "label": "Image",
    "no_copy": 1
   },

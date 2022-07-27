@@ -63,6 +63,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date"
@@ -214,7 +215,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-14 15:58:42.136116",
+ "modified": "2021-04-19 18:24:40.119647",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

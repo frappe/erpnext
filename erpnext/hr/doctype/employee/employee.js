@@ -3,29 +3,33 @@
 
 frappe.provide("erpnext.hr");
 erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
-	setup: function () {
-		this.frm.fields_dict.user_id.get_query = function (doc, cdt, cdn) {
+	setup: function() {
+		this.frm.fields_dict.user_id.get_query = function() {
 			return {
 				query: "frappe.core.doctype.user.user.user_query",
-				filters: { ignore_user_type: 1 }
-			}
-		}
-		this.frm.fields_dict.reports_to.get_query = function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.employee_query" }
-		}
+				filters: {
+					ignore_user_type: 1
+				}
+			};
+		};
+		this.frm.fields_dict.reports_to.get_query = function() {
+			return {
+				query: "erpnext.controllers.queries.employee_query"
+			};
+		};
 	},
 
-	refresh: function () {
-		var me = this;
+	refresh: function() {
 		erpnext.toggle_naming_series();
 	},
 
-	date_of_birth: function () {
+	date_of_birth: function() {
 		return cur_frm.call({
 			method: "get_retirement_date",
-			args: { date_of_birth: this.frm.doc.date_of_birth }
+			args: {
+				date_of_birth: this.frm.doc.date_of_birth
+			}
 		});
-
 	},
 
 	salutation: function() {

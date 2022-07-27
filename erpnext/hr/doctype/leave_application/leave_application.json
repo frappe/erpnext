@@ -182,6 +182,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date",
@@ -249,7 +250,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2021-09-13 16:19:39.782064",
+ "modified": "2020-05-18 13:00:41.577327",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",

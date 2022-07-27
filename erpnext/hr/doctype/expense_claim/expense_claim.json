@@ -163,6 +163,7 @@
    "options": "Simple"
   },
   {
+   "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,

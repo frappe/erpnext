@@ -6,5 +6,5 @@
 frappe.ui.form.on('Employee Transfer', {
 	refresh: function(frm) {
 
-	},
+	}
 });

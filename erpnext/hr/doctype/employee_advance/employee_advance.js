@@ -171,6 +171,7 @@ frappe.ui.form.on('Employee Advance', {
 			}
 		});
 	},
+
 	get_employee_currency: function(frm) {
 		frappe.call({
 			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",

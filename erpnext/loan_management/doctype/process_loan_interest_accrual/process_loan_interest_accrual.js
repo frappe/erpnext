@@ -5,5 +5,4 @@ frappe.ui.form.on('Process Loan Interest Accrual', {
 	// refresh: function(frm) {
 
 	// }
-	
 });

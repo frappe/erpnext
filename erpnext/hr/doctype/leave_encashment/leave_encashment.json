@@ -89,7 +89,8 @@
    "fieldname": "encashable_days",
    "fieldtype": "Float",
    "label": "Encashable days",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -115,6 +116,7 @@
    "read_only": 1
   },
   {
+   "default": "Today",
    "fieldname": "encashment_date",
    "fieldtype": "Date",
    "label": "Encashment Date"
@@ -152,7 +154,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-14 13:04:17.072305",
+ "modified": "2021-03-31 22:32:55.492327",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",

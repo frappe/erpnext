@@ -60,7 +60,6 @@ frappe.ui.form.on('Loan', {
 
 	},
 
-
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
 			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
@@ -104,7 +103,6 @@ frappe.ui.form.on('Loan', {
 		frm.trigger("toggle_fields");
 	},
 
-	
 	loan_type: function(frm) {
 		frm.toggle_reqd("repayment_method", frm.doc.is_term_loan);
 		frm.toggle_display("repayment_method", frm.doc.is_term_loan);
