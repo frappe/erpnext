@@ -1,7 +1,16 @@
+<<<<<<< HEAD
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
+=======
+# -*- coding: utf-8 -*-
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
+>>>>>>> af38baeb3b (fix: Map `Item` image to `Website Item` website_image only if published via UI (v13))
 # For license information, please see license.txt
 
 import json
+from typing import TYPE_CHECKING, List, Union
+
+if TYPE_CHECKING:
+	from erpnext.stock.doctype.item.item import Item
 
 import frappe
 from frappe import _
@@ -438,7 +447,9 @@ def check_if_user_is_customer(user=None):
 
 
 @frappe.whitelist()
-def make_website_item(doc, save=True):
+def make_website_item(doc: "Item", save: bool = True) -> Union["WebsiteItem", List[str]]:
+	"Make Website Item from Item. Used via Form UI or patch."
+
 	if not doc:
 		return
 
@@ -465,7 +476,8 @@ def make_website_item(doc, save=True):
 	for field in fields_to_map:
 		website_item.update({field: doc.get(field)})
 
-	if doc.get("image") and not website_item.website_image:
+	# Needed for publishing/mapping via Form UI only
+	if not frappe.flags.in_migrate and (doc.get("image") and not website_item.website_image):
 		website_item.website_image = doc.get("image")
 
 	if not save:
