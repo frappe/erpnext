@@ -96,6 +96,28 @@ frappe.ui.form.on("Delivery Note", {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+	},
+	customer_type:function(frm) {
+		if (frm.doc.customer_type === 'Employee'){
+			frm.set_df_property('transporter','hidden',true);
+			frm.set_df_property('transporter_name','hidden',true);		
+			frm.set_df_property('driver','hidden',false);
+			frm.set_df_property('driver_name','hidden',false);		
+			frm.set_df_property('driver_name','read_only',1);	
+			frm.set_value("transporter", '');
+			frm.set_value("transporter_name", null);
+			frm.set_df_property('driver', 'reqd', 1);
+			frm.set_df_property('transporter', 'reqd', 0)
+		}else if(frm.doc.customer_type === 'Supplier'){
+			frm.set_df_property('transporter','hidden',false);
+			frm.set_df_property('transporter_name','hidden',false);		
+			frm.set_df_property('driver','hidden',true);
+			frm.set_df_property('driver_name','hidden',true);	
+			frm.set_df_property('driver', 'reqd', 0)
+			frm.set_df_property('transporter', 'reqd', 1)
+			frm.set_value("driver_name", null);
+			frm.set_value("driver", null);
+		}
 	}
 });
 
