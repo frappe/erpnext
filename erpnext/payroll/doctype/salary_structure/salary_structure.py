@@ -20,6 +20,7 @@ class SalaryStructure(Document):
 		self.validate_max_benefits_with_flexi()
 		self.validate_component_based_on_tax_slab()
 		self.validate_payment_days_based_dependent_component()
+		self.validate_timesheet_component()
 
 	def set_missing_values(self):
 		overwritten_fields = [
@@ -88,6 +89,21 @@ class SalaryStructure(Document):
 		abbr += [d.abbr for d in self.deductions if d.depends_on_payment_days]
 
 		return abbr
+
+	def validate_timesheet_component(self):
+		if not self.salary_slip_based_on_timesheet:
+			return
+
+		for component in self.earnings:
+			if component.salary_component == self.salary_component:
+				frappe.msgprint(
+					_(
+						"Row #{0}: Timesheet amount will overwrite the Earning component amount for the Salary Component {1}"
+					).format(self.idx, frappe.bold(self.salary_component)),
+					title=_("Warning"),
+					indicator="orange",
+				)
+				break
 
 	def strip_condition_and_formula_fields(self):
 		# remove whitespaces from condition and formula fields

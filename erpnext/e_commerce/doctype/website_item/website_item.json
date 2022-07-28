@@ -22,7 +22,6 @@
   "column_break_11",
   "description",
   "brand",
-  "image",
   "display_section",
   "website_image",
   "website_image_alt",
@@ -113,8 +112,11 @@
   {
    "description": "Item Image (if not slideshow)",
    "fieldname": "website_image",
-   "fieldtype": "Attach",
-   "label": "Website Image"
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "in_preview": 1,
+   "label": "Website Image",
+   "print_hide": 1
   },
   {
    "description": "Image Alternative Text",
@@ -187,14 +189,6 @@
    "label": "Item Group",
    "options": "Item Group",
    "read_only": 1
-  },
-  {
-   "fieldname": "image",
-   "fieldtype": "Attach Image",
-   "hidden": 1,
-   "in_preview": 1,
-   "label": "Image",
-   "print_hide": 1
   },
   {
    "default": "1",
@@ -348,13 +342,14 @@
   }
  ],
  "has_web_view": 1,
- "image_field": "image",
+ "image_field": "website_image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-09-02 13:08:41.942726",
+ "modified": "2022-06-28 17:10:30.613251",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -410,6 +405,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "web_item_name",
  "track_changes": 1
 }

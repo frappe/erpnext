@@ -17,7 +17,6 @@ def execute():
 		"item_group",
 		"stock_uom",
 		"brand",
-		"image",
 		"has_variants",
 		"variant_of",
 		"description",
@@ -30,6 +29,7 @@ def execute():
 		"website_warehouse",
 		"web_long_description",
 		"website_content",
+		"website_image",
 		"thumbnail",
 	]
 

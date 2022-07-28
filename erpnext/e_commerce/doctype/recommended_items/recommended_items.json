@@ -48,7 +48,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "website_item.image",
+   "fetch_from": "website_item.website_image",
    "fieldname": "website_item_image",
    "fieldtype": "Attach",
    "label": "Website Item Image",
@@ -75,7 +75,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-13 21:02:19.031652",
+ "modified": "2022-06-28 16:44:24.718728",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Recommended Items",
@@ -83,5 +83,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
