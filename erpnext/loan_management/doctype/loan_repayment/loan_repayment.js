@@ -20,7 +20,7 @@ frappe.ui.form.on('Loan Repayment', {
 			frm.trigger('calculate_repayment_amounts');
 		}
 	},
-	
+
 	posting_date : function(frm) {
 		frm.trigger('calculate_repayment_amounts');
 	},

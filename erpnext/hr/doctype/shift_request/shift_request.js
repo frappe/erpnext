@@ -14,5 +14,4 @@ frappe.ui.form.on('Shift Request', {
 		});
 		frm.set_query("employee", erpnext.queries.employee);
 	},
-	
 });

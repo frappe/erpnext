@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 
-from datetime import date
 import json
 
 import frappe
@@ -35,7 +34,6 @@ class Timesheet(Document):
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
-		
 
 	def set_employee_name(self):
 		if self.employee and not self.employee_name:
@@ -286,7 +284,6 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 			AND tsd.docstatus = 1
 			AND tsd.is_billable = 1
 			AND tsd.sales_invoice is NULL
-			AND ts.status not in ("Billed","Cancelled")
 			{condition}
 		ORDER BY tsd.from_time ASC
 	"""

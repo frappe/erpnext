@@ -35,7 +35,6 @@ frappe.ui.form.on('Leave Encashment', {
 	encashment_date: function(frm) {
 		frm.trigger("get_leave_details_for_encashment");
 	},
-
 	get_leave_details_for_encashment: function(frm) {
 		if(frm.doc.docstatus==0 && frm.doc.employee && frm.doc.leave_type) {
 			return frappe.call({
@@ -62,5 +61,4 @@ frappe.ui.form.on('Leave Encashment', {
 			}
 		});
 	},
-	
 });

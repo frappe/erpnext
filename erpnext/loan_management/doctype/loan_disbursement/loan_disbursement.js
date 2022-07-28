@@ -13,6 +13,5 @@ frappe.ui.form.on('Loan Disbursement', {
 				}
 			}
 		})
-	},
-	
+	}
 });

@@ -22,7 +22,6 @@ frappe.ui.form.on('Training Event', {
 		}
 		frm.events.set_employee_query(frm);
 	},
-	
 
 	set_employee_query: function(frm) {
 		let emp = [];

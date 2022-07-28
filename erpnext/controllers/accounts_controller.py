@@ -21,7 +21,6 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
-from six import text_type
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -1101,9 +1100,14 @@ class AccountsController(TransactionBase):
 		return amount, base_amount
 
 	def make_discount_gl_entries(self, gl_entries):
-		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
-		)
+		if self.doctype == "Purchase Invoice":
+			enable_discount_accounting = cint(
+				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
+			)
+		elif self.doctype == "Sales Invoice":
+			enable_discount_accounting = cint(
+				frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
+			)
 
 		if enable_discount_accounting:
 			if self.doctype == "Purchase Invoice":
@@ -1311,10 +1315,8 @@ class AccountsController(TransactionBase):
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
 			stock_items = frappe.db.get_values(
-				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, as_dict=True, cache=True
+				"Item", {"name": ["in", item_codes], "is_stock_item": 1}, pluck="name", cache=True
 			)
-			if stock_items:
-				stock_items = [d.get("name") for d in stock_items]
 
 		return stock_items
 
@@ -1470,8 +1472,15 @@ class AccountsController(TransactionBase):
 			self.get("debit_to") if self.doctype == "Sales Invoice" else self.get("credit_to")
 		)
 		party_account_currency = get_account_currency(party_account)
+		allow_multi_currency_invoices_against_single_party_account = frappe.db.get_singles_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account"
+		)
 
-		if not party_gle_currency and (party_account_currency != self.currency):
+		if (
+			not party_gle_currency
+			and (party_account_currency != self.currency)
+			and not allow_multi_currency_invoices_against_single_party_account
+		):
 			frappe.throw(
 				_("Party Account {0} currency ({1}) and document currency ({2}) should be same").format(
 					frappe.bold(party_account), party_account_currency, self.currency
@@ -1885,7 +1894,7 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 def get_taxes_and_charges(master_doctype, master_name):
 	if not master_name:
 		return
-	from frappe.model import default_fields
+	from frappe.model import child_table_fields, default_fields
 
 	tax_master = frappe.get_doc(master_doctype, master_name)
 
@@ -1893,7 +1902,7 @@ def get_taxes_and_charges(master_doctype, master_name):
 	for i, tax in enumerate(tax_master.get("taxes")):
 		tax = tax.as_dict()
 
-		for fieldname in default_fields:
+		for fieldname in default_fields + child_table_fields:
 			if fieldname in tax:
 				del tax[fieldname]
 
@@ -2058,7 +2067,7 @@ def get_advance_journal_entries(
 	journal_entries = frappe.db.sql(
 		"""
 		select
-			"Journal Entry" as reference_type, t1.name as reference_name,
+			'Journal Entry' as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
 			t2.reference_name as against_order, t2.exchange_rate
 		from
@@ -2113,7 +2122,7 @@ def get_advance_payment_entries(
 		payment_entries_against_order = frappe.db.sql(
 			"""
 			select
-				"Payment Entry" as reference_type, t1.name as reference_name,
+				'Payment Entry' as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
 				t1.{0} as currency, t1.{4} as exchange_rate
@@ -2133,7 +2142,7 @@ def get_advance_payment_entries(
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql(
 			"""
-				select "Payment Entry" as reference_type, name as reference_name, posting_date,
+				select 'Payment Entry' as reference_type, name as reference_name, posting_date,
 				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency
 				from `tabPayment Entry`
 				where
@@ -2230,7 +2239,7 @@ def get_payment_term_details(
 	term, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None
 ):
 	term_details = frappe._dict()
-	if isinstance(term, text_type):
+	if isinstance(term, str):
 		term = frappe.get_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
@@ -2707,10 +2716,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_ordered_qty()
 		parent.update_ordered_and_reserved_qty()
 		parent.update_receiving_percentage()
-		if parent.is_subcontracted == "Yes":
+		if parent.is_old_subcontracting_flow:
 			if should_update_supplied_items(parent):
 				parent.update_reserved_qty_for_subcontract()
-				parent.create_raw_materials_supplied("supplied_items")
+				parent.create_raw_materials_supplied()
 			parent.save()
 	else:  # Sales Order
 		parent.validate_warehouse()

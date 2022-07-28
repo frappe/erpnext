@@ -181,6 +181,7 @@
    "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
+   "hidden": 1,
    "label": "Image",
    "no_copy": 1
   },
@@ -812,7 +813,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-04-28 20:38:53.886319",
+ "modified": "2022-07-18 20:03:43.188705",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

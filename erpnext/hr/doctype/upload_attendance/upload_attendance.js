@@ -10,8 +10,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 		this.frm.set_value("att_fr_date", frappe.datetime.get_today());
 		this.frm.set_value("att_to_date", frappe.datetime.get_today());
 	},
-	
-	
+
 	refresh: function() {
 		this.frm.disable_save();
 		this.show_upload();
@@ -29,11 +28,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 			from_date: this.frm.doc.att_fr_date,
 			to_date: this.frm.doc.att_to_date,
 		});
-		
-		
 	},
-
-	
 
 	show_upload() {
 		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();

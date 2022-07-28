@@ -117,7 +117,6 @@
    "options": "currency"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "leave_encashment_amount_per_day",
    "fieldtype": "Currency",
    "label": "Leave Encashment Amount Per Day",

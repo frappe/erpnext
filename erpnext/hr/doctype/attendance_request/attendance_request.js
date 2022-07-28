@@ -3,14 +3,12 @@
 cur_frm.add_fetch('employee', 'company', 'company');
 
 frappe.ui.form.on('Attendance Request', {
-	half_day: function (frm) {
-		if (frm.doc.half_day == 1) {
+	half_day: function(frm) {
+		if(frm.doc.half_day == 1){
 			frm.set_df_property('half_day_date', 'reqd', true);
 		}
-		else {
+		else{
 			frm.set_df_property('half_day_date', 'reqd', false);
 		}
-		
-	},
-	
+	}
 });

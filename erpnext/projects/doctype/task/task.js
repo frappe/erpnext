@@ -58,5 +58,4 @@ frappe.ui.form.on("Task", {
 		frm.doc.project && frappe.model.remove_from_locals("Project",
 			frm.doc.project);
 	}
-
 });

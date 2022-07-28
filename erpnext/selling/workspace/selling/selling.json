@@ -434,24 +434,6 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "YoY Sales ",
-   "link_to": "YoY Sales",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "YoY Item Wise Dealer Sales",
-   "link_to": "YoY Item Wise Dealer Sales",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
    "is_query_report": 0,
    "label": "Other Reports",
    "onboard": 0,

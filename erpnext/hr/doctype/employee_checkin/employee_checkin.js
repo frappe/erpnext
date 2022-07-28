@@ -6,6 +6,5 @@ frappe.ui.form.on('Employee Checkin', {
 		if(!frm.doc.time) {
 			frm.set_value("time", frappe.datetime.now_datetime());
 		}
-		
 	}
 });

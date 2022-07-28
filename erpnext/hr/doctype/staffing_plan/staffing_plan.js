@@ -26,8 +26,6 @@ frappe.ui.form.on('Staffing Plan', {
 			};
 		});
 	},
-
-
 });
 
 frappe.ui.form.on('Staffing Plan Detail', {

@@ -60,7 +60,6 @@ frappe.ui.form.on('Blanket Order', {
 		});
 	},
 
-
 	set_tc_name_filter: function(frm) {
 		if (frm.doc.blanket_order_type === 'Selling') {
 			frm.set_df_property("customer","reqd", 1);

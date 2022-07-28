@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -119,8 +118,7 @@
   }
  ],
  "icon": "fa fa-user",
- "links": [],
- "modified": "2021-09-15 18:21:17.038164",
+ "modified": "2019-07-18 16:29:14.151380",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Driver",

@@ -3,27 +3,6 @@
 
 frappe.provide("erpnext.maintenance");
 frappe.ui.form.on('Maintenance Visit', {
-	refresh: function (frm) {
-		//filters for serial_no based on item_code
-		frm.set_query('serial_no', 'purposes', function (frm, cdt, cdn) {
-			let item = locals[cdt][cdn];
-			if (serial_nos) {
-				return {
-					filters: {
-						'item_code': item.item_code,
-						'name': ["in", serial_nos]
-					}
-				};
-			} else {
-				return {
-					filters: {
-						'item_code': item.item_code
-					}
-				};
-			}
-		});
-		
-	},
 	setup: function (frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
@@ -70,13 +49,6 @@ frappe.ui.form.on('Maintenance Visit', {
 				};
 			});
 		}
-		else {
-			frm.clear_table("purposes");
-		}
-
-		
-		
-		
 		if (!frm.doc.status) {
 			frm.set_value({ status: 'Draft' });
 		}
@@ -84,8 +56,6 @@ frappe.ui.form.on('Maintenance Visit', {
 			frm.set_value({ mntc_date: frappe.datetime.get_today() });
 		}
 	},
-	
-	
 	customer: function (frm) {
 		erpnext.utils.get_party_details(frm);
 	},

@@ -355,6 +355,8 @@ class Subcontracting:
 			rm_obj.purchase_order = item_row.purchase_order
 			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
+		rm_obj.amount = flt(rm_obj.required_qty) * flt(rm_obj.rate)
+
 	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.purchase_order)
 

@@ -10,9 +10,7 @@
   "expired_leaves",
   "used_leaves",
   "pending_leaves",
-  "available_leaves",
-  "balance",
-  "encashment_days"
+  "available_leaves"
  ],
  "fields": [
   {
@@ -63,18 +61,6 @@
    "label": "Available Leave(s)",
    "no_copy": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "balance",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Balance "
-  },
-  {
-   "fieldname": "encashment_days",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Encashment Days"
   }
  ],
  "index_web_pages_for_search": 1,
