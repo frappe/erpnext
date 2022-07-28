@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate, cint, format_time
+from frappe.utils import getdate, nowdate, cint, format_time, format_datetime
 
-
+date_format = "d/MM/Y"
 time_format = "hh:mm a"
+datetime_format = "{0}, {1}".format(date_format, time_format)
 
 
 class AppointmentSheetReport(object):
@@ -50,14 +51,11 @@ class AppointmentSheetReport(object):
 			if not d.applies_to_variant_of_name:
 				d.applies_to_variant_of_name = d.applies_to_item_name
 
-			# Unregistered
-			if self.is_vehicle_service and not d.vehicle_license_plate and d.vehicle_unregistered:
-				d.vehicle_license_plate = _('Unreg')
-
 			# Date/Time Formatting
 			self.set_formatted_datetime(d)
 
 	def set_formatted_datetime(self, d):
+		d.scheduled_dt_fmt = format_datetime(d.scheduled_dt, datetime_format)
 		d.scheduled_time_fmt = format_time(d.scheduled_time, time_format)
 
 	def get_conditions(self):

@@ -2,9 +2,12 @@
 @media screen {
 	.print-format {
 		padding: 8mm;
+		font-size: 8pt;
 	}
 }
 </style>
+
+{% var is_vehicle_service = columns.map(d => d.fieldname).includes('vehicle_license_plate') %}
 
 <h2 class="text-center">
 	{%= __("Appointment Sheet") %}
@@ -35,7 +38,11 @@
 			<th>{%= __("Customer Name") %}</th>
 			<th>{%= __("Contact #") %}</th>
 			<th>{%= __("Item") %}</th>
-			<th class="text-center">{%= __("Reg #") %}</th>
+
+			{% if is_vehicle_service %}
+			<th class="text-center">{%= __("Vehicle") %}</th>
+			{% endif %}
+
 			<th>{%= __("Voice") %}</th>
 			<th style="width: 20%;">Remarks</th>
 		</tr>
@@ -48,7 +55,13 @@
 
 				<td class="text-center">{%= data[i].appointment %}</td>
 
-				<td class="text-center">{%= data[i].scheduled_time_fmt %}</td>
+				<td class="text-center">
+					{% if (filters.from_date == filters.to_date) { %}
+						{%= data[i].scheduled_time_fmt %}
+					{% } else { %}
+						{%= data[i].scheduled_dt_fmt %}
+					{% } %}
+				</td>
 
 				<td>{%= data[i].customer_name %}</td>
 
@@ -56,7 +69,15 @@
 
 				<td>{%= data[i].applies_to_variant_of_name %}</td>
 
-				<td class="text-center">{%= data[i].vehicle_license_plate %}</td>
+				{% if is_vehicle_service %}
+				<td class="text-center">
+					{% if data[i].vehicle_license_plate %}
+						{%= data[i].vehicle_license_plate %}
+					{% else %}
+						<small>{%= data[i].vehicle_chassis_no %}</small>
+					{% endif %}
+				</td>
+				{% endif %}
 
 				<td>{%= data[i].voice_of_customer %}</td>
 
