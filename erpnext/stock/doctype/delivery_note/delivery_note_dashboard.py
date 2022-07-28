@@ -4,11 +4,11 @@ from frappe import _
 def get_data():
 	return {
 		'fieldname': 'delivery_note',
-		'non_standard_fieldnames': {
-			'Stock Entry': 'delivery_note_no',
-			'Quality Inspection': 'reference_name',
-			'Auto Repeat': 'reference_document',
-		},
+		# 'non_standard_fieldnames': {
+		# 	'Stock Entry': 'delivery_note_no',
+		# 	'Quality Inspection': 'reference_name',
+		# 	'Auto Repeat': 'reference_document',
+		# },
 		'internal_links': {
 			'Sales Order': ['items', 'against_sales_order'],
 		},
@@ -19,15 +19,16 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Sales Order', 'Quality Inspection']
+				'items': ['Sales Order']
+				# 'items': ['Sales Order', 'Quality Inspection']
 			},
-			{
-				'label': _('Returns'),
-				'items': ['Stock Entry']
-			},
-			{
-				'label': _('Subscription'),
-				'items': ['Auto Repeat']
-			},
+			# {
+			# 	'label': _('Returns'),
+			# 	'items': ['Stock Entry']
+			# },
+			# {
+			# 	'label': _('Subscription'),
+			# 	'items': ['Auto Repeat']
+			# },
 		]
 	}

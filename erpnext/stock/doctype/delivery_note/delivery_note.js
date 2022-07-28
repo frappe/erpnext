@@ -96,6 +96,15 @@ frappe.ui.form.on("Delivery Note", {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+		
+		//load drivers
+		cur_frm.fields_dict['driver'].get_query = function (doc) {
+			return {
+				filters: { "designation": "Driver" }
+			}
+		}
+		frm.refresh_field('driver');
+		
 	},
 	customer_type:function(frm) {
 		if (frm.doc.customer_type === 'Employee'){

@@ -907,7 +907,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
-   "options": "Driver",
+   "options": "Employee",
    "print_hide": 1
   },
   {
@@ -1271,7 +1271,7 @@
  "idx": 146,
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2022-07-27 17:26:23.297420",
+ "modified": "2022-07-28 11:06:45.362712",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
