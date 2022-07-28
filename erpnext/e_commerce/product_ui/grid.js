@@ -35,7 +35,7 @@ erpnext.ProductGrid = class {
 	}
 
 	get_image_html(item, title) {
-		let image = item.website_image || item.image;
+		let image = item.website_image;
 
 		if (image) {
 			return `
