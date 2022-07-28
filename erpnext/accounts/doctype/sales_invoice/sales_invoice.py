@@ -1557,23 +1557,15 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 	if not party:
 		return
 
-	if doctype in ["Sales Invoice", "Sales Order"]:
-		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
+	ref_doctype = get_intercompany_ref_doctype(doctype)
 
-		if doctype == "Sales Invoice":
-			ref_doc = "Purchase Invoice"
-		else:
-			ref_doc = "Purchase Order"
+	if doctype in ["Sales Invoice", "Delivery Note", "Sales Order"]:
+		partytype, ref_partytype, internal = "Customer", "Supplier", "is_internal_customer"
 	else:
 		partytype, ref_partytype, internal = "Supplier", "Customer", "is_internal_supplier"
 
-		if doctype == "Purchase Invoice":
-			ref_doc = "Sales Invoice"
-		else:
-			ref_doc = "Sales Order"
-
 	if inter_company_reference:
-		doc = frappe.get_doc(ref_doc, inter_company_reference)
+		doc = frappe.get_doc(ref_doctype, inter_company_reference)
 		ref_party = doc.supplier if doctype in ["Sales Invoice", "Sales Order"] else doc.customer
 		if not frappe.db.get_value(partytype, {"represents_company": doc.company}, "name") == party:
 			frappe.throw(_("Invalid {0} for Inter Company Transaction.").format(partytype))
@@ -1606,7 +1598,7 @@ def get_intercompany_ref_doctype(doctype):
 		"Sales Order": "Purchase Order",
 		"Delivery Note": "Purchase Receipt",
 	}
-	for source, target in ref_doc_map.copy():
+	for source, target in ref_doc_map.copy().items():
 		ref_doc_map[target] = source
 
 	ref_doc = ref_doc_map.get(doctype)
@@ -1734,7 +1726,7 @@ def set_account_for_mode_of_payment(self):
 
 
 def get_inter_company_details(doc, doctype):
-	if doctype in ["Sales Invoice", "Sales Order"]:
+	if doctype in ["Sales Invoice", "Delivery Note", "Sales Order"]:
 		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 	else:
@@ -1798,10 +1790,15 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_items(source_doc, target_doc, source_parent, target_parent):
+		if target_parent.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+			target_doc.received_qty = target_doc.qty
 
 	def update_details(source_doc, target_doc, source_parent, target_parent):
 		target_doc.inter_company_reference = source_doc.name
-		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
+		if target_doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Purchase Order"]:
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.buying_price_list = source_doc.selling_price_list
@@ -1815,11 +1812,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"doctype": target_doctype,
 			"postprocess": update_details,
 			"field_no_map": [
-				"taxes_and_charges"
+				"taxes_and_charges",
+				"cost_center",
+				"set_warehouse",
+				"transaction_type",
+				"address_display",
+				"shipping_address",
 			]
 		},
-		doctype +" Item": {
+		doctype + " Item": {
 			"doctype": target_doctype + " Item",
+			"postprocess": update_items,
 			"field_no_map": [
 				"income_account",
 				"expense_account",

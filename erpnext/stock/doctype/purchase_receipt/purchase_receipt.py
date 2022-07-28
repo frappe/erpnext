@@ -49,6 +49,9 @@ class PurchaseReceipt(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_reference)
+
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
 
@@ -65,6 +68,9 @@ class PurchaseReceipt(BuyingController):
 			self.company, self.base_grand_total)
 
 		self.update_previous_doc_status()
+
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import update_linked_doc
+		update_linked_doc(self.doctype, self.name, self.inter_company_reference)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
@@ -93,6 +99,9 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def set_title(self):
 		if self.letter_of_credit:
@@ -597,6 +606,12 @@ def make_stock_entry(source_name,target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+@frappe.whitelist()
+def make_inter_company_delivery_note(source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
 
 
 def get_item_account_wise_additional_cost(purchase_document):

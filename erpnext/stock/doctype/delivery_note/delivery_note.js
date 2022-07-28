@@ -226,6 +226,20 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 					me.update_item_qty_from_availability()
 				});
 			}
+
+			if (me.frm.doc.docstatus === 1 && !me.frm.doc.inter_company_reference) {
+				let me = this;
+				frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
+					let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
+					let internal = customer.is_internal_customer;
+					let disabled = customer.disabled;
+					if (internal === 1 && disabled === 0) {
+						me.frm.add_custom_button("Inter Company Receipt", function() {
+							me.make_inter_company_receipt();
+						}, __('Create'));
+					}
+				});
+			}
 		}
 
 		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
@@ -240,6 +254,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			frm: this.frm
 		})
+	},
+
+	make_inter_company_receipt: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt",
+			frm: this.frm
+		});
 	},
 
 	make_installation_note: function() {

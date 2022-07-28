@@ -159,6 +159,20 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					}, __('Create'))
 				}
 
+				if (me.frm.doc.docstatus === 1 && !me.frm.doc.inter_company_reference) {
+					let me = this;
+					frappe.model.with_doc("Supplier", me.frm.doc.supplier, () => {
+						let supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
+						let internal = supplier.is_internal_supplier;
+						let disabled = supplier.disabled;
+						if (internal === 1 && disabled === 0) {
+							me.frm.add_custom_button("Inter Company Delivery", function() {
+								me.make_inter_company_delivery(me.frm);
+							}, __('Create'));
+						}
+					});
+				}
+
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}
@@ -183,6 +197,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
 			frm: cur_frm
 		})
+	},
+
+	make_inter_company_delivery: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_inter_company_delivery_note",
+			frm: this.frm
+		});
 	},
 
 	close_purchase_receipt: function() {

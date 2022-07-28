@@ -43,6 +43,9 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_reference)
+
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
 
@@ -68,6 +71,9 @@ class DeliveryNote(SellingController):
 		if not self.is_return:
 			self.check_credit_limit()
 
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import update_linked_doc
+		update_linked_doc(self.doctype, self.name, self.inter_company_reference)
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
@@ -86,6 +92,9 @@ class DeliveryNote(SellingController):
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
@@ -658,6 +667,12 @@ def make_sales_invoice(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doc
+
+
+@frappe.whitelist()
+def make_inter_company_purchase_receipt(source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 
 @frappe.whitelist()
