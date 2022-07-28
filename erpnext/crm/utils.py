@@ -1,4 +1,5 @@
 import frappe
+from frappe.desk.notifications import notify_mentions
 from frappe.model.document import Document
 from frappe.utils import cstr, now, today
 from pypika import functions
@@ -204,6 +205,7 @@ class CRMNote(Document):
 	def add_note(self, note):
 		self.append("notes", {"note": note, "added_by": frappe.session.user, "added_on": now()})
 		self.save()
+		notify_mentions(self.doctype, self.name, note)
 
 	@frappe.whitelist()
 	def edit_note(self, note, row_id):

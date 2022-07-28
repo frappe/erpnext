@@ -225,16 +225,12 @@
    "fieldname": "items_section",
    "fieldtype": "Tab Break",
    "label": "Items",
-   "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
   {
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "mandatory_depends_on": "eval: doc.with_items == 1",
-   "oldfieldname": "enquiry_details",
-   "oldfieldtype": "Table",
    "options": "Opportunity Item"
   },
   {
@@ -409,7 +405,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "with_items",
    "fieldname": "section_break_32",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -466,8 +461,9 @@
   },
   {
    "fieldname": "no_of_employees",
-   "fieldtype": "Int",
-   "label": "No of Employees"
+   "fieldtype": "Select",
+   "label": "No of Employees",
+   "options": "1-10\n11-20\n21-30\n31-100\n11-50\n51-200\n201-500\n101-500\n500-1000\n501-1000\n>1000\n1000+"
   },
   {
    "fieldname": "annual_revenue",
@@ -626,7 +622,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2022-06-27 18:44:32.858696",
+ "modified": "2022-07-22 18:46:32.858696",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
