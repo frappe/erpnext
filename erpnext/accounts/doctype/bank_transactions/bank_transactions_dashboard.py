@@ -9,7 +9,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Journal Entry'),
-				'items': ['Journal Entry']
+				'items': ['Journal Entry', 'Print Bank Check']
 			}
 		]
 	}
