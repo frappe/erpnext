@@ -1023,7 +1023,6 @@
   },
   {
    "columns": 1,
-   "fetch_from": "batch_no.manufacturing_date",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -1031,7 +1030,6 @@
   },
   {
    "columns": 1,
-   "fetch_from": "batch_no.expiry_date",
    "fieldname": "expiry_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -1054,13 +1052,14 @@
    "fieldname": "batch_number",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Batch No"
+   "label": "Batch No",
+   "read_only_depends_on": "eval:!doc.__islocal"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-27 23:08:15.787663",
+ "modified": "2022-07-28 08:12:59.836113",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
