@@ -5,6 +5,7 @@ import json
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
@@ -18,27 +19,20 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 test_dependencies = ["Item", "Cost Center"]
 
 
-class TestBankTransaction(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+class TestBankTransaction(FrappeTestCase):
+	def setUp(self):
+		for dt in [
+			"Loan Repayment",
+			"Bank Transaction",
+			"Payment Entry",
+			"Payment Entry Reference",
+			"POS Profile",
+		]:
+			frappe.db.delete(dt)
+
 		make_pos_profile()
 		add_transactions()
 		add_vouchers()
-
-	@classmethod
-	def tearDownClass(cls):
-		for bt in frappe.get_all("Bank Transaction"):
-			doc = frappe.get_doc("Bank Transaction", bt.name)
-			if doc.docstatus == 1:
-				doc.cancel()
-			doc.delete()
-
-		# Delete directly in DB to avoid validation errors for countries not allowing deletion
-		frappe.db.sql("""delete from `tabPayment Entry Reference`""")
-		frappe.db.sql("""delete from `tabPayment Entry`""")
-
-		# Delete POS Profile
-		frappe.db.sql("delete from `tabPOS Profile`")
 
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
@@ -154,6 +148,35 @@ class TestBankTransaction(unittest.TestCase):
 			frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date")
 			is not None
 		)
+
+	def test_matching_loan_repayment(self):
+		from erpnext.loan_management.doctype.loan.test_loan import create_loan_accounts
+
+		create_loan_accounts()
+		bank_account = frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": "Payment Account",
+				"bank": "Citi Bank",
+				"account": "Payment Account - _TC",
+			}
+		).insert(ignore_if_duplicate=True)
+
+		bank_transaction = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Loan Repayment - OPSKATTUZWXXX AT776000000098709837 Herr G",
+				"date": "2018-10-27",
+				"deposit": 500,
+				"currency": "INR",
+				"bank_account": bank_account.name,
+			}
+		).submit()
+
+		repayment_entry = create_loan_and_repayment()
+
+		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
+		self.assertEqual(linked_payments[0][2], repayment_entry.name)
 
 
 def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
@@ -364,3 +387,59 @@ def add_vouchers():
 	)
 	si.insert()
 	si.submit()
+
+
+def create_loan_and_repayment():
+	from erpnext.loan_management.doctype.loan.test_loan import (
+		create_loan,
+		create_loan_type,
+		create_repayment_entry,
+		make_loan_disbursement_entry,
+	)
+	from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+		process_loan_interest_accrual_for_term_loans,
+	)
+	from erpnext.setup.doctype.employee.test_employee import make_employee
+
+	create_loan_type(
+		"Personal Loan",
+		500000,
+		8.4,
+		is_term_loan=1,
+		mode_of_payment="Cash",
+		disbursement_account="Disbursement Account - _TC",
+		payment_account="Payment Account - _TC",
+		loan_account="Loan Account - _TC",
+		interest_income_account="Interest Income Account - _TC",
+		penalty_income_account="Penalty Income Account - _TC",
+	)
+
+	applicant = make_employee("test_bank_reco@loan.com", company="_Test Company")
+	loan = create_loan(applicant, "Personal Loan", 5000, "Repay Over Number of Periods", 20)
+	loan = frappe.get_doc(
+		{
+			"doctype": "Loan",
+			"applicant_type": "Employee",
+			"company": "_Test Company",
+			"applicant": applicant,
+			"loan_type": "Personal Loan",
+			"loan_amount": 5000,
+			"repayment_method": "Repay Fixed Amount per Period",
+			"monthly_repayment_amount": 500,
+			"repayment_start_date": "2018-09-27",
+			"is_term_loan": 1,
+			"posting_date": "2018-09-27",
+		}
+	).insert()
+
+	make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date="2018-09-27")
+	process_loan_interest_accrual_for_term_loans(posting_date="2018-10-27")
+
+	repayment_entry = create_repayment_entry(
+		loan.name,
+		applicant,
+		"2018-10-27",
+		500,
+	)
+	repayment_entry.submit()
+	return repayment_entry

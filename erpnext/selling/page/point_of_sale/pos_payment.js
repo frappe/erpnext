@@ -160,16 +160,14 @@ erpnext.PointOfSale.Payment = class {
 		});
 
 		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
-			if (this.request_for_payment_field != undefined) {
-				const contact = frm.doc.contact_mobile;
-				const request_button = $(this.request_for_payment_field.$input[0]);
-				if (contact) {
-					request_button.removeClass('btn-default').addClass('btn-primary');
-				} else {
-					request_button.removeClass('btn-primary').addClass('btn-default');
-				}
+			const contact = frm.doc.contact_mobile;
+			const request_button = $(this.request_for_payment_field?.$input[0]);
+			if (contact) {
+				request_button.removeClass('btn-default').addClass('btn-primary');
+			} else {
+				request_button.removeClass('btn-primary').addClass('btn-default');
 			}
-    });
+		});
 
 		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
 			if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {
@@ -205,7 +203,7 @@ erpnext.PointOfSale.Payment = class {
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
 
-			if (!items.length) {
+			if (paid_amount == 0 || !items.length) {
 				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.");
 				frappe.show_alert({ message, indicator: "orange" });
 				frappe.utils.play_sound("error");
@@ -367,7 +365,7 @@ erpnext.PointOfSale.Payment = class {
 				const amount = p.amount > 0 ? format_currency(p.amount, currency) : '';
 
 				return (`
-					<div class="payment-mode-wrapper ${mode}">
+					<div class="payment-mode-wrapper">
 						<div class="mode-of-payment" data-mode="${mode}" data-payment-type="${payment_type}">
 							${p.mode_of_payment}
 							<div class="${mode}-amount pay-amount">${amount}</div>
