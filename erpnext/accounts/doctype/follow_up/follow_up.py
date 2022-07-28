@@ -97,6 +97,7 @@ class FollowUp(Document):
 			print(" In sidde follow up button click", i.get("follow_up"),  follow_up)
 
 			outstanding = 0
+			invoice_amount = 0
 
 			if i["__checked"] == 1 and i["follow_up"] == follow_up :
 			# if i["__checked"] == 1 and i["follow_up"] == follow_up and "due_date" in i.keys():
@@ -108,15 +109,17 @@ class FollowUp(Document):
 						if si_cur == frappe.defaults.get_global_default('currency'):
 							print(" this is currency")
 							outstanding = i["outstanding_amount"]
+							invoice_amount = i["invoice_amount"],
 						else: 
 							c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
 							outstanding =	i["outstanding_amount"] / c_rate
+							invoice_amount = i["invoice_amount"] / c_rate
 					comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + i["due_date"] + "    " + str(i["outstanding_amount"]) +" \n "
 					detail_dict = {"voucher_type": i["voucher_type"],
 									"voucher_no": i["voucher_no"] if i["voucher_no"] else "",
 									"due_date": i["due_date"],
 									"outstanding_amount" : outstanding,
-									"invoice_amount" : i["invoice_amount"],
+									"invoice_amount" : invoice_amount,
 									"date": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "posting_date"),
 									"age": i["age"],
 									"currency": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "currency")}
@@ -300,7 +303,7 @@ class FollowUp(Document):
 			commit_name = ""
 			commit_link = ""
 			remarks = ""
-			outstanding = 0
+			outstanding = invoice_amount = 0
 			comp = frappe.defaults.get_user_default('Company')
 			currency = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["currency"])
 			remarks = frappe.db.get_value("Sales Invoice", i["voucher_no"] , ["remarks"])
@@ -310,9 +313,11 @@ class FollowUp(Document):
 
 			if currency == frappe.defaults.get_global_default('currency'):
 				outstanding = i["outstanding_amount"]
+				invoice_amount = i["invoice_amount"]
 			else:	
 				c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
 				outstanding = i["outstanding_amount"] / c_rate
+				invoice_amount = i["invoice_amount"] / c_rate
 			
 
 			comm_email = ""
@@ -341,7 +346,7 @@ class FollowUp(Document):
 				prc.commitment_amount = i["commited_amount"]
 				prc.commitment_to = frappe.session.user
 				prc.voucher_type = i["voucher_type"]
-				prc.invoice_amount = i["invoice_amount"]
+				prc.invoice_amount = invoice_amount
 				prc.total_outstanding = outstanding
 				prc.voucher_no = i["voucher_no"]
 				prc.total_due = i["total_due"]
@@ -353,7 +358,7 @@ class FollowUp(Document):
 				commit_name = prc.name
 				commit_link= site+"/app/payment-receivable-commitment/"+ prc.name
 			
-				comment_v = "Commitment Given on "+ str(utils.today()) +" for Sales Invoice- "+i["voucher_no"]+"  Invoice Amount- "+ str(i["invoice_amount"])
+				comment_v = "Commitment Given on "+ str(utils.today()) +" for Sales Invoice- "+i["voucher_no"]+"  Invoice Amount- "+ str(invoice_amount)
 				# comment_v += "  Outstanding Amount- "+str(i["invoice_amount"])+"  Commitment Amount- "+ str(i["commited_amount"])+"  Commitment Date- "+str(i["commited_date"])
 			if 	"commited_date" in i.keys() and i["commited_amount"] > 0 and i["voucher_type"] == "Sales Invoice" and commit_name:
 				print(" After Creating Commit")
@@ -388,7 +393,7 @@ class FollowUp(Document):
 								Making a payment on time enables us to serve you better and we look forward to provide uninterrupted services to you.</p>
 				
 							""".format(full_name, str(utils.today()), str(i["commited_amount"]), currency, 
-							str(outstanding), i["voucher_no"], i["voucher_type"], remarks, str(i["invoice_amount"]))
+							str(outstanding), i["voucher_no"], i["voucher_type"], remarks, str(invoice_amount))
 
 				#Adding comment on Customer
 				comm = frappe.new_doc("Comment")
