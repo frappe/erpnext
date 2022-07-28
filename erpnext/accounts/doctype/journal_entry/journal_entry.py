@@ -22,6 +22,9 @@ class JournalEntry(AccountsController):
 		return self.voucher_type
 
 	def validate(self):
+		if self.supplier_document != None:
+			self.verificate_supplier_document_date()
+
 		if not self.is_opening:
 			self.is_opening='No'
 		self.clearance_date = None
@@ -56,6 +59,10 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		if not self.title:
 			self.title = self.get_title()
+	
+	def verificate_supplier_document_date(self):
+		doc = frappe.get_doc("Supplier Documents", self.supplier_document)
+		self.posting_date = doc.posting_date
 	
 	def create_register(self):
 		transaction = frappe.get_all("Bank Transactions", ["name","bank_account", "transaction_data", "amount_data"], filters = {"name": self.bank_transaction})
