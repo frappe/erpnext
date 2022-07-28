@@ -4,6 +4,5 @@
 frappe.ui.form.on('Income Tax Slab', {
 	currency: function(frm) {
 		frm.refresh_fields();
-	},
-
+	}
 });

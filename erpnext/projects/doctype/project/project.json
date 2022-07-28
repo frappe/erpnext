@@ -134,7 +134,7 @@
   {
    "fieldname": "expected_start_date",
    "fieldtype": "Date",
-   "label": "Expected Start Date ",
+   "label": "Expected Start Date",
    "oldfieldname": "project_start_date",
    "oldfieldtype": "Date"
   },

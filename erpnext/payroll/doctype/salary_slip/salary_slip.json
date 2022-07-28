@@ -32,18 +32,9 @@
   "total_working_days",
   "unmarked_days",
   "leave_without_pay",
-  "days_in_month",
-  "weekly_off",
-  "encashment_days",
-  "leave",
   "column_break_24",
   "absent_days",
   "payment_days",
-  "months_of_service_in_payment_period",
-  "paid_holidays",
-  "compoff",
-  "present_days",
-  "net_present_days",
   "hourly_wages",
   "timesheets",
   "column_break_20",
@@ -93,7 +84,6 @@
   "base_total_in_words",
   "leave_details_section",
   "leave_details",
-  "check",
   "section_break_75",
   "amended_from"
  ],
@@ -639,16 +629,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "leave",
-   "fieldtype": "Data",
-   "label": "Total Leave(Current Month)"
-  },
-  {
-   "fieldname": "months_of_service_in_payment_period",
-   "fieldtype": "Int",
-   "label": "Months of Service in payment period"
-  },
-  {
    "fieldname": "gross_year_to_date",
    "fieldtype": "Currency",
    "label": "Gross Year To Date",
@@ -659,60 +639,15 @@
    "fieldname": "base_gross_year_to_date",
    "fieldtype": "Currency",
    "label": "Gross Year To Date(Company Currency)",
-   "options": "Company:company:default_currency"
-  },
-  {
-   "fieldname": "days_in_month",
-   "fieldtype": "Int",
-   "label": "Days in Month"
-  },
-  {
-   "fieldname": "weekly_off",
-   "fieldtype": "Int",
-   "label": "Weekly Off",
+   "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "paid_holidays",
-   "fieldtype": "Int",
-   "label": "Paid Holidays",
-   "read_only": 1
-  },
-  {
-   "fieldname": "compoff",
-   "fieldtype": "Int",
-   "label": "Comp.Off",
-   "read_only": 1
-  },
-  {
-   "fieldname": "encashment_days",
-   "fieldtype": "Int",
-   "label": "Encashment Days"
-  },
-  {
-   "fieldname": "present_days",
-   "fieldtype": "Data",
-   "label": "Present Days",
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "check",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Check"
-  },
-  {
-   "fieldname": "net_present_days",
-   "fieldtype": "Float",
-   "label": "Net Present Days"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-18 11:09:22.447380",
+ "modified": "2021-10-08 11:48:47.098248",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

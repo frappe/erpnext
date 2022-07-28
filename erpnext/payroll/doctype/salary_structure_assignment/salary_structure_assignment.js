@@ -42,7 +42,6 @@ frappe.ui.form.on('Salary Structure Assignment', {
 		});
 	},
 
-
 	employee: function(frm) {
 		if(frm.doc.employee){
 			frappe.call({

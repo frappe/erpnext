@@ -18,9 +18,9 @@ from erpnext.accounts.general_ledger import (
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
-	get_evaluated_inventory_dimension,
-)
+# from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
+# 	get_evaluated_inventory_dimension,
+# )
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
