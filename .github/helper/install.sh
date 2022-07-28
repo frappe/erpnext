@@ -2,13 +2,6 @@
 
 set -e
 
-# Check for merge conflicts before proceeding
-python -m compileall -f "${GITHUB_WORKSPACE}"
-if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
-    then echo "Found merge conflicts"
-    exit 1
-fi
-
 cd ~ || exit
 
 sudo apt update && sudo apt install redis-server libcups2-dev
@@ -63,6 +56,7 @@ sed -i 's/schedule:/# schedule:/g' Procfile
 sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
+bench get-app payments
 bench get-app erpnext "${GITHUB_WORKSPACE}"
 
 if [ "$TYPE" == "server" ]; then bench setup requirements --dev; fi
