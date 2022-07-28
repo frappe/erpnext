@@ -50,10 +50,10 @@ class PickList(Document):
 				)
 			elif item.picked_qty > item.stock_qty:
 				frappe.throw(
-					_(
-						"Row {0} picked quantity is greater than the required quantity of {1} {2}."
-					).format(item.idx, item.stock_qty, item.stock_uom),
-					title=_("Pick List Over Picked")
+					_("Row {0} picked quantity is greater than the required quantity of {1} {2}.").format(
+						item.idx, item.stock_qty, item.stock_uom
+					),
+					title=_("Pick List Over Picked"),
 				)
 			elif not self.scan_mode and item.picked_qty == 0:
 				# if the user has not entered any picked qty, set it to stock_qty, before submit
