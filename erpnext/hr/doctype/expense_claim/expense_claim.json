@@ -12,7 +12,6 @@
   "employee_name",
   "email_id",
   "department",
-  "vehicle_log",
   "column_break_5",
   "amended_from",
   "company",
@@ -153,13 +152,6 @@
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "reqd": 1
-  },
-  {
-   "fieldname": "vehicle_log",
-   "fieldtype": "Link",
-   "label": "Vehicle Log",
-   "options": "Vehicle Log",
-   "read_only": 1
   },
   {
    "fieldname": "cb1",
@@ -307,7 +299,7 @@
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-11-07 23:27:17.033233",
+ "modified": "2022-07-28 22:57:02.267437",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

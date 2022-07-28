@@ -3,12 +3,7 @@
 
 frappe.ui.form.on("Vehicle Log", {
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1 && (frm.doc.price || (frm.doc.service_detail && frm.doc.service_detail.length))) {
-			frm.add_custom_button(__('Expense Claim'), function() {
-				frm.events.expense_claim(frm);
-			}, __('Create'));
-			frm.page.set_inner_btn_group_as_primary(__('Create'));
-		}
+
 	},
 
 	vehicle: function (frm) {
@@ -21,7 +16,7 @@ frappe.ui.form.on("Vehicle Log", {
 	get_last_odometer(frm) {
 		if (frm.doc.vehicle && frm.doc.date) {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle.vehicle.get_vehicle_odometer",
+				method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.get_vehicle_odometer",
 				args: {
 					vehicle: frm.doc.vehicle,
 					date: frm.doc.date
@@ -34,18 +29,5 @@ frappe.ui.form.on("Vehicle Log", {
 			});
 		}
 	},
-
-	expense_claim: function(frm){
-		frappe.call({
-			method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.make_expense_claim",
-			args:{
-				docname: frm.doc.name
-			},
-			callback: function(r){
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route('Form', 'Expense Claim', r.message.name);
-			}
-		});
-	}
 });
 

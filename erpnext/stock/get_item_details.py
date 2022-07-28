@@ -1418,7 +1418,7 @@ def get_applies_to_details(args, for_validate=False):
 
 	# If called by Project, get first and last project's odometer readings
 	if vehicle and args.doctype == "Project" and not for_validate:
-		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
+		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_project_odometer
 		out.update(get_project_odometer(args.name, vehicle.name))
 
 	# Item Details

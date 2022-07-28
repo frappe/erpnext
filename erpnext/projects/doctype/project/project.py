@@ -742,7 +742,7 @@ class Project(StatusUpdater):
 
 	def update_odometer(self):
 		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
-		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
+		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_project_odometer
 
 		if not self.meta.has_field('applies_to_vehicle'):
 			return

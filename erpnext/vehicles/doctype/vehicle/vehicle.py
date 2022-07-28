@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_vehicle_odometer
 from frappe import _
 from frappe.utils import getdate, nowdate, cstr, cint
 from frappe.model.document import Document
@@ -483,49 +484,6 @@ def validate_duplicate_vehicle(fieldname, value, exclude=None, throw=False):
 		frappe.msgprint(_("{0} {1} is already set in Vehicle: {2}").format(label, frappe.bold(value),
 			", ".join([frappe.utils.get_link_to_form("Vehicle", name) for name in duplicate_names])),
 			raise_exception=throw, indicator='red' if throw else 'orange')
-
-
-@frappe.whitelist()
-def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
-	odometer_log = get_last_odometer_log(vehicle, date, project, ascending)
-	return cint(odometer_log.odometer) if odometer_log else 0
-
-
-def get_last_odometer_log(vehicle, date=None, project=None, ascending=False, date_operator='<='):
-	if not vehicle:
-		frappe.throw(_("Vehicle not provided"))
-
-	filters = {
-		"vehicle": vehicle,
-		"docstatus": 1
-	}
-
-	if project:
-		filters['project'] = project
-	if date:
-		filters['date'] = [date_operator, getdate(date)]
-
-	asc_or_desc = "asc" if ascending else "desc"
-	order_by = "date {0}, odometer {0}".format(asc_or_desc)
-
-	odometer_log = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer', 'date'], order_by=order_by,
-		limit_page_length=1)
-	return odometer_log[0] if odometer_log else None
-
-
-@frappe.whitelist()
-def get_project_odometer(project, vehicle):
-	if project:
-		first_odometer = get_vehicle_odometer(vehicle, project=project, ascending=True)
-		last_odometer = get_vehicle_odometer(vehicle, project=project, ascending=False)
-	else:
-		first_odometer = 0
-		last_odometer = 0
-
-	return frappe._dict({
-		'vehicle_first_odometer': first_odometer,
-		'vehicle_last_odometer': last_odometer,
-	})
 
 
 @frappe.whitelist()

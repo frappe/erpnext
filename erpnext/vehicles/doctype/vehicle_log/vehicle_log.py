@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate, formatdate
 from frappe.model.document import Document
-from erpnext.vehicles.doctype.vehicle.vehicle import get_vehicle_odometer, get_last_odometer_log
+
 
 class VehicleLog(Document):
 	def validate(self):
@@ -32,6 +32,9 @@ class VehicleLog(Document):
 			frappe.throw(_("Odometer Reading cannot be negative"))
 
 	def validate_last_odometer(self):
+		if not cint(self.odometer):
+			return
+
 		previous_odometer_log = get_last_odometer_log(self.vehicle, self.date)
 		self.last_odometer = cint(previous_odometer_log.odometer) if previous_odometer_log else 0
 
@@ -53,8 +56,6 @@ class VehicleLog(Document):
 		frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", odometer, notify=True)
 
 	def update_project_odometer(self):
-		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
-
 		if self.project and frappe.get_meta("Project").has_field("applies_to_vehicle") and 'Vehicles' in frappe.get_active_domains():
 			vehicle = frappe.db.get_value("Project", self.project, "applies_to_vehicle")
 			if vehicle:
@@ -66,29 +67,6 @@ class VehicleLog(Document):
 					"vehicle_last_odometer": odo.vehicle_last_odometer
 				}, None, update_modified=update_modified, notify=update_modified)
 
-@frappe.whitelist()
-def make_expense_claim(docname):
-	expense_claim = frappe.db.exists("Expense Claim", {"vehicle_log": docname})
-	if expense_claim:
-		frappe.throw(_("Expense Claim {0} already exists for the Vehicle Log").format(expense_claim))
-
-	vehicle_log = frappe.get_doc("Vehicle Log", docname)
-	service_expense = sum([flt(d.expense_amount) for d in vehicle_log.service_detail])
-
-	claim_amount = service_expense + flt(vehicle_log.price)
-	if not claim_amount:
-		frappe.throw(_("No additional expenses has been added"))
-
-	exp_claim = frappe.new_doc("Expense Claim")
-	exp_claim.employee = vehicle_log.employee
-	exp_claim.vehicle_log = vehicle_log.name
-	exp_claim.remark = _("Expense Claim for Vehicle Log {0}").format(vehicle_log.name)
-	exp_claim.append("expenses", {
-		"expense_date": vehicle_log.date,
-		"description": _("Vehicle Expenses"),
-		"amount": claim_amount
-	})
-	return exp_claim.as_dict()
 
 
 @frappe.whitelist()
@@ -124,4 +102,48 @@ def odometer_log_exists(vehicle, odometer):
 		"vehicle": vehicle,
 		"odometer": cint(odometer),
 		"docstatus": 1
+	})
+
+
+@frappe.whitelist()
+def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
+	odometer_log = get_last_odometer_log(vehicle, date, project, ascending)
+	return cint(odometer_log.odometer) if odometer_log else 0
+
+
+def get_last_odometer_log(vehicle, date=None, project=None, ascending=False, date_operator='<='):
+	if not vehicle:
+		frappe.throw(_("Vehicle not provided"))
+
+	filters = {
+		"vehicle": vehicle,
+		"docstatus": 1,
+		"odometer": ['>', 0]
+	}
+
+	if project:
+		filters['project'] = project
+	if date:
+		filters['date'] = [date_operator, getdate(date)]
+
+	asc_or_desc = "asc" if ascending else "desc"
+	order_by = "date {0}, odometer {0}".format(asc_or_desc)
+
+	odometer_log = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer', 'date'], order_by=order_by,
+		limit_page_length=1)
+	return odometer_log[0] if odometer_log else None
+
+
+@frappe.whitelist()
+def get_project_odometer(project, vehicle):
+	if project:
+		first_odometer = get_vehicle_odometer(vehicle, project=project, ascending=True)
+		last_odometer = get_vehicle_odometer(vehicle, project=project, ascending=False)
+	else:
+		first_odometer = 0
+		last_odometer = 0
+
+	return frappe._dict({
+		'vehicle_first_odometer': first_odometer,
+		'vehicle_last_odometer': last_odometer,
 	})

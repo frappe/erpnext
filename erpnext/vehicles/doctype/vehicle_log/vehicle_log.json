@@ -15,20 +15,11 @@
   "item_name",
   "column_break_7",
   "date",
+  "amended_from",
   "odometer_reading",
   "odometer",
   "column_break_12",
-  "last_odometer",
-  "refuelling_details",
-  "fuel_qty",
-  "price",
-  "column_break_15",
-  "supplier",
-  "invoice",
-  "employee",
-  "service_details",
-  "service_detail",
-  "amended_from"
+  "last_odometer"
  ],
  "fields": [
   {
@@ -45,14 +36,6 @@
    "options": "VLOG-",
    "print_hide": 1,
    "set_only_once": 1
-  },
-  {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
-   "label": "Employee",
-   "options": "Employee"
   },
   {
    "fieldname": "column_break_4",
@@ -94,49 +77,6 @@
    "label": "Last Odometer Reading",
    "read_only": 1,
    "reqd": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "refuelling_details",
-   "fieldtype": "Section Break",
-   "label": "Refuelling Details"
-  },
-  {
-   "fieldname": "fuel_qty",
-   "fieldtype": "Float",
-   "label": "Fuel Qty"
-  },
-  {
-   "fieldname": "price",
-   "fieldtype": "Currency",
-   "label": "Fuel Price"
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "supplier",
-   "fieldtype": "Link",
-   "label": "Supplier",
-   "options": "Supplier"
-  },
-  {
-   "fieldname": "invoice",
-   "fieldtype": "Data",
-   "label": "Invoice Ref"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "service_details",
-   "fieldtype": "Section Break",
-   "label": "Service Details"
-  },
-  {
-   "fieldname": "service_detail",
-   "fieldtype": "Table",
-   "label": "Service Detail",
-   "options": "Vehicle Service"
   },
   {
    "fieldname": "amended_from",
@@ -183,7 +123,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-05-12 16:48:18.255641",
+ "modified": "2022-07-28 23:00:41.786278",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",
