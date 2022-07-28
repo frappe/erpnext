@@ -623,9 +623,20 @@ class SalarySlip(TransactionBase):
 
 	def add_structure_components(self, component_type):
 		data = self.get_data_for_eval()
+		timesheet_component = frappe.db.get_value(
+			"Salary Structure", self.salary_structure, "salary_component"
+		)
+
 		for struct_row in self._salary_structure_doc.get(component_type):
+			if self.salary_slip_based_on_timesheet and struct_row.salary_component == timesheet_component:
+				continue
+
 			amount = self.eval_condition_and_formula(struct_row, data)
-			if amount is not None and struct_row.statistical_component == 0:
+			if (
+				amount
+				or (struct_row.amount_based_on_formula and amount is not None)
+				and struct_row.statistical_component == 0
+			):
 				self.update_component_row(struct_row, amount, component_type, data=data)
 
 	def get_data_for_eval(self):
@@ -1352,23 +1363,22 @@ class SalarySlip(TransactionBase):
 		self.total_interest_amount = 0
 		self.total_principal_amount = 0
 
-		if not self.get("loans"):
-			for loan in self.get_loan_details():
+		self.set("loans", [])
+		for loan in self.get_loan_details():
+			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
 
-				amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
-
-				if amounts["interest_amount"] or amounts["payable_principal_amount"]:
-					self.append(
-						"loans",
-						{
-							"loan": loan.name,
-							"total_payment": amounts["interest_amount"] + amounts["payable_principal_amount"],
-							"interest_amount": amounts["interest_amount"],
-							"principal_amount": amounts["payable_principal_amount"],
-							"loan_account": loan.loan_account,
-							"interest_income_account": loan.interest_income_account,
-						},
-					)
+			if amounts["interest_amount"] or amounts["payable_principal_amount"]:
+				self.append(
+					"loans",
+					{
+						"loan": loan.name,
+						"total_payment": amounts["interest_amount"] + amounts["payable_principal_amount"],
+						"interest_amount": amounts["interest_amount"],
+						"principal_amount": amounts["payable_principal_amount"],
+						"loan_account": loan.loan_account,
+						"interest_income_account": loan.interest_income_account,
+					},
+				)
 
 		for payment in self.get("loans"):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")

@@ -105,6 +105,8 @@ class ProgramEnrollment(Document):
 						"academic_term": d.academic_term,
 						"fee_structure": d.fee_structure,
 						"program": self.program,
+						"student_batch": self.student_batch_name,
+						"student_category": self.student_category,
 						"due_date": d.due_date,
 						"student_name": self.student_name,
 						"program_enrollment": self.name,
