@@ -168,7 +168,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						}, __('Create'))
 					}
 
-					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
+					if (doc.docstatus === 1 && !doc.inter_company_reference) {
 						let me = this;
 						frappe.model.with_doc("Supplier", me.frm.doc.supplier, () => {
 							let supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);

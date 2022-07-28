@@ -126,7 +126,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (doc.docstatus == 1 && !doc.inter_company_reference) {
 			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function() {
 				var supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
 				var internal = supplier.is_internal_supplier;

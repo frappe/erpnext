@@ -230,7 +230,7 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 		jv1 = make_journal_entry("Sales Expenses - _TC1", "Buildings - _TC1", 100, posting_date=nowdate(), cost_center = "Main - _TC1", save=False)
-		jv1.inter_company_journal_entry_reference = jv.name
+		jv1.inter_company_reference = jv.name
 		jv1.company = "_Test Company 1"
 		jv1.voucher_type = "Inter Company Journal Entry"
 		jv1.multi_currency = 0
@@ -239,15 +239,15 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv.reload()
 
-		self.assertEqual(jv.inter_company_journal_entry_reference, jv1.name)
-		self.assertEqual(jv1.inter_company_journal_entry_reference, jv.name)
+		self.assertEqual(jv.inter_company_reference, jv1.name)
+		self.assertEqual(jv1.inter_company_reference, jv.name)
 
 		jv.cancel()
 		jv1.reload()
 		jv.reload()
 
-		self.assertEqual(jv.inter_company_journal_entry_reference, "")
-		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
+		self.assertEqual(jv.inter_company_reference, "")
+		self.assertEqual(jv1.inter_company_reference, "")
 
 	def test_jv_reference_no_in_gle(self):
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 500, save=False)

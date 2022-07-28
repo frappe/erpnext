@@ -46,7 +46,7 @@ frappe.ui.form.on("Journal Entry", {
 		// hide /unhide fields based on currency
 		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
 
-		if ((frm.doc.voucher_type == "Inter Company Journal Entry") && (frm.doc.docstatus == 1) && (!frm.doc.inter_company_journal_entry_reference)) {
+		if ((frm.doc.voucher_type == "Inter Company Journal Entry") && (frm.doc.docstatus == 1) && (!frm.doc.inter_company_reference)) {
 			frm.add_custom_button(__("Create Inter Company Journal Entry"),
 				function() {
 					frm.trigger("make_inter_company_journal_entry");

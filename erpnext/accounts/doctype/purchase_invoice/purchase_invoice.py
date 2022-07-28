@@ -83,7 +83,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_write_off_account()
 		self.create_remarks()
 		self.validate_purchase_receipt_if_update_stock()
-		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_reference)
 
 		self.set_returned_status()
 		self.set_status()
@@ -124,7 +124,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_zero_outstanding()
 
 		self.update_project()
-		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
@@ -143,7 +143,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		self.db_set('status', 'Cancelled')
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def set_title(self):
 		if self.letter_of_credit:

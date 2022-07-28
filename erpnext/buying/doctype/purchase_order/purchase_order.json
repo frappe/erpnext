@@ -31,7 +31,7 @@
   "ref_sq",
   "party_account_currency",
   "more_info_cb_3",
-  "inter_company_order_reference",
+  "inter_company_reference",
   "incoterms",
   "drop_ship",
   "customer",
@@ -1011,14 +1011,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "inter_company_order_reference",
-   "fieldtype": "Link",
-   "label": "Inter Company Order Reference",
-   "no_copy": 1,
-   "options": "Sales Order",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "per_received",
    "fieldtype": "Percent",
@@ -1583,12 +1575,20 @@
    "hidden": 1,
    "label": "Applies to Template Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Order Reference",
+   "no_copy": 1,
+   "options": "Sales Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2022-07-28 13:51:25.503920",
+ "modified": "2022-07-28 17:19:47.472514",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

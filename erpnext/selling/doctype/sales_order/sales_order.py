@@ -58,7 +58,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
-		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_reference)
 
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
@@ -87,7 +87,7 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
-		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_reference)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code, 'used')
@@ -107,7 +107,7 @@ class SalesOrder(SellingController):
 
 		self.update_blanket_order()
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 			update_coupon_code_count(self.coupon_code, 'cancelled')
@@ -1200,7 +1200,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 		target.apply_discount_on = ""
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
-		target.inter_company_order_reference = ""
+		target.inter_company_reference = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:

@@ -43,7 +43,7 @@
   "more_info_cb_2",
   "cost_center",
   "more_info_cb_3",
-  "inter_company_invoice_reference",
+  "inter_company_reference",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -1389,14 +1389,6 @@
    "report_hide": 1
   },
   {
-   "fieldname": "inter_company_invoice_reference",
-   "fieldtype": "Link",
-   "label": "Inter Company Invoice Reference",
-   "no_copy": 1,
-   "options": "Purchase Invoice",
-   "read_only": 1
-  },
-  {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "hidden": 1,
@@ -2233,12 +2225,20 @@
    "hidden": 1,
    "label": "Applies to Template Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Invoice Reference",
+   "no_copy": 1,
+   "options": "Purchase Invoice",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-07-28 13:51:49.596431",
+ "modified": "2022-07-28 17:19:41.636078",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

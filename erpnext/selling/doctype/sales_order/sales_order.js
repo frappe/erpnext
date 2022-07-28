@@ -211,7 +211,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						}, __('Create'))
 					}
 
-					if (me.frm.doc.docstatus === 1 && !me.frm.doc.inter_company_order_reference) {
+					if (me.frm.doc.docstatus === 1 && !me.frm.doc.inter_company_reference) {
 						let me = this;
 						frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
 							let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);

@@ -105,8 +105,8 @@ class JournalEntry(AccountsController):
 		pass
 
 	def validate_inter_company_accounts(self):
-		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
-			doc = frappe.get_doc("Journal Entry", self.inter_company_journal_entry_reference)
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
+			doc = frappe.get_doc("Journal Entry", self.inter_company_reference)
 			account_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 			previous_account_currency = frappe.get_cached_value('Company',  doc.company,  "default_currency")
 			if account_currency == previous_account_currency:
@@ -114,9 +114,9 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
 
 	def update_inter_company_jv(self):
-		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
-			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
-				"inter_company_journal_entry_reference", self.name)
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
+			frappe.db.set_value("Journal Entry", self.inter_company_reference,\
+				"inter_company_reference", self.name)
 
 	def update_invoice_discounting(self):
 		def _validate_invoice_discounting_status(inv_disc, id_status, expected_status, row_id):
@@ -171,11 +171,11 @@ class JournalEntry(AccountsController):
 						asset.set_status()
 
 	def unlink_inter_company_jv(self):
-		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
-			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
-				"inter_company_journal_entry_reference", "")
+		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
+			frappe.db.set_value("Journal Entry", self.inter_company_reference,\
+				"inter_company_reference", "")
 			frappe.db.set_value("Journal Entry", self.name,\
-				"inter_company_journal_entry_reference", "")
+				"inter_company_reference", "")
 
 	def unlink_asset_adjustment_entry(self):
 		frappe.db.sql(""" update `tabAsset Value Adjustment`
@@ -1283,7 +1283,7 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 	journal_entry.voucher_type = voucher_type
 	journal_entry.company = company
 	journal_entry.posting_date = nowdate()
-	journal_entry.inter_company_journal_entry_reference = name
+	journal_entry.inter_company_reference = name
 	return journal_entry.as_dict()
 
 @frappe.whitelist()

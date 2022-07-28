@@ -37,8 +37,8 @@
   "party_account_currency",
   "more_info_cb_2",
   "source",
+  "inter_company_reference",
   "more_info_cb_3",
-  "inter_company_order_reference",
   "campaign",
   "tax_id",
   "tax_cnic",
@@ -985,14 +985,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "inter_company_order_reference",
-   "fieldtype": "Link",
-   "label": "Inter Company Order Reference",
-   "no_copy": 1,
-   "options": "Purchase Order",
-   "read_only": 1
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -1717,12 +1709,20 @@
    "hidden": 1,
    "label": "Applies to Template Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Order Reference",
+   "no_copy": 1,
+   "options": "Purchase Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2022-07-28 13:51:07.578217",
+ "modified": "2022-07-28 17:19:54.273231",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

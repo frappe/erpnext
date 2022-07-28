@@ -159,7 +159,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.set_default_print_format();
-		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
+		if (doc.docstatus == 1 && !doc.inter_company_reference) {
 			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
 				var internal = customer.is_internal_customer;

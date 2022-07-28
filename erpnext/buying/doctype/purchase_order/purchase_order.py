@@ -56,7 +56,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 
-		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_order_reference)
+		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_reference)
 
 		self.validate_with_previous_doc()
 		self.set_receipt_status()
@@ -80,7 +80,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
-		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -103,7 +103,7 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 	def on_update(self):
 		pass

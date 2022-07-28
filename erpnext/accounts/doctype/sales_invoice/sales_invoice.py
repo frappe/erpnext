@@ -66,7 +66,7 @@ class SalesInvoice(SellingController):
 		self.validate_account_for_change_amount()
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
-		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
+		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_reference)
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -159,7 +159,7 @@ class SalesInvoice(SellingController):
 		if frappe.get_cached_value('Selling Settings', None, 'sales_update_frequency') == "Each Transaction":
 			update_company_current_month_sales(self.company)
 
-		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		update_linked_doc(self.doctype, self.name, self.inter_company_reference)
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if not self.is_return and self.loyalty_program:
@@ -211,7 +211,7 @@ class SalesInvoice(SellingController):
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()
 
-		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
 		# Healthcare Service Invoice.
 		if "Healthcare" in frappe.get_active_domains():
@@ -1588,29 +1588,32 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 
 
 def update_linked_doc(doctype, name, inter_company_reference):
-
-	if doctype in ["Sales Invoice", "Purchase Invoice"]:
-		ref_field = "inter_company_invoice_reference"
-	else:
-		ref_field = "inter_company_order_reference"
-
+	ref_doctype = get_intercompany_ref_doctype(doctype)
 	if inter_company_reference:
-		frappe.db.set_value(doctype, inter_company_reference,\
-			ref_field, name)
+		frappe.db.set_value(ref_doctype, inter_company_reference, "inter_company_reference", name, notify=1)
 
 
 def unlink_inter_company_doc(doctype, name, inter_company_reference):
-
-	if doctype in ["Sales Invoice", "Purchase Invoice"]:
-		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
-		ref_field = "inter_company_invoice_reference"
-	else:
-		ref_doc = "Purchase Order" if doctype == "Sales Order" else "Sales Order"
-		ref_field = "inter_company_order_reference"
-
+	ref_doctype = get_intercompany_ref_doctype(doctype)
 	if inter_company_reference:
-		frappe.db.set_value(doctype, name, ref_field, "")
-		frappe.db.set_value(ref_doc, inter_company_reference, ref_field, "")
+		frappe.db.set_value(doctype, name, "inter_company_reference", "")
+		frappe.db.set_value(ref_doctype, inter_company_reference, "inter_company_reference", "", notify=1)
+
+
+def get_intercompany_ref_doctype(doctype):
+	ref_doc_map = {
+		"Sales Invoice": "Purchase Invoice",
+		"Sales Order": "Purchase Order",
+		"Delivery Note": "Purchase Receipt",
+	}
+	for source, target in ref_doc_map.copy():
+		ref_doc_map[target] = source
+
+	ref_doc = ref_doc_map.get(doctype)
+	if not ref_doc:
+		frappe.throw(_("Inter Company Transaction for {0} not allowed").format(doctype))
+
+	return ref_doc
 
 
 def get_list_context(context=None):
@@ -1763,14 +1766,14 @@ def get_internal_party(parties, link_doctype, doc):
 
 def validate_inter_company_transaction(doc, doctype):
 	details = get_inter_company_details(doc, doctype)
-	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order"] else doc.buying_price_list
+	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Delivery Note", "Sales Order"] else doc.buying_price_list
 	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
 	if not valid_price_list:
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
 
 	party = details.get("party")
 	if not party:
-		partytype = "Supplier" if doctype in ["Sales Invoice", "Sales Order"] else "Customer"
+		partytype = "Supplier" if doctype in ["Sales Invoice", "Delivery Note", "Sales Order"] else "Customer"
 		frappe.throw(_("No {0} found for Inter Company Transactions.").format(partytype))
 
 	company = details.get("company")
@@ -1787,12 +1790,8 @@ def make_inter_company_purchase_invoice(source_name, target_doc=None):
 
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	if doctype in ["Sales Invoice", "Sales Order"]:
-		source_doc = frappe.get_doc(doctype, source_name)
-		target_doctype = "Purchase Invoice" if doctype == "Sales Invoice" else "Purchase Order"
-	else:
-		source_doc = frappe.get_doc(doctype, source_name)
-		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
+	source_doc = frappe.get_doc(doctype, source_name)
+	target_doctype = get_intercompany_ref_doctype(doctype)
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -1801,7 +1800,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target.run_method("set_missing_values")
 
 	def update_details(source_doc, target_doc, source_parent, target_parent):
-		target_doc.inter_company_invoice_reference = source_doc.name
+		target_doc.inter_company_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
