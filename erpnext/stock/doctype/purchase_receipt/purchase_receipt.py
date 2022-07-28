@@ -296,6 +296,18 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries)
 
+	# Create Batch
+	def before_save(self):
+		for d in self.get("items"):
+			if d.is_new():
+				batch_data = frappe.new_doc("Batch")
+				batch_data.item = d.get("item_code")
+				batch_data.batch_id = d.get("batch_number")
+				batch_data.manufacturing_date= d.get("manufacturing_date")
+				batch_data.expiry_date= d.get("expiry_date")
+				batch_data.insert(ignore_mandatory=True)
+				d.batch_no = d.get("batch_number")
+
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		if erpnext.is_perpetual_inventory_enabled(self.company):
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
