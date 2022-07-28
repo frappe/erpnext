@@ -51,7 +51,7 @@ frappe.query_reports["Gross Profit"] = {
 		}
 		value = default_formatter(value, row, column, data);
 
-		if (data && (data.indent == 0.0 || row[1].content == "Total")) {
+		if (data && (data.indent == 0.0 || (row[1] != undefined ? row[1].content == "Total" : true))) {
 			value = $(`<span>${value}</span>`);
 			var $value = $(value).css("font-weight", "bold");
 			value = $value.wrap("<p></p>").parent().html();
