@@ -611,6 +611,34 @@ class TestBOM(FrappeTestCase):
 		bom.reload()
 		self.assertEqual(frappe.get_value("Item", fg_item.item_code, "default_bom"), bom.name)
 
+	def test_exploded_items_rate(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 99, "last_purchase_rate": 89}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
+
+		bom.rm_cost_as_per = "Last Purchase Rate"
+		bom.save()
+		self.assertEqual(bom.items[0].base_rate, 89)
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+		bom.rm_cost_as_per = "Price List"
+		bom.save()
+		self.assertEqual(bom.items[0].base_rate, 0.0)
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+		bom.rm_cost_as_per = "Valuation Rate"
+		bom.save()
+		self.assertEqual(bom.items[0].base_rate, 99)
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+		bom.submit()
+		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
