@@ -385,7 +385,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	make_inter_company_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_inter_company_purchase_invoice",
-			frm: me.frm
+			frm: this.frm
 		});
 	},
 

@@ -1308,6 +1308,7 @@
    "fieldname": "inter_company_invoice_reference",
    "fieldtype": "Link",
    "label": "Inter Company Invoice Reference",
+   "no_copy": 1,
    "options": "Sales Invoice",
    "read_only": 1
   },
@@ -1829,7 +1830,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2022-07-24 11:48:23.098873",
+ "modified": "2022-07-28 13:51:58.628694",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
