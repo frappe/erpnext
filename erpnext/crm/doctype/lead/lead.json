@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_events_in_timeline": 1,
+ "allow_rename": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2022-02-08 13:14:41.083327",
@@ -514,7 +515,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-07-22 15:55:03.176094",
+ "modified": "2022-07-28 15:55:03.176094",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
