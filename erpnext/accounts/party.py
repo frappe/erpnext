@@ -208,7 +208,7 @@ def set_address_details(
 			)
 
 	if company_address:
-		party_details.update({"company_address": company_address})
+		party_details.company_address = company_address
 	else:
 		party_details.update(get_company_address(company))
 
@@ -220,12 +220,31 @@ def set_address_details(
 		get_regional_address_details(party_details, doctype, company)
 
 	elif doctype and doctype in ["Purchase Invoice", "Purchase Order", "Purchase Receipt"]:
-		if party_details.company_address:
-			party_details["shipping_address"] = shipping_address or party_details["company_address"]
-			party_details.shipping_address_display = get_address_display(party_details["shipping_address"])
+		if shipping_address:
 			party_details.update(
-				get_fetch_values(doctype, "shipping_address", party_details.shipping_address)
+				shipping_address=shipping_address,
+				shipping_address_display=get_address_display(shipping_address),
+				**get_fetch_values(doctype, "shipping_address", shipping_address)
 			)
+
+		if party_details.company_address:
+			# billing address
+			party_details.update(
+				billing_address=party_details.company_address,
+				billing_address_display=(
+					party_details.company_address_display or get_address_display(party_details.company_address)
+				),
+				**get_fetch_values(doctype, "billing_address", party_details.company_address)
+			)
+
+			# shipping address - if not already set
+			if not party_details.shipping_address:
+				party_details.update(
+					shipping_address=party_details.billing_address,
+					shipping_address_display=party_details.billing_address_display,
+					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
+				)
+
 		get_regional_address_details(party_details, doctype, company)
 
 	return party_details.get(billing_address_field), party_details.shipping_address_name
