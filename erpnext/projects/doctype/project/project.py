@@ -741,8 +741,7 @@ class Project(StatusUpdater):
 					self.set(project_field, None)
 
 	def update_odometer(self):
-		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
-		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_project_odometer
+		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_vehicle_log, get_project_odometer
 
 		if not self.meta.has_field('applies_to_vehicle'):
 			return
@@ -752,14 +751,14 @@ class Project(StatusUpdater):
 
 			odo = get_project_odometer(self.name, self.applies_to_vehicle)
 			if not odo.vehicle_first_odometer and self.vehicle_first_odometer:
-				make_odometer_log(self.applies_to_vehicle, self.vehicle_first_odometer, project=self.name,
+				make_vehicle_log(self.applies_to_vehicle, odometer=self.vehicle_first_odometer, project=self.name,
 					from_project_update=True)
 				reload = True
 
 			if reload:
 				odo = get_project_odometer(self.name, self.applies_to_vehicle)
 			if self.vehicle_last_odometer and self.vehicle_last_odometer > odo.vehicle_last_odometer:
-				make_odometer_log(self.applies_to_vehicle, self.vehicle_last_odometer, project=self.name,
+				make_vehicle_log(self.applies_to_vehicle, odometer=self.vehicle_last_odometer, project=self.name,
 					from_project_update=True)
 				reload = True
 

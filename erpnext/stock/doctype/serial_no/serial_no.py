@@ -204,26 +204,14 @@ class SerialNo(StockController):
 			self.vehicle_owner_name = None
 
 		if self.vehicle:
-			filters = {"vehicle": self.vehicle, "docstatus": 1}
-			if self.purchase_date:
-				filters['posting_date'] = ['>=', self.purchase_date]
+			from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_last_customer_log
+			last_customer_log = get_last_customer_log(self.vehicle, self.purchase_date)
 
-			transfer_letter_details = frappe.get_all("Vehicle Transfer Letter",
-				fields=['customer', 'customer_name', 'financer', 'financer_name', 'lessee_name', 'posting_date', 'creation'],
-				filters=filters, order_by="posting_date desc, creation desc", limit=1)
-
-			registration_receipt_details = frappe.get_all("Vehicle Registration Receipt",
-				fields=['customer', 'customer_name', 'financer', 'financer_name', 'lessee_name', 'posting_date', 'creation'],
-				filters=filters, order_by="posting_date desc, creation desc", limit=1)
-
-			name_change_transactions = transfer_letter_details + registration_receipt_details
-			name_change_details = max(name_change_transactions, key=lambda d: (d.posting_date, d.creation)) if name_change_transactions else None
-
-			if name_change_details:
-				self.customer = name_change_details.get('customer')
-				self.customer_name = name_change_details.get('lessee_name') or name_change_details.get('customer_name')
-				self.vehicle_owner = name_change_details.get('financer')
-				self.vehicle_owner_name = name_change_details.get('financer_name')
+			if last_customer_log:
+				self.customer = last_customer_log.get('customer')
+				self.customer_name = last_customer_log.get('customer_name')
+				self.vehicle_owner = last_customer_log.get('vehicle_owner')
+				self.vehicle_owner_name = last_customer_log.get('vehicle_owner_name')
 
 	def get_last_sle(self, serial_no=None):
 		entries = {}

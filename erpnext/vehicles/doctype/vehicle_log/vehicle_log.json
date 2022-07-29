@@ -9,17 +9,33 @@
   "vehicle_section",
   "naming_series",
   "vehicle",
-  "project",
   "column_break_4",
-  "item_code",
-  "item_name",
+  "project",
   "column_break_7",
   "date",
   "amended_from",
-  "odometer_reading",
+  "vehicle_details_section",
+  "item_code",
+  "item_name",
+  "cb_12",
+  "vehicle_chassis_no",
+  "vehicle_engine_no",
+  "column_break_15",
+  "vehicle_license_plate",
+  "vehicle_color",
+  "reading",
   "odometer",
+  "last_odometer",
   "column_break_12",
-  "last_odometer"
+  "customer",
+  "customer_name",
+  "column_break_17",
+  "vehicle_owner",
+  "vehicle_owner_name",
+  "reference_section",
+  "reference_type",
+  "column_break_19",
+  "reference_name"
  ],
  "fields": [
   {
@@ -46,11 +62,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "odometer_reading",
-   "fieldtype": "Section Break",
-   "label": "Odometer Reading"
-  },
-  {
    "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
@@ -65,7 +76,7 @@
    "fieldtype": "Int",
    "in_list_view": 1,
    "label": "Current Odometer Reading",
-   "reqd": 1
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_12",
@@ -75,8 +86,8 @@
    "fieldname": "last_odometer",
    "fieldtype": "Int",
    "label": "Last Odometer Reading",
-   "read_only": 1,
-   "reqd": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -100,7 +111,6 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
@@ -120,30 +130,126 @@
    "fieldtype": "Data",
    "label": "Vehicle Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "reading",
+   "fieldtype": "Section Break",
+   "label": "Reading"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Reference Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reference Name",
+   "no_copy": 1,
+   "options": "reference_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_owner",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle Owner",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "vehicle_owner.customer_name",
+   "fieldname": "vehicle_owner_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Owner Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fieldname": "cb_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.chassis_no",
+   "fieldname": "vehicle_chassis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.engine_no",
+   "fieldname": "vehicle_engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.license_plate",
+   "fieldname": "vehicle_license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.color",
+   "fieldname": "vehicle_color",
+   "fieldtype": "Data",
+   "label": "Vehicle Color",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-28 23:00:41.786278",
+ "modified": "2022-07-29 11:05:53.235999",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",
  "owner": "Administrator",
  "permissions": [
-  {
-   "amend": 1,
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Fleet Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
   {
    "amend": 1,
    "cancel": 1,
@@ -172,6 +278,15 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
+   "share": 1
   },
   {
    "email": 1,

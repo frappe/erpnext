@@ -26,9 +26,11 @@ class VehicleGatePass(VehicleTransactionController):
 
 	def on_submit(self):
 		self.update_project_vehicle_status()
+		self.make_vehicle_log()
 
 	def on_cancel(self):
 		self.update_project_vehicle_status()
+		self.cancel_vehicle_log()
 
 	def set_title(self):
 		self.title = self.get('customer_name') or self.get('customer')

@@ -31,13 +31,13 @@ class VehicleReceipt(VehicleTransactionController):
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.update_vehicle_warranty_no()
-		self.make_odometer_log()
 		self.update_vehicle_booking_order_delivery()
+		self.make_vehicle_log()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
-		self.cancel_odometer_log()
 		self.update_vehicle_booking_order_delivery()
+		self.cancel_vehicle_log()
 
 	def set_title(self):
 		party = self.get('customer_name') or self.get('customer') or self.get('supplier_name') or self.get('supplier')

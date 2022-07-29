@@ -1068,7 +1068,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		dialog.set_primary_action(__("Create"), function () {
 			var values = dialog.get_values();
 			return frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.make_odometer_log_api",
+				method: "erpnext.vehicles.doctype.vehicle_log.vehicle_log.make_odometer_log",
 				args: {
 					"vehicle": me.frm.doc.applies_to_vehicle,
 					"odometer": cint(values.new_odometer),

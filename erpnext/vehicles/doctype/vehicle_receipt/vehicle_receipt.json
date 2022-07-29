@@ -57,7 +57,6 @@
   "lr_no",
   "more_info_section",
   "vehicle_odometer",
-  "vehicle_log",
   "vehicle_warranty_no",
   "column_break_48",
   "keys",
@@ -394,14 +393,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "vehicle_log",
-   "fieldtype": "Link",
-   "label": "Vehicle Odometer Log",
-   "no_copy": 1,
-   "options": "Vehicle Log",
-   "read_only": 1
-  },
-  {
    "fieldname": "vehicle_odometer",
    "fieldtype": "Int",
    "label": "Odometer Reading",
@@ -461,7 +452,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-05-09 18:40:30.348657",
+ "modified": "2022-07-28 23:20:27.861233",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

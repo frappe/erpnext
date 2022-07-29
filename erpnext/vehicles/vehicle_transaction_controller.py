@@ -11,7 +11,7 @@ from erpnext.vehicles.doctype.vehicle.vehicle import warn_vehicle_reserved
 from erpnext.accounts.party import validate_party_frozen_disabled
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
-from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log, odometer_log_exists, get_vehicle_odometer
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_vehicle_log, get_vehicle_odometer
 import json
 from six import string_types
 
@@ -517,13 +517,6 @@ class VehicleTransactionController(StockController):
 			project.update_vehicle_booking_order_pdi_status()
 			project.notify_update()
 
-	def update_vehicle_party_details(self):
-		if self.get('vehicle'):
-			sr_no = frappe.get_doc("Serial No", self.vehicle)
-			last_sle = sr_no.get_last_sle()
-			sr_no.set_party_details(last_sle.get("purchase_sle"), last_sle.get("delivery_sle"))
-			sr_no.save(ignore_permissions=True)
-
 	def get_vehicle_booking_order(self, doc=None):
 		if not doc:
 			doc = self
@@ -552,20 +545,29 @@ class VehicleTransactionController(StockController):
 			if frappe.db.get_value("Vehicle", self.vehicle, "warranty_no") != self.get('vehicle_warranty_no'):
 				frappe.db.set_value("Vehicle", self.vehicle, "warranty_no", self.vehicle_warranty_no, notify=1)
 
-	def make_odometer_log(self):
-		if self.meta.has_field('vehicle_log') and cint(self.get('vehicle_odometer')):
-			if not odometer_log_exists(self.vehicle, self.vehicle_odometer):
-				vehicle_log = make_odometer_log(self.vehicle, self.vehicle_odometer,
-					date=self.get('posting_date') or self.get('transaction_date'), project=self.get('project'))
-				self.db_set('vehicle_log', vehicle_log)
+	def make_vehicle_log(self, do_not_update_customer=False):
+		if cint(self.get('vehicle_odometer')) or self.get('customer'):
+			make_vehicle_log(self.vehicle,
+				odometer=cint(self.get('vehicle_odometer')),
+				customer=self.get('customer'),
+				vehicle_owner=self.get('financer'),
+				date=self.get('posting_date') or self.get('transaction_date'),
+				project=self.get('project'),
+				reference_type=self.doctype,
+				reference_name=self.name,
+				do_not_update_customer=do_not_update_customer)
 
-	def cancel_odometer_log(self):
-		if self.meta.has_field('vehicle_log') and self.get('vehicle_log'):
-			doc = frappe.get_doc("Vehicle Log", self.vehicle_log)
+	def cancel_vehicle_log(self):
+		vehicle_log = frappe.db.get_value("Vehicle Log", {
+			'reference_type': self.doctype,
+			'reference_name': self.name,
+			'docstatus': 1
+		})
+
+		if vehicle_log:
+			doc = frappe.get_doc("Vehicle Log", vehicle_log)
 			doc.flags.ignore_permissions = True
 			doc.cancel()
-
-			self.db_set('vehicle_log', None)
 
 	def update_project_vehicle_checklist(self):
 		if self.get('project') and self.get('vehicle_checklist'):

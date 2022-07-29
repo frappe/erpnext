@@ -29,16 +29,16 @@ class VehicleRegistrationReceipt(VehicleTransactionController):
 
 	def on_submit(self):
 		self.update_vehicle_details()
-		self.update_vehicle_party_details()
 		self.update_vehicle_registration_order()
 		self.update_vehicle_booking_order_registration()
 		self.update_vehicle_booking_order_transfer_customer()
+		self.make_vehicle_log()
 
 	def on_cancel(self):
-		self.update_vehicle_party_details()
 		self.update_vehicle_registration_order()
 		self.update_vehicle_booking_order_registration()
 		self.update_vehicle_booking_order_transfer_customer()
+		self.cancel_vehicle_log()
 
 	def set_title(self):
 		self.title = "{0} - {1}".format(self.get('vehicle_license_plate'), self.get('customer_name') or self.get('customer'))
