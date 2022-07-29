@@ -236,6 +236,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 						financer: me.frm.doc.financer,
 						finance_type: me.frm.doc.finance_type,
 						transaction_date: me.frm.doc.transaction_date,
+						delivery_date: me.frm.doc.delivery_date,
 						item_code: me.frm.doc.item_code,
 						do_not_apply_withholding_tax: cint(me.frm.doc.do_not_apply_withholding_tax)
 					}
@@ -262,6 +263,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 						company: me.frm.doc.company,
 						item_code: me.frm.doc.item_code,
 						transaction_date: me.frm.doc.transaction_date,
+						delivery_date: me.frm.doc.delivery_date,
 						delivery_period: me.frm.doc.delivery_period,
 						vehicle_price_list: me.frm.doc.vehicle_price_list,
 						supplier: me.frm.doc.supplier,
@@ -422,7 +424,10 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.delivery_date) {
 			this.get_delivery_period_details_from_date();
 			this.set_lead_time_days();
-			this.frm.trigger('payment_terms_template');
+			frappe.run_serially([
+				() => this.get_vehicle_price(),
+				() => this.frm.trigger('payment_terms_template')
+			]);
 		}
 	},
 
@@ -601,6 +606,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 					vehicle_price_list: me.frm.doc.vehicle_price_list,
 					fni_price_list: me.frm.doc.fni_price_list,
 					transaction_date: me.frm.doc.transaction_date,
+					delivery_date: me.frm.doc.delivery_date,
 					tax_status: tax_status,
 					do_not_apply_withholding_tax: cint(me.frm.doc.do_not_apply_withholding_tax)
 				},
@@ -633,7 +639,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 			frappe.call({
 				method: "erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule.get_withholding_tax_amount",
 				args: {
-					date: cstr(me.frm.doc.transaction_date),
+					date: cstr(me.frm.doc.delivery_date || me.frm.doc.transaction_date),
 					item_code: me.frm.doc.item_code,
 					tax_status: tax_status,
 					company: me.frm.doc.company

@@ -203,7 +203,7 @@ class VehicleBookingController(AccountsController):
 		self.total_in_words = money_in_words(self.grand_total, self.company_currency)
 
 	def get_withholding_tax_amount(self, tax_status):
-		return get_withholding_tax_amount(self.transaction_date, self.item_code, tax_status, self.company)
+		return get_withholding_tax_amount(self.delivery_date or self.transaction_date, self.item_code, tax_status, self.company)
 
 	def get_party_tax_status(self):
 		party_type, customer, financer = get_party_doc(self.as_dict())
@@ -280,7 +280,8 @@ def get_customer_details(args, get_withholding_tax=True):
 
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
 		if not cint(args.do_not_apply_withholding_tax):
-			out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, tax_status, args.company)
+			out.withholding_tax_amount = get_withholding_tax_amount(args.delivery_date or args.transaction_date,
+				args.item_code, tax_status, args.company)
 		else:
 			out.withholding_tax_amount = 0
 
@@ -467,6 +468,19 @@ def get_item_details(args):
 		party_type, party, financer = get_party_doc(args)
 		args.tax_status = get_party_tax_status(args, party, financer)
 
+	if args.doctype == "Vehicle Quotation":
+		if not cint(args.quotation_validity_days) and cint(item.quotation_validity_days):
+			out.quotation_validity_days = cint(item.quotation_validity_days)
+			if out.quotation_validity_days:
+				out.valid_till = add_days(getdate(args.transaction_date), out.quotation_validity_days - 1)
+
+	if args.doctype and frappe.get_meta(args.doctype).has_field('lead_time_days'):
+		out.lead_time_days = cint(args.lead_time_days) if 'lead_time_days' in args else cint(item.lead_time_days)
+
+		if out.lead_time_days:
+			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
+			out.delivery_period = get_delivery_period(out.delivery_date)
+
 	tax_status = args.tax_status
 	if args.doctype == "Vehicle Quotation":
 		tax_status = tax_status or 'Filer'
@@ -474,8 +488,10 @@ def get_item_details(args):
 	out.exempt_from_vehicle_withholding_tax = cint(item.exempt_from_vehicle_withholding_tax)
 
 	if out.vehicle_price_list:
-		out.update(get_vehicle_price(args.company, item.name, out.vehicle_price_list, out.fni_price_list,
-			args.transaction_date, tax_status, cint(args.do_not_apply_withholding_tax)))
+		out.update(get_vehicle_price(args.company, item.name,
+			vehicle_price_list=out.vehicle_price_list, fni_price_list=out.fni_price_list,
+			transaction_date=args.transaction_date, delivery_date=out.delivery_date or args.delivery_date,
+			tax_status=tax_status, do_not_apply_withholding_tax=cint(args.do_not_apply_withholding_tax)))
 
 	if not args.payment_terms_template:
 		out.payment_terms_template = item.default_payment_terms
@@ -491,19 +507,6 @@ def get_item_details(args):
 			out.tc_name = get_default_terms(item, args)
 			if not out.tc_name:
 				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
-
-	if args.doctype == "Vehicle Quotation":
-		if not cint(args.quotation_validity_days) and cint(item.quotation_validity_days):
-			out.quotation_validity_days = cint(item.quotation_validity_days)
-			if out.quotation_validity_days:
-				out.valid_till = add_days(getdate(args.transaction_date), out.quotation_validity_days - 1)
-
-	if args.doctype and frappe.get_meta(args.doctype).has_field('lead_time_days'):
-		out.lead_time_days = cint(args.lead_time_days) if 'lead_time_days' in args else cint(item.lead_time_days)
-
-		if out.lead_time_days:
-			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
-			out.delivery_period = get_delivery_period(out.delivery_date)
 
 	out.vehicle_allocation_required = get_vehicle_allocation_required(item.name,
 		delivery_period=out.delivery_period or args.delivery_period)
@@ -566,8 +569,8 @@ def get_vehicle_default_supplier(item_code, company):
 
 
 @frappe.whitelist()
-def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=None, transaction_date=None,
-		tax_status=None, do_not_apply_withholding_tax=False):
+def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=None,
+		transaction_date=None, delivery_date=None, tax_status=None, do_not_apply_withholding_tax=False):
 	if not item_code:
 		frappe.throw(_("Variant Item Code is mandatory"))
 	if not vehicle_price_list:
@@ -575,13 +578,13 @@ def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=Non
 	if not company:
 		frappe.throw(_("Company is mandatory"))
 
-	transaction_date = getdate(transaction_date)
+	price_date = getdate(delivery_date or transaction_date)
 	item = frappe.get_cached_doc("Item", item_code)
 
 	out = frappe._dict()
 	vehicle_price_args = {
 		"price_list": vehicle_price_list,
-		"transaction_date": transaction_date,
+		"transaction_date": price_date,
 		"uom": item.stock_uom
 	}
 
@@ -590,7 +593,7 @@ def get_vehicle_price(company, item_code, vehicle_price_list, fni_price_list=Non
 	out.vehicle_amount = flt(vehicle_item_price)
 
 	if not cint(do_not_apply_withholding_tax):
-		out.withholding_tax_amount = get_withholding_tax_amount(transaction_date, item_code, tax_status, company)
+		out.withholding_tax_amount = get_withholding_tax_amount(price_date, item_code, tax_status, company)
 	else:
 		out.withholding_tax_amount = 0
 

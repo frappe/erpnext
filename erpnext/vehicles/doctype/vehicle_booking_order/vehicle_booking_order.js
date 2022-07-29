@@ -813,6 +813,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 							company: me.frm.doc.company,
 							item_code: me.frm.doc.item_code,
 							transaction_date: me.frm.doc.transaction_date,
+							delivery_date: me.frm.doc.delivery_date,
 							customer: values.customer,
 							customer_is_company: values.customer_is_company,
 							financer: values.financer,
