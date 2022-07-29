@@ -107,6 +107,8 @@ def validate_returned_items(doc):
 		elif d.item_name:
 			items_returned = True
 
+	if doc.get('is_return') and len(doc.get('items')) == 0:
+		items_returned = True
 	if not items_returned:
 		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
 

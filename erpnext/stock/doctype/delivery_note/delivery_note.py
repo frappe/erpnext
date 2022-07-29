@@ -201,65 +201,65 @@ class DeliveryNote(SellingController):
 			self.set("returnable_items", [])        
 		## check if returanable manage manullay
 		elif not self.get('manually_manage_return_items'):
-			if self.is_new() == True:
-				self.returnable_items = {}
-				from nrp_manufacturing.utils import returnable_items
-				club_items = []
-				for item in self.items:
-					is_add = True
-					for ci in club_items:
-						if ci.item_code == item.item_code:
-							ci.qty += item.qty
-							is_add = False
-							break
-					if is_add == True:
-						_item = copy(item)
-						club_items.append(_item)
+			# if self.is_new() == True:
+			self.returnable_items = {}
+			from nrp_manufacturing.utils import returnable_items
+			club_items = []
+			for item in self.items:
+				is_add = True
+				for ci in club_items:
+					if ci.item_code == item.item_code:
+						ci.qty += item.qty
+						is_add = False
+						break
+				if is_add == True:
+					_item = copy(item)
+					club_items.append(_item)
 
-				returnables = returnable_items(club_items,self.company)			
-				for returnable in returnables:
-					ordered_qty = 0
-					for item in club_items:
-						if item.item_code == returnable.item:
-							ordered_qty = item.qty
-							break
-					if ordered_qty == 0:
-						frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
-					if returnable.returnable_qty == 1:
-						qty = ordered_qty / returnable.item_qty
-					else:
-						res = returnable.item_qty / returnable.returnable_qty
-						qty = ordered_qty * res
-					qty = math.ceil(qty)
-									# check if item is ordered then please adjust the RI quantity
-					minus_qty = 0
-					for i in self.items:
-						if i.item_code == returnable.returnable_item:
-							minus_qty = i.qty
-							break
-					qty -= minus_qty
-					
-					temp_item = self.append('returnable_items',{})
-					temp_item.item_code = returnable.returnable_item
-					temp_item.item_name = returnable.returnable_item_name
-					temp_item.rate = returnable.sale_price
-					temp_item.actual_qty = qty
-					temp_item.so_qty = qty
-					if self.is_return == True:
+			returnables = returnable_items(club_items,self.company)			
+			for returnable in returnables:
+				ordered_qty = 0
+				for item in club_items:
+					if item.item_code == returnable.item:
+						ordered_qty = item.qty
+						break
+				if ordered_qty == 0:
+					frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
+				if returnable.returnable_qty == 1:
+					qty = ordered_qty / returnable.item_qty
+				else:
+					res = returnable.item_qty / returnable.returnable_qty
+					qty = ordered_qty * res
+				qty = math.ceil(qty)
+								# check if item is ordered then please adjust the RI quantity
+				minus_qty = 0
+				for i in self.items:
+					if i.item_code == returnable.returnable_item:
+						minus_qty = i.qty
+						break
+				qty -= minus_qty
+				
+				temp_item = self.append('returnable_items',{})
+				temp_item.item_code = returnable.returnable_item
+				temp_item.item_name = returnable.returnable_item_name
+				temp_item.rate = returnable.sale_price
+				temp_item.actual_qty = qty
+				temp_item.so_qty = qty
+				if self.is_return == True:
 						temp_item.return_qty = qty
 						temp_item.so_qty = 0 # in case of return
-					# if len(self.get('returnable_items')) != len(returnables): # need to change
-					# 	temp_item = self.append('returnable_items',{})
-					# 	temp_item.item_code = returnable.returnable_item
-					# 	temp_item.item_name = returnable.returnable_item_name
-					# 	temp_item.rate = returnable.sale_price
-					# 	temp_item.actual_qty = qty
-					# 	temp_item.so_qty = qty
-					# else:
-					# 	for ritems in self.get('returnable_items'):
-					# 		if ritems.item_reference == returnable.item:
-					# 			ritems.actual_qty = qty
-					# 			break
+				# if len(self.get('returnable_items')) != len(returnables): # need to change
+				# 	temp_item = self.append('returnable_items',{})
+				# 	temp_item.item_code = returnable.returnable_item
+				# 	temp_item.item_name = returnable.returnable_item_name
+				# 	temp_item.rate = returnable.sale_price
+				# 	temp_item.actual_qty = qty
+				# 	temp_item.so_qty = qty
+				# else:
+				# 	for ritems in self.get('returnable_items'):
+				# 		if ritems.item_reference == returnable.item:
+				# 			ritems.actual_qty = qty
+				# 			break
 		
 	def on_submit(self):
 		self.validate_packed_qty()
