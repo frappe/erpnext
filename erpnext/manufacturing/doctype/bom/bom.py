@@ -11,8 +11,10 @@ import frappe
 from frappe import _
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, cstr, flt, today
 from frappe.website.website_generator import WebsiteGenerator
+from pypika.terms import ExistsCriterion
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
@@ -397,11 +399,17 @@ class BOM(WebsiteGenerator):
 
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
-			parent_boms = frappe.db.sql_list(
-				"""select distinct parent from `tabBOM Item`
-				where bom_no = %s and docstatus=1 and parenttype='BOM'""",
-				self.name,
-			)
+			bom_item = frappe.qb.DocType("BOM Item")
+			result = (
+				frappe.qb.from_(bom_item)
+				.select(bom_item.parent)
+				.distinct()
+				.where(
+					(bom_item.bom_no == self.name) & (bom_item.docstatus == 1) & (bom_item.parenttype == "BOM")
+				)
+			).run(as_list=True)
+
+			parent_boms = [r[0] for r in result]
 
 			for bom in parent_boms:
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
@@ -413,19 +421,24 @@ class BOM(WebsiteGenerator):
 		if self.total_cost:
 			cost = self.total_cost / self.quantity
 
-			frappe.db.sql(
-				"""update `tabBOM Item` set rate=%s, amount=stock_qty*%s
-				where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
-				(cost, cost, self.name),
-			)
+			bom_item = frappe.qb.DocType("BOM Item")
+			(
+				frappe.qb.update(bom_item)
+				.set(bom_item.rate, cost)
+				.set(bom_item.amount, bom_item.stock_qty * cost)
+				.where(
+					(bom_item.bom_no == self.name) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM")
+				)
+			).run()
 
 	def get_bom_unitcost(self, bom_no):
-		bom = frappe.db.sql(
-			"""select name, base_total_cost/quantity as unit_cost from `tabBOM`
-			where is_active = 1 and name = %s""",
-			bom_no,
-			as_dict=1,
-		)
+		bom_table = frappe.qb.DocType("BOM")
+		bom = (
+			frappe.qb.from_(bom_table)
+			.select(bom_table.name, (bom_table.base_total_cost / bom_table.quantity).as_("unit_cost"))
+			.where((bom_table.is_active == 1) & (bom_table.name == bom_no))
+		).run(as_dict=True)
+
 		return bom and bom[0]["unit_cost"] or 0
 
 	def manage_default_bom(self):
@@ -561,11 +574,14 @@ class BOM(WebsiteGenerator):
 		def _get_children(bom_no):
 			children = frappe.cache().hget("bom_children", bom_no)
 			if children is None:
-				children = frappe.db.sql_list(
-					"""SELECT `bom_no` FROM `tabBOM Item`
-					WHERE `parent`=%s AND `bom_no`!='' AND `parenttype`='BOM'""",
-					bom_no,
-				)
+				bom_item = frappe.qb.DocType("BOM Item")
+				result = (
+					frappe.qb.from_(bom_item)
+					.select(bom_item.bom_no)
+					.where((bom_item.parent == bom_no) & (bom_item.bom_no != "") & (bom_item.parenttype == "BOM"))
+				).run(as_list=True)
+
+				children = [r[0] for r in result]
 				frappe.cache().hset("bom_children", bom_no, children)
 			return children
 
@@ -765,29 +781,28 @@ class BOM(WebsiteGenerator):
 	def get_child_exploded_items(self, bom_no, stock_qty):
 		"""Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-		child_fb_items = frappe.db.sql(
-			"""
-			SELECT
-				bom_item.item_code,
-				bom_item.item_name,
-				bom_item.description,
-				bom_item.source_warehouse,
-				bom_item.operation,
-				bom_item.stock_uom,
-				bom_item.stock_qty,
-				bom_item.rate,
-				bom_item.include_item_in_manufacturing,
-				bom_item.sourced_by_supplier,
-				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
-			FROM `tabBOM Explosion Item` bom_item, `tabBOM` bom
-			WHERE
-				bom_item.parent = bom.name
-				AND bom.name = %s
-				AND bom.docstatus = 1
-		""",
-			bom_no,
-			as_dict=1,
-		)
+		bom = frappe.qb.DocType("BOM")
+		explosion_item = frappe.qb.DocType("BOM Explosion Item")
+
+		child_fb_items = (
+			frappe.qb.from_(bom)
+			.inner_join(explosion_item)
+			.on(bom.name == explosion_item.parent)
+			.select(
+				explosion_item.item_code,
+				explosion_item.item_name,
+				explosion_item.description,
+				explosion_item.source_warehouse,
+				explosion_item.operation,
+				explosion_item.stock_uom,
+				explosion_item.stock_qty,
+				explosion_item.rate,
+				explosion_item.include_item_in_manufacturing,
+				explosion_item.sourced_by_supplier,
+				(explosion_item.stock_qty / IfNull(bom.quantity, 1)).as_("qty_consumed_per_unit"),
+			)
+			.where((bom.name == bom_no) & (bom.docstatus == 1))
+		).run(as_dict=True)
 
 		for d in child_fb_items:
 			self.add_to_cur_exploded_items(
@@ -812,7 +827,7 @@ class BOM(WebsiteGenerator):
 		self.set("exploded_items", [])
 
 		if save:
-			frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
+			frappe.db.delete("BOM Explosion Item", {"parent": self.name})
 
 		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
 			ch = self.append("exploded_items", {})
@@ -827,13 +842,24 @@ class BOM(WebsiteGenerator):
 
 	def validate_bom_links(self):
 		if not self.is_active:
-			act_pbom = frappe.db.sql(
-				"""select distinct bom_item.parent from `tabBOM Item` bom_item
-				where bom_item.bom_no = %s and bom_item.docstatus = 1 and bom_item.parenttype='BOM'
-				and exists (select * from `tabBOM` where name = bom_item.parent
-					and docstatus = 1 and is_active = 1)""",
-				self.name,
+			bom = frappe.qb.DocType("BOM")
+			bom_item = frappe.qb.DocType("BOM Item")
+			bom_subquery = (
+				frappe.qb.from_(bom)
+				.select("*")
+				.where((bom.name == bom_item.parent) & (bom.docstatus == 1) & (bom.is_active == 1))
 			)
+			act_pbom = (
+				frappe.qb.from_(bom_item)
+				.select(bom_item.parent)
+				.distinct()
+				.where(
+					(bom_item.bom_no == self.name)
+					& (bom_item.docstatus == 1)
+					& (bom_item.parenttype == "BOM")
+					& (ExistsCriterion(bom_subquery))
+				)
+			).run()
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
@@ -991,76 +1017,95 @@ def get_bom_items_as_dict(
 	include_non_stock_items=False,
 	fetch_qty_in_stock_uom=True,
 ):
-	item_dict = {}
-
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-	query = """select
+	def get_base_query(qty_field, is_stock_item):
+		return (
+			frappe.qb.from_(bom_item)
+			.join(bom_table)
+			.on(bom_item.parent == bom_table.name)
+			.join(item)
+			.on(item.name == bom_item.item_code)
+			.left_join(item_default)
+			.on(item_default.parent == item.name & item_default.company == company)
+			.select(
 				bom_item.item_code,
 				bom_item.idx,
 				item.item_name,
-				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				(Sum(bom_item[qty_field] / IfNull(bom_table.quantity, 1)) * qty).as_("qty"),
 				item.image,
-				bom.project,
+				bom_table.project,
 				bom_item.rate,
-				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * bom_item.rate * %(qty)s as amount,
+				(Sum(bom_item[qty_field] / IfNull(bom_table.quantity, 1)) * bom_item.rate * qty).as_("amount"),
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
 				item_default.default_warehouse,
-				item_default.expense_account as expense_account,
-				item_default.buying_cost_center as cost_center
-				{select_columns}
-			from
-				`tab{table}` bom_item
-				JOIN `tabBOM` bom ON bom_item.parent = bom.name
-				JOIN `tabItem` item ON item.name = bom_item.item_code
-				LEFT JOIN `tabItem Default` item_default
-					ON item_default.parent = item.name and item_default.company = %(company)s
-			where
-				bom_item.docstatus < 2
-				and bom.name = %(bom)s
-				and ifnull(item.has_variants, 0) = 0
-				and item.is_stock_item in (1, {is_stock_item})
-				{where_conditions}
-				group by item_code, stock_uom
-				order by idx"""
+				item_default.expense_account.as_("expense_account"),
+				item_default.buying_cost_center.as_("cost_center"),
+			)
+			.where(
+				(bom_item.docstatus < 2)
+				& (bom_table.name == bom)
+				& (IfNull(item.has_variants, 0) == 0)
+				& (item.is_stock_item.isin([1, is_stock_item]))
+			)
+			.groupby("item_code", "stock_uom")
+			.orderby("idx")
+		)
+
+	item_dict = {}
+
+	bom_item = None
+	bom_table = frappe.qb.DocType("BOM")
+	item = frappe.qb.DocType("Item")
+	item_default = frappe.qb.DocType("Item Default")
 
 	is_stock_item = 0 if include_non_stock_items else 1
 	if cint(fetch_exploded):
-		query = query.format(
-			table="BOM Explosion Item",
-			where_conditions="",
-			is_stock_item=is_stock_item,
-			qty_field="stock_qty",
-			select_columns=""", bom_item.source_warehouse, bom_item.operation,
-				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
-				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""",
-		)
+		bom_item = frappe.qb.DocType("BOM Explosion Item")
+		items = (
+			get_base_query(is_stock_item=is_stock_item, qty_field="stock_qty").select(
+				bom_item.source_warehouse,
+				bom_item.operation,
+				bom_item.include_item_in_manufacturing,
+				bom_item.description,
+				bom_item.rate,
+				bom_item.sourced_by_supplier,
+				(
+					frappe.qb.from_("BOM Item")
+					.select("idx")
+					.where(
+						(frappe.qb.Field("item_code") == bom_item.item_code) & (frappe.qb.Field("parent") == bom)
+					)
+					.limit(1)
+				).as_("idx"),
+			)
+		).run(as_dict=True)
 
-		items = frappe.db.sql(
-			query, {"parent": bom, "qty": qty, "bom": bom, "company": company}, as_dict=True
-		)
 	elif fetch_scrap_items:
-		query = query.format(
-			table="BOM Scrap Item",
-			where_conditions="",
-			select_columns=", item.description, is_process_loss",
-			is_stock_item=is_stock_item,
-			qty_field="stock_qty",
-		)
+		bom_item = frappe.qb.DocType("BOM Scrap Item")
+		items = (
+			get_base_query(is_stock_item=is_stock_item, qty_field="stock_qty").select(
+				item.description, bom_item.is_process_loss
+			)
+		).run(as_dict=True)
 
-		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
 	else:
-		query = query.format(
-			table="BOM Item",
-			where_conditions="",
-			is_stock_item=is_stock_item,
-			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
-			select_columns=""", bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
-				bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
-				bom_item.description, bom_item.base_rate as rate """,
-		)
-		items = frappe.db.sql(query, {"qty": qty, "bom": bom, "company": company}, as_dict=True)
+		bom_item = frappe.qb.DocType("BOM Item")
+		items = (
+			get_base_query(
+				is_stock_item=is_stock_item, qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty"
+			).select(
+				bom_item.uom,
+				bom_item.conversion_factor,
+				bom_item.source_warehouse,
+				bom_item.operation,
+				bom_item.include_item_in_manufacturing,
+				bom_item.sourced_by_supplier,
+				bom_item.description,
+				bom_item.base_rate.as_("rate"),
+			)
+		).run(as_dict=True)
 
 	for item in items:
 		if item.item_code in item_dict:
