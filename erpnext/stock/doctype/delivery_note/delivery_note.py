@@ -193,6 +193,9 @@ class DeliveryNote(SellingController):
 	# 	self.queue_action('submit',queue_name="dn_queue")
 	##caclute returnables
 	def before_save(self):
+		## id returnable
+		if self.is_return:
+			return
 		## unset returnable items
 		if self.get('remove_return_items'):
 			self.set("returnable_items", [])        
@@ -269,7 +272,7 @@ class DeliveryNote(SellingController):
 			self.check_credit_limit()
 		elif self.issue_credit_note:
 			self.make_return_invoice()
-		elif self.is_return and self.return_type == 'Shop Return':
+		elif self.is_return and self.return_type == 'Shop Return' and len(self.items) >0:
 			savedoc =	make_sales_invoice(self.name)
 			savedoc.submit()
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -494,7 +497,12 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
-
+		
+		## when is return and items are empty
+		if len(target.get("items")) == 0 and target.get('is_return'):
+			return
+		
+		
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All these items have already been Invoiced/Returned"))
 

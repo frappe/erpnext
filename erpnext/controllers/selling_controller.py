@@ -120,10 +120,16 @@ class SellingController(StockController):
 		from frappe.utils import money_in_words
 
 		if self.meta.get_field("base_in_words"):
-			base_amount = abs(self.base_grand_total
-				if self.is_rounded_total_disabled() else self.base_rounded_total)
-			self.base_in_words = money_in_words(base_amount, self.company_currency)
-
+			if not self.meta.get_field("is_return") or not self.is_return:
+				base_amount = abs(self.base_grand_total
+					if self.is_rounded_total_disabled() else self.base_rounded_total)
+				self.base_in_words = money_in_words(base_amount, self.company_currency)
+			# Caclutions when is return and items are empty
+			elif self.is_return and self.get('grand_total') == None and self.get('rounded_total') == None and len(self.get('items')) == 0:
+				base_amount = 0
+				self.base_in_words = ''
+				self.grand_total = 0
+				self.rounded_total = 0
 		if self.meta.get_field("in_words"):
 			amount = abs(self.grand_total if self.is_rounded_total_disabled() else self.rounded_total)
 			self.in_words = money_in_words(amount, self.currency)
