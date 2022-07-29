@@ -244,7 +244,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-29 11:05:53.235999",
+ "modified": "2022-07-29 14:27:01.017240",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",
@@ -309,6 +309,5 @@
  ],
  "restrict_to_domain": "Vehicles",
  "sort_field": "date",
- "sort_order": "DESC",
- "track_changes": 1
+ "sort_order": "DESC"
 }
