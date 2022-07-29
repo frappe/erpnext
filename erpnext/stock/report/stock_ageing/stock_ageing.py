@@ -34,6 +34,9 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
 	for item, item_dict in item_details.items():
+		if not flt(item_dict.get("total_qty"), precision):
+			continue
+
 		earliest_age, latest_age = 0, 0
 		details = item_dict["details"]
 
