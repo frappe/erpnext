@@ -245,6 +245,9 @@ class DeliveryNote(SellingController):
 					temp_item.rate = returnable.sale_price
 					temp_item.actual_qty = qty
 					temp_item.so_qty = qty
+					if self.is_return == True:
+						temp_item.return_qty = qty
+						temp_item.so_qty = 0 # in case of return
 					# if len(self.get('returnable_items')) != len(returnables): # need to change
 					# 	temp_item = self.append('returnable_items',{})
 					# 	temp_item.item_code = returnable.returnable_item
