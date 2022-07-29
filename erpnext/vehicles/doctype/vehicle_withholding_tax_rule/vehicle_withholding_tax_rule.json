@@ -19,6 +19,7 @@
   {
    "fieldname": "from_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "From Date"
   },
   {
@@ -34,6 +35,7 @@
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "To Date"
   },
   {
@@ -61,7 +63,7 @@
   }
  ],
  "icon": "fa fa-cog",
- "modified": "2021-09-17 16:23:15.784094",
+ "modified": "2022-07-29 12:56:23.235786",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Withholding Tax Rule",
