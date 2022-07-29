@@ -29,7 +29,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
-			idx desc,
+			modified desc,
 			name, employee_name
 		limit %(start)s, %(page_len)s""".format(**{
 			'fields': ", ".join(fields),
@@ -63,7 +63,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, lead_name), locate(%(_txt)s, lead_name), 99999),
 			if(locate(%(_txt)s, company_name), locate(%(_txt)s, company_name), 99999),
-			idx desc,
+			modified desc,
 			name, lead_name
 		limit %(start)s, %(page_len)s""".format(**{
 			'fields': ", ".join(fields),
@@ -102,7 +102,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, customer_name), locate(%(_txt)s, customer_name), 99999),
-			idx desc,
+			modified desc,
 			name, customer_name
 		limit %(start)s, %(page_len)s""".format(**{
 			"fields": ", ".join(fields),
@@ -138,7 +138,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
-			idx desc,
+			modified desc,
 			name, supplier_name
 		limit %(start)s, %(page_len)s """.format(**{
 			'field': ', '.join(fields),
@@ -389,7 +389,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			{fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			idx desc, name
+			modified desc, name
 		limit %(start)s, %(page_len)s """.format(
 			fields=", ".join(fields),
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
@@ -418,7 +418,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			and {cond} `tabProject`.name like %(txt)s {match_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			idx desc,
+			modified desc,
 			`tabProject`.name asc
 		limit {start}, {page_len}""".format(
 			fields=", ".join(['`tabProject`.{0}'.format(f) for f in fields]),

@@ -663,7 +663,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2022-04-18 00:46:24.249516",
+ "modified": "2022-07-29 14:03:43.290879",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -764,7 +764,7 @@
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",
- "sort_order": "ASC",
+ "sort_order": "DESC",
  "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1

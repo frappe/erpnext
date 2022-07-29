@@ -413,7 +413,7 @@
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2021-06-04 22:16:48.238043",
+ "modified": "2022-07-29 14:28:14.092620",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -481,7 +481,7 @@
  "search_fields": "supplier_name, supplier_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC",
+ "sort_order": "DESC",
  "title_field": "supplier_name",
  "track_changes": 1,
  "track_seen": 1
