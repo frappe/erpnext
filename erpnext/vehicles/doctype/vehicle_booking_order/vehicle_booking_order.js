@@ -1128,6 +1128,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 							vehicle_price_list: me.frm.doc.vehicle_price_list,
 							fni_price_list: me.frm.doc.fni_price_list,
 							tax_status: tax_status,
+							transaction_date: me.frm.doc.transaction_date,
+							delivery_date: me.frm.doc.delivery_date,
 						},
 						callback: function (r2) {
 							if (!r2.exc) {
