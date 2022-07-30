@@ -527,7 +527,8 @@ def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None
 				'available': max(0, no_of_agents - appointments_in_same_slots)
 			}
 			out.timeslots.append(timeslot_data)
-	else:
+
+	elif timeslots is None:
 		out.timeslots = None
 
 	return out
