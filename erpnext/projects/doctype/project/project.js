@@ -4,6 +4,7 @@
 frappe.provide('erpnext.projects');
 
 {% include 'erpnext/vehicles/vehicle_checklist.js' %};
+{% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
 
 erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	setup: function() {
@@ -29,6 +30,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 		this.toggle_vehicle_odometer_fields();
 		this.make_vehicle_checklist();
 		this.make_customer_request_checklist();
+		this.make_customer_vehicle_selector();
 		this.set_sales_data_html();
 		this.set_service_advisor_from_user();
 		this.setup_dashboard();
@@ -469,6 +471,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 
 	customer: function () {
 		this.get_customer_details();
+		this.reload_customer_vehicle_selector();
 	},
 
 	get_customer_details: function () {
@@ -616,6 +619,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	applies_to_vehicle: function () {
 		this.set_applies_to_read_only();
 		this.get_applies_to_details();
+		this.reload_customer_vehicle_selector();
 	},
 	vehicle_owner: function () {
 		if (!this.frm.doc.vehicle_owner) {
@@ -740,6 +744,22 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 	refresh_customer_request_checklist: function () {
 		if (this.frm.customer_request_checklist_editor) {
 			this.frm.customer_request_checklist_editor.refresh();
+		}
+	},
+
+	make_customer_vehicle_selector: function () {
+		if (this.frm.fields_dict.customer_vehicle_selector_html) {
+			this.frm.customer_vehicle_selector = erpnext.vehicles.make_customer_vehicle_selector(this.frm,
+				this.frm.fields_dict.customer_vehicle_selector_html.wrapper,
+				'applies_to_vehicle',
+				'customer',
+			);
+		}
+	},
+
+	reload_customer_vehicle_selector: function () {
+		if (this.frm.customer_vehicle_selector) {
+			this.frm.customer_vehicle_selector.load_and_render();
 		}
 	},
 

@@ -4,6 +4,7 @@
 frappe.provide("erpnext.crm");
 
 {% include 'erpnext/crm/doctype/appointment/appointment_slots.js' %};
+{% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
 
 erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 	setup: function () {
@@ -15,13 +16,15 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 
 	refresh: function() {
 		erpnext.hide_company();
-		this.make_appointment_slot_picker();
 		this.setup_buttons();
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
 		this.setup_route_options();
 		this.set_applies_to_read_only();
 		this.frm.trigger('set_disallow_on_submit_fields_read_only');
+
+		this.make_appointment_slot_picker();
+		this.make_customer_vehicle_selector();
 	},
 
 	onload: function () {
@@ -213,14 +216,33 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	make_customer_vehicle_selector: function () {
+		if (this.frm.fields_dict.customer_vehicle_selector_html) {
+			this.frm.customer_vehicle_selector = erpnext.vehicles.make_customer_vehicle_selector(this.frm,
+				this.frm.fields_dict.customer_vehicle_selector_html.wrapper,
+				'applies_to_vehicle',
+				'party_name',
+				'appointment_for'
+			);
+		}
+	},
+
+	reload_customer_vehicle_selector: function () {
+		if (this.frm.customer_vehicle_selector) {
+			this.frm.customer_vehicle_selector.load_and_render();
+		}
+	},
+
 	appointment_for: function () {
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
 		this.frm.set_value("party_name", null);
+		this.reload_customer_vehicle_selector();
 	},
 
 	party_name: function () {
 		this.get_customer_details();
+		this.reload_customer_vehicle_selector();
 	},
 
 	contact_person: function() {
@@ -271,6 +293,7 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 	applies_to_vehicle: function () {
 		this.set_applies_to_read_only();
 		this.get_applies_to_details();
+		this.reload_customer_vehicle_selector();
 	},
 
 	vehicle_chassis_no: function () {

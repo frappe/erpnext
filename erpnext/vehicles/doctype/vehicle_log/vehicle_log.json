@@ -142,7 +142,8 @@
    "in_standard_filter": 1,
    "label": "Customer",
    "no_copy": 1,
-   "options": "Customer"
+   "options": "Customer",
+   "search_index": 1
   },
   {
    "fetch_from": "customer.customer_name",
@@ -179,7 +180,8 @@
    "label": "Reference Name",
    "no_copy": 1,
    "options": "reference_type",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_17",
@@ -244,7 +246,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-29 14:27:01.017240",
+ "modified": "2022-07-29 23:30:54.666418",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",

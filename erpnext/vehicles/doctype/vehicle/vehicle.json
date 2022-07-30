@@ -85,6 +85,8 @@
   "reserved_customer",
   "column_break_67",
   "reserved_customer_name",
+  "sec_customer_vehicle_selector",
+  "customer_vehicle_selector_html",
   "more_info",
   "status",
   "invoice_status",
@@ -498,7 +500,8 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
-   "label": "Image"
+   "label": "Image",
+   "options": "image"
   },
   {
    "fieldname": "insurance_policy_no",
@@ -712,10 +715,23 @@
   {
    "fieldname": "column_break_49",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:true",
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "sec_customer_vehicle_selector",
+   "fieldtype": "Section Break",
+   "label": "Customer History"
+  },
+  {
+   "fieldname": "customer_vehicle_selector_html",
+   "fieldtype": "HTML",
+   "label": "Customer Vehicle Selector HTML"
   }
  ],
  "image_field": "image",
- "modified": "2022-04-05 17:12:08.070057",
+ "modified": "2022-07-30 17:28:10.940157",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

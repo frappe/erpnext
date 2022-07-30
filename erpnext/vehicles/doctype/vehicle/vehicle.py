@@ -504,3 +504,19 @@ def warn_vehicle_reserved(vehicle, customer=None):
 		else:
 			frappe.msgprint(_("{0} is reserved without a Customer").format(frappe.get_desk_link("Vehicle", vehicle)),
 				title="Reserved", indicator="orange")
+
+
+@frappe.whitelist()
+def get_vehicle_image(vehicle=None, item_code=None):
+	image = None
+
+	if vehicle:
+		vehicle_details = frappe.db.get_value("Vehicle", vehicle, ['item_code', 'image'], as_dict=1)
+		if vehicle_details:
+			item_code = vehicle_details.item_code
+			image = vehicle_details.image
+
+	if not image and item_code:
+		image = frappe.get_cached_value("Item", item_code, 'image')
+
+	return image

@@ -885,8 +885,6 @@
    "options": "Campaign"
   },
   {
-   "fetch_from": "applies_to_item.image",
-   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -1209,7 +1207,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-07-26 11:35:29.530084",
+ "modified": "2022-07-30 03:30:13.433545",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

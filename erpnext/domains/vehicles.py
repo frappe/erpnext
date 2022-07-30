@@ -212,6 +212,25 @@ project_template_fields = [
 project_template_category_fields = deepcopy(project_template_fields)
 [d for d in project_template_category_fields if d['fieldname'] == 'sec_vehicle_checklist'][0]['insert_after'] = 'description'
 
+# Customer Vehicle Selector Fields
+customer_vehicle_selector_fields = [
+	{"label": "Customer Vehicles", "fieldname": "sec_customer_vehicle_selector", "fieldtype": "Section Break",
+		"collapsible": 1, "collapsible_depends_on": "eval:!doc.applies_to_vehicle || (!doc.customer && !doc.party_name)"},
+	{"label": "Customer Vehicle Selector HTML", "fieldname": "customer_vehicle_selector_html", "fieldtype": "HTML",
+		"insert_after": "sec_customer_vehicle_selector"},
+]
+
+project_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
+[d for d in project_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'change_vehicle_delivery_date'
+
+appointment_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
+[d for d in appointment_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'vehicle_last_odometer'
+
+customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
+[d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'contact_html'
+[d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['collapsible_depends_on'] = "eval:true"
+[d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['depends_on'] = "eval:!doc.__islocal"
+
 # Accounting Dimensions
 accounting_dimension_fields = [
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
@@ -249,11 +268,15 @@ item_fields = [
 ]
 
 # Set Translatable = 0
-field_lists = [applies_to_fields, applies_to_transaction_fields, applies_to_project_fields, applies_to_appointment_fields,
+field_lists = [
+	applies_to_fields, applies_to_transaction_fields, applies_to_project_fields, applies_to_appointment_fields,
 	project_vehicle_reading_fields, vehicle_owner_fields, sales_invoice_vehicle_owner_fields, service_person_fields,
 	material_request_service_person_fields, accounting_dimension_fields, accounting_dimension_table_fields,
 	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
-	project_template_fields, project_template_category_fields]
+	project_template_fields, project_template_category_fields,
+	customer_vehicle_selector_fields, project_customer_vehicle_selector,
+	appointment_customer_vehicle_selector, customer_customer_vehicle_selector
+]
 
 for field_list in field_lists:
 	for d in field_list:
@@ -332,14 +355,15 @@ data = {
 		"Purchase Invoice": applies_to_transaction_fields,
 		"Material Request": applies_to_transaction_fields + material_request_service_person_fields,
 		"Project": project_fields + applies_to_project_fields + project_change_vehicle_details_fields +
-			project_vehicle_reading_fields,
-		"Appointment": applies_to_appointment_fields,
+			project_vehicle_reading_fields + project_customer_vehicle_selector,
+		"Appointment": applies_to_appointment_fields + appointment_customer_vehicle_selector,
 		"Journal Entry": accounting_dimension_fields,
 		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
 		"Project Type": project_type_fields,
 		"Project Template": project_template_fields,
 		"Project Template Category": project_template_category_fields,
+		"Customer": customer_customer_vehicle_selector,
 	},
 	'default_portal_role': 'Customer'
 }

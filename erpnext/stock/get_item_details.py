@@ -1437,6 +1437,10 @@ def get_applies_to_details(args, for_validate=False):
 	out.vehicle_owner_name = frappe.get_cached_value("Customer", vehicle_owner, 'customer_name') if vehicle_owner\
 		else None
 
+	# Image
+	if args.doctype == "Project":
+		out.image = vehicle.image or item.image
+
 	return out
 
 

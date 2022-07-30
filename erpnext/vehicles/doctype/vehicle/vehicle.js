@@ -3,6 +3,8 @@
 
 frappe.provide("erpnext.vehicles");
 
+{% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
+
 erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.setup_queries();
@@ -12,6 +14,7 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.setup_buttons();
 		this.set_cant_change_read_only();
+		this.make_customer_vehicle_selector();
 	},
 
 	setup_queries: function () {
@@ -69,6 +72,27 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 		});
 	},
 
+	item_code: function () {
+		this.set_image();
+	},
+
+	set_image: function () {
+		var me = this;
+		if (me.frm.doc.item_code) {
+			frappe.call({
+				method: "erpnext.vehicles.doctype.vehicle.vehicle.get_vehicle_image",
+				args: {
+					item_code: me.frm.doc.item_code,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.set_value('image', r.message);
+					}
+				}
+			})
+		}
+	},
+
 	unregistered: function () {
 		if (this.frm.doc.unregistered) {
 			this.frm.set_value("license_plate", "");
@@ -86,6 +110,15 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	license_plate: function () {
 		erpnext.utils.format_vehicle_id(this.frm, 'license_plate');
 		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'license_plate');
+	},
+
+	make_customer_vehicle_selector: function () {
+		if (this.frm.fields_dict.customer_vehicle_selector_html && !this.frm.doc.__islocal) {
+			this.frm.customer_vehicle_selector = erpnext.vehicles.make_customer_vehicle_selector(this.frm,
+				this.frm.fields_dict.customer_vehicle_selector_html.wrapper,
+				'name',
+			);
+		}
 	},
 });
 
