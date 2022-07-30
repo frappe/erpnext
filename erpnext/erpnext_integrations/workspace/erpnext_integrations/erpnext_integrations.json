@@ -77,17 +77,6 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Exotel Settings",
-   "link_count": 0,
-   "link_to": "Exotel Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
  "modified": "2022-01-13 17:35:35.508718",
