@@ -13,6 +13,7 @@ from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, 
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.contacts.doctype.address.address import get_default_address, get_address_display
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
 
@@ -35,6 +36,7 @@ primary_contact_fields = [
 	{'customer_field': 'email_id', 'contact_field': 'email_id'}
 ]
 
+
 class Customer(TransactionBase):
 	def get_feed(self):
 		return self.customer_name
@@ -43,6 +45,9 @@ class Customer(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+
+		if 'Vehicles' in frappe.get_active_domains() and not self.is_new():
+			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(customer=self.name))
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)

@@ -18,6 +18,7 @@ from frappe.contacts.doctype.address.address import get_address_display, get_def
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.crm.doctype.lead.lead import _get_lead_contact_details, get_customer_from_lead
 from erpnext.stock.get_item_details import get_applies_to_details
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
 from frappe.model.mapper import get_mapped_doc
 import json
 
@@ -40,6 +41,12 @@ class Appointment(StatusUpdater):
 			self.set_onload('disallow_on_submit', self.get_disallow_on_submit_fields())
 
 		self.set_onload('customer', self.get_customer())
+		self.set_onload('appointment_timeslots_data', get_appointment_timeslots(self.scheduled_date, self.appointment_type,
+			company=self.company))
+
+		if self.meta.has_field('applies_to_vehicle'):
+			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(self.get_customer(),
+				self.get('applies_to_vehicle')))
 
 	def validate(self):
 		self.set_missing_values()
@@ -497,18 +504,18 @@ def check_agent_availability(agent, scheduled_dt, end_dt):
 
 @frappe.whitelist()
 def get_appointment_timeslots(scheduled_date, appointment_type, appointment=None, company=None):
-	if not scheduled_date:
-		frappe.throw(_("Schedule Date not provided"))
-	if not appointment_type:
-		frappe.throw(_("Appointment Type not provided"))
+	out = frappe._dict({
+		'holiday': None,
+		'timeslots': []
+	})
+
+	if not scheduled_date or not appointment_type:
+		return out
 
 	scheduled_date = getdate(scheduled_date)
 	appointment_type_doc = frappe.get_cached_doc("Appointment Type", appointment_type)
 
-	out = frappe._dict({
-		'holiday': appointment_type_doc.is_holiday(scheduled_date, company=company),
-		'timeslots': []
-	})
+	out.holiday = appointment_type_doc.is_holiday(scheduled_date, company=company)
 
 	timeslots = appointment_type_doc.get_timeslots(scheduled_date)
 	no_of_agents = cint(appointment_type_doc.number_of_agents)

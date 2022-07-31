@@ -209,10 +209,10 @@ def get_last_customer_log(vehicle, purchase_date=None):
 
 @frappe.whitelist()
 def get_customer_vehicle_selector_data(customer=None, vehicle=None):
-	out = {
+	out = frappe._dict({
 		'vehicles': get_vehicles_from_customer(customer),
 		'customers': get_customers_from_vehicle(vehicle),
-	}
+	})
 	return out
 
 

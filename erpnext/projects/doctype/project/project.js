@@ -887,6 +887,7 @@ erpnext.projects.ProjectController = frappe.ui.form.Controller.extend({
 						frappe.model.sync(r.message);
 						me.frm.dirty();
 						me.get_all_contact_nos();
+						me.reload_customer_vehicle_selector();
 						me.frm.refresh_fields();
 					}
 				}

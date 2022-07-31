@@ -27,7 +27,14 @@ erpnext.vehicles.CustomerVehicleSelector = Class.extend({
 		me.vehicles = [];
 		me.customers = [];
 
-		me.load_and_render();
+		if (me.frm.doc.__onload && me.frm.doc.__onload.customer_vehicle_selector_data) {
+			me.vehicles = me.frm.doc.__onload.customer_vehicle_selector_data.vehicles || [];
+			me.customers = me.frm.doc.__onload.customer_vehicle_selector_data.customers || [];
+			me.render_selector();
+		} else {
+			me.load_and_render();
+		}
+
 		me.bind();
 	},
 

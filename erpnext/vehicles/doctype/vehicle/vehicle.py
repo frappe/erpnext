@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_vehicle_odometer
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_vehicle_odometer, get_customer_vehicle_selector_data
 from frappe import _
 from frappe.utils import getdate, nowdate, cstr, cint
 from frappe.model.document import Document
@@ -46,6 +46,9 @@ class Vehicle(Document):
 		self.copy_image_from_item()
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_onload('cant_change_fields', self.get_cant_change_fields())
+
+		if not self.is_new():
+			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(vehicle=self.name))
 
 	def validate(self):
 		self.validate_item()

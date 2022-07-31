@@ -24,7 +24,15 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 
 		me.timeslots = [];
 		me.holiday = null;
-		me.load_slots_and_render();
+
+		if (me.frm.doc.__onload && me.frm.doc.__onload.appointment_timeslots_data) {
+			me.timeslots = me.frm.doc.__onload.appointment_timeslots_data.timeslots;
+			me.holiday = me.frm.doc.__onload.appointment_timeslots_data.holiday;
+			me.render_slot_picker();
+		} else {
+			me.load_slots_and_render();
+		}
+
 		me.bind();
 	},
 
@@ -41,7 +49,6 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 				args: {
 					scheduled_date: me.frm.doc.scheduled_date,
 					appointment_type: me.frm.doc.appointment_type,
-					appointment: !me.frm.is_new() && me.frm.doc.docstatus == 0 ? me.frm.doc.name: null,
 					company: me.frm.doc.company,
 				},
 				callback: function (r) {

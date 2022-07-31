@@ -21,6 +21,7 @@ from erpnext.projects.doctype.project_status.project_status import get_auto_proj
 	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
 from six import string_types
 from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
+from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
 from frappe.model.meta import get_field_precision
 import json
 
@@ -65,6 +66,10 @@ class Project(StatusUpdater):
 		self.set_onload('valid_manual_project_status_names', get_valid_manual_project_status_names(self))
 		self.set_onload('is_manual_project_status', is_manual_project_status(self.project_status))
 		self.set_onload('contact_nos', get_all_contact_nos('Customer', self.customer))
+
+		if self.meta.has_field('applies_to_vehicle'):
+			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(self.customer,
+				self.get('applies_to_vehicle')))
 
 		self.reset_quick_change_fields()
 		self.set_missing_checklist()
