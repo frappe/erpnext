@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
+from erpnext import get_default_company
 from frappe.utils import getdate, cstr, flt
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
@@ -43,9 +44,6 @@ def execute(filters=None):
 
 
 def validate_filters(filters, account_details):
-	if not filters.get("company"):
-		frappe.throw(_("{0} is mandatory").format(_("Company")))
-
 	if not filters.get("from_date") and not filters.get("to_date"):
 		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
 
@@ -109,13 +107,17 @@ def get_customer_linked_suppliers(filters):
 
 
 def set_account_currency(filters):
-	filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
+	company = filters.company or get_default_company()
+	if not company:
+		frappe.throw(_("Company is mandatory"))
+
+	filters["company_currency"] = frappe.get_cached_value('Company', company,  "default_currency")
 	if filters.get("account") or (filters.get('party_list') and len(filters.party_list) == 1):
 		account_currency = None
 
 		if filters.get("account"):
 			account_currency = get_account_currency(filters.account)
-		elif filters.get("party_type") and filters.get("party"):
+		elif filters.get("party_type") and filters.get("party") and filters.get("company"):
 			gle_currency = frappe.db.get_value(
 				"GL Entry", {
 					"party_type": filters.party_type, "party": filters.party[0], "company": filters.company
@@ -183,7 +185,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			remarks, against, is_opening, against_voucher_type, against_voucher, reference_no, reference_date,
 			%(ledger_currency)s as currency {dimensions_fields}
 		from `tabGL Entry`
-		where company=%(company)s {conditions}
+		where {conditions}
 		order by posting_date, account, creation
 		""".format(conditions=get_conditions(filters, accounting_dimensions), dimensions_fields=dimensions_fields),
 			filters, as_dict=1)
@@ -243,6 +245,10 @@ def merge_similar_entries(filters, gl_entries, supplier_invoice_details):
 
 def get_conditions(filters, accounting_dimensions):
 	conditions = []
+
+	if filters.get("company"):
+		conditions.append("company=%(company)s")
+
 	if filters.get("account"):
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount
@@ -311,7 +317,7 @@ def get_conditions(filters, accounting_dimensions):
 			if filters.get(dimension.fieldname):
 				conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
-	return "and {}".format(" and ".join(conditions)) if conditions else ""
+	return "{}".format(" and ".join(conditions)) if conditions else ""
 
 
 def calculate_opening_closing(filters, gl_entries, group_field, group_value, grouped_by):
