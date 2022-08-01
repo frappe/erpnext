@@ -112,7 +112,7 @@ class RequestforQuotation(BuyingController):
 
 	def get_link(self):
 		# RFQ link for supplier portal
-		return get_url("/rfq/" + self.name)
+		return get_url("/app/request-for-quotation/" + self.name)
 
 	def update_supplier_part_no(self, supplier):
 		self.vendor = supplier
