@@ -1401,9 +1401,19 @@ class StockEntry(StockController):
 
 						item_wh = frappe._dict(item_wh)
 
+					source_wh_dict = {}
+					if self.pro_doc:
+						for row in self.pro_doc.required_items:
+							source_wh_dict[row.item_code] = row.source_warehouse
+
 					for item in item_dict.values():
-						if self.pro_doc and cint(self.pro_doc.from_wip_warehouse):
-							item["from_warehouse"] = self.pro_doc.wip_warehouse
+						if self.pro_doc and not item.get("from_warehouse"):
+							if self.pro_doc.skip_transfer and cint(self.pro_doc.from_wip_warehouse):
+								item["from_warehouse"] = self.pro_doc.wip_warehouse
+							else:
+								item["from_warehouse"] = (source_wh_dict.get(item.item_code)
+									or self.from_warehouse)
+
 						# Get Reserve Warehouse from Subcontract Order
 						if self.get(self.subcontract_data.order_field) and self.purpose == "Send to Subcontractor":
 							item["from_warehouse"] = item_wh.get(item.item_code)
