@@ -397,16 +397,34 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 		});
 	}
 };
-
-// ----------Fetch manufacturing_date,expiry_date depends on Batch
-frappe.ui.form.on("Purchase Receipt Item", "batch_no", function (frm, cdt, cdn) {
-    var d = locals[cdt][cdn];
-    frappe.db.get_value("Batch", { "batch_id": d.batch_no}, "manufacturing_date", function (value){
-        frappe.model.set_value(d.doctype, d.name, "manufacturing_date", value.manufacturing_date)
-        refresh_field('manufacturing_date')
-    });
-    frappe.db.get_value("Batch", { "batch_id": d.batch_no}, "expiry_date", function (value){
-        frappe.model.set_value(d.doctype, d.name, "expiry_date", value.expiry_date)
-        refresh_field('expiry_date')
-    });
-});
+frappe.ui.form.on("Purchase Receipt", "before_save", function (frm) {
+	$.each(cur_frm.doc.items || [], function (i, v) {
+		var manufacturing_date;
+		var expiry_date;
+		
+		frappe.call({
+			method: "frappe.client.get_list",
+			args: {
+				doctype: "Batch",
+				filters: [
+					["batch_id", "=", v.batch_number],
+				],
+				fields: [
+					"manufacturing_date",
+					"expiry_date",
+					"name",
+				]
+			},
+			callback: function (r) {
+				manufacturing_date = (r.message[0].manufacturing_date);
+				expiry_date = (r.message[0].expiry_date);
+				var batch_id = r.message[0].name
+				if (manufacturing_date != v.manufacturing_date) {
+					frappe.db.set_value("Batch", batch_id, "manufacturing_date", v.manufacturing_date)	
+				}else if (expiry_date != v.expiry_date) {
+					frappe.db.set_value("Batch", batch_id, "expiry_date", v.expiry_date)
+				}
+			}
+		});
+	})
+})
