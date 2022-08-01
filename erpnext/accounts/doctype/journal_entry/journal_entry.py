@@ -116,7 +116,7 @@ class JournalEntry(AccountsController):
 	def update_inter_company_jv(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
 			frappe.db.set_value("Journal Entry", self.inter_company_reference,\
-				"inter_company_reference", self.name)
+				"inter_company_reference", self.name, notify=1)
 
 	def update_invoice_discounting(self):
 		def _validate_invoice_discounting_status(inv_disc, id_status, expected_status, row_id):
@@ -173,7 +173,7 @@ class JournalEntry(AccountsController):
 	def unlink_inter_company_jv(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
 			frappe.db.set_value("Journal Entry", self.inter_company_reference,\
-				"inter_company_reference", "")
+				"inter_company_reference", "", notify=1)
 			frappe.db.set_value("Journal Entry", self.name,\
 				"inter_company_reference", "")
 
@@ -1279,12 +1279,97 @@ def get_average_exchange_rate(account, from_currency, to_currency, transaction_d
 
 @frappe.whitelist()
 def make_inter_company_journal_entry(name, voucher_type, company):
-	journal_entry = frappe.new_doc('Journal Entry')
-	journal_entry.voucher_type = voucher_type
-	journal_entry.company = company
-	journal_entry.posting_date = nowdate()
-	journal_entry.inter_company_reference = name
-	return journal_entry.as_dict()
+	from frappe.model.mapper import get_mapped_doc
+
+	def postprocess(source, target):
+		target.set_amounts_in_company_currency()
+		target.set_total_debit_credit()
+		target.set_party_name()
+
+	def set_company(source, target, source_parent, target_parent):
+		target.company = company
+		target.voucher_type = voucher_type
+
+	def update_accounts(source, target, source_parent, target_parent):
+		source_company = frappe.get_cached_doc("Company", source_parent.company)
+		target_company = frappe.get_cached_doc("Company", target_parent.company)
+
+		company_field = None
+		for df in source_company.meta.fields:
+			if df.fieldtype == "Link" and df.options == "Account":
+				if source_company.get(df.fieldname) == source.account:
+					company_field = df.fieldname
+					break
+
+		if company_field:
+			target.account = target_company.get(company_field)
+
+		if source.party:
+			if source.party_type == "Customer":
+				source_customer = frappe.get_cached_doc("Customer", source.party)
+				if source_customer.is_internal_customer and source_customer.represents_company == target_company.name:
+					supplier = frappe.db.get_value("Supplier",
+						{"disabled": 0, "is_internal_supplier": 1, "represents_company": source_company.name}, "name")
+					if supplier:
+						target.party_type = "Supplier"
+						target.party = supplier
+						target.account = get_party_account(target.party_type, target.party, target_company.name)
+
+			elif source.party_type == "Supplier":
+				source_supplier = frappe.get_cached_doc("Supplier", source.party)
+				if source_supplier.is_internal_supplier and source_supplier.represents_company == target_company.name:
+					customer = frappe.db.get_value("Customer",
+						{"disabled": 0, "is_internal_customer": 1, "represents_company": source_company.name}, "name")
+					if customer:
+						target.party_type = "Customer"
+						target.party = customer
+						target.account = get_party_account(target.party_type, target.party, target_company.name)
+
+	doclist = get_mapped_doc("Journal Entry", name, {
+		"Journal Entry": {
+			"doctype": "Journal Entry",
+			"validation": {
+				"docstatus": ["=", 1]
+			},
+			"field_map": {
+				"name": "inter_company_reference",
+				"posting_date": "posting_date",
+			},
+			"field_no_map": [
+				"company",
+				"cost_center",
+				"letter_head",
+			],
+			"postprocess": set_company,
+		},
+		"Journal Entry Account": {
+			"doctype": "Journal Entry Account",
+			"field_map": {
+				"debit_in_account_currency": "credit_in_account_currency",
+				"credit_in_account_currency": "debit_in_account_currency",
+				"party_type": "party_type",
+				"party": "party",
+			},
+			"field_no_map": [
+				"account",
+				"account_balance",
+				"account_currency",
+				"cost_center",
+				"party_balance",
+				"reference_type",
+				"reference_name",
+				"bank_account",
+				"cheque_no",
+				"cheque_date",
+				"debit",
+				"credit",
+			],
+			"postprocess": update_accounts,
+		},
+	}, None, postprocess)
+
+	return doclist
+
 
 @frappe.whitelist()
 def make_reverse_journal_entry(source_name, target_doc=None):
