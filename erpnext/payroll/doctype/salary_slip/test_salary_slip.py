@@ -981,6 +981,16 @@ class TestSalarySlip(unittest.TestCase):
 
 		frappe.db.rollback()
 
+	def test_do_not_show_statistical_component_in_slip(self):
+		make_employee("test_statistical_component@salary.com")
+		new_ss = make_employee_salary_slip(
+			"test_statistical_component@salary.com",
+			"Monthly",
+			"Test Payment Based On Attendence",
+		)
+		components = [row.salary_component for row in new_ss.get("earnings")]
+		self.assertNotIn("Statistical Component", components)
+
 	def make_activity_for_employee(self):
 		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
 		activity_type.billing_rate = 50
@@ -1122,6 +1132,13 @@ def make_earning_salary_component(
 			"depends_on_payment_days": 0,
 		},
 		{"salary_component": "Leave Encashment", "abbr": "LE", "type": "Earning"},
+		{
+			"salary_component": "Statistical Component",
+			"abbr": "SC",
+			"type": "Earning",
+			"statistical_component": 1,
+			"amount": 500,
+		},
 	]
 	if include_flexi_benefits:
 		data.extend(
