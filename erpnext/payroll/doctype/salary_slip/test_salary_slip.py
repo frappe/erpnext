@@ -372,13 +372,19 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEqual(salary_slip.payment_days, days_in_month - no_of_holidays - 1)
 
-		# gross pay calculation based on attendance (payment days)
-		gross_pay = 78100 - (
-			(78000 / (days_in_month - no_of_holidays))
-			* flt(salary_slip.leave_without_pay + salary_slip.absent_days)
+		# component calculation based on attendance (payment days)
+		amount, precision = None, None
+
+		for row in salary_slip.earnings:
+			if row.salary_component == "Basic Salary":
+				amount = row.amount
+				precision = row.precision("amount")
+				break
+		expected_amount = flt(
+			(50000 * salary_slip.payment_days / salary_slip.total_working_days), precision
 		)
 
-		self.assertEqual(salary_slip.gross_pay, flt(gross_pay, 2))
+		self.assertEqual(amount, expected_amount)
 
 	@change_settings("Payroll Settings", {"payroll_based_on": "Attendance"})
 	def test_component_amount_dependent_on_another_payment_days_based_component(self):
