@@ -36,6 +36,15 @@ frappe.ui.form.on('POS Closing Entry', {
 		});
 
 		set_html_data(frm);
+
+		if (frm.doc.docstatus == 1) {
+			if (!frm.doc.posting_date) {
+				frm.set_value("posting_date", frappe.datetime.nowdate());
+			}
+			if (!frm.doc.posting_time) {
+				frm.set_value("posting_time", frappe.datetime.now_time());
+			}
+		}
 	},
 
 	refresh: function(frm) {
