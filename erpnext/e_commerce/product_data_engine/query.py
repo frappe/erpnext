@@ -35,7 +35,6 @@ class ProductQuery:
 			"variant_of",
 			"has_variants",
 			"item_group",
-			"image",
 			"web_long_description",
 			"short_description",
 			"route",

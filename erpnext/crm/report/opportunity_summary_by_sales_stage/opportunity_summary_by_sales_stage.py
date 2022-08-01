@@ -201,26 +201,21 @@ class OpportunitySummaryBySalesStage(object):
 	def get_chart_data(self):
 		labels = []
 		datasets = []
-		values = [0] * 8
-
-		for sales_stage in self.sales_stage_list:
-			labels.append(sales_stage)
+		values = [0] * len(self.sales_stage_list)
 
 		options = {"Number": "count", "Amount": "amount"}[self.filters.get("data_based_on")]
 
 		for data in self.query_result:
-			for count in range(len(values)):
-				if data["sales_stage"] == labels[count]:
+			for count in range(len(self.sales_stage_list)):
+				if data["sales_stage"] == self.sales_stage_list[count]:
 					values[count] = values[count] + data[options]
 
 		datasets.append({"name": options, "values": values})
+		self.chart = {"data": {"labels": self.sales_stage_list, "datasets": datasets}, "type": "line"}
 
-		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
-
-	def currency_conversion(self, from_currency, to_currency):
+	def get_exchange_rate(self, from_currency, to_currency):
 		cacheobj = frappe.cache()
-
-		if cacheobj.get(from_currency):
+		if cacheobj and cacheobj.get(from_currency):
 			return flt(str(cacheobj.get(from_currency), "UTF-8"))
 
 		else:
@@ -235,7 +230,7 @@ class OpportunitySummaryBySalesStage(object):
 	def convert_to_base_currency(self):
 		default_currency = self.get_default_currency()
 		for data in self.query_result:
-			if data.get("currency") != default_currency:
+			if data.get("currency") and data.get("currency") != default_currency:
 				opportunity_currency = data.get("currency")
-				value = self.currency_conversion(opportunity_currency, default_currency)
-				data["amount"] = data["amount"] * value
+				exchange_rate = self.get_exchange_rate(opportunity_currency, default_currency)
+				data["amount"] = data["amount"] * exchange_rate
