@@ -372,13 +372,19 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEqual(salary_slip.payment_days, days_in_month - no_of_holidays - 1)
 
-		# gross pay calculation based on attendance (payment days)
-		gross_pay = 78100 - (
-			(78000 / (days_in_month - no_of_holidays))
-			* flt(salary_slip.leave_without_pay + salary_slip.absent_days)
+		# component calculation based on attendance (payment days)
+		amount, precision = None, None
+
+		for row in salary_slip.earnings:
+			if row.salary_component == "Basic Salary":
+				amount = row.amount
+				precision = row.precision("amount")
+				break
+		expected_amount = flt(
+			(50000 * salary_slip.payment_days / salary_slip.total_working_days), precision
 		)
 
-		self.assertEqual(salary_slip.gross_pay, flt(gross_pay, 2))
+		self.assertEqual(amount, expected_amount)
 
 	@change_settings("Payroll Settings", {"payroll_based_on": "Attendance"})
 	def test_component_amount_dependent_on_another_payment_days_based_component(self):
@@ -981,6 +987,16 @@ class TestSalarySlip(unittest.TestCase):
 
 		frappe.db.rollback()
 
+	def test_do_not_show_statistical_component_in_slip(self):
+		make_employee("test_statistical_component@salary.com")
+		new_ss = make_employee_salary_slip(
+			"test_statistical_component@salary.com",
+			"Monthly",
+			"Test Payment Based On Attendence",
+		)
+		components = [row.salary_component for row in new_ss.get("earnings")]
+		self.assertNotIn("Statistical Component", components)
+
 	def make_activity_for_employee(self):
 		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
 		activity_type.billing_rate = 50
@@ -1122,6 +1138,13 @@ def make_earning_salary_component(
 			"depends_on_payment_days": 0,
 		},
 		{"salary_component": "Leave Encashment", "abbr": "LE", "type": "Earning"},
+		{
+			"salary_component": "Statistical Component",
+			"abbr": "SC",
+			"type": "Earning",
+			"statistical_component": 1,
+			"amount": 500,
+		},
 	]
 	if include_flexi_benefits:
 		data.extend(

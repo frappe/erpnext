@@ -633,10 +633,8 @@ class SalarySlip(TransactionBase):
 
 			amount = self.eval_condition_and_formula(struct_row, data)
 			if (
-				amount
-				or (struct_row.amount_based_on_formula and amount is not None)
-				and struct_row.statistical_component == 0
-			):
+				amount or (struct_row.amount_based_on_formula and amount is not None)
+			) and struct_row.statistical_component == 0:
 				self.update_component_row(struct_row, amount, component_type, data=data)
 
 	def get_data_for_eval(self):
