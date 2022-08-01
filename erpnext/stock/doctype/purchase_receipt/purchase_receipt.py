@@ -3,11 +3,10 @@
 
 
 import frappe
-from frappe import _, msgprint, throw
+from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, getdate, nowdate
-from pseudo_app.pseudo_app import doctype
 from six import iteritems
 
 import erpnext
@@ -18,8 +17,6 @@ from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 from erpnext.stock.doctype.batch.batch import get_batch_qty
-from frappe.model.utils.rename_field import rename_field
-
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -302,7 +299,6 @@ class PurchaseReceipt(BuyingController):
 	# Create Batch
 	def before_save(self):
 		for d in self.get("items"):
-			
 			if d.batch_no != d.get("batch_number"):
 				if frappe.db.exists({"doctype": "Batch", "batch_id": d.get("batch_number")}):
 					frappe.throw(_("For Product {0}, Batch {1} already exists.").format(d.item_code, d.batch_number,d.manufacturing_date))
