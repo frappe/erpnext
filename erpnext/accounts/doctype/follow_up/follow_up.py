@@ -112,14 +112,14 @@ class FollowUp(Document):
 							invoice_amount = i["invoice_amount"],
 						else: 
 							c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
-							outstanding =	i["outstanding_amount"] / c_rate
-							invoice_amount = i["invoice_amount"] / c_rate
+							outstanding = float("{:.2f}".format(i["outstanding_amount"] / c_rate))
+							invoice_amount = float("{:.2f}".format(i["invoice_amount"] / c_rate))
 					comm_voucher_no += i["voucher_type"] + "    " + i["voucher_no"] + "    " + i["due_date"] + "    " + str(i["outstanding_amount"]) +" \n "
 					detail_dict = {"voucher_type": i["voucher_type"],
 									"voucher_no": i["voucher_no"] if i["voucher_no"] else "",
 									"due_date": i["due_date"],
-									"outstanding_amount" : outstanding,
-									"invoice_amount" : invoice_amount,
+									"outstanding_amount" : float("{:.2f}".format(outstanding)),
+									"invoice_amount" :  float("{:.2f}".format(invoice_amount)),
 									"date": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "posting_date"),
 									"age": i["age"],
 									"currency": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "currency")}
@@ -316,8 +316,8 @@ class FollowUp(Document):
 				invoice_amount = i["invoice_amount"]
 			else:	
 				c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
-				outstanding = i["outstanding_amount"] / c_rate
-				invoice_amount = i["invoice_amount"] / c_rate
+				outstanding = float("{:.2f}".format(i["outstanding_amount"] / c_rate))
+				invoice_amount = float("{:.2f}".format(i["invoice_amount"] / c_rate))
 			
 
 			comm_email = ""
@@ -346,8 +346,8 @@ class FollowUp(Document):
 				prc.commitment_amount = i["commited_amount"]
 				prc.commitment_to = frappe.session.user
 				prc.voucher_type = i["voucher_type"]
-				prc.invoice_amount = invoice_amount
-				prc.total_outstanding = outstanding
+				prc.invoice_amount = float("{:.2f}".format(invoice_amount))
+				prc.total_outstanding = float("{:.2f}".format(outstanding))
 				prc.voucher_no = i["voucher_no"]
 				prc.total_due = i["total_due"]
 				prc.age = i["age"]
