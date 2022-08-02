@@ -62,7 +62,7 @@ frappe.ui.form.on('Patient', {
 		}
 	}
 });
-frappe.ui.form.on('Patient', 'blood_group', function(frm) {
+frappe.ui.form.on('Patient', 'validate', function(frm) {
 	if (frm.doc.cnic) {
 		var regex = /^[0-9+]{5}-[0-9+]{7}-[0-9]{1}$/g;
 		if(regex.test(frm.doc.cnic)  != true){
