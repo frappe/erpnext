@@ -54,13 +54,9 @@ frappe.ui.form.on('Patient', {
 		}
 	},
 
-	setup: function (frm) {
-			var regex = /^[0-9+]{5}-[0-9+]{7}-[0-9]{1}$/g;
-			if(regex.test(frm.doc.cnic)  != true){
-				frappe.msgprint(__("CNIC: Please follow CNIC format."));
-				frappe.validated = false;
-			}
-	},
+	// setup: function (frm) {
+			
+	// },
 
 	onload: function (frm) {
 		if (frm.doc.dob) {
@@ -70,7 +66,15 @@ frappe.ui.form.on('Patient', {
 		}
 	}
 });
-
+frappe.ui.form.on('Patient', 'cnic', function(frm) {
+	if (frm.doc.cnic) {
+		var regex = /^[0-9+]{5}-[0-9+]{7}-[0-9]{1}$/g;
+		if(regex.test(frm.doc.cnic)  != true){
+			frappe.msgprint(__("CNIC: Please follow CNIC format."));
+			frappe.validated = false;
+		}
+	}
+});
 frappe.ui.form.on('Patient', 'dob', function(frm) {
 	if (frm.doc.dob) {
 		let today = new Date();
