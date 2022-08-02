@@ -8,9 +8,9 @@ from frappe.model.document import Document
 from frappe import _
 
 class PrintBankCheck(Document):
-	# def validate(self):
-	# 	self.get_transaction()
-	# 	self.add_journal_entry()
+	def validate(self):
+		self.get_transaction()
+		self.add_journal_entry()
 	
 	def get_transaction(self):
 		doc = frappe.get_doc("Bank Transactions", self.bank_transaction)
@@ -29,12 +29,61 @@ class PrintBankCheck(Document):
 		for i in amount_of_split:
 			amount_of += i + " "
 		
+		str_amount = str(doc.amount)
+		
+		split_amount = str_amount.split(".")
+
+		self.amount = "***"
+		# if len(split_amount) == 1:
+		# 	self.amount = str_amount
+		# 	self.amount += ".00"
+		# if len(split_amount) == 2:
+		# 	if split_amount[1] == "0":
+		# 		self.amount = split_amount[0]
+		# 		self.amount += ".00"
+		# 	else:
+		# 		self.amount = str_amount
+		self.amount += self.SetMoneda(doc.amount, 2)
+		self.amount += "***"
+		self.amount_of = "***"
 		self.amount_of = amount_of
-		self.amount = doc.amount
+		self.amount_of += "***"
+
+	def SetMoneda(nume, num, n_decimales):
+		n_decimales = abs(n_decimales)
+		num = round(num, n_decimales)
+		num, dec = str(num).split(".")
+		dec += "0" * (n_decimales - len(dec))
+		num = num[::-1]
+
+		arr_inverse = [num[pos:pos+3][::-1] for pos in range(0,50,3) if (num[pos:pos+3])]
+
+		arr = []
+		idx = len(arr_inverse) - 1
+
+		while (idx >= 0):
+			arr.append(arr_inverse[idx])
+			idx = idx - 1
+    	
+		num = str.join(",", arr)
+
+		try:
+			if num[0:2] == "-,":
+				num = "-%s" % num[2:]
+
+		except IndexError:
+			pass
+
+		if not n_decimales:
+			return "%s" % (num)
+        
+		return "%s.%s" % (num, dec)
 
 	def add_journal_entry(self):
 		self.delte_rows()
 		entries = frappe.get_all("Journal Entry", ["name"], filters = {"bank_transaction": self.bank_transaction, "docstatus": 1})
+
+		count = 0
 
 		if len(entries) == 0:
 			frappe.throw(_("No exist journal entry."))
@@ -49,6 +98,14 @@ class PrintBankCheck(Document):
 				row.descripcion = doc.name
 				row.debit = account.debit_in_account_currency
 				row.credit = account.credit_in_account_currency
+				count += 1
+
+				if count == 6:
+					break
+			
+			if count == 6:
+				break
+				
 	
 	def delte_rows(self):
 		rows = frappe.get_all("Print Bank Check Detail", ["name"], filters = {"parent": self.name})
