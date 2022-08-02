@@ -54,10 +54,6 @@ frappe.ui.form.on('Patient', {
 		}
 	},
 
-	// setup: function (frm) {
-			
-	// },
-
 	onload: function (frm) {
 		if (frm.doc.dob) {
 			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${get_age(frm.doc.dob)}`);
@@ -66,7 +62,7 @@ frappe.ui.form.on('Patient', {
 		}
 	}
 });
-frappe.ui.form.on('Patient', 'cnic', function(frm) {
+frappe.ui.form.on('Patient', 'blood_group', function(frm) {
 	if (frm.doc.cnic) {
 		var regex = /^[0-9+]{5}-[0-9+]{7}-[0-9]{1}$/g;
 		if(regex.test(frm.doc.cnic)  != true){
