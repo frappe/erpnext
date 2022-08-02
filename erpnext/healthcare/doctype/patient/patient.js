@@ -55,7 +55,7 @@ frappe.ui.form.on('Patient', {
 	},
 
 	cnic: function (frm) {
-		var regex = "^[0-9+]{5}-[0-9+]{7}-[0-9]{1}$";
+		var regex = /^[0-9+]{5}-[0-9+]{7}-[0-9]{1}$/g;
 		if(regex.test(frm.doc.cnic)  != true){
 			frappe.msgprint(__("CNIC: Please follow CNIC format."));
     		frappe.validated = false;
