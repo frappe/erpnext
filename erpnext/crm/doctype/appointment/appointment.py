@@ -43,6 +43,7 @@ class Appointment(StatusUpdater):
 		self.set_onload('customer', self.get_customer())
 		self.set_onload('appointment_timeslots_data', get_appointment_timeslots(self.scheduled_date, self.appointment_type,
 			company=self.company))
+		self.set_onload('contact_nos', get_all_contact_nos(self.appointment_for, self.party_name))
 
 		if self.meta.has_field('applies_to_vehicle'):
 			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(self.get_customer(),
