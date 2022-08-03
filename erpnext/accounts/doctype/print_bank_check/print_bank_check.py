@@ -46,7 +46,7 @@ class PrintBankCheck(Document):
 		self.amount += self.SetMoneda(doc.amount, 2)
 		self.amount += "***"
 		self.amount_of = "***"
-		self.amount_of = amount_of
+		self.amount_of += amount_of
 		self.amount_of += "***"
 
 	def SetMoneda(nume, num, n_decimales):
