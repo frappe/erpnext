@@ -24,7 +24,7 @@ import json
 
 
 force_fields = ['customer_name', 'tax_id', 'tax_cnic', 'tax_strn',
-	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'address_display', 'contact_display', 'contact_email',
 	"vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
 	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name"
 ]
