@@ -221,10 +221,10 @@ customer_vehicle_selector_fields = [
 ]
 
 project_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
-[d for d in project_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'change_vehicle_delivery_date'
+[d for d in project_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'address_display'
 
 appointment_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
-[d for d in appointment_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'vehicle_last_odometer'
+[d for d in appointment_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'address_display'
 
 customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
 [d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['insert_after'] = 'contact_html'
