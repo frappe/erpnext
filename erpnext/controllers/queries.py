@@ -346,15 +346,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			frappe.db.escape(filters.get("customer"))
 		)
 
-<<<<<<< HEAD
-	fields = get_fields("Project", ["name", "project_name"])
-	searchfields = frappe.get_meta("Project").get_search_fields()
-	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
-=======
 	fields = get_fields(doctype, ["name", "project_name"])
 	searchfields = frappe.get_meta(doctype).get_search_fields()
 	searchfields = " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields])
->>>>>>> 9baa222976 (fix: specify allowed doctype in queries (#31761))
 
 	return frappe.db.sql(
 		"""select {fields} from `tabProject`
