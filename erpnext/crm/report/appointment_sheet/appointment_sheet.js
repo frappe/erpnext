@@ -17,7 +17,16 @@ frappe.query_reports["Appointment Sheet"] = {
 			label: __("From Date"),
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
-			reqd: 1
+			reqd: 1,
+			on_change: function() {
+				var from_date = frappe.query_report.get_filter_value('from_date');
+				var to_date = frappe.query_report.get_filter_value('to_date');
+				if (from_date && to_date) {
+					if (frappe.datetime.str_to_obj(from_date) > frappe.datetime.str_to_obj(to_date)) {
+						frappe.query_report.set_filter_value('to_date', from_date);
+					}
+				}
+			}
 		},
 		{
 			fieldname:"to_date",
