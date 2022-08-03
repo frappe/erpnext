@@ -470,6 +470,13 @@ def get_data():
 					"doctype": "Bank Transactions",
 					"is_query_report": True,
 				},
+				{
+              		"type": "doctype",
+              		"name": "Print Bank Check",
+              		"label": _("Print Bank Check"),
+              		"description": _("Create Print Bank Check"),
+            	},
+				
 			]
 		},
 		{
