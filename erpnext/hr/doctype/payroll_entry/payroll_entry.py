@@ -336,6 +336,7 @@ class PayrollEntry(Document):
 		return jv_name
 
 	def make_payment_entry(self):
+
 		self.check_permission('write')
 
 		cond = self.get_filter_condition()
@@ -361,6 +362,65 @@ class PayrollEntry(Document):
 						salary_slip_total -= sal_detail.amount
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
+	
+	def create_journal_entry(self):
+		verificate_list= []
+		rows = []
+		salary_slips = frappe.get_all("Salary Slip", ["*"], filters = {"payroll_entry": self.name})
+		
+		for salary_slip in salary_slips:
+			details = frappe.get_all("Salary Detail", ["*"], filters = {"parent": salary_slip.name})
+			
+			for detail in details:
+				debit = 0
+				credit = 0
+
+				component = frappe.get_doc("Salary Component", detail.salary_component)
+
+				account = frappe.get_all("Salary Component Account", ["default_account"], filters = {"parent": component.name, "company": self.company})
+
+				if component.type == "Earning":
+					debit = detail.amount
+					credit = 0
+
+				if component.type == "Deduction":
+					debit = 0
+					credit = detail.amount
+
+				verificate_list.append(
+					{
+						"account": account[0].default_account,
+						"debit": debit,
+						"credit": credit
+					}
+				)
+		
+		for verificate in verificate_list:
+			if len(rows) == 0:
+				rows.append(
+					{
+						"account": verificate.account,
+						"debit": verificate.debit,
+						"credit": verificate.credit
+					}
+				)
+			else:
+				cont = 0
+				for row in rows:
+					if row.account == verificate.account:
+						row.debit += verificate.debit
+						row.verificate += verificate.credit
+					else:
+						cont += 1
+				
+				if len(rows) == cont:
+					rows.append(
+						{
+							"account": verificate.account,
+							"debit": verificate.debit,
+							"credit": verificate.credit
+						}
+					)	
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
