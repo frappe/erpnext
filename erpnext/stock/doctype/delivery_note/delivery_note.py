@@ -245,6 +245,7 @@ class DeliveryNote(SellingController):
 				temp_item.rate = returnable.sale_price
 				temp_item.actual_qty = qty
 				temp_item.so_qty = qty
+				temp_item.in_transit_qty = qty
 				if self.is_return == True:
 						temp_item.return_qty = qty
 						temp_item.so_qty = 0 # in case of return
@@ -275,7 +276,7 @@ class DeliveryNote(SellingController):
 			self.check_credit_limit()
 		elif self.issue_credit_note:
 			self.make_return_invoice()
-		elif self.is_return and self.return_type == 'Shop Return' and len(self.items) >0:
+		elif self.is_return and self.return_type == 'Shop Return' and len(self.items) > 0:
 			savedoc =	make_sales_invoice(self.name)
 			savedoc.submit()
 		# Updating stock ledger should always be called after updating prevdoc status,
