@@ -15,7 +15,7 @@ from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignment, clear as clear_assignments, close_all_assignments
 from six import string_types
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact, get_all_contact_nos
 from erpnext.crm.doctype.lead.lead import _get_lead_contact_details, get_customer_from_lead
 from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
@@ -616,6 +616,8 @@ def get_customer_details(args):
 		out.update(_get_lead_contact_details(party))
 	else:
 		out.update(get_contact_details(out.contact_person))
+
+	out.contact_nos = get_all_contact_nos(party.doctype, party.name)
 
 	return out
 

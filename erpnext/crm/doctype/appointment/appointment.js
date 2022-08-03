@@ -5,8 +5,9 @@ frappe.provide("erpnext.crm");
 
 {% include 'erpnext/crm/doctype/appointment/appointment_slots.js' %};
 {% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
+{% include "erpnext/public/js/controllers/quick_contacts.js" %};
 
-erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
+erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
 			'Project': 'Project',
@@ -28,6 +29,7 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 	},
 
 	onload: function () {
+		this._super();
 		this.setup_queries();
 	},
 
@@ -245,9 +247,6 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 		this.reload_customer_vehicle_selector();
 	},
 
-	contact_person: function() {
-		erpnext.utils.get_contact_details(this.frm);
-	},
 	customer_address: function() {
 		erpnext.utils.get_address_display(this.frm, "customer_address");
 	},
@@ -268,7 +267,10 @@ erpnext.crm.AppointmentController = frappe.ui.form.Controller.extend({
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
-						me.frm.set_value(r.message);
+						frappe.run_serially([
+							() => me.frm.set_value(r.message),
+							() => me.setup_contact_no_fields(r.message.contact_nos),
+						]);
 					}
 				}
 			});

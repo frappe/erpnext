@@ -42,6 +42,8 @@
   "contact_display",
   "column_break_36",
   "contact_mobile",
+  "contact_mobile_2",
+  "column_break_39",
   "contact_phone",
   "contact_email",
   "column_break_25",
@@ -226,9 +228,8 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_mobile",
-   "fieldtype": "Data",
-   "label": "Contact Mobile No",
-   "read_only": 1
+   "fieldtype": "Select",
+   "label": "Mobile No (Primary)"
   },
   {
    "allow_on_submit": 1,
@@ -398,9 +399,8 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_phone",
-   "fieldtype": "Data",
-   "label": "Contact Phone No",
-   "read_only": 1
+   "fieldtype": "Select",
+   "label": "Phone No"
   },
   {
    "allow_on_submit": 1,
@@ -420,10 +420,21 @@
   {
    "fieldname": "column_break_36",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible_depends_on": "eval:doc.contact_mobile_2 || doc.contact_mobile",
+   "depends_on": "eval:doc.contact_mobile_2 || doc.contact_mobile",
+   "fieldname": "contact_mobile_2",
+   "fieldtype": "Select",
+   "label": "Mobile No (Secondary)"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-04 00:26:48.541824",
+ "modified": "2022-08-04 00:33:47.140854",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
