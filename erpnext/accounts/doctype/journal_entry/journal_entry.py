@@ -1287,6 +1287,7 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 		target.set_party_name()
 
 	def set_company(source, target, source_parent, target_parent):
+		target.posting_date = source.posting_date
 		target.company = company
 		target.voucher_type = voucher_type
 
