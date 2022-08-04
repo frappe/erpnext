@@ -9,6 +9,9 @@ from frappe.utils import cint, flt, getdate
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import (
+	get_pending_principal_amount,
+)
 
 
 class LoanWriteOff(AccountsController):
@@ -22,16 +25,26 @@ class LoanWriteOff(AccountsController):
 
 	def validate_write_off_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
-		total_payment, principal_paid, interest_payable, written_off_amount = frappe.get_value(
+
+		loan_details = frappe.get_value(
 			"Loan",
 			self.loan,
-			["total_payment", "total_principal_paid", "total_interest_payable", "written_off_amount"],
+			[
+				"total_payment",
+				"debit_adjustment_amount",
+				"credit_adjustment_amount",
+				"refund_amount",
+				"total_principal_paid",
+				"loan_amount",
+				"total_interest_payable",
+				"written_off_amount",
+				"disbursed_amount",
+				"status",
+			],
+			as_dict=1,
 		)
 
-		pending_principal_amount = flt(
-			flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount),
-			precision,
-		)
+		pending_principal_amount = flt(get_pending_principal_amount(loan_details), precision)
 
 		if self.write_off_amount > pending_principal_amount:
 			frappe.throw(_("Write off amount cannot be greater than pending principal amount"))
