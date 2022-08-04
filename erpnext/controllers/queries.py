@@ -815,4 +815,8 @@ def get_fields(doctype, fields=None):
 	if meta.title_field and not meta.title_field.strip() in fields:
 		fields.insert(1, meta.title_field.strip())
 
+	if meta.focus_field:
+		focus_field_idx = 2 if meta.title_field else 1
+		fields.insert(focus_field_idx, meta.focus_field.strip())
+
 	return unique(fields)
