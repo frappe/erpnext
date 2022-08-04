@@ -52,6 +52,15 @@ class PartyLedgerSummaryReport(object):
 				"width": 200
 			})
 
+		if self.filters.party_type == "Customer":
+			columns.append({
+				"label": _("Sales Person"),
+				"fieldtype": "Link",
+				"options": "Sales Person",
+				"fieldname": "sales_person",
+				"width": 150
+			})
+
 		invoiced_label = "Paid Amount" if self.filters.party_type == "Employee" else "Invoiced Amount"
 		paid_label = "Returned Amount" if self.filters.party_type == "Employee" else "Paid Amount"
 		if self.filters.party_type in ['Customer', 'Supplier']:
@@ -186,6 +195,19 @@ class PartyLedgerSummaryReport(object):
 					self.party_data[gle.party].return_amount -= amount
 				else:
 					self.party_data[gle.party].paid_amount -= amount
+
+		if self.filters.party_type == "Customer":
+			customers = list(self.party_data.keys())
+			if customers:
+				sales_person_map = dict(frappe.db.sql("""
+					select steam.parent, GROUP_CONCAT(distinct steam.sales_person SEPARATOR ', ')
+					from `tabSales Team` steam
+					where steam.parenttype = 'Customer' and steam.parent in %s
+					group by steam.parent
+				""", [customers]))
+
+				for d in self.party_data.values():
+					d.sales_person = sales_person_map.get(d.party)
 
 		out = []
 		for party, row in iteritems(self.party_data):
