@@ -10,7 +10,6 @@ from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_t
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.controllers.accounts_controller import get_gl_dict
 
 class PayrollEntry(Document):
 	def onload(self):
@@ -365,8 +364,12 @@ class PayrollEntry(Document):
 				self.create_journal_entry(salary_slip_total, "salary")
 	
 	def create_journal_entry_salary_slip(self):
-		verificate_list= []
-		rows = []
+		ver_acc = []
+		ver_deb = []
+		ver_cred = []
+		rows_acc = []
+		rows_deb = []
+		rows_cred = []
 		salary_slips = frappe.get_all("Salary Slip", ["*"], filters = {"payroll_entry": self.name})
 		
 		for salary_slip in salary_slips:
@@ -388,41 +391,62 @@ class PayrollEntry(Document):
 					debit = 0
 					credit = detail.amount
 
-				verificate_list.append(
-						{
-							"account": account[0].default_account,
-							"debit": debit,
-							"credit": credit
-						}
-				)
+				
+				ver_acc.append(account[0].default_account)
+				ver_deb.append(debit)
+				ver_cred.append(credit)
 		
-		for verificate in verificate_list:
-			if len(rows) == 0:
-				rows.append(verificate)
+		cont_acc = 0
+		for verificate in ver_acc:
+			if len(rows_acc) == 0:
+				rows_acc.append(verificate)
+				rows_deb.append(ver_deb[cont_acc])
+				rows_cred.append(ver_cred[cont_acc])
 			else:
 				cont = 0
-				for row in rows:
-					if row.account == verificate.account:
-						row.debit += verificate.debit
-						row.verificate += verificate.credit
+				cont_row = 0
+				for row in rows_acc:
+					if row == verificate:
+						rows_deb[cont_row] += ver_deb[cont_row]
+						rows_cred[cont_row] += ver_cred[cont_row]
 					else:
 						cont += 1
+					
+					cont_row += 1
 				
-				if len(rows) == cont:
-					rows.append(verificate)
-		
+				if len(rows_acc) == cont:
+					rows_acc.append(verificate)
+					rows_deb.append(ver_deb[cont_acc])
+					rows_cred.append(ver_cred[cont_acc])
+
+			cont_acc += 1
+
 		doc = frappe.new_doc("Journal Entry")
 		doc.voucher_type = "Payroll Entry"
 		doc.company = self.company
 		doc.reference_name = self.name
 		doc.posting_date = self.posting_date
+		doc.user_remark = _("Payment of Payrroll Entry from {} to {}".format(self.start_date, self.end_date))
 
-
-		for row in rows:
+		cont_rows = 0
+		debit = 0
+		credit = 0
+		for row in rows_acc:
+			debit += rows_deb[cont_rows]
+			credit += rows_cred[cont_rows]
 			acc = doc.append("accounts", {})
-			acc.account = row.account
-			acc.debit_in_account_currency = row.debit
-			acc.credit_in_account_currency = row.credit
+			acc.account = row
+			acc.debit_in_account_currency = rows_deb[cont_rows]
+			acc.credit_in_account_currency = rows_cred[cont_rows]
+
+			cont_rows += 1
+		
+		difference = debit - credit
+
+		acc = doc.append("accounts", {})
+		acc.account = self.payment_account
+		acc.debit_in_account_currency = 0
+		acc.credit_in_account_currency = difference	
 		
 		doc.insert()
 
