@@ -10,6 +10,7 @@ from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_t
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.controllers.accounts_controller import get_gl_dict
 
 class PayrollEntry(Document):
 	def onload(self):
@@ -336,7 +337,7 @@ class PayrollEntry(Document):
 		return jv_name
 
 	def make_payment_entry(self):
-
+		# self.create_journal_entry_salary_slip()
 		self.check_permission('write')
 
 		cond = self.get_filter_condition()
@@ -363,7 +364,7 @@ class PayrollEntry(Document):
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
 	
-	def create_journal_entry(self):
+	def create_journal_entry_salary_slip(self):
 		verificate_list= []
 		rows = []
 		salary_slips = frappe.get_all("Salary Slip", ["*"], filters = {"payroll_entry": self.name})
@@ -388,22 +389,16 @@ class PayrollEntry(Document):
 					credit = detail.amount
 
 				verificate_list.append(
-					{
-						"account": account[0].default_account,
-						"debit": debit,
-						"credit": credit
-					}
+						{
+							"account": account[0].default_account,
+							"debit": debit,
+							"credit": credit
+						}
 				)
 		
 		for verificate in verificate_list:
 			if len(rows) == 0:
-				rows.append(
-					{
-						"account": verificate.account,
-						"debit": verificate.debit,
-						"credit": verificate.credit
-					}
-				)
+				rows.append(verificate)
 			else:
 				cont = 0
 				for row in rows:
@@ -414,13 +409,22 @@ class PayrollEntry(Document):
 						cont += 1
 				
 				if len(rows) == cont:
-					rows.append(
-						{
-							"account": verificate.account,
-							"debit": verificate.debit,
-							"credit": verificate.credit
-						}
-					)	
+					rows.append(verificate)
+		
+		doc = frappe.new_doc("Journal Entry")
+		doc.voucher_type = "Payroll Entry"
+		doc.company = self.company
+		doc.reference_name = self.name
+		doc.posting_date = self.posting_date
+
+
+		for row in rows:
+			acc = doc.append("accounts", {})
+			acc.account = row.account
+			acc.debit_in_account_currency = row.debit
+			acc.credit_in_account_currency = row.credit
+		
+		doc.insert()
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
