@@ -356,6 +356,7 @@
   {
    "fieldname": "round_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Round Off Account",
    "options": "Account"
   },
@@ -368,30 +369,35 @@
   {
    "fieldname": "write_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Write Off Account",
    "options": "Account"
   },
   {
    "fieldname": "discount_allowed_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Discount Allowed Account",
    "options": "Account"
   },
   {
    "fieldname": "discount_received_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Discount Received Account",
    "options": "Account"
   },
   {
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Exchange Gain / Loss Account",
    "options": "Account"
   },
   {
    "fieldname": "unrealized_exchange_gain_loss_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Unrealized Exchange Gain/Loss Account",
    "options": "Account"
   },
@@ -422,6 +428,7 @@
   {
    "fieldname": "default_employee_advance_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Employee Advance Account",
    "no_copy": 1,
    "options": "Account"
@@ -519,6 +526,7 @@
   {
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Inventory Account",
    "options": "Account"
   },
@@ -559,6 +567,7 @@
   {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Accumulated Depreciation Account",
    "no_copy": 1,
    "options": "Account"
@@ -566,6 +575,7 @@
   {
    "fieldname": "depreciation_expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Depreciation Expense Account",
    "no_copy": 1,
    "options": "Account"
@@ -578,6 +588,7 @@
   {
    "fieldname": "expenses_included_in_asset_valuation",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Expenses Included In Asset Valuation",
    "options": "Account"
   },
@@ -588,6 +599,7 @@
   {
    "fieldname": "disposal_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Gain/Loss Account on Asset Disposal",
    "no_copy": 1,
    "options": "Account"
@@ -602,12 +614,14 @@
   {
    "fieldname": "capital_work_in_progress_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Capital Work In Progress Account",
    "options": "Account"
   },
   {
    "fieldname": "asset_received_but_not_billed",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Asset Received But Not Billed",
    "options": "Account"
   },
@@ -752,30 +766,35 @@
   {
    "fieldname": "extra_tax_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Extra Tax Account",
    "options": "Account"
   },
   {
    "fieldname": "further_tax_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Further Tax Account",
    "options": "Account"
   },
   {
    "fieldname": "advance_tax_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Advance Tax Account",
    "options": "Account"
   },
   {
    "fieldname": "sales_tax_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Sales Tax Account",
    "options": "Account"
   },
   {
    "fieldname": "service_tax_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Service Tax Account",
    "options": "Account"
   },
@@ -792,6 +811,7 @@
   {
    "fieldname": "temporary_opening_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Temporary Opening Account",
    "options": "Account"
   },
@@ -906,7 +926,7 @@
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2021-11-17 12:01:43.526302",
+ "modified": "2022-08-05 14:53:17.287528",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

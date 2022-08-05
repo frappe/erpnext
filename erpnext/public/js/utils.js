@@ -29,8 +29,17 @@ $.extend(erpnext, {
 	hide_company: function() {
 		if(cur_frm.fields_dict.company) {
 			var companies = Object.keys(locals[":Company"] || {});
+			var company_user_permissions = frappe.defaults.get_user_permissions()['Company'];
+
 			if(companies.length === 1) {
-				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
+				if (!cur_frm.doc.company) {
+					cur_frm.set_value("company", companies[0]);
+				}
+				cur_frm.toggle_display("company", false);
+			} else if (company_user_permissions && company_user_permissions.length === 1) {
+				if (!cur_frm.doc.company) {
+					cur_frm.set_value("company", company_user_permissions[0].doc);
+				}
 				cur_frm.toggle_display("company", false);
 			} else if(erpnext.last_selected_company) {
 				if(!cur_frm.doc.company) cur_frm.set_value("company", erpnext.last_selected_company);
