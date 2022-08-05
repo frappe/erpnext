@@ -278,6 +278,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				});
 			} else {
+				if (frm.fields_dict.project_reference_no) {
+					frm.set_value("project_reference_no", null);
+				}
 				return frm.cscript.get_applies_to_details();
 			}
 		});

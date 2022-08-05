@@ -1700,6 +1700,8 @@ def get_project_details(project, doctype):
 			out['quotation_to'] = 'Customer'
 			out['party_name'] = project.get(f)
 
+	out['project_reference_no'] = project.get('reference_no')
+
 	return out
 
 
@@ -1851,7 +1853,7 @@ def get_delivery_note(project_name):
 	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
 	project = frappe.get_doc("Project", project_name)
-	project_details = get_project_details(project, "Sales Invoice")
+	project_details = get_project_details(project, "Delivery Note")
 
 	# Create Sales Invoice
 	target_doc = frappe.new_doc("Delivery Note")

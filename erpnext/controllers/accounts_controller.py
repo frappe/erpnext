@@ -294,6 +294,8 @@ class AccountsController(TransactionBase):
 					self.set(fieldname, today())
 					break
 
+		self.set_project_reference_no()
+
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
@@ -1564,6 +1566,13 @@ class AccountsController(TransactionBase):
 		for d in self.items:
 			if not d.item_code:
 				frappe.throw(_("Row #{0}: Item Code is mandatory").format(d.idx))
+
+	def set_project_reference_no(self):
+		if self.meta.has_field('project_reference_no'):
+			if self.get('project'):
+				self.project_reference_no = frappe.db.get_value("Project", self.project, 'reference_no')
+			else:
+				self.project_reference_no = None
 
 
 @frappe.whitelist()
