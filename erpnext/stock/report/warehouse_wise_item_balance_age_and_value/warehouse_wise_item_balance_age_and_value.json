@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:31.904741",
+ "modified": "2022-08-06 03:57:50.629447",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse wise Item Balance Age and Value",
@@ -28,6 +28,9 @@
   },
   {
    "role": "Sales User"
+  },
+  {
+   "role": "Delivery User"
   }
  ]
 }

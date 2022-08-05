@@ -758,3 +758,5 @@ erpnext.patches.v12_0.resetup_vehicle_domain #30-04-2022 #24-07-2022 #27-07-2022
 erpnext.patches.v12_0.update_reference_vehicle_log
 erpnext.patches.v12_0.set_vehicle_images
 erpnext.patches.v12_0.set_vehicle_transfer_letter_territory
+erpnext.patches.v12_0.restrict_vehicle_roles
+erpnext.patches.v12_0.add_delivery_user_role

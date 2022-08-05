@@ -324,9 +324,10 @@ data = {
 
 	],
 	'restricted_roles': [
+		'Vehicle Manager',
 		'Vehicle Stock User',
 		'Vehicle Registration User',
-		'Sales Admin'
+		'Sales Admin',
 	],
 	'modules': [
 

@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:30.008331",
+ "modified": "2022-08-06 03:56:19.712731",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delayed Item Report",
@@ -31,6 +31,9 @@
   },
   {
    "role": "Sales User"
+  },
+  {
+   "role": "Delivery User"
   }
  ]
 }

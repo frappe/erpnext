@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2021-03-09 18:52:40.946800",
+ "modified": "2022-08-06 03:58:17.550599",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "stock-balance",
@@ -25,6 +25,9 @@
   },
   {
    "role": "Manufacturing User"
+  },
+  {
+   "role": "Delivery User"
   }
  ],
  "script": null,

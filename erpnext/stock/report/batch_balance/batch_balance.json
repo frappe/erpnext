@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2021-03-02 16:32:39.856188",
+ "modified": "2022-08-06 03:57:47.200460",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch Balance",
@@ -31,6 +31,9 @@
   },
   {
    "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Delivery User"
   }
  ]
 }

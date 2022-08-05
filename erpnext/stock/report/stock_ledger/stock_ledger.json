@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 29,
  "is_standard": "Yes",
- "modified": "2021-03-09 18:35:58.570881",
+ "modified": "2022-08-06 03:57:43.726940",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger",
@@ -34,6 +34,9 @@
   },
   {
    "role": "Manufacturing User"
+  },
+  {
+   "role": "Delivery User"
   }
  ]
 }

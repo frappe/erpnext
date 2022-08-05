@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:30.086848",
+ "modified": "2022-08-06 03:56:12.092375",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Trends",
@@ -28,6 +28,9 @@
   },
   {
    "role": "Accounts User"
+  },
+  {
+   "role": "Delivery User"
   }
  ]
 }

@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 27,
  "is_standard": "Yes",
- "modified": "2021-03-09 18:36:24.647094",
+ "modified": "2022-08-06 03:57:39.405245",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Balance",
@@ -34,6 +34,9 @@
   },
   {
    "role": "Manufacturing User"
+  },
+  {
+   "role": "Delivery User"
   }
  ]
 }
