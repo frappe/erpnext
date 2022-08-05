@@ -198,7 +198,16 @@ class DeliveryNote(SellingController):
 			return
 		## unset returnable items
 		if self.get('remove_return_items'):
-			self.set("returnable_items", [])        
+			# self.set("returnable_items", [])
+			alwayes_returnable_items = []
+			for returnable_item in self.returnable_items:
+				if returnable_item.is_allways_return == 1:
+					alwayes_returnable_items.append(returnable_item)
+			if len(alwayes_returnable_items):
+				self.set("returnable_items", alwayes_returnable_items)
+			else:
+				self.set("returnable_items", [])
+				
 		## check if returanable manage manullay
 		elif not self.get('manually_manage_return_items'):
 			# if self.is_new() == True:
@@ -240,9 +249,9 @@ class DeliveryNote(SellingController):
 				qty -= minus_qty
 				
 				temp_item = self.append('returnable_items',{})
+				temp_item.is_allways_return = returnable.is_allways_return
 				temp_item.item_code = returnable.returnable_item
 				temp_item.item_name = returnable.returnable_item_name
-				temp_item.item_reference = returnable.item
 				temp_item.rate = returnable.sale_price
 				temp_item.actual_qty = qty
 				temp_item.so_qty = qty

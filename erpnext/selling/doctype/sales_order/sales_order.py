@@ -198,6 +198,7 @@ class SalesOrder(SellingController):
 			temp_item.rate = returnable.sale_price
 			temp_item.item_reference = returnable.item
 			temp_item.qty = qty
+			temp_item.is_allways_return = returnable.is_allways_return
 
 	def on_submit(self):
 		self.check_credit_limit()
