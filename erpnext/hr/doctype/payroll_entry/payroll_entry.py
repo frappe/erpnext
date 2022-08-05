@@ -336,7 +336,6 @@ class PayrollEntry(Document):
 		return jv_name
 
 	def make_payment_entry(self):
-		# self.create_journal_entry_salary_slip()
 		self.check_permission('write')
 
 		cond = self.get_filter_condition()
@@ -362,6 +361,9 @@ class PayrollEntry(Document):
 						salary_slip_total -= sal_detail.amount
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
+	
+	def make_journal_entry(self):
+		self.create_journal_entry_salary_slip()
 	
 	def create_journal_entry_salary_slip(self):
 		ver_acc = []
@@ -424,38 +426,51 @@ class PayrollEntry(Document):
 		doc = frappe.new_doc("Journal Entry")
 		doc.voucher_type = "Payroll Entry"
 		doc.company = self.company
-		doc.reference_name = self.name
 		doc.posting_date = self.posting_date
 		doc.user_remark = _("Payment of Payrroll Entry from {} to {}".format(self.start_date, self.end_date))
 
 		cont_rows = 0
 		debit = 0
 		credit = 0
+		register_list = []
 		for row in rows_acc:
 			debit += rows_deb[cont_rows]
 			credit += rows_cred[cont_rows]
-			acc = doc.append("accounts", {})
-			acc.account = row
-			acc.debit_in_account_currency = rows_deb[cont_rows]
-			acc.credit_in_account_currency = rows_cred[cont_rows]
+
+			register_list.append(
+				{
+					"account": row,
+					"debit_in_account_currency": rows_deb[cont_rows],
+					"credit_in_account_currency": rows_cred[cont_rows],
+					"reference_type": self.doctype,
+					"reference_name": self.name
+				}
+			)			
 
 			cont_rows += 1
 		
 		difference = debit - credit
+		default_payroll_payable_account = self.get_default_payroll_payable_account()
+		register_list.append(
+		 	{
+				"account": default_payroll_payable_account,
+		 		"debit_in_account_currency": 0,
+		 		"credit_in_account_currency": difference,
+		 		"reference_type": self.doctype,
+		 		"reference_name": self.name
+		 	}
+		)
 
-		acc = doc.append("accounts", {})
-		acc.account = self.payment_account
-		acc.debit_in_account_currency = 0
-		acc.credit_in_account_currency = difference	
+		doc.set("accounts", register_list)
 		
-		doc.insert()
+		doc.save(ignore_permissions = True)
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
 		journal_entry = frappe.new_doc('Journal Entry')
-		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.voucher_type = 'Payroll Entry'
 		journal_entry.user_remark = _('Payment of {0} from {1} to {2}')\
 			.format(user_remark, self.start_date, self.end_date)
 		journal_entry.company = self.company
