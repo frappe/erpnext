@@ -283,6 +283,41 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.get("invoices")), 2)
 		self.assertEqual(len(pr.get("payments")), 2)
 
+	def test_filter_posting_date_case2(self):
+		"""
+		Posting date should not affect outstanding amount calculation
+		"""
+
+		from_date = add_days(nowdate(), -30)
+		to_date = nowdate()
+		self.create_payment_entry(amount=25, posting_date=from_date).submit()
+		self.create_sales_invoice(rate=25, qty=1, posting_date=to_date)
+
+		pr = self.create_payment_reconciliation()
+		pr.from_invoice_date = pr.from_payment_date = from_date
+		pr.to_invoice_date = pr.to_payment_date = to_date
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		pr.from_invoice_date = pr.from_payment_date = to_date
+		pr.to_invoice_date = pr.to_payment_date = to_date
+
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 0)
+
 	def test_filter_invoice_limit(self):
 		# check filter condition - invoice limit
 		transaction_date = nowdate()
