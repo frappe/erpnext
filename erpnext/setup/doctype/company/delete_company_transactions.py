@@ -18,7 +18,7 @@ excluded_dts = (
 	"POS Profile", "Mode Of Payment", "Mode of Payment Account",
 	"Company", "Bank Account", "Item Tax Template",
 	"Item Default Rule", "Customer", "Supplier", "GST Account",
-	"Vehicle Withholding Tax Rule"
+	"Vehicle Withholding Tax Rule", "Department",
 )
 
 
