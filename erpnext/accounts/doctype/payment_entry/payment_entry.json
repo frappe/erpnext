@@ -5,7 +5,6 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "company",
   "type_of_payment",
   "naming_series",
   "payment_type",
@@ -16,9 +15,10 @@
   "party_name",
   "payment_order_status",
   "column_break_5",
-  "amended_from",
+  "company",
   "posting_date",
   "mode_of_payment",
+  "amended_from",
   "more_information_section",
   "bank",
   "bank_account_no",
@@ -696,7 +696,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-04-19 02:29:34.361237",
+ "modified": "2022-08-05 15:05:57.994220",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
