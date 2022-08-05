@@ -99,7 +99,7 @@ class LoanBalanceAdjustment(AccountsController):
 		loan_account = frappe.db.get_value("Loan", self.loan, "loan_account")
 		remarks = "{} against loan {}".format(self.adjustment_type.capitalize(), self.loan)
 		if self.reference_number:
-			remarks += "with reference no. {}".format(self.reference_number)
+			remarks += " with reference no. {}".format(self.reference_number)
 
 		loan_entry = {
 			"account": loan_account,
