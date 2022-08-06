@@ -862,13 +862,16 @@ def get_price_list_rate_for(args, item_code):
 		"customer": args.get('customer'),
 		"supplier": args.get('supplier'),
 		"uom": args.get('uom'),
-		"transaction_date": args.get('transaction_date') or args.get('transaction_date'),
+		"transaction_date": args.get('transaction_date') or args.get('posting_date'),
 	}
 
 	item_price_data = 0
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
 		desired_qty = args.get("qty")
+		if desired_qty is None:
+			desired_qty = 1
+
 		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:

@@ -113,7 +113,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Pricing"),
+			"label": _("Price List"),
 			"items": [
 				{
 					"type": "doctype",
@@ -134,12 +134,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Bulk Price Update"),
+					"name": "Bulk Price Update",
+					"description": _("Update or Upload Prices in Bulk."),
+					"dependencies": ["Price List"],
+				},
+				{
+					"type": "doctype",
 					"name": "Item Price",
 					"label": _("All Item Prices"),
 					"description": _("Multiple Item prices."),
 					"route": "#Report/Item Price",
 					"dependencies": ["Item", "Price List"],
 				},
+			]
+		},
+		{
+			"label": _("Special Prices"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Promotional Scheme",

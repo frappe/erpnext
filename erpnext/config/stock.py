@@ -182,6 +182,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Bulk Price Update"),
+					"name": "Bulk Price Update",
+					"description": _("Update or Upload Prices in Bulk."),
+					"dependencies": ["Price List"],
+				},
+				{
+					"type": "doctype",
 					"name": "Item Price",
 				},
 				{
