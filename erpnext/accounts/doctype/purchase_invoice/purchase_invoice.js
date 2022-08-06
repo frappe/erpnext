@@ -32,6 +32,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			this.show_stock_ledger();
 		}
 
+		if (me.frm.doc.docstatus == 0) {
+			me.add_get_latest_price_button();
+		}
+		if (me.frm.doc.docstatus == 1) {
+			me.add_update_price_list_button();
+		}
+
 		if(!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0){
 			if(doc.on_hold) {
 				this.frm.add_custom_button(

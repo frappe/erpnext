@@ -89,6 +89,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		if(doc.update_stock) this.show_stock_ledger();
 
+		if (me.frm.doc.docstatus == 0) {
+			me.add_get_latest_price_button();
+		}
+		if (me.frm.doc.docstatus == 1) {
+			me.add_update_price_list_button();
+		}
+
 		if (doc.docstatus == 1 && doc.outstanding_amount!=0
 			&& !(cint(doc.is_return) && doc.return_against)) {
 			cur_frm.add_custom_button(__('Payment'),

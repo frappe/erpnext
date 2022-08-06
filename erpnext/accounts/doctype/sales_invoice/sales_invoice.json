@@ -92,7 +92,6 @@
   "plc_conversion_rate",
   "column_break_75",
   "ignore_pricing_rule",
-  "get_latest_price",
   "sec_warehouse",
   "update_stock",
   "auto_select_batches",
@@ -100,7 +99,6 @@
   "set_warehouse",
   "items_section",
   "scan_barcode",
-  "update_item_prices",
   "items",
   "packing_list",
   "packed_items",
@@ -1703,11 +1701,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "get_latest_price",
-   "fieldtype": "Button",
-   "label": "Get Latest Price"
-  },
-  {
    "fieldname": "column_break_79",
    "fieldtype": "Column Break"
   },
@@ -1956,12 +1949,6 @@
   {
    "fieldname": "column_break_208",
    "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "eval:doc.docstatus==1",
-   "fieldname": "update_item_prices",
-   "fieldtype": "Button",
-   "label": "Update Price List"
   },
   {
    "collapsible": 1,
@@ -2238,7 +2225,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-08-06 03:34:36.087346",
+ "modified": "2022-08-06 13:27:20.896525",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

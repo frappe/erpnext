@@ -114,6 +114,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			}, __("View"));
 		}
 
+		if (me.frm.doc.docstatus == 0) {
+			me.add_get_latest_price_button();
+		}
+		if (me.frm.doc.docstatus == 1) {
+			me.add_update_price_list_button();
+		}
+
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
 			if (this.frm.doc.docstatus == 0) {
 				this.frm.add_custom_button(__('Purchase Order'),

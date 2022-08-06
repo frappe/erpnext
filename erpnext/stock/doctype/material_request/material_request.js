@@ -80,6 +80,8 @@ frappe.ui.form.on('Material Request', {
 				__("Get Items From"));
 			frm.add_custom_button(__("Bill of Materials"), () => frm.events.get_items_from_bom(frm),
 				__("Get Items From"));
+
+			frm.cscript.set_from_product_bundle();
 		}
 
 		if (frm.doc.docstatus == 1 && flt(frm.doc.per_ordered, 2) < 100) {

@@ -71,6 +71,13 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	setup_buttons: function () {
 		var me = this;
 
+		if (me.frm.doc.docstatus == 0) {
+			me.add_get_latest_price_button();
+		}
+		if (me.frm.doc.docstatus == 1) {
+			me.add_update_price_list_button();
+		}
+
 		var customer;
 		if (this.frm.doc.quotation_to == "Customer") {
 			customer = this.frm.doc.party_name;

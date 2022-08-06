@@ -115,6 +115,24 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
 
+		if (me.frm.doc.docstatus == 0) {
+			me.add_get_latest_price_button();
+
+			this.frm.add_custom_button(__('Set Price as Last Rurchase Rate'), function() {
+				frappe.call({
+					"method": "get_last_purchase_rate",
+					"doc": me.frm.doc,
+					callback: function(r, rt) {
+						me.frm.dirty();
+						me.frm.cscript.calculate_taxes_and_totals();
+					}
+				})
+			}, __("Prices"));
+		}
+		if (me.frm.doc.docstatus == 1) {
+			me.add_update_price_list_button();
+		}
+
 		if(doc.docstatus == 1) {
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
 				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
@@ -192,7 +210,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		} else if(doc.docstatus===0) {
-			cur_frm.cscript.add_from_mappers();
+			me.add_from_mappers();
 		}
 	},
 
@@ -368,54 +386,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	add_from_mappers: function() {
 		var me = this;
-		this.frm.add_custom_button(__('Material Request'),
-			function() {
-				erpnext.utils.map_current_doc({
-					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
-					source_doctype: "Material Request",
-					target: me.frm,
-					setters: {
-						company: me.frm.doc.company
-					},
-					get_query_filters: {
-						material_request_type: "Purchase",
-						docstatus: 1,
-						status: ["!=", "Stopped"],
-						per_ordered: ["<", 99.99],
-					}
-				})
-			}, __("Get Items From"));
 
-		this.frm.add_custom_button(__('Supplier Quotation'),
-			function() {
-				erpnext.utils.map_current_doc({
-					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
-					source_doctype: "Supplier Quotation",
-					target: me.frm,
-					setters: {
-						company: me.frm.doc.company
-					},
-					get_query_filters: {
-						docstatus: 1,
-						status: ["!=", "Stopped"],
-					}
-				})
-			}, __("Get Items From"));
-
-		this.frm.add_custom_button(__('Update rate as per last purchase'),
-			function() {
-				frappe.call({
-					"method": "get_last_purchase_rate",
-					"doc": me.frm.doc,
-					callback: function(r, rt) {
-						me.frm.dirty();
-						me.frm.cscript.calculate_taxes_and_totals();
-					}
-				})
-			}, __("Tools"));
-
-		this.frm.add_custom_button(__('Link to Material Request'),
-		function() {
+		this.frm.add_custom_button(__('Link to Material Request'), function() {
 			var my_items = [];
 			for (var i in me.frm.doc.items) {
 				if(!me.frm.doc.items[i].material_request){
@@ -469,6 +441,42 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			});
 		}, __("Tools"));
+
+		this.frm.add_custom_button(__('Material Request'),
+			function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+					source_doctype: "Material Request",
+					target: me.frm,
+					setters: {
+						company: me.frm.doc.company
+					},
+					get_query_filters: {
+						material_request_type: "Purchase",
+						docstatus: 1,
+						status: ["!=", "Stopped"],
+						per_ordered: ["<", 99.99],
+					}
+				})
+			}, __("Get Items From"));
+
+		this.frm.add_custom_button(__('Supplier Quotation'),
+			function() {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+					source_doctype: "Supplier Quotation",
+					target: me.frm,
+					setters: {
+						company: me.frm.doc.company
+					},
+					get_query_filters: {
+						docstatus: 1,
+						status: ["!=", "Stopped"],
+					}
+				})
+			}, __("Get Items From"));
+
+		this.set_from_product_bundle();
 	},
 
 	tc_name: function() {

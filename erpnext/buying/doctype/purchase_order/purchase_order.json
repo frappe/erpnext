@@ -74,7 +74,6 @@
   "cb_price_list",
   "ignore_pricing_rule",
   "calculate_tax_on_company_currency",
-  "get_latest_price",
   "sec_warehouse",
   "set_warehouse",
   "col_break_warehouse",
@@ -83,7 +82,6 @@
   "items_section",
   "get_items_from_open_material_requests",
   "scan_barcode",
-  "update_item_prices",
   "items",
   "section_break_48",
   "pricing_rules",
@@ -1232,11 +1230,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "get_latest_price",
-   "fieldtype": "Button",
-   "label": "Get Latest Price"
-  },
-  {
    "fieldname": "column_break_82",
    "fieldtype": "Column Break"
   },
@@ -1514,12 +1507,6 @@
    "options": "Transaction Type"
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
-   "fieldname": "update_item_prices",
-   "fieldtype": "Button",
-   "label": "Update Price List"
-  },
-  {
    "collapsible": 1,
    "collapsible_depends_on": "applies_to_item",
    "fieldname": "sec_applies_to",
@@ -1588,7 +1575,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2022-08-05 15:02:20.572146",
+ "modified": "2022-08-06 13:27:52.595767",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

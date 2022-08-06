@@ -130,6 +130,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var me = this;
 		let allow_delivery = false;
 
+		if (me.frm.doc.docstatus == 0) {
+			me.add_get_latest_price_button();
+		}
+		if (me.frm.doc.docstatus == 1) {
+			me.add_update_price_list_button();
+		}
+
 		if (me.frm.doc.docstatus==1) {
 			if(me.frm.has_perm("submit")) {
 				if(me.frm.doc.status === 'On Hold') {

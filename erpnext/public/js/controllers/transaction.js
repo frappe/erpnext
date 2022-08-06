@@ -2528,7 +2528,21 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			() => this.frm.doc.ignore_pricing_rule=0,
 			() => me.apply_pricing_rule()
 		]);
-	}
+	},
+
+	add_get_latest_price_button: function () {
+		var me = this;
+		me.frm.add_custom_button(__("Get Latest Prices"), function() {
+			me.get_latest_price();
+		}, __("Prices"));
+	},
+
+	add_update_price_list_button: function () {
+		var me = this;
+		me.frm.add_custom_button(__("Update Price List"), function() {
+			me.update_item_prices();
+		}, __("Prices"));
+	},
 });
 
 erpnext.show_serial_batch_selector = function(frm, d, callback, on_close, show_dialog, on_make_dialog) {

@@ -79,7 +79,6 @@
   "column_break2",
   "ignore_pricing_rule",
   "calculate_tax_on_company_currency",
-  "get_latest_price",
   "sec_warehouse",
   "update_stock",
   "revalue_purchase_receipt",
@@ -92,7 +91,6 @@
   "supplier_warehouse",
   "items_section",
   "scan_barcode",
-  "update_item_prices",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -1487,11 +1485,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "get_latest_price",
-   "fieldtype": "Button",
-   "label": "Get Latest Price"
-  },
-  {
    "default": "0",
    "depends_on": "eval:(!doc.is_return || !doc.update_stock)",
    "fieldname": "revalue_purchase_receipt",
@@ -1752,12 +1745,6 @@
    "options": "Transaction Type"
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
-   "fieldname": "update_item_prices",
-   "fieldtype": "Button",
-   "label": "Update Price List"
-  },
-  {
    "collapsible": 1,
    "collapsible_depends_on": "applies_to_item",
    "fieldname": "sec_applies_to",
@@ -1830,7 +1817,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2022-08-05 15:03:39.158442",
+ "modified": "2022-08-06 13:27:33.876365",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
