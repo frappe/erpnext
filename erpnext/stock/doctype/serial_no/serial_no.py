@@ -514,6 +514,9 @@ def has_serial_no_exists(sn, sle):
 	):
 		return True
 
+	if sn.status != "Inactive":
+		return True
+
 	if sn.company != sle.company:
 		return False
 
