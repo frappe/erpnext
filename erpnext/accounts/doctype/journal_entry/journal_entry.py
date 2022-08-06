@@ -105,7 +105,7 @@ class JournalEntry(AccountsController):
 		pass
 
 	def validate_inter_company_accounts(self):
-		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
+		if self.inter_company_reference:
 			doc = frappe.get_doc("Journal Entry", self.inter_company_reference)
 			account_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 			previous_account_currency = frappe.get_cached_value('Company',  doc.company,  "default_currency")
@@ -114,7 +114,7 @@ class JournalEntry(AccountsController):
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
 
 	def update_inter_company_jv(self):
-		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
+		if self.inter_company_reference:
 			frappe.db.set_value("Journal Entry", self.inter_company_reference,\
 				"inter_company_reference", self.name, notify=1)
 
@@ -171,7 +171,7 @@ class JournalEntry(AccountsController):
 						asset.set_status()
 
 	def unlink_inter_company_jv(self):
-		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_reference:
+		if self.inter_company_reference:
 			frappe.db.set_value("Journal Entry", self.inter_company_reference,\
 				"inter_company_reference", "", notify=1)
 			frappe.db.set_value("Journal Entry", self.name,\
