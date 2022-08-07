@@ -772,15 +772,41 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	setup_sms: function() {
 		var me = this;
-		let blacklist = ['Purchase Invoice', 'BOM'];
-		if(this.frm.doc.docstatus===1 && !in_list(["Lost", "Stopped", "Closed"], this.frm.doc.status)
-			&& !blacklist.includes(this.frm.doctype)) {
-			this.frm.page.add_menu_item(__('Send SMS'), function() { me.send_sms(); });
+		let blacklist_dt = ['Purchase Invoice', 'BOM'];
+		let blacklist_status = in_list(["Lost", "Stopped", "Closed"], this.frm.doc.status);
+
+		if(this.frm.doc.docstatus===1 && !blacklist_status && !blacklist_dt.includes(this.frm.doctype)) {
+			this.frm.page.add_menu_item(__('Send SMS'), function() {
+				me.send_sms();
+			});
 		}
 	},
 
 	send_sms: function() {
-		var sms_man = new erpnext.SMSManager(this.frm.doc);
+		var doc = this.frm.doc;
+		var args = {};
+
+		args.contact = doc.contact_person || doc.customer_primary_contact;
+		args.mobile_no = doc.contact_mobile || doc.mobile_no || doc.contact_no;
+
+		if (in_list(['Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			args.party_doctype = 'Customer';
+			args.party_name = doc.bill_to || doc.customer;
+
+		} else if (doc.doctype == 'Quotation') {
+			args.party_doctype = doc.quotation_to;
+			args.party_name = doc.party_name;
+
+		} else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype)) {
+			args.party_doctype = 'Supplier';
+			args.party_name = doc.supplier;
+
+		} else if (in_list(['Lead', 'Customer', 'Supplier'], doc.doctype)) {
+			args.party_doctype = doc.doctype;
+			args.party_name = doc.name;
+		}
+
+		new frappe.SMSManager(doc, args);
 	},
 
 	barcode: function(doc, cdt, cdn) {
