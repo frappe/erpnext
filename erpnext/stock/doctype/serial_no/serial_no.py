@@ -514,7 +514,7 @@ def has_serial_no_exists(sn, sle):
 	):
 		return True
 
-	if sn.status in ["Delivered", "Expired"]:
+	if sn.status == "Delivered":
 		return True
 
 	if sn.company != sle.company:
