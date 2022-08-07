@@ -432,6 +432,8 @@ class PayrollEntry(Document):
 					)
 					if statistical_component != 1:
 						salary_slip_total -= sal_detail.amount
+				if salary_slip.total_loan_repayment:
+					salary_slip_total -= salary_slip.total_loan_repayment
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
 
