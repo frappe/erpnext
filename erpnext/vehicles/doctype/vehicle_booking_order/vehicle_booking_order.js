@@ -390,31 +390,31 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		// Notification Status
 		var booking_confirmation_count = me.get_notification_count('Booking Confirmation', 'SMS');
 		var booking_confirmation_color = booking_confirmation_count ? "green"
-			: this.frm.doc.delivery_status == "Not Received" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "grey";
+			: this.can_notify('Booking Confirmation') ? "yellow" : "grey";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
 		var balance_payment_count = me.get_notification_count('Balance Payment Request', 'SMS');
 		var balance_payment_color = balance_payment_count ? "green"
-			: this.frm.doc.customer_outstanding && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "grey";
+			: this.can_notify('Balance Payment Request') ? "yellow" : "grey";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
 			: __("Not Sent");
 
 		var ready_for_delivery_count = me.get_notification_count('Ready For Delivery', 'SMS');
 		var ready_for_delivery_color = ready_for_delivery_count ? "green"
-			: this.frm.doc.delivery_status == "In Stock" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "grey";
+			: this.can_notify('Ready For Delivery') ? "yellow" : "grey";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
 
 		var congratulations_count = me.get_notification_count('Congratulations', 'SMS');
 		var congratulations_color = congratulations_count ? "green"
-			: this.frm.doc.invoice_status == "Delivered" && this.frm.doc.status != "Cancelled Booking" ? "yellow" : "grey";
+			: this.can_notify('Congratulations') ? "yellow" : "grey";
 		var congratulations_status = congratulations_count ? __("{0} SMS", [congratulations_count])
 			: __("Not Sent");
 
 		var booking_cancellation_count = me.get_notification_count('Booking Cancellation', 'SMS');
 		var booking_cancellation_color = booking_cancellation_count ? "green"
-			: this.frm.doc.status == "Cancelled Booking" ? "yellow" : "grey";
+			: this.can_notify('Booking Cancellation') ? "yellow" : "grey";
 		var booking_cancellation_status = booking_cancellation_count ? __("{0} SMS", [booking_cancellation_count])
 			: __("Not Sent");
 
@@ -468,39 +468,39 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 	setup_notification_buttons: function() {
 		var me = this;
 		if(this.frm.doc.docstatus === 1) {
-			if (this.frm.doc.status == "Cancelled Booking") {
+			if (this.can_notify("Booking Cancellation")) {
 				var booking_cancellation_count = this.get_notification_count('Booking Cancellation', 'SMS');
 				let label = __("Booking Cancellation{0}", [booking_cancellation_count ? " (Resend)" : ""]);
 				this.frm.add_custom_button(label, () => this.send_sms('Booking Cancellation'),
 					__("Notify"));
-			} else {
-				if (this.frm.doc.delivery_status == "Not Received") {
-					var booking_confirmation_count = this.get_notification_count('Booking Confirmation', 'SMS');
-					let label = __("Booking Confirmation{0}", [booking_confirmation_count ? " (Resend)" : ""]);
-					this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
-						__("Notify"));
-				}
+			}
 
-				if (this.frm.doc.customer_outstanding) {
-					var balance_payment_count = this.get_notification_count('Balance Payment Request', 'SMS');
-					let label = __("Balance Payment Request{0}", [balance_payment_count ? " (Resend)" : ""]);
-					this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Request'),
-						__("Notify"));
-				}
+			if (this.can_notify("Booking Confirmation")) {
+				var booking_confirmation_count = this.get_notification_count('Booking Confirmation', 'SMS');
+				let label = __("Booking Confirmation{0}", [booking_confirmation_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
+					__("Notify"));
+			}
 
-				if (this.frm.doc.delivery_status == "In Stock") {
-					var ready_for_delivery_count = this.get_notification_count('Ready For Delivery', 'SMS');
-					let label = __("Ready For Delivery{0}", [ready_for_delivery_count ? " (Resend)" : ""]);
-					this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),
-						__("Notify"));
-				}
+			if (this.can_notify("Balance Payment Request")) {
+				var balance_payment_count = this.get_notification_count('Balance Payment Request', 'SMS');
+				let label = __("Balance Payment Request{0}", [balance_payment_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Request'),
+					__("Notify"));
+			}
 
-				if (this.frm.doc.invoice_status == "Delivered") {
-					var congratulations_count = this.get_notification_count('Congratulations', 'SMS');
-					let label = __("Congratulations{0}", [congratulations_count ? " (Resend)" : ""]);
-					this.frm.add_custom_button(label, () => this.send_sms('Congratulations'),
-						__("Notify"));
-				}
+			if (this.can_notify("Ready For Delivery")) {
+				var ready_for_delivery_count = this.get_notification_count('Ready For Delivery', 'SMS');
+				let label = __("Ready For Delivery{0}", [ready_for_delivery_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),
+					__("Notify"));
+			}
+
+			if (this.can_notify("Congratulations")) {
+				var congratulations_count = this.get_notification_count('Congratulations', 'SMS');
+				let label = __("Congratulations{0}", [congratulations_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Congratulations'),
+					__("Notify"));
 			}
 
 			this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
@@ -1236,6 +1236,14 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			return false;
 		}
 	},
+
+	can_notify: function (what) {
+		if (this.frm.doc.__onload && this.frm.doc.__onload.can_notify) {
+			return this.frm.doc.__onload.can_notify[what];
+		} else {
+			return false;
+		}
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleBookingOrder({frm: cur_frm}));

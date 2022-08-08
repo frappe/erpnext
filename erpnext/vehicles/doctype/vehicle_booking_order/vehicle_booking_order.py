@@ -65,6 +65,7 @@ class VehicleBookingOrder(VehicleBookingController):
 		if self.docstatus == 1:
 			from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import set_can_change_onload
 			set_can_change_onload(self)
+			self.set_can_notify_onload()
 
 	def before_print(self):
 		super(VehicleBookingOrder, self).before_print()
@@ -555,33 +556,67 @@ class VehicleBookingOrder(VehicleBookingController):
 			'party_name': self.customer
 		})
 
-	def validate_notification(self, notification_type=None, notification_medium=None, args=None):
+	def set_can_notify_onload(self):
+		notification_types = [
+			'Booking Confirmation',
+			'Balance Payment Request',
+			'Ready For Delivery',
+			'Congratulations',
+			'Booking Cancellation'
+		]
+
+		can_notify = frappe._dict()
+		for notification_type in notification_types:
+			can_notify[notification_type] = self.validate_notification(notification_type, throw=False)
+
+		self.set_onload('can_notify', can_notify)
+
+	def validate_notification(self, notification_type=None, throw=False):
 		if not notification_type:
-			frappe.throw(_("Notification Type is mandatory"))
+			if throw:
+				frappe.throw(_("Notification Type is mandatory"))
+			return False
 
 		if self.docstatus != 1:
-			frappe.throw(_("Cannot send notification because Vehicle Booking Order is not submitted"))
+			if throw:
+				frappe.throw(_("Cannot send notification because Vehicle Booking Order is not submitted"))
+			return False
 
 		# Not allowed if cancelled except for Booking Cancellation message
-		if notification_type != "Booking Cancellation":
+		if notification_type == "Booking Cancellation":
+			if not self.check_cancelled():
+				return False
+		else:
 			if self.check_cancelled():
-				frappe.throw(_("Cannot send {0} notification because Vehicle Booking Order is cancelled").format(notification_type))
+				if throw:
+					frappe.throw(_("Cannot send {0} notification because Vehicle Booking Order is cancelled").format(notification_type))
+				return False
 
 		if notification_type == "Booking Confirmation":
 			if self.delivery_status != "Not Received":
-				frappe.throw(_("Cannot send Booking Confirmation notification after receiving Vehicle"))
+				if throw:
+					frappe.throw(_("Cannot send Booking Confirmation notification after receiving Vehicle"))
+				return False
 
 		if notification_type == "Balance Payment Request":
-			if not self.customer_outstanding:
-				frappe.throw(_("Cannot send Balance Payment Request notification because Customer Outstanding amount is zero"))
+			if not self.customer_outstanding > 0:
+				if throw:
+					frappe.throw(_("Cannot send Balance Payment Request notification because Customer Outstanding amount is zero"))
+				return False
 
 		if notification_type == "Ready For Delivery":
 			if self.delivery_status != 'In Stock':
-				frappe.throw(_("Cannot send Ready For Delivery notification because Vehicle is not 'In Stock'"))
+				if throw:
+					frappe.throw(_("Cannot send Ready For Delivery notification because Vehicle is not 'In Stock'"))
+				return False
 
 		if notification_type == "Congratulations":
 			if self.delivery_status != 'Delivered':
-				frappe.throw(_("Cannot send Congratulations notification because Vehicle has not been delivered yet"))
+				if throw:
+					frappe.throw(_("Cannot send Congratulations notification because Vehicle has not been delivered yet"))
+				return False
+
+		return True
 
 
 @frappe.whitelist()
