@@ -271,7 +271,7 @@ var send_sms = function(v,frm){
 		method: "frappe.core.doctype.sms_settings.sms_settings.send_sms",
 		args: {
 			receiver_list: [number],
-			msg: messages
+			message: messages
 		},
 		callback: function(r) {
 			if(r.exc) {frappe.msgprint(r.exc); return; }

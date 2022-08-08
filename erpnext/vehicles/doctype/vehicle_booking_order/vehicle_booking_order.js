@@ -508,10 +508,9 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		}
 	},
 
-	send_sms: function(type) {
+	send_sms: function(notification_type) {
 		new frappe.SMSManager(this.frm.doc, {
-			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.send_sms",
-			type: type,
+			notification_type: notification_type,
 			mobile_no: this.frm.doc.contact_mobile,
 			party_doctype: 'Customer',
 			party_name: this.frm.doc.customer

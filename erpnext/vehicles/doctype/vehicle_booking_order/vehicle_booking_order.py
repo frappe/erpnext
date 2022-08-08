@@ -362,29 +362,6 @@ class VehicleBookingOrder(VehicleBookingController):
 			frappe.throw(_("Cannot deliver vehicle because there is a Supplier Outstanding of {0}")
 				.format(self.get_formatted("supplier_outstanding")))
 
-	def get_notification_count(self, notification_type, notification_medium):
-		row = self.get('notification_count',
-			{"notification_type": notification_type, "notification_medium": notification_medium})
-
-		row = row[0] if row else {}
-		return cint(row.get('notification_count'))
-
-	def add_notification_count(self, notification_type, notification_medium, count=1, update=False):
-		filters = {"notification_type": notification_type, "notification_medium": notification_medium}
-
-		row = self.get('notification_count', filters)
-		if row:
-			row = row[0]
-		else:
-			row = self.append('notification_count', filters)
-			row.notification_count = 0
-
-		count = cint(count) or 1
-		row.notification_count += count
-
-		if update:
-			row.db_update()
-
 	def set_invoice_status(self, update=False):
 		vehicle_invoice = None
 
@@ -570,6 +547,41 @@ class VehicleBookingOrder(VehicleBookingController):
 			return True
 
 		return False
+
+	def get_sms_args(self, notification_type=None):
+		return frappe._dict({
+			'receiver_list': [self.contact_mobile],
+			'party_doctype': 'Customer',
+			'party_name': self.customer
+		})
+
+	def validate_notification(self, notification_type=None, notification_medium=None, args=None):
+		if not notification_type:
+			frappe.throw(_("Notification Type is mandatory"))
+
+		if self.docstatus != 1:
+			frappe.throw(_("Cannot send notification because Vehicle Booking Order is not submitted"))
+
+		# Not allowed if cancelled except for Booking Cancellation message
+		if notification_type != "Booking Cancellation":
+			if self.check_cancelled():
+				frappe.throw(_("Cannot send {0} notification because Vehicle Booking Order is cancelled").format(notification_type))
+
+		if notification_type == "Booking Confirmation":
+			if self.delivery_status != "Not Received":
+				frappe.throw(_("Cannot send Booking Confirmation notification after receiving Vehicle"))
+
+		if notification_type == "Balance Payment Request":
+			if not self.customer_outstanding:
+				frappe.throw(_("Cannot send Balance Payment Request notification because Customer Outstanding amount is zero"))
+
+		if notification_type == "Ready For Delivery":
+			if self.delivery_status != 'In Stock':
+				frappe.throw(_("Cannot send Ready For Delivery notification because Vehicle is not 'In Stock'"))
+
+		if notification_type == "Congratulations":
+			if self.delivery_status != 'Delivered':
+				frappe.throw(_("Cannot send Congratulations notification because Vehicle has not been delivered yet"))
 
 
 @frappe.whitelist()
@@ -793,36 +805,6 @@ def set_next_document_values(source, target):
 
 	if target.meta.has_field('warehouse'):
 		target.warehouse = source.warehouse
-
-
-@frappe.whitelist()
-def send_sms(receiver_list, msg, success_msg=True, type=None,
-		reference_doctype=None, reference_name=None, party_doctype=None, party_name=None):
-	from frappe.core.doctype.sms_settings.sms_settings import send_sms
-
-	if not type:
-		frappe.throw(_("SMS Type is mandatory"))
-
-	if reference_doctype != 'Vehicle Booking Order':
-		frappe.throw(_("Reference DocType must be Vehicle Booking Order"))
-
-	vbo_doc = frappe.get_doc("Vehicle Booking Order", reference_name)
-
-	if type != "Booking Cancellation" and vbo_doc.check_cancelled():
-		frappe.throw(_("Cannot send {0} SMS because Vehicle Booking Order is cancelled").format(type))
-	if type == "Booking Confirmation" and vbo_doc.delivery_status != "Not Received":
-		frappe.throw(_("Cannot send Booking Confirmation SMS after receiving Vehicle"))
-	if type == "Balance Payment Request" and not vbo_doc.customer_outstanding:
-		frappe.throw(_("Cannot send Balance Payment Request SMS because Customer Outstanding amount is zero"))
-	if type == "Ready For Delivery" and vbo_doc.delivery_status != 'In Stock':
-		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'In Stock'"))
-	if type == "Congratulations" and vbo_doc.invoice_status != 'Delivered':
-		frappe.throw(_("Cannot send Congratulations SMS because Invoice has not been delivered yet"))
-
-	vbo_doc.add_notification_count(type, "SMS", update=1)
-	vbo_doc.notify_update()
-
-	send_sms(receiver_list, msg, success_msg, type, reference_doctype, reference_name, party_doctype, party_name)
 
 
 def update_overdue_status():
