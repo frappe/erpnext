@@ -791,19 +791,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (in_list(['Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype)) {
 			args.party_doctype = 'Customer';
-			args.party_name = doc.bill_to || doc.customer;
+			args.party = doc.bill_to || doc.customer;
 
 		} else if (doc.doctype == 'Quotation') {
 			args.party_doctype = doc.quotation_to;
-			args.party_name = doc.party_name;
+			args.party = doc.party_name;
 
 		} else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype)) {
 			args.party_doctype = 'Supplier';
-			args.party_name = doc.supplier;
+			args.party = doc.supplier;
 
 		} else if (in_list(['Lead', 'Customer', 'Supplier'], doc.doctype)) {
 			args.party_doctype = doc.doctype;
-			args.party_name = doc.name;
+			args.party = doc.name;
 		}
 
 		new frappe.SMSManager(doc, args);

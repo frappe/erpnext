@@ -513,7 +513,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			notification_type: notification_type,
 			mobile_no: this.frm.doc.contact_mobile,
 			party_doctype: 'Customer',
-			party_name: this.frm.doc.customer
+			party: this.frm.doc.customer
 		});
 	},
 
