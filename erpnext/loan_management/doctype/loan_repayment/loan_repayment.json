@@ -311,11 +311,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-02-18 19:10:07.742298",
-=======
  "modified": "2022-08-04 17:13:51.964203",
->>>>>>> a272d73dd9 (fix: pending principal- amount)
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
