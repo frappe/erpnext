@@ -150,6 +150,9 @@ class LoanRepayment(AccountsController):
 				"status",
 				"is_secured_loan",
 				"total_payment",
+				"debit_adjustment_amount",
+				"credit_adjustment_amount",
+				"refund_amount",
 				"loan_amount",
 				"disbursed_amount",
 				"total_interest_payable",
@@ -399,7 +402,7 @@ class LoanRepayment(AccountsController):
 			remarks = "Repayment against loan " + self.against_loan
 
 		if self.reference_number:
-			remarks += "with reference no. {}".format(self.reference_number)
+			remarks += " with reference no. {}".format(self.reference_number)
 
 		if self.repay_from_salary:
 			payment_account = self.payroll_payable_account
