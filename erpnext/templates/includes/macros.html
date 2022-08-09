@@ -46,7 +46,7 @@
 		<div class="col-md-{{ section.column_value }} mb-4">
 			<div class="card h-100 justify-content-between">
 				{% if card.image %}
-				<div class="website-image-lazy" data-class="card-img-top h-75" data-src="{{ card.image }}" data-alt="{{ card.title }}"></div>
+				<img class="card-img-top h-75" src="{{ card.image }}" loading="lazy" alt="{{ card.title }}"></img>
 				{% endif %}
 				<div class="card-body">
 					<h5 class="card-title">{{ card.title }}</h5>
