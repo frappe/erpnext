@@ -46,8 +46,8 @@ def _execute(filters=None):
 				total_tax += flt(item_tax.get("tax_amount", 0))
 
 			row += [tax_rate]
-			row += [d.base_net_amount + total_tax]
-			row += [d.base_net_amount]
+			row += [d.taxable_value + total_tax]
+			row += [d.taxable_value]
 			for tax in tax_columns:
 				item_tax = itemised_tax.get((d.parent, d.item_code), {}).get(tax, {})
 				row += [item_tax.get("tax_amount", 0)]
@@ -145,7 +145,7 @@ def get_items(filters):
 			`tabSales Invoice Item`.gst_hsn_code,
 			`tabSales Invoice Item`.stock_uom,
 			sum(`tabSales Invoice Item`.stock_qty) AS stock_qty,
-			sum(`tabSales Invoice Item`.base_net_amount) AS base_net_amount,
+			sum(`tabSales Invoice Item`.taxable_value) AS taxable_value,
 			sum(`tabSales Invoice Item`.base_price_list_rate) AS base_price_list_rate,
 			`tabSales Invoice Item`.parent,
 			`tabSales Invoice Item`.item_code,
@@ -218,7 +218,7 @@ def get_tax_accounts(
 
 	for parent, account_head, item_wise_tax_detail, tax_amount in tax_details:
 
-		if account_head not in tax_columns and tax_amount:
+		if account_head in output_gst_accounts and account_head not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
 			tax_columns.append(account_head)
 
@@ -256,14 +256,15 @@ def get_tax_accounts(
 
 	tax_columns.sort()
 	for account_head in tax_columns:
-		columns.append(
-			{
-				"label": account_head,
-				"fieldname": frappe.scrub(account_head),
-				"fieldtype": "Float",
-				"width": 110,
-			}
-		)
+		if account_head in output_gst_accounts:
+			columns.append(
+				{
+					"label": account_head,
+					"fieldname": frappe.scrub(account_head),
+					"fieldtype": "Float",
+					"width": 110,
+				}
+			)
 
 	return itemised_tax, tax_columns
 
