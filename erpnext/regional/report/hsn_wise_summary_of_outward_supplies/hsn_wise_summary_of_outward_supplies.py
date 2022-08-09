@@ -140,7 +140,7 @@ def get_items(filters):
 		match_conditions = " and {0} ".format(match_conditions)
 
 	items = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			`tabSales Invoice Item`.gst_hsn_code,
 			`tabSales Invoice Item`.stock_uom,
@@ -153,10 +153,11 @@ def get_items(filters):
 		FROM
 			`tabSales Invoice`
 			INNER JOIN `tabSales Invoice Item` ON `tabSales Invoice`.name = `tabSales Invoice Item`.parent
-			INNER JOIN `tabGST HSN Code` ON `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name % s % s
+			INNER JOIN `tabGST HSN Code` ON `tabSales Invoice Item`.gst_hsn_code = `tabGST HSN Code`.name
 		WHERE
 			`tabSales Invoice`.docstatus = 1
 			AND `tabSales Invoice Item`.gst_hsn_code IS NOT NULL
+			{conditions}
 		GROUP BY
 			`tabSales Invoice Item`.parent,
 			`tabSales Invoice Item`.item_code,
@@ -165,8 +166,9 @@ def get_items(filters):
 		ORDER BY
 			`tabSales Invoice Item`.gst_hsn_code,
 			`tabSales Invoice Item`.uom
-		"""
-		% (conditions, match_conditions),
+		""".format(
+			conditions=conditions
+		),
 		filters,
 		as_dict=1,
 	)
