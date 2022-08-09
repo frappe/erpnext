@@ -305,8 +305,9 @@ class ExpenseClaim(AccountsController):
 
 		if self.total_advance_amount:
 			precision = self.precision("total_advance_amount")
-			amount_with_taxes = flt(self.total_sanctioned_amount, precision) + flt(
-				self.total_taxes_and_charges, precision
+			amount_with_taxes = flt(
+				(flt(self.total_sanctioned_amount, precision) + flt(self.total_taxes_and_charges, precision)),
+				precision,
 			)
 
 			if flt(self.total_advance_amount, precision) > amount_with_taxes:
