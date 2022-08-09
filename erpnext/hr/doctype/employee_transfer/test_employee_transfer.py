@@ -80,12 +80,14 @@ class TestEmployeeTransfer(unittest.TestCase):
 		department = ["Accounts - TC", "Management - TC"]
 		designation = ["Accountant", "Manager"]
 		dt = [getdate("01-10-2021"), getdate()]
+		to_date = [add_days(dt[1], -1), None]
 
 		employee = frappe.get_doc("Employee", employee)
 		for data in employee.internal_work_history:
 			self.assertEqual(data.department, department[count])
 			self.assertEqual(data.designation, designation[count])
 			self.assertEqual(data.from_date, dt[count])
+			self.assertEqual(data.to_date, to_date[count])
 			count = count + 1
 
 		transfer.cancel()
@@ -95,6 +97,7 @@ class TestEmployeeTransfer(unittest.TestCase):
 			self.assertEqual(data.designation, designation[0])
 			self.assertEqual(data.department, department[0])
 			self.assertEqual(data.from_date, dt[0])
+			self.assertEqual(data.to_date, None)
 
 
 def create_company():
