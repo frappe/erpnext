@@ -7,7 +7,7 @@ import unittest
 
 import frappe
 from frappe.model.document import Document
-from frappe.tests.utils import change_settings
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -35,13 +35,12 @@ from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_detail
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 
 
-class TestSalarySlip(unittest.TestCase):
+class TestSalarySlip(FrappeTestCase):
 	def setUp(self):
 		setup_test()
 		frappe.flags.pop("via_payroll_entry", None)
 
 	def tearDown(self):
-		frappe.db.rollback()
 		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
 
@@ -925,6 +924,41 @@ class TestSalarySlip(unittest.TestCase):
 		# undelete fixture data
 		frappe.db.rollback()
 
+	@change_settings(
+		"Payroll Settings",
+		{
+			"payroll_based_on": "Attendance",
+			"consider_unmarked_attendance_as": "Present",
+			"include_holidays_in_total_working_days": True,
+		},
+	)
+	def test_default_amount(self):
+		# Special Allowance (SA) uses another component Basic (BS) in it's formula : BD * .5
+		# Basic has "Depends on Payment Days" enabled
+		# Test default amount for SA is based on default amount for BS (irrespective of PD)
+		# Test amount for SA is based on amount for BS (based on PD)
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		month_start_date = get_first_day(nowdate())
+		joining_date = add_days(month_start_date, 3)
+		employee = make_employee("test_tax_for_mid_joinee@salary.com", date_of_joining=joining_date)
+
+		salary_structure = make_salary_structure(
+			"Stucture to test tax",
+			"Monthly",
+			test_tax=True,
+			from_date=joining_date,
+			employee=employee,
+		)
+
+		ss = make_salary_slip(salary_structure.name, employee=employee)
+
+		# default amount for SA (special allowance = BS*0.5) should be based on default amount for basic
+		self.assertEqual(ss.earnings[2].default_amount, 25000)
+		self.assertEqual(
+			ss.earnings[2].amount, flt(ss.earnings[0].amount * 0.5, ss.earnings[0].precision("amount"))
+		)
+
 	def test_tax_for_recurring_additional_salary(self):
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
@@ -1054,7 +1088,7 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None, po
 def make_salary_component(salary_components, test_tax, company_list=None):
 	for salary_component in salary_components:
 		if frappe.db.exists("Salary Component", salary_component["salary_component"]):
-			continue
+			frappe.delete_doc("Salary Component", salary_component["salary_component"], force=True)
 
 		if test_tax:
 			if salary_component["type"] == "Earning":
@@ -1442,6 +1476,10 @@ def setup_test():
 		"Salary Slip",
 		"Attendance",
 		"Additional Salary",
+		"Employee Tax Exemption Declaration",
+		"Employee Tax Exemption Proof Submission",
+		"Employee Benefit Claim",
+		"Salary Structure Assignment",
 	]:
 		frappe.db.sql("delete from `tab%s`" % dt)
 
