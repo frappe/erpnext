@@ -20,6 +20,9 @@
   "sex",
   "blood_group",
   "dob",
+  "cnic",
+  "medical_department",
+  "patient_type",
   "age_html",
   "image",
   "column_break_14",
@@ -66,7 +69,8 @@
   "surrounding_factors",
   "other_risk_factors",
   "more_info",
-  "patient_details"
+  "patient_details",
+  "medical_department_abbreviation"
  ],
  "fields": [
   {
@@ -469,13 +473,43 @@
    "in_standard_filter": 1,
    "label": "Identification Number (UID)",
    "unique": 1
+  },
+  {
+   "fieldname": "cnic",
+   "fieldtype": "Data",
+   "label": "CNIC",
+   "length": 15,
+   "reqd": 1
+  },
+  {
+   "fieldname": "medical_department",
+   "fieldtype": "Link",
+   "label": "Medical Department",
+   "options": "Medical Department",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_type",
+   "fieldtype": "Select",
+   "label": "Patient Type",
+   "options": "\nPrivate Patient\nCorporate\nEmployee",
+   "reqd": 1
+  },
+  {
+   "depends_on": "medical_department",
+   "fetch_from": "medical_department.abbreviation",
+   "fetch_if_empty": 1,
+   "fieldname": "medical_department_abbreviation",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Medical Department Abbreviation "
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2021-03-14 13:21:09.759906",
+ "modified": "2022-08-10 20:21:24.931153",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
