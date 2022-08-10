@@ -4,7 +4,7 @@
 frappe.ui.form.on('Patient', {
 	before_save: function (frm) {
 		if (frm.doc.sex) {
-			var sex_first_letter = frm.doc.sex.charAt[0];
+			var sex_first_letter = frm.doc.sex.charAt(0);
 			frappe.call({
 				method: "erpnext.healthcare.doctype.patient.patient.create_custom_series",
 				args: {"sex_abbr": sex_first_letter},
@@ -13,7 +13,7 @@ frappe.ui.form.on('Patient', {
 						frm.set_value("uid", r.message);
 					}
 				}
-			})
+			});
 
 		}
 	},
