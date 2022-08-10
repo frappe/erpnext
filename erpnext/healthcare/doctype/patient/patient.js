@@ -6,7 +6,7 @@ frappe.ui.form.on('Patient', {
 		if (frm.doc.sex) {
 			var sex_first_letter = frm.doc.sex.charAt[0];
 			frappe.call({
-				method: "erpnext.healthcare.doctype.patient.patient.get_series_name",
+				method: "erpnext.healthcare.doctype.patient.get_series_name",
 				args: {sex_abbr: sex_first_letter},
 				callback: function(r) {
 					if (r.message) {
