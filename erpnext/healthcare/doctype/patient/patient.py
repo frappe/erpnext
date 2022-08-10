@@ -184,17 +184,6 @@ class Patient(Document):
 		return age_str
 
 	@frappe.whitelist()
-	def get_series_name(sex_abbr):
-		date = datetime.today()
-		day = '%02d'% date.day
-		month = '%02d' % date.month
-		year = '%02d' % date.year
-		date_concatenated = day+month+year
-		prefix = f'RYK-{sex_abbr}-{date_concatenated}-'.format()
-		custom_series = getseries(prefix,4)
-		custom_final_series = f'RYK-{sex_abbr}-{date_concatenated}-'+custom_series
-		return custom_final_series
-		
 	def invoice_patient_registration(self):
 		if frappe.db.get_single_value("Healthcare Settings", "registration_fee"):
 			company = frappe.defaults.get_user_default("company")
@@ -315,6 +304,17 @@ def make_invoice(patient, company):
 
 
 @frappe.whitelist()
+def create_custom_series(sex_abbr):
+	date = datetime.today()
+	day = '%02d'% date.day
+	month = '%02d' % date.month
+	year = '%02d' % date.year
+	date_concatenated = day+month+year
+	prefix = f'RYK-{sex_abbr}-{date_concatenated}-'.format()
+	custom_series = getseries(prefix,4)
+	custom_final_series = f'RYK-{sex_abbr}-{date_concatenated}-'+custom_series
+	return custom_final_series
+
 def get_patient_detail(patient):
 	patient_dict = frappe.db.sql("""select * from tabPatient where name=%s""", (patient), as_dict=1)
 	if not patient_dict:
@@ -360,17 +360,5 @@ def get_timeline_data(doctype, name):
 		patient_timeline_data.update(customer_timeline_data)
 
 	return patient_timeline_data
-
-
-def get_series_name(sex_abbr):
-	date = datetime.today()
-	day = '%02d'% date.day
-	month = '%02d' % date.month
-	year = '%02d' % date.year
-	date_concatenated = day+month+year
-	prefix = f'RYK-{sex_abbr}-{date_concatenated}-'.format()
-	custom_series = getseries(prefix,4)
-	custom_final_series = f'RYK-{sex_abbr}-{date_concatenated}-'+custom_series
-	return custom_final_series
 
 
