@@ -168,7 +168,13 @@ class StatusUpdater(Document):
 						item = item[0]
 						item['idx'] = d.idx
 						item['target_ref_field'] = args['target_ref_field'].replace('_', ' ')
-
+						
+						#site confige import
+						from nrp_manufacturing.utils import  get_config_by_name
+						#daily items list
+						daily_rate_item = get_config_by_name("DAILY_RATE_ITEMS", [])
+						if item.item_code in daily_rate_item:
+							return
 						# if not item[args['target_ref_field']]:
 						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
 						if args.get('no_allowance'):
