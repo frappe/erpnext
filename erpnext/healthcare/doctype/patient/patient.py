@@ -19,6 +19,8 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import (
 	get_receivable_account,
 	send_registration_sms,
 )
+from frappe.model.naming import getseries
+from datetime import datetime
 
 
 class Patient(Document):
@@ -347,3 +349,17 @@ def get_timeline_data(doctype, name):
 		patient_timeline_data.update(customer_timeline_data)
 
 	return patient_timeline_data
+
+
+def get_series_name(sex_abbr):
+	date = datetime.today()
+	day = '%02d'% date.day
+	month = '%02d' % date.month
+	year = '%02d' % date.year
+	date_concatenated = day+month+year
+	prefix = f'RYK-{sex_abbr}-{date_concatenated}-'.format()
+	custom_series = getseries(prefix,4)
+	custom_final_series = f'RYK-{sex_abbr}-{date_concatenated}-'+custom_series
+	return custom_final_series
+
+

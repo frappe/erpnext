@@ -2,6 +2,21 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Patient', {
+	before_save: function (frm) {
+		if (frm.doc.sex) {
+			var sex_first_letter = frm.doc.sex.charAt[0];
+			frappe.call({
+				method: "erpnext.healthcare.doctype.patient.patient.get_series_name",
+				args: {sex_abbr: sex_first_letter},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_value("uid", r.message);
+					}
+				}
+			})
+
+		}
+	},
 	refresh: function (frm) {
 		frm.set_query('patient', 'patient_relation', function () {
 			return {
