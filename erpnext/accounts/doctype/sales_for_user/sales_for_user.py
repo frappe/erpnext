@@ -85,61 +85,62 @@ class SalesForUser(Document):
 			change_amount = 0
 
 			for salary_slip in salary_slips:
-				date_validate = salary_slip.creation.strftime('%Y-%m-%d %H:%M:%S')
-				dates_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
-				if date == dates_validate and salary_slip.status != "Return" and date_validate >= self.start_date and date_validate <= self.final_date:
-					operations += 1
-					if cont == 0:
-						split_initial_range = salary_slip.name.split("-")
-						initial_range = split_initial_range[3]
+				if salary_slip.status != "Cancelled":
+					date_validate = salary_slip.creation.strftime('%Y-%m-%d %H:%M:%S')
+					dates_validate = salary_slip.posting_date.strftime('%Y-%m-%d')
+					if date == dates_validate and salary_slip.status != "Return" and date_validate >= self.start_date and date_validate <= self.final_date:
+						operations += 1
+						if cont == 0:
+							split_initial_range = salary_slip.name.split("-")
+							initial_range = split_initial_range[3]
 
-					outstanding_amount += salary_slip.outstanding_amount
-					adv_app += salary_slip.total_advance
-					total_exempt += salary_slip.total_exempt
-					gross += salary_slip.total
-					total_exonerated += salary_slip.total_exonerated
-					taxed_sales15 += salary_slip.taxed_sales15
-					isv15 += salary_slip.isv15
-					taxed_sales18 += salary_slip.taxed_sales18
-					discount += salary_slip.discount_amount
-					partial_discount += salary_slip.partial_discount
-					grand_total += salary_slip.grand_total
-					isv18 = salary_slip.isv18
-					authorized_range = salary_slip.authorized_range
-					change_amount += salary_slip.paid_amount - salary_slip.change_amount
+						outstanding_amount += salary_slip.outstanding_amount
+						adv_app += salary_slip.total_advance
+						total_exempt += salary_slip.total_exempt
+						gross += salary_slip.total
+						total_exonerated += salary_slip.total_exonerated
+						taxed_sales15 += salary_slip.taxed_sales15
+						isv15 += salary_slip.isv15
+						taxed_sales18 += salary_slip.taxed_sales18
+						discount += salary_slip.discount_amount
+						partial_discount += salary_slip.partial_discount
+						grand_total += salary_slip.grand_total
+						isv18 = salary_slip.isv18
+						authorized_range = salary_slip.authorized_range
+						change_amount += salary_slip.paid_amount - salary_slip.change_amount
 
-					split_final_range = salary_slip.name.split("-")
-					final_range = split_final_range[3]
-					cont += 1
+						split_final_range = salary_slip.name.split("-")
+						final_range = split_final_range[3]
+						cont += 1
 
-					payments = frappe.get_all("Sales Invoice Payment", ["*"], filters = {"parent": salary_slip.name})
-			
-					for payment in payments:
-						if payment.mode_of_payment == "Efectivo":
-							cash += payment.amount
-						if payment.mode_of_payment == "Tarjetas de credito":
-							cards += payment.amount
+						payments = frappe.get_all("Sales Invoice Payment", ["*"], filters = {"parent": salary_slip.name})
+				
+						for payment in payments:
+							if payment.mode_of_payment == "Efectivo":
+								cash += payment.amount
+							if payment.mode_of_payment == "Tarjetas de credito":
+								cards += payment.amount
+
+							conta = 0
+
+							for mode in modes:
+								if payment.mode_of_payment == mode:
+									values_modes[conta] += payment.amount
+								
+								conta += 1
 
 						conta = 0
 
-						for mode in modes:
-							if payment.mode_of_payment == mode:
-								values_modes[conta] += payment.amount
+						for cond in conditions_arr:
+							if salary_slip.tc_name == cond:
+								values_conditions[conta] += salary_slip.grand_total
+
+								if cond == "Contado":
+									total_cont += salary_slip.grand_total
 							
 							conta += 1
 
-					conta = 0
-
-					for cond in conditions_arr:
-						if salary_slip.tc_name == cond:
-							values_conditions[conta] += salary_slip.grand_total
-
-							if cond == "Contado":
-								total_cont += salary_slip.grand_total
-						
-						conta += 1
-
-					advances += salary_slip.total_advance
+						advances += salary_slip.total_advance
 					
 			final_range = "{}-{}".format(initial_range, final_range)
 
