@@ -385,6 +385,9 @@ class PayrollEntry(Document):
 
 				account = frappe.get_all("Salary Component Account", ["default_account"], filters = {"parent": component.name, "company": self.company})
 
+				if len(account) == 0:
+					frappe.throw(_("This component {} don't have a account.".format(component.name)))
+
 				if component.type == "Earning":
 					debit = detail.amount
 					credit = 0

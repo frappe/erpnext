@@ -309,6 +309,11 @@ class SalesInvoice(SellingController):
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
 	
+	def apply_advances(self):
+		for advance in self.get("advances"):
+			self.outstanding_amount -= advance.allocated_amount
+			self.db_set('outstanding_amount', self.outstanding_amount, update_modified=False)	
+	
 	def update_dashboard_customer(self):
 		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
 
@@ -587,6 +592,7 @@ class SalesInvoice(SellingController):
 		self.in_words = money_in_words(self.grand_total)
 		self.db_set('in_words', self.in_words, update_modified=False)		
 		self.calculate_insurance()
+		self.apply_advances()
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
