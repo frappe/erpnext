@@ -2,21 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Patient', {
-	before_save: function (frm) {
-		if (frm.doc.sex) {
-			var sex_first_letter = frm.doc.sex.charAt(0);
-			frappe.call({
-				method: "erpnext.healthcare.doctype.patient.patient.create_custom_series",
-				args: {"sex_abbr": sex_first_letter},
-				callback: function(r) {
-					if (r.message) {
-						frm.set_value("uid", r.message);
-					}
-				}
-			});
-
-		}
-	},
 	refresh: function (frm) {
 		frm.set_query('patient', 'patient_relation', function () {
 			return {
@@ -84,6 +69,21 @@ frappe.ui.form.on('Patient', 'validate', function(frm) {
 			frappe.msgprint(__("CNIC: Please follow CNIC format."));
 			frappe.validated = false;
 		}
+	}
+});
+frappe.ui.form.on('Patient', 'sex', function(frm) {
+	if (frm.doc.sex) {
+		var sex_first_letter = frm.doc.sex.charAt(0);
+		frappe.call({
+			method: "erpnext.healthcare.doctype.patient.patient.create_custom_series",
+			args: {"sex_abbr": sex_first_letter},
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value("uid", r.message);
+				}
+			}
+		});
+
 	}
 });
 frappe.ui.form.on('Patient', 'dob', function(frm) {
