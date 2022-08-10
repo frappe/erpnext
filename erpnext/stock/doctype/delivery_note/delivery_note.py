@@ -191,25 +191,19 @@ class DeliveryNote(SellingController):
 	# def submit(self):
 	# 	time.sleep(1)
 	# 	self.queue_action('submit',queue_name="dn_queue")
-	##caclute returnables
+
 	def before_save(self):
 		## id returnable
 		if self.is_return:
 			return
-		## unset returnable items
-		if self.get('remove_return_items'):
-			# self.set("returnable_items", [])
-			alwayes_returnable_items = []
-			for returnable_item in self.returnable_items:
-				if returnable_item.is_allways_return == 1:
-					alwayes_returnable_items.append(returnable_item)
-			if len(alwayes_returnable_items):
-				self.set("returnable_items", alwayes_returnable_items)
-			else:
-				self.set("returnable_items", [])
-				
-		## check if returanable manage manullay
-		elif not self.get('manually_manage_return_items'):
+
+		if self.get('manually_manage_return_items'):
+			returnables = self.get("returnable_items")
+			for returnable in returnables:
+				#temp_item = self.append('returnable_items',{})
+				returnable.in_transit_qty = returnable.actual_qty
+			
+		if self.get('remove_return_items') or not self.get('manually_manage_return_items'):
 			# if self.is_new() == True:
 			self.returnable_items = {}
 			from nrp_manufacturing.utils import returnable_items
@@ -271,6 +265,16 @@ class DeliveryNote(SellingController):
 				# 		if ritems.item_reference == returnable.item:
 				# 			ritems.actual_qty = qty
 				# 			break
+
+			if self.get('remove_return_items'):	
+				alwayes_returnable_items = []
+				for returnable_item in self.returnable_items:
+					if returnable_item.is_allways_return == 1:
+						alwayes_returnable_items.append(returnable_item)
+				if len(alwayes_returnable_items):
+					self.set("returnable_items", alwayes_returnable_items)
+				else:
+					self.set("returnable_items", [])
 		
 	def on_submit(self):
 		self.validate_packed_qty()
