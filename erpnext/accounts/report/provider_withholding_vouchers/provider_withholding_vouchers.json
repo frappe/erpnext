@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "modified": "2022-02-11 15:13:51.087592",
+ "modified": "2022-08-09 15:20:49.613330",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Provider Withholding Vouchers",
@@ -20,6 +20,9 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Reporte de cuentas por pagar"
   }
  ]
 }
