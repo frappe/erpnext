@@ -73,7 +73,6 @@ def get_data(filters):
 
 	item_data = frappe.db.sql("""
 		select item.name as item_code, item.item_name, item.item_group, item.stock_uom, item.sales_uom, item.alt_uom, item.alt_uom_size,
-		item.variant_of,
 		item.hide_in_price_list
 		from tabItem item
 		where disabled != 1 {0}
@@ -81,7 +80,7 @@ def get_data(filters):
 
 	po_data = frappe.db.sql("""
 		select
-			item.item_code, 		
+			item.item_code,
 			sum(if(item.qty - item.received_qty < 0, 0, item.qty - item.received_qty) * item.conversion_factor) as po_qty,
 			sum(if(item.qty - item.received_qty < 0, 0, item.qty - item.received_qty) * item.conversion_factor * item.base_net_rate) as po_lc_amount
 		from `tabPurchase Order Item` item
@@ -427,7 +426,7 @@ def _set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uo
 		doc.valid_upto = frappe.utils.add_days(future_item_price[3], -1)
 	doc.save()
 
-	# Update previous item price`P`
+	# Update previous item price
 	before_effective_date = frappe.utils.add_days(effective_date, -1)
 	if past_item_price and past_item_price[4] != before_effective_date:
 		frappe.set_value("Item Price", past_item_price[0], 'valid_upto', before_effective_date)

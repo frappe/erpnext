@@ -49,7 +49,7 @@ class GrossProfitGenerator(object):
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si.project as parent_project, si_item.project as item_project,
 				si.cost_center as parent_cost_center, si_item.cost_center as item_cost_center,
-				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,i.variant_of,
+				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
 				si_item.warehouse, i.item_group, i.brand, i.item_source, 
 				si.update_stock, si_item.delivery_note_item, si_item.delivery_note,
 				si_item.qty, si_item.stock_qty, si_item.conversion_factor, si_item.alt_uom_size,
