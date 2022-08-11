@@ -135,7 +135,11 @@ def calculate_accrual_amount_for_demand_loans(
 def make_accrual_interest_entry_for_demand_loans(
 	posting_date, process_loan_interest, open_loans=None, loan_type=None, accrual_type="Regular"
 ):
-	query_filters = {"status": ("in", ["Disbursed", "Partially Disbursed"]), "docstatus": 1}
+	query_filters = {
+		"status": ("in", ["Disbursed", "Partially Disbursed"]),
+		"docstatus": 1,
+		"is_term_loan": 0,
+	}
 
 	if loan_type:
 		query_filters.update({"loan_type": loan_type})
@@ -232,6 +236,7 @@ def get_term_loans(date, term_loan=None, loan_type=None):
 			AND l.is_term_loan =1
 			AND rs.payment_date <= %s
 			AND rs.is_accrued=0 {0}
+			AND rs.interest_amount > 0
 			AND l.status = 'Disbursed'
 			ORDER BY rs.payment_date""".format(
 			condition
