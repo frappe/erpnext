@@ -226,7 +226,7 @@ def get_vehicles_from_customer(customer):
 		from `tabVehicle` v
 		left join `tabVehicle Log` log on log.vehicle = v.name and log.customer = %s
 		where v.customer = %s
-		group by vehicle
+		group by v.name
 		order by count(log.name) desc, max(log.date)
 	""", (customer, customer), as_dict=1)
 
@@ -283,7 +283,7 @@ def get_customers_from_vehicle(vehicle):
 		select v.customer as name, count(log.name) as log_count, max(log.date) as last_log_date
 		from `tabVehicle` v
 		left join `tabVehicle Log` log on log.vehicle = v.name and log.customer = v.customer
-		where v.name = %s
+		where v.name = %s and ifnull(v.customer, '') != ''
 		group by v.customer
 	""", vehicle, as_dict=1)
 
