@@ -100,22 +100,39 @@ class StockController(AccountsController):
 		if self.doctype == "Sales Invoice":
 			if self.discount_reason != None:				
 				if self.outstanding_amount == 0:
-					pos = frappe.get_doc("POS Profile", self.pos_profile)
-					if pos.income_account == None:
-						frappe.throw(_("You must assign a income account in the Pos Profile."))
+					if self.is_pos == 1:
+						pos = frappe.get_doc("POS Profile", self.pos_profile)
+						if pos.income_account == None:
+							frappe.throw(_("You must assign a income account in the Pos Profile."))
 
-					account_currency = get_account_currency(pos.income_account)
+						account_currency = get_account_currency(pos.income_account)
 
-					company = frappe.get_doc("Company", self.company)
+						company = frappe.get_doc("Company", self.company)
 
-					gl_list.append(self.get_gl_dict({
-						"account": pos.income_account,
-						"against": pos.income_account,
-						"cost_center": company.cost_center,
-						"remarks": self.get("remarks") or "Accounting Entry for Stock",
-						"credit": self.discount_amount,
-						"credit_in_account_currency": self.discount_amount
-					}, account_currency))
+						gl_list.append(self.get_gl_dict({
+							"account": pos.income_account,
+							"against": pos.income_account,
+							"cost_center": company.cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"credit": self.discount_amount,
+							"credit_in_account_currency": self.discount_amount
+						}, account_currency))
+					else:
+						company = frappe.get_doc("Company", self.company)
+
+						if company.default_account_for_credit_discounts == None:
+							frappe.throw(_("You must assign a default account for credit discounts in the company."))
+
+						account_currency = get_account_currency(company.default_account_for_credit_discounts)
+
+						gl_list.append(self.get_gl_dict({
+							"account": company.default_account_for_credit_discounts,
+							"against": company.default_account_for_credit_discounts,
+							"cost_center": company.cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"credit": self.discount_amount,
+							"credit_in_account_currency": self.discount_amount
+						}, account_currency))
 				else:
 					company = frappe.get_doc("Company", self.company)
 
