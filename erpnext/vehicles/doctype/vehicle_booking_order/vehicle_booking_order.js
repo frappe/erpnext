@@ -394,10 +394,16 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
-		var balance_payment_count = me.get_notification_count('Balance Payment Request', 'SMS');
+		var balance_payment_count = me.get_notification_count('Balance Payment Due', 'SMS');
 		var balance_payment_color = balance_payment_count ? "green"
-			: this.can_notify('Balance Payment Request') ? "yellow" : "grey";
+			: this.can_notify('Balance Payment Due') ? "yellow" : "grey";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
+			: __("Not Sent");
+
+		var payment_confirmation_count = me.get_notification_count('Balance Payment Confirmation', 'SMS');
+		var payment_confirmation_color = payment_confirmation_count ? "green"
+			: this.can_notify('Balance Payment Confirmation') ? "yellow" : "grey";
+		var payment_confirmation_status = payment_confirmation_count ? __("{0} SMS", [payment_confirmation_count])
 			: __("Not Sent");
 
 		var ready_for_delivery_count = me.get_notification_count('Ready For Delivery', 'SMS');
@@ -424,8 +430,12 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				indicator: booking_confirmation_color
 			},
 			{
-				contents: __('Balance Payment Request: {0}', [balance_payment_status]),
+				contents: __('Balance Payment Due: {0}', [balance_payment_status]),
 				indicator: balance_payment_color
+			},
+			{
+				contents: __('Balance Payment Confirmation: {0}', [payment_confirmation_status]),
+				indicator: payment_confirmation_color
 			},
 			{
 				contents: __('Ready For Delivery: {0}', [ready_for_delivery_status]),
@@ -482,10 +492,10 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					__("Notify"));
 			}
 
-			if (this.can_notify("Balance Payment Request")) {
-				var balance_payment_count = this.get_notification_count('Balance Payment Request', 'SMS');
-				let label = __("Balance Payment Request{0}", [balance_payment_count ? " (Resend)" : ""]);
-				this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Request'),
+			if (this.can_notify("Balance Payment Due")) {
+				var balance_payment_count = this.get_notification_count('Balance Payment Due', 'SMS');
+				let label = __("Balance Payment Due{0}", [balance_payment_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Due'),
 					__("Notify"));
 			}
 

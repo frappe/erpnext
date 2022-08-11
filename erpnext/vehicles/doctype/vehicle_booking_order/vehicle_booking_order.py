@@ -10,6 +10,7 @@ from frappe.utils import cint, flt, getdate, today
 from frappe.model.naming import set_name_by_naming_series
 from erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
 from erpnext.vehicles.vehicle_booking_controller import VehicleBookingController
+from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
 
 
 class VehicleBookingOrder(VehicleBookingController):
@@ -553,13 +554,14 @@ class VehicleBookingOrder(VehicleBookingController):
 		return frappe._dict({
 			'receiver_list': [self.contact_mobile],
 			'party_doctype': 'Customer',
-			'party_name': self.customer
+			'party': self.customer
 		})
 
 	def set_can_notify_onload(self):
 		notification_types = [
 			'Booking Confirmation',
-			'Balance Payment Request',
+			'Balance Payment Due',
+			'Balance Payment Confirmation',
 			'Ready For Delivery',
 			'Congratulations',
 			'Booking Cancellation'
@@ -585,6 +587,8 @@ class VehicleBookingOrder(VehicleBookingController):
 		# Not allowed if cancelled except for Booking Cancellation message
 		if notification_type == "Booking Cancellation":
 			if not self.check_cancelled():
+				if throw:
+					frappe.throw(_("Cannot send Booking Cancellation notification because Booking is not cancelled"))
 				return False
 		else:
 			if self.check_cancelled():
@@ -598,10 +602,21 @@ class VehicleBookingOrder(VehicleBookingController):
 					frappe.throw(_("Cannot send Booking Confirmation notification after receiving Vehicle"))
 				return False
 
-		if notification_type == "Balance Payment Request":
-			if not self.customer_outstanding > 0:
+		if notification_type == "Balance Payment Confirmation":
+			if self.customer_advance <= 0:
 				if throw:
-					frappe.throw(_("Cannot send Balance Payment Request notification because Customer Outstanding amount is zero"))
+					frappe.throw(_("Cannot send Balance Payment Confirmation notification because Customer Advance amount is 0"))
+				return False
+
+		if notification_type == "Balance Payment Due":
+			if self.customer_outstanding <= 0:
+				if throw:
+					frappe.throw(_("Cannot send Balance Payment Due notification because Customer Outstanding amount is zero"))
+				return False
+
+			if not self.due_date or getdate() < getdate(self.due_date):
+				if throw:
+					frappe.throw(_("Cannot send Balance Payment Due notification because Due Date has not passed"))
 				return False
 
 		if notification_type == "Ready For Delivery":
@@ -617,6 +632,41 @@ class VehicleBookingOrder(VehicleBookingController):
 				return False
 
 		return True
+
+	def send_notification_on_payment(self, payment):
+		if payment.payment_type != "Receive":
+			return
+
+		linked_payment_receipts = frappe.get_all("Vehicle Booking Payment",
+			{"docstatus": 1, "payment_type": "Receive", "vehicle_booking_order": self.name})
+		linked_payment_receipts = [d.name for d in linked_payment_receipts]
+
+		if payment.name not in linked_payment_receipts:
+			return
+
+		context = {'payment': payment}
+
+		if len(linked_payment_receipts) == 1:
+			enqueue_template_sms(self, notification_type="Booking Confirmation", context=context)
+		elif len(linked_payment_receipts) > 1:
+			enqueue_template_sms(self, notification_type="Balance Payment Confirmation", context=context,
+				allow_if_already_sent=True)
+
+	def send_notification_on_delivery(self, vehicle_delivery):
+		context = {'vehicle_delivery': vehicle_delivery}
+
+		if vehicle_delivery.get('is_return'):
+			return
+
+		enqueue_template_sms(self, notification_type="Congratulations", context=context)
+
+	def send_notification_on_payment_due(self):
+		send_after = None
+		payment_due_notification_time = frappe.get_cached_value('Vehicles Settings', None, 'payment_due_notification_time')
+		if payment_due_notification_time:
+			send_after = frappe.utils.combine_datetime(today(), payment_due_notification_time)
+
+		enqueue_template_sms(self, notification_type="Balance Payment Due", send_after=send_after)
 
 
 @frappe.whitelist()
@@ -876,6 +926,29 @@ def update_overdue_status():
 			and customer_outstanding <= 0
 			and status != 'Cancelled Booking'
 	""")
+
+
+def send_payment_overdue_notifications():
+	from frappe.core.doctype.sms_settings.sms_settings import is_automated_sms_enabled
+	from frappe.core.doctype.sms_template.sms_template import has_automated_sms_template
+	if 'Vehicles' not in frappe.get_active_domains():
+		return
+	if not is_automated_sms_enabled():
+		return
+	if not has_automated_sms_template("Vehicle Booking Order", "Balance Payment Due"):
+		return
+
+	date = today()
+
+	overdue_bookings = frappe.db.sql_list("""
+		select name
+		from `tabVehicle Booking Order`
+		where docstatus = 1 and due_date = %s and due_date > transaction_date and customer_outstanding > 0 and status != 'Cancelled Booking'
+	""", date)
+
+	for name in overdue_bookings:
+		doc = frappe.get_doc("Vehicle Booking Order", name)
+		doc.send_notification_on_payment_due()
 
 
 def update_vehicle_booked(vehicle, is_booked):

@@ -267,6 +267,8 @@ class VehicleBookingPayment(Document):
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
+			vbo.send_notification_on_payment(self)
+
 
 @frappe.whitelist()
 def get_party_name(party_type, party, vehicle_booking_order=None):

@@ -17,6 +17,8 @@
   "vehicle_allocation_periodicity",
   "column_break_8",
   "dealership_code",
+  "notification_section",
+  "payment_due_notification_time",
   "registration_section",
   "registration_customer_account",
   "registration_agent_account",
@@ -306,11 +308,21 @@
   {
    "fieldname": "column_break_29",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "notification_section",
+   "fieldtype": "Section Break",
+   "label": "Notification"
+  },
+  {
+   "fieldname": "payment_due_notification_time",
+   "fieldtype": "Time",
+   "label": "Booking Payment Due Notification Time of Day"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-07-25 16:31:07.290444",
+ "modified": "2022-08-09 23:57:01.566557",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

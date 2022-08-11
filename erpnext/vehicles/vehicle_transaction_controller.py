@@ -365,6 +365,9 @@ class VehicleTransactionController(StockController):
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
+			if self.doctype == "Vehicle Delivery":
+				vbo.send_notification_on_delivery(self)
+
 	def update_vehicle_booking_order_invoice(self, doc=None):
 		if not doc:
 			doc = self
