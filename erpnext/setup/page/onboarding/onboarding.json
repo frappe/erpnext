@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2022-07-26 17:53:40.587337",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2022-08-01 18:07:32.290463",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "onboarding",
+ "owner": "Administrator",
+ "page_name": "onboarding",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 1,
+ "title": ""
+}
