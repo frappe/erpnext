@@ -31,7 +31,7 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"get_query": function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'include_disabled': 1}
+					filters: {'include_disabled': 1, 'include_templates':1}
 				}
 			}
 		},

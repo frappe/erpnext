@@ -71,7 +71,14 @@ frappe.query_reports["Gross Profit"] = {
 			"fieldname":"item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
-			"options": "Item"
+			"options": "Item",
+			"get_query": function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1, 'include_templates': 1}
+				};
+			}
+
 		},
 		{
 			"fieldname":"item_group",

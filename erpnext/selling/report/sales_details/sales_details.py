@@ -436,7 +436,11 @@ class SalesPurchaseDetailsReport(object):
 					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
 		if self.filters.get("item_code"):
-			conditions.append("i.item_code=%(item_code)s")
+			is_template = frappe.db.get_value("Item", self.filters.get('item_code'), 'has_variants')
+			if is_template:
+				conditions.append("im.variant_of=%(item_code)s")
+			else:
+				conditions.append("im.item_code=%(item_code)s")
 
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])

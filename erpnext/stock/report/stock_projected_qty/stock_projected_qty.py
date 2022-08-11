@@ -28,9 +28,11 @@ def execute(filters=None):
 			# likely an item that has reached its end of life
 			continue
 
+
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
 		company = warehouse_company.setdefault(bin.warehouse,
 			frappe.get_cached_value("Warehouse", bin.warehouse, "company"))
+		
 
 		if filters.brand and filters.brand != item.brand:
 			continue
@@ -124,7 +126,7 @@ def get_grouped_data(columns, data, filters, item_map):
 
 def get_columns(filters, show_item_name=True):
 	item_col_width = 150 if filters.get('group_by_1', 'Ungrouped') != 'Ungrouped' or filters.get('group_by_2', 'Ungrouped') != 'Ungrouped'\
-		else 100
+		else 100	
 
 	columns = [
 		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": item_col_width if show_item_name else 250},
@@ -157,7 +159,11 @@ def get_bin_list(filters):
 	conditions = []
 
 	if filters.item_code:
-		conditions.append("item_code = '%s' "%filters.item_code)
+		is_template = frappe.db.get_value("Item", filters.get('item_code'), 'has_variants')
+		if is_template:
+			conditions.append("item.variant_of='%s' "%filters.item_code)
+		else:
+			conditions.append("item_code = '%s' "%filters.item_code)
 
 	if filters.warehouse:
 		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
@@ -191,7 +197,7 @@ def get_item_map(item_code, include_uom):
 		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
 
 	items = frappe.db.sql("""
-		select item.name, item.item_name, item.description, item.item_group, item.brand, item.item_source,
+		select item.name, item.item_name, item.description, item.item_group, item.brand, item.item_source, item.variant_of,
 		item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
 		from `tabItem` item
 		{cf_join}
