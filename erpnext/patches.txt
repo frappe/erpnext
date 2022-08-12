@@ -372,3 +372,4 @@ erpnext.patches.v13_0.show_india_localisation_deprecation_warning
 erpnext.patches.v13_0.fix_number_and_frequency_for_monthly_depreciation
 erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
+erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair

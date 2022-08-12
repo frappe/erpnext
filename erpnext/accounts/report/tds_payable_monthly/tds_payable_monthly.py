@@ -26,7 +26,6 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 	supplier_map = get_supplier_pan_map()
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
-	print(journal_entry_party_map)
 
 	out = []
 	for name, details in gle_map.items():
