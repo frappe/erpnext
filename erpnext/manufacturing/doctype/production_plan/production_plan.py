@@ -638,6 +638,9 @@ class ProductionPlan(Document):
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 
 		for row in self.po_items:
+			if not row.item_code:
+				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
+
 			bom_data = []
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
