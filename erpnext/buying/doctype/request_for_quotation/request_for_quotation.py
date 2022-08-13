@@ -288,6 +288,7 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
+<<<<<<< HEAD
 @frappe.validate_and_sanitize_search_inputs
 def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(
@@ -300,6 +301,8 @@ def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+=======
+>>>>>>> e5e88bb9f1 (fix: contact search in request for quotation (#31828))
 def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=None):
 	def postprocess(source, target_doc):
 		if for_supplier:
