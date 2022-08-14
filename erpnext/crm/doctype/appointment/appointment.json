@@ -9,9 +9,10 @@
   "appointment_type",
   "column_break_3",
   "previous_appointment",
-  "column_break_6",
   "previous_appointment_dt",
+  "column_break_6",
   "company",
+  "confirmation_dt",
   "amended_from",
   "appointment_time_section",
   "scheduled_date",
@@ -57,7 +58,8 @@
   "column_break_41",
   "status",
   "is_closed",
-  "is_missed"
+  "is_missed",
+  "notification_count"
  ],
  "fields": [
   {
@@ -92,7 +94,8 @@
    "no_copy": 1,
    "options": "Draft\nOpen\nClosed\nRescheduled\nMissed\nCancelled",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "calendar_event",
@@ -110,7 +113,8 @@
    "in_standard_filter": 1,
    "label": "Scheduled Date",
    "no_copy": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_3",
@@ -123,7 +127,8 @@
    "label": "Start Date/Time",
    "no_copy": 1,
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "appointment_type",
@@ -148,7 +153,8 @@
    "fieldtype": "Datetime",
    "label": "End Date/Time",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "appointment_type.appointment_duration",
@@ -373,7 +379,8 @@
    "label": "Previous Appointment",
    "no_copy": 1,
    "options": "Appointment",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_6",
@@ -431,10 +438,26 @@
   {
    "fieldname": "column_break_39",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "confirmation_dt",
+   "fieldtype": "Datetime",
+   "label": "Appointment Confirmation Date/Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "notification_count",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Notification Count",
+   "no_copy": 1,
+   "options": "Notification Count",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-05 15:13:20.323461",
+ "modified": "2022-08-14 16:33:13.928728",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

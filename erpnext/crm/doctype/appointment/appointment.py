@@ -9,7 +9,7 @@ import datetime
 from frappe import _
 from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import cint, today, getdate, get_time, get_datetime, combine_datetime, date_diff,\
-	format_datetime, formatdate, get_url
+	format_datetime, formatdate, get_url, now_datetime, add_days
 from frappe.utils.verified_command import get_signed_params
 from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignment, clear as clear_assignments, close_all_assignments
@@ -19,6 +19,8 @@ from frappe.contacts.doctype.contact.contact import get_contact_details, get_def
 from erpnext.crm.doctype.lead.lead import _get_lead_contact_details, get_customer_from_lead
 from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
+from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
+from frappe.core.doctype.notification_count.notification_count import clear_notification_count
 from frappe.model.mapper import get_mapped_doc
 import json
 
@@ -45,6 +47,8 @@ class Appointment(StatusUpdater):
 			company=self.company))
 		self.set_onload('contact_nos', get_all_contact_nos(self.appointment_for, self.party_name))
 
+		self.set_can_notify_onload()
+
 		if self.meta.has_field('applies_to_vehicle'):
 			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(self.get_customer(),
 				self.get('applies_to_vehicle')))
@@ -56,22 +60,30 @@ class Appointment(StatusUpdater):
 		self.validate_timeslot_availability()
 		self.set_status()
 
+	def before_insert(self):
+		clear_notification_count(self)
+
 	def before_update_after_submit(self):
 		self.set_customer_details()
 		self.set_applies_to_details()
 		self.set_status()
 		self.get_disallow_on_submit_fields()
 
+	def before_submit(self):
+		self.confirmation_dt = now_datetime()
+
 	def on_submit(self):
 		self.update_previous_appointment()
 		self.auto_assign()
 		self.create_calendar_event(update=True)
+		self.send_appointment_confirmation_notification()
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
 		self.validate_on_cancel()
 		self.update_previous_appointment()
 		self.auto_unassign()
+		self.send_appointment_cancellation_notification()
 
 	def get_disallow_on_submit_fields(self):
 		if self.status in ["Closed", "Rescheduled"]:
@@ -454,6 +466,77 @@ class Appointment(StatusUpdater):
 		else:
 			return ""
 
+	def get_sms_args(self, notification_type=None):
+		return frappe._dict({
+			'receiver_list': [self.contact_mobile],
+			'party_doctype': self.appointment_for,
+			'party': self.party_name
+		})
+
+	def set_can_notify_onload(self):
+		notification_types = [
+			'Appointment Confirmation',
+			'Appointment Reminder',
+			'Appointment Cancellation',
+		]
+
+		can_notify = frappe._dict()
+		for notification_type in notification_types:
+			can_notify[notification_type] = self.validate_notification(notification_type, throw=False)
+
+		self.set_onload('can_notify', can_notify)
+
+	def validate_notification(self, notification_type=None, throw=False):
+		if not notification_type:
+			if throw:
+				frappe.throw(_("Notification Type is mandatory"))
+			return False
+
+		if notification_type == 'Appointment Cancellation':
+			# Must be cancelled
+			if self.docstatus != 2:
+				if throw:
+					frappe.throw(_("Cannot send Appointment Cancellation notification because Appointment is not cancelled"))
+				return False
+		elif notification_type != 'Custom Message':
+			# Must be submitted
+			if self.docstatus != 1:
+				if throw:
+					frappe.throw(_("Cannot send notification because Appointment is not submitted"))
+				return False
+
+		# Must be Open
+		if notification_type in ("Appointment Confirmation", "Appointment Reminder"):
+			if self.status != "Open":
+				if throw:
+					frappe.throw(_("Cannot send {0} notification because Appointment status is not 'Open'")
+						.format(notification_type))
+				return False
+
+		# Appointment Start Date/Time is in the past or End Date/Time if cancellation
+		if notification_type in ("Appointment Confirmation", "Appointment Reminder", "Appointment Cancellation"):
+			appointment_dt = self.end_dt if "Appointment Cancellation" else self.scheduled_dt
+			appointment_dt = get_datetime(appointment_dt or self.scheduled_dt)
+
+			if appointment_dt <= now_datetime():
+				if throw:
+					frappe.throw(_("Cannot send {0} notification after Appointment Time has passed")
+						.format(notification_type))
+				return False
+
+		return True
+
+	def send_appointment_confirmation_notification(self):
+		if self.docstatus == 1:
+			enqueue_template_sms(self, notification_type="Appointment Confirmation")
+
+	def send_appointment_cancellation_notification(self):
+		if self.docstatus == 2:
+			enqueue_template_sms(self, notification_type="Appointment Cancellation")
+
+	def send_appointment_reminder_notification(self):
+		enqueue_template_sms(self, notification_type="Appointment Reminder")
+
 
 def get_agents_sorted_by_asc_workload(date, appointment_type):
 	date = getdate(date)
@@ -696,3 +779,59 @@ def update_status(appointment, status):
 	doc.set_status(update=True, status=status)
 	doc.auto_unassign()
 	doc.notify_update()
+
+
+def send_appointment_reminder_notifications():
+	from frappe.core.doctype.sms_settings.sms_settings import is_automated_sms_enabled
+	from frappe.core.doctype.sms_template.sms_template import has_automated_sms_template
+
+	if not is_automated_sms_enabled():
+		return
+	if not has_automated_sms_template("Appointment", "Appointment Reminder"):
+		return
+
+	today_date = getdate(today())
+
+	appointment_settings = frappe.get_cached_doc("Appointment Booking Settings", None)
+
+	appointment_reminder_time = appointment_settings.appointment_reminder_time or get_time("00:00:00")
+
+	appointment_reminder_dt = combine_datetime(today_date, appointment_reminder_time)
+	now_dt = now_datetime()
+	if now_dt < appointment_reminder_dt:
+		return
+
+	remind_days_before = cint(appointment_settings.appointment_reminder_days_before)
+	if remind_days_before < 0:
+		remind_days_before = 0
+
+	appointment_reminder_confirmation_hours = cint(appointment_settings.appointment_reminder_confirmation_hours)
+	if appointment_reminder_confirmation_hours < 0:
+		appointment_reminder_confirmation_hours = 0
+
+	appointment_date = add_days(today_date, remind_days_before)
+
+	appointments_to_remind = frappe.db.sql_list("""
+		select a.name
+		from `tabAppointment` a
+		left join `tabNotification Count` n on n.parenttype = 'Appointment' and n.parent = a.name
+			and n.notification_type = 'Appointment Reminder' and n.notification_medium = 'SMS'
+		where a.docstatus = 1
+			and a.status = 'Open'
+			and a.scheduled_date = %(appointment_date)s
+			and %(appointment_reminder_dt)s < a.scheduled_dt
+			and %(now_dt)s < a.scheduled_dt
+			and TIMESTAMPDIFF(MINUTE, a.confirmation_dt, %(appointment_reminder_dt)s) >= %(required_minutes)s
+			and n.last_scheduled_dt is null
+			and (n.last_sent_dt is null or DATE(n.last_sent_dt) != %(today_date)s)
+	""", {
+		'appointment_date': appointment_date,
+		'appointment_reminder_dt': appointment_reminder_dt,
+		'today_date': today_date,
+		'now_dt': now_dt,
+		'required_minutes': appointment_reminder_confirmation_hours * 60,
+	})
+
+	for name in appointments_to_remind:
+		doc = frappe.get_doc("Appointment", name)
+		doc.send_appointment_reminder_notification()

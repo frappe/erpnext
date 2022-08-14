@@ -5,8 +5,12 @@
  "engine": "InnoDB",
  "field_order": [
   "auto_mark_missed_days",
-  "enable_online_booking",
   "holiday_list",
+  "enable_online_booking",
+  "column_break_4",
+  "appointment_reminder_time",
+  "appointment_reminder_days_before",
+  "appointment_reminder_confirmation_hours",
   "success_details",
   "success_redirect_url"
  ],
@@ -39,10 +43,29 @@
    "fieldname": "auto_mark_missed_days",
    "fieldtype": "Int",
    "label": "Automatically Mark Appointment as Missed After Days"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "appointment_reminder_time",
+   "fieldtype": "Time",
+   "label": "Appointment Reminder Notification Time of Day"
+  },
+  {
+   "fieldname": "appointment_reminder_confirmation_hours",
+   "fieldtype": "Int",
+   "label": "Appointment Reminder Required Hours After Confirmation"
+  },
+  {
+   "fieldname": "appointment_reminder_days_before",
+   "fieldtype": "Int",
+   "label": "Appointment Reminder Days Before Appointment"
   }
  ],
  "issingle": 1,
- "modified": "2022-07-27 22:31:08.089078",
+ "modified": "2022-08-14 15:29:51.244828",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",

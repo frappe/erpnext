@@ -1194,7 +1194,8 @@
    "label": "Appointment",
    "no_copy": 1,
    "options": "Appointment",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "appointment_dt",
@@ -1207,7 +1208,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-08-04 00:26:12.718231",
+ "modified": "2022-08-14 16:32:47.495945",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

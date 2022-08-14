@@ -22,7 +22,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		this.set_dynamic_link();
 		this.setup_route_options();
 		this.set_applies_to_read_only();
+
 		this.frm.trigger('set_disallow_on_submit_fields_read_only');
+		this.setup_dashboard();
 
 		this.make_appointment_slot_picker();
 		this.make_customer_vehicle_selector();
@@ -34,6 +36,8 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 	},
 
 	setup_buttons: function () {
+		this.setup_notification_buttons();
+
 		if (this.frm.doc.calendar_event) {
 			this.frm.add_custom_button(__(this.frm.doc.calendar_event), () => {
 				frappe.set_route("Form", "Event", this.frm.doc.calendar_event);
@@ -82,6 +86,38 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		}
 	},
 
+	setup_notification_buttons: function() {
+		if(this.frm.doc.docstatus === 1) {
+			if (this.can_notify("Appointment Confirmation")) {
+				var confirmation_count = frappe.get_notification_count(this.frm, 'Appointment Confirmation', 'SMS');
+				let label = __("Appointment Confirmation{0}", [confirmation_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Appointment Confirmation'),
+					__("Notify"));
+			}
+
+			if (this.can_notify("Appointment Reminder")) {
+				var reminder_count = frappe.get_notification_count(this.frm, 'Appointment Reminder', 'SMS');
+				let label = __("Appointment Reminder{0}", [reminder_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Appointment Reminder'),
+					__("Notify"));
+			}
+		}
+
+		if (this.frm.doc.docstatus === 2) {
+			if (this.can_notify("Appointment Cancellation")) {
+				var cancellation_count = frappe.get_notification_count(this.frm, 'Appointment Cancellation', 'SMS');
+				let label = __("Appointment Cancellation{0}", [cancellation_count ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Appointment Cancellation'),
+					__("Notify"));
+			}
+		}
+
+		if (this.frm.doc.docstatus != 0) {
+			this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
+				__("Notify"));
+		}
+	},
+
 	setup_queries: function () {
 		var me = this;
 
@@ -124,6 +160,39 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 					"color": me.frm.doc.vehicle_color,
 				}
 			}
+		}
+	},
+
+	setup_dashboard: function() {
+		if (this.frm.doc.docstatus == 0) {
+			return;
+		}
+
+		var me = this;
+
+		// Notification Status
+		var confirmation_count = frappe.get_notification_count(me.frm, 'Appointment Confirmation', 'SMS');
+		var confirmation_color = confirmation_count ? "green"
+			: this.can_notify('Appointment Confirmation') ? "yellow" : "grey";
+		var confirmation_status = confirmation_count ? __("{0} SMS", [confirmation_count])
+			: __("Not Sent");
+
+		var reminder_count = frappe.get_notification_count(me.frm, 'Appointment Reminder', 'SMS');
+		var reminder_color = reminder_count ? "green"
+			: this.can_notify('Appointment Reminder') ? "yellow" : "grey";
+		var reminder_status = reminder_count ? __("{0} SMS", [reminder_count])
+			: __("Not Sent");
+
+		var cancellation_count = frappe.get_notification_count(me.frm, 'Appointment Cancellation', 'SMS');
+		var cancellation_color = cancellation_count ? "green"
+			: this.can_notify('Appointment Cancellation') ? "yellow" : "grey";
+		var cancellation_status = cancellation_count ? __("{0} SMS", [cancellation_count])
+			: __("Not Sent");
+
+		me.frm.dashboard.add_indicator(__('Appointment Confirmation: {0}', [confirmation_status]), confirmation_color);
+		me.frm.dashboard.add_indicator(__('Appointment Reminder: {0}', [reminder_status]), reminder_color);
+		if (me.frm.doc.docstatus == 2) {
+			me.frm.dashboard.add_indicator(__('Appointment Cancellation: {0}', [cancellation_status]), cancellation_color);
 		}
 	},
 
@@ -377,6 +446,23 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 			callback: function(r) {
 				me.frm.reload_doc();
 			},
+		});
+	},
+
+	can_notify: function (what) {
+		if (this.frm.doc.__onload && this.frm.doc.__onload.can_notify) {
+			return this.frm.doc.__onload.can_notify[what];
+		} else {
+			return false;
+		}
+	},
+
+	send_sms: function(notification_type) {
+		new frappe.SMSManager(this.frm.doc, {
+			notification_type: notification_type,
+			mobile_no: this.frm.doc.contact_mobile,
+			party_doctype: this.frm.doc.appointment_for,
+			party: this.frm.doc.party_name,
 		});
 	},
 });
