@@ -288,21 +288,6 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-@frappe.validate_and_sanitize_search_inputs
-def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		"""select `tabContact`.name from `tabContact`, `tabDynamic Link`
-		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s
-		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
-		limit %(start)s, %(page_len)s""",
-		{"start": start, "page_len": page_len, "txt": "%%%s%%" % txt, "name": filters.get("supplier")},
-	)
-
-
-@frappe.whitelist()
-=======
->>>>>>> e5e88bb9f1 (fix: contact search in request for quotation (#31828))
 def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=None):
 	def postprocess(source, target_doc):
 		if for_supplier:
