@@ -388,37 +388,37 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		]);
 
 		// Notification Status
-		var booking_confirmation_count = me.get_notification_count('Booking Confirmation', 'SMS');
+		var booking_confirmation_count = frappe.get_notification_count(me.frm, 'Booking Confirmation', 'SMS');
 		var booking_confirmation_color = booking_confirmation_count ? "green"
 			: this.can_notify('Booking Confirmation') ? "yellow" : "grey";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
-		var balance_payment_count = me.get_notification_count('Balance Payment Due', 'SMS');
+		var balance_payment_count = frappe.get_notification_count(me.frm, 'Balance Payment Due', 'SMS');
 		var balance_payment_color = balance_payment_count ? "green"
 			: this.can_notify('Balance Payment Due') ? "yellow" : "grey";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
 			: __("Not Sent");
 
-		var payment_confirmation_count = me.get_notification_count('Balance Payment Confirmation', 'SMS');
+		var payment_confirmation_count = frappe.get_notification_count(me.frm, 'Balance Payment Confirmation', 'SMS');
 		var payment_confirmation_color = payment_confirmation_count ? "green"
 			: this.can_notify('Balance Payment Confirmation') ? "yellow" : "grey";
 		var payment_confirmation_status = payment_confirmation_count ? __("{0} SMS", [payment_confirmation_count])
 			: __("Not Sent");
 
-		var ready_for_delivery_count = me.get_notification_count('Ready For Delivery', 'SMS');
+		var ready_for_delivery_count = frappe.get_notification_count(me.frm, 'Ready For Delivery', 'SMS');
 		var ready_for_delivery_color = ready_for_delivery_count ? "green"
 			: this.can_notify('Ready For Delivery') ? "yellow" : "grey";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
 
-		var congratulations_count = me.get_notification_count('Congratulations', 'SMS');
+		var congratulations_count = frappe.get_notification_count(me.frm, 'Congratulations', 'SMS');
 		var congratulations_color = congratulations_count ? "green"
 			: this.can_notify('Congratulations') ? "yellow" : "grey";
 		var congratulations_status = congratulations_count ? __("{0} SMS", [congratulations_count])
 			: __("Not Sent");
 
-		var booking_cancellation_count = me.get_notification_count('Booking Cancellation', 'SMS');
+		var booking_cancellation_count = frappe.get_notification_count(me.frm, 'Booking Cancellation', 'SMS');
 		var booking_cancellation_color = booking_cancellation_count ? "green"
 			: this.can_notify('Booking Cancellation') ? "yellow" : "grey";
 		var booking_cancellation_status = booking_cancellation_count ? __("{0} SMS", [booking_cancellation_count])
@@ -479,35 +479,35 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 		var me = this;
 		if(this.frm.doc.docstatus === 1) {
 			if (this.can_notify("Booking Cancellation")) {
-				var booking_cancellation_count = this.get_notification_count('Booking Cancellation', 'SMS');
+				var booking_cancellation_count = frappe.get_notification_count(this.frm, 'Booking Cancellation', 'SMS');
 				let label = __("Booking Cancellation{0}", [booking_cancellation_count ? " (Resend)" : ""]);
 				this.frm.add_custom_button(label, () => this.send_sms('Booking Cancellation'),
 					__("Notify"));
 			}
 
 			if (this.can_notify("Booking Confirmation")) {
-				var booking_confirmation_count = this.get_notification_count('Booking Confirmation', 'SMS');
+				var booking_confirmation_count = frappe.get_notification_count(this.frm, 'Booking Confirmation', 'SMS');
 				let label = __("Booking Confirmation{0}", [booking_confirmation_count ? " (Resend)" : ""]);
 				this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
 					__("Notify"));
 			}
 
 			if (this.can_notify("Balance Payment Due")) {
-				var balance_payment_count = this.get_notification_count('Balance Payment Due', 'SMS');
+				var balance_payment_count = frappe.get_notification_count(this.frm, 'Balance Payment Due', 'SMS');
 				let label = __("Balance Payment Due{0}", [balance_payment_count ? " (Resend)" : ""]);
 				this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Due'),
 					__("Notify"));
 			}
 
 			if (this.can_notify("Ready For Delivery")) {
-				var ready_for_delivery_count = this.get_notification_count('Ready For Delivery', 'SMS');
+				var ready_for_delivery_count = frappe.get_notification_count(this.frm, 'Ready For Delivery', 'SMS');
 				let label = __("Ready For Delivery{0}", [ready_for_delivery_count ? " (Resend)" : ""]);
 				this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),
 					__("Notify"));
 			}
 
 			if (this.can_notify("Congratulations")) {
-				var congratulations_count = this.get_notification_count('Congratulations', 'SMS');
+				var congratulations_count = frappe.get_notification_count(this.frm, 'Congratulations', 'SMS');
 				let label = __("Congratulations{0}", [congratulations_count ? " (Resend)" : ""]);
 				this.frm.add_custom_button(label, () => this.send_sms('Congratulations'),
 					__("Notify"));
@@ -1226,17 +1226,6 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				});
 			}
 		)
-	},
-
-	get_notification_count: function (notification_type, notification_medium) {
-		var row = this.frm.doc.notification_count
-			.filter(d => d.notification_type === notification_type && d.notification_medium === notification_medium);
-
-		if (row && row.length) {
-			return cint(row[0].notification_count);
-		} else {
-			return 0;
-		}
 	},
 
 	can_change: function (what) {
