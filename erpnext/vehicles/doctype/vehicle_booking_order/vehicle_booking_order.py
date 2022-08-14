@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from erpnext.vehicles.utils import get_booking_payments, separate_customer_and_supplier_payments, separate_advance_and_balance_payments
 from frappe import _
-from frappe.utils import cint, flt, getdate, today
+from frappe.utils import cint, flt, getdate, today, combine_datetime, now_datetime
 from frappe.model.naming import set_name_by_naming_series
 from erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
 from erpnext.vehicles.vehicle_booking_controller import VehicleBookingController
@@ -661,12 +661,7 @@ class VehicleBookingOrder(VehicleBookingController):
 		enqueue_template_sms(self, notification_type="Congratulations", context=context)
 
 	def send_notification_on_payment_due(self):
-		send_after = None
-		payment_due_notification_time = frappe.get_cached_value('Vehicles Settings', None, 'payment_due_notification_time')
-		if payment_due_notification_time:
-			send_after = frappe.utils.combine_datetime(today(), payment_due_notification_time)
-
-		enqueue_template_sms(self, notification_type="Balance Payment Due", send_after=send_after)
+		enqueue_template_sms(self, notification_type="Balance Payment Due")
 
 
 @frappe.whitelist()
@@ -931,6 +926,7 @@ def update_overdue_status():
 def send_payment_overdue_notifications():
 	from frappe.core.doctype.sms_settings.sms_settings import is_automated_sms_enabled
 	from frappe.core.doctype.sms_template.sms_template import has_automated_sms_template
+
 	if 'Vehicles' not in frappe.get_active_domains():
 		return
 	if not is_automated_sms_enabled():
@@ -938,15 +934,29 @@ def send_payment_overdue_notifications():
 	if not has_automated_sms_template("Vehicle Booking Order", "Balance Payment Due"):
 		return
 
-	date = today()
+	today_date = getdate(today())
 
-	overdue_bookings = frappe.db.sql_list("""
-		select name
-		from `tabVehicle Booking Order`
-		where docstatus = 1 and due_date = %s and due_date > transaction_date and customer_outstanding > 0 and status != 'Cancelled Booking'
-	""", date)
+	payment_due_notification_time = frappe.get_cached_value("Vehicles Settings", None, "payment_due_notification_time")
+	if payment_due_notification_time:
+		run_after = combine_datetime(today_date, payment_due_notification_time)
+		if now_datetime() < run_after:
+			return
 
-	for name in overdue_bookings:
+	overdue_bookings_to_notify = frappe.db.sql_list("""
+		select vbo.name
+		from `tabVehicle Booking Order` vbo
+		left join `tabNotification Count` n on n.parenttype = 'Vehicle Booking Order' and n.parent = vbo.name
+			and n.notification_type = 'Balance Payment Due' and n.notification_medium = 'SMS'
+		where vbo.docstatus = 1
+			and vbo.status != 'Cancelled Booking'
+			and vbo.customer_outstanding > 0
+			and vbo.due_date = %s
+			and vbo.due_date > vbo.transaction_date
+			and n.last_scheduled_dt is null
+			and n.last_sent_dt is null
+	""", today_date)
+
+	for name in overdue_bookings_to_notify:
 		doc = frappe.get_doc("Vehicle Booking Order", name)
 		doc.send_notification_on_payment_due()
 

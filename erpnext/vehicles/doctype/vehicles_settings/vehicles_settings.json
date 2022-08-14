@@ -19,6 +19,7 @@
   "dealership_code",
   "notification_section",
   "payment_due_notification_time",
+  "cb_15",
   "registration_section",
   "registration_customer_account",
   "registration_agent_account",
@@ -318,11 +319,15 @@
    "fieldname": "payment_due_notification_time",
    "fieldtype": "Time",
    "label": "Booking Payment Due Notification Time of Day"
+  },
+  {
+   "fieldname": "cb_15",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-08-09 23:57:01.566557",
+ "modified": "2022-08-14 14:09:07.787579",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
