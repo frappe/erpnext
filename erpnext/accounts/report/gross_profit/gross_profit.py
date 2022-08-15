@@ -7,8 +7,8 @@ from frappe import _, scrub
 from frappe.utils import cint, flt, formatdate
 
 from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import get_incoming_rate
 
 
 def execute(filters=None):
@@ -681,9 +681,9 @@ class GrossProfitGenerator(object):
 			conditions += " and {0}".format(get_item_group_condition(self.filters.item_group))
 
 		if self.filters.sales_person:
-			conditions += """ 
-				and exists(select 1 
-							from `tabSales Team` st 
+			conditions += """
+				and exists(select 1
+							from `tabSales Team` st
 							where st.parent = `tabSales Invoice`.name
 							and   st.sales_person = %(sales_person)s)
 			"""
