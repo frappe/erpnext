@@ -310,7 +310,13 @@ class StockController(AccountsController):
 			)
 			if (
 				self.doctype
-				not in ("Purchase Receipt", "Purchase Invoice", "Stock Reconciliation", "Stock Entry")
+				not in (
+					"Purchase Receipt",
+					"Purchase Invoice",
+					"Stock Reconciliation",
+					"Stock Entry",
+					"Subcontracting Receipt",
+				)
 				and not is_expense_account
 			):
 				frappe.throw(
