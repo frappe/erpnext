@@ -154,6 +154,25 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		if(this.frm.fields_dict["custom_weight_uom"]) {
+			var units = [];
+			frappe.call({
+				method: "frappe.client.get_list",
+				args: {
+					doctype: "UOM Conversion Factor",
+					filters: { "category": __("Mass") },
+					fields: ["to_uom"],
+					limit_page_length: 500
+				},
+				callback: function (r) {
+					r.message.forEach(row => units.push(row.to_uom));
+				}
+			});
+			this.frm.set_query("custom_weight_uom", function () {
+				return { filters: { "name": ["IN", units] } };
+			});
+		}
+
 		if(this.frm.fields_dict["return_against"]) {
 			this.frm.set_query("return_against", function(doc) {
 				var filters = {
@@ -582,6 +601,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
+							default_weight_uom: me.frm.doc.default_weight_uom,
 							manufacturer: item.manufacturer,
 							stock_uom: item.stock_uom,
 							pos_profile: cint(me.frm.doc.is_pos) ? me.frm.doc.pos_profile : '',
@@ -802,6 +822,67 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	update_stock: function() {
 		this.frm.trigger('set_default_internal_warehouse');
+	},
+
+	custom_weight_uom: function() {
+		let frm = this.frm;
+		if (frm.doc.custom_weight_uom) {
+			// for same UOM Selection
+			if (frm.doc.custom_weight_uom == frm.doc.default_weight_uom) {
+				frm.set_value('weight_in_selected_uom', frm.doc.total_net_weight);
+			}
+			else frappe.db.get_value('UOM Conversion Factor', {
+				'from_uom': frm.doc.default_weight_uom,
+				'to_uom': frm.doc.custom_weight_uom, 'category': 'Mass'
+			}, 'value', (r) => {
+				frm.set_value('weight_in_selected_uom', r.value ? flt(frm.doc.total_net_weight * r.value) : 0);
+				if (!r.value) {
+					frappe.show_alert({
+						message: __("Conversion Factor for <b>{0}</b> to <b>{1}</b> not found in <u>UOM Conversion Factor List</u>", 
+										[frm.doc.default_weight_uom, frm.doc.custom_weight_uom]),
+						indicator: 'red'
+					});
+				}
+			});
+		}
+		else frappe.model.set_value(cdt, cdn, "weight_in_selected_uom", 0.0);
+	},
+	
+	weight_uom: function(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		if (item.weight_uom) {
+			// for same UOM Selection
+			if (item.weight_uom == item.default_weight_uom) frappe.model.set_value(cdt, cdn, "weight_conversion_factor", 1);
+			else frappe.db.get_value('UOM Conversion Factor', {
+				'from_uom': item.weight_uom,
+				'to_uom': item.default_weight_uom, 'category': 'Mass'
+			}, 'value', (r) => {
+				frappe.model.set_value(cdt, cdn, "weight_conversion_factor", flt(r.value));
+				if (!r.value) {
+					frappe.show_alert({
+						message: __("Conversion Factor for <b>{0}</b> to <b>{1}</b> not found in <u>UOM Conversion Factor List</u>", 
+										[item.weight_uom, item.default_weight_uom]),
+						indicator: 'red'
+					});
+				}
+			});
+		}
+		else frappe.model.set_value(cdt, cdn, "weight_conversion_factor", 0);
+	},
+	
+	weight_conversion_factor: function(doc, cdt, cdn) {
+		this.total_weight(doc, cdt, cdn);
+	},
+	
+	weight_per_unit: function(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		frappe.model.set_value(cdt, cdn, 'total_weight', flt(item.stock_qty * item.weight_per_unit));
+	},
+	
+	total_weight: function(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		frappe.model.set_value(cdt, cdn, "net_weight_as_per_default", flt(item.weight_conversion_factor * item.total_weight));
+		this.calculate_net_weight();
 	},
 
 	set_default_internal_warehouse: function() {
@@ -1205,8 +1286,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.toggle_conversion_factor(item);
 
 			if(doc.doctype != "Material Request") {
-				item.total_weight = flt(item.stock_qty * item.weight_per_unit);
-				refresh_field("total_weight", item.name, item.parentfield);
+				frappe.model.set_value(cdt,cdn,'total_weight', flt(item.stock_qty * item.weight_per_unit));
 				this.calculate_net_weight();
 			}
 
@@ -1303,9 +1383,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.doc.total_net_weight= 0.0;
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
-			me.frm.doc.total_net_weight += flt(item.total_weight);
+			if (!item.net_weight_as_per_default) {
+				me.frm.doc.total_net_weight = 0.0;
+				frappe.show_alert({
+					message: __("Weight UOM details invalid/missing. Setting Total Net Weight to <b>0</b>"),
+					indicator: 'red'
+				});
+				return false;
+			}
+			me.frm.doc.total_net_weight += flt(item.net_weight_as_per_default);
 		});
 		refresh_field("total_net_weight");
+		if (me.frm.doc.custom_weight_uom) {
+			me.frm.trigger('custom_weight_uom');
+		}
 		this.shipping_rule();
 	},
 

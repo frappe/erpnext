@@ -91,6 +91,9 @@
   "total_weight",
   "column_break_40",
   "weight_uom",
+  "default_weight_uom",
+  "weight_conversion_factor",
+  "net_weight_as_per_default",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -845,6 +848,25 @@
    "label": "Sales Order Packed Item",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "default_weight_uom",
+   "fieldtype": "Link",
+   "label": "Default Weight UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight_conversion_factor",
+   "fieldtype": "Float",
+   "label": "Weight Conversion Factor",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_weight_as_per_default",
+   "fieldtype": "Float",
+   "label": "Net Weight as Per Default",
+   "read_only": 1
   }
  ],
  "idx": 1,

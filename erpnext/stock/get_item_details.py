@@ -369,6 +369,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"transaction_date": args.get("transaction_date"),
 			"against_blanket_order": args.get("against_blanket_order"),
 			"bom_no": item.get("default_bom"),
+			"default_weight_uom": args.get("default_weight_uom"),
 			"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
 			"weight_uom": args.get("weight_uom") or item.get("weight_uom"),
 			"grant_commission": item.get("grant_commission"),
@@ -436,8 +437,17 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if meta.get_field("barcode"):
 		update_barcode_value(out)
 
+	# set default uom from company if not fetched in frm
+	if not out.get('default_weight_uom'):
+		out['default_weight_uom'] = frappe.db.get_value('Company', args.company, 'default_weight_uom')
+	if out.default_weight_uom == out.weight_uom:
+		out['weight_conversion_factor'] = 1
+	else:
+		out['weight_conversion_factor'] = frappe.db.get_value('UOM Conversion Factor',{'from_uom':out.get('weight_uom'), 
+					'to_uom': out.get('default_weight_uom'), 'category': 'Mass'},'value') or 0
 	if out.get("weight_per_unit"):
 		out["total_weight"] = out.weight_per_unit * out.stock_qty
+		out['net_weight_as_per_default'] = out.weight_conversion_factor * out.total_weight
 
 	return out
 

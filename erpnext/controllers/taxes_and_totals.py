@@ -554,8 +554,12 @@ class calculate_taxes_and_totals(object):
 		if self.doc.meta.get_field("total_net_weight"):
 			self.doc.total_net_weight = 0.0
 			for d in self.doc.items:
-				if d.total_weight:
-					self.doc.total_net_weight += d.total_weight
+				if d.net_weight_as_per_default:
+					self.doc.total_net_weight += d.net_weight_as_per_default
+				else:
+					self.doc.total_net_weight = 0.0
+					frappe.msgprint(msg = _("UOM details invalid/missing for item <b>{}</b>").format(d.item_code), alert=True, indicator='red')
+					break
 
 	def set_rounded_total(self):
 		if self.doc.get("is_consolidated") and self.doc.get("rounding_adjustment"):

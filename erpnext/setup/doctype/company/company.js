@@ -16,6 +16,8 @@ frappe.ui.form.on("Company", {
 		frm.call('check_if_transactions_exist').then(r => {
 			frm.toggle_enable("default_currency", (!r.message));
 		});
+		
+		frm.trigger('get_weight_uoms');
 	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
@@ -47,6 +49,25 @@ frappe.ui.form.on("Company", {
 					'company': frm.doc.company
 				}
 			};
+		});
+	},
+
+	get_weight_uoms: function(frm) {
+		var units = [];
+		frappe.call({
+			method: "frappe.client.get_list",
+			args: {
+				doctype: "UOM Conversion Factor",
+				filters: { "category": __("Mass") },
+				fields: ["to_uom"],
+				limit_page_length: 500
+			},
+			callback: function (r) {
+				r.message.forEach(row => units.push(row.to_uom));
+			}
+		});
+		frm.set_query("default_weight_uom", function () {
+			return { filters: { "name": ["IN", units] } };
 		});
 	},
 

@@ -63,9 +63,14 @@
   "base_total",
   "base_net_total",
   "column_break_27",
-  "total_net_weight",
   "total",
   "net_total",
+  "weight_details_section",
+  "custom_weight_uom",
+  "weight_in_selected_uom",
+  "column_break_49",
+  "default_weight_uom",
+  "total_net_weight",
   "pricing_rule_details",
   "pricing_rules",
   "raw_material_details",
@@ -1143,6 +1148,39 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "weight_details_section",
+   "fieldtype": "Section Break",
+   "label": "Weight Details"
+  },
+  {
+   "depends_on": "total_net_weight",
+   "fieldname": "custom_weight_uom",
+   "fieldtype": "Link",
+   "label": "Custom Weight UOM",
+   "options": "UOM"
+  },
+  {
+   "depends_on": "custom_weight_uom",
+   "fieldname": "weight_in_selected_uom",
+   "fieldtype": "Float",
+   "label": "Weight in Selected UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.default_weight_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "default_weight_uom",
+   "fieldtype": "Link",
+   "label": "Default Weight UOM",
+   "options": "UOM",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",

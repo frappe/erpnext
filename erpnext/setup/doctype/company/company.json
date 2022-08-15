@@ -70,6 +70,7 @@
   "default_inventory_account",
   "stock_adjustment_account",
   "column_break_32",
+  "default_weight_uom",
   "stock_received_but_not_billed",
   "default_provisional_account",
   "expenses_included_in_valuation",
@@ -740,6 +741,12 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "fieldname": "default_weight_uom",
+   "fieldtype": "Link",
+   "label": "Default Weight UOM",
+   "options": "UOM"
   }
  ],
  "icon": "fa fa-building",
