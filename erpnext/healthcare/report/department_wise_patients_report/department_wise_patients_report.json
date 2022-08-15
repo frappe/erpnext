@@ -1,0 +1,36 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-08-15 23:07:40.836294",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "Neurology Clinic RYK",
+ "modified": "2022-08-15 23:07:40.836294",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Department Wise Patients Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Patient",
+ "report_name": "Department Wise Patients Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Physician"
+  },
+  {
+   "role": "Laboratory User"
+  },
+  {
+   "role": "Nursing User"
+  }
+ ]
+}
