@@ -147,3 +147,8 @@ class PaymentLedgerEntry(Document):
 			update_voucher_outstanding(
 				self.against_voucher_type, self.against_voucher_no, self.account, self.party_type, self.party
 			)
+
+
+def on_doctype_update():
+	frappe.db.add_index("Payment Ledger Entry", ["against_voucher_no", "against_voucher_type"])
+	frappe.db.add_index("Payment Ledger Entry", ["voucher_no", "voucher_type"])

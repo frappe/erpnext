@@ -11,22 +11,18 @@ erpnext/selling                 @nextchamp-saqib @deepeshgarg007 @ruthra-kumar
 erpnext/support/                @nextchamp-saqib @deepeshgarg007
 pos*                            @nextchamp-saqib
 
-erpnext/buying/                 @marination @rohitwaghchaure @s-aga-r
-erpnext/e_commerce/             @marination
-erpnext/maintenance/            @marination @rohitwaghchaure @s-aga-r
-erpnext/manufacturing/          @marination @rohitwaghchaure @s-aga-r
-erpnext/portal/                 @marination
+erpnext/buying/                 @rohitwaghchaure @s-aga-r
+erpnext/maintenance/            @rohitwaghchaure @s-aga-r
+erpnext/manufacturing/          @rohitwaghchaure @s-aga-r
 erpnext/quality_management/     @marination @rohitwaghchaure @s-aga-r
-erpnext/shopping_cart/          @marination
 erpnext/stock/                  @marination @rohitwaghchaure @s-aga-r
 
-erpnext/crm/                    @NagariaHussain 
-erpnext/education/              @rutwikhdev 
+erpnext/crm/                    @NagariaHussain
+erpnext/education/              @rutwikhdev
 erpnext/projects/               @ruchamahabal
 
-erpnext/controllers/            @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure @marination
-erpnext/patches/                @deepeshgarg007 @nextchamp-saqib @marination
-erpnext/public/                 @nextchamp-saqib @marination
+erpnext/controllers/            @deepeshgarg007 @nextchamp-saqib @rohitwaghchaure
+erpnext/patches/                @deepeshgarg007 @nextchamp-saqib
 
 .github/                        @ankush
-pyproject.toml                  @gavindsouza @ankush
+pyproject.toml                  @ankush

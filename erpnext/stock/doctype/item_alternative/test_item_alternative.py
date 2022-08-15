@@ -1,17 +1,16 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import json
-
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
-from erpnext.buying.doctype.purchase_order.purchase_order import (
-	make_purchase_receipt,
-	make_rm_stock_entry,
+from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+from erpnext.controllers.tests.test_subcontracting_controller import (
+	get_subcontracting_order,
+	make_service_item,
+	set_backflush_based_on,
 )
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
@@ -22,6 +21,9 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
+from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+	make_subcontracting_receipt,
+)
 
 
 class TestItemAlternative(FrappeTestCase):
@@ -30,9 +32,7 @@ class TestItemAlternative(FrappeTestCase):
 		make_items()
 
 	def test_alternative_item_for_subcontract_rm(self):
-		frappe.db.set_value(
-			"Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM"
-		)
+		set_backflush_based_on("BOM")
 
 		create_stock_reconciliation(
 			item_code="Alternate Item For A RW 1", warehouse="_Test Warehouse - _TC", qty=5, rate=2000
@@ -42,15 +42,22 @@ class TestItemAlternative(FrappeTestCase):
 		)
 
 		supplier_warehouse = "Test Supplier Warehouse - _TC"
-		po = create_purchase_order(
-			item="Test Finished Goods - A",
-			is_subcontracted=1,
-			qty=5,
-			rate=3000,
-			supplier_warehouse=supplier_warehouse,
-		)
 
-		rm_item = [
+		make_service_item("Subcontracted Service Item 1")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 5,
+				"rate": 3000,
+				"fg_item": "Test Finished Goods - A",
+				"fg_item_qty": 5,
+			},
+		]
+		sco = get_subcontracting_order(
+			service_items=service_items, supplier_warehouse=supplier_warehouse
+		)
+		rm_items = [
 			{
 				"item_code": "Test Finished Goods - A",
 				"rm_item_code": "Test FG A RW 1",
@@ -73,14 +80,13 @@ class TestItemAlternative(FrappeTestCase):
 			},
 		]
 
-		rm_item_string = json.dumps(rm_item)
 		reserved_qty_for_sub_contract = frappe.db.get_value(
 			"Bin",
 			{"item_code": "Test FG A RW 1", "warehouse": "_Test Warehouse - _TC"},
 			"reserved_qty_for_sub_contract",
 		)
 
-		se = frappe.get_doc(make_rm_stock_entry(po.name, rm_item_string))
+		se = frappe.get_doc(make_rm_stock_entry(sco.name, rm_items))
 		se.to_warehouse = supplier_warehouse
 		se.insert()
 
@@ -104,22 +110,17 @@ class TestItemAlternative(FrappeTestCase):
 			after_transfer_reserved_qty_for_sub_contract, flt(reserved_qty_for_sub_contract - 5)
 		)
 
-		pr = make_purchase_receipt(po.name)
-		pr.save()
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
 
-		pr = frappe.get_doc("Purchase Receipt", pr.name)
+		scr = frappe.get_doc("Subcontracting Receipt", scr.name)
 		status = False
-		for d in pr.supplied_items:
-			if d.rm_item_code == "Alternate Item For A RW 1":
+		for item in scr.supplied_items:
+			if item.rm_item_code == "Alternate Item For A RW 1":
 				status = True
 
 		self.assertEqual(status, True)
-		frappe.db.set_value(
-			"Buying Settings",
-			None,
-			"backflush_raw_materials_of_subcontract_based_on",
-			"Material Transferred for Subcontract",
-		)
+		set_backflush_based_on("Material Transferred for Subcontract")
 
 	def test_alternative_item_for_production_rm(self):
 		create_stock_reconciliation(

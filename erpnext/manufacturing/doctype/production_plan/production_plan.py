@@ -508,7 +508,7 @@ class ProductionPlan(Document):
 			po.is_subcontracted = 1
 			for row in po_list:
 				po_data = {
-					"item_code": row.production_item,
+					"fg_item": row.production_item,
 					"warehouse": row.fg_warehouse,
 					"production_plan_sub_assembly_item": row.name,
 					"bom": row.bom_no,
@@ -518,9 +518,6 @@ class ProductionPlan(Document):
 				for field in [
 					"schedule_date",
 					"qty",
-					"uom",
-					"stock_uom",
-					"item_name",
 					"description",
 					"production_plan_item",
 				]:
@@ -642,6 +639,9 @@ class ProductionPlan(Document):
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 
 		for row in self.po_items:
+			if not row.item_code:
+				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
+
 			bom_data = []
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)

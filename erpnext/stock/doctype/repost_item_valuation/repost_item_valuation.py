@@ -138,6 +138,11 @@ def repost(doc):
 		doc.set_status("Completed")
 
 	except Exception as e:
+		if frappe.flags.in_test:
+			# Don't silently fail in tests,
+			# there is no reason for reposts to fail in CI
+			raise
+
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		doc.log_error("Unable to repost item valuation")

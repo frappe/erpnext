@@ -77,7 +77,7 @@ def validate_returned_items(doc):
 	if doc.doctype != "Purchase Invoice":
 		select_fields += ",serial_no, batch_no"
 
-	if doc.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		select_fields += ",rejected_qty, received_qty"
 
 	for d in frappe.db.sql(
@@ -161,7 +161,7 @@ def validate_returned_items(doc):
 
 def validate_quantity(doc, args, ref, valid_items, already_returned_items):
 	fields = ["stock_qty"]
-	if doc.doctype in ["Purchase Receipt", "Purchase Invoice"]:
+	if doc.doctype in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
 		fields.extend(["received_qty", "rejected_qty"])
 
 	already_returned_data = already_returned_items.get(args.item_code) or {}
@@ -224,7 +224,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 	if ref_item_row.get("rate", 0) > item_dict["rate"]:
 		item_dict["rate"] = ref_item_row.get("rate", 0)
 
-	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt"]:
+	if ref_item_row.parenttype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		item_dict["received_qty"] += ref_item_row.received_qty
 		item_dict["rejected_qty"] += ref_item_row.rejected_qty
 
@@ -239,7 +239,7 @@ def get_ref_item_dict(valid_items, ref_item_row):
 
 def get_already_returned_items(doc):
 	column = "child.item_code, sum(abs(child.qty)) as qty, sum(abs(child.stock_qty)) as stock_qty"
-	if doc.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+	if doc.doctype in ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]:
 		column += """, sum(abs(child.rejected_qty) * child.conversion_factor) as rejected_qty,
 			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
 
@@ -281,17 +281,21 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 	child_doctype = doctype + " Item"
 	reference_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(child_doctype)
 
-	if doctype in ("Purchase Receipt", "Purchase Invoice"):
+	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		party_type = "supplier"
 	else:
 		party_type = "customer"
 
 	fields = [
 		"sum(abs(`tab{0}`.qty)) as qty".format(child_doctype),
-		"sum(abs(`tab{0}`.stock_qty)) as stock_qty".format(child_doctype),
 	]
 
-	if doctype in ("Purchase Receipt", "Purchase Invoice"):
+	if doctype != "Subcontracting Receipt":
+		fields += [
+			"sum(abs(`tab{0}`.stock_qty)) as stock_qty".format(child_doctype),
+		]
+
+	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
 			"sum(abs(`tab{0}`.rejected_qty)) as rejected_qty".format(child_doctype),
 			"sum(abs(`tab{0}`.received_qty)) as received_qty".format(child_doctype),
@@ -342,7 +346,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			# look for Print Heading "Debit Note"
 			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
 
-		for tax in doc.get("taxes"):
+		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
 
@@ -381,8 +385,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			for d in doc.get("packed_items"):
 				d.qty = d.qty * -1
 
-		doc.discount_amount = -1 * source.discount_amount
-		doc.run_method("calculate_taxes_and_totals")
+		if doc.get("discount_amount"):
+			doc.discount_amount = -1 * source.discount_amount
+
+		if doctype != "Subcontracting Receipt":
+			doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
@@ -393,7 +400,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if serial_nos:
 				target_doc.serial_no = "\n".join(serial_nos)
 
-		if doctype == "Purchase Receipt":
+		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
@@ -405,15 +412,24 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			)
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 
-			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0))
-			target_doc.received_stock_qty = -1 * flt(
-				source_doc.received_stock_qty - (returned_qty_map.get("received_stock_qty") or 0)
-			)
+			if hasattr(target_doc, "stock_qty"):
+				target_doc.stock_qty = -1 * flt(
+					source_doc.stock_qty - (returned_qty_map.get("stock_qty") or 0)
+				)
+				target_doc.received_stock_qty = -1 * flt(
+					source_doc.received_stock_qty - (returned_qty_map.get("received_stock_qty") or 0)
+				)
 
-			target_doc.purchase_order = source_doc.purchase_order
-			target_doc.purchase_order_item = source_doc.purchase_order_item
-			target_doc.rejected_warehouse = source_doc.rejected_warehouse
-			target_doc.purchase_receipt_item = source_doc.name
+			if doctype == "Subcontracting Receipt":
+				target_doc.subcontracting_order = source_doc.subcontracting_order
+				target_doc.subcontracting_order_item = source_doc.subcontracting_order_item
+				target_doc.rejected_warehouse = source_doc.rejected_warehouse
+				target_doc.subcontracting_receipt_item = source_doc.name
+			else:
+				target_doc.purchase_order = source_doc.purchase_order
+				target_doc.purchase_order_item = source_doc.purchase_order_item
+				target_doc.rejected_warehouse = source_doc.rejected_warehouse
+				target_doc.purchase_receipt_item = source_doc.name
 
 		elif doctype == "Purchase Invoice":
 			returned_qty_map = get_returned_qty_map_for_row(
@@ -525,7 +541,7 @@ def get_rate_for_return(
 		item_row,
 	)
 
-	if voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+	if voucher_type in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		select_field = "incoming_rate"
 	else:
 		select_field = "abs(stock_value_difference / actual_qty)"
@@ -560,6 +576,7 @@ def get_return_against_item_fields(voucher_type):
 		"Purchase Invoice": "purchase_invoice_item",
 		"Delivery Note": "dn_detail",
 		"Sales Invoice": "sales_invoice_item",
+		"Subcontracting Receipt": "subcontracting_receipt_item",
 	}
 	return return_against_item_fields[voucher_type]
 

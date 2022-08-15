@@ -24,7 +24,7 @@
 			})
 		</script>
 	{% else %}
-		{{ product_image(doc.website_image or doc.image, alt=doc.website_image_alt or doc.item_name) }}
+		{{ product_image(doc.website_image, alt=doc.website_image_alt or doc.item_name) }}
 	{% endif %}
 
 	<!-- Simple image preview -->

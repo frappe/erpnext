@@ -33,7 +33,10 @@ def execute():
 				"insert_after": insert_after_field,
 			}
 
-			create_custom_field(doctype, df, ignore_validate=True)
-			frappe.clear_cache(doctype=doctype)
+			try:
+				create_custom_field(doctype, df, ignore_validate=True)
+				frappe.clear_cache(doctype=doctype)
+			except Exception as e:
+				pass
 
 		count += 1

@@ -42,7 +42,6 @@
   "act_end_date",
   "sb_costing",
   "total_costing_amount",
-  "total_expense_claim",
   "column_break_20",
   "total_billing_amount",
   "sb_more_info",
@@ -280,13 +279,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "total_expense_claim",
-   "fieldtype": "Currency",
-   "label": "Total Expense Claim (via Expense Claim)",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
   },
@@ -397,7 +389,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2022-01-29 13:58:47.005241",
+ "modified": "2022-06-23 16:58:47.005241",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

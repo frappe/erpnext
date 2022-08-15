@@ -1,0 +1,485 @@
+{
+    "actions": [],
+    "allow_auto_repeat": 1,
+    "allow_import": 1,
+    "autoname": "naming_series:",
+    "creation": "2022-04-01 22:39:17.662819",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "engine": "InnoDB",
+    "field_order": [
+        "title",
+        "naming_series",
+        "purchase_order",
+        "supplier",
+        "supplier_name",
+        "supplier_warehouse",
+        "column_break_7",
+        "company",
+        "transaction_date",
+        "schedule_date",
+        "amended_from",
+        "address_and_contact_section",
+        "supplier_address",
+        "address_display",
+        "contact_person",
+        "contact_display",
+        "contact_mobile",
+        "contact_email",
+        "column_break_19",
+        "shipping_address",
+        "shipping_address_display",
+        "billing_address",
+        "billing_address_display",
+        "section_break_24",
+        "column_break_25",
+        "set_warehouse",
+        "items",
+        "section_break_32",
+        "total_qty",
+        "column_break_29",
+        "total",
+        "service_items_section",
+        "service_items",
+        "raw_materials_supplied_section",
+        "set_reserve_warehouse",
+        "supplied_items",
+        "additional_costs_section",
+        "distribute_additional_costs_based_on",
+        "additional_costs",
+        "total_additional_costs",
+        "order_status_section",
+        "status",
+        "column_break_39",
+        "per_received",
+        "printing_settings_section",
+        "select_print_heading",
+        "column_break_43",
+        "letter_head"
+    ],
+    "fields": [
+        {
+            "allow_on_submit": 1,
+            "default": "{supplier_name}",
+            "fieldname": "title",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Title",
+            "no_copy": 1,
+            "print_hide": 1
+        },
+        {
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "label": "Series",
+            "no_copy": 1,
+            "options": "SC-ORD-.YYYY.-",
+            "print_hide": 1,
+            "reqd": 1,
+            "set_only_once": 1
+        },
+        {
+            "fieldname": "purchase_order",
+            "fieldtype": "Link",
+            "label": "Subcontracting Purchase Order",
+            "options": "Purchase Order",
+            "reqd": 1
+        },
+        {
+            "bold": 1,
+            "fieldname": "supplier",
+            "fieldtype": "Link",
+            "in_global_search": 1,
+            "in_standard_filter": 1,
+            "label": "Supplier",
+            "options": "Supplier",
+            "print_hide": 1,
+            "reqd": 1,
+            "search_index": 1
+        },
+        {
+            "bold": 1,
+            "fetch_from": "supplier.supplier_name",
+            "fieldname": "supplier_name",
+            "fieldtype": "Data",
+            "in_global_search": 1,
+            "label": "Supplier Name",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "depends_on": "supplier",
+            "fieldname": "supplier_warehouse",
+            "fieldtype": "Link",
+            "label": "Supplier Warehouse",
+            "options": "Warehouse",
+            "reqd": 1
+        },
+        {
+            "fieldname": "column_break_7",
+            "fieldtype": "Column Break",
+            "print_width": "50%",
+            "width": "50%"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "in_standard_filter": 1,
+            "label": "Company",
+            "options": "Company",
+            "print_hide": 1,
+            "remember_last_selected_value": 1,
+            "reqd": 1
+        },
+        {
+            "default": "Today",
+            "fetch_from": "purchase_order.transaction_date",
+            "fetch_if_empty": 1,
+            "fieldname": "transaction_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Date",
+            "reqd": 1,
+            "search_index": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "fetch_from": "purchase_order.schedule_date",
+            "fetch_if_empty": 1,
+            "fieldname": "schedule_date",
+            "fieldtype": "Date",
+            "label": "Required By",
+            "read_only": 1
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "ignore_user_permissions": 1,
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Subcontracting Order",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "address_and_contact_section",
+            "fieldtype": "Section Break",
+            "label": "Address and Contact"
+        },
+        {
+            "fetch_from": "supplier.supplier_primary_address",
+            "fetch_if_empty": 1,
+            "fieldname": "supplier_address",
+            "fieldtype": "Link",
+            "label": "Supplier Address",
+            "options": "Address",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "address_display",
+            "fieldtype": "Small Text",
+            "label": "Supplier Address Details",
+            "read_only": 1
+        },
+        {
+            "fetch_from": "supplier.supplier_primary_contact",
+            "fetch_if_empty": 1,
+            "fieldname": "contact_person",
+            "fieldtype": "Link",
+            "label": "Supplier Contact",
+            "options": "Contact",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "contact_display",
+            "fieldtype": "Small Text",
+            "in_global_search": 1,
+            "label": "Contact Name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "contact_mobile",
+            "fieldtype": "Small Text",
+            "label": "Contact Mobile No",
+            "read_only": 1
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Small Text",
+            "label": "Contact Email",
+            "options": "Email",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_19",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "shipping_address",
+            "fieldtype": "Link",
+            "label": "Company Shipping Address",
+            "options": "Address",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "shipping_address_display",
+            "fieldtype": "Small Text",
+            "label": "Shipping Address Details",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "billing_address",
+            "fieldtype": "Link",
+            "label": "Company Billing Address",
+            "options": "Address"
+        },
+        {
+            "fieldname": "billing_address_display",
+            "fieldtype": "Small Text",
+            "label": "Billing Address Details",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_24",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "column_break_25",
+            "fieldtype": "Column Break"
+        },
+        {
+            "depends_on": "purchase_order",
+            "description": "Sets 'Warehouse' in each row of the Items table.",
+            "fieldname": "set_warehouse",
+            "fieldtype": "Link",
+            "label": "Set Target Warehouse",
+            "options": "Warehouse",
+            "print_hide": 1
+        },
+        {
+            "allow_bulk_edit": 1,
+            "depends_on": "purchase_order",
+            "fieldname": "items",
+            "fieldtype": "Table",
+            "label": "Items",
+            "options": "Subcontracting Order Item",
+            "reqd": 1
+        },
+        {
+            "fieldname": "section_break_32",
+            "fieldtype": "Section Break"
+        },
+        {
+            "depends_on": "purchase_order",
+            "fieldname": "total_qty",
+            "fieldtype": "Float",
+            "label": "Total Quantity",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_29",
+            "fieldtype": "Column Break"
+        },
+        {
+            "depends_on": "purchase_order",
+            "fieldname": "total",
+            "fieldtype": "Currency",
+            "label": "Total",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "depends_on": "purchase_order",
+            "fieldname": "service_items_section",
+            "fieldtype": "Section Break",
+            "label": "Service Items"
+        },
+        {
+            "fieldname": "service_items",
+            "fieldtype": "Table",
+            "label": "Service Items",
+            "options": "Subcontracting Order Service Item",
+            "read_only": 1,
+            "reqd": 1
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "supplied_items",
+            "depends_on": "supplied_items",
+            "fieldname": "raw_materials_supplied_section",
+            "fieldtype": "Section Break",
+            "label": "Raw Materials Supplied"
+        },
+        {
+            "depends_on": "supplied_items",
+            "description": "Sets 'Reserve Warehouse' in each row of the Supplied Items table.",
+            "fieldname": "set_reserve_warehouse",
+            "fieldtype": "Link",
+            "label": "Set Reserve Warehouse",
+            "options": "Warehouse"
+        },
+        {
+            "fieldname": "supplied_items",
+            "fieldtype": "Table",
+            "label": "Supplied Items",
+            "no_copy": 1,
+            "options": "Subcontracting Order Supplied Item",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "total_additional_costs",
+            "depends_on": "eval:(doc.docstatus == 0 || doc.total_additional_costs)",
+            "fieldname": "additional_costs_section",
+            "fieldtype": "Section Break",
+            "label": "Additional Costs"
+        },
+        {
+            "fieldname": "additional_costs",
+            "fieldtype": "Table",
+            "label": "Additional Costs",
+            "options": "Landed Cost Taxes and Charges"
+        },
+        {
+            "fieldname": "total_additional_costs",
+            "fieldtype": "Currency",
+            "label": "Total Additional Costs",
+            "print_hide_if_no_value": 1,
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "order_status_section",
+            "fieldtype": "Section Break",
+            "label": "Order Status"
+        },
+        {
+            "default": "Draft",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_standard_filter": 1,
+            "label": "Status",
+            "no_copy": 1,
+            "options": "Draft\nOpen\nPartially Received\nCompleted\nMaterial Transferred\nPartial Material Transferred\nCancelled",
+            "print_hide": 1,
+            "read_only": 1,
+            "reqd": 1,
+            "search_index": 1
+        },
+        {
+            "fieldname": "column_break_39",
+            "fieldtype": "Column Break"
+        },
+        {
+            "depends_on": "eval:!doc.__islocal",
+            "fieldname": "per_received",
+            "fieldtype": "Percent",
+            "in_list_view": 1,
+            "label": "% Received",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "printing_settings_section",
+            "fieldtype": "Section Break",
+            "label": "Printing Settings",
+            "print_hide": 1,
+            "print_width": "50%",
+            "width": "50%"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "select_print_heading",
+            "fieldtype": "Link",
+            "label": "Print Heading",
+            "no_copy": 1,
+            "options": "Print Heading",
+            "print_hide": 1,
+            "report_hide": 1
+        },
+        {
+            "fieldname": "column_break_43",
+            "fieldtype": "Column Break"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "letter_head",
+            "fieldtype": "Link",
+            "label": "Letter Head",
+            "options": "Letter Head",
+            "print_hide": 1
+        },
+        {
+            "default": "Qty",
+            "fieldname": "distribute_additional_costs_based_on",
+            "fieldtype": "Select",
+            "label": "Distribute Additional Costs Based On ",
+            "options": "Qty\nAmount"
+        }
+    ],
+    "icon": "fa fa-file-text",
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2022-04-11 21:02:44.097841",
+    "modified_by": "Administrator",
+    "module": "Subcontracting",
+    "name": "Subcontracting Order",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "read": 1,
+            "report": 1,
+            "role": "Stock User"
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Purchase Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Purchase User",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "permlevel": 1,
+            "read": 1,
+            "role": "Purchase Manager",
+            "write": 1
+        }
+    ],
+    "search_fields": "status, transaction_date, supplier",
+    "show_name_in_global_search": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "timeline_field": "supplier",
+    "title_field": "supplier_name",
+    "track_changes": 1
+}

@@ -613,7 +613,25 @@ frappe.ui.form.on('Stock Entry', {
 
 	apply_putaway_rule: function (frm) {
 		if (frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(frm, frm.doc.purpose);
-	}
+	},
+
+	purchase_order: (frm) => {
+		if (frm.doc.purchase_order) {
+			frm.set_value("subcontracting_order", "");
+		}
+	},
+
+	subcontracting_order: (frm) => {
+		if (frm.doc.subcontracting_order) {
+			frm.set_value("purchase_order", "");
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontracting_order',
+				source_name: frm.doc.subcontracting_order,
+				target_doc: frm,
+				freeze: true,
+			});
+		}
+	},
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -780,7 +798,16 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return {
 				"filters": {
 					"docstatus": 1,
-					"is_subcontracted": 1,
+					"is_old_subcontracting_flow": 1,
+					"company": me.frm.doc.company
+				}
+			};
+		});
+
+		this.frm.set_query("subcontracting_order", function() {
+			return {
+				"filters": {
+					"docstatus": 1,
 					"company": me.frm.doc.company
 				}
 			};
@@ -801,7 +828,12 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			}
 		}
 
-		this.frm.add_fetch("purchase_order", "supplier", "supplier");
+		if (me.frm.doc.purchase_order) {
+			this.frm.add_fetch("purchase_order", "supplier", "supplier");
+		}
+		else {
+			this.frm.add_fetch("subcontracting_order", "supplier", "supplier");
+		}
 
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'supplier', doctype: 'Supplier' }
 		this.frm.set_query("supplier_address", erpnext.queries.address_query)

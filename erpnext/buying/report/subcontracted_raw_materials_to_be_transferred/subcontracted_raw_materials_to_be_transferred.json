@@ -13,7 +13,7 @@
  "name": "Subcontracted Raw Materials To Be Transferred",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Purchase Order",
+ "ref_doctype": "Subcontracting Order",
  "report_name": "Subcontracted Raw Materials To Be Transferred",
  "report_type": "Script Report",
  "roles": [

@@ -169,60 +169,44 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: __("Filters"),
 				depends_on: "eval:doc.action=='Match Against Voucher'",
 			},
-			{
-				fieldtype: "Check",
-				label: "Payment Entry",
-				fieldname: "payment_entry",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Journal Entry",
-				fieldname: "journal_entry",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Loan Repayment",
-				fieldname: "loan_repayment",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldname: "column_break_5",
-				fieldtype: "Column Break",
-			},
-			{
-				fieldtype: "Check",
-				label: "Sales Invoice",
-				fieldname: "sales_invoice",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Purchase Invoice",
-				fieldname: "purchase_invoice",
-				onchange: () => this.update_options(),
-			},
+		];
+
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_transaction.bank_transaction.get_doctypes_for_bank_reconciliation",
+			callback: (r) => {
+				$.each(r.message, (_i, entry) => {
+					if (_i % 3 == 0) {
+						fields.push({
+							fieldtype: "Column Break",
+						});
+					}
+					fields.push({
+						fieldtype: "Check",
+						label: entry,
+						fieldname: frappe.scrub(entry),
+						onchange: () => this.update_options(),
+					});
+				});
+
+				fields.push(...this.get_voucher_fields());
+
+				me.dialog = new frappe.ui.Dialog({
+					title: __("Reconcile the Bank Transaction"),
+					fields: fields,
+					size: "large",
+					primary_action: (values) =>
+						this.reconciliation_dialog_primary_action(values),
+				});
+			}
+		});
+	}
+
+	get_voucher_fields() {
+		return [
 			{
 				fieldtype: "Check",
 				label: "Show Only Exact Amount",
 				fieldname: "exact_match",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldname: "column_break_5",
-				fieldtype: "Column Break",
-			},
-			{
-				fieldtype: "Check",
-				label: "Expense Claim",
-				fieldname: "expense_claim",
-				onchange: () => this.update_options(),
-			},
-			{
-				fieldtype: "Check",
-				label: "Loan Disbursement",
-				fieldname: "loan_disbursement",
 				onchange: () => this.update_options(),
 			},
 			{
@@ -404,14 +388,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				read_only: 1,
 			},
 		];
-
-		me.dialog = new frappe.ui.Dialog({
-			title: __("Reconcile the Bank Transaction"),
-			fields: fields,
-			size: "large",
-			primary_action: (values) =>
-				this.reconciliation_dialog_primary_action(values),
-		});
 	}
 
 	get_selected_attributes() {

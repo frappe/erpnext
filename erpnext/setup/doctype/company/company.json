@@ -15,6 +15,7 @@
   "default_currency",
   "country",
   "is_group",
+  "default_holiday_list",
   "cb0",
   "default_letter_head",
   "tax_id",
@@ -48,12 +49,6 @@
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
-  "hr_settings_section",
-  "default_holiday_list",
-  "default_expense_claim_payable_account",
-  "column_break_10",
-  "default_employee_advance_account",
-  "default_payroll_payable_account",
   "default_settings",
   "default_bank_account",
   "default_cash_account",
@@ -239,10 +234,7 @@
    "label": "Default Warehouse for Sales Return",
    "options": "Warehouse"
   },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
+
   {
    "fieldname": "country",
    "fieldtype": "Link",
@@ -375,13 +367,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "default_employee_advance_account",
-   "fieldtype": "Link",
-   "label": "Default Employee Advance Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "default_expense_account",
    "fieldtype": "Link",
@@ -414,24 +399,6 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Default Deferred Expense Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "default_payroll_payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Payroll Payable Account",
-   "no_copy": 1,
-   "options": "Account"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "default_expense_claim_payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Expense Claim Payable Account",
    "no_copy": 1,
    "options": "Account"
   },
@@ -702,11 +669,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
-   "label": "HR & Payroll Settings"
-  },
-  {
    "fieldname": "column_break_26",
    "fieldtype": "Column Break"
   },
@@ -747,7 +709,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-04-27 10:33:16.826067",
+ "modified": "2022-06-30 18:03:18.701314",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

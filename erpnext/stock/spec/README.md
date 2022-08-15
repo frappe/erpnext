@@ -7,7 +7,7 @@
 - `controllers/stock_controller.py`
 - `stock/valuation.py`
 
-## What is in an Stock Ledger Entry (SLE)?
+## What is in a Stock Ledger Entry (SLE)?
 
 Stock Ledger Entry is a single row in the Stock Ledger. It signifies some
 modification of stock for a particular Item in the specified warehouse.

@@ -1,1 +1,0 @@
-Standard set of goals for an Employee / Designation / Job Profile. New Appraisal transactions can be created from the Template.

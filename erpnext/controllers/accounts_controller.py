@@ -1472,8 +1472,15 @@ class AccountsController(TransactionBase):
 			self.get("debit_to") if self.doctype == "Sales Invoice" else self.get("credit_to")
 		)
 		party_account_currency = get_account_currency(party_account)
+		allow_multi_currency_invoices_against_single_party_account = frappe.db.get_singles_value(
+			"Accounts Settings", "allow_multi_currency_invoices_against_single_party_account"
+		)
 
-		if not party_gle_currency and (party_account_currency != self.currency):
+		if (
+			not party_gle_currency
+			and (party_account_currency != self.currency)
+			and not allow_multi_currency_invoices_against_single_party_account
+		):
 			frappe.throw(
 				_("Party Account {0} currency ({1}) and document currency ({2}) should be same").format(
 					frappe.bold(party_account), party_account_currency, self.currency
@@ -2709,10 +2716,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_ordered_qty()
 		parent.update_ordered_and_reserved_qty()
 		parent.update_receiving_percentage()
-		if parent.is_subcontracted:
+		if parent.is_old_subcontracting_flow:
 			if should_update_supplied_items(parent):
 				parent.update_reserved_qty_for_subcontract()
-				parent.create_raw_materials_supplied("supplied_items")
+				parent.create_raw_materials_supplied()
 			parent.save()
 	else:  # Sales Order
 		parent.validate_warehouse()

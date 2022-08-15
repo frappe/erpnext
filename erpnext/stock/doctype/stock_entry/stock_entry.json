@@ -15,6 +15,7 @@
   "add_to_transit",
   "work_order",
   "purchase_order",
+  "subcontracting_order",
   "delivery_note_no",
   "sales_invoice_no",
   "pick_list",
@@ -147,12 +148,19 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
-   "fieldname": "purchase_order",
-   "fieldtype": "Link",
-   "label": "Purchase Order",
-   "options": "Purchase Order"
+    "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+    "fieldname": "purchase_order",
+    "fieldtype": "Link",
+    "label": "Purchase Order",
+    "options": "Purchase Order"
   },
+  {
+    "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+    "fieldname": "subcontracting_order",
+    "fieldtype": "Link",
+    "label": "Subcontracting Order",
+    "options": "Subcontracting Order"
+   },
   {
    "depends_on": "eval:doc.purpose==\"Sales Return\"",
    "fieldname": "delivery_note_no",

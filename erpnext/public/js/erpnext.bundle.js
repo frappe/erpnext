@@ -8,7 +8,6 @@ import "./payment/payments";
 import "./controllers/taxes_and_totals";
 import "./controllers/transaction";
 import "./templates/item_selector.html";
-import "./templates/employees_to_mark_attendance.html";
 import "./utils/item_selector";
 import "./help_links";
 import "./agriculture/ternary_plot";

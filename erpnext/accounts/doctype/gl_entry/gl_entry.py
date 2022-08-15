@@ -42,7 +42,7 @@ class GLEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
 
-		if not self.flags.from_repost:
+		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.check_mandatory()
 			self.validate_cost_center()
 			self.check_pl_account()
@@ -51,7 +51,7 @@ class GLEntry(Document):
 
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
-		if not self.flags.from_repost:
+		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
 			self.validate_allowed_dimensions()

@@ -83,9 +83,17 @@ erpnext.buying.BuyingController = class BuyingController extends erpnext.Transac
 
 		this.frm.set_query("item_code", "items", function() {
 			if (me.frm.doc.is_subcontracted) {
+				var filters = {'supplier': me.frm.doc.supplier};
+				if (me.frm.doc.is_old_subcontracting_flow) {
+					filters["is_sub_contracted_item"] = 1;
+				}
+				else {
+					filters["is_stock_item"] = 0;
+				}
+
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'supplier': me.frm.doc.supplier, 'is_sub_contracted_item': 1 }
+					filters: filters
 				}
 			}
 			else {

@@ -1,7 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide('erpnext.accounts.dimensions');
 
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
@@ -470,7 +469,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							cost_center: item.cost_center,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template,
-							child_docname: item.name
+							child_docname: item.name,
+							is_old_subcontracting_flow: me.frm.doc.is_old_subcontracting_flow,
 						}
 					},
 
@@ -792,24 +792,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			erpnext.utils.get_shipping_address(this.frm, function() {
 				set_party_account(set_pricing);
 			});
-
-			// Get default company billing address in Purchase Invoice, Order and Receipt
-			if (this.frm.doc.company && frappe.meta.get_docfield(this.frm.doctype, "billing_address")) {
-				frappe.call({
-					method: "erpnext.setup.doctype.company.company.get_default_company_address",
-					args: {name: this.frm.doc.company, existing_address: this.frm.doc.billing_address || ""},
-					debounce: 2000,
-					callback: function(r) {
-						if (r.message) {
-							me.frm.set_value("billing_address", r.message);
-						} else {
-							if (frappe.meta.get_docfield(me.frm.doctype, 'company_address')) {
-								me.frm.set_value("company_address", "");
-							}
-						}
-					}
-				});
-			}
 
 		} else {
 			set_party_account(set_pricing);
@@ -2003,7 +1985,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"qty": item.qty,
 					"description": item.description,
 					"serial_no": item.serial_no,
-					"batch_no": item.batch_no
+					"batch_no": item.batch_no,
+					"sample_size": item.sample_quantity
 				});
 				dialog_items.grid.refresh();
 			}

@@ -645,12 +645,15 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
    "no_copy": 1,
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
   },
   {
    "default": "0",

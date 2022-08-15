@@ -91,7 +91,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 			adj_doc.journal_entry,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 
 
 def make_asset_value_adjustment(**args):

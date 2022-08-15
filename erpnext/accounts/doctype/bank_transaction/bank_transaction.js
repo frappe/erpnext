@@ -3,28 +3,21 @@
 
 frappe.ui.form.on("Bank Transaction", {
 	onload(frm) {
-		frm.set_query("payment_document", "payment_entries", function () {
+		frm.set_query("payment_document", "payment_entries", function() {
+			const payment_doctypes = frm.events.get_payment_doctypes(frm);
 			return {
 				filters: {
-					name: [
-						"in",
-						[
-							"Payment Entry",
-							"Journal Entry",
-							"Sales Invoice",
-							"Purchase Invoice",
-							"Expense Claim",
-						],
-					],
+					name: ["in", payment_doctypes],
 				},
 			};
 		});
 	},
-	bank_account: function (frm) {
+
+	bank_account: function(frm) {
 		set_bank_statement_filter(frm);
 	},
 
-	setup: function (frm) {
+	setup: function(frm) {
 		frm.set_query("party_type", function () {
 			return {
 				filters: {
@@ -33,6 +26,16 @@ frappe.ui.form.on("Bank Transaction", {
 			};
 		});
 	},
+
+	get_payment_doctypes: function() {
+		// get payment doctypes from all the apps
+		return [
+			"Payment Entry",
+			"Journal Entry",
+			"Sales Invoice",
+			"Purchase Invoice",
+		];
+	}
 });
 
 frappe.ui.form.on("Bank Transaction Payments", {

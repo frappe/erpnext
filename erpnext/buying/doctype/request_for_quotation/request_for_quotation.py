@@ -112,7 +112,7 @@ class RequestforQuotation(BuyingController):
 
 	def get_link(self):
 		# RFQ link for supplier portal
-		return get_url("/rfq/" + self.name)
+		return get_url("/app/request-for-quotation/" + self.name)
 
 	def update_supplier_part_no(self, supplier):
 		self.vendor = supplier
@@ -180,12 +180,20 @@ class RequestforQuotation(BuyingController):
 		doc_args = self.as_dict()
 		doc_args.update({"supplier": data.get("supplier"), "supplier_name": data.get("supplier_name")})
 
+		# Get Contact Full Name
+		supplier_name = None
+		if data.get("contact"):
+			contact_name = frappe.db.get_value(
+				"Contact", data.get("contact"), ["first_name", "middle_name", "last_name"]
+			)
+			supplier_name = (" ").join(x for x in contact_name if x)  # remove any blank values
+
 		args = {
 			"update_password_link": update_password_link,
 			"message": frappe.render_template(self.message_for_supplier, doc_args),
 			"rfq_link": rfq_link,
 			"user_fullname": full_name,
-			"supplier_name": data.get("supplier_name"),
+			"supplier_name": supplier_name or data.get("supplier_name"),
 			"supplier_salutation": self.salutation or "Dear Mx.",
 		}
 
@@ -276,18 +284,6 @@ def get_list_context(context=None):
 		}
 	)
 	return list_context
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		"""select `tabContact`.name from `tabContact`, `tabDynamic Link`
-		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s
-		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
-		limit %(page_len)s offset %(start)s""",
-		{"start": start, "page_len": page_len, "txt": "%%%s%%" % txt, "name": filters.get("supplier")},
-	)
 
 
 @frappe.whitelist()

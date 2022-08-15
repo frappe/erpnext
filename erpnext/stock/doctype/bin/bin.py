@@ -40,25 +40,37 @@ class Bin(Document):
 		self.db_set("reserved_qty_for_production", flt(self.reserved_qty_for_production))
 		self.db_set("projected_qty", self.projected_qty)
 
-	def update_reserved_qty_for_sub_contracting(self):
+	def update_reserved_qty_for_sub_contracting(self, subcontract_doctype="Subcontracting Order"):
 		# reserved qty
 
-		po = frappe.qb.DocType("Purchase Order")
-		supplied_item = frappe.qb.DocType("Purchase Order Item Supplied")
+		subcontract_order = frappe.qb.DocType(subcontract_doctype)
+		supplied_item = frappe.qb.DocType(
+			"Purchase Order Item Supplied"
+			if subcontract_doctype == "Purchase Order"
+			else "Subcontracting Order Supplied Item"
+		)
+
+		conditions = (
+			(supplied_item.rm_item_code == self.item_code)
+			& (subcontract_order.name == supplied_item.parent)
+			& (subcontract_order.per_received < 100)
+			& (supplied_item.reserve_warehouse == self.warehouse)
+			& (
+				(
+					(subcontract_order.is_old_subcontracting_flow == 1)
+					& (subcontract_order.status != "Closed")
+					& (subcontract_order.docstatus == 1)
+				)
+				if subcontract_doctype == "Purchase Order"
+				else (subcontract_order.docstatus == 1)
+			)
+		)
 
 		reserved_qty_for_sub_contract = (
-			frappe.qb.from_(po)
+			frappe.qb.from_(subcontract_order)
 			.from_(supplied_item)
 			.select(Sum(Coalesce(supplied_item.required_qty, 0)))
-			.where(
-				(supplied_item.rm_item_code == self.item_code)
-				& (po.name == supplied_item.parent)
-				& (po.docstatus == 1)
-				& (po.is_subcontracted)
-				& (po.status != "Closed")
-				& (po.per_received < 100)
-				& (supplied_item.reserve_warehouse == self.warehouse)
-			)
+			.where(conditions)
 		).run()[0][0] or 0.0
 
 		se = frappe.qb.DocType("Stock Entry")
@@ -71,23 +83,34 @@ class Bin(Document):
 		else:
 			qty_field = se_item.transfer_qty
 
+		conditions = (
+			(se.docstatus == 1)
+			& (se.purpose == "Send to Subcontractor")
+			& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
+			& (se.name == se_item.parent)
+			& (subcontract_order.docstatus == 1)
+			& (subcontract_order.per_received < 100)
+			& (
+				(
+					(Coalesce(se.purchase_order, "") != "")
+					& (subcontract_order.name == se.purchase_order)
+					& (subcontract_order.is_old_subcontracting_flow == 1)
+					& (subcontract_order.status != "Closed")
+				)
+				if subcontract_doctype == "Purchase Order"
+				else (
+					(Coalesce(se.subcontracting_order, "") != "")
+					& (subcontract_order.name == se.subcontracting_order)
+				)
+			)
+		)
+
 		materials_transferred = (
 			frappe.qb.from_(se)
 			.from_(se_item)
-			.from_(po)
+			.from_(subcontract_order)
 			.select(Sum(qty_field))
-			.where(
-				(se.docstatus == 1)
-				& (se.purpose == "Send to Subcontractor")
-				& (Coalesce(se.purchase_order, "") != "")
-				& ((se_item.item_code == self.item_code) | (se_item.original_item == self.item_code))
-				& (se.name == se_item.parent)
-				& (po.name == se.purchase_order)
-				& (po.docstatus == 1)
-				& (po.is_subcontracted == 1)
-				& (po.status != "Closed")
-				& (po.per_received < 100)
-			)
+			.where(conditions)
 		).run()[0][0] or 0.0
 
 		if reserved_qty_for_sub_contract > materials_transferred:

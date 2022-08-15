@@ -54,7 +54,6 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
 
-		this.frm.dashboard.links_area.hide();
 		this.show_notes();
 		this.show_activities();
 	}

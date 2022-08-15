@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:dimension_name",
+ "creation": "2022-06-17 13:04:16.554051",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dimension_details_tab",
+  "dimension_name",
+  "reference_document",
+  "column_break_4",
+  "disabled",
+  "section_break_7",
+  "field_mapping_section",
+  "source_fieldname",
+  "column_break_9",
+  "target_fieldname",
+  "applicable_for_documents_tab",
+  "apply_to_all_doctypes",
+  "document_type",
+  "istable",
+  "type_of_transaction",
+  "column_break_16",
+  "condition",
+  "applicable_condition_example_section",
+  "html_19"
+ ],
+ "fields": [
+  {
+   "fieldname": "dimension_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dimension Details"
+  },
+  {
+   "fieldname": "reference_document",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference Document",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dimension_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dimension Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "applicable_for_documents_tab",
+   "fieldtype": "Tab Break",
+   "label": "Applicable For Documents"
+  },
+  {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "label": "Applicable to Document",
+   "mandatory_depends_on": "eval:!doc.apply_to_all_doctypes",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.apply_to_all_doctypes && doc.document_type",
+   "fetch_from": "document_type.istable",
+   "fieldname": "istable",
+   "fieldtype": "Check",
+   "label": " Is Child Table",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "fieldname": "condition",
+   "fieldtype": "Code",
+   "label": "Applicable Condition"
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_to_all_doctypes",
+   "fieldtype": "Check",
+   "label": "Apply to All Inventory Document Types"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "target_fieldname",
+   "fieldtype": "Data",
+   "label": "Target Fieldname (Stock Ledger Entry)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "source_fieldname",
+   "fieldtype": "Data",
+   "label": "Source Fieldname",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "field_mapping_section",
+   "fieldtype": "Section Break",
+   "label": "Field Mapping"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "type_of_transaction",
+   "fieldtype": "Select",
+   "label": "Type of Transaction",
+   "options": "\nInward\nOutward"
+  },
+  {
+   "fieldname": "html_19",
+   "fieldtype": "HTML",
+   "options": "<table class=\"table table-bordered table-condensed\">\n<thead>\n  <tr>\n         <th class=\"table-sr\" style=\"width: 50%;\">Child Document</th>\n         <th class=\"table-sr\" style=\"width: 50%;\">Non Child Document</th>\n   </tr>\n</thead>\n<tbody>\n<tr>\n         <td>\n                  <p> To access parent document field use parent.fieldname and to access child table document field use doc.fieldname </p>\n\n         </td>\n         <td>\n                    <p>To access document field use doc.fieldname </p>\n         </td>\n</tr>\n<tr>\n        <td>\n                   <p><b>Example: </b> parent.doctype == \"Stock Entry\" and doc.item_code == \"Test\" </p>\n\n        </td>\n         <td>\n                   <p><b>Example: </b> doc.doctype == \"Stock Entry\" and doc.purpose == \"Manufacture\"</p>    \n          </td>\n</tr>\n\n</tbody>\n</table>\n\n\n\n\n\n\n"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.apply_to_all_doctypes",
+   "fieldname": "applicable_condition_example_section",
+   "fieldtype": "Section Break",
+   "label": "Applicable Condition Examples"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-07-19 21:06:11.824976",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Inventory Dimension",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

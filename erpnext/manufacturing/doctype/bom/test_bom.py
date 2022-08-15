@@ -9,7 +9,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.controllers.tests.test_subcontracting_controller import set_backflush_based_on
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
@@ -18,7 +18,6 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.tests.test_subcontracting import set_backflush_based_on
 
 test_records = frappe.get_test_records("BOM")
 test_dependencies = ["Item", "Quality Inspection Template"]
@@ -256,12 +255,29 @@ class TestBOM(FrappeTestCase):
 		bom.submit()
 		# test that sourced_by_supplier rate is zero even after updating cost
 		self.assertEqual(bom.items[2].rate, 0)
-		# test in Purchase Order sourced_by_supplier is not added to Supplied Item
-		po = create_purchase_order(
-			item_code=item_code, qty=1, is_subcontracted=1, supplier_warehouse="_Test Warehouse 1 - _TC"
+
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			get_subcontracting_order,
+			make_service_item,
+		)
+
+		make_service_item("Subcontracted Service Item 1")
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": item_code,
+				"fg_item_qty": 1,
+			},
+		]
+		# test in Subcontracting Order sourced_by_supplier is not added to Supplied Item
+		sco = get_subcontracting_order(
+			service_items=service_items, supplier_warehouse="_Test Warehouse 1 - _TC"
 		)
 		bom_items = sorted([d.item_code for d in bom.items if d.sourced_by_supplier != 1])
-		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
+		supplied_items = sorted([d.rm_item_code for d in sco.supplied_items])
 		self.assertEqual(bom_items, supplied_items)
 
 	def test_bom_tree_representation(self):

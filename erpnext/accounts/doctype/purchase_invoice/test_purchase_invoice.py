@@ -470,37 +470,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
 
-	def test_purchase_invoice_with_subcontracted_item(self):
-		wrapper = frappe.copy_doc(test_records[0])
-		wrapper.get("items")[0].item_code = "_Test FG Item"
-		wrapper.insert()
-		wrapper.load_from_db()
-
-		expected_values = [["_Test FG Item", 90, 59], ["_Test Item Home Desktop 200", 135, 177]]
-		for i, item in enumerate(wrapper.get("items")):
-			self.assertEqual(item.item_code, expected_values[i][0])
-			self.assertEqual(item.item_tax_amount, expected_values[i][1])
-			self.assertEqual(item.valuation_rate, expected_values[i][2])
-
-		self.assertEqual(wrapper.base_net_total, 1250)
-
-		# tax amounts
-		expected_values = [
-			["_Test Account Shipping Charges - _TC", 100, 1350],
-			["_Test Account Customs Duty - _TC", 125, 1350],
-			["_Test Account Excise Duty - _TC", 140, 1490],
-			["_Test Account Education Cess - _TC", 2.8, 1492.8],
-			["_Test Account S&H Education Cess - _TC", 1.4, 1494.2],
-			["_Test Account CST - _TC", 29.88, 1524.08],
-			["_Test Account VAT - _TC", 156.25, 1680.33],
-			["_Test Account Discount - _TC", 168.03, 1512.30],
-		]
-
-		for i, tax in enumerate(wrapper.get("taxes")):
-			self.assertEqual(tax.account_head, expected_values[i][0])
-			self.assertEqual(tax.tax_amount, expected_values[i][1])
-			self.assertEqual(tax.total, expected_values[i][2])
-
 	def test_purchase_invoice_with_advance(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
@@ -960,30 +929,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.reload()
 		pi.cancel()
 		self.assertEqual(actual_qty_0, get_qty_after_transaction())
-
-	def test_subcontracting_via_purchase_invoice(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import update_backflush_based_on
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-
-		update_backflush_based_on("BOM")
-		make_stock_entry(
-			item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, basic_rate=100
-		)
-		make_stock_entry(
-			item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse 1 - _TC",
-			qty=100,
-			basic_rate=100,
-		)
-
-		pi = make_purchase_invoice(
-			item_code="_Test FG Item", qty=10, rate=500, update_stock=1, is_subcontracted=1
-		)
-
-		self.assertEqual(len(pi.get("supplied_items")), 2)
-
-		rm_supp_cost = sum(d.amount for d in pi.get("supplied_items"))
-		self.assertEqual(flt(pi.get("items")[0].rm_supp_cost, 2), flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(

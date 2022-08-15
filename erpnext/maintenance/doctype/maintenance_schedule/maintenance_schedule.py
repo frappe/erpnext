@@ -5,7 +5,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
 
-from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.utilities.transaction_base import TransactionBase, delete_events

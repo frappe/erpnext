@@ -40,19 +40,22 @@
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
    "label": "Party Type",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "label": "Party",
-   "options": "party_type"
+   "options": "party_type",
+   "search_index": 1
   },
   {
    "fieldname": "voucher_type",
@@ -114,7 +117,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "search_index": 1
   },
   {
    "fieldname": "cost_center",
@@ -137,7 +141,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-30 19:04:55.532171",
+ "modified": "2022-07-11 09:13:54.379168",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",
