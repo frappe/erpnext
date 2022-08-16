@@ -8173,7 +8173,7 @@ DocType: Bank reconciliations,Bank reconciliations,Conciliaciones bancarias
 DocType: Bank reconciliations,Bank reconciliations Detail,Detalle conciliaciones bancarias
 DocType: Bank reconciliations,Payment Entry Detail,Detalle de entrada de pago
 DocType: Cancel Bank Checks,Cancel Bank Checks,Anulació de Cheques
-DocType: Bank Deposit,Bank Deposit,Reporte de cheques de banco
+DocType: Bank Deposit,Bank Deposit,Reporte de deposito de bancos
 DocType: Credit Note Transaction,Credit Note Transaction,Reporte de notas de credito
 DocType: Debit Note Transaction,Debit Note Transaction,Reporte de notas de debito
 DocType: Price List Schedule,Price List Schedule,Programación de lista de precios
@@ -8182,3 +8182,21 @@ DocType: Balance Sheet Accounts,Balance Sheet Accounts, Reporte de Balance Gener
 DocType: Statement Of Income,Statement Of Income, Reporte de Estado de Resultado
 DocType: Provider Account Statement,Provider Account Statement, Reporte de Estado de cuenta de proveedor
 DocType: Sale Price List,Sale Price List,Reporte Precios de productos
+DocType: Hospital Outgoings,Hospital Outgoings,Gastos Administrativos
+DocType: Laboratory And Image,Laboratory And Image,Laboratorio e imagen
+DocType: Return Laboratory And Hospital Expenses,Return Laboratory And Hospital Expenses,Retornos de Examenes y Gastos Admin
+DocType: Provider Withholding Vouchers,Provider Withholding Vouchers,Reporte de comprobantes de retención
+DocType: Voided Check,Voided Check,Anulación de cheques
+DocType: Print Bank Check,Print Bank Check,Impresion de cheques
+DocType: Apply Payment Entries Without References,Apply Payment Entries Without References,Aplicar pagos a facturas emitidas
+DocType: Advances Applied Customer,Advances Applied Customer,Reporte de avances aplicados a clientes
+DocType: Payment Entry Applied,Payment Entry Applied,Reporte de Entrada de pagos aplicados
+DocType: Bank Check Of Bank Transactions,Bank Check Of Bank Transactions,Reporte de Cheques por cuenta de banco
+DocType: Bank Book,Bank Book,Reporte de libro de bancos
+DocType: Advances Applied Supplier,Advances Applied Supplier,Reporte de Avances aplicados a proveedores
+DocType: Credit Invoice,Credit Invoice,Reporte de facturas al credito
+DocType: Group Of Products Solds,Group Of Products Solds,Reporte de Productos vendidos
+DocType: Group Of Products Solds,Confidential Payroll Users,Usuarios de nomina confidencial
+DocType: Confidential Payroll Employee,Confidential Payroll Employee,Empleados de nomina confidencial
+DocType: Assignment Salary Component Confidential,Assignment Salary Component Confidential,Componentes salariales nomina confidencial
+DocType: Salary Register Detail Without Components,Salary Register Detail Without Components,Reporte de nomina sin componentes validados
