@@ -226,7 +226,11 @@ class GrossProfitGenerator(object):
 					where lft>=%s and rgt<=%s)""" % (lft, rgt))
 
 		if self.filters.get("item_code"):
-			conditions.append("si_item.item_code = %(item_code)s")
+			is_template = frappe.db.get_value("Item", self.filters.get('item_code'), 'has_variants')
+			if is_template:
+				conditions.append("i.variant_of=%(item_code)s")
+			else:
+				conditions.append("i.item_code = %(item_code)s")
 
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])

@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from distutils.log import debug
 import frappe
 from frappe import _, scrub
 from frappe.utils import flt, today, cint
@@ -157,7 +158,16 @@ def get_bin_list(filters):
 	conditions = []
 
 	if filters.item_code:
-		conditions.append("item_code = '%s' "%filters.item_code)
+		is_template = frappe.db.get_value("Item", filters.item_code, 'has_variants')
+		if is_template:
+			variant_items = frappe.get_all("Item", {'variant_of': filters.item_code})
+			variant_items_condition = ", ".join([frappe.db.escape(d.name) for d in variant_items])
+			if variant_items:
+				conditions.append("item_code in ({0})".format(variant_items_condition))
+			else:
+				conditions.append("item_code = '%s' "%filters.item_code)
+		else:
+			conditions.append("item_code = '%s' "%filters.item_code)
 
 	if filters.warehouse:
 		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
@@ -180,10 +190,16 @@ def get_bin_list(filters):
 
 def get_item_map(item_code, include_uom):
 	"""Optimization: get only the item doc and re_order_levels table"""
+	is_template = False
+	if item_code:
+		is_template = frappe.db.get_value("Item", item_code, 'has_variants')
 
 	condition = ""
 	if item_code:
-		condition = 'and item_code = {0}'.format(frappe.db.escape(item_code, percent=False))
+		if is_template:
+			condition = "and item.variant_of = {0}".format(frappe.db.escape(item_code, percent=False))
+		else:
+			condition = 'and item_code = {0}'.format(frappe.db.escape(item_code, percent=False))
 
 	cf_field = cf_join = ""
 	if include_uom:
@@ -205,10 +221,20 @@ def get_item_map(item_code, include_uom):
 
 	condition = ""
 	if item_code:
-		condition = 'where parent={0}'.format(frappe.db.escape(item_code, percent=False))
+		if is_template:
+			condition = "and item.variant_of = {0}".format(frappe.db.escape(item_code, percent=False))
+		else :
+			condition = 'where parent={0}'.format(frappe.db.escape(item_code, percent=False))
+
+	item_reorder_data = frappe.db.sql("""
+		select item_re.*
+		from `tabItem Reorder` item_re
+		inner join `tabItem` item on item_re.parent = item.name and item_re.parenttype = 'Item' 
+		{condition}
+	""".format(condition=condition), as_dict=1)
 
 	reorder_levels = frappe._dict()
-	for ir in frappe.db.sql("""select * from `tabItem Reorder` {condition}""".format(condition=condition), as_dict=1):
+	for ir in item_reorder_data:
 		if ir.parent not in reorder_levels:
 			reorder_levels[ir.parent] = []
 

@@ -221,7 +221,11 @@ def get_stock_ledger_entries(filters):
 def get_item_conditions(filters):
 	conditions = []
 	if filters.get("item_code"):
-		conditions.append("item_code=%(item_code)s")
+		is_template = frappe.db.get_value("Item", filters.get('item_code'), 'has_variants')
+		if is_template:
+			conditions.append("variant_of=%(item_code)s")
+		else:
+			conditions.append("name=%(item_code)s")
 	if filters.get("brand"):
 		conditions.append("brand=%(brand)s")
 

@@ -350,7 +350,11 @@ def consolidate_values(iwb_map):
 def get_items(filters):
 	conditions = []
 	if filters.get("item_code"):
-		conditions.append("item.name=%(item_code)s")
+		is_template = frappe.db.get_value("Item", filters.get('item_code'), 'has_variants')
+		if is_template:
+			conditions.append("item.variant_of=%(item_code)s")
+		else:
+			conditions.append("item.name=%(item_code)s")
 	else:
 		if filters.get("brand"):
 			conditions.append("item.brand=%(brand)s")

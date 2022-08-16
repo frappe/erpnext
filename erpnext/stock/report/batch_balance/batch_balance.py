@@ -63,7 +63,11 @@ def get_item_conditions(filters):
 	from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 	conditions = []
 	if filters.get("item_code"):
-		conditions.append("item.name=%(item_code)s")
+		is_template = frappe.db.get_value("Item", filters.get('item_code'), 'has_variants')
+		if is_template:
+			conditions.append("item.variant_of=%(item_code)s")
+		else:
+			conditions.append("item.name=%(item_code)s")
 	else:
 		if filters.get("brand"):
 			conditions.append("item.brand=%(brand)s")
