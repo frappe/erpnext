@@ -663,6 +663,9 @@ class VehicleBookingOrder(VehicleBookingController):
 	def send_notification_on_payment_due(self):
 		enqueue_template_sms(self, notification_type="Balance Payment Due")
 
+	def send_notification_on_cancellation(self):
+		enqueue_template_sms(self, notification_type="Booking Cancellation")
+
 
 @frappe.whitelist()
 def get_next_document(vehicle_booking_order, doctype):

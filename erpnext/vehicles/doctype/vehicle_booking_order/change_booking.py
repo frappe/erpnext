@@ -533,6 +533,7 @@ def change_cancellation(vehicle_booking_order, cancelled):
 
 	if vbo_doc.status == "Cancelled Booking":
 		vbo_doc.add_status_comment(None)
+		vbo_doc.send_notification_on_cancellation()
 
 	message = "Booking Cancelled Successfully" if cancelled else "Booking Re-Opened Successfully"
 	frappe.msgprint(_(message), indicator='green', alert=True)
