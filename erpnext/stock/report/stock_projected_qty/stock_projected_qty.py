@@ -223,8 +223,8 @@ def get_item_map(item_code, include_uom):
 	if item_code:
 		if is_template:
 			condition = "and item.variant_of = {0}".format(frappe.db.escape(item_code, percent=False))
-		else :
-			condition = 'where parent={0}'.format(frappe.db.escape(item_code, percent=False))
+		else:
+			condition = 'where item.name = {0}'.format(frappe.db.escape(item_code, percent=False))
 
 	item_reorder_data = frappe.db.sql("""
 		select item_re.*
