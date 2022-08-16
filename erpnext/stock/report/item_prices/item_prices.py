@@ -73,7 +73,7 @@ def get_data(filters):
 
 	item_data = frappe.db.sql("""
 		select item.name as item_code, item.item_name, item.item_group, item.stock_uom, item.sales_uom, item.alt_uom, item.alt_uom_size,
-		item.hide_in_price_list
+			item.hide_in_price_list
 		from tabItem item
 		where disabled != 1 {0}
 	""".format(item_conditions), filters, as_dict=1)

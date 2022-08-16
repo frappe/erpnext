@@ -32,7 +32,7 @@ def execute(filters=None):
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
 		company = warehouse_company.setdefault(bin.warehouse,
 			frappe.get_cached_value("Warehouse", bin.warehouse, "company"))
-		
+
 		if filters.brand and filters.brand != item.brand:
 			continue
 
@@ -227,7 +227,7 @@ def get_item_map(item_code, include_uom):
 			condition = 'where parent={0}'.format(frappe.db.escape(item_code, percent=False))
 
 	item_reorder_data = frappe.db.sql("""
-		select *
+		select item_re.*
 		from `tabItem Reorder` item_re
 		inner join `tabItem` item on item_re.parent = item.name and item_re.parenttype = 'Item' 
 		{condition}
