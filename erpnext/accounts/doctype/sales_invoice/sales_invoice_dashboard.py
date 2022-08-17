@@ -24,7 +24,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Timesheet', 'Delivery Note', 'Sales Order']
+				'items': ['Timesheet', 'Delivery Note', 'Sales Order', 'Work Order Invoice']
 			},
 			{
 				'label': _('Returns'),
