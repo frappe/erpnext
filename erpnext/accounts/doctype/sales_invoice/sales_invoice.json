@@ -31,7 +31,9 @@
   "due_date",
   "reason_for_sale",
   "patient_statement",
+  "is_work_order",
   "amended_from",
+  "work_order",
   "cai_info_section",
   "cai",
   "due_date_cai",
@@ -1886,12 +1888,25 @@
    "fieldname": "round_off_discount",
    "fieldtype": "Check",
    "label": "Round Off Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_work_order",
+   "fieldtype": "Check",
+   "label": "Is Work Order"
+  },
+  {
+   "depends_on": "is_work_order",
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order Invoice",
+   "options": "Work Order Invoice"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-05-18 15:42:17.448714",
+ "modified": "2022-08-17 15:56:20.257902",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
