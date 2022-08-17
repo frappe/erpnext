@@ -195,6 +195,32 @@ class SalesInvoice(SellingController):
 
 					self.set_new_row_item(item, product_price[0].price_list_rate, amount, 0)
 					frappe.delete_doc('Sales Invoice Item', item.name)
+	
+	def work_order_create(self):
+		if self.is_work_order == 1:
+			if self.work_order == None:
+				frappe.throw(_("Select Work Order Invoice."))
+			else:
+				order = frappe.get_doc("Work Order Invoice", self.work_order)
+				order.sales_invoice = self.name
+				order.save()
+		else:
+			order = frappe.new_doc("Work Order Invoice")
+			order.sales_invoice = self.name
+			order.insert()
+		
+		self.verificate_work_order()
+		
+	def verificate_work_order(self):
+		orders = frappe.get_all("Work Order Invoice", ["name"], filters = {"sales_invoice": self.name})
+
+		if len(orders) > 0:
+			order = frappe.get_doc("Work Order Invoice", orders[0].name)
+
+			items = frappe.get_all("Work Order Items", ["*"], filters = {"parent": order.name})
+
+			if len(items) == 0:
+				frappe.delete_doc("Work Order Invoice", order.name)
 
 	def calculate_insurance(self):
 		self.total_insurance_deduction = self.excesses + self.deductible + self.ineligible_expenses + self.co_pay20
@@ -285,6 +311,7 @@ class SalesInvoice(SellingController):
 			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 			
 		if self.docstatus == 1:
+			self.work_order_create()
 			self.update_accounts_status()
 			self.calculated_taxes()
 			if self.is_pos:
@@ -1030,10 +1057,12 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
-		self.exonerated_value()
+		# self.exonerated_value()
 		self.calculated_taxes()
 		if self.docstatus == 1:
 			self.create_dispatch_control()
+			self.verificate_work_order()
+		
 		self.reload()
 
 		# if self.grand_total == self.paid_amount:
