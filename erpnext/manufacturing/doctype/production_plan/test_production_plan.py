@@ -11,8 +11,9 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_warehouse_list,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_se_from_wo
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
@@ -583,9 +584,6 @@ class TestProductionPlan(FrappeTestCase):
 		Test Prod Plan impact via: SO -> Prod Plan -> WO -> SE -> SE (cancel)
 		"""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-		from erpnext.manufacturing.doctype.work_order.work_order import (
-			make_stock_entry as make_se_from_wo,
-		)
 
 		make_stock_entry(
 			item_code="Raw Material Item 1", target="Work In Progress - _TC", qty=2, basic_rate=100
@@ -629,9 +627,6 @@ class TestProductionPlan(FrappeTestCase):
 	def test_production_plan_pending_qty_independent_items(self):
 		"Test Prod Plan impact if items are added independently (no from SO or MR)."
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-		from erpnext.manufacturing.doctype.work_order.work_order import (
-			make_stock_entry as make_se_from_wo,
-		)
 
 		make_stock_entry(
 			item_code="Raw Material Item 1", target="Work In Progress - _TC", qty=2, basic_rate=100
@@ -727,6 +722,57 @@ class TestProductionPlan(FrappeTestCase):
 		pp._rename_temporary_references()
 		for po_item, subassy_item in zip(pp.po_items, pp.sub_assembly_items):
 			self.assertEqual(po_item.name, subassy_item.production_plan_item)
+
+	def test_produced_qty_for_multi_level_bom_item(self):
+		# Create Items and BOMs
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+		sub_assembly_item = make_item(properties={"is_stock_item": 1}).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry(
+			item_code=rm_item,
+			qty=60,
+			to_warehouse="Work In Progress - _TC",
+			rate=99,
+			purpose="Material Receipt",
+		)
+
+		make_bom(item=sub_assembly_item, raw_materials=[rm_item], rm_qty=3)
+		make_bom(item=fg_item, raw_materials=[sub_assembly_item], rm_qty=4)
+
+		# Step - 1: Create Production Plan
+		pln = create_production_plan(item_code=fg_item, planned_qty=5, skip_getting_mr_items=1)
+		pln.get_sub_assembly_items()
+
+		# Step - 2: Create Work Orders
+		pln.make_work_order()
+		work_orders = frappe.get_all("Work Order", filters={"production_plan": pln.name}, pluck="name")
+		sa_wo = fg_wo = None
+		for work_order in work_orders:
+			wo_doc = frappe.get_doc("Work Order", work_order)
+			if wo_doc.production_plan_item:
+				wo_doc.update(
+					{"wip_warehouse": "Work In Progress - _TC", "fg_warehouse": "Finished Goods - _TC"}
+				)
+				fg_wo = wo_doc.name
+			else:
+				wo_doc.update(
+					{"wip_warehouse": "Work In Progress - _TC", "fg_warehouse": "Work In Progress - _TC"}
+				)
+				sa_wo = wo_doc.name
+			wo_doc.submit()
+
+		# Step - 3: Complete Work Orders
+		se = frappe.get_doc(make_se_from_wo(sa_wo, "Manufacture"))
+		se.submit()
+
+		se = frappe.get_doc(make_se_from_wo(fg_wo, "Manufacture"))
+		se.submit()
+
+		# Step - 4: Check Production Plan Item Produced Qty
+		pln.load_from_db()
+		self.assertEqual(pln.status, "Completed")
+		self.assertEqual(pln.po_items[0].produced_qty, 5)
 
 
 def create_production_plan(**args):
