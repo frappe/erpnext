@@ -48,6 +48,13 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				is_group: 0
 			}
 		}));
+
+		frm.set_query("expense_account", "items", function () {
+			return {
+				query: "erpnext.controllers.queries.get_expense_account",
+				filters: { 'company': frm.doc.company }
+			};
+		});
 	},
 
 	refresh: (frm) => {

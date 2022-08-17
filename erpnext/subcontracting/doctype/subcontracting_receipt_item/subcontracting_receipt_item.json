@@ -49,11 +49,12 @@
         "col_break5",
         "batch_no",
         "rejected_serial_no",
-        "expense_account",
         "manufacture_details",
         "manufacturer",
         "column_break_16",
         "manufacturer_part_no",
+        "accounting_details_section",
+        "expense_account",
         "accounting_dimensions_section",
         "project",
         "dimension_col_break",
@@ -363,10 +364,8 @@
         {
             "fieldname": "expense_account",
             "fieldtype": "Link",
-            "hidden": 1,
             "label": "Expense Account",
-            "options": "Account",
-            "read_only": 1
+            "options": "Account"
         },
         {
             "collapsible": 1,
@@ -456,12 +455,17 @@
             "no_copy": 1,
             "print_hide": 1,
             "read_only": 1
+        },
+        {
+            "fieldname": "accounting_details_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting Details"
         }
     ],
     "idx": 1,
     "istable": 1,
     "links": [],
-    "modified": "2022-04-21 12:07:55.899701",
+    "modified": "2022-08-15 11:34:00.970042",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt Item",
