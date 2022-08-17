@@ -364,10 +364,8 @@
         {
             "fieldname": "expense_account",
             "fieldtype": "Link",
-            "hidden": 1,
             "label": "Expense Account",
-            "options": "Account",
-            "read_only": 1
+            "options": "Account"
         },
         {
             "collapsible": 1,
