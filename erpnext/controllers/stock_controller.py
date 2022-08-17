@@ -36,6 +36,10 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError):
 	pass
 
 
+class BatchExpiredError(frappe.ValidationError):
+	pass
+
+
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
@@ -77,6 +81,10 @@ class StockController(AccountsController):
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+		is_material_issue = False
+		if self.doctype == "Stock Entry" and self.purpose == "Material Issue":
+			is_material_issue = True
+
 		for d in self.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
 				serial_nos = frappe.get_all(
@@ -93,6 +101,9 @@ class StockController(AccountsController):
 							)
 						)
 
+			if is_material_issue:
+				continue
+
 			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
 
@@ -100,7 +111,8 @@ class StockController(AccountsController):
 					frappe.throw(
 						_("Row #{0}: The batch {1} has already expired.").format(
 							d.idx, get_link_to_form("Batch", d.get("batch_no"))
-						)
+						),
+						BatchExpiredError,
 					)
 
 	def clean_serial_nos(self):
