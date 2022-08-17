@@ -30,6 +30,7 @@
   "valuation_rate",
   "standard_rate",
   "is_fixed_asset",
+  "is_work_order",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
@@ -1079,6 +1080,12 @@
    "label": "Default Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_work_order",
+   "fieldtype": "Check",
+   "label": "Is Work Order"
   }
  ],
  "has_web_view": 1,
@@ -1086,7 +1093,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-12-03 15:15:34.729610",
+ "modified": "2022-08-17 13:44:41.818995",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

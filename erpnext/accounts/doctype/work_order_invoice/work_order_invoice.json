@@ -1,0 +1,147 @@
+{
+ "autoname": "WOR-ORD-.YYYY.-.########",
+ "creation": "2022-08-17 14:05:57.326412",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_invoice",
+  "customer",
+  "customer_name",
+  "column1",
+  "company",
+  "posting_date",
+  "patient",
+  "patient_name",
+  "section1",
+  "items",
+  "amended_from",
+  "details",
+  "detail_one",
+  "detail_two"
+ ],
+ "fields": [
+  {
+   "fetch_from": "sales_invoice.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "sales_invoice.posting_date",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "fetch_from": "sales_invoice.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Work Order Items",
+   "options": "Work Order Items",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Work Order Invoice",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "details",
+   "fieldtype": "Section Break",
+   "label": "Work Order Detail"
+  },
+  {
+   "fieldname": "detail_one",
+   "fieldtype": "Table",
+   "label": "Materials",
+   "options": "Work Order Detail One"
+  },
+  {
+   "fieldname": "detail_two",
+   "fieldtype": "Table",
+   "label": "Tests",
+   "options": "Work Order Detail Two"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sale Invoice",
+   "options": "Sales Invoice"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-08-17 16:57:41.655745",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Work Order Invoice",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "patient_name, customer",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
