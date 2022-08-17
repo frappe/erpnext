@@ -473,7 +473,13 @@ def make_new_batch(**args):
 				"doctype": "Batch",
 				"batch_id": args.batch_id,
 				"item": args.item_code,
+				"expiry_date": args.expiry_date,
 			}
-		).insert()
+		)
+
+		if args.expiry_date:
+			batch.expiry_date = args.expiry_date
+
+		batch.insert()
 
 	return batch
