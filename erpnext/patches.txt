@@ -268,6 +268,7 @@ erpnext.patches.v13_0.enable_ksa_vat_docs #1
 erpnext.patches.v13_0.show_india_localisation_deprecation_warning
 erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
+erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -309,3 +310,4 @@ erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.remove_india_localisation # 14-07-2022
 erpnext.patches.v13_0.fix_number_and_frequency_for_monthly_depreciation
 erpnext.patches.v14_0.remove_hr_and_payroll_modules # 20-07-2022
+erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes

@@ -165,7 +165,7 @@ class ReceivablePayableReport(object):
 			"range4",
 			"range5",
 			"future_amount",
-			"remaining_balance"
+			"remaining_balance",
 		]
 
 	def get_voucher_balance(self, ple):
