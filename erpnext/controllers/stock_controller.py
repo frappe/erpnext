@@ -410,13 +410,14 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
 		if voucher_type != "Inventory Download":
 			if voucher_type != "Cancellation Of Invoices":
-				expected_gle = voucher_obj.get_gl_entries(warehouse_account)
-				if expected_gle:
-					if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				if voucher_type != "Work Order Invoice":
+					expected_gle = voucher_obj.get_gl_entries(warehouse_account)
+					if expected_gle:
+						if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+							_delete_gl_entries(voucher_type, voucher_no)
+							voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
+					else:
 						_delete_gl_entries(voucher_type, voucher_no)
-						voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
-				else:
-					_delete_gl_entries(voucher_type, voucher_no)
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	matched = True

@@ -24,6 +24,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -31,8 +32,7 @@
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
    "print_hide": 1,
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -46,7 +46,7 @@
   }
  ],
  "istable": 1,
- "modified": "2022-08-17 15:39:41.477516",
+ "modified": "2022-08-18 15:30:09.310742",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Work Order Detail One",
