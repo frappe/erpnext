@@ -11,6 +11,7 @@
   "column1",
   "company",
   "posting_date",
+  "posting_time",
   "patient",
   "patient_name",
   "section1",
@@ -18,7 +19,10 @@
   "amended_from",
   "details",
   "detail_one",
-  "detail_two"
+  "detail_two",
+  "section2",
+  "project",
+  "warehouse"
  ],
  "fields": [
   {
@@ -117,10 +121,35 @@
    "in_standard_filter": 1,
    "label": "Sale Invoice",
    "options": "Sales Invoice"
+  },
+  {
+   "fetch_from": "sales_invoice.posting_time",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time"
+  },
+  {
+   "fieldname": "section2",
+   "fieldtype": "Section Break",
+   "label": "Inventory"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-17 16:57:41.655745",
+ "modified": "2022-08-18 15:20:28.738545",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Work Order Invoice",
