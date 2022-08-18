@@ -8,7 +8,7 @@ import unittest
 import frappe
 from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import add_days, getdate, nowtime
+from frappe.utils import add_days, get_time, getdate, nowtime
 
 from erpnext.hr.doctype.designation.test_designation import create_designation
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
@@ -26,18 +26,23 @@ class TestInterview(unittest.TestCase):
 	def test_notification_on_rescheduling(self):
 		job_applicant = create_job_applicant()
 		interview = create_interview_and_dependencies(
-			job_applicant.name, scheduled_on=add_days(getdate(), -4)
+			job_applicant.name,
+			scheduled_on=add_days(getdate(), -4),
+			from_time="10:00:00",
+			to_time="11:00:00",
 		)
 
 		previous_scheduled_date = interview.scheduled_on
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 
 		interview.reschedule_interview(
-			add_days(getdate(previous_scheduled_date), 2), from_time=nowtime(), to_time=nowtime()
+			add_days(getdate(previous_scheduled_date), 2), from_time="11:00:00", to_time="12:00:00"
 		)
 		interview.reload()
 
 		self.assertEqual(interview.scheduled_on, add_days(getdate(previous_scheduled_date), 2))
+		self.assertEqual(get_time(interview.from_time), get_time("11:00:00"))
+		self.assertEqual(get_time(interview.to_time), get_time("12:00:00"))
 
 		notification = frappe.get_all(
 			"Email Queue", filters={"message": ("like", "%Your Interview session is rescheduled from%")}

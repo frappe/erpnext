@@ -224,7 +224,7 @@ def delete_employee_work_history(details, employee, date):
 				filters["from_date"] = date
 	if filters:
 		frappe.db.delete("Employee Internal Work History", filters)
-		employee.reload()
+		employee.save()
 
 
 @frappe.whitelist()
