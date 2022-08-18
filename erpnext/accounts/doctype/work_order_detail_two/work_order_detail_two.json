@@ -24,6 +24,7 @@
    "search_index": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -46,7 +47,7 @@
   }
  ],
  "istable": 1,
- "modified": "2022-08-17 15:39:21.658200",
+ "modified": "2022-08-18 15:30:49.520829",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Work Order Detail Two",
