@@ -4,23 +4,26 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, nowdate
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.shift_request.shift_request import OverlappingShiftRequestError
+from erpnext.hr.doctype.shift_type.test_shift_type import setup_shift_type
 
 test_dependencies = ["Shift Type"]
 
 
-class TestShiftRequest(unittest.TestCase):
+class TestShiftRequest(FrappeTestCase):
 	def setUp(self):
-		for doctype in ["Shift Request", "Shift Assignment"]:
-			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
-
-	def tearDown(self):
-		frappe.db.rollback()
+		from erpnext.hr.doctype.attendance.test_attendance import make_or_return_company
+		make_or_return_company()
+		for doctype in ["Shift Request", "Shift Assignment", "Shift Type"]:
+			frappe.db.delete(doctype)
 
 	def test_make_shift_request(self):
 		"Test creation/updation of Shift Assignment from Shift Request."
+		setup_shift_type(shift_type="Day Shift")
 		department = frappe.get_value("Employee", "_T-Employee-00001", "department")
 		set_shift_approver(department)
 		approver = frappe.db.sql(
@@ -48,6 +51,7 @@ class TestShiftRequest(unittest.TestCase):
 		self.assertEqual(shift_assignment_docstatus, 2)
 
 	def test_shift_request_approver_perms(self):
+		setup_shift_type(shift_type="Day Shift")
 		employee = frappe.get_doc("Employee", "_T-Employee-00001")
 		user = "test_approver_perm_emp@example.com"
 		make_employee(user, "_Test Company")
@@ -86,6 +90,145 @@ class TestShiftRequest(unittest.TestCase):
 		employee.reload()
 		employee.shift_request_approver = ""
 		employee.save()
+
+	def test_overlap_for_request_without_to_date(self):
+		# shift should be Ongoing if Only from_date is present
+		user = "test_shift_request@example.com"
+		employee = make_employee(user, company="_Test Company", shift_request_approver=user)
+		setup_shift_type(shift_type="Day Shift")
+
+		shift_request = frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": "Day Shift",
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": nowdate(),
+				"approver": user,
+				"status": "Approved",
+			}
+		).submit()
+
+		shift_request = frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": "Day Shift",
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": add_days(nowdate(), 2),
+				"approver": user,
+				"status": "Approved",
+			}
+		)
+
+		self.assertRaises(OverlappingShiftRequestError, shift_request.save)
+
+	def test_overlap_for_request_with_from_and_to_dates(self):
+		user = "test_shift_request@example.com"
+		employee = make_employee(user, company="_Test Company", shift_request_approver=user)
+		setup_shift_type(shift_type="Day Shift")
+
+		shift_request = frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": "Day Shift",
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": nowdate(),
+				"to_date": add_days(nowdate(), 30),
+				"approver": user,
+				"status": "Approved",
+			}
+		).submit()
+
+		shift_request = frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": "Day Shift",
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": add_days(nowdate(), 10),
+				"to_date": add_days(nowdate(), 35),
+				"approver": user,
+				"status": "Approved",
+			}
+		)
+
+		self.assertRaises(OverlappingShiftRequestError, shift_request.save)
+
+	def test_overlapping_for_a_fixed_period_shift_and_ongoing_shift(self):
+		user = "test_shift_request@example.com"
+		employee = make_employee(user, company="_Test Company", shift_request_approver=user)
+
+		# shift setup for 8-12
+		shift_type = setup_shift_type(shift_type="Shift 1", start_time="08:00:00", end_time="12:00:00")
+		date = nowdate()
+
+		# shift with end date
+		frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": shift_type.name,
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": date,
+				"to_date": add_days(date, 30),
+				"approver": user,
+				"status": "Approved",
+			}
+		).submit()
+
+		# shift setup for 11-15
+		shift_type = setup_shift_type(shift_type="Shift 2", start_time="11:00:00", end_time="15:00:00")
+		shift2 = frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": shift_type.name,
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": date,
+				"approver": user,
+				"status": "Approved",
+			}
+		)
+
+		self.assertRaises(OverlappingShiftRequestError, shift2.insert)
+
+	def test_allow_non_overlapping_shift_requests_for_same_day(self):
+		user = "test_shift_request@example.com"
+		employee = make_employee(user, company="_Test Company", shift_request_approver=user)
+
+		# shift setup for 8-12
+		shift_type = setup_shift_type(shift_type="Shift 1", start_time="08:00:00", end_time="12:00:00")
+		date = nowdate()
+
+		# shift with end date
+		frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": shift_type.name,
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": date,
+				"to_date": add_days(date, 30),
+				"approver": user,
+				"status": "Approved",
+			}
+		).submit()
+
+		# shift setup for 13-15
+		shift_type = setup_shift_type(shift_type="Shift 2", start_time="13:00:00", end_time="15:00:00")
+		frappe.get_doc(
+			{
+				"doctype": "Shift Request",
+				"shift_type": shift_type.name,
+				"company": "_Test Company",
+				"employee": employee,
+				"from_date": date,
+				"approver": user,
+				"status": "Approved",
+			}
+		).submit()
 
 
 def set_shift_approver(department):

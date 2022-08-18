@@ -5,9 +5,19 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, formatdate, get_datetime, getdate, nowdate
+from frappe.query_builder import Criterion
+from frappe.utils import cint, cstr, formatdate, get_datetime, get_link_to_form, getdate, nowdate
 
+from erpnext.hr.doctype.shift_assignment.shift_assignment import has_overlapping_timings
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
+
+
+class DuplicateAttendanceError(frappe.ValidationError):
+	pass
+
+
+class OverlappingShiftAttendanceError(frappe.ValidationError):
+	pass
 
 
 class Attendance(Document):
@@ -18,11 +28,9 @@ class Attendance(Document):
 		validate_active_employee(self.employee)
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
+		self.validate_overlapping_shift_attendance()
 		self.validate_employee_status()
 		self.check_leave_record()
-
-	def on_cancel(self):
-		self.unlink_attendance_from_checkins()
 
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
@@ -38,21 +46,35 @@ class Attendance(Document):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))
 
 	def validate_duplicate_record(self):
-		res = frappe.db.sql(
-			"""
-			select name from `tabAttendance`
-			where employee = %s
-				and attendance_date = %s
-				and name != %s
-				and docstatus != 2
-		""",
-			(self.employee, getdate(self.attendance_date), self.name),
+		duplicate = get_duplicate_attendance_record(
+			self.employee, self.attendance_date, self.shift, self.name
 		)
-		if res:
+
+		if duplicate:
 			frappe.throw(
-				_("Attendance for employee {0} is already marked for the date {1}").format(
-					frappe.bold(self.employee), frappe.bold(self.attendance_date)
-				)
+				_("Attendance for employee {0} is already marked for the date {1}: {2}").format(
+					frappe.bold(self.employee),
+					frappe.bold(self.attendance_date),
+					get_link_to_form("Attendance", duplicate[0].name),
+				),
+				title=_("Duplicate Attendance"),
+				exc=DuplicateAttendanceError,
+			)
+
+	def validate_overlapping_shift_attendance(self):
+		attendance = get_overlapping_shift_attendance(
+			self.employee, self.attendance_date, self.shift, self.name
+		)
+
+		if attendance:
+			frappe.throw(
+				_("Attendance for employee {0} is already marked for an overlapping shift {1}: {2}").format(
+					frappe.bold(self.employee),
+					frappe.bold(attendance.shift),
+					get_link_to_form("Attendance", attendance.name),
+				),
+				title=_("Overlapping Shift Attendance"),
+				exc=OverlappingShiftAttendanceError,
 			)
 
 	def validate_employee_status(self):
@@ -105,34 +127,68 @@ class Attendance(Document):
 		if not emp:
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
-	def unlink_attendance_from_checkins(self):
-		from frappe.utils import get_link_to_form
 
-		EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
-		linked_logs = (
-			frappe.qb.from_(EmployeeCheckin)
-			.select(EmployeeCheckin.name)
-			.where(EmployeeCheckin.attendance == self.name)
-			.for_update()
-			.run(as_dict=True)
-		)
+def get_duplicate_attendance_record(employee, attendance_date, shift, name=None):
+	attendance = frappe.qb.DocType("Attendance")
+	query = (
+		frappe.qb.from_(attendance)
+		.select(attendance.name)
+		.where((attendance.employee == employee) & (attendance.docstatus < 2))
+	)
 
-		if linked_logs:
-			(
-				frappe.qb.update(EmployeeCheckin)
-				.set("attendance", "")
-				.where(EmployeeCheckin.attendance == self.name)
-			).run()
-
-			frappe.msgprint(
-				msg=_("Unlinked Attendance record from Employee Checkins: {}").format(
-					", ".join(get_link_to_form("Employee Checkin", log.name) for log in linked_logs)
-				),
-				title=_("Unlinked logs"),
-				indicator="blue",
-				is_minimizable=True,
-				wide=True,
+	if shift:
+		query = query.where(
+			Criterion.any(
+				[
+					Criterion.all(
+						[
+							((attendance.shift.isnull()) | (attendance.shift == "")),
+							(attendance.attendance_date == attendance_date),
+						]
+					),
+					Criterion.all(
+						[
+							((attendance.shift.isnotnull()) | (attendance.shift != "")),
+							(attendance.attendance_date == attendance_date),
+							(attendance.shift == shift),
+						]
+					),
+				]
 			)
+		)
+	else:
+		query = query.where((attendance.attendance_date == attendance_date))
+
+	if name:
+		query = query.where(attendance.name != name)
+
+	return query.run(as_dict=True)
+
+
+def get_overlapping_shift_attendance(employee, attendance_date, shift, name=None):
+	if not shift:
+		return {}
+
+	attendance = frappe.qb.DocType("Attendance")
+	query = (
+		frappe.qb.from_(attendance)
+		.select(attendance.name, attendance.shift)
+		.where(
+			(attendance.employee == employee)
+			& (attendance.docstatus < 2)
+			& (attendance.attendance_date == attendance_date)
+			& (attendance.shift != shift)
+		)
+	)
+
+	if name:
+		query = query.where(attendance.name != name)
+
+	overlapping_attendance = query.run(as_dict=True)
+
+	if overlapping_attendance and has_overlapping_timings(shift, overlapping_attendance[0].shift):
+		return overlapping_attendance[0]
+	return {}
 
 
 @frappe.whitelist()
@@ -173,28 +229,39 @@ def add_attendance(events, start, end, conditions=None):
 
 
 def mark_attendance(
-	employee, attendance_date, status, shift=None, leave_type=None, ignore_validate=False
+	employee,
+	attendance_date,
+	status,
+	shift=None,
+	leave_type=None,
+	ignore_validate=False,
+	late_entry=False,
+	early_exit=False,
 ):
-	if not frappe.db.exists(
-		"Attendance",
-		{"employee": employee, "attendance_date": attendance_date, "docstatus": ("!=", "2")},
-	):
-		company = frappe.db.get_value("Employee", employee, "company")
-		attendance = frappe.get_doc(
-			{
-				"doctype": "Attendance",
-				"employee": employee,
-				"attendance_date": attendance_date,
-				"status": status,
-				"company": company,
-				"shift": shift,
-				"leave_type": leave_type,
-			}
-		)
-		attendance.flags.ignore_validate = ignore_validate
-		attendance.insert()
-		attendance.submit()
-		return attendance.name
+	if get_duplicate_attendance_record(employee, attendance_date, shift):
+		return
+
+	if get_overlapping_shift_attendance(employee, attendance_date, shift):
+		return
+
+	company = frappe.db.get_value("Employee", employee, "company")
+	attendance = frappe.get_doc(
+		{
+			"doctype": "Attendance",
+			"employee": employee,
+			"attendance_date": attendance_date,
+			"status": status,
+			"company": company,
+			"shift": shift,
+			"leave_type": leave_type,
+			"late_entry": late_entry,
+			"early_exit": early_exit,
+		}
+	)
+	attendance.flags.ignore_validate = ignore_validate
+	attendance.insert()
+	attendance.submit()
+	return attendance.name
 
 
 @frappe.whitelist()
