@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.utils import cint
 
@@ -83,35 +83,32 @@ def setup_currency_exchange():
 
 
 def create_print_setting_custom_fields():
-	create_custom_field(
-		"Print Settings",
+	create_custom_fields(
 		{
-			"label": _("Compact Item Print"),
-			"fieldname": "compact_item_print",
-			"fieldtype": "Check",
-			"default": 1,
-			"insert_after": "with_letterhead",
-		},
-	)
-	create_custom_field(
-		"Print Settings",
-		{
-			"label": _("Print UOM after Quantity"),
-			"fieldname": "print_uom_after_quantity",
-			"fieldtype": "Check",
-			"default": 0,
-			"insert_after": "compact_item_print",
-		},
-	)
-	create_custom_field(
-		"Print Settings",
-		{
-			"label": _("Print taxes with zero amount"),
-			"fieldname": "print_taxes_with_zero_amount",
-			"fieldtype": "Check",
-			"default": 0,
-			"insert_after": "allow_print_for_cancelled",
-		},
+			"Print Settings": [
+				{
+					"label": _("Compact Item Print"),
+					"fieldname": "compact_item_print",
+					"fieldtype": "Check",
+					"default": "1",
+					"insert_after": "with_letterhead",
+				},
+				{
+					"label": _("Print UOM after Quantity"),
+					"fieldname": "print_uom_after_quantity",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "compact_item_print",
+				},
+				{
+					"label": _("Print taxes with zero amount"),
+					"fieldname": "print_taxes_with_zero_amount",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "allow_print_for_cancelled",
+				},
+			]
+		}
 	)
 
 
