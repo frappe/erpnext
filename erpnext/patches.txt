@@ -309,10 +309,5 @@ erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.crm_ux_cleanup
 erpnext.patches.v14_0.remove_india_localisation # 14-07-2022
 erpnext.patches.v13_0.fix_number_and_frequency_for_monthly_depreciation
-<<<<<<< HEAD
 erpnext.patches.v14_0.remove_hr_and_payroll_modules # 20-07-2022
-=======
-erpnext.patches.v14_0.remove_hr_and_payroll_modules # 20-07-2022
-erpnext.patches.v14_0.fix_crm_no_of_employees
 erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes
->>>>>>> 8704ca783d (fix: Add dimension section in subcontracting doctypes (#31849))
