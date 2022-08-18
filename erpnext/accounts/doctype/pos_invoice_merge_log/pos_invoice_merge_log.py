@@ -405,7 +405,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 					getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
 				)
 				merge_log.posting_time = (
-					getdate(closing_entry.get("posting_time")) if closing_entry else nowtime()
+					get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
 				)
 				merge_log.customer = customer
 				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
