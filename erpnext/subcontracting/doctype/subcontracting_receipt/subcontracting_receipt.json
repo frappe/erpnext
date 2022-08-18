@@ -51,8 +51,6 @@
         "in_words",
         "bill_no",
         "bill_date",
-        "accounting_details_section",
-        "provisional_expense_account",
         "more_info",
         "status",
         "column_break_39",
@@ -525,19 +523,6 @@
             "read_only": 1
         },
         {
-            "collapsible": 1,
-            "fieldname": "accounting_details_section",
-            "fieldtype": "Section Break",
-            "label": "Accounting Details"
-        },
-        {
-            "fieldname": "provisional_expense_account",
-            "fieldtype": "Link",
-            "hidden": 1,
-            "label": "Provisional Expense Account",
-            "options": "Account"
-        },
-        {
             "default": "0",
             "fieldname": "is_return",
             "fieldtype": "Check",
@@ -599,7 +584,7 @@
     ],
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-08-15 14:30:29.447307",
+    "modified": "2022-08-16 09:56:41.199435",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt",
