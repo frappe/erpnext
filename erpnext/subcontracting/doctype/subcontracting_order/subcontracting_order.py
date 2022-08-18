@@ -82,25 +82,6 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values_in_supplied_items()
 		self.set_missing_values_in_items()
 
-	def set_missing_values_in_additional_costs(self):
-		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
-
-		if self.total_additional_costs:
-			if self.distribute_additional_costs_based_on == "Amount":
-				total_amt = sum(flt(item.amount) for item in self.get("items"))
-				for item in self.items:
-					item.additional_cost_per_qty = (
-						(item.amount * self.total_additional_costs) / total_amt
-					) / item.qty
-			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items"))
-				additional_cost_per_qty = self.total_additional_costs / total_qty
-				for item in self.items:
-					item.additional_cost_per_qty = additional_cost_per_qty
-		else:
-			for item in self.items:
-				item.additional_cost_per_qty = 0
-
 	def set_missing_values_in_service_items(self):
 		for idx, item in enumerate(self.get("service_items")):
 			self.items[idx].service_cost_per_qty = item.amount / self.items[idx].qty
