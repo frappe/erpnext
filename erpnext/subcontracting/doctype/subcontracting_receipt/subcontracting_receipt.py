@@ -103,6 +103,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def set_missing_values(self):
+		self.set_missing_values_in_additional_costs()
 		self.set_missing_values_in_supplied_items()
 		self.set_missing_values_in_items()
 
