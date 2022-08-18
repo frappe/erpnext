@@ -40,6 +40,10 @@
         "manufacture_section",
         "manufacturer",
         "manufacturer_part_no",
+        "accounting_dimensions_section",
+        "cost_center",
+        "dimension_col_break",
+        "project",
         "section_break_34",
         "page_break"
     ],
@@ -304,13 +308,35 @@
             "no_copy": 1,
             "print_hide": 1,
             "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "accounting_dimensions_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting Dimensions"
+        },
+        {
+            "fieldname": "cost_center",
+            "fieldtype": "Link",
+            "label": "Cost Center",
+            "options": "Cost Center"
+        },
+        {
+            "fieldname": "dimension_col_break",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "project",
+            "fieldtype": "Link",
+            "label": "Project",
+            "options": "Project"
         }
     ],
     "idx": 1,
     "index_web_pages_for_search": 1,
     "istable": 1,
     "links": [],
-    "modified": "2022-04-11 21:28:06.585338",
+    "modified": "2022-08-15 14:25:45.177703",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Order Item",
