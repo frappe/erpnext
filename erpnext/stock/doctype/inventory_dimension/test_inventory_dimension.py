@@ -8,6 +8,7 @@ from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	CanNotBeChildDoc,
 	CanNotBeDefaultDimension,
 	DoNotChangeError,
+	delete_dimension,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -41,6 +42,32 @@ class TestInventoryDimension(FrappeTestCase):
 		)
 
 		self.assertRaises(CanNotBeDefaultDimension, inv_dim1.insert)
+
+	def test_delete_inventory_dimension(self):
+		inv_dim1 = create_inventory_dimension(
+			reference_document="Shelf",
+			type_of_transaction="Outward",
+			dimension_name="From Shelf",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+			condition="parent.purpose == 'Material Issue'",
+		)
+
+		inv_dim1.save()
+
+		custom_field = frappe.db.get_value(
+			"Custom Field", {"fieldname": "from_shelf", "dt": "Stock Entry Detail"}, "name"
+		)
+
+		self.assertTrue(custom_field)
+
+		delete_dimension(inv_dim1.name)
+
+		custom_field = frappe.db.get_value(
+			"Custom Field", {"fieldname": "from_shelf", "dt": "Stock Entry Detail"}, "name"
+		)
+
+		self.assertFalse(custom_field)
 
 	def test_inventory_dimension(self):
 		warehouse = "Shelf Warehouse - _TC"
