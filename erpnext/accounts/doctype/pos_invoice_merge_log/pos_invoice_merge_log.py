@@ -9,7 +9,7 @@ from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.utils import cint, flt, getdate, nowdate, nowtime, get_time
+from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import is_scheduler_inactive
 
