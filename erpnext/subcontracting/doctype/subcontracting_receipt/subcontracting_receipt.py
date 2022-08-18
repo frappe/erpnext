@@ -125,7 +125,7 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
 
-			if self.is_new() and item.rm_supp_cost > 0:
+			if item.recalculate_rate:
 				item.rate = (
 					item.rm_cost_per_qty + (item.service_cost_per_qty or 0) + item.additional_cost_per_qty
 				)
