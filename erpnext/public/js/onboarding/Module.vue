@@ -12,7 +12,7 @@
 				</div>
 				<p class="module-title">{{ module.name }}</p>
 				<p class="module-subtitle">
-					Products, Purchases, <br />Analysis, and more.
+					{{ module.description }}
 				</p>
 			</div>
 		</div>

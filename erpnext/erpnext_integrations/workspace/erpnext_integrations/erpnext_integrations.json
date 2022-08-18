@@ -2,6 +2,7 @@
  "charts": [],
  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Marketplace\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}}]",
  "creation": "2020-08-20 19:30:48.138801",
+ "description": "Woocommerce, Plaid,\nExotel and more.",
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
@@ -90,13 +91,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:35:35.508718",
+ "modified": "2022-08-15 19:07:54.125900",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 10.0,

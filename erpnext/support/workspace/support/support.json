@@ -2,6 +2,7 @@
  "charts": [],
  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Issue\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Maintenance Visit\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Service Level Agreement\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Issues\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Service Level Agreement\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Warranty\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-03-02 15:48:23.224699",
+ "description": "Issues, SLAs,\nMaintenance and more.",
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
@@ -169,13 +170,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:48:27.247406",
+ "modified": "2022-08-15 19:06:01.790892",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 25.0,

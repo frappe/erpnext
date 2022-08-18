@@ -2,6 +2,7 @@
  "charts": [],
  "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Point Of Sale\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings & Configurations\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loyalty Program\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Opening & Closing\",\"col\":4}}]",
  "creation": "2020-03-02 17:18:32.505616",
+ "description": "Point of Sale, Loyalty Points,\nand more.",
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
@@ -101,13 +102,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 18:07:56.711095",
+ "modified": "2022-08-15 18:54:55.135732",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "Retail",
  "roles": [],
  "sequence_id": 22.0,

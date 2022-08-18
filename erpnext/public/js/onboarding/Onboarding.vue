@@ -3,10 +3,13 @@
 		<div class="col-3 onboarding-sidebar">
 			<div class="sidebar-container">
 				<div class="step-title row" v-for="(step, index) in steps" :key="index">
-					<div class="step-no">
-						<p style="margin-top:2px">{{ index }}</p>
+					<div class="step-no" v-bind:class="[CurrentStep == index ? 'current-step' :'', CurrentStep > index ? 'completed-step': '']">
+						<svg v-if="CurrentStep > index" class="icon icon-xs completed-step">
+							<use class="" href="#icon-tick"></use>
+						</svg>
+						<p v-else style="margin-top:2px">{{ index }}</p>
 					</div>
-					<span class="step">{{ step }}</span>
+					<span class="step" v-bind:class="[CurrentStep == index ? 'current-step' :'']">{{ step }}</span>
 				</div>
 			</div>
 		</div>
@@ -14,7 +17,35 @@
 			<div v-show="CurrentStep == 1">
 				<p class="onboarding-title">Setup Organization</p>
 				<p class="onboarding-subtitle">Don't Panic - These settings can be changed later.</p>
-				<div class="row field-row">
+				<div class="row company-info">
+					<div class="abbreviation-container">
+						<span class="abbreviation-text">TV</span>
+					</div>
+					<div class="col-8 company-name">
+						Your Company Name
+					</div>
+					<div class="button-container">
+						<div class="btn edit-button btn-secondary">
+							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2" stroke="#505A62" stroke-linecap="round"/>
+								<path d="M14 2L7 9" stroke="#505A62" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+							&nbsp;&nbsp;Edit
+						</div>
+					</div>
+				</div>
+				<div class="company-domain">
+					<div>
+						What does your organization do?
+					</div>
+					<div class="row domain-box">
+						<div class="domain"
+						v-bind:class="[selectedDomain == domain ? 'selected-domain' :'']"
+						@click="selectedDomain = domain"
+						v-for="(domain, index) in domains" :key="index">
+							{{ domain }}
+						</div>
+					</div>
 				</div>
 			</div>
 			<div v-show="CurrentStep == 2">
@@ -37,12 +68,12 @@
 				<Module v-for="(module, index) in modules" :key="index" :module="module" />
 			</div>
 			<div class="row button-row">
-				<div class="button-col">
-					<button v-on:click="CurrentStep -= 1" class="secondary-button" v-if="CurrentStep > 1">Previous</button>
+				<div>
+					<button v-on:click=prev_step class="btn btn-secondary btn-sm" v-if="CurrentStep > 1">Previous</button>
 				</div>
-				<div class="button-col">
-					<button v-on:click="CurrentStep += 1" class="primary-button" v-if="CurrentStep < 4">Next</button>
-					<button class="primary-button" v-if="CurrentStep == 4">Complete Setup</button>
+				<div>
+					<button v-on:click=next_step class="btn btn-primary btn-sm btn-next" v-if="CurrentStep < 4">Next</button>
+					<button class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">Finish Setup</button>
 				</div>
 			</div>
 		</div>
@@ -59,31 +90,44 @@ export default {
 	data() {
 		return {
 			CurrentStep: 1,
+			selectedDomain: '',
 			steps: {
 				1: "Setup Organization",
 				2: "Regional Settings",
 				3: "Accounting Setup",
 				4: "Enabled Module"
-			}
+			},
+			domains: ["Manufacturing", "Retail", "Service", "Distribution", "Loans"],
 		};
 	},
 	components: {
 		Module,
 	},
+	methods: {
+		next_step: function (event) {
+			this.CurrentStep += 1;
+		},
+		prev_step: function(event) {
+			this.CurrentStep -= 1;
+		}
+	},
 	mounted() {
+		// console.log(this.regional_data);
 		let regional_data = this.regional_data.country_info;
-		console.log(regional_data);
-		const slide_2 = new frappe.ui.FieldGroup({
+		// console.log(regional_data);
+		this.slide_2 = new frappe.ui.FieldGroup({
 			fields: [
 				{
-					label: __('Country'),
+					label: __('Your Country'),
 					fieldname: 'country',
-					fieldtype: 'Autocomplete',
+					fieldtype: 'Link',
 					placeholder: __("Select Country"),
+					options: "Country",
+					reqd: 1,
 					onchange: () => {
-						let country = slide_2.get_value('country');
-						slide_2.set_value("currency", regional_data[country].currency);
-						slide_2.set_value("timezone", regional_data[country].timezones[0]);
+						let country = this.slide_2.get_value('country');
+						this.slide_2.set_value("currency", regional_data[country].currency);
+						this.slide_2.set_value("timezone", regional_data[country].timezones[0]);
 					}
 				},
 				{
@@ -96,6 +140,7 @@ export default {
 					fieldname: 'currency',
 					fieldtype: 'Link',
 					options: 'Currency',
+					reqd: 1,
 				},
 				{
 					label: '',
@@ -103,11 +148,43 @@ export default {
 					fieldtype: 'Section Break',
 				},
 				{
-					label: __('Language'),
-					fieldname: 'language',
-					fieldtype: 'Autocomplete',
-					options: 'Language',
-					default: 'English'
+					fieldname: "language",
+					label: __("Your Language"),
+					fieldtype: "Link",
+					placeholder: __("Select Language"),
+					default: "en",
+					options: "Language",
+					reqd: 1,
+				},
+				{
+					label: '',
+					fieldname: 'cb_1',
+					fieldtype: 'Column Break',
+					reqd: 1
+				},
+				{
+					label: __('Timezone'),
+					fieldname: 'timezone',
+					fieldtype: 'Select',
+					placeholder: __("Select Time Zone"),
+					options: this.regional_data.all_timezones,
+					reqd: 1
+				},
+
+			],
+			body: this.$refs.slide_2
+		});
+
+		this.slide_2.make();
+
+		this.slide_3 = new frappe.ui.FieldGroup({
+			fields: [
+				{
+					label: __('Bank Name'),
+					fieldname: 'bank_name',
+					fieldtype: 'Data',
+					placeholder: __("Add Your Bank Name"),
+					reqd: 1,
 				},
 				{
 					label: '',
@@ -115,16 +192,41 @@ export default {
 					fieldtype: 'Column Break',
 				},
 				{
-					label: __('Timezone'),
-					fieldname: 'timezone',
-					fieldtype: 'Data',
+					label: __('Chart Of Accounts'),
+					fieldname: 'chart_of_accounts',
+					fieldtype: 'Select',
+					options: [],
+					reqd: 1,
+				},
+				{
+					label: '',
+					fieldname: 'sb_1',
+					fieldtype: 'Section Break',
+				},
+				{
+					fieldname: "fy_start_date",
+					label: __("Financial Year Begins On"),
+					fieldtype: "Date",
+					reqd: 1,
+				},
+				{
+					label: '',
+					fieldname: 'cb_1',
+					fieldtype: 'Column Break',
+					reqd: 1
+				},
+				{
+					fieldname: "fy_end_date",
+					label: __("Financial Year Ends On"),
+					fieldtype: "Date",
+					reqd: 1,
 				},
 
 			],
-			body: this.$refs.slide_2
+			body: this.$refs.slide_3
 		});
 
-		slide_2.make();
+		this.slide_3.make();
 	}
 }
 </script>
@@ -138,13 +240,11 @@ export default {
 
 .onboarding-sidebar {
 	height: 100%;
-	background: #F9FAFA;
-	border: 1px solid #E5E5E5;
+	background: #F0F0F0;
+	border-radius: 16px;
 }
 
 .onboarding-title {
-	/* position: absolute;
-	display: flex; */
 	font-family: 'Inter';
 	font-style: normal;
 	font-weight: 700;
@@ -173,6 +273,8 @@ export default {
 	gap: 16px;
 	justify-content: center;
 	overflow: scroll;
+	scrollbar-width: 'none';
+	-ms-overflow-style: 'none'
 }
 
 .slide-section {
@@ -208,30 +310,6 @@ export default {
 	margin-top: 3px;
 }
 
-.secondary-button {
-	display: block;
-	align-items: center;
-	text-align: center;
-	padding: 4px 20px;
-	height: 28px;
-	background: #F9FAFA;
-	border-radius: 8px;
-	color: #687178;
-	border: 0px;
-	float: left;
-}
-.primary-button {
-	align-items: center;
-	text-align: center;
-	padding: 4px 20px;
-	height: 28px;
-	background: #2D95F0;
-	border-radius: 8px;
-	color: #FFFFFF;
-	border: 0px;
-	float: right;
-}
-
 .label {
 	width: 262px;
 	height: 15px;
@@ -248,44 +326,107 @@ export default {
 	flex-grow: 0;
 }
 
-.control-input {
-	background: #F4F5F6;
-	border-radius: 8px;
-	flex: none;
-	height: 28px;
-	order: 1;
-	align-self: stretch;
-	flex-grow: 1;
-	border: 0px;
-	width: 100%;
-}
-
 .field-layout {
 	margin-top: 50px;
 	margin-left: 40px;
 	margin-right: 40px;
 }
 
-.field-row {
-	margin-top: 24px;
-}
-
 .button-row {
-	margin-left: 40px;
-	margin-right: 40px;
-}
-
-.button-col {
-	margin: 0px;
-	padding: 0px;
-}
-
-.control-input-wrapper {
-	width:100% !important;
+	width: 100%;
+	position: absolute;
+	padding-left: 75px;
+	padding-right: 75px;
+	bottom: 50px;
+	justify-content: space-between;
 }
 
 ::-webkit-scrollbar {
 	display: none;
 }
 
+.completed-step {
+	background-color: #48BB74;
+	stroke: white;
+}
+
+.current-step {
+	color: #2D95F0;
+	border-color: #2D95F0;
+}
+
+.abbreviation-container {
+	display: flex;
+	width: 72px;
+	height: 72px;
+	background: #EBEEF0;
+	border-radius: 8px;
+	align-items: center;
+	justify-content: center;
+}
+
+.abbreviation-text {
+	font-weight: 600;
+	font-size: 28px;
+	line-height: 34px;
+	text-align: center;
+	color: #1F272E;
+	opacity: 0.5;
+	margin:0;
+}
+
+.company-info {
+	margin-left: 82px;
+	margin-top: 67px;
+}
+
+.company-name {
+	display: flex;
+	font-family: 'Inter';
+	font-style: normal;
+	font-weight: 600;
+	font-size: 25px;
+	line-height: 25px;
+	color: #1F272E;
+	align-items: center;
+}
+
+.edit-button {
+	display: flex;
+	height: 28px;
+	align-items: center;
+}
+
+.button-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.company-domain {
+	margin-left: 82px;
+	margin-top: 70px;
+
+}
+
+.domain {
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	padding: 8px 14px;
+	gap: 10px;
+	border: 1px solid #EBEEF0;
+	border-radius: 8px;
+	margin-left: 9px;
+}
+
+.domain-box {
+	margin-top: 8px;
+}
+
+.selected-domain {
+	background: #687178;
+	color: #FFFFFF !important;
+}
 </style>
