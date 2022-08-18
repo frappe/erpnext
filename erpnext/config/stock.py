@@ -46,6 +46,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Delivery Trip"
 				},
+				{
+					"type": "doctype",
+					"name": "Work Order Invoice"
+				},
 			]
 		},
 		{
