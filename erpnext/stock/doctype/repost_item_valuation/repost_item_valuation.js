@@ -15,7 +15,7 @@ frappe.ui.form.on('Repost Item Valuation', {
 			return {
 				filters: {
 					name: ['in', ['Purchase Receipt', 'Purchase Invoice', 'Delivery Note',
-						'Sales Invoice', 'Stock Entry', 'Stock Reconciliation']]
+						'Sales Invoice', 'Stock Entry', 'Stock Reconciliation', 'Subcontracting Receipt']]
 				}
 			};
 		});
