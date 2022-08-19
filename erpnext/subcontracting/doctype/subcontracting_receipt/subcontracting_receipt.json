@@ -15,6 +15,7 @@
         "company",
         "posting_date",
         "posting_time",
+        "set_posting_time",
         "is_return",
         "return_against",
         "accounting_dimensions_section",
@@ -138,6 +139,7 @@
             "label": "Date",
             "no_copy": 1,
             "print_width": "100px",
+            "read_only_depends_on": "eval: !doc.set_posting_time",
             "reqd": 1,
             "search_index": 1,
             "width": "100px"
@@ -150,6 +152,7 @@
             "no_copy": 1,
             "print_hide": 1,
             "print_width": "100px",
+            "read_only_depends_on": "eval: !doc.set_posting_time",
             "reqd": 1,
             "width": "100px"
         },
@@ -612,11 +615,19 @@
             "label": "Total Additional Costs",
             "print_hide_if_no_value": 1,
             "read_only": 1
+        },
+        {
+            "default": "0",
+            "depends_on": "eval:doc.docstatus==0",
+            "fieldname": "set_posting_time",
+            "fieldtype": "Check",
+            "label": "Edit Posting Date and Time",
+            "print_hide": 1
         }
     ],
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-08-18 15:48:57.419191",
+    "modified": "2022-08-19 19:50:16.935124",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt",
