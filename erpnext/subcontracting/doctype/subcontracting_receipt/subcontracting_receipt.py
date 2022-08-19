@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 
@@ -128,10 +128,10 @@ class SubcontractingReceipt(SubcontractingController):
 
 			if item.recalculate_rate:
 				item.rate = (
-					item.rm_cost_per_qty + (item.service_cost_per_qty or 0) + item.additional_cost_per_qty
+					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
 				)
 
-			item.received_qty = item.qty + (item.rejected_qty or 0)
+			item.received_qty = item.qty + flt(item.rejected_qty)
 			item.amount = item.qty * item.rate
 			total_qty += item.qty
 			total_amount += item.amount
