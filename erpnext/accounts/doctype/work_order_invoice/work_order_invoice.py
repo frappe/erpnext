@@ -15,6 +15,12 @@ class WorkOrderInvoice(Document):
 			self.add_items()
 		
 		if self.docstatus == 1:
+			if self.project == None:
+				frappe.throw(_("Project is required."))
+			
+			if self.warehouse == None:
+				frappe.throw(_("Warehouse is required."))
+
 			for item in self.get("detail_one"):
 				items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
 
