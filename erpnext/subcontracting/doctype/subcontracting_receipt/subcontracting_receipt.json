@@ -616,11 +616,7 @@
     ],
     "is_submittable": 1,
     "links": [],
-<<<<<<< HEAD
-    "modified": "2022-08-16 09:56:41.199435",
-=======
     "modified": "2022-08-18 15:48:57.419191",
->>>>>>> 256b4245d5 (chore: add additional-cost table in SCR)
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt",
