@@ -47,6 +47,10 @@
         "raw_material_details",
         "get_current_stock",
         "supplied_items",
+        "additional_costs_section",
+        "distribute_additional_costs_based_on",
+        "additional_costs",
+        "total_additional_costs",
         "section_break_46",
         "in_words",
         "bill_no",
@@ -580,11 +584,39 @@
             "fieldtype": "Link",
             "label": "Project",
             "options": "Project"
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "total_additional_costs",
+            "depends_on": "eval:(doc.docstatus == 0 || doc.total_additional_costs)",
+            "fieldname": "additional_costs_section",
+            "fieldtype": "Section Break",
+            "label": "Additional Costs"
+        },
+        {
+            "default": "Qty",
+            "fieldname": "distribute_additional_costs_based_on",
+            "fieldtype": "Select",
+            "label": "Distribute Additional Costs Based On ",
+            "options": "Qty\nAmount"
+        },
+        {
+            "fieldname": "additional_costs",
+            "fieldtype": "Table",
+            "label": "Additional Costs",
+            "options": "Landed Cost Taxes and Charges"
+        },
+        {
+            "fieldname": "total_additional_costs",
+            "fieldtype": "Currency",
+            "label": "Total Additional Costs",
+            "print_hide_if_no_value": 1,
+            "read_only": 1
         }
     ],
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-08-16 09:56:41.199435",
+    "modified": "2022-08-18 15:48:57.419191",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt",
