@@ -63,6 +63,7 @@ class WorkOrderInvoice(Document):
 	
 	def add_items(self):
 		items = frappe.get_all("Sales Invoice Item", ["*"], filters = {"parent": self.sales_invoice})
+		invoice = frappe.get_doc("Sales Invoice", self.sales_invoice)
 
 		for item in items:
 			it = frappe.get_doc("Item", item.item_code)

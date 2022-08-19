@@ -203,10 +203,12 @@ class SalesInvoice(SellingController):
 			else:
 				order = frappe.get_doc("Work Order Invoice", self.work_order)
 				order.sales_invoice = self.name
+				order.company = self.company
 				order.save()
 		else:
 			order = frappe.new_doc("Work Order Invoice")
 			order.sales_invoice = self.name
+			order.company = self.company
 			order.insert()
 		
 		self.verificate_work_order()
@@ -311,7 +313,6 @@ class SalesInvoice(SellingController):
 			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 			
 		if self.docstatus == 1:
-			self.work_order_create()
 			self.update_accounts_status()
 			self.calculated_taxes()
 			if self.is_pos:
@@ -1062,6 +1063,7 @@ class SalesInvoice(SellingController):
 		if self.docstatus == 1:
 			self.create_dispatch_control()
 			self.verificate_work_order()
+			self.work_order_create()
 		
 		self.reload()
 
