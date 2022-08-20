@@ -683,10 +683,10 @@ erpnext.work_order = {
 					});
 
 					//  code commented for issue ISS-2021-2022-00236 
-					var start_btn = frm.add_custom_button(__('Start'), function() {
-						erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
-					});
-					start_btn.addClass('btn-primary');
+					// var start_btn = frm.add_custom_button(__('Start'), function() {
+					// 	erpnext.work_order.make_se(frm, 'Material Transfer for Manufacture');
+					// });
+					// start_btn.addClass('btn-primary');
 				}
 			}
 
