@@ -118,8 +118,8 @@ class FollowUp(Document):
 					detail_dict = {"voucher_type": i["voucher_type"],
 									"voucher_no": i["voucher_no"] if i["voucher_no"] else "",
 									"due_date": i["due_date"],
-									"outstanding_amount" : float("{:.2f}".format(outstanding)),
-									"invoice_amount" :  float("{:.2f}".format(invoice_amount)),
+									"outstanding_amount" : outstanding,
+									"invoice_amount" :  invoice_amount,
 									"date": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "posting_date"),
 									"age": i["age"],
 									"currency": frappe.db.get_value("Sales Invoice", i["voucher_no"],  "currency")}
@@ -300,6 +300,7 @@ class FollowUp(Document):
 		
 		commit_amt = 0		
 		for i in trans_items:
+			
 			commit_name = ""
 			commit_link = ""
 			remarks = ""
@@ -312,14 +313,14 @@ class FollowUp(Document):
 			emails = []
 
 			if currency == frappe.defaults.get_global_default('currency'):
-				outstanding = i["outstanding_amount"]
-				invoice_amount = i["invoice_amount"]
-				commited_amount = i["commited_amount"]
+				outstanding = i.get("outstanding_amount")
+				invoice_amount = i.get("invoice_amount")
+				commited_amount = i.get("commited_amount")
 			else:	
 				c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
 				outstanding = float("{:.2f}".format(i["outstanding_amount"] / c_rate))
 				invoice_amount = float("{:.2f}".format(i["invoice_amount"] / c_rate))
-				commited_amount = float("{:.2f}".format(i["commited_amount"] / c_rate))
+				commited_amount = float("{:.2f}".format(i.get("commited_amount") / c_rate))
 			
 
 			comm_email = ""
@@ -330,7 +331,7 @@ class FollowUp(Document):
 			
 			print(" this is emails", emails)
 			
-			if "commited_date" in i.keys() and i["commited_amount"] > 0 and i["voucher_type"] == "Sales Invoice":
+			if "commited_date" in i.keys() and i.get("commited_amount") > 0 and i["voucher_type"] == "Sales Invoice":
 
 				pre_commit = frappe.db.get_list("Payment Receivable Commitment", {"voucher_type": "Sales Invoice", "voucher_no": i["voucher_no"]}, ['name', 'commitment_status', 'commitment_amount'])
 				print("pre Commit", pre_commit, len(pre_commit))	
@@ -348,8 +349,8 @@ class FollowUp(Document):
 				prc.commitment_amount = commited_amount
 				prc.commitment_to = frappe.session.user
 				prc.voucher_type = i["voucher_type"]
-				prc.invoice_amount = float("{:.2f}".format(invoice_amount))
-				prc.total_outstanding = float("{:.2f}".format(outstanding))
+				prc.invoice_amount = invoice_amount
+				prc.total_outstanding = outstanding
 				prc.voucher_no = i["voucher_no"]
 				prc.total_due = i["total_due"]
 				prc.age = i["age"]
