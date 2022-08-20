@@ -81,6 +81,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Quotation Comparison Sheet",
+   "link_count": 0,
+   "link_to": "Quotation Comparison Sheet",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Items & Pricing",
    "link_count": 0,
    "onboard": 0,
@@ -509,13 +519,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:26:39.090190",
+ "modified": "2022-08-20 23:11:52.037659",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 6.0,

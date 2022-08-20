@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "autoname": "format:QCS-{YYYY}-{MM}-{###}",
+ "creation": "2020-06-05 22:03:35.288911",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "request_for_quotation",
+  "column_break_5",
+  "required_date",
+  "priority",
+  "quotations_section",
+  "compare_quotation_by",
+  "quotations",
+  "quotation_items",
+  "choose_quotation_and_supplier_for_item_section",
+  "items",
+  "section_break_14",
+  "selected_by",
+  "column_break_16",
+  "grand_total",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "QCO-.YYYY.-.######\nQCS-.YYYY.-"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "request_for_quotation.schedule_date",
+   "fetch_if_empty": 1,
+   "fieldname": "required_date",
+   "fieldtype": "Date",
+   "label": "Required Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "request_for_purchase.priority",
+   "fieldname": "priority",
+   "fieldtype": "Select",
+   "label": "Priority",
+   "options": "\nHigh\nMedium\nLow",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quotations_section",
+   "fieldtype": "Section Break",
+   "label": "Quotations"
+  },
+  {
+   "fieldname": "quotations",
+   "fieldtype": "Table",
+   "label": "Quotations",
+   "options": "Comparison Sheet Quotation"
+  },
+  {
+   "fieldname": "choose_quotation_and_supplier_for_item_section",
+   "fieldtype": "Section Break",
+   "label": "Choose Quotation and Supplier for Item "
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Quotation Comparison Sheet Item"
+  },
+  {
+   "fieldname": "request_for_quotation",
+   "fieldtype": "Link",
+   "label": "Request for Quotation",
+   "options": "Request for Quotation"
+  },
+  {
+   "fieldname": "compare_quotation_by",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Compare Quotation By",
+   "options": "Whole Quotation\nItem Wise"
+  },
+  {
+   "fieldname": "quotation_items",
+   "fieldtype": "Table",
+   "label": "Quotation Items",
+   "options": "Comparison Sheet Quotation Item"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "selected_by",
+   "fieldtype": "Data",
+   "label": "Selected By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Quotation Comparison Sheet",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-08-18 23:00:28.125854",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Quotation Comparison Sheet",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

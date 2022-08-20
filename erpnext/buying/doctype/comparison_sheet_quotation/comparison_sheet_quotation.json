@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "autoname": "CSQ.#######",
+ "creation": "2020-06-05 22:25:38.962080",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "quotation",
+  "supplier",
+  "supplier_name",
+  "column_break_3",
+  "date",
+  "grand_total",
+  "section_break_5",
+  "item_details",
+  "attach_sq"
+ ],
+ "fields": [
+  {
+   "fieldname": "quotation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Quotation",
+   "oldfieldname": "item_name",
+   "oldfieldtype": "Data",
+   "options": "Supplier Quotation",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "oldfieldname": "qty",
+   "oldfieldtype": "Currency",
+   "print_width": "60px",
+   "read_only": 1,
+   "width": "60px"
+  },
+  {
+   "fieldname": "item_details",
+   "fieldtype": "Text Editor",
+   "label": "Item Details",
+   "oldfieldname": "uom",
+   "oldfieldtype": "Link",
+   "print_width": "100px",
+   "read_only": 1,
+   "width": "100px"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attach_sq",
+   "fieldtype": "Attach",
+   "label": "Quotation",
+   "read_only": 1
+  },
+  {
+   "depends_on": "supplier",
+   "fetch_from": "supplier.supplier_name",
+   "fetch_if_empty": 1,
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "quotation.transaction_date",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "oldfieldname": "description",
+   "oldfieldtype": "Small Text",
+   "print_width": "300px",
+   "read_only": 1,
+   "width": "300px"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2022-08-18 22:23:17.796261",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Comparison Sheet Quotation",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
