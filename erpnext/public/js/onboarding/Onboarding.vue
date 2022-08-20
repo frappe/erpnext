@@ -19,18 +19,20 @@
 				<p class="onboarding-subtitle">Don't Panic - These settings can be changed later.</p>
 				<div class="row company-info">
 					<div class="abbreviation-container">
-						<span class="abbreviation-text">TV</span>
+						<span class="abbreviation-text">{{ abbreviation }}</span>
 					</div>
-					<div class="col-8 company-name">
-						Your Company Name
+					<input class="input-field col-6" v-if="edit" v-model="company_name">
+					<div v-if="!edit" class="col-8 company-name">
+						{{ company_name }}
 					</div>
 					<div class="button-container">
-						<div class="btn edit-button btn-secondary">
+						<div v-on:click="toggle_edit"
+							class="btn edit-button btn-secondary">
 							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 								<path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2" stroke="#505A62" stroke-linecap="round"/>
 								<path d="M14 2L7 9" stroke="#505A62" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
 							</svg>
-							&nbsp;&nbsp;Edit
+							&nbsp;&nbsp;{{ button_string }}
 						</div>
 					</div>
 				</div>
@@ -73,7 +75,7 @@
 				</div>
 				<div>
 					<button v-on:click=next_step class="btn btn-primary btn-sm btn-next" v-if="CurrentStep < 4">Next</button>
-					<button class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">Finish Setup</button>
+					<button v-on:click=finish_setup class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">Finish Setup</button>
 				</div>
 			</div>
 		</div>
@@ -91,30 +93,87 @@ export default {
 		return {
 			CurrentStep: 1,
 			selectedDomain: '',
+			company_name: "My Company",
+			abbreviation: "MC",
+			edit: false,
+			button_string: "Edit",
 			steps: {
 				1: "Setup Organization",
 				2: "Regional Settings",
 				3: "Accounting Setup",
 				4: "Enabled Module"
 			},
-			domains: ["Manufacturing", "Retail", "Service", "Distribution", "Loans"],
+			domains: ["Manufacturing", "Retail", "Service", "Distribution", "Loans", "Education", "Healthcare", "Other"],
+			fiscal_years: {
+				"Afghanistan": ["12-21", "12-20"],
+				"Australia": ["07-01", "06-30"],
+				"Bangladesh": ["07-01", "06-30"],
+				"Canada": ["04-01", "03-31"],
+				"Costa Rica": ["10-01", "09-30"],
+				"Egypt": ["07-01", "06-30"],
+				"Hong Kong": ["04-01", "03-31"],
+				"India": ["04-01", "03-31"],
+				"Iran": ["06-23", "06-22"],
+				"Myanmar": ["04-01", "03-31"],
+				"New Zealand": ["04-01", "03-31"],
+				"Pakistan": ["07-01", "06-30"],
+				"Singapore": ["04-01", "03-31"],
+				"South Africa": ["03-01", "02-28"],
+				"Thailand": ["10-01", "09-30"],
+				"United Kingdom": ["04-01", "03-31"],
+			}
 		};
 	},
 	components: {
 		Module,
 	},
 	methods: {
-		next_step: function (event) {
+		next_step: function () {
 			this.CurrentStep += 1;
 		},
-		prev_step: function(event) {
+		prev_step: function() {
 			this.CurrentStep -= 1;
+		},
+		toggle_edit: function() {
+			this.edit = !this.edit;
+			this.button_string = this.edit ? "Save" : "Edit";
+
+			let parts = this.company_name.split(" ");
+			let abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
+			this.abbreviation=abbr.slice(0, 10).toUpperCase();
+		},
+		finish_setup: function() {
+			frappe.call({
+				method: "frappe.desk.page.setup_wizard.setup_wizard.setup_complete",
+				args: { args: {
+					"company_name": this.company_name,
+					"company_abbreviation": this.abbreviation,
+					"currency": this.slide_2.get_value("currency"),
+					"country": this.slide_2.get_value("country"),
+					"timezone": this.slide_2.get_value("timezone"),
+					"fy_start_date": this.slide_3.get_value("fy_start_date"),
+					"fy_end_date": this.slide_3.get_value("fy_end_date"),
+					"chart_of_accounts": this.slide_3.get_value("chart_of_accounts"),
+					"bank_account": this.slide_3.get_value("bank_account"),
+					"domain": this.selectedDomain
+				}},
+				callback: (r) => {
+					if (r.message.status === "ok") {
+						if (frappe.setup.welcome_page) {
+								localStorage.setItem("session_last_route", frappe.setup.welcome_page);
+							}
+							setTimeout(function () {
+								// Reload
+								window.location.href = "/app";
+							}, 2000);
+					}
+				},
+				error: () => frappe.msgprint(__("Something went wrong")),
+			});
 		}
 	},
 	mounted() {
-		// console.log(this.regional_data);
 		let regional_data = this.regional_data.country_info;
-		// console.log(regional_data);
 		this.slide_2 = new frappe.ui.FieldGroup({
 			fields: [
 				{
@@ -126,8 +185,39 @@ export default {
 					reqd: 1,
 					onchange: () => {
 						let country = this.slide_2.get_value('country');
+						if (country) {
+							frappe.call({
+								method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+								args: { "country": country, with_standard: true },
+								callback: (r) => {
+									if (r.message) {
+										console.log(r.message);
+										this.slide_3.set_df_property("chart_of_accounts", "options", r.message)
+									}
+								}
+							})
+						}
 						this.slide_2.set_value("currency", regional_data[country].currency);
 						this.slide_2.set_value("timezone", regional_data[country].timezones[0]);
+
+						let fy = this.fiscal_years[country];
+						let current_year = moment(new Date()).year();
+						let next_year = current_year + 1;
+
+						if (!fy) {
+							fy = ["01-01", "12-31"];
+							next_year = current_year;
+						}
+
+						let year_start_date = current_year + "-" + fy[0];
+
+						if (year_start_date > frappe.datetime.get_today()) {
+							next_year = current_year;
+							current_year -= 1;
+						}
+
+						this.slide_3.set_value("fy_start_date", current_year + '-' + fy[0]);
+						this.slide_3.set_value("fy_end_date", next_year + '-' + fy[1]);
 					}
 				},
 				{
@@ -241,7 +331,7 @@ export default {
 .onboarding-sidebar {
 	height: 100%;
 	background: #F0F0F0;
-	border-radius: 16px;
+	border-radius: 16px 0 0 16px;
 }
 
 .onboarding-title {
@@ -428,5 +518,14 @@ export default {
 .selected-domain {
 	background: #687178;
 	color: #FFFFFF !important;
+}
+
+.input-field {
+	background: #F4F5F6;
+	border-radius: 8px;
+	flex: none;
+	order: 1;
+	align-self: stretch;
+	flex-grow: 1;
 }
 </style>
