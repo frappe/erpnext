@@ -101,25 +101,28 @@ class CallLog(Document):
 
 @frappe.whitelist()
 def add_call_summary_and_call_type(call_log, summary, call_type):
-	doc = frappe.get_doc('Call Log', call_log)
+	doc = frappe.get_doc("Call Log", call_log)
 	doc.type_of_call = call_type
 	doc.save()
-	doc.add_comment('Comment', frappe.bold(_('Call Summary')) + '<br><br>' + summary)
+	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
+
 
 def get_employees_with_number(number):
 	number = strip_number(number)
 	if not number:
 		return []
 
-	employee_doc_name_and_emails = frappe.cache().hget('employees_with_number', number)
-	if employee_doc_name_and_emails: return employee_doc_name_and_emails
+	employee_doc_name_and_emails = frappe.cache().hget("employees_with_number", number)
+	if employee_doc_name_and_emails:
+		return employee_doc_name_and_emails
 
-	employee_doc_name_and_emails = frappe.get_all('Employee', filters={
-		'cell_number': ['like', '%{}%'.format(number)],
-		'user_id': ['!=', '']
-	}, fields=['name', 'user_id'])
+	employee_doc_name_and_emails = frappe.get_all(
+		"Employee",
+		filters={"cell_number": ["like", "%{}%".format(number)], "user_id": ["!=", ""]},
+		fields=["name", "user_id"],
+	)
 
-	frappe.cache().hset('employees_with_number', number, employee_doc_name_and_emails)
+	frappe.cache().hset("employees_with_number", number, employee_doc_name_and_emails)
 
 	return employee_doc_name_and_emails
 
