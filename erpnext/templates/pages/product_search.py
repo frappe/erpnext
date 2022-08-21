@@ -5,14 +5,13 @@ import json
 
 import frappe
 from frappe.utils import cint, cstr
-from redisearch import AutoCompleter, Client, Query
+from redis.commands.search.query import Query
 
 from erpnext.e_commerce.redisearch_utils import (
 	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 	WEBSITE_ITEM_INDEX,
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
 	is_redisearch_enabled,
-	make_key,
 )
 from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
 from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
@@ -88,15 +87,17 @@ def product_search(query, limit=10, fuzzy_search=True):
 	if not query:
 		return search_results
 
-	red = frappe.cache()
+	redis = frappe.cache()
 	query = clean_up_query(query)
 
 	# TODO: Check perf/correctness with Suggestions & Query vs only Query
 	# TODO: Use Levenshtein Distance in Query (max=3)
-	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
-	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
-	suggestions = ac.get_suggestions(
-		query, num=limit, fuzzy=fuzzy_search and len(query) > 3  # Fuzzy on length < 3 can be real slow
+	redisearch = redis.ft(WEBSITE_ITEM_INDEX)
+	suggestions = redisearch.sugget(
+		WEBSITE_ITEM_NAME_AUTOCOMPLETE,
+		query,
+		num=limit,
+		fuzzy=fuzzy_search and len(query) > 3,
 	)
 
 	# Build a query
@@ -106,8 +107,8 @@ def product_search(query, limit=10, fuzzy_search=True):
 		query_string += f"|('{clean_up_query(s.string)}')"
 
 	q = Query(query_string)
+	results = redisearch.search(q)
 
-	results = client.search(q)
 	search_results["results"] = list(map(convert_to_dict, results.docs))
 	search_results["results"] = sorted(
 		search_results["results"], key=lambda k: frappe.utils.cint(k["ranking"]), reverse=True
@@ -141,8 +142,8 @@ def get_category_suggestions(query):
 	if not query:
 		return search_results
 
-	ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=frappe.cache())
-	suggestions = ac.get_suggestions(query, num=10, with_payloads=True)
+	ac = frappe.cache().ft()
+	suggestions = ac.sugget(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE, query, num=10, with_payloads=True)
 
 	results = [json.loads(s.payload) for s in suggestions]
 
