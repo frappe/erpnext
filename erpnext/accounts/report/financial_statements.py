@@ -371,11 +371,15 @@ def set_gl_entries_by_account(
 					key: value
 				})
 
-		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
+		gl_entries = frappe.db.sql("""
+			select posting_date, account, debit, credit, debit_in_account_currency, credit_in_account_currency,
+				is_opening, fiscal_year, account_currency
+			from `tabGL Entry`
 			where company=%(company)s
-			{additional_conditions}
-			and posting_date <= %(to_date)s
-			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+				{additional_conditions}
+				and posting_date <= %(to_date)s
+			order by account, posting_date
+		""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True)  #nosec
 
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters))
@@ -422,6 +426,10 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
 				else:
 					additional_conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
+
+	hooks = frappe.get_hooks('set_gl_conditions')
+	for method in hooks:
+		frappe.get_attr(method)(filters, additional_conditions)
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

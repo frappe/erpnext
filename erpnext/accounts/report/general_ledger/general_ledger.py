@@ -317,6 +317,10 @@ def get_conditions(filters, accounting_dimensions):
 			if filters.get(dimension.fieldname):
 				conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
+	hooks = frappe.get_hooks('set_gl_conditions')
+	for method in hooks:
+		frappe.get_attr(method)(filters, conditions)
+
 	return "{}".format(" and ".join(conditions)) if conditions else ""
 
 

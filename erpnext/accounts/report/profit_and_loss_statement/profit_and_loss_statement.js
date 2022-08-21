@@ -29,4 +29,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			"default": 1
 		}
 	);
+
+	erpnext.utils.add_additional_gl_filters('Profit and Loss Statement');
 });

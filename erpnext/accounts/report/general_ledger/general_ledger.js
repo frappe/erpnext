@@ -201,5 +201,5 @@ frappe.query_reports["General Ledger"] = {
 	]
 }
 
-erpnext.utils.add_dimensions('General Ledger', 15)
-
+erpnext.utils.add_dimensions('General Ledger', 15);
+erpnext.utils.add_additional_gl_filters('General Ledger');

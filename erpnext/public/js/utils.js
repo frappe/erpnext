@@ -219,6 +219,18 @@ $.extend(erpnext.utils, {
 		});
 	},
 
+	add_additional_gl_filters: function(report_name) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		(frappe.boot.additional_gl_filters || []).forEach((additional_filter) => {
+			let found = filters.some(el => el.fieldname === additional_filter['fieldname']);
+
+			if (!found) {
+				filters.push(additional_filter);
+			}
+		});
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
