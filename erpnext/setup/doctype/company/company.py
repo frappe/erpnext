@@ -223,102 +223,65 @@ class Company(NestedSet):
 		)
 
 	def create_default_departments(self):
-		records = [
-			# Department
+		departments_list = [
 			{
-				"doctype": "Department",
 				"department_name": _("All Departments"),
 				"is_group": 1,
-				"parent_department": "",
-				"__condition": lambda: not frappe.db.exists("Department", _("All Departments")),
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Accounts"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Accounts")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Marketing"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Marketing")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Sales"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Sales")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Purchase"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Purchase")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Operations"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Operations")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Production"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Production")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Dispatch"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Dispatch")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Customer Service"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Customer Service")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Human Resources"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Human Resources")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Management"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Management")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Quality Management"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Quality Management")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Research & Development"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Research & Development")
 			},
 			{
-				"doctype": "Department",
-				"department_name": _("Legal"),
-				"parent_department": _("All Departments"),
-				"company": self.name,
+				"department_name": _("Legal")
 			},
 		]
-
-		# Make root department with NSM updation
-		make_records(records[:1])
-
-		frappe.local.flags.ignore_update_nsm = True
-		make_records(records)
-		frappe.local.flags.ignore_update_nsm = False
-		rebuild_tree("Department", "parent_department")
+		for dep_record in departments_list:
+			if not frappe.db.exists("Department", "{0} - {1}".format(dep_record["department_name"], self.abbr)):
+				department = frappe.get_doc(
+					{
+						"doctype": "Department",
+						"department_name": dep_record["department_name"],
+						"is_group": dep_record.get("is_group", 0),
+						"company": self.name,
+						"parent_department": "{0} - {1}".format(_("All Departments"), self.abbr) if not dep_record.get("is_group", 0) else "",
+					}
+				)
+				department.flags.ignore_permissions = True
+				department.flags.ignore_mandatory = True
+				department.insert()
 
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":
