@@ -631,47 +631,6 @@ class PurchaseReceipt(BuyingController):
 
 					i += 1
 
-	def add_gl_entry(
-		self,
-		gl_entries,
-		account,
-		cost_center,
-		debit,
-		credit,
-		remarks,
-		against_account,
-		debit_in_account_currency=None,
-		credit_in_account_currency=None,
-		account_currency=None,
-		project=None,
-		voucher_detail_no=None,
-		item=None,
-		posting_date=None,
-	):
-
-		gl_entry = {
-			"account": account,
-			"cost_center": cost_center,
-			"debit": debit,
-			"credit": credit,
-			"against": against_account,
-			"remarks": remarks,
-		}
-
-		if voucher_detail_no:
-			gl_entry.update({"voucher_detail_no": voucher_detail_no})
-
-		if debit_in_account_currency:
-			gl_entry.update({"debit_in_account_currency": debit_in_account_currency})
-
-		if credit_in_account_currency:
-			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
-
-		if posting_date:
-			gl_entry.update({"posting_date": posting_date})
-
-		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
-
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
 			if item.is_fixed_asset:
