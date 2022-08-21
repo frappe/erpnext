@@ -12,9 +12,12 @@ dependencies = [
     "pycountry~=20.7.3",
     "python-stdnum~=1.16",
     "Unidecode~=1.2.0",
+<<<<<<< HEAD
     "redisearch~=2.1.0",
     "rapidfuzz~=2.15.0",
     "holidays~=0.28",
+=======
+>>>>>>> 4a38ce659d (refactor!: drop redisearch)
 
     # integration dependencies
     "gocardless-pro~=1.22.0",
