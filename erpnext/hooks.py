@@ -507,6 +507,7 @@ accounting_dimension_doctypes = [
 	"Shipping Rule",
 	"Landed Cost Item",
 	"Asset Value Adjustment",
+	"Asset Repair",
 	"Loyalty Program",
 	"Stock Reconciliation",
 	"POS Profile",
@@ -519,6 +520,10 @@ accounting_dimension_doctypes = [
 	"Purchase Order",
 	"Purchase Receipt",
 	"Sales Order",
+	"Subcontracting Order",
+	"Subcontracting Order Item",
+	"Subcontracting Receipt",
+	"Subcontracting Receipt Item",
 ]
 
 # get matching queries for Bank Reconciliation
