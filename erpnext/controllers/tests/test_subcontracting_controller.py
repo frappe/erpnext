@@ -36,6 +36,36 @@ class TestSubcontractingController(FrappeTestCase):
 		sco.remove_empty_rows()
 		self.assertEqual((len_before - 1), len(sco.service_items))
 
+	def test_set_missing_values_in_additional_costs(self):
+		sco = get_subcontracting_order(do_not_submit=1)
+
+		rate_without_additional_cost = sco.items[0].rate
+		amount_without_additional_cost = sco.items[0].amount
+
+		additional_amount = 120
+		sco.append(
+			"additional_costs",
+			{
+				"expense_account": "Cost of Goods Sold - _TC",
+				"description": "Test",
+				"amount": additional_amount,
+			},
+		)
+		sco.save()
+
+		additional_cost_per_qty = additional_amount / sco.items[0].qty
+
+		self.assertEqual(sco.items[0].additional_cost_per_qty, additional_cost_per_qty)
+		self.assertEqual(rate_without_additional_cost + additional_cost_per_qty, sco.items[0].rate)
+		self.assertEqual(amount_without_additional_cost + additional_amount, sco.items[0].amount)
+
+		sco.additional_costs = []
+		sco.save()
+
+		self.assertEqual(sco.items[0].additional_cost_per_qty, 0)
+		self.assertEqual(rate_without_additional_cost, sco.items[0].rate)
+		self.assertEqual(amount_without_additional_cost, sco.items[0].amount)
+
 	def test_create_raw_materials_supplied(self):
 		sco = get_subcontracting_order()
 		sco.supplied_items = None

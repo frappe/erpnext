@@ -490,7 +490,7 @@ class SubcontractingController(StockController):
 						row.item_code,
 						row.get(self.subcontract_data.order_field),
 					) and transfer_item.qty > 0:
-						qty = self.__get_qty_based_on_material_transfer(row, transfer_item) or 0
+						qty = flt(self.__get_qty_based_on_material_transfer(row, transfer_item))
 						transfer_item.qty -= qty
 						self.__add_supplied_item(row, transfer_item.get("item_details"), qty)
 
@@ -720,6 +720,25 @@ class SubcontractingController(StockController):
 					sco_doc = frappe.get_doc("Subcontracting Order", sco)
 					sco_doc.update_status()
 
+	def set_missing_values_in_additional_costs(self):
+		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
+
+		if self.total_additional_costs:
+			if self.distribute_additional_costs_based_on == "Amount":
+				total_amt = sum(flt(item.amount) for item in self.get("items"))
+				for item in self.items:
+					item.additional_cost_per_qty = (
+						(item.amount * self.total_additional_costs) / total_amt
+					) / item.qty
+			else:
+				total_qty = sum(flt(item.qty) for item in self.get("items"))
+				additional_cost_per_qty = self.total_additional_costs / total_qty
+				for item in self.items:
+					item.additional_cost_per_qty = additional_cost_per_qty
+		else:
+			for item in self.items:
+				item.additional_cost_per_qty = 0
+
 	@frappe.whitelist()
 	def get_current_stock(self):
 		if self.doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
@@ -730,7 +749,7 @@ class SubcontractingController(StockController):
 						{"item_code": item.rm_item_code, "warehouse": self.supplier_warehouse},
 						"actual_qty",
 					)
-					item.current_stock = flt(actual_qty) or 0
+					item.current_stock = flt(actual_qty)
 
 	@property
 	def sub_contracted_items(self):
