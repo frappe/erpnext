@@ -1161,7 +1161,7 @@ class TestWorkOrder(FrappeTestCase):
 
 	def test_fix_time_operations(self):
 		bom = frappe.get_doc({
-			"doctype": "BOMa",
+			"doctype": "BOM",
 			"item": "_Test FG Item 2",
 			"is_active": 1,
 			"is_default": 1,

@@ -657,7 +657,7 @@ class WorkOrder(Document):
 			                      filters={"parent": bom_no},
 			                      fields=["operation", "description", "workstation", "idx",
 			                              "base_hour_rate as hour_rate", "time_in_mins", "parent as bom",
-			                              "batch_size", "sequence_id", "fixed_time"],
+			                              "batch_size", "sequence_id", "fixed_timed"],
 			                      order_by="idx")
 
 			for d in data:
