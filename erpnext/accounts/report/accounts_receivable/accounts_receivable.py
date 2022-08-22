@@ -119,6 +119,7 @@ class ReceivablePayableReport(object):
 					party_account=ple.account,
 					posting_date=ple.posting_date,
 					account_currency=ple.account_currency,
+					remarks=ple.remarks,
 					invoiced=0.0,
 					paid=0.0,
 					credit_note=0.0,
@@ -697,6 +698,7 @@ class ReceivablePayableReport(object):
 				ple.account_currency,
 				ple.amount,
 				ple.amount_in_account_currency,
+				ple.remarks,
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(self.qb_selection_filter))
@@ -973,6 +975,9 @@ class ReceivablePayableReport(object):
 				fieldtype="Link",
 				options="Supplier Group",
 			)
+
+		if self.filters.show_remarks:
+			self.add_column(label=_("Remarks"), fieldname="remarks", fieldtype="Text", width=200),
 
 	def add_column(self, label, fieldname=None, fieldtype="Currency", options=None, width=120):
 		if not fieldname:
