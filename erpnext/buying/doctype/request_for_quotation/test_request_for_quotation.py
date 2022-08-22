@@ -65,7 +65,6 @@ class TestRequestforQuotation(FrappeTestCase):
 		)
 		sq.submit()
 
-		frappe.form_dict = frappe.local("form_dict")
 		frappe.form_dict.name = rfq.name
 
 		self.assertEqual(check_supplier_has_docname_access(supplier_wt_appos[0].get("supplier")), True)
