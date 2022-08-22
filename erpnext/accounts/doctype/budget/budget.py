@@ -225,7 +225,7 @@ def get_ordered_amount(args, budget):
 	item_code = args.get('item_code')
 	condition = get_other_condition(args, budget, 'Purchase Order')
 
-	data = frappe.db.sql(""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
+	data = frappe.db.sql(""" select ifnull(sum(child.base_amount - (child.billed_amt * parent.conversion_rate)), 0) as amount
 		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
 		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
 		and parent.status != 'Closed' and {0}""".format(condition), item_code, as_list=1)
