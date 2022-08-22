@@ -265,6 +265,8 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 
+		frappe.throw(_("Cannot delete or cancel because Purchase Order With Ready Status {0} is linked with Purchase Order {1}").format(self.name,self.purchase_order))
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
