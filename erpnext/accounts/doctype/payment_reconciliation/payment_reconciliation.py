@@ -22,6 +22,7 @@ class PaymentReconciliation(Document):
 	def __init__(self, *args, **kwargs):
 		super(PaymentReconciliation, self).__init__(*args, **kwargs)
 		self.common_filter_conditions = []
+		self.ple_posting_date_filter = []
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
@@ -150,6 +151,7 @@ class PaymentReconciliation(Document):
 			return_outstanding = ple_query.get_voucher_outstandings(
 				vouchers=return_invoices,
 				common_filter=self.common_filter_conditions,
+				posting_date=self.ple_posting_date_filter,
 				min_outstanding=-(self.minimum_payment_amount) if self.minimum_payment_amount else None,
 				max_outstanding=-(self.maximum_payment_amount) if self.maximum_payment_amount else None,
 				get_payments=True,
@@ -187,6 +189,7 @@ class PaymentReconciliation(Document):
 			self.party,
 			self.receivable_payable_account,
 			common_filter=self.common_filter_conditions,
+			posting_date=self.ple_posting_date_filter,
 			min_outstanding=self.minimum_invoice_amount if self.minimum_invoice_amount else None,
 			max_outstanding=self.maximum_invoice_amount if self.maximum_invoice_amount else None,
 		)
@@ -350,6 +353,7 @@ class PaymentReconciliation(Document):
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()
+		self.ple_posting_date_filter.clear()
 		ple = qb.DocType("Payment Ledger Entry")
 
 		self.common_filter_conditions.append(ple.company == self.company)
@@ -359,15 +363,15 @@ class PaymentReconciliation(Document):
 
 		if get_invoices:
 			if self.from_invoice_date:
-				self.common_filter_conditions.append(ple.posting_date.gte(self.from_invoice_date))
+				self.ple_posting_date_filter.append(ple.posting_date.gte(self.from_invoice_date))
 			if self.to_invoice_date:
-				self.common_filter_conditions.append(ple.posting_date.lte(self.to_invoice_date))
+				self.ple_posting_date_filter.append(ple.posting_date.lte(self.to_invoice_date))
 
 		elif get_return_invoices:
 			if self.from_payment_date:
-				self.common_filter_conditions.append(ple.posting_date.gte(self.from_payment_date))
+				self.ple_posting_date_filter.append(ple.posting_date.gte(self.from_payment_date))
 			if self.to_payment_date:
-				self.common_filter_conditions.append(ple.posting_date.lte(self.to_payment_date))
+				self.ple_posting_date_filter.append(ple.posting_date.lte(self.to_payment_date))
 
 	def get_conditions(self, get_payments=False):
 		condition = " and company = '{0}' ".format(self.company)
