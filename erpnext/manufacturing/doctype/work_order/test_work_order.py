@@ -1068,7 +1068,7 @@ class TestWorkOrder(FrappeTestCase):
 		sm = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 100))
 		for row in sm.get("items"):
 			if row.get("item_code") == "_Test Item":
-				row.qty = 120
+				row.qty = 110
 
 		sm.submit()
 		cancel_stock_entry.append(sm.name)
@@ -1076,21 +1076,22 @@ class TestWorkOrder(FrappeTestCase):
 		s = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 90))
 		for row in s.get("items"):
 			if row.get("item_code") == "_Test Item":
-				self.assertEqual(row.get("qty"), 108)
+				self.assertEqual(row.get("qty"), 100)
+
 		s.submit()
 		cancel_stock_entry.append(s.name)
 
 		s1 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
 		for row in s1.get("items"):
 			if row.get("item_code") == "_Test Item":
-				self.assertEqual(row.get("qty"), 6)
+				self.assertEqual(row.get("qty"), 5)
 		s1.submit()
 		cancel_stock_entry.append(s1.name)
 
 		s2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 5))
 		for row in s2.get("items"):
 			if row.get("item_code") == "_Test Item":
-				self.assertEqual(row.get("qty"), 6)
+				self.assertEqual(row.get("qty"), 5)
 
 		cancel_stock_entry.reverse()
 		for ste in cancel_stock_entry:
