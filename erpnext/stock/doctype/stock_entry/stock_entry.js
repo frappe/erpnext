@@ -583,18 +583,23 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	add_to_transit: function(frm) {
-		if(frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer') {
-			frm.set_value('to_warehouse', '');
+		if(frm.doc.purpose=='Material Transfer') {
+			var filters = {
+				'is_group': 0,
+				'company': frm.doc.company
+			}
+
+			if(frm.doc.add_to_transit){
+				filters['warehouse_type'] = 'Transit';
+				frm.set_value('to_warehouse', '');
+				frm.trigger('set_transit_warehouse');
+			}
+
 			frm.fields_dict.to_warehouse.get_query = function() {
 				return {
-					filters:{
-						'warehouse_type' : 'Transit',
-						'is_group': 0,
-						'company': frm.doc.company
-					}
+					filters:filters
 				};
 			};
-			frm.trigger('set_transit_warehouse');
 		}
 	},
 
