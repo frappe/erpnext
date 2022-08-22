@@ -1320,7 +1320,7 @@ def get_serial_nos_for_job_card(row, wo_doc):
 		used_serial_nos.extend(get_serial_nos(d.serial_no))
 
 	serial_nos = sorted(list(set(serial_nos) - set(used_serial_nos)))
-	row.serial_no = "\n".join(serial_nos[0: cint(row.job_card_qty)])
+	row.serial_no = "\n".join(serial_nos[0 : cint(row.job_card_qty)])
 
 
 def validate_operation_data(row):
@@ -1438,24 +1438,24 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 	wo_item = frappe.qb.DocType("Work Order Item")
 
 	return (
-		       frappe.qb.from_(wo)
-			       .from_(wo_item)
-			       .select(
-			       Sum(
-				       Case()
-					       .when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
-					       .else_(wo_item.required_qty - wo_item.consumed_qty)
-			       )
-		       )
-			       .where(
-			       (wo_item.item_code == item_code)
-			       & (wo_item.parent == wo.name)
-			       & (wo.docstatus == 1)
-			       & (wo_item.source_warehouse == warehouse)
-			       & (wo.status.notin(["Stopped", "Completed", "Closed"]))
-			       & (
-				       (wo_item.required_qty > wo_item.transferred_qty)
-				       | (wo_item.required_qty > wo_item.consumed_qty)
-			       )
-		       )
-	       ).run()[0][0] or 0.0
+		frappe.qb.from_(wo)
+		.from_(wo_item)
+		.select(
+			Sum(
+				Case()
+				.when(wo.skip_transfer == 0, wo_item.required_qty - wo_item.transferred_qty)
+				.else_(wo_item.required_qty - wo_item.consumed_qty)
+			)
+		)
+		.where(
+			(wo_item.item_code == item_code)
+			& (wo_item.parent == wo.name)
+			& (wo.docstatus == 1)
+			& (wo_item.source_warehouse == warehouse)
+			& (wo.status.notin(["Stopped", "Completed", "Closed"]))
+			& (
+				(wo_item.required_qty > wo_item.transferred_qty)
+				| (wo_item.required_qty > wo_item.consumed_qty)
+			)
+		)
+	).run()[0][0] or 0.0
