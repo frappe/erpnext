@@ -625,9 +625,10 @@
             "print_hide": 1
         }
     ],
+    "in_create": 1,
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-08-19 19:50:16.935124",
+    "modified": "2022-08-22 17:30:40.827517",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt",
