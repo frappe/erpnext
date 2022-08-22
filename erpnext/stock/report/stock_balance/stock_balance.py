@@ -259,7 +259,9 @@ def apply_conditions(query, filters):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	warehouse_table = frappe.qb.DocType("Warehouse")
 
-	if not filters.get("from_date"):
+	if from_date := filters.get("from_date"):
+		query = query.where(sle.posting_date >= from_date)
+	else:
 		frappe.throw(_("'From Date' is required"))
 
 	if to_date := filters.get("to_date"):
