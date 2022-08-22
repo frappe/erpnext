@@ -318,7 +318,6 @@ def get_advance_vouchers(
 		"is_cancelled": 0,
 		"party_type": party_type,
 		"party": ["in", parties],
-		"against_voucher": ["is", "not set"],
 	}
 
 	if company:
