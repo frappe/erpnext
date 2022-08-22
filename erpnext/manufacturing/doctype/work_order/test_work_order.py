@@ -23,6 +23,8 @@ from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 
+test_dependencies = ["BOM"]
+
 
 class TestWorkOrder(FrappeTestCase):
 	def setUp(self):
@@ -93,7 +95,7 @@ class TestWorkOrder(FrappeTestCase):
 
 	def test_planned_operating_cost(self):
 		wo_order = make_wo_order_test_record(
-			item="_Test FG Item 2", planned_start_date=now(), qty=1, do_not_save=True
+			item="_Test FG Item 3", planned_start_date=now(), qty=1, do_not_save=True
 		)
 		wo_order.set_work_order_operations()
 		cost = wo_order.planned_operating_cost
