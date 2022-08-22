@@ -1170,7 +1170,7 @@ class AccountsController(TransactionBase):
 					)
 
 		if (
-			(enable_discount_accounting or self.is_cash_or_non_trade_discount)
+			(enable_discount_accounting or self.get("is_cash_or_non_trade_discount"))
 			and self.get("additional_discount_account")
 			and self.get("discount_amount")
 		):
