@@ -94,7 +94,8 @@ class CallLog(Document):
 				frappe.publish_realtime("show_call_popup", self, user=email)
 
 	def update_received_by(self):
-		if employees := get_employees_with_number(self.get("to")):
+		employees = get_employees_with_number(self.get("to"))
+		if employees:
 			self.call_received_by = employees[0].get("name")
 			self.employee_user_id = employees[0].get("user_id")
 
