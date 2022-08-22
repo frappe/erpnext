@@ -63,7 +63,8 @@ def validate_for_items(doc):
 		item = frappe.get_cached_value("Item", d.item_code, ['is_stock_item', 'is_sub_contracted_item', 'end_of_life',
 			'disabled'], as_dict=1)
 
-		validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
+		if not d.get('purchase_order') and not d.get('purchase_receipt'):
+			validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
 
 		# validate stock item
 		if doc.doctype not in ['Quotation', 'Supplier Quotation']:

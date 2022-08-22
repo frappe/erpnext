@@ -497,7 +497,8 @@ class SellingController(StockController):
 		for d in self.get('items'):
 			if d.item_code:
 				item = frappe.get_cached_value("Item", d.item_code, ['has_variants', 'end_of_life', 'disabled'], as_dict=1)
-				validate_end_of_life(d.item_code, end_of_life=item.end_of_life, disabled=item.disabled)
+				if not d.get('sales_order') and not d.get('delivery_note'):
+					validate_end_of_life(d.item_code, end_of_life=item.end_of_life, disabled=item.disabled)
 
 				if cint(item.has_variants):
 					throw(_("Item {0} is a template, please select one of its variants").format(item.name))
