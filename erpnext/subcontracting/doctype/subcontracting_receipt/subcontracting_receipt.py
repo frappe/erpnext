@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 
@@ -103,6 +103,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def set_missing_values(self):
+		self.set_missing_values_in_additional_costs()
 		self.set_missing_values_in_supplied_items()
 		self.set_missing_values_in_items()
 
@@ -125,12 +126,12 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
 
-			if self.is_new() and item.rm_supp_cost > 0:
+			if item.recalculate_rate:
 				item.rate = (
-					item.rm_cost_per_qty + (item.service_cost_per_qty or 0) + item.additional_cost_per_qty
+					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
 				)
 
-			item.received_qty = item.qty + (item.rejected_qty or 0)
+			item.received_qty = item.qty + flt(item.rejected_qty)
 			item.amount = item.qty * item.rate
 			total_qty += item.qty
 			total_amount += item.amount

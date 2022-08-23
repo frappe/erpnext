@@ -3,6 +3,8 @@
 
 frappe.provide('erpnext.buying');
 
+{% include 'erpnext/stock/landed_taxes_and_charges_common.js' %};
+
 frappe.ui.form.on('Subcontracting Order', {
 	setup: (frm) => {
 		frm.get_field("items").grid.cannot_add_rows = true;
@@ -133,6 +135,16 @@ frappe.ui.form.on('Subcontracting Order', {
 				});
 			}, __('Create'));
 		}
+	}
+});
+
+frappe.ui.form.on('Landed Cost Taxes and Charges', {
+	amount: function (frm, cdt, cdn) {
+		frm.events.set_base_amount(frm, cdt, cdn);
+	},
+
+	expense_account: function (frm, cdt, cdn) {
+		frm.events.set_account_currency(frm, cdt, cdn);
 	}
 });
 

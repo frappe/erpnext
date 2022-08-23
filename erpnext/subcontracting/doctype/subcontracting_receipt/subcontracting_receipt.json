@@ -15,6 +15,7 @@
         "company",
         "posting_date",
         "posting_time",
+        "set_posting_time",
         "is_return",
         "return_against",
         "accounting_dimensions_section",
@@ -47,12 +48,14 @@
         "raw_material_details",
         "get_current_stock",
         "supplied_items",
+        "additional_costs_section",
+        "distribute_additional_costs_based_on",
+        "additional_costs",
+        "total_additional_costs",
         "section_break_46",
         "in_words",
         "bill_no",
         "bill_date",
-        "accounting_details_section",
-        "provisional_expense_account",
         "more_info",
         "status",
         "column_break_39",
@@ -136,6 +139,7 @@
             "label": "Date",
             "no_copy": 1,
             "print_width": "100px",
+            "read_only_depends_on": "eval: !doc.set_posting_time",
             "reqd": 1,
             "search_index": 1,
             "width": "100px"
@@ -148,6 +152,7 @@
             "no_copy": 1,
             "print_hide": 1,
             "print_width": "100px",
+            "read_only_depends_on": "eval: !doc.set_posting_time",
             "reqd": 1,
             "width": "100px"
         },
@@ -525,19 +530,6 @@
             "read_only": 1
         },
         {
-            "collapsible": 1,
-            "fieldname": "accounting_details_section",
-            "fieldtype": "Section Break",
-            "label": "Accounting Details"
-        },
-        {
-            "fieldname": "provisional_expense_account",
-            "fieldtype": "Link",
-            "hidden": 1,
-            "label": "Provisional Expense Account",
-            "options": "Account"
-        },
-        {
             "default": "0",
             "fieldname": "is_return",
             "fieldtype": "Check",
@@ -595,11 +587,48 @@
             "fieldtype": "Link",
             "label": "Project",
             "options": "Project"
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "total_additional_costs",
+            "depends_on": "eval:(doc.docstatus == 0 || doc.total_additional_costs)",
+            "fieldname": "additional_costs_section",
+            "fieldtype": "Section Break",
+            "label": "Additional Costs"
+        },
+        {
+            "default": "Qty",
+            "fieldname": "distribute_additional_costs_based_on",
+            "fieldtype": "Select",
+            "label": "Distribute Additional Costs Based On ",
+            "options": "Qty\nAmount"
+        },
+        {
+            "fieldname": "additional_costs",
+            "fieldtype": "Table",
+            "label": "Additional Costs",
+            "options": "Landed Cost Taxes and Charges"
+        },
+        {
+            "fieldname": "total_additional_costs",
+            "fieldtype": "Currency",
+            "label": "Total Additional Costs",
+            "print_hide_if_no_value": 1,
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "depends_on": "eval:doc.docstatus==0",
+            "fieldname": "set_posting_time",
+            "fieldtype": "Check",
+            "label": "Edit Posting Date and Time",
+            "print_hide": 1
         }
     ],
+    "in_create": 1,
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-08-15 14:30:29.447307",
+    "modified": "2022-08-22 17:30:40.827517",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt",
