@@ -618,7 +618,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				precision("base_discount_amount"));
 
 			if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
-				return
+				return;
 			}
 
 			var total_for_discount_amount = this.get_total_for_discount_amount();
