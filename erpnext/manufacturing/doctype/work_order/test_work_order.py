@@ -26,6 +26,8 @@ from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 
+test_dependencies = ["BOM"]
+
 
 class TestWorkOrder(FrappeTestCase):
 	def setUp(self):
