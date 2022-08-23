@@ -37,7 +37,6 @@ class TestStockBalance(FrappeTestCase):
 			self.assertEqual(v, actual[k], msg=f"{expected=}\n{actual=}")
 
 	def generate_stock_ledger(self, item_code: str, movements):
-
 		for movement in map(_dict, movements):
 			if "to_warehouse" not in movement:
 				movement.to_warehouse = "_Test Warehouse - _TC"
@@ -53,10 +52,10 @@ class TestStockBalance(FrappeTestCase):
 						ORDER BY timestamp(posting_date, posting_time) desc, creation desc)
 						AS rn
 					FROM `tabStock Ledger Entry`
-					where is_cancelled=0
+					where is_cancelled=0 AND posting_date BETWEEN %(from_date)s AND %(to_date)s
 				)
 				SELECT * FROM last_balances WHERE rn = 1""",
-			as_dict=True,
+			self.filters, as_dict=True,
 		)
 
 		item_wh_stock = _dict()
