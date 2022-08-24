@@ -237,6 +237,8 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_po()
+		# Update Ammount in Account Payble DocType
+		frappe.db.set_value("Account Payable", self.purchase_order, 'total_payable_after_revision', self.total)
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
