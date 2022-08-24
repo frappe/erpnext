@@ -56,7 +56,7 @@ class Bankreconciliations(Document):
 		self.db_set('total_last_reconciliations', account.total_reconciliation, update_modified=False)
 		self.db_set('date_last_reconciliations', account.reconciliation_date, update_modified=False)
 
-		self.transaction_amount = self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount - self.wire_transfer_amount
+		self.transaction_amount = self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount - self.wire_transfer_amount + self.total_last_reconciliations
 
 		self.db_set('transaction_amount', self.transaction_amount, update_modified=False)
 
@@ -297,6 +297,7 @@ class Bankreconciliations(Document):
 		conditions += ', "reconciled": 0'
 		conditions += ', "mode_of_payment": "Cheque"'
 		conditions += ', "company": "{}"'.format(self.company)
+		conditions += ', "status": "Submitted"'
 		conditions += '}'
 
 		return conditions

@@ -1627,6 +1627,16 @@ class SalesInvoice(SellingController):
 							frappe.throw(_("Assign Credit Account by default in the company"))
 						else:
 							income_account = company.default_credit_account
+					
+					paid_amount = 0
+
+					for advance in self.get("advances"):
+						paid_amount += advance.allocated_amount
+					
+					if paid_amount > 0:
+						if paid_amount == self.grand_total:
+							company = frappe.get_doc("Company", self.company)
+							income_account = company.default_income_account
 
 					account_currency = get_account_currency(income_account)
 					gl_entries.append(
