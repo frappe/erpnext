@@ -85,7 +85,6 @@
   "depreciation_expense_account",
   "series_for_depreciation_entry",
   "expenses_included_in_asset_valuation",
-  "repair_and_maintenance_account",
   "column_break_40",
   "disposal_account",
   "depreciation_cost_center",
@@ -234,7 +233,6 @@
    "label": "Default Warehouse for Sales Return",
    "options": "Warehouse"
   },
-
   {
    "fieldname": "country",
    "fieldtype": "Link",
@@ -679,12 +677,6 @@
    "label": "Fixed Asset Defaults"
   },
   {
-   "fieldname": "repair_and_maintenance_account",
-   "fieldtype": "Link",
-   "label": "Repair and Maintenance Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "section_break_28",
    "fieldtype": "Section Break",
    "label": "Chart of Accounts"
@@ -709,7 +701,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-06-30 18:03:18.701314",
+ "modified": "2022-08-16 16:09:02.327724",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
