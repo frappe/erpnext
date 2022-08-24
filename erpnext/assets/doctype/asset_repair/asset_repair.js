@@ -76,7 +76,7 @@ frappe.ui.form.on('Asset Repair Consumed Item', {
 			'warehouse': frm.doc.warehouse,
 			'qty': item.consumed_quantity,
 			'serial_no': item.serial_no,
-			'company': frm.doc.company
+			'company': frm.doc.company,
 		};
 
 		frappe.call({

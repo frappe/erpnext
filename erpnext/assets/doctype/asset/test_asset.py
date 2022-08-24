@@ -1454,12 +1454,14 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 	return item
 
 
-def set_depreciation_settings_in_company():
-	company = frappe.get_doc("Company", "_Test Company")
-	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - _TC"
-	company.depreciation_expense_account = "_Test Depreciations - _TC"
-	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"
-	company.depreciation_cost_center = "_Test Cost Center - _TC"
+def set_depreciation_settings_in_company(company=None):
+	if not company:
+		company = "_Test Company"
+	company = frappe.get_doc("Company", company)
+	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - " + company.abbr
+	company.depreciation_expense_account = "_Test Depreciations - " + company.abbr
+	company.disposal_account = "_Test Gain/Loss on Asset Disposal - " + company.abbr
+	company.depreciation_cost_center = "Main - " + company.abbr
 	company.save()
 
 	# Enable booking asset depreciation entry automatically
