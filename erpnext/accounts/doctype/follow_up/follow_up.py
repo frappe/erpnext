@@ -200,12 +200,15 @@ class FollowUp(Document):
 			# email_template = frappe.get_doc("Email Template", follow.email_template)
 			primary_c = frappe.db.get_value('Customer', customer, "customer_primary_contact")
 			email_id = frappe.db.get_list('Contact Email', {"parent":primary_c }, ['email_id'])
+			account_manager = frappe.db.get_value('Customer', customer, "account_manager")
 			comm_email = ""
 			emails = []
 			for e in email_id:
 				emails.append(e.get('email_id'))
 				comm_email += e.get('email_id') +', '
 
+			if account_manager:
+				comm_email += account_manager 
 			
 
 			#Creating new dict for args for email Template ,comment and ToDo
@@ -318,15 +321,18 @@ class FollowUp(Document):
 				commited_amount = i.get("commited_amount")
 			else:	
 				c_rate = frappe.get_value("Sales Invoice", i["voucher_no"], "conversion_rate")
-				outstanding = float("{:.2f}".format(i["outstanding_amount"] / c_rate))
+				o = i["outstanding_amount"] / c_rate
+				outstanding = float("{:.2f}".format(o))
 				invoice_amount = float("{:.2f}".format(i["invoice_amount"] / c_rate))
 				commited_amount = float("{:.2f}".format(i.get("commited_amount") / c_rate))
 			
-
+			account_manager = frappe.db.get_value('Customer', customer, "account_manager")
 			comm_email = ""
 			for e in email_id:
 				emails.append(e.get('email_id'))
 				comm_email += e.get('email_id') +', '
+			if account_manager:
+				comm_email += account_manager 	
 			
 			
 			print(" this is emails", emails)

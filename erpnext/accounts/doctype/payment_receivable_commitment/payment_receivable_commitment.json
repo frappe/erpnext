@@ -181,13 +181,14 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-06 10:09:23.325215",
+ "modified": "2022-08-24 10:45:37.788308",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Receivable Commitment",
  "owner": "Administrator",
  "permissions": [
   {
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -197,6 +198,7 @@
    "share": 1
   },
   {
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -206,6 +208,7 @@
    "share": 1
   },
   {
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
