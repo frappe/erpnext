@@ -187,6 +187,7 @@ def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation
 @frappe.whitelist()
 def scrap_asset(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
+	accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
 	if asset.docstatus != 1:
 		frappe.throw(_("Asset {0} must be submitted").format(asset.name))
@@ -208,6 +209,14 @@ def scrap_asset(asset_name):
 
 	for entry in get_gl_entries_on_asset_disposal(asset):
 		entry.update({"reference_type": "Asset", "reference_name": asset_name})
+		for dimension in accounting_dimensions:
+			if asset.get(dimension["fieldname"]) or dimension.get("mandatory_for_bs"):
+				entry.update(
+					{
+						dimension["fieldname"]: asset.get(dimension["fieldname"])
+						or dimension.get("default_dimension")
+					}
+				)
 		je.append("accounts", entry)
 
 	je.flags.ignore_permissions = True
