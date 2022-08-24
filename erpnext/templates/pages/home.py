@@ -51,6 +51,6 @@ def get_context(context):
 
 	context.metatags = context.metatags or frappe._dict({})
 	context.metatags.image = homepage.hero_image or None
-	context.metatags.description = homepage.description or None
+	context.metatags.description = None # homepage.description or None
 
 	context.explore_link = "/all-products"
