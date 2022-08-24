@@ -761,3 +761,4 @@ erpnext.patches.v12_0.set_vehicle_transfer_letter_territory
 erpnext.patches.v12_0.restrict_vehicle_roles
 erpnext.patches.v12_0.add_delivery_user_role
 execute:frappe.delete_doc_if_exists("DocType", "Vehicle Booking Notification Count")
+erpnext.patches.v12_0.fix_leave_enchashment_duplicate_ledger
