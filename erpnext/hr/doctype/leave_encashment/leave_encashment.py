@@ -119,13 +119,11 @@ class LeaveEncashment(Document):
 		# create reverse entry for expired leaves
 		to_date = self.get_leave_allocation().get('to_date')
 		if to_date < getdate(nowdate()):
-			args = frappe._dict(
-				leaves=self.encashable_days,
-				from_date=to_date,
-				to_date=to_date,
-				is_carry_forward=0
-			)
-			create_leave_ledger_entry(self, args, submit)
+			leave_allocation = self.get_leave_allocation()
+			if leave_allocation:
+				name = frappe.get_value('Leave Ledger Entry', {"transaction_type": "Leave Allocation", "transaction_name": leave_allocation.get("name"), "is_expired": 1}, "name")
+				if name:
+					frappe.db.sql("""DELETE FROM `tabLeave Ledger Entry` WHERE `name`=%s""", (name))
 
 	def get_encashment_amount_per_day(self):
 		if not self.salary_structure:
