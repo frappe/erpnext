@@ -99,13 +99,14 @@ def return_data(filters):
 		isv15 = 0
 		taxed_sales18 = 0
 		isv18 = 0
-		is_row = False
+		
 		cont = 0
 		partial_discount = 0
 		discount_amount = 0
 		grand_total = 0
 
 		for salary_slip in salary_slips:
+			is_row = False
 			split_serie = salary_slip.naming_series.split('-')
 			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
 				
@@ -209,7 +210,7 @@ def return_data(filters):
 		final_range = "{}-{}".format(initial_range, final_range)
 
 		if is_row:
-			row = [posting_date, serie_number, type_transaction, final_range, grand_total, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			row = [posting_date, serie_number, type_transaction, final_range, grand_total, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, 0, 0, grand_total]
 			data.append(row)
 	
 	conditions = return_filters_credit_note(filters, from_date, to_date)
@@ -286,7 +287,7 @@ def return_data(filters):
 		final_range = "{}-{}".format(initial_range, final_range)
 
 		if is_row:
-			row = [posting_date, serie_number, type_transaction, final_range, grand_total, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			row = [posting_date, serie_number, type_transaction, final_range, grand_total, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, 0, 0, grand_total]
 			data.append(row)
 	
 	dates.clear()
