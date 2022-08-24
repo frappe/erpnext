@@ -63,8 +63,11 @@
   "is_fixed_asset",
   "asset",
   "finance_book",
+  "sales_default_values",
   "col_break4",
   "expense_account",
+  "purchase_default_values",
+  "inventory_default_values",
   "deferred_revenue",
   "deferred_revenue_account",
   "service_stop_date",
@@ -835,11 +838,32 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "is_exonerated"
+  },
+  {
+   "fetch_from": "item_code.sales_default_values",
+   "fieldname": "sales_default_values",
+   "fieldtype": "Link",
+   "label": "Sales Default Values",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "item_code.purchase_default_values",
+   "fieldname": "purchase_default_values",
+   "fieldtype": "Link",
+   "label": "Purchase Default Values",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "item_code.inventory_default_values",
+   "fieldname": "inventory_default_values",
+   "fieldtype": "Link",
+   "label": "Inventory Default Values",
+   "options": "Account"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-07-26 15:39:08.270049",
+ "modified": "2022-08-24 16:23:59.840458",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
