@@ -159,7 +159,7 @@ def return_data(filters):
 	
 	conditions = return_filters_credit_note(filters, from_date, to_date)
 	
-	credit_notes = frappe.get_all("Credit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "amount_total"], filters = conditions, order_by = "name asc")
+	credit_notes = frappe.get_all("Credit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "amount_total", "total_exempt"], filters = conditions, order_by = "name asc")
 
 	for credit_note in credit_notes:
 		split_date = str(credit_note.posting_date).split("T")[0].split("-")
@@ -183,14 +183,15 @@ def return_data(filters):
 			initial_range = split_initial_range[3]
 
 			isv15 += credit_note.isv_15
-			isv18 = credit_note.isv_18
+			isv18 += credit_note.isv_18
 			split_final_range = credit_note.name.split("-")
 			final_range = split_final_range[3]
+			total_exempt += credit_note.total_exempt
 
-			multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv", "isv"], filters = {"parent": credit_note.name})
+			multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv", "isv_template"], filters = {"parent": credit_note.name})
 
 			for multiple_taxe in multiples_taxes:
-				item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": multiple_taxe.isv})
+				item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": multiple_taxe.isv_template})
 
 				for tax_tamplate in item_tax_templates:
 
@@ -299,6 +300,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "status": ["!=", "Canceled"]'
 	conditions += '}'
 
 	return conditions

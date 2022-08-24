@@ -12,6 +12,8 @@
   "naming_series",
   "is_transaction",
   "bank_transaction",
+  "customer_document",
+  "inventory_download",
   "column_break1",
   "posting_date",
   "company",
@@ -19,6 +21,7 @@
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
+  "supplier_document",
   "cheque_no",
   "cheque_date",
   "user_remark",
@@ -83,7 +86,7 @@
    "label": "Entry Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation",
+   "options": "Journal Entry\nPayroll Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation",
    "reqd": 1,
    "search_index": 1
   },
@@ -497,12 +500,32 @@
    "fieldtype": "Link",
    "label": "Bank Transactions",
    "options": "Bank Transactions"
+  },
+  {
+   "fieldname": "supplier_document",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Supplier Document",
+   "options": "Supplier Documents",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_document",
+   "fieldtype": "Link",
+   "label": "Customer Document",
+   "options": "Customer Documents"
+  },
+  {
+   "fieldname": "inventory_download",
+   "fieldtype": "Link",
+   "label": "Inventory Download",
+   "options": "Inventory Download"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2021-09-30 11:05:39.240203",
+ "modified": "2022-08-03 14:02:59.351481",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

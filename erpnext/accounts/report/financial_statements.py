@@ -258,7 +258,10 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 					if row.get("account") in children and row.get("has_value"):
 						data_with_value.append(d)
 						break
-
+		
+		if d.get("account") == "Total":
+			data_with_value.append(d)
+ 
 	return data_with_value
 
 

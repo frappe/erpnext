@@ -15,8 +15,10 @@
   "columna_general",
   "company",
   "reason_for_sale",
+  "update_table",
   "products_section",
   "products_table",
+  "products_detail",
   "totals_section",
   "total",
   "total_advance",
@@ -97,9 +99,10 @@
   {
    "fieldname": "products_table",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Products Table",
    "options": "Account Statement Payment Item",
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "totals_section",
@@ -235,12 +238,26 @@
   {
    "fieldname": "total_without_medical_fees",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Total Without Medical Fees",
    "read_only": 1
+  },
+  {
+   "fieldname": "products_detail",
+   "fieldtype": "Table",
+   "label": "Products Detail",
+   "options": "Account Statement Payment Item Detail",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "update_table",
+   "fieldtype": "Check",
+   "label": "Update Table"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-24 11:44:50.453929",
+ "modified": "2022-07-22 14:37:38.618784",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",

@@ -1,0 +1,80 @@
+{
+ "creation": "2022-02-11 14:06:07.287066",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bank_account",
+  "no_bank_check",
+  "posting_date",
+  "remarks",
+  "created_by",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_bank_check",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "No. Bank Check",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Voided Check",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Long Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Data",
+   "label": "Created By"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-03-10 11:17:07.747399",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Voided Check",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

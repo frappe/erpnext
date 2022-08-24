@@ -30,6 +30,7 @@
   "valuation_rate",
   "standard_rate",
   "is_fixed_asset",
+  "is_work_order",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
@@ -141,7 +142,11 @@
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub"
+  "synced_with_hub",
+  "accouting",
+  "sales_default_values",
+  "purchase_default_values",
+  "inventory_default_values"
  ],
  "fields": [
   {
@@ -1079,6 +1084,35 @@
    "label": "Default Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_work_order",
+   "fieldtype": "Check",
+   "label": "Is Work Order"
+  },
+  {
+   "fieldname": "accouting",
+   "fieldtype": "Section Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "sales_default_values",
+   "fieldtype": "Link",
+   "label": "Sales Default Values",
+   "options": "Account"
+  },
+  {
+   "fieldname": "purchase_default_values",
+   "fieldtype": "Link",
+   "label": "Purchase Default Values",
+   "options": "Account"
+  },
+  {
+   "fieldname": "inventory_default_values",
+   "fieldtype": "Link",
+   "label": "Inventory Default Values",
+   "options": "Account"
   }
  ],
  "has_web_view": 1,
@@ -1086,7 +1120,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-12-03 15:15:34.729610",
+ "modified": "2022-08-24 16:16:21.461691",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

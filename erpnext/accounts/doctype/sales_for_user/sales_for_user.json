@@ -16,17 +16,23 @@
   "section1",
   "details",
   "section2",
+  "payments",
+  "section3",
+  "terms_and_conditions",
+  "section4",
   "total_cash",
   "total_cards",
+  "actual_cash",
   "total_advances_applied",
   "total_no_monetary",
   "total_income",
-  "column2",
   "total_credit",
+  "column2",
   "total_utility",
   "total_invoice",
   "total_operations",
-  "total_exempt_sales"
+  "total_exempt_sales",
+  "payment_entry"
  ],
  "fields": [
   {
@@ -70,6 +76,8 @@
   {
    "fieldname": "user",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "User",
    "options": "User"
   },
@@ -81,13 +89,17 @@
   {
    "fieldname": "total_cash",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Cash",
+   "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "total_cards",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Cards",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -160,9 +172,45 @@
    "fieldtype": "Currency",
    "label": "Total Exempt Sales",
    "read_only": 1
+  },
+  {
+   "fieldname": "actual_cash",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Actual Cash",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Sales Invoice Payment",
+   "options": "Sales Invoice Payment Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Table",
+   "label": "Terms and Conditions Detail",
+   "options": "Terms and Conditions Detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Currency",
+   "label": "Payment Entry",
+   "read_only": 1
   }
  ],
- "modified": "2021-12-23 11:15:16.126999",
+ "modified": "2022-05-03 11:17:23.527858",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales For User",
@@ -177,6 +225,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Reporte de Ventas",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Factura de Venta",
    "share": 1,
    "write": 1
   }

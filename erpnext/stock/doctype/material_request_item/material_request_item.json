@@ -24,12 +24,12 @@
   "uom",
   "conversion_factor",
   "stock_uom",
+  "stock_qty",
   "warehouse",
   "col_break2",
   "schedule_date",
   "rate",
   "amount",
-  "stock_qty",
   "more_info",
   "lead_time_date",
   "sales_order",
@@ -128,7 +128,6 @@
    "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
@@ -174,7 +173,6 @@
    "columns": 2,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Required Date",
    "oldfieldname": "schedule_date",
    "oldfieldtype": "Date",
@@ -183,17 +181,20 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate"
   },
   {
+   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Stock Qty",
@@ -312,6 +313,7 @@
   {
    "fieldname": "actual_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Actual Qty",
    "no_copy": 1,
    "print_hide": 1,
@@ -407,7 +409,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-02 06:49:36.493957",
+ "modified": "2022-01-21 16:21:23.932095",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

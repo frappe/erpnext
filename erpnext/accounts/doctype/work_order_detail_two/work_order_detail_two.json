@@ -1,0 +1,58 @@
+{
+ "autoname": "hash",
+ "creation": "2022-08-17 15:38:31.779619",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "qty"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "columns": 3,
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "oldfieldname": "item_code",
+   "oldfieldtype": "Link",
+   "options": "Item",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Item Name",
+   "oldfieldname": "item_name",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "columns": 2,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "oldfieldname": "qty",
+   "oldfieldtype": "Currency"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-08-18 15:30:49.520829",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Work Order Detail Two",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

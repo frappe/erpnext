@@ -12,54 +12,110 @@ from frappe.model.naming import parse_naming_series
 
 class CreditNoteCXP(Document):
 	def validate(self):
-		self.calculate_total()
-		self.validate_status()
-		self.set_status()
+		self.calculate_totals()
+
 		if self.docstatus == 1:
+			self.apply_changes_references()
+			self.update_dashboard_supplier()
 			self.update_accounts_status()
 			self.apply_gl_entry()
+	
+	def on_cancel(self):
+		self.apply_changes_references_cancel()
+		self.update_dashboard_supplier_cancel()
+		self.update_accounts_status_cancel()
+		self.delete_gl_entry()
+	
+	def calculate_totals(self):
+		self.total_references = 0
+
+		for reference in self.get("references"):			
+			self.total_references += reference.paid_amount
 		
-	def on_load(self):
-		self.validate_status()
+		self.total_taxed = 0
+		tax15 = 0
+		tax18 = 0
 
-	def calculate_total(self):
-		self.calculate_isv()
-		total_base = 0
-		if self.total_exempt != None:
-			if not self.get("taxes"):
-				self.total = self.total_exempt
-				self.outstanding_amount = self.total_exempt
-			else:
-				for taxes_list in self.get("taxes"):
-					total_base += taxes_list.base_isv
-				if self.total_exempt != None:
-					self.total = total_base + self.total_exempt
-					self.outstanding_amount = total_base + self.total_exempt
-				else:
-					self.total = total_base
-					self.outstanding_amount = total_base 
-				if self.isv_15 != None:
-					self.total = total_base + self.total_exempt + self.isv_15
-					self.outstanding_amount = total_base + self.total_exempt + self.isv_15
-				elif self.isv_18 != None:
-					self.total = total_base + self.total_exempt + self.isv_15
-					self.outstanding_amount = total_base + self.total_exempt + self.isv_15
+		for tax in self.get("taxes"):
+			self.total_taxed += tax.base_isv
+
+			tax_rate = frappe.get_all("Item Tax Template Detail", ["*"], filters = {"parent": tax.isv_template})
+
+			if tax_rate[0].tax_rate == 15:
+				tax15 += (tax.base_isv / 1.15)*0.15
 			
-	def calculate_isv(self):
-		self.isv_15 = 0
-		self.isv_18 = 0
-		for taxes_list in self.get("taxes"):
-			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv_template})
-			for tax_template in item_tax_template:
-				tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_template.name})
-				for tax in tax_details:
-					if tax.tax_rate == 15:
-						tx_base = taxes_list.base_isv * (tax.tax_rate/100)
-						self.isv_15 = tx_base
-					elif tax.tax_rate == 18:
-						tx_base = taxes_list.base_isv * (tax.tax_rate/100)
-						self.isv_18 = tx_base
+			if tax_rate[0].tax_rate == 18:
+				tax18 += (tax.base_isv / 1.18)*0.18
+	
+		if self.total_taxed > self.total_references:
+			frappe.throw(_("Total taxed can't be greater than total references."))
+		
+		self.isv_18 = tax18
+		self.isv_15 = tax15
+		self.total = self.total_references - self.total_taxed
+	
+	def apply_changes_references(self):
+		for reference in self.get("references"):
+			doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
+			doc.outstanding_amount -= reference.paid_amount
+			
+			if doc.outstanding_amount < 0:
+				frappe.throw(_("Outstanding Amount can't be negative value."))
+			
+			if doc.outstanding_amount == 0:
+				if reference.reference_doctype == "Purchase Invoice":
+					doc.docstatus = 4
+					doc.status = "Paid"
+					doc.db_set('status', doc.status, update_modified=False)
+				
+				if reference.reference_doctype == "Supplier Documents":
+					doc.status = "Paid"
+					doc.db_set('status', doc.status, update_modified=False)
+			
+			doc.db_set('outstanding_amount', doc.outstanding_amount, update_modified=False)
+			doc.db_set('docstatus', doc.docstatus, update_modified=False)
+	
+	def apply_changes_references_cancel(self):
+		for reference in self.get("references"):
+			doc = frappe.get_doc(reference.reference_doctype, reference.reference_name)
+			doc.outstanding_amount += reference.paid_amount
+			
+			if doc.outstanding_amount == reference.paid_amount:
+				if reference.reference_doctype == "Purchase Invoice":
+					doc.docstatus = 5
+					doc.status = "Unpaid"
+					doc.db_set('status', doc.status, update_modified=False)
 
+				if reference.reference_doctype == "Supplier Documents":
+					doc.status = "Unpaid"
+					doc.db_set('status', doc.status, update_modified=False)
+			
+			doc.db_set('outstanding_amount', doc.outstanding_amount, update_modified=False)
+			doc.db_set('docstatus', doc.docstatus, update_modified=False)
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.total_unpaid -= self.total
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total * -1
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.total_unpaid += self.total
+			supplier.save()
+	
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
@@ -67,38 +123,19 @@ class CreditNoteCXP(Document):
 			supplier.remaining_balance -= self.total
 			supplier.save()
 	
-	def validate_status(self):
-		if self.outstanding_amount > 0:
-			self.status = "Unpaid"
-		elif  getdate(self.due_date) >= getdate(nowdate()):
-			self.status = "Overdue"
-		elif self.outstanding_amount <= 0:
-			self.status = "Paid"
-	
-	def set_status(self, update=False, status=None, update_modified=True):
-		if self.is_new():
-			if self.get('amended_from'):
-				self.status = 'Draft'
-			return
+	def update_accounts_status_cancel(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.credit -= self.total
+			supplier.remaining_balance += self.total
+			supplier.save()
 
-		if not status:
-			if self.docstatus == 2:
-				status = "Cancelled"
-			elif self.docstatus == 1:
-				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
-					self.status = "Overdue"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
-					self.status = "Unpaid"
-				elif flt(self.outstanding_amount)<=0:
-					self.status = "Paid"
-				else:
-					self.status = "Submitted"
-			else:
-				self.status = "Draft"
+	def delete_gl_entry(self):
+		entries = frappe.get_all("GL Entry", ["name"], filters = {"voucher_no": self.name})
 
-		if update:
-			self.db_set('status', self.status, update_modified = update_modified)
-	
+		for entry in entries:
+			frappe.delete_doc("GL Entry", entry.name)
+
 	def apply_gl_entry(self):
 		currentDateTime = datetime.now()
 		date = currentDateTime.date()

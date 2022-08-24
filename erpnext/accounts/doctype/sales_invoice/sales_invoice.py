@@ -32,6 +32,7 @@ from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
 from frappe.utils.data import money_in_words
 from datetime import datetime
+import math
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -194,17 +195,48 @@ class SalesInvoice(SellingController):
 
 					self.set_new_row_item(item, product_price[0].price_list_rate, amount, 0)
 					frappe.delete_doc('Sales Invoice Item', item.name)
+	
+	def work_order_create(self):
+		if self.is_work_order == 1:
+			if self.work_order == None:
+				frappe.throw(_("Select Work Order Invoice."))
+			else:
+				order = frappe.get_doc("Work Order Invoice", self.work_order)
+				order.sales_invoice = self.name
+				order.company = self.company
+				order.save()
+		else:
+			order = frappe.new_doc("Work Order Invoice")
+			order.sales_invoice = self.name
+			order.company = self.company
+			order.insert()
+		
+		self.verificate_work_order()
+		
+	def verificate_work_order(self):
+		orders = frappe.get_all("Work Order Invoice", ["name"], filters = {"sales_invoice": self.name})
+
+		if len(orders) > 0:
+			order = frappe.get_doc("Work Order Invoice", orders[0].name)
+
+			items = frappe.get_all("Work Order Items", ["*"], filters = {"parent": order.name})
+
+			if len(items) == 0:
+				frappe.delete_doc("Work Order Invoice", order.name)
 
 	def calculate_insurance(self):
 		self.total_insurance_deduction = self.excesses + self.deductible + self.ineligible_expenses + self.co_pay20
 		self.deduction_grand_total = self.grand_total - self.total_insurance_deduction
+		self.db_set('deduction_grand_total', self.deduction_grand_total, update_modified=False)
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 		self.discount_product()
 		self.calculate_insurance()
-
+		if self.round_off_discount == 1 and self.update_stock == 0:
+			frappe.throw(_("When selecting a discount reason check the field to update inventory."))
+			
 		if self.docstatus == 0:
 			self.caculate_items_amount()
 			# self.set_cost_center()
@@ -275,24 +307,86 @@ class SalesInvoice(SellingController):
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.exonerated_value()
+
+		if self.grand_total == self.paid_amount:
+			outstanding_amount = 0
+			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+			
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.calculated_taxes()
 			if self.is_pos:
 				self.allow_credit_pos()
+
+			self.update_dashboard_customer()
 			# self.create_dispatch_control()
+			# if self.grand_total == self.paid_amount:
+			# 	self.db_set('outstanding_amount', 0, update_modified=False)	
+			# else:
+			# 	outstanding_amount = self.rounded_total
+
+			# 	if self.total_advance > 0:
+			# 		outstanding_amount = self.rounded_total - self.total_advance
+
+			# 	if self.paid_amount > 0:
+			# 		outstanding_amount = self.rounded_total - self.paid_amount
 
 		# if self.docstatus == 0:
 		# 	self.validate_camps()
-
+		# if self.round_off_discount == 1
 		# if self.docstatus == 0:
 		# 	self.assign_cai()
+	
+	# def apply_advances(self):
+	# 	for advance in self.get("advances"):
+	# 		self.outstanding_amount -= advance.allocated_amount
+	# 		self.db_set('outstanding_amount', self.outstanding_amount, update_modified=False)	
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.billing_this_year += self.grand_total
+
+			outstanding_amount = self.outstanding_amount
+
+			if self.grand_total == self.paid_amount:
+				outstanding_amount = 0
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			customer.total_unpaid += outstanding_amount
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.grand_total
+			outstanding_amount = self.outstanding_amount
+
+			if self.grand_total == self.paid_amount:
+				outstanding_amount = 0
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			new_doc.total_unpaid = outstanding_amount
+			new_doc.insert()
+	
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.billing_this_year -= self.grand_total
+			customer.total_unpaid -= self.outstanding_amount
+			customer.save()
 	
 	def allow_credit_pos(self):
 		pos_profile = frappe.get_all("POS Profile", ["allow_credit"], filters = {"name": self.pos_profile})
 
 		if self.outstanding_amount > 0:
 			if pos_profile[0].allow_credit == 0:
-				frappe.throw(_("It is not allowed to give credit at this point of sale"))
+				if self.grand_total > self.paid_amount:
+					frappe.throw(_("It is not allowed to give credit at this point of sale"))
 
 	def create_dispatch_control(self):
 		products = frappe.get_all("Sales Invoice Item", ["item_code", "qty"], filters = {"parent": self.name})
@@ -381,6 +475,7 @@ class SalesInvoice(SellingController):
 		taxed_sales15 = 0
 		taxed_sales18 = 0
 		outstanding_amount = 0
+		grand_total = 0
 
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
@@ -438,6 +533,33 @@ class SalesInvoice(SellingController):
 		self.taxed_sales15 = taxed_sales15
 		self.taxed_sales18 = taxed_sales18
 
+		if self.is_pos:
+			pos = frappe.get_doc("POS Profile", self.pos_profile)
+
+			if pos.round_off_discount == 1:
+				discount_amount = math.ceil(self.discount_amount)
+
+				net_total = math.floor(self.net_total)
+				self.db_set('net_total', net_total, update_modified=False)
+
+				# rounding_adjustment = math.floor(self.rounding_adjustment)
+				self.db_set('rounding_adjustment', 0, update_modified=False)
+
+				self.discount_amount = discount_amount
+				self.db_set('discount_amount', discount_amount, update_modified=False)
+		else:
+			if self.round_off_discount == 1:
+				discount_amount = math.ceil(self.discount_amount)
+
+				net_total = math.floor(self.net_total)
+				self.db_set('net_total', net_total, update_modified=False)
+
+				# rounding_adjustment = math.floor(self.rounding_adjustment)
+				self.db_set('rounding_adjustment', 0, update_modified=False)
+
+				self.discount_amount = discount_amount
+				self.db_set('discount_amount', discount_amount, update_modified=False)
+
 		if self.exonerated == 1:
 			if self.discount_amount:
 				self.grand_total = self.total - self.discount_amount
@@ -449,16 +571,29 @@ class SalesInvoice(SellingController):
 			else:
 				self.grand_total = self.total
 		
+		grand_total = self.grand_total
+		
 		if self.is_pos and self.change_amount > 0:
 			outstanding_amount = 0
 			self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 		else:
-			self.outstanding_amount = self.grand_total - self.total_advance
+			if self.round_off_discount:
+				if self.grand_total != self.outstanding_amount:
+					outstanding_amount = self.grand_total
+					self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+			else:
+				outstanding_amount = 0
+				if self.paid_amount > 0:
+					outstanding_amount = self.grand_total - self.paid_amount
+				else:
+					outstanding_amount = self.grand_total
+
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 		
 		self.rounded_total = self.grand_total
-		self.in_words = money_in_words(self.grand_total)
 
 		# if self.status == 'Draft' or self.docstatus == 1:
+		self.db_set('grand_total', grand_total, update_modified=False)
 		self.db_set('isv15', taxed15, update_modified=False)
 		self.db_set('isv18', taxed18, update_modified=False)
 		self.db_set('total_exonerated', exonerated, update_modified=False)
@@ -466,6 +601,25 @@ class SalesInvoice(SellingController):
 		self.db_set('total_exempt', exempt, update_modified=False)
 		self.db_set('taxed_sales18', taxed_sales18, update_modified=False)
 		self.db_set('total_taxes_and_charges', taxed15 + taxed18, update_modified=False)
+
+		if self.is_pos:
+			pos = frappe.get_doc("POS Profile", self.pos_profile)
+
+			if pos.round_off_discount == 1:
+				self.db_set('rounded_total', self.grand_total, update_modified=False)
+
+				if self.grand_total == self.paid_amount:
+					self.db_set('outstanding_amount', 0, update_modified=False)	
+		else:
+			if self.round_off_discount == 1:
+				self.db_set('rounded_total', self.grand_total, update_modified=False)
+
+				if self.grand_total == self.paid_amount:
+					self.db_set('outstanding_amount', 0, update_modified=False)		
+
+		self.in_words = money_in_words(self.grand_total)
+		self.db_set('in_words', self.in_words, update_modified=False)		
+		self.calculate_insurance()
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
@@ -499,7 +653,8 @@ class SalesInvoice(SellingController):
 		customer = frappe.get_doc("Customer", self.customer)
 		if customer:
 			customer.debit += self.grand_total
-			customer.remaining_balance += self.grand_total
+			customer.credit += self.paid_amount
+			customer.remaining_balance += self.grand_total - self.paid_amount
 			customer.save()
 			
 	def discount_product(self):
@@ -523,6 +678,9 @@ class SalesInvoice(SellingController):
 		now = datetime.now()
 
 		date = now.date()
+
+		if current_value == None:
+			current_value = 0
 
 		number_final = current_value + 1
 
@@ -758,6 +916,8 @@ class SalesInvoice(SellingController):
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
 
+		self.update_dashboard_customer_cancel()
+ 
 		self.check_sales_order_on_hold_or_close("sales_order")
 
 		if self.is_return and not self.update_billed_amount_in_sales_order:
@@ -898,11 +1058,27 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
-		self.exonerated_value()
+		# self.exonerated_value()
 		self.calculated_taxes()
 		if self.docstatus == 1:
 			self.create_dispatch_control()
+			self.verificate_work_order()
+			self.work_order_create()
+		
 		self.reload()
+
+		# if self.grand_total == self.paid_amount:
+		# 		self.db_set('outstanding_amount', 0, update_modified=False)	
+		# else:
+		# 	outstanding_amount = self.rounded_total
+
+		# 	if self.total_advance > 0:
+		# 		outstanding_amount = self.rounded_total - self.total_advance
+
+		# 	if self.paid_amount > 0:
+		# 		outstanding_amount = self.rounded_total - self.paid_amount
+				
+		# 	self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -1275,6 +1451,9 @@ class SalesInvoice(SellingController):
 
 		self.make_customer_gl_entry(gl_entries)
 
+		if self.discount_reason != None:
+			self.make_discount_gl_entries(gl_entries)
+
 		# if self.exonerated and self.account_head == None:
 		# 	frappe.throw(_("You need to fill the account head field"))
 
@@ -1303,6 +1482,8 @@ class SalesInvoice(SellingController):
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
 
+			company = frappe.get_doc("Company", self.company)
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -1315,9 +1496,42 @@ class SalesInvoice(SellingController):
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.cost_center
 				}, self.party_account_currency)
 			)
+	
+	def make_discount_gl_entries(self, gl_entries):
+		account = frappe.get_all("Mode of Payment Account", ["*"], filters = {"company": self.company, "parent": self.discount_reason})
+
+		if len(account) == 0:
+			frappe.throw(_("The discount reason does not have a ledger account assigned for this company."))
+
+		account_currency = get_account_currency(account[0].default_account)
+
+		# gl_entries.append(
+		# 	self.get_gl_dict({
+		# 		"account": account[0].default_account,
+		# 		"against": self.customer,
+		# 		"credit": self.discount_amount,
+		# 		"credit_in_account_currency": self.discount_amount,
+		# 		"cost_center": self.cost_center
+		# 	}, account_currency)
+		# )
+		company = frappe.get_doc("Company", self.company)
+		gl_entries.append(
+				self.get_gl_dict({
+					"account": account[0].default_account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"due_date": self.due_date,
+					"against": self.against_income_account,
+					"debit": self.discount_amount,
+					"debit_in_account_currency": self.discount_amount,
+					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": company.round_off_cost_center
+			}, account_currency)
+		)
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
@@ -1338,8 +1552,53 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
+		total_amount = 0
+		cont = 0
 		for item in self.get("items"):
-			if flt(item.base_net_amount, item.precision("base_net_amount")):
+			base_net_amount = 0
+
+			if self.is_pos:
+				pos = frappe.get_doc("POS Profile", self.pos_profile)
+
+				if pos.round_off_discount == 1:
+					base_net_amount = math.floor(item.base_net_amount)
+					total_amount += base_net_amount
+					items = self.get("items")
+					last = items[-1]
+					
+					if last.item_code == item.item_code:
+						if total_amount < gl_entries[0].debit:
+							total_amount -= base_net_amount
+							base_net_amount = math.ceil(item.base_net_amount)
+							total_amount += base_net_amount
+
+							if total_amount < gl_entries[0].debit:
+								sum_amount = gl_entries[0].debit - total_amount
+								base_net_amount += sum_amount
+								total_amount += sum_amount
+				else:
+					base_net_amount = item.base_net_amount
+			else:
+				if self.round_off_discount:
+					base_net_amount = math.floor(item.base_net_amount)
+					total_amount += base_net_amount
+					items = self.get("items")
+					last = items[-1]
+						
+					if last.item_code == item.item_code:
+						if total_amount < gl_entries[0].debit:
+							total_amount -= base_net_amount
+							base_net_amount = math.ceil(item.base_net_amount)
+							total_amount += base_net_amount
+
+							if total_amount < gl_entries[0].debit:
+								sum_amount = gl_entries[0].debit - total_amount
+								base_net_amount += sum_amount
+								total_amount += sum_amount
+				else:
+					base_net_amount = item.base_net_amount
+
+			if flt(base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
 					asset = frappe.get_doc("Asset", item.asset)
 
@@ -1349,7 +1608,7 @@ class SalesInvoice(SellingController):
 							.format(item.item_code, item.idx))
 
 					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
-						item.base_net_amount, item.finance_book)
+						base_net_amount, item.finance_book)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1360,14 +1619,32 @@ class SalesInvoice(SellingController):
 				else:
 					income_account = (item.income_account
 						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
+					
+					if self.outstanding_amount > 0:
+						company = frappe.get_doc("Company", self.company)
+
+						if company.default_credit_account == None:
+							frappe.throw(_("Assign Credit Account by default in the company"))
+						else:
+							income_account = company.default_credit_account
+					
+					paid_amount = 0
+
+					for advance in self.get("advances"):
+						paid_amount += advance.allocated_amount
+					
+					if paid_amount > 0:
+						if paid_amount == self.grand_total:
+							company = frappe.get_doc("Company", self.company)
+							income_account = company.default_income_account
 
 					account_currency = get_account_currency(income_account)
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": income_account,
 							"against": self.customer,
-							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+							"credit": flt(base_net_amount, item.precision("base_net_amount")),
+							"credit_in_account_currency": (flt(base_net_amount, item.precision("base_net_amount"))
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
 							"cost_center": item.cost_center
@@ -1380,6 +1657,7 @@ class SalesInvoice(SellingController):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
+		company = frappe.get_doc("Company", self.company)
 		if cint(self.redeem_loyalty_points):
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1390,13 +1668,13 @@ class SalesInvoice(SellingController):
 					"credit": self.loyalty_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.cost_center
 				})
 			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.loyalty_redemption_account,
-					"cost_center": self.cost_center or self.loyalty_redemption_cost_center,
+					"cost_center": company.cost_center or self.loyalty_redemption_cost_center,
 					"against": self.customer,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
@@ -1412,7 +1690,9 @@ class SalesInvoice(SellingController):
 						amount = payment_mode.base_amount - self.change_amount
 					else:
 						amount = payment_mode.base_amount
-						
+					
+					company = frappe.get_doc("Company", self.company)
+					
 					gl_entries.append(
 						self.get_gl_dict({
 							"account": self.debit_to,
@@ -1425,7 +1705,7 @@ class SalesInvoice(SellingController):
 								else payment_mode.amount,
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
-							"cost_center": self.cost_center
+							"cost_center": company.cost_center
 						}, self.party_account_currency)
 					)
 
@@ -1438,12 +1718,13 @@ class SalesInvoice(SellingController):
 							"debit_in_account_currency": amount \
 								if payment_mode_account_currency==self.company_currency \
 								else payment_mode.amount,
-							"cost_center": self.cost_center
+							"cost_center": company.cost_center
 						}, payment_mode_account_currency)
 					)
 
 	def make_gle_for_change_amount(self, gl_entries):
 		if cint(self.is_pos) and self.change_amount:
+			company = frappe.get_doc("Company", self.company)
 			if self.account_for_change_amount:
 				gl_entries.append(
 					self.get_gl_dict({
@@ -1456,7 +1737,7 @@ class SalesInvoice(SellingController):
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
-						"cost_center": self.cost_center
+						"cost_center": company.cost_center
 					}, self.party_account_currency)
 				)
 
@@ -1465,7 +1746,7 @@ class SalesInvoice(SellingController):
 						"account": self.account_for_change_amount,
 						"against": self.customer,
 						"credit": self.base_change_amount,
-						"cost_center": self.cost_center
+						"cost_center": company.cost_center
 					})
 				)
 			else:
@@ -1476,6 +1757,8 @@ class SalesInvoice(SellingController):
 		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
 			write_off_account_currency = get_account_currency(self.write_off_account)
 			default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
+
+			company = frappe.get_doc("Company", self.company)
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1489,7 +1772,7 @@ class SalesInvoice(SellingController):
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": company.cost_center
 				}, self.party_account_currency)
 			)
 			gl_entries.append(
@@ -1500,7 +1783,7 @@ class SalesInvoice(SellingController):
 					"debit_in_account_currency": (flt(self.base_write_off_amount,
 						self.precision("base_write_off_amount")) if write_off_account_currency==self.company_currency
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
-					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
+					"cost_center": company.cost_center or self.write_off_cost_center or default_cost_center
 				}, write_off_account_currency)
 			)
 
@@ -1508,6 +1791,8 @@ class SalesInvoice(SellingController):
 		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
+
+			company = frappe.get_doc("Company", self.company)
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1517,7 +1802,7 @@ class SalesInvoice(SellingController):
 						self.precision("rounding_adjustment")),
 					"credit": flt(self.base_rounding_adjustment,
 						self.precision("base_rounding_adjustment")),
-					"cost_center": self.cost_center or round_off_cost_center,
+					"cost_center": company.cost_center or round_off_cost_center,
 				}
 			))
 

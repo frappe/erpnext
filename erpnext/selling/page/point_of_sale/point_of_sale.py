@@ -124,6 +124,18 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	return res
 
 @frappe.whitelist()
+def is_rounding(pos_profile):
+	rounding = False
+
+	pos = frappe.get_doc("POS Profile", pos_profile)
+	if pos.round_off_discount == 1:
+		rounding = True
+
+	return {
+		"rounding": rounding
+	}
+
+@frappe.whitelist()
 def search_serial_or_batch_or_barcode_number(search_value):
 	# search barcode no
 	barcode_data = frappe.db.get_value('Item Barcode', {'barcode': search_value}, ['barcode', 'parent as item_code'], as_dict=True)

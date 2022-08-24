@@ -179,6 +179,7 @@ DocType: Soil Analysis,(Ca+Mg)/K,(Ca + Mg) / K
 DocType: Delivery Stop,Contact Information,Información del contacto
 apps/erpnext/erpnext/public/js/hub/pages/Search.vue,Search for anything ...,Busca cualquier cosa ...
 DocType: Company,Phone No,Teléfono No.
+DocType: Company,Default Credit Account,Cuenta de Crédito por defecto.
 DocType: Delivery Trip,Initial Email Notification Sent,Notificación Inicial de Correo Electrónico Enviada
 DocType: Bank Statement Settings,Statement Header Mapping,Encabezado del enunciado
 ,Sales Partners Commission,Comisiones de socios de ventas
@@ -362,6 +363,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure d
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.","No se puede garantizar la entrega por número de serie, ya que \ Item {0} se agrega con y sin Garantizar entrega por \ Serial No."
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,At least one mode of payment is required for POS invoice.,Se requiere al menos un modo de pago de la factura POS.
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,When selecting a discount reason check the field to update inventory.,Al seleccionar una razon de descuento marque el campo de actualizar inventario.
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Batch no is required for batched item {0},No se requiere lote para el artículo en lote {0}
 DocType: Bank Statement Transaction Invoice Item,Bank Statement Transaction Invoice Item,Estado de Factura de Transacción de Extracto Bancario
 DocType: Salary Detail,Tax on flexible benefit,Impuesto sobre el Beneficio Flexible
@@ -2085,7 +2087,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_account/bank_account.js,This action w
 apps/erpnext/erpnext/config/buying.py,Supplier database.,Base de datos de proveedores.
 DocType: Contract Template,Contract Terms and Conditions,Términos y Condiciones del Contrato
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,You cannot restart a Subscription that is not cancelled.,No puede reiniciar una Suscripción que no está cancelada.
-DocType: Account,Balance Sheet,Hoja de balance
+DocType: Account,Balance Sheet,Balance General
 DocType: Leave Type,Is Earned Leave,Es Licencia Ganada
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Purchase Order Amount,Monto de orden de compra
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Cost Center For Item with Item Code ',Centro de costos para el producto con código '
@@ -2143,6 +2145,7 @@ DocType: Marketplace Settings,Disable Marketplace,Deshabilitar Marketplace
 DocType: Quality Meeting,Minutes,Minutos
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Featured Items,Tus artículos destacados
 ,Trial Balance,Balanza de Comprobación
+apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Analytical Ledger, Libro Mayor
 apps/erpnext/erpnext/templates/pages/projects.js,Show Completed,Mostrar completado
 apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Fiscal Year {0} not found,Año fiscal {0} no encontrado
 apps/erpnext/erpnext/config/help.py,Setting up Employees,Configuración de empleados
@@ -4407,7 +4410,7 @@ DocType: Customer,"Reselect, if the chosen contact is edited after save","Vuelva
 DocType: Quality Procedure,Parent Procedure,Procedimiento para padres
 DocType: Patient Encounter,In print,En la impresión
 DocType: Accounting Dimension,Accounting Dimension,Dimensión contable
-,Profit and Loss Statement,Cuenta de pérdidas y ganancias
+,Profit and Loss Statement,Estado Resultados
 DocType: Bank Reconciliation Detail,Cheque Number,Número de cheque
 apps/erpnext/erpnext/healthcare/utils.py,The item referenced by {0} - {1} is already invoiced,El elemento al que hace referencia {0} - {1} ya está facturado
 ,Sales Browser,Explorar ventas
@@ -8085,3 +8088,115 @@ DocType: Account,Cash,Efectivo
 DocType: Sales Invoice,Unpaid and Discounted,Sin pagar y con descuento
 DocType: Employee,Short biography for website and other publications.,Breve biografía para la página web y otras publicaciones.
 DocType: Sales Invoice,Client Name,Nombre del cliente
+DocType: Dispatch Control,Dispatch Control,Control de Entrega
+DocType: Dispatch Control,Sale Invoice,Factura de Venta
+DocType: Dispatch Control,Delivery Area,Area de Entrega
+DocType: Reason For Discount,Reason For Discount,Razón de Descuento
+DocType: Type Price List,Type Price List,Reporte de Lista de Precio
+DocType: Sold Products,Sold Products,Reporte de Productos Vendidos
+DocType: Sales Book,Sales Book,Reporte Libro de Venta
+DocType: Sale for day,Sale for day,Reporte Ventas del día
+DocType: Discount Reason Sales,Discount Reason Sales,Reporte Ventas por descuento
+DocType: Sales For Discount Reason,Sales For Discount Reason,Reporte Ventas por razon de descuento totalizado
+DocType: Sales For Discount Reason,Sales For Discount Reason,Reporte Ventas por razon de descuento totalizado
+DocType: Sales For User,Sales For User,Reporte de ventas por usuario
+DocType: Daily summary,Daily summary,Reporte de resumen diario
+DocType: Detailed sales book per transaction,Detailed sales book per transaction,Reporte Libro de venta detallado por transacción
+DocType: Inventory Download,Inventory Download,Descargas de Inventario
+DocType: Inventory Download,Reason For Download,Razón de Descarga
+DocType: Inventory Download,Download Area,Area de Descarga
+DocType: Material Request Details,Material Request Details,Detalle de requisición de materiales
+DocType: Shopping Book,Shopping Book,Reporte Libro de compras
+DocType: Orden de compra (OC),Purchase Justification,Justificación de compra
+DocType: Item-wise Purchase History By Purchase Justification,Item-wise Purchase History By Purchase Justification,Justificación de compra
+DocType: Advance Statement,Advance Statement,Anticipos a la cuenta
+DocType: Advance Statement,Type Pay Advance,Tipo de anticipo
+DocType: Patient statement,Account Statement,Status de la cuenta
+DocType: Return Advance Statement,Way to pay,Forma de Pago
+DocType: Account Statement Payment,Cash Total Medical Fees,Total de honorarios medicos en efectivo
+DocType: Account Statement Payment,Bank Check Total Medical Fees,Total de honorarios medicos en cheque
+DocType: Patient Warehouse,Patient Warehouse,Bodega del paciente
+DocType: Cancellation Of Invoices,Cancellation Of Invoices,Anulación de facturas
+DocType: Cancellation Of Invoices,Reason For Cancellation,Razón de anulación
+DocType: Account Statement Payment,Account Statement Payment,Estado de cuenta
+DocType: Account Statement Payment,Outstanding Balance,Saldo pendiente
+DocType: Account Statement Payment,Total Sale Invoice,Total de la cuenta hospitalaria
+DocType: Account Statement Payment,total medical fees,Total honorarios medicos
+DocType: Account Statement Payment,Total Without Medical Fees,Total sin honorarios medicos
+DocType: Payment Of Honorarium,Payment Of Honorarium,Reporte de Honorarios Medicos
+DocType: Account Status Items,Account Status Items,Reporte detalle de la cuenta hospitalaria
+DocType: Patient Medical Fees,Patient Medical Fees,Reporte de honorarios medicos por paciente
+DocType: History Account Status,History Account Status,Reporte historial de la cuenta hospitalaria
+DocType: General report of hospital accounts,General report of hospital accounts,Reporte general de la cuenta hospitalaria
+DocType: Advance Statement For Hours,Advance Statement For Hours,Reporte anticipos a la cuenta
+DocType: Credit Note CXC,Credit Note CXC,Nota de crédito CXC
+DocType: Return credit notes,Return credit notes,Retorno de Nota de crédito CXC
+DocType: Sales Invoice,INSURANCE PLAN,Plan de seguro médico
+DocType: Sales Invoice,Excesses,Excedente
+DocType: Sales Invoice,Deductible,Deducible
+DocType: Sales Invoice,Ineligible expenses,Gastos no elegibles
+DocType: Sales Invoice,Co-Pay 20%,Co-Pago 20%
+DocType: Customer Documents,Document number,Numero de documento
+DocType: Customer Documents,Type Transaction,Tipo de transacción
+DocType: Customer Documents,Account To Debit,Cuenta de débito
+DocType: Customer Documents,Account To Credit,Cuenta de credito
+DocType: Customer Documents,Total Exempt,Total Exento
+DocType: Customer Documents,Affects Sales Book,Afectar el libro de ventas
+DocType: Customer Documents,Affects Sales Month,Afectar ventas mensuales
+DocType: Customer Documents,Affects Sales Month,Afectar ventas mensuales
+DocType: Payment Entry,Reason For Payment,Tipo de pago
+DocType: Customer Retention,Transaction Number,Numero de transación
+DocType: Accounts Receivable,Accounts Receivable,Reporte de Cuentas por cobrar
+DocType: Supplier Documents,Type Transaction,Tipo de transacción
+DocType: Supplier Documents,Transaction Number,Numero de transacción
+DocType: Supplier Documents,Total Exempt,Total
+DocType: Supplier Retention,Company RTN,RTN de la compañia
+DocType: Supplier Retention,Reasons,Razones
+DocType: Supplier Retention,Reason For Retention,Tipo de retención
+DocType: Supplier Retention,Transaction Number,Numero de transacción
+DocType: Cancellation Of Supplier Retentions,Cancellation Of Supplier Retentions,Anulación de retenciones
+DocType: Payment Entry CXC,Payment Entry CXC,Reporte de entradas de pago CxC
+DocType: Payment Entry CXP,Payment Entry CXP,Reporte de entradas de pago CxP
+DocType: Accounts Payable,Accounts Payable,Reporte de cuentas por pagar
+DocType: Accounts Payable Summary,Accounts Payable Summary,Reporte de Balance de cuentas por pagar
+DocType: Purchase Register,Purchase Register,Reporte de registro de compras
+DocType: Item-wise Purchase Register,Item-wise Purchase Register,Reporte detalle de compras
+DocType: Purchase Order Items To Be Billed,Purchase Order Items To Be Billed,Reporte de O/C por pagar
+DocType: Received Items To Be Billed,Purchase Order Items To Be Billed,Reporte de O/C por pagar
+DocType: Bank Transactions,Bank Transactions,Transacciones de Bancos
+DocType: Bank Transactions,Bank Check,Cheque bancario
+DocType: Bank Transactions,Bank deposit,Deposito bancario
+DocType: Bank Transactions,No. Bank Check,No. de Cheque
+DocType: Bank Transactions,Check Date,Fecha del cheque
+DocType: Bank Transactions,The Amount Of,La cantidad de
+DocType: Bank reconciliations,Bank reconciliations,Conciliaciones bancarias
+DocType: Bank reconciliations,Bank reconciliations Detail,Detalle conciliaciones bancarias
+DocType: Bank reconciliations,Payment Entry Detail,Detalle de entrada de pago
+DocType: Cancel Bank Checks,Cancel Bank Checks,Anulació de Cheques
+DocType: Bank Deposit,Bank Deposit,Reporte de deposito de bancos
+DocType: Credit Note Transaction,Credit Note Transaction,Reporte de notas de credito
+DocType: Debit Note Transaction,Debit Note Transaction,Reporte de notas de debito
+DocType: Price List Schedule,Price List Schedule,Programación de lista de precios
+DocType: Daily Books,Daily Books, Reporte de Libro diario
+DocType: Balance Sheet Accounts,Balance Sheet Accounts, Reporte de Balance General
+DocType: Statement Of Income,Statement Of Income, Reporte de Estado de Resultado
+DocType: Provider Account Statement,Provider Account Statement, Reporte de Estado de cuenta de proveedor
+DocType: Sale Price List,Sale Price List,Reporte Precios de productos
+DocType: Hospital Outgoings,Hospital Outgoings,Gastos Administrativos
+DocType: Laboratory And Image,Laboratory And Image,Laboratorio e imagen
+DocType: Return Laboratory And Hospital Expenses,Return Laboratory And Hospital Expenses,Retornos de Examenes y Gastos Admin
+DocType: Provider Withholding Vouchers,Provider Withholding Vouchers,Reporte de comprobantes de retención
+DocType: Voided Check,Voided Check,Anulación de cheques
+DocType: Print Bank Check,Print Bank Check,Impresion de cheques
+DocType: Apply Payment Entries Without References,Apply Payment Entries Without References,Aplicar pagos a facturas emitidas
+DocType: Advances Applied Customer,Advances Applied Customer,Reporte de avances aplicados a clientes
+DocType: Payment Entry Applied,Payment Entry Applied,Reporte de Entrada de pagos aplicados
+DocType: Bank Check Of Bank Transactions,Bank Check Of Bank Transactions,Reporte de Cheques por cuenta de banco
+DocType: Bank Book,Bank Book,Reporte de libro de bancos
+DocType: Advances Applied Supplier,Advances Applied Supplier,Reporte de Avances aplicados a proveedores
+DocType: Credit Invoice,Credit Invoice,Reporte de facturas al credito
+DocType: Group Of Products Solds,Group Of Products Solds,Reporte de Productos vendidos
+DocType: Group Of Products Solds,Confidential Payroll Users,Usuarios de nomina confidencial
+DocType: Confidential Payroll Employee,Confidential Payroll Employee,Empleados de nomina confidencial
+DocType: Assignment Salary Component Confidential,Assignment Salary Component Confidential,Componentes salariales nomina confidencial
+DocType: Salary Register Detail Without Components,Salary Register Detail Without Components,Reporte de nomina sin componentes validados

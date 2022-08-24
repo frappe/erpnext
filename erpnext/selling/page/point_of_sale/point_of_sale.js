@@ -816,7 +816,6 @@ class POSCart {
 
 		let total_item_qty = 0.0;
 		this.frm.set_value("pos_total_qty",total_item_qty);
-
 		this.$discount_amount.find('input:text').val('');
 		this.wrapper.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency));
@@ -932,6 +931,53 @@ class POSCart {
 	}
 
 	update_grand_total() {
+		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
+    	.then(doc => {
+			if (doc.round_off_discount === 1){
+				var total = Math.floor(this.frm.doc.grand_total)
+				this.frm.doc.grand_total = total
+				this.frm.doc.rounded_total = total
+				this.frm.doc.paid_amount = total
+				this.frm.doc.base_grand_total = total
+				this.frm.doc.base_net_total = total
+				this.frm.doc.base_total = total
+				this.frm.doc.grand_total = total
+				this.frm.doc.net_total = total
+				this.frm.doc.total = total
+			}
+	
+			this.$grand_total.find('.grand-total-value').text(
+				format_currency(this.frm.doc.grand_total, this.frm.currency)
+			);
+	
+			this.$grand_total.find('.rounded-total-value').text(
+				format_currency(this.frm.doc.rounded_total, this.frm.currency)
+			);
+   	 	})
+	}
+
+	update_totals_is_rounding(){
+		var total = Math.floor(this.frm.doc.grand_total)
+		this.frm.doc.grand_total = total
+		this.frm.doc.rounded_total = total
+		this.frm.doc.paid_amount = total
+		this.frm.doc.base_grand_total = total
+		this.frm.doc.base_net_total = total
+		this.frm.doc.base_total = total
+		this.frm.doc.grand_total = total
+		this.frm.doc.net_total = total
+		this.frm.doc.total = total
+
+		this.$grand_total.find('.grand-total-value').text(
+			format_currency(this.frm.doc.grand_total, this.frm.currency)
+		);
+
+		this.$grand_total.find('.rounded-total-value').text(
+			format_currency(this.frm.doc.rounded_total, this.frm.currency)
+		);
+	}
+
+	update_totals_is_not_rounding(){
 		this.$grand_total.find('.grand-total-value').text(
 			format_currency(this.frm.doc.grand_total, this.frm.currency)
 		);
@@ -1148,24 +1194,33 @@ class POSCart {
 	}
 
 	update_item(item) {
-		const item_selector = item.batch_no ?
+		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
+    	.then(doc => {
+			const item_selector = item.batch_no ?
 			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${escape(item.item_code)}"]`;
 
-		const $item = this.$cart_items.find(item_selector);
+			const $item = this.$cart_items.find(item_selector);
 
-		if(item.qty > 0) {
-			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
-			const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
-			const remove_class = indicator_class == 'green' ? 'red' : 'green';
+			if(item.qty > 0) {
+				const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
+				const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
+				const remove_class = indicator_class == 'green' ? 'red' : 'green';
+				
+				if (doc.round_off_discount === 1){
+					var itemrate = item.rate;
+					var rate = Math.floor(itemrate);
+					item.rate = rate;
+				}
 
-			$item.find('.quantity input').val(item.qty);
-			$item.find('.discount').text(item.discount_percentage + '%');
-			$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
-			$item.addClass(indicator_class);
-			$item.removeClass(remove_class);
-		} else {
-			$item.remove();
-		}
+				$item.find('.quantity input').val(item.qty);
+				$item.find('.discount').text(item.discount_percentage + '%');
+				$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
+				$item.addClass(indicator_class);
+				$item.removeClass(remove_class);
+			} else {
+				$item.remove();
+			}
+   	 	})
 	}
 
 	get_item_html(item) {
@@ -1772,6 +1827,7 @@ class Payment {
 	}
 
 	set_title() {
+		debugger;
 		let title = __('Total Amount {0}',
 			[format_currency(this.frm.doc.rounded_total || this.frm.doc.grand_total,
 			this.frm.doc.currency)]);
@@ -2053,8 +2109,47 @@ class Payment {
 	}
 
 	update_additional_discount_percentage() {
-		this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
-		this.update_change_amount();
+		frappe.db.get_doc('POS Profile', this.frm.doc.pos_profile)
+    	.then(doc => {
+			if (doc.round_off_discount === 1){
+				var total = Math.floor(this.frm.doc.grand_total)
+				var out_amount = 0
+				var me = this;
+				$.each(this.frm.doc.payments, function(i, data) {
+					debugger;
+					if(out_amount === 0){
+						me.frm.doc.payments[0].amount = total;
+						me.frm.doc.payments[0].base_amount = total;
+						me.dialog.set_value(data.mode_of_payment, total);
+					}
+					else{
+						me.dialog.set_value(data.amount, 0);
+						me.dialog.set_value(data.base_amount, 0);
+						me.dialog.set_value(data.mode_of_payment, data.amount);
+					}
+					out_amount += data.amount;
+				});				
+
+				debugger
+				this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
+				this.dialog.set_value("change_amount", this.frm.doc.change_amount);
+				this.dialog.set_value("total_with_discount", total);
+				this.dialog.set_value("paid_amount", total);
+				this.dialog.set_value("grand_total", total);
+				this.dialog.set_value("rounded_total", total);
+				this.frm.doc.additional_discount_percentage = this.frm.doc.additional_discount_percentage;
+				this.frm.doc.change_amount = this.frm.doc.change_amount;
+				this.frm.doc.total_with_discount = total;
+				this.frm.doc.paid_amount = total;
+				this.frm.doc.grand_total = total;
+				this.frm.doc.rounded_total = total;
+			}
+			else{
+				debugger
+				this.dialog.set_value("additional_discount_percentage", this.frm.doc.additional_discount_percentage);
+				this.update_change_amount();
+			}
+   	 	})
 	}
 
 	update_change_amount() {
@@ -2073,11 +2168,27 @@ class Payment {
 
 
 	show_paid_amount() {
-		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
+		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);			
 	}
+
+	// show_paid_amount() {
+	// 	var out_amount = 0
+	// 	$.each(this.frm.doc.payments, function(i, data) {
+	// 		out_amount += data.amount;
+	// 	});	
+	// 	debugger;
+	// 	if (this.frm.doc.total_with_discount === out_amount){
+	// 		this.dialog.set_value("outstanding_amount", 0);
+	// 	}
+	// 	else{
+	// 		this.dialog.set_value("outstanding_amount", this.frm.doc.outstanding_amount);
+	// 	}
+			
+	// }
 
 	update_payment_amount() {
 		var me = this;
+		debugger
 		$.each(this.frm.doc.payments, function(i, data) {
 			console.log("setting the ", data.mode_of_payment, " for the value", data.amount);
 			me.dialog.set_value(data.mode_of_payment, data.amount);

@@ -1,0 +1,95 @@
+{
+ "creation": "2022-07-28 14:55:01.600618",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bank_transaction",
+  "place",
+  "place_date",
+  "person_name",
+  "amount",
+  "amount_of",
+  "movement_detail",
+  "detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "place_date",
+   "fieldtype": "Data",
+   "label": "Place and date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_transactions.amount",
+   "fieldname": "amount",
+   "fieldtype": "Data",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount_of",
+   "fieldtype": "Data",
+   "label": "The Amount Of",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_transaction.movement_detail",
+   "fieldname": "movement_detail",
+   "fieldtype": "Data",
+   "label": "Movement detail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Place"
+  },
+  {
+   "fieldname": "bank_transaction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Transactions",
+   "options": "Bank Transactions",
+   "reqd": 1
+  },
+  {
+   "fieldname": "detail",
+   "fieldtype": "Table",
+   "label": "Print Bank Check Detail",
+   "options": "Print Bank Check Detail",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "bank_transaction.person_name",
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "label": "Party Name",
+   "read_only": 1
+  }
+ ],
+ "modified": "2022-07-28 16:20:56.465068",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Print Bank Check",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -22,6 +22,9 @@ class JournalEntry(AccountsController):
 		return self.voucher_type
 
 	def validate(self):
+		if self.supplier_document != None:
+			self.verificate_supplier_document_date()
+
 		if not self.is_opening:
 			self.is_opening='No'
 		self.clearance_date = None
@@ -43,6 +46,8 @@ class JournalEntry(AccountsController):
 		self.validate_inter_company_accounts()
 		# if not self.title:
 		# 	self.title = self.get_title()
+		if self.docstatus == 0:
+			self.set_date_transaction()
 		if self.docstatus == 1:
 			self.check_transaction()
 	
@@ -54,6 +59,10 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		if not self.title:
 			self.title = self.get_title()
+	
+	def verificate_supplier_document_date(self):
+		doc = frappe.get_doc("Supplier Documents", self.supplier_document)
+		self.posting_date = doc.posting_date
 	
 	def create_register(self):
 		transaction = frappe.get_all("Bank Transactions", ["name","bank_account", "transaction_data", "amount_data"], filters = {"name": self.bank_transaction})
@@ -75,10 +84,16 @@ class JournalEntry(AccountsController):
 	
 	def check_transaction(self):
 		if self.bank_transaction != None and self.is_transaction:
-			transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
-			doc_tran = frappe.get_doc("Bank Transactions", transaction[0].name)
+			# transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+			doc_tran = frappe.get_doc("Bank Transactions", self.bank_transaction)
 			doc_tran.accounting_seat = 1
 			doc_tran.save()
+	
+	def set_date_transaction(self):
+		if self.bank_transaction != None and self.is_transaction:
+			# transaction = frappe.get_all("Bank Transactions", ["name"], filters = {"name": self.bank_transaction})
+			doc_tran = frappe.get_doc("Bank Transactions", self.bank_transaction)
+			self.posting_date =  doc_tran.date_data
 	
 	def uncheck_transaction(self):
 		if self.bank_transaction != None and self.is_transaction:

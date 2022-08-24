@@ -15,6 +15,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Confidential Customer",
+					"description": _("Confidential Customer."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Quotation",
 					"description": _("Quotes to Leads or Customers."),
 					"onboard": 1,
@@ -228,6 +234,13 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Credit Invoice",
+					"doctype": "Sales Invoice",
+					"onboard": 1,
+				},
+				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),
@@ -252,6 +265,13 @@ def get_data():
 					"is_query_report": True,
 					"name": "Sold Products",
 					"doctype": "Sold Products",
+                    "dependencies": ["Sales Invoice"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Group Of Products Solds",
+					"doctype": "Sales Invoice",
                     "dependencies": ["Sales Invoice"]
 				},
 				{

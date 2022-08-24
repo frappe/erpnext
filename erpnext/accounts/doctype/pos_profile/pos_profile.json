@@ -25,6 +25,7 @@
   "allow_print_before_pay",
   "display_items_in_stock",
   "allow_credit",
+  "round_off_discount",
   "section_break_15",
   "applicable_for_users",
   "section_break_11",
@@ -400,11 +401,17 @@
    "fieldname": "allow_credit",
    "fieldtype": "Check",
    "label": "Allow Credit"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_off_discount",
+   "fieldtype": "Check",
+   "label": "Round Off Discount"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2021-11-10 15:21:31.720844",
+ "modified": "2022-03-23 14:11:58.549993",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

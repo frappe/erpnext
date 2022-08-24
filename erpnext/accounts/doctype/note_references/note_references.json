@@ -6,7 +6,8 @@
  "field_order": [
   "reference_doctype",
   "reference_name",
-  "total_amount"
+  "total_amount",
+  "paid_amount"
  ],
  "fields": [
   {
@@ -37,10 +38,17 @@
    "label": "Total Amount",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Paid Amount",
+   "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2021-04-29 14:21:33.632000",
+ "modified": "2022-06-08 16:06:36.134109",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Note References",

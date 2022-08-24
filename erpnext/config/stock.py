@@ -46,6 +46,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Delivery Trip"
 				},
+				{
+					"type": "doctype",
+					"name": "Work Order Invoice"
+				},
 			]
 		},
 		{
@@ -107,6 +111,12 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Type Price List",
+					"doctype": "Price List"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sale Price List",
 					"doctype": "Price List"
 				}
 			]
@@ -292,6 +302,12 @@ def get_data():
 					"name": "Stock Analytics",
 					"doctype": "Stock Entry",
 					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Comparative Cost and Price Of Products",
+					"doctype": "Purchase Invoice"
 				},
 				{
 					"type": "report",

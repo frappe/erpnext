@@ -6,6 +6,15 @@ frappe.ui.form.on('Account Statement Payment', {
 
 	// }
 
+	// onload: function(frm) {
+	// 	frappe.call({
+	// 		method: "add_products_detail",
+	// 		doc: frm.doc,
+	// 		callback: function(r) {
+	// 		}
+	// 	});
+	// }, 
+
 	calculate: function(frm) {
 		frappe.call({
 			method: "calculate_discount",

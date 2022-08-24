@@ -74,8 +74,30 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Apply Payment Entries Without References",
+					"description": _("Assignment payment entries without references.")
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Request",
 					"description": _("Payment Request"),
+				},
+				{
+					"type": "report",
+					"name": "Cancellation Of Invoices",
+					"doctype": "Cancellation Of Invoices",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Advances Applied Customer",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Payment Entry CXC",
+					"is_query_report": True
 				},
 				{
 					"type": "report",
@@ -112,6 +134,12 @@ def get_data():
 					"name": "Delivered Items To Be Billed",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Customer Documents",
+					"doctype": "Customer Documents",
+					"is_query_report": True
 				},
 			]
 		},
@@ -167,8 +195,25 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Advances Applied Supplier",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Payment Entry CXP",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Accounts Payable",
 					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Supplier Retention",
+					"doctype": "Supplier Retention",
 					"is_query_report": True
 				},
 				{
@@ -200,6 +245,41 @@ def get_data():
 					"name": "Received Items To Be Billed",
 					"is_query_report": True,
 					"doctype": "Purchase Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Provider Withholding Vouchers",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Suplier Documents",
+					"doctype": "Supplier Documents",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Payment Entry",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Unallocated Payment Entry",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Payment Entry Applied",
+					"doctype": "Payment Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Accounts Payable Analisis",
+					"doctype": "Supplier",
+					"is_query_report": True,
 				},
 			]
 		},
@@ -256,6 +336,11 @@ def get_data():
 					"type": "doctype",
 					"label": _("Bank"),
 					"name": "Bank",
+				},
+				{
+					"type": "doctype",
+					"label": _("Account Levels"),
+					"name": "Account Levels",
 				},
 				{
 					"type": "doctype",
@@ -331,11 +416,29 @@ def get_data():
               		"label": _("Bank reconciliations"),
               		"description": _("Create Bank reconciliations"),
             	},
+				{
+              		"type": "doctype",
+              		"name": "Cancel Bank Checks",
+              		"label": _("Cancel Bank Checks"),
+              		"description": _("This option is for create new Cancel Bank Checks."),
+            	},
+				{
+              		"type": "doctype",
+              		"name": "Correlative Of Bank Checks",
+              		"label": _("Correlative Of Bank Checks"),
+              		"description": _("This option is for create new Correlative Of Bank Checks."),
+            	},
             	{
               		"type": "doctype",
               		"name": "Reconciled balances",
               		"label": _("Reconciled balances"),
               		"description": _("Create Reconciled balances"),
+            	},
+				{
+              		"type": "doctype",
+              		"name": "Voided Check",
+              		"label": _("Voided Check"),
+              		"description": _("Create Voided Check"),
             	},
 				{
 					"type": "report",
@@ -351,10 +454,29 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Bank Check Transaction",
+					"name": "Bank Check Of Bank Transactions",
 					"doctype": "Bank Transactions",
 					"is_query_report": True,
 				},
+				{
+					"type": "report",
+					"name": "Bank Deposit",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Bank Book",
+					"doctype": "Bank Transactions",
+					"is_query_report": True,
+				},
+				{
+              		"type": "doctype",
+              		"name": "Print Bank Check",
+              		"label": _("Print Bank Check"),
+              		"description": _("Create Print Bank Check"),
+            	},
+				
 			]
 		},
 		{
@@ -464,7 +586,13 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Ledger",
+					"name": "Daily Books",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Analytical Ledger",
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
@@ -483,12 +611,6 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Cash Flow",
-					"doctype": "GL Entry",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Consolidated Financial Statement",
 					"doctype": "GL Entry",
 					"is_query_report": True
 				},
@@ -660,7 +782,38 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Cash Report",
-				}
+				},
+
+				{
+					"type": "report",
+					"name": "Balance Sheet Accounts",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Statement Of Income",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Provider Account Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Ledger",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Consolidated Financial Statement",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
 			]
 		},
 		{

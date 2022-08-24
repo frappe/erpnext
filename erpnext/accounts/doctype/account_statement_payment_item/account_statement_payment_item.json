@@ -10,7 +10,8 @@
   "price",
   "net_pay",
   "reference",
-  "sale_amount"
+  "sale_amount",
+  "no_order"
  ],
  "fields": [
   {
@@ -62,10 +63,16 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Sales Amount"
+  },
+  {
+   "fieldname": "no_order",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "No Order"
   }
  ],
  "istable": 1,
- "modified": "2021-06-16 15:49:46.560621",
+ "modified": "2022-07-11 15:06:43.078485",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment Item",

@@ -36,7 +36,8 @@
   "isv_15",
   "total",
   "outstanding_amount",
-  "amended_from"
+  "amended_from",
+  "grand_total"
  ],
  "fields": [
   {
@@ -236,16 +237,16 @@
   {
    "fieldname": "account_to_debit",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account To Debit",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "account_to_credit",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account To Credit",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "columnaccount",
@@ -254,19 +255,26 @@
   {
    "fieldname": "currency",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Currency",
-   "options": "Currency",
-   "reqd": 1
+   "options": "Currency"
   },
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Grand Total"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-08 15:47:09.863295",
+ "modified": "2022-03-14 15:17:25.681285",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Customer Documents",

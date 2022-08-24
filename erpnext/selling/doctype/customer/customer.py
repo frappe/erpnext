@@ -23,7 +23,6 @@ class Customer(TransactionBase):
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
-		self.load_dashboard_info()
 		# self.accounts_status()
 	
 	# def accounts_status(self):
@@ -54,6 +53,30 @@ class Customer(TransactionBase):
 	# 				total_credit += d.paid_amount
 	# 	self.credit = total_credit
 	# 	self.remaining_balance = total_debit - total_credit
+
+	def confidentials(self):
+		confidentials_list = frappe.get_all("Confidential Customer", ["*"])
+
+		if len(confidentials_list):
+			customers = frappe.get_all("Confidential Customer Detail", ["*"], filters = {"parent":confidentials_list[0].name})
+			
+			if len(customers) > 0:
+				user = frappe.session.user
+				confidential = False
+
+				for customer in customers:
+					if user == customer.user or user == customer.name_user:
+						confidential = True
+
+				if confidential:
+					self.db_set('confidential', 1, update_modified=False)
+				else:
+					self.db_set('confidential', 0, update_modified=False)
+		else:
+			self.db_set('confidential', 0, update_modified=False)
+		
+		if self.confidential:
+			self.load_dashboard_info()
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)

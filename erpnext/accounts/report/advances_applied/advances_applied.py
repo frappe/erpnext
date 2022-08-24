@@ -9,7 +9,51 @@ import datetime
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns = [_("Identificador") + "::240", _("Name") + "::240", _("Payment Type") + "::240", _("Posting Date") + "::240", _("Mode of payment") + "::240", _("Party Type") + "::240", _("Party") + "::240", _("Amount") + ":Currency:120",]
+	columns = [
+		{
+			"label": _("Identificador"),
+			"fieldname": "identifier",
+			"fieldtype": "Link",
+			"options": "Payment Entry",
+			"width": 240
+		},
+		{
+			"label": _("Name"),
+			"fieldname": "name",
+			"width": 240
+		},
+		{
+			"label": _("Payment Type"),
+			"fieldname": "payment_type",
+			"width": 240
+		},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"width": 240
+		},
+		{
+			"label": _("Mode of payment"),
+			"fieldname": "mode_of_payment",
+			"width": 240
+		},
+		{
+			"label": _("Party Type"),
+			"fieldname": "party_type",
+			"width": 240
+		},
+		{
+			"label": _("Party"),
+			"fieldname": "party",
+			"width": 240
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+	]
 	data = return_data(filters)
 	return columns, data
 
@@ -40,6 +84,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += ', "docstatus": ["!=", 2]'
 	if filters.get("applied") == 1:
 		conditions += ', "total_allocated_amount": [">", "0"]'
 	else:

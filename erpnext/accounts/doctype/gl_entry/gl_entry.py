@@ -236,6 +236,17 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
+		if against_voucher_type == "Sales Invoice":
+			bal -= ref_doc.discount_amount
+
+			if ref_doc.paid_amount > 0:
+				bal = ref_doc.grand_total - ref_doc.paid_amount
+			else:
+				bal = ref_doc.grand_total
+			
+			for advance in ref_doc.get("advances"):
+				bal -= advance.allocated_amount
+
 		ref_doc.db_set('outstanding_amount', bal)
 		ref_doc.set_status(update=True)
 

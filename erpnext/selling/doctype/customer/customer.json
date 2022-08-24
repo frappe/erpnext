@@ -19,6 +19,7 @@
   "default_bank_account",
   "lead_name",
   "image",
+  "confidential",
   "column_break0",
   "account_manager",
   "customer_group",
@@ -492,6 +493,7 @@
    "options": "CUST-.YYYY.-"
   },
   {
+   "depends_on": "confidential",
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Account Status"
@@ -530,12 +532,19 @@
    "label": "Remaining Balance",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "confidential",
+   "fieldtype": "Check",
+   "label": "Confidential",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-10-05 13:36:46.046484",
+ "modified": "2022-03-28 13:55:17.580857",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -618,6 +627,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
- "title_field": "customer_name",
- "track_changes": 1
+ "title_field": "customer_name"
 }

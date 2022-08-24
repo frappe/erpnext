@@ -63,11 +63,115 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		if self.docstatus == 0:
+			self.verificate_bank_check()
+
 		if self.docstatus == 1:
 			self.update_accounts_status()
 			self.paid_supplier_documents()
+			self.paid_credit_note_cxp()
 			self.paid_customer_documents()
 			self.calculate_diferred_account()
+			if self.party_type == "Customer":
+				self.update_dashboard_customer()
+			if self.party_type == "Supplier":
+				self.update_dashboard_supplier()
+			self.create_serial()
+	
+	def create_serial(self):
+		serial_split = self.naming_series.split("-")
+		serialString = serial_split[0] + "-" + serial_split[1]
+		serial = frappe.get_all("Secuence Payment Entry", ["*"], filters = {"name": serialString})
+		
+		if len(serial) == 0:
+			doc = frappe.new_doc("Secuence Payment Entry")
+			doc.serial = serialString
+			doc.insert()
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.total_unpaid -= self.total_allocated_amount
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.party
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_allocated_amount * -1
+			new_doc.insert()
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.party, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.total_unpaid -= self.total_allocated_amount
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.party
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_allocated_amount * -1
+			new_doc.insert()
+
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.party, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.total_unpaid += self.total_allocated_amount
+			supplier.save()
+
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.party, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.total_unpaid += self.total_allocated_amount
+			customer.save()
+
+	def verificate_bank_check(self):
+		bank_transaction = frappe.get_all("Bank Transactions", "*", filters = {"no_bank_check": self.reference_no, "bank_account": self.bank_account})
+		voided_check = frappe.get_all("Voided Check", "*", filters = {"no_bank_check": self.reference_no, "bank_account": self.bank_account})
+		payment_entry = frappe.get_all("Payment Entry", "*", filters = {"reference_no": self.reference_no, "bank_account": self.bank_account})
+
+		if len(bank_transaction) > 0:
+			frappe.throw(_("This bank check number is assigned to bank transaction number {}".format(bank_transaction[0].name)))
+
+		if len(voided_check) > 0:
+			frappe.throw(_("This bank check number is assigned to voided check number {}".format(voided_check[0].name)))
+		
+		if len(payment_entry) > 0 and payment_entry[0].name != self.name:
+			frappe.throw(_("This bank check number is assigned to payment entry number {}".format(payment_entry[0].name)))
+	
+	def on_update(self):
+		if self.docstatus == 0:
+			self.concatenate_reference()
+
+	def prereconciled(self):
+		self.db_set('prereconcilied', 1, update_modified=False)
+		self.reload()
+	
+	def transit(self):
+		self.db_set('prereconcilied', 0, update_modified=False)
+		self.reload()
+	
+	def concatenate_reference(self):
+		references = frappe.get_all("Payment Entry Reference", "*", filters = {"parent": self.name})
+
+		reference_nos = ""
+
+		for reference in references:
+			if reference_nos == "":
+				reference_nos = reference.reference_name
+			else:
+				reference_nos = reference_nos + ", " + reference.reference_name
+				
+		self.db_set('references_nos', reference_nos, update_modified=False)
 
 	def calculate_diferred_account(self):
 		if self.bank_account != None:
@@ -113,25 +217,88 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.set_status()
 		self.calculate_diferred_account_cancel()
+		if self.party_type == "Customer":
+			self.update_dashboard_customer_cancel()
+		if self.party_type == "Supplier":
+			self.update_dashboard_supplier_cancel()
+		self.paid_supplier_documents_cancel()
+		self.paid_credit_note_cxp_cancel()
+		self.paid_customer_documents_cancel()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
 
 	def paid_supplier_documents(self):
-		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
 
 		for document in documents:
 			if document.reference_doctype == "Supplier Documents":
 				doc = frappe.get_doc("Supplier Documents", document.reference_name)
-				doc.db_set('status', "Paid", update_modified=False)
+				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+
+				if outstanding == 0:
+					doc.db_set('status', "Paid", update_modified=False)
+				else:
+					doc.db_set('status', "Unpaid", update_modified=False)
 	
 	def paid_customer_documents(self):
-		documents = frappe.get_all("Payment Entry Reference", ["reference_doctype", "reference_name"], filters = {"parent": self.name})
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
 
 		for document in documents:
 			if document.reference_doctype == "Customer Documents":
 				doc = frappe.get_doc("Customer Documents", document.reference_name)
-				doc.db_set('status', "Paid", update_modified=False)
+				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+
+				if outstanding == 0:
+					doc.db_set('status', "Paid", update_modified=False)
+				else:
+					doc.db_set('status', "Unpaid", update_modified=False)
+	
+	def paid_credit_note_cxp(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Debit Note CXP":
+				doc = frappe.get_doc("Debit Note CXP", document.reference_name)
+				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+	
+	def paid_supplier_documents_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Supplier Documents":
+				doc = frappe.get_doc("Supplier Documents", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+				doc.db_set('status', "Unpaid", update_modified=False)
+	
+	def paid_customer_documents_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Customer Documents":
+				doc = frappe.get_doc("Customer Documents", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+				doc.db_set('status', "Unpaid", update_modified=False)
+	
+	def paid_credit_note_cxp_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Debit Note CXP":
+				doc = frappe.get_doc("Debit Note CXP", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
 
 	def update_accounts_status(self):
 		if self.party_type == "Customer":
@@ -276,7 +443,7 @@ class PaymentEntry(AccountsController):
 		elif self.party_type == "Customer":
 			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Debit Note CXC", "Customer Documents")
 		elif self.party_type == "Supplier":
-			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry", "Supplier Documents", "Credit Note CXP")
+			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry", "Supplier Documents", "Debit Note CXP")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
 
@@ -451,8 +618,8 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
 	def set_remarks(self):
-		if self.remarks: return
-
+		# if self.remarks: return
+		self.remarks = ""
 		if self.payment_type=="Internal Transfer":
 			remarks = [_("Amount {0} {1} transferred from {2} to {3}")
 				.format(self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to)]
@@ -471,8 +638,14 @@ class PaymentEntry(AccountsController):
 		if self.payment_type in ["Receive", "Pay"]:
 			for d in self.get("references"):
 				if d.allocated_amount:
-					remarks.append(_("Amount {0} {1} against {2} {3}").format(self.party_account_currency,
-						d.allocated_amount, d.reference_doctype, d.reference_name))
+					if d.bill_no == None:
+						remarks.append(_("Amount {0} {1} against {2} {3}").format(self.party_account_currency,
+							d.allocated_amount, d.reference_doctype, d.reference_name))
+					else:
+						remarks.append(_("Amount {0} {1} against {2} {3} Supplier Invoice No {4}").format(self.party_account_currency,
+							d.allocated_amount, d.reference_doctype, d.reference_name, d.bill_no))
+				
+
 
 		for d in self.get("deductions"):
 			if d.amount:
@@ -912,8 +1085,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				total_amount = ref_doc.total
 			elif ref_doc.doctype == "Customer Documents":
 				total_amount = ref_doc.total
-			elif ref_doc.doctype == "Credit Note CXP":
-				total_amount = ref_doc.total
+			elif ref_doc.doctype == "Debit Note CXP":
+				total_amount = ref_doc.amount_total
 			elif ref_doc.doctype == "Supplier Documents":
 				total_amount = ref_doc.total
 			else:
@@ -927,7 +1100,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Customer Documents", "Credit Note CXP", "Supplier Documents"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Customer Documents", "Debit Note CXP", "Supplier Documents"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":

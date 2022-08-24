@@ -14,6 +14,7 @@ class BankTransactions(Document):
 		if self.check:
 			self.amount_of = money_in_words(self.amount)
 			self.amount_data = self.amount
+			self.verificate_bank_check()
 		
 		if self.debit_note:
 			self.amount_of_nd = money_in_words(self.amount_nd)
@@ -30,10 +31,30 @@ class BankTransactions(Document):
 		if self.docstatus == 0:
 			self.set_transaction_data()
 
+			if self.created_by == None:
+				self.created_by = frappe.session.user
+
 		if self.docstatus == 1:
 			self.docstatus = 3
 			self.status = "Transit"
 			self.calculate_diferred_account()
+
+		# if self.check and self.no_bank_check == None:
+		# 	self.no_bank_check = self.insert_numeration_for_check()
+
+	def verificate_bank_check(self):
+		bank_transaction = frappe.get_all("Bank Transactions", "*", filters = {"no_bank_check": self.no_bank_check, "bank_account": self.bank_account})
+		voided_check = frappe.get_all("Voided Check", "*", filters = {"no_bank_check": self.no_bank_check, "bank_account": self.bank_account})
+		payment_entry = frappe.get_all("Payment Entry", "*", filters = {"reference_no": self.no_bank_check, "bank_account": self.bank_account})
+
+		if len(bank_transaction) > 0 and bank_transaction[0].name != self.name:
+			frappe.throw(_("This bank check number is assigned to bank transaction number {}".format(bank_transaction[0].name)))
+
+		if len(voided_check) > 0:
+			frappe.throw(_("This bank check number is assigned to voided check number {}".format(voided_check[0].name)))
+		
+		if len(payment_entry) > 0:
+			frappe.throw(_("This bank check number is assigned to payment entry number {}".format(payment_entry[0].name)))
 
 	def verified_check(self, arg=None):		
 		if self.debit_note:
@@ -93,6 +114,12 @@ class BankTransactions(Document):
 		self.db_set('status', "Pre-reconciled", update_modified=False)
 		self.reload()
 	
+	def transit(self):
+		self.set_transaction_data()
+		self.db_set('docstatus', 3, update_modified=False)
+		self.db_set('status', "Transit", update_modified=False)
+		self.reload()
+	
 	def set_transaction_data(self):
 		if self.check:
 			self.db_set('transaction_data', "Bank Check", update_modified=False)
@@ -136,3 +163,29 @@ class BankTransactions(Document):
 	
 	def on_cancel(self):
 		self.calculate_diferred_account_cancel()
+	
+	def insert_numeration_for_check(self):
+		correlative = frappe.get_doc("Correlative Of Bank Checks", self.bank_account)
+
+		if correlative == None:
+			frappe.throw(_("This bank account does not have a check correlative assigned."))
+
+		actual = correlative.current_numbering + 1
+
+		actual_string = str(actual)
+
+		actual_len = len(actual_string)
+
+		cont = correlative.number_of_digits - actual_len
+
+		actual_correlative = ""
+
+		for number in range(cont):
+			actual_correlative += "0"
+		
+		actual_correlative += actual_string
+
+		correlative.current_numbering = actual
+		correlative.save()
+
+		return actual_correlative

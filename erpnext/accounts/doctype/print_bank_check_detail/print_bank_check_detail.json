@@ -1,0 +1,49 @@
+{
+ "creation": "2022-07-28 15:44:37.756652",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "cuenta",
+  "descripcion",
+  "debit",
+  "credit"
+ ],
+ "fields": [
+  {
+   "fieldname": "cuenta",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cuenta N"
+  },
+  {
+   "fieldname": "descripcion",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Descripci\u00f3n"
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Debe"
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Haber"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-07-28 16:03:27.362189",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Print Bank Check Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

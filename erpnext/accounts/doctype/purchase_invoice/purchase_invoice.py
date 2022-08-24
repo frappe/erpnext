@@ -158,7 +158,46 @@ class PurchaseInvoice(BuyingController):
 		self.validate_purchase_receipt_if_update_stock()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.update_dashboard_supplier()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.billing_this_year += self.grand_total
+
+			outstanding_amount = self.outstanding_amount
+
+			if self.grand_total == self.paid_amount:
+				outstanding_amount = 0
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			supplier.total_unpaid += outstanding_amount
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.rounded_total
+			outstanding_amount = self.outstanding_amount
+
+			if self.rounded_total == self.paid_amount:
+				outstanding_amount = 0
+				self.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+
+			new_doc.total_unpaid = outstanding_amount
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.billing_this_year -= self.rounded_total
+			supplier.total_unpaid -= self.outstanding_amount
+			supplier.save()
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -177,8 +216,9 @@ class PurchaseInvoice(BuyingController):
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.debit += self.grand_total
-			supplier.remaining_balance += self.grand_total
+			supplier.debit += self.rounded_total
+			supplier.credit += self.paid_amount
+			supplier.remaining_balance += self.rounded_total - self.paid_amount
 			supplier.save()
 	
 	def create_remarks(self):
@@ -916,6 +956,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_cancel()
 
 		self.check_on_hold_or_closed_status()
+		self.update_dashboard_supplier_cancel()
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()

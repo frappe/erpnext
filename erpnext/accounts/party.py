@@ -538,37 +538,83 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 			})
 
 
-	company_wise_total_unpaid = frappe._dict(frappe.db.sql("""
-		select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
-		from `tabGL Entry`
-		where party_type = %s and party=%s
-		group by company""", (party_type, party)))
+	# company_wise_total_unpaid = frappe._dict(frappe.db.sql("""
+	# 	select company, sum(debit_in_account_currency) - sum(credit_in_account_currency)
+	# 	from `tabGL Entry`
+	# 	where party_type = %s and party=%s
+	# 	group by company""", (party_type, party)))
+
+	# company_wise_total_unpaid = 0
+	# debit_in_account_currency = 0
+	# credit_in_account_currency = 0
+	
+	# gl_entries = frappe.get_all("GL Entry", ["debit_in_account_currency", "credit_in_account_currency"], filters = {"party_type": party_type, "party": party})
+	
+	# for entry in gl_entries:
+	# 	debit_in_account_currency += entry.debit_in_account_currency
+	# 	credit_in_account_currency += entry.credit_in_account_currency
+	
+	# company_wise_total_unpaid =  debit_in_account_currency - credit_in_account_currency
 
 	for d in companies:
-		company_default_currency = frappe.db.get_value("Company", d.company, 'default_currency')
+		# company_default_currency = frappe.db.get_value("Company", d.company, 'default_currency')
 		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
-		if party_account_currency==company_default_currency:
-			billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("base_grand_total"))
-		else:
-			billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("grand_total"))
+		# if party_account_currency==company_default_currency:
+		# 	billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("base_grand_total"))
+		# else:
+		# 	billing_this_year = flt(company_wise_billing_this_year.get(d.company,{}).get("grand_total"))
 
-		total_unpaid = flt(company_wise_total_unpaid.get(d.company))
+		# total_unpaid = flt(company_wise_total_unpaid.get(d.company))
 
 		if loyalty_point_details:
 			loyalty_points = loyalty_point_details.get(d.company)
 
+		billing_this_year = 0
+		total_unpaid = 0
 		info = {}
-		info["billing_this_year"] = flt(billing_this_year) if billing_this_year else 0
+
+		# if party_type == "Customer":
+		# 	cds = frappe.get_all("Customer Documents", ["total", "outstanding_amount"], filters = {"company": d.company, "customer": party, "docstatus": 1})
+
+		# 	for cd in cds:
+		# 		billing_this_year += cd.total
+		# 		total_unpaid += cd.outstanding_amount
+
+		# billing_this_year_supplier = 0			
+
+		if party_type == "Supplier":
+			# cds = frappe.get_all("Supplier Documents", ["total", "outstanding_amount"], filters = {"company": d.company, "supplier": party, "docstatus": 1})
+
+			# for cd in cds:
+			# 	billing_this_year_supplier += cd.total
+			# 	total_unpaid += cd.outstanding_amount
+
+			# supplier = frappe.get_doc("Supplier", party)
+			# billing_this_year_supplier += supplier.remaining_balance
+			dss = frappe.get_all("Dashboard Supplier", ["billing_this_year", "total_unpaid"], filters = {"company": d.company, "supplier": party})
+			
+			for ds in dss:
+				billing_this_year =+ ds.billing_this_year
+				total_unpaid += ds.total_unpaid
+
+		if party_type == "Customer":
+			dcs = frappe.get_all("Dashboard Customer", ["billing_this_year", "total_unpaid"], filters = {"company": d.company, "customer": party})
+			
+			for dc in dcs:
+				billing_this_year += dc.billing_this_year
+				total_unpaid += dc.total_unpaid
+
+		info["billing_this_year"] = billing_this_year
 		info["currency"] = party_account_currency
-		info["total_unpaid"] = flt(total_unpaid) if total_unpaid else 0
+		info["total_unpaid"] = total_unpaid
 		info["company"] = d.company
 
 		if party_type == "Customer" and loyalty_point_details:
 			info["loyalty_points"] = loyalty_points
 
-		if party_type == "Supplier":
-			info["total_unpaid"] = -1 * info["total_unpaid"]
+		# if party_type == "Supplier":
+		# 	info["total_unpaid"] = -1 * info["total_unpaid"]
 
 		company_wise_info.append(info)
 

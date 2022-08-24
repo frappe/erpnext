@@ -49,3 +49,30 @@ class RetentionBonus(Document):
 				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', bonus_removed)
 			
 			self.db_set('additional_salary', '')
+	
+	def confidentials(self):
+		confidentials_list = frappe.get_all("Confidential Payroll Employee", ["*"])
+
+		if len(confidentials_list):
+			employees = frappe.get_all("Confidential Payroll Detail", ["*"], filters = {"parent":confidentials_list[0].name, "employee": self.employee})
+			
+			if len(employees) > 0:
+				user = frappe.session.user
+
+				users = frappe.get_all("User", ["*"], filters = {"name": user})
+
+				roles = frappe.get_all("Has Role", ["*"], filters = {"parent": users[0].name})
+
+				roles_arr = []
+
+				for role in roles:
+					roles_arr.append(role.role)
+
+				if confidentials_list[0].rol in roles_arr:
+					self.db_set('confidential', 1, update_modified=False)
+				else:
+					self.db_set('confidential', 0, update_modified=False)
+			else:
+				self.db_set('confidential', 1, update_modified=False)
+		else:
+			self.db_set('confidential', 1, update_modified=False)

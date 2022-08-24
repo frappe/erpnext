@@ -1,0 +1,93 @@
+{
+ "creation": "2022-07-11 15:26:22.588398",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "history",
+  "item",
+  "item_name",
+  "quantity",
+  "price",
+  "net_pay",
+  "reference",
+  "sale_amount",
+  "no_order"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_pay",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Net Pay",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sale_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Sales Amount"
+  },
+  {
+   "fieldname": "no_order",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "No Order"
+  },
+  {
+   "fieldname": "history",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "History",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-07-11 17:06:42.489203",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Account Statement Payment Item Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

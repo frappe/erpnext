@@ -7,13 +7,18 @@
  "field_order": [
   "naming_series",
   "creation_date",
+  "posting_time",
   "reason_for_download",
   "responsable",
   "authorized",
   "company",
   "warehouse",
+  "project",
   "download_area",
+  "cost_center",
+  "currency",
   "items",
+  "total_valuation_rate",
   "amended_from"
  ],
  "fields": [
@@ -48,8 +53,9 @@
   },
   {
    "fieldname": "responsable",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Responsable",
+   "options": "Employee",
    "reqd": 1
   },
   {
@@ -87,10 +93,42 @@
    "label": "Download Area",
    "options": "Download Area",
    "reqd": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_valuation_rate",
+   "fieldtype": "Currency",
+   "label": "Total Valuation Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-30 14:31:52.625275",
+ "modified": "2022-05-25 15:13:31.654555",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download",

@@ -16,6 +16,34 @@ class CustomerRetention(Document):
 			self.update_accounts_status()
 			self.apply_gl_entry()
 			self.apply_changes_sales_invoice()
+			self.apply_changes_customer_document()
+			self.update_dashboard_customer()
+	
+	def on_cancel(self):
+		self.update_dashboard_customer_cancel()
+	
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.total_unpaid -= self.total_withheld
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_withheld * -1
+			new_doc.insert()
+	
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.total_unpaid += self.total_withheld
+			customer.save()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
@@ -35,9 +63,11 @@ class CustomerRetention(Document):
 	def calculate_retention(self):
 		for document in self.get("references"):
 			total = document.net_total * (self.percentage_total/100)
-			sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
-			sales_invoice.outstanding_amount -= total
-			sales_invoice.save()
+			if document.reference_name == "Sales Invoice":
+				sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
+				# sales_invoice.outstanding_amount -= total
+				sales_invoice.outstanding_amount = document.net_total - total
+				sales_invoice.save()
 	
 	def update_accounts_status(self):
 		customer = frappe.get_doc("Customer", self.customer)
@@ -74,7 +104,7 @@ class CustomerRetention(Document):
 
 		company = frappe.get_doc("Company", self.company)
 
-		account_to_debit = company.default_payable_account
+		account_to_debit = company.default_receivable_account
 
 		reason_porcentage = frappe.get_all("Customer Reason And Percentage", ["reason"], filters = {"parent": self.name})
 
@@ -148,5 +178,14 @@ class CustomerRetention(Document):
 		for reference in references:
 			if reference.reference_doctype == "Sales Invoice":
 				doc = frappe.get_doc("Sales Invoice", reference.reference_name)
-				outstanding = doc.outstanding_amount - reference.net_total
+				outstanding = doc.outstanding_amount
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+	
+	def apply_changes_customer_document(self):
+		references = frappe.get_all("Reference Customer Retention", ["*"], filters = {"parent": self.name})
+
+		for reference in references:
+			if reference.reference_doctype == "Customer Documents":
+				doc = frappe.get_doc("Customer Documents", reference.reference_name)
+				outstanding = doc.outstanding_amount - self.total_withheld
 				doc.db_set('outstanding_amount', outstanding, update_modified=False)

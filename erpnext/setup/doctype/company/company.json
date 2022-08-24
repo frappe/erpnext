@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
@@ -53,6 +52,8 @@
   "column_break0",
   "allow_account_creation_against_child_company",
   "default_payable_account",
+  "default_credit_account",
+  "default_account_for_credit_discounts",
   "default_employee_advance_account",
   "default_expense_account",
   "default_income_account",
@@ -69,6 +70,7 @@
   "enable_perpetual_inventory",
   "default_inventory_account",
   "stock_adjustment_account",
+  "inventory_download_acc",
   "column_break_32",
   "stock_received_but_not_billed",
   "expenses_included_in_valuation",
@@ -722,13 +724,30 @@
    "fieldtype": "Link",
    "label": "Default Buying Terms",
    "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "default_credit_account",
+   "fieldtype": "Link",
+   "label": "Default Credit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "default_account_for_credit_discounts",
+   "fieldtype": "Link",
+   "label": "Default Account For Credit Discounts",
+   "options": "Account"
+  },
+  {
+   "fieldname": "inventory_download_acc",
+   "fieldtype": "Link",
+   "label": "Inventory Download Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "links": [],
- "modified": "2020-02-14 15:37:19.179839",
+ "modified": "2022-05-18 14:36:54.451252",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

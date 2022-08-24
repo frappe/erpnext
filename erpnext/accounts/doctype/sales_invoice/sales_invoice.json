@@ -31,7 +31,9 @@
   "due_date",
   "reason_for_sale",
   "patient_statement",
+  "is_work_order",
   "amended_from",
+  "work_order",
   "cai_info_section",
   "cai",
   "due_date_cai",
@@ -133,6 +135,7 @@
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
+  "round_off_discount",
   "totals",
   "taxed_sales15",
   "isv15",
@@ -151,6 +154,7 @@
   "in_words",
   "total_advance",
   "outstanding_amount",
+  "disable_rounded_total",
   "insurance_section",
   "excesses",
   "deductible",
@@ -1035,6 +1039,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "label": "Rounded Total",
@@ -1396,7 +1401,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
+   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled\nCanceled",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1871,12 +1876,37 @@
   {
    "fieldname": "insurancecolumn",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_off_discount",
+   "fieldtype": "Check",
+   "label": "Round Off Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_work_order",
+   "fieldtype": "Check",
+   "label": "Is Work Order"
+  },
+  {
+   "depends_on": "is_work_order",
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order Invoice",
+   "options": "Work Order Invoice"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-12-23 10:48:13.337450",
+ "modified": "2022-08-17 15:56:20.257902",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

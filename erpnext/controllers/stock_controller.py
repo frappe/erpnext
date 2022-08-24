@@ -11,6 +11,7 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+from erpnext.accounts.utils import get_account_currency
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
@@ -95,6 +96,59 @@ class StockController(AccountsController):
 						}, item=item_row))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
+		
+		if self.doctype == "Sales Invoice":
+			if self.discount_reason != None:				
+				if self.outstanding_amount == 0:
+					if self.is_pos == 1:
+						pos = frappe.get_doc("POS Profile", self.pos_profile)
+						if pos.income_account == None:
+							frappe.throw(_("You must assign a income account in the Pos Profile."))
+
+						account_currency = get_account_currency(pos.income_account)
+
+						company = frappe.get_doc("Company", self.company)
+
+						gl_list.append(self.get_gl_dict({
+							"account": pos.income_account,
+							"against": pos.income_account,
+							"cost_center": company.cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"credit": self.discount_amount,
+							"credit_in_account_currency": self.discount_amount
+						}, account_currency))
+					else:
+						company = frappe.get_doc("Company", self.company)
+
+						if company.default_account_for_credit_discounts == None:
+							frappe.throw(_("You must assign a default account for credit discounts in the company."))
+
+						account_currency = get_account_currency(company.default_account_for_credit_discounts)
+
+						gl_list.append(self.get_gl_dict({
+							"account": company.default_account_for_credit_discounts,
+							"against": company.default_account_for_credit_discounts,
+							"cost_center": company.cost_center,
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"credit": self.discount_amount,
+							"credit_in_account_currency": self.discount_amount
+						}, account_currency))
+				else:
+					company = frappe.get_doc("Company", self.company)
+
+					if company.default_account_for_credit_discounts == None:
+						frappe.throw(_("You must assign a default account for credit discounts in the company."))
+
+					account_currency = get_account_currency(company.default_account_for_credit_discounts)
+
+					gl_list.append(self.get_gl_dict({
+						"account": company.default_account_for_credit_discounts,
+						"against": company.default_account_for_credit_discounts,
+						"cost_center": company.cost_center,
+						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+						"credit": self.discount_amount,
+						"credit_in_account_currency": self.discount_amount
+					}, account_currency))
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
@@ -354,13 +408,16 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
-		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
-		if expected_gle:
-			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
-				_delete_gl_entries(voucher_type, voucher_no)
-				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
-		else:
-			_delete_gl_entries(voucher_type, voucher_no)
+		if voucher_type != "Inventory Download":
+			if voucher_type != "Cancellation Of Invoices":
+				if voucher_type != "Work Order Invoice":
+					expected_gle = voucher_obj.get_gl_entries(warehouse_account)
+					if expected_gle:
+						if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+							_delete_gl_entries(voucher_type, voucher_no)
+							voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
+					else:
+						_delete_gl_entries(voucher_type, voucher_no)
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	matched = True

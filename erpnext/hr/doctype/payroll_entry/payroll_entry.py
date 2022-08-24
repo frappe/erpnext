@@ -62,7 +62,7 @@ class PayrollEntry(Document):
 			cond += "and %(from_date)s >= t2.from_date"
 			emp_list = frappe.db.sql("""
 				select
-					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation
+					distinct t1.name as employee, t1.employee_name, t1.department, t1.designation, t2.salary_structure
 				from
 					`tabEmployee` t1, `tabSalary Structure Assignment` t2
 				where
@@ -75,13 +75,21 @@ class PayrollEntry(Document):
 	def fill_employee_details(self):
 		self.set('employees', [])
 		employees = self.get_emp_list()
+		number_of_employees = 0
+
 		if not employees:
 			frappe.throw(_("No employees for the mentioned criteria"))
 
 		for d in employees:
-			self.append('employees', d)
+			if self.salary_structure != None:
+				if self.salary_structure == d.salary_structure:
+					self.append('employees', d)
+					number_of_employees += 1
+			else:
+				self.append('employees', d)
+				number_of_employees += 1
 
-		self.number_of_employees = len(employees)
+		self.number_of_employees = number_of_employees
 		if self.validate_attendance:
 			return self.validate_employee_attendance()
 
@@ -114,7 +122,18 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		self.created = 1
 		emp_list = [d.employee for d in self.get_emp_list()]
-		if emp_list:
+		
+		aployees_list_verificate = []
+		aployees_list = []
+
+		for emp in self.get("employees"):
+			aployees_list_verificate.append(emp.employee)
+
+		for emp in emp_list: 
+			if emp in aployees_list_verificate:
+				aployees_list.append(emp) 
+
+		if aployees_list:
 			args = frappe._dict({
 				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
 				"payroll_frequency": self.payroll_frequency,
@@ -126,10 +145,10 @@ class PayrollEntry(Document):
 				"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
 				"payroll_entry": self.name
 			})
-			if len(emp_list) > 30:
-				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
+			if len(aployees_list) > 30:
+				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=aployees_list, args=args)
 			else:
-				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
+				create_salary_slips_for_employees(aployees_list, args, publish_progress=False)
 				# since this method is called via frm.call this doc needs to be updated manually
 				self.reload()
 
@@ -342,13 +361,119 @@ class PayrollEntry(Document):
 						salary_slip_total -= sal_detail.amount
 			if salary_slip_total > 0:
 				self.create_journal_entry(salary_slip_total, "salary")
+	
+	def make_journal_entry(self):
+		self.create_journal_entry_salary_slip()
+	
+	def create_journal_entry_salary_slip(self):
+		ver_acc = []
+		ver_deb = []
+		ver_cred = []
+		rows_acc = []
+		rows_deb = []
+		rows_cred = []
+		salary_slips = frappe.get_all("Salary Slip", ["*"], filters = {"payroll_entry": self.name})
+		
+		for salary_slip in salary_slips:
+			details = frappe.get_all("Salary Detail", ["*"], filters = {"parent": salary_slip.name})
+			
+			for detail in details:
+				debit = 0
+				credit = 0
+
+				component = frappe.get_doc("Salary Component", detail.salary_component)
+
+				account = frappe.get_all("Salary Component Account", ["default_account"], filters = {"parent": component.name, "company": self.company})
+
+				if len(account) == 0:
+					frappe.throw(_("This component {} don't have a account.".format(component.name)))
+
+				if component.type == "Earning":
+					debit = detail.amount
+					credit = 0
+
+				if component.type == "Deduction":
+					debit = 0
+					credit = detail.amount
+
+				
+				ver_acc.append(account[0].default_account)
+				ver_deb.append(debit)
+				ver_cred.append(credit)
+		
+		cont_acc = 0
+		for verificate in ver_acc:
+			if len(rows_acc) == 0:
+				rows_acc.append(verificate)
+				rows_deb.append(ver_deb[cont_acc])
+				rows_cred.append(ver_cred[cont_acc])
+			else:
+				cont = 0
+				cont_row = 0
+				for row in rows_acc:
+					if row == verificate:
+						rows_deb[cont_row] += ver_deb[cont_row]
+						rows_cred[cont_row] += ver_cred[cont_row]
+					else:
+						cont += 1
+					
+					cont_row += 1
+				
+				if len(rows_acc) == cont:
+					rows_acc.append(verificate)
+					rows_deb.append(ver_deb[cont_acc])
+					rows_cred.append(ver_cred[cont_acc])
+
+			cont_acc += 1
+
+		doc = frappe.new_doc("Journal Entry")
+		doc.voucher_type = "Payroll Entry"
+		doc.company = self.company
+		doc.posting_date = self.posting_date
+		doc.user_remark = _("Payment of Payrroll Entry from {} to {}".format(self.start_date, self.end_date))
+
+		cont_rows = 0
+		debit = 0
+		credit = 0
+		register_list = []
+		for row in rows_acc:
+			debit += rows_deb[cont_rows]
+			credit += rows_cred[cont_rows]
+
+			register_list.append(
+				{
+					"account": row,
+					"debit_in_account_currency": rows_deb[cont_rows],
+					"credit_in_account_currency": rows_cred[cont_rows],
+					"reference_type": self.doctype,
+					"reference_name": self.name
+				}
+			)			
+
+			cont_rows += 1
+		
+		difference = debit - credit
+		default_payroll_payable_account = self.get_default_payroll_payable_account()
+		register_list.append(
+		 	{
+				"account": default_payroll_payable_account,
+		 		"debit_in_account_currency": 0,
+		 		"credit_in_account_currency": difference,
+		 		"reference_type": self.doctype,
+		 		"reference_name": self.name
+		 	}
+		)
+
+		doc.set("accounts", register_list)
+		
+		doc.save(ignore_permissions = True)
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
 		journal_entry = frappe.new_doc('Journal Entry')
-		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.voucher_type = 'Payroll Entry'
 		journal_entry.user_remark = _('Payment of {0} from {1} to {2}')\
 			.format(user_remark, self.start_date, self.end_date)
 		journal_entry.company = self.company

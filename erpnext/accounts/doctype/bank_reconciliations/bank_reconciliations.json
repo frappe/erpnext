@@ -6,14 +6,26 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "from_date",
+  "to_date",
   "date",
+  "company",
   "bank_account",
   "detail",
   "payment_entry_detail",
+  "bank_check_amount",
+  "bank_check_transit_amount",
+  "credit_note_amount",
+  "debit_note_amount",
+  "bank_deposit_amount",
+  "wire_transfer_amount",
   "bank_amount",
+  "total_last_reconciliations",
   "transaction_amount",
+  "actual_total_conciliation",
   "defference_amount",
-  "amended_from"
+  "amended_from",
+  "date_last_reconciliations"
  ],
  "fields": [
   {
@@ -60,11 +72,13 @@
    "fieldtype": "Table",
    "label": "Bank reconciliations Detail",
    "options": "Bank reconciliations Table",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "bank_account",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Bank Account",
    "options": "Bank Account",
    "reqd": 1
@@ -74,11 +88,86 @@
    "fieldtype": "Table",
    "label": "PAyment Entry Detail",
    "options": "Bank reconciliations payment entry Table",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_check_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Check Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_note_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Note Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "debit_note_amount",
+   "fieldtype": "Currency",
+   "label": "Debit Note Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_deposit_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Deposit Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "wire_transfer_amount",
+   "fieldtype": "Currency",
+   "label": "Wire Transfer Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_check_transit_amount",
+   "fieldtype": "Currency",
+   "label": "Bank Check Transit Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "total_last_reconciliations",
+   "fieldtype": "Currency",
+   "label": "Total Last Reconciliation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_total_conciliation",
+   "fieldtype": "Currency",
+   "label": "Actual Total Conciliation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To",
+   "reqd": 1
+  },
+  {
+   "fieldname": "date_last_reconciliations",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "date_last_reconciliations"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-11-09 16:01:04.950023",
+ "modified": "2022-07-01 15:45:11.159821",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations",

@@ -17,12 +17,41 @@ class SupplierDocuments(Document):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.update_dashboard_supplier()
 			self.grand_total = self.outstanding_amount
 			self.db_set('grand_total', self.outstanding_amount, update_modified=False)
-			self.apply_gl_entry()
+			# self.apply_gl_entry()
 		
 	def on_load(self):
 		self.validate_status()
+	
+	def on_cancel(self):
+		self.update_dashboard_supplier_cancel()
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.billing_this_year += self.total
+			supplier.total_unpaid += self.outstanding_amount
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.total
+			new_doc.total_unpaid = self.outstanding_amount
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.billing_this_year -= self.total
+			supplier.total_unpaid -= self.outstanding_amount
+			supplier.save()
 
 	def calculate_total(self):
 		self.calculate_isv()
@@ -65,8 +94,8 @@ class SupplierDocuments(Document):
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.credit += self.total
-			supplier.remaining_balance -= self.total
+			supplier.debit += self.total
+			supplier.remaining_balance += self.total
 			supplier.save()
 	
 	def validate_status(self):

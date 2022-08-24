@@ -26,6 +26,7 @@
   "party_bank_account",
   "contact_person",
   "contact_email",
+  "prereconcilied",
   "reconciled",
   "payment_accounts_section",
   "party_balance",
@@ -69,6 +70,7 @@
   "section_break_12",
   "status",
   "remarks",
+  "references_nos",
   "column_break_16",
   "letter_head",
   "print_heading",
@@ -78,7 +80,8 @@
   "subscription_section",
   "auto_repeat",
   "amended_from",
-  "title"
+  "title",
+  "dncxp"
  ],
  "fields": [
   {
@@ -233,6 +236,7 @@
    "depends_on": "paid_from",
    "fieldname": "paid_from_account_balance",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Account Balance",
    "options": "paid_from_account_currency",
    "print_hide": 1,
@@ -266,6 +270,7 @@
    "depends_on": "paid_to",
    "fieldname": "paid_to_account_balance",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Account Balance",
    "options": "paid_to_account_currency",
    "print_hide": 1,
@@ -609,11 +614,29 @@
    "fieldname": "reason_payment",
    "fieldtype": "Select",
    "label": "Reason For Payment",
-   "options": "Advance\nAdvancement\nCancellation"
+   "options": "Payment\nAdvancement"
+  },
+  {
+   "fieldname": "references_nos",
+   "fieldtype": "Small Text",
+   "label": "References Nos"
+  },
+  {
+   "fieldname": "dncxp",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Debit Note CXP",
+   "options": "Debit Note CXP"
+  },
+  {
+   "default": "0",
+   "fieldname": "prereconcilied",
+   "fieldtype": "Check",
+   "label": "Pre-reconciled"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-28 15:04:55.136108",
+ "modified": "2022-07-20 13:58:46.126899",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

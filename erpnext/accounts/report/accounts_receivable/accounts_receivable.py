@@ -46,7 +46,34 @@ class ReceivablePayableReport(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
+		self.customer_documents()
 		return self.columns, self.data, None, self.chart
+	
+	def customer_documents(self):
+		report_date = self.filters.get("report_date")
+		conditions = self.return_filters_customer_documents(report_date)
+		documents = frappe.get_all("Customer Documents", ["*"], filters = conditions)
+
+		for document in documents:
+			paid = document.total - document.outstanding_amount
+			row = [document.posting_date, document.customer, _("Customer Documents"), document.name, "", document.due_date, "", document.posting_date, document.total, paid, 0.0, document.outstanding_amount, 0, 0.0, 0.0, 0.0, 0.0, 0.0, "HNL", "", "No hay observaciones"]
+			self.data.append(row)
+
+	def return_filters_customer_documents(self, report_date):
+		conditions = ''	
+
+		conditions += "{"
+
+		if self.filters.get("ageing_based_on") == "Due Date":
+			conditions += '"due_date": ["<=", "{}"]'.format(report_date)
+		else:
+			conditions += '"posting_date": ["<=", "{}"]'.format(report_date)
+
+		conditions += ', "company": "{}"'.format(self.filters.get("company"))
+		conditions += ', "outstanding_amount": [">", 0]'
+		conditions += '}'
+
+		return conditions
 
 	def set_defaults(self):
 		if not self.filters.get("company"):
@@ -193,11 +220,22 @@ class ReceivablePayableReport(object):
 					self.append_row(row)
 
 	def append_row(self, row):
-		self.allocate_future_payments(row)
-		self.set_invoice_details(row)
-		self.set_party_details(row)
-		self.set_ageing(row)
-		self.data.append(row)
+		newrow = False
+
+		if row.voucher_type == 'Payment Entry' or row.voucher_type == 'Journal Entry':
+			newrow = False
+		else:		
+			document = frappe.get_doc(row.voucher_type, row.voucher_no)
+
+			if document.docstatus == 1:
+				newrow = True
+		
+		if newrow:
+			self.allocate_future_payments(row)
+			self.set_invoice_details(row)
+			self.set_party_details(row)
+			self.set_ageing(row)
+			self.data.append(row)
 
 	def set_invoice_details(self, row):
 		invoice_details = self.invoice_details.get(row.voucher_no, {})
@@ -212,6 +250,12 @@ class ReceivablePayableReport(object):
 			if self.filters.show_sales_person and row.sales_team:
 				row.sales_person = ", ".join(row.sales_team)
 				del row['sales_team']
+		
+		if row.voucher_type == 'Customer Documents':
+			document_number = frappe.get_value("Customer Documents", row.voucher_no, 'document_number')
+			row.document_number = document_number
+		else:
+			row.document_number = ''
 
 	def set_delivery_notes(self, row):
 		delivery_notes = self.delivery_notes.get(row.voucher_no, [])
@@ -244,12 +288,16 @@ class ReceivablePayableReport(object):
 
 	def get_invoice_details(self):
 		self.invoice_details = frappe._dict()
+		date_type = "posting_date"
+		if self.filters.ageing_based_on == "Due Date":
+			date_type = "due_date"
+			
 		if self.party_type == "Customer":
 			si_list = frappe.db.sql("""
 				select name, due_date, po_no
 				from `tabSales Invoice`
-				where posting_date <= %s
-			""",self.filters.report_date, as_dict=1)
+				where %s <= %s
+			""",(date_type, self.filters.report_date), as_dict=1)
 			for d in si_list:
 				self.invoice_details.setdefault(d.name, d)
 
@@ -268,8 +316,8 @@ class ReceivablePayableReport(object):
 			for pi in frappe.db.sql("""
 				select name, due_date, bill_no, bill_date
 				from `tabPurchase Invoice`
-				where posting_date <= %s
-			""", self.filters.report_date, as_dict=1):
+				where %s <= %s
+			""",(date_type, self.filters.report_date), as_dict=1):
 				self.invoice_details.setdefault(pi.name, pi)
 
 		# Invoices booked via Journal Entries
@@ -660,6 +708,7 @@ class ReceivablePayableReport(object):
 		self.add_column(label=_('Voucher Type'), fieldname='voucher_type', fieldtype='Data')
 		self.add_column(label=_('Voucher No'), fieldname='voucher_no', fieldtype='Dynamic Link',
 			options='voucher_type', width=180)
+		self.add_column(label=_('Document Nnumber'), fieldname='document_number', fieldtype='Data', width=180)
 		self.add_column(label='Due Date', fieldtype='Date')
 
 		if self.party_type == "Supplier":

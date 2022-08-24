@@ -18,6 +18,12 @@ frappe.query_reports["Sold Products"] = {
 			options: "Item",
 		},
 		{
+			fieldname:"item_group",
+			label: __("Item Group"),
+			fieldtype: "Link",
+			options: "Item Group",
+		},
+		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",

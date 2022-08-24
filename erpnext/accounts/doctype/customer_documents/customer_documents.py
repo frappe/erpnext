@@ -17,14 +17,45 @@ class CustomerDocuments(Document):
 		self.set_status()
 		if self.docstatus == 1:
 			self.update_accounts_status()
-			self.apply_gl_entry()
+			self.update_dashboard_customer()
+			# self.apply_gl_entry()
+	
+	def on_cancel(self):
+		self.update_accounts_status_cancel()
+		self.update_dashboard_customer_cancel()
 
 	def on_load(self):
 		self.validate_status()
 
+	def update_dashboard_customer(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.billing_this_year += self.total
+			customer.total_unpaid += self.outstanding_amount
+			customer.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Customer")
+			new_doc.customer = self.customer
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.total
+			new_doc.total_unpaid = self.outstanding_amount
+			new_doc.insert()
+
+	def update_dashboard_customer_cancel(self):
+		customers = frappe.get_all("Dashboard Customer",["*"], filters = {"customer": self.customer, "company": self.company})
+
+		if len(customers) > 0:
+			customer = frappe.get_doc("Dashboard Customer", customers[0].name)
+			customer.billing_this_year -= self.total
+			customer.total_unpaid -= self.outstanding_amount
+			customer.save()
+
 	def calculate_total(self):
 		self.calculate_isv()
 		total_base = 0
+		self.grand_total = self.total
 		if self.total_exempt != None:
 			if not self.get("taxes"):
 				self.total = self.total_exempt
@@ -64,6 +95,13 @@ class CustomerDocuments(Document):
 		if customer:
 			customer.debit += self.total
 			customer.remaining_balance += self.total
+			customer.save()
+	
+	def update_accounts_status_cancel(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.debit -= self.total
+			customer.remaining_balance -= self.total
 			customer.save()
 	
 	def validate_status(self):

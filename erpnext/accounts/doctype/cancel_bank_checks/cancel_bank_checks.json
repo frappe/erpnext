@@ -1,0 +1,118 @@
+{
+ "autoname": "CBC-.YYYY.-.########",
+ "creation": "2022-01-31 15:10:50.258886",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bank_account",
+  "check",
+  "person_name",
+  "section1",
+  "no_bank_check",
+  "check_date",
+  "release_date",
+  "colum1",
+  "amount",
+  "amount_of",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "check",
+   "fieldtype": "Link",
+   "label": "Bank Check",
+   "options": "Bank Transactions"
+  },
+  {
+   "fieldname": "section1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "check.no_bank_check",
+   "fieldname": "no_bank_check",
+   "fieldtype": "Data",
+   "label": "No. Bank Check",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "check.check_date",
+   "fieldname": "check_date",
+   "fieldtype": "Date",
+   "label": "Check Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "check.release_date",
+   "fieldname": "release_date",
+   "fieldtype": "Data",
+   "label": "Release Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "colum1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "check.amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "check.amount_of",
+   "fieldname": "amount_of",
+   "fieldtype": "Data",
+   "label": "The Amount Of",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Cancel Bank Checks",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "check.person_name",
+   "fieldname": "person_name",
+   "fieldtype": "Data",
+   "label": "Party Name",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-02-28 13:58:29.977005",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cancel Bank Checks",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

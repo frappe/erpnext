@@ -1,0 +1,24 @@
+{
+ "add_total_row": 1,
+ "creation": "2022-06-13 16:15:41.744401",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2022-06-13 16:15:41.744401",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Suplier Documents",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Supplier Documents",
+ "report_name": "Suplier Documents",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

@@ -121,6 +121,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Confidential Payroll Users",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Leave Encashment",
 					"dependencies": ["Employee"]
 				},
@@ -168,12 +173,22 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Confidential Payroll",
+					"name": "Confidential Payroll Employee",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Confidential Payroll Users",
 					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Assignment Salary Component",
+					"dependencies": ["Payroll Entry"]
+				},
+				{
+					"type": "doctype",
+					"name": "Assignment Salary Component Confidential",
 					"dependencies": ["Payroll Entry"]
 				},
 				{
@@ -474,6 +489,12 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Salary Register Detail",
+					"doctype": "Salary Slip"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Salary Register Detail Without Components",
 					"doctype": "Salary Slip"
 				},
 			]

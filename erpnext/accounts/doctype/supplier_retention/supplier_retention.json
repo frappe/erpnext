@@ -25,6 +25,7 @@
   "references",
   "total_references",
   "total_withheld",
+  "status",
   "amended_from"
  ],
  "fields": [
@@ -178,10 +179,20 @@
    "fieldtype": "Data",
    "label": "Company RTN",
    "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "\nDraft\nSubmitted\nCancelled\nAnnulled",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-12-07 15:02:30.731194",
+ "modified": "2022-02-25 15:18:43.065575",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Supplier Retention",

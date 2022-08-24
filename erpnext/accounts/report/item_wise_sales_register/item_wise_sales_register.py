@@ -42,7 +42,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		if not delivery_note and d.update_stock:
 			delivery_note = d.parent
 
-		row = [d.item_code, d.item_name, d.item_group, d.description, d.parent, d.posting_date, d.customer, d.customer_name]
+		row = [d.item_code, d.item_name, d.item_group, d.description, d.parent, d.posting_date, d.customer, d.customer_name, d.patient_name]
 
 		if additional_query_columns:
 			for col in additional_query_columns:
@@ -76,7 +76,7 @@ def get_columns(additional_table_columns):
 		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120",
 		_("Item Group") + ":Link/Item Group:100", "Description::150", _("Invoice") + ":Link/Sales Invoice:120",
 		_("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
-		_("Customer Name") + "::120"]
+		_("Customer Name") + "::120", _("Patient Name") + "::120"]
 
 	if additional_table_columns:
 		columns += additional_table_columns
@@ -143,6 +143,7 @@ def get_items(filters, additional_query_columns):
 	return frappe.db.sql("""
 		select
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
+			`tabSales Invoice`.patient_name,
 			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
 			`tabSales Invoice`.project, `tabSales Invoice`.customer, `tabSales Invoice`.remarks,
 			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,

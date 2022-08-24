@@ -32,5 +32,11 @@ frappe.query_reports["Supplier Retention"] = {
 			"options": "Company",
 			"reqd": 1
 		},
+		{
+			"fieldname":"reason_for_retention",
+			"label": __("Reason For Retention"),
+			"fieldtype": "Link",
+			"options": "Reason For Retention"
+		},
 	]
 };

@@ -18,6 +18,33 @@ class SupplierRetention(Document):
 			self.calculate_retention()
 			self.update_accounts_status()
 			self.apply_gl_entry()
+			self.update_dashboard_supplier()
+	
+	def on_cancel(self):
+		self.update_dashboard_supplier_cancel()
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.total_unpaid -= self.total_withheld
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = 0
+			new_doc.total_unpaid = self.total_withheld * -1
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.total_unpaid += self.total_withheld
+			supplier.save()
 
 	def calculate_percentage_and_references(self):
 		if self.get("reasons"):
@@ -43,6 +70,12 @@ class SupplierRetention(Document):
 				outstanding_amount = sales_invoice.outstanding_amount
 				outstanding_amount -= total
 				sales_invoice.db_set('outstanding_amount', outstanding_amount, update_modified=False)
+			
+			if document.reference_doctype == "Sales Invoice":
+				sales_invoice = frappe.get_doc("Sales Invoice", document.reference_name)
+				outstanding_amount = sales_invoice.outstanding_amount
+				outstanding_amount -= total
+				sales_invoice.db_set('outstanding_amount', outstanding_amount, update_modified=False)
 
 			if document.reference_doctype == "Supplier Documents":
 				supllier_document = frappe.get_doc("Supplier Documents", document.reference_name)
@@ -53,8 +86,8 @@ class SupplierRetention(Document):
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
 		if supplier:
-			supplier.credit -= self.total_withheld
-			supplier.remaining_balance += self.total_withheld
+			supplier.credit += self.total_withheld
+			supplier.remaining_balance -= self.total_withheld
 			supplier.save()
 
 	def assign_cai(self):

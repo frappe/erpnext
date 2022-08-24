@@ -2,6 +2,17 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Customer", {
+	before_load: function(frm) {
+		frm.events.confidential(frm);
+	},
+
+	confidential: function(frm) {
+		return frappe.call({
+			method: "confidentials",
+			doc: frm.doc
+		});
+	},
+
 	setup: function(frm) {
 
 		frm.make_methods = {

@@ -122,6 +122,7 @@ class SalarySlip(TransactionBase):
 			self.end_date = date_details.end_date
 
 	def get_emp_and_leave_details(self):
+		self.confidentials()
 		'''First time, load all the components from salary structure'''
 		if self.employee:
 			self.set("earnings", [])
@@ -143,7 +144,7 @@ class SalarySlip(TransactionBase):
 				self.pull_sal_struct()
 	
 	def confidentials(self):
-		confidentials_list = frappe.get_all("Confidential Payroll", ["*"])
+		confidentials_list = frappe.get_all("Confidential Payroll Employee", ["*"])
 
 		if len(confidentials_list):
 			employees = frappe.get_all("Confidential Payroll Detail", ["*"], filters = {"parent":confidentials_list[0].name, "employee": self.employee})

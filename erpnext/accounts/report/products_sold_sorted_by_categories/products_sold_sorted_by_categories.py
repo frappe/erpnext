@@ -71,9 +71,29 @@ def execute(filters=None):
 		group_arr = [{'indent': 0.0, "category": item_group, "total_price": total_group}]
 		data.extend(group_arr or [])
 
+		items_list = []
+
 		for product in products:
-			if item_group == product.item_group:
-				product_arr = {'indent': 1.0, "category":"", "product": product.item_name, "total_product": product.rate, "product_description": product.description, "quantity": product.qty, "total_price": product.amount}
+			exist = True
+			item_name = product.item_name
+			rate = product.rate
+			description = product.description
+			qty = 0
+			amount = 0
+
+			if item_name in items_list:
+				exist = True
+			else:
+				exist = False
+
+			if item_group == product.item_group and exist == False:
+				for item in products:
+					if item.item_name == product.item_name:
+						qty += product.qty
+						amount += product.amount
+
+				items_list.append(item_name)
+				product_arr = {'indent': 1.0, "category":"", "product": item_name, "total_product": rate, "product_description": description, "quantity": qty, "total_price": amount}
 				items.append(product_arr)
 		
 		data.extend(items or [])
@@ -85,9 +105,7 @@ def get_conditions(filters, from_date, to_date):
 
 	conditions += "{"
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
-	conditions += ', "posting_time": [">=", "{}"]'.format(filters.get("from_time"))
-	conditions += ', "posting_time": ["<=", "{}"]'.format(filters.get("to_time"))
-	conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
+	conditions += ', "company": "{}"'.format(filters.get("company"))
 	if filters.get("user"):
 		conditions += ', "cashier": "{}"'.format(filters.get("user"))
 	conditions += '}'

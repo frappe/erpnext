@@ -1,0 +1,74 @@
+{
+ "creation": "2022-02-16 10:05:48.945854",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_name",
+  "due_date",
+  "column_break",
+  "total_amount",
+  "outstanding_amount",
+  "allocated"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "reference_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Name",
+   "options": "Sales Invoice",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "reference_name.due_date",
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "reference_name.grand_total",
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Amount",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "reference_name.outstanding_amount",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "allocated",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-02-16 10:30:12.942364",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Apply Payment Entries Without References Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

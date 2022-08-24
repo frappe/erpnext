@@ -71,6 +71,7 @@ frappe.ui.form.on('Payroll Entry', {
 	add_context_buttons: function(frm) {
 		if(frm.doc.salary_slips_submitted || (frm.doc.__onload && frm.doc.__onload.submitted_ss)) {
 			frm.events.add_bank_entry_button(frm);
+			frm.events.add_journal_entry_button(frm);
 		} else if(frm.doc.salary_slips_created) {
 			frm.add_custom_button(__("Submit Salary Slip"), function() {
 				submit_salary_slip(frm);
@@ -88,6 +89,22 @@ frappe.ui.form.on('Payroll Entry', {
 				if (r.message && !r.message.submitted) {
 					frm.add_custom_button("Make Bank Entry", function() {
 						make_bank_entry(frm);
+					}).addClass("btn-primary");
+				}
+			}
+		});
+	},
+
+	add_journal_entry_button: function(frm) {
+		frappe.call({
+			method: 'erpnext.hr.doctype.payroll_entry.payroll_entry.payroll_entry_has_bank_entries',
+			args: {
+				'name': frm.doc.name
+			},
+			callback: function(r) {
+				if (r.message && !r.message.submitted) {
+					frm.add_custom_button("Journal Entry", function() {
+						journal_entry(frm);
 					}).addClass("btn-primary");
 				}
 			}
@@ -249,6 +266,25 @@ let make_bank_entry = function (frm) {
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "make_payment_entry",
+			callback: function() {
+				frappe.set_route(
+					'List', 'Journal Entry', {"Journal Entry Account.reference_name": frm.doc.name}
+				);
+			},
+			freeze: true,
+			freeze_message: __("Creating Payment Entries......")
+		});
+	} else {
+		frappe.msgprint(__("Company, Payment Account, From Date and To Date is mandatory"));		
+	}
+};
+
+let journal_entry = function (frm) {
+	var doc = frm.doc;
+	if (doc.company && doc.start_date && doc.end_date && doc.payment_account) {
+		return frappe.call({
+			doc: cur_frm.doc,
+			method: "make_journal_entry",
 			callback: function() {
 				frappe.set_route(
 					'List', 'Journal Entry', {"Journal Entry Account.reference_name": frm.doc.name}

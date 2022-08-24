@@ -14,6 +14,7 @@
   "party_name",
   "customer_name",
   "patient",
+  "patient_name",
   "column_break1",
   "amended_from",
   "company",
@@ -84,6 +85,7 @@
   "rounding_adjustment",
   "rounded_total",
   "in_words",
+  "disable_rounded_total",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -933,15 +935,29 @@
   },
   {
    "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
    "fieldtype": "Data",
-   "label": "Patient"
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-11-10 13:18:03.719163",
+ "modified": "2022-03-31 09:48:53.648340",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

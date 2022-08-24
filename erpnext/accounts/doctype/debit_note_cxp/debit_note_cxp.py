@@ -10,86 +10,65 @@ from datetime import datetime, timedelta, date
 
 class DebitNoteCXP(Document):
 	def validate(self):
-		self.verificate_references_and_amount()
-		self.calculate_total()
+		self.calculate_totals()
+
 		if self.docstatus == 1:
-			self.verificate_amount()
+			self.update_dashboard_supplier()
 			self.update_accounts_status()
 			self.apply_gl_entry()
-
-	def calculate_total(self):
-		if not self.get("references"):
-			frappe.throw(_(" Required references"))
-		total_reference = 0
-		for d in self.get("references"):
-			total_reference += d.total_amount
-			self.total_references = total_reference
-		
-		if self.total_exempt > self.total_references:
-			frappe.throw(_("Amount cannot be greater than the total references"))
-
-		self.calculate_isv()
-		total_base = 0
-		if len(self.get("references")) > 0:
-			if self.total_exempt != None:
-				if not self.get("taxes"):
-					self.amount_total = self.total_exempt
-				else:
-					for taxes_list in self.get("taxes"):
-						total_base += taxes_list.base_isv
-						if self.total_exempt != None:
-							self.amount_total = total_base + self.total_exempt
-						else:
-							self.amount_total = total_base
-						if self.isv_15 != None:
-							self.amount_total = total_base + self.total_exempt + self.isv_15
-						elif self.isv_18 != None:
-							self.amount_total = total_base + self.total_exempt + self.isv_18
 	
-	def calculate_isv(self):
-		self.isv_15 = 0
-		self.isv_18 = 0
-		for taxes_list in self.get("taxes"):
-			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv_template})
-			for tax_template in item_tax_template:
-				tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_template.name})
-				for tax in tax_details:
-					if tax.tax_rate == 15:
-						tx_base = taxes_list.base_isv * (tax.tax_rate/100)
-						self.isv_15 = tx_base
-					elif tax.tax_rate == 18:
-						tx_base = taxes_list.base_isv * (tax.tax_rate/100)
-						self.isv_18 = tx_base
+	def on_cancel(self):
+		self.update_dashboard_supplier_cancel()
+		self.update_accounts_status_cancel()
+		self.delete_gl_entry()
+	
+	def calculate_totals(self):		
+		self.total_taxed = 0
+		tax15 = 0
+		tax18 = 0
 
-	def verificate_references_and_amount(self):
-		if len(self.get("references")) > 1:
-			order_by = sorted(self.references, key=lambda item: item.total_amount)
-			remaining_amount = self.amount
-			for d in order_by:
-				if remaining_amount <= d.total_amount:
-					result = d.total_amount - remaining_amount
-					if result <= 0:
-						frappe.throw(_("The amount can not be accepted to pay the bills, the amount must pay the bills or pay one and advance another."))
+		for tax in self.get("taxes"):
+			self.total_taxed += tax.base_isv
 
-	def verificate_amount(self):
-		remaining = 0
-		amount_total = self.amount_total
-		if len(self.get("references")) > 1:
-			for d in sorted(self.references, key=lambda item: item.total_amount):
-				purchase_invoice = frappe.get_doc("Purchase Invoice", d.reference_name)
-				if amount_total > d.total_amount:
-					amount_total -= d.total_amount
-					purchase_invoice.outstanding_amount -= d.total_amount
-				else:
-					if amount_total <= d.total_amount:
-						purchase_invoice.outstanding_amount -= amount_total
-				purchase_invoice.save()
-		else: 
-			for x in self.get("references"):
-				if amount_total <= x.total_amount:
-					purchase_invoice = frappe.get_doc("Purchase Invoice", x.reference_name)
-					purchase_invoice.outstanding_amount -= self.amount_total
-				purchase_invoice.save()
+			tax_rate = frappe.get_all("Item Tax Template Detail", ["*"], filters = {"parent": tax.isv_template})
+
+			if tax_rate[0].tax_rate == 15:
+				tax15 += (tax.base_isv / 1.15)*0.15
+			
+			if tax_rate[0].tax_rate == 18:
+				tax18 += (tax.base_isv / 1.18)*0.18
+		
+		if self.total_taxed > self.amount_total:
+			frappe.throw(_("Total taxed can't be greater than Amount Total."))
+		
+		self.isv_18 = tax18
+		self.isv_15 = tax15
+		self.outstanding_amount = self.amount_total
+	
+	def update_dashboard_supplier(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.billing_this_year += self.amount_total
+			supplier.total_unpaid += self.outstanding_amount
+			supplier.save()
+		else:
+			new_doc = frappe.new_doc("Dashboard Supplier")
+			new_doc.supplier = self.supplier
+			new_doc.company = self.company
+			new_doc.billing_this_year = self.amount_total
+			new_doc.total_unpaid = self.outstanding_amount
+			new_doc.insert()
+	
+	def update_dashboard_supplier_cancel(self):
+		suppliers = frappe.get_all("Dashboard Supplier",["*"], filters = {"supplier": self.supplier, "company": self.company})
+
+		if len(suppliers) > 0:
+			supplier = frappe.get_doc("Dashboard Supplier", suppliers[0].name)
+			supplier.billing_this_year -= self.amount_total
+			supplier.total_unpaid -= self.outstanding_amount
+			supplier.save()
 	
 	def update_accounts_status(self):
 		supplier = frappe.get_doc("Supplier", self.supplier)
@@ -97,6 +76,19 @@ class DebitNoteCXP(Document):
 			supplier.debit += self.amount_total
 			supplier.remaining_balance += self.amount_total
 			supplier.save()
+	
+	def update_accounts_status_cancel(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.debit -= self.amount_total
+			supplier.remaining_balance -= self.amount_total
+			supplier.save()
+	
+	def delete_gl_entry(self):
+		entries = frappe.get_all("GL Entry", ["name"], filters = {"voucher_no": self.name})
+
+		for entry in entries:
+			frappe.delete_doc("GL Entry", entry.name)
 	
 	def apply_gl_entry(self):
 		currentDateTime = datetime.now()
