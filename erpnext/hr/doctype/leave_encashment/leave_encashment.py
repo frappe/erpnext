@@ -10,7 +10,7 @@ from frappe.utils import getdate, nowdate, flt, add_days, today
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure,\
 	get_salary_structure_assignment
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry,expire_allocation
 from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
 import datetime
 
@@ -112,20 +112,15 @@ class LeaveEncashment(Document):
 			leaves=self.encashable_days * -1,
 			from_date=self.encashment_date,
 			to_date=self.encashment_date,
-			is_carry_forward=0
 		)
 		create_leave_ledger_entry(self, args, submit)
 
 		# create reverse entry for expired leaves
-		to_date = self.get_leave_allocation().get('to_date')
-		if to_date < getdate(nowdate()):
-			args = frappe._dict(
-				leaves=self.encashable_days,
-				from_date=to_date,
-				to_date=to_date,
-				is_carry_forward=0
-			)
-			create_leave_ledger_entry(self, args, submit)
+		leave_allocation = self.get_leave_allocation()
+		if leave_allocation:
+			name = frappe.get_value('Leave Ledger Entry', {"transaction_type": "Leave Allocation", "transaction_name": leave_allocation.get("name"), "is_expired": 1}, "name")
+			if name:
+				frappe.db.sql("""DELETE FROM `tabLeave Ledger Entry` WHERE `name`=%s""", (name))
 
 	def get_encashment_amount_per_day(self):
 		if not self.salary_structure:
