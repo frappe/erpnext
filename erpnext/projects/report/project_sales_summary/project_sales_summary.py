@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from distutils.log import debug
 import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
@@ -31,7 +30,7 @@ class ProjectSalesSummaryReport(object):
 
 		self.data = frappe.db.sql("""
 			SELECT p.name as project, p.project_type, p.project_workshop, p.project_status,p.project_name, p.project_date,
-				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,p.status,
+				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,
 				p.customer, p.customer_name, p.company,
 				p.service_advisor, p.service_manager,
 				p.applies_to_variant_of, p.applies_to_variant_of_name,
