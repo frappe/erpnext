@@ -35,7 +35,7 @@ erpnext.ProductList = class {
 	}
 
 	get_image_html(item, title, settings) {
-		let image = item.website_image || item.image;
+		let image = item.website_image;
 		let wishlist_enabled = !item.has_variants && settings.enable_wishlist;
 		let image_html = ``;
 

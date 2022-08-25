@@ -2712,6 +2712,19 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 20)
 		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 10)
 
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = ""
+		si.items[1].price_list_rate = 15
+		si.items[1].discount_amount = -5
+		si.items[1].rate = 20
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 20)
+
 	def test_einvoice_without_discounts(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice, validate_totals
 
@@ -2803,6 +2816,19 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 15)
 		self.assertEqual(einvoice["ItemList"][2]["UnitPrice"], 18)
 		self.assertEqual(einvoice["ItemList"][3]["UnitPrice"], 5)
+
+		si = get_sales_invoice_for_e_invoice()
+		si.apply_discount_on = ""
+		si.items[1].price_list_rate = 15
+		si.items[1].discount_amount = -5
+		si.items[1].rate = 20
+		si.save()
+
+		einvoice = make_einvoice(si)
+		validate_totals(einvoice)
+
+		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
+		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 20)
 
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")

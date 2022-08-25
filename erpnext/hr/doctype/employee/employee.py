@@ -10,7 +10,7 @@ from frappe.permissions import (
 	remove_user_permission,
 	set_user_permission_if_allowed,
 )
-from frappe.utils import add_years, cstr, getdate, today, validate_email_address
+from frappe.utils import add_days, add_years, cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
 from erpnext.utilities.transaction_base import delete_events
@@ -63,6 +63,8 @@ class Employee(NestedSet):
 			existing_user_id = frappe.db.get_value("Employee", self.name, "user_id")
 			if existing_user_id:
 				remove_user_permission("Employee", self.name, existing_user_id)
+
+		self.update_to_date_in_work_history()
 
 	def after_rename(self, old, new, merge):
 		self.db_set("employee", new)
@@ -165,6 +167,18 @@ class Employee(NestedSet):
 			user = frappe.get_doc("User", self.expense_approver)
 			user.flags.ignore_permissions = True
 			user.add_roles("Expense Approver")
+
+	def update_to_date_in_work_history(self):
+		if not self.internal_work_history:
+			return
+
+		for idx, row in enumerate(self.internal_work_history):
+			if not row.from_date or idx == 0:
+				continue
+
+			self.internal_work_history[idx - 1].to_date = add_days(row.from_date, -1)
+
+		self.internal_work_history[-1].to_date = None
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -349,7 +363,9 @@ def get_employee_email(employee_doc):
 
 def get_holiday_list_for_employee(employee, raise_exception=True):
 	if employee:
-		holiday_list, company = frappe.db.get_value("Employee", employee, ["holiday_list", "company"])
+		holiday_list, company = frappe.get_cached_value(
+			"Employee", employee, ["holiday_list", "company"]
+		)
 	else:
 		holiday_list = ""
 		company = frappe.db.get_value("Global Defaults", None, "default_company")

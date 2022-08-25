@@ -150,6 +150,7 @@ def make_salary_structure(
 	currency=erpnext.get_default_currency(),
 	payroll_period=None,
 	include_flexi_benefits=False,
+	base=None,
 ):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""", (salary_structure))
@@ -200,6 +201,7 @@ def make_salary_structure(
 			company=company,
 			currency=currency,
 			payroll_period=payroll_period,
+			base=base,
 		)
 
 	return salary_structure_doc

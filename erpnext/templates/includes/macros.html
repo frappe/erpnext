@@ -74,7 +74,7 @@
 {%- set col_size = 3 if is_full_width else 4 -%}
 {%- set title = item.web_item_name or item.item_name or item.item_code -%}
 {%- set title = title[:50] + "..." if title|len > 50 else title -%}
-{%- set image = item.website_image or item.image -%}
+{%- set image = item.website_image -%}
 {%- set description = item.website_description or item.description-%}
 
 {% if is_featured %}

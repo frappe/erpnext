@@ -305,7 +305,7 @@ class PaymentEntry(AccountsController):
 
 	def validate_reference_documents(self):
 		if self.party_type == "Student":
-			valid_reference_doctypes = "Fees"
+			valid_reference_doctypes = ("Fees", "Journal Entry")
 		elif self.party_type == "Customer":
 			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
 		elif self.party_type == "Supplier":

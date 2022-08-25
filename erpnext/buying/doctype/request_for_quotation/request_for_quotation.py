@@ -113,7 +113,7 @@ class RequestforQuotation(BuyingController):
 
 	def get_link(self):
 		# RFQ link for supplier portal
-		return get_url("/rfq/" + self.name)
+		return get_url("/app/request-for-quotation/" + self.name)
 
 	def update_supplier_part_no(self, supplier):
 		self.vendor = supplier
@@ -285,18 +285,6 @@ def get_list_context(context=None):
 		}
 	)
 	return list_context
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql(
-		"""select `tabContact`.name from `tabContact`, `tabDynamic Link`
-		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s
-		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
-		limit %(start)s, %(page_len)s""",
-		{"start": start, "page_len": page_len, "txt": "%%%s%%" % txt, "name": filters.get("supplier")},
-	)
 
 
 @frappe.whitelist()

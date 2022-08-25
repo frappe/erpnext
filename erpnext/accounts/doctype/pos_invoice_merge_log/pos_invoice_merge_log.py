@@ -9,7 +9,7 @@ from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.utils import flt, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -219,6 +219,9 @@ class POSInvoiceMergeLog(Document):
 		invoice.taxes_and_charges = None
 		invoice.ignore_pricing_rule = 1
 		invoice.customer = self.customer
+		invoice.disable_rounded_total = cint(
+			frappe.db.get_value("POS Profile", invoice.pos_profile, "disable_rounded_total")
+		)
 
 		if self.merge_invoices_based_on == "Customer Group":
 			invoice.flags.ignore_pos_profile = True

@@ -114,6 +114,40 @@ class TestExpenseClaim(FrappeTestCase):
 		self.assertEqual(claim.grand_total, 0)
 		self.assertEqual(claim.status, "Paid")
 
+	def test_advance_amount_allocation_against_claim_with_taxes(self):
+		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
+			get_advances_for_claim,
+			make_employee_advance,
+			make_payment_entry,
+		)
+
+		frappe.db.delete("Employee Advance")
+
+		payable_account = get_payable_account("_Test Company")
+		taxes = generate_taxes("_Test Company")
+		claim = make_expense_claim(
+			payable_account,
+			700,
+			700,
+			"_Test Company",
+			"Travel Expenses - _TC",
+			do_not_submit=True,
+			taxes=taxes,
+		)
+		claim.save()
+
+		advance = make_employee_advance(claim.employee)
+		pe = make_payment_entry(advance)
+		pe.submit()
+
+		# claim for already paid out advances
+		claim = get_advances_for_claim(claim, advance.name, 763)
+		claim.save()
+		claim.submit()
+
+		self.assertEqual(claim.grand_total, 0)
+		self.assertEqual(claim.status, "Paid")
+
 	def test_expense_claim_partially_paid_via_advance(self):
 		from erpnext.hr.doctype.employee_advance.test_employee_advance import (
 			get_advances_for_claim,
@@ -300,12 +334,13 @@ def get_payable_account(company):
 	return frappe.get_cached_value("Company", company, "default_payable_account")
 
 
-def generate_taxes():
+def generate_taxes(company=None):
+	company = company or company_name
 	parent_account = frappe.db.get_value(
-		"Account", {"company": company_name, "is_group": 1, "account_type": "Tax"}, "name"
+		"Account", filters={"account_name": "Duties and Taxes", "company": company}
 	)
 	account = create_account(
-		company=company_name,
+		company=company,
 		account_name="Output Tax CGST",
 		account_type="Tax",
 		parent_account=parent_account,

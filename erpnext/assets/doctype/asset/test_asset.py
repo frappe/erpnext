@@ -145,6 +145,7 @@ class TestAsset(AssetSetup):
 	def test_is_fixed_asset_set(self):
 		asset = create_asset(is_existing_asset=1)
 		doc = frappe.new_doc("Purchase Invoice")
+		doc.company = "_Test Company"
 		doc.supplier = "_Test Supplier"
 		doc.append("items", {"item_code": "Macbook Pro", "qty": 1, "asset": asset.name})
 
@@ -702,6 +703,8 @@ class TestDepreciationMethods(AssetSetup):
 		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
 
 	def test_monthly_depreciation_by_wdv_method(self):
+		existing_precision = frappe.db.get_default("float_precision")
+		frappe.db.set_default("float_precision", 3)
 		asset = create_asset(
 			calculate_depreciation=1,
 			available_for_use_date="2022-02-15",
@@ -715,12 +718,12 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2022-02-28", 645.0, 645.0],
-			["2022-03-31", 1206.8, 1851.8],
-			["2022-04-30", 1051.12, 2902.92],
-			["2022-05-31", 915.52, 3818.44],
-			["2022-06-30", 797.42, 4615.86],
-			["2022-07-15", 384.14, 5000.0],
+			["2022-02-28", 647.25, 647.25],
+			["2022-03-31", 1210.71, 1857.96],
+			["2022-04-30", 1053.99, 2911.95],
+			["2022-05-31", 917.55, 3829.5],
+			["2022-06-30", 798.77, 4628.27],
+			["2022-07-15", 371.73, 5000.0],
 		]
 
 		schedules = [
@@ -731,8 +734,8 @@ class TestDepreciationMethods(AssetSetup):
 			]
 			for d in asset.get("schedules")
 		]
-
 		self.assertEqual(schedules, expected_schedules)
+		frappe.db.set_default("float_precision", existing_precision)
 
 
 class TestDepreciationBasics(AssetSetup):

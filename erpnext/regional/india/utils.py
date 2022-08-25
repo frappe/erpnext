@@ -580,7 +580,7 @@ def get_ewb_data(dt, dn):
 
 		if dt == "Delivery Note":
 			data.subSupplyType = 1
-		elif doc.gst_category in ["Registered Regular", "SEZ"]:
+		elif doc.gst_category in ["Unregistered", "Registered Regular", "SEZ"]:
 			data.subSupplyType = 1
 		elif doc.gst_category in ["Overseas", "Deemed Export"]:
 			data.subSupplyType = 3

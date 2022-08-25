@@ -189,8 +189,8 @@ class BOM(WebsiteGenerator):
 		self.validate_transfer_against()
 		self.set_routing_operations()
 		self.validate_operations()
-		self.update_exploded_items(save=False)
 		self.calculate_cost()
+		self.update_exploded_items(save=False)
 		self.update_stock_qty()
 		self.validate_scrap_items()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate=False, save=False)
@@ -444,6 +444,7 @@ class BOM(WebsiteGenerator):
 			and self.is_active
 		):
 			frappe.db.set(self, "is_default", 1)
+			frappe.db.set_value("Item", self.item, "default_bom", self.name)
 		else:
 			frappe.db.set(self, "is_default", 0)
 			item = frappe.get_doc("Item", self.item)
