@@ -249,7 +249,7 @@ class AssetRepair(AccountsController):
 							"account": fixed_asset_account,
 							"debit": item.amount,
 							"debit_in_account_currency": item.amount,
-							"against": item.expense_account,
+							"against": item.expense_account or default_expense_account,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,
