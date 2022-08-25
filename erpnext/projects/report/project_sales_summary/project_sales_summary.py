@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from distutils.log import debug
 import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate
@@ -25,21 +26,21 @@ class ProjectSalesSummaryReport(object):
 
 		extra_rows = ""
 		if self.is_vehicle_service:
-			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered
+			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered 
 			"""
 
 		self.data = frappe.db.sql("""
-			select p.name as project, p.project_type, p.project_workshop, p.project_status, p.project_name, p.project_date,
-				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,
+			SELECT p.name as project, p.project_type, p.project_workshop, p.project_status,p.project_name, p.project_date,
+				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,p.status,
 				p.customer, p.customer_name, p.company,
 				p.service_advisor, p.service_manager,
 				p.applies_to_variant_of, p.applies_to_variant_of_name,
 				p.applies_to_item, p.applies_to_item_name {0}
-			from `tabProject` p
-			left join `tabItem` im on im.name = p.applies_to_item
-			left join `tabCustomer` c on c.name = p.customer
-			where status != 'Cancelled' {1}
-			order by p.project_date, p.creation
+			FROM `tabProject` p
+			LEFT JOIN `tabItem` im on im.name = p.applies_to_item
+			LEFT JOIN `tabCustomer` c on c.name = p.customer
+			WHERE {1}
+			ORDER BY p.project_date, p.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
 
 	def get_conditions(self):
@@ -53,6 +54,20 @@ class ProjectSalesSummaryReport(object):
 
 		if self.filters.get("to_date"):
 			conditions.append("p.project_date <= %(to_date)s")
+
+		if self.filters.get("status"):
+			if self.filters.get("status") == "Closed":
+				conditions.append("status in ('Closed', 'Completed')")
+			elif self.filters.get("status") == "Cancelled":
+				conditions.append( "status = 'Cancelled'")
+			elif self.filters.get("status") == "Open":
+				conditions.append( "status = 'Open'")
+			elif self.filters.get("status") == "Closed or To Close":
+				conditions.append("status in ('To Close' ,'Closed', 'Completed')")
+			elif self.filters.get("status") == "To Close":
+				conditions.append( "status = 'To Close'")
+		else:
+			conditions.append("status='Cancelled'")
 
 		if self.filters.get("project"):
 			conditions.append("p.name = %(project)s")
@@ -102,7 +117,7 @@ class ProjectSalesSummaryReport(object):
 			conditions.append("""c.territory in (select name from `tabTerritory`
 				where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
-		return "and {}".format(" and ".join(conditions)) if conditions else ""
+		return " and ".join(conditions) if conditions else ""
 
 	def get_columns(self):
 		columns = [

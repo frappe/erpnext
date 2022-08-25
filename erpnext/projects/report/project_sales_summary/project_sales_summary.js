@@ -27,6 +27,12 @@ frappe.query_reports["Project Sales Summary"] = {
 			reqd: 1
 		},
 		{
+			fieldname:"status",
+			label: __("Status"),
+			fieldtype: "Select",
+			options: ["", "Open", "To Close", "Closed", "Closed or To Close", "Cancelled"]
+		},
+		{
 			fieldname: "project",
 			label: __("Project"),
 			fieldtype: "Link",
