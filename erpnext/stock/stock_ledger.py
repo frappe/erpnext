@@ -646,6 +646,24 @@ class update_entries_after(object):
 					voucher_detail_no=sle.voucher_detail_no,
 					sle=sle,
 				)
+
+			elif (
+				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+				and sle.actual_qty > 0
+				and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
+			):
+				sle_details = frappe.db.get_value(
+					"Stock Ledger Entry",
+					{
+						"voucher_type": sle.voucher_type,
+						"voucher_no": sle.voucher_no,
+						"dependant_sle_voucher_detail_no": sle.voucher_detail_no,
+					},
+					["stock_value_difference", "actual_qty"],
+					as_dict=1,
+				)
+
+				rate = abs(sle_details.stock_value_difference / sle.actual_qty)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"

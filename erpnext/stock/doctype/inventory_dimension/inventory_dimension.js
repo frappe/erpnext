@@ -35,14 +35,39 @@ frappe.ui.form.on('Inventory Dimension', {
 	refresh(frm) {
 		if (frm.doc.__onload && frm.doc.__onload.has_stock_ledger
 			&& frm.doc.__onload.has_stock_ledger.length) {
-			let msg = __('Stock transactions exists against this dimension, user can not update document.');
-			frm.dashboard.add_comment(msg, 'blue', true);
+			let allow_to_edit_fields = ['disabled', 'fetch_from_parent',
+				'type_of_transaction', 'condition'];
 
 			frm.fields.forEach((field) => {
-				if (field.df.fieldname !== 'disabled') {
+				if (!in_list(allow_to_edit_fields, field.df.fieldname)) {
 					frm.set_df_property(field.df.fieldname, "read_only", "1");
 				}
 			});
 		}
+
+		if (!frm.is_new()) {
+			frm.add_custom_button(__('Delete Dimension'), () => {
+				frm.trigger('delete_dimension');
+			});
+		}
+	},
+
+	delete_dimension(frm) {
+		let msg = (`
+			Custom fields related to this dimension will be deleted on deletion of dimension.
+			<br> Do you want to delete {0} dimension?
+		`);
+
+		frappe.confirm(__(msg, [frm.doc.name.bold()]), () => {
+			frappe.call({
+				method: 'erpnext.stock.doctype.inventory_dimension.inventory_dimension.delete_dimension',
+				args: {
+					dimension: frm.doc.name
+				},
+				callback: function() {
+					frappe.set_route('List', 'Inventory Dimension');
+				}
+			});
+		});
 	}
 });

@@ -82,25 +82,6 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values_in_supplied_items()
 		self.set_missing_values_in_items()
 
-	def set_missing_values_in_additional_costs(self):
-		if self.get("additional_costs"):
-			self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
-
-			if self.total_additional_costs:
-				if self.distribute_additional_costs_based_on == "Amount":
-					total_amt = sum(flt(item.amount) for item in self.get("items"))
-					for item in self.items:
-						item.additional_cost_per_qty = (
-							(item.amount * self.total_additional_costs) / total_amt
-						) / item.qty
-				else:
-					total_qty = sum(flt(item.qty) for item in self.get("items"))
-					additional_cost_per_qty = self.total_additional_costs / total_qty
-					for item in self.items:
-						item.additional_cost_per_qty = additional_cost_per_qty
-		else:
-			self.total_additional_costs = 0
-
 	def set_missing_values_in_service_items(self):
 		for idx, item in enumerate(self.get("service_items")):
 			self.items[idx].service_cost_per_qty = item.amount / self.items[idx].qty
@@ -114,9 +95,7 @@ class SubcontractingOrder(SubcontractingController):
 	def set_missing_values_in_items(self):
 		total_qty = total = 0
 		for item in self.items:
-			item.rate = (
-				item.rm_cost_per_qty + item.service_cost_per_qty + (item.additional_cost_per_qty or 0)
-			)
+			item.rate = item.rm_cost_per_qty + item.service_cost_per_qty + flt(item.additional_cost_per_qty)
 			item.amount = item.qty * item.rate
 			total_qty += flt(item.qty)
 			total += flt(item.amount)
@@ -187,7 +166,7 @@ class SubcontractingOrder(SubcontractingController):
 					total_required_qty = total_supplied_qty = 0
 					for item in self.supplied_items:
 						total_required_qty += item.required_qty
-						total_supplied_qty += item.supplied_qty or 0
+						total_supplied_qty += flt(item.supplied_qty)
 					if total_supplied_qty:
 						status = "Partial Material Transferred"
 						if total_supplied_qty >= total_required_qty:

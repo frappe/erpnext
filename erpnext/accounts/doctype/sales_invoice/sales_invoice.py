@@ -1033,22 +1033,6 @@ class SalesInvoice(SellingController):
 				)
 			)
 
-		if self.apply_discount_on == "Grand Total" and self.get("is_cash_or_discount_account"):
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": self.additional_discount_account,
-						"against": self.debit_to,
-						"debit": self.base_discount_amount,
-						"debit_in_account_currency": self.discount_amount,
-						"cost_center": self.cost_center,
-						"project": self.project,
-					},
-					self.currency,
-					item=self,
-				)
-			)
-
 	def make_tax_gl_entries(self, gl_entries):
 		enable_discount_accounting = cint(
 			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
@@ -2103,13 +2087,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		target_detail_field = "sales_invoice_item" if doctype == "Sales Invoice" else "sales_order_item"
 		source_document_warehouse_field = "target_warehouse"
 		target_document_warehouse_field = "from_warehouse"
+		received_items = get_received_items(source_name, target_doctype, target_detail_field)
 	else:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
 		source_document_warehouse_field = "from_warehouse"
 		target_document_warehouse_field = "target_warehouse"
-
-	received_items = get_received_items(source_name, target_doctype, target_detail_field)
+		received_items = {}
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)

@@ -5,7 +5,7 @@
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, nowdate, nowtime
+from frappe.utils import add_days, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
@@ -1588,6 +1588,31 @@ class TestStockEntry(FrappeTestCase):
 			index = 1 if obj.purpose == "Repack" else 0
 			self.assertEqual(obj.items[index].basic_rate, 200)
 			self.assertEqual(obj.items[index].basic_amount, 2000)
+
+	def test_batch_expiry(self):
+		from erpnext.controllers.stock_controller import BatchExpiredError
+		from erpnext.stock.doctype.batch.test_batch import make_new_batch
+
+		item_code = "Test Batch Expiry Test Item - 001"
+		item_doc = create_item(item_code=item_code, is_stock_item=1, valuation_rate=10)
+
+		item_doc.has_batch_no = 1
+		item_doc.save()
+
+		batch = make_new_batch(
+			batch_id=frappe.generate_hash("", 5), item_code=item_doc.name, expiry_date=add_days(today(), -1)
+		)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			purpose="Material Receipt",
+			qty=4,
+			to_warehouse="_Test Warehouse - _TC",
+			batch_no=batch.name,
+			do_not_save=True,
+		)
+
+		self.assertRaises(BatchExpiredError, se.save)
 
 
 def make_serialized_item(**args):
