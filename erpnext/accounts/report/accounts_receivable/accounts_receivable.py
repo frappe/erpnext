@@ -178,6 +178,11 @@ class ReceivablePayableReport(object):
 
 		key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
 		row = self.voucher_balance.get(key)
+
+		if not row:
+			# no invoice, this is an invoice / stand-alone payment / credit note
+			row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
+
 		return row
 
 	def update_voucher_balance(self, ple):
