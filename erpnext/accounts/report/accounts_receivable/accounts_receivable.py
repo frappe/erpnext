@@ -178,6 +178,11 @@ class ReceivablePayableReport(object):
 
 		key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
 		row = self.voucher_balance.get(key)
+
+		if not row:
+			# no invoice, this is an invoice / stand-alone payment / credit note
+			row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
+
 		return row
 
 	def update_voucher_balance(self, ple):
@@ -187,7 +192,11 @@ class ReceivablePayableReport(object):
 		if not row:
 			return
 
-		amount = ple.amount
+		# amount in "Party Currency", if its supplied. If not, amount in company currency
+		if self.filters.get(scrub(self.party_type)):
+			amount = ple.amount_in_account_currency
+		else:
+			amount = ple.amount
 		amount_in_account_currency = ple.amount_in_account_currency
 
 		# update voucher
@@ -685,7 +694,7 @@ class ReceivablePayableReport(object):
 				ple.party,
 				ple.posting_date,
 				ple.due_date,
-				ple.account_currency.as_("currency"),
+				ple.account_currency,
 				ple.amount,
 				ple.amount_in_account_currency,
 			)

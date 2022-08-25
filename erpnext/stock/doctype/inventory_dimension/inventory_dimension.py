@@ -43,12 +43,36 @@ class InventoryDimension(Document):
 			return
 
 		old_doc = self._doc_before_save
+		allow_to_edit_fields = [
+			"disabled",
+			"fetch_from_parent",
+			"type_of_transaction",
+			"condition",
+		]
+
 		for field in frappe.get_meta("Inventory Dimension").fields:
-			if field.fieldname != "disabled" and old_doc.get(field.fieldname) != self.get(field.fieldname):
+			if field.fieldname not in allow_to_edit_fields and old_doc.get(field.fieldname) != self.get(
+				field.fieldname
+			):
 				msg = f"""The user can not change value of the field {bold(field.label)} because
 					stock transactions exists against the dimension {bold(self.name)}."""
 
 				frappe.throw(_(msg), DoNotChangeError)
+
+	def on_trash(self):
+		self.delete_custom_fields()
+
+	def delete_custom_fields(self):
+		filters = {"fieldname": self.source_fieldname}
+
+		if self.document_type:
+			filters["dt"] = self.document_type
+
+		for field in frappe.get_all("Custom Field", filters=filters):
+			frappe.delete_doc("Custom Field", field.name)
+
+		msg = f"Deleted custom fields related to the dimension {self.name}"
+		frappe.msgprint(_(msg))
 
 	def reset_value(self):
 		if self.apply_to_all_doctypes:
@@ -76,30 +100,35 @@ class InventoryDimension(Document):
 		self.add_custom_fields()
 
 	def add_custom_fields(self):
-		dimension_field = dict(
-			fieldname=self.source_fieldname,
-			fieldtype="Link",
-			insert_after="warehouse",
-			options=self.reference_document,
-			label=self.dimension_name,
-		)
+		dimension_fields = [
+			dict(
+				fieldname="inventory_dimension",
+				fieldtype="Section Break",
+				insert_after="warehouse",
+				label="Inventory Dimension",
+				collapsible=1,
+			),
+			dict(
+				fieldname=self.source_fieldname,
+				fieldtype="Link",
+				insert_after="inventory_dimension",
+				options=self.reference_document,
+				label=self.dimension_name,
+			),
+		]
 
 		custom_fields = {}
 
 		if self.apply_to_all_doctypes:
 			for doctype in get_inventory_documents():
-				if not frappe.db.get_value(
-					"Custom Field", {"dt": doctype[0], "fieldname": self.source_fieldname}
-				):
-					custom_fields.setdefault(doctype[0], dimension_field)
-		elif not frappe.db.get_value(
-			"Custom Field", {"dt": self.document_type, "fieldname": self.source_fieldname}
-		):
-			custom_fields.setdefault(self.document_type, dimension_field)
+				custom_fields.setdefault(doctype[0], dimension_fields)
+		else:
+			custom_fields.setdefault(self.document_type, dimension_fields)
 
 		if not frappe.db.get_value(
 			"Custom Field", {"dt": "Stock Ledger Entry", "fieldname": self.target_fieldname}
 		):
+			dimension_field = dimension_fields[1]
 			dimension_field["fieldname"] = self.target_fieldname
 			custom_fields["Stock Ledger Entry"] = dimension_field
 
@@ -143,7 +172,7 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 		elif (
 			row.type_of_transaction == "Outward"
 			if doc.docstatus == 1
-			else row.type_of_transaction != "Inward"
+			else row.type_of_transaction != "Outward"
 		) and sl_dict.actual_qty > 0:
 			continue
 
@@ -166,7 +195,14 @@ def get_document_wise_inventory_dimensions(doctype) -> dict:
 	if not frappe.local.document_wise_inventory_dimensions.get(doctype):
 		dimensions = frappe.get_all(
 			"Inventory Dimension",
-			fields=["name", "source_fieldname", "condition", "target_fieldname", "type_of_transaction"],
+			fields=[
+				"name",
+				"source_fieldname",
+				"condition",
+				"target_fieldname",
+				"type_of_transaction",
+				"fetch_from_parent",
+			],
 			filters={"disabled": 0},
 			or_filters={"document_type": doctype, "apply_to_all_doctypes": 1},
 		)
@@ -194,3 +230,9 @@ def get_inventory_dimensions():
 		frappe.local.inventory_dimensions = dimensions
 
 	return frappe.local.inventory_dimensions
+
+
+@frappe.whitelist()
+def delete_dimension(dimension):
+	doc = frappe.get_doc("Inventory Dimension", dimension)
+	doc.delete()
