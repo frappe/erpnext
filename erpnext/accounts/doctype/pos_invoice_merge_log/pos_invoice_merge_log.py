@@ -79,6 +79,7 @@ class POSInvoiceMergeLog(Document):
 		if sales:
 			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
+		self.flags.ignore_validate_update_after_submit = True
 		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
 		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
