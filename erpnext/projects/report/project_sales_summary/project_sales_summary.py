@@ -27,9 +27,8 @@ class ProjectSalesSummaryReport(object):
 		if self.is_vehicle_service:
 			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered 
 			"""
-
 		self.data = frappe.db.sql("""
-			select p.name as project, p.project_type, p.project_workshop, p.project_status,p.project_name, p.project_date,
+			select p.name as project, p.project_type, p.project_workshop, p.project_status, p.project_name, p.project_date,
 				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,
 				p.customer, p.customer_name, p.company,
 				p.service_advisor, p.service_manager,
