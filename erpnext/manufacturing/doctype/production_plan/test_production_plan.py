@@ -281,6 +281,31 @@ class TestProductionPlan(FrappeTestCase):
 		pln.reload()
 		pln.cancel()
 
+	def test_production_plan_subassembly_default_supplier(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree_1 = {"Test Laptop": {"Test Motherboard": {"Test Motherboard Wires": {}}}}
+		bom = create_nested_bom(bom_tree_1, prefix="")
+
+		item_doc = frappe.get_doc("Item", "Test Motherboard")
+		company = "_Test Company"
+
+		item_doc.is_sub_contracted_item = 1
+		for row in item_doc.item_defaults:
+			if row.company == company and not row.default_supplier:
+				row.default_supplier = "_Test Supplier"
+
+		if not item_doc.item_defaults:
+			item_doc.append("item_defaults", {"company": company, "default_supplier": "_Test Supplier"})
+
+		item_doc.save()
+
+		plan = create_production_plan(item_code="Test Laptop", use_multi_level_bom=1, do_not_submit=True)
+		plan.get_sub_assembly_items()
+		plan.set_default_supplier_for_subcontracting_order()
+
+		self.assertEqual(plan.sub_assembly_items[0].supplier, "_Test Supplier")
+
 	def test_production_plan_combine_subassembly(self):
 		"""
 		Test combining Sub assembly items belonging to the same BOM in Prod Plan.
