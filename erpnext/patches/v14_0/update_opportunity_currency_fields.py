@@ -26,7 +26,7 @@ def execute():
 				update_modified=False,
 			)
 			click.secho(
-				f' Opportunity `{opportunity.name}` has no currency set. We for it to company currency : `{opportunity.currency}`"\n',
+				f' Opportunity `{opportunity.name}` has no currency set. We force it to company currency : `{opportunity.currency}`"\n',
 				fg="yellow",
 			)
 
