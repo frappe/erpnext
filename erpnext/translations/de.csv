@@ -189,6 +189,10 @@ All other ITC,Alle anderen ITC,
 All the mandatory Task for employee creation hasn't been done yet.,Alle obligatorischen Aufgaben zur Mitarbeitererstellung wurden noch nicht erledigt.,
 Allocate Payment Amount,Zahlungsbetrag zuweisen,
 Allocated Amount,Zugewiesene Menge,
+<<<<<<< HEAD
+=======
+Allocated Leaves,Zugewiesene Urlaubstage,
+>>>>>>> 915102a400 (chore: german translations (#31463))
 Allocating leaves...,Blätter zuordnen...,
 Already record exists for the item {0},Es existiert bereits ein Datensatz für den Artikel {0},
 "Already set default in pos profile {0} for user {1}, kindly disabled default","Im Standardprofil {0} für den Benutzer {1} ist der Standard bereits festgelegt, standardmäßig deaktiviert",
@@ -7873,8 +7877,8 @@ Material Request Warehouse,Materialanforderungslager,
 Select warehouse for material requests,Wählen Sie Lager für Materialanfragen,
 Transfer Materials For Warehouse {0},Material für Lager übertragen {0},
 Production Plan Material Request Warehouse,Produktionsplan Materialanforderungslager,
-Sets 'Source Warehouse' in each row of the items table.,Legt &#39;Source Warehouse&#39; in jeder Zeile der Artikeltabelle fest.,
-Sets 'Target Warehouse' in each row of the items table.,"Füllt das Feld ""Ziel Lager"" in allen Positionen der folgenden Tabelle.",
+Sets 'Source Warehouse' in each row of the items table.,Legt in jeder Zeile der Artikeltabelle das „Ausgangslager“ fest.,
+Sets 'Target Warehouse' in each row of the items table.,Legt in jeder Zeile der Artikeltabelle das „Eingangslager“ fest.,
 Show Cancelled Entries,Abgebrochene Einträge anzeigen,
 Backdated Stock Entry,Backdated Stock Entry,
 Row #{}: Currency of {} - {} doesn't matches company currency.,Zeile # {}: Die Währung von {} - {} stimmt nicht mit der Firmenwährung überein.,
@@ -9060,6 +9064,14 @@ Leave Type Allocation,Zuordnung Abwesenheitsarten,
 From Lead,Aus Lead,
 From Opportunity,Aus Chance,
 Publish in Website,Auf Webseite veröffentlichen,
+<<<<<<< HEAD
+=======
+Total Allocated Leave(s),Gesamte zugewiesene Urlaubstage,
+Expired Leave(s),Verfallene Urlaubstage,
+Used Leave(s),Verbrauchte Urlaubstage,
+Leave(s) Pending Approval,Urlaubstage zur Genehmigung ausstehend,
+Available Leave(s),Verfügbare Urlaubstage,
+>>>>>>> 915102a400 (chore: german translations (#31463))
 Party Specific Item,Parteispezifischer Artikel,
 Active Customers,Aktive Kunden,
 Annual Sales,Jährlicher Umsatz,
@@ -9074,6 +9086,10 @@ Accounts Payable Ageing,Fälligkeit Verbindlichkeiten,
 Budget Variance,Budgetabweichung,
 Based On Value,Basierend auf Wert,
 Restrict Items Based On,Artikel einschränken auf Basis von,
+<<<<<<< HEAD
+=======
+Earnings & Deductions,Erträge & Abzüge,
+>>>>>>> 915102a400 (chore: german translations (#31463))
 Is Process Loss,Ist Prozessverlust,
 Is Finished Item,Ist fertiger Artikel,
 Is Scrap Item,Ist Schrott,
@@ -9082,6 +9098,7 @@ Show Remarks,Bemerkungen anzeigen,
 Website Item,Webseiten-Artikel,
 Update Property,Eigenschaft aktualisieren,
 Recurring Sales Invoice,Wiederkehrende Ausgangsrechnung,
+<<<<<<< HEAD
 Total Asset,Aktiva,
 Total Liability,Verbindlichkeiten,
 Total Equity,Eigenkapital,
@@ -9108,3 +9125,5 @@ Lost Quotations,Verlorene Angebote,
 Lost Quotations %,Verlorene Angebote %,
 Lost Value,Verlorener Wert,
 Lost Value %,Verlorener Wert %,
+=======
+>>>>>>> 915102a400 (chore: german translations (#31463))
