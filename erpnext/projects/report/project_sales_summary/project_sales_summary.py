@@ -29,17 +29,17 @@ class ProjectSalesSummaryReport(object):
 			"""
 
 		self.data = frappe.db.sql("""
-			SELECT p.name as project, p.project_type, p.project_workshop, p.project_status,p.project_name, p.project_date,
+			select p.name as project, p.project_type, p.project_workshop, p.project_status,p.project_name, p.project_date,
 				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,
 				p.customer, p.customer_name, p.company,
 				p.service_advisor, p.service_manager,
 				p.applies_to_variant_of, p.applies_to_variant_of_name,
 				p.applies_to_item, p.applies_to_item_name {0}
-			FROM `tabProject` p
-			LEFT JOIN `tabItem` im on im.name = p.applies_to_item
-			LEFT JOIN `tabCustomer` c on c.name = p.customer
-			WHERE {1}
-			ORDER BY p.project_date, p.creation
+			from `tabProject` p
+			left join `tabItem` im on im.name = p.applies_to_item
+			left join `tabCustomer` c on c.name = p.customer
+			where {1}
+			order by p.project_date, p.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
 
 	def get_conditions(self):

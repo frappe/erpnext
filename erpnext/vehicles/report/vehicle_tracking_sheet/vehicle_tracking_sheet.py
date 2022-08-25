@@ -37,7 +37,7 @@ class VehicleServiceTrackingReport(object):
 		conditions = self.get_conditions()
 
 		self.data = frappe.db.sql("""
-			select p.name as project, p.project_name, p.project_type, p.project_workshop, p.company,p.project_status,
+			select p.name as project, p.project_name, p.project_type, p.project_workshop, p.company, p.project_status,
 				p.customer, p.customer_name, p.contact_mobile, p.contact_mobile_2, p.contact_phone,
 				p.insurance_company, p.insurance_company_name,
 				p.applies_to_vehicle, p.service_advisor, p.service_manager,
