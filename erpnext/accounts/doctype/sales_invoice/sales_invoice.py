@@ -1620,9 +1620,8 @@ class SalesInvoice(SellingController):
 					income_account = (item.income_account
 						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 					
-					if self.outstanding_amount > 0:
-						company = frappe.get_doc("Company", self.company)
-
+					company = frappe.get_doc("Company", self.company)
+					if self.outstanding_amount > 0:						
 						if company.default_credit_account == None:
 							frappe.throw(_("Assign Credit Account by default in the company"))
 						else:
@@ -1635,9 +1634,8 @@ class SalesInvoice(SellingController):
 					
 					if paid_amount > 0:
 						if paid_amount == self.grand_total:
-							company = frappe.get_doc("Company", self.company)
 							income_account = company.default_income_account
-
+					
 					account_currency = get_account_currency(income_account)
 					gl_entries.append(
 						self.get_gl_dict({
@@ -1655,6 +1653,37 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) and \
 			erpnext.is_perpetual_inventory_enabled(self.company):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
+		
+		if self.discount_reason != None:				
+				
+				company = frappe.get_doc("Company", self.company)
+				income_account = company.default_income_account
+
+				if self.outstanding_amount > 0:						
+					if company.default_credit_account == None:
+						frappe.throw(_("Assign Credit Account by default in the company"))
+					else:
+						income_account = company.default_credit_account
+					
+				paid_amount = 0
+
+				for advance in self.get("advances"):
+					paid_amount += advance.allocated_amount
+					
+				if paid_amount > 0:
+					if paid_amount == self.grand_total:
+						income_account = company.default_income_account
+
+				account_currency = get_account_currency(income_account)
+
+				gl_entries.append(self.get_gl_dict({
+					"account": income_account,
+					"against": self.customer,
+					"cost_center": company.cost_center,
+					"remarks": self.get("remarks") or "Accounting Entry for Stock",
+					"credit": self.discount_amount,
+					"credit_in_account_currency": self.discount_amount
+				}, account_currency))
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
 		company = frappe.get_doc("Company", self.company)
