@@ -116,6 +116,7 @@ class StockEntry(StockController):
 		self.validate_warehouse()
 		self.validate_work_order()
 		self.validate_bom()
+		self.validate_purchase_order()
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_scrap_items()
@@ -945,6 +946,19 @@ class StockEntry(StockController):
 			if d.bom_no and d.is_finished_item:
 				item_code = d.original_item or d.item_code
 				validate_bom_no(item_code, d.bom_no)
+
+	def validate_purchase_order(self):
+		if self.purpose == "Send to Subcontractor" and self.get("purchase_order"):
+			is_old_subcontracting_flow = frappe.db.get_value(
+				"Purchase Order", self.purchase_order, "is_old_subcontracting_flow"
+			)
+
+			if not is_old_subcontracting_flow:
+				frappe.throw(
+					_("Please select Subcontracting Order instead of Purchase Order {0}").format(
+						self.purchase_order
+					)
+				)
 
 	def mark_finished_and_scrap_items(self):
 		if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
