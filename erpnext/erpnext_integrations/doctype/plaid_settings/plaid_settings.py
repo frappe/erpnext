@@ -226,7 +226,7 @@ def new_bank_transaction(transaction):
 	try:
 		tags += transaction["category"]
 		tags += ["Plaid Cat. {}".format(transaction["category_id"])]
-	except KeyError:
+	except Exception:
 		pass
 
 	if not frappe.db.exists("Bank Transaction", dict(transaction_id=transaction["transaction_id"])):
