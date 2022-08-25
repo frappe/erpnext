@@ -1,10 +1,9 @@
+import click
 import frappe
 from frappe.utils import flt
 
 import erpnext
 from erpnext.setup.utils import get_exchange_rate
-
-import click
 
 
 def execute():
@@ -18,7 +17,7 @@ def execute():
 	for opportunity in opportunities:
 		company_currency = erpnext.get_company_currency(opportunity.company)
 
-		if opportunity.currency is None or opportunity.currency == '':
+		if opportunity.currency is None or opportunity.currency == "":
 			opportunity.currency = company_currency
 			frappe.db.set_value(
 				"Opportunity",
@@ -27,7 +26,7 @@ def execute():
 				update_modified=False,
 			)
 			click.secho(
-				f" Opportunity `{opportunity.name}` has no currency set. We for it to company currency : `{opportunity.currency}`\"\n",
+				f' Opportunity `{opportunity.name}` has no currency set. We for it to company currency : `{opportunity.currency}`"\n',
 				fg="yellow",
 			)
 
@@ -38,10 +37,6 @@ def execute():
 		else:
 			conversion_rate = 1
 			base_opportunity_amount = flt(opportunity.opportunity_amount)
-
-		if conversion_rate is None:
-			print(opportunity.name,conversion_rate,opportunity.currency)
-
 
 		frappe.db.set_value(
 			"Opportunity",
