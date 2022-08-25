@@ -731,6 +731,7 @@ class ReceivablePayableReport(object):
 	def prepare_conditions(self):
 		self.qb_selection_filter = []
 		party_type_field = scrub(self.party_type)
+		self.qb_selection_filter.append(self.ple.party_type == self.party_type)
 
 		self.add_common_filters(party_type_field=party_type_field)
 
