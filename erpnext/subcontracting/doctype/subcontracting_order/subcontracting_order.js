@@ -107,9 +107,9 @@ frappe.ui.form.on('Subcontracting Order', {
 	get_materials_from_supplier: function (frm) {
 		let sco_rm_details = [];
 
-		if (frm.doc.supplied_items && (frm.doc.per_received == 100)) {
+		if (frm.doc.supplied_items && frm.doc.per_received > 0) {
 			frm.doc.supplied_items.forEach(d => {
-				if (d.total_supplied_qty && d.total_supplied_qty != d.consumed_qty) {
+				if (d.total_supplied_qty > 0 && d.total_supplied_qty != d.consumed_qty) {
 					sco_rm_details.push(d.name);
 				}
 			});
@@ -160,7 +160,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 		var me = this;
 
 		if (doc.docstatus == 1) {
-			if (doc.status != 'Completed') {
+			if (!['Closed', 'Completed'].includes(doc.status)) {
 				if (flt(doc.per_received) < 100) {
 					cur_frm.add_custom_button(__('Subcontracting Receipt'), this.make_subcontracting_receipt, __('Create'));
 					if (me.has_unsupplied_items()) {
