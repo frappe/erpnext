@@ -7,7 +7,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
-from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+from erpnext.controllers.subcontracting_controller import (
+	get_materials_from_supplier,
+	make_rm_stock_entry,
+)
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
@@ -86,6 +89,16 @@ class TestSubcontractingOrder(FrappeTestCase):
 		scr.items[0].qty -= 1
 		scr.save()
 		scr.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partially Received")
+
+		# Closed
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		ste.save()
+		ste.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Closed")
+		ste.cancel()
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
 
