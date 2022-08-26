@@ -428,3 +428,24 @@ frappe.ui.form.on("Purchase Receipt", "before_save", function (frm) {
 		});
 	})
 })
+frappe.ui.form.on('Purchase Receipt',  {
+   after_cancel : function(frm) {
+        frappe.call({
+            "method": "frappe.client.set_value",
+            "args": {
+                "doctype": "Purchase Order",
+                "name": frm.doc.purchase_order,
+                "fieldname": {"po_status" : "Open" },
+            }
+        });
+		frappe.call({
+            "method": "frappe.client.set_value",
+            "args": {
+                "doctype": "Account Payable",
+                "name": frm.doc.purchase_order,
+                "fieldname": "total_payable_after_revision",
+                "value": frm.doc.po_total,
+            }
+        });
+    }
+});

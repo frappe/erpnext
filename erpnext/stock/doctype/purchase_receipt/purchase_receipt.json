@@ -15,6 +15,7 @@
      "section_break_3",
      "supplier",
      "purchase_order",
+     "po_total",
      "supplier_name",
      "supplier_delivery_note",
      "column_break1",
@@ -1188,6 +1189,14 @@
       "hidden": 1,
       "label": "Purchase Order",
       "options": "Purchase Order"
+     },
+     {
+      "fetch_from": "purchase_order.total",
+      "fetch_if_empty": 1,
+      "fieldname": "po_total",
+      "fieldtype": "Currency",
+      "hidden": 1,
+      "label": "POTotal"
      }
     ],
     "hide_toolbar": 1,
@@ -1195,7 +1204,7 @@
     "idx": 261,
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-07-21 08:56:36.875030",
+    "modified": "2022-08-25 01:52:51.958537",
     "modified_by": "Administrator",
     "module": "Stock",
     "name": "Purchase Receipt",

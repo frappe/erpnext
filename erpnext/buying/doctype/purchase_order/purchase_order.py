@@ -326,6 +326,7 @@ class PurchaseOrder(BuyingController):
 		acc_payble_data = frappe.new_doc("Account Payable")
 		acc_payble_data.po_number = self.name
 		acc_payble_data.total = self.total
+		acc_payble_data.payment_outstanding	= self.total
 		acc_payble_data.total_payable_after_revision = self.total
 		acc_payble_data.insert(ignore_mandatory=True)
 
@@ -346,7 +347,6 @@ class PurchaseOrder(BuyingController):
 		frappe.db.set(self, "po_status", "Cancelled")# on Cancelled change po status
 
 		self.update_prevdoc_status()
-
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
 		self.update_requested_qty()
@@ -355,6 +355,7 @@ class PurchaseOrder(BuyingController):
 		self.update_blanket_order()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
+		frappe.delete_doc("Account Payable", self.name)
 
 	def on_update(self):
 		pass
