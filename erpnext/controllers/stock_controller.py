@@ -74,26 +74,90 @@ class StockController(AccountsController):
 							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
+						if self.doctype == "Sales Invoice":
+							if  item_row.sales_default_values != None:
+								gl_list.append(self.get_gl_dict({
+									"account": item_row.sales_default_values,
+									"against": item_row.sales_default_values,
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"debit": flt(sle.stock_value_difference, 2),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+								}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
+							else:
+								gl_list.append(self.get_gl_dict({
+									"account": warehouse_account[sle.warehouse]["account"],
+									"against": item_row.expense_account,
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"debit": flt(sle.stock_value_difference, 2),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+								}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
+							
+							if item_row.inventory_default_values != None:
+								# to target warehouse / expense account
+								gl_list.append(self.get_gl_dict({
+									"account": item_row.inventory_default_values,
+									"against": warehouse_account[sle.warehouse]["account"],
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"credit": flt(sle.stock_value_difference, 2),
+									"project": item_row.get("project") or self.get("project"),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
+								}, item=item_row))
+							else:
+								gl_list.append(self.get_gl_dict({
+									"account": item_row.expense_account,
+									"against": warehouse_account[sle.warehouse]["account"],
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"credit": flt(sle.stock_value_difference, 2),
+									"project": item_row.get("project") or self.get("project"),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
+								}, item=item_row))
+						
+						if self.doctype == "Purchase Invoice":
+							if  item_row.purchase_default_values != None:
+								gl_list.append(self.get_gl_dict({
+									"account": item_row.purchase_default_values,
+									"against": item_row.purchase_default_values,
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"debit": flt(sle.stock_value_difference, 2),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+								}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
+							else:
+								gl_list.append(self.get_gl_dict({
+									"account": warehouse_account[sle.warehouse]["account"],
+									"against": item_row.expense_account,
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"debit": flt(sle.stock_value_difference, 2),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+								}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
+							
+							if item_row.inventory_default_values != None:
+								# to target warehouse / expense account
+								gl_list.append(self.get_gl_dict({
+									"account": item_row.inventory_default_values,
+									"against": warehouse_account[sle.warehouse]["account"],
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"credit": flt(sle.stock_value_difference, 2),
+									"project": item_row.get("project") or self.get("project"),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
+								}, item=item_row))
+							else:
+								gl_list.append(self.get_gl_dict({
+									"account": item_row.expense_account,
+									"against": warehouse_account[sle.warehouse]["account"],
+									"cost_center": item_row.cost_center,
+									"remarks": self.get("remarks") or "Accounting Entry for Stock",
+									"credit": flt(sle.stock_value_difference, 2),
+									"project": item_row.get("project") or self.get("project"),
+									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
+								}, item=item_row))
 
-						gl_list.append(self.get_gl_dict({
-							"account": warehouse_account[sle.warehouse]["account"],
-							"against": item_row.expense_account,
-							"cost_center": item_row.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(sle.stock_value_difference, 2),
-							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
-						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
-
-						# to target warehouse / expense account
-						gl_list.append(self.get_gl_dict({
-							"account": item_row.expense_account,
-							"against": warehouse_account[sle.warehouse]["account"],
-							"cost_center": item_row.cost_center,
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": flt(sle.stock_value_difference, 2),
-							"project": item_row.get("project") or self.get("project"),
-							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
-						}, item=item_row))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 		
