@@ -562,51 +562,93 @@ class PurchaseInvoice(BuyingController):
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = get_account_currency(item.expense_account)
 				if item.item_code:
 					asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
 				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
 					# warehouse account
-					warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
+					if  item.purchase_default_values != None:
+						account_currency = get_account_currency(item.purchase_default_values)
+						warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
+							item, voucher_wise_stock_value, account_currency)
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": item.purchase_default_values,
+								"against": self.supplier,
+								"debit": warehouse_debit_amount,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"cost_center": item.cost_center,
+								"project": item.project
+							}, account_currency, item=item)
+						)
+
+						# Amount added through landed-cost-voucher
+						if landed_cost_entries:
+							for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
+								gl_entries.append(self.get_gl_dict({
+									"account": account,
+									"against": item.purchase_default_values,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(amount),
+									"project": item.project
+								}, item=item))
+
+						# sub-contracting warehouse
+						if flt(item.rm_supp_cost):
+							supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
+							if not supplier_warehouse_account:
+								frappe.throw(_("Please set account in Warehouse {0}")
+									.format(self.supplier_warehouse))
+							gl_entries.append(self.get_gl_dict({
+								"account": supplier_warehouse_account,
+								"against": item.purchase_default_values,
+								"cost_center": item.cost_center,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"credit": flt(item.rm_supp_cost)
+							}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
+					else:
+						account_currency = get_account_currency(item.expense_account)
+						warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
 						item, voucher_wise_stock_value, account_currency)
 
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": item.expense_account,
-							"against": self.supplier,
-							"debit": warehouse_debit_amount,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"cost_center": item.cost_center,
-							"project": item.project
-						}, account_currency, item=item)
-					)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": item.expense_account,
+								"against": self.supplier,
+								"debit": warehouse_debit_amount,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"cost_center": item.cost_center,
+								"project": item.project
+							}, account_currency, item=item)
+						)
 
-					# Amount added through landed-cost-voucher
-					if landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
+						# Amount added through landed-cost-voucher
+						if landed_cost_entries:
+							for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
+								gl_entries.append(self.get_gl_dict({
+									"account": account,
+									"against": item.expense_account,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(amount),
+									"project": item.project
+								}, item=item))
+
+						# sub-contracting warehouse
+						if flt(item.rm_supp_cost):
+							supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
+							if not supplier_warehouse_account:
+								frappe.throw(_("Please set account in Warehouse {0}")
+									.format(self.supplier_warehouse))
 							gl_entries.append(self.get_gl_dict({
-								"account": account,
+								"account": supplier_warehouse_account,
 								"against": item.expense_account,
 								"cost_center": item.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"credit": flt(amount),
-								"project": item.project
-							}, item=item))
-
-					# sub-contracting warehouse
-					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
-						if not supplier_warehouse_account:
-							frappe.throw(_("Please set account in Warehouse {0}")
-								.format(self.supplier_warehouse))
-						gl_entries.append(self.get_gl_dict({
-							"account": supplier_warehouse_account,
-							"against": item.expense_account,
-							"cost_center": item.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(item.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
+								"credit": flt(item.rm_supp_cost)
+							}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 
 				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
 					expense_account = (item.expense_account
