@@ -8,13 +8,13 @@ frappe.ui.form.on('Work Order Invoice', {
 	setup: function(frm) {
 		frm.set_query("item_code", "detail_one", function(doc, cdt, cdn) {
 			return {
-				filters:{"default_company": doc.company, "category_for_sale": "Materiales"}
+				filters:{"default_company": doc.company, "item_group": "Materiales"}
 			};
 		});
 
 		frm.set_query("item_code", "detail_two", function(doc, cdt, cdn) {
 			return {
-				filters:{"default_company": doc.company, "category_for_sale": "Pruebas"}
+				filters:{"default_company": doc.company, "item_group": "Pruebas"}
 			};
 		});
     },
