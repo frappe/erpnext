@@ -15,8 +15,8 @@ class WorkOrderInvoice(Document):
 			self.add_items()
 		
 		if self.docstatus == 1:
-			if self.project == None:
-				frappe.throw(_("Project is required."))
+			# if self.project == None:
+			# 	frappe.throw(_("Project is required."))
 			
 			if self.warehouse == None:
 				frappe.throw(_("Warehouse is required."))
