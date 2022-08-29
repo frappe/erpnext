@@ -75,10 +75,10 @@ class StockController(AccountsController):
 
 							sle = self.update_stock_ledger_entries(sle)
 						if self.doctype == "Sales Invoice":
-							if  item_row.sales_default_values != None:
+							if  item_row.inventory_default_values != None:
 								gl_list.append(self.get_gl_dict({
-									"account": item_row.sales_default_values,
-									"against": item_row.sales_default_values,
+									"account": item_row.inventory_default_values,
+									"against": item_row.inventory_default_values,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"debit": flt(sle.stock_value_difference, 2),
@@ -94,11 +94,11 @@ class StockController(AccountsController):
 									"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 								}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 							
-							if item_row.inventory_default_values != None:
+							if item_row.sales_default_values != None:
 								# to target warehouse / expense account
 								gl_list.append(self.get_gl_dict({
-									"account": item_row.inventory_default_values,
-									"against": warehouse_account[sle.warehouse]["account"],
+									"account": item_row.sales_default_values,
+									"against": item_row.sales_default_values,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"credit": flt(sle.stock_value_difference, 2),
