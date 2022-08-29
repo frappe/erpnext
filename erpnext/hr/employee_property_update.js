@@ -8,7 +8,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 			};
 		});
 	},
-	onload: function(frm){
+	onload: function(frm) {
 		if (frm.doc.__islocal && !frm.doc.amended_from) {
 			if (frm.doctype == "Employee Promotion") {
 				frm.doc.promotion_details = [];
@@ -106,12 +106,12 @@ var render_dynamic_field = function(d, fieldtype, options, fieldname) {
 
 var add_to_details = function(frm, d, table) {
 	let data = d.data;
-	if(data.fieldname){
-		if(validate_duplicate(frm, table, data.fieldname)){
+	if (data.fieldname) {
+		if (validate_duplicate(frm, table, data.fieldname)) {
 			frappe.show_alert({message:__("Property already added"), indicator:'orange'});
 			return false;
 		}
-		if(data.current == data.new){
+		if (data.current == data.new) {
 			frappe.show_alert({message:__("Nothing to change"), indicator:'orange'});
 			d.get_primary_btn().attr('disabled', false);
 			return false;
@@ -130,7 +130,7 @@ var add_to_details = function(frm, d, table) {
 		d.set_value('current', "");
 		frappe.show_alert({message:__("Added to details"),indicator:'green'});
 		d.data = {};
-	}else {
+	} else {
 		frappe.show_alert({message:__("Value missing"),indicator:'red'});
 	}
 };
