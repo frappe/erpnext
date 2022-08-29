@@ -4,7 +4,7 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 	onload: function () {
 		this.setup_contact_no_fields();
 	},
-	contact_display_info :function( contact,contact_display, type) {
+	contact_display_info :function(contact,contact_display, type) {
 		var me = this;
 
 		if (contact) {
@@ -36,29 +36,29 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 	},
 
 	contact_person: function() {
-		this.contact_display_info( me.frm.doc.contact_person,"contact_display", "");
+		this.contact_display_info(me.frm.doc.contact_person,"contact_display", "");
 	},
 	secondary_contact_person: function() {
-		this.contact_display_info( me.frm.doc.secondary_contact_person,"secondary_contact_display", "secondary_");
+		this.contact_display_info(me.frm.doc.secondary_contact_person,"secondary_contact_display", "secondary_");
 	},
 
-	contact_mobile_setter: function(type, has_secondary_contact) {
-		if (this.add_new_contact_number(`${type}contact_mobile`, 'is_primary_mobile_no')) {
+	contact_mobile_setter: function(field_name, has_secondary_contact) {
+		if (this.add_new_contact_number(`${field_name}contact_mobile`, 'is_primary_mobile_no', field_name)) {
 			return;
 		}
 
 		var tasks = [];
 
-		var mobile_no = this.frm.doc[`${type}contact_mobile`];
+		var mobile_no = this.frm.doc[`${field_name}contact_mobile`];
 		if (mobile_no) {
 			var contacts = frappe.contacts.get_contacts_from_number(this.frm, mobile_no);
-			if (contacts && contacts.length && !contacts.includes(this.frm.doc[`${type}contact_person`])) {
+			if (contacts && contacts.length && !contacts.includes(this.frm.doc[`${field_name}contact_person`])) {
 				tasks = [
-					() => this.frm.doc[`${type}contact_person`] = contacts[0],
-					() => this.frm.trigger(`${type}contact_person`),
+					() => this.frm.doc[`${field_name}contact_person`] = contacts[0],
+					() => this.frm.trigger(`${field_name}contact_person`),
 					() => {
-						this.frm.doc[`${type}contact_mobile`] = mobile_no;
-						this.frm.refresh_field(`${type}contact_mobile`);
+						this.frm.doc[`${field_name}contact_mobile`] = mobile_no;
+						this.frm.refresh_field(`${field_name}contact_mobile`);
 					},
 				];
 			}
@@ -92,11 +92,11 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 		this.add_new_contact_number('contact_phone', 'is_primary_phone');
 	},
 
-	add_new_contact_number: function (number_field, number_type) {
+	add_new_contact_number: function (number_field, number_type, field_name) {
 		if (this.frm.doc[number_field] == __("[Add New Number]")) {
 			this.set_dynamic_link();
 			frappe.contacts.add_new_number_dialog(this.frm, number_field,
-				'contact_person', 'contact_display', number_type,
+				`${field_name}contact_person`, `${field_name}contact_display`, number_type,
 				(phone) => {
 					return frappe.run_serially([
 						() => this.get_all_contact_nos(),

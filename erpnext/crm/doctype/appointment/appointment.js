@@ -143,6 +143,10 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		me.frm.set_query('contact_person', () => {
 			return erpnext.queries.contact_query(me.frm.doc);
 		});
+
+		me.frm.set_query('secondary_contact_person', () => {
+			return erpnext.queries.contact_query(me.frm.doc);
+		});
 	},
 
 	setup_route_options: function () {
