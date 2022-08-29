@@ -2568,33 +2568,49 @@ def get_supplied_items(
 
 @frappe.whitelist()
 def get_items_from_subcontracting_order(source_name, target_doc=None):
-	sco = frappe.get_doc("Subcontracting Order", source_name)
+	def post_process(source, target):
+		target.stock_entry_type = target.purpose = "Send to Subcontractor"
+		target.subcontracting_order = source_name
 
-	if sco.docstatus == 1:
-		if target_doc and isinstance(target_doc, str):
-			target_doc = frappe.get_doc(json.loads(target_doc))
-
-		if target_doc.items:
-			target_doc.items = []
+		if target.items:
+			target.items = []
 
 		warehouses = {}
-		for item in sco.items:
+		for item in source.items:
 			warehouses[item.name] = item.warehouse
 
-		for item in sco.supplied_items:
-			target_doc.append(
+		for item in source.supplied_items:
+			target.append(
 				"items",
 				{
 					"s_warehouse": warehouses.get(item.reference_name),
-					"t_warehouse": sco.supplier_warehouse,
+					"t_warehouse": source.supplier_warehouse,
+					"subcontracted_item": item.main_item_code,
 					"item_code": item.rm_item_code,
-					"qty": item.required_qty,
+					"qty": max(item.required_qty - item.total_supplied_qty, 0),
 					"transfer_qty": item.required_qty,
 					"uom": item.stock_uom,
 					"stock_uom": item.stock_uom,
 					"conversion_factor": 1,
 				},
 			)
+
+	target_doc = get_mapped_doc(
+		"Subcontracting Order",
+		source_name,
+		{
+			"Subcontracting Order": {
+				"doctype": "Stock Entry",
+				"field_no_map": ["purchase_order"],
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+		},
+		target_doc,
+		post_process,
+		ignore_child_tables=True,
+	)
 
 	return target_doc
 
