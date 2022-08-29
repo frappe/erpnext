@@ -493,17 +493,6 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				if (r.message && !r.exc) {
 					frappe.run_serially([
 						() => me.frm.set_value(r.message),
-						() => {
-							me.frm.doc.secondary_contact_mobile = "";
-							me.frm.refresh_field("secondary_contact_mobile");
-
-							me.frm.doc.secondary_contact_person = "";
-							me.frm.refresh_field("secondary_contact_person");
-
-							me.frm.doc.secondary_contact_display = "";
-							me.frm.refresh_field("secondary_contact_display");
-
-						},
 						() => me.setup_contact_no_fields(r.message.contact_nos),
 					]);
 				}
