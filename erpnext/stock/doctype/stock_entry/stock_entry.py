@@ -2229,7 +2229,7 @@ class StockEntry(StockController):
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
 	def update_subcontracting_order_status(self):
-		if self.subcontracting_order and self.purpose == "Send to Subcontractor":
+		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 				update_subcontracting_order_status,
 			)
