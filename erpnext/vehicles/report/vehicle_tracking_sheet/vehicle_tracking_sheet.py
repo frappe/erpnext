@@ -37,7 +37,7 @@ class VehicleServiceTrackingReport(object):
 		conditions = self.get_conditions()
 
 		self.data = frappe.db.sql("""
-			select p.name as project, p.project_name, p.project_type, p.project_workshop, p.company,
+			select p.name as project, p.project_name, p.project_type, p.project_workshop, p.company, p.project_status,
 				p.customer, p.customer_name, p.contact_mobile, p.contact_mobile_2, p.contact_phone,
 				p.insurance_company, p.insurance_company_name,
 				p.applies_to_vehicle, p.service_advisor, p.service_manager,
@@ -54,7 +54,7 @@ class VehicleServiceTrackingReport(object):
 				p.billing_status, p.customer_billable_amount, p.total_billable_amount
 			from `tabProject` p
 			left join `tabItem` item on item.name = p.applies_to_item
-			where p.status != 'Cancelled' {0}
+			where {0}
 			order by p.vehicle_received_date, p.vehicle_received_time
 		""".format(conditions), self.filters, as_dict=1)
 
@@ -148,6 +148,20 @@ class VehicleServiceTrackingReport(object):
 		if self.filters.service_advisor:
 			conditions.append("p.service_advisor = %(service_advisor)s")
 
+		if self.filters.get("status"):
+			if self.filters.get("status") == "Closed":
+				conditions.append("status in ('Closed', 'Completed')")
+			elif self.filters.get("status") == "Cancelled":
+				conditions.append("status = 'Cancelled'")
+			elif self.filters.get("status") == "Open":
+				conditions.append("status = 'Open'")
+			elif self.filters.get("status") == "Closed or To Close":
+				conditions.append("status in ('To Close', 'Closed', 'Completed')")
+			elif self.filters.get("status") == "To Close":
+				conditions.append("status = 'To Close'")
+		else:
+			conditions.append("status != 'Cancelled'")
+
 		if self.filters.service_manager:
 			conditions.append("p.service_manager = %(service_manager)s")
 
@@ -172,7 +186,7 @@ class VehicleServiceTrackingReport(object):
 		if self.filters.brand:
 			conditions.append("item.brand = %(brand)s")
 
-		return "and {0}".format(" and ".join(conditions)) if conditions else ""
+		return " and ".join(conditions) if conditions else ""
 
 	def get_columns(self):
 		columns = [
