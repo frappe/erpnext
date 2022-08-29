@@ -1211,9 +1211,11 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "secondary_contact_person",
    "fieldname": "secondary_contact_info_section",
    "fieldtype": "Section Break",
-   "label": "Secondary Contact Info"
+   "label": "Secondary Contact"
   },
   {
    "fieldname": "secondary_contact_person",
@@ -1244,7 +1246,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-08-26 14:42:44.032914",
+ "modified": "2022-08-29 13:07:24.835232",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
