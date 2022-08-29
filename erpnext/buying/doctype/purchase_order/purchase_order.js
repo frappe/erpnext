@@ -120,7 +120,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			} else if(in_list(["Closed", "Delivered"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
-					this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
+					// as per requirment of of DF & DI ticket no 24333
+					//this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
 				}
 			}
 			if(doc.status != "Closed") {
