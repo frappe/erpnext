@@ -26,7 +26,7 @@ import json
 
 
 force_fields = ['customer_name', 'tax_id', 'tax_cnic', 'tax_strn',
-	'address_display', 'contact_display', 'contact_email',
+	'address_display', 'contact_display', 'contact_email', 'secondary_contact_display',
 	"vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
 	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name"
 ]
@@ -700,6 +700,11 @@ def get_customer_details(args):
 		out.update(_get_lead_contact_details(party))
 	else:
 		out.update(get_contact_details(out.contact_person))
+
+	out.secondary_contact_person = args.secondary_contact_person
+	secondary_contact_details = get_contact_details(out.secondary_contact_person)
+	secondary_contact_details = {"secondary_" + k: v for k, v in secondary_contact_details.items()}
+	out.update(secondary_contact_details)
 
 	out.contact_nos = get_all_contact_nos(party.doctype, party.name)
 
