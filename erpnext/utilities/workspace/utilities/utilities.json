@@ -6,6 +6,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
+ "icon": "keyboard",
  "idx": 0,
  "label": "Utilities",
  "links": [
@@ -40,13 +41,14 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 17:50:10.067510",
+ "modified": "2022-08-24 14:00:43.943007",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Utilities",
  "owner": "user@erpnext.com",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 30.0,

@@ -39,6 +39,13 @@ def get_setup_stages(args=None):
 				],
 			},
 			{
+				"status": _("Enabling Modules"),
+				"fail_msg": "Failed to set defaults",
+				"tasks": [
+					{"fn": enable_workspaces, "args": args, "fail_msg": _("Failed to setup defaults")},
+				],
+			},
+			{
 				"status": _("Wrapping up"),
 				"fail_msg": _("Failed to login"),
 				"tasks": [{"fn": fin, "args": args, "fail_msg": _("Failed to login")}],
@@ -66,6 +73,10 @@ def stage_four(args):
 	company_setup.create_logo(args)
 
 
+def enable_workspaces(args):
+	fixtures.enable_workspaces(args)
+
+
 def fin(args):
 	frappe.local.message_log = []
 	login_as_first_user(args)
@@ -82,4 +93,5 @@ def setup_complete(args=None):
 	setup_company(args)
 	setup_defaults(args)
 	stage_four(args)
+	enable_workspaces(args)
 	fin(args)

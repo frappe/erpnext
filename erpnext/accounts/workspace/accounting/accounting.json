@@ -1094,10 +1094,10 @@
    "type": "Link"
   }
  ],
- "modified": "2022-08-15 15:50:41.797200",
+ "modified": "2022-08-29 15:50:41.797200",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Accounting",
+ "name": "Accounts",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,

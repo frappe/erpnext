@@ -66,8 +66,34 @@
 				<p class="onboarding-title">Enable Modules</p>
 				<p class="onboarding-subtitle">Think of modules as apps that you might need for your org</p>
 			</div>
-			<div v-show="CurrentStep == 4" class="row module-layout">
-				<Module v-for="(module, index) in modules" :key="index" :module="module" />
+			<div v-show="CurrentStep == 4" class="module-layout">
+				<div>
+					<div class="section-heading">
+						Primary
+					</div>
+					<div class="row module-row">
+						<Module v-for="(module, index) in modules.slice(0, 3)" :key="index" :module="module" :primary=1
+						v-on:toggle="add_remove_module" />
+					</div>
+				</div>
+				<div>
+					<div class="section-heading">
+						Secondary
+					</div>
+					<div class="row module-row">
+						<Module v-for="(module, index) in modules.slice(3, 6)" :key="index + 3" :module="module" :primary=0
+						v-on:toggle="add_remove_module" />
+					</div>
+				</div>
+				<div>
+					<div class="section-heading">
+						Others
+					</div>
+					<div class="row module-row">
+						<Module v-for="(module, index) in modules.slice(6, -1)" :key="index + 6" :module="module" :primary=0
+						v-on:toggle="add_remove_module" />
+					</div>
+				</div>
 			</div>
 			<div class="row button-row">
 				<div>
@@ -121,7 +147,8 @@ export default {
 				"South Africa": ["03-01", "02-28"],
 				"Thailand": ["10-01", "09-30"],
 				"United Kingdom": ["04-01", "03-31"],
-			}
+			},
+			enabled_modules: [],
 		};
 	},
 	components: {
@@ -129,7 +156,23 @@ export default {
 	},
 	methods: {
 		next_step: function () {
-			this.CurrentStep += 1;
+			let slide = "slide_" + this.CurrentStep;
+			let missing = 0;
+
+			if (this[slide]) {
+				Object.keys(this[slide].fields_dict).forEach((fieldname) => {
+					let field = this[slide].get_field(fieldname).df;
+					if (!["Section Break", "Column Break"].includes(field.fieldtype) && !this[slide].get_value(fieldname)) {
+						this[slide].set_df_property(fieldname, "reqd", field.label + " is mandatpry");
+						this[slide].set_df_property(fieldname, "description", field.label + " is mandatory");
+						missing = 1;
+					}
+				});
+			}
+
+			if (!missing) {
+				this.CurrentStep += 1;
+			}
 		},
 		prev_step: function() {
 			this.CurrentStep -= 1;
@@ -143,6 +186,8 @@ export default {
 			this.abbreviation=abbr.slice(0, 10).toUpperCase();
 		},
 		finish_setup: function() {
+			console.log(this.enabled_modules);
+			// frappe.throw("Finish Setup");
 			frappe.call({
 				method: "frappe.desk.page.setup_wizard.setup_wizard.setup_complete",
 				args: { args: {
@@ -155,7 +200,9 @@ export default {
 					"fy_end_date": this.slide_3.get_value("fy_end_date"),
 					"chart_of_accounts": this.slide_3.get_value("chart_of_accounts"),
 					"bank_account": this.slide_3.get_value("bank_account"),
-					"domain": this.selectedDomain
+					"domain": this.selectedDomain,
+					"company_tagline": this.slide_3.get_value("tagline"),
+					"enabled_modules": this.enabled_modules,
 				}},
 				callback: (r) => {
 					if (r.message.status === "ok") {
@@ -170,6 +217,16 @@ export default {
 				},
 				error: () => frappe.msgprint(__("Something went wrong")),
 			});
+		},
+		add_remove_module: function(module, checked) {
+			if (checked) {
+				this.enabled_modules.push(module);
+			} else {
+				let index = this.enabled_modules.indexOf(module);
+				if (index !== -1) {
+					this.enabled_modules.splice(index, 1);
+				}
+			}
 		}
 	},
 	mounted() {
@@ -182,7 +239,6 @@ export default {
 					fieldtype: 'Link',
 					placeholder: __("Select Country"),
 					options: "Country",
-					reqd: 1,
 					onchange: () => {
 						let country = this.slide_2.get_value('country');
 						if (country) {
@@ -191,7 +247,6 @@ export default {
 								args: { "country": country, with_standard: true },
 								callback: (r) => {
 									if (r.message) {
-										console.log(r.message);
 										this.slide_3.set_df_property("chart_of_accounts", "options", r.message)
 									}
 								}
@@ -230,7 +285,6 @@ export default {
 					fieldname: 'currency',
 					fieldtype: 'Link',
 					options: 'Currency',
-					reqd: 1,
 				},
 				{
 					label: '',
@@ -244,13 +298,11 @@ export default {
 					placeholder: __("Select Language"),
 					default: "en",
 					options: "Language",
-					reqd: 1,
 				},
 				{
 					label: '',
 					fieldname: 'cb_1',
 					fieldtype: 'Column Break',
-					reqd: 1
 				},
 				{
 					label: __('Timezone'),
@@ -258,7 +310,6 @@ export default {
 					fieldtype: 'Select',
 					placeholder: __("Select Time Zone"),
 					options: this.regional_data.all_timezones,
-					reqd: 1
 				},
 
 			],
@@ -311,6 +362,17 @@ export default {
 					fieldtype: "Date",
 					reqd: 1,
 				},
+				{
+					label: '',
+					fieldname: 'sb_2',
+					fieldtype: 'Section Break',
+				},
+				{
+					fieldname: "tagline",
+					label: __("Company Tagline"),
+					fieldtype: "Data",
+					reqd: 1,
+				},
 
 			],
 			body: this.$refs.slide_3
@@ -323,7 +385,8 @@ export default {
 
 <style scoped>
 .onboarding-container {
-	height: 800px;
+	margin-top: 50px;
+	height: 650px;
 	background: #FFFFFF;
 	border-radius: 16px;
 }
@@ -358,13 +421,25 @@ export default {
 }
 
 .module-layout {
-	height: 600px;
-	padding:40px;
-	gap: 16px;
+	height: 450px;
 	justify-content: center;
 	overflow: scroll;
 	scrollbar-width: 'none';
 	-ms-overflow-style: 'none'
+}
+
+.module-row {
+	gap: 16px;
+	margin-left: 40px;
+}
+
+.section-heading {
+	font-weight: 600;
+	font-size: 16px;
+	line-height: 24px;
+	margin-left: 40px;
+	margin-top: 17px;
+	margin-bottom: 12px;
 }
 
 .slide-section {

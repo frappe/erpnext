@@ -1,14 +1,12 @@
 <template>
-		<div class="module-body">
+		<div v-on:click=toggle class="module-body"
+			v-bind:class="[primary ? 'primary-module':'', checked ? 'checked-border':'']">
 			<div>
-				<div>
-					<div>
-						<input class="module-checkbox" type="checkbox" v-model="checked">
-					</div>
-					<div class="icon">
-						<span class="icon-container" v-html="getIcon"></span>
-					</div>
-
+				<input class="module-checkbox" type="checkbox" v-model="checked">
+				<div class="icon">
+					<div class="icon-container"
+					v-bind:class="[primary ? 'primary-icon' :'']"
+					v-html="getIcon"></div>
 				</div>
 				<p class="module-title">{{ module.name }}</p>
 				<p class="module-subtitle">
@@ -27,10 +25,11 @@ export default {
 			checked: false,
 		};
 	},
-	props: ["module"],
+	props: ["module", "primary"],
 	methods: {
 		toggle() {
-			this.$emit('toggle', this.checked);
+			this.checked = !this.checked;
+			this.$emit('toggle', this.module.name, this.checked);
 		},
 	},
 	computed: {
@@ -43,11 +42,26 @@ export default {
 </script>
 
 <style scoped>
+
+.primary-module {
+	background: #F5FAFF !important;
+}
+
 .module-body {
 	height: 160px;
 	width: 280px;
-	background: #F5FAFF;
 	border-radius: 10px;
+	box-shadow: 0px 2px 6px rgba(17, 43, 66, 0.08), 0px 1px 4px rgba(17, 43, 66, 0.1);
+	padding-right: 10px;
+}
+
+.checked-border {
+	border: 2px solid #2D95F0 !important;
+}
+
+.primary-icon {
+	background: #EBF4FC !important;
+	border: 1px solid #DEEEFC !important;
 }
 
 .icon {
@@ -59,8 +73,9 @@ export default {
 	box-sizing: border-box;
 	width: 42px;
 	height: 42px;
-	background: #EBF4FC;
-	border: 1px solid #DEEEFC;
+	padding: 5px;
+	background: #F4F5F6;
+	border: 1px solid #EBEEF0;
 	border-radius: 6px;
 }
 
@@ -84,6 +99,6 @@ export default {
 
 .module-checkbox {
 	float: right;
-	margin-top: 10px;
+	margin-top: 12px;
 }
 </style>

@@ -595,3 +595,16 @@ def get_fy_details(fy_start_date, fy_end_date):
 	else:
 		fy = cstr(start_year) + "-" + cstr(start_year + 1)
 	return fy
+
+
+def enable_workspaces(args):
+	erpnext_modules = frappe.db.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
+	workspace = frappe.qb.DocType("Workspace")
+
+	frappe.qb.update(workspace).set(workspace.public, 0).where(
+		workspace.module.isin(erpnext_modules)
+	).run()
+
+	frappe.qb.update(workspace).set(workspace.public, 1).where(
+		workspace.module.isin(args.get("enabled_modules"))
+	).run()
