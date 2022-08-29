@@ -52,7 +52,7 @@ frappe.ui.form.on("Leave Application", {
 	make_dashboard: function(frm) {
 		var leave_details;
 		let lwps;
-		if (frm.doc.employee && frm.doc.from_date) {
+		if (frm.doc.employee) {
 			frappe.call({
 				method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_details",
 				async: false,
