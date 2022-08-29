@@ -312,3 +312,4 @@ erpnext.patches.v13_0.fix_number_and_frequency_for_monthly_depreciation
 erpnext.patches.v14_0.remove_hr_and_payroll_modules # 20-07-2022
 erpnext.patches.v14_0.fix_crm_no_of_employees
 erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes
+erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
