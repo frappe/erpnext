@@ -1811,10 +1811,13 @@ def get_sales_invoice(project_name, depreciation_type=None):
 		elif depreciation_type == "After Depreciation Amount":
 			if not project.bill_to and project.insurance_company:
 				target_doc.bill_to = project.insurance_company
-			target_doc.contact_person = None
 
 	if depreciation_type != 'After Depreciation Amount':
 		target_doc.is_pos = project.cash_billing
+
+	if target_doc.customer and target_doc.bill_to and target_doc.customer != target_doc.bill_to:
+		target_doc.contact_person = None
+		target_doc.customer_address = None
 
 	# Insurance Company Fetch Values
 	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
