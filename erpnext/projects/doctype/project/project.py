@@ -1811,6 +1811,7 @@ def get_sales_invoice(project_name, depreciation_type=None):
 		elif depreciation_type == "After Depreciation Amount":
 			if not project.bill_to and project.insurance_company:
 				target_doc.bill_to = project.insurance_company
+			target_doc.contact_person = None
 
 	if depreciation_type != 'After Depreciation Amount':
 		target_doc.is_pos = project.cash_billing
@@ -1827,7 +1828,7 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	# Tax Table
 	target_doc.run_method("append_taxes_from_master")
 
-	# Calcualte Taxes and Totals
+	# Calculate Taxes and Totals
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	# Check Undelivered Sales Order Stock Items
