@@ -1105,17 +1105,17 @@ class AccountsController(TransactionBase):
 			frappe.db.get_single_value("Accounts Settings", "enable_discount_accounting")
 		)
 
+		if self.doctype == "Purchase Invoice":
+			dr_or_cr = "credit"
+			rev_dr_cr = "debit"
+			supplier_or_customer = self.supplier
+
+		else:
+			dr_or_cr = "debit"
+			rev_dr_cr = "credit"
+			supplier_or_customer = self.customer
+
 		if enable_discount_accounting:
-			if self.doctype == "Purchase Invoice":
-				dr_or_cr = "credit"
-				rev_dr_cr = "debit"
-				supplier_or_customer = self.supplier
-
-			else:
-				dr_or_cr = "debit"
-				rev_dr_cr = "credit"
-				supplier_or_customer = self.customer
-
 			for item in self.get("items"):
 				if item.get("discount_amount") and item.get("discount_account"):
 					discount_amount = item.discount_amount * item.qty
@@ -1169,18 +1169,22 @@ class AccountsController(TransactionBase):
 						)
 					)
 
-			if self.get("discount_amount") and self.get("additional_discount_account"):
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": self.additional_discount_account,
-							"against": supplier_or_customer,
-							dr_or_cr: self.discount_amount,
-							"cost_center": self.cost_center,
-						},
-						item=self,
-					)
+		if (
+			(enable_discount_accounting or self.get("is_cash_or_non_trade_discount"))
+			and self.get("additional_discount_account")
+			and self.get("discount_amount")
+		):
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.additional_discount_account,
+						"against": supplier_or_customer,
+						dr_or_cr: self.discount_amount,
+						"cost_center": self.cost_center,
+					},
+					item=self,
 				)
+			)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
