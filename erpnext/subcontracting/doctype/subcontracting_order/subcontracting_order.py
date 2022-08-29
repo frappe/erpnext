@@ -153,7 +153,7 @@ class SubcontractingOrder(SubcontractingController):
 			else:
 				self.set_missing_values()
 
-	def update_status(self, status=None, update_modified=False):
+	def update_status(self, status=None, update_modified=True):
 		if self.docstatus >= 1 and not status:
 			if self.docstatus == 1:
 				if self.status == "Draft":
@@ -162,6 +162,10 @@ class SubcontractingOrder(SubcontractingController):
 					status = "Completed"
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
+					for item in self.supplied_items:
+						if item.returned_qty:
+							status = "Closed"
+							break
 				else:
 					total_required_qty = total_supplied_qty = 0
 					for item in self.supplied_items:
@@ -176,7 +180,10 @@ class SubcontractingOrder(SubcontractingController):
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
-			frappe.db.set_value("Subcontracting Order", self.name, "status", status, update_modified)
+		if status:
+			frappe.db.set_value(
+				"Subcontracting Order", self.name, "status", status, update_modified=update_modified
+			)
 
 
 @frappe.whitelist()

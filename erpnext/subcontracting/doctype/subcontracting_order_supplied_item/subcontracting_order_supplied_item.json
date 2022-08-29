@@ -150,8 +150,7 @@
             "label": "Returned Qty",
             "no_copy": 1,
             "print_hide": 1,
-            "read_only": 1,
-            "hidden": 1
+            "read_only": 1
         },
         {
             "fieldname": "total_supplied_qty",
@@ -166,7 +165,7 @@
     "hide_toolbar": 1,
     "istable": 1,
     "links": [],
-    "modified": "2022-04-07 12:58:28.208847",
+    "modified": "2022-08-26 16:04:56.125951",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Order Supplied Item",
