@@ -754,7 +754,7 @@ erpnext.patches.v12_0.reset_returned_qty_sales_invoice
 erpnext.patches.v12_0.create_item_default_rules
 erpnext.patches.v12_0.set_project_date
 erpnext.patches.v12_0.rename_vehicle_workshop
-erpnext.patches.v12_0.resetup_vehicle_domain #30-04-2022 #24-07-2022 #27-07-2022 #30-07-2022 #04-08-2022
+erpnext.patches.v12_0.resetup_vehicle_domain #30-04-2022 #24-07-2022 #27-07-2022 #30-07-2022 #04-08-2022 #29-08-2022
 erpnext.patches.v12_0.update_reference_vehicle_log
 erpnext.patches.v12_0.set_vehicle_images
 erpnext.patches.v12_0.set_vehicle_transfer_letter_territory
