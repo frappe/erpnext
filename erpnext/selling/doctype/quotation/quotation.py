@@ -265,7 +265,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 
 def set_expired_status():
 	# filter out submitted non expired quotations whose validity has been ended
+<<<<<<< HEAD
 	cond = "qo.docstatus = 1 and qo.status != 'Expired' and qo.valid_till < %s"
+=======
+	cond = "`tabQuotation`.docstatus = 1 and `tabQuotation`.status NOT IN ('Expired', 'Lost') and `tabQuotation`.valid_till < %s"
+>>>>>>> 69ffef8c0e (fix: lost quotation not to expired)
 	# check if those QUO have SO against it
 	so_against_quo = """
 		SELECT
