@@ -160,7 +160,7 @@ class VehicleServiceTrackingReport(object):
 			elif self.filters.get("status") == "To Close":
 				conditions.append( "status = 'To Close'")
 		else:
-			conditions.append("status='Cancelled'")
+			conditions.append("status != 'Cancelled'")
 
 		if self.filters.service_manager:
 			conditions.append("p.service_manager = %(service_manager)s")

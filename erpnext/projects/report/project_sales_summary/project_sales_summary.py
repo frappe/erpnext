@@ -25,7 +25,7 @@ class ProjectSalesSummaryReport(object):
 
 		extra_rows = ""
 		if self.is_vehicle_service:
-			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered 
+			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered
 			"""
 		self.data = frappe.db.sql("""
 			select p.name as project, p.project_type, p.project_workshop, p.project_status, p.project_name, p.project_date,
@@ -61,11 +61,11 @@ class ProjectSalesSummaryReport(object):
 			elif self.filters.get("status") == "Open":
 				conditions.append( "status = 'Open'")
 			elif self.filters.get("status") == "Closed or To Close":
-				conditions.append("status in ('To Close' ,'Closed', 'Completed')")
+				conditions.append("status in ('To Close', 'Closed', 'Completed')")
 			elif self.filters.get("status") == "To Close":
 				conditions.append( "status = 'To Close'")
 		else:
-			conditions.append("status='Cancelled'")
+			conditions.append("status !='Cancelled'")
 
 		if self.filters.get("project"):
 			conditions.append("p.name = %(project)s")
