@@ -32,7 +32,8 @@ force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_l
 
 force_customer_fields = ("customer_name",
 	"tax_id", "tax_cnic", "tax_strn", "tax_status",
-	"address_display", "contact_display", "contact_email")
+	"address_display", "contact_display", "contact_email",
+	"secondary_contact_display")
 
 vehicle_change_fields = [
 	('change_vehicle_license_plate', 'license_plate'),
@@ -1657,6 +1658,11 @@ def get_customer_details(args):
 		out.contact_person = get_default_contact("Customer", customer.name)
 
 	out.update(get_contact_details(out.contact_person))
+
+	out.secondary_contact_person = args.secondary_contact_person
+	secondary_contact_details = get_contact_details(out.secondary_contact_person)
+	secondary_contact_details = {"secondary_" + k: v for k, v in secondary_contact_details.items()}
+	out.update(secondary_contact_details)
 
 	out.contact_nos = get_all_contact_nos("Customer", customer.name)
 

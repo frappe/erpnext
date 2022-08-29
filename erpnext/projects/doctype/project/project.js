@@ -47,6 +47,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		}
 
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
+		me.frm.set_query('secondary_contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
 
 		if(me.frm.fields_dict.insurance_company) {

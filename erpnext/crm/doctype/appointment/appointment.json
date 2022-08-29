@@ -50,6 +50,12 @@
   "column_break_25",
   "customer_address",
   "address_display",
+  "secondary_contact_section",
+  "secondary_contact_person",
+  "column_break_secondary_contact_person",
+  "secondary_contact_display",
+  "column_break_secondary_contact_display",
+  "secondary_contact_mobile",
   "details_section",
   "voice_of_customer",
   "description",
@@ -454,10 +460,45 @@
    "no_copy": 1,
    "options": "Notification Count",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "secondary_contact_person",
+   "fieldname": "secondary_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Secondary Contact"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "secondary_contact_person",
+   "fieldtype": "Link",
+   "label": "Secondary Contact Person",
+   "options": "Contact"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "secondary_contact_display",
+   "fieldtype": "Data",
+   "label": "Secondary Contact Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "secondary_contact_mobile",
+   "fieldtype": "Select",
+   "label": "Secondary Mobile No"
+  },
+  {
+   "fieldname": "column_break_secondary_contact_person",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_secondary_contact_display",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-14 16:33:13.928728",
+ "modified": "2022-08-29 13:06:16.032627",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
