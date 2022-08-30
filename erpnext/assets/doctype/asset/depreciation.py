@@ -249,8 +249,8 @@ def get_gl_entries_on_asset_regain(asset, selling_amount=0, finance_book=None):
 		asset.get_gl_dict(
 			{
 				"account": fixed_asset_account,
-				"credit_in_account_currency": asset.gross_purchase_amount,
-				"credit": asset.gross_purchase_amount,
+				"debit_in_account_currency": asset.gross_purchase_amount,
+				"debit": asset.gross_purchase_amount,
 				"cost_center": depreciation_cost_center,
 				"posting_date": getdate(),
 			},
@@ -259,8 +259,8 @@ def get_gl_entries_on_asset_regain(asset, selling_amount=0, finance_book=None):
 		asset.get_gl_dict(
 			{
 				"account": accumulated_depr_account,
-				"debit_in_account_currency": accumulated_depr_amount,
-				"debit": accumulated_depr_amount,
+				"credit_in_account_currency": accumulated_depr_amount,
+				"credit": accumulated_depr_amount,
 				"cost_center": depreciation_cost_center,
 				"posting_date": getdate(),
 			},
