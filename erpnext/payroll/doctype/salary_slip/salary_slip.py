@@ -1379,12 +1379,29 @@ class SalarySlip(TransactionBase):
 		for loan in self.get_loan_details():
 			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
 
-			if amounts["interest_amount"] or amounts["payable_principal_amount"]:
+			if (amounts["interest_amount"] or amounts["payable_principal_amount"]) and (
+				amounts["payable_principal_amount"] + amounts["interest_amount"]
+				> amounts["written_off_amount"]
+			):
+
+				if amounts["interest_amount"] > amounts["written_off_amount"]:
+					amounts["interest_amount"] -= amounts["written_off_amount"]
+					amounts["written_off_amount"] = 0
+				else:
+					amounts["written_off_amount"] -= amounts["interest_amount"]
+					amounts["interest_amount"] = 0
+
+				if amounts["payable_principal_amount"] > amounts["written_off_amount"]:
+					amounts["payable_principal_amount"] -= amounts["written_off_amount"]
+					amounts["written_off_amount"] = 0
+				else:
+					amounts["written_off_amount"] -= amounts["payable_principal_amount"]
+					amounts["payable_principal_amount"] = 0
+
 				self.append(
 					"loans",
 					{
 						"loan": loan.name,
-						"total_payment": amounts["interest_amount"] + amounts["payable_principal_amount"],
 						"interest_amount": amounts["interest_amount"],
 						"principal_amount": amounts["payable_principal_amount"],
 						"loan_account": loan.loan_account,
@@ -1395,7 +1412,7 @@ class SalarySlip(TransactionBase):
 		for payment in self.get("loans"):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 			total_amount = amounts["interest_amount"] + amounts["payable_principal_amount"]
-			if payment.total_payment > total_amount:
+			if flt(payment.total_payment) > total_amount:
 				frappe.throw(
 					_(
 						"""Row {0}: Paid amount {1} is greater than pending accrued amount {2} against loan {3}"""
@@ -1407,10 +1424,10 @@ class SalarySlip(TransactionBase):
 					)
 				)
 
-			self.total_interest_amount += payment.interest_amount
-			self.total_principal_amount += payment.principal_amount
+			self.total_interest_amount += flt(payment.interest_amount)
+			self.total_principal_amount += flt(payment.principal_amount)
 
-			self.total_loan_repayment += payment.total_payment
+			self.total_loan_repayment += flt(payment.total_payment)
 
 	def get_loan_details(self):
 		loan_details = frappe.get_all(
@@ -1436,7 +1453,7 @@ class SalarySlip(TransactionBase):
 	def make_loan_repayment_entry(self):
 		payroll_payable_account = get_payroll_payable_account(self.company, self.payroll_entry)
 		for loan in self.loans:
-			if loan.total_payment:
+			if flt(loan.total_payment) > 0:
 				repayment_entry = create_repayment_entry(
 					loan.loan,
 					self.employee,
