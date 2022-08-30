@@ -161,13 +161,13 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
 			const contact = frm.doc.contact_mobile;
-			const request_button = $(this.request_for_payment_field.$input[0]);
+			const request_button = $(this.request_for_payment_field?.$input[0]);
 			if (contact) {
 				request_button.removeClass('btn-default').addClass('btn-primary');
 			} else {
 				request_button.removeClass('btn-primary').addClass('btn-default');
-      }
-    });
+			}
+		});
 
 		frappe.ui.form.on('POS Invoice', 'coupon_code', (frm) => {
 			if (frm.doc.coupon_code && !frm.applying_pos_coupon_code) {

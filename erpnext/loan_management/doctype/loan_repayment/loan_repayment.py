@@ -149,6 +149,9 @@ class LoanRepayment(AccountsController):
 				"status",
 				"is_secured_loan",
 				"total_payment",
+				"debit_adjustment_amount",
+				"credit_adjustment_amount",
+				"refund_amount",
 				"loan_amount",
 				"disbursed_amount",
 				"total_interest_payable",
@@ -398,9 +401,9 @@ class LoanRepayment(AccountsController):
 			remarks = "Repayment against loan " + self.against_loan
 
 		if self.reference_number:
-			remarks += "with reference no. {}".format(self.reference_number)
+			remarks += " with reference no. {}".format(self.reference_number)
 
-		if self.repay_from_salary:
+		if hasattr(self, "repay_from_salary") and self.repay_from_salary:
 			payment_account = self.payroll_payable_account
 		else:
 			payment_account = self.payment_account
@@ -684,7 +687,9 @@ def get_amounts(amounts, against_loan, posting_date):
 
 		if (
 			no_of_late_days > 0
-			and (not against_loan_doc.repay_from_salary)
+			and (
+				not (hasattr(against_loan_doc, "repay_from_salary") and against_loan_doc.repay_from_salary)
+			)
 			and entry.accrual_type == "Regular"
 		):
 			penalty_amount += (

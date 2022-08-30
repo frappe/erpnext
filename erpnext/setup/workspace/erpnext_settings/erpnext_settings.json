@@ -10,13 +10,14 @@
  "idx": 0,
  "label": "ERPNext Settings",
  "links": [],
- "modified": "2022-04-28 11:42:01.043569",
+ "modified": "2022-06-27 16:53:07.056620",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
  "sequence_id": 12.0,
@@ -25,14 +26,6 @@
    "icon": "project",
    "label": "Projects Settings",
    "link_to": "Projects Settings",
-   "type": "DocType"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "",
-   "icon": "dot-horizontal",
-   "label": "Naming Series",
-   "link_to": "Naming Series",
    "type": "DocType"
   },
   {
@@ -45,12 +38,6 @@
    "icon": "stock",
    "label": "Stock Settings",
    "link_to": "Stock Settings",
-   "type": "DocType"
-  },
-  {
-   "icon": "hr",
-   "label": "HR Settings",
-   "link_to": "HR Settings",
    "type": "DocType"
   },
   {
@@ -73,8 +60,8 @@
   },
   {
    "icon": "retail",
-   "label": "Shopping Cart Settings",
-   "link_to": "Shopping Cart Settings",
+   "label": "E Commerce Settings",
+   "link_to": "E Commerce Settings",
    "type": "DocType"
   },
   {
@@ -94,13 +81,6 @@
    "icon": "setting",
    "label": "Domain Settings",
    "link_to": "Domain Settings",
-   "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "icon": "retail",
-   "label": "Products Settings",
-   "link_to": "Products Settings",
    "type": "DocType"
   },
   {

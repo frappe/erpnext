@@ -84,7 +84,7 @@ frappe.ui.form.on("Opportunity", {
 		erpnext.toggle_naming_series();
 
 		if(!frm.is_new() && doc.status!=="Lost") {
-			if(doc.with_items){
+			if(doc.items){
 				frm.add_custom_button(__('Supplier Quotation'),
 					function() {
 						frm.trigger("make_supplier_quotation")

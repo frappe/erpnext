@@ -133,7 +133,7 @@ class TestAsset(AssetSetup):
 			order by account""",
 			pi.name,
 		)
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 
 		pi.cancel()
 		asset.cancel()
@@ -208,7 +208,7 @@ class TestAsset(AssetSetup):
 			order by account""",
 			asset.journal_entry_for_scrap,
 		)
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 
 		restore_asset(asset.name)
 
@@ -253,7 +253,7 @@ class TestAsset(AssetSetup):
 			si.name,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 
 		si.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
@@ -361,7 +361,7 @@ class TestAsset(AssetSetup):
 			pr.name,
 		)
 
-		self.assertEqual(pr_gle, expected_gle)
+		self.assertSequenceEqual(pr_gle, expected_gle)
 
 		pi = make_invoice(pr.name)
 		pi.submit()
@@ -381,7 +381,7 @@ class TestAsset(AssetSetup):
 			pi.name,
 		)
 
-		self.assertEqual(pi_gle, expected_gle)
+		self.assertSequenceEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
 
@@ -414,7 +414,7 @@ class TestAsset(AssetSetup):
 			asset_doc.name,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 
 	def test_asset_cwip_toggling_cases(self):
 		cwip = frappe.db.get_value("Asset Category", "Computers", "enable_cwip_accounting")
@@ -721,12 +721,12 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2022-02-28", 645.0, 645.0],
-			["2022-03-31", 1206.8, 1851.8],
-			["2022-04-30", 1051.12, 2902.92],
-			["2022-05-31", 915.52, 3818.44],
-			["2022-06-30", 797.42, 4615.86],
-			["2022-07-15", 384.14, 5000.0],
+			["2022-02-28", 647.25, 647.25],
+			["2022-03-31", 1210.71, 1857.96],
+			["2022-04-30", 1053.99, 2911.95],
+			["2022-05-31", 917.55, 3829.5],
+			["2022-06-30", 798.77, 4628.27],
+			["2022-07-15", 371.73, 5000.0],
 		]
 
 		schedules = [
@@ -737,7 +737,6 @@ class TestDepreciationMethods(AssetSetup):
 			]
 			for d in asset.get("schedules")
 		]
-
 		self.assertEqual(schedules, expected_schedules)
 
 
@@ -1288,7 +1287,7 @@ class TestDepreciationBasics(AssetSetup):
 			asset.name,
 		)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertSequenceEqual(gle, expected_gle)
 		self.assertEqual(asset.get("value_after_depreciation"), 0)
 
 	def test_expected_value_change(self):
@@ -1455,12 +1454,14 @@ def create_fixed_asset_item(item_code=None, auto_create_assets=1, is_grouped_ass
 	return item
 
 
-def set_depreciation_settings_in_company():
-	company = frappe.get_doc("Company", "_Test Company")
-	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - _TC"
-	company.depreciation_expense_account = "_Test Depreciations - _TC"
-	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"
-	company.depreciation_cost_center = "_Test Cost Center - _TC"
+def set_depreciation_settings_in_company(company=None):
+	if not company:
+		company = "_Test Company"
+	company = frappe.get_doc("Company", company)
+	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - " + company.abbr
+	company.depreciation_expense_account = "_Test Depreciations - " + company.abbr
+	company.disposal_account = "_Test Gain/Loss on Asset Disposal - " + company.abbr
+	company.depreciation_cost_center = "Main - " + company.abbr
 	company.save()
 
 	# Enable booking asset depreciation entry automatically

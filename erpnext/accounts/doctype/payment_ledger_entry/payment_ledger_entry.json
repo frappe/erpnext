@@ -22,7 +22,8 @@
   "amount",
   "account_currency",
   "amount_in_account_currency",
-  "delinked"
+  "delinked",
+  "remarks"
  ],
  "fields": [
   {
@@ -40,19 +41,22 @@
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Account",
-   "options": "Account"
+   "options": "Account",
+   "search_index": 1
   },
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
    "label": "Party Type",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "label": "Party",
-   "options": "party_type"
+   "options": "party_type",
+   "search_index": 1
   },
   {
    "fieldname": "voucher_type",
@@ -114,7 +118,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "search_index": 1
   },
   {
    "fieldname": "cost_center",
@@ -132,12 +137,17 @@
    "fieldtype": "Link",
    "label": "Finance Book",
    "options": "Finance Book"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-05-30 19:04:55.532171",
+ "modified": "2022-08-22 15:32:56.629430",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",

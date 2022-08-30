@@ -16,7 +16,6 @@
   "company",
   "posting_date",
   "status",
-  "repay_from_salary",
   "section_break_8",
   "loan_type",
   "loan_amount",
@@ -127,13 +126,6 @@
    "no_copy": 1,
    "options": "Sanctioned\nPartially Disbursed\nDisbursed\nLoan Closure Requested\nClosed",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.applicant_type==\"Employee\"",
-   "fieldname": "repay_from_salary",
-   "fieldtype": "Check",
-   "label": "Repay From Salary"
   },
   {
    "fieldname": "section_break_8",
@@ -415,7 +407,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-30 12:04:13.728880",
+ "modified": "2022-07-12 11:50:31.957360",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

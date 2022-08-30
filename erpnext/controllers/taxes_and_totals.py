@@ -37,6 +37,12 @@ class calculate_taxes_and_totals(object):
 			self.set_discount_amount()
 			self.apply_discount_amount()
 
+		# Update grand total as per cash and non trade discount
+		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
+			self.doc.grand_total -= self.doc.discount_amount
+			self.doc.base_grand_total -= self.doc.base_discount_amount
+			self.set_rounded_total()
+
 		self.calculate_shipping_charges()
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
@@ -500,9 +506,6 @@ class calculate_taxes_and_totals(object):
 		else:
 			self.doc.grand_total = flt(self.doc.net_total)
 
-		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
-			self.doc.grand_total -= self.doc.discount_amount
-
 		if self.doc.get("taxes"):
 			self.doc.total_taxes_and_charges = flt(
 				self.doc.grand_total - self.doc.net_total - flt(self.doc.rounding_adjustment),
@@ -597,15 +600,15 @@ class calculate_taxes_and_totals(object):
 			if not self.doc.apply_discount_on:
 				frappe.throw(_("Please select Apply Discount On"))
 
+			self.doc.base_discount_amount = flt(
+				self.doc.discount_amount * self.doc.conversion_rate, self.doc.precision("base_discount_amount")
+			)
+
 			if self.doc.apply_discount_on == "Grand Total" and self.doc.get(
 				"is_cash_or_non_trade_discount"
 			):
 				self.discount_amount_applied = True
 				return
-
-			self.doc.base_discount_amount = flt(
-				self.doc.discount_amount * self.doc.conversion_rate, self.doc.precision("base_discount_amount")
-			)
 
 			total_for_discount_amount = self.get_total_for_discount_amount()
 			taxes = self.doc.get("taxes")

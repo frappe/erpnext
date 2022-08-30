@@ -87,17 +87,6 @@ $.extend(erpnext, {
 	route_to_pending_reposts: (args) => {
 		frappe.set_route('List', 'Repost Item Valuation', args);
 	},
-
-	proceed_save_with_reminders_frequency_change: () => {
-		frappe.ui.hide_open_dialog();
-
-		frappe.call({
-			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
-			callback: () => {
-				cur_frm.save();
-			}
-		});
-	}
 });
 
 
@@ -220,6 +209,32 @@ $.extend(erpnext.utils, {
 						});
 					}
 				});
+			}
+		});
+	},
+
+	add_inventory_dimensions: function(report_name, index) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		frappe.call({
+			method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			callback: function(r) {
+				if (r.message && r.message.length) {
+					r.message.forEach((dimension) => {
+						let found = filters.some(el => el.fieldname === dimension['fieldname']);
+
+						if (!found) {
+							filters.splice(index, 0, {
+								"fieldname": dimension["fieldname"],
+								"label": __(dimension["label"]),
+								"fieldtype": "MultiSelectList",
+								get_data: function(txt) {
+									return frappe.db.get_link_options(dimension["doctype"], txt);
+								},
+							});
+						}
+					});
+				}
 			}
 		});
 	},

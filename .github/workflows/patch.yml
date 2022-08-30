@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: patch-develop-${{ github.event.number }}
+  group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -33,6 +33,14 @@ jobs:
     steps:
       - name: Clone
         uses: actions/checkout@v2
+
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
 
       - name: Setup Python
         uses: "gabrielfalcao/pyenv-action@v9"
@@ -105,7 +113,6 @@ jobs:
               echo "Updating to v$version"
               branch_name="version-$version-hotfix"
 
-
               git -C "apps/frappe" fetch --depth 1 upstream $branch_name:$branch_name
               git -C "apps/erpnext" fetch --depth 1 upstream $branch_name:$branch_name
 
@@ -114,6 +121,7 @@ jobs:
 
               rm -rf ~/frappe-bench/env
               bench setup env
+              bench pip install -e ./apps/payments
               bench pip install -e ./apps/erpnext
 
               bench --site test_site migrate
@@ -127,6 +135,8 @@ jobs:
           pyenv global $(pyenv versions | grep '3.10')
           rm -rf ~/frappe-bench/env
           bench -v setup env
+          bench pip install -e ./apps/payments
           bench pip install -e ./apps/erpnext
 
           bench --site test_site migrate
+          bench --site test_site install-app payments

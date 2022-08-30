@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.utils import add_to_date, flt, get_datetime, getdate, time_diff_in_hours
 
 from erpnext.controllers.queries import get_match_cond
-from erpnext.hr.utils import validate_active_employee
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -24,9 +23,6 @@ class OverWorkLoggedError(frappe.ValidationError):
 
 class Timesheet(Document):
 	def validate(self):
-		if self.employee:
-			validate_active_employee(self.employee)
-		self.set_employee_name()
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
@@ -34,10 +30,6 @@ class Timesheet(Document):
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
-
-	def set_employee_name(self):
-		if self.employee and not self.employee_name:
-			self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
@@ -80,10 +72,7 @@ class Timesheet(Document):
 		if self.per_billed == 100:
 			self.status = "Billed"
 
-		if self.salary_slip:
-			self.status = "Payslip"
-
-		if self.sales_invoice and self.salary_slip:
+		if self.sales_invoice:
 			self.status = "Completed"
 
 	def set_dates(self):
@@ -404,27 +393,6 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 	target.run_method("set_missing_values")
 
 	return target
-
-
-@frappe.whitelist()
-def make_salary_slip(source_name, target_doc=None):
-	target = frappe.new_doc("Salary Slip")
-	set_missing_values(source_name, target)
-	target.run_method("get_emp_and_working_day_details")
-
-	return target
-
-
-def set_missing_values(time_sheet, target):
-	doc = frappe.get_doc("Timesheet", time_sheet)
-	target.employee = doc.employee
-	target.employee_name = doc.employee_name
-	target.salary_slip_based_on_timesheet = 1
-	target.start_date = doc.start_date
-	target.end_date = doc.end_date
-	target.posting_date = doc.modified
-	target.total_working_hours = doc.total_hours
-	target.append("timesheets", {"time_sheet": doc.name, "working_hours": doc.total_hours})
 
 
 @frappe.whitelist()
