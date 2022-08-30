@@ -1379,10 +1379,11 @@ class SalarySlip(TransactionBase):
 		for loan in self.get_loan_details():
 			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
 
-			if (amounts["interest_amount"] or amounts["payable_principal_amount"]) \
-				and (amounts["payable_principal_amount"] + amounts["interest_amount"] > amounts["written_off_amount"]):
+			if (amounts["interest_amount"] or amounts["payable_principal_amount"]) and (
+				amounts["payable_principal_amount"] + amounts["interest_amount"]
+				> amounts["written_off_amount"]
+			):
 
-				print("Ininininin")
 				if amounts["interest_amount"] > amounts["written_off_amount"]:
 					amounts["interest_amount"] -= amounts["written_off_amount"]
 					amounts["written_off_amount"] = 0
