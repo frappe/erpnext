@@ -670,9 +670,10 @@ class TestSalarySlip(FrappeTestCase):
 		ss = make_employee_salary_slip(
 			"test_loan_repayment_salary_slip@salary.com", "Monthly", "Test Loan Repayment Salary Structure"
 		)
+
+		ss.loans[0].total_payment = 592
 		ss.submit()
 
-		self.assertEqual(ss.total_loan_repayment, 592)
 		self.assertEqual(
 			ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment)))
 		)

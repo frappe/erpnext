@@ -1065,22 +1065,6 @@ class SalesInvoice(SellingController):
 				)
 			)
 
-		if self.apply_discount_on == "Grand Total" and self.get("is_cash_or_discount_account"):
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": self.additional_discount_account,
-						"against": self.debit_to,
-						"debit": self.base_discount_amount,
-						"debit_in_account_currency": self.discount_amount,
-						"cost_center": self.cost_center,
-						"project": self.project,
-					},
-					self.currency,
-					item=self,
-				)
-			)
-
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
 			amount, base_amount = self.get_tax_amounts(tax, self.enable_discount_accounting)

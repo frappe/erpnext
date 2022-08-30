@@ -9,7 +9,7 @@ from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -79,6 +79,7 @@ class POSInvoiceMergeLog(Document):
 		if sales:
 			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
+		self.flags.ignore_validate_update_after_submit = True
 		self.save()  # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
 		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
@@ -99,6 +100,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.is_consolidated = 1
 		sales_invoice.set_posting_time = 1
 		sales_invoice.posting_date = getdate(self.posting_date)
+		sales_invoice.posting_time = get_time(self.posting_time)
 		sales_invoice.save()
 		sales_invoice.submit()
 
@@ -115,6 +117,7 @@ class POSInvoiceMergeLog(Document):
 		credit_note.is_consolidated = 1
 		credit_note.set_posting_time = 1
 		credit_note.posting_date = getdate(self.posting_date)
+		credit_note.posting_time = get_time(self.posting_time)
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
 		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
@@ -401,6 +404,9 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 				merge_log = frappe.new_doc("POS Invoice Merge Log")
 				merge_log.posting_date = (
 					getdate(closing_entry.get("posting_date")) if closing_entry else nowdate()
+				)
+				merge_log.posting_time = (
+					get_time(closing_entry.get("posting_time")) if closing_entry else nowtime()
 				)
 				merge_log.customer = customer
 				merge_log.pos_closing_entry = closing_entry.get("name") if closing_entry else None
