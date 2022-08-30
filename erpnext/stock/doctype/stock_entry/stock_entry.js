@@ -174,6 +174,8 @@ frappe.ui.form.on('Stock Entry', {
 					if(!items.length) {
 						items = frm.doc.items;
 					}
+
+					mr.work_order = frm.doc.work_order;
 					items.forEach(function(item) {
 						var mr_item = frappe.model.add_child(mr, 'items');
 						mr_item.item_code = item.item_code;
