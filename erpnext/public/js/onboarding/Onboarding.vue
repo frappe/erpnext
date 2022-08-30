@@ -239,6 +239,7 @@ export default {
 					fieldtype: 'Link',
 					placeholder: __("Select Country"),
 					options: "Country",
+					only_select: true,
 					onchange: () => {
 						let country = this.slide_2.get_value('country');
 						if (country) {
@@ -285,6 +286,7 @@ export default {
 					fieldname: 'currency',
 					fieldtype: 'Link',
 					options: 'Currency',
+					only_select: true,
 				},
 				{
 					label: '',
@@ -298,6 +300,7 @@ export default {
 					placeholder: __("Select Language"),
 					default: "en",
 					options: "Language",
+					only_select: true,
 				},
 				{
 					label: '',
