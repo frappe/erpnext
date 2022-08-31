@@ -26,6 +26,7 @@
   "validate_over_billing_in_purchase_invoice",
   "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
+  "purchase_invoice_receipt_same_fy",
   "section_break_18",
   "determine_address_tax_category_from",
   "column_break_22",
@@ -264,12 +265,18 @@
   {
    "fieldname": "column_break_36",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "purchase_invoice_receipt_same_fy",
+   "fieldtype": "Check",
+   "label": "Purchase Invoice must be in same Fiscal Year as Purchase Receipts"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2021-11-04 11:32:59.344396",
+ "modified": "2022-08-31 16:44:47.004691",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
