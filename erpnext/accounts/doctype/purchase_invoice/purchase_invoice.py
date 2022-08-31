@@ -83,6 +83,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_write_off_account()
 		self.create_remarks()
 		self.validate_purchase_receipt_if_update_stock()
+		self.validate_purchase_receipt_in_same_fy()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_reference)
 
 		self.set_returned_status()
@@ -472,6 +473,22 @@ class PurchaseInvoice(BuyingController):
 						format(d.idx, d.item_code, self.company))
 
 		super(PurchaseInvoice, self).validate_warehouse()
+
+	def validate_purchase_receipt_in_same_fy(self):
+		if not frappe.get_cached_value("Accounts Settings", None, 'purchase_invoice_receipt_same_fy'):
+			return
+
+		pinv_fy = get_fiscal_year(self.posting_date, company=self.company, as_dict=True)
+
+		purchase_receipt_list = [d.purchase_receipt for d in self.items if d.purchase_receipt]
+		purchase_receipt_list = list(set(purchase_receipt_list))
+		for purchase_receipt in purchase_receipt_list:
+			purchase_receipt_date = frappe.db.get_value("Purchase Receipt", purchase_receipt, 'posting_date')
+			prec_fy = get_fiscal_year(purchase_receipt_date, company=self.company, as_dict=True)
+
+			if prec_fy != pinv_fy:
+				frappe.throw(_("Purchase Invoice against {0} must be in the Fiscal Year of Purchase Invoice date {1}")
+				.format(frappe.get_desk_link('Purchase Receipt', purchase_receipt), frappe.bold(pinv_fy.name)))
 
 	def validate_item_code(self):
 		for d in self.get('items'):
