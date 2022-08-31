@@ -735,6 +735,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	)
 	amounts["pending_accrual_entries"] = pending_accrual_entries
 	amounts["unaccrued_interest"] = flt(unaccrued_interest, precision)
+	amounts["written_off_amount"] = flt(against_loan_doc.written_off_amount, precision)
 
 	if final_due_date:
 		amounts["due_date"] = final_due_date
