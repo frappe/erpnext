@@ -1,0 +1,33 @@
+{
+ "add_total_row": 1,
+ "creation": "2022-08-31 15:24:57.885186",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2022-08-31 15:24:57.885186",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts Payable Tests",
+ "owner": "Administrator",
+ "prepared_report": 1,
+ "ref_doctype": "Purchase Invoice",
+ "report_name": "Accounts Payable Tests",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Auditor"
+  }
+ ]
+}
