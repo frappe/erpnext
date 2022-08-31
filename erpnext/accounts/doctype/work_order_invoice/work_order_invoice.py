@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from datetime import datetime
+from erpnext.accounts.utils import get_account_currency
 
 class WorkOrderInvoice(Document):
 	def validate(self):
@@ -28,6 +29,7 @@ class WorkOrderInvoice(Document):
 					if self.warehouse == bin.warehouse:
 						doc = frappe.get_doc("Bin", bin.name)
 						self.create_stock_ledger_entry(item, doc.actual_qty, 0)
+						self.apply_gl_entry(item)
 			
 			for item in self.get("detail_two"):
 				items_bin = frappe.get_all("Bin", ["*"], filters = {"item_code": item.item_code})
@@ -36,6 +38,7 @@ class WorkOrderInvoice(Document):
 					if self.warehouse == bin.warehouse:
 						doc = frappe.get_doc("Bin", bin.name)
 						self.create_stock_ledger_entry(item, doc.actual_qty, 0)
+						self.apply_gl_entry(item)
 	
 	def on_cancel(self):
 		frappe.throw(_("Unable to cancel inventory downloads"))
@@ -123,13 +126,111 @@ class WorkOrderInvoice(Document):
 		from erpnext.stock.utils import update_bin
 
 		update_bin(sle, allow_negative_stock, via_landed_cost_voucher)
-	
+
+	def apply_gl_entry(self, item):
+			currentDateTime = datetime.now()
+			date = currentDateTime.date()
+			year = date.strftime("%Y")
+
+			fecha_inicial = '01-01-{}'.format(year)
+			fecha_final = '31-12-{}'.format(year)
+			fecha_i = datetime.strptime(fecha_inicial, '%d-%m-%Y')
+			fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
+
+			fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+			if item.sales_default_values == None:
+				frappe.throw(_("Assign an sales default values in item {}.".format(item.item_code)))
+			
+			if item.inventory_default_values == None:
+				frappe.throw(_("Assign an inventory default account in item {}.".format(item.item_code)))
+
+			account_currency = get_account_currency(item.sales_default_values)
+
+			price = self.get_price_item(item)
+
+			company = frappe.get_doc("Company", self.company)
+
+			amount = price * item.qty
+
+			doc = frappe.new_doc("GL Entry")
+			doc.posting_date = self.posting_date
+			doc.transaction_date = None
+			doc.account = item.sales_default_values
+			doc.party_type = "Customer"
+			doc.party = self.customer
+			doc.cost_center = company.round_off_cost_center
+			doc.debit = amount
+			doc.credit = 0
+			doc.account_currency = account_currency
+			doc.debit_in_account_currency = amount
+			doc.credit_in_account_currency = 0
+			doc.against = item.sales_default_values
+			doc.against_voucher_type = self.doctype
+			doc.against_voucher = self.name
+			doc.voucher_type =  self.doctype
+			doc.voucher_no = self.name
+			doc.voucher_detail_no = None
+			doc.project = None
+			doc.remarks = 'No Remarks'
+			doc.is_opening = "No"
+			doc.is_advance = "No"
+			doc.fiscal_year = fiscal_year[0].name
+			doc.company = self.company
+			doc.finance_book = None
+			doc.to_rename = 1
+			doc.due_date = None
+			# doc.docstatus = 1
+			doc.insert()
+
+			account_currency = get_account_currency( item.inventory_default_values)
+
+			doc = frappe.new_doc("GL Entry")
+			doc.posting_date = self.posting_date
+			doc.transaction_date = None
+			doc.account = item.inventory_default_values
+			doc.party_type = "Customer"
+			doc.party = self.customer
+			doc.cost_center = company.round_off_cost_center
+			doc.debit = 0
+			doc.credit = amount
+			doc.account_currency = account_currency
+			doc.debit_in_account_currency = 0
+			doc.credit_in_account_currency = amount
+			doc.against = item.inventory_default_values
+			doc.against_voucher_type = self.doctype
+			doc.against_voucher = self.name
+			doc.voucher_type =  self.doctype
+			doc.voucher_no = self.name
+			doc.voucher_detail_no = None
+			doc.project = None
+			doc.remarks = 'No Remarks'
+			doc.is_opening = "No"
+			doc.is_advance = "No"
+			doc.fiscal_year = fiscal_year[0].name
+			doc.company = self.company
+			doc.finance_book = None
+			doc.to_rename = 1
+			doc.due_date = None
+			# doc.docstatus = 1
+			doc.insert()
+
+	def get_price_item(self, item):
+		if self.selling_price_list == None:
+			frappe.throw(_("Select an sales invoice."))
+
+		item_price = frappe.get_all("Item Price", ["price_list_rate"], filters = {"item_code": item.item_code, "price_list": self.selling_price_list})
+
+		if len(item_price) == 0:
+			frappe.throw(_("Assign a price in price list {} to item {}.".format(self.selling_price_list, item.item_code)))
+
+		return item_price[0].price_list_rate
+
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
-	args.update({"doctype": "Stock Ledger Entry"})
-	sle = frappe.get_doc(args)
-	sle.flags.ignore_permissions = 1
-	sle.allow_negative_stock=allow_negative_stock
-	sle.via_landed_cost_voucher = via_landed_cost_voucher
-	sle.insert()
-	sle.submit()
-	return sle.name
+		args.update({"doctype": "Stock Ledger Entry"})
+		sle = frappe.get_doc(args)
+		sle.flags.ignore_permissions = 1
+		sle.allow_negative_stock=allow_negative_stock
+		sle.via_landed_cost_voucher = via_landed_cost_voucher
+		sle.insert()
+		sle.submit()
+		return sle.name

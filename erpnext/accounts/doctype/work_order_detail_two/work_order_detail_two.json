@@ -8,7 +8,10 @@
  "field_order": [
   "item_code",
   "item_name",
-  "qty"
+  "qty",
+  "sales_default_values",
+  "purchase_default_values",
+  "inventory_default_values"
  ],
  "fields": [
   {
@@ -44,10 +47,34 @@
    "label": "Quantity",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency"
+  },
+  {
+   "fetch_from": "item_code.sales_default_values",
+   "fieldname": "sales_default_values",
+   "fieldtype": "Link",
+   "label": "Sales Default Values",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.purchase_default_values",
+   "fieldname": "purchase_default_values",
+   "fieldtype": "Link",
+   "label": "Purchase Default Values",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.inventory_default_values",
+   "fieldname": "inventory_default_values",
+   "fieldtype": "Link",
+   "label": "Inventory Default Values",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2022-08-18 15:30:49.520829",
+ "modified": "2022-08-31 13:54:26.613977",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Work Order Detail Two",
