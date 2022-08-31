@@ -583,10 +583,10 @@ def make_sales_invoice(source_name, target_doc=None):
 		if source.name in [d.delivery_note_item for d in target_parent.get('items') if d.delivery_note_item]:
 			return False
 
-		if source.bill_only_to_customer:
-			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
-			if not bill_to or bill_to != source.bill_only_to_customer:
-				return False
+		# if source.bill_only_to_customer:
+		# 	bill_to = target_parent.get('bill_to') or target_parent.get('customer')
+		# 	if not bill_to or bill_to != source.bill_only_to_customer:
+		# 		return False
 
 		if source_parent.get('is_return'):
 			return get_pending_qty(source) <= 0

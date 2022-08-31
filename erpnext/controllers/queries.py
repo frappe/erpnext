@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from distutils.log import debug
 import frappe
 import erpnext
 from frappe import _
@@ -442,6 +443,19 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 	select_fields = ", ".join(["`tabDelivery Note`.{0}".format(f) for f in fields])
 	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
 
+	bill_only_to_cond = ""
+	if cint(filters.get('bill_multiple_projects')):
+		if filters.get('customer'):
+			bill_only_operation = "dni.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			filters.pop("customer")
+		else:
+			bill_only_operation = "ifnull(dni.bill_only_to_customer, '') != ''"
+
+		bill_only_to_cond = """ and exists(select dni.name from `tabDelivery Note Item` dni
+			where dni.parent = `tabDelivery Note`.name and {0})""".format(bill_only_operation)
+
+	filters.pop("bill_multiple_projects")
+
 	return frappe.db.sql("""
 		select {fields}
 		from `tabDelivery Note`
@@ -451,7 +465,7 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 			and `tabDelivery Note`.`status` not in ('Stopped', 'Closed')
 			and `tabDelivery Note`.per_completed < 100
 			and (`tabDelivery Note`.is_return = 0 or dr.per_completed < 100)
-			{fcond} {mcond}
+			{bill_only_to_cond} {fcond} {mcond}
 			order by `tabDelivery Note`.posting_date, `tabDelivery Note`.posting_time, `tabDelivery Note`.creation
 			{limit}
 	""".format(
@@ -459,6 +473,7 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 		key=searchfield,
 		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
 		mcond="" if ignore_permissions else get_match_cond(doctype),
+		bill_only_to_cond=bill_only_to_cond,
 		limit=limit,
 		txt="%(txt)s",
 	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
@@ -920,3 +935,45 @@ def get_fields(doctype, fields=[]):
 		fields.insert(1, meta.title_field.strip())
 
 	return unique(fields)
+
+# Name, customer name, Repair order, Date
+
+@frappe.whitelist()
+def get_sales_order_to_be_billed(doctype="Sales Order", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True, ignore_permissions=False):
+	fields = get_fields(doctype, ["name", "customer_name", "project", "transaction_date"])
+	select_fields = ", ".join(["`tabSales Order`.{0}".format(f) for f in fields])
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	bill_only_to_cond = ""
+	if cint(filters.get('bill_multiple_projects')):
+		if filters.get('customer'):
+			bill_only_operation = "soi.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			filters.pop("customer")
+		else:
+			bill_only_operation = "ifnull(soi.bill_only_to_customer, '') != ''"
+
+		bill_only_to_cond = """ and exists(select soi.name from `tabSales Order Item` soi
+			where soi.parent = `tabSales Order`.name and {0})""".format(bill_only_operation)
+
+	filters.pop("bill_multiple_projects")
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabSales Order`
+		where `tabSales Order`.docstatus = 1
+			and `tabSales Order`.`{key}` like {txt}
+			and `tabSales Order`.`status` not in ('Stopped', 'Closed')
+			and `tabSales Order`.per_completed < 100
+			{bill_only_to_cond} {fcond} {mcond}
+			order by `tabSales Order`.transaction_date, `tabSales Order`.creation
+			{limit}
+	""".format(
+		fields=select_fields,
+		key=searchfield,
+		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
+		mcond="" if ignore_permissions else get_match_cond(doctype),
+		bill_only_to_cond=bill_only_to_cond,
+		limit=limit,
+		txt="%(txt)s",
+	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)

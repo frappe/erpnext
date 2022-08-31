@@ -1476,3 +1476,14 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 	if not total_produced_qty and frappe.flags.in_patch: return
 
 	frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
+
+
+@frappe.whitelist()
+def get_biller(sales_order):
+	customer = {}
+	if sales_order:
+		sales_order = frappe.get_doc("Sales Order", sales_order)
+		if sales_order:
+			customer["customer_id"] = sales_order.items[0].bill_only_to_customer if sales_order and sales_order.items else ""
+			customer["customer_name"] = frappe.db.get_value("Customer", customer.get("customer_id"), "customer_name")
+	return 	customer

@@ -270,11 +270,19 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
 					},
 					columns: ['customer_name', 'project'],
-					get_query_filters: {
-						docstatus: 1,
-						status: ["not in", ["Closed", "On Hold"]],
-						per_completed: ["<", 99.99],
-						company: me.frm.doc.company
+					get_query: function() {
+						var filters = {
+							docstatus: 1,
+							status: ["not in", ["Closed", "On Hold"]],
+							per_completed: ["<", 99.99],
+							company: me.frm.doc.company,
+							bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
+						};
+						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
+						return {
+							query: "erpnext.controllers.queries.get_sales_order_to_be_billed",
+							filters: filters
+						};
 					}
 				})
 			}, __("Get Items From"));
@@ -330,7 +338,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						var filters = {
 							docstatus: 1,
 							company: me.frm.doc.company,
-							is_return: cint(me.frm.doc.is_return)
+							is_return: cint(me.frm.doc.is_return),
+							bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
 						};
 						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
 						return {
