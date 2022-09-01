@@ -56,27 +56,28 @@ def return_data(filters):
 		grand_total = 0
 
 		for salary_slip in salary_slips:
-			split_serie = salary_slip.naming_series.split('-')
-			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
-				
-			if date == salary_slip.posting_date and serie_number == serie and salary_slip.status != "Return":
-				if cont == 0:
-					split_initial_range = salary_slip.name.split("-")
-					initial_range = split_initial_range[3]
+			if salary_slip.status != "Cancelled":
+				split_serie = salary_slip.naming_series.split('-')
+				serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+					
+				if date == salary_slip.posting_date and serie_number == serie and salary_slip.status != "Return":
+					if cont == 0:
+						split_initial_range = salary_slip.name.split("-")
+						initial_range = split_initial_range[3]
 
-				total_exempt += salary_slip.total_exempt
-				gross += salary_slip.total
-				total_exonerated += salary_slip.total_exonerated
-				taxed_sales15 += salary_slip.taxed_sales15
-				isv15 += salary_slip.isv15
-				taxed_sales18 += salary_slip.taxed_sales18
-				isv18 = salary_slip.isv18
-				grand_total += salary_slip.grand_total
-				is_row = True
-				split_final_range = salary_slip.name.split("-")
-				final_range = split_final_range[3]
-				partial_discount += salary_slip.partial_discount
-				discount_amount += salary_slip.discount_amount
+					total_exempt += salary_slip.total_exempt
+					gross += salary_slip.total
+					total_exonerated += salary_slip.total_exonerated
+					taxed_sales15 += salary_slip.taxed_sales15
+					isv15 += salary_slip.isv15
+					taxed_sales18 += salary_slip.taxed_sales18
+					isv18 = salary_slip.isv18
+					grand_total += salary_slip.grand_total
+					is_row = True
+					split_final_range = salary_slip.name.split("-")
+					final_range = split_final_range[3]
+					partial_discount += salary_slip.partial_discount
+					discount_amount += salary_slip.discount_amount
 				cont += 1
 
 		final_range = "{}-{}".format(initial_range, final_range)
@@ -105,30 +106,32 @@ def return_data(filters):
 		discount_amount = 0
 		grand_total = 0
 
-		for salary_slip in salary_slips:
+		for salary_slip in salary_slips:			
 			is_row = False
-			split_serie = salary_slip.naming_series.split('-')
-			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
-				
-			if date == salary_slip.creation_date and serie_number == serie and salary_slip.status == "Return":
-				if cont == 0:
-					split_initial_range = salary_slip.name.split("-")
-					initial_range = split_initial_range[3]
+			if salary_slip.status != "Cancelled":
+				split_serie = salary_slip.naming_series.split('-')
+				serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+					
+				if date == salary_slip.creation_date and serie_number == serie and salary_slip.status == "Return":
+					if cont == 0:
+						split_initial_range = salary_slip.name.split("-")
+						initial_range = split_initial_range[3]
 
-				total_exempt += salary_slip.total_exempt
-				gross += salary_slip.total
-				total_exonerated += salary_slip.total_exonerated
-				taxed_sales15 += salary_slip.taxed_sales15
-				isv15 += salary_slip.isv15
-				taxed_sales18 += salary_slip.taxed_sales18
-				isv18 = salary_slip.isv18
-				partial_discount += salary_slip.partial_discount
-				discount_amount += salary_slip.discount_amount
-				grand_total += salary_slip.grand_total
-				is_row = True
-				split_final_range = salary_slip.name.split("-")
-				final_range = split_final_range[3]
-				cont += 1
+					serie =  "{}-{}".format(split_serie[0], split_serie[1])	
+					total_exempt += salary_slip.total_exempt
+					gross += salary_slip.total
+					total_exonerated += salary_slip.total_exonerated
+					taxed_sales15 += salary_slip.taxed_sales15
+					isv15 += salary_slip.isv15
+					taxed_sales18 += salary_slip.taxed_sales18
+					isv18 = salary_slip.isv18
+					partial_discount += salary_slip.partial_discount
+					discount_amount += salary_slip.discount_amount
+					grand_total += salary_slip.grand_total
+					is_row = True
+					split_final_range = salary_slip.name.split("-")
+					final_range = split_final_range[3]
+					cont += 1
 
 		final_range = "{}-{}".format(initial_range, final_range)
 
