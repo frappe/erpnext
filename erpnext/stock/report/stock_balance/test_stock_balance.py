@@ -45,12 +45,18 @@ class TestStockBalance(FrappeTestCase):
 	def assertInvariants(self, rows):
 		last_balance = frappe.db.sql(
 			"""
-			SELECT item_code, warehouse, stock_value, qty_after_transaction
-			FROM `tabStock Ledger Entry` sle
-			WHERE posting_date <= %s and is_cancelled = 0
-			ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
+			WITH last_balances AS (
+				SELECT item_code, warehouse,
+					stock_value, qty_after_transaction,
+					ROW_NUMBER() OVER (PARTITION BY item_code, warehouse
+						ORDER BY timestamp(posting_date, posting_time) desc, creation desc)
+						AS rn
+					FROM `tabStock Ledger Entry`
+					where posting_date >= %s and posting_date <= %s and is_cancelled=0
+				)
+				SELECT * FROM last_balances WHERE rn = 1
 			""",
-			[self.filters["to_date"]],
+			[self.filters["from_date"], self.filters["to_date"]],
 			as_dict=True,
 		)
 
@@ -123,7 +129,6 @@ class TestStockBalance(FrappeTestCase):
 		self.assertPartialDictEq({"opening_qty": 6, "in_qty": 0}, rows[0])
 
 	def test_uom_converted_info(self):
-
 		self.item.append("uoms", {"conversion_factor": 5, "uom": "Box"})
 		self.item.save()
 
