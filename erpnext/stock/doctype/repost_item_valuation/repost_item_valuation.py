@@ -264,12 +264,14 @@ def repost_entries():
 
 	riv_entries = get_repost_item_valuation_entries()
 
+	frappe.db.auto_commit_on_many_writes = 1
 	for row in riv_entries:
 		doc = frappe.get_doc("Repost Item Valuation", row.name)
 		if doc.status in ("Queued", "In Progress"):
 			repost(doc)
 			doc.deduplicate_similar_repost()
 
+	frappe.db.auto_commit_on_many_writes = 0
 	riv_entries = get_repost_item_valuation_entries()
 	if riv_entries:
 		return
