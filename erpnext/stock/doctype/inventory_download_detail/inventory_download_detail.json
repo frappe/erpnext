@@ -59,7 +59,10 @@
   "column_break_51",
   "transferred_qty",
   "reference_purchase_receipt",
-  "project"
+  "project",
+  "sales_default_values",
+  "purchase_default_values",
+  "inventory_default_values"
  ],
  "fields": [
   {
@@ -450,10 +453,34 @@
    "label": "Project",
    "options": "Project",
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.sales_default_values",
+   "fieldname": "sales_default_values",
+   "fieldtype": "Link",
+   "label": "Sales Default Values",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.purchase_default_values",
+   "fieldname": "purchase_default_values",
+   "fieldtype": "Link",
+   "label": "Purchase Default Values",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.inventory_default_values",
+   "fieldname": "inventory_default_values",
+   "fieldtype": "Link",
+   "label": "Inventory Default Values",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-11-04 10:38:35.397577",
+ "modified": "2022-09-01 15:06:27.737207",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Download Detail",
