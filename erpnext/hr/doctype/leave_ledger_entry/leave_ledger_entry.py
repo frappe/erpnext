@@ -130,7 +130,7 @@ def process_expired_allocation():
 	expire_allocation = frappe.db.sql(
 		"""
 		SELECT
-			leaves, to_date, employee, leave_type,
+			leaves, from_date, to_date, employee, leave_type,
 			is_carry_forward, transaction_name as name, transaction_type
 		FROM `tabLeave Ledger Entry` l
 		WHERE (NOT EXISTS
@@ -218,7 +218,7 @@ def expire_carried_forward_allocation(allocation):
 		args = frappe._dict(
 			transaction_name=allocation.name,
 			transaction_type="Leave Allocation",
-			leaves=allocation.leaves * -1,
+			leaves=leaves * -1,
 			is_carry_forward=allocation.is_carry_forward,
 			is_expired=1,
 			from_date=allocation.to_date,
