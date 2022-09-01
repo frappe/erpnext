@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import _
+from frappe import _, throw
 from datetime import datetime
 from frappe.utils import cint, flt, cstr
+from erpnext.accounts.utils import get_account_currency
 
 class InventoryDownload(Document):
 	def validate(self):
@@ -20,9 +21,8 @@ class InventoryDownload(Document):
 				for bin in items_bin:
 					if self.warehouse == bin.warehouse:
 						doc = frappe.get_doc("Bin", bin.name)
-						self.create_stock_ledger_entry(item, doc.actual_qty, 0)
-			
-			self.apply_gl_entry()
+						self.create_stock_ledger_entry(item, doc.actual_qty, 0)			
+						self.apply_gl_entry(item)
 	
 	def on_update(self):
 		if self.docstatus == 0:
@@ -159,7 +159,7 @@ class InventoryDownload(Document):
 
 		# doc.insert()
 	
-	def apply_gl_entry(self):
+	def apply_gl_entry(self, item):
 		currentDateTime = datetime.now()
 		date = currentDateTime.date()
 		year = date.strftime("%Y")
@@ -171,27 +171,29 @@ class InventoryDownload(Document):
 
 		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
 
-		company = frappe.get_doc("Company", self.company)
+		if item.sales_default_values == None:
+			frappe.throw(_("Assign an sales default values in item {}.".format(item.item_code)))
+			
+		if item.inventory_default_values == None:
+			frappe.throw(_("Assign an inventory default account in item {}.".format(item.item_code)))
 
-		if company.inventory_download_acc == None:
-			frappe.throw(_("Assign an inventory download account in company."))
-		
-		if company.default_inventory_account == None:
-			frappe.throw(_("Assign an default inventory account in company."))
+		price = self.set_valuation_rate_item(item)
+
+		amount = price * item.qty
 
 		doc = frappe.new_doc("GL Entry")
 		doc.posting_date = self.creation_date
 		doc.transaction_date = None
-		doc.account = company.inventory_download_acc
+		doc.account = item.sales_default_values
 		doc.party_type = "Employee"
 		doc.party = self.responsable
 		doc.cost_center = self.cost_center
-		doc.debit = self.total_valuation_rate
+		doc.debit = amount
 		doc.credit = 0
 		doc.account_currency = self.currency
-		doc.debit_in_account_currency = self.total_valuation_rate
+		doc.debit_in_account_currency = amount
 		doc.credit_in_account_currency = 0
-		doc.against = company.default_inventory_account
+		doc.against = item.sales_default_values
 		doc.against_voucher_type = self.doctype
 		doc.against_voucher = self.name
 		doc.voucher_type =  self.doctype
@@ -212,16 +214,16 @@ class InventoryDownload(Document):
 		doc = frappe.new_doc("GL Entry")
 		doc.posting_date = self.creation_date
 		doc.transaction_date = None
-		doc.account = company.default_inventory_account
+		doc.account = item.inventory_default_values
 		doc.party_type = "Employee"
 		doc.party = self.responsable
 		doc.cost_center = self.cost_center
 		doc.debit = 0
-		doc.credit = self.total_valuation_rate
+		doc.credit = amount
 		doc.account_currency = self.currency
 		doc.debit_in_account_currency = 0
-		doc.credit_in_account_currency = self.total_valuation_rate
-		doc.against = company.inventory_download_acc
+		doc.credit_in_account_currency = amount
+		doc.against = item.inventory_default_values
 		doc.against_voucher_type = self.doctype
 		doc.against_voucher = self.name
 		doc.voucher_type =  self.doctype
@@ -238,6 +240,18 @@ class InventoryDownload(Document):
 		doc.due_date = None
 		# doc.docstatus = 1
 		doc.insert()
+	
+	def set_valuation_rate_item(self, item):
+		valuation_rate = 0
+
+		stock = frappe.get_all("Stock Ledger Entry", ["valuation_rate"], filters = {"item_code": item.item_code})
+
+		if len(stock) > 0:
+			valuation_rate += stock[0].valuation_rate
+		else:
+			frappe.throw(_("The Item {} is not defined valuation rate.".format(item.item_code)))
+		
+		return valuation_rate
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	args.update({"doctype": "Stock Ledger Entry"})
