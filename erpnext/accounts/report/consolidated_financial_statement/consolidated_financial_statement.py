@@ -535,7 +535,11 @@ def get_accounts(root_type, companies):
 		):
 			if account.account_name not in added_accounts:
 				accounts.append(account)
-				added_accounts.append(account.account_name)
+				if account.account_number:
+					account_key = account.account_number + "-" + account.account_name
+				else:
+					account_key = account.account_name
+				added_accounts.append(account_key)
 
 	return accounts
 
