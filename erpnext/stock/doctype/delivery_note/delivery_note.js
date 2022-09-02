@@ -51,6 +51,13 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
+		frm.set_query('driver', function(doc) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			}
+		});
 
 		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
@@ -100,7 +107,7 @@ frappe.ui.form.on("Delivery Note", {
 		//load drivers
 		cur_frm.fields_dict['driver'].get_query = function (doc) {
 			return {
-				filters: { "designation": "Driver" }
+				filters: { "designation": "Driver",company: frm.doc.company }
 			}
 		}
 		frm.refresh_field('driver');
