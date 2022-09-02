@@ -41,12 +41,13 @@
 						What does your organization do?
 					</div>
 					<div class="row domain-box">
-						<div class="domain"
-						v-bind:class="[selectedDomain == domain ? 'selected-domain' :'']"
-						@click="selectedDomain = domain"
-						v-for="(domain, index) in domains" :key="index">
+						<button class="domain"
+							@click="selectedDomain = domain"
+							:class="[selectedDomain == domain ? 'selected-domain' :'']"
+							v-for="(domain, index) in domains" :key="index"
+						>
 							{{ domain }}
-						</div>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -68,19 +69,9 @@
 			</div>
 			<div v-show="CurrentStep == 4" class="module-layout">
 				<div>
-					<div class="section-heading">
-						Primary
-					</div>
 					<div class="row module-row">
 						<Module v-for="(module, index) in modules.slice(0, 3)" :key="index" :module="module" :primary=1
 						v-on:toggle="add_remove_module" />
-					</div>
-				</div>
-				<div>
-					<div class="section-heading">
-						Secondary
-					</div>
-					<div class="row module-row">
 						<Module v-for="(module, index) in modules.slice(3, 6)" :key="index + 3" :module="module" :primary=0
 						v-on:toggle="add_remove_module" />
 					</div>
@@ -110,6 +101,7 @@
 
 <script>
 import Module from "./Module.vue";
+import LoadingIndicator from './LoadingIndicator.vue'
 frappe.provide('frappe.setup');
 
 export default {
@@ -153,6 +145,7 @@ export default {
 	},
 	components: {
 		Module,
+		LoadingIndicator
 	},
 	methods: {
 		next_step: function () {
@@ -587,6 +580,7 @@ export default {
 	border: 1px solid #EBEEF0;
 	border-radius: 8px;
 	margin-left: 9px;
+	background-color:#FFFFFF;
 }
 
 .domain-box {
