@@ -76,7 +76,7 @@
    "label": "Subcontracting Settings"
   },
   {
-   "default": "Material Transferred for Subcontract",
+   "default": "BOM",
    "fieldname": "backflush_raw_materials_of_subcontract_based_on",
    "fieldtype": "Select",
    "label": "Backflush Raw Materials of Subcontract Based On",
@@ -148,7 +148,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-05-31 19:40:26.103909",
+ "modified": "2022-09-01 18:01:34.994657",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
