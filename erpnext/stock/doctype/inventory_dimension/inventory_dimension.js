@@ -30,6 +30,7 @@ frappe.ui.form.on('Inventory Dimension', {
 
 	onload(frm) {
 		frm.trigger('render_traget_field');
+		frm.trigger("set_parent_fields");
 	},
 
 	refresh(frm) {
@@ -52,10 +53,6 @@ frappe.ui.form.on('Inventory Dimension', {
 		}
 	},
 
-	onload(frm) {
-		frm.trigger("set_parent_fields");
-	},
-
 	document_type(frm) {
 		frm.trigger("set_parent_fields");
 	},
@@ -76,7 +73,7 @@ frappe.ui.form.on('Inventory Dimension', {
 							[""].concat(r.message));
 					}
 				}
-			})
+			});
 		}
 	},
 
