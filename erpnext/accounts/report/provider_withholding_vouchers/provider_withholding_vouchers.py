@@ -44,6 +44,12 @@ def execute(filters=None):
 			"width": 240
 		},
 		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
+			"width": 240
+		},
+		{
 			"label": _("Due Date"),
 			"fieldname": "due_date",
 			"fieldtype": "Date",
@@ -64,6 +70,11 @@ def execute(filters=None):
 			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
 			"options": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Transaction No"),
+			"fieldname": "transaction_no",
 			"width": 240
 		},
 		{
@@ -128,11 +139,20 @@ def build_data(retention):
 		percentage = "{}%".format(percentage_str)
 		amount = reference.net_total * (retention.percentage_total/100) 
 		bill_no = ""
+		transaction_number = ""
+		date = retention.due_date
 
 		if reference.reference_doctype == "Purchase Invoice":
-			bill_no = frappe.get_value("Purchase Invoice", reference.reference_name, "bill_no")
+			invoice = frappe.get_doc("Purchase Invoice", reference.reference_name)
+			transaction_number = invoice.bill_no
+			date = invoice.posting_date
+		else:
+			if reference.reference_doctype == "Supplier Documents":
+				document = frappe.get_doc("Supplier Documents", reference.reference_name)
+				transaction_number = reference.transaction_number
+				date = document.posting_date
 
-		row = [retention.name, retention.status, retention.posting_date, retention.supplier, retention.rtn, retention.cai, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, bill_no, reference.net_total, amount, retention.owner]
+		row = [retention.name, retention.status, retention.posting_date, retention.supplier, retention.rtn, retention.cai, date, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, transaction_number, bill_no, reference.net_total, amount, retention.owner]
 		data.append(row)
 
 	return data
