@@ -244,6 +244,7 @@ def return_data(filters):
 		for credit_note in credit_notes:
 			split_serie = credit_note.naming_series.split('-')
 			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+			total_exempt = credit_note.amount_total
 				
 			if date == credit_note.posting_date and serie_number == serie:
 				if cont == 0:
