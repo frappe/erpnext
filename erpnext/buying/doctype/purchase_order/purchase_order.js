@@ -326,7 +326,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 						read_only:1,
 						fieldname:'qty',
 						label: __('Quantity'),
-						read_only:1,
 						in_list_view:1
 					},
 					{
