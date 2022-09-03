@@ -419,8 +419,8 @@ class StockController(AccountsController):
 					if fieldname and self.get(fieldname):
 						sl_dict[dimension.target_fieldname] = self.get(fieldname)
 
-				if sl_dict[dimension.target_fieldname]:
-					row.set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
+				if sl_dict[dimension.target_fieldname] and self.docstatus == 1:
+					row.db_set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
