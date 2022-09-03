@@ -19,4 +19,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"fieldtype": "Check",
 		"default": 1
 	});
+
+	erpnext.utils.add_additional_gl_filters('Balance Sheet');
 });

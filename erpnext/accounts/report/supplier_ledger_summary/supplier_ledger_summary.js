@@ -126,3 +126,5 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 		return default_formatter(value, row, column, data, {css: style});
 	}
 };
+
+erpnext.utils.add_additional_gl_filters('Supplier Ledger Summary');

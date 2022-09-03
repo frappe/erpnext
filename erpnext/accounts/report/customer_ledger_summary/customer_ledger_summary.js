@@ -149,3 +149,5 @@ frappe.query_reports["Customer Ledger Summary"] = {
 		return default_formatter(value, row, column, data, {css: style});
 	}
 };
+
+erpnext.utils.add_additional_gl_filters('Customer Ledger Summary');

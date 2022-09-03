@@ -321,6 +321,10 @@ class PartyLedgerSummaryReport(object):
 			if self.filters.get("branch"):
 				conditions.append("gle.party in (select name from tabEmployee where branch=%(brand)s)")
 
+		hooks = frappe.get_hooks('set_gl_conditions')
+		for method in hooks:
+			frappe.get_attr(method)(self.filters, conditions, alias='gle')
+
 		return " and ".join(conditions)
 
 	def get_return_invoices(self):

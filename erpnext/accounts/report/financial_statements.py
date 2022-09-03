@@ -429,7 +429,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 	hooks = frappe.get_hooks('set_gl_conditions')
 	for method in hooks:
-		frappe.get_attr(method)(filters, additional_conditions)
+		frappe.get_attr(method)(filters, additional_conditions, alias="`tabGL Entry`")
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

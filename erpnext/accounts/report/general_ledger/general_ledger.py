@@ -319,7 +319,7 @@ def get_conditions(filters, accounting_dimensions):
 
 	hooks = frappe.get_hooks('set_gl_conditions')
 	for method in hooks:
-		frappe.get_attr(method)(filters, conditions)
+		frappe.get_attr(method)(filters, conditions, alias="`tabGL Entry`")
 
 	return "{}".format(" and ".join(conditions)) if conditions else ""
 
