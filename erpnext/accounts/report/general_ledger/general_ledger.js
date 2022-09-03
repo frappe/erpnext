@@ -92,12 +92,10 @@ frappe.query_reports["General Ledger"] = {
 				if(!party_type || parties.length === 0 || parties.length > 1) {
 					frappe.query_report.set_filter_value('party_name', "");
 					frappe.query_report.set_filter_value('tax_id', "");
-					return;
 				} else {
-					var party = parties[0];
-					var fieldname = erpnext.utils.get_party_name(party_type) || "name";
-					frappe.db.get_value(party_type, party, fieldname, function(value) {
-						frappe.query_report.set_filter_value('party_name', value[fieldname]);
+					party = parties[0];
+					erpnext.utils.get_party_name(party_type, party, function (party_name) {
+						frappe.query_report.set_filter_value('party_name', party_name);
 					});
 
 					if (party_type === "Customer" || party_type === "Supplier") {

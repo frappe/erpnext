@@ -438,3 +438,28 @@ erpnext.utils.make_customer_from_lead = function (frm, lead) {
 
 	dialog.show();
 };
+
+erpnext.utils.get_party_name = function (party_type, party, callback) {
+	if (party_type && party) {
+		return frappe.call({
+			method: "erpnext.accounts.party.get_party_name",
+			args: {
+				party_type: party_type,
+				party: party,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					callback && callback(r.message);
+				}
+			}
+		});
+	} else {
+		callback && callback(null);
+	}
+};
+
+erpnext.utils.get_party_name_field = function(party_type) {
+	var dict = {'Customer': 'customer_name', 'Supplier': 'supplier_name', 'Employee': 'employee_name',
+		'Member': 'member_name'};
+	return dict[party_type] || "name";
+};

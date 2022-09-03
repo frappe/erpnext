@@ -131,9 +131,8 @@ frappe.query_reports["Stock Ledger"] = {
 				if(!party_type || !party) {
 					frappe.query_report.set_filter_value('party_name', "");
 				} else {
-					var fieldname = erpnext.utils.get_party_name(party_type) || "name";
-					frappe.db.get_value(party_type, party, fieldname, function(value) {
-						frappe.query_report.set_filter_value('party_name', value[fieldname]);
+					erpnext.utils.get_party_name(party_type, party, function (party_name) {
+						frappe.query_report.set_filter_value('party_name', party_name);
 					});
 				}
 			}

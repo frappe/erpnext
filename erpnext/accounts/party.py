@@ -671,6 +671,9 @@ def validate_duplicate_tax_id(doctype, fieldname, value, exclude=None, throw=Fal
 
 @frappe.whitelist()
 def get_party_name(party_type, party):
+	if not party_type or not party:
+		return None
+
 	if party_type == "Letter of Credit":
 		return party
 	else:
