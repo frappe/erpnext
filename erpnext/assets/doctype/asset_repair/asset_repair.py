@@ -1,11 +1,11 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
 import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
 
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.controllers.accounts_controller import AccountsController
@@ -17,7 +17,7 @@ class AssetRepair(AccountsController):
 		self.update_status()
 
 		if self.get("stock_items"):
-			self.set_total_value()
+			self.set_stock_items_cost()
 		self.calculate_total_repair_cost()
 
 	def update_status(self):
@@ -26,7 +26,7 @@ class AssetRepair(AccountsController):
 		else:
 			self.asset_doc.set_status()
 
-	def set_total_value(self):
+	def set_stock_items_cost(self):
 		for item in self.get("stock_items"):
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 
@@ -66,6 +66,7 @@ class AssetRepair(AccountsController):
 		if self.get("capitalize_repair_cost"):
 			self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 			self.make_gl_entries(cancel=True)
+			self.db_set("stock_entry", None)
 			if (
 				frappe.db.get_value("Asset", self.asset, "calculate_depreciation")
 				and self.increase_in_asset_life
@@ -133,6 +134,7 @@ class AssetRepair(AccountsController):
 					"qty": stock_item.consumed_quantity,
 					"basic_rate": stock_item.valuation_rate,
 					"serial_no": stock_item.serial_no,
+					"cost_center": self.cost_center,
 				},
 			)
 
@@ -142,72 +144,42 @@ class AssetRepair(AccountsController):
 		self.db_set("stock_entry", stock_entry.name)
 
 	def increase_stock_quantity(self):
-		stock_entry = frappe.get_doc("Stock Entry", self.stock_entry)
-		stock_entry.flags.ignore_links = True
-		stock_entry.cancel()
+		if self.stock_entry:
+			stock_entry = frappe.get_doc("Stock Entry", self.stock_entry)
+			stock_entry.flags.ignore_links = True
+			stock_entry.cancel()
 
 	def make_gl_entries(self, cancel=False):
-		if flt(self.repair_cost) > 0:
+		if flt(self.total_repair_cost) > 0:
 			gl_entries = self.get_gl_entries()
 			make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
 		gl_entries = []
-		repair_and_maintenance_account = frappe.db.get_value(
-			"Company", self.company, "repair_and_maintenance_account"
-		)
+
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=self.asset, company=self.company
 		)
-		expense_account = (
+		self.get_gl_entries_for_repair_cost(gl_entries, fixed_asset_account)
+		self.get_gl_entries_for_consumed_items(gl_entries, fixed_asset_account)
+
+		return gl_entries
+
+	def get_gl_entries_for_repair_cost(self, gl_entries, fixed_asset_account):
+		if flt(self.repair_cost) <= 0:
+			return
+
+		pi_expense_account = (
 			frappe.get_doc("Purchase Invoice", self.purchase_invoice).items[0].expense_account
 		)
 
 		gl_entries.append(
 			self.get_gl_dict(
 				{
-					"account": expense_account,
-					"credit": self.repair_cost,
-					"credit_in_account_currency": self.repair_cost,
-					"against": repair_and_maintenance_account,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"cost_center": self.cost_center,
-					"posting_date": getdate(),
-					"company": self.company,
-				},
-				item=self,
-			)
-		)
-
-		if self.get("stock_consumption"):
-			# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
-			stock_entry = frappe.get_doc("Stock Entry", self.stock_entry)
-			for item in stock_entry.items:
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": item.expense_account,
-							"credit": item.amount,
-							"credit_in_account_currency": item.amount,
-							"against": repair_and_maintenance_account,
-							"voucher_type": self.doctype,
-							"voucher_no": self.name,
-							"cost_center": self.cost_center,
-							"posting_date": getdate(),
-							"company": self.company,
-						},
-						item=self,
-					)
-				)
-
-		gl_entries.append(
-			self.get_gl_dict(
-				{
 					"account": fixed_asset_account,
-					"debit": self.total_repair_cost,
-					"debit_in_account_currency": self.total_repair_cost,
-					"against": expense_account,
+					"debit": self.repair_cost,
+					"debit_in_account_currency": self.repair_cost,
+					"against": pi_expense_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
@@ -220,7 +192,75 @@ class AssetRepair(AccountsController):
 			)
 		)
 
-		return gl_entries
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": pi_expense_account,
+					"credit": self.repair_cost,
+					"credit_in_account_currency": self.repair_cost,
+					"against": fixed_asset_account,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"cost_center": self.cost_center,
+					"posting_date": getdate(),
+					"company": self.company,
+				},
+				item=self,
+			)
+		)
+
+	def get_gl_entries_for_consumed_items(self, gl_entries, fixed_asset_account):
+		if not (self.get("stock_consumption") and self.get("stock_items")):
+			return
+
+		# creating GL Entries for each row in Stock Items based on the Stock Entry created for it
+		stock_entry = frappe.get_doc("Stock Entry", self.stock_entry)
+
+		default_expense_account = None
+		if not erpnext.is_perpetual_inventory_enabled(self.company):
+			default_expense_account = frappe.get_cached_value(
+				"Company", self.company, "default_expense_account"
+			)
+			if not default_expense_account:
+				frappe.throw(_("Please set default Expense Account in Company {0}").format(self.company))
+
+		for item in stock_entry.items:
+			if flt(item.amount) > 0:
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": item.expense_account or default_expense_account,
+							"credit": item.amount,
+							"credit_in_account_currency": item.amount,
+							"against": fixed_asset_account,
+							"voucher_type": self.doctype,
+							"voucher_no": self.name,
+							"cost_center": self.cost_center,
+							"posting_date": getdate(),
+							"company": self.company,
+						},
+						item=self,
+					)
+				)
+
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": fixed_asset_account,
+							"debit": item.amount,
+							"debit_in_account_currency": item.amount,
+							"against": item.expense_account or default_expense_account,
+							"voucher_type": self.doctype,
+							"voucher_no": self.name,
+							"cost_center": self.cost_center,
+							"posting_date": getdate(),
+							"against_voucher_type": "Stock Entry",
+							"against_voucher": self.stock_entry,
+							"company": self.company,
+						},
+						item=self,
+					)
+				)
 
 	def modify_depreciation_schedule(self):
 		for row in self.asset_doc.finance_books:
