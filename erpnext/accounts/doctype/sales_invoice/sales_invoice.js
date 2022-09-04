@@ -164,6 +164,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			this.add_get_applicable_items_button();
 			this.add_get_project_template_items_button();
 		}
+		this.frm.cscript.get_projects_btn();
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_reference) {
@@ -287,6 +288,62 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				})
 			}, __("Get Items From"));
 	},
+
+
+
+get_projects_btn: function() {
+	var me = this;
+	this.$get_projects_btn = this.frm.add_custom_button(__('Projects'),
+		function() {
+			erpnext.utils.map_current_doc({
+				method: "erpnext.projects.doctype.project.project.get_sales_invoice",
+				source_doctype: "Project",
+				target: me.frm,
+				setters: [
+					{
+						label: __("Customer"),
+						fieldname: 'customer',
+						fieldtype: 'Link',
+						options: 'Customer',
+						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+					},
+					{
+						label: __("Project"),
+						fieldname: 'name',
+						fieldtype: 'Link',
+						options: 'Project',
+						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
+					},
+					{
+						label: __("Project Type"),
+						fieldname: 'project_type',
+						fieldtype: 'Link',
+						options: 'Project Type',
+						
+					}
+				],
+				columns: ['Sales Order', 'Delivery Note', 'customer_name', 'project_type'],
+				get_query: function() {
+					var filters = {
+						company: me.frm.doc.company,
+					};
+					var join_filters ={
+						docstatus: ["=", 1],
+						status: ["not in", ["Closed", "On Hold"]],
+						per_completed: ["<", 99.99],
+						// company: ["=", me.frm.doc.company],
+						bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
+					}
+					if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
+					return {
+						query: "erpnext.controllers.queries.get_sales_order_for_project",
+						filters: {"filters":filters, "join_filters":join_filters}
+						// join_filters:join_filters
+					};
+				}
+			})
+		}, __("Get Items From"));
+},
 
 	quotation_btn: function() {
 		var me = this;

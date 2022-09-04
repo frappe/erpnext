@@ -480,6 +480,123 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 
 
 @frappe.whitelist()
+def get_sales_order_to_be_billed(doctype="Sales Order", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True, ignore_permissions=False):
+	fields = get_fields(doctype, ["name", "customer_name", "project", "transaction_date"])
+	select_fields = ", ".join(["`tabSales Order`.{0}".format(f) for f in fields])
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	bill_only_to_cond = ""
+	if cint(filters.get('bill_multiple_projects')):
+		if filters.get('customer'):
+			bill_only_operation = "soi.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			filters.pop("customer")
+		else:
+			bill_only_operation = "ifnull(soi.bill_only_to_customer, '') != ''"
+
+		bill_only_to_cond = """ and exists(select soi.name from `tabSales Order Item` soi
+			where soi.parent = `tabSales Order`.name and {0})""".format(bill_only_operation)
+
+	filters.pop("bill_multiple_projects")
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabSales Order`
+		where `tabSales Order`.docstatus = 1
+			and `tabSales Order`.`{key}` like {txt}
+			and `tabSales Order`.`status` not in ('Stopped', 'Closed')
+			and `tabSales Order`.per_completed < 100
+			{bill_only_to_cond} {fcond} {mcond}
+			order by `tabSales Order`.transaction_date, `tabSales Order`.creation
+			{limit}
+	""".format(
+		fields=select_fields,
+		key=searchfield,
+		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
+		mcond="" if ignore_permissions else get_match_cond(doctype),
+		bill_only_to_cond=bill_only_to_cond,
+		limit=limit,
+		txt="%(txt)s",
+	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+
+
+
+@frappe.whitelist()
+def get_sales_order_for_project(doctype="Project", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True, ignore_permissions=False):
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	f_sales_order_cond, bill_only_to_sales_order_cond = get_extra_info(filters, "Sales Order", ignore_permissions)
+	f_delivery_note_cond, bill_only_to_delivery_note_cond = get_extra_info(filters, "Delivery Note", ignore_permissions)
+	
+	filters.pop("join_filters")
+	filters.update(filters.get("filters"))
+	if filters.get("filters"):
+		filters.pop("filters")
+	sql_query = """
+		SELECT 
+			tabProject.name, tabProject.project_type, tabProject.customer as 'customer_name', tabProject.expected_delivery_date as Date,
+			so.name as 'Sales Order',
+			dn.name as 'Delivery Note'
+		FROM `tabProject` tabProject
+
+		LEFT JOIN `tabSales Order` so
+				ON tabProject.name=so.project
+		LEFT JOIN `tabDelivery Note` dn
+			ON tabProject.name=dn.project
+
+		Where 
+			tabProject.docstatus <3 
+			
+			{fcond} {mcond}
+
+			{bill_only_to_sales_order_cond} {f_sales_order_cond} {m_sales_order_cond}
+			{bill_only_to_delivery_note_cond} {f_delivery_note_cond} {m_delivery_note_cond}
+		ORDER BY 
+			tabProject.expected_delivery_date, tabProject.creation
+		{limit}
+	""".format(
+		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
+		mcond="" if ignore_permissions else get_match_cond(doctype),
+		limit=limit,
+		
+		bill_only_to_sales_order_cond=bill_only_to_sales_order_cond,
+		f_sales_order_cond=f_sales_order_cond,
+		m_sales_order_cond= "" if ignore_permissions else get_match_cond("Sales Order"),
+
+		bill_only_to_delivery_note_cond = bill_only_to_delivery_note_cond,
+		f_delivery_note_cond = f_delivery_note_cond,
+		m_delivery_note_cond= "" if ignore_permissions else get_match_cond("Delivery Note"),
+		
+	)
+	result = frappe.db.sql(sql_query, as_dict=as_dict)
+	return result
+	
+def get_extra_info(filters, doctype, ignore_permissions):
+	f_cond = ""
+	bill_only_to_cond = ""
+
+	if filters.get("join_filters"):
+		for k, v in filters.get("join_filters").items():
+			if type(v) != list:
+				value_cond, value = v[0], v[1]
+				if type(value) != str:
+					f_cond += " and {0} {1} {2}".format(f"so.{k}",value_cond ,value if type(value) != list else tuple(value))
+				else:
+					f_cond += " and {0} {1} '{2}'".format(f"`tab{doctype}`.{k}",value_cond ,value)
+		
+		if cint(filters.get("join_filters").get('bill_multiple_projects')):
+			if filters.get('customer'):
+				bill_only_operation = "current_table.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			else:
+				bill_only_operation = "ifnull(current_table.bill_only_to_customer, '') != ''"
+
+			bill_only_to_cond = """ and exists(select current_table.name from `tab{1} Item` current_table
+				where current_table.parent = `tab{1}`.name and {0})""".format(bill_only_operation, doctype)
+
+	return f_cond, bill_only_to_cond
+
+@frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
@@ -935,45 +1052,3 @@ def get_fields(doctype, fields=[]):
 		fields.insert(1, meta.title_field.strip())
 
 	return unique(fields)
-
-# Name, customer name, Repair order, Date
-
-@frappe.whitelist()
-def get_sales_order_to_be_billed(doctype="Sales Order", txt="", searchfield="name", start=0, page_len=0,
-		filters=None, as_dict=True, ignore_permissions=False):
-	fields = get_fields(doctype, ["name", "customer_name", "project", "transaction_date"])
-	select_fields = ", ".join(["`tabSales Order`.{0}".format(f) for f in fields])
-	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
-
-	bill_only_to_cond = ""
-	if cint(filters.get('bill_multiple_projects')):
-		if filters.get('customer'):
-			bill_only_operation = "soi.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
-			filters.pop("customer")
-		else:
-			bill_only_operation = "ifnull(soi.bill_only_to_customer, '') != ''"
-
-		bill_only_to_cond = """ and exists(select soi.name from `tabSales Order Item` soi
-			where soi.parent = `tabSales Order`.name and {0})""".format(bill_only_operation)
-
-	filters.pop("bill_multiple_projects")
-
-	return frappe.db.sql("""
-		select {fields}
-		from `tabSales Order`
-		where `tabSales Order`.docstatus = 1
-			and `tabSales Order`.`{key}` like {txt}
-			and `tabSales Order`.`status` not in ('Stopped', 'Closed')
-			and `tabSales Order`.per_completed < 100
-			{bill_only_to_cond} {fcond} {mcond}
-			order by `tabSales Order`.transaction_date, `tabSales Order`.creation
-			{limit}
-	""".format(
-		fields=select_fields,
-		key=searchfield,
-		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
-		mcond="" if ignore_permissions else get_match_cond(doctype),
-		bill_only_to_cond=bill_only_to_cond,
-		limit=limit,
-		txt="%(txt)s",
-	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
