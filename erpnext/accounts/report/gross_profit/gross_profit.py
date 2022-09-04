@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import cint, flt, formatdate
 
 from erpnext.controllers.queries import get_match_cond
+from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import get_incoming_rate
 
 
@@ -676,6 +677,17 @@ class GrossProfitGenerator(object):
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
 
+		if self.filters.item_group:
+			conditions += " and {0}".format(get_item_group_condition(self.filters.item_group))
+
+		if self.filters.sales_person:
+			conditions += """
+				and exists(select 1
+							from `tabSales Team` st
+							where st.parent = `tabSales Invoice`.name
+							and   st.sales_person = %(sales_person)s)
+			"""
+
 		if self.filters.group_by == "Sales Person":
 			sales_person_cols = ", sales.sales_person, sales.allocated_amount, sales.incentives"
 			sales_team_table = "left join `tabSales Team` sales on sales.parent = `tabSales Invoice`.name"
@@ -723,6 +735,7 @@ class GrossProfitGenerator(object):
 			from
 				`tabSales Invoice` inner join `tabSales Invoice Item`
 					on `tabSales Invoice Item`.parent = `tabSales Invoice`.name
+				join `tabItem` item on item.name = `tabSales Invoice Item`.item_code
 				{sales_team_table}
 				{payment_term_table}
 			where
