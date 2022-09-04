@@ -75,6 +75,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.get_current_stock()
 
 	def on_submit(self):
+		self.validate_available_qty_for_consumption()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status()
@@ -107,9 +108,41 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_missing_values_in_supplied_items()
 		self.set_missing_values_in_items()
 
+	def set_available_qty_for_consumption(self):
+		supplied_items_details = {}
+
+		sco_supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
+		for item in self.get("items"):
+			supplied_items = (
+				frappe.qb.from_(sco_supplied_item)
+				.select(
+					sco_supplied_item.rm_item_code,
+					sco_supplied_item.reference_name,
+					(sco_supplied_item.total_supplied_qty - sco_supplied_item.consumed_qty).as_("available_qty"),
+				)
+				.where(
+					(sco_supplied_item.parent == item.subcontracting_order)
+					& (sco_supplied_item.main_item_code == item.item_code)
+					& (sco_supplied_item.reference_name == item.subcontracting_order_item)
+				)
+			).run(as_dict=True)
+
+			if supplied_items:
+				supplied_items_details[item.name] = {}
+
+				for supplied_item in supplied_items:
+					supplied_items_details[item.name][supplied_item.rm_item_code] = supplied_item.available_qty
+		else:
+			for item in self.get("supplied_items"):
+				item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
+					item.rm_item_code, 0
+				)
+
 	def set_missing_values_in_supplied_items(self):
 		for item in self.get("supplied_items") or []:
 			item.amount = item.rate * item.consumed_qty
+
+		self.set_available_qty_for_consumption()
 
 	def set_missing_values_in_items(self):
 		rm_supp_cost = {}
@@ -146,6 +179,17 @@ class SubcontractingReceipt(SubcontractingController):
 					frappe.throw(
 						_("Rejected Warehouse is mandatory against rejected Item {0}").format(item.item_code)
 					)
+
+	def validate_available_qty_for_consumption(self):
+		for item in self.get("supplied_items"):
+			if (
+				item.available_qty_for_consumption and item.available_qty_for_consumption < item.consumed_qty
+			):
+				frappe.throw(
+					_(
+						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
+					).format(item.idx)
+				)
 
 	def set_items_cost_center(self):
 		if self.company:
