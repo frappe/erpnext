@@ -168,7 +168,6 @@
    "label": "Variable Based On Taxable Salary"
   },
   {
-   "depends_on": "eval:doc.statistical_component != 1",
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
    "label": "Accounts"
@@ -244,7 +243,7 @@
  "icon": "fa fa-flag",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-07 20:38:33.795853",
+ "modified": "2022-09-05 02:09:20.149639",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Component",
