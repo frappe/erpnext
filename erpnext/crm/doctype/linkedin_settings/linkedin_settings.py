@@ -14,12 +14,16 @@ from six.moves.urllib.parse import urlencode
 class LinkedInSettings(Document):
 	@frappe.whitelist()
 	def get_authorization_url(self):
-		params = urlencode({
-			"response_type":"code",
-			"client_id": self.consumer_key,
-			"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(frappe.utils.get_url()),
-			"scope": "r_emailaddress w_organization_social r_basicprofile r_liteprofile r_organization_social rw_organization_admin w_member_social"
-		})
+		params = urlencode(
+			{
+				"response_type": "code",
+				"client_id": self.consumer_key,
+				"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(
+					frappe.utils.get_url()
+				),
+				"scope": "r_emailaddress w_organization_social r_basicprofile r_liteprofile r_organization_social rw_organization_admin w_member_social",
+			}
+		)
 
 		url = "https://www.linkedin.com/oauth/v2/authorization?{}".format(params)
 
@@ -32,11 +36,11 @@ class LinkedInSettings(Document):
 			"code": code,
 			"client_id": self.consumer_key,
 			"client_secret": self.get_password(fieldname="consumer_secret"),
-			"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(frappe.utils.get_url()),
+			"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(
+				frappe.utils.get_url()
+			),
 		}
-		headers = {
-			"Content-Type": "application/x-www-form-urlencoded"
-		}
+		headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
 		response = self.http_post(url=url, data=body, headers=headers)
 		response = frappe.parse_json(response.content.decode())
@@ -46,11 +50,15 @@ class LinkedInSettings(Document):
 		response = requests.get(url="https://api.linkedin.com/v2/me", headers=self.get_headers())
 		response = frappe.parse_json(response.content.decode())
 
-		frappe.db.set_value(self.doctype, self.name, {
-			"person_urn": response["id"],
-			"account_name": response["vanityName"],
-			"session_status": "Active"
-		})
+		frappe.db.set_value(
+			self.doctype,
+			self.name,
+			{
+				"person_urn": response["id"],
+				"account_name": response["vanityName"],
+				"session_status": "Active",
+			},
+		)
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings", "LinkedIn Settings")
 
@@ -63,8 +71,7 @@ class LinkedInSettings(Document):
 			if media_id:
 				return self.post_text(text, title, media_id=media_id)
 			else:
-				frappe.log_error("Failed to upload media.","LinkedIn Upload Error")
-
+				frappe.log_error("Failed to upload media.", "LinkedIn Upload Error")
 
 	def upload_image(self, media):
 		media = get_file_path(media)
@@ -73,10 +80,9 @@ class LinkedInSettings(Document):
 			"registerUploadRequest": {
 				"recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
 				"owner": "urn:li:organization:{0}".format(self.company_id),
-				"serviceRelationships": [{
-					"relationshipType": "OWNER",
-					"identifier": "urn:li:userGeneratedContent"
-				}]
+				"serviceRelationships": [
+					{"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}
+				],
 			}
 		}
 		headers = self.get_headers()
@@ -85,11 +91,16 @@ class LinkedInSettings(Document):
 		if response.status_code == 200:
 			response = response.json()
 			asset = response["value"]["asset"]
-			upload_url = response["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
-			headers['Content-Type']='image/jpeg'
-			response = self.http_post(upload_url, headers=headers, data=open(media,"rb"))
+			upload_url = response["value"]["uploadMechanism"][
+				"com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"
+			]["uploadUrl"]
+			headers["Content-Type"] = "image/jpeg"
+			response = self.http_post(upload_url, headers=headers, data=open(media, "rb"))
 			if response.status_code < 200 and response.status_code > 299:
-				frappe.throw(_("Error While Uploading Image"), title="{0} {1}".format(response.status_code, response.reason))
+				frappe.throw(
+					_("Error While Uploading Image"),
+					title="{0} {1}".format(response.status_code, response.reason),
+				)
 				return None
 			return asset
 
@@ -102,46 +113,26 @@ class LinkedInSettings(Document):
 		headers["Content-Type"] = "application/json; charset=UTF-8"
 
 		body = {
-			"distribution": {
-				"linkedInDistributionTarget": {}
-			},
-			"owner":"urn:li:organization:{0}".format(self.company_id),
+			"distribution": {"linkedInDistributionTarget": {}},
+			"owner": "urn:li:organization:{0}".format(self.company_id),
 			"subject": title,
-			"text": {
-				"text": text
-			}
+			"text": {"text": text},
 		}
 
 		reference_url = self.get_reference_url(text)
 		if reference_url:
-			body["content"] = {
-				"contentEntities": [
-					{
-						"entityLocation": reference_url
-					}
-				]
-			}
+			body["content"] = {"contentEntities": [{"entityLocation": reference_url}]}
 
 		if media_id:
-			body["content"]= {
-				"contentEntities": [{
-					"entity": media_id
-				}],
-				"shareMediaCategory": "IMAGE"
-			}
+			body["content"] = {"contentEntities": [{"entity": media_id}], "shareMediaCategory": "IMAGE"}
 
 		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 
 	def http_post(self, url, headers=None, body=None, data=None):
 		try:
-			response = requests.post(
-				url = url,
-				json = body,
-				data = data,
-				headers = headers
-			)
-			if response.status_code not in [201,200]:
+			response = requests.post(url=url, json=body, data=data, headers=headers)
+			if response.status_code not in [201, 200]:
 				raise
 
 		except Exception as e:
@@ -150,12 +141,11 @@ class LinkedInSettings(Document):
 		return response
 
 	def get_headers(self):
-		return {
-			"Authorization": "Bearer {}".format(self.access_token)
-		}
+		return {"Authorization": "Bearer {}".format(self.access_token)}
 
 	def get_reference_url(self, text):
 		import re
+
 		regex_url = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
 		urls = re.findall(regex_url, text)
 		if urls:
@@ -163,18 +153,23 @@ class LinkedInSettings(Document):
 
 	def delete_post(self, post_id):
 		try:
-			response = requests.delete(url="https://api.linkedin.com/v2/shares/urn:li:share:{0}".format(post_id), headers=self.get_headers())
-			if response.status_code !=200:
+			response = requests.delete(
+				url="https://api.linkedin.com/v2/shares/urn:li:share:{0}".format(post_id),
+				headers=self.get_headers(),
+			)
+			if response.status_code != 200:
 				raise
 		except Exception:
 			self.api_error(response)
 
 	def get_post(self, post_id):
-		url = "https://api.linkedin.com/v2/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=urn:li:organization:{0}&shares[0]=urn:li:share:{1}".format(self.company_id, post_id)
+		url = "https://api.linkedin.com/v2/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=urn:li:organization:{0}&shares[0]=urn:li:share:{1}".format(
+			self.company_id, post_id
+		)
 
 		try:
 			response = requests.get(url=url, headers=self.get_headers())
-			if response.status_code !=200:
+			if response.status_code != 200:
 				raise
 
 		except Exception:
@@ -199,6 +194,7 @@ class LinkedInSettings(Document):
 		else:
 			frappe.throw(response.reason, title=response.status_code)
 
+
 @frappe.whitelist(allow_guest=True)
 def callback(code=None, error=None, error_description=None):
 	if not error:
@@ -208,4 +204,4 @@ def callback(code=None, error=None, error_description=None):
 		frappe.db.commit()
 	else:
 		frappe.local.response["type"] = "redirect"
-		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
+		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings", "LinkedIn Settings")

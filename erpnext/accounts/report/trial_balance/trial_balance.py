@@ -17,7 +17,15 @@ from erpnext.accounts.report.financial_statements import (
 	set_gl_entries_by_account,
 )
 
-value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
+value_fields = (
+	"opening_debit",
+	"opening_credit",
+	"debit",
+	"credit",
+	"closing_debit",
+	"closing_credit",
+)
+
 
 def execute(filters=None):
 	validate_filters(filters)
@@ -25,11 +33,14 @@ def execute(filters=None):
 	columns = get_columns()
 	return columns, data
 
+
 def validate_filters(filters):
 	if not filters.fiscal_year:
 		frappe.throw(_("Fiscal Year {0} is required").format(filters.fiscal_year))
 
-	fiscal_year = frappe.db.get_value("Fiscal Year", filters.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True)
+	fiscal_year = frappe.db.get_value(
+		"Fiscal Year", filters.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True
+	)
 	if not fiscal_year:
 		frappe.throw(_("Fiscal Year {0} does not exist").format(filters.fiscal_year))
 	else:
@@ -49,21 +60,32 @@ def validate_filters(filters):
 		frappe.throw(_("From Date cannot be greater than To Date"))
 
 	if (filters.from_date < filters.year_start_date) or (filters.from_date > filters.year_end_date):
-		frappe.msgprint(_("From Date should be within the Fiscal Year. Assuming From Date = {0}")\
-			.format(formatdate(filters.year_start_date)))
+		frappe.msgprint(
+			_("From Date should be within the Fiscal Year. Assuming From Date = {0}").format(
+				formatdate(filters.year_start_date)
+			)
+		)
 
 		filters.from_date = filters.year_start_date
 
 	if (filters.to_date < filters.year_start_date) or (filters.to_date > filters.year_end_date):
-		frappe.msgprint(_("To Date should be within the Fiscal Year. Assuming To Date = {0}")\
-			.format(formatdate(filters.year_end_date)))
+		frappe.msgprint(
+			_("To Date should be within the Fiscal Year. Assuming To Date = {0}").format(
+				formatdate(filters.year_end_date)
+			)
+		)
 		filters.to_date = filters.year_end_date
+
 
 def get_data(filters):
 
-	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+	accounts = frappe.db.sql(
+		"""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
 
-		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
+		from `tabAccount` where company=%s order by lft""",
+		filters.company,
+		as_dict=True,
+	)
 	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
 
 	if not accounts:
@@ -71,27 +93,43 @@ def get_data(filters):
 
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
-	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
-		where company=%s""", (filters.company,))[0]
+	min_lft, max_rgt = frappe.db.sql(
+		"""select min(lft), max(rgt) from `tabAccount`
+		where company=%s""",
+		(filters.company,),
+	)[0]
 
 	gl_entries_by_account = {}
 
 	opening_balances = get_opening_balances(filters)
 
-	#add filter inside list so that the query in financial_statements.py doesn't break
+	# add filter inside list so that the query in financial_statements.py doesn't break
 	if filters.project:
 		filters.project = [filters.project]
 
-	set_gl_entries_by_account(filters.company, filters.from_date,
-		filters.to_date, min_lft, max_rgt, filters, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
+	set_gl_entries_by_account(
+		filters.company,
+		filters.from_date,
+		filters.to_date,
+		min_lft,
+		max_rgt,
+		filters,
+		gl_entries_by_account,
+		ignore_closing_entries=not flt(filters.with_period_closing_entry),
+	)
 
-	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency)
+	total_row = calculate_values(
+		accounts, gl_entries_by_account, opening_balances, filters, company_currency
+	)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
-	data = filter_out_zero_value_rows(data, parent_children_map, show_zero_values=filters.get("show_zero_values"))
+	data = filter_out_zero_value_rows(
+		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
+	)
 
 	return data
+
 
 def get_opening_balances(filters):
 	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet")
@@ -104,26 +142,30 @@ def get_opening_balances(filters):
 def get_rootwise_opening_balances(filters, report_type):
 	additional_conditions = ""
 	if not filters.show_unclosed_fy_pl_balances:
-		additional_conditions = " and posting_date >= %(year_start_date)s" \
-			if report_type == "Profit and Loss" else ""
+		additional_conditions = (
+			" and posting_date >= %(year_start_date)s" if report_type == "Profit and Loss" else ""
+		)
 
 	if not flt(filters.with_period_closing_entry):
 		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
 
 	if filters.cost_center:
-		lft, rgt = frappe.db.get_value('Cost Center', filters.cost_center, ['lft', 'rgt'])
+		lft, rgt = frappe.db.get_value("Cost Center", filters.cost_center, ["lft", "rgt"])
 		additional_conditions += """ and cost_center in (select name from `tabCost Center`
-			where lft >= %s and rgt <= %s)""" % (lft, rgt)
+			where lft >= %s and rgt <= %s)""" % (
+			lft,
+			rgt,
+		)
 
 	if filters.project:
 		additional_conditions += " and project = %(project)s"
 
-	if filters.finance_book:
-		fb_conditions = " AND finance_book = %(finance_book)s"
-		if filters.include_default_book_entries:
-			fb_conditions = " AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
-
-		additional_conditions += fb_conditions
+	if filters.get("include_default_book_entries"):
+		additional_conditions += (
+			" AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
+		)
+	else:
+		additional_conditions += " AND (finance_book in (%(finance_book)s, '') OR finance_book IS NULL)"
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -134,24 +176,24 @@ def get_rootwise_opening_balances(filters, report_type):
 		"year_start_date": filters.year_start_date,
 		"project": filters.project,
 		"finance_book": filters.finance_book,
-		"company_fb": frappe.db.get_value("Company", filters.company, 'default_finance_book')
+		"company_fb": frappe.db.get_value("Company", filters.company, "default_finance_book"),
 	}
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
-				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
-					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
-						filters.get(dimension.fieldname))
-					additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
+				if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
+					filters[dimension.fieldname] = get_dimension_with_children(
+						dimension.document_type, filters.get(dimension.fieldname)
+					)
+					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
 				else:
-					additional_conditions += "and {0} in (%({0})s)".format(dimension.fieldname)
+					additional_conditions += " and {0} in %({0})s".format(dimension.fieldname)
 
-				query_filters.update({
-					dimension.fieldname: filters.get(dimension.fieldname)
-				})
+				query_filters.update({dimension.fieldname: filters.get(dimension.fieldname)})
 
-	gle = frappe.db.sql("""
+	gle = frappe.db.sql(
+		"""
 		select
 			account, sum(debit) as opening_debit, sum(credit) as opening_credit
 		from `tabGL Entry`
@@ -161,13 +203,19 @@ def get_rootwise_opening_balances(filters, report_type):
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
 			and is_cancelled = 0
-		group by account""".format(additional_conditions=additional_conditions), query_filters , as_dict=True)
+		group by account""".format(
+			additional_conditions=additional_conditions
+		),
+		query_filters,
+		as_dict=True,
+	)
 
 	opening = frappe._dict()
 	for d in gle:
 		opening.setdefault(d.account, d)
 
 	return opening
+
 
 def calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency):
 	init = {
@@ -176,7 +224,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"debit": 0.0,
 		"credit": 0.0,
 		"closing_debit": 0.0,
-		"closing_credit": 0.0
+		"closing_credit": 0.0,
 	}
 
 	total_row = {
@@ -192,7 +240,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 		"parent_account": None,
 		"indent": 0,
 		"has_value": True,
-		"currency": company_currency
+		"currency": company_currency,
 	}
 
 	for d in accounts:
@@ -217,11 +265,13 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 	return total_row
 
+
 def accumulate_values_into_parents(accounts, accounts_by_name):
 	for d in reversed(accounts):
 		if d.parent_account:
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
+
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
@@ -239,8 +289,9 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
 			"currency": company_currency,
-			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
-				if d.account_number else d.account_name)
+			"account_name": (
+				"{} - {}".format(d.account_number, d.account_name) if d.account_number else d.account_name
+			),
 		}
 
 		for key in value_fields:
@@ -253,9 +304,10 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 		row["has_value"] = has_value
 		data.append(row)
 
-	data.extend([{},total_row])
+	data.extend([{}, total_row])
 
 	return data
+
 
 def get_columns():
 	return [
@@ -264,58 +316,59 @@ def get_columns():
 			"label": _("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 300
+			"width": 300,
 		},
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),
 			"fieldtype": "Link",
 			"options": "Currency",
-			"hidden": 1
+			"hidden": 1,
 		},
 		{
 			"fieldname": "opening_debit",
 			"label": _("Opening (Dr)"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"fieldname": "opening_credit",
 			"label": _("Opening (Cr)"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"fieldname": "debit",
 			"label": _("Debit"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"fieldname": "credit",
 			"label": _("Credit"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"fieldname": "closing_debit",
 			"label": _("Closing (Dr)"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"fieldname": "closing_credit",
 			"label": _("Closing (Cr)"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 120
-		}
+			"width": 120,
+		},
 	]
+
 
 def prepare_opening_closing(row):
 	dr_or_cr = "debit" if row["root_type"] in ["Asset", "Equity", "Expense"] else "credit"

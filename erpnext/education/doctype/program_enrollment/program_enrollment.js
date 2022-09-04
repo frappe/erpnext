@@ -60,12 +60,15 @@ frappe.ui.form.on('Program Enrollment', {
 				method: 'erpnext.education.api.get_fee_schedule',
 				args: {
 					'program': frm.doc.program,
-					'student_category': frm.doc.student_category
+					'student_category': frm.doc.student_category,
+					'academic_year': frm.doc.academic_year
 				},
 				callback: function(r) {
 					if (r.message) {
+						cur_frm.clear_table("fees");
+						frm.refresh_fields('fees');
 						frm.set_value('fees' ,r.message);
-						frm.events.get_courses(frm);
+						frm.refresh_fields('fees');
 					}
 				}
 			});
@@ -73,6 +76,10 @@ frappe.ui.form.on('Program Enrollment', {
 	},
 
 	student_category: function() {
+		frappe.ui.form.trigger('Program Enrollment', 'program');
+	},
+
+	academic_year: function() {
 		frappe.ui.form.trigger('Program Enrollment', 'program');
 	},
 

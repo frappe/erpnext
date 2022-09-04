@@ -8,7 +8,7 @@ from frappe.utils import cint, flt
 
 from erpnext.setup.utils import get_exchange_rate
 
-test_records = frappe.get_test_records('Currency Exchange')
+test_records = frappe.get_test_records("Currency Exchange")
 
 
 def save_new_records(test_records):
@@ -16,13 +16,19 @@ def save_new_records(test_records):
 		# If both selling and buying enabled
 		purpose = "Selling-Buying"
 
-		if cint(record.get("for_buying"))==0 and cint(record.get("for_selling"))==1:
+		if cint(record.get("for_buying")) == 0 and cint(record.get("for_selling")) == 1:
 			purpose = "Selling"
-		if cint(record.get("for_buying"))==1 and cint(record.get("for_selling"))==0:
+		if cint(record.get("for_buying")) == 1 and cint(record.get("for_selling")) == 0:
 			purpose = "Buying"
 		kwargs = dict(
 			doctype=record.get("doctype"),
-			docname=record.get("date") + '-' + record.get("from_currency") + '-' + record.get("to_currency") + '-' + purpose,
+			docname=record.get("date")
+			+ "-"
+			+ record.get("from_currency")
+			+ "-"
+			+ record.get("to_currency")
+			+ "-"
+			+ purpose,
 			fieldname="exchange_rate",
 			value=record.get("exchange_rate"),
 		)

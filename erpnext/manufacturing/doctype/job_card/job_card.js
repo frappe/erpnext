@@ -28,12 +28,12 @@ frappe.ui.form.on('Job Card', {
 		frappe.flags.resume_job = 0;
 		let has_items = frm.doc.items && frm.doc.items.length;
 
-		if (frm.doc.__onload.work_order_stopped) {
+		if (!frm.is_new() && frm.doc.__onload.work_order_stopped) {
 			frm.disable_save();
 			return;
 		}
 
-		if (!frm.doc.__islocal && has_items && frm.doc.docstatus < 2) {
+		if (!frm.is_new() && has_items && frm.doc.docstatus < 2) {
 			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
 			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
 
@@ -73,7 +73,18 @@ frappe.ui.form.on('Job Card', {
 		if (frm.doc.docstatus == 0 && !frm.is_new() &&
 			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
-			frm.trigger("prepare_timer_buttons");
+
+			// if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
+			// and if stock mvt for WIP is required
+			if (frm.doc.work_order) {
+				frappe.db.get_value('Work Order', frm.doc.work_order, ['skip_transfer', 'status'], (result) => {
+					if (result.skip_transfer === 1 || result.status == 'In Process') {
+						frm.trigger("prepare_timer_buttons");
+					}
+				});
+			} else {
+				frm.trigger("prepare_timer_buttons");
+			}
 		}
 		frm.trigger("setup_quality_inspection");
 

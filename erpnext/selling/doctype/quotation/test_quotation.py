@@ -2,17 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
-
-from erpnext.tests.utils import ERPNextTestCase
 
 test_dependencies = ["Product Bundle"]
 
 
-class TestQuotation(ERPNextTestCase):
+class TestQuotation(FrappeTestCase):
 	def test_make_quotation_without_terms(self):
 		quotation = make_quotation(do_not_save=1)
-		self.assertFalse(quotation.get('payment_schedule'))
+		self.assertFalse(quotation.get("payment_schedule"))
 
 		quotation.insert()
 
@@ -29,7 +28,7 @@ class TestQuotation(ERPNextTestCase):
 
 		sales_order = make_sales_order(quotation.name)
 
-		self.assertTrue(sales_order.get('payment_schedule'))
+		self.assertTrue(sales_order.get("payment_schedule"))
 
 	def test_make_sales_order_with_different_currency(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
@@ -81,9 +80,7 @@ class TestQuotation(ERPNextTestCase):
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.transaction_date = nowdate()
 		quotation.valid_till = add_months(quotation.transaction_date, 1)
-		quotation.update(
-			{"payment_terms_template": "_Test Payment Term Template"}
-		)
+		quotation.update({"payment_terms_template": "_Test Payment Term Template"})
 		quotation.insert()
 
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
@@ -93,7 +90,9 @@ class TestQuotation(ERPNextTestCase):
 		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.00)
 		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
 		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.00)
-		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30))
+		self.assertEqual(
+			quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30)
+		)
 
 		sales_order = make_sales_order(quotation.name)
 
@@ -109,7 +108,7 @@ class TestQuotation(ERPNextTestCase):
 		sales_order.insert()
 
 		# Remove any unknown taxes if applied
-		sales_order.set('taxes', [])
+		sales_order.set("taxes", [])
 		sales_order.save()
 
 		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
@@ -131,6 +130,15 @@ class TestQuotation(ERPNextTestCase):
 		quotation.submit()
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 
+	def test_shopping_cart_without_website_item(self):
+		if frappe.db.exists("Website Item", {"item_code": "_Test Item Home Desktop 100"}):
+			frappe.get_last_doc("Website Item", {"item_code": "_Test Item Home Desktop 100"}).delete()
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.order_type = "Shopping Cart"
+		quotation.valid_till = getdate()
+		self.assertRaises(frappe.ValidationError, quotation.validate)
+
 	def test_create_quotation_with_margin(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 		from erpnext.selling.doctype.sales_order.sales_order import (
@@ -138,11 +146,11 @@ class TestQuotation(ERPNextTestCase):
 			make_sales_invoice,
 		)
 
-		rate_with_margin = flt((1500*18.75)/100 + 1500)
+		rate_with_margin = flt((1500 * 18.75) / 100 + 1500)
 
-		test_records[0]['items'][0]['price_list_rate'] = 1500
-		test_records[0]['items'][0]['margin_type'] = 'Percentage'
-		test_records[0]['items'][0]['margin_rate_or_amount'] = 18.75
+		test_records[0]["items"][0]["price_list_rate"] = 1500
+		test_records[0]["items"][0]["margin_type"] = "Percentage"
+		test_records[0]["items"][0]["margin_rate_or_amount"] = 18.75
 
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.transaction_date = nowdate()
@@ -175,11 +183,9 @@ class TestQuotation(ERPNextTestCase):
 	def test_create_two_quotations(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		first_item = make_item("_Test Laptop",
-							{"is_stock_item": 1})
+		first_item = make_item("_Test Laptop", {"is_stock_item": 1})
 
-		second_item = make_item("_Test CPU",
-							{"is_stock_item": 1})
+		second_item = make_item("_Test CPU", {"is_stock_item": 1})
 
 		qo_item1 = [
 			{
@@ -188,7 +194,7 @@ class TestQuotation(ERPNextTestCase):
 				"qty": 2,
 				"rate": 400,
 				"delivered_by_supplier": 1,
-				"supplier": '_Test Supplier'
+				"supplier": "_Test Supplier",
 			}
 		]
 
@@ -198,7 +204,7 @@ class TestQuotation(ERPNextTestCase):
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": 2,
 				"rate": 300,
-				"conversion_factor": 1.0
+				"conversion_factor": 1.0,
 			}
 		]
 
@@ -210,17 +216,12 @@ class TestQuotation(ERPNextTestCase):
 	def test_quotation_expiry(self):
 		from erpnext.selling.doctype.quotation.quotation import set_expired_status
 
-		quotation_item = [
-			{
-				"item_code": "_Test Item",
-				"warehouse":"",
-				"qty": 1,
-				"rate": 500
-			}
-		]
+		quotation_item = [{"item_code": "_Test Item", "warehouse": "", "qty": 1, "rate": 500}]
 
 		yesterday = add_days(nowdate(), -1)
-		expired_quotation = make_quotation(item_list=quotation_item, transaction_date=yesterday, do_not_submit=True)
+		expired_quotation = make_quotation(
+			item_list=quotation_item, transaction_date=yesterday, do_not_submit=True
+		)
 		expired_quotation.valid_till = yesterday
 		expired_quotation.save()
 		expired_quotation.submit()
@@ -237,24 +238,49 @@ class TestQuotation(ERPNextTestCase):
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
 		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
 
-		make_product_bundle("_Test Product Bundle",
-			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+		make_product_bundle("_Test Product Bundle", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
 
 		quotation = make_quotation(item_code="_Test Product Bundle", qty=1, rate=100)
 		sales_order = make_sales_order(quotation.name)
 
-		quotation_item = [quotation.items[0].item_code, quotation.items[0].rate, quotation.items[0].qty, quotation.items[0].amount]
-		so_item = [sales_order.items[0].item_code, sales_order.items[0].rate, sales_order.items[0].qty, sales_order.items[0].amount]
+		quotation_item = [
+			quotation.items[0].item_code,
+			quotation.items[0].rate,
+			quotation.items[0].qty,
+			quotation.items[0].amount,
+		]
+		so_item = [
+			sales_order.items[0].item_code,
+			sales_order.items[0].rate,
+			sales_order.items[0].qty,
+			sales_order.items[0].amount,
+		]
 
 		self.assertEqual(quotation_item, so_item)
 
 		quotation_packed_items = [
-			[quotation.packed_items[0].parent_item, quotation.packed_items[0].item_code, quotation.packed_items[0].qty],
-			[quotation.packed_items[1].parent_item, quotation.packed_items[1].item_code, quotation.packed_items[1].qty]
+			[
+				quotation.packed_items[0].parent_item,
+				quotation.packed_items[0].item_code,
+				quotation.packed_items[0].qty,
+			],
+			[
+				quotation.packed_items[1].parent_item,
+				quotation.packed_items[1].item_code,
+				quotation.packed_items[1].qty,
+			],
 		]
 		so_packed_items = [
-			[sales_order.packed_items[0].parent_item, sales_order.packed_items[0].item_code, sales_order.packed_items[0].qty],
-			[sales_order.packed_items[1].parent_item, sales_order.packed_items[1].item_code, sales_order.packed_items[1].qty]
+			[
+				sales_order.packed_items[0].parent_item,
+				sales_order.packed_items[0].item_code,
+				sales_order.packed_items[0].qty,
+			],
+			[
+				sales_order.packed_items[1].parent_item,
+				sales_order.packed_items[1].item_code,
+				sales_order.packed_items[1].qty,
+			],
 		]
 
 		self.assertEqual(quotation_packed_items, so_packed_items)
@@ -267,8 +293,7 @@ class TestQuotation(ERPNextTestCase):
 		bundle_item1 = make_item("_Test Bundle Item 1", {"is_stock_item": 1})
 		bundle_item2 = make_item("_Test Bundle Item 2", {"is_stock_item": 1})
 
-		make_product_bundle("_Test Product Bundle",
-			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+		make_product_bundle("_Test Product Bundle", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
 
 		bundle_item1.valuation_rate = 100
 		bundle_item1.save()
@@ -287,8 +312,7 @@ class TestQuotation(ERPNextTestCase):
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
 		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
 
-		make_product_bundle("_Test Product Bundle",
-			["_Test Bundle Item 1", "_Test Bundle Item 2"])
+		make_product_bundle("_Test Product Bundle", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
 
 		enable_calculate_bundle_price()
 
@@ -302,7 +326,9 @@ class TestQuotation(ERPNextTestCase):
 
 		enable_calculate_bundle_price(enable=0)
 
-	def test_product_bundle_price_calculation_for_multiple_product_bundles_when_calculate_bundle_price_is_checked(self):
+	def test_product_bundle_price_calculation_for_multiple_product_bundles_when_calculate_bundle_price_is_checked(
+		self,
+	):
 		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 		from erpnext.stock.doctype.item.test_item import make_item
 
@@ -312,10 +338,8 @@ class TestQuotation(ERPNextTestCase):
 		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
 		make_item("_Test Bundle Item 3", {"is_stock_item": 1})
 
-		make_product_bundle("_Test Product Bundle 1",
-			["_Test Bundle Item 1", "_Test Bundle Item 2"])
-		make_product_bundle("_Test Product Bundle 2",
-			["_Test Bundle Item 2", "_Test Bundle Item 3"])
+		make_product_bundle("_Test Product Bundle 1", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
+		make_product_bundle("_Test Product Bundle 2", ["_Test Bundle Item 2", "_Test Bundle Item 3"])
 
 		enable_calculate_bundle_price()
 
@@ -326,7 +350,7 @@ class TestQuotation(ERPNextTestCase):
 				"qty": 1,
 				"rate": 400,
 				"delivered_by_supplier": 1,
-				"supplier": '_Test Supplier'
+				"supplier": "_Test Supplier",
 			},
 			{
 				"item_code": "_Test Product Bundle 2",
@@ -334,8 +358,8 @@ class TestQuotation(ERPNextTestCase):
 				"qty": 1,
 				"rate": 400,
 				"delivered_by_supplier": 1,
-				"supplier": '_Test Supplier'
-			}
+				"supplier": "_Test Supplier",
+			},
 		]
 
 		quotation = make_quotation(item_list=item_list, do_not_submit=1)
@@ -348,7 +372,7 @@ class TestQuotation(ERPNextTestCase):
 		expected_values = [300, 500]
 
 		for item in quotation.items:
-			self.assertEqual(item.amount, expected_values[item.idx-1])
+			self.assertEqual(item.amount, expected_values[item.idx - 1])
 
 		enable_calculate_bundle_price(enable=0)
 
@@ -363,12 +387,9 @@ class TestQuotation(ERPNextTestCase):
 		make_item("_Test Bundle Item 2", {"is_stock_item": 1})
 		make_item("_Test Bundle Item 3", {"is_stock_item": 1})
 
-		make_product_bundle("_Test Product Bundle 1",
-			["_Test Bundle Item 1", "_Test Bundle Item 2"])
-		make_product_bundle("_Test Product Bundle 2",
-			["_Test Bundle Item 2", "_Test Bundle Item 3"])
-		make_product_bundle("_Test Product Bundle 3",
-			["_Test Bundle Item 3", "_Test Bundle Item 1"])
+		make_product_bundle("_Test Product Bundle 1", ["_Test Bundle Item 1", "_Test Bundle Item 2"])
+		make_product_bundle("_Test Product Bundle 2", ["_Test Bundle Item 2", "_Test Bundle Item 3"])
+		make_product_bundle("_Test Product Bundle 3", ["_Test Bundle Item 3", "_Test Bundle Item 1"])
 
 		item_list = [
 			{
@@ -377,7 +398,7 @@ class TestQuotation(ERPNextTestCase):
 				"qty": 1,
 				"rate": 400,
 				"delivered_by_supplier": 1,
-				"supplier": '_Test Supplier'
+				"supplier": "_Test Supplier",
 			},
 			{
 				"item_code": "_Test Product Bundle 2",
@@ -385,7 +406,7 @@ class TestQuotation(ERPNextTestCase):
 				"qty": 1,
 				"rate": 400,
 				"delivered_by_supplier": 1,
-				"supplier": '_Test Supplier'
+				"supplier": "_Test Supplier",
 			},
 			{
 				"item_code": "_Test Product Bundle 3",
@@ -393,8 +414,8 @@ class TestQuotation(ERPNextTestCase):
 				"qty": 1,
 				"rate": 400,
 				"delivered_by_supplier": 1,
-				"supplier": '_Test Supplier'
-			}
+				"supplier": "_Test Supplier",
+			},
 		]
 
 		quotation = make_quotation(item_list=item_list, do_not_submit=1)
@@ -405,29 +426,26 @@ class TestQuotation(ERPNextTestCase):
 			expected_index = id + 1
 			self.assertEqual(item.idx, expected_index)
 
-test_records = frappe.get_test_records('Quotation')
+
+test_records = frappe.get_test_records("Quotation")
+
 
 def enable_calculate_bundle_price(enable=1):
 	selling_settings = frappe.get_doc("Selling Settings")
 	selling_settings.editable_bundle_item_rates = enable
 	selling_settings.save()
 
+
 def get_quotation_dict(party_name=None, item_code=None):
 	if not party_name:
-		party_name = '_Test Customer'
+		party_name = "_Test Customer"
 	if not item_code:
-		item_code = '_Test Item'
+		item_code = "_Test Item"
 
 	return {
-		'doctype': 'Quotation',
-		'party_name': party_name,
-		'items': [
-			{
-				'item_code': item_code,
-				'qty': 1,
-				'rate': 100
-			}
-		]
+		"doctype": "Quotation",
+		"party_name": party_name,
+		"items": [{"item_code": item_code, "qty": 1, "rate": 100}],
 	}
 
 
@@ -451,13 +469,16 @@ def make_quotation(**args):
 			qo.append("items", item)
 
 	else:
-		qo.append("items", {
-			"item_code": args.item or args.item_code or "_Test Item",
-			"warehouse": args.warehouse,
-			"qty": args.qty or 10,
-			"uom": args.uom or None,
-			"rate": args.rate or 100
-		})
+		qo.append(
+			"items",
+			{
+				"item_code": args.item or args.item_code or "_Test Item",
+				"warehouse": args.warehouse,
+				"qty": args.qty or 10,
+				"uom": args.uom or None,
+				"rate": args.rate or 100,
+			},
+		)
 
 	qo.delivery_date = add_days(qo.transaction_date, 10)
 

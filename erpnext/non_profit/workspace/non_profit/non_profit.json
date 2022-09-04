@@ -109,7 +109,7 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Membership Settings",
+   "label": "Non Profit Settings",
    "link_to": "Non Profit Settings",
    "link_type": "DocType",
    "onboard": 0,
@@ -213,7 +213,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-03-11 11:38:09.140655",
+ "modified": "2022-05-09 11:38:09.140655",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",

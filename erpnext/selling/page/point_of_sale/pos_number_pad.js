@@ -25,7 +25,7 @@ erpnext.PointOfSale.NumberPad = class {
 					const fieldname = fieldnames && fieldnames[number] ?
 						fieldnames[number] : typeof number === 'string' ? frappe.scrub(number) : number;
 
-					return a2 + `<div class="numpad-btn ${class_to_append}" data-button-value="${fieldname}">${number}</div>`;
+					return a2 + `<div class="numpad-btn ${class_to_append}" data-button-value="${fieldname}">${__(number)}</div>`;
 				}, '');
 			}, '');
 		}

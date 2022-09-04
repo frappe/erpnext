@@ -131,16 +131,14 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
-		if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
+		if (frm.doc.docstatus === 0 && !frm.is_new()) {
 			frm.set_intro(__("Submit this Work Order for further processing."));
+		} else {
+			frm.trigger("show_progress_for_items");
+			frm.trigger("show_progress_for_operations");
 		}
 
 		if (frm.doc.status != "Closed") {
-			if (frm.doc.docstatus===1) {
-				frm.trigger('show_progress_for_items');
-				frm.trigger('show_progress_for_operations');
-			}
-
 			if (frm.doc.docstatus === 1
 				&& frm.doc.operations && frm.doc.operations.length) {
 
@@ -542,8 +540,10 @@ erpnext.work_order = {
 				|| frm.doc.transfer_material_against == 'Job Card') ? 0 : 1;
 
 			if (show_start_btn) {
-				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
-					&& frm.doc.status != 'Stopped') {
+				let pending_to_transfer = frm.doc.required_items.some(
+					item => flt(item.transferred_qty) < flt(item.required_qty)
+				);
+				if (pending_to_transfer && frm.doc.status != 'Stopped') {
 					frm.has_start_btn = true;
 					frm.add_custom_button(__('Create Pick List'), function() {
 						erpnext.work_order.create_pick_list(frm);

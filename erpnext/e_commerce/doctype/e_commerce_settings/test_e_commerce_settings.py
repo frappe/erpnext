@@ -1,4 +1,4 @@
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
 import unittest
@@ -11,42 +11,34 @@ from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
 
 
 class TestECommerceSettings(unittest.TestCase):
-	def setUp(self):
-		frappe.db.sql("""delete from `tabSingles` where doctype="Shipping Cart Settings" """)
-
-	def get_cart_settings(self):
-		return frappe.get_doc({"doctype": "E Commerce Settings",
-			"company": "_Test Company"})
-
-	# NOTE: Exchangrate API has all enabled currencies that ERPNext supports.
-	# We aren't checking just currency exchange record anymore
-	# while validating price list currency exchange rate to that of company.
-	# The API is being used to fetch the rate which again almost always
-	# gives back a valid value (for valid currencies).
-	# This makes the test obsolete.
-	# Commenting because im not sure if there's a better test we can write
-
-	# def test_exchange_rate_exists(self):
-	# 	frappe.db.sql("""delete from `tabCurrency Exchange`""")
-
-	# 	cart_settings = self.get_cart_settings()
-	# 	cart_settings.price_list = "_Test Price List Rest of the World"
-	# 	self.assertRaises(ShoppingCartSetupError, cart_settings.validate_price_list_exchange_rate)
-
-	# 	from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records as \
-	# 		currency_exchange_records
-	# 	frappe.get_doc(currency_exchange_records[0]).insert()
-	# 	cart_settings.validate_price_list_exchange_rate()
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_tax_rule_validation(self):
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")
 
-		cart_settings = self.get_cart_settings()
+		cart_settings = frappe.get_doc("E Commerce Settings")
 		cart_settings.enabled = 1
 		if not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart": 1}, "name"):
 			self.assertRaises(ShoppingCartSetupError, cart_settings.validate_tax_rule)
 
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 1")
+
+	def test_invalid_filter_fields(self):
+		"Check if Item fields are blocked in E Commerce Settings filter fields."
+		from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+
+		setup_e_commerce_settings({"enable_field_filters": 1})
+
+		create_custom_field(
+			"Item",
+			dict(owner="Administrator", fieldname="test_data", label="Test", fieldtype="Data"),
+		)
+		settings = frappe.get_doc("E Commerce Settings")
+		settings.append("filter_fields", {"fieldname": "test_data"})
+
+		self.assertRaises(frappe.ValidationError, settings.save)
+
 
 def setup_e_commerce_settings(values_dict):
 	"Accepts a dict of values that updates E Commerce Settings."
@@ -56,5 +48,6 @@ def setup_e_commerce_settings(values_dict):
 	doc = frappe.get_doc("E Commerce Settings", "E Commerce Settings")
 	doc.update(values_dict)
 	doc.save()
+
 
 test_dependencies = ["Tax Rule"]

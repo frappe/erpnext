@@ -9,6 +9,9 @@
   "section_break_2",
   "sandbox_mode",
   "applicable_from",
+  "column_break_4",
+  "dont_show_discounts_in_e_invoice",
+  "section_break_7",
   "credentials",
   "advanced_settings_section",
   "client_id",
@@ -80,12 +83,28 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "description": "Enabling this will directly report net rates in e-Invoice post discounts",
+   "fieldname": "dont_show_discounts_in_e_invoice",
+   "fieldtype": "Check",
+   "label": "Don't show discounts in e-Invoice"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-11-16 19:50:28.029517",
+ "modified": "2022-07-17 14:57:50.783517",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",

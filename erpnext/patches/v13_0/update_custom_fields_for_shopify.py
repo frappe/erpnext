@@ -10,5 +10,5 @@ from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings impo
 
 
 def execute():
-	if frappe.db.get_single_value('Shopify Settings', 'enable_shopify'):
+	if frappe.db.get_single_value("Shopify Settings", "enable_shopify"):
 		setup_custom_fields()

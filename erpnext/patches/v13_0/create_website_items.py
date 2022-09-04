@@ -11,14 +11,31 @@ def execute():
 	frappe.reload_doc("e_commerce", "doctype", "e_commerce_settings")
 	frappe.reload_doc("stock", "doctype", "item")
 
-	item_fields = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
-		"has_variants", "variant_of", "description", "weightage"]
-	web_fields_to_map = ["route", "slideshow", "website_image_alt",
-		"website_warehouse", "web_long_description", "website_content", "thumbnail"]
+	item_fields = [
+		"item_code",
+		"item_name",
+		"item_group",
+		"stock_uom",
+		"brand",
+		"has_variants",
+		"variant_of",
+		"description",
+		"weightage",
+	]
+	web_fields_to_map = [
+		"route",
+		"slideshow",
+		"website_image_alt",
+		"website_warehouse",
+		"web_long_description",
+		"website_content",
+		"website_image",
+		"thumbnail",
+	]
 
 	# get all valid columns (fields) from Item master DB schema
 	item_table_fields = frappe.db.sql("desc `tabItem`", as_dict=1)
-	item_table_fields = [d.get('Field') for d in item_table_fields]
+	item_table_fields = [d.get("Field") for d in item_table_fields]
 
 	# prepare fields to query from Item, check if the web field exists in Item master
 	web_query_fields = []
@@ -38,11 +55,7 @@ def execute():
 		# most likely a fresh installation that doesnt need this patch
 		return
 
-	items = frappe.db.get_all(
-		"Item",
-		fields=item_fields,
-		or_filters=or_filters
-	)
+	items = frappe.db.get_all("Item", fields=item_fields, or_filters=or_filters)
 	total_count = len(items)
 
 	for count, item in enumerate(items, start=1):
@@ -62,11 +75,11 @@ def execute():
 		for doctype in ("Website Item Group", "Item Website Specification"):
 			frappe.db.set_value(
 				doctype,
-				{"parenttype": "Item", "parent": item.item_code}, # filters
-				{"parenttype": "Website Item", "parent": website_item.name} # value dict
+				{"parenttype": "Item", "parent": item.item_code},  # filters
+				{"parenttype": "Website Item", "parent": website_item.name},  # value dict
 			)
 
-		if count % 20 == 0: # commit after every 20 items
+		if count % 20 == 0:  # commit after every 20 items
 			frappe.db.commit()
 
-		frappe.utils.update_progress_bar('Creating Website Items', count, total_count)
+		frappe.utils.update_progress_bar("Creating Website Items", count, total_count)

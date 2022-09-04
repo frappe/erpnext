@@ -2,12 +2,13 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:title",
- "creation": "2018-11-22 23:38:39.668804",
+ "creation": "2022-01-19 01:09:28.920486",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "title"
+  "title",
+  "disabled"
  ],
  "fields": [
   {
@@ -18,14 +19,21 @@
    "label": "Title",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-03 11:50:38.748872",
+ "modified": "2022-01-18 21:13:41.161017",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Category",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -65,5 +73,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

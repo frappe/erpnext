@@ -6,76 +6,78 @@ class ItemVariantsCacheManager:
 		self.item_code = item_code
 
 	def get_item_variants_data(self):
-		val = frappe.cache().hget('item_variants_data', self.item_code)
+		val = frappe.cache().hget("item_variants_data", self.item_code)
 
 		if not val:
 			self.build_cache()
 
-		return frappe.cache().hget('item_variants_data', self.item_code)
-
+		return frappe.cache().hget("item_variants_data", self.item_code)
 
 	def get_attribute_value_item_map(self):
-		val = frappe.cache().hget('attribute_value_item_map', self.item_code)
+		val = frappe.cache().hget("attribute_value_item_map", self.item_code)
 
 		if not val:
 			self.build_cache()
 
-		return frappe.cache().hget('attribute_value_item_map', self.item_code)
-
+		return frappe.cache().hget("attribute_value_item_map", self.item_code)
 
 	def get_item_attribute_value_map(self):
-		val = frappe.cache().hget('item_attribute_value_map', self.item_code)
+		val = frappe.cache().hget("item_attribute_value_map", self.item_code)
 
 		if not val:
 			self.build_cache()
 
-		return frappe.cache().hget('item_attribute_value_map', self.item_code)
-
+		return frappe.cache().hget("item_attribute_value_map", self.item_code)
 
 	def get_optional_attributes(self):
-		val = frappe.cache().hget('optional_attributes', self.item_code)
+		val = frappe.cache().hget("optional_attributes", self.item_code)
 
 		if not val:
 			self.build_cache()
 
-		return frappe.cache().hget('optional_attributes', self.item_code)
+		return frappe.cache().hget("optional_attributes", self.item_code)
 
 	def get_ordered_attribute_values(self):
-		val = frappe.cache().get_value('ordered_attribute_values_map')
-		if val: return val
+		val = frappe.cache().get_value("ordered_attribute_values_map")
+		if val:
+			return val
 
-		all_attribute_values = frappe.db.get_all('Item Attribute Value',
-			['attribute_value', 'idx', 'parent'], order_by='idx asc')
+		all_attribute_values = frappe.get_all(
+			"Item Attribute Value", ["attribute_value", "idx", "parent"], order_by="idx asc"
+		)
 
 		ordered_attribute_values_map = frappe._dict({})
 		for d in all_attribute_values:
 			ordered_attribute_values_map.setdefault(d.parent, []).append(d.attribute_value)
 
-		frappe.cache().set_value('ordered_attribute_values_map', ordered_attribute_values_map)
+		frappe.cache().set_value("ordered_attribute_values_map", ordered_attribute_values_map)
 		return ordered_attribute_values_map
 
 	def build_cache(self):
 		parent_item_code = self.item_code
 
-		attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
-			{'parent': parent_item_code}, ['attribute'], order_by='idx asc')
+		attributes = [
+			a.attribute
+			for a in frappe.get_all(
+				"Item Variant Attribute", {"parent": parent_item_code}, ["attribute"], order_by="idx asc"
+			)
 		]
 
-		item_variants_data = frappe.db.get_all('Item Variant Attribute',
-			{'variant_of': parent_item_code}, ['parent', 'attribute', 'attribute_value'],
-			order_by='name',
-			as_list=1
+		# Get Variants and tehir Attributes that are not disabled
+		iva = frappe.qb.DocType("Item Variant Attribute")
+		item = frappe.qb.DocType("Item")
+		query = (
+			frappe.qb.from_(iva)
+			.join(item)
+			.on(item.name == iva.parent)
+			.select(iva.parent, iva.attribute, iva.attribute_value)
+			.where((iva.variant_of == parent_item_code) & (item.disabled == 0))
+			.orderby(iva.name)
 		)
+		item_variants_data = query.run()
 
-		unpublished_items = set([i.item_code for i in frappe.db.get_all('Website Item', filters={'published': 0}, fields=["item_code"])])
-
-		attribute_value_item_map = frappe._dict({})
-		item_attribute_value_map = frappe._dict({})
-
-		# dont consider variants that are unpublished
-		# (either have no Website Item or are unpublished in Website Item)
-		item_variants_data = [r for r in item_variants_data if r[0] not in unpublished_items]
-		item_variants_data = [r for r in item_variants_data if frappe.db.exists("Website Item", {"item_code": r[0]})]
+		attribute_value_item_map = frappe._dict()
+		item_attribute_value_map = frappe._dict()
 
 		for row in item_variants_data:
 			item_code, attribute, attribute_value = row
@@ -90,13 +92,18 @@ class ItemVariantsCacheManager:
 				if attribute not in attr_dict:
 					optional_attributes.add(attribute)
 
-		frappe.cache().hset('attribute_value_item_map', parent_item_code, attribute_value_item_map)
-		frappe.cache().hset('item_attribute_value_map', parent_item_code, item_attribute_value_map)
-		frappe.cache().hset('item_variants_data', parent_item_code, item_variants_data)
-		frappe.cache().hset('optional_attributes', parent_item_code, optional_attributes)
+		frappe.cache().hset("attribute_value_item_map", parent_item_code, attribute_value_item_map)
+		frappe.cache().hset("item_attribute_value_map", parent_item_code, item_attribute_value_map)
+		frappe.cache().hset("item_variants_data", parent_item_code, item_variants_data)
+		frappe.cache().hset("optional_attributes", parent_item_code, optional_attributes)
 
 	def clear_cache(self):
-		keys = ['attribute_value_item_map', 'item_attribute_value_map', 'item_variants_data', 'optional_attributes']
+		keys = [
+			"attribute_value_item_map",
+			"item_attribute_value_map",
+			"item_variants_data",
+			"optional_attributes",
+		]
 
 		for key in keys:
 			frappe.cache().hdel(key, self.item_code)
@@ -107,12 +114,17 @@ class ItemVariantsCacheManager:
 
 
 def build_cache(item_code):
-	frappe.cache().hset('item_cache_build_in_progress', item_code, 1)
+	frappe.cache().hset("item_cache_build_in_progress", item_code, 1)
 	i = ItemVariantsCacheManager(item_code)
 	i.build_cache()
-	frappe.cache().hset('item_cache_build_in_progress', item_code, 0)
+	frappe.cache().hset("item_cache_build_in_progress", item_code, 0)
+
 
 def enqueue_build_cache(item_code):
-	if frappe.cache().hget('item_cache_build_in_progress', item_code):
+	if frappe.cache().hget("item_cache_build_in_progress", item_code):
 		return
-	frappe.enqueue(build_cache, item_code=item_code, queue='long')
+	frappe.enqueue(
+		"erpnext.e_commerce.variant_selector.item_variants_cache.build_cache",
+		item_code=item_code,
+		queue="long",
+	)

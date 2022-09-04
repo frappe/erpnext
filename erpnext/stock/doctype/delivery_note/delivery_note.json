@@ -23,6 +23,10 @@
   "is_return",
   "issue_credit_note",
   "return_against",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "customer_po_details",
   "po_no",
   "column_break_17",
@@ -115,7 +119,6 @@
   "driver_name",
   "lr_date",
   "more_info",
-  "project",
   "campaign",
   "source",
   "column_break5",
@@ -1189,6 +1192,8 @@
    "width": "50%"
   },
   {
+   "fetch_from": "sales_partner.commission_rate",
+   "fetch_if_empty": 1,
    "fieldname": "commission_rate",
    "fieldtype": "Float",
    "label": "Commission Rate (%)",
@@ -1309,13 +1314,29 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-09 14:29:13.428984",
+ "modified": "2022-06-10 03:52:04.197415",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
@@ -1380,6 +1401,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,

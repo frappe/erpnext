@@ -18,17 +18,23 @@ from erpnext.stock.doctype.item.item import DataValidationError
 from erpnext.stock.doctype.item.test_item import make_item
 
 WEBITEM_DESK_TESTS = ("test_website_item_desk_item_sync", "test_publish_variant_and_template")
-WEBITEM_PRICE_TESTS = ('test_website_item_price_for_logged_in_user', 'test_website_item_price_for_guest_user')
+WEBITEM_PRICE_TESTS = (
+	"test_website_item_price_for_logged_in_user",
+	"test_website_item_price_for_guest_user",
+)
+
 
 class TestWebsiteItem(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		setup_e_commerce_settings({
-			"company": "_Test Company",
-			"enabled": 1,
-			"default_customer_group": "_Test Customer Group",
-			"price_list": "_Test Price List India"
-		})
+		setup_e_commerce_settings(
+			{
+				"company": "_Test Company",
+				"enabled": 1,
+				"default_customer_group": "_Test Customer Group",
+				"price_list": "_Test Price List India",
+			}
+		)
 
 	@classmethod
 	def tearDownClass(cls):
@@ -36,40 +42,42 @@ class TestWebsiteItem(unittest.TestCase):
 
 	def setUp(self):
 		if self._testMethodName in WEBITEM_DESK_TESTS:
-			make_item("Test Web Item", {
-				"has_variant": 1,
-				"variant_based_on": "Item Attribute",
-				"attributes": [
-					{
-						"attribute": "Test Size"
-					}
-				]
-			})
+			make_item(
+				"Test Web Item",
+				{
+					"has_variant": 1,
+					"variant_based_on": "Item Attribute",
+					"attributes": [{"attribute": "Test Size"}],
+				},
+			)
 		elif self._testMethodName in WEBITEM_PRICE_TESTS:
-			create_user_and_customer_if_not_exists("test_contact_customer@example.com", "_Test Contact For _Test Customer")
+			create_user_and_customer_if_not_exists(
+				"test_contact_customer@example.com", "_Test Contact For _Test Customer"
+			)
 			create_regular_web_item()
 			make_web_item_price(item_code="Test Mobile Phone")
 
 			# Note: When testing web item pricing rule logged-in user pricing rule must differ from guest pricing rule or test will falsely pass.
-			#	  This is because make_web_pricing_rule creates a pricing rule "selling": 1, without specifying "applicable_for". Therefor,
-			#	  when testing for logged-in user the test will get the previous pricing rule because "selling" is still true.
+			# 	  This is because make_web_pricing_rule creates a pricing rule "selling": 1, without specifying "applicable_for". Therefor,
+			# 	  when testing for logged-in user the test will get the previous pricing rule because "selling" is still true.
 			#
 			#     I've attempted to mitigate this by setting applicable_for=Customer, and customer=Guest however, this only results in PermissionError failing the test.
 			make_web_pricing_rule(
-				title="Test Pricing Rule for Test Mobile Phone",
-				item_code="Test Mobile Phone",
-				selling=1)
+				title="Test Pricing Rule for Test Mobile Phone", item_code="Test Mobile Phone", selling=1
+			)
 			make_web_pricing_rule(
 				title="Test Pricing Rule for Test Mobile Phone (Customer)",
 				item_code="Test Mobile Phone",
 				selling=1,
 				discount_percentage="25",
 				applicable_for="Customer",
-				customer="_Test Customer")
+				customer="_Test Customer",
+			)
 
 	def test_index_creation(self):
 		"Check if index is getting created in db."
 		from erpnext.e_commerce.doctype.website_item.website_item import on_doctype_update
+
 		on_doctype_update()
 
 		indices = frappe.db.sql("show index from `tabWebsite Item`", as_dict=1)
@@ -83,7 +91,7 @@ class TestWebsiteItem(unittest.TestCase):
 	def test_website_item_desk_item_sync(self):
 		"Check creation/updation/deletion of Website Item and its impact on Item master."
 		web_item = None
-		item = make_item("Test Web Item") # will return item if exists
+		item = make_item("Test Web Item")  # will return item if exists
 		try:
 			web_item = make_website_item(item, save=False)
 			web_item.save()
@@ -96,7 +104,7 @@ class TestWebsiteItem(unittest.TestCase):
 
 		item.reload()
 		self.assertEqual(web_item.published, 1)
-		self.assertEqual(item.published_in_website, 1) # check if item was back updated
+		self.assertEqual(item.published_in_website, 1)  # check if item was back updated
 		self.assertEqual(web_item.item_group, item.item_group)
 
 		# check if changing item data changes it in website item
@@ -169,9 +177,12 @@ class TestWebsiteItem(unittest.TestCase):
 		from erpnext.setup.doctype.item_group.item_group import get_parent_item_groups
 
 		item_code = "Test Breadcrumb Item"
-		item = make_item(item_code, {
-			"item_group": "_Test Item Group B - 1",
-		})
+		item = make_item(
+			item_code,
+			{
+				"item_group": "_Test Item Group B - 1",
+			},
+		)
 
 		if not frappe.db.exists("Website Item", {"item_code": item_code}):
 			web_item = make_website_item(item, save=False)
@@ -186,7 +197,7 @@ class TestWebsiteItem(unittest.TestCase):
 
 		self.assertEqual(breadcrumbs[0]["name"], "Home")
 		self.assertEqual(breadcrumbs[1]["name"], "Shop by Category")
-		self.assertEqual(breadcrumbs[2]["name"], "_Test Item Group B") # parent item group
+		self.assertEqual(breadcrumbs[2]["name"], "_Test Item Group B")  # parent item group
 		self.assertEqual(breadcrumbs[3]["name"], "_Test Item Group B - 1")
 
 		# tear down
@@ -235,10 +246,7 @@ class TestWebsiteItem(unittest.TestCase):
 		item_code = "Test Mobile Phone"
 
 		# show price for guest user in e commerce settings
-		setup_e_commerce_settings({
-			"show_price": 1,
-			"hide_price_for_guest": 0
-		})
+		setup_e_commerce_settings({"show_price": 1, "hide_price_for_guest": 0})
 
 		# price and pricing rule added via setUp
 
@@ -269,11 +277,11 @@ class TestWebsiteItem(unittest.TestCase):
 
 	def test_website_item_stock_when_out_of_stock(self):
 		"""
-			Check if stock details are fetched correctly for empty inventory when:
-			1) Showing stock availability enabled:
-				- Warehouse unset
-				- Warehouse set
-			2) Showing stock availability disabled
+		Check if stock details are fetched correctly for empty inventory when:
+		1) Showing stock availability enabled:
+		        - Warehouse unset
+		        - Warehouse set
+		2) Showing stock availability disabled
 		"""
 		item_code = "Test Mobile Phone"
 		create_regular_web_item()
@@ -287,7 +295,9 @@ class TestWebsiteItem(unittest.TestCase):
 		self.assertFalse(bool(data.product_info["stock_qty"]))
 
 		# set warehouse
-		frappe.db.set_value("Website Item", {"item_code": item_code}, "website_warehouse", "_Test Warehouse - _TC")
+		frappe.db.set_value(
+			"Website Item", {"item_code": item_code}, "website_warehouse", "_Test Warehouse - _TC"
+		)
 
 		# check if stock details are fetched and item not in stock with warehouse set
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
@@ -309,11 +319,11 @@ class TestWebsiteItem(unittest.TestCase):
 
 	def test_website_item_stock_when_in_stock(self):
 		"""
-			Check if stock details are fetched correctly for available inventory when:
-			1) Showing stock availability enabled:
-				- Warehouse set
-				- Warehouse unset
-			2) Showing stock availability disabled
+		Check if stock details are fetched correctly for available inventory when:
+		1) Showing stock availability enabled:
+		        - Warehouse set
+		        - Warehouse unset
+		2) Showing stock availability disabled
 		"""
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -323,10 +333,14 @@ class TestWebsiteItem(unittest.TestCase):
 		frappe.local.shopping_cart_settings = None
 
 		# set warehouse
-		frappe.db.set_value("Website Item", {"item_code": item_code}, "website_warehouse", "_Test Warehouse - _TC")
+		frappe.db.set_value(
+			"Website Item", {"item_code": item_code}, "website_warehouse", "_Test Warehouse - _TC"
+		)
 
 		# stock up item
-		stock_entry = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
+		stock_entry = make_stock_entry(
+			item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100
+		)
 
 		# check if stock details are fetched and item is in stock with warehouse set
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
@@ -361,10 +375,7 @@ class TestWebsiteItem(unittest.TestCase):
 		item_code = "Test Mobile Phone"
 		web_item = create_regular_web_item(item_code)
 
-		setup_e_commerce_settings({
-			"enable_recommendations": 1,
-			"show_price": 1
-		})
+		setup_e_commerce_settings({"enable_recommendations": 1, "show_price": 1})
 
 		# create recommended web item and price for it
 		recommended_web_item = create_regular_web_item("Test Mobile Phone 1")
@@ -382,7 +393,7 @@ class TestWebsiteItem(unittest.TestCase):
 		self.assertEqual(len(recommended_items), 1)
 		recomm_item = recommended_items[0]
 		self.assertEqual(recomm_item.get("website_item_name"), "Test Mobile Phone 1")
-		self.assertTrue(bool(recomm_item.get("price_info"))) # price fetched
+		self.assertTrue(bool(recomm_item.get("price_info")))  # price fetched
 
 		price_info = recomm_item.get("price_info")
 		self.assertEqual(price_info.get("price_list_rate"), 1000)
@@ -396,7 +407,7 @@ class TestWebsiteItem(unittest.TestCase):
 		recommended_items = web_item.get_recommended_items(e_commerce_settings)
 
 		self.assertEqual(len(recommended_items), 1)
-		self.assertFalse(bool(recommended_items[0].get("price_info"))) # price not fetched
+		self.assertFalse(bool(recommended_items[0].get("price_info")))  # price not fetched
 
 		# tear down
 		web_item.delete()
@@ -409,11 +420,9 @@ class TestWebsiteItem(unittest.TestCase):
 		web_item = create_regular_web_item(item_code)
 
 		# price visible to guests
-		setup_e_commerce_settings({
-			"enable_recommendations": 1,
-			"show_price": 1,
-			"hide_price_for_guest": 0
-		})
+		setup_e_commerce_settings(
+			{"enable_recommendations": 1, "show_price": 1, "hide_price_for_guest": 0}
+		)
 
 		# create recommended web item and price for it
 		recommended_web_item = create_regular_web_item("Test Mobile Phone 1")
@@ -431,7 +440,7 @@ class TestWebsiteItem(unittest.TestCase):
 
 		# test results if show price is enabled
 		self.assertEqual(len(recommended_items), 1)
-		self.assertTrue(bool(recommended_items[0].get("price_info"))) # price fetched
+		self.assertTrue(bool(recommended_items[0].get("price_info")))  # price fetched
 
 		# price hidden from guests
 		frappe.set_user("Administrator")
@@ -444,13 +453,14 @@ class TestWebsiteItem(unittest.TestCase):
 
 		# test results if show price is enabled
 		self.assertEqual(len(recommended_items), 1)
-		self.assertFalse(bool(recommended_items[0].get("price_info"))) # price fetched
+		self.assertFalse(bool(recommended_items[0].get("price_info")))  # price fetched
 
 		# tear down
 		frappe.set_user("Administrator")
 		web_item.delete()
 		recommended_web_item.delete()
 		frappe.get_cached_doc("Item", "Test Mobile Phone 1").delete()
+
 
 def create_regular_web_item(item_code=None, item_args=None, web_args=None):
 	"Create Regular Item and Website Item."
@@ -467,23 +477,27 @@ def create_regular_web_item(item_code=None, item_args=None, web_args=None):
 
 	return web_item
 
+
 def make_web_item_price(**kwargs):
 	item_code = kwargs.get("item_code")
 	if not item_code:
 		return
 
 	if not frappe.db.exists("Item Price", {"item_code": item_code}):
-		item_price = frappe.get_doc({
-			"doctype": "Item Price",
-			"item_code": item_code,
-			"price_list": kwargs.get("price_list") or "_Test Price List India",
-			"price_list_rate": kwargs.get("price_list_rate") or 1000
-		})
+		item_price = frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"item_code": item_code,
+				"price_list": kwargs.get("price_list") or "_Test Price List India",
+				"price_list_rate": kwargs.get("price_list_rate") or 1000,
+			}
+		)
 		item_price.insert()
 	else:
 		item_price = frappe.get_cached_doc("Item Price", {"item_code": item_code})
 
 	return item_price
+
 
 def make_web_pricing_rule(**kwargs):
 	title = kwargs.get("title")
@@ -491,23 +505,23 @@ def make_web_pricing_rule(**kwargs):
 		return
 
 	if not frappe.db.exists("Pricing Rule", title):
-		pricing_rule = frappe.get_doc({
-			"doctype": "Pricing Rule",
-			"title": title,
-			"apply_on": kwargs.get("apply_on") or "Item Code",
-			"items": [{
-				"item_code": kwargs.get("item_code")
-			}],
-			"selling": kwargs.get("selling") or 0,
-			"buying": kwargs.get("buying") or 0,
-			"rate_or_discount": kwargs.get("rate_or_discount") or "Discount Percentage",
-			"discount_percentage": kwargs.get("discount_percentage") or 10,
-			"company": kwargs.get("company") or "_Test Company",
-			"currency": kwargs.get("currency") or "INR",
-			"for_price_list": kwargs.get("price_list") or "_Test Price List India",
-			"applicable_for": kwargs.get("applicable_for") or "",
-			"customer": kwargs.get("customer") or "",
-		})
+		pricing_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": title,
+				"apply_on": kwargs.get("apply_on") or "Item Code",
+				"items": [{"item_code": kwargs.get("item_code")}],
+				"selling": kwargs.get("selling") or 0,
+				"buying": kwargs.get("buying") or 0,
+				"rate_or_discount": kwargs.get("rate_or_discount") or "Discount Percentage",
+				"discount_percentage": kwargs.get("discount_percentage") or 10,
+				"company": kwargs.get("company") or "_Test Company",
+				"currency": kwargs.get("currency") or "INR",
+				"for_price_list": kwargs.get("price_list") or "_Test Price List India",
+				"applicable_for": kwargs.get("applicable_for") or "",
+				"customer": kwargs.get("customer") or "",
+			}
+		)
 		pricing_rule.insert()
 	else:
 		pricing_rule = frappe.get_doc("Pricing Rule", {"title": title})
@@ -515,23 +529,26 @@ def make_web_pricing_rule(**kwargs):
 	return pricing_rule
 
 
-def create_user_and_customer_if_not_exists(email, first_name = None):
+def create_user_and_customer_if_not_exists(email, first_name=None):
 	if frappe.db.exists("User", email):
 		return
 
-	frappe.get_doc({
-		"doctype": "User",
-		"user_type": "Website User",
-		"email": email,
-		"send_welcome_email": 0,
-		"first_name": first_name or email.split("@")[0]
-	}).insert(ignore_permissions=True)
+	frappe.get_doc(
+		{
+			"doctype": "User",
+			"user_type": "Website User",
+			"email": email,
+			"send_welcome_email": 0,
+			"first_name": first_name or email.split("@")[0],
+		}
+	).insert(ignore_permissions=True)
 
 	contact = frappe.get_last_doc("Contact", filters={"email_id": email})
-	link = contact.append('links', {})
+	link = contact.append("links", {})
 	link.link_doctype = "Customer"
 	link.link_name = "_Test Customer"
 	link.link_title = "_Test Customer"
 	contact.save()
+
 
 test_dependencies = ["Price List", "Item Price", "Customer", "Contact", "Item"]

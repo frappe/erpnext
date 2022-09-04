@@ -337,9 +337,13 @@ let check_and_set_availability = function(frm) {
 		});
 
 		d.fields_dict['department'].df.onchange = () => {
-			d.set_values({
-				'practitioner': ''
-			});
+			if (d.get_value('department') == frm.doc.department) {
+				d.set_value('practitioner', frm.doc.practitioner);
+			} else {
+				d.set_value('practitioner', '');
+				d.fields_dict.available_slots.html('');
+				d.get_primary_btn().attr('disabled', true);
+			}
 			let department = d.get_value('department');
 			if (department) {
 				d.fields_dict.practitioner.get_query = function() {
@@ -426,7 +430,8 @@ let check_and_set_availability = function(frm) {
 
 		slot_details.forEach((slot_info) => {
 			slot_html += `<div class="slot-info">
-				<span> <b> ${__('Practitioner Schedule:')} </b> ${slot_info.slot_name} </span><br>
+				<span> <b> ${slot_info.practitioner_name} </b> </span><br>
+				<span> <b> ${__('Schedule:')} </b> ${slot_info.slot_name} </span><br>
 				<span> <b> ${__('Service Unit:')} </b> ${slot_info.service_unit} </span>`;
 
 			if (slot_info.service_unit_capacity) {

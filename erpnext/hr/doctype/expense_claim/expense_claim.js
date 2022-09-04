@@ -171,7 +171,7 @@ frappe.ui.form.on("Expense Claim", {
 					['docstatus', '=', 1],
 					['employee', '=', frm.doc.employee],
 					['paid_amount', '>', 0],
-					['status', '!=', 'Claimed']
+					['status', 'not in', ['Claimed', 'Returned', 'Partly Claimed and Returned']]
 				]
 			};
 		});
@@ -254,9 +254,11 @@ frappe.ui.form.on("Expense Claim", {
 			}, __("View"));
 		}
 
-		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid) && cint(frm.doc.grand_total) > 0
-				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
-				&& frappe.model.can_create("Payment Entry")) {
+		if (
+			frm.doc.docstatus === 1
+			&& frm.doc.status !== "Paid"
+			&& frappe.model.can_create("Payment Entry")
+		) {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __('Create'));
 		}

@@ -24,17 +24,17 @@ frappe.ui.form.on("E Commerce Settings", {
 			);
 		}
 
-		frappe.model.with_doctype("Item", () => {
+		frappe.model.with_doctype("Website Item", () => {
 			const web_item_meta = frappe.get_meta('Website Item');
 
 			const valid_fields = web_item_meta.fields.filter(
 				df => ["Link", "Table MultiSelect"].includes(df.fieldtype) && !df.hidden
 			).map(df => ({ label: df.label, value: df.fieldname }));
 
-			frm.fields_dict.filter_fields.grid.update_docfield_property(
+			frm.get_field("filter_fields").grid.update_docfield_property(
 				'fieldname', 'fieldtype', 'Select'
 			);
-			frm.fields_dict.filter_fields.grid.update_docfield_property(
+			frm.get_field("filter_fields").grid.update_docfield_property(
 				'fieldname', 'options', valid_fields
 			);
 		});

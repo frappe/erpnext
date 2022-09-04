@@ -1,4 +1,3 @@
-
 import json
 import random
 
@@ -16,44 +15,49 @@ def setup_data():
 	setup_item()
 	setup_workstation()
 	setup_asset()
-	import_json('Operation')
+	import_json("Operation")
 	setup_item_price()
 	show_item_groups_in_website()
-	import_json('BOM', submit=True)
+	import_json("BOM", submit=True)
 	frappe.db.commit()
 	frappe.clear_cache()
 
+
 def setup_workstation():
-	workstations = [u'Drilling Machine 1', u'Lathe 1', u'Assembly Station 1', u'Assembly Station 2', u'Packing and Testing Station']
+	workstations = [
+		"Drilling Machine 1",
+		"Lathe 1",
+		"Assembly Station 1",
+		"Assembly Station 2",
+		"Packing and Testing Station",
+	]
 	for w in workstations:
-		frappe.get_doc({
-			"doctype": "Workstation",
-			"workstation_name": w,
-			"holiday_list": frappe.get_all("Holiday List")[0].name,
-			"hour_rate_consumable": int(random.random() * 20),
-			"hour_rate_electricity": int(random.random() * 10),
-			"hour_rate_labour": int(random.random() * 40),
-			"hour_rate_rent": int(random.random() * 10),
-			"working_hours": [
-				{
-					"enabled": 1,
-				    "start_time": "8:00:00",
-					"end_time": "15:00:00"
-				}
-			]
-		}).insert()
+		frappe.get_doc(
+			{
+				"doctype": "Workstation",
+				"workstation_name": w,
+				"holiday_list": frappe.get_all("Holiday List")[0].name,
+				"hour_rate_consumable": int(random.random() * 20),
+				"hour_rate_electricity": int(random.random() * 10),
+				"hour_rate_labour": int(random.random() * 40),
+				"hour_rate_rent": int(random.random() * 10),
+				"working_hours": [{"enabled": 1, "start_time": "8:00:00", "end_time": "15:00:00"}],
+			}
+		).insert()
+
 
 def show_item_groups_in_website():
 	"""set show_in_website=1 for Item Groups"""
 	products = frappe.get_doc("Item Group", "Products")
 	products.show_in_website = 1
-	products.route = 'products'
+	products.route = "products"
 	products.save()
 
+
 def setup_asset():
-	assets = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'asset.json')).read())
+	assets = json.loads(open(frappe.get_app_path("erpnext", "demo", "data", "asset.json")).read())
 	for d in assets:
-		asset = frappe.new_doc('Asset')
+		asset = frappe.new_doc("Asset")
 		asset.update(d)
 		asset.purchase_date = add_days(nowdate(), -random.randint(20, 1500))
 		asset.next_depreciation_date = add_days(asset.purchase_date, 30)
@@ -65,28 +69,35 @@ def setup_asset():
 		asset.save()
 		asset.submit()
 
+
 def setup_item():
-	items = json.loads(open(frappe.get_app_path('erpnext', 'demo', 'data', 'item.json')).read())
+	items = json.loads(open(frappe.get_app_path("erpnext", "demo", "data", "item.json")).read())
 	for i in items:
-		item = frappe.new_doc('Item')
+		item = frappe.new_doc("Item")
 		item.update(i)
-		if hasattr(item, 'item_defaults') and item.item_defaults[0].default_warehouse:
-			item.item_defaults[0].company = data.get("Manufacturing").get('company_name')
-			warehouse = frappe.get_all('Warehouse', filters={'warehouse_name': item.item_defaults[0].default_warehouse}, limit=1)
+		if hasattr(item, "item_defaults") and item.item_defaults[0].default_warehouse:
+			item.item_defaults[0].company = data.get("Manufacturing").get("company_name")
+			warehouse = frappe.get_all(
+				"Warehouse", filters={"warehouse_name": item.item_defaults[0].default_warehouse}, limit=1
+			)
 			if warehouse:
 				item.item_defaults[0].default_warehouse = warehouse[0].name
 		item.insert()
 
+
 def setup_product_bundle():
-	frappe.get_doc({
-		'doctype': 'Product Bundle',
-		'new_item_code': 'Wind Mill A Series with Spare Bearing',
-		'items': [
-			{'item_code': 'Wind Mill A Series', 'qty': 1},
-			{'item_code': 'Bearing Collar', 'qty': 1},
-			{'item_code': 'Bearing Assembly', 'qty': 1},
-		]
-	}).insert()
+	frappe.get_doc(
+		{
+			"doctype": "Product Bundle",
+			"new_item_code": "Wind Mill A Series with Spare Bearing",
+			"items": [
+				{"item_code": "Wind Mill A Series", "qty": 1},
+				{"item_code": "Bearing Collar", "qty": 1},
+				{"item_code": "Bearing Assembly", "qty": 1},
+			],
+		}
+	).insert()
+
 
 def setup_item_price():
 	frappe.db.sql("delete from `tabItem Price`")
@@ -109,7 +120,7 @@ def setup_item_price():
 		"Wind Mill A Series with Spare Bearing": 750,
 		"Wind MIll C Series": 400,
 		"Wind Turbine": 400,
-		"Wing Sheet": 30.8
+		"Wing Sheet": 30.8,
 	}
 
 	standard_buying = {
@@ -126,17 +137,19 @@ def setup_item_price():
 		"Shaft": 250,
 		"Stand": 300,
 		"Upper Bearing Plate": 200,
-		"Wing Sheet": 25
+		"Wing Sheet": 25,
 	}
 
 	for price_list in ("standard_buying", "standard_selling"):
 		for item, rate in iteritems(locals().get(price_list)):
-			frappe.get_doc({
-				"doctype": "Item Price",
-				"price_list": price_list.replace("_", " ").title(),
-				"item_code": item,
-				"selling": 1 if price_list=="standard_selling" else 0,
-				"buying": 1 if price_list=="standard_buying" else 0,
-				"price_list_rate": rate,
-				"currency": "USD"
-			}).insert()
+			frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"price_list": price_list.replace("_", " ").title(),
+					"item_code": item,
+					"selling": 1 if price_list == "standard_selling" else 0,
+					"buying": 1 if price_list == "standard_buying" else 0,
+					"price_list_rate": rate,
+					"currency": "USD",
+				}
+			).insert()

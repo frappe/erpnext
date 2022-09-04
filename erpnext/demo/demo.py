@@ -1,4 +1,3 @@
-
 import sys
 
 import frappe
@@ -27,17 +26,18 @@ bench --site demo.erpnext.dev execute erpnext.demo.demo.simulate
 
 """
 
-def make(domain='Manufacturing', days=100):
+
+def make(domain="Manufacturing", days=100):
 	frappe.flags.domain = domain
 	frappe.flags.mute_emails = True
 	setup_data.setup(domain)
-	if domain== 'Manufacturing':
+	if domain == "Manufacturing":
 		manufacture.setup_data()
 	elif domain == "Retail":
 		retail.setup_data()
-	elif domain== 'Education':
+	elif domain == "Education":
 		education.setup_data()
-	elif domain== 'Healthcare':
+	elif domain == "Healthcare":
 		healthcare.setup_data()
 
 	site = frappe.local.site
@@ -47,20 +47,20 @@ def make(domain='Manufacturing', days=100):
 
 	simulate(domain, days)
 
-def simulate(domain='Manufacturing', days=100):
+
+def simulate(domain="Manufacturing", days=100):
 	runs_for = frappe.flags.runs_for or days
 	frappe.flags.company = erpnext.get_default_company()
 	frappe.flags.mute_emails = True
 
 	if not frappe.flags.start_date:
 		# start date = 100 days back
-		frappe.flags.start_date = frappe.utils.add_days(frappe.utils.nowdate(),
-			-1 * runs_for)
+		frappe.flags.start_date = frappe.utils.add_days(frappe.utils.nowdate(), -1 * runs_for)
 
 	current_date = frappe.utils.getdate(frappe.flags.start_date)
 
 	# continue?
-	demo_last_date = frappe.db.get_global('demo_last_date')
+	demo_last_date = frappe.db.get_global("demo_last_date")
 	if demo_last_date:
 		current_date = frappe.utils.add_days(frappe.utils.getdate(demo_last_date), 1)
 
@@ -71,8 +71,7 @@ def simulate(domain='Manufacturing', days=100):
 
 	fixed_asset.work()
 	for i in range(runs_for):
-		sys.stdout.write("\rSimulating {0}: Day {1}".format(
-			current_date.strftime("%Y-%m-%d"), i))
+		sys.stdout.write("\rSimulating {0}: Day {1}".format(current_date.strftime("%Y-%m-%d"), i))
 		sys.stdout.flush()
 		frappe.flags.current_date = current_date
 		if current_date.weekday() in (5, 6):
@@ -87,13 +86,13 @@ def simulate(domain='Manufacturing', days=100):
 			sales.work(domain)
 			# run_messages()
 
-			if domain=='Manufacturing':
+			if domain == "Manufacturing":
 				manufacturing.work()
-			elif domain=='Education':
+			elif domain == "Education":
 				edu.work()
 
 		except Exception:
-			frappe.db.set_global('demo_last_date', current_date)
+			frappe.db.set_global("demo_last_date", current_date)
 			raise
 		finally:
 			current_date = frappe.utils.add_days(current_date, 1)

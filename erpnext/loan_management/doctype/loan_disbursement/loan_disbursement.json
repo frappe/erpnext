@@ -14,11 +14,15 @@
   "applicant",
   "section_break_7",
   "disbursement_date",
+  "clearance_date",
   "column_break_8",
   "disbursed_amount",
   "accounting_dimensions_section",
   "cost_center",
-  "customer_details_section",
+  "accounting_details",
+  "disbursement_account",
+  "column_break_16",
+  "loan_account",
   "bank_account",
   "disbursement_references_section",
   "reference_date",
@@ -107,11 +111,6 @@
    "label": "Disbursement Details"
   },
   {
-   "fieldname": "customer_details_section",
-   "fieldtype": "Section Break",
-   "label": "Customer Details"
-  },
-  {
    "fetch_from": "against_loan.applicant_type",
    "fieldname": "applicant_type",
    "fieldtype": "Select",
@@ -149,15 +148,48 @@
    "fieldname": "reference_number",
    "fieldtype": "Data",
    "label": "Reference Number"
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fetch_from": "against_loan.disbursement_account",
+   "fetch_if_empty": 1,
+   "fieldname": "disbursement_account",
+   "fieldtype": "Link",
+   "label": "Disbursement Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "against_loan.loan_account",
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:09:32.175355",
+ "modified": "2022-08-04 17:16:04.922444",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -194,5 +226,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

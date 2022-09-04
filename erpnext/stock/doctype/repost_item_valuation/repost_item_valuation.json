@@ -1,7 +1,7 @@
 {
  "actions": [],
  "autoname": "REPOST-ITEM-VAL-.######",
- "creation": "2020-10-22 22:27:07.742161",
+ "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -23,8 +23,10 @@
   "error_section",
   "error_log",
   "items_to_be_repost",
+  "affected_transactions",
   "distinct_item_and_warehouse",
-  "current_index"
+  "current_index",
+  "gl_reposting_index"
  ],
  "fields": [
   {
@@ -129,7 +131,7 @@
    "reqd": 1
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
    "label": "Allow Negative Stock"
@@ -172,12 +174,28 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "affected_transactions",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Affected Transactions",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "gl_reposting_index",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "GL reposting index",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-24 02:18:10.524560",
+ "modified": "2022-06-13 12:20:22.182322",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
@@ -227,5 +245,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

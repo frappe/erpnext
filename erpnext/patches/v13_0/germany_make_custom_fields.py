@@ -13,7 +13,7 @@ def execute():
 	It is usually run once at setup of a new company. Since it's new, run it
 	once for existing companies as well.
 	"""
-	company_list = frappe.get_all('Company', filters = {'country': 'Germany'})
+	company_list = frappe.get_all("Company", filters={"country": "Germany"})
 	if not company_list:
 		return
 

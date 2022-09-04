@@ -659,7 +659,6 @@
   },
   {
    "collapsible": 1,
-   "default": "eval:!doc.is_fixed_asset",
    "fieldname": "sales_details",
    "fieldtype": "Section Break",
    "label": "Sales Details",
@@ -919,8 +918,9 @@
   },
   {
    "fieldname": "default_item_manufacturer",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Default Item Manufacturer",
+   "options": "Manufacturer",
    "read_only": 1
   },
   {
@@ -955,7 +955,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-14 04:13:16.857534",
+ "modified": "2022-04-28 04:52:10.272256",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

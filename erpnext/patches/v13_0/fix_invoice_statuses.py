@@ -8,6 +8,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 
 TODAY = getdate()
 
+
 def execute():
 	# This fix is not related to Party Specific Item,
 	# but it is needed for code introduced after Party Specific Item was
@@ -35,39 +36,28 @@ def execute():
 			fields=fields,
 			filters={
 				"docstatus": 1,
-				"status": ("in", (
-					"Overdue",
-					"Overdue and Discounted",
-					"Partly Paid",
-					"Partly Paid and Discounted"
-				)),
+				"status": (
+					"in",
+					("Overdue", "Overdue and Discounted", "Partly Paid", "Partly Paid and Discounted"),
+				),
 				"outstanding_amount": (">", 0),
 				"modified": (">", "2021-01-01")
 				# an assumption is being made that only invoices modified
 				# after 2021 got affected as incorrectly overdue.
 				# required for performance reasons.
-			}
+			},
 		)
 
-		invoices_to_update = {
-			invoice.name: invoice for invoice in invoices_to_update
-		}
+		invoices_to_update = {invoice.name: invoice for invoice in invoices_to_update}
 
 		payment_schedule_items = frappe.get_all(
 			"Payment Schedule",
-			fields=(
-				"due_date",
-				"payment_amount",
-				"base_payment_amount",
-				"parent"
-			),
-			filters={"parent": ("in", invoices_to_update)}
+			fields=("due_date", "payment_amount", "base_payment_amount", "parent"),
+			filters={"parent": ("in", invoices_to_update)},
 		)
 
 		for item in payment_schedule_items:
-			invoices_to_update[item.parent].setdefault(
-				"payment_schedule", []
-			).append(item)
+			invoices_to_update[item.parent].setdefault("payment_schedule", []).append(item)
 
 		status_map = {}
 
@@ -81,19 +71,11 @@ def execute():
 			status_map.setdefault(correct_status, []).append(doc.name)
 
 		for status, docs in status_map.items():
-			frappe.db.set_value(
-				doctype, {"name": ("in", docs)},
-				"status",
-				status,
-				update_modified=False
-			)
-
+			frappe.db.set_value(doctype, {"name": ("in", docs)}, "status", status, update_modified=False)
 
 
 def get_correct_status(doc):
-	outstanding_amount = flt(
-		doc.outstanding_amount, doc.precision("outstanding_amount")
-	)
+	outstanding_amount = flt(doc.outstanding_amount, doc.precision("outstanding_amount"))
 	total = get_total_in_party_account_currency(doc)
 
 	status = ""

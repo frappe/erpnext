@@ -17,14 +17,16 @@ class TestInterviewFeedback(unittest.TestCase):
 	def test_validation_for_skill_set(self):
 		frappe.set_user("Administrator")
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(getdate(), -1))
+		interview = create_interview_and_dependencies(
+			job_applicant.name, scheduled_on=add_days(getdate(), -1)
+		)
 		skill_ratings = get_skills_rating(interview.interview_round)
 
 		interviewer = interview.interview_details[0].interviewer
-		create_skill_set(['Leadership'])
+		create_skill_set(["Leadership"])
 
 		interview_feedback = create_interview_feedback(interview.name, interviewer, skill_ratings)
-		interview_feedback.append("skill_assessment", {"skill": 'Leadership', 'rating': 4})
+		interview_feedback.append("skill_assessment", {"skill": "Leadership", "rating": 4})
 		frappe.set_user(interviewer)
 
 		self.assertRaises(frappe.ValidationError, interview_feedback.save)
@@ -33,7 +35,9 @@ class TestInterviewFeedback(unittest.TestCase):
 
 	def test_average_ratings_on_feedback_submission_and_cancellation(self):
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(getdate(), -1))
+		interview = create_interview_and_dependencies(
+			job_applicant.name, scheduled_on=add_days(getdate(), -1)
+		)
 		skill_ratings = get_skills_rating(interview.interview_round)
 
 		# For First Interviewer Feedback
@@ -48,20 +52,26 @@ class TestInterviewFeedback(unittest.TestCase):
 			if d.rating:
 				total_rating += d.rating
 
-		avg_rating = flt(total_rating / len(feedback_1.skill_assessment) if len(feedback_1.skill_assessment) else 0)
+		avg_rating = flt(
+			total_rating / len(feedback_1.skill_assessment) if len(feedback_1.skill_assessment) else 0
+		)
 
 		self.assertEqual(flt(avg_rating, 3), feedback_1.average_rating)
 
-		avg_on_interview_detail = frappe.db.get_value('Interview Detail', {
-			'parent': feedback_1.interview,
-			'interviewer': feedback_1.interviewer,
-			'interview_feedback': feedback_1.name
-		}, 'average_rating')
+		avg_on_interview_detail = frappe.db.get_value(
+			"Interview Detail",
+			{
+				"parent": feedback_1.interview,
+				"interviewer": feedback_1.interviewer,
+				"interview_feedback": feedback_1.name,
+			},
+			"average_rating",
+		)
 
 		# 1. average should be reflected in Interview Detail.
 		self.assertEqual(avg_on_interview_detail, round(feedback_1.average_rating))
 
-		'''For Second Interviewer Feedback'''
+		"""For Second Interviewer Feedback"""
 		interviewer = interview.interview_details[1].interviewer
 		frappe.set_user(interviewer)
 
@@ -95,7 +105,9 @@ def create_interview_feedback(interview, interviewer, skills_ratings):
 def get_skills_rating(interview_round):
 	import random
 
-	skills = frappe.get_all("Expected Skill Set", filters={"parent": interview_round}, fields = ["skill"])
+	skills = frappe.get_all(
+		"Expected Skill Set", filters={"parent": interview_round}, fields=["skill"]
+	)
 	for d in skills:
 		d["rating"] = random.randint(1, 5)
 	return skills
