@@ -9,6 +9,9 @@ erpnext.ui.Onboarding = class {
 		let $container = $('<div>');
 		$container.appendTo(this.$wrapper);
 		this.page = page;
+		$('.navbar').remove();
+		$('.page-head').remove();
+
 		let $vm = new Vue({
 			el: $container.get(0),
 			render: h => h(Onboarding, {

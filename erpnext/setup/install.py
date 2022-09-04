@@ -28,6 +28,7 @@ def after_install():
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
+	update_home_page()
 	frappe.db.commit()
 
 
@@ -194,6 +195,17 @@ def add_standard_navbar_items():
 		)
 
 	navbar_settings.save()
+
+
+def update_home_page():
+	if not frappe.conf.skip_setup_wizard:
+		# only set home_page if the value doesn't exist in the db
+		if (
+			not frappe.db.get_default("desktop:home_page")
+			or frappe.db.get_default("desktop:home_page") == "setup-wizard"
+		):
+			frappe.db.set_default("desktop:home_page", "onboarding")
+			frappe.db.set_single_value("System Settings", "setup_complete", 0)
 
 
 def add_app_name():

@@ -41,7 +41,7 @@
 						What does your organization do?
 					</div>
 					<div class="row domain-box">
-						<button class="domain"
+						<button class="col-3 domain"
 							@click="selectedDomain = domain"
 							:class="[selectedDomain == domain ? 'selected-domain' :'']"
 							v-for="(domain, index) in domains" :key="index"
@@ -580,6 +580,7 @@ export default {
 	border: 1px solid #EBEEF0;
 	border-radius: 8px;
 	margin-left: 9px;
+	margin-top: 10px;
 	background-color:#FFFFFF;
 }
 
