@@ -3,7 +3,7 @@ from frappe.utils import cstr, strip_html
 
 
 def execute():
-	for doctype in ("Lead", "Prospect"):
+	for doctype in ("Lead", "Prospect", "Opportunity"):
 		if not frappe.db.has_column(doctype, "notes"):
 			continue
 
@@ -19,3 +19,5 @@ def execute():
 				doc = frappe.get_doc(doctype, d.name)
 				doc.append("notes", {"note": d.notes, "added_by": d.modified_by, "added_on": d.modified})
 				doc.update_child_table("notes")
+
+		frappe.db.sql_ddl(f"alter table `tab{doctype}` drop column `notes`")
