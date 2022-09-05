@@ -168,7 +168,7 @@ class Analytics(object):
 	def get_sales_transactions_based_on_items(self):
 
 		if self.filters["value_quantity"] == "Value":
-			value_field = "base_amount"
+			value_field = "base_net_amount"
 		else:
 			value_field = "stock_qty"
 
@@ -216,7 +216,7 @@ class Analytics(object):
 
 	def get_sales_transactions_based_on_item_group(self):
 		if self.filters["value_quantity"] == "Value":
-			value_field = "base_amount"
+			value_field = "base_net_amount"
 		else:
 			value_field = "qty"
 

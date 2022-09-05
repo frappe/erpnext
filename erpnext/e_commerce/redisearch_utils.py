@@ -7,7 +7,9 @@ import frappe
 from frappe import _
 from frappe.utils.redis_wrapper import RedisWrapper
 from redis import ResponseError
-from redisearch import AutoCompleter, Client, IndexDefinition, Suggestion, TagField, TextField
+from redis.commands.search.field import TagField, TextField
+from redis.commands.search.indexDefinition import IndexDefinition
+from redis.commands.search.suggestion import Suggestion
 
 WEBSITE_ITEM_INDEX = "website_items_index"
 WEBSITE_ITEM_KEY_PREFIX = "website_item:"
@@ -35,12 +37,9 @@ def is_redisearch_enabled():
 def is_search_module_loaded():
 	try:
 		cache = frappe.cache()
-		out = cache.execute_command("MODULE LIST")
-
-		parsed_output = " ".join(
-			(" ".join([frappe.as_unicode(s) for s in o if not isinstance(s, int)]) for o in out)
-		)
-		return "search" in parsed_output
+		for module in cache.module_list():
+			if module.get(b"name") == b"search":
+				return True
 	except Exception:
 		return False  # handling older redis versions
 
@@ -58,18 +57,18 @@ def if_redisearch_enabled(function):
 
 
 def make_key(key):
-	return "{0}|{1}".format(frappe.conf.db_name, key).encode("utf-8")
+	return frappe.cache().make_key(key)
 
 
 @if_redisearch_enabled
 def create_website_items_index():
 	"Creates Index Definition."
 
-	# CREATE index
-	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=frappe.cache())
+	redis = frappe.cache()
+	index = redis.ft(WEBSITE_ITEM_INDEX)
 
 	try:
-		client.drop_index()  # drop if already exists
+		index.dropindex()  # drop if already exists
 	except ResponseError:
 		# will most likely raise a ResponseError if index does not exist
 		# ignore and create index
@@ -86,9 +85,10 @@ def create_website_items_index():
 	if "web_item_name" in idx_fields:
 		idx_fields.remove("web_item_name")
 
-	idx_fields = list(map(to_search_field, idx_fields))
+	idx_fields = [to_search_field(f) for f in idx_fields]
 
-	client.create_index(
+	# TODO: sortable?
+	index.create_index(
 		[TextField("web_item_name", sortable=True)] + idx_fields,
 		definition=idx_def,
 	)
@@ -119,8 +119,8 @@ def insert_item_to_index(website_item_doc):
 
 @if_redisearch_enabled
 def insert_to_name_ac(web_name, doc_name):
-	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=frappe.cache())
-	ac.add_suggestions(Suggestion(web_name, payload=doc_name))
+	ac = frappe.cache().ft()
+	ac.sugadd(WEBSITE_ITEM_NAME_AUTOCOMPLETE, Suggestion(web_name, payload=doc_name))
 
 
 def create_web_item_map(website_item_doc):
@@ -157,9 +157,8 @@ def delete_item_from_index(website_item_doc):
 @if_redisearch_enabled
 def delete_from_ac_dict(website_item_doc):
 	"""Removes this items's name from autocomplete dictionary"""
-	cache = frappe.cache()
-	name_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=cache)
-	name_ac.delete(website_item_doc.web_item_name)
+	ac = frappe.cache().ft()
+	ac.sugdel(website_item_doc.web_item_name)
 
 
 @if_redisearch_enabled
@@ -170,8 +169,6 @@ def define_autocomplete_dictionary():
 	"""
 
 	cache = frappe.cache()
-	item_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=cache)
-	item_group_ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=cache)
 
 	# Delete both autocomplete dicts
 	try:
@@ -180,38 +177,43 @@ def define_autocomplete_dictionary():
 	except Exception:
 		raise_redisearch_error()
 
-	create_items_autocomplete_dict(autocompleter=item_ac)
-	create_item_groups_autocomplete_dict(autocompleter=item_group_ac)
+	create_items_autocomplete_dict()
+	create_item_groups_autocomplete_dict()
 
 
 @if_redisearch_enabled
-def create_items_autocomplete_dict(autocompleter):
+def create_items_autocomplete_dict():
 	"Add items as suggestions in Autocompleter."
+
+	ac = frappe.cache().ft()
 	items = frappe.get_all(
 		"Website Item", fields=["web_item_name", "item_group"], filters={"published": 1}
 	)
-
 	for item in items:
-		autocompleter.add_suggestions(Suggestion(item.web_item_name))
+		ac.sugadd(WEBSITE_ITEM_NAME_AUTOCOMPLETE, Suggestion(item.web_item_name))
 
 
 @if_redisearch_enabled
-def create_item_groups_autocomplete_dict(autocompleter):
+def create_item_groups_autocomplete_dict():
 	"Add item groups with weightage as suggestions in Autocompleter."
+
 	published_item_groups = frappe.get_all(
 		"Item Group", fields=["name", "route", "weightage"], filters={"show_in_website": 1}
 	)
 	if not published_item_groups:
 		return
 
+	ac = frappe.cache().ft()
+
 	for item_group in published_item_groups:
 		payload = json.dumps({"name": item_group.name, "route": item_group.route})
-		autocompleter.add_suggestions(
+		ac.sugadd(
+			WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
 			Suggestion(
 				string=item_group.name,
 				score=frappe.utils.flt(item_group.weightage) or 1.0,
 				payload=payload,  # additional info that can be retrieved later
-			)
+			),
 		)
 
 
