@@ -18,4 +18,4 @@ def execute():
 			if strip_html(cstr(d.notes)).strip():
 				doc = frappe.get_doc(doctype, d.name)
 				doc.append("notes", {"note": d.notes, "added_by": d.modified_by, "added_on": d.modified})
-				doc.save()
+				doc.update_child_table("notes")
