@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Journal Entry Template", {
-	setup: function(frm) {
+	refresh: function(frm) {
 		frappe.model.set_default_values(frm.doc);
 
 		frm.set_query("account" ,"accounts", function(){
