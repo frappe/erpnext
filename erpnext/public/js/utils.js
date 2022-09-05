@@ -703,11 +703,11 @@ erpnext.utils.map_current_doc = function(opts) {
 			callback: function(r) {
 				if(!r.exc) {
 					frappe.model.sync(r.message);
-					cur_frm.dirty();
-					cur_frm.refresh();
 					if (opts.after_cscript_method) {
 						cur_frm.cscript[opts.after_cscript_method]();
 					}
+					cur_frm.dirty();
+					cur_frm.refresh();
 				}
 			}
 		});
