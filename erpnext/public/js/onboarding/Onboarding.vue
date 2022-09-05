@@ -1,5 +1,5 @@
 <template>
-	<div class="layout-main-section row onboarding-container">
+	<div class="row onboarding-container">
 		<div class="col-3 onboarding-sidebar">
 			<div class="sidebar-container">
 				<div class="step-title row" v-for="(step, index) in steps" :key="index">
@@ -77,8 +77,8 @@
 					</div>
 				</div>
 				<div>
-					<div class="section-heading">
-						Others
+					<div class="row section-heading">
+						Other Modules
 					</div>
 					<div class="row module-row">
 						<Module v-for="(module, index) in modules.slice(6, -1)" :key="index + 6" :module="module" :primary=0
@@ -88,12 +88,18 @@
 			</div>
 			<div class="row button-row">
 				<div>
-					<button v-on:click=prev_step class="btn btn-secondary btn-sm" v-if="CurrentStep > 1">Previous</button>
+					<button v-on:click=prev_step class="btn btn-secondary btn-sm" v-if="CurrentStep > 1 && CurrentStep < 5">Previous</button>
 				</div>
 				<div>
 					<button v-on:click=next_step class="btn btn-primary btn-sm btn-next" v-if="CurrentStep < 4">Next</button>
 					<button v-on:click=finish_setup class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">Finish Setup</button>
 				</div>
+			</div>
+			<div v-show="CurrentStep == 5">
+				<div class="row loading-state">
+					<LoadingIndicator />
+				</div>
+				<div class="row setup-message">{{ setup_stage}}...</div>
 			</div>
 		</div>
 	</div>
@@ -115,11 +121,12 @@ export default {
 			abbreviation: "MC",
 			edit: false,
 			button_string: "Edit",
+			setup_stage: 'Loading',
 			steps: {
 				1: "Setup Organization",
 				2: "Regional Settings",
 				3: "Accounting Setup",
-				4: "Enabled Module"
+				4: "Enabled Modules"
 			},
 			domains: ["Manufacturing", "Retail", "Service", "Distribution", "Loans", "Education", "Healthcare", "Other"],
 			fiscal_years: {
@@ -179,8 +186,9 @@ export default {
 			this.abbreviation=abbr.slice(0, 10).toUpperCase();
 		},
 		finish_setup: function() {
-			console.log(this.enabled_modules);
-			// frappe.throw("Finish Setup");
+			this.CurrentStep += 1;
+			this.listen_for_setup_stages();
+
 			frappe.call({
 				method: "frappe.desk.page.setup_wizard.setup_wizard.setup_complete",
 				args: { args: {
@@ -220,7 +228,14 @@ export default {
 					this.enabled_modules.splice(index, 1);
 				}
 			}
-		}
+		},
+
+		listen_for_setup_stages: function() {
+			frappe.realtime.on("setup_task", (data) => {
+				console.log(data);
+				this.setup_stage = data.stage_status;
+			});
+	}
 	},
 	mounted() {
 		let regional_data = this.regional_data.country_info;
@@ -242,6 +257,7 @@ export default {
 								callback: (r) => {
 									if (r.message) {
 										this.slide_3.set_df_property("chart_of_accounts", "options", r.message)
+										this.slide_3.set_value("chart_of_accounts", r.message[0]);
 									}
 								}
 							})
@@ -367,6 +383,7 @@ export default {
 					fieldname: "tagline",
 					label: __("Company Tagline"),
 					fieldtype: "Data",
+					default: "Your Company Tagline",
 					reqd: 1,
 				},
 
@@ -383,8 +400,10 @@ export default {
 .onboarding-container {
 	margin-top: 50px;
 	height: 650px;
+	width: 1250px;
 	background: #FFFFFF;
 	border-radius: 16px;
+	align-items: center;
 }
 
 .onboarding-sidebar {
@@ -418,23 +437,23 @@ export default {
 
 .module-layout {
 	height: 450px;
-	justify-content: center;
 	overflow: scroll;
 	scrollbar-width: 'none';
 	-ms-overflow-style: 'none'
 }
 
 .module-row {
-	gap: 16px;
-	margin-left: 40px;
+	gap: 20px;
+	justify-content: center;
+	align-items: center;
 }
 
 .section-heading {
 	font-weight: 600;
-	font-size: 16px;
+	font-size: 18px;
 	line-height: 24px;
-	margin-left: 40px;
-	margin-top: 17px;
+	margin-left: 57px;
+	margin-top: 25px;
 	margin-bottom: 12px;
 }
 
@@ -600,5 +619,24 @@ export default {
 	order: 1;
 	align-self: stretch;
 	flex-grow: 1;
+}
+
+.loading-state {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-top: 250px;
+}
+
+.setup-message {
+	display: flex;
+	margin-top: 10px;
+	justify-content: center;
+	align-items: center;
+	font-family: 'Inter';
+	font-style: normal;
+	font-size: 20px;
+	line-height: 25px;
+	color: #505A62;
 }
 </style>

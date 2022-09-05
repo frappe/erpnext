@@ -49,14 +49,14 @@ export default {
 
 .module-body {
 	height: 160px;
-	width: 280px;
+	width: 250px;
 	border-radius: 10px;
 	box-shadow: 0px 2px 6px rgba(17, 43, 66, 0.08), 0px 1px 4px rgba(17, 43, 66, 0.1);
 	padding-right: 10px;
 }
 
 .checked-border {
-	border: 2px solid #2D95F0 !important;
+	border: 1px solid #2D95F0 !important;
 }
 
 .primary-icon {
