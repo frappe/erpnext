@@ -169,16 +169,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 	},
 
-	before_save: function(frm) {
-		var supplier_list = frappe.utils.get_config_by_name("supplier_expire_check")
-		if(supplier_list.includes(frm.supplier)){		
-			this.frm.set_df_property('expiry_date','read_only',false);
-		}else{
-			this.frm.set_value("expiry_date", '');
-			this.frm.set_df_property('expiry_date','read_only',true);			
-		}
+	// before_save: function(frm) {
+	// 	var supplier_list = frappe.utils.get_config_by_name("supplier_expire_check")
+	// 	if(supplier_list.includes(frm.supplier)){		
+	// 		this.frm.set_df_property('expiry_date','read_only',false);
+	// 	}else{
+	// 		this.frm.set_value("expiry_date", '');
+	// 		this.frm.set_df_property('expiry_date','read_only',true);			
+	// 	}
 		
-	},
+	// },
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
