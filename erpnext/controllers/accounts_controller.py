@@ -2247,6 +2247,9 @@ def get_payment_term_details(
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date)
 		term_details.discount_date = get_discount_date(term, bill_date)
+	
+	elif term_details.payment_term == "AS AGREED":
+		term_details.due_date = ''
 	elif posting_date:
 		term_details.due_date = get_due_date(term, posting_date)
 		term_details.discount_date = get_discount_date(term, posting_date)
