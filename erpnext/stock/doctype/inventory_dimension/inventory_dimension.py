@@ -236,3 +236,30 @@ def get_inventory_dimensions():
 def delete_dimension(dimension):
 	doc = frappe.get_doc("Inventory Dimension", dimension)
 	doc.delete()
+
+
+@frappe.whitelist()
+def get_parent_fields(child_doctype, dimension_name):
+	parent_doctypes = frappe.get_all(
+		"DocField", fields=["parent"], filters={"options": child_doctype}
+	)
+
+	fields = []
+
+	fields.extend(
+		frappe.get_all(
+			"DocField",
+			fields=["fieldname as value", "label"],
+			filters={"options": dimension_name, "parent": ("in", [d.parent for d in parent_doctypes])},
+		)
+	)
+
+	fields.extend(
+		frappe.get_all(
+			"Custom Field",
+			fields=["fieldname as value", "label"],
+			filters={"options": dimension_name, "dt": ("in", [d.parent for d in parent_doctypes])},
+		)
+	)
+
+	return fields

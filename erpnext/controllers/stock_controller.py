@@ -390,6 +390,10 @@ class StockController(AccountsController):
 		return sl_dict
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
+		# To handle delivery note and sales invoice
+		if row.get("item_row"):
+			row = row.get("item_row")
+
 		dimensions = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
 		for dimension in dimensions:
 			if not dimension:
@@ -407,8 +411,16 @@ class StockController(AccountsController):
 						"DocField", {"parent": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
 					)
 
+					if not fieldname:
+						fieldname = frappe.get_cached_value(
+							"Custom Field", {"dt": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
+						)
+
 					if fieldname and self.get(fieldname):
 						sl_dict[dimension.target_fieldname] = self.get(fieldname)
+
+				if sl_dict[dimension.target_fieldname] and self.docstatus == 1:
+					row.db_set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
