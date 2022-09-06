@@ -70,6 +70,55 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		rm_supp_cost = sum(item.amount for item in scr.get("supplied_items"))
 		self.assertEqual(scr.get("items")[0].rm_supp_cost, flt(rm_supp_cost))
 
+	def test_available_qty_for_consumption(self):
+		make_stock_entry(
+			item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100
+		)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			qty=100,
+			target="_Test Warehouse 1 - _TC",
+			basic_rate=100,
+		)
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = [
+			{
+				"main_item_code": "_Test FG Item",
+				"item_code": "_Test Item",
+				"qty": 5.0,
+				"rate": 100.0,
+				"stock_uom": "_Test UOM",
+				"warehouse": "_Test Warehouse - _TC",
+			},
+			{
+				"main_item_code": "_Test FG Item",
+				"item_code": "_Test Item Home Desktop 100",
+				"qty": 10.0,
+				"rate": 100.0,
+				"stock_uom": "_Test UOM",
+				"warehouse": "_Test Warehouse - _TC",
+			},
+		]
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		self.assertRaises(frappe.ValidationError, scr.submit)
+
 	def test_subcontracting_gle_fg_item_rate_zero(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 
