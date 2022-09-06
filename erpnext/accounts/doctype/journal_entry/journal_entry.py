@@ -436,9 +436,15 @@ class JournalEntry(AccountsController):
 				if invoice.docstatus != 1:
 					frappe.throw(_("{0} {1} is not submitted").format(reference_type, reference_name))
 
-				if total and flt(invoice.outstanding_amount) < total:
-					frappe.throw(_("Payment against {0} {1} cannot be greater than Outstanding Amount {2}")
-						.format(reference_type, reference_name, invoice.outstanding_amount))
+				if total:
+					if flt(invoice.outstanding_amount) >= 0:
+						if total > flt(invoice.outstanding_amount):
+							frappe.throw(_("Payment against {0} cannot be greater than Outstanding Amount {1}")
+								.format(frappe.get_desk_link(reference_type, reference_name), frappe.format(invoice.outstanding_amount)))
+					else:
+						if total < flt(invoice.outstanding_amount):
+							frappe.throw(_("Payment against {0} cannot be greater than Outstanding Amount {1}")
+								.format(frappe.get_desk_link(reference_type, reference_name), frappe.format(invoice.outstanding_amount)))
 
 	def validate_jv_party_references(self):
 		for reference_name, acc_amounts in iteritems(self.jv_party_references):
