@@ -875,25 +875,24 @@ class StockEntry(StockController):
 						)
 					)
 
-				parent = frappe.qb.DocType("Stock Entry")
-				child = frappe.qb.DocType("Stock Entry Detail")
-
-				conditions = (
-					(parent.docstatus == 1)
-					& (child.item_code == se_item.item_code)
-					& (
-						(parent.purchase_order == self.purchase_order)
-						if self.subcontract_data.order_doctype == "Purchase Order"
-						else (parent.subcontracting_order == self.subcontracting_order)
-					)
-				)
+				se = frappe.qb.DocType("Stock Entry")
+				se_detail = frappe.qb.DocType("Stock Entry Detail")
 
 				total_supplied = (
-					frappe.qb.from_(parent)
-					.inner_join(child)
-					.on(parent.name == child.parent)
-					.select(Sum(child.transfer_qty))
-					.where(conditions)
+					frappe.qb.from_(se)
+					.inner_join(se_detail)
+					.on(se.name == se_detail.parent)
+					.select(Sum(se_detail.transfer_qty))
+					.where(
+						(se.purpose == "Send to Subcontractor")
+						& (se.docstatus == 1)
+						& (se_detail.item_code == se_item.item_code)
+						& (
+							(se.purchase_order == self.purchase_order)
+							if self.subcontract_data.order_doctype == "Purchase Order"
+							else (se.subcontracting_order == self.subcontracting_order)
+						)
+					)
 				).run()[0][0]
 
 				if flt(total_supplied, precision) > flt(total_allowed, precision):
