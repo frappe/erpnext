@@ -2,6 +2,9 @@ import frappe
 
 
 def execute():
+	if 'Vehicles' not in frappe.get_active_domains():
+			return
+
 	frappe.reload_doc("vehicles", "doctype", "vehicle_log")
 
 	invalid_serial_no_names = frappe.db.sql("""
@@ -31,18 +34,24 @@ def execute():
 	""")
 
 	print("Updating Vehicle Receipt and Vehicle Delivery as reference")
-	vehicle_receipt_logs = frappe.db.sql("""
-		select name, vehicle_log from `tabVehicle Receipt` where ifnull(vehicle_log, '') != ''
-	""", as_dict=1)
+	if frappe.db.has_column('Vehicle Receipt', 'vehicle_log'):
+		vehicle_receipt_logs = frappe.db.sql("""
+			select name, vehicle_log from `tabVehicle Receipt` where ifnull(vehicle_log, '') != ''
+		""", as_dict=1)
+	else:
+		vehicle_receipt_logs = []
 
 	for d in vehicle_receipt_logs:
 		frappe.db.set_value("Vehicle Log", d.vehicle_log, {
 			'reference_type': 'Vehicle Receipt', 'reference_name': d.name
 		}, None, update_modified=False)
 
-	vehicle_delivery_logs = frappe.db.sql("""
-		select name, vehicle_log from `tabVehicle Delivery` where ifnull(vehicle_log, '') != ''
-	""", as_dict=1)
+	if frappe.db.has_column('Vehicle Delivery', 'vehicle_log'):
+		vehicle_delivery_logs = frappe.db.sql("""
+			select name, vehicle_log from `tabVehicle Delivery` where ifnull(vehicle_log, '') != ''
+		""", as_dict=1)
+	else:
+		vehicle_delivery_logs = []
 
 	for d in vehicle_delivery_logs:
 		frappe.db.set_value("Vehicle Log", d.vehicle_log, {
@@ -60,6 +69,12 @@ def execute():
 		where reference_type in %s
 	""", [doctypes])
 
+	frappe.reload_doc("vehicles", "doctype", "vehicle_receipt")
+	frappe.reload_doc("vehicles", "doctype", "vehicle_delivery")
+	frappe.reload_doc("vehicles", "doctype", "vehicle_registration_receipt")
+	frappe.reload_doc("vehicles", "doctype", "vehicle_transfer_letter")
+	frappe.reload_doc("vehicles", "doctype", "vehicle_gate_pass")
+	frappe.reload_doc("vehicles", "doctype", "vehicle_service_receipt")
 	for dt in doctypes:
 		print("Making Vehicle Logs for {0}".format(dt))
 		docs = frappe.get_all(dt, filters={"docstatus": 1})
