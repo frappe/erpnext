@@ -80,7 +80,10 @@
   "bank_name",
   "column_break_heye",
   "bank_ac_no",
+<<<<<<< HEAD
   "iban",
+=======
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
   "personal_details",
   "marital_status",
   "family_background",
@@ -398,7 +401,11 @@
    "collapsible": 1,
    "fieldname": "salary_information",
    "fieldtype": "Tab Break",
+<<<<<<< HEAD
    "label": "Salary",
+=======
+   "label": "Salary Details",
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
    "oldfieldtype": "Section Break",
    "width": "50%"
   },
@@ -430,7 +437,11 @@
    "collapsible": 1,
    "fieldname": "contact_details",
    "fieldtype": "Tab Break",
+<<<<<<< HEAD
    "label": "Address & Contacts"
+=======
+   "label": "Contact"
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
   },
   {
    "fieldname": "cell_number",
@@ -509,7 +520,11 @@
    "collapsible": 1,
    "fieldname": "personal_details",
    "fieldtype": "Tab Break",
+<<<<<<< HEAD
    "label": "Personal"
+=======
+   "label": "Personal Details"
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
   },
   {
    "fieldname": "passport_number",
@@ -704,7 +719,11 @@
    "collapsible": 1,
    "fieldname": "attendance_and_leave_details",
    "fieldtype": "Tab Break",
+<<<<<<< HEAD
    "label": "Attendance & Leaves"
+=======
+   "label": "Attendance and Leave Details"
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
   },
   {
    "fieldname": "column_break_44",
@@ -729,7 +748,11 @@
   {
    "fieldname": "basic_details_tab",
    "fieldtype": "Tab Break",
+<<<<<<< HEAD
    "label": "Overview"
+=======
+   "label": "Basic Details"
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
   },
   {
    "fieldname": "company_details_section",
@@ -807,6 +830,7 @@
   {
    "fieldname": "column_break_104",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
   },
   {
    "fieldname": "column_break_heye",
@@ -817,6 +841,8 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN"
+=======
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
   }
  ],
  "icon": "fa fa-user",
@@ -824,7 +850,11 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-01-03 17:36:20.984421",
+=======
+ "modified": "2022-08-23 13:47:46.944993",
+>>>>>>> 5ab5811770 (feat: tabbed view for Employee form (#31940))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
