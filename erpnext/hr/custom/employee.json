@@ -1974,11 +1974,11 @@
    "columns": 0,
    "creation": "2022-08-01 15:20:24.446843",
    "default": null,
-   "depends_on": "designation",
+   "depends_on": "",
    "description": null,
    "docstatus": 0,
    "dt": "Employee",
-   "fetch_from": "designation.jd",
+   "fetch_from": "designation.job_description",
    "fetch_if_empty": 0,
    "fieldname": "job_description",
    "fieldtype": "Text Editor",
@@ -2010,7 +2010,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
-   "translatable": 1,
+   "translatable": 0,
    "unique": 0,
    "width": null
   }
