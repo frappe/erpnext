@@ -86,7 +86,8 @@
   "reason_for_return_section_break",
   "reason_for_return",
   "section_break_72",
-  "page_break"
+  "page_break",
+  "is_returnable"
  ],
  "fields": [
   {
@@ -739,11 +740,17 @@
    "label": "Mix Choora Return Rate",
    "options": "currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_returnable",
+   "fieldtype": "Check",
+   "label": "IS Returnable"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-06-08 17:51:34.520457",
+ "modified": "2022-08-15 17:17:44.553998",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

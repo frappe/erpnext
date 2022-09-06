@@ -86,9 +86,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				break;
 			}
 		}
-
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
-
 		if(doc.docstatus == 1) {
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
 				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
@@ -125,8 +123,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			}
 			if(doc.status != "Closed") {
-				if (doc.status != "On Hold") {
-					if(flt(doc.per_received) < 100 && allow_receipt) {
+				if (doc.status != "On Hold") {					
+					if(flt(doc.per_received) < 100 && allow_receipt && doc.status != "Expired") {
 						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
 						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
@@ -171,6 +169,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 	},
 
+	// before_save: function(frm) {
+	// 	var supplier_list = frappe.utils.get_config_by_name("supplier_expire_check")
+	// 	if(supplier_list.includes(frm.supplier)){		
+	// 		this.frm.set_df_property('expiry_date','read_only',false);
+	// 	}else{
+	// 		this.frm.set_value("expiry_date", '');
+	// 		this.frm.set_df_property('expiry_date','read_only',true);			
+	// 	}
+		
+	// },
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
@@ -355,7 +363,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
-						status: ["!=", "Stopped"],
+						status: ["!=" ["Closed", "On Hold"]],
 						per_ordered: ["<", 99.99],
 					}
 				})

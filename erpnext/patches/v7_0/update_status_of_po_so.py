@@ -65,4 +65,4 @@ def update_status():
 			when per_received = 100 and per_billed = 100 and docstatus = 1 then 'Completed'
 			when docstatus = 2 then 'Cancelled'
 			else 'Draft'
-		End)""")
+		End) where status !='Expired'""")

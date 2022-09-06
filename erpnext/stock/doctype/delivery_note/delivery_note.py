@@ -247,6 +247,7 @@ class DeliveryNote(SellingController):
 				temp_item.item_code = returnable.returnable_item
 				temp_item.item_name = returnable.returnable_item_name
 				temp_item.rate = returnable.sale_price
+				temp_item.item_reference = returnable.item
 				temp_item.actual_qty = qty
 				temp_item.so_qty = qty
 				temp_item.in_transit_qty = qty
