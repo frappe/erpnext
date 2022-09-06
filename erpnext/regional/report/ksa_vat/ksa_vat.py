@@ -177,16 +177,16 @@ def get_tax_data_for_each_vat_setting(vat_setting, filters, doctype):
 				"parent": invoice.name,
 				"item_tax_template": vat_setting.item_tax_template,
 			},
-			fields=["item_code", "net_amount"],
+			fields=["item_code", "base_net_amount"],
 		)
 
 		for item in invoice_items:
 			# Summing up total taxable amount
 			if invoice.is_return == 0:
-				total_taxable_amount += item.net_amount
+				total_taxable_amount += item.base_net_amount
 
 			if invoice.is_return == 1:
-				total_taxable_adjustment_amount += item.net_amount
+				total_taxable_adjustment_amount += item.base_net_amount
 
 			# Summing up total tax
 			total_tax += get_tax_amount(item.item_code, vat_setting.account, doctype, invoice.name)
