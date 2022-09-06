@@ -144,16 +144,15 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "istable",
    "description": "Set fieldname or DocType name like Supplier, Customer etc.",
    "fieldname": "fetch_from_parent",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "label": "Fetch Value From Parent Form"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-08-17 11:43:24.722441",
+ "modified": "2022-09-02 13:29:04.098469",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",
