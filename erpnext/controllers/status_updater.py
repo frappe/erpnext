@@ -307,6 +307,20 @@ class StatusUpdater(Document):
 
 	def limits_crossed_error(self, args, item, qty_or_amount):
 		"""Raise exception for limits crossed"""
+		if (
+			self.doctype in ["Sales Invoice", "Delivery Note"]
+			and qty_or_amount == "amount"
+			and self.is_internal_customer
+		):
+			return
+
+		elif (
+			self.doctype in ["Purchase Invoice", "Purchase Receipt"]
+			and qty_or_amount == "amount"
+			and self.is_internal_supplier
+		):
+			return
+
 		if qty_or_amount == "qty":
 			action_msg = _(
 				'To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.'

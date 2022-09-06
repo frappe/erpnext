@@ -10,10 +10,12 @@
   "item_code",
   "supplier_part_no",
   "item_name",
+  "brand",
   "product_bundle",
   "column_break_4",
   "schedule_date",
   "expected_delivery_date",
+  "item_group",
   "section_break_5",
   "description",
   "col_break1",
@@ -56,9 +58,12 @@
   "base_net_rate",
   "base_net_amount",
   "warehouse_and_reference",
+  "from_warehouse",
   "warehouse",
+  "column_break_54",
   "actual_qty",
   "company_total_stock",
+  "references_section",
   "material_request",
   "material_request_item",
   "sales_order",
@@ -71,8 +76,6 @@
   "against_blanket_order",
   "blanket_order",
   "blanket_order_rate",
-  "item_group",
-  "brand",
   "section_break_56",
   "received_qty",
   "returned_qty",
@@ -438,13 +441,13 @@
   {
    "fieldname": "warehouse_and_reference",
    "fieldtype": "Section Break",
-   "label": "Warehouse and Reference"
+   "label": "Warehouse Settings"
   },
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Warehouse",
+   "label": "Target Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -753,7 +756,7 @@
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Available Qty at Warehouse",
+   "label": "Available Qty at Target Warehouse",
    "print_hide": 1,
    "read_only": 1
   },
@@ -845,13 +848,53 @@
    "label": "Sales Order Packed Item",
    "no_copy": 1,
    "print_hide": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item",
+   "fieldtype": "Link",
+   "label": "Finished Good Item",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "options": "Item"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Item Qty",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
+  },
+  {
+   "depends_on": "eval:parent.is_internal_supplier",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
+>>>>>>> b4a102d119 (fix: internal transfer flow)
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-02-02 13:10:18.398976",
+=======
+ "modified": "2022-09-07 11:12:38.634976",
+>>>>>>> b4a102d119 (fix: internal transfer flow)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

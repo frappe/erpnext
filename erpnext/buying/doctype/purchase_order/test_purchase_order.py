@@ -9,6 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.buying.doctype.purchase_order.purchase_order import make_inter_company_sales_order
 from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
 )
@@ -1239,6 +1240,56 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_internal_transfer_flow(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		prepare_data_for_internal_transfer()
+		supplier = "_Test Internal Supplier 2"
+		customer = "_Test Internal Customer 2"
+
+		po = create_purchase_order(
+			company="_Test Company with perpetual inventory",
+			supplier=supplier,
+			warehouse="Stores - TCP1",
+			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
+			qty=2,
+			rate=1,
+		)
+
+		so = make_inter_company_sales_order(po.name)
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+
+
+def prepare_data_for_internal_transfer():
+	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	create_internal_customer(
+		"_Test Internal Customer 2",
+		"_Test Company with perpetual inventory",
+		"_Test Company with perpetual inventory",
+	)
+
+	create_internal_supplier(
+		"_Test Internal Supplier 2",
+		"_Test Company with perpetual inventory",
+		"_Test Company with perpetual inventory",
+	)
+
+	warehouse = create_warehouse(
+		"_Test Internal Warehouse New 1", company="_Test Company with perpetual inventory"
+	)
+
+	make_purchase_receipt(
+		company="_Test Company with perpetual inventory",
+		warehouse=warehouse,
+		qty=2,
+	)
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
@@ -1334,6 +1385,7 @@ def create_purchase_order(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"from_warehouse": args.from_warehouse,
 				"qty": args.qty or 10,
 				"rate": args.rate or 500,
 				"schedule_date": add_days(nowdate(), 1),

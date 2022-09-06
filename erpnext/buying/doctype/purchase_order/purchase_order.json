@@ -61,6 +61,7 @@
   "supplier_warehouse",
   "before_items_section",
   "scan_barcode",
+  "set_from_warehouse",
   "items_col_break",
   "set_warehouse",
   "items_section",
@@ -1164,13 +1165,35 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "default": "0",
+   "fieldname": "is_old_subcontracting_flow",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Old Subcontracting Flow",
+   "read_only": 1
+  },
+  {
+   "depends_on": "is_internal_supplier",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
+>>>>>>> b4a102d119 (fix: internal transfer flow)
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-11-17 12:34:36.033363",
+=======
+ "modified": "2022-09-07 11:06:46.035093",
+>>>>>>> b4a102d119 (fix: internal transfer flow)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

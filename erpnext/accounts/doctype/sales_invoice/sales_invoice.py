@@ -723,6 +723,7 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
+			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
@@ -2234,6 +2235,17 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def update_item(source, target, source_parent):
 		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
+		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
+			target.purchase_order = source.parent
+			target.purchase_order_item = source.name
+
+		if (
+			source.get("purchase_order")
+			and source.get("purchase_order_item")
+			and target.doctype == "Purchase Invoice Item"
+		):
+			target.purchase_order = source.purchase_order
+			target.po_detail = source.purchase_order_item
 
 	item_field_map = {
 		"doctype": target_doctype + " Item",
@@ -2258,6 +2270,12 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				source_document_warehouse_field: target_document_warehouse_field,
 				"batch_no": "batch_no",
 				"serial_no": "serial_no",
+			}
+		)
+	elif target_doctype == "Sales Order":
+		item_field_map["field_map"].update(
+			{
+				source_document_warehouse_field: "warehouse",
 			}
 		)
 
@@ -2304,6 +2322,7 @@ def get_received_items(reference_name, doctype, reference_fieldname):
 
 def set_purchase_references(doc):
 	# add internal PO or PR links if any
+
 	if doc.is_internal_transfer():
 		if doc.doctype == "Purchase Receipt":
 			so_item_map = get_delivery_note_details(doc.inter_company_invoice_reference)
@@ -2333,15 +2352,6 @@ def set_purchase_references(doc):
 					warehouse_map,
 				)
 
-			if list(so_item_map.values()):
-				pd_item_map, parent_child_map, warehouse_map = get_pd_details(
-					"Purchase Order Item", so_item_map, "sales_order_item"
-				)
-
-				update_pi_items(
-					doc, "po_detail", "purchase_order", so_item_map, pd_item_map, parent_child_map, warehouse_map
-				)
-
 
 def update_pi_items(
 	doc,
@@ -2357,13 +2367,19 @@ def update_pi_items(
 		item.set(parent_field, parent_child_map.get(sales_item_map.get(item.sales_invoice_item)))
 		if doc.update_stock:
 			item.warehouse = warehouse_map.get(sales_item_map.get(item.sales_invoice_item))
+			if not item.warehouse and item.get("purchase_order") and item.get("purchase_order_item"):
+				item.warehouse = frappe.db.get_value(
+					"Purchase Order Item", item.purchase_order_item, "warehouse"
+				)
 
 
 def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, warehouse_map):
 	for item in doc.get("items"):
-		item.purchase_order_item = purchase_item_map.get(sales_item_map.get(item.delivery_note_item))
 		item.warehouse = warehouse_map.get(sales_item_map.get(item.delivery_note_item))
-		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
+		if not item.warehouse and item.get("purchase_order") and item.get("purchase_order_item"):
+			item.warehouse = frappe.db.get_value(
+				"Purchase Order Item", item.purchase_order_item, "warehouse"
+			)
 
 
 def get_delivery_note_details(internal_reference):

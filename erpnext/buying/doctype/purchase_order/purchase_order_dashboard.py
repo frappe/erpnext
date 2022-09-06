@@ -21,6 +21,11 @@ def get_data():
 				"label": _("Reference"),
 				"items": ["Material Request", "Supplier Quotation", "Project", "Auto Repeat"],
 			},
+<<<<<<< HEAD
 			{"label": _("Sub-contracting"), "items": ["Stock Entry"]},
+=======
+			{"label": _("Sub-contracting"), "items": ["Subcontracting Order", "Stock Entry"]},
+			{"label": _("Internal"), "items": ["Sales Order"]},
+>>>>>>> b4a102d119 (fix: internal transfer flow)
 		],
 	}
