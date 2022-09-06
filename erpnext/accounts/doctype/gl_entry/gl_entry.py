@@ -246,6 +246,9 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 			
 			for advance in ref_doc.get("advances"):
 				bal -= advance.allocated_amount
+		
+			if bal < 0:
+				bal = 0
 
 		ref_doc.db_set('outstanding_amount', bal)
 		ref_doc.set_status(update=True)
