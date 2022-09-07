@@ -116,6 +116,7 @@ class StockEntry(StockController):
 		self.validate_warehouse()
 		self.validate_work_order()
 		self.validate_bom()
+		self.validate_purchase_order()
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_scrap_items()
@@ -945,6 +946,19 @@ class StockEntry(StockController):
 			if d.bom_no and d.is_finished_item:
 				item_code = d.original_item or d.item_code
 				validate_bom_no(item_code, d.bom_no)
+
+	def validate_purchase_order(self):
+		if self.purpose == "Send to Subcontractor" and self.get("purchase_order"):
+			is_old_subcontracting_flow = frappe.db.get_value(
+				"Purchase Order", self.purchase_order, "is_old_subcontracting_flow"
+			)
+
+			if not is_old_subcontracting_flow:
+				frappe.throw(
+					_("Please select Subcontracting Order instead of Purchase Order {0}").format(
+						self.purchase_order
+					)
+				)
 
 	def mark_finished_and_scrap_items(self):
 		if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
@@ -2215,7 +2229,7 @@ class StockEntry(StockController):
 		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
 	def update_subcontracting_order_status(self):
-		if self.subcontracting_order and self.purpose == "Send to Subcontractor":
+		if self.subcontracting_order and self.purpose in ["Send to Subcontractor", "Material Transfer"]:
 			from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 				update_subcontracting_order_status,
 			)
@@ -2554,33 +2568,49 @@ def get_supplied_items(
 
 @frappe.whitelist()
 def get_items_from_subcontracting_order(source_name, target_doc=None):
-	sco = frappe.get_doc("Subcontracting Order", source_name)
+	def post_process(source, target):
+		target.stock_entry_type = target.purpose = "Send to Subcontractor"
+		target.subcontracting_order = source_name
 
-	if sco.docstatus == 1:
-		if target_doc and isinstance(target_doc, str):
-			target_doc = frappe.get_doc(json.loads(target_doc))
-
-		if target_doc.items:
-			target_doc.items = []
+		if target.items:
+			target.items = []
 
 		warehouses = {}
-		for item in sco.items:
+		for item in source.items:
 			warehouses[item.name] = item.warehouse
 
-		for item in sco.supplied_items:
-			target_doc.append(
+		for item in source.supplied_items:
+			target.append(
 				"items",
 				{
 					"s_warehouse": warehouses.get(item.reference_name),
-					"t_warehouse": sco.supplier_warehouse,
+					"t_warehouse": source.supplier_warehouse,
+					"subcontracted_item": item.main_item_code,
 					"item_code": item.rm_item_code,
-					"qty": item.required_qty,
+					"qty": max(item.required_qty - item.total_supplied_qty, 0),
 					"transfer_qty": item.required_qty,
 					"uom": item.stock_uom,
 					"stock_uom": item.stock_uom,
 					"conversion_factor": 1,
 				},
 			)
+
+	target_doc = get_mapped_doc(
+		"Subcontracting Order",
+		source_name,
+		{
+			"Subcontracting Order": {
+				"doctype": "Stock Entry",
+				"field_no_map": ["purchase_order"],
+				"validation": {
+					"docstatus": ["=", 1],
+				},
+			},
+		},
+		target_doc,
+		post_process,
+		ignore_child_tables=True,
+	)
 
 	return target_doc
 

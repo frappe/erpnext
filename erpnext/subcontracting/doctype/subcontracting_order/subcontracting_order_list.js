@@ -10,6 +10,7 @@ frappe.listview_settings['Subcontracting Order'] = {
 			"Completed": "green",
 			"Partial Material Transferred": "purple",
 			"Material Transferred": "blue",
+			"Closed": "red",
 		};
 		return [__(doc.status), status_colors[doc.status], "status,=," + doc.status];
 	},
