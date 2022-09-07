@@ -30,6 +30,7 @@ frappe.ui.form.on('Inventory Dimension', {
 
 	onload(frm) {
 		frm.trigger('render_traget_field');
+		frm.trigger("set_parent_fields");
 	},
 
 	refresh(frm) {
@@ -48,6 +49,30 @@ frappe.ui.form.on('Inventory Dimension', {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__('Delete Dimension'), () => {
 				frm.trigger('delete_dimension');
+			});
+		}
+	},
+
+	document_type(frm) {
+		frm.trigger("set_parent_fields");
+	},
+
+	set_parent_fields(frm) {
+		if (frm.doc.apply_to_all_doctypes) {
+			frm.set_df_property("fetch_from_parent", "options", frm.doc.reference_document);
+		} else if (frm.doc.document_type && frm.doc.istable) {
+			frappe.call({
+				method: 'erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_parent_fields',
+				args: {
+					child_doctype: frm.doc.document_type,
+					dimension_name: frm.doc.reference_document
+				},
+				callback: (r) => {
+					if (r.message && r.message.length) {
+						frm.set_df_property("fetch_from_parent", "options",
+							[""].concat(r.message));
+					}
+				}
 			});
 		}
 	},
