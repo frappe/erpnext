@@ -373,7 +373,7 @@ class AccountsController(TransactionBase):
 				)
 
 	def validate_inter_company_reference(self):
-		if self.doctype not in ("Purchase Invoice", "Purchase Receipt", "Purchase Order"):
+		if self.doctype not in ("Purchase Invoice", "Purchase Receipt"):
 			return
 
 		if self.is_internal_transfer():
