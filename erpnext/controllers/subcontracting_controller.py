@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
@@ -870,7 +871,17 @@ def add_items_in_ste(
 def make_return_stock_entry_for_subcontract(
 	available_materials, order_doc, rm_details, order_doctype="Subcontracting Order"
 ):
-	ste_doc = frappe.new_doc("Stock Entry")
+	ste_doc = get_mapped_doc(
+		order_doctype,
+		order_doc.name,
+		{
+			order_doctype: {
+				"doctype": "Stock Entry",
+			},
+		},
+		ignore_child_tables=True,
+	)
+
 	ste_doc.purpose = "Material Transfer"
 
 	if order_doctype == "Purchase Order":
