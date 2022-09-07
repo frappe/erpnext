@@ -59,7 +59,36 @@ frappe.ui.form.on("Sales Order", {
 				})
 			});
 		}
+
+		if (frm.doc.docstatus === 0 && frm.doc.is_internal_customer) {
+			frm.events.get_items_from_internal_purchase_order(frm);
+		}
 	},
+
+	get_items_from_internal_purchase_order(frm) {
+		frm.add_custom_button(__('Purchase Order'), () => {
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order',
+				source_doctype: 'Purchase Order',
+				target: frm,
+				setters: [
+					{
+						label: 'Supplier',
+						fieldname: 'supplier',
+						fieldtype: 'Link',
+						options: 'Supplier'
+					}
+				],
+				get_query_filters: {
+					company: frm.doc.company,
+					is_internal_supplier: 1,
+					docstatus: 1,
+					status: ['!=', 'Completed']
+				}
+			});
+		}, __('Get Items From'));
+	},
+
 	onload: function(frm) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
