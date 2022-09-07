@@ -84,7 +84,7 @@ def create_qr_code(doc, method=None):
 		tlv_array.append("".join([tag, length, value]))
 
 		# Invoice Amount
-		invoice_amount = str(doc.grand_total)
+		invoice_amount = str(doc.base_grand_total)
 		tag = bytes([4]).hex()
 		length = bytes([len(invoice_amount)]).hex()
 		value = invoice_amount.encode("utf-8").hex()
@@ -144,7 +144,7 @@ def get_vat_amount(doc):
 
 	for tax in doc.get("taxes"):
 		if tax.account_head in vat_accounts:
-			vat_amount += tax.tax_amount
+			vat_amount += tax.base_tax_amount
 
 	return vat_amount
 
