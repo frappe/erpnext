@@ -188,9 +188,9 @@ class DeliveryNote(SellingController):
 				if bin_qty:
 					d.actual_qty = flt(bin_qty.actual_qty)
 					d.projected_qty = flt(bin_qty.projected_qty)
-	# def submit(self):
-	# 	time.sleep(1)
-	# 	self.queue_action('submit',queue_name="dn_queue")
+	def submit(self):
+		time.sleep(1)
+		self.queue_action('submit',queue_name="dn_queue")
 
 	def before_save(self):
 		## id returnable
