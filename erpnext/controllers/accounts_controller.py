@@ -205,6 +205,10 @@ class AccountsController(TransactionBase):
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
+			ple = frappe.qb.DocType("Payment Ledger Entry")
+			frappe.qb.from_(ple).delete().where(
+				(ple.voucher_type == self.doctype) & (ple.voucher_no == self.name)
+			).run()
 			frappe.db.sql(
 				"delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name)
 			)
