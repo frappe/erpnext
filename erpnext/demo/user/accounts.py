@@ -25,8 +25,8 @@ def work():
 	frappe.set_user(frappe.db.get_global("demo_accounts_user"))
 
 	if random.random() <= 0.6:
-		report = "Ordered Items to be Billed"
-		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total"]))[
+		report = "Sales Order Analysis"
+		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total" and r.qty_to_bill>0]))[
 			: random.randint(1, 5)
 		]:
 			try:
@@ -44,7 +44,7 @@ def work():
 				pass
 
 	if random.random() <= 0.6:
-		report = "Received Items to be Billed"
+		report = "Sales Order Analysis"
 		for pr in list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total"]))[
 			: random.randint(1, 5)
 		]:

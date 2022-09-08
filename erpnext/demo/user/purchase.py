@@ -25,7 +25,7 @@ def work():
 	if random.random() < 0.6:
 		report = "Items To Be Requested"
 		for row in query_report.run(report)["result"][: random.randint(1, 5)]:
-			item_code, qty = row[0], abs(row[-1])
+			item_code, qty = row.get("item"), abs(row.get("projected"))
 
 			mr = make_material_request(item_code, qty)
 
@@ -79,8 +79,8 @@ def work():
 
 		report = "Material Requests for which Supplier Quotations are not created"
 		for row in query_report.run(report)["result"][: random.randint(1, 3)]:
-			if row[0] != "Total":
-				sq = frappe.get_doc(make_supplier_quotation(row[0]))
+			if row.get("material_request"):
+				sq = frappe.get_doc(make_supplier_quotation(row.get("material_request")))
 				sq.transaction_date = frappe.flags.current_date
 				sq.supplier = supplier
 				sq.currency = party_account_currency or company_currency
@@ -93,7 +93,7 @@ def work():
 	if random.random() < 0.5:
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
-		report = "Requested Items To Be Ordered"
+		report = "Requested Items to Order and Receive"
 		for row in query_report.run(report)["result"][: how_many("Purchase Order")]:
 			if row[0] != "Total":
 				try:

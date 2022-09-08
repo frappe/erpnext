@@ -2,7 +2,7 @@ import datetime
 import random
 
 import frappe
-from frappe.utils import add_days, get_last_day, getdate, random_string
+from frappe.utils import add_days, get_last_day, getdate, random_string, today
 from frappe.utils.make_random import get_random
 
 import erpnext
@@ -18,6 +18,7 @@ from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_
 
 
 def work():
+	frappe.flags.company = "Wind Power LLC"
 	frappe.set_user(frappe.db.get_global("demo_hr_user"))
 	year, month = frappe.flags.current_date.strftime("%Y-%m").split("-")
 	setup_department_approvers()
@@ -194,6 +195,7 @@ def make_salary_slip_for_timesheet(name):
 def make_sales_invoice_for_timesheet(name):
 	sales_invoice = make_sales_invoice(name)
 	sales_invoice.customer = get_random("Customer")
+	sales_invoice.due_date = today()
 	sales_invoice.append(
 		"items",
 		{

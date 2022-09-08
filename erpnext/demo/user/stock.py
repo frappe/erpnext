@@ -30,8 +30,8 @@ def make_purchase_receipt():
 	if random.random() < 0.6:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
-		report = "Purchase Order Items To Be Received"
-		po_list = list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total"]))[
+		report = "Purchase Order Analysis"
+		po_list = list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total" and r.pending_qty > 0]))[
 			: random.randint(1, 10)
 		]
 		for po in po_list:
@@ -57,8 +57,8 @@ def make_delivery_note():
 	if random.random() < 0.6:
 		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 
-		report = "Ordered Items To Be Delivered"
-		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total"]))[
+		report = "Sales Order Analysis"
+		for so in list(set([r[0] for r in query_report.run(report)["result"] if r[0] != "Total" and r.get("qty_to_deliver") > 0]))[
 			: random.randint(1, 3)
 		]:
 			dn = frappe.get_doc(make_delivery_note(so))

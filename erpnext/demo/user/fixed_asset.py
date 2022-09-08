@@ -24,6 +24,8 @@ def work():
 	)
 
 	asset = get_random_asset()
+	if not asset:
+		return
 	scrap_asset(asset.name)
 
 	# Sell a random asset
@@ -44,9 +46,10 @@ def sell_an_asset():
 
 
 def get_random_asset():
-	return frappe.db.sql(
+	assets = frappe.db.sql(
 		""" select name, item_code, value_after_depreciation, gross_purchase_amount
 		from `tabAsset`
 		where docstatus=1 and status not in ("Scrapped", "Sold") order by rand() limit 1""",
 		as_dict=1,
-	)[0]
+	)
+	return assets[0] if len(assets) else None
