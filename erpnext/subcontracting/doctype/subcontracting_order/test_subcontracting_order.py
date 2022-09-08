@@ -510,7 +510,7 @@ def create_subcontracting_order(**args):
 	for item in sco.items:
 		item.include_exploded_items = args.get("include_exploded_items", 1)
 
-	if args.get("warehouse"):
+	if args.warehouse:
 		for item in sco.items:
 			item.warehouse = args.warehouse
 	else:
