@@ -494,6 +494,7 @@ def setup_pos_profile():
 	pos = frappe.new_doc("POS Profile")
 	pos.user = frappe.db.get_global("demo_accounts_user")
 	pos.name = "Demo POS Profile"
+	pos.warehouse = "Stores - " + company_abbr
 	pos.naming_series = "SINV-"
 	pos.update_stock = 0
 	pos.write_off_account = "Cost of Goods Sold - " + company_abbr
