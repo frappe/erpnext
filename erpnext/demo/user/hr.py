@@ -108,6 +108,7 @@ def get_payroll_entry():
 
 
 def get_expenses():
+	company_abbr = frappe.get_cached_value("Company", erpnext.get_default_company(), "abbr")
 	expenses = []
 	expese_types = frappe.db.sql(
 		"""select ect.name, eca.default_account from `tabExpense Claim Type` ect,
@@ -122,6 +123,7 @@ def get_expenses():
 
 		expenses.append(
 			{
+				"cost_center": "Main - " + company_abbr,
 				"expense_date": frappe.flags.current_date,
 				"expense_type": expense_type.name,
 				"default_account": expense_type.default_account or "Miscellaneous Expenses - WPL",
