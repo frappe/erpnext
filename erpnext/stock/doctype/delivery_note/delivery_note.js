@@ -109,7 +109,7 @@ frappe.ui.form.on("Delivery Note", {
 			return {
 				filters: [ 
 					["designation","LIKE" , "%Driver%"],
-					[company,"=", frm.doc.company ]
+					["company","=", frm.doc.company ]
 				]
 			}
 		}
