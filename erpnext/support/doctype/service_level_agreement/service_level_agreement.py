@@ -776,6 +776,9 @@ def on_communication_update(doc, status):
 	if not parent.meta.has_field("service_level_agreement"):
 		return
 
+	if not parent.get("service_level_agreement"):
+		return
+
 	if (
 		doc.sent_or_received == "Received"  # a reply is received
 		and parent.get("status") == "Open"  # issue status is set as open from communication.py
