@@ -108,7 +108,7 @@ frappe.ui.form.on("Delivery Note", {
 		cur_frm.fields_dict['driver'].get_query = function (doc) {
 			return {
 				filters: [ 
-					["designation","LIKE" , "Driver"],
+					["designation","LIKE" , "%Driver%"],
 					[company,"=", frm.doc.company ]
 				]
 			}
