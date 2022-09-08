@@ -89,7 +89,7 @@ def get_payroll_entry():
 	payroll_entry = frappe.new_doc("Payroll Entry")
 	payroll_entry.company = frappe.flags.company
 	payroll_entry.payroll_frequency = "Monthly"
-	payroll_entry.payroll_payable_account = "Monthly"
+	payroll_entry.payroll_payable_account = payroll_payable_account
 	payroll_entry.exchange_rate = 1
 
 
@@ -167,7 +167,7 @@ def make_timesheet_records():
 		ts = make_timesheet(
 			e.employee,
 			simulate=True,
-			billable=1,
+			is_billable=1,
 			activity_type=get_random("Activity Type"),
 			company=frappe.flags.company,
 		)
