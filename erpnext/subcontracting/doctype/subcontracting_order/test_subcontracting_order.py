@@ -502,6 +502,35 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		set_backflush_based_on("BOM")
 
+	def test_get_materials_from_supplier(self):
+		# Create SCO
+		sco = get_subcontracting_order()
+
+		# Transfer RM
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create SCR (Partial)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty -= 5
+		scr.save()
+		scr.submit()
+
+		# Get RM from Supplier
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		ste.save()
+		ste.submit()
+
+		sco.load_from_db()
+
+		self.assertEqual(sco.status, "Closed")
+		self.assertEqual(sco.supplied_items[0].returned_qty, 5)
+
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)
