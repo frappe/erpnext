@@ -81,10 +81,17 @@ def work():
 
 
 def get_payroll_entry():
+	# getting default payroll payable account for company
+	payroll_payable_account = frappe.get_cached_value("Company", erpnext.get_default_company(), "default_payroll_payable_account")
+
+
 	# process payroll for previous month
 	payroll_entry = frappe.new_doc("Payroll Entry")
 	payroll_entry.company = frappe.flags.company
 	payroll_entry.payroll_frequency = "Monthly"
+	payroll_entry.payroll_payable_account = "Monthly"
+	payroll_entry.exchange_rate = 1
+
 
 	# select a posting date from the previous month
 	payroll_entry.posting_date = get_last_day(
