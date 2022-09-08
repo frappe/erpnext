@@ -63,7 +63,7 @@ def setup_asset():
 		asset.next_depreciation_date = add_days(asset.purchase_date, 30)
 		asset.warehouse = "Stores - WPL"
 		asset.set_missing_values()
-		asset.make_depreciation_schedule()
+		asset.make_depreciation_schedule(False)
 		asset.flags.ignore_validate = True
 		asset.flags.ignore_mandatory = True
 		asset.save()
