@@ -48,6 +48,7 @@ export default {
 }
 
 .module-body {
+	cursor: pointer;
 	height: 160px;
 	width: 250px;
 	border-radius: 10px;

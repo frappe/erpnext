@@ -34,7 +34,7 @@ override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAdd
 welcome_email = "erpnext.setup.utils.welcome_email"
 
 # setup wizard
-setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
+setup_wizard_requires = "assets/erpnext/js/onboarding.bundle.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 

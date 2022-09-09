@@ -14,31 +14,25 @@
 			</div>
 		</div>
 		<div class="slide-section col-9">
-			<div v-show="CurrentStep == 1">
-				<p class="onboarding-title">Setup Organization</p>
-				<p class="onboarding-subtitle">Don't Panic - These settings can be changed later.</p>
+			<div v-show="CurrentStep == 2">
+				<p class="onboarding-title">{{ __("Setup Organization") }}</p>
+				<p class="onboarding-subtitle">{{ __("Don't Panic - These settings can be changed later.") }}</p>
 				<div class="row company-info">
 					<div class="abbreviation-container">
 						<span class="abbreviation-text">{{ abbreviation }}</span>
 					</div>
 					<input class="input-field col-6" v-if="edit" v-model="company_name">
-					<div v-if="!edit" class="col-8 company-name">
-						{{ company_name }}
-					</div>
-					<div class="button-container">
-						<div v-on:click="toggle_edit"
-							class="btn edit-button btn-secondary">
-							<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path d="M14 8C14 11.3137 11.3137 14 8 14C4.68629 14 2 11.3137 2 8C2 4.68629 4.68629 2 8 2" stroke="#505A62" stroke-linecap="round"/>
-								<path d="M14 2L7 9" stroke="#505A62" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
-							</svg>
-							&nbsp;&nbsp;{{ button_string }}
+					<div class="control-input-wrapper">
+						<div class="control-input">
+							<input type="text" class="input-with-feedback form-control bold"
+								maxlength="140" v-model="company_name">
 						</div>
+						<div class="control-value like-disabled-input bold" style="display: none;"> {{ company_name }} </div>
 					</div>
 				</div>
 				<div class="company-domain">
 					<div>
-						What does your organization do?
+						{{ __("What does your organization do?") }}
 					</div>
 					<div class="row domain-box">
 						<button class="col-3 domain"
@@ -51,21 +45,21 @@
 					</div>
 				</div>
 			</div>
-			<div v-show="CurrentStep == 2">
-				<p class="onboarding-title">Regional Settings</p>
-				<p class="onboarding-subtitle">Don't Panic - These settings can be changed later.</p>
-				<div class="field-layout" ref="slide_2">
+			<div v-show="CurrentStep == 1">
+				<p class="onboarding-title">{{ __("Regional Settings") }}</p>
+				<p class="onboarding-subtitle">{{ __("Don't Panic - These settings can be changed later.") }}</p>
+				<div class="field-layout" ref="slide_1">
 				</div>
 			</div>
 			<div v-show="CurrentStep == 3">
-				<p class="onboarding-title">Accounting Setup</p>
-				<p class="onboarding-subtitle">Don't Panic - These settings can be changed later.</p>
+				<p class="onboarding-title">{{ __("Accounting Setup") }}</p>
+				<p class="onboarding-subtitle">{{ __("Don't Panic - These settings can be changed later.") }}</p>
 				<div class="field-layout" ref="slide_3">
 				</div>
 			</div>
 			<div v-show="CurrentStep == 4">
-				<p class="onboarding-title">Enable Modules</p>
-				<p class="onboarding-subtitle">Think of modules as apps that you might need for your org</p>
+				<p class="onboarding-title">{{ __("Enable Modules") }}</p>
+				<p class="onboarding-subtitle">{{ __("Think of modules as apps that you might need for your org") }}</p>
 			</div>
 			<div v-show="CurrentStep == 4" class="module-layout">
 				<div>
@@ -78,7 +72,7 @@
 				</div>
 				<div>
 					<div class="row section-heading">
-						Other Modules
+						{{ __("Other Modules") }}
 					</div>
 					<div class="row module-row">
 						<Module v-for="(module, index) in modules.slice(6, -1)" :key="index + 6" :module="module" :primary=0
@@ -88,11 +82,11 @@
 			</div>
 			<div class="row button-row">
 				<div>
-					<button v-on:click=prev_step class="btn btn-secondary btn-sm" v-if="CurrentStep > 1 && CurrentStep < 5">Previous</button>
+					<button v-on:click=prev_step class="btn btn-secondary btn-sm" v-if="CurrentStep > 1 && CurrentStep < 5">{{ __("Previous") }}</button>
 				</div>
 				<div>
-					<button v-on:click=next_step class="btn btn-primary btn-sm btn-next" v-if="CurrentStep < 4">Next</button>
-					<button v-on:click=finish_setup class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">Finish Setup</button>
+					<button v-on:click=next_step class="btn btn-primary btn-sm btn-next" v-if="CurrentStep < 4">{{ __("Next") }}</button>
+					<button v-on:click=finish_setup class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">{{ __("Finish Setup") }}</button>
 				</div>
 			</div>
 			<div v-show="CurrentStep == 5">
@@ -115,20 +109,21 @@ export default {
 	props: ["modules", "regional_data"],
 	data() {
 		return {
+			language: "en",
 			CurrentStep: 1,
 			selectedDomain: '',
-			company_name: "My Company",
-			abbreviation: "MC",
+			company_name: __("My Company"),
 			edit: false,
 			button_string: "Edit",
-			setup_stage: 'Loading',
+			setup_stage: __('Loading'),
 			steps: {
-				1: "Setup Organization",
-				2: "Regional Settings",
-				3: "Accounting Setup",
-				4: "Enabled Modules"
+				1: __("Regional Settings"),
+				2: __("Setup Organization"),
+				3: __("Accounting Setup"),
+				4: __("Enabled Modules")
 			},
-			domains: ["Manufacturing", "Retail", "Service", "Distribution", "Loans", "Education", "Healthcare", "Other"],
+			domains: [__("Manufacturing"), __("Retail"), __("Service"), __("Distribution"),
+				__("Loans"), __("Education"), __("Healthcare"), __("Other")],
 			fiscal_years: {
 				"Afghanistan": ["12-21", "12-20"],
 				"Australia": ["07-01", "06-30"],
@@ -154,6 +149,13 @@ export default {
 		Module,
 		LoadingIndicator
 	},
+	computed: {
+		abbreviation: function() {
+			let parts = this.company_name.split(" ");
+			let abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
+			return abbr;
+		}
+	},
 	methods: {
 		next_step: function () {
 			let slide = "slide_" + this.CurrentStep;
@@ -177,14 +179,6 @@ export default {
 		prev_step: function() {
 			this.CurrentStep -= 1;
 		},
-		toggle_edit: function() {
-			this.edit = !this.edit;
-			this.button_string = this.edit ? "Save" : "Edit";
-
-			let parts = this.company_name.split(" ");
-			let abbr = $.map(parts, function (p) { return p ? p.substr(0, 1) : null }).join("");
-			this.abbreviation=abbr.slice(0, 10).toUpperCase();
-		},
 		finish_setup: function() {
 			this.CurrentStep += 1;
 			this.listen_for_setup_stages();
@@ -194,9 +188,9 @@ export default {
 				args: { args: {
 					"company_name": this.company_name,
 					"company_abbreviation": this.abbreviation,
-					"currency": this.slide_2.get_value("currency"),
-					"country": this.slide_2.get_value("country"),
-					"timezone": this.slide_2.get_value("timezone"),
+					"currency": this.slide_1.get_value("currency"),
+					"country": this.slide_1.get_value("country"),
+					"timezone": this.slide_1.get_value("timezone"),
 					"fy_start_date": this.slide_3.get_value("fy_start_date"),
 					"fy_end_date": this.slide_3.get_value("fy_end_date"),
 					"chart_of_accounts": this.slide_3.get_value("chart_of_accounts"),
@@ -235,186 +229,208 @@ export default {
 				console.log(data);
 				this.setup_stage = data.stage_status;
 			});
-	}
+		},
+
+		make_slides: function() {
+			let me = this;
+			let regional_data = this.regional_data.country_info;
+
+			if (this.slide_1) this.slide_1.wrapper.empty();
+
+			this.slide_1 = new frappe.ui.FieldGroup({
+				fields: [
+					{
+						fieldname: "language",
+						label: __("Your Language"),
+						fieldtype: "Link",
+						placeholder: __("Select Language"),
+						default: this.language,
+						options: "Language",
+						only_select: true,
+						onchange: () => {
+							frappe.call({
+								method: "erpnext.setup.page.onboarding.onboarding.load_messages",
+								freeze: true,
+								args: {
+									language:  this.slide_1.get_value('language')
+								},
+								callback: function (r) {
+									console.log(__("Country"));
+									console.log(r);
+									me.language = r.message;
+									me.make_slides();
+								},
+							});
+						}
+					},
+					{
+						label: '',
+						fieldname: 'cb_1',
+						fieldtype: 'Column Break',
+					},
+					{
+						label: __('Your Country'),
+						fieldname: 'country',
+						fieldtype: 'Link',
+						placeholder: __("Select Country"),
+						options: "Country",
+						only_select: true,
+						onchange: () => {
+							let country = this.slide_1.get_value('country');
+							if (country) {
+								frappe.call({
+									method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+									args: { "country": country, with_standard: true },
+									callback: (r) => {
+										if (r.message) {
+											this.slide_3.set_df_property("chart_of_accounts", "options", r.message)
+											this.slide_3.set_value("chart_of_accounts", r.message[0]);
+										}
+									}
+								})
+							}
+							this.slide_1.set_value("currency", regional_data[country].currency);
+							this.slide_1.set_value("timezone", regional_data[country].timezones[0]);
+
+							let fy = this.fiscal_years[country];
+							let current_year = moment(new Date()).year();
+							let next_year = current_year + 1;
+
+							if (!fy) {
+								fy = ["01-01", "12-31"];
+								next_year = current_year;
+							}
+
+							let year_start_date = current_year + "-" + fy[0];
+
+							if (year_start_date > frappe.datetime.get_today()) {
+								next_year = current_year;
+								current_year -= 1;
+							}
+
+							this.slide_3.set_value("fy_start_date", current_year + '-' + fy[0]);
+							this.slide_3.set_value("fy_end_date", next_year + '-' + fy[1]);
+						}
+					},
+					{
+						label: '',
+						fieldname: 'sb_1',
+						fieldtype: 'Section Break',
+					},
+					{
+						label: __('Currency'),
+						fieldname: 'currency',
+						fieldtype: 'Link',
+						options: 'Currency',
+						only_select: true,
+					},
+					{
+						label: '',
+						fieldname: 'cb_1',
+						fieldtype: 'Column Break',
+					},
+					{
+						label: __('Timezone'),
+						fieldname: 'timezone',
+						fieldtype: 'Select',
+						placeholder: __("Select Time Zone"),
+						options: this.regional_data.all_timezones,
+					},
+
+				],
+				body: this.$refs.slide_1
+			});
+
+			this.slide_1.make();
+
+			if (this.slide_3) this.slide_3.wrapper.empty();
+
+			this.slide_3 = new frappe.ui.FieldGroup({
+				fields: [
+					{
+						label: __('Bank Name'),
+						fieldname: 'bank_name',
+						fieldtype: 'Data',
+						placeholder: __("Add Your Bank Name"),
+						reqd: 1,
+					},
+					{
+						label: '',
+						fieldname: 'cb_1',
+						fieldtype: 'Column Break',
+					},
+					{
+						label: __('Chart Of Accounts'),
+						fieldname: 'chart_of_accounts',
+						fieldtype: 'Select',
+						options: [],
+						reqd: 1,
+					},
+					{
+						label: '',
+						fieldname: 'sb_1',
+						fieldtype: 'Section Break',
+					},
+					{
+						fieldname: "fy_start_date",
+						label: __("Financial Year Begins On"),
+						fieldtype: "Date",
+						reqd: 1,
+					},
+					{
+						label: '',
+						fieldname: 'cb_1',
+						fieldtype: 'Column Break',
+						reqd: 1
+					},
+					{
+						fieldname: "fy_end_date",
+						label: __("Financial Year Ends On"),
+						fieldtype: "Date",
+						reqd: 1,
+					},
+					{
+						label: '',
+						fieldname: 'sb_2',
+						fieldtype: 'Section Break',
+					},
+					{
+						fieldname: "tagline",
+						label: __("Company Tagline"),
+						fieldtype: "Data",
+						default: "Your Company Tagline",
+						reqd: 1,
+					},
+
+				],
+				body: this.$refs.slide_3
+			});
+
+			this.slide_3.make();
+		}
 	},
 	mounted() {
-		let regional_data = this.regional_data.country_info;
-		this.slide_2 = new frappe.ui.FieldGroup({
-			fields: [
-				{
-					label: __('Your Country'),
-					fieldname: 'country',
-					fieldtype: 'Link',
-					placeholder: __("Select Country"),
-					options: "Country",
-					only_select: true,
-					onchange: () => {
-						let country = this.slide_2.get_value('country');
-						if (country) {
-							frappe.call({
-								method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
-								args: { "country": country, with_standard: true },
-								callback: (r) => {
-									if (r.message) {
-										this.slide_3.set_df_property("chart_of_accounts", "options", r.message)
-										this.slide_3.set_value("chart_of_accounts", r.message[0]);
-									}
-								}
-							})
-						}
-						this.slide_2.set_value("currency", regional_data[country].currency);
-						this.slide_2.set_value("timezone", regional_data[country].timezones[0]);
-
-						let fy = this.fiscal_years[country];
-						let current_year = moment(new Date()).year();
-						let next_year = current_year + 1;
-
-						if (!fy) {
-							fy = ["01-01", "12-31"];
-							next_year = current_year;
-						}
-
-						let year_start_date = current_year + "-" + fy[0];
-
-						if (year_start_date > frappe.datetime.get_today()) {
-							next_year = current_year;
-							current_year -= 1;
-						}
-
-						this.slide_3.set_value("fy_start_date", current_year + '-' + fy[0]);
-						this.slide_3.set_value("fy_end_date", next_year + '-' + fy[1]);
-					}
-				},
-				{
-					label: '',
-					fieldname: 'cb_1',
-					fieldtype: 'Column Break',
-				},
-				{
-					label: __('Currency'),
-					fieldname: 'currency',
-					fieldtype: 'Link',
-					options: 'Currency',
-					only_select: true,
-				},
-				{
-					label: '',
-					fieldname: 'sb_1',
-					fieldtype: 'Section Break',
-				},
-				{
-					fieldname: "language",
-					label: __("Your Language"),
-					fieldtype: "Link",
-					placeholder: __("Select Language"),
-					default: "en",
-					options: "Language",
-					only_select: true,
-				},
-				{
-					label: '',
-					fieldname: 'cb_1',
-					fieldtype: 'Column Break',
-				},
-				{
-					label: __('Timezone'),
-					fieldname: 'timezone',
-					fieldtype: 'Select',
-					placeholder: __("Select Time Zone"),
-					options: this.regional_data.all_timezones,
-				},
-
-			],
-			body: this.$refs.slide_2
-		});
-
-		this.slide_2.make();
-
-		this.slide_3 = new frappe.ui.FieldGroup({
-			fields: [
-				{
-					label: __('Bank Name'),
-					fieldname: 'bank_name',
-					fieldtype: 'Data',
-					placeholder: __("Add Your Bank Name"),
-					reqd: 1,
-				},
-				{
-					label: '',
-					fieldname: 'cb_1',
-					fieldtype: 'Column Break',
-				},
-				{
-					label: __('Chart Of Accounts'),
-					fieldname: 'chart_of_accounts',
-					fieldtype: 'Select',
-					options: [],
-					reqd: 1,
-				},
-				{
-					label: '',
-					fieldname: 'sb_1',
-					fieldtype: 'Section Break',
-				},
-				{
-					fieldname: "fy_start_date",
-					label: __("Financial Year Begins On"),
-					fieldtype: "Date",
-					reqd: 1,
-				},
-				{
-					label: '',
-					fieldname: 'cb_1',
-					fieldtype: 'Column Break',
-					reqd: 1
-				},
-				{
-					fieldname: "fy_end_date",
-					label: __("Financial Year Ends On"),
-					fieldtype: "Date",
-					reqd: 1,
-				},
-				{
-					label: '',
-					fieldname: 'sb_2',
-					fieldtype: 'Section Break',
-				},
-				{
-					fieldname: "tagline",
-					label: __("Company Tagline"),
-					fieldtype: "Data",
-					default: "Your Company Tagline",
-					reqd: 1,
-				},
-
-			],
-			body: this.$refs.slide_3
-		});
-
-		this.slide_3.make();
+		this.make_slides();
 	}
 }
 </script>
 
 <style scoped>
+
 .onboarding-container {
-	margin-top: 50px;
+	margin-top: 80px;
 	height: 650px;
-	width: 1250px;
+	width: 1200px;
 	background: #FFFFFF;
 	border-radius: 16px;
 	align-items: center;
-}
-
-.onboarding-sidebar {
-	height: 100%;
-	background: #F0F0F0;
-	border-radius: 16px 0 0 16px;
+	margin-left: auto;
+	margin-right: auto;
+	font-family: 'Inter';
+	font-style: normal;
 }
 
 .onboarding-title {
-	font-family: 'Inter';
-	font-style: normal;
 	font-weight: 700;
 	font-size: 24px;
 	line-height: 29px;
@@ -425,8 +441,6 @@ export default {
 }
 
 .onboarding-subtitle {
-	font-family: 'Inter';
-	font-style: normal;
 	font-weight: 400;
 	font-size: 13px;
 	line-height: 20px;
@@ -481,6 +495,12 @@ export default {
 	margin-right: 12px;
 }
 
+.onboarding-sidebar {
+	height: 100%;
+	background: #F0F0F0;
+	border-radius: 16px 0 0 16px;
+}
+
 .sidebar-container {
 	margin-left: 30px;
 	margin-top:30px
@@ -493,8 +513,6 @@ export default {
 .label {
 	width: 262px;
 	height: 15px;
-	font-family: 'Inter';
-	font-style: normal;
 	font-weight: 400;
 	font-size: 12px;
 	line-height: 15px;
@@ -562,8 +580,6 @@ export default {
 
 .company-name {
 	display: flex;
-	font-family: 'Inter';
-	font-style: normal;
 	font-weight: 600;
 	font-size: 25px;
 	line-height: 25px;
@@ -639,4 +655,10 @@ export default {
 	line-height: 25px;
 	color: #505A62;
 }
+
+.control-input-wrapper {
+	margin: 20px 0px 0px 20px;
+	width: 400px;
+}
+
 </style>
