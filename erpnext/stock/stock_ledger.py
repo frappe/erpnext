@@ -646,8 +646,6 @@ class update_entries_after(object):
 					voucher_detail_no=sle.voucher_detail_no,
 					sle=sle,
 				)
-<<<<<<< HEAD
-=======
 
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
@@ -670,7 +668,6 @@ class update_entries_after(object):
 						refernce_name,
 						"incoming_rate",
 					)
->>>>>>> a03b4ce213 (fix: reposting not working for internal transferred purchase receipt)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"
