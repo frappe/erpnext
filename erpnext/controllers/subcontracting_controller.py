@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
 from erpnext.controllers.stock_controller import StockController
@@ -490,7 +491,7 @@ class SubcontractingController(StockController):
 						row.item_code,
 						row.get(self.subcontract_data.order_field),
 					) and transfer_item.qty > 0:
-						qty = self.__get_qty_based_on_material_transfer(row, transfer_item) or 0
+						qty = flt(self.__get_qty_based_on_material_transfer(row, transfer_item))
 						transfer_item.qty -= qty
 						self.__add_supplied_item(row, transfer_item.get("item_details"), qty)
 
@@ -720,6 +721,25 @@ class SubcontractingController(StockController):
 					sco_doc = frappe.get_doc("Subcontracting Order", sco)
 					sco_doc.update_status()
 
+	def set_missing_values_in_additional_costs(self):
+		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
+
+		if self.total_additional_costs:
+			if self.distribute_additional_costs_based_on == "Amount":
+				total_amt = sum(flt(item.amount) for item in self.get("items"))
+				for item in self.items:
+					item.additional_cost_per_qty = (
+						(item.amount * self.total_additional_costs) / total_amt
+					) / item.qty
+			else:
+				total_qty = sum(flt(item.qty) for item in self.get("items"))
+				additional_cost_per_qty = self.total_additional_costs / total_qty
+				for item in self.items:
+					item.additional_cost_per_qty = additional_cost_per_qty
+		else:
+			for item in self.items:
+				item.additional_cost_per_qty = 0
+
 	@frappe.whitelist()
 	def get_current_stock(self):
 		if self.doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
@@ -730,7 +750,7 @@ class SubcontractingController(StockController):
 						{"item_code": item.rm_item_code, "warehouse": self.supplier_warehouse},
 						"actual_qty",
 					)
-					item.current_stock = flt(actual_qty) or 0
+					item.current_stock = flt(actual_qty)
 
 	@property
 	def sub_contracted_items(self):
@@ -851,7 +871,18 @@ def add_items_in_ste(
 def make_return_stock_entry_for_subcontract(
 	available_materials, order_doc, rm_details, order_doctype="Subcontracting Order"
 ):
-	ste_doc = frappe.new_doc("Stock Entry")
+	ste_doc = get_mapped_doc(
+		order_doctype,
+		order_doc.name,
+		{
+			order_doctype: {
+				"doctype": "Stock Entry",
+				"field_no_map": ["purchase_order", "subcontracting_order"],
+			},
+		},
+		ignore_child_tables=True,
+	)
+
 	ste_doc.purpose = "Material Transfer"
 
 	if order_doctype == "Purchase Order":

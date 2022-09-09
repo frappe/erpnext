@@ -222,9 +222,6 @@ class POSInvoice(SalesInvoice):
 		from erpnext.stock.stock_ledger import is_negative_stock_allowed
 
 		for d in self.get("items"):
-			is_service_item = not (frappe.db.get_value("Item", d.get("item_code"), "is_stock_item"))
-			if is_service_item:
-				return
 			if d.serial_no:
 				self.validate_pos_reserved_serial_nos(d)
 				self.validate_delivered_serial_nos(d)

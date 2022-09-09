@@ -224,25 +224,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 
-			// expense claim
-			if(jvd.reference_type==="Expense Claim") {
-				return {
-					filters: {
-						'total_sanctioned_amount': ['>', 0],
-						'status': ['!=', 'Paid'],
-						'docstatus': 1
-					}
-				};
-			}
-
-			if(jvd.reference_type==="Employee Advance") {
-				return {
-					filters: {
-						'docstatus': 1
-					}
-				};
-			}
-
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
@@ -252,13 +233,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 						account: jvd.account,
 						party: jvd.party
 					}
-				};
-			}
-
-			// payroll entry
-			if(jvd.reference_type==="Payroll Entry") {
-				return {
-					query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
 				};
 			}
 

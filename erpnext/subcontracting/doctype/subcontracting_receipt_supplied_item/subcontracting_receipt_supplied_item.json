@@ -19,6 +19,7 @@
         "col_break2",
         "amount",
         "secbreak_2",
+        "available_qty_for_consumption",
         "required_qty",
         "col_break3",
         "consumed_qty",
@@ -75,8 +76,7 @@
         {
             "fieldname": "required_qty",
             "fieldtype": "Float",
-            "in_list_view": 1,
-            "label": "Available Qty For Consumption",
+            "label": "Required Qty",
             "print_hide": 1,
             "read_only": 1
         },
@@ -85,7 +85,7 @@
             "fieldname": "consumed_qty",
             "fieldtype": "Float",
             "in_list_view": 1,
-            "label": "Qty to be Consumed",
+            "label": "Consumed Qty",
             "reqd": 1
         },
         {
@@ -179,12 +179,21 @@
             "options": "Subcontracting Order",
             "print_hide": 1,
             "read_only": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "available_qty_for_consumption",
+            "fieldtype": "Float",
+            "in_list_view": 1,
+            "label": "Available Qty For Consumption",
+            "print_hide": 1,
+            "read_only": 1
         }
     ],
     "idx": 1,
     "istable": 1,
     "links": [],
-    "modified": "2022-04-18 10:45:16.538479",
+    "modified": "2022-09-02 22:28:53.392381",
     "modified_by": "Administrator",
     "module": "Subcontracting",
     "name": "Subcontracting Receipt Supplied Item",
@@ -193,6 +202,6 @@
     "permissions": [],
     "sort_field": "modified",
     "sort_order": "DESC",
-    "track_changes": 1,
-    "states": []
+    "states": [],
+    "track_changes": 1
 }

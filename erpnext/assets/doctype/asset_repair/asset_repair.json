@@ -238,7 +238,6 @@
    "no_copy": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
@@ -257,6 +256,7 @@
    "fieldname": "stock_entry",
    "fieldtype": "Link",
    "label": "Stock Entry",
+   "no_copy": 1,
    "options": "Stock Entry",
    "read_only": 1
   }
@@ -264,10 +264,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-06-25 13:14:38.307723",
+ "modified": "2022-08-16 15:55:25.023471",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -303,6 +304,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "asset_name",
  "track_changes": 1,
  "track_seen": 1

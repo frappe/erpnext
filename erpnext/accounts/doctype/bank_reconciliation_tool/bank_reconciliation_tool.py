@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt
 
-from erpnext import get_company_currency
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_paid_amount
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	get_amounts_not_reflected_in_system,
@@ -368,6 +367,27 @@ def get_queries(bank_account, company, transaction, document_types):
 	account_from_to = "paid_to" if transaction.deposit > 0 else "paid_from"
 	queries = []
 
+	# get matching queries from all the apps
+	for method_name in frappe.get_hooks("get_matching_queries"):
+		queries.extend(
+			frappe.get_attr(method_name)(
+				bank_account,
+				company,
+				transaction,
+				document_types,
+				amount_condition,
+				account_from_to,
+			)
+			or []
+		)
+
+	return queries
+
+
+def get_matching_queries(
+	bank_account, company, transaction, document_types, amount_condition, account_from_to
+):
+	queries = []
 	if "payment_entry" in document_types:
 		pe_amount_matching = get_pe_matching_query(amount_condition, account_from_to, transaction)
 		queries.extend([pe_amount_matching])
@@ -384,10 +404,6 @@ def get_queries(bank_account, company, transaction, document_types):
 		if "purchase_invoice" in document_types:
 			pi_amount_matching = get_pi_matching_query(amount_condition)
 			queries.extend([pi_amount_matching])
-
-		if "expense_claim" in document_types:
-			ec_amount_matching = get_ec_matching_query(bank_account, company, amount_condition)
-			queries.extend([ec_amount_matching])
 
 	return queries
 
@@ -467,10 +483,12 @@ def get_lr_matching_query(bank_account, amount_condition, filters):
 			loan_repayment.posting_date,
 		)
 		.where(loan_repayment.docstatus == 1)
-		.where(loan_repayment.repay_from_salary == 0)
 		.where(loan_repayment.clearance_date.isnull())
 		.where(loan_repayment.payment_account == bank_account)
 	)
+
+	if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
+		query = query.where((loan_repayment.repay_from_salary == 0))
 
 	if amount_condition:
 		query.where(loan_repayment.amount_paid == filters.get("amount"))
@@ -601,38 +619,4 @@ def get_pi_matching_query(amount_condition):
 			AND is_paid = 1
 			AND ifnull(clearance_date, '') = ""
 			AND cash_bank_account  = %(bank_account)s
-	"""
-
-
-def get_ec_matching_query(bank_account, company, amount_condition):
-	# get matching Expense Claim query
-	mode_of_payments = [
-		x["parent"]
-		for x in frappe.db.get_all(
-			"Mode of Payment Account", filters={"default_account": bank_account}, fields=["parent"]
-		)
-	]
-	mode_of_payments = "('" + "', '".join(mode_of_payments) + "' )"
-	company_currency = get_company_currency(company)
-	return f"""
-		SELECT
-			( CASE WHEN employee = %(party)s THEN 1 ELSE 0 END
-			+ 1 ) AS rank,
-			'Expense Claim' as doctype,
-			name,
-			total_sanctioned_amount as paid_amount,
-			'' as reference_no,
-			'' as reference_date,
-			employee as party,
-			'Employee' as party_type,
-			posting_date,
-			'{company_currency}' as currency
-		FROM
-			`tabExpense Claim`
-		WHERE
-			total_sanctioned_amount {amount_condition} %(amount)s
-			AND docstatus = 1
-			AND is_paid = 1
-			AND ifnull(clearance_date, '') = ""
-			AND mode_of_payment in {mode_of_payments}
 	"""

@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 import json
+from typing import TYPE_CHECKING, List, Union
+
+if TYPE_CHECKING:
+	from erpnext.stock.doctype.item.item import Item
 
 import frappe
 from frappe import _
@@ -114,11 +118,6 @@ class WebsiteItem(WebsiteGenerator):
 			return
 
 		"""Validate if the website image is a public file"""
-		auto_set_website_image = False
-		if not self.website_image and self.image:
-			auto_set_website_image = True
-			self.website_image = self.image
-
 		if not self.website_image:
 			return
 
@@ -135,18 +134,16 @@ class WebsiteItem(WebsiteGenerator):
 			file_doc = file_doc[0]
 
 		if not file_doc:
-			if not auto_set_website_image:
-				frappe.msgprint(
-					_("Website Image {0} attached to Item {1} cannot be found").format(
-						self.website_image, self.name
-					)
+			frappe.msgprint(
+				_("Website Image {0} attached to Item {1} cannot be found").format(
+					self.website_image, self.name
 				)
+			)
 
 			self.website_image = None
 
 		elif file_doc.is_private:
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image should be a public file or website URL"))
+			frappe.msgprint(_("Website Image should be a public file or website URL"))
 
 			self.website_image = None
 
@@ -157,9 +154,8 @@ class WebsiteItem(WebsiteGenerator):
 
 		import requests.exceptions
 
-		if not self.is_new() and self.website_image != frappe.db.get_value(
-			self.doctype, self.name, "website_image"
-		):
+		db_website_image = frappe.db.get_value(self.doctype, self.name, "website_image")
+		if not self.is_new() and self.website_image != db_website_image:
 			self.thumbnail = None
 
 		if self.website_image and not self.thumbnail:
@@ -431,7 +427,9 @@ def check_if_user_is_customer(user=None):
 
 
 @frappe.whitelist()
-def make_website_item(doc, save=True):
+def make_website_item(doc: "Item", save: bool = True) -> Union["WebsiteItem", List[str]]:
+	"Make Website Item from Item. Used via Form UI or patch."
+
 	if not doc:
 		return
 
@@ -451,13 +449,16 @@ def make_website_item(doc, save=True):
 		"item_group",
 		"stock_uom",
 		"brand",
-		"image",
 		"has_variants",
 		"variant_of",
 		"description",
 	]
 	for field in fields_to_map:
 		website_item.update({field: doc.get(field)})
+
+	# Needed for publishing/mapping via Form UI only
+	if not frappe.flags.in_migrate and (doc.get("image") and not website_item.website_image):
+		website_item.website_image = doc.get("image")
 
 	if not save:
 		return website_item

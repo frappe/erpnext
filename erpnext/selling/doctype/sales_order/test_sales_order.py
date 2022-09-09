@@ -1620,6 +1620,65 @@ class TestSalesOrder(FrappeTestCase):
 		so.load_from_db()
 		self.assertEqual(so.billing_status, "Fully Billed")
 
+	def test_so_billing_status_with_crnote_against_sales_return(self):
+		"""
+		| Step | Document creation                    |                               |
+		|------+--------------------------------------+-------------------------------|
+		|    1 | SO -> DN -> SI                       | SO Fully Billed and Completed |
+		|    2 | DN -> Sales Return(Partial)          | SO 50% Delivered, 100% billed |
+		|    3 | Sales Return(Partial) -> Credit Note | SO 50% Delivered, 50% billed  |
+
+		"""
+		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+
+		so = make_sales_order(uom="Nos", do_not_save=1)
+		so.save()
+		so.submit()
+
+		self.assertEqual(so.billing_status, "Not Billed")
+
+		dn1 = make_delivery_note(so.name)
+		dn1.taxes_and_charges = ""
+		dn1.taxes.clear()
+		dn1.save().submit()
+
+		si = create_sales_invoice(qty=10, do_not_save=1)
+		si.items[0].sales_order = so.name
+		si.items[0].so_detail = so.items[0].name
+		si.items[0].delivery_note = dn1.name
+		si.items[0].dn_detail = dn1.items[0].name
+		si.save()
+		si.submit()
+
+		so.reload()
+		self.assertEqual(so.billing_status, "Fully Billed")
+		self.assertEqual(so.status, "Completed")
+
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		dn1.reload()
+		dn_ret = create_delivery_note(is_return=1, return_against=dn1.name, qty=-5, do_not_submit=True)
+		dn_ret.items[0].against_sales_order = so.name
+		dn_ret.items[0].so_detail = so.items[0].name
+		dn_ret.submit()
+
+		so.reload()
+		self.assertEqual(so.per_billed, 100)
+		self.assertEqual(so.per_delivered, 50)
+
+		cr_note = create_sales_invoice(is_return=1, qty=-1, do_not_submit=True)
+		cr_note.items[0].qty = -5
+		cr_note.items[0].sales_order = so.name
+		cr_note.items[0].so_detail = so.items[0].name
+		cr_note.items[0].delivery_note = dn_ret.name
+		cr_note.items[0].dn_detail = dn_ret.items[0].name
+		cr_note.update_billed_amount_in_sales_order = True
+		cr_note.submit()
+
+		so.reload()
+		self.assertEqual(so.per_billed, 50)
+		self.assertEqual(so.per_delivered, 50)
+
 	def test_so_back_updated_from_wo_via_mr(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
 		from erpnext.manufacturing.doctype.work_order.work_order import (

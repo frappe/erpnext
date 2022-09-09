@@ -6,10 +6,10 @@ import json
 
 import frappe
 from frappe import _
-from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.model.document import Document
 from frappe.utils import flt, get_url, nowdate
 from frappe.utils.background_jobs import enqueue
+from payments.utils import get_payment_gateway_controller
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_company_defaults,

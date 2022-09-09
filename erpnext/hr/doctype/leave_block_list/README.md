@@ -1,1 +1,0 @@
-List of days on which leaves can only be approved by special users.

@@ -4,9 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-from frappe.installer import update_site_config
 from frappe.utils import cint
 
 from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
@@ -29,7 +28,6 @@ def after_install():
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
-	add_non_standard_user_types()
 	frappe.db.commit()
 
 
@@ -44,7 +42,6 @@ def set_single_defaults():
 	for dt in (
 		"Accounts Settings",
 		"Print Settings",
-		"HR Settings",
 		"Buying Settings",
 		"Selling Settings",
 		"Stock Settings",
@@ -86,35 +83,32 @@ def setup_currency_exchange():
 
 
 def create_print_setting_custom_fields():
-	create_custom_field(
-		"Print Settings",
+	create_custom_fields(
 		{
-			"label": _("Compact Item Print"),
-			"fieldname": "compact_item_print",
-			"fieldtype": "Check",
-			"default": 1,
-			"insert_after": "with_letterhead",
-		},
-	)
-	create_custom_field(
-		"Print Settings",
-		{
-			"label": _("Print UOM after Quantity"),
-			"fieldname": "print_uom_after_quantity",
-			"fieldtype": "Check",
-			"default": 0,
-			"insert_after": "compact_item_print",
-		},
-	)
-	create_custom_field(
-		"Print Settings",
-		{
-			"label": _("Print taxes with zero amount"),
-			"fieldname": "print_taxes_with_zero_amount",
-			"fieldtype": "Check",
-			"default": 0,
-			"insert_after": "allow_print_for_cancelled",
-		},
+			"Print Settings": [
+				{
+					"label": _("Compact Item Print"),
+					"fieldname": "compact_item_print",
+					"fieldtype": "Check",
+					"default": "1",
+					"insert_after": "with_letterhead",
+				},
+				{
+					"label": _("Print UOM after Quantity"),
+					"fieldname": "print_uom_after_quantity",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "compact_item_print",
+				},
+				{
+					"label": _("Print taxes with zero amount"),
+					"fieldname": "print_taxes_with_zero_amount",
+					"fieldtype": "Check",
+					"default": "0",
+					"insert_after": "allow_print_for_cancelled",
+				},
+			]
+		}
 	)
 
 
@@ -201,104 +195,3 @@ def add_standard_navbar_items():
 
 def add_app_name():
 	frappe.db.set_value("System Settings", None, "app_name", "ERPNext")
-
-
-def add_non_standard_user_types():
-	user_types = get_user_types_data()
-
-	user_type_limit = {}
-	for user_type, data in user_types.items():
-		user_type_limit.setdefault(frappe.scrub(user_type), 20)
-
-	update_site_config("user_type_doctype_limit", user_type_limit)
-
-	for user_type, data in user_types.items():
-		create_custom_role(data)
-		create_user_type(user_type, data)
-
-
-def get_user_types_data():
-	return {
-		"Employee Self Service": {
-			"role": "Employee Self Service",
-			"apply_user_permission_on": "Employee",
-			"user_id_field": "user_id",
-			"doctypes": {
-				# masters
-				"Holiday List": ["read"],
-				"Employee": ["read", "write"],
-				# payroll
-				"Salary Slip": ["read"],
-				"Employee Benefit Application": ["read", "write", "create", "delete"],
-				# expenses
-				"Expense Claim": ["read", "write", "create", "delete"],
-				"Employee Advance": ["read", "write", "create", "delete"],
-				# leave and attendance
-				"Leave Application": ["read", "write", "create", "delete"],
-				"Attendance Request": ["read", "write", "create", "delete"],
-				"Compensatory Leave Request": ["read", "write", "create", "delete"],
-				# tax
-				"Employee Tax Exemption Declaration": ["read", "write", "create", "delete"],
-				"Employee Tax Exemption Proof Submission": ["read", "write", "create", "delete"],
-				# projects
-				"Timesheet": ["read", "write", "create", "delete", "submit", "cancel", "amend"],
-				# trainings
-				"Training Program": ["read"],
-				"Training Feedback": ["read", "write", "create", "delete", "submit", "cancel", "amend"],
-				# shifts
-				"Shift Request": ["read", "write", "create", "delete", "submit", "cancel", "amend"],
-				# misc
-				"Employee Grievance": ["read", "write", "create", "delete"],
-				"Employee Referral": ["read", "write", "create", "delete"],
-				"Travel Request": ["read", "write", "create", "delete"],
-			},
-		}
-	}
-
-
-def create_custom_role(data):
-	if data.get("role") and not frappe.db.exists("Role", data.get("role")):
-		frappe.get_doc(
-			{"doctype": "Role", "role_name": data.get("role"), "desk_access": 1, "is_custom": 1}
-		).insert(ignore_permissions=True)
-
-
-def create_user_type(user_type, data):
-	if frappe.db.exists("User Type", user_type):
-		doc = frappe.get_cached_doc("User Type", user_type)
-		doc.user_doctypes = []
-	else:
-		doc = frappe.new_doc("User Type")
-		doc.update(
-			{
-				"name": user_type,
-				"role": data.get("role"),
-				"user_id_field": data.get("user_id_field"),
-				"apply_user_permission_on": data.get("apply_user_permission_on"),
-			}
-		)
-
-	create_role_permissions_for_doctype(doc, data)
-	doc.save(ignore_permissions=True)
-
-
-def create_role_permissions_for_doctype(doc, data):
-	for doctype, perms in data.get("doctypes").items():
-		args = {"document_type": doctype}
-		for perm in perms:
-			args[perm] = 1
-
-		doc.append("user_doctypes", args)
-
-
-def update_select_perm_after_install():
-	if not frappe.flags.update_select_perm_after_migrate:
-		return
-
-	frappe.flags.ignore_select_perm = False
-	for row in frappe.get_all("User Type", filters={"is_standard": 0}):
-		print("Updating user type :- ", row.name)
-		doc = frappe.get_doc("User Type", row.name)
-		doc.save()
-
-	frappe.flags.update_select_perm_after_migrate = False

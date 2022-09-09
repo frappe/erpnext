@@ -18,6 +18,7 @@
   "automatically_fetch_payment_terms",
   "column_break_17",
   "enable_common_party_accounting",
+  "allow_multi_currency_invoices_against_single_party_account",
   "report_setting_section",
   "use_custom_cash_flow",
   "deferred_accounting_settings_section",
@@ -339,6 +340,13 @@
    "fieldname": "report_setting_section",
    "fieldtype": "Section Break",
    "label": "Report Setting"
+  },
+  {
+   "default": "0",
+   "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
+   "fieldname": "allow_multi_currency_invoices_against_single_party_account",
+   "fieldtype": "Check",
+   "label": "Allow multi-currency invoices against single party account "
   }
  ],
  "icon": "icon-cog",
@@ -346,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-08 14:45:06.796418",
+ "modified": "2022-07-11 13:37:50.605141",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

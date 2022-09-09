@@ -362,6 +362,12 @@ class PurchaseReceipt(BuyingController):
 						if credit_currency == self.company_currency
 						else flt(d.net_amount, d.precision("net_amount"))
 					)
+
+					outgoing_amount = d.base_net_amount
+					if self.is_internal_supplier and d.valuation_rate:
+						outgoing_amount = d.valuation_rate * d.stock_qty
+						credit_amount = outgoing_amount
+
 					if credit_amount:
 						account = warehouse_account[d.from_warehouse]["account"] if d.from_warehouse else stock_rbnb
 
@@ -369,7 +375,7 @@ class PurchaseReceipt(BuyingController):
 							gl_entries=gl_entries,
 							account=account,
 							cost_center=d.cost_center,
-							debit=-1 * flt(d.base_net_amount, d.precision("base_net_amount")),
+							debit=-1 * flt(outgoing_amount, d.precision("base_net_amount")),
 							credit=0.0,
 							remarks=remarks,
 							against_account=warehouse_account_name,
@@ -456,7 +462,7 @@ class PurchaseReceipt(BuyingController):
 
 					# divisional loss adjustment
 					valuation_amount_as_per_doc = (
-						flt(d.base_net_amount, d.precision("base_net_amount"))
+						flt(outgoing_amount, d.precision("base_net_amount"))
 						+ flt(d.landed_cost_voucher_amount)
 						+ flt(d.rm_supp_cost)
 						+ flt(d.item_tax_amount)
@@ -630,47 +636,6 @@ class PurchaseReceipt(BuyingController):
 					)
 
 					i += 1
-
-	def add_gl_entry(
-		self,
-		gl_entries,
-		account,
-		cost_center,
-		debit,
-		credit,
-		remarks,
-		against_account,
-		debit_in_account_currency=None,
-		credit_in_account_currency=None,
-		account_currency=None,
-		project=None,
-		voucher_detail_no=None,
-		item=None,
-		posting_date=None,
-	):
-
-		gl_entry = {
-			"account": account,
-			"cost_center": cost_center,
-			"debit": debit,
-			"credit": credit,
-			"against": against_account,
-			"remarks": remarks,
-		}
-
-		if voucher_detail_no:
-			gl_entry.update({"voucher_detail_no": voucher_detail_no})
-
-		if debit_in_account_currency:
-			gl_entry.update({"debit_in_account_currency": debit_in_account_currency})
-
-		if credit_in_account_currency:
-			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
-
-		if posting_date:
-			gl_entry.update({"posting_date": posting_date})
-
-		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):

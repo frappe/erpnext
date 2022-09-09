@@ -8,36 +8,16 @@ import frappe
 from frappe.utils import add_months, add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
-	make_deduction_salary_component,
-	make_earning_salary_component,
-)
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import (
-	create_salary_structure_assignment,
-	make_salary_structure,
-)
-from erpnext.projects.doctype.timesheet.timesheet import (
-	OverlapError,
-	make_salary_slip,
-	make_sales_invoice,
-)
+from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
+from erpnext.setup.doctype.employee.test_employee import make_employee
 
 
 class TestTimesheet(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
-		make_earning_salary_component(setup=True, company_list=["_Test Company"])
-		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
-
 	def setUp(self):
-		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
-			frappe.db.sql("delete from `tab%s`" % dt)
+		frappe.db.delete("Timesheet")
 
 	def test_timesheet_billing_amount(self):
 		emp = make_employee("test_employee_6@salary.com")
-
-		make_salary_structure_for_timesheet(emp)
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -48,8 +28,6 @@ class TestTimesheet(unittest.TestCase):
 
 	def test_timesheet_billing_amount_not_billable(self):
 		emp = make_employee("test_employee_6@salary.com")
-
-		make_salary_structure_for_timesheet(emp)
 		timesheet = make_timesheet(emp, simulate=True, is_billable=0)
 
 		self.assertEqual(timesheet.total_hours, 2)
@@ -57,28 +35,6 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.time_logs[0].billing_rate, 0)
 		self.assertEqual(timesheet.time_logs[0].billing_amount, 0)
 		self.assertEqual(timesheet.total_billable_amount, 0)
-
-	def test_salary_slip_from_timesheet(self):
-		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
-
-		salary_structure = make_salary_structure_for_timesheet(emp)
-		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
-		salary_slip = make_salary_slip(timesheet.name)
-		salary_slip.submit()
-
-		self.assertEqual(salary_slip.total_working_hours, 2)
-		self.assertEqual(salary_slip.hour_rate, 50)
-		self.assertEqual(salary_slip.earnings[0].salary_component, "Timesheet Component")
-		self.assertEqual(salary_slip.earnings[0].amount, 100)
-		self.assertEqual(salary_slip.timesheets[0].time_sheet, timesheet.name)
-		self.assertEqual(salary_slip.timesheets[0].working_hours, 2)
-
-		timesheet = frappe.get_doc("Timesheet", timesheet.name)
-		self.assertEqual(timesheet.status, "Payslip")
-		salary_slip.cancel()
-
-		timesheet = frappe.get_doc("Timesheet", timesheet.name)
-		self.assertEqual(timesheet.status, "Submitted")
 
 	def test_sales_invoice_from_timesheet(self):
 		emp = make_employee("test_employee_6@salary.com")
@@ -204,31 +160,6 @@ class TestTimesheet(unittest.TestCase):
 
 		to_time = timesheet.time_logs[0].to_time
 		self.assertEqual(to_time, add_to_date(from_time, hours=2, as_datetime=True))
-
-
-def make_salary_structure_for_timesheet(employee, company=None):
-	salary_structure_name = "Timesheet Salary Structure Test"
-	frequency = "Monthly"
-
-	if not frappe.db.exists("Salary Component", "Timesheet Component"):
-		frappe.get_doc(
-			{"doctype": "Salary Component", "salary_component": "Timesheet Component"}
-		).insert()
-
-	salary_structure = make_salary_structure(
-		salary_structure_name, frequency, company=company, dont_submit=True
-	)
-	salary_structure.salary_component = "Timesheet Component"
-	salary_structure.salary_slip_based_on_timesheet = 1
-	salary_structure.hour_rate = 50.0
-	salary_structure.save()
-	salary_structure.submit()
-
-	if not frappe.db.get_value("Salary Structure Assignment", {"employee": employee, "docstatus": 1}):
-		frappe.db.set_value("Employee", employee, "date_of_joining", add_months(nowdate(), -5))
-		create_salary_structure_assignment(employee, salary_structure.name)
-
-	return salary_structure
 
 
 def make_timesheet(

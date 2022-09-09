@@ -412,7 +412,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.is_return && doc.return_against",
+   "depends_on": "eval: doc.is_return",
    "fieldname": "update_billed_amount_in_sales_order",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -2022,7 +2022,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-06-16 16:22:44.870575",
+ "modified": "2022-07-11 17:43:56.435382",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

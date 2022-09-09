@@ -527,10 +527,13 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 					_("Please contact your administrator to extend the credit limits for {0}.").format(customer)
 				)
 
-			message = """Please contact any of the following users to extend the credit limits for {0}:
-				<br><br><ul><li>{1}</li></ul>""".format(
-				customer, "<li>".join(credit_controller_users_formatted)
+			user_list = "<br><br><ul><li>{0}</li></ul>".format(
+				"<li>".join(credit_controller_users_formatted)
 			)
+
+			message = _(
+				"Please contact any of the following users to extend the credit limits for {0}: {1}"
+			).format(customer, user_list)
 
 			# if the current user does not have permissions to override credit limit,
 			# prompt them to send out an email to the controller users

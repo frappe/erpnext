@@ -136,6 +136,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
+		},
+		{
+			"fieldname": "show_future_payments",
+			"label": __("Show Future Payments"),
+			"fieldtype": "Check",
 		}
 	],
 
