@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Floor, IfNull, Sum
+from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils.data import comma_and
 from pypika.terms import ExistsCriterion
 
@@ -18,7 +18,7 @@ def execute(filters=None):
 	manufacture_details = get_manufacturer_records()
 
 	for row in bom_data:
-		required_qty = qty_to_make * row.actual_qty
+		required_qty = qty_to_make * row.qty_per_unit
 		last_purchase_rate = frappe.db.get_value("Item", row.item_code, "last_purchase_rate")
 
 		data.append(get_report_data(last_purchase_rate, required_qty, row, manufacture_details))
@@ -27,8 +27,8 @@ def execute(filters=None):
 
 
 def get_report_data(last_purchase_rate, required_qty, row, manufacture_details):
-	to_build = row.to_build if row.to_build > 0 else 0
-	difference_qty = to_build - required_qty
+	qty_per_unit = row.qty_per_unit if row.qty_per_unit > 0 else 0
+	difference_qty = row.actual_qty - required_qty
 	return [
 		row.item_code,
 		row.description,
@@ -36,8 +36,8 @@ def get_report_data(last_purchase_rate, required_qty, row, manufacture_details):
 		comma_and(
 			manufacture_details.get(row.item_code, {}).get("manufacturer_part", []), add_quotes=False
 		),
+		qty_per_unit,
 		row.actual_qty,
-		str(to_build),
 		required_qty,
 		difference_qty,
 		last_purchase_rate,
@@ -72,16 +72,16 @@ def get_columns():
 			"width": 150,
 		},
 		{
-			"fieldname": "available_qty",
-			"label": _("Available Qty"),
-			"fieldtype": "Float",
-			"width": 120,
-		},
-		{
 			"fieldname": "qty_per_unit",
 			"label": _("Qty Per Unit"),
 			"fieldtype": "Float",
 			"width": 110,
+		},
+		{
+			"fieldname": "available_qty",
+			"label": _("Available Qty"),
+			"fieldtype": "Float",
+			"width": 120,
 		},
 		{
 			"fieldname": "required_qty",
@@ -106,10 +106,8 @@ def get_columns():
 
 def get_bom_data(filters):
 	if filters.get("show_exploded_view"):
-		qty_field = "stock_qty"
 		bom_item_table = "BOM Explosion Item"
 	else:
-		qty_field = "qty"
 		bom_item_table = "BOM Item"
 
 	bom_item = frappe.qb.DocType(bom_item_table)
@@ -122,9 +120,8 @@ def get_bom_data(filters):
 		.select(
 			bom_item.item_code,
 			bom_item.description,
-			bom_item[qty_field],
+			bom_item.qty_consumed_per_unit.as_("qty_per_unit"),
 			IfNull(Sum(bin.actual_qty), 0).as_("actual_qty"),
-			IfNull(Sum(Floor(bin.actual_qty / bom_item[qty_field])), 0).as_("to_build"),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
 		.groupby(bom_item.item_code)
