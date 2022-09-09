@@ -877,6 +877,7 @@ def make_return_stock_entry_for_subcontract(
 		{
 			order_doctype: {
 				"doctype": "Stock Entry",
+				"field_no_map": ["purchase_order", "subcontracting_order"],
 			},
 		},
 		ignore_child_tables=True,

@@ -107,7 +107,7 @@ frappe.ui.form.on('Subcontracting Order', {
 	get_materials_from_supplier: function (frm) {
 		let sco_rm_details = [];
 
-		if (frm.doc.supplied_items && frm.doc.per_received > 0) {
+		if (frm.doc.status != "Closed" && frm.doc.supplied_items && frm.doc.per_received > 0) {
 			frm.doc.supplied_items.forEach(d => {
 				if (d.total_supplied_qty > 0 && d.total_supplied_qty != d.consumed_qty) {
 					sco_rm_details.push(d.name);

@@ -6,8 +6,10 @@ import copy
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import flt
+from frappe.utils import cint, flt
 
+import erpnext
+from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
@@ -22,6 +24,7 @@ from erpnext.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
@@ -365,6 +368,103 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		args = frappe._dict(scr_name=scr1.name, qty=-15)
 		self.assertRaises(OverAllowanceError, make_return_subcontracting_receipt, **args)
+
+	def test_subcontracting_receipt_no_gl_entry(self):
+		sco = get_subcontracting_order()
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": "Expenses Included In Valuation - _TC",
+				"description": "Test Additional Costs",
+				"amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{
+				"voucher_type": "Subcontracting Receipt",
+				"voucher_no": scr.name,
+				"item_code": "Subcontracted Item SA7",
+				"warehouse": "_Test Warehouse - _TC",
+			},
+			"stock_value_difference",
+		)
+
+		# Service Cost(100 * 10) + Raw Materials Cost(50 * 10) + Additional Costs(100) = 1600
+		self.assertEqual(stock_value_difference, 1600)
+		self.assertFalse(get_gl_entries("Subcontracting Receipt", scr.name))
+
+	def test_subcontracting_receipt_gl_entry(self):
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		scr = make_subcontracting_receipt(sco.name)
+		additional_costs_expense_account = "Expenses Included In Valuation - TCP1"
+		scr.append(
+			"additional_costs",
+			{
+				"expense_account": additional_costs_expense_account,
+				"description": "Test Additional Costs",
+				"amount": 100,
+				"base_amount": 100,
+			},
+		)
+		scr.save()
+		scr.submit()
+
+		self.assertEqual(cint(erpnext.is_perpetual_inventory_enabled(scr.company)), 1)
+
+		gl_entries = get_gl_entries("Subcontracting Receipt", scr.name)
+
+		self.assertTrue(gl_entries)
+
+		fg_warehouse_ac = get_inventory_account(scr.company, scr.items[0].warehouse)
+		supplier_warehouse_ac = get_inventory_account(scr.company, scr.supplier_warehouse)
+		expense_account = scr.items[0].expense_account
+
+		if fg_warehouse_ac == supplier_warehouse_ac:
+			expected_values = {
+				fg_warehouse_ac: [2100.0, 1000.0],  # FG Amount (D), RM Cost (C)
+				expense_account: [0.0, 1000.0],  # Service Cost (C)
+				additional_costs_expense_account: [0.0, 100.0],  # Additional Cost (C)
+			}
+		else:
+			expected_values = {
+				fg_warehouse_ac: [2100.0, 0.0],  # FG Amount (D)
+				supplier_warehouse_ac: [0.0, 1000.0],  # RM Cost (C)
+				expense_account: [0.0, 1000.0],  # Service Cost (C)
+				additional_costs_expense_account: [0.0, 100.0],  # Additional Cost (C)
+			}
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
+
+		scr.reload()
+		scr.cancel()
+		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 
 
 def make_return_subcontracting_receipt(**args):
