@@ -117,6 +117,7 @@ class StockEntry(StockController):
 		self.validate_work_order()
 		self.validate_bom()
 		self.validate_purchase_order()
+		self.validate_subcontracting_order()
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_scrap_items()
@@ -956,6 +957,20 @@ class StockEntry(StockController):
 				frappe.throw(
 					_("Please select Subcontracting Order instead of Purchase Order {0}").format(
 						self.purchase_order
+					)
+				)
+
+	def validate_subcontracting_order(self):
+		if self.get("subcontracting_order") and self.purpose in [
+			"Send to Subcontractor",
+			"Material Transfer",
+		]:
+			sco_status = frappe.db.get_value("Subcontracting Order", self.subcontracting_order, "status")
+
+			if sco_status == "Closed":
+				frappe.throw(
+					_("Cannot create Stock Entry against a closed Subcontracting Order {0}.").format(
+						self.subcontracting_order
 					)
 				)
 
