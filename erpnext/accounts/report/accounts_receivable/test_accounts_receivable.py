@@ -1,19 +1,27 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, getdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
-class TestAccountsReceivable(unittest.TestCase):
-	def test_accounts_receivable(self):
+class TestAccountsReceivable(FrappeTestCase):
+	def setUp(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
+		frappe.db.sql("delete from `tabSales Order` where company='_Test Company 2'")
+		frappe.db.sql("delete from `tabPayment Entry` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabPayment Ledger Entry` where company='_Test Company 2'")
 
+	def tearDown(self):
+		frappe.db.rollback()
+
+	def test_accounts_receivable(self):
 		filters = {
 			"company": "_Test Company 2",
 			"based_on_payment_terms": 1,
@@ -63,6 +71,50 @@ class TestAccountsReceivable(unittest.TestCase):
 				row.credit_note,
 				row.outstanding,
 				row.party_account,
+			],
+		)
+
+	def test_payment_againt_po_in_receivable_report(self):
+		"""
+		Payments made against Purchase Order will show up as outstanding amount
+		"""
+
+		so = make_sales_order(
+			company="_Test Company 2",
+			customer="_Test Customer 2",
+			warehouse="Finished Goods - _TC2",
+			currency="EUR",
+			debit_to="Debtors - _TC2",
+			income_account="Sales - _TC2",
+			expense_account="Cost of Goods Sold - _TC2",
+			cost_center="Main - _TC2",
+		)
+
+		pe = get_payment_entry(so.doctype, so.name)
+		pe = pe.save().submit()
+
+		filters = {
+			"company": "_Test Company 2",
+			"based_on_payment_terms": 0,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+
+		report = execute(filters)
+
+		expected_data_after_payment = [0, 1000, 0, -1000]
+
+		row = report[1][0]
+		self.assertEqual(
+			expected_data_after_payment,
+			[
+				row.invoiced,
+				row.paid,
+				row.credit_note,
+				row.outstanding,
 			],
 		)
 

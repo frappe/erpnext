@@ -3,8 +3,10 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate
 
+import erpnext
+from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 
 
@@ -75,6 +77,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.get_current_stock()
 
 	def on_submit(self):
+		self.validate_available_qty_for_consumption()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status()
@@ -103,12 +106,45 @@ class SubcontractingReceipt(SubcontractingController):
 
 	@frappe.whitelist()
 	def set_missing_values(self):
+		self.set_missing_values_in_additional_costs()
 		self.set_missing_values_in_supplied_items()
 		self.set_missing_values_in_items()
+
+	def set_available_qty_for_consumption(self):
+		supplied_items_details = {}
+
+		sco_supplied_item = frappe.qb.DocType("Subcontracting Order Supplied Item")
+		for item in self.get("items"):
+			supplied_items = (
+				frappe.qb.from_(sco_supplied_item)
+				.select(
+					sco_supplied_item.rm_item_code,
+					sco_supplied_item.reference_name,
+					(sco_supplied_item.total_supplied_qty - sco_supplied_item.consumed_qty).as_("available_qty"),
+				)
+				.where(
+					(sco_supplied_item.parent == item.subcontracting_order)
+					& (sco_supplied_item.main_item_code == item.item_code)
+					& (sco_supplied_item.reference_name == item.subcontracting_order_item)
+				)
+			).run(as_dict=True)
+
+			if supplied_items:
+				supplied_items_details[item.name] = {}
+
+				for supplied_item in supplied_items:
+					supplied_items_details[item.name][supplied_item.rm_item_code] = supplied_item.available_qty
+		else:
+			for item in self.get("supplied_items"):
+				item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
+					item.rm_item_code, 0
+				)
 
 	def set_missing_values_in_supplied_items(self):
 		for item in self.get("supplied_items") or []:
 			item.amount = item.rate * item.consumed_qty
+
+		self.set_available_qty_for_consumption()
 
 	def set_missing_values_in_items(self):
 		rm_supp_cost = {}
@@ -125,12 +161,12 @@ class SubcontractingReceipt(SubcontractingController):
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
 
-			if self.is_new() and item.rm_supp_cost > 0:
+			if item.recalculate_rate:
 				item.rate = (
-					item.rm_cost_per_qty + (item.service_cost_per_qty or 0) + item.additional_cost_per_qty
+					flt(item.rm_cost_per_qty) + flt(item.service_cost_per_qty) + flt(item.additional_cost_per_qty)
 				)
 
-			item.received_qty = item.qty + (item.rejected_qty or 0)
+			item.received_qty = item.qty + flt(item.rejected_qty)
 			item.amount = item.qty * item.rate
 			total_qty += item.qty
 			total_amount += item.amount
@@ -145,6 +181,17 @@ class SubcontractingReceipt(SubcontractingController):
 					frappe.throw(
 						_("Rejected Warehouse is mandatory against rejected Item {0}").format(item.item_code)
 					)
+
+	def validate_available_qty_for_consumption(self):
+		for item in self.get("supplied_items"):
+			if (
+				item.available_qty_for_consumption and item.available_qty_for_consumption < item.consumed_qty
+			):
+				frappe.throw(
+					_(
+						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
+					).format(item.idx)
+				)
 
 	def set_items_cost_center(self):
 		if self.company:
@@ -179,6 +226,137 @@ class SubcontractingReceipt(SubcontractingController):
 
 		if status:
 			frappe.db.set_value("Subcontracting Receipt", self.name, "status", status, update_modified)
+
+	def get_gl_entries(self, warehouse_account=None):
+		from erpnext.accounts.general_ledger import process_gl_map
+
+		gl_entries = []
+		self.make_item_gl_entries(gl_entries, warehouse_account)
+
+		return process_gl_map(gl_entries)
+
+	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+		if erpnext.is_perpetual_inventory_enabled(self.company):
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
+		warehouse_with_no_account = []
+
+		for item in self.items:
+			if flt(item.rate) and flt(item.qty):
+				if warehouse_account.get(item.warehouse):
+					stock_value_diff = frappe.db.get_value(
+						"Stock Ledger Entry",
+						{
+							"voucher_type": "Subcontracting Receipt",
+							"voucher_no": self.name,
+							"voucher_detail_no": item.name,
+							"warehouse": item.warehouse,
+							"is_cancelled": 0,
+						},
+						"stock_value_difference",
+					)
+
+					warehouse_account_name = warehouse_account[item.warehouse]["account"]
+					warehouse_account_currency = warehouse_account[item.warehouse]["account_currency"]
+					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
+					supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get(
+						"account_currency"
+					)
+					remarks = self.get("remarks") or _("Accounting Entry for Stock")
+
+					# FG Warehouse Account (Debit)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=warehouse_account_name,
+						cost_center=item.cost_center,
+						debit=stock_value_diff,
+						credit=0.0,
+						remarks=remarks,
+						against_account=stock_rbnb,
+						account_currency=warehouse_account_currency,
+						item=item,
+					)
+
+					# Supplier Warehouse Account (Credit)
+					if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=supplier_warehouse_account,
+							cost_center=item.cost_center,
+							debit=0.0,
+							credit=flt(item.rm_supp_cost),
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=supplier_warehouse_account_currency,
+							item=item,
+						)
+
+					# Expense Account (Credit)
+					if flt(item.service_cost_per_qty):
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=item.expense_account,
+							cost_center=item.cost_center,
+							debit=0.0,
+							credit=flt(item.service_cost_per_qty) * flt(item.qty),
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=get_account_currency(item.expense_account),
+							item=item,
+						)
+
+					# Loss Account (Credit)
+					divisional_loss = flt(item.amount - stock_value_diff, item.precision("amount"))
+
+					if divisional_loss:
+						if self.is_return:
+							loss_account = expenses_included_in_valuation
+						else:
+							loss_account = item.expense_account
+
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=loss_account,
+							cost_center=item.cost_center,
+							debit=divisional_loss,
+							credit=0.0,
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=get_account_currency(loss_account),
+							project=item.project,
+							item=item,
+						)
+				elif (
+					item.warehouse not in warehouse_with_no_account
+					or item.rejected_warehouse not in warehouse_with_no_account
+				):
+					warehouse_with_no_account.append(item.warehouse)
+
+		# Additional Costs Expense Accounts (Credit)
+		for row in self.additional_costs:
+			credit_amount = (
+				flt(row.base_amount)
+				if (row.base_amount or row.account_currency != self.company_currency)
+				else flt(row.amount)
+			)
+
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=row.expense_account,
+				cost_center=self.cost_center or self.get_company_default("cost_center"),
+				debit=0.0,
+				credit=credit_amount,
+				remarks=remarks,
+				against_account=None,
+			)
+
+		if warehouse_with_no_account:
+			frappe.msgprint(
+				_("No accounting entries for the following warehouses")
+				+ ": \n"
+				+ "\n".join(warehouse_with_no_account)
+			)
 
 
 @frappe.whitelist()
