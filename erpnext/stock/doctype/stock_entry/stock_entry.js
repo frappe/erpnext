@@ -815,7 +815,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			return {
 				"filters": {
 					"docstatus": 1,
-					"company": me.frm.doc.company
+					"company": me.frm.doc.company,
+					"status": ["not in", ["Completed", "Closed"]]
 				}
 			};
 		});
