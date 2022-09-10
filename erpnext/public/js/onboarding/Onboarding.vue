@@ -16,7 +16,7 @@
 		<div class="slide-section col-9">
 			<div v-show="CurrentStep == 2">
 				<p class="onboarding-title">{{ __("Setup Organization") }}</p>
-				<p class="onboarding-subtitle">{{ __("Don't Panic - These settings can be changed later.") }}</p>
+				<p class="onboarding-subtitle">{{ slide_subtitle }}</p>
 				<div class="row company-info">
 					<div class="abbreviation-container">
 						<span class="abbreviation-text">{{ abbreviation }}</span>
@@ -47,13 +47,13 @@
 			</div>
 			<div v-show="CurrentStep == 1">
 				<p class="onboarding-title">{{ __("Regional Settings") }}</p>
-				<p class="onboarding-subtitle">{{ __("Don't Panic - These settings can be changed later.") }}</p>
+				<p class="onboarding-subtitle">{{ slide_subtitle }}</p>
 				<div class="field-layout" ref="slide_1">
 				</div>
 			</div>
 			<div v-show="CurrentStep == 3">
 				<p class="onboarding-title">{{ __("Accounting Setup") }}</p>
-				<p class="onboarding-subtitle">{{ __("Don't Panic - These settings can be changed later.") }}</p>
+				<p class="onboarding-subtitle">{{ slide_subtitle }}</p>
 				<div class="field-layout" ref="slide_3">
 				</div>
 			</div>
@@ -143,6 +143,7 @@ export default {
 				"United Kingdom": ["04-01", "03-31"],
 			},
 			enabled_modules: [],
+			slide_subtitle: __("Don't Sweat - These settings can be changed later."),
 		};
 	},
 	components: {
@@ -376,6 +377,12 @@ export default {
 						label: __("Financial Year Begins On"),
 						fieldtype: "Date",
 						reqd: 1,
+						onchange: () => {
+							let fy_start_date = this.slide_3.get_value("fy_start_date");
+							if (fy_start_date) {
+								this.slide_3.set_value("fy_end_date", frappe.datetime.add_days(frappe.datetime.add_months(fy_start_date, 12),-1));
+							}
+						}
 					},
 					{
 						label: '',
