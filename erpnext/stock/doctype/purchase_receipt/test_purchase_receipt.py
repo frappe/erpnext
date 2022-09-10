@@ -9,8 +9,8 @@ from collections import defaultdict
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, today
-from six import iteritems
 from pypika import functions as fn
+from six import iteritems
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
