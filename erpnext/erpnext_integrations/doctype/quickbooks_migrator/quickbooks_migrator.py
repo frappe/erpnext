@@ -1271,7 +1271,7 @@ class QuickBooksMigrator(Document):
 							party_account = purchase_invoice["credit_to"]
 
 							account_1["party_type"] = "Supplier"
-							account_1["party"] = "party"
+							account_1["party"] = party
 							account_1["reference_type"] = reference_type
 							account_1["reference_name"] = reference_name
 							account_1["account"] = party_account
