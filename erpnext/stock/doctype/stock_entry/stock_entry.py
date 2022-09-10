@@ -128,7 +128,7 @@ class StockEntry(StockController):
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
 			"Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor",
-			"Material Consumption for Manufacture", "Send to Warehouse", "Receive at Warehouse"]
+			"Material Consumption for Manufacture", "Send to Warehouse", "Receive at Warehouse", "Inventory Adjustment"]
 
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
