@@ -9,11 +9,8 @@ from collections import defaultdict
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, today
-<<<<<<< HEAD
 from six import iteritems
-=======
 from pypika import functions as fn
->>>>>>> a03b4ce213 (fix: reposting not working for internal transferred purchase receipt)
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
