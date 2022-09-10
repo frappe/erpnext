@@ -36,6 +36,10 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError):
 	pass
 
 
+class BatchExpiredError(frappe.ValidationError):
+	pass
+
+
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
@@ -77,6 +81,10 @@ class StockController(AccountsController):
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+		is_material_issue = False
+		if self.doctype == "Stock Entry" and self.purpose == "Material Issue":
+			is_material_issue = True
+
 		for d in self.get("items"):
 			if hasattr(d, "serial_no") and hasattr(d, "batch_no") and d.serial_no and d.batch_no:
 				serial_nos = frappe.get_all(
@@ -93,6 +101,9 @@ class StockController(AccountsController):
 							)
 						)
 
+			if is_material_issue:
+				continue
+
 			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
 
@@ -100,7 +111,8 @@ class StockController(AccountsController):
 					frappe.throw(
 						_("Row #{0}: The batch {1} has already expired.").format(
 							d.idx, get_link_to_form("Batch", d.get("batch_no"))
-						)
+						),
+						BatchExpiredError,
 					)
 
 	def clean_serial_nos(self):
@@ -310,7 +322,13 @@ class StockController(AccountsController):
 			)
 			if (
 				self.doctype
-				not in ("Purchase Receipt", "Purchase Invoice", "Stock Reconciliation", "Stock Entry")
+				not in (
+					"Purchase Receipt",
+					"Purchase Invoice",
+					"Stock Reconciliation",
+					"Stock Entry",
+					"Subcontracting Receipt",
+				)
 				and not is_expense_account
 			):
 				frappe.throw(
@@ -372,10 +390,37 @@ class StockController(AccountsController):
 		return sl_dict
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
+		# To handle delivery note and sales invoice
+		if row.get("item_row"):
+			row = row.get("item_row")
+
 		dimensions = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
 		for dimension in dimensions:
-			if dimension and row.get(dimension.source_fieldname):
+			if not dimension:
+				continue
+
+			if row.get(dimension.source_fieldname):
 				sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
+
+			if not sl_dict.get(dimension.target_fieldname) and dimension.fetch_from_parent:
+				sl_dict[dimension.target_fieldname] = self.get(dimension.fetch_from_parent)
+
+				# Get value based on doctype name
+				if not sl_dict.get(dimension.target_fieldname):
+					fieldname = frappe.get_cached_value(
+						"DocField", {"parent": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
+					)
+
+					if not fieldname:
+						fieldname = frappe.get_cached_value(
+							"Custom Field", {"dt": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
+						)
+
+					if fieldname and self.get(fieldname):
+						sl_dict[dimension.target_fieldname] = self.get(fieldname)
+
+				if sl_dict[dimension.target_fieldname] and self.docstatus == 1:
+					row.db_set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
@@ -654,6 +699,47 @@ class StockController(AccountsController):
 				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
 			else:
 				create_repost_item_valuation_entry(args)
+
+	def add_gl_entry(
+		self,
+		gl_entries,
+		account,
+		cost_center,
+		debit,
+		credit,
+		remarks,
+		against_account,
+		debit_in_account_currency=None,
+		credit_in_account_currency=None,
+		account_currency=None,
+		project=None,
+		voucher_detail_no=None,
+		item=None,
+		posting_date=None,
+	):
+
+		gl_entry = {
+			"account": account,
+			"cost_center": cost_center,
+			"debit": debit,
+			"credit": credit,
+			"against": against_account,
+			"remarks": remarks,
+		}
+
+		if voucher_detail_no:
+			gl_entry.update({"voucher_detail_no": voucher_detail_no})
+
+		if debit_in_account_currency:
+			gl_entry.update({"debit_in_account_currency": debit_in_account_currency})
+
+		if credit_in_account_currency:
+			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
+
+		if posting_date:
+			gl_entry.update({"posting_date": posting_date})
+
+		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
 
 def repost_required_for_queue(doc: StockController) -> bool:

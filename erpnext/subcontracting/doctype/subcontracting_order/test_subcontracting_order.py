@@ -7,7 +7,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_subcontracting_order
-from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+from erpnext.controllers.subcontracting_controller import (
+	get_materials_from_supplier,
+	make_rm_stock_entry,
+)
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
@@ -86,6 +89,16 @@ class TestSubcontractingOrder(FrappeTestCase):
 		scr.items[0].qty -= 1
 		scr.save()
 		scr.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Partially Received")
+
+		# Closed
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		ste.save()
+		ste.submit()
+		sco.load_from_db()
+		self.assertEqual(sco.status, "Closed")
+		ste.cancel()
 		sco.load_from_db()
 		self.assertEqual(sco.status, "Partially Received")
 
@@ -174,22 +187,13 @@ class TestSubcontractingOrder(FrappeTestCase):
 		self.assertEqual(len(ste.items), len(rm_items))
 
 	def test_update_reserved_qty_for_subcontracting(self):
-		# Make stock available for raw materials
-		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		# Create RM Material Receipt
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=10, basic_rate=100)
 		make_stock_entry(
 			target="_Test Warehouse - _TC", item_code="_Test Item Home Desktop 100", qty=20, basic_rate=100
 		)
-		make_stock_entry(
-			target="_Test Warehouse 1 - _TC", item_code="_Test Item", qty=30, basic_rate=100
-		)
-		make_stock_entry(
-			target="_Test Warehouse 1 - _TC",
-			item_code="_Test Item Home Desktop 100",
-			qty=30,
-			basic_rate=100,
-		)
 
-		bin1 = frappe.db.get_value(
+		bin_before_sco = frappe.db.get_value(
 			"Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty", "modified"],
@@ -209,102 +213,97 @@ class TestSubcontractingOrder(FrappeTestCase):
 		]
 		sco = get_subcontracting_order(service_items=service_items)
 
-		bin2 = frappe.db.get_value(
+		bin_after_sco = frappe.db.get_value(
 			"Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname=["reserved_qty_for_sub_contract", "projected_qty", "modified"],
 			as_dict=1,
 		)
 
-		self.assertEqual(bin2.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
-		self.assertEqual(bin2.projected_qty, bin1.projected_qty - 10)
-		self.assertNotEqual(bin1.modified, bin2.modified)
+		# reserved_qty_for_sub_contract should be increased by 10
+		self.assertEqual(
+			bin_after_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract + 10
+		)
 
-		# Create stock transfer
+		# projected_qty should be decreased by 10
+		self.assertEqual(bin_after_sco.projected_qty, bin_before_sco.projected_qty - 10)
+
+		self.assertNotEqual(bin_before_sco.modified, bin_after_sco.modified)
+
+		# Create Stock Entry(Send to Subcontractor)
 		rm_items = [
 			{
 				"item_code": "_Test FG Item",
 				"rm_item_code": "_Test Item",
 				"item_name": "_Test Item",
-				"qty": 6,
+				"qty": 10,
 				"warehouse": "_Test Warehouse - _TC",
 				"rate": 100,
-				"amount": 600,
+				"amount": 1000,
 				"stock_uom": "Nos",
-			}
+			},
+			{
+				"item_code": "_Test FG Item",
+				"rm_item_code": "_Test Item Home Desktop 100",
+				"item_name": "_Test Item Home Desktop 100",
+				"qty": 20,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"amount": 2000,
+				"stock_uom": "Nos",
+			},
 		]
 		ste = frappe.get_doc(make_rm_stock_entry(sco.name, rm_items))
 		ste.to_warehouse = "_Test Warehouse 1 - _TC"
 		ste.save()
 		ste.submit()
 
-		bin3 = frappe.db.get_value(
+		bin_after_rm_transfer = frappe.db.get_value(
 			"Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
 		)
 
-		self.assertEqual(bin3.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
-
-		make_stock_entry(
-			target="_Test Warehouse 1 - _TC", item_code="_Test Item", qty=40, basic_rate=100
-		)
-		make_stock_entry(
-			target="_Test Warehouse 1 - _TC",
-			item_code="_Test Item Home Desktop 100",
-			qty=40,
-			basic_rate=100,
+		# reserved_qty_for_sub_contract should be decreased by 10
+		self.assertEqual(
+			bin_after_rm_transfer.reserved_qty_for_sub_contract,
+			bin_after_sco.reserved_qty_for_sub_contract - 10,
 		)
 
-		# Make SCR against the SCO
-		scr = make_subcontracting_receipt(sco.name)
-		scr.save()
-		scr.submit()
-
-		bin4 = frappe.db.get_value(
-			"Bin",
-			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
-			fieldname="reserved_qty_for_sub_contract",
-			as_dict=1,
-		)
-
-		self.assertEqual(bin4.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
-
-		# Cancel SCR
-		scr.reload()
-		scr.cancel()
-		bin5 = frappe.db.get_value(
-			"Bin",
-			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
-			fieldname="reserved_qty_for_sub_contract",
-			as_dict=1,
-		)
-
-		self.assertEqual(bin5.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
-
-		# Cancel Stock Entry
+		# Cancel Stock Entry(Send to Subcontractor)
 		ste.cancel()
-		bin6 = frappe.db.get_value(
+		bin_after_cancel_ste = frappe.db.get_value(
 			"Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
 		)
 
-		self.assertEqual(bin6.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract + 10)
+		# reserved_qty_for_sub_contract should be increased by 10
+		self.assertEqual(
+			bin_after_cancel_ste.reserved_qty_for_sub_contract,
+			bin_after_rm_transfer.reserved_qty_for_sub_contract + 10,
+		)
 
-		# Cancel PO
+		# Cancel SCO
 		sco.reload()
 		sco.cancel()
-		bin7 = frappe.db.get_value(
+		bin_after_cancel_sco = frappe.db.get_value(
 			"Bin",
 			filters={"warehouse": "_Test Warehouse - _TC", "item_code": "_Test Item"},
 			fieldname="reserved_qty_for_sub_contract",
 			as_dict=1,
 		)
 
-		self.assertEqual(bin7.reserved_qty_for_sub_contract, bin1.reserved_qty_for_sub_contract)
+		# reserved_qty_for_sub_contract should be decreased by 10
+		self.assertEqual(
+			bin_after_cancel_sco.reserved_qty_for_sub_contract,
+			bin_after_cancel_ste.reserved_qty_for_sub_contract - 10,
+		)
+		self.assertEqual(
+			bin_after_cancel_sco.reserved_qty_for_sub_contract, bin_before_sco.reserved_qty_for_sub_contract
+		)
 
 	def test_exploded_items(self):
 		item_code = "_Test Subcontracted FG Item 11"
@@ -503,6 +502,35 @@ class TestSubcontractingOrder(FrappeTestCase):
 
 		set_backflush_based_on("BOM")
 
+	def test_get_materials_from_supplier(self):
+		# Create SCO
+		sco = get_subcontracting_order()
+
+		# Transfer RM
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create SCR (Partial)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].qty -= 5
+		scr.save()
+		scr.submit()
+
+		# Get RM from Supplier
+		ste = get_materials_from_supplier(sco.name, [d.name for d in sco.supplied_items])
+		ste.save()
+		ste.submit()
+
+		sco.load_from_db()
+
+		self.assertEqual(sco.status, "Closed")
+		self.assertEqual(sco.supplied_items[0].returned_qty, 5)
+
 
 def create_subcontracting_order(**args):
 	args = frappe._dict(args)
@@ -511,7 +539,7 @@ def create_subcontracting_order(**args):
 	for item in sco.items:
 		item.include_exploded_items = args.get("include_exploded_items", 1)
 
-	if args.get("warehouse"):
+	if args.warehouse:
 		for item in sco.items:
 			item.warehouse = args.warehouse
 	else:

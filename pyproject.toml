@@ -12,7 +12,6 @@ dependencies = [
     "pycountry~=20.7.3",
     "python-stdnum~=1.16",
     "Unidecode~=1.2.0",
-    "redisearch~=2.1.0",
 
     # integration dependencies
     "gocardless-pro~=1.22.0",
@@ -21,6 +20,9 @@ dependencies = [
     "python-youtube~=0.8.0",
     "taxjar~=1.9.2",
     "tweepy~=3.10.0",
+
+    # Not used directly - required by PyQRCode for PNG generation
+    "pypng~=0.20220715.0",
 ]
 
 [build-system]

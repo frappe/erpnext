@@ -178,6 +178,7 @@ class DeliveryNote(SellingController):
 		if (
 			cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
+			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[
@@ -896,6 +897,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 					"name": "delivery_note_item",
 					"batch_no": "batch_no",
 					"serial_no": "serial_no",
+					"purchase_order": "purchase_order",
+					"purchase_order_item": "purchase_order_item",
 				},
 				"field_no_map": ["warehouse"],
 			},
