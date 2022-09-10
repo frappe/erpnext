@@ -227,7 +227,6 @@ export default {
 
 		listen_for_setup_stages: function() {
 			frappe.realtime.on("setup_task", (data) => {
-				console.log(data);
 				this.setup_stage = data.stage_status;
 			});
 		},
@@ -256,8 +255,6 @@ export default {
 									language:  this.slide_1.get_value('language')
 								},
 								callback: function (r) {
-									console.log(__("Country"));
-									console.log(r);
 									me.language = r.message;
 									me.make_slides();
 								},
