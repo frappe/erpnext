@@ -50,10 +50,10 @@ export default {
 .module-body {
 	cursor: pointer;
 	height: 160px;
-	width: 250px;
+	width: 230px;
 	border-radius: 10px;
 	box-shadow: 0px 2px 6px rgba(17, 43, 66, 0.08), 0px 1px 4px rgba(17, 43, 66, 0.1);
-	padding-right: 10px;
+	margin-top: 20px;
 }
 
 .checked-border {

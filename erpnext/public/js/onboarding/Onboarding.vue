@@ -30,8 +30,8 @@
 						<div class="control-value like-disabled-input bold" style="display: none;"> {{ company_name }} </div>
 					</div>
 				</div>
-				<div class="company-domain">
-					<div>
+				<div>
+					<div class="domain-title">
 						{{ __("What does your organization do?") }}
 					</div>
 					<div class="row domain-box">
@@ -71,7 +71,7 @@
 					</div>
 				</div>
 				<div>
-					<div class="row section-heading">
+					<div class="section-heading">
 						{{ __("Other Modules") }}
 					</div>
 					<div class="row module-row">
@@ -85,8 +85,8 @@
 					<button v-on:click=prev_step class="btn btn-secondary btn-sm" v-if="CurrentStep > 1 && CurrentStep < 5">{{ __("Previous") }}</button>
 				</div>
 				<div>
-					<button v-on:click=next_step class="btn btn-primary btn-sm btn-next" v-if="CurrentStep < 4">{{ __("Next") }}</button>
-					<button v-on:click=finish_setup class="btn btn-primary btn-sm btn-next" v-if="CurrentStep == 4">{{ __("Finish Setup") }}</button>
+					<button v-on:click=next_step class="btn btn-primary btn-sm" v-if="CurrentStep < 4">{{ __("Next") }}</button>
+					<button v-on:click=finish_setup class="btn btn-primary btn-sm" v-if="CurrentStep == 4">{{ __("Finish Setup") }}</button>
 				</div>
 			</div>
 			<div v-show="CurrentStep == 5">
@@ -450,6 +450,8 @@ export default {
 }
 
 .module-layout {
+	padding-left: 75px;
+	padding-right: 75px;
 	height: 450px;
 	overflow: scroll;
 	scrollbar-width: 'none';
@@ -457,22 +459,21 @@ export default {
 }
 
 .module-row {
-	gap: 20px;
-	justify-content: center;
-	align-items: center;
+	margin: 0;
+	padding: 0;
+	justify-content: space-between;
 }
 
 .section-heading {
 	font-weight: 600;
 	font-size: 18px;
 	line-height: 24px;
-	margin-left: 57px;
-	margin-top: 25px;
-	margin-bottom: 12px;
+	margin-top: 20px;
 }
 
 .slide-section {
 	height: 100%;
+	padding: 0;
 }
 
 .step-title {
@@ -526,15 +527,14 @@ export default {
 
 .field-layout {
 	margin-top: 50px;
-	margin-left: 40px;
-	margin-right: 40px;
+	margin-left: 60px;
+	margin-right: 60px;
 }
 
 .button-row {
-	width: 100%;
+	width: 749px;
 	position: absolute;
-	padding-left: 75px;
-	padding-right: 75px;
+	margin-left: 75px;
 	bottom: 50px;
 	justify-content: space-between;
 }
@@ -574,8 +574,9 @@ export default {
 }
 
 .company-info {
-	margin-left: 82px;
+	margin-left: 75px;
 	margin-top: 67px;
+	padding: 0;
 }
 
 .company-name {
@@ -587,23 +588,12 @@ export default {
 	align-items: center;
 }
 
-.edit-button {
-	display: flex;
-	height: 28px;
-	align-items: center;
-}
-
 .button-container {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 }
 
-.company-domain {
-	margin-left: 82px;
-	margin-top: 70px;
-
-}
 
 .domain {
 	box-sizing: border-box;
@@ -614,13 +604,19 @@ export default {
 	gap: 10px;
 	border: 1px solid #EBEEF0;
 	border-radius: 8px;
-	margin-left: 9px;
+	margin-right: 9px;
 	margin-top: 10px;
 	background-color:#FFFFFF;
 }
 
 .domain-box {
+	margin-left: 75px;
 	margin-top: 8px;
+}
+
+.domain-title {
+	margin-left: 75px;
+	margin-top: 64px;
 }
 
 .selected-domain {
