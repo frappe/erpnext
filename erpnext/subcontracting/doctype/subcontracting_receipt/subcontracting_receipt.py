@@ -5,6 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate, nowdate
 
+import erpnext
+from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 
 
@@ -224,6 +226,137 @@ class SubcontractingReceipt(SubcontractingController):
 
 		if status:
 			frappe.db.set_value("Subcontracting Receipt", self.name, "status", status, update_modified)
+
+	def get_gl_entries(self, warehouse_account=None):
+		from erpnext.accounts.general_ledger import process_gl_map
+
+		gl_entries = []
+		self.make_item_gl_entries(gl_entries, warehouse_account)
+
+		return process_gl_map(gl_entries)
+
+	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
+		if erpnext.is_perpetual_inventory_enabled(self.company):
+			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
+		warehouse_with_no_account = []
+
+		for item in self.items:
+			if flt(item.rate) and flt(item.qty):
+				if warehouse_account.get(item.warehouse):
+					stock_value_diff = frappe.db.get_value(
+						"Stock Ledger Entry",
+						{
+							"voucher_type": "Subcontracting Receipt",
+							"voucher_no": self.name,
+							"voucher_detail_no": item.name,
+							"warehouse": item.warehouse,
+							"is_cancelled": 0,
+						},
+						"stock_value_difference",
+					)
+
+					warehouse_account_name = warehouse_account[item.warehouse]["account"]
+					warehouse_account_currency = warehouse_account[item.warehouse]["account_currency"]
+					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
+					supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get(
+						"account_currency"
+					)
+					remarks = self.get("remarks") or _("Accounting Entry for Stock")
+
+					# FG Warehouse Account (Debit)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=warehouse_account_name,
+						cost_center=item.cost_center,
+						debit=stock_value_diff,
+						credit=0.0,
+						remarks=remarks,
+						against_account=stock_rbnb,
+						account_currency=warehouse_account_currency,
+						item=item,
+					)
+
+					# Supplier Warehouse Account (Credit)
+					if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=supplier_warehouse_account,
+							cost_center=item.cost_center,
+							debit=0.0,
+							credit=flt(item.rm_supp_cost),
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=supplier_warehouse_account_currency,
+							item=item,
+						)
+
+					# Expense Account (Credit)
+					if flt(item.service_cost_per_qty):
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=item.expense_account,
+							cost_center=item.cost_center,
+							debit=0.0,
+							credit=flt(item.service_cost_per_qty) * flt(item.qty),
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=get_account_currency(item.expense_account),
+							item=item,
+						)
+
+					# Loss Account (Credit)
+					divisional_loss = flt(item.amount - stock_value_diff, item.precision("amount"))
+
+					if divisional_loss:
+						if self.is_return:
+							loss_account = expenses_included_in_valuation
+						else:
+							loss_account = item.expense_account
+
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=loss_account,
+							cost_center=item.cost_center,
+							debit=divisional_loss,
+							credit=0.0,
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=get_account_currency(loss_account),
+							project=item.project,
+							item=item,
+						)
+				elif (
+					item.warehouse not in warehouse_with_no_account
+					or item.rejected_warehouse not in warehouse_with_no_account
+				):
+					warehouse_with_no_account.append(item.warehouse)
+
+		# Additional Costs Expense Accounts (Credit)
+		for row in self.additional_costs:
+			credit_amount = (
+				flt(row.base_amount)
+				if (row.base_amount or row.account_currency != self.company_currency)
+				else flt(row.amount)
+			)
+
+			self.add_gl_entry(
+				gl_entries=gl_entries,
+				account=row.expense_account,
+				cost_center=self.cost_center or self.get_company_default("cost_center"),
+				debit=0.0,
+				credit=credit_amount,
+				remarks=remarks,
+				against_account=None,
+			)
+
+		if warehouse_with_no_account:
+			frappe.msgprint(
+				_("No accounting entries for the following warehouses")
+				+ ": \n"
+				+ "\n".join(warehouse_with_no_account)
+			)
 
 
 @frappe.whitelist()
