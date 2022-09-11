@@ -39,6 +39,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this._calculate_taxes_and_totals();
 		this.calculate_discount_amount();
 
+		// # Update grand total as per cash and non trade discount
+		if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
+			this.frm.doc.grand_total -= this.frm.doc.discount_amount;
+			this.frm.doc.base_grand_total -= this.frm.doc.base_discount_amount;
+		}
+
 		await this.calculate_shipping_charges();
 
 		// Advance calculation applicable to Sales /Purchase Invoice
@@ -632,6 +638,10 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 			this.frm.doc.base_discount_amount = flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate,
 				precision("base_discount_amount"));
+
+			if (this.frm.doc.apply_discount_on == "Grand Total" && this.frm.doc.is_cash_or_non_trade_discount) {
+				return;
+			}
 
 			var total_for_discount_amount = this.get_total_for_discount_amount();
 			var net_total = 0;

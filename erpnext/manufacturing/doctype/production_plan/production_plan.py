@@ -482,7 +482,6 @@ class ProductionPlan(Document):
 			"bom_no",
 			"stock_uom",
 			"bom_level",
-			"production_plan_item",
 			"schedule_date",
 		]:
 			if row.get(field):
@@ -639,6 +638,9 @@ class ProductionPlan(Document):
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 
 		for row in self.po_items:
+			if not row.item_code:
+				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
+
 			bom_data = []
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
@@ -654,6 +656,8 @@ class ProductionPlan(Document):
 			row.idx = idx + 1
 			self.append("sub_assembly_items", row)
 
+		self.set_default_supplier_for_subcontracting_order()
+
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		"Modify bom_data, set additional details."
 		for data in bom_data:
@@ -664,6 +668,32 @@ class ProductionPlan(Document):
 			data.type_of_manufacturing = manufacturing_type or (
 				"Subcontract" if data.is_sub_contracted_item else "In House"
 			)
+
+	def set_default_supplier_for_subcontracting_order(self):
+		items = [
+			d.production_item for d in self.sub_assembly_items if d.type_of_manufacturing == "Subcontract"
+		]
+
+		if not items:
+			return
+
+		default_supplier = frappe._dict(
+			frappe.get_all(
+				"Item Default",
+				fields=["parent", "default_supplier"],
+				filters={"parent": ("in", items), "default_supplier": ("is", "set")},
+				as_list=1,
+			)
+		)
+
+		if not default_supplier:
+			return
+
+		for row in self.sub_assembly_items:
+			if row.type_of_manufacturing != "Subcontract":
+				continue
+
+			row.supplier = default_supplier.get(row.production_item)
 
 	def combine_subassembly_items(self, sub_assembly_items_store):
 		"Aggregate if same: Item, Warehouse, Inhouse/Outhouse Manu.g, BOM No."

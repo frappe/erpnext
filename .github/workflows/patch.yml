@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: patch-develop-${{ github.event.number }}
+  group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
 jobs:

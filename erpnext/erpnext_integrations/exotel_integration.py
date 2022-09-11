@@ -26,6 +26,7 @@ def handle_incoming_call(**kwargs):
 	except Exception as e:
 		frappe.db.rollback()
 		exotel_settings.log_error("Error in Exotel incoming call")
+		frappe.db.commit()
 
 
 @frappe.whitelist(allow_guest=True)

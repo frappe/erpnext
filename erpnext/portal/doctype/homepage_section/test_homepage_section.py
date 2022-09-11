@@ -57,7 +57,11 @@ class TestHomepageSection(unittest.TestCase):
 		self.assertEqual(cards[0].h5.text, "Card 1")
 		self.assertEqual(cards[0].a["href"], "/card-1")
 		self.assertEqual(cards[1].p.text, "Subtitle 2")
-		self.assertEqual(cards[1].find(class_="website-image-lazy")["data-src"], "test.jpg")
+
+		img = cards[1].find(class_="card-img-top")
+
+		self.assertEqual(img["src"], "test.jpg")
+		self.assertEqual(img["loading"], "lazy")
 
 		# cleanup
 		frappe.db.rollback()
