@@ -6,11 +6,10 @@ import json
 
 import frappe
 from frappe import _
-from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
 from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
-from frappe.utils.background_jobs import enqueue
+from frappe.utils.background_jobs import enqueue, is_job_queued
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -467,7 +466,7 @@ def enqueue_job(job, **kwargs):
 	closing_entry = kwargs.get("closing_entry") or {}
 
 	job_name = closing_entry.get("name")
-	if not job_already_enqueued(job_name):
+	if not is_job_queued(job_name):
 		enqueue(
 			job,
 			**kwargs,
@@ -489,12 +488,6 @@ def enqueue_job(job, **kwargs):
 def check_scheduler_status():
 	if is_scheduler_inactive() and not frappe.flags.in_test:
 		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
-
-
-def job_already_enqueued(job_name):
-	enqueued_jobs = [d.get("job_name") for d in get_info()]
-	if job_name in enqueued_jobs:
-		return True
 
 
 def safe_load_json(message):
