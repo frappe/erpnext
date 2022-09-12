@@ -632,9 +632,19 @@ class SalarySlip(TransactionBase):
 				continue
 
 			amount = self.eval_condition_and_formula(struct_row, data)
-			if (
-				amount or (struct_row.amount_based_on_formula and amount is not None)
-			) and struct_row.statistical_component == 0:
+
+			if struct_row.statistical_component:
+				# update statitical component amount in reference data based on payment days
+				# since row for statistical component is not added to salary slip
+				if struct_row.depends_on_payment_days:
+					joining_date, relieving_date = self.get_joining_and_relieving_dates()
+					default_data[struct_row.abbr] = amount
+					data[struct_row.abbr] = flt(
+						(flt(amount) * flt(self.payment_days) / cint(self.total_working_days)),
+						struct_row.precision("amount"),
+					)
+
+			elif amount or struct_row.amount_based_on_formula and amount is not None:
 				default_amount = self.eval_condition_and_formula(struct_row, default_data)
 				self.update_component_row(
 					struct_row, amount, component_type, data=data, default_amount=default_amount
