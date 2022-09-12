@@ -687,8 +687,8 @@ class SalarySlip(TransactionBase):
 
 		for key in ("earnings", "deductions"):
 			for d in self.get(key):
-				default_data[d.abbr] = d.default_amount
-				data[d.abbr] = d.amount
+				default_data[d.abbr] = d.default_amount or 0
+				data[d.abbr] = d.amount or 0
 
 		return data, default_data
 
