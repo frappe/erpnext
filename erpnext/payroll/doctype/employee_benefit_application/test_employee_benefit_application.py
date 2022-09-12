@@ -9,7 +9,7 @@ from frappe.utils import add_days, date_diff, get_year_ending, get_year_start, g
 
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.holiday_list.test_holiday_list import set_holiday_list
-from erpnext.hr.doctype.leave_application.test_leave_application import get_first_sunday
+from erpnext.hr.tests.test_utils import get_first_sunday
 from erpnext.hr.utils import get_holiday_dates_for_employee
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import (
 	calculate_lwp,
