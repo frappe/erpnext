@@ -1,4 +1,9 @@
 frappe.listview_settings['Journal Entry'] = {
+	onload: function(me) {
+		frappe.route_options = {
+			"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), -31),frappe.datetime.get_today()]]
+		};
+	},
 	add_fields: ["voucher_type", "posting_date", "total_debit", "company", "user_remark"],
 	get_indicator: function(doc) {
 		if(doc.docstatus==0) {
