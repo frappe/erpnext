@@ -1,4 +1,10 @@
 frappe.listview_settings['Material Request'] = {
+	onload: function(me) {
+		frappe.route_options = {
+			// "status": "Draft",
+			"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), -60),frappe.datetime.get_today()]]
+		};
+	},
 	add_fields: ["material_request_type", "status", "per_ordered", "per_received"],
 	get_indicator: function(doc) {
 		if(doc.status=="Stopped") {

@@ -158,9 +158,7 @@
    "fetch_from": "license_plate.last_odometer",
    "fieldname": "last_odometer",
    "fieldtype": "Int",
-   "label": "last Odometer Value ",
-   "read_only": 1,
-   "reqd": 1
+   "label": "last Odometer Value "
   },
   {
    "fieldname": "column_break_12",
@@ -168,7 +166,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-18 16:45:45.060761",
+ "modified": "2022-09-12 15:10:17.153809",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",
