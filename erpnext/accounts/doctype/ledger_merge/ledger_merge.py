@@ -4,22 +4,20 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.background_jobs import is_job_queued
 
 from erpnext.accounts.doctype.account.account import merge_account
 
 
 class LedgerMerge(Document):
 	def start_merge(self):
-		from frappe.core.page.background_jobs.background_jobs import get_info
 		from frappe.utils.background_jobs import enqueue
 		from frappe.utils.scheduler import is_scheduler_inactive
 
 		if is_scheduler_inactive() and not frappe.flags.in_test:
 			frappe.throw(_("Scheduler is inactive. Cannot merge accounts."), title=_("Scheduler Inactive"))
 
-		enqueued_jobs = [d.get("job_name") for d in get_info()]
-
-		if self.name not in enqueued_jobs:
+		if not is_job_queued(self.name):
 			enqueue(
 				start_merge,
 				queue="default",
