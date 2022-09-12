@@ -190,10 +190,10 @@ class DeliveryNote(SellingController):
 					d.projected_qty = flt(bin_qty.projected_qty)
 	def submit(self):
 		time.sleep(1)
-		if(self.company=='Unit 6' and self.is_return!=1):
-			self.queue_action('submit',queue_name="dn_primary")
-		elif(self.is_return==1):
+		if(self.is_return==1):
 			self.queue_action('submit',queue_name="return")
+		elif(self.company=='Unit 6'):
+			self.queue_action('submit',queue_name="dn_primary")
 		else:
 			self.queue_action('submit',queue_name="dn_secondary")
 
