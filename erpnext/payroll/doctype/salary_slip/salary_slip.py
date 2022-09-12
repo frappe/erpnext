@@ -587,7 +587,7 @@ class SalarySlip(TransactionBase):
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
 
-		self.set_loan_repayment()
+		self.add_applicable_loans()
 		self.set_precision_for_component_amounts()
 		self.set_net_pay()
 
@@ -1370,44 +1370,33 @@ class SalarySlip(TransactionBase):
 
 		return joining_date, relieving_date
 
-	def set_loan_repayment(self):
+	def add_applicable_loans(self):
 		self.total_loan_repayment = 0
 		self.total_interest_amount = 0
 		self.total_principal_amount = 0
 
-		self.set("loans", [])
+		loans = [d.loan for d in self.get("loans")]
+
 		for loan in self.get_loan_details():
-			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
-
-			if (amounts["interest_amount"] or amounts["payable_principal_amount"]) and (
-				amounts["payable_principal_amount"] + amounts["interest_amount"]
-				> amounts["written_off_amount"]
-			):
-
-				if amounts["interest_amount"] > amounts["written_off_amount"]:
-					amounts["interest_amount"] -= amounts["written_off_amount"]
-					amounts["written_off_amount"] = 0
-				else:
-					amounts["written_off_amount"] -= amounts["interest_amount"]
-					amounts["interest_amount"] = 0
-
-				if amounts["payable_principal_amount"] > amounts["written_off_amount"]:
-					amounts["payable_principal_amount"] -= amounts["written_off_amount"]
-					amounts["written_off_amount"] = 0
-				else:
-					amounts["written_off_amount"] -= amounts["payable_principal_amount"]
-					amounts["payable_principal_amount"] = 0
-
-				self.append(
-					"loans",
-					{
-						"loan": loan.name,
-						"interest_amount": amounts["interest_amount"],
-						"principal_amount": amounts["payable_principal_amount"],
-						"loan_account": loan.loan_account,
-						"interest_income_account": loan.interest_income_account,
-					},
-				)
+			if loan.name not in loans:
+				amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
+				if (
+					amounts["interest_amount"] + amounts["payable_principal_amount"]
+					> amounts["written_off_amount"]
+				):
+					self.append(
+						"loans",
+						{
+							"loan": loan.name,
+							"interest_amount": amounts["interest_amount"],
+							"principal_amount": amounts["payable_principal_amount"],
+							"total_payment": amounts["interest_amount"] + amounts["payable_principal_amount"]
+							if not loan.manually_update_paid_amount_in_salary_slip
+							else 0,
+							"loan_account": loan.loan_account,
+							"interest_income_account": loan.interest_income_account,
+						},
+					)
 
 		for payment in self.get("loans"):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
@@ -1432,7 +1421,14 @@ class SalarySlip(TransactionBase):
 	def get_loan_details(self):
 		loan_details = frappe.get_all(
 			"Loan",
-			fields=["name", "interest_income_account", "loan_account", "loan_type", "is_term_loan"],
+			fields=[
+				"name",
+				"interest_income_account",
+				"loan_account",
+				"loan_type",
+				"is_term_loan",
+				"manually_update_paid_amount_in_salary_slip",
+			],
 			filters={
 				"applicant": self.employee,
 				"docstatus": 1,
