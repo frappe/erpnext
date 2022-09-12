@@ -50,6 +50,8 @@ class StockLedgerEntry(Document):
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
+		# Setting Qty after transaction, Stock Value and Stock Queue
+		frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=self.name,warehouse=self.warehouse,item_code=self.item_code,created_on=self.creation,queue="slu",enqueue_after_commit=True)
 
 	#check for item quantity available in stock
 	def actual_amt_check(self):
