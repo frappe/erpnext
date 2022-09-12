@@ -1105,7 +1105,7 @@ def allocate_leaves(employee, leave_period, leave_type, new_leaves_allocated, el
 	allocate_leave.submit()
 
 
-def get_first_sunday(holiday_list, for_date=None):
+def get_first_sunday(holiday_list="Salary Slip Test Holiday List", for_date=None):
 	date = for_date or getdate()
 	month_start_date = get_first_day(date)
 	month_end_date = get_last_day(date)
