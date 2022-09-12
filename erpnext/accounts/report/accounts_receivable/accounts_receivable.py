@@ -784,7 +784,7 @@ class ReceivablePayableReport(object):
 	def add_customer_filters(
 		self,
 	):
-		self.customter = qb.DocType("Customer")
+		self.customer = qb.DocType("Customer")
 
 		if self.filters.get("customer_group"):
 			self.get_hierarchical_filters("Customer Group", "customer_group")
@@ -838,7 +838,7 @@ class ReceivablePayableReport(object):
 		customer = self.customer
 		groups = qb.from_(doc).select(doc.name).where((doc.lft >= lft) & (doc.rgt <= rgt))
 		customers = qb.from_(customer).select(customer.name).where(customer[key].isin(groups))
-		self.qb_selection_filter.append(ple.isin(ple.party.isin(customers)))
+		self.qb_selection_filter.append(ple.party.isin(customers))
 
 	def add_accounting_dimensions_filters(self):
 		accounting_dimensions = get_accounting_dimensions(as_list=False)
