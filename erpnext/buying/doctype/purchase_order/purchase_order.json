@@ -60,6 +60,7 @@
   "section_break_45",
   "before_items_section",
   "scan_barcode",
+  "set_from_warehouse",
   "items_col_break",
   "set_warehouse",
   "items_section",
@@ -1166,13 +1167,20 @@
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
    "read_only": 1
+  },
+  {
+   "depends_on": "is_internal_supplier",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-15 15:40:58.527065",
+ "modified": "2022-09-07 11:06:46.035093",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
