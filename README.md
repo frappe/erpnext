@@ -89,6 +89,12 @@ We do not allow the use of the trademark in advertising, including AdSense/AdWor
 
 Please note that it is not the goal of this policy to limit commercial activity around ERPNext. We encourage ERPNext-based businesses, and we would love to see hundreds of them.
 
+<<<<<<< HEAD
 When in doubt about your use of the ERPNext name or logo, please contact Frappe Technologies for clarification.
+=======
+By contributing to ERPNext, you agree that your contributions will be licensed under its GNU General Public License (v3).
+
+## Logo and Trademark Policy
+>>>>>>> a30f38481d (chore: correct license text for GPLv3 (#32170))
 
 (inspired by WordPress)
