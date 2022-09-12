@@ -962,6 +962,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
+		target.shipping_rule = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
@@ -1080,6 +1081,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.additional_discount_percentage = 0.0
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
+		target.shipping_rule = ""
 		target.customer = ""
 		target.customer_name = ""
 		target.run_method("set_missing_values")
