@@ -308,16 +308,12 @@ class BuyingController(SubcontractingController):
 
 					rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
 				else:
-<<<<<<< HEAD
-					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), "rate")
-=======
 					field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
 					rate = flt(
 						frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
 						* (d.conversion_factor or 1),
 						d.precision("rate"),
 					)
->>>>>>> 0f655e4430 (fix: Rate for internal PI have non stock UOM items)
 
 				if self.is_internal_transfer():
 					if rate != d.rate:
