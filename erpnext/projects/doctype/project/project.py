@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 
 from erpnext import get_default_company
-from erpnext.controllers.employee_boarding_controller import update_employee_boarding_status
 from erpnext.controllers.queries import get_filters_cond
 from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
@@ -43,7 +42,6 @@ class Project(Document):
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
-		update_employee_boarding_status(self)
 
 	def copy_from_template(self):
 		"""
@@ -145,7 +143,6 @@ class Project(Document):
 	def update_project(self):
 		"""Called externally by Task"""
 		self.update_percent_complete()
-		update_employee_boarding_status(self)
 		self.update_costing()
 		self.db_update()
 
