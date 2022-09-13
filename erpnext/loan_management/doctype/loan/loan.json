@@ -52,10 +52,10 @@
   "refund_amount",
   "debit_adjustment_amount",
   "credit_adjustment_amount",
-  "is_npa",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
+  "is_npa",
   "amended_from"
  ],
  "fields": [
@@ -424,7 +424,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-12 03:36:49.145014",
+ "modified": "2022-09-13 02:05:25.017190",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
