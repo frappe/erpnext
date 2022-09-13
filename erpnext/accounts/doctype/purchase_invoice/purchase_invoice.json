@@ -93,6 +93,8 @@
   "taxes_and_charges_added",
   "taxes_and_charges_deducted",
   "total_taxes_and_charges",
+  "tax_withheld_vouchers_section",
+  "tax_withheld_vouchers",
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
@@ -1367,7 +1369,7 @@
    "width": "50px"
   },
   {
-    "depends_on": "eval:doc.is_subcontracted",
+   "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1426,13 +1428,25 @@
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
    "read_only": 1
-   }
+  },
+  {
+   "fieldname": "tax_withheld_vouchers_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Withheld Vouchers"
+  },
+  {
+   "fieldname": "tax_withheld_vouchers",
+   "fieldtype": "Table",
+   "label": "Tax Withheld Vouchers",
+   "options": "Tax Withheld Vouchers",
+   "read_only": 1
+  }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-15 15:40:58.527065",
+ "modified": "2022-09-13 16:22:04.103982",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1492,6 +1506,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
