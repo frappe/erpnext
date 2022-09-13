@@ -6,14 +6,23 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "budget_against",
   "company",
+  "budget_against",
   "cost_center",
   "project",
-  "fiscal_year",
   "column_break_3",
+  "fiscal_year",
+  "budget_type",
   "monthly_distribution",
   "amended_from",
+  "section_break_21",
+  "get_accounts",
+  "accounts",
+  "section_break_13",
+  "initial_total",
+  "column_break_14",
+  "supp_total",
+  "actual_total",
   "section_break_6",
   "applicable_on_material_request",
   "action_if_annual_budget_exceeded_on_mr",
@@ -25,9 +34,7 @@
   "section_break_16",
   "applicable_on_booking_actual_expenses",
   "action_if_annual_budget_exceeded",
-  "action_if_accumulated_monthly_budget_exceeded",
-  "section_break_21",
-  "accounts"
+  "action_if_accumulated_monthly_budget_exceeded"
  ],
  "fields": [
   {
@@ -43,8 +50,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -54,6 +59,7 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Cost Center",
    "options": "Cost Center"
@@ -97,7 +103,7 @@
   },
   {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Control Action"
   },
   {
@@ -129,7 +135,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "applicable_on_purchase_order",
    "fieldtype": "Check",
    "label": "Applicable on Purchase Order"
@@ -157,7 +163,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "applicable_on_booking_actual_expenses",
    "fieldtype": "Check",
    "label": "Applicable on booking actual expenses"
@@ -185,19 +191,58 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "accounts",
    "fieldtype": "Table",
    "label": "Budget Accounts",
    "options": "Budget Account",
    "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "get_accounts",
+   "fieldtype": "Button",
+   "label": "Get Budget Heads"
+  },
+  {
+   "fieldname": "budget_type",
+   "fieldtype": "Link",
+   "label": "Budget Type",
+   "options": "Budget Type"
+  },
+  {
+   "fieldname": "initial_total",
+   "fieldtype": "Currency",
+   "label": "Total(Initial)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supp_total",
+   "fieldtype": "Currency",
+   "label": "Total(Supplementary)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_total",
+   "fieldtype": "Currency",
+   "label": "Total(Actual)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-06 15:13:54.055854",
+ "modified": "2022-09-13 08:08:19.764661",
  "modified_by": "Administrator",
- "module": "Accounts",
+ "module": "Budget",
  "name": "Budget",
  "owner": "Administrator",
  "permissions": [
@@ -216,9 +261,48 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Budget Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Budget User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

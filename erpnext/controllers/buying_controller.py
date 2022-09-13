@@ -7,7 +7,7 @@ from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
 
-from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
+from erpnext.budget.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return

@@ -25,7 +25,8 @@ class DuplicateBudgetError(frappe.ValidationError):
 class Budget(Document):
 	def autoname(self):
 		self.name = make_autoname(
-			self.get(frappe.scrub(self.budget_against)) + "/" + self.fiscal_year + "/.###"
+			#self.get(frappe.scrub(self.budget_against)) + "/" + self.fiscal_year + "/.###"
+			"BUD" + "/" + self.fiscal_year + "/.###"
 		)
 
 	def validate(self):
@@ -35,6 +36,8 @@ class Budget(Document):
 		self.validate_accounts()
 		self.set_null_value()
 		self.validate_applicable_for()
+		self.calculate_budget()
+		self.calculate_totals()
 
 	def validate_duplicate(self):
 		budget_against_field = frappe.scrub(self.budget_against)
@@ -109,6 +112,58 @@ class Budget(Document):
 		):
 			self.applicable_on_booking_actual_expenses = 1
 
+	# Added by Thukten on Sept 12th 2022
+	def calculate_budget(self):
+		if self.accounts:
+			for acc in self.accounts:
+				acc.budget_amount = flt(acc.initial_budget) + flt(acc.supplementary_budget) + flt(acc.budget_received) - flt(acc.budget_sent)
+				acc.db_set("budget_amount", acc.budget_amount)
+
+	# Added by Thukten on Sept 12th 2022
+	def calculate_totals(self): 
+		total_initial = 0
+		total_actual = 0
+		total_supplementary = 0
+		if self.accounts:
+			for item in self.accounts:
+				total_initial += flt(item.initial_budget)
+				total_actual += flt(item.budget_amount)
+				total_supplementary += flt(item.supplementary_budget)
+
+			self.initial_total = total_initial
+			self.actual_total = total_actual
+			self.supp_total = total_supplementary
+
+	@frappe.whitelist()
+	def get_accounts(self):
+		condition = " and a.budget_type = '{}'".format(self.budget_type) if self.budget_type else ""
+		entries = frappe.db.sql("""select parent_account, a.name as account, a.budget_type
+							from tabAccount a
+							where a.is_group = 0
+							and (a.freeze_account is null or a.freeze_account != 'Yes')
+							and (a.centralized_budget = 0 or (a.centralized_budget =1 and a.cost_center='{cost_center}'))
+							and NOT EXISTS( select 1
+								from `tabBudget` b 
+								inner join `tabBudget Account` i
+								on b.name = i.parent
+								where  b.docstatus != 2
+								and i.account = a.name
+								and b.cost_center = '{cost_center}'
+								and b.fiscal_year = '{fiscal_year}'
+								and b.name != '{name}'
+							)
+							{condition}
+						""".format(fiscal_year =self.fiscal_year, cost_center=self.cost_center, name=self.name, condition = condition), as_dict=True)
+		self.set('accounts', [])
+		p_account = ""
+		for d in entries:
+			d.initial_budget = 0
+			if d.parent_account == p_account:
+				d.parent_account = ""
+			else:
+				p_account = d.parent_account
+			row = self.append('accounts', {})
+			row.update(d)
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)

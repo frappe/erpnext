@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-09-11 09:42:04.681779",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_account",
+  "column_break_2",
+  "to_account",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "From Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "To Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Appropiation Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-11 10:01:43.186316",
+ "modified_by": "Administrator",
+ "module": "Budget",
+ "name": "Budget Reappropiation Detail",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -101,16 +101,17 @@
    "type": "Link"
   }
  ],
- "modified": "2022-01-13 18:07:56.711095",
+ "modified": "2022-09-09 09:45:51.822208",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "Retail",
  "roles": [],
- "sequence_id": 22.0,
+ "sequence_id": 26.0,
  "shortcuts": [
   {
    "doc_view": "",

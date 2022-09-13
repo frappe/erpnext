@@ -41,9 +41,33 @@ frappe.ui.form.on('Budget', {
 			frm.set_value('cost_center', null)
 		}
 	},
-
+	get_accounts: function(frm) {
+		if(frm.doc.cost_center || frm.doc.project){
+			return frappe.call({
+				method: "get_accounts",
+				doc: frm.doc,
+				callback: function(r, rt) {
+					frm.refresh_field("accounts");
+					frm.refresh_fields();
+				},
+				freeze: true,
+				freeze_message: "Loading Expense Accounts..... Please Wait"
+			});
+		}else{
+			frappe.throw("Either Cost Center or Project is missing. ")
+		}
+	},
 	toggle_reqd_fields: function(frm) {
 		frm.toggle_reqd("cost_center", frm.doc.budget_against=="Cost Center");
 		frm.toggle_reqd("project", frm.doc.budget_against=="Project");
 	}
+});
+
+frappe.ui.form.on("Budget Account", {
+	initial_budget: function (frm, doctype, name) {
+		var d = locals[doctype][name];
+		if(d.initial_budget >0){
+			frappe.model.set_value(doctype, name, "budget_amount", d.initial_budget);
+		}
+	},
 });

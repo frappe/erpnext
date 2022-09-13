@@ -14,6 +14,7 @@
   "basic_information",
   "employee",
   "naming_series",
+  "salutation",
   "first_name",
   "middle_name",
   "last_name",
@@ -27,7 +28,6 @@
   "image",
   "status",
   "erpnext_user",
-  "user_id",
   "create_user",
   "create_user_permission",
   "company_details_section",
@@ -139,45 +139,32 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "HR-EMP-",
-   "set_only_once": 1
+   "options": "EMP/",
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "salutation",
-   "fieldtype": "Link",
+   "fieldtype": "Select",
    "label": "Salutation",
    "oldfieldname": "salutation",
    "oldfieldtype": "Select",
-   "options": "Salutation"
+   "options": "\nMr\nMs"
   },
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
-   "label": "First Name",
-   "reqd": 1
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "middle_name",
-   "fieldtype": "Data",
-   "label": "Middle Name"
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "last_name",
-   "fieldtype": "Data",
-   "label": "Last Name"
+   "label": "First Name"
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "in_global_search": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
    "oldfieldname": "employee_name",
    "oldfieldtype": "Data",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fetch_from": "user_id.user_image",
@@ -217,7 +204,9 @@
   {
    "fieldname": "employee_number",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Employee Number",
    "oldfieldname": "employee_number",
    "oldfieldtype": "Data"
@@ -246,12 +235,6 @@
    "oldfieldname": "date_of_joining",
    "oldfieldtype": "Date",
    "reqd": 1
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "emergency_contact_details",
-   "fieldtype": "Section Break",
-   "label": "Emergency Contact"
   },
   {
    "bold": 1,
@@ -301,7 +284,6 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "collapsible": 1,
    "fieldname": "employment_details",
    "fieldtype": "Tab Break",
    "label": "Joining"

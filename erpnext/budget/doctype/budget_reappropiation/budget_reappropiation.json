@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "BR.YYYY.###",
+ "creation": "2022-09-11 09:29:25.117778",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "budget_against",
+  "from_cost_center",
+  "from_project",
+  "fiscal_year",
+  "column_break_4",
+  "company",
+  "to_cost_center",
+  "to_project",
+  "remark",
+  "section_break_10",
+  "items",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "budget_against",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Budget Against",
+   "options": "Cost Center\nProject",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fiscal Year",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Budget Reappropiation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.budget_against == \"Cost Center\"",
+   "fieldname": "from_cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "From Cost Center",
+   "mandatory_depends_on": "eval:doc.budget_against == \"Cost Center\"",
+   "options": "Cost Center"
+  },
+  {
+   "depends_on": "eval:doc.budget_against == \"Project\"",
+   "fieldname": "from_project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "From Project",
+   "mandatory_depends_on": "eval:doc.budget_against == \"Project\"",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.budget_against == \"Cost Center\"",
+   "fieldname": "to_cost_center",
+   "fieldtype": "Link",
+   "label": "To Cost Center",
+   "mandatory_depends_on": "eval:doc.budget_against == \"Cost Center\"",
+   "options": "Cost Center"
+  },
+  {
+   "depends_on": "eval:doc.budget_against == \"Project\"",
+   "fieldname": "to_project",
+   "fieldtype": "Link",
+   "label": "To Project",
+   "mandatory_depends_on": "eval:doc.budget_against == \"Project\"",
+   "options": "Project"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Reappropiation Detail",
+   "options": "Budget Reappropiation Detail"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-09-11 10:07:01.008232",
+ "modified_by": "Administrator",
+ "module": "Budget",
+ "name": "Budget Reappropiation",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
