@@ -119,6 +119,7 @@ class ReceivablePayableReport(object):
 					party_account=ple.account,
 					posting_date=ple.posting_date,
 					account_currency=ple.account_currency,
+					remarks=ple.remarks,
 					invoiced=0.0,
 					paid=0.0,
 					credit_note=0.0,
@@ -697,6 +698,7 @@ class ReceivablePayableReport(object):
 				ple.account_currency,
 				ple.amount,
 				ple.amount_in_account_currency,
+				ple.remarks,
 			)
 			.where(ple.delinked == 0)
 			.where(Criterion.all(self.qb_selection_filter))
@@ -782,7 +784,7 @@ class ReceivablePayableReport(object):
 	def add_customer_filters(
 		self,
 	):
-		self.customter = qb.DocType("Customer")
+		self.customer = qb.DocType("Customer")
 
 		if self.filters.get("customer_group"):
 			self.get_hierarchical_filters("Customer Group", "customer_group")
@@ -836,7 +838,7 @@ class ReceivablePayableReport(object):
 		customer = self.customer
 		groups = qb.from_(doc).select(doc.name).where((doc.lft >= lft) & (doc.rgt <= rgt))
 		customers = qb.from_(customer).select(customer.name).where(customer[key].isin(groups))
-		self.qb_selection_filter.append(ple.isin(ple.party.isin(customers)))
+		self.qb_selection_filter.append(ple.party.isin(customers))
 
 	def add_accounting_dimensions_filters(self):
 		accounting_dimensions = get_accounting_dimensions(as_list=False)
@@ -974,6 +976,9 @@ class ReceivablePayableReport(object):
 				fieldtype="Link",
 				options="Supplier Group",
 			)
+
+		if self.filters.show_remarks:
+			self.add_column(label=_("Remarks"), fieldname="remarks", fieldtype="Text", width=200),
 
 	def add_column(self, label, fieldname=None, fieldtype="Currency", options=None, width=120):
 		if not fieldname:
