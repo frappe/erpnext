@@ -1394,7 +1394,6 @@ class SalarySlip(TransactionBase):
 					amounts["interest_amount"] + amounts["payable_principal_amount"]
 					> amounts["written_off_amount"]
 				):
-					print(amounts["written_off_amount"], "###########")
 					if amounts["interest_amount"] > amounts["written_off_amount"]:
 						amounts["interest_amount"] -= amounts["written_off_amount"]
 						amounts["written_off_amount"] = 0
