@@ -1457,7 +1457,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.tax_withholding_category:
 			return
 
-		tax_withholding_details, advance_taxes = get_party_tax_withholding_details(
+		tax_withholding_details, advance_taxes, voucher_wise_amount = get_party_tax_withholding_details(
 			self, self.tax_withholding_category
 		)
 
@@ -1485,6 +1485,19 @@ class PurchaseInvoice(BuyingController):
 
 		for d in to_remove:
 			self.remove(d)
+
+		## Add pending vouchers on which tax was withheld
+		self.set("tax_withheld_vouchers", [])
+
+		for voucher_no, voucher_details in voucher_wise_amount.items():
+			self.append(
+				"tax_withheld_vouchers",
+				{
+					"voucher_name": voucher_no,
+					"voucher_type": voucher_details.get("voucher_type"),
+					"taxable_amount": voucher_details.get("amount"),
+				},
+			)
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
