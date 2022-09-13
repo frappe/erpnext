@@ -311,6 +311,7 @@ class SellingController(StockController):
 									"sales_invoice_item": d.get("sales_invoice_item"),
 									"dn_detail": d.get("dn_detail"),
 									"incoming_rate": p.get("incoming_rate"),
+									"item_row": p,
 								}
 							)
 						)
@@ -334,6 +335,7 @@ class SellingController(StockController):
 							"sales_invoice_item": d.get("sales_invoice_item"),
 							"dn_detail": d.get("dn_detail"),
 							"incoming_rate": d.get("incoming_rate"),
+							"item_row": d,
 						}
 					)
 				)
