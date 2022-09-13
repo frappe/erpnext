@@ -778,6 +778,14 @@ class TestItem(FrappeTestCase):
 			item.has_batch_no = 1
 			item.save()
 
+	def test_customer_codes_length(self):
+		"""Check if item code with special characters are allowed."""
+		item = make_item(properties={"item_code": "Test Item Code With Special Characters"})
+		for row in range(3):
+			item.append("customer_items", {"ref_code": frappe.generate_hash("", 120)})
+		item.save()
+		self.assertTrue(len(item.customer_code) > 140)
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
