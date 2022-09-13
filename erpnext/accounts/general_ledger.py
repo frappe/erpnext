@@ -489,7 +489,6 @@ def make_reverse_gl_entries(
 		).run(as_dict=1)
 
 	if gl_entries:
-		create_payment_ledger_entry(gl_entries, cancel=1)
 		create_payment_ledger_entry(
 			gl_entries, cancel=1, adv_adj=adv_adj, update_outstanding=update_outstanding
 		)

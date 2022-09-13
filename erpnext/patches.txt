@@ -307,9 +307,11 @@ erpnext.patches.v13_0.job_card_status_on_hold
 erpnext.patches.v14_0.copy_is_subcontracted_value_to_is_old_subcontracting_flow
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.patches.v14_0.crm_ux_cleanup
+erpnext.patches.v14_0.migrate_existing_lead_notes_as_per_the_new_format
 erpnext.patches.v14_0.remove_india_localisation # 14-07-2022
 erpnext.patches.v13_0.fix_number_and_frequency_for_monthly_depreciation
 erpnext.patches.v14_0.remove_hr_and_payroll_modules # 20-07-2022
 erpnext.patches.v14_0.fix_crm_no_of_employees
 erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes
+erpnext.patches.v14_0.fix_subcontracting_receipt_gl_entries
 erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger

@@ -795,7 +795,7 @@
   },
   {
    "fieldname": "customer_code",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Customer Code",
    "no_copy": 1,
@@ -910,7 +910,8 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-15 09:02:06.177691",
+ "make_attachments_public": 1,
+ "modified": "2022-09-13 04:08:17.431731",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

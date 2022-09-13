@@ -646,6 +646,28 @@ class update_entries_after(object):
 					voucher_detail_no=sle.voucher_detail_no,
 					sle=sle,
 				)
+
+			elif (
+				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+				and sle.voucher_detail_no
+				and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
+			):
+				field = (
+					"delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
+				)
+				doctype = (
+					"Delivery Note Item" if sle.voucher_type == "Purchase Receipt" else "Sales Invoice Item"
+				)
+				refernce_name = frappe.get_cached_value(
+					sle.voucher_type + " Item", sle.voucher_detail_no, field
+				)
+
+				if refernce_name:
+					rate = frappe.get_cached_value(
+						doctype,
+						refernce_name,
+						"incoming_rate",
+					)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"
@@ -727,7 +749,12 @@ class update_entries_after(object):
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
 			frappe.db.set_value(
-				sle.voucher_type + " Item", sle.voucher_detail_no, "base_net_rate", outgoing_rate
+				sle.voucher_type + " Item",
+				sle.voucher_detail_no,
+				{
+					"base_net_rate": outgoing_rate,
+					"valuation_rate": outgoing_rate,
+				},
 			)
 		else:
 			frappe.db.set_value(
