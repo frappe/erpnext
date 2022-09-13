@@ -690,6 +690,74 @@ class TestItem(FrappeTestCase):
 		item.save()
 		self.assertEqual(item.description, item.item_name)
 
+<<<<<<< HEAD
+=======
+	def test_item_type_field_change(self):
+		"""Check if critical fields like `is_stock_item`, `has_batch_no` are not changed if transactions exist."""
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+		transaction_creators = [
+			lambda i: make_purchase_receipt(item_code=i),
+			lambda i: make_purchase_invoice(item_code=i, update_stock=1),
+			lambda i: make_stock_entry(item_code=i, qty=1, target="_Test Warehouse - _TC"),
+			lambda i: create_delivery_note(item_code=i),
+		]
+
+		properties = {"has_batch_no": 0, "allow_negative_stock": 1, "valuation_rate": 10}
+		for transaction_creator in transaction_creators:
+			item = make_item(properties=properties)
+			transaction = transaction_creator(item.name)
+			item.has_batch_no = 1
+			self.assertRaises(frappe.ValidationError, item.save)
+
+			transaction.cancel()
+			# should be allowed now
+			item.reload()
+			item.has_batch_no = 1
+			item.save()
+
+	def test_customer_codes_length(self):
+		"""Check if item code with special characters are allowed."""
+		item = make_item(properties={"item_code": "Test Item Code With Special Characters"})
+		for row in range(3):
+			item.append("customer_items", {"ref_code": frappe.generate_hash("", 120)})
+		item.save()
+		self.assertTrue(len(item.customer_code) > 140)
+
+	def test_update_is_stock_item(self):
+		# Step - 1: Create an Item with Maintain Stock enabled
+		item = make_item(properties={"is_stock_item": 1})
+
+		# Step - 2: Disable Maintain Stock
+		item.is_stock_item = 0
+		item.save()
+		item.reload()
+		self.assertEqual(item.is_stock_item, 0)
+
+		# Step - 3: Create Product Bundle
+		pb = frappe.new_doc("Product Bundle")
+		pb.new_item_code = item.name
+		pb.flags.ignore_mandatory = True
+		pb.save()
+
+		# Step - 4: Try to enable Maintain Stock, should throw a validation error
+		item.is_stock_item = 1
+		self.assertRaises(frappe.ValidationError, item.save)
+		item.reload()
+
+		# Step - 5: Delete Product Bundle
+		pb.delete()
+
+		# Step - 6: Again try to enable Maintain Stock
+		item.is_stock_item = 1
+		item.save()
+		item.reload()
+		self.assertEqual(item.is_stock_item, 1)
+
+>>>>>>> bf1fa014f4 (test: add test case for item master maintain-stock)
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
