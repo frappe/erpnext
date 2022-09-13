@@ -1394,6 +1394,21 @@ class SalarySlip(TransactionBase):
 					amounts["interest_amount"] + amounts["payable_principal_amount"]
 					> amounts["written_off_amount"]
 				):
+					print(amounts["written_off_amount"], "###########")
+					if amounts["interest_amount"] > amounts["written_off_amount"]:
+						amounts["interest_amount"] -= amounts["written_off_amount"]
+						amounts["written_off_amount"] = 0
+					else:
+						amounts["written_off_amount"] -= amounts["interest_amount"]
+						amounts["interest_amount"] = 0
+
+					if amounts["payable_principal_amount"] > amounts["written_off_amount"]:
+						amounts["payable_principal_amount"] -= amounts["written_off_amount"]
+						amounts["written_off_amount"] = 0
+					else:
+						amounts["written_off_amount"] -= amounts["payable_principal_amount"]
+						amounts["payable_principal_amount"] = 0
+
 					self.append(
 						"loans",
 						{
