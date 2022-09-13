@@ -5,9 +5,10 @@ from frappe.translate import set_default_language
 
 @frappe.whitelist()
 def get_onboarding_data():
+	workspaces_to_ignore = ["Home", "Build", "ERPNext Settings", "Users"]
 	workspaces = frappe.get_all(
 		"Workspace",
-		filters={"name": ("not in", ["Home"])},
+		filters={"name": ("not in", workspaces_to_ignore)},
 		fields=["name", "title", "module", "icon", "description"],
 		order_by="sequence_id",
 	)

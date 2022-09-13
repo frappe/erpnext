@@ -142,7 +142,7 @@ export default {
 				"Thailand": ["10-01", "09-30"],
 				"United Kingdom": ["04-01", "03-31"],
 			},
-			enabled_modules: [],
+			enabled_workspaces: [],
 			slide_subtitle: __("Don't Sweat - These settings can be changed later."),
 		};
 	},
@@ -198,7 +198,7 @@ export default {
 					"bank_account": this.slide_3.get_value("bank_account"),
 					"domain": this.selectedDomain,
 					"company_tagline": this.slide_3.get_value("tagline"),
-					"enabled_modules": this.enabled_modules,
+					"enabled_workspaces": this.enabled_workspaces,
 				}},
 				callback: (r) => {
 					if (r.message.status === "ok") {
@@ -216,11 +216,11 @@ export default {
 		},
 		add_remove_module: function(module, checked) {
 			if (checked) {
-				this.enabled_modules.push(module);
+				this.enabled_workspaces.push(module);
 			} else {
-				let index = this.enabled_modules.indexOf(module);
+				let index = this.enabled_workspaces.indexOf(module);
 				if (index !== -1) {
-					this.enabled_modules.splice(index, 1);
+					this.enabled_workspaces.splice(index, 1);
 				}
 			}
 		},

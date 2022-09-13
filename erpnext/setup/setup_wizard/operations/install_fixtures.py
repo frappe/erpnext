@@ -598,13 +598,13 @@ def get_fy_details(fy_start_date, fy_end_date):
 
 
 def enable_workspaces(args):
-	erpnext_modules = frappe.db.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
+	workspaces = ["Home"] + args.get("enabled_workspaces", [])
+
+	# erpnext_modules = frappe.db.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
 	workspace = frappe.qb.DocType("Workspace")
 
-	frappe.qb.update(workspace).set(workspace.public, 0).where(
-		workspace.module.isin(erpnext_modules)
-	).run()
+	# Disable all workspaces
+	frappe.qb.update(workspace).set(workspace.public, 0).run()
 
-	frappe.qb.update(workspace).set(workspace.public, 1).where(
-		workspace.module.isin(args.get("enabled_modules"))
-	).run()
+	# Enable just selected workspaces
+	frappe.qb.update(workspace).set(workspace.public, 1).where(workspace.name.isin(workspaces)).run()
