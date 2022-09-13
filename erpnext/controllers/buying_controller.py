@@ -303,7 +303,11 @@ class BuyingController(StockController, Subcontracting):
 					rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
 				else:
 					field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
-					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+					rate = flt(
+						frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+						* (d.conversion_factor or 1),
+						d.precision("rate"),
+					)
 
 				if self.is_internal_transfer():
 					if rate != d.rate:

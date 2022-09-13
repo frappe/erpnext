@@ -302,3 +302,9 @@ def in_configured_timeslot(repost_settings=None, current_time=None):
 		return end_time >= now_time >= start_time
 	else:
 		return now_time >= start_time or now_time <= end_time
+
+
+@frappe.whitelist()
+def execute_repost_item_valuation():
+	"""Execute repost item valuation via scheduler."""
+	frappe.get_doc("Scheduled Job Type", "repost_item_valuation.repost_entries").enqueue(force=True)

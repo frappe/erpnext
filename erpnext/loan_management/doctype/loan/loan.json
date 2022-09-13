@@ -17,6 +17,7 @@
   "posting_date",
   "status",
   "repay_from_salary",
+  "manually_update_paid_amount_in_salary_slip",
   "section_break_8",
   "loan_type",
   "loan_amount",
@@ -51,10 +52,10 @@
   "refund_amount",
   "debit_adjustment_amount",
   "credit_adjustment_amount",
-  "is_npa",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
+  "is_npa",
   "amended_from"
  ],
  "fields": [
@@ -410,16 +411,23 @@
    "fieldname": "is_npa",
    "fieldtype": "Check",
    "label": "Is NPA"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "repay_from_salary",
+   "fieldname": "manually_update_paid_amount_in_salary_slip",
+   "fieldtype": "Check",
+   "label": "Manually Update Paid Amount in Salary Slip"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-30 12:04:13.728880",
+ "modified": "2022-09-13 02:05:25.017190",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
- "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -445,6 +453,5 @@
  "search_fields": "posting_date",
  "sort_field": "creation",
  "sort_order": "DESC",
- "states": [],
  "track_changes": 1
 }
