@@ -27,7 +27,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 		me.setup_warehouse_query();
 
 		me.frm.set_query("target_item_code", function() {
-			return erpnext.queries.item();
+			if (me.frm.doc.entry_type == "Capitalization") {
+				return erpnext.queries.item({"is_stock_item": 0, "is_fixed_asset": 1});
+			} else {
+				return erpnext.queries.item({"is_stock_item": 1, "is_fixed_asset": 0});
+			}
 		});
 
 		me.frm.set_query("target_asset", function() {
@@ -410,5 +414,4 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 	}
 };
 
-//$.extend(cur_frm.cscript, new erpnext.assets.AssetCapitalization({frm: cur_frm}));
 cur_frm.cscript = new erpnext.assets.AssetCapitalization({frm: cur_frm});

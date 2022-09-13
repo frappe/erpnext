@@ -8,29 +8,28 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "naming_series",
+  "entry_type",
   "target_item_code",
   "target_item_name",
   "target_is_fixed_asset",
   "target_has_batch_no",
   "target_has_serial_no",
-  "entry_type",
-  "finance_book",
-  "naming_series",
   "column_break_9",
+  "target_asset",
+  "target_asset_name",
+  "target_warehouse",
+  "target_qty",
+  "target_stock_uom",
+  "target_batch_no",
+  "target_serial_no",
+  "column_break_5",
   "company",
+  "finance_book",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "amended_from",
-  "target_item_details_section",
-  "target_asset",
-  "target_asset_name",
-  "target_warehouse",
-  "target_batch_no",
-  "target_serial_no",
-  "column_break_5",
-  "target_qty",
-  "target_stock_uom",
   "section_break_16",
   "stock_items",
   "stock_items_total",
@@ -86,16 +85,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.target_item_code || doc.target_is_fixed_asset",
+   "depends_on": "eval:doc.entry_type=='Capitalization'",
    "fieldname": "target_asset",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Target Asset",
+   "mandatory_depends_on": "eval:doc.entry_type=='Capitalization'",
    "no_copy": 1,
    "options": "Asset"
   },
   {
-   "depends_on": "target_asset",
+   "depends_on": "eval:doc.entry_type=='Capitalization'",
    "fetch_from": "target_asset.asset_name",
    "fieldname": "target_asset_name",
    "fieldtype": "Data",
@@ -170,15 +170,11 @@
    "options": "Asset Capitalization Stock Item"
   },
   {
-   "fieldname": "target_item_details_section",
-   "fieldtype": "Section Break",
-   "label": "Target Item Details"
-  },
-  {
-   "depends_on": "eval:!doc.target_is_fixed_asset",
+   "depends_on": "eval:doc.entry_type=='Decapitalization'",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
+   "mandatory_depends_on": "eval:doc.entry_type=='Decapitalization'",
    "options": "Warehouse"
   },
   {
@@ -240,13 +236,14 @@
    "options": "Asset Capitalization Asset Item"
   },
   {
+   "default": "Capitalization",
    "fieldname": "entry_type",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Entry Type",
-   "options": "\nCapitalization\nDecapitalization",
-   "read_only": 1
+   "options": "Capitalization\nDecapitalization",
+   "reqd": 1
   },
   {
    "fieldname": "stock_items_total",
@@ -337,7 +334,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-15 15:41:27.917458",
+ "modified": "2022-09-12 15:09:40.771332",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
@@ -377,6 +374,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
