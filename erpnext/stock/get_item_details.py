@@ -311,8 +311,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if item.stock_uom == args.uom:
 		out.conversion_factor = 1.0
 	else:
-		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.name, args.uom).get("conversion_factor")
+		out.conversion_factor = get_conversion_factor(item.name, args.uom).get("conversion_factor")
+		#use this because if we create direct PO the Convertion of packsize is not working 
+		#out.conversion_factor = args.conversion_factor or \
+		#	get_conversion_factor(item.name, args.uom).get("conversion_factor")
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
