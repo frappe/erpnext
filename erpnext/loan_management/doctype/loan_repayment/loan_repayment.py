@@ -519,6 +519,8 @@ def get_accrued_interest_entries(against_loan, posting_date=None):
 	if not posting_date:
 		posting_date = getdate()
 
+	precision = cint(frappe.db.get_default("currency_precision")) or 2
+
 	unpaid_accrued_entries = frappe.db.sql(
 		"""
 			SELECT name, posting_date, interest_amount - paid_interest_amount as interest_amount,
@@ -538,6 +540,13 @@ def get_accrued_interest_entries(against_loan, posting_date=None):
 		(against_loan, posting_date),
 		as_dict=1,
 	)
+
+	# Skip entries with zero interest amount & payable principal amount
+	unpaid_accrued_entries = [
+		d
+		for d in unpaid_accrued_entries
+		if flt(d.interest_amount, precision) > 0 or flt(d.payable_principal_amount, precision) > 0
+	]
 
 	return unpaid_accrued_entries
 
