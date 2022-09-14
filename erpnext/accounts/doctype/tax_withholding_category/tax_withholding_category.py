@@ -276,9 +276,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
 
-	invoices_details = frappe.get_all(
-		doctype, filters=filters, fields=["name", "base_net_total"]
-	) or [""]
+	invoices_details = frappe.get_all(doctype, filters=filters, fields=["name", "base_net_total"])
 
 	for d in invoices_details:
 		vouchers.append(d.name)
