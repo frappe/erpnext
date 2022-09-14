@@ -514,10 +514,11 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype in [
 			"Quotation",
 			"Sales Order",
+			"Customer Order",
 			"Delivery Note",
+			"Shipping Notice Instruction",
 			"Sales Invoice",
 			"POS Invoice",
-			"Shipping Notice Instruction",
 		]:
 			self.doc.base_grand_total = (
 				flt(self.doc.grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total"))
