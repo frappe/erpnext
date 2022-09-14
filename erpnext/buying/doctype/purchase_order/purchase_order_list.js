@@ -28,11 +28,14 @@ frappe.listview_settings['Purchase Order'] = {
 		
 	},
 	onload: function (listview) {
-		var method = "erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders";
+		var method = "erpnext.buying.doctype.purchase_order.purchase_order.close_or_unclose_purchase_orders";	
+		
+		if (Object.values(frappe.route_options).length == 0){
 		frappe.route_options = {
 			// "status": "Draft",
 			"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), -60),frappe.datetime.get_today()]]
 		};
+	}
 		listview.page.add_menu_item(__("Close"), function () {
 			listview.call_for_selected_items(method, { "status": "Closed" });
 		});
