@@ -12,7 +12,7 @@ def execute():
 			frappe.qb.from_(dt)
 			.select(dt.name, dt.notes, dt.modified_by, dt.modified)
 			.where(dt.notes.isnotnull() & dt.notes != "")
-		).run()
+		).run(as_dict=True)
 
 		for d in records:
 			if strip_html(cstr(d.notes)).strip():
