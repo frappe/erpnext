@@ -33,7 +33,7 @@ class AppointmentSheetReport(object):
 			extra_rows = ", a.vehicle_license_plate, a.vehicle_unregistered, a.vehicle_chassis_no, a.vehicle_engine_no"
 
 		self.data = frappe.db.sql("""
-			select a.name as appointment, a.appointment_type, a.voice_of_customer,
+			select a.name as appointment, a.appointment_type, a.voice_of_customer, a.remarks,
 				a.scheduled_dt, a.scheduled_date, a.scheduled_time, a.appointment_duration, a.end_dt,
 				a.appointment_for, a.party_name, a.customer_name,
 				a.contact_display, a.contact_mobile, a.contact_phone, a.contact_email,
@@ -97,6 +97,7 @@ class AppointmentSheetReport(object):
 
 		columns += [
 			{"label": _("Voice of Customer"), "fieldname": "voice_of_customer", "fieldtype": "Data", "width": 200},
+			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 200, "editable": 1},
 		]
 
 		return columns

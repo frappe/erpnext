@@ -59,6 +59,8 @@
   "details_section",
   "voice_of_customer",
   "description",
+  "appointment_remarks_section",
+  "remarks",
   "more_information_section",
   "calendar_event",
   "column_break_41",
@@ -435,6 +437,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "collapsible_depends_on": "eval:doc.contact_mobile_2 || doc.contact_mobile",
    "depends_on": "eval:doc.contact_mobile_2 || doc.contact_mobile",
    "fieldname": "contact_mobile_2",
@@ -486,7 +489,7 @@
    "allow_on_submit": 1,
    "fieldname": "secondary_contact_mobile",
    "fieldtype": "Select",
-   "label": "Secondary Mobile No"
+   "label": "Secondary Contact Mobile No"
   },
   {
    "fieldname": "column_break_secondary_contact_person",
@@ -495,10 +498,23 @@
   {
    "fieldname": "column_break_secondary_contact_display",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "remarks",
+   "fieldname": "appointment_remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Appointment Remarks"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-08-29 13:06:16.032627",
+ "modified": "2022-09-14 12:03:18.969933",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

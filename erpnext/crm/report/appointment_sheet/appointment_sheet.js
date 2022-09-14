@@ -41,5 +41,18 @@ frappe.query_reports["Appointment Sheet"] = {
 			fieldtype: "Link",
 			options: "Appointment Type",
 		},
-	]
+	],
+	onChange: function(new_value, column, data, rowIndex) {
+		if (column.fieldname == "remarks") {
+			return frappe.call({
+				method: "frappe.client.set_value",
+				args: {
+					doctype: "Appointment",
+					name: data.appointment,
+					fieldname: 'remarks',
+					value: new_value
+				}
+			});
+		}
+	}
 };

@@ -9,7 +9,7 @@ import datetime
 from frappe import _
 from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import cint, today, getdate, get_time, get_datetime, combine_datetime, date_diff,\
-	format_datetime, formatdate, get_url, now_datetime, add_days
+	format_datetime, formatdate, get_url, now_datetime, add_days, clean_whitespace
 from frappe.utils.verified_command import get_signed_params
 from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignment, clear as clear_assignments, close_all_assignments
@@ -58,14 +58,18 @@ class Appointment(StatusUpdater):
 		self.validate_previous_appointment()
 		self.validate_timeslot_validity()
 		self.validate_timeslot_availability()
+		self.clean_remarks()
 		self.set_status()
 
 	def before_insert(self):
 		clear_notification_count(self)
 
 	def before_update_after_submit(self):
-		self.set_customer_details()
-		self.set_applies_to_details()
+		if self.status not in ["Closed", "Rescheduled"]:
+			self.set_customer_details()
+			self.set_applies_to_details()
+
+		self.clean_remarks()
 		self.set_status()
 		self.get_disallow_on_submit_fields()
 
@@ -87,7 +91,7 @@ class Appointment(StatusUpdater):
 
 	def get_disallow_on_submit_fields(self):
 		if self.status in ["Closed", "Rescheduled"]:
-			self.flags.disallow_on_submit = self.get_fields_for_disallow_on_submit()
+			self.flags.disallow_on_submit = self.get_fields_for_disallow_on_submit(['remarks'])
 
 		return self.flags.disallow_on_submit or []
 
@@ -153,6 +157,16 @@ class Appointment(StatusUpdater):
 		for k, v in applies_to_details.items():
 			if self.meta.has_field(k) and not self.get(k) or k in force_fields:
 				self.set(k, v)
+
+	def clean_remarks(self):
+		fields = ['remarks']
+
+		if self.status not in ["Closed", "Rescheduled"]:
+			fields.append('voice_of_customer')
+
+		for f in fields:
+			if self.meta.has_field(f):
+				self.set(f, clean_whitespace(self.get(f)))
 
 	def validate_timeslot_validity(self):
 		if not self.appointment_type:
