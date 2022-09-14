@@ -116,6 +116,11 @@ class StockEntry(StockController):
 
 	def on_cancel(self):
 
+		items_list = frappe.db.sql(f"""SELECT * FROM `tabStock Ledger Entry` WHERE voucher_no = '{self.name}'""",as_dict=True)
+		for item in items_list:        
+			frappe.db.sql(f"""UPDATE `tabStock Ledger Entry` set active_batch = 1 WHERE item_code = '{item.item_code}' and batch_no = '{item.batch_no}' and warehouse = '{item.warehouse}'""")
+			frappe.db.commit()
+
 		if self.purchase_order and self.purpose == "Send to Subcontractor":
 			self.update_purchase_order_supplied_items()
 
@@ -130,6 +135,7 @@ class StockEntry(StockController):
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
+
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
