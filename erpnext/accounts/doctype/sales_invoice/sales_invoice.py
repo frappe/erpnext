@@ -7,7 +7,17 @@ from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -22,9 +32,12 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
+	depreciate_asset,
+	get_depreciation_amount_in_je,
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
+	reset_depreciation_schedule
 )
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
@@ -175,7 +188,7 @@ class SalesInvoice(SellingController):
 					if self.update_stock:
 						frappe.throw(_("'Update Stock' cannot be checked for fixed asset sale"))
 
-					elif asset.status in ("Scrapped", "Cancelled", "Capitalized", "Decapitalized") or (
+					elif asset.status in ("Scrapped", "Cancelled") or (
 						asset.status == "Sold" and not self.is_return
 					):
 						frappe.throw(
@@ -699,7 +712,6 @@ class SalesInvoice(SellingController):
 		if (
 			cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate"))
 			and not self.is_return
-			and not self.is_internal_customer
 		):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
@@ -1086,17 +1098,18 @@ class SalesInvoice(SellingController):
 						asset.db_set("disposal_date", None)
 
 						if asset.calculate_depreciation:
-							self.reverse_depreciation_entry_made_after_disposal(asset)
-							self.reset_depreciation_schedule(asset)
+							self.reverse_depreciation_entry_made_after_sale(asset)
+							reset_depreciation_schedule(asset, self.posting_date)
 
 					else:
+						if asset.calculate_depreciation:
+							depreciate_asset(asset, self.posting_date)
+							asset.reload()
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", self.posting_date)
-
-						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
@@ -1150,6 +1163,68 @@ class SalesInvoice(SellingController):
 
 		self.check_finance_books(item, asset)
 		return asset
+
+	def check_finance_books(self, item, asset):
+		if (
+			len(asset.finance_books) > 1 and not item.finance_book and asset.finance_books[0].finance_book
+		):
+			frappe.throw(
+				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
+			)
+
+	def reverse_depreciation_entry_made_after_sale(self, asset):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
+
+		row = -1
+		finance_book = asset.get("schedules")[0].get("finance_book")
+		for schedule in asset.get("schedules"):
+			if schedule.finance_book != finance_book:
+				row = 0
+				finance_book = schedule.finance_book
+			else:
+				row += 1
+
+			if schedule.schedule_date == posting_date_of_original_invoice:
+				if not self.sale_was_made_on_original_schedule_date(
+					asset, schedule, row, posting_date_of_original_invoice
+				) or self.sale_happens_in_the_future(posting_date_of_original_invoice):
+
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+					frappe.flags.is_reverse_depr_entry = True
+					reverse_journal_entry.submit()
+
+					frappe.flags.is_reverse_depr_entry = False
+					asset.flags.ignore_validate_update_after_submit = True
+					schedule.journal_entry = None
+					depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
+					asset.finance_books[0].value_after_depreciation += depreciation_amount
+					asset.save()
+
+	def get_posting_date_of_sales_invoice(self):
+		return frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
+	def sale_was_made_on_original_schedule_date(
+		self, asset, schedule, row, posting_date_of_original_invoice
+	):
+		for finance_book in asset.get("finance_books"):
+			if schedule.finance_book == finance_book.finance_book:
+				orginal_schedule_date = add_months(
+					finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
+				)
+
+				if orginal_schedule_date == posting_date_of_original_invoice:
+					return True
+		return False
+
+	def sale_happens_in_the_future(self, posting_date_of_original_invoice):
+		if posting_date_of_original_invoice > getdate():
+			return True
+
+		return False
 
 	@property
 	def enable_discount_accounting(self):
@@ -2056,17 +2131,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def update_item(source, target, source_parent):
 		target.qty = flt(source.qty) - received_items.get(source.name, 0.0)
-		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
-			target.purchase_order = source.parent
-			target.purchase_order_item = source.name
-
-		if (
-			source.get("purchase_order")
-			and source.get("purchase_order_item")
-			and target.doctype == "Purchase Invoice Item"
-		):
-			target.purchase_order = source.purchase_order
-			target.po_detail = source.purchase_order_item
 
 	item_field_map = {
 		"doctype": target_doctype + " Item",
@@ -2091,12 +2155,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				source_document_warehouse_field: target_document_warehouse_field,
 				"batch_no": "batch_no",
 				"serial_no": "serial_no",
-			}
-		)
-	elif target_doctype == "Sales Order":
-		item_field_map["field_map"].update(
-			{
-				source_document_warehouse_field: "warehouse",
 			}
 		)
 
@@ -2143,7 +2201,6 @@ def get_received_items(reference_name, doctype, reference_fieldname):
 
 def set_purchase_references(doc):
 	# add internal PO or PR links if any
-
 	if doc.is_internal_transfer():
 		if doc.doctype == "Purchase Receipt":
 			so_item_map = get_delivery_note_details(doc.inter_company_invoice_reference)
@@ -2173,6 +2230,15 @@ def set_purchase_references(doc):
 					warehouse_map,
 				)
 
+			if list(so_item_map.values()):
+				pd_item_map, parent_child_map, warehouse_map = get_pd_details(
+					"Purchase Order Item", so_item_map, "sales_order_item"
+				)
+
+				update_pi_items(
+					doc, "po_detail", "purchase_order", so_item_map, pd_item_map, parent_child_map, warehouse_map
+				)
+
 
 def update_pi_items(
 	doc,
@@ -2188,19 +2254,13 @@ def update_pi_items(
 		item.set(parent_field, parent_child_map.get(sales_item_map.get(item.sales_invoice_item)))
 		if doc.update_stock:
 			item.warehouse = warehouse_map.get(sales_item_map.get(item.sales_invoice_item))
-			if not item.warehouse and item.get("purchase_order") and item.get("purchase_order_item"):
-				item.warehouse = frappe.db.get_value(
-					"Purchase Order Item", item.purchase_order_item, "warehouse"
-				)
 
 
 def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, warehouse_map):
 	for item in doc.get("items"):
+		item.purchase_order_item = purchase_item_map.get(sales_item_map.get(item.delivery_note_item))
 		item.warehouse = warehouse_map.get(sales_item_map.get(item.delivery_note_item))
-		if not item.warehouse and item.get("purchase_order") and item.get("purchase_order_item"):
-			item.warehouse = frappe.db.get_value(
-				"Purchase Order Item", item.purchase_order_item, "warehouse"
-			)
+		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
 
 
 def get_delivery_note_details(internal_reference):
