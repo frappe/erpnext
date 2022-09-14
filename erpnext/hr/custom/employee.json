@@ -1978,7 +1978,7 @@
    "description": null,
    "docstatus": 0,
    "dt": "Employee",
-   "fetch_from": "designation.jd",
+   "fetch_from": "designation.job_description",
    "fetch_if_empty": 0,
    "fieldname": "job_description",
    "fieldtype": "Text Editor",
@@ -2116,7 +2116,7 @@
    "report_hide": 0,
    "reqd": 0,
    "search_index": 0,
-   "translatable": 1,
+   "translatable": 0,
    "unique": 0,
    "width": null
   }
