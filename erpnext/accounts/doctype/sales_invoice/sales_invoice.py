@@ -1091,7 +1091,7 @@ class SalesInvoice(SellingController):
 
 					else:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
 						)
 						asset.db_set("disposal_date", self.posting_date)
 
