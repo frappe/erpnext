@@ -220,7 +220,7 @@ def scrap_asset(asset_name):
 	je.flags.ignore_permissions = True
 	je.submit()
 
-	frappe.db.set_value("Asset", asset_name, "disposal_date", today())
+	frappe.db.set_value("Asset", asset_name, "disposal_date", date)
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
 	asset.set_status("Scrapped")
 
