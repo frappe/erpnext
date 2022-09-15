@@ -396,7 +396,7 @@
    "collapsible": 1,
    "fieldname": "salary_information",
    "fieldtype": "Tab Break",
-   "label": "Salary Details",
+   "label": "Salary",
    "oldfieldtype": "Section Break",
    "width": "50%"
   },
@@ -428,7 +428,7 @@
    "collapsible": 1,
    "fieldname": "contact_details",
    "fieldtype": "Tab Break",
-   "label": "Contact"
+   "label": "Address & Contacts"
   },
   {
    "fieldname": "cell_number",
@@ -507,7 +507,7 @@
    "collapsible": 1,
    "fieldname": "personal_details",
    "fieldtype": "Tab Break",
-   "label": "Personal Details"
+   "label": "Personal"
   },
   {
    "fieldname": "passport_number",
@@ -701,7 +701,7 @@
    "collapsible": 1,
    "fieldname": "attendance_and_leave_details",
    "fieldtype": "Tab Break",
-   "label": "Attendance and Leave Details"
+   "label": "Attendance & Leaves"
   },
   {
    "fieldname": "column_break_44",
@@ -726,7 +726,7 @@
   {
    "fieldname": "basic_details_tab",
    "fieldtype": "Tab Break",
-   "label": "Basic Details"
+   "label": "Overview"
   },
   {
    "fieldname": "company_details_section",
@@ -810,7 +810,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-08-23 13:47:46.944993",
+ "modified": "2022-09-13 10:27:14.579197",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
