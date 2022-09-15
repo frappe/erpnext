@@ -53,7 +53,8 @@
   "apply_discount_on",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break"
+  "dimension_col_break",
+  "pos_profile_supervisor"
  ],
  "fields": [
   {
@@ -366,6 +367,12 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "pos_profile_supervisor",
+   "fieldtype": "Table",
+   "label": "POS Profile Supervisor",
+   "options": "POS Profile Supervisor"
   }
  ],
  "icon": "icon-cog",
@@ -393,11 +400,10 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2022-07-21 11:16:46.911173",
+ "modified": "2022-09-03 13:23:42.685456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
- "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -420,6 +426,5 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+ "sort_order": "DESC"
 }

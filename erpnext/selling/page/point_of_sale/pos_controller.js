@@ -1,3 +1,6 @@
+
+
+
 erpnext.PointOfSale.Controller = class {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
@@ -165,6 +168,10 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	prepare_menu() {
+		
+
+		this.button();
+
 		this.page.clear_menu();
 
 		this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
@@ -175,6 +182,167 @@ erpnext.PointOfSale.Controller = class {
 
 		this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
 	}
+
+	get_mapped_printer() {
+		// returns a list of "print format: printer" mapping filtered by the current print format
+		let print_format_printer_map = this.get_print_format_printer_map();
+		if (print_format_printer_map[this.frm.doctype]) {
+			return print_format_printer_map[this.frm.doctype].filter(
+				(printer_map) => printer_map.print_format == this.selected_format()
+			);
+		} else {
+			return [];
+		}
+	}
+	get_print_format_printer_map() {
+		// returns the whole object "print_format_printer_map" stored in the localStorage.
+		try {
+			let print_format_printer_map = JSON.parse(
+				localStorage.print_format_printer_map
+			);
+			return print_format_printer_map;
+		} catch (e) {
+			return {};
+		}
+	}
+
+	button(){
+		this.page.add_inner_button(('Open Cash Drawer'),()=>{
+			
+			// const me = this;
+			console.log("%%%%%%%%%%%%%%%%%%%%%%%",this)
+			this.print_format_printer_map = this.get_print_format_printer_map();
+			this.data = this.print_format_printer_map[this.frm.doctype] || [];
+		    // let printer_list = [];
+			f
+			frappe.ui.form.qz_get_printer_list().then((data) => {
+				
+				data.forEach(printer => {
+					d.fields_dict.printer.df.options.push(printer)
+					d.fields_dict.printer.refresh()
+				})
+	
+			})
+		const d = new frappe.ui.Dialog({
+			title: __("Supervisor Authorization"),
+			fields: [
+				{
+					label : "Supervisor ID",
+					fieldname: "user",
+					fieldtype: "Select",
+					reqd: 1,
+					options: []
+				},
+				{
+					label: "Password",
+					fieldname: "password",
+					fieldtype: "Password",
+					reqd: 1,
+				},
+				{
+					label: 'Date & Time',
+					fieldname: 'date_and_time',
+					fieldtype: 'Datetime',
+					reqd:1,
+					read_only:1,
+					default: frappe.datetime.now_datetime(),
+					hidden:1
+				},
+				{
+					label: 'POS User',
+					fieldname: 'pos_user',
+					fieldtype: 'Data',
+					reqd:1,
+					read_only:1,
+					hidden:1
+				},
+				{
+					label:'POS Profile',
+					fieldname:'pos_profile',
+					fieldtype:'Data',
+					reqd:1,
+					read_only:1,
+					hidden:1
+				},
+				{
+					label:'Reason',
+					fieldname:'reason',
+					fieldtype:'Small Text',
+					reqd:1
+				},
+				{
+					label:"Printer",
+					fieldname:'printer',
+					fieldtype:"Select",
+					options:[]
+				}
+				
+			],
+			primary_action(v) {
+				var data = d.get_values();
+				frappe.call({
+					method: "grandhyper.api.remove_authorize",
+					
+					args: {
+						"user": data.user,
+						"password": data.password,
+						"pos_profile": cur_frm.doc.pos_profile,
+						'date_and_time':data.date_and_time,
+						'pos_user':data.pos_user,
+						'pos_profile':data.pos_profile,
+						'reason':data.reason
+					},
+					callback:function(r){
+	
+						if(r.message){
+
+
+					// frappe.ui.form.qz_get_printer_list().then(
+						frappe.ui.form.qz_connect()
+							// frappe.utils.print(
+							// 	'Supervisor Log',
+							// 	r.message,
+							// 	'Demo'
+							// )
+							.then(function () {
+
+								var config = qz.configs.create(v.printer);
+								var data =["Cash Drawer Open"]
+								return qz.print(config,data);
+
+							})
+							.then(frappe.ui.form.qz_success)
+							.catch(err => {
+								frappe.ui.form.qz_fail(err);
+							})
+						}
+						
+						else{
+							frappe.throw('Please enter valid "Supervisor ID" and "Password."');
+							
+						}
+
+					
+					}
+				});
+
+				d.hide();
+			},
+			primary_action_label: __('Authorize')
+		});
+		d.fields_dict.pos_user.set_value(user)
+		d.fields_dict.pos_profile.set_value(this.pos_profile)
+
+		frappe.db.get_doc('POS Profile', this.pos_profile).then((doc) => {
+			doc.pos_profile_supervisor.forEach(m=>{
+				d.fields_dict.user.df.options.push(m.user)
+				d.fields_dict.user.refresh();
+			})
+		});		
+		d.show();			
+		}).addClass("btn-warning").css({'color':'#FFFFFF','font-weight': 'bold','background-color':'#0096FF'})
+	}
+
 
 	open_form_view() {
 		frappe.model.sync(this.frm.doc);
