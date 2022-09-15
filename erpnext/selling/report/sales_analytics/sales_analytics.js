@@ -117,6 +117,18 @@ frappe.query_reports["Sales Analytics"] = {
 			options: "Item Source"
 		},
 		{
+			fieldname: "applies_to_item",
+			label: __("Applies to Item"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1,'include_templates':1}
+				}
+			},
+		},
+		{
 			fieldname: "territory",
 			label: __("Territory"),
 			fieldtype: "Link",

@@ -85,7 +85,7 @@ class Analytics(object):
 			self.get_rows()
 
 		elif self.filters.tree_type == 'Item':
-			self.get_entries("i.item_code", "i.item_name")
+			self.get_entries("i.item_code", "im.item_name")
 			self.get_rows()
 
 		elif self.filters.tree_type == 'Brand':
@@ -198,7 +198,16 @@ class Analytics(object):
 			if is_template:
 				conditions.append("im.variant_of=%(item_code)s")
 			else:
-				conditions.append("im.item_code=%(item_code)s")
+				conditions.append("im.name=%(item_code)s")
+
+		if self.filters.get("applies_to_item"):
+			is_template = frappe.db.get_value("Item", self.filters.get('applies_to_item'), 'has_variants')
+			if is_template:
+				self.filters.applies_to_items = [self.filters.applies_to_item]
+				self.filters.applies_to_items += [d.name for d in frappe.get_all("Item", {'variant_of': self.filters.applies_to_item})]
+				conditions.append("s.applies_to_item in %(applies_to_items)s")
+			else:
+				conditions.append("s.applies_to_item = %(applies_to_item)s")
 
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])

@@ -5,6 +5,7 @@ const group_by_options_gp = [
 	"Ungrouped", "Group by Invoice", "Group by Customer", "Group by Customer Group",
 	"Group by Item", "Group by Item Group", "Group by Brand", "Group by Warehouse",
 	"Group by Territory", "Group by Sales Person", "Group by Item Source",
+	"Group by Applies To Item", "Group by Applies To Variant Of",
 	"Group by Transaction Type", "Group by Project", "Group by Cost Center"
 ]
 
@@ -109,6 +110,18 @@ frappe.query_reports["Gross Profit"] = {
 			"label": __("Item Source"),
 			"fieldtype": "Link",
 			"options": "Item Source"
+		},
+		{
+			fieldname: "applies_to_item",
+			label: __("Applies to Item"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1,'include_templates':1}
+				}
+			},
 		},
 		{
 			"fieldname":"transaction_type",

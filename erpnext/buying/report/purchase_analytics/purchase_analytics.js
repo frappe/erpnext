@@ -112,6 +112,18 @@ frappe.query_reports["Purchase Analytics"] = {
 			options: "Item Source"
 		},
 		{
+			fieldname: "applies_to_item",
+			label: __("Applies to Item"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1,'include_templates':1}
+				}
+			},
+		},
+		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
 			"fieldtype": "MultiSelectList",

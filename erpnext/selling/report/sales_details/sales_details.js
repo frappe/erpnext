@@ -96,6 +96,18 @@ frappe.query_reports["Sales Details"] = {
 			options: "Item Source"
 		},
 		{
+			fieldname: "applies_to_item",
+			label: __("Applies to Item"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1, 'include_templates': 1}
+				}
+			},
+		},
+		{
 			fieldname: "territory",
 			label: __("Territory"),
 			fieldtype: "Link",
@@ -132,7 +144,9 @@ frappe.query_reports["Sales Details"] = {
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Customer", "Group by Customer Group", "Group by Transaction",
-				"Group by Item", "Group by Item Group", "Group by Brand", "Group by Territory", "Group by Sales Person"],
+				"Group by Item", "Group by Item Group", "Group by Brand",
+				"Group by Applies To Item", "Group by Applies To Variant Of",
+				"Group by Territory", "Group by Sales Person"],
 			default: "Ungrouped"
 		},
 		{
@@ -140,7 +154,9 @@ frappe.query_reports["Sales Details"] = {
 			label: __("Group By Level 2"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Customer", "Group by Customer Group", "Group by Transaction",
-				"Group by Item", "Group by Item Group", "Group by Brand", "Group by Territory", "Group by Sales Person"],
+				"Group by Item", "Group by Item Group", "Group by Brand",
+				"Group by Applies To Item", "Group by Applies To Variant Of",
+				"Group by Territory", "Group by Sales Person"],
 			default: "Group by Customer"
 		},
 		{
@@ -148,7 +164,9 @@ frappe.query_reports["Sales Details"] = {
 			label: __("Group By Level 3"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Customer", "Group by Customer Group", "Group by Transaction",
-				"Group by Item", "Group by Item Group", "Group by Brand", "Group by Territory", "Group by Sales Person"],
+				"Group by Item", "Group by Item Group", "Group by Brand",
+				"Group by Applies To Item", "Group by Applies To Variant Of",
+				"Group by Territory", "Group by Sales Person"],
 			default: "Group by Transaction"
 		},
 		{

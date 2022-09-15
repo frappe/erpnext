@@ -50,7 +50,8 @@ class GrossProfitGenerator(object):
 				si.project as parent_project, si_item.project as item_project,
 				si.cost_center as parent_cost_center, si_item.cost_center as item_cost_center,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
-				si_item.warehouse, i.item_group, i.brand, i.item_source, 
+				si_item.warehouse, i.item_group, i.brand, i.item_source,
+				si.applies_to_item, si.applies_to_variant_of,
 				si.update_stock, si_item.delivery_note_item, si_item.delivery_note,
 				si_item.qty, si_item.stock_qty, si_item.conversion_factor, si_item.alt_uom_size,
 				si_item.base_net_amount,
@@ -82,6 +83,7 @@ class GrossProfitGenerator(object):
 
 			d["project"] = d.item_project or d.parent_project
 			d["cost_center"] = d.parent_cost_center or d.item_cost_center
+			d["applies_to_variant_of"] = d.applies_to_variant_of or d.applies_to_item
 
 			if d.depreciation_type:
 				self.has_depreciation = True
@@ -165,6 +167,13 @@ class GrossProfitGenerator(object):
 			if 'item_code' in grouped_by:
 				totals['item_name'] = data[0].get('item_name')
 				totals['item_group'] = data[0].get('item_group')
+				totals['brand'] = data[0].get('brand')
+				totals['disable_item_formatter'] = cint(self.show_item_name)
+
+			if group_field in ('applies_to_item', 'applies_to_variant_of'):
+				totals['item_name'] = frappe.db.get_value("Item", group_value, 'item_name', cache=1) if group_value else None
+				totals['item_group'] = frappe.db.get_value("Item", group_value, 'item_group', cache=1) if group_value else None
+				totals['brand'] = frappe.db.get_value("Item", group_value, 'brand', cache=1) if group_value else None
 				totals['disable_item_formatter'] = cint(self.show_item_name)
 
 			if group_field in ('party', 'parent'):
@@ -176,6 +185,8 @@ class GrossProfitGenerator(object):
 			"customer": "Customer",
 			"parent": "Sales Invoice",
 			"item_code": "Item",
+			"applies_to_item": "Item",
+			"applies_to_variant_of": "Item",
 		}
 
 		reference_field = group_field[0] if isinstance(group_field, (list, tuple)) else group_field
@@ -230,7 +241,16 @@ class GrossProfitGenerator(object):
 			if is_template:
 				conditions.append("i.variant_of=%(item_code)s")
 			else:
-				conditions.append("i.item_code = %(item_code)s")
+				conditions.append("i.name = %(item_code)s")
+
+		if self.filters.get("applies_to_item"):
+			is_template = frappe.db.get_value("Item", self.filters.get('applies_to_item'), 'has_variants')
+			if is_template:
+				self.filters.applies_to_items = [self.filters.applies_to_item]
+				self.filters.applies_to_items += [d.name for d in frappe.get_all("Item", {'variant_of': self.filters.applies_to_item})]
+				conditions.append("si.applies_to_item in %(applies_to_items)s")
+			else:
+				conditions.append("si.applies_to_item = %(applies_to_item)s")
 
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])

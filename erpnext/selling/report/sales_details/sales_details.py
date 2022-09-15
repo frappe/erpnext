@@ -123,6 +123,7 @@ class SalesPurchaseDetailsReport(object):
 				i.{qty_field} as qty,
 				i.uom, i.stock_uom, i.alt_uom,
 				im.brand, im.item_group,
+				s.applies_to_item, s.applies_to_variant_of,
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
 				{item_cost_center_field} {parent_cost_center_field}
 				{item_project_field} {parent_project_field}
@@ -222,6 +223,7 @@ class SalesPurchaseDetailsReport(object):
 				"party_name": d.party_name,
 				"disable_item_formatter": cint(self.show_item_name),
 				"disable_party_name_formatter": cint(self.show_party_name),
+				"applies_to_variant_of": d.applies_to_variant_of or d.applies_to_item,
 			})
 
 			if "Group by Item" in [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]:
@@ -321,9 +323,16 @@ class SalesPurchaseDetailsReport(object):
 				totals['project'] = ", ".join(projects)
 
 			if 'item_code' in grouped_by:
+				totals['item_name'] = data[0].get('item_name')
 				totals['group_doctype'] = "Item Group"
 				totals['group'] = data[0].get('item_group')
-				totals['item_name'] = data[0].get('item_name')
+				totals['brand'] = data[0].get('brand')
+
+			if group_field in ('applies_to_item', 'applies_to_variant_of'):
+				totals['item_name'] = frappe.db.get_value("Item", group_value, 'item_name', cache=1) if group_value else None
+				totals['group_doctype'] = "Item Group"
+				totals['group'] = frappe.db.get_value("Item", group_value, 'item_group', cache=1) if group_value else None
+				totals['brand'] = frappe.db.get_value("Item", group_value, 'brand', cache=1) if group_value else None
 
 			if group_field == 'party':
 				totals['group_doctype'] = data[0].get("party_group_dt")
@@ -344,6 +353,8 @@ class SalesPurchaseDetailsReport(object):
 			"party": self.filters.party_type,
 			"voucher_no": self.filters.doctype,
 			"item_code": "Item",
+			"applies_to_item": "Item",
+			"applies_to_variant_of": "Item",
 		}
 
 		if group_field == ("item_code", "item_nane", "uom", "voucher_no") and data:
@@ -440,7 +451,16 @@ class SalesPurchaseDetailsReport(object):
 			if is_template:
 				conditions.append("im.variant_of=%(item_code)s")
 			else:
-				conditions.append("im.item_code=%(item_code)s")
+				conditions.append("im.name=%(item_code)s")
+
+		if self.filters.get("applies_to_item"):
+			is_template = frappe.db.get_value("Item", self.filters.get('applies_to_item'), 'has_variants')
+			if is_template:
+				self.filters.applies_to_items = [self.filters.applies_to_item]
+				self.filters.applies_to_items += [d.name for d in frappe.get_all("Item", {'variant_of': self.filters.applies_to_item})]
+				conditions.append("s.applies_to_item in %(applies_to_items)s")
+			else:
+				conditions.append("s.applies_to_item = %(applies_to_item)s")
 
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
