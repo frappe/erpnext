@@ -389,6 +389,7 @@ class Company(NestedSet):
 			"capital_work_in_progress_account": "Capital Work in Progress",
 			"asset_received_but_not_billed": "Asset Received But Not Billed",
 			"expenses_included_in_asset_valuation": "Expenses Included In Asset Valuation",
+			"default_expense_account": "Cost of Goods Sold",
 		}
 
 		if self.enable_perpetual_inventory:
@@ -398,7 +399,6 @@ class Company(NestedSet):
 					"default_inventory_account": "Stock",
 					"stock_adjustment_account": "Stock Adjustment",
 					"expenses_included_in_valuation": "Expenses Included In Valuation",
-					"default_expense_account": "Cost of Goods Sold",
 				}
 			)
 
