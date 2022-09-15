@@ -201,17 +201,29 @@ class TestAsset(AssetSetup):
 		)
 
 		post_depreciation_entries(date=add_months(purchase_date, 2))
+		asset.load_from_db()
+
+		accumulated_depr_amount = flt(
+			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("gross_purchase_amount"),
+		)
+		self.assertEquals(accumulated_depr_amount, 18000.0)
 
 		scrap_asset(asset.name)
-
 		asset.load_from_db()
-		self.assertEqual(asset.status, "Scrapped")
-		self.assertTrue(asset.journal_entry_for_scrap)
 
+		accumulated_depr_amount = flt(
+			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("gross_purchase_amount"),
+		)
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
 			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
+		self.assertEquals(accumulated_depr_amount, 18000.00 + pro_rata_amount)
+
+		self.assertEqual(asset.status, "Scrapped")
+		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
 			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
@@ -232,6 +244,12 @@ class TestAsset(AssetSetup):
 		asset.load_from_db()
 		self.assertFalse(asset.journal_entry_for_scrap)
 		self.assertEqual(asset.status, "Partially Depreciated")
+
+		accumulated_depr_amount = flt(
+			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("gross_purchase_amount"),
+		)
+		self.assertEquals(accumulated_depr_amount, 18000.0)
 
 	def test_gle_made_by_asset_sale(self):
 		date = nowdate()
