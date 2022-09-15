@@ -106,10 +106,9 @@ frappe.provide('frappe.setup');
 
 export default {
 	name: 'Onboarding',
-	props: ["modules", "regional_data"],
+	props: ["modules", "regional_data", "language"],
 	data() {
 		return {
-			language: "en",
 			CurrentStep: 1,
 			selectedDomain: '',
 			company_name: __("My Company"),
@@ -255,8 +254,8 @@ export default {
 									language:  this.slide_1.get_value('language')
 								},
 								callback: function (r) {
-									me.language = r.message;
-									me.make_slides();
+									console.log("Reloaded......");
+									window.location.reload();
 								},
 							});
 						}

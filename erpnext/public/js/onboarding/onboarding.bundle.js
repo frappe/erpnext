@@ -4,7 +4,7 @@ frappe.provide('erpnext.ui');
 
 
 erpnext.ui.Onboarding = class {
-	constructor({wrapper, page, module_data, regional_data}) {
+	constructor({wrapper, page, module_data, regional_data, language}) {
 		this.$wrapper = wrapper;
 		let $container = $('<div>');
 		$container.appendTo(this.$wrapper);
@@ -17,7 +17,8 @@ erpnext.ui.Onboarding = class {
 			render: h => h(Onboarding, {
 				props: {
 					modules: module_data,
-					regional_data: regional_data
+					regional_data: regional_data,
+					language: language
 				}
 			}),
 		});

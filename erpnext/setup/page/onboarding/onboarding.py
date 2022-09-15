@@ -15,7 +15,7 @@ def get_onboarding_data():
 
 	regional_data = get_country_timezone_info()
 
-	return {"workspaces": workspaces, "regional_data": regional_data}
+	return {"workspaces": workspaces, "regional_data": regional_data, "language": frappe.local.lang}
 
 
 @frappe.whitelist()
