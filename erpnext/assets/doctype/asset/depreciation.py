@@ -297,7 +297,16 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 				frappe.flags.is_reverse_depr_entry = False
 				asset.flags.ignore_validate_update_after_submit = True
 				schedule.journal_entry = None
+				depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
+				asset.finance_books[0].value_after_depreciation += depreciation_amount
 				asset.save()
+
+
+def get_depreciation_amount_in_je(journal_entry):
+	if journal_entry.accounts[0].debit_in_account_currency:
+		return journal_entry.accounts[0].debit_in_account_currency
+	else:
+		return journal_entry.accounts[0].credit_in_account_currency
 
 
 # if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
