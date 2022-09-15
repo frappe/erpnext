@@ -42,7 +42,7 @@ class VehicleServiceTrackingReport(object):
 				p.insurance_company, p.insurance_company_name,
 				p.applies_to_vehicle, p.service_advisor, p.service_manager,
 				p.applies_to_item, p.applies_to_item_name, p.applies_to_variant_of, p.applies_to_variant_of_name,
-				p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered,
+				p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered, p.vehicle_color,
 				p.vehicle_received_date, p.vehicle_received_time,
 				timestamp(p.vehicle_received_date, p.vehicle_received_time) as vehicle_received_dt,
 				p.vehicle_delivered_date, p.vehicle_delivered_time,
@@ -76,6 +76,11 @@ class VehicleServiceTrackingReport(object):
 			# Unregistered
 			if not d.vehicle_license_plate and d.vehicle_unregistered:
 				d.vehicle_license_plate = _('Unreg')
+
+			# Age
+			if d.vehicle_received_date:
+				end_date = d.vehicle_delivered_date or self.filters.to_date
+				d.age = (getdate(end_date) - getdate(d.vehicle_received_date)).days or 0
 
 			# Is Late
 			self.set_late_or_early(d)
@@ -198,16 +203,23 @@ class VehicleServiceTrackingReport(object):
 			{"label": _("Reg No"), "fieldname": "vehicle_license_plate", "fieldtype": "Data", "width": 80},
 			{"label": _("Model"), "fieldname": "applies_to_variant_of_name", "fieldtype": "Data", "width": 120},
 			{"label": _("Variant Code"), "fieldname": "applies_to_item", "fieldtype": "Link", "options": "Item", "width": 120},
+			{"label": _("Age"), "fieldname": "age", "fieldtype": "Int", "width": 50},
 			{"label": _("Service Advisor"), "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person", "width": 120},
 			{"label": _("Voice of Customer"), "fieldname": "project_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Project Type"), "fieldname": "project_type", "fieldtype": "Link", "options": "Project Type", "width": 100},
 			{"label": _("Bill Amount"), "fieldname": "customer_billable_amount", "fieldtype": "Currency", "options": "Company:company:default_currency", "width": 90},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 130},
 			{"label": _("Contact #"), "fieldname": "contact_mobile", "fieldtype": "Data", "width": 100},
+			{"label": _("Insurance Company"), "fieldname": "insurance_company_name", "fieldtype": "Data", "width": 130},
+			{'label': _("Status"), 'fieldname': 'project_status', 'fieldtype': 'Data', 'width': 100},
 			{"label": _("Received Date/Time"), "fieldname": "vehicle_received_dt_fmt", "fieldtype": "Data", "width": 135},
 			{"label": _("Promised Date/Time"), "fieldname": "expected_delivery_dt_fmt", "fieldtype": "Data", "width": 135},
 			{"label": _("Ready Date/Time"), "fieldname": "ready_to_close_dt_fmt", "fieldtype": "Data", "width": 135},
 			{"label": _("Delivered Date/Time"), "fieldname": "vehicle_delivered_dt_fmt", "fieldtype": "Data", "width": 135},
+			{"label": _("Chassis No"), "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "width": 150},
+			{"label": _("Engine No"), "fieldname": "vehicle_engine_no", "fieldtype": "Data", "width": 115},
+			{"label": _("Color"), "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
+			{"label": _("Workshop"), "fieldname": "project_workshop", "fieldtype": "Link", "options": "Project Workshop", "width": 100},
 		]
 
 		return columns
