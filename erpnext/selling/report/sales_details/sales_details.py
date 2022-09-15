@@ -10,6 +10,7 @@ from erpnext.accounts.report.financial_statements import get_cost_centers_with_c
 from frappe.desk.query_report import group_report_data
 from six import iteritems, string_types
 
+
 class SalesPurchaseDetailsReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
@@ -23,9 +24,8 @@ class SalesPurchaseDetailsReport(object):
 		self.date_field = 'transaction_date' \
 			if self.filters.doctype in ['Sales Order', 'Purchase Order'] else 'posting_date'
 
-		if not self.filters.get("company"):
-			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
-		self.company_currency = frappe.get_cached_value('Company', self.filters.get("company"), "default_currency")
+		company = self.filters.get('company') or frappe.db.get_single_value('Global Defaults', 'default_company')
+		self.company_currency = frappe.get_cached_value('Company', company, "default_currency") if company else None
 
 		self.amount_fields = []
 		self.rate_fields = []
@@ -133,7 +133,7 @@ class SalesPurchaseDetailsReport(object):
 			left join `tabItem` im on im.name = i.item_code
 			{supplier_join}
 			{sales_person_join}
-			where s.docstatus = 1 and s.company = %(company)s
+			where s.docstatus = 1
 				and s.{date_field} between %(from_date)s and %(to_date)s
 				{is_opening_condition} {filter_conditions}
 			group by s.name, i.name
@@ -170,7 +170,7 @@ class SalesPurchaseDetailsReport(object):
 				left join `tabItem` im on im.name = i.item_code
 				{supplier_join}
 				{sales_person_join}
-				where s.docstatus = 1 and s.company = %(company)s 
+				where s.docstatus = 1
 					and sp.parent = s.name and sp.parenttype = %(doctype)s
 					and s.{date_field} between %(from_date)s and %(to_date)s
 					{is_opening_condition} {filter_conditions}
@@ -429,6 +429,9 @@ class SalesPurchaseDetailsReport(object):
 
 	def get_conditions(self):
 		conditions = []
+
+		if self.filters.get("company"):
+			conditions.append("s.company = %(company)s")
 
 		if self.filters.get("customer"):
 			conditions.append("s.customer=%(customer)s")

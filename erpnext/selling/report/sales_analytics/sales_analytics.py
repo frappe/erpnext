@@ -8,6 +8,7 @@ from frappe.utils import getdate, flt, add_to_date, add_days, cstr
 from six import iteritems, string_types
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext import get_default_currency
 
 def execute(filters=None):
 	return Analytics(filters).run()
@@ -74,7 +75,10 @@ class Analytics(object):
 			})
 
 	def get_data(self):
-		self.company_currency = frappe.get_cached_value('Company', self.filters.get("company"), "default_currency")
+		if self.filters.get('company'):
+			self.company_currency = frappe.get_cached_value('Company', self.filters.get("company"), "default_currency")
+		else:
+			self.company_currency = get_default_currency()
 
 		if self.filters.tree_type == 'Customer':
 			self.get_entries("s.customer", "s.customer_name")
@@ -135,7 +139,7 @@ class Analytics(object):
 			left join `tabItem` im on im.name = i.item_code
 			{supplier_join}
 			{sales_team_join}
-			where s.docstatus = 1 and s.company = %(company)s
+			where s.docstatus = 1
 				and s.{date_field} between %(from_date)s and %(to_date)s
 				{is_opening_condition} {filter_conditions}
 		""".format(
@@ -176,6 +180,9 @@ class Analytics(object):
 
 	def get_conditions(self):
 		conditions = []
+
+		if self.filters.get("company"):
+			conditions.append("s.company = %(company)s")
 
 		if self.filters.get("customer"):
 			conditions.append("s.customer=%(customer)s")

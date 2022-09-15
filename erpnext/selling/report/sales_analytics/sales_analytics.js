@@ -61,7 +61,7 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
+			bold: 1
 		},
 		{
 			fieldname: "transaction_type",
