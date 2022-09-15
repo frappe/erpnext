@@ -388,5 +388,4 @@ def get_chart_data(filters, columns, data):
 			],
 		},
 		"type": "bar",
-		"fieldtype": "Currency"
 	}
