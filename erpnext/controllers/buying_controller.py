@@ -6,6 +6,7 @@ import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.utils import cint, cstr, flt, getdate
+from frappe.utils.data import nowtime
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import get_party_details
@@ -289,12 +290,16 @@ class BuyingController(SubcontractingController):
 				# Get outgoing rate based on original item cost based on valuation method
 
 				if not d.get(frappe.scrub(ref_doctype)):
+					posting_time = self.get("posting_time")
+					if not posting_time and self.doctype == "Purchase Order":
+						posting_time = nowtime()
+
 					outgoing_rate = get_incoming_rate(
 						{
 							"item_code": d.item_code,
 							"warehouse": d.get("from_warehouse"),
 							"posting_date": self.get("posting_date") or self.get("transation_date"),
-							"posting_time": self.get("posting_time"),
+							"posting_time": posting_time,
 							"qty": -1 * flt(d.get("stock_qty")),
 							"serial_no": d.get("serial_no"),
 							"batch_no": d.get("batch_no"),
