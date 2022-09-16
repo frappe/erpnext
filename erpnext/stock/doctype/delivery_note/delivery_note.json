@@ -490,7 +490,6 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule",
-   "no_copy": 1,
    "permlevel": 1,
    "print_hide": 1
   },
@@ -1336,7 +1335,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-10 03:52:04.197415",
+ "modified": "2022-09-16 17:46:17.701904",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
