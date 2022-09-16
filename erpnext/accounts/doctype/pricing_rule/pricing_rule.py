@@ -324,7 +324,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if isinstance(pricing_rule, str):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
-				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
+				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
 
 			if pricing_rule.get("suggestion"):
 				continue
@@ -337,7 +337,6 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
 				item_details.update(
 					{
-						"apply_rule_on_other_items": json.dumps(pricing_rule.apply_rule_on_other_items),
 						"price_or_product_discount": pricing_rule.price_or_product_discount,
 						"apply_rule_on": (
 							frappe.scrub(pricing_rule.apply_rule_on_other)
@@ -346,6 +345,9 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 						),
 					}
 				)
+
+				if pricing_rule.apply_rule_on_other_items:
+					item_details["apply_rule_on_other_items"] = json.dumps(pricing_rule.apply_rule_on_other_items)
 
 			if pricing_rule.coupon_code_based == 1 and args.coupon_code == None:
 				return item_details
@@ -492,7 +494,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 			)
 
 		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
-			items = get_pricing_rule_items(pricing_rule)
+			items = get_pricing_rule_items(pricing_rule, other_items=True)
 			item_details.apply_on = (
 				frappe.scrub(pricing_rule.apply_rule_on_other)
 				if pricing_rule.apply_rule_on_other
