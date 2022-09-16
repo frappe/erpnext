@@ -59,14 +59,14 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					}
 
 					me.update_table(data).then(row => {
-						row ? resolve(row) : reject();
-					});
+						resolve(row);
+					}).catch(() => reject());
 				});
 		});
 	}
 
 	update_table(data) {
-		return new Promise(resolve => {
+		return new Promise((resolve, reject) => {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
 			const {item_code, barcode, batch_no, serial_no, uom} = data;
@@ -77,6 +77,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				if (this.dont_allow_new_row) {
 					this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
 					this.clean_up();
+					reject();
 					return;
 				}
 
@@ -88,6 +89,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			if (this.is_duplicate_serial_no(row, serial_no)) {
 				this.clean_up();
+				reject();
 				return;
 			}
 
