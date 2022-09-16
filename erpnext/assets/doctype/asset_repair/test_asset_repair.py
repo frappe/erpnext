@@ -130,6 +130,7 @@ class TestAssetRepair(unittest.TestCase):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
 
 		asset_category = frappe.get_doc("Asset Category", "Computers")
+		asset_category.enable_cwip_accounting = 0
 		asset_category.append(
 			"accounts",
 			{
