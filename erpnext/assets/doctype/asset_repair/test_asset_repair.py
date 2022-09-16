@@ -129,6 +129,18 @@ class TestAssetRepair(unittest.TestCase):
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
 
+		asset_category = frappe.get_doc("Asset Category", "Computers")
+		asset_category.append(
+			"accounts",
+			{
+				"company_name": "_Test Company with perpetual inventory",
+				"fixed_asset_account": "_Test Fixed Asset - TCP1",
+				"accumulated_depreciation_account": "_Test Accumulated Depreciations - TCP1",
+				"depreciation_expense_account": "_Test Depreciations - TCP1",
+			},
+		)
+		asset_category.save()
+
 		asset_repair = create_asset_repair(
 			capitalize_repair_cost=1,
 			stock_consumption=1,
