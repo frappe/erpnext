@@ -37,7 +37,7 @@ class Account(NestedSet):
 	def autoname(self):
 		from erpnext.accounts.utils import get_autoname_with_number
 
-		self.name = get_autoname_with_number(self.account_number, self.account_name, None, self.company)
+		self.name = get_autoname_with_number(self.account_number, self.account_name, self.company)
 
 	def validate(self):
 		from erpnext.accounts.utils import validate_field_number

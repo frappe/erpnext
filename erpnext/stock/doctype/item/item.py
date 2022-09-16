@@ -945,7 +945,12 @@ class Item(Document):
 			if doctype == "Product Bundle":
 				filters = {"new_item_code": self.name}
 
-			if doctype in (
+				if linked_doc := frappe.db.get_value(
+					doctype, filters, ["new_item_code as docname"], as_dict=True
+				):
+					return linked_doc.update({"doctype": doctype})
+
+			elif doctype in (
 				"Purchase Invoice Item",
 				"Sales Invoice Item",
 			):
