@@ -21,11 +21,8 @@ from frappe.utils import (
 	nowdate,
 )
 from frappe.utils.csvutils import build_csv_response
-<<<<<<< HEAD
-from six import iteritems
-=======
 from pypika.terms import ExistsCriterion
->>>>>>> b8cf3b4c77 (refactor: rewrite Production Plan queries in QB)
+from six import iteritems
 
 from erpnext.manufacturing.doctype.bom.bom import get_children, validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -874,35 +871,6 @@ def get_subitems(
 	parent_qty,
 	planned_qty=1,
 ):
-<<<<<<< HEAD
-	items = frappe.db.sql(
-		"""
-		SELECT
-			bom_item.item_code, default_material_request_type, item.item_name,
-			ifnull(%(parent_qty)s * sum(bom_item.stock_qty/ifnull(bom.quantity, 1)) * %(planned_qty)s, 0) as qty,
-			item.is_sub_contracted_item as is_sub_contracted, bom_item.source_warehouse,
-			item.default_bom as default_bom, bom_item.description as description,
-			bom_item.stock_uom as stock_uom, item.min_order_qty as min_order_qty, item.safety_stock as safety_stock,
-			item_default.default_warehouse, item.purchase_uom, item_uom.conversion_factor
-		FROM
-			`tabBOM Item` bom_item
-			JOIN `tabBOM` bom ON bom.name = bom_item.parent
-			JOIN tabItem item ON bom_item.item_code = item.name
-			LEFT JOIN `tabItem Default` item_default
-				ON item.name = item_default.parent and item_default.company = %(company)s
-			LEFT JOIN `tabUOM Conversion Detail` item_uom
-				ON item.name = item_uom.parent and item_uom.uom = item.purchase_uom
-		where
-			bom.name = %(bom)s
-			and bom_item.docstatus < 2
-			and item.is_stock_item in (1, {0})
-		group by bom_item.item_code""".format(
-			0 if include_non_stock_items else 1
-		),
-		{"bom": bom_no, "parent_qty": parent_qty, "planned_qty": planned_qty, "company": company},
-		as_dict=1,
-	)
-=======
 	bom_item = frappe.qb.DocType("BOM Item")
 	bom = frappe.qb.DocType("BOM")
 	item = frappe.qb.DocType("Item")
@@ -944,7 +912,6 @@ def get_subitems(
 		)
 		.groupby(bom_item.item_code)
 	).run(as_dict=True)
->>>>>>> b8cf3b4c77 (refactor: rewrite Production Plan queries in QB)
 
 	for d in items:
 		if not data.get("include_exploded_items") or not d.default_bom:
@@ -1084,28 +1051,6 @@ def get_sales_orders(self):
 			open_so_query = open_so_query.where(so[so_field] == self.get(field))
 
 	if self.item_code and frappe.db.exists("Item", self.item_code):
-<<<<<<< HEAD
-		bom_item = self.get_bom_item() or bom_item
-		item_filter += " and so_item.item_code = %(item_code)s"
-
-	open_so = frappe.db.sql(
-		f"""
-		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
-		from `tabSales Order` so, `tabSales Order Item` so_item
-		where so_item.parent = so.name
-			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
-			and so.company = %(company)s
-			and so_item.qty > so_item.work_order_qty {so_filter} {item_filter}
-			and (exists (select name from `tabBOM` bom where {bom_item}
-					and bom.is_active = 1)
-				or exists (select name from `tabPacked Item` pi
-					where pi.parent = so.name and pi.parent_item = so_item.item_code
-						and exists (select name from `tabBOM` bom where bom.item=pi.item_code
-							and bom.is_active = 1)))
-		""",
-		self.as_dict(),
-		as_dict=1,
-=======
 		open_so_query = open_so_query.where(so_item.item_code == self.item_code)
 		open_so_subquery1 = open_so_subquery1.where(
 			self.get_bom_item_condition() or bom.item == so_item.item_code
@@ -1113,7 +1058,6 @@ def get_sales_orders(self):
 
 	open_so_query = open_so_query.where(
 		(ExistsCriterion(open_so_subquery1) | ExistsCriterion(open_so_subquery2))
->>>>>>> b8cf3b4c77 (refactor: rewrite Production Plan queries in QB)
 	)
 
 	open_so = open_so_query.run(as_dict=True)
