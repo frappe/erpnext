@@ -344,23 +344,25 @@ def get_advance_vouchers(
 
 
 def get_taxes_deducted_on_advances_allocated(inv, tax_details):
-	advances = [d.reference_name for d in inv.get("advances")]
 	tax_info = []
 
-	if advances:
-		pe = frappe.qb.DocType("Payment Entry").as_("pe")
-		at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+	if inv.get("advances"):
+		advances = [d.reference_name for d in inv.get("advances")]
 
-		tax_info = (
-			frappe.qb.from_(at)
-			.inner_join(pe)
-			.on(pe.name == at.parent)
-			.select(at.parent, at.name, at.tax_amount, at.allocated_amount)
-			.where(pe.tax_withholding_category == tax_details.get("tax_withholding_category"))
-			.where(at.parent.isin(advances))
-			.where(at.account_head == tax_details.account_head)
-			.run(as_dict=True)
-		)
+		if advances:
+			pe = frappe.qb.DocType("Payment Entry").as_("pe")
+			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+
+			tax_info = (
+				frappe.qb.from_(at)
+				.inner_join(pe)
+				.on(pe.name == at.parent)
+				.select(at.parent, at.name, at.tax_amount, at.allocated_amount)
+				.where(pe.tax_withholding_category == tax_details.get("tax_withholding_category"))
+				.where(at.parent.isin(advances))
+				.where(at.account_head == tax_details.account_head)
+				.run(as_dict=True)
+			)
 
 	return tax_info
 
