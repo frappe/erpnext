@@ -919,6 +919,16 @@ class StockEntry(StockController):
 					)
 					if order_rm_detail:
 						se_item.db_set(self.subcontract_data.rm_detail_field, order_rm_detail)
+					else:
+						if not se_item.allow_alternative_item:
+							frappe.throw(
+								_("Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}").format(
+									se_item.idx,
+									se_item.item_code,
+									self.subcontract_data.order_doctype,
+									self.get(self.subcontract_data.order_field),
+								)
+							)
 		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
 			for row in self.items:
 				if not row.subcontracted_item:
