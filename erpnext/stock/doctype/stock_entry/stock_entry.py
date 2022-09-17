@@ -2606,6 +2606,7 @@ def get_items_from_subcontracting_order(source_name, target_doc=None):
 					"uom": item.stock_uom,
 					"stock_uom": item.stock_uom,
 					"conversion_factor": 1,
+					"sco_rm_detail": item.name,
 				},
 			)
 
