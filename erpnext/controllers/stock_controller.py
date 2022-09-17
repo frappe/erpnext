@@ -75,10 +75,11 @@ class StockController(AccountsController):
 
 							sle = self.update_stock_ledger_entries(sle)
 						if self.doctype == "Sales Invoice":
+							company = frappe.get_doc("Company", self.company)
 							if  item_row.inventory_default_values != None:
 								gl_list.append(self.get_gl_dict({
 									"account": item_row.inventory_default_values,
-									"against": item_row.inventory_default_values,
+									"against": item_row.sales_default_values,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"debit": flt(sle.stock_value_difference, 2),
@@ -86,8 +87,8 @@ class StockController(AccountsController):
 								}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 							else:
 								gl_list.append(self.get_gl_dict({
-									"account": warehouse_account[sle.warehouse]["account"],
-									"against": item_row.expense_account,
+									"account": company.default_inventory_account,
+									"against": company.default_expense_account,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"debit": flt(sle.stock_value_difference, 2),
@@ -98,7 +99,7 @@ class StockController(AccountsController):
 								# to target warehouse / expense account
 								gl_list.append(self.get_gl_dict({
 									"account": item_row.sales_default_values,
-									"against": item_row.sales_default_values,
+									"against": item_row.inventory_default_values,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"credit": flt(sle.stock_value_difference, 2),
@@ -107,8 +108,8 @@ class StockController(AccountsController):
 								}, item=item_row))
 							else:
 								gl_list.append(self.get_gl_dict({
-									"account": item_row.expense_account,
-									"against": warehouse_account[sle.warehouse]["account"],
+									"account": company.default_expense_account,
+									"against": company.default_inventory_account,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"credit": flt(sle.stock_value_difference, 2),
@@ -129,7 +130,7 @@ class StockController(AccountsController):
 							else:
 								gl_list.append(self.get_gl_dict({
 									"account": warehouse_account[sle.warehouse]["account"],
-									"against": item_row.expense_account,
+									"against": company.default_inventory_account,
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",
 									"debit": flt(sle.stock_value_difference, 2),
@@ -149,7 +150,7 @@ class StockController(AccountsController):
 								}, item=item_row))
 							else:
 								gl_list.append(self.get_gl_dict({
-									"account": item_row.expense_account,
+									"account": company.default_inventory_account,
 									"against": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or "Accounting Entry for Stock",

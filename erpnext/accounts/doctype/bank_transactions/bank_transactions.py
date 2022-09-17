@@ -28,17 +28,16 @@ class BankTransactions(Document):
 			if self.bank_deposit:
 				self.amount_data = 0
 				self.amount_data = self.amount_bd
-			
-			if self.docstatus == 0:
-				self.set_transaction_data()
 
-				if self.created_by == None:
-					self.created_by = frappe.session.user
+			self.set_transaction_data()
 
-			if self.docstatus == 1:
-				self.docstatus = 3
-				self.status = "Transit"
-				self.calculate_diferred_account()
+			if self.created_by == None:
+				self.created_by = frappe.session.user
+
+		if self.docstatus == 1:
+			self.docstatus = 3
+			self.status = "Transit"
+			self.calculate_diferred_account()
 
 		# if self.check and self.no_bank_check == None:
 		# 	self.no_bank_check = self.insert_numeration_for_check()
