@@ -138,24 +138,30 @@ class WorkOrderInvoice(Document):
 		fecha_f = datetime.strptime(fecha_final, '%d-%m-%Y')
 
 		fiscal_year = frappe.get_all("Fiscal Year", ["*"], filters = {"year_start_date": [">=", fecha_i], "year_end_date": ["<=", fecha_f]})
+		sales_default_values = None
+		company = frappe.get_doc("Company", self.company)
 		if item.sales_default_values == None:
-			frappe.throw(_("Assign an sales default values in item {}.".format(item.item_code)))
-			
+			sales_default_values = company.default_inventory_account
+		else:
+			sales_default_values =  item.sales_default_values
+		
+		inventory_default_values = None
+		
 		if item.inventory_default_values == None:
-			frappe.throw(_("Assign an inventory default account in item {}.".format(item.item_code)))
-
-		account_currency = get_account_currency(item.sales_default_values)
+			inventory_default_values = company.default_expense_account
+		else:
+			inventory_default_values = item.inventory_default_values
 
 		price = self.set_valuation_rate(item)
 
-		company = frappe.get_doc("Company", self.company)
-
 		amount = price * item.qty
-
+		
+		account_currency = get_account_currency(sales_default_values)
+		
 		doc = frappe.new_doc("GL Entry")
 		doc.posting_date = self.posting_date
 		doc.transaction_date = None
-		doc.account = item.sales_default_values
+		doc.account = sales_default_values
 		doc.party_type = "Customer"
 		doc.party = self.customer
 		doc.cost_center = company.round_off_cost_center
@@ -164,7 +170,7 @@ class WorkOrderInvoice(Document):
 		doc.account_currency = account_currency
 		doc.debit_in_account_currency = amount
 		doc.credit_in_account_currency = 0
-		doc.against = item.sales_default_values
+		doc.against = inventory_default_values
 		doc.against_voucher_type = self.doctype
 		doc.against_voucher = self.name
 		doc.voucher_type =  self.doctype
@@ -182,12 +188,12 @@ class WorkOrderInvoice(Document):
 		# doc.docstatus = 1
 		doc.insert()
 
-		account_currency = get_account_currency( item.inventory_default_values)
+		account_currency = get_account_currency(inventory_default_values)
 
 		doc = frappe.new_doc("GL Entry")
 		doc.posting_date = self.posting_date
 		doc.transaction_date = None
-		doc.account = item.inventory_default_values
+		doc.account = inventory_default_values
 		doc.party_type = "Customer"
 		doc.party = self.customer
 		doc.cost_center = company.round_off_cost_center
@@ -196,7 +202,7 @@ class WorkOrderInvoice(Document):
 		doc.account_currency = account_currency
 		doc.debit_in_account_currency = 0
 		doc.credit_in_account_currency = amount
-		doc.against = item.inventory_default_values
+		doc.against = sales_default_values
 		doc.against_voucher_type = self.doctype
 		doc.against_voucher = self.name
 		doc.voucher_type =  self.doctype
