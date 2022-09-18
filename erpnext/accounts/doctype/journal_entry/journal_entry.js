@@ -4,6 +4,7 @@
 frappe.provide("erpnext.accounts");
 frappe.provide("erpnext.journal_entry");
 
+{% include "erpnext/public/js/controllers/cheque_details.js" %};
 
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
@@ -366,16 +367,26 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
 
 cur_frm.cscript.update_totals = function(doc) {
-	var td=0.0; var tc =0.0;
+	var td=0.0; var tc =0.0; var tax_amount=0.0, tax_dr=0.0, tax_cr=0.0;
 	var accounts = doc.accounts || [];
 	for(var i in accounts) {
 		td += flt(accounts[i].debit, precision("debit", accounts[i]));
 		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
+		if(accounts[i].add_deduct_tax){
+			tax_amount = flt(accounts[i].tax_amount);
+			if(accounts[i].add_deduct_tax == "Add"){
+				tax_cr += (flt(accounts[i].credit)) ? tax_amount : 0;
+				tax_dr += (flt(accounts[i].debit)) ? tax_amount : 0;
+			} else {
+				tax_dr += (flt(accounts[i].credit)) ? tax_amount : 0;
+				tax_cr += (flt(accounts[i].debit)) ? tax_amount : 0;
+			}
+		}
 	}
 	var doc = locals[doc.doctype][doc.name];
-	doc.total_debit = td;
-	doc.total_credit = tc;
-	doc.difference = flt((td - tc), precision("difference"));
+	doc.total_debit = td + tax_dr;
+	doc.total_credit = tc + tax_cr;
+	doc.difference = flt(((td+tax_dr) - (tc+tax_cr)), precision("difference"));
 	refresh_many(['total_debit','total_credit','difference']);
 }
 
@@ -438,6 +449,27 @@ frappe.ui.form.on("Journal Entry Account", {
 		}
 
 		erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+		erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
+	},
+
+	// following methods added by SHIV on 2022/09/17
+	add_deduct_tax: function(frm, cdt, cdn) {
+		erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
+		cur_frm.cscript.update_totals(frm.doc);
+	},
+
+	rate: function(frm, cdt, cdn) {
+		erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
+		cur_frm.cscript.update_totals(frm.doc);
+	},
+	
+	taxable_amount_in_account_currency: function(frm, cdt, cdn){
+		erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
+		cur_frm.cscript.update_totals(frm.doc);
+	},
+
+	tax_amount: function(frm, cdt, cdn){
+		cur_frm.cscript.update_totals(frm.doc);
 	}
 })
 
@@ -479,6 +511,30 @@ $.extend(erpnext.journal_entry, {
 		cur_frm.cscript.update_totals(frm.doc);
 	},
 
+	// added by SHIV on 2022/09/17
+	set_tax_in_company_currency: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn], tax_amount = 0.0;
+
+		if(!flt(row.taxable_amount_in_account_currency)){
+			frappe.model.set_value(cdt, cdn, "taxable_amount_in_account_currency",
+				flt(row.debit_in_account_currency) || flt(row.credit_in_account_currency));
+		}
+
+		frappe.model.set_value(cdt, cdn, "taxable_amount",
+			flt(flt(row.taxable_amount_in_account_currency)*row.exchange_rate, precision("taxable_amount", row)));
+
+		tax_amount = flt(row.taxable_amount_in_account_currency) * flt(row.rate) / 100;
+		tax_amount = (row.add_deduct_tax) ? flt(tax_amount) : 0;
+
+		frappe.model.set_value(cdt, cdn, "tax_amount_in_account_currency",
+			flt(tax_amount, precision("tax_amount", row)));
+
+		frappe.model.set_value(cdt, cdn, "tax_amount",
+			flt(flt(tax_amount)*row.exchange_rate, precision("tax_amount", row)));
+
+		cur_frm.cscript.update_totals(frm.doc);
+	},
+
 	set_exchange_rate: function(frm, cdt, cdn) {
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		var row = locals[cdt][cdn];
@@ -486,6 +542,7 @@ $.extend(erpnext.journal_entry, {
 		if(row.account_currency == company_currency || !frm.doc.multi_currency) {
 			row.exchange_rate = 1;
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+			erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
 		} else if (!row.exchange_rate || row.exchange_rate == 1 || row.account_type == "Bank") {
 			frappe.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
@@ -504,11 +561,13 @@ $.extend(erpnext.journal_entry, {
 					if(r.message) {
 						row.exchange_rate = r.message;
 						erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+						erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
 					}
 				}
 			})
 		} else {
 			erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
+			erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
 		}
 		refresh_field("exchange_rate", cdn, "accounts");
 	},

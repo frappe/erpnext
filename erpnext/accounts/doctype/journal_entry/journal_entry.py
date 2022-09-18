@@ -616,11 +616,20 @@ class JournalEntry(AccountsController):
 	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 		for d in self.get("accounts"):
+			tax_amount, tax_dr, tax_cr = 0, 0, 0
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit"))
+			if d.add_deduct_tax:
+				tax_amount = flt(d.tax_amount)
+				if(d.add_deduct_tax == "Add"):
+					tax_cr = tax_amount if flt(d.credit) else 0
+					tax_dr = tax_amount if flt(d.debit) else 0
+				else:
+					tax_dr = tax_amount if flt(d.credit) else 0
+					tax_cr = tax_amount if flt(d.debit) else 0
+			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit")) + flt(tax_dr)
+			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit")) + flt(tax_cr)
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - flt(
 			self.total_credit, self.precision("total_credit")
@@ -656,9 +665,20 @@ class JournalEntry(AccountsController):
 			d.credit_in_account_currency = flt(
 				d.credit_in_account_currency, d.precision("credit_in_account_currency")
 			)
-
+			
 			d.debit = flt(d.debit_in_account_currency * flt(d.exchange_rate), d.precision("debit"))
 			d.credit = flt(d.credit_in_account_currency * flt(d.exchange_rate), d.precision("credit"))
+
+			# following code added by SHIV on 2022/09/17
+			d.taxable_amount_in_account_currency = flt(d.taxable_amount_in_account_currency) if flt(d.taxable_amount_in_account_currency) \
+				else (flt(d.debit_in_account_currency) or flt(d.credit_in_account_currency))
+			d.taxable_amount_in_account_currency = flt(d.taxable_amount_in_account_currency, d.precision("taxable_amount_in_account_currency"))
+			d.taxable_amount = flt(d.taxable_amount_in_account_currency * flt(d.exchange_rate), d.precision("taxable_amount"))
+
+			tax_amount = flt(d.taxable_amount_in_account_currency) * flt(d.rate) / 100
+			tax_amount = tax_amount if d.add_deduct_tax else 0
+			d.tax_amount_in_account_currency = flt(tax_amount, d.precision("tax_amount_in_account_currency"))
+			d.tax_amount = flt(d.tax_amount_in_account_currency * flt(d.exchange_rate), d.precision("tax_amount"))
 
 	def set_exchange_rate(self):
 		for d in self.get("accounts"):
@@ -792,34 +812,60 @@ class JournalEntry(AccountsController):
 				r = [x for x in r if x]
 				remarks = "\n".join(r)
 
-				gl_map.append(
-					self.get_gl_dict(
-						{
-							"account": d.account,
-							"party_type": d.party_type,
-							"due_date": self.due_date,
-							"party": d.party,
-							"against": d.against_account,
-							"debit": flt(d.debit, d.precision("debit")),
-							"credit": flt(d.credit, d.precision("credit")),
-							"account_currency": d.account_currency,
-							"debit_in_account_currency": flt(
-								d.debit_in_account_currency, d.precision("debit_in_account_currency")
-							),
-							"credit_in_account_currency": flt(
-								d.credit_in_account_currency, d.precision("credit_in_account_currency")
-							),
-							"against_voucher_type": d.reference_type,
-							"against_voucher": d.reference_name,
-							"remarks": remarks,
-							"voucher_detail_no": d.reference_detail_no,
-							"cost_center": d.cost_center,
-							"project": d.project,
-							"finance_book": self.finance_book,
-						},
-						item=d,
+				with_tax = [d.account]
+				if d.tax_account and flt(d.rate) and flt(d.tax_amount):
+					with_tax.append(d.tax_account)
+
+				for acc in with_tax:
+					tax_account = (acc == d.tax_account)
+					tax_amount_in_account_currency, tax_amount = 0, 0
+					tax_amount_in_account_currency_dr, tax_amount_in_account_currency_cr = 0, 0
+					tax_amount_dr, tax_amount_cr = 0, 0
+					if tax_account:
+						tax_amount_in_account_currency = flt(d.tax_amount_in_account_currency)
+						tax_amount = flt(d.tax_amount)
+
+						if(d.add_deduct_tax == "Add"):
+							tax_amount_in_account_currency_cr = tax_amount_in_account_currency if flt(d.credit) else 0
+							tax_amount_in_account_currency_dr = tax_amount_in_account_currency if flt(d.debit) else 0
+
+							tax_amount_cr = tax_amount if flt(d.credit) else 0
+							tax_amount_dr = tax_amount if flt(d.debit) else 0
+						else:
+							tax_amount_in_account_currency_dr = tax_amount_in_account_currency if flt(d.credit) else 0
+							tax_amount_in_account_currency_cr = tax_amount_in_account_currency if flt(d.debit) else 0
+
+							tax_amount_dr = tax_amount if flt(d.credit) else 0
+							tax_amount_cr = tax_amount if flt(d.debit) else 0
+
+					gl_map.append(
+						self.get_gl_dict(
+							{
+								"account": acc,
+								"party_type": d.party_type,
+								"due_date": self.due_date,
+								"party": d.party,
+								"against": d.against_account,
+								"debit": flt(abs(tax_amount_dr), d.precision("tax_amount")) if tax_account \
+									else flt(d.debit, d.precision("debit")),
+								"credit": flt(abs(tax_amount_cr), d.precision("tax_amount")) if tax_account \
+									else flt(d.credit, d.precision("credit")),
+								"account_currency": d.account_currency,
+								"debit_in_account_currency": flt(abs(tax_amount_in_account_currency_dr), d.precision("tax_amount_in_account_currency")) \
+									if tax_account else flt(d.debit_in_account_currency, d.precision("debit_in_account_currency")),
+								"credit_in_account_currency": flt(abs(tax_amount_in_account_currency_cr), d.precision("tax_amount_in_account_currency")) \
+									if tax_account else flt(d.credit_in_account_currency, d.precision("credit_in_account_currency")),
+								"against_voucher_type": d.reference_type,
+								"against_voucher": d.reference_name,
+								"remarks": remarks,
+								"voucher_detail_no": d.reference_detail_no,
+								"cost_center": d.cost_center,
+								"project": d.project,
+								"finance_book": self.finance_book,
+							},
+							item=d,
+						)
 					)
-				)
 		return gl_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
@@ -1423,3 +1469,24 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator" or "System Manager" in user_roles: 
+		return
+
+	return """(
+		exists(select 1
+			from `tabEmployee` as e
+			where e.branch = `tabJournal Entry`.branch
+			and e.user_id = '{user}')
+		or
+		exists(select 1
+			from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
+			where e.user_id = '{user}'
+			and ab.employee = e.name
+			and bi.parent = ab.name
+			and bi.branch = `tabJournal Entry`.branch)
+	)""".format(user=user)

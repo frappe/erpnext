@@ -29,6 +29,15 @@
   "col_break2",
   "credit_in_account_currency",
   "credit",
+  "sb_taxes",
+  "add_deduct_tax",
+  "tax_account",
+  "rate",
+  "col_break_13",
+  "taxable_amount_in_account_currency",
+  "taxable_amount",
+  "tax_amount_in_account_currency",
+  "tax_amount",
   "reference",
   "reference_type",
   "reference_name",
@@ -75,16 +84,19 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "default": ":Company",
    "description": "If Income or Expense",
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Cost Center",
    "oldfieldname": "cost_center",
    "oldfieldtype": "Link",
    "options": "Cost Center",
    "print_hide": 1,
    "print_width": "180px",
+   "reqd": 1,
    "width": "180px"
   },
   {
@@ -93,10 +105,9 @@
   },
   {
    "fieldname": "party_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
+   "fieldtype": "Select",
    "label": "Party Type",
-   "options": "DocType",
+   "options": "\nCustomer\nSupplier\nEmployee",
    "search_index": 1
   },
   {
@@ -255,7 +266,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -275,18 +285,71 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Reference Detail No"
+  },
+  {
+   "fieldname": "sb_taxes",
+   "fieldtype": "Section Break",
+   "label": "Taxes"
+  },
+  {
+   "fieldname": "add_deduct_tax",
+   "fieldtype": "Select",
+   "label": "Add Or Deduct",
+   "options": "\nAdd\nDeduct"
+  },
+  {
+   "fieldname": "tax_account",
+   "fieldtype": "Link",
+   "label": "Tax Account",
+   "mandatory_depends_on": "add_deduct_tax",
+   "options": "Account"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "label": "Rate",
+   "precision": "2"
+  },
+  {
+   "fieldname": "col_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxable_amount",
+   "fieldtype": "Currency",
+   "label": "Taxable Amount in Company Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Amount in Company Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxable_amount_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Taxable Amount in Account Currency"
+  },
+  {
+   "fieldname": "tax_amount_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Tax Amount in Account Currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-30 21:27:32.200299",
+ "modified": "2022-09-17 18:10:05.056312",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
