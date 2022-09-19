@@ -31,12 +31,10 @@ class Lead(SellingController, CRMNote):
 		self.check_email_id_is_unique()
 		self.validate_email_id()
 
-	def before_insert(self):
+	def after_insert(self):
 		self.contact_doc = None
 		if frappe.db.get_single_value("CRM Settings", "auto_creation_of_contact"):
 			self.contact_doc = self.create_contact()
-
-	def after_insert(self):
 		self.link_to_contact()
 
 	def on_update(self):
