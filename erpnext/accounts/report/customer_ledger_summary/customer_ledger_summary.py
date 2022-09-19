@@ -3,10 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-import erpnext
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate
 from erpnext.accounts.utils import get_account_currency
+from erpnext import get_default_currency
 from six import iteritems, itervalues
 
 class PartyLedgerSummaryReport(object):
@@ -14,9 +14,7 @@ class PartyLedgerSummaryReport(object):
 		self.filters = frappe._dict(filters or {})
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
-
-		if not self.filters.get("company"):
-			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
+		self.adjustment_details = frappe._dict()
 
 	def run(self, args):
 		if self.filters.from_date > self.filters.to_date:
@@ -124,7 +122,7 @@ class PartyLedgerSummaryReport(object):
 			}
 		]
 
-		if self.filters.show_deduction_details:
+		if self.adjustment_details and self.filters.show_deduction_details:
 			for account in self.adjustment_details.accounts:
 				columns.append({
 					"label": account,
@@ -138,7 +136,8 @@ class PartyLedgerSummaryReport(object):
 		return columns
 
 	def set_account_currency(self):
-		self.filters["company_currency"] = frappe.get_cached_value('Company', self.filters.company, "default_currency")
+		self.filters["company_currency"] = frappe.get_cached_value('Company', self.filters.company, "default_currency")\
+			if self.filters.company else get_default_currency()
 		self.filters["account_currency"] = self.filters["company_currency"]
 
 		if self.filters.get("account") or self.filters.get('party'):
@@ -212,13 +211,14 @@ class PartyLedgerSummaryReport(object):
 		out = []
 		for party, row in iteritems(self.party_data):
 			if row.opening_balance or row.invoiced_amount or row.paid_amount or row.return_amount or row.closing_amount:
-				total_party_adjustment = sum([amount for amount in itervalues(self.adjustment_details.parties.get(party, {}))])
-				row.paid_amount -= total_party_adjustment
-				row.total_deductions = total_party_adjustment
+				if self.adjustment_details:
+					total_party_adjustment = sum([amount for amount in itervalues(self.adjustment_details.parties.get(party, {}))])
+					row.paid_amount -= total_party_adjustment
+					row.total_deductions = total_party_adjustment
 
-				adjustments = self.adjustment_details.parties.get(party, {})
-				for account in self.adjustment_details.accounts:
-					row["adj_" + scrub(account)] = adjustments.get(account, 0)
+					adjustments = self.adjustment_details.parties.get(party, {})
+					for account in self.adjustment_details.accounts:
+						row["adj_" + scrub(account)] = adjustments.get(account, 0)
 
 				out.append(row)
 
@@ -265,8 +265,13 @@ class PartyLedgerSummaryReport(object):
 		if self.filters.get("account"):
 			conditions.append("account=%(account)s")
 		else:
-			accounts = [d.name for d in frappe.get_all("Account",
-				filters={"account_type": ('in', ['Receivable', 'Payable']), "company": self.filters.company})]
+			account_filters = {
+				"account_type": ('in', ['Receivable', 'Payable'])
+			}
+			if self.filters.get('company'):
+				account_filters["company"] = self.filters.company
+
+			accounts = [d.name for d in frappe.get_all("Account", filters=account_filters)]
 			conditions.append("account in ({0})".format(", ".join([frappe.db.escape(d) for d in accounts])))
 
 		if self.filters.get("cost_center"):
