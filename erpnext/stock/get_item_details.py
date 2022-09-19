@@ -580,12 +580,29 @@ def get_price_list_rate(args, item_doc, out):
 		args.update(pl_details)
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
+## Oblige Rate Check company wise 
+		oblige_rate = 0
+		if args.parenttype == 'Purchase Order' or args.doctype == 'Purchase Order':
+			oblige_rate = flt(frappe.db.get_value('Item Daily Rate Table', {
+                            'category':'Buying Rate','campany':args.company, 'item_code': item_doc.name, 'supplier_code': args.supplier, 'docstatus': '1', 'date': ["<=", frappe.utils.now()]}, 'new_rate'))
 
-		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+		if not oblige_rate and oblige_rate !=0:
+			price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
-		# variant
-		if not price_list_rate and item_doc.variant_of:
-			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+			# variant
+			if not price_list_rate and item_doc.variant_of:
+				price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+
+			
+			out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
+			/ flt(args.conversion_rate)
+		else:
+			out.price_list_rate = oblige_rate
+		#price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+
+		# # variant
+		# if not price_list_rate and item_doc.variant_of:
+		# 	price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
 		# insert in database
 		if not price_list_rate:
