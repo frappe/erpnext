@@ -20,4 +20,3 @@ frappe.pages['point-of-sale'].refresh = function(wrapper) {
 		wrapper.pos.check_opening_entry();
 	}
 };
-
