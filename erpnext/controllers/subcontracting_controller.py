@@ -770,7 +770,7 @@ def get_item_details(items):
 	item = frappe.qb.DocType("Item")
 	item_list = (
 		frappe.qb.from_(item)
-		.select(item.item_code, item.description, item.allow_alternative_item)
+		.select(item.item_code, item.item_name, item.description, item.allow_alternative_item)
 		.where(item.name.isin(items))
 		.run(as_dict=True)
 	)
@@ -783,68 +783,93 @@ def get_item_details(items):
 
 
 @frappe.whitelist()
-def make_rm_stock_entry(subcontract_order, rm_items, order_doctype="Subcontracting Order"):
-	rm_items_list = rm_items
-
-	if isinstance(rm_items, str):
-		rm_items_list = json.loads(rm_items)
-	elif not rm_items:
-		frappe.throw(_("No Items available for transfer"))
-
-	if rm_items_list:
-		fg_items = list(set(item["item_code"] for item in rm_items_list))
-	else:
-		frappe.throw(_("No Items selected for transfer"))
-
+def make_rm_stock_entry(
+	subcontract_order, rm_items=None, order_doctype="Subcontracting Order", target_doc=None
+):
 	if subcontract_order:
 		subcontract_order = frappe.get_doc(order_doctype, subcontract_order)
 
-	if fg_items:
-		items = tuple(set(item["rm_item_code"] for item in rm_items_list))
-		item_wh = get_item_details(items)
+		if not rm_items:
+			if not subcontract_order.supplied_items:
+				frappe.throw(_("No item available for transfer."))
 
-		stock_entry = frappe.new_doc("Stock Entry")
-		stock_entry.purpose = "Send to Subcontractor"
-		if order_doctype == "Purchase Order":
-			stock_entry.purchase_order = subcontract_order.name
-		else:
-			stock_entry.subcontracting_order = subcontract_order.name
-		stock_entry.supplier = subcontract_order.supplier
-		stock_entry.supplier_name = subcontract_order.supplier_name
-		stock_entry.supplier_address = subcontract_order.supplier_address
-		stock_entry.address_display = subcontract_order.address_display
-		stock_entry.company = subcontract_order.company
-		stock_entry.to_warehouse = subcontract_order.supplier_warehouse
-		stock_entry.set_stock_entry_type()
+			rm_items = subcontract_order.supplied_items
 
-		if order_doctype == "Purchase Order":
-			rm_detail_field = "po_detail"
-		else:
-			rm_detail_field = "sco_rm_detail"
+		fg_item_code_list = list(
+			set(item.get("main_item_code") or item.get("item_code") for item in rm_items)
+		)
 
-		for item_code in fg_items:
-			for rm_item_data in rm_items_list:
-				if rm_item_data["item_code"] == item_code:
-					rm_item_code = rm_item_data["rm_item_code"]
-					items_dict = {
-						rm_item_code: {
-							rm_detail_field: rm_item_data.get("name"),
-							"item_name": rm_item_data["item_name"],
-							"description": item_wh.get(rm_item_code, {}).get("description", ""),
-							"qty": rm_item_data["qty"],
-							"from_warehouse": rm_item_data["warehouse"],
-							"stock_uom": rm_item_data["stock_uom"],
-							"serial_no": rm_item_data.get("serial_no"),
-							"batch_no": rm_item_data.get("batch_no"),
-							"main_item_code": rm_item_data["item_code"],
-							"allow_alternative_item": item_wh.get(rm_item_code, {}).get("allow_alternative_item"),
+		if fg_item_code_list:
+			rm_item_code_list = tuple(set(item.get("rm_item_code") for item in rm_items))
+			item_wh = get_item_details(rm_item_code_list)
+
+			field_no_map, rm_detail_field = "purchase_order", "sco_rm_detail"
+			if order_doctype == "Purchase Order":
+				field_no_map, rm_detail_field = "subcontracting_order", "po_detail"
+
+			if target_doc and target_doc.get("items"):
+				target_doc.items = []
+
+			stock_entry = get_mapped_doc(
+				order_doctype,
+				subcontract_order.name,
+				{
+					order_doctype: {
+						"doctype": "Stock Entry",
+						"field_map": {
+							"to_warehouse": "supplier_warehouse",
+						},
+						"field_no_map": [field_no_map],
+						"validation": {
+							"docstatus": ["=", 1],
+						},
+					},
+				},
+				target_doc,
+				ignore_child_tables=True,
+			)
+
+			stock_entry.purpose = "Send to Subcontractor"
+
+			if order_doctype == "Purchase Order":
+				stock_entry.purchase_order = subcontract_order.name
+			else:
+				stock_entry.subcontracting_order = subcontract_order.name
+
+			stock_entry.set_stock_entry_type()
+
+			for fg_item_code in fg_item_code_list:
+				for rm_item in rm_items:
+
+					if rm_item.get("main_item_code") or rm_item.get("item_code") == fg_item_code:
+						rm_item_code = rm_item.get("rm_item_code")
+
+						items_dict = {
+							rm_item_code: {
+								rm_detail_field: rm_item.get("name"),
+								"item_name": rm_item.get("item_name")
+								or item_wh.get(rm_item_code, {}).get("item_name", ""),
+								"description": item_wh.get(rm_item_code, {}).get("description", ""),
+								"qty": rm_item.get("qty")
+								or max(rm_item.get("required_qty") - rm_item.get("total_supplied_qty"), 0),
+								"from_warehouse": rm_item.get("warehouse") or rm_item.get("reserve_warehouse"),
+								"to_warehouse": subcontract_order.supplier_warehouse,
+								"stock_uom": rm_item.get("stock_uom"),
+								"serial_no": rm_item.get("serial_no"),
+								"batch_no": rm_item.get("batch_no"),
+								"main_item_code": fg_item_code,
+								"allow_alternative_item": item_wh.get(rm_item_code, {}).get("allow_alternative_item"),
+							}
 						}
-					}
-					stock_entry.add_to_stock_entry_detail(items_dict)
-		return stock_entry.as_dict()
-	else:
-		frappe.throw(_("No Items selected for transfer"))
-	return subcontract_order.name
+
+						stock_entry.add_to_stock_entry_detail(items_dict)
+
+			if target_doc:
+				return stock_entry
+			else:
+				return stock_entry.as_dict()
+		else:
+			frappe.throw(_("No Items selected for transfer."))
 
 
 def add_items_in_ste(
