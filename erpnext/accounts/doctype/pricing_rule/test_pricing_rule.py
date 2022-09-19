@@ -766,6 +766,68 @@ class TestPricingRule(unittest.TestCase):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule with Min Qty - 2")
 
+	def test_pricing_rule_for_other_items_cond_with_amount(self):
+		item = make_item("Water Flask New")
+		other_item = make_item("Other Water Flask New")
+		make_item_price(item.name, "_Test Price List", 100)
+		make_item_price(other_item.name, "_Test Price List", 100)
+
+		pricing_rule_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Water Flask Rule",
+			"apply_on": "Item Code",
+			"apply_rule_on_other": "Item Code",
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"other_item_code": other_item.name,
+			"items": [
+				{
+					"item_code": item.name,
+				}
+			],
+			"selling": 1,
+			"currency": "INR",
+			"min_amt": 200,
+			"discount_percentage": 10,
+			"company": "_Test Company",
+		}
+		rule = frappe.get_doc(pricing_rule_record)
+		rule.insert()
+
+		si = create_sales_invoice(do_not_save=True, item_code=item.name)
+		si.append(
+			"items",
+			{
+				"item_code": other_item.name,
+				"item_name": other_item.item_name,
+				"description": other_item.description,
+				"stock_uom": other_item.stock_uom,
+				"uom": other_item.stock_uom,
+				"cost_center": si.items[0].cost_center,
+				"expense_account": si.items[0].expense_account,
+				"warehouse": si.items[0].warehouse,
+				"conversion_factor": 1,
+				"qty": 1,
+			},
+		)
+		si.selling_price_list = "_Test Price List"
+		si.save()
+
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[1].discount_percentage, 0)
+
+		si.items[0].qty = 2
+		si.save()
+
+		self.assertEqual(si.items[0].discount_percentage, 0)
+		self.assertEqual(si.items[0].stock_qty, 2)
+		self.assertEqual(si.items[0].amount, 200)
+		self.assertEqual(si.items[0].price_list_rate, 100)
+		self.assertEqual(si.items[1].discount_percentage, 10)
+
+		si.delete()
+		rule.delete()
+
 
 test_dependencies = ["Campaign"]
 
