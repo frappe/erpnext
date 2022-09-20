@@ -375,6 +375,9 @@ def get_deducted_tax(taxable_vouchers, tax_details):
 
 def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 	tds_amount = 0
+	supp_credit_amt = 0.0
+	supp_jv_credit_amt = 0.0
+
 	invoice_filters = {"name": ("in", vouchers), "docstatus": 1, "apply_tds": 1}
 
 	field = "sum(net_total)"
@@ -383,21 +386,21 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 		invoice_filters.pop("apply_tds", None)
 		field = "sum(grand_total)"
 
-	supp_credit_amt = frappe.db.get_value("Purchase Invoice", invoice_filters, field) or 0.0
+	if vouchers:
+		supp_credit_amt = frappe.db.get_value("Purchase Invoice", invoice_filters, field) or 0.0
 
-	supp_jv_credit_amt = (
-		frappe.db.get_value(
-			"Journal Entry Account",
-			{
-				"parent": ("in", vouchers),
-				"docstatus": 1,
-				"party": ("in", parties),
-				"reference_type": ("!=", "Purchase Invoice"),
-			},
-			"sum(credit_in_account_currency)",
-		)
-		or 0.0
-	)
+		supp_jv_credit_amt = (
+			frappe.db.get_value(
+				"Journal Entry Account",
+				{
+					"parent": ("in", vouchers),
+					"docstatus": 1,
+					"party": ("in", parties),
+					"reference_type": ("!=", "Purchase Invoice"),
+				},
+				"sum(credit_in_account_currency)",
+			)
+		) or 0.0
 
 	supp_credit_amt += supp_jv_credit_amt
 	supp_credit_amt += inv.net_total
