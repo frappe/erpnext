@@ -940,6 +940,13 @@ class PaymentEntry(AccountsController):
 			)
 
 			if not d.included_in_paid_amount:
+				if get_account_currency(payment_account) != self.company_currency:
+					if self.payment_type == "Receive":
+						exchange_rate = self.target_exchange_rate
+					elif self.payment_type in ["Pay", "Internal Transfer"]:
+						exchange_rate = self.source_exchange_rate
+					base_tax_amount = flt((tax_amount / exchange_rate), self.precision("paid_amount"))
+
 				gl_entries.append(
 					self.get_gl_dict(
 						{
@@ -1033,7 +1040,7 @@ class PaymentEntry(AccountsController):
 			for fieldname in tax_fields:
 				tax.set(fieldname, 0.0)
 
-		self.paid_amount_after_tax = self.paid_amount
+		self.paid_amount_after_tax = self.base_paid_amount
 
 	def determine_exclusive_rate(self):
 		if not any(cint(tax.included_in_paid_amount) for tax in self.get("taxes")):
@@ -1052,7 +1059,7 @@ class PaymentEntry(AccountsController):
 
 			cumulated_tax_fraction += tax.tax_fraction_for_current_item
 
-		self.paid_amount_after_tax = flt(self.paid_amount / (1 + cumulated_tax_fraction))
+		self.paid_amount_after_tax = flt(self.base_paid_amount / (1 + cumulated_tax_fraction))
 
 	def calculate_taxes(self):
 		self.total_taxes_and_charges = 0.0
@@ -1075,7 +1082,7 @@ class PaymentEntry(AccountsController):
 					current_tax_amount += actual_tax_dict[tax.idx]
 
 			tax.tax_amount = current_tax_amount
-			tax.base_tax_amount = tax.tax_amount * self.source_exchange_rate
+			tax.base_tax_amount = current_tax_amount
 
 			if tax.add_deduct_tax == "Deduct":
 				current_tax_amount *= -1.0
@@ -1089,14 +1096,20 @@ class PaymentEntry(AccountsController):
 					self.get("taxes")[i - 1].total + current_tax_amount, self.precision("total", tax)
 				)
 
-			tax.base_total = tax.total * self.source_exchange_rate
+			tax.base_total = tax.total
 
 			if self.payment_type == "Pay":
-				self.base_total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
-				self.total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
-			else:
-				self.base_total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
-				self.total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
+				if tax.currency != self.paid_to_account_currency:
+					self.total_taxes_and_charges += flt(current_tax_amount / self.target_exchange_rate)
+				else:
+					self.total_taxes_and_charges += current_tax_amount
+			elif self.payment_type == "Receive":
+				if tax.currency != self.paid_from_account_currency:
+					self.total_taxes_and_charges += flt(current_tax_amount / self.source_exchange_rate)
+				else:
+					self.total_taxes_and_charges += current_tax_amount
+
+			self.base_total_taxes_and_charges += tax.base_tax_amount
 
 		if self.get("taxes"):
 			self.paid_amount_after_tax = self.get("taxes")[-1].base_total
