@@ -649,7 +649,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Ignore Pricing Rule",
-   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -2022,7 +2021,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-11 17:43:56.435382",
+ "modified": "2022-09-16 17:44:22.227332",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

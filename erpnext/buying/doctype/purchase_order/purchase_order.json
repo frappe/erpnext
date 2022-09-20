@@ -441,7 +441,6 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule",
-   "no_copy": 1,
    "permlevel": 1,
    "print_hide": 1
   },
@@ -1180,7 +1179,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-07 11:06:46.035093",
+ "modified": "2022-09-16 17:45:04.954055",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
