@@ -117,6 +117,7 @@ class StockEntry(StockController):
 		self.validate_work_order()
 		self.validate_bom()
 		self.validate_purchase_order()
+		self.validate_subcontracting_order()
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_scrap_items()
@@ -875,25 +876,24 @@ class StockEntry(StockController):
 						)
 					)
 
-				parent = frappe.qb.DocType("Stock Entry")
-				child = frappe.qb.DocType("Stock Entry Detail")
-
-				conditions = (
-					(parent.docstatus == 1)
-					& (child.item_code == se_item.item_code)
-					& (
-						(parent.purchase_order == self.purchase_order)
-						if self.subcontract_data.order_doctype == "Purchase Order"
-						else (parent.subcontracting_order == self.subcontracting_order)
-					)
-				)
+				se = frappe.qb.DocType("Stock Entry")
+				se_detail = frappe.qb.DocType("Stock Entry Detail")
 
 				total_supplied = (
-					frappe.qb.from_(parent)
-					.inner_join(child)
-					.on(parent.name == child.parent)
-					.select(Sum(child.transfer_qty))
-					.where(conditions)
+					frappe.qb.from_(se)
+					.inner_join(se_detail)
+					.on(se.name == se_detail.parent)
+					.select(Sum(se_detail.transfer_qty))
+					.where(
+						(se.purpose == "Send to Subcontractor")
+						& (se.docstatus == 1)
+						& (se_detail.item_code == se_item.item_code)
+						& (
+							(se.purchase_order == self.purchase_order)
+							if self.subcontract_data.order_doctype == "Purchase Order"
+							else (se.subcontracting_order == self.subcontracting_order)
+						)
+					)
 				).run()[0][0]
 
 				if flt(total_supplied, precision) > flt(total_allowed, precision):
@@ -919,6 +919,16 @@ class StockEntry(StockController):
 					)
 					if order_rm_detail:
 						se_item.db_set(self.subcontract_data.rm_detail_field, order_rm_detail)
+					else:
+						if not se_item.allow_alternative_item:
+							frappe.throw(
+								_("Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}").format(
+									se_item.idx,
+									se_item.item_code,
+									self.subcontract_data.order_doctype,
+									self.get(self.subcontract_data.order_field),
+								)
+							)
 		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
 			for row in self.items:
 				if not row.subcontracted_item:
@@ -957,6 +967,20 @@ class StockEntry(StockController):
 				frappe.throw(
 					_("Please select Subcontracting Order instead of Purchase Order {0}").format(
 						self.purchase_order
+					)
+				)
+
+	def validate_subcontracting_order(self):
+		if self.get("subcontracting_order") and self.purpose in [
+			"Send to Subcontractor",
+			"Material Transfer",
+		]:
+			sco_status = frappe.db.get_value("Subcontracting Order", self.subcontracting_order, "status")
+
+			if sco_status == "Closed":
+				frappe.throw(
+					_("Cannot create Stock Entry against a closed Subcontracting Order {0}.").format(
+						self.subcontracting_order
 					)
 				)
 
@@ -1921,6 +1945,8 @@ class StockEntry(StockController):
 			se_child.is_finished_item = item_row.get("is_finished_item", 0)
 			se_child.is_scrap_item = item_row.get("is_scrap_item", 0)
 			se_child.is_process_loss = item_row.get("is_process_loss", 0)
+			se_child.po_detail = item_row.get("po_detail")
+			se_child.sco_rm_detail = item_row.get("sco_rm_detail")
 
 			for field in [
 				self.subcontract_data.rm_detail_field,
@@ -2567,49 +2593,15 @@ def get_supplied_items(
 
 
 @frappe.whitelist()
-def get_items_from_subcontracting_order(source_name, target_doc=None):
-	def post_process(source, target):
-		target.stock_entry_type = target.purpose = "Send to Subcontractor"
-		target.subcontracting_order = source_name
+def get_items_from_subcontract_order(source_name, target_doc=None):
+	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
 
-		if target.items:
-			target.items = []
+	if isinstance(target_doc, str):
+		target_doc = frappe.get_doc(json.loads(target_doc))
 
-		warehouses = {}
-		for item in source.items:
-			warehouses[item.name] = item.warehouse
-
-		for item in source.supplied_items:
-			target.append(
-				"items",
-				{
-					"s_warehouse": warehouses.get(item.reference_name),
-					"t_warehouse": source.supplier_warehouse,
-					"subcontracted_item": item.main_item_code,
-					"item_code": item.rm_item_code,
-					"qty": max(item.required_qty - item.total_supplied_qty, 0),
-					"transfer_qty": item.required_qty,
-					"uom": item.stock_uom,
-					"stock_uom": item.stock_uom,
-					"conversion_factor": 1,
-				},
-			)
-
-	target_doc = get_mapped_doc(
-		"Subcontracting Order",
-		source_name,
-		{
-			"Subcontracting Order": {
-				"doctype": "Stock Entry",
-				"field_no_map": ["purchase_order"],
-				"validation": {
-					"docstatus": ["=", 1],
-				},
-			},
-		},
-		target_doc,
-		post_process,
-		ignore_child_tables=True,
+	order_doctype = "Purchase Order" if target_doc.purchase_order else "Subcontracting Order"
+	target_doc = make_rm_stock_entry(
+		subcontract_order=source_name, order_doctype=order_doctype, target_doc=target_doc
 	)
 
 	return target_doc

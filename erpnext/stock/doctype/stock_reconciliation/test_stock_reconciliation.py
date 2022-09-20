@@ -727,12 +727,21 @@ def create_stock_reconciliation(**args):
 	sr.set_posting_time = 1
 	sr.company = args.company or "_Test Company"
 	sr.expense_account = args.expense_account or (
-		"Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC"
+		(
+			frappe.get_cached_value("Company", sr.company, "stock_adjustment_account")
+			or frappe.get_cached_value(
+				"Account", {"account_type": "Stock Adjustment", "company": sr.company}, "name"
+			)
+		)
+		if frappe.get_all("Stock Ledger Entry", {"company": sr.company})
+		else frappe.get_cached_value(
+			"Account", {"account_type": "Temporary", "company": sr.company}, "name"
+		)
 	)
 	sr.cost_center = (
 		args.cost_center
 		or frappe.get_cached_value("Company", sr.company, "cost_center")
-		or "_Test Cost Center - _TC"
+		or frappe.get_cached_value("Cost Center", filters={"is_group": 0, "company": sr.company})
 	)
 
 	sr.append(
