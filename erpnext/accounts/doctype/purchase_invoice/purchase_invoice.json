@@ -83,6 +83,8 @@
   "section_break_51",
   "taxes_and_charges",
   "taxes",
+  "tax_withheld_vouchers_section",
+  "tax_withheld_vouchers",
   "sec_tax_breakup",
   "other_charges_calculation",
   "totals",
@@ -1417,13 +1419,25 @@
    "label": "Advance Tax",
    "options": "Advance Tax",
    "read_only": 1
+  },
+  {
+   "fieldname": "tax_withheld_vouchers_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Withheld Vouchers"
+  },
+  {
+   "fieldname": "tax_withheld_vouchers",
+   "fieldtype": "Table",
+   "label": "Tax Withheld Vouchers",
+   "options": "Tax Withheld Vouchers",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-25 13:31:02.716727",
+ "modified": "2022-09-13 23:39:54.525037",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1483,6 +1497,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1
