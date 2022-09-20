@@ -51,8 +51,11 @@ class StockLedgerEntry(Document):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
 		# Setting Qty after transaction, Stock Value and Stock Queue
-		frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=self.name,warehouse=self.warehouse,item_code=self.item_code,created_on=self.creation,queue="slu",enqueue_after_commit=True)
-
+		if self.voucher_type=='Delivery Note':
+			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=self.name,warehouse=self.warehouse,item_code=self.item_code,created_on=self.creation,queue="slu_secondary",enqueue_after_commit=True)
+		else:
+			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=self.name,warehouse=self.warehouse,item_code=self.item_code,created_on=self.creation,queue="slu_primary",enqueue_after_commit=True)
+		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.batch_no and not self.get("allow_negative_stock"):
