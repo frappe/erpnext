@@ -322,7 +322,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	# calculate last purchase rate
 	if args.get('doctype') in purchase_doctypes:
 		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
-		out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.name, out.conversion_factor)
+		out.last_purchase_rate = item_last_purchase_rate(args.company,args.name, args.conversion_rate, item.name, out.conversion_factor)
 
 	# if default specified in item is for another company, fetch from company
 	for d in [
@@ -586,7 +586,7 @@ def get_price_list_rate(args, item_doc, out):
 			oblige_rate = flt(frappe.db.get_value('Item Daily Rate Table', {
                             'category':'Buying Rate','campany':args.company, 'item_code': item_doc.name, 'supplier_code': args.supplier, 'docstatus': '1', 'date': ["<=", frappe.utils.now()]}, 'new_rate'))
 
-		if  oblige_rate== None and oblige_rate == 0:
+		if  oblige_rate== None or oblige_rate == 0:
 			price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
 			# variant
@@ -615,7 +615,7 @@ def get_price_list_rate(args, item_doc, out):
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
-			out.update(get_last_purchase_details(item_doc.name,
+			out.update(get_last_purchase_details(args.compnay,item_doc.name,
 				args.name, args.conversion_rate))
 
 def insert_item_price(args):

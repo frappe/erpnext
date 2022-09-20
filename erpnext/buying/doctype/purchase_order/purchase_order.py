@@ -139,7 +139,7 @@ class PurchaseOrder(BuyingController):
 		conversion_rate = flt(self.get('conversion_rate')) or 1.0
 		for d in self.get("items"):
 			if d.item_code:
-				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+				last_purchase_details = get_last_purchase_details(self.company,d.item_code, self.name)
 				if last_purchase_details:
 					d.base_price_list_rate = (last_purchase_details['base_price_list_rate'] *
 						(flt(d.conversion_factor) or 1.0))
@@ -315,12 +315,12 @@ class PurchaseOrder(BuyingController):
 		else:
 			self.db_set("per_received", 0, update_modified=False)
 
-def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
+def item_last_purchase_rate(company,name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""
 
 	conversion_rate = flt(conversion_rate) or 1.0
 
-	last_purchase_details =  get_last_purchase_details(item_code, name)
+	last_purchase_details =  get_last_purchase_details(company,item_code, name)
 	if last_purchase_details:
 		last_purchase_rate = (last_purchase_details['base_net_rate'] * (flt(conversion_factor) or 1.0)) / conversion_rate
 		return last_purchase_rate
