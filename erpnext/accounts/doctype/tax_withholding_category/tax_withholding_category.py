@@ -437,36 +437,40 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 
 def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	tcs_amount = 0
+	invoiced_amt = 0
+	advance_amt = 0
 
 	# sum of debit entries made from sales invoices
-	invoiced_amt = (
-		frappe.db.get_value(
-			"GL Entry",
-			{
-				"is_cancelled": 0,
-				"party": ["in", parties],
-				"company": inv.company,
-				"voucher_no": ["in", vouchers],
-			},
-			"sum(debit)",
+	if vouchers:
+		invoiced_amt = (
+			frappe.db.get_value(
+				"GL Entry",
+				{
+					"is_cancelled": 0,
+					"party": ["in", parties],
+					"company": inv.company,
+					"voucher_no": ["in", vouchers],
+				},
+				"sum(debit)",
+			)
+			or 0.0
 		)
-		or 0.0
-	)
 
 	# sum of credit entries made from PE / JV with unset 'against voucher'
-	advance_amt = (
-		frappe.db.get_value(
-			"GL Entry",
-			{
-				"is_cancelled": 0,
-				"party": ["in", parties],
-				"company": inv.company,
-				"voucher_no": ["in", adv_vouchers],
-			},
-			"sum(credit)",
+	if advance_amt:
+		advance_amt = (
+			frappe.db.get_value(
+				"GL Entry",
+				{
+					"is_cancelled": 0,
+					"party": ["in", parties],
+					"company": inv.company,
+					"voucher_no": ["in", adv_vouchers],
+				},
+				"sum(credit)",
+			)
+			or 0.0
 		)
-		or 0.0
-	)
 
 	# sum of credit entries made from sales invoice
 	credit_note_amt = sum(
