@@ -38,6 +38,7 @@ from erpnext.accounts.party import (
 	validate_party_frozen_disabled,
 )
 from erpnext.accounts.utils import get_account_currency, get_fiscal_years, validate_fiscal_year
+from erpnext.assets.doctype.asset.depreciation import make_depreciation_entry
 from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.print_settings import (
 	set_print_templates_for_item_table,
@@ -571,6 +572,11 @@ class AccountsController(TransactionBase):
 			# if user changed the discount percentage then set user's discount percentage ?
 			if pricing_rule_args.get("price_or_product_discount") == "Price":
 				item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
+				if pricing_rule_args.get("apply_rule_on_other_items"):
+					other_items = json.loads(pricing_rule_args.get("apply_rule_on_other_items"))
+					if other_items and item.item_code not in other_items:
+						return
+
 				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
 				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
 				if pricing_rule_args.get("pricing_rule_for") == "Rate":
@@ -1873,6 +1879,99 @@ class AccountsController(TransactionBase):
 			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
 		):
 			throw(_("Conversion rate cannot be 0 or 1"))
+
+	def check_finance_books(self, item, asset):
+		if (
+			len(asset.finance_books) > 1
+			and not item.get("finance_book")
+			and not self.get("finance_book")
+			and asset.finance_books[0].finance_book
+		):
+			frappe.throw(
+				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
+			)
+
+	def depreciate_asset(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+		asset.prepare_depreciation_data(date_of_disposal=self.posting_date)
+		asset.save()
+
+		make_depreciation_entry(asset.name, self.posting_date)
+
+	def reset_depreciation_schedule(self, asset):
+		asset.flags.ignore_validate_update_after_submit = True
+
+		# recreate original depreciation schedule of the asset
+		asset.prepare_depreciation_data(date_of_return=self.posting_date)
+
+		self.modify_depreciation_schedule_for_asset_repairs(asset)
+		asset.save()
+
+	def modify_depreciation_schedule_for_asset_repairs(self, asset):
+		asset_repairs = frappe.get_all(
+			"Asset Repair", filters={"asset": asset.name}, fields=["name", "increase_in_asset_life"]
+		)
+
+		for repair in asset_repairs:
+			if repair.increase_in_asset_life:
+				asset_repair = frappe.get_doc("Asset Repair", repair.name)
+				asset_repair.modify_depreciation_schedule()
+				asset.prepare_depreciation_data()
+
+	def reverse_depreciation_entry_made_after_disposal(self, asset):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
+		posting_date_of_original_disposal = self.get_posting_date_of_disposal_entry()
+
+		row = -1
+		finance_book = asset.get("schedules")[0].get("finance_book")
+		for schedule in asset.get("schedules"):
+			if schedule.finance_book != finance_book:
+				row = 0
+				finance_book = schedule.finance_book
+			else:
+				row += 1
+
+			if schedule.schedule_date == posting_date_of_original_disposal:
+				if not self.disposal_was_made_on_original_schedule_date(
+					asset, schedule, row, posting_date_of_original_disposal
+				) or self.disposal_happens_in_the_future(posting_date_of_original_disposal):
+
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+					frappe.flags.is_reverse_depr_entry = True
+					reverse_journal_entry.submit()
+
+					frappe.flags.is_reverse_depr_entry = False
+					asset.flags.ignore_validate_update_after_submit = True
+					schedule.journal_entry = None
+					asset.save()
+
+	def get_posting_date_of_disposal_entry(self):
+		if self.doctype == "Sales Invoice" and self.return_against:
+			return frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+		else:
+			return self.posting_date
+
+	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
+	def disposal_was_made_on_original_schedule_date(
+		self, asset, schedule, row, posting_date_of_disposal
+	):
+		for finance_book in asset.get("finance_books"):
+			if schedule.finance_book == finance_book.finance_book:
+				orginal_schedule_date = add_months(
+					finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
+				)
+
+				if orginal_schedule_date == posting_date_of_disposal:
+					return True
+		return False
+
+	def disposal_happens_in_the_future(self, posting_date_of_disposal):
+		if posting_date_of_disposal > getdate():
+			return True
+
+		return False
 
 
 @frappe.whitelist()

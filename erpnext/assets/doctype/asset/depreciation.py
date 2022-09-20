@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 
 
-def post_depreciation_entries(date=None):
+def post_depreciation_entries(date=None, commit=True):
 	# Return if automatic booking of asset depreciation is disabled
 	if not cint(
 		frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically")
@@ -22,7 +22,8 @@ def post_depreciation_entries(date=None):
 		date = today()
 	for asset in get_depreciable_assets(date):
 		make_depreciation_entry(asset, date)
-		frappe.db.commit()
+		if commit:
+			frappe.db.commit()
 
 
 def get_depreciable_assets(date):
@@ -190,7 +191,7 @@ def scrap_asset(asset_name):
 
 	if asset.docstatus != 1:
 		frappe.throw(_("Asset {0} must be submitted").format(asset.name))
-	elif asset.status in ("Cancelled", "Sold", "Scrapped"):
+	elif asset.status in ("Cancelled", "Sold", "Scrapped", "Capitalized", "Decapitalized"):
 		frappe.throw(
 			_("Asset {0} cannot be scrapped, as it is already {1}").format(asset.name, asset.status)
 		)
@@ -358,3 +359,30 @@ def get_disposal_account_and_cost_center(company):
 		frappe.throw(_("Please set 'Asset Depreciation Cost Center' in Company {0}").format(company))
 
 	return disposal_account, depreciation_cost_center
+
+
+@frappe.whitelist()
+def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book=None):
+	asset_doc = frappe.get_doc("Asset", asset)
+
+	if asset_doc.calculate_depreciation:
+		asset_doc.prepare_depreciation_data(getdate(disposal_date))
+
+		finance_book_id = 1
+		if finance_book:
+			for fb in asset_doc.finance_books:
+				if fb.finance_book == finance_book:
+					finance_book_id = fb.idx
+					break
+
+		asset_schedules = [
+			sch for sch in asset_doc.schedules if cint(sch.finance_book_id) == finance_book_id
+		]
+		accumulated_depr_amount = asset_schedules[-1].accumulated_depreciation_amount
+
+		return flt(
+			flt(asset_doc.gross_purchase_amount) - accumulated_depr_amount,
+			asset_doc.precision("gross_purchase_amount"),
+		)
+	else:
+		return flt(asset_doc.value_after_depreciation)
