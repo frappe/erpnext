@@ -22,9 +22,9 @@ def execute(filters=None):
 
 def get_columns(leave_types):
 	columns = [
-		_("Employee") + ":Link.Employee:150",
+		_("Employee") + ":Link/Employee:150",
 		_("Employee Name") + "::200",
-		_("Department") + "::150",
+		_("Department") + ":Link/Department:150",
 	]
 
 	for leave_type in leave_types:
