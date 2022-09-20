@@ -146,7 +146,7 @@ def get_bom_data(filters):
 				)
 			)
 		else:
-			query = query.where(bin.warehouse == frappe.db.escape(filters.get("warehouse")))
+			query = query.where(bin.warehouse == filters.get("warehouse"))
 
 	return query.run(as_dict=True)
 
