@@ -52,7 +52,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		invoices.append(pi)
 
 		# delete invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_single_threshold_tds(self):
@@ -88,7 +88,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		self.assertEqual(pi.taxes_and_charges_deducted, 1000)
 
 		# delete invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_tax_withholding_category_checks(self):
@@ -114,7 +114,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		# TDS should be applied only on 1000
 		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
 
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_cumulative_threshold_tcs(self):
@@ -149,7 +149,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		invoices.append(si)
 
 		# cancel invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_tds_calculation_on_net_total(self):
@@ -183,7 +183,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		self.assertEqual(pi1.taxes[0].tax_amount, 4000)
 
 		# cancel invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_multi_category_single_supplier(self):
@@ -208,7 +208,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		self.assertEqual(pi1.taxes[0].tax_amount, 250)
 
 		# cancel invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_tax_withholding_category_voucher_display(self):
