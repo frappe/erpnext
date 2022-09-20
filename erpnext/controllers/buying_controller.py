@@ -194,16 +194,16 @@ class BuyingController(SubcontractingController):
 
 		if self.meta.get_field("base_in_words"):
 			if self.meta.get_field("base_rounded_total") and not self.is_rounded_total_disabled():
-				amount = self.base_rounded_total
+				amount = abs(self.base_rounded_total)
 			else:
-				amount = self.base_grand_total
+				amount = abs(self.base_grand_total)
 			self.base_in_words = money_in_words(amount, self.company_currency)
 
 		if self.meta.get_field("in_words"):
 			if self.meta.get_field("rounded_total") and not self.is_rounded_total_disabled():
-				amount = self.rounded_total
+				amount = abs(self.rounded_total)
 			else:
-				amount = self.grand_total
+				amount = abs(self.grand_total)
 
 			self.in_words = money_in_words(amount, self.currency)
 
