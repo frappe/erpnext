@@ -591,13 +591,14 @@ def get_price_list_rate(args, item_doc, out):
 
 			# variant
 			if not price_list_rate and item_doc.variant_of:
-				price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+				frm.doc.item_wise_rate = [] = get_price_list_rate_for(args, item_doc.variant_of)
 
 			
 			out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
 		else:
 			out.price_list_rate = oblige_rate
+			price_list_rate=oblige_rate
 		#price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
 		# # variant
