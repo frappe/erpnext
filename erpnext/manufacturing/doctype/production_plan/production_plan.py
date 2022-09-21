@@ -894,6 +894,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 		.select(
 			(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
 			item.item_name,
+			item.name.as_("item_code"),
 			bei.description,
 			bei.stock_uom,
 			item.min_order_qty,
