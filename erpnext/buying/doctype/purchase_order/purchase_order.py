@@ -40,6 +40,12 @@ class PurchaseOrder(BuyingController):
 		}]
 
 	def validate(self):
+		
+		if self.docstatus == 1 :
+			self.set_status()
+			self.check_on_hold_or_closed_status()
+			return
+		
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
