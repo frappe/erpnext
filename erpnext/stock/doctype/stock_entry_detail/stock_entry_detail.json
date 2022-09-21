@@ -42,6 +42,7 @@
   "quality_inspection",
   "accounting",
   "expense_account",
+  "inventory_default_values",
   "col_break5",
   "accounting_dimensions_section",
   "cost_center",
@@ -491,11 +492,19 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.inventory_default_values",
+   "fieldname": "inventory_default_values",
+   "fieldtype": "Link",
+   "label": "Inventory Default Values",
+   "options": "Account",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-10-18 11:48:10.492616",
+ "modified": "2022-09-20 10:34:05.075576",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
