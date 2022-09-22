@@ -24,7 +24,8 @@ class SellingController(StockController):
 
 	def onload(self):
 		super(SellingController, self).onload()
-		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
+		# Add CUSTOMER ORDER in below list
+		if self.doctype in ("Sales Order","Customer Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code, item.warehouse))
 
@@ -365,15 +366,37 @@ class SellingController(StockController):
 			(so_detail, so, current_docname),
 		)
 
-		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) + (
-			flt(delivered_via_si[0][0]) if delivered_via_si else 0
+		# update delivered qty from SHIPPING NOTICE
+		delivered_via_sni = frappe.db.sql(
+			"""select sum(qty) from `tabShipping Note Item` 
+			where so_detail = %s and docstatus = 1
+			and against_sales_order = %s
+			and parent != %s""",
+			(so_detail, so, current_docname),
 		)
 
+		# Change Total Delivered qty calculation using CO delivered using SNI
+		# total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) + (
+		# 	flt(delivered_via_si[0][0]) if delivered_via_si else 0
+		total_delivered_qty = (flt(delivered_via_sni[0][0]) if delivered_via_sni else 0)
 		return total_delivered_qty
 
+	# get SLAES ORDER quantity and warehouse 
+	# def get_so_qty_and_warehouse(self, so_detail):
+	# 	so_item = frappe.db.sql(
+	# 		"""select qty, warehouse from `tabSales Order Item`
+	# 		where name = %s and docstatus = 1""",
+	# 		so_detail,
+	# 		as_dict=1,
+	# 	)
+	# 	so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
+	# 	so_warehouse = so_item and so_item[0]["warehouse"] or ""
+	# 	return so_qty, so_warehouse
+
+	# get CUSTOMER ORDER quantity and warehouse
 	def get_so_qty_and_warehouse(self, so_detail):
 		so_item = frappe.db.sql(
-			"""select qty, warehouse from `tabSales Order Item`
+			"""select qty, warehouse from `tabCustomer Order Item`
 			where name = %s and docstatus = 1""",
 			so_detail,
 			as_dict=1,
@@ -397,14 +420,19 @@ class SellingController(StockController):
 					so_map.setdefault(d.against_sales_order, []).append(d.so_detail)
 				elif self.doctype == "Sales Invoice" and d.sales_order and self.update_stock:
 					so_map.setdefault(d.sales_order, []).append(d.so_detail)
+				# for update reserved qty on SNI submit
+				elif self.doctype == "Shipping Notice Instruction" and d.against_sales_order:
+					so_map.setdefault(d.against_sales_order, []).append(d.so_detail)
 
 		for so, so_item_rows in so_map.items():
 			if so and so_item_rows:
-				sales_order = frappe.get_doc("Sales Order", so)
+				# sales_order object used for customer order
+				sales_order = frappe.get_doc("Customer Order", so)
 
-				if sales_order.status in ["Closed", "Cancelled"]:
+				# changed condition for closed status of CUSTOMER ORDER
+				if (sales_order.status in ["Cancelled"] or (sales_order.status == "Closed" and  sales_order.per_delivered < 100)):
 					frappe.throw(
-						_("{0} {1} is cancelled or closed").format(_("Sales Order"), so), frappe.InvalidStatusError
+						_("{0} {1} is cancelled or closed by user").format(_("Customer Order"), so), frappe.InvalidStatusError
 					)
 
 				sales_order.update_reserved_qty(so_item_rows)
