@@ -903,15 +903,22 @@ class StockEntry(StockController):
 							se_item.item_code, self.purchase_order
 						)
 					)
-				total_supplied = frappe.db.sql(
-					"""select sum(transfer_qty)
-					from `tabStock Entry Detail`, `tabStock Entry`
-					where `tabStock Entry`.purchase_order = %s
-						and `tabStock Entry`.docstatus = 1
-						and `tabStock Entry Detail`.item_code = %s
-						and `tabStock Entry Detail`.parent = `tabStock Entry`.name""",
-					(self.purchase_order, se_item.item_code),
-				)[0][0]
+
+				se = frappe.qb.DocType("Stock Entry")
+				se_detail = frappe.qb.DocType("Stock Entry Detail")
+
+				total_supplied = (
+					frappe.qb.from_(se)
+					.inner_join(se_detail)
+					.on(se.name == se_detail.parent)
+					.select(Sum(se_detail.transfer_qty))
+					.where(
+						(se.purpose == "Send to Subcontractor")
+						& (se.purchase_order == self.purchase_order)
+						& (se_detail.item_code == se_item.item_code)
+						& (se.docstatus == 1)
+					)
+				).run()[0][0]
 
 				if flt(total_supplied, precision) > flt(total_allowed, precision):
 					frappe.throw(
@@ -919,6 +926,27 @@ class StockEntry(StockController):
 							se_item.idx, se_item.item_code, total_allowed, self.purchase_order
 						)
 					)
+				elif not se_item.get("po_detail"):
+					filters = {
+						"parent": self.purchase_order,
+						"docstatus": 1,
+						"rm_item_code": se_item.item_code,
+						"main_item_code": se_item.subcontracted_item,
+					}
+
+					order_rm_detail = frappe.db.get_value("Purchase Order Item Supplied", filters, "name")
+					if order_rm_detail:
+						se_item.db_set("po_detail", order_rm_detail)
+					else:
+						if not se_item.allow_alternative_item:
+							frappe.throw(
+								_("Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}").format(
+									se_item.idx,
+									se_item.item_code,
+									"Purchase Order",
+									self.purchase_order,
+								)
+							)
 		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
 			for row in self.items:
 				if not row.subcontracted_item:

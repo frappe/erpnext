@@ -98,6 +98,7 @@
    "fieldname": "price_list",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List",
@@ -203,6 +204,7 @@
    "fieldname": "reference",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Reference"
   },
   {
@@ -216,7 +218,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-15 17:57:56.137719",
+ "modified": "2022-09-02 16:33:55.612992",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -253,6 +255,7 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "item_name",
  "track_changes": 1
 }

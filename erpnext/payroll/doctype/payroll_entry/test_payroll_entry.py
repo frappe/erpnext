@@ -330,13 +330,13 @@ class TestPayrollEntry(FrappeTestCase):
 		)
 
 		salary_slip = frappe.get_doc("Salary Slip", name)
+
 		for row in salary_slip.loans:
 			if row.loan == loan.name:
 				interest_amount = (280000 * 8.4) / (12 * 100)
 				principal_amount = loan.monthly_repayment_amount - interest_amount
 				self.assertEqual(row.interest_amount, interest_amount)
 				self.assertEqual(row.principal_amount, principal_amount)
-				self.assertEqual(row.total_payment, interest_amount + principal_amount)
 
 		if salary_slip.docstatus == 0:
 			frappe.delete_doc("Salary Slip", name)

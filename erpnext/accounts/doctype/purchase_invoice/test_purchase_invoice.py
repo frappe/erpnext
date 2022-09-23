@@ -304,59 +304,6 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
-	def test_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
-
-		discount_account = create_account(
-			account_name="Discount Account",
-			parent_account="Indirect Expenses - _TC",
-			company="_Test Company",
-		)
-		pi = make_purchase_invoice(discount_account=discount_account, rate=45)
-
-		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 225.0, nowdate()],
-			["Discount Account - _TC", 0.0, 25.0, nowdate()],
-		]
-
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		enable_discount_accounting(enable=0)
-
-	def test_additional_discount_for_purchase_invoice_with_discount_accounting_enabled(self):
-		enable_discount_accounting()
-		additional_discount_account = create_account(
-			account_name="Discount Account",
-			parent_account="Indirect Expenses - _TC",
-			company="_Test Company",
-		)
-
-		pi = make_purchase_invoice(do_not_save=1, parent_cost_center="Main - _TC")
-		pi.apply_discount_on = "Grand Total"
-		pi.additional_discount_account = additional_discount_account
-		pi.additional_discount_percentage = 10
-		pi.disable_rounded_total = 1
-		pi.append(
-			"taxes",
-			{
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account VAT - _TC",
-				"cost_center": "Main - _TC",
-				"description": "Test",
-				"rate": 10,
-			},
-		)
-		pi.submit()
-
-		expected_gle = [
-			["_Test Account Cost for Goods Sold - _TC", 250.0, 0.0, nowdate()],
-			["_Test Account VAT - _TC", 25.0, 0.0, nowdate()],
-			["Creditors - _TC", 0.0, 247.5, nowdate()],
-			["Discount Account - _TC", 0.0, 27.5, nowdate()],
-		]
-
-		check_gl_entries(self, pi.name, expected_gle, nowdate())
-
 	def test_purchase_invoice_change_naming_series(self):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
