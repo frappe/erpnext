@@ -3,16 +3,17 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, cint
 from frappe import _
 from erpnext.stock.doctype.item.item import convert_item_uom_for
 
 
 def execute(filters=None):
 	filters = frappe._dict(filters)
+	filters.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
 	data = get_bom_stock(filters)
-	columns = get_columns()
+	columns = get_columns(filters)
 
 	return columns, data
 
@@ -32,7 +33,7 @@ def get_bom_stock(filters):
 		SELECT bom_item.item_code, bom_item.item_name,
 			bom_item.qty as bom_qty,
 			bom_item.qty * {qty_to_produce} / bom.quantity as required_qty,
-			bom_item.uom, bin.stock_uom,
+			bom_item.uom, bin.stock_uom, bom.uom as production_uom,
 			sum(bin.actual_qty) as actual_qty,
 			bom.quantity as bom_unit_qty
 		FROM `tabBOM` bom
@@ -46,6 +47,7 @@ def get_bom_stock(filters):
 	for d in data:
 		d.actual_qty = convert_item_uom_for(d.actual_qty, d.item_code, d.stock_uom, d.uom)
 		d.producible_qty = (d.actual_qty / (d.bom_qty / d.bom_unit_qty))
+		d.disable_item_formatter = cint(filters.show_item_name)
 
 	return data
 
@@ -68,15 +70,20 @@ def get_conditions(filters):
 	return " and ".join(conditions)
 
 
-def get_columns():
+def get_columns(filters):
 	columns = [
-		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item"},
-		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data"},
+		{"label": _("Item Code"), "fieldtype": "Link", "fieldname": "item_code", "options": "Item",
+			"width": 120 if filters.show_item_name else 200},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 		{"label": _("UOM"), "fieldtype": "Link", "options": "UOM", "fieldname": "uom", "width": 50},
-		{"label": _("BOM Qty"), "fieldname": "bom_qty", "fieldtype": "Float"},
-		{"label": _("Required Qty"), "fieldname": "required_qty", "fieldtype": "Float"},
-		{"label": _("In Stock"), "fieldname": "actual_qty", "fieldtype": "Float"},
-		{"label": _("Enough To Produce"), "fieldname": "producible_qty", "fieldtype": "Float"},
+		{"label": _("BOM Qty"), "fieldname": "bom_qty", "fieldtype": "Float", "width": 100},
+		{"label": _("Required Qty"), "fieldname": "required_qty", "fieldtype": "Float", "width": 100},
+		{"label": _("In Stock"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 100},
+		{"label": _("Enough To Produce"), "fieldname": "producible_qty", "fieldtype": "Float", "width": 120},
+		{"label": _("Production UOM"), "fieldname": "production_uom", "fieldtype": "Link", "options": "UOM", "width": 80},
 	]
+
+	if not filters.show_item_name:
+		columns = [c for c in columns if c.get('fieldname') != 'item_name']
 
 	return columns
