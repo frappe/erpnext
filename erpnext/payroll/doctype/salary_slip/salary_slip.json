@@ -377,7 +377,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
    "label": "Loan Repayment"
@@ -647,7 +646,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-08 11:48:47.098248",
+ "modified": "2022-08-29 08:59:50.819986",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

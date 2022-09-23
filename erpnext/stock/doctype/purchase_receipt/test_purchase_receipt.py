@@ -9,6 +9,7 @@ from collections import defaultdict
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, today
+from pypika import functions as fn
 from six import iteritems
 
 import erpnext
@@ -1360,6 +1361,125 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for gle in gles:
 			if gle.account == account:
 				self.assertEqual(gle.credit, 50)
+
+	def test_backdated_transaction_for_internal_transfer(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		from_warehouse = create_warehouse("_Test Internal From Warehouse New", company=company)
+		to_warehouse = create_warehouse("_Test Internal To Warehouse New", company=company)
+		item_doc = create_item("Test Internal Transfer Item")
+
+		target_warehouse = create_warehouse("_Test Internal GIT Warehouse New", company=company)
+
+		make_purchase_receipt(
+			item_code=item_doc.name,
+			company=company,
+			posting_date=add_days(today(), -1),
+			warehouse=from_warehouse,
+			qty=1,
+			rate=100,
+		)
+
+		dn1 = create_delivery_note(
+			item_code=item_doc.name,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=1,
+			rate=500,
+			warehouse=from_warehouse,
+			target_warehouse=target_warehouse,
+		)
+
+		self.assertEqual(dn1.items[0].rate, 100)
+
+		pr1 = make_inter_company_purchase_receipt(dn1.name)
+		pr1.items[0].warehouse = to_warehouse
+		self.assertEqual(pr1.items[0].rate, 100)
+		pr1.submit()
+
+		# Backdated purchase receipt entry, the valuation rate should be updated for DN1 and PR1
+		make_purchase_receipt(
+			item_code=item_doc.name,
+			company=company,
+			posting_date=add_days(today(), -2),
+			warehouse=from_warehouse,
+			qty=1,
+			rate=200,
+		)
+
+		dn_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Delivery Note", "voucher_no": dn1.name, "warehouse": target_warehouse},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(abs(dn_value), 200.00)
+
+		pr_value = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr1.name, "warehouse": to_warehouse},
+			"stock_value_difference",
+		)
+
+		self.assertEqual(abs(pr_value), 200.00)
+		pr1.load_from_db()
+
+		self.assertEqual(pr1.items[0].valuation_rate, 200)
+		self.assertEqual(pr1.items[0].rate, 100)
+
+		Gl = frappe.qb.DocType("GL Entry")
+
+		query = (
+			frappe.qb.from_(Gl)
+			.select(
+				(fn.Sum(Gl.debit) - fn.Sum(Gl.credit)).as_("value"),
+			)
+			.where((Gl.voucher_type == pr1.doctype) & (Gl.voucher_no == pr1.name))
+		).run(as_dict=True)
+
+		self.assertEqual(query[0].value, 0)
+
+
+def prepare_data_for_internal_transfer():
+	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+
+	company = "_Test Company with perpetual inventory"
+
+	create_internal_customer(
+		"_Test Internal Customer 2",
+		company,
+		company,
+	)
+
+	create_internal_supplier(
+		"_Test Internal Supplier 2",
+		company,
+		company,
+	)
+
+	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
+		account = "Unrealized Profit and Loss - TCP1"
+		if not frappe.db.exists("Account", account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "Unrealized Profit and Loss",
+					"parent_account": "Direct Income - TCP1",
+					"company": company,
+					"is_group": 0,
+					"account_type": "Income Account",
+				}
+			).insert()
+
+		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
 
 
 def get_sl_entries(voucher_type, voucher_no):

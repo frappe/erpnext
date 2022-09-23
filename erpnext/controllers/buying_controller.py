@@ -86,6 +86,7 @@ class BuyingController(StockController, Subcontracting):
 					company=self.company,
 					party_address=self.get("supplier_address"),
 					shipping_address=self.get("shipping_address"),
+					company_address=self.get("billing_address"),
 					fetch_payment_terms_template=not self.get("ignore_default_payment_terms_template"),
 					ignore_permissions=self.flags.ignore_permissions,
 				)
@@ -302,7 +303,11 @@ class BuyingController(StockController, Subcontracting):
 					rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
 				else:
 					field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
-					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+					rate = flt(
+						frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+						* (d.conversion_factor or 1),
+						d.precision("rate"),
+					)
 
 				if self.is_internal_transfer():
 					if rate != d.rate:

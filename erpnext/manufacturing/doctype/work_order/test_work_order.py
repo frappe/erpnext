@@ -23,6 +23,8 @@ from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.utils import get_bin
 
+test_dependencies = ["BOM"]
+
 
 class TestWorkOrder(FrappeTestCase):
 	def setUp(self):
@@ -93,7 +95,7 @@ class TestWorkOrder(FrappeTestCase):
 
 	def test_planned_operating_cost(self):
 		wo_order = make_wo_order_test_record(
-			item="_Test FG Item 2", planned_start_date=now(), qty=1, do_not_save=True
+			item="_Test FG Item 3", planned_start_date=now(), qty=1, do_not_save=True
 		)
 		wo_order.set_work_order_operations()
 		cost = wo_order.planned_operating_cost
@@ -999,6 +1001,49 @@ class TestWorkOrder(FrappeTestCase):
 			close_work_order(wo_order, "Closed")
 			self.assertEqual(wo_order.get("status"), "Closed")
 
+	def test_fix_time_operations(self):
+		bom = frappe.get_doc(
+			{
+				"doctype": "BOM",
+				"item": "_Test FG Item 2",
+				"is_active": 1,
+				"is_default": 1,
+				"quantity": 1.0,
+				"with_operations": 1,
+				"operations": [
+					{
+						"operation": "_Test Operation 1",
+						"description": "_Test",
+						"workstation": "_Test Workstation 1",
+						"time_in_mins": 60,
+						"operating_cost": 140,
+						"fixed_time": 1,
+					}
+				],
+				"items": [
+					{
+						"amount": 5000.0,
+						"doctype": "BOM Item",
+						"item_code": "_Test Item",
+						"parentfield": "items",
+						"qty": 1.0,
+						"rate": 5000.0,
+					},
+				],
+			}
+		)
+		bom.save()
+		bom.submit()
+
+		wo1 = make_wo_order_test_record(
+			item=bom.item, bom_no=bom.name, qty=1, skip_transfer=1, do_not_submit=1
+		)
+		wo2 = make_wo_order_test_record(
+			item=bom.item, bom_no=bom.name, qty=2, skip_transfer=1, do_not_submit=1
+		)
+
+		self.assertEqual(wo1.operations[0].time_in_mins, wo2.operations[0].time_in_mins)
+
 	def test_partial_manufacture_entries(self):
 		cancel_stock_entry = []
 
@@ -1013,7 +1058,6 @@ class TestWorkOrder(FrappeTestCase):
 		ste1 = test_stock_entry.make_stock_entry(
 			item_code="_Test Item", target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0
 		)
-
 		ste2 = test_stock_entry.make_stock_entry(
 			item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC",

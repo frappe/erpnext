@@ -3,23 +3,12 @@
 
 frappe.provide("erpnext.utils");
 
+const SALES_DOCTYPES = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'];
+const PURCHASE_DOCTYPES = ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'];
+
 erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if (!method) {
 		method = "erpnext.accounts.party.get_party_details";
-	}
-
-	if (args) {
-		if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
-			if (frm.doc.company_address && (!args.company_address)) {
-				args.company_address = frm.doc.company_address;
-			}
-		}
-
-		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'], frm.doc.doctype)) {
-			if (frm.doc.shipping_address && (!args.shipping_address)) {
-				args.shipping_address = frm.doc.shipping_address;
-			}
-		}
 	}
 
 	if (!args) {
@@ -45,41 +34,44 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 			};
 		}
 
-		if (in_list(['Sales Invoice', 'Sales Order', 'Delivery Note'], frm.doc.doctype)) {
-			if (!args) {
+		if (!args) {
+			if (in_list(SALES_DOCTYPES, frm.doc.doctype)) {
 				args = {
 					party: frm.doc.customer || frm.doc.party_name,
 					party_type: 'Customer'
-				}
-			}
-			if (frm.doc.company_address && (!args.company_address)) {
-				args.company_address = frm.doc.company_address;
+				};
 			}
 
-			if (frm.doc.shipping_address_name &&(!args.shipping_address_name)) {
-				args.shipping_address_name = frm.doc.shipping_address_name;
-			}
-		}
-
-		if (in_list(['Purchase Invoice', 'Purchase Order', 'Purchase Receipt'], frm.doc.doctype)) {
-			if (!args) {
+			if (in_list(PURCHASE_DOCTYPES, frm.doc.doctype)) {
 				args = {
 					party: frm.doc.supplier,
 					party_type: 'Supplier'
-				}
-			}
-
-			if (frm.doc.shipping_address && (!args.shipping_address)) {
-				args.shipping_address = frm.doc.shipping_address;
+				};
 			}
 		}
 
-		if (args) {
-			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
-			args.fetch_payment_terms_template = cint(!frm.doc.ignore_default_payment_terms_template);
+		if (!args || !args.party) return;
+
+		args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
+		args.fetch_payment_terms_template = cint(!frm.doc.ignore_default_payment_terms_template);
+	}
+
+	if (in_list(SALES_DOCTYPES, frm.doc.doctype)) {
+		if (!args.company_address && frm.doc.company_address) {
+			args.company_address = frm.doc.company_address;
 		}
 	}
-	if (!args || !args.party) return;
+
+	if (in_list(PURCHASE_DOCTYPES, frm.doc.doctype)) {
+		if (!args.company_address && frm.doc.billing_address) {
+			args.company_address = frm.doc.billing_address;
+		}
+
+		if (!args.shipping_address && frm.doc.shipping_address) {
+			args.shipping_address = frm.doc.shipping_address;
+		}
+	}
+
 
 	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
 		if (!erpnext.utils.validate_mandatory(frm, "Posting / Transaction Date",

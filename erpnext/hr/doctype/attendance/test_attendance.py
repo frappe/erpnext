@@ -19,7 +19,7 @@ from erpnext.hr.doctype.attendance.attendance import (
 	mark_attendance,
 )
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.leave_application.test_leave_application import get_first_sunday
+from erpnext.hr.tests.test_utils import get_first_sunday
 
 test_records = frappe.get_test_records("Attendance")
 
