@@ -6,32 +6,36 @@ frappe.query_reports["BOM Stock Report"] = {
 			"fieldtype": "Link",
 			"options": "BOM",
 			"reqd": 1
-		}, {
+		},
+		{
 			"fieldname": "warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
 			"options": "Warehouse",
-			"reqd": 1
-		}, {
-			"fieldname": "show_exploded_view",
-			"label": __("Show exploded view"),
-			"fieldtype": "Check"
-		}, {
+		},
+		{
 			"fieldname": "qty_to_produce",
 			"label": __("Quantity to Produce"),
-			"fieldtype": "Int",
-			"default": "1"
+			"fieldtype": "Float",
+			"default": 1
 		 },
+		{
+			"fieldname": "show_exploded_view",
+			"label": __("Show Exploded View"),
+			"fieldtype": "Check"
+		},
 	],
-	"formatter": function(value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
-		if (column.id == "Item"){
-			if (data["Enough Parts to Build"] > 0){
-				value = `<a style='color:green' href="#Form/Item/${data['Item']}" data-doctype="Item">${data['Item']}</a>`
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (["item_code", "producible_qty"].includes(column.fieldname)) {
+			if (flt(data["producible_qty"]) > 0) {
+				style['color'] = 'green';
 			} else {
-				value = `<a style='color:red' href="#Form/Item/${data['Item']}" data-doctype="Item">${data['Item']}</a>`
+				style['color'] = 'red';
 			}
 		}
-		return value
+
+		return default_formatter(value, row, column, data, {css: style});
 	}
 }

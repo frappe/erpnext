@@ -3,78 +3,80 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import flt
 from frappe import _
+from erpnext.stock.doctype.item.item import convert_item_uom_for
+
 
 def execute(filters=None):
-	if not filters: filters = {}
-
-	columns = get_columns()
+	filters = frappe._dict(filters)
 
 	data = get_bom_stock(filters)
+	columns = get_columns()
 
 	return columns, data
 
-def get_columns():
-	"""return columns"""
-	columns = [
-		_("Item") + ":Link/Item:150",
-		_("Description") + "::300",
-		_("BOM Qty") + ":Float:160",
-		_("Required Qty") + ":Float:120",
-		_("In Stock Qty") + ":Float:120",
-		_("Enough Parts to Build") + ":Float:200",
-	]
-
-	return columns
 
 def get_bom_stock(filters):
-	conditions = ""
-	bom = filters.get("bom")
-
-	table = "`tabBOM Item`"
-	qty_field = "qty"
-
-	qty_to_produce = filters.get("qty_to_produce", 1)
-	if  int(qty_to_produce) <= 0:
+	qty_to_produce = flt(filters.get("qty_to_produce", 1)) or 1
+	if flt(qty_to_produce) <= 0:
 		frappe.throw(_("Quantity to Produce can not be less than Zero"))
 
+	bom_item_table = "tabBOM Item"
 	if filters.get("show_exploded_view"):
-		table = "`tabBOM Explosion Item`"
-		qty_field = "stock_qty"
+		bom_item_table = "tabBOM Explosion Item"
+
+	conditions = get_conditions(filters)
+
+	data = frappe.db.sql("""
+		SELECT bom_item.item_code, bom_item.item_name,
+			bom_item.qty as bom_qty,
+			bom_item.qty * {qty_to_produce} / bom.quantity as required_qty,
+			bom_item.uom, bin.stock_uom,
+			sum(bin.actual_qty) as actual_qty,
+			bom.quantity as bom_unit_qty
+		FROM `tabBOM` bom
+		INNER JOIN `{bom_item_table}` bom_item ON bom_item.parent = bom.name and bom_item.parenttype = 'BOM'
+		LEFT JOIN `tabBin` bin ON bom_item.item_code = bin.item_code
+		WHERE {conditions}
+		GROUP BY bom_item.item_code
+		ORDER BY bom_item.idx
+	""".format(bom_item_table=bom_item_table, conditions=conditions, qty_to_produce=qty_to_produce), filters, as_dict=1)
+
+	for d in data:
+		d.actual_qty = convert_item_uom_for(d.actual_qty, d.item_code, d.stock_uom, d.uom)
+		d.producible_qty = (d.actual_qty / (d.bom_qty / d.bom_unit_qty))
+
+	return data
+
+
+def get_conditions(filters):
+	conditions = []
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 		if warehouse_details:
-			conditions += " and exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and ledger.warehouse = wh.name)" % (warehouse_details.lft,
-				warehouse_details.rgt)
+			conditions.append("""exists (select name from `tabWarehouse` wh
+				where wh.lft >= {0} and wh.rgt <= {1} and bin.warehouse = wh.name)
+			""".format(warehouse_details.lft, warehouse_details.rgt))
 		else:
-			conditions += " and ledger.warehouse = %s" % frappe.db.escape(filters.get("warehouse"))
+			conditions.append("bin.warehouse = {0}".format(frappe.db.escape(filters.get("warehouse"))))
 
-	else:
-		conditions += ""
+	if filters.get("bom"):
+		conditions.append("bom.name = %(bom)s")
 
-	return frappe.db.sql("""
-			SELECT
-				bom_item.item_code,
-				bom_item.description ,
-				bom_item.{qty_field},
-				bom_item.{qty_field} * {qty_to_produce} / bom.quantity,
-				sum(ledger.actual_qty) as actual_qty,
-				sum(FLOOR(ledger.actual_qty / (bom_item.{qty_field} * {qty_to_produce} / bom.quantity)))
-			FROM
-				`tabBOM` AS bom INNER JOIN {table} AS bom_item
-					ON bom.name = bom_item.parent
-				LEFT JOIN `tabBin` AS ledger
-					ON bom_item.item_code = ledger.item_code
-				{conditions}
-			WHERE
-				bom_item.parent = '{bom}' and bom_item.parenttype='BOM'
+	return " and ".join(conditions)
 
-			GROUP BY bom_item.item_code""".format(
-				qty_field=qty_field,
-				table=table,
-				conditions=conditions,
-				bom=bom,
-				qty_to_produce=qty_to_produce or 1)
-			)
+
+def get_columns():
+	columns = [
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item"},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data"},
+		{"label": _("UOM"), "fieldtype": "Link", "options": "UOM", "fieldname": "uom", "width": 50},
+		{"label": _("BOM Qty"), "fieldname": "bom_qty", "fieldtype": "Float"},
+		{"label": _("Required Qty"), "fieldname": "required_qty", "fieldtype": "Float"},
+		{"label": _("In Stock"), "fieldname": "actual_qty", "fieldtype": "Float"},
+		{"label": _("Enough To Produce"), "fieldname": "producible_qty", "fieldtype": "Float"},
+	]
+
+	return columns
