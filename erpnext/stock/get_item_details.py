@@ -893,7 +893,8 @@ def get_price_list_rate_for(args, item_code):
 			return item_price_data[0][1]
 		elif args.get('price_list_uom_dependant'):
 			return convert_item_uom_for(value=item_price_data[0][1], item_code=item_code,
-				from_uom=item_price_data[0][2], to_uom=args.get("uom"), conversion_factor=args.get("conversion_factor"))
+				from_uom=item_price_data[0][2], to_uom=args.get("uom"),
+				conversion_factor=args.get("conversion_factor"), is_rate=True)
 		else:
 			return item_price_data[0][1]
 

@@ -1235,29 +1235,41 @@ def get_uom_conv_factor(from_uom, to_uom):
 	return get_uom_conv_factor(from_uom, to_uom)
 
 @frappe.whitelist()
-def convert_item_uom_for(value, item_code, from_uom=None, to_uom=None, conversion_factor=None, null_if_not_convertible=False):
+def convert_item_uom_for(value, item_code, from_uom=None, to_uom=None, conversion_factor=None,
+		null_if_not_convertible=False, is_rate=False):
 	from erpnext.stock.get_item_details import get_conversion_factor
 
 	value = flt(value)
 	conversion_factor = flt(conversion_factor)
 
 	if cstr(from_uom) != cstr(to_uom):
+		# From UOM to Stock UOM
 		from_uom = from_uom or frappe.get_cached_value("Item", item_code, 'stock_uom')
 
 		from_stock_uom_conversion = get_conversion_factor(item_code, from_uom)
 		if from_stock_uom_conversion.get('not_convertible') and null_if_not_convertible:
 			return None
 
-		value /= flt(from_stock_uom_conversion.get('conversion_factor'))
+		if is_rate:
+			value /= flt(from_stock_uom_conversion.get('conversion_factor'))
+		else:
+			value *= flt(from_stock_uom_conversion.get('conversion_factor'))
 
+		# Stock UOM to To UOM
 		if conversion_factor:
-			value *= conversion_factor
+			if is_rate:
+				value *= conversion_factor
+			else:
+				value /= conversion_factor
 		else:
 			to_uom_conversion = get_conversion_factor(item_code, to_uom)
 			if to_uom_conversion.get('not_convertible') and null_if_not_convertible:
 				return None
 
-			value *= flt(to_uom_conversion.get('conversion_factor'))
+			if is_rate:
+				value *= flt(to_uom_conversion.get('conversion_factor'))
+			else:
+				value /= flt(to_uom_conversion.get('conversion_factor'))
 
 	return value
 

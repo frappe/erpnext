@@ -135,7 +135,7 @@ def get_data(filters):
 		d['print_in_price_list'] = cint(not d['hide_in_price_list'])
 		del d['hide_in_price_list']
 
-		d['alt_uom_size'] = convert_item_uom_for(d.alt_uom_size, d.item_code, d.stock_uom, d.uom)
+		d['alt_uom_size'] = convert_item_uom_for(d.alt_uom_size, d.item_code, d.uom, d.stock_uom)
 		items_map[d.item_code] = d
 
 	for d in po_data:
@@ -150,7 +150,7 @@ def get_data(filters):
 		for d in item_prices:
 			if d.item_code in items_map:
 				d.price_list_rate = convert_item_uom_for(d.price_list_rate, d.item_code, d.uom, items_map[d.item_code]['uom'],
-					null_if_not_convertible=True)
+					null_if_not_convertible=True, is_rate=True)
 
 	item_price_map = {}
 	for d in item_price_data:
@@ -181,9 +181,8 @@ def get_data(filters):
 				price.previous_price = d.price_list_rate
 
 	for item_code, d in iteritems(items_map):
-		conversion_factor = convert_item_uom_for(1, d.item_code, d.stock_uom, d.uom)
-		d.actual_qty = flt(d.actual_qty) / conversion_factor
-		d.po_qty = flt(d.po_qty) / conversion_factor
+		d.actual_qty = convert_item_uom_for(flt(d.actual_qty), d.item_code, d.stock_uom, d.uom)
+		d.po_qty = convert_item_uom_for(flt(d.po_qty), d.item_code, d.stock_uom, d.uom)
 
 		d.po_lc_rate = flt(d.po_lc_amount) / d.po_qty if d.po_qty else 0
 		d.valuation_rate = flt(d.stock_value) / d.actual_qty if d.actual_qty else 0
@@ -396,7 +395,8 @@ def _set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uo
 		item_price_precision = get_field_precision(frappe.get_meta("Item Price").get_field('price_list_rate'))
 		current_effective_item_price_uom = frappe.db.get_value("Item Price", current_effective_item_price[0], "uom")
 
-		converted_rate = convert_item_uom_for(price_list_rate, item_code, uom, current_effective_item_price_uom, conversion_factor)
+		converted_rate = convert_item_uom_for(price_list_rate, item_code, uom, current_effective_item_price_uom,
+			conversion_factor=conversion_factor, is_rate=True)
 		if flt(converted_rate, item_price_precision) == flt(current_effective_item_price[1], item_price_precision):
 			frappe.msgprint(_("Rate not set for Item {0} because it is the same").format(item_code, price_list),
 				alert=1, indicator="blue")
@@ -409,7 +409,8 @@ def _set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uo
 	# Update or add item price
 	if existing_item_price:
 		doc = frappe.get_doc("Item Price", existing_item_price[0])
-		converted_rate = convert_item_uom_for(price_list_rate, item_code, uom, doc.uom, conversion_factor)
+		converted_rate = convert_item_uom_for(price_list_rate, item_code, uom, doc.uom,
+			conversion_factor=conversion_factor, is_rate=True)
 		doc.price_list_rate = converted_rate
 	else:
 		doc = frappe.new_doc("Item Price")
