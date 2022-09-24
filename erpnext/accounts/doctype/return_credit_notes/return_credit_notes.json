@@ -443,15 +443,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Return credit notes",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "cai_info_section",
    "fieldtype": "Section Break",
