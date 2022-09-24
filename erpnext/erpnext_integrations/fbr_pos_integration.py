@@ -297,7 +297,7 @@ def get_invoice_data(invoice):
 		item_data.TaxCharged = flt(pos_item.fbr_pos_tax_charged)
 		item_data.FurtherTax = flt(pos_item.fbr_pos_further_tax)
 
-		item_data.TotalAmount = flt(pos_item.fbr_pos_further_tax)
+		item_data.TotalAmount = flt(pos_item.fbr_pos_total_amount)
 
 	return invoice_data
 
