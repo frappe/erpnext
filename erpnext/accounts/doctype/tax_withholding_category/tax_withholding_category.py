@@ -109,7 +109,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 			).format(tax_withholding_category, inv.company, party)
 		)
 
-	tax_amount, tax_deducted, tax_deducted_on_advances = get_tax_amount(
+	tax_amount, tax_deducted, tax_deducted_on_advances, voucher_wise_amount = get_tax_amount(
 		party_type, parties, inv, tax_details, posting_date, pan_no
 	)
 
@@ -119,7 +119,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
 	if inv.doctype == "Purchase Invoice":
-		return tax_row, tax_deducted_on_advances
+		return tax_row, tax_deducted_on_advances, voucher_wise_amount
 	else:
 		return tax_row
 
@@ -217,7 +217,9 @@ def get_lower_deduction_certificate(tax_details, pan_no):
 
 
 def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=None):
-	vouchers = get_invoice_vouchers(parties, tax_details, inv.company, party_type=party_type)
+	vouchers, voucher_wise_amount = get_invoice_vouchers(
+		parties, tax_details, inv.company, party_type=party_type
+	)
 	advance_vouchers = get_advance_vouchers(
 		parties,
 		company=inv.company,
@@ -236,6 +238,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		tax_deducted = get_deducted_tax(taxable_vouchers, tax_details)
 
 	tax_amount = 0
+
 	if party_type == "Supplier":
 		ldc = get_lower_deduction_certificate(tax_details, pan_no)
 		if tax_deducted:
@@ -261,12 +264,13 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	if cint(tax_details.round_off_tax_amount):
 		tax_amount = round(tax_amount)
 
-	return tax_amount, tax_deducted, tax_deducted_on_advances
+	return tax_amount, tax_deducted, tax_deducted_on_advances, voucher_wise_amount
 
 
 def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
-	dr_or_cr = "credit" if party_type == "Supplier" else "debit"
 	doctype = "Purchase Invoice" if party_type == "Supplier" else "Sales Invoice"
+	voucher_wise_amount = {}
+	vouchers = []
 
 	filters = {
 		"company": company,
@@ -281,29 +285,40 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
 
-	invoices = frappe.get_all(doctype, filters=filters, pluck="name") or [""]
+	invoices_details = frappe.get_all(doctype, filters=filters, fields=["name", "base_net_total"])
 
-	journal_entries = frappe.db.sql(
+	for d in invoices_details:
+		vouchers.append(d.name)
+		voucher_wise_amount.update({d.name: {"amount": d.base_net_total, "voucher_type": doctype}})
+
+	journal_entries_details = frappe.db.sql(
 		"""
-		SELECT j.name
+		SELECT j.name, ja.credit - ja.debit AS amount
 			FROM `tabJournal Entry` j, `tabJournal Entry Account` ja
 		WHERE
-			j.docstatus = 1
+			j.name = ja.parent
+			AND j.docstatus = 1
 			AND j.is_opening = 'No'
 			AND j.posting_date between %s and %s
-			AND ja.{dr_or_cr} > 0
 			AND ja.party in %s
-	""".format(
-			dr_or_cr=dr_or_cr
+			AND j.apply_tds = 1
+			AND j.tax_withholding_category = %s
+	""",
+		(
+			tax_details.from_date,
+			tax_details.to_date,
+			tuple(parties),
+			tax_details.get("tax_withholding_category"),
 		),
-		(tax_details.from_date, tax_details.to_date, tuple(parties)),
-		as_list=1,
+		as_dict=1,
 	)
 
-	if journal_entries:
-		journal_entries = journal_entries[0]
+	if journal_entries_details:
+		for d in journal_entries_details:
+			vouchers.append(d.name)
+			voucher_wise_amount.update({d.name: {"amount": d.amount, "voucher_type": "Journal Entry"}})
 
-	return invoices + journal_entries
+	return vouchers, voucher_wise_amount
 
 
 def get_advance_vouchers(
@@ -329,23 +344,25 @@ def get_advance_vouchers(
 
 
 def get_taxes_deducted_on_advances_allocated(inv, tax_details):
-	advances = [d.reference_name for d in inv.get("advances")]
 	tax_info = []
 
-	if advances:
-		pe = frappe.qb.DocType("Payment Entry").as_("pe")
-		at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+	if inv.get("advances"):
+		advances = [d.reference_name for d in inv.get("advances")]
 
-		tax_info = (
-			frappe.qb.from_(at)
-			.inner_join(pe)
-			.on(pe.name == at.parent)
-			.select(at.parent, at.name, at.tax_amount, at.allocated_amount)
-			.where(pe.tax_withholding_category == tax_details.get("tax_withholding_category"))
-			.where(at.parent.isin(advances))
-			.where(at.account_head == tax_details.account_head)
-			.run(as_dict=True)
-		)
+		if advances:
+			pe = frappe.qb.DocType("Payment Entry").as_("pe")
+			at = frappe.qb.DocType("Advance Taxes and Charges").as_("at")
+
+			tax_info = (
+				frappe.qb.from_(at)
+				.inner_join(pe)
+				.on(pe.name == at.parent)
+				.select(at.parent, at.name, at.tax_amount, at.allocated_amount)
+				.where(pe.tax_withholding_category == tax_details.get("tax_withholding_category"))
+				.where(at.parent.isin(advances))
+				.where(at.account_head == tax_details.account_head)
+				.run(as_dict=True)
+			)
 
 	return tax_info
 
@@ -393,11 +410,6 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 
 	supp_credit_amt += supp_jv_credit_amt
 	supp_credit_amt += inv.net_total
-
-	debit_note_amount = get_debit_note_amount(
-		parties, tax_details.from_date, tax_details.to_date, inv.company
-	)
-	supp_credit_amt -= debit_note_amount
 
 	threshold = tax_details.get("threshold", 0)
 	cumulative_threshold = tax_details.get("cumulative_threshold", 0)
@@ -513,22 +525,6 @@ def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net
 		)
 
 	return tds_amount
-
-
-def get_debit_note_amount(suppliers, from_date, to_date, company=None):
-
-	filters = {
-		"supplier": ["in", suppliers],
-		"is_return": 1,
-		"docstatus": 1,
-		"posting_date": ["between", (from_date, to_date)],
-	}
-	fields = ["abs(sum(net_total)) as net_total"]
-
-	if company:
-		filters["company"] = company
-
-	return frappe.get_all("Purchase Invoice", filters, fields)[0].get("net_total") or 0.0
 
 
 def get_ltds_amount(current_amount, deducted_amount, certificate_limit, rate, tax_details):
