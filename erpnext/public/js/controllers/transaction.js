@@ -1492,7 +1492,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						frappe.model.set_value(child.doctype, child.name, "rate", value);
 					}
 
+					if (key === "pricing_rules") {
+						frappe.model.set_value(child.doctype, child.name, key, value);
+					}
+
 					if (key !== "free_item_data") {
+						if (child.apply_rule_on_other_items && JSON.parse(child.apply_rule_on_other_items).length) {
+							if (!in_list(JSON.parse(child.apply_rule_on_other_items), child.item_code)) {
+								continue;
+							}
+						}
+
 						frappe.model.set_value(child.doctype, child.name, key, value);
 					}
 				}
@@ -1510,11 +1520,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				this.remove_pricing_rule(frappe.get_doc(child.doctype, child.name));
 			}
 
-			if (child.free_item_data.length > 0) {
+			if (child.free_item_data && child.free_item_data.length > 0) {
 				this.apply_product_discount(child);
 			}
 
-			if (child.apply_rule_on_other_items) {
+			if (child.apply_rule_on_other_items && JSON.parse(child.apply_rule_on_other_items).length) {
 				items_rule_dict[child.name] = child;
 			}
 		}
@@ -1530,11 +1540,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		for(var k in args) {
 			let data = args[k];
 
-			if (data && data.apply_rule_on_other_items) {
+			if (data && data.apply_rule_on_other_items && JSON.parse(data.apply_rule_on_other_items)) {
 				me.frm.doc.items.forEach(d => {
-					if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
+					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
 						for(var k in data) {
-							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'price' || k === 'pricing_rules')) {
+							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'Price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
 						}

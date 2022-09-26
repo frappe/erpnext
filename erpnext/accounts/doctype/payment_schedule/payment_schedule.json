@@ -39,6 +39,7 @@
   {
    "columns": 2,
    "fetch_from": "payment_term.description",
+   "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Small Text",
    "in_list_view": 1,
@@ -159,7 +160,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-28 05:41:35.084233",
+ "modified": "2022-09-16 13:57:06.382859",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
@@ -168,5 +169,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

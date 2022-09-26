@@ -52,7 +52,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		invoices.append(pi)
 
 		# delete invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_single_threshold_tds(self):
@@ -88,7 +88,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		self.assertEqual(pi.taxes_and_charges_deducted, 1000)
 
 		# delete invoices to avoid clashing
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_tax_withholding_category_checks(self):
@@ -114,7 +114,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		# TDS should be applied only on 1000
 		self.assertEqual(pi1.taxes[0].tax_amount, 1000)
 
-		for d in invoices:
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_cumulative_threshold_tcs(self):
@@ -148,8 +148,8 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		self.assertEqual(tcs_charged, 500)
 		invoices.append(si)
 
-		# delete invoices to avoid clashing
-		for d in invoices:
+		# cancel invoices to avoid clashing
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_tds_calculation_on_net_total(self):
@@ -182,8 +182,8 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 		self.assertEqual(pi1.taxes[0].tax_amount, 4000)
 
-		# delete invoices to avoid clashing
-		for d in invoices:
+		# cancel invoices to avoid clashing
+		for d in reversed(invoices):
 			d.cancel()
 
 	def test_multi_category_single_supplier(self):
@@ -207,8 +207,50 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 		self.assertEqual(pi1.taxes[0].tax_amount, 250)
 
-		# delete invoices to avoid clashing
-		for d in invoices:
+		# cancel invoices to avoid clashing
+		for d in reversed(invoices):
+			d.cancel()
+
+	def test_tax_withholding_category_voucher_display(self):
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier6", "tax_withholding_category", "Test Multi Invoice Category"
+		)
+		invoices = []
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier6", rate=4000, do_not_save=True)
+		pi.apply_tds = 1
+		pi.tax_withholding_category = "Test Multi Invoice Category"
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
+
+		pi1 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=2000, do_not_save=True)
+		pi1.apply_tds = 1
+		pi1.is_return = 1
+		pi1.items[0].qty = -1
+		pi1.tax_withholding_category = "Test Multi Invoice Category"
+		pi1.save()
+		pi1.submit()
+		invoices.append(pi1)
+
+		pi2 = create_purchase_invoice(supplier="Test TDS Supplier6", rate=9000, do_not_save=True)
+		pi2.apply_tds = 1
+		pi2.tax_withholding_category = "Test Multi Invoice Category"
+		pi2.save()
+		pi2.submit()
+		invoices.append(pi2)
+
+		pi2.load_from_db()
+
+		self.assertTrue(pi2.taxes[0].tax_amount, 1100)
+
+		self.assertTrue(pi2.tax_withheld_vouchers[0].voucher_name == pi1.name)
+		self.assertTrue(pi2.tax_withheld_vouchers[0].taxable_amount == pi1.net_total)
+		self.assertTrue(pi2.tax_withheld_vouchers[1].voucher_name == pi.name)
+		self.assertTrue(pi2.tax_withheld_vouchers[1].taxable_amount == pi.net_total)
+
+		# cancel invoices to avoid clashing
+		for d in reversed(invoices):
 			d.cancel()
 
 
@@ -308,6 +350,7 @@ def create_records():
 		"Test TDS Supplier3",
 		"Test TDS Supplier4",
 		"Test TDS Supplier5",
+		"Test TDS Supplier6",
 	]:
 		if frappe.db.exists("Supplier", name):
 			continue
@@ -493,6 +536,25 @@ def create_tax_with_holding_category():
 						"tax_withholding_rate": 10,
 						"single_threshold": 2000,
 						"cumulative_threshold": 2000,
+					}
+				],
+				"accounts": [{"company": "_Test Company", "account": "TDS - _TC"}],
+			}
+		).insert()
+
+	if not frappe.db.exists("Tax Withholding Category", "Test Multi Invoice Category"):
+		frappe.get_doc(
+			{
+				"doctype": "Tax Withholding Category",
+				"name": "Test Multi Invoice Category",
+				"category_name": "Test Multi Invoice Category",
+				"rates": [
+					{
+						"from_date": fiscal_year[1],
+						"to_date": fiscal_year[2],
+						"tax_withholding_rate": 10,
+						"single_threshold": 5000,
+						"cumulative_threshold": 10000,
 					}
 				],
 				"accounts": [{"company": "_Test Company", "account": "TDS - _TC"}],

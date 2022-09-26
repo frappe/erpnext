@@ -205,20 +205,10 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	}
 
 	make_stock_entry() {
-		frappe.model.open_mapped_doc({
-			method: 'erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_subcontracting_order',
-			source_name: cur_frm.doc.name,
-			freeze: true,
-			freeze_message: __('Creating Stock Entry ...')
-		});
-	}
-
-	make_rm_stock_entry(rm_items) {
 		frappe.call({
 			method: 'erpnext.controllers.subcontracting_controller.make_rm_stock_entry',
 			args: {
 				subcontract_order: cur_frm.doc.name,
-				rm_items: rm_items,
 				order_doctype: cur_frm.doc.doctype
 			},
 			callback: (r) => {
