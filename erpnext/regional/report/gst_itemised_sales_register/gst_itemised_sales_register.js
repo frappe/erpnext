@@ -15,12 +15,6 @@ filters = filters.concat({
     "placeholder":"Company GSTIN",
     "options": [""],
     "width": "80"
-}, {
-    "fieldname":"invoice_type",
-    "label": __("Invoice Type"),
-    "fieldtype": "Select",
-    "placeholder":"Invoice Type",
-    "options": ["", "Regular", "SEZ", "Export", "Deemed Export"]
 });
 
 // Handle company on change
