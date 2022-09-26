@@ -142,12 +142,14 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		precision = self.get_debit_field_precision()
 		for item_row in voucher_details:
-
 			sle_list = sle_map.get(item_row.name)
+			sle_rounding_diff = 0.0
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
+
+						sle_rounding_diff += flt(sle.stock_value_difference, precision)
 
 						self.check_expense_account(item_row)
 
@@ -190,6 +192,42 @@ class StockController(AccountsController):
 						)
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
+
+			if sle_rounding_diff > 0:
+				expense_account = item_row.get("expense_account")
+				target_warehouse_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+				source_warehouse_account = warehouse_account[item_row.get("warehouse")]["account"]
+
+				gl_list.append(
+					self.get_gl_dict(
+						{
+							"account": target_warehouse_account or expense_account,
+							"against": expense_account,
+							"cost_center": item_row.cost_center,
+							"project": item_row.project or self.get("project"),
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": sle_rounding_diff,
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+						},
+						warehouse_account[sle.warehouse]["account_currency"],
+						item=item_row,
+					)
+				)
+
+				gl_list.append(
+					self.get_gl_dict(
+						{
+							"account": source_warehouse_account or expense_account,
+							"against": target_warehouse_account,
+							"cost_center": item_row.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": -1 * sle_rounding_diff,
+							"project": item_row.get("project") or self.get("project"),
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+						},
+						item=item_row,
+					)
+				)
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
