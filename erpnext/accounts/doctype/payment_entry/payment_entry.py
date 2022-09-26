@@ -68,6 +68,7 @@ class PaymentEntry(AccountsController):
 
 		if self.docstatus == 1:
 			self.update_accounts_status()
+			self.paid_sales_invoice()
 			self.paid_supplier_documents()
 			self.paid_credit_note_cxp()
 			self.paid_customer_documents()
@@ -221,12 +222,43 @@ class PaymentEntry(AccountsController):
 			self.update_dashboard_customer_cancel()
 		if self.party_type == "Supplier":
 			self.update_dashboard_supplier_cancel()
+		# self. paid_sales_invoice_cancel()
 		self.paid_supplier_documents_cancel()
 		self.paid_credit_note_cxp_cancel()
 		self.paid_customer_documents_cancel()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
+	
+	def paid_sales_invoice(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Sales Invoice":
+				doc = frappe.get_doc("Sales Invoice", document.reference_name)
+				outstanding = doc.outstanding_amount - document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+
+				if outstanding == 0:
+					doc.db_set('status', "Paid", update_modified=False)
+				else:
+					doc.db_set('status', "Unpaid", update_modified=False)
+	
+	def paid_sales_invoice_cancel(self):
+		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})
+
+		for document in documents:
+			if document.reference_doctype == "Sales Invoice":
+				doc = frappe.get_doc("Sales Invoice", document.reference_name)
+				outstanding = doc.outstanding_amount + document.allocated_amount 
+
+				doc.db_set('outstanding_amount', outstanding, update_modified=False)
+
+				if outstanding == 0:
+					doc.db_set('status', "Paid", update_modified=False)
+				else:
+					doc.db_set('status', "Unpaid", update_modified=False)
 
 	def paid_supplier_documents(self):
 		documents = frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": self.name})

@@ -46,7 +46,8 @@ class ReceivablePayableReport(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
-		self.customer_documents()
+		if self.filters.get("party_type") == 'Customer':
+			self.customer_documents()
 		return self.columns, self.data, None, self.chart
 	
 	def customer_documents(self):
@@ -71,6 +72,7 @@ class ReceivablePayableReport(object):
 
 		conditions += ', "company": "{}"'.format(self.filters.get("company"))
 		conditions += ', "outstanding_amount": [">", 0]'
+		if self.filters.get("customer"): conditions += ', "customer": "{}"'.format(self.filters.get("customer"))
 		conditions += '}'
 
 		return conditions
