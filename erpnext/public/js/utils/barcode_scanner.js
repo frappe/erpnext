@@ -21,6 +21,11 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		this.items_table_name = opts.items_table_name || "items";
 		this.items_table = this.frm.doc[this.items_table_name];
 
+		// optional sound name to play when scan either fails or passes.
+		// see https://frappeframework.com/docs/v14/user/en/python-api/hooks#sounds
+		this.success_sound = opts.play_success_sound;
+		this.fail_sound = opts.play_fail_sound;
+
 		// any API that takes `search_value` as input and returns dictionary as follows
 		// {
 		//     item_code: "HORSESHOE", // present if any item was found
@@ -54,19 +59,24 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 					if (!data || Object.keys(data).length === 0) {
 						this.show_alert(__("Cannot find Item with this Barcode"), "red");
 						this.clean_up();
+						this.play_fail_sound();
 						reject();
 						return;
 					}
 
 					me.update_table(data).then(row => {
-						row ? resolve(row) : reject();
+						this.play_success_sound();
+						resolve(row);
+					}).catch(() => {
+						this.play_fail_sound();
+						reject();
 					});
 				});
 		});
 	}
 
 	update_table(data) {
-		return new Promise(resolve => {
+		return new Promise((resolve, reject) => {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
 
 			const {item_code, barcode, batch_no, serial_no, uom} = data;
@@ -77,6 +87,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				if (this.dont_allow_new_row) {
 					this.show_alert(__("Maximum quantity scanned for item {0}.", [item_code]), "red");
 					this.clean_up();
+					reject();
 					return;
 				}
 
@@ -88,6 +99,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			if (this.is_duplicate_serial_no(row, serial_no)) {
 				this.clean_up();
+				reject();
 				return;
 			}
 
@@ -217,6 +229,14 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	get_existing_blank_row() {
 		return this.items_table.find((d) => !d.item_code);
+	}
+
+	play_success_sound() {
+		this.success_sound && frappe.utils.play_sound(this.success_sound);
+	}
+
+	play_fail_sound() {
+		this.fail_sound && frappe.utils.play_sound(this.fail_sound);
 	}
 
 	clean_up() {
