@@ -14,6 +14,7 @@ from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
 	reconcile_against_document,
+	update_reference_in_payment_entry,
 )
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
@@ -212,6 +213,23 @@ class PaymentReconciliation(Document):
 			inv.currency = entry.get("currency")
 			inv.outstanding_amount = flt(entry.get("outstanding_amount"))
 
+	def get_difference_amount(self, allocated_entry):
+		if allocated_entry.get("reference_type") != "Payment Entry":
+			return
+
+		dr_or_cr = (
+			"credit_in_account_currency"
+			if erpnext.get_party_account_type(self.party_type) == "Receivable"
+			else "debit_in_account_currency"
+		)
+
+		row = self.get_payment_details(allocated_entry, dr_or_cr)
+
+		doc = frappe.get_doc(allocated_entry.reference_type, allocated_entry.reference_name)
+		update_reference_in_payment_entry(row, doc, do_not_save=True)
+
+		return doc.difference_amount
+
 	@frappe.whitelist()
 	def allocate_entries(self, args):
 		self.validate_entries()
@@ -227,12 +245,16 @@ class PaymentReconciliation(Document):
 					res = self.get_allocated_entry(pay, inv, pay["amount"])
 					inv["outstanding_amount"] = flt(inv.get("outstanding_amount")) - flt(pay.get("amount"))
 					pay["amount"] = 0
+
+				res.difference_amount = self.get_difference_amount(res)
+
 				if pay.get("amount") == 0:
 					entries.append(res)
 					break
 				elif inv.get("outstanding_amount") == 0:
 					entries.append(res)
 					continue
+
 			else:
 				break
 
