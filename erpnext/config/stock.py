@@ -14,6 +14,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Inventory Adjustment",
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
 					"name": "Delivery Note",
 					"onboard": 1,
 					"dependencies": ["Item", "Customer"],
