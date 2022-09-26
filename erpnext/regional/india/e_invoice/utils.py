@@ -894,6 +894,7 @@ class GSPConnector:
 		return self.e_invoice_settings.auth_token
 
 	def make_request(self, request_type, url, headers=None, data=None):
+		res = None
 		try:
 			if request_type == "post":
 				res = make_post_request(url, headers=headers, data=data)
