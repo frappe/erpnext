@@ -198,7 +198,9 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				((so_item.qty - so_item.work_order_qty) * so_item.conversion_factor).as_("pending_qty"),
+				(
+					(so_item.qty - so_item.work_order_qty - so_item.delivered_qty) * so_item.conversion_factor
+				).as_("pending_qty"),
 				so_item.description,
 				so_item.name,
 			)
@@ -892,6 +894,7 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 		.select(
 			(IfNull(Sum(bei.stock_qty / IfNull(bom.quantity, 1)), 0) * planned_qty).as_("qty"),
 			item.item_name,
+			item.name.as_("item_code"),
 			bei.description,
 			bei.stock_uom,
 			item.min_order_qty,
