@@ -113,6 +113,11 @@ class StockEntry(StockController):
 		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",stock_entry_name=stock_gl.stock_entry,queue="gl",enqueue_after_commit=True)
 		# #enqueue(StockEntry.make_gl_entries, self=self, queue='short')
 		# self.make_gl_entries()
+		# update slu
+		sles = frappe.db.sql(f'''SELECT * from `tabStock Ledger Entry` WHERE voucher_no = '{self.name}' ''', as_dict=True)
+		for sle in sles:
+			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=sle.name,warehouse=sle.warehouse,item_code=sle.item_code,created_on=sle.creation,queue="slu_primary",enqueue_after_commit=True)
+
 
 	def on_cancel(self):
 
