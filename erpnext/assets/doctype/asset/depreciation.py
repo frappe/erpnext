@@ -243,6 +243,7 @@ def restore_asset(asset_name):
 
 	asset.set_status()
 
+
 def depreciate_asset(asset, date):
 	asset.flags.ignore_validate_update_after_submit = True
 	asset.prepare_depreciation_data(date_of_disposal=date)
@@ -326,6 +327,7 @@ def disposal_happens_in_the_future(posting_date_of_disposal):
 		return True
 
 	return False
+
 
 def get_gl_entries_on_asset_regain(
 	asset, selling_amount=0, finance_book=None, voucher_type=None, voucher_no=None
