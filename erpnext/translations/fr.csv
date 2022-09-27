@@ -4938,12 +4938,15 @@ Is Cumulative,Est cumulatif,
 Coupon Code Based,Code de coupon basé,
 Discount on Other Item,Remise sur un autre article,
 Apply Rule On Other,Appliquer la règle sur autre,
-Party Information,Informations sur la fête,
+Party Information,Informations sur le tier,
 Quantity and Amount,Quantité et montant,
 Min Qty,Qté Min,
 Max Qty,Qté Max,
-Min Amt,Min Amt,
-Max Amt,Max Amt,
+Min Amt,Montant Min,
+Max Amt,Montant Max,
+"If rate is zero them item will be treated as ""Free Item""",Si le prix est à 0 alors l'article sera traité comme article gratuit
+Is Recursive,Est récursif
+"Discounts to be applied in sequential ranges like buy 1 get 1, buy 2 get 2, buy 3 get 3 and so on",La remise sera appliquée séquencillement telque : achater 1 => recupérer 1,achater 2 => recupérer 2,achater 3 => recupérer 3, etc...
 Period Settings,Paramètres de période,
 Margin,Marge,
 Margin Type,Type de Marge,
