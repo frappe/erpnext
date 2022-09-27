@@ -712,7 +712,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_49",
    "fieldtype": "Section Break",
    "label": "Additional Discount"
@@ -1387,7 +1386,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 12:49:21.640004",
+ "modified": "2022-09-27 14:51:31.964085",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
