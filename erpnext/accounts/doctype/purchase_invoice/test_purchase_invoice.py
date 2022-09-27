@@ -1543,6 +1543,37 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 		pi.save()
 		self.assertEqual(pi.items[0].conversion_factor, 1000)
 
+	def test_batch_expiry_for_purchase_invoice(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+
+		item = self.make_item(
+			"_Test Batch Item For Return Check",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBIRC.#####",
+			},
+		)
+
+		pi = make_purchase_invoice(
+			qty=1,
+			item_code=item.name,
+			update_stock=True,
+		)
+
+		pi.load_from_db()
+		batch_no = pi.items[0].batch_no
+		self.assertTrue(batch_no)
+
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(nowdate(), -1))
+
+		return_pi = make_return_doc(pi.doctype, pi.name)
+		return_pi.save().submit()
+
+		self.assertTrue(return_pi.docstatus == 1)
+
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(

@@ -1084,7 +1084,7 @@ class SalesInvoice(SellingController):
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
 						)
 						asset.db_set("disposal_date", None)
 
@@ -1099,7 +1099,7 @@ class SalesInvoice(SellingController):
 							asset.reload()
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
 						)
 						asset.db_set("disposal_date", self.posting_date)
 
@@ -2434,7 +2434,6 @@ def create_dunning(source_name, target_doc=None):
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
 			amounts = calculate_interest_and_amount(
-				target.posting_date,
 				target.outstanding_amount,
 				target.rate_of_interest,
 				target.dunning_fee,
