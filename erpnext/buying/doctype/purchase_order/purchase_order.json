@@ -13,12 +13,12 @@
   "naming_series",
   "supplier",
   "supplier_name",
+  "order_confirmation_no",
+  "order_confirmation_date",
   "get_items_from_open_material_requests",
   "column_break_7",
   "transaction_date",
   "schedule_date",
-  "order_confirmation_no",
-  "order_confirmation_date",
   "column_break1",
   "company",
   "apply_tds",
@@ -95,26 +95,21 @@
   "discount_amount",
   "sec_tax_breakup",
   "other_charges_calculation",
-  "contacts_and_addresses_tab",
+  "address_and_contact_tab",
   "section_addresses",
   "supplier_address",
   "address_display",
+  "col_break_address",
   "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "col_break_address",
+  "company_shipping_address_section",
   "shipping_address",
   "shipping_address_display",
+  "company_billing_address_section",
   "billing_address",
   "billing_address_display",
-  "terms_tab",
-  "terms_section_break",
-  "tc_name",
-  "terms",
-  "payment_schedule_section",
-  "payment_terms_template",
-  "payment_schedule",
   "drop_ship",
   "customer",
   "customer_name",
@@ -123,6 +118,13 @@
   "customer_contact_display",
   "customer_contact_mobile",
   "customer_contact_email",
+  "terms_tab",
+  "payment_schedule_section",
+  "payment_terms_template",
+  "payment_schedule",
+  "terms_section_break",
+  "tc_name",
+  "terms",
   "more_info_tab",
   "tracking_section",
   "status",
@@ -141,12 +143,12 @@
   "column_break_97",
   "auto_repeat",
   "update_auto_repeat_reference",
-  "more_info",
+  "additional_info_section",
+  "is_internal_supplier",
+  "represents_company",
   "ref_sq",
   "column_break_74",
   "party_account_currency",
-  "is_internal_supplier",
-  "represents_company",
   "inter_company_order_reference",
   "is_old_subcontracting_flow",
   "dashboard"
@@ -273,8 +275,9 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.customer",
    "fieldname": "drop_ship",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Drop Ship"
   },
   {
@@ -305,7 +308,6 @@
   {
    "fieldname": "customer_contact_display",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Customer Contact",
    "print_hide": 1
   },
@@ -325,10 +327,9 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "section_addresses",
    "fieldtype": "Section Break",
-   "label": "Address and Contact"
+   "label": "Supplier Address"
   },
   {
    "fieldname": "supplier_address",
@@ -714,7 +715,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "apply_discount_on",
    "fieldname": "discount_section",
    "fieldtype": "Section Break",
    "label": "Additional Discount"
@@ -857,7 +857,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Terms"
@@ -877,11 +876,10 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
+   "label": "Terms & Conditions",
    "oldfieldtype": "Section Break",
    "options": "fa fa-legal"
   },
@@ -900,13 +898,6 @@
    "label": "Terms and Conditions",
    "oldfieldname": "terms",
    "oldfieldtype": "Text Editor"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break"
   },
   {
    "default": "Draft",
@@ -1029,7 +1020,7 @@
    "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Subscription Section"
+   "label": "Auto Repeat"
   },
   {
    "allow_on_submit": 1,
@@ -1179,11 +1170,6 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "contacts_and_addresses_tab",
-   "fieldtype": "Tab Break",
-   "label": "Contacts & Addresses"
-  },
-  {
    "fieldname": "terms_tab",
    "fieldtype": "Tab Break",
    "label": "Terms"
@@ -1210,13 +1196,35 @@
   {
    "fieldname": "column_break_53",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "company_shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Company Shipping Address"
+  },
+  {
+   "fieldname": "company_billing_address_section",
+   "fieldtype": "Section Break",
+   "label": "Company Billing Address"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "additional_info_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Info",
+   "oldfieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-16 17:45:04.954055",
+ "modified": "2022-09-27 17:28:35.652609",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
