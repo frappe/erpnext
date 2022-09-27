@@ -634,11 +634,12 @@ def get_stock_availability(item_code, warehouse):
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 		return bin_qty - pos_sales_qty, is_stock_item
 	else:
-		is_stock_item = False
+		is_stock_item = True
 		if frappe.db.exists("Product Bundle", item_code):
 			return get_bundle_availability(item_code, warehouse), is_stock_item
 		else:
-			# Is a service item
+			is_stock_item = False
+			# Is a service item or non_stock item
 			return 0, is_stock_item
 
 
@@ -652,7 +653,9 @@ def get_bundle_availability(bundle_item_code, warehouse):
 		available_qty = item_bin_qty - item_pos_reserved_qty
 
 		max_available_bundles = available_qty / item.qty
-		if bundle_bin_qty > max_available_bundles:
+		if bundle_bin_qty > max_available_bundles and frappe.get_value(
+			"Item", item.item_code, "is_stock_item"
+		):
 			bundle_bin_qty = max_available_bundles
 
 	pos_sales_qty = get_pos_reserved_qty(bundle_item_code, warehouse)
