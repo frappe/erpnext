@@ -46,7 +46,9 @@ def validate_for_items(doc) -> None:
 	items = []
 	for d in doc.get("items"):
 		if not d.qty:
-			if doc.doctype == "Purchase Receipt" and doc.docstatus != DocStatus.submitted() or d.rejected_qty:
+			if (
+				doc.doctype == "Purchase Receipt" and doc.docstatus != DocStatus.submitted() or d.rejected_qty
+			):
 				continue
 			frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
