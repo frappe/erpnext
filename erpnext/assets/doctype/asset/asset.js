@@ -230,7 +230,7 @@ frappe.ui.form.on('Asset', {
 				datasets: [{
 					color: 'green',
 					values: asset_values,
-					formatted: asset_values.map(d => d.toFixed(2))
+					formatted: asset_values.map(d => d?.toFixed(2))
 				}]
 			},
 			type: 'line'
