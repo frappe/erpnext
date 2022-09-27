@@ -7,6 +7,7 @@ from typing import Dict
 
 import frappe
 from frappe import _
+from frappe.model.docstatus import DocStatus
 from frappe.utils import cint, cstr, flt, getdate
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
@@ -45,7 +46,7 @@ def validate_for_items(doc) -> None:
 	items = []
 	for d in doc.get("items"):
 		if not d.qty:
-			if doc.doctype == "Purchase Receipt" and d.rejected_qty:
+			if doc.doctype == "Purchase Receipt" and doc.docstatus != DocStatus.submitted() or d.rejected_qty:
 				continue
 			frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
