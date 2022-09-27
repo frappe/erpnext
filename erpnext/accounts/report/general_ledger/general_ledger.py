@@ -280,9 +280,9 @@ def get_conditions(filters):
 		or filters.get("party")
 		or filters.get("group_by") in ["Group by Account", "Group by Party"]
 	):
-		conditions.append("posting_date >=%(from_date)s")
+		conditions.append("(posting_date >=%(from_date)s or is_opening = 'Yes')")
 
-	conditions.append("(posting_date <=%(to_date)s or is_opening = 'Yes')")
+	conditions.append("(posting_date <=%(to_date)s)")
 
 	if filters.get("project"):
 		conditions.append("project in %(project)s")
