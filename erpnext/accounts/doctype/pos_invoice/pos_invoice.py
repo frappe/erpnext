@@ -239,14 +239,14 @@ class POSInvoice(SalesInvoice):
 					frappe.bold(d.warehouse),
 					frappe.bold(d.qty),
 				)
-				if is_stock_item and flt(available_stock) <= 0:
+				if flt(available_stock) <= 0:
 					frappe.throw(
 						_("Row #{}: Item Code: {} is not available under warehouse {}.").format(
 							d.idx, item_code, warehouse
 						),
 						title=_("Item Unavailable"),
 					)
-				elif is_stock_item and flt(available_stock) < flt(d.qty):
+				elif flt(available_stock) < flt(d.qty):
 					frappe.throw(
 						_(
 							"Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}."
