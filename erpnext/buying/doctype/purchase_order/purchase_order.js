@@ -30,6 +30,24 @@ frappe.ui.form.on("Purchase Order", {
 
 	},
 
+	purchase_order_type: function(frm) {
+		
+		if(frm.doc.purchase_order_type == "Local" || frm.doc.purchase_order_type == "Import"){
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			rate_field.read_only = 1;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			price_list_field.read_only = 1;
+			refresh_field("items");
+		}else{
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			rate_field.read_only = 0;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			price_list_field.read_only = 0;
+			refresh_field("items");
+		}
+
+	},
+
 	onload: function(frm) {
 		set_schedule_date(frm);
 		if (!frm.doc.transaction_date){
@@ -53,6 +71,7 @@ frappe.ui.form.on("Purchase Order Item", {
 			}
 		}
 	}
+	
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
