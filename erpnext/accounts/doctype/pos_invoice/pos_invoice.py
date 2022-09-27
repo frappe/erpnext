@@ -747,4 +747,4 @@ def add_return_modes(doc, pos_profile):
 
 
 def on_doctype_update():
-	frappe.db.add_index("POS Invoice", ["customer", "is_return", "return_against"])
+	frappe.db.add_index("POS Invoice", ["return_against"])
