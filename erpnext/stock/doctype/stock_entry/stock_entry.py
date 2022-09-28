@@ -1212,13 +1212,19 @@ class StockEntry(StockController):
 
 	def update_work_order(self):
 		def _validate_work_order(pro_doc):
+			msg, title = "", ""
 			if flt(pro_doc.docstatus) != 1:
-				frappe.throw(_("Work Order {0} must be submitted").format(self.work_order))
+				msg = f"Work Order {self.work_order} must be submitted"
 
 			if pro_doc.status == "Stopped":
-				frappe.throw(
-					_("Transaction not allowed against stopped Work Order {0}").format(self.work_order)
-				)
+				msg = f"Transaction not allowed against stopped Work Order {self.work_order}"
+
+			if self.is_return and pro_doc.status not in ["Completed", "Closed"]:
+				title = _("Stock Return")
+				msg = f"Work Order {self.work_order} must be completed or closed"
+
+			if msg:
+				frappe.throw(_(msg), title=title)
 
 		if self.job_card:
 			job_doc = frappe.get_doc("Job Card", self.job_card)
@@ -1754,10 +1760,12 @@ class StockEntry(StockController):
 
 		for key, row in available_materials.items():
 			remaining_qty_to_produce = flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
-			if remaining_qty_to_produce <= 0:
+			if remaining_qty_to_produce <= 0 and not self.is_return:
 				continue
 
-			qty = (flt(row.qty) * flt(self.fg_completed_qty)) / remaining_qty_to_produce
+			qty = flt(row.qty)
+			if not self.is_return:
+				qty = (flt(row.qty) * flt(self.fg_completed_qty)) / remaining_qty_to_produce
 
 			item = row.item_details
 			if cint(frappe.get_cached_value("UOM", item.stock_uom, "must_be_whole_number")):
@@ -1781,6 +1789,9 @@ class StockEntry(StockController):
 				self.update_item_in_stock_entry_detail(row, item, qty)
 
 	def update_item_in_stock_entry_detail(self, row, item, qty) -> None:
+		if not qty:
+			return
+
 		ste_item_details = {
 			"from_warehouse": item.warehouse,
 			"to_warehouse": "",
@@ -1793,6 +1804,9 @@ class StockEntry(StockController):
 			"cost_center": item.buying_cost_center,
 			"original_item": item.original_item,
 		}
+
+		if self.is_return:
+			ste_item_details["to_warehouse"] = item.s_warehouse
 
 		if row.serial_nos:
 			serial_nos = row.serial_nos
