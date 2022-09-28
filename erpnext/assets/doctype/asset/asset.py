@@ -660,7 +660,18 @@ class Asset(AccountsController):
 		elif self.docstatus == 1:
 			status = "Submitted"
 
-			if self.journal_entry_for_scrap:
+			is_asset_sold = frappe.db.sql(
+				"""
+				select item.parent
+				from `tabSales Invoice Item` item, `tabSales Invoice` p
+				where item.asset=%s and item.parent = p.name and p.docstatus = 1
+			""",
+				self.name,
+			)
+
+			if is_asset_sold:
+				status = "Sold"
+			elif self.journal_entry_for_scrap:
 				status = "Scrapped"
 			elif self.finance_books:
 				idx = self.get_default_finance_book_idx() or 0
