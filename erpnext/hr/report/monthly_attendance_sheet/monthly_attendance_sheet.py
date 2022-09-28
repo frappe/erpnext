@@ -181,7 +181,6 @@ def add_data(
 					total_l += 1
 				elif status == "Half Day":
 					total_p += 0.5
-					total_a += 0.5
 					total_l += 0.5
 				elif not status:
 					total_um += 1
