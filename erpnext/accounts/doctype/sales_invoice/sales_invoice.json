@@ -12,14 +12,14 @@
   "customer",
   "customer_name",
   "tax_id",
+  "company",
+  "company_tax_id",
   "column_break1",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "due_date",
   "column_break_14",
-  "company",
-  "company_tax_id",
   "is_pos",
   "pos_profile",
   "is_consolidated",
@@ -87,8 +87,8 @@
   "disable_rounded_total",
   "section_break_49",
   "apply_discount_on",
-  "is_cash_or_non_trade_discount",
   "base_discount_amount",
+  "is_cash_or_non_trade_discount",
   "additional_discount_account",
   "column_break_51",
   "additional_discount_percentage",
@@ -1055,7 +1055,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_49",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1111,6 +1110,7 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
+   "label": "Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
    "print_hide": 1
@@ -1292,8 +1292,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1325,7 +1323,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:!doc.is_pos",
-   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)",
+   "depends_on": "eval:doc.is_pos===1",
    "fieldname": "payments_section",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -1363,6 +1361,7 @@
    "hide_seconds": 1
   },
   {
+   "depends_on": "eval: doc.is_pos || doc.redeem_loyalty_points",
    "fieldname": "base_paid_amount",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1498,8 +1497,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -2111,7 +2108,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-09-27 14:15:35.293825",
+ "modified": "2022-09-28 19:23:38.265409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

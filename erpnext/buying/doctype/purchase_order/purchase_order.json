@@ -106,9 +106,11 @@
   "contact_email",
   "company_shipping_address_section",
   "shipping_address",
+  "column_break_99",
   "shipping_address_display",
   "company_billing_address_section",
   "billing_address",
+  "column_break_103",
   "billing_address_display",
   "drop_ship",
   "customer",
@@ -133,10 +135,10 @@
   "per_received",
   "column_break5",
   "letter_head",
-  "select_print_heading",
-  "column_break_86",
-  "language",
   "group_same_items",
+  "column_break_86",
+  "select_print_heading",
+  "language",
   "subscription_section",
   "from_date",
   "to_date",
@@ -1218,13 +1220,21 @@
    "fieldtype": "Section Break",
    "label": "Additional Info",
    "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_99",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_103",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 17:28:35.652609",
+ "modified": "2022-09-28 18:20:49.494279",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

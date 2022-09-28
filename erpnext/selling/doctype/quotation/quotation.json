@@ -103,15 +103,20 @@
   "tc_name",
   "terms",
   "more_info_tab",
+  "subscription_section",
+  "auto_repeat",
+  "update_auto_repeat_reference",
   "print_settings",
   "letter_head",
   "group_same_items",
   "column_break_73",
   "select_print_heading",
   "language",
-  "subscription_section",
-  "auto_repeat",
-  "update_auto_repeat_reference",
+  "lost_reasons_section",
+  "lost_reasons",
+  "competitors",
+  "column_break_117",
+  "order_lost_reason",
   "additional_info_section",
   "status",
   "customer_group",
@@ -123,11 +128,6 @@
   "opportunity",
   "supplier_quotation",
   "enq_det",
-  "lost_reasons_section",
-  "lost_reasons",
-  "competitors",
-  "column_break_117",
-  "order_lost_reason",
   "connections_tab"
  ],
  "fields": [
@@ -975,7 +975,7 @@
   {
    "fieldname": "address_and_contact_tab",
    "fieldtype": "Tab Break",
-   "label": "Address and Contact"
+   "label": "Address & Contact"
   },
   {
    "fieldname": "terms_tab",
@@ -1058,7 +1058,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 15:14:27.693005",
+ "modified": "2022-09-27 15:18:27.693005",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

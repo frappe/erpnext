@@ -170,9 +170,9 @@
   "to_date",
   "printing_settings",
   "letter_head",
-  "select_print_heading",
-  "column_break_112",
   "group_same_items",
+  "column_break_112",
+  "select_print_heading",
   "language",
   "sb_14",
   "on_hold",
@@ -1443,7 +1443,7 @@
   {
    "fieldname": "address_and_contact_tab",
    "fieldtype": "Tab Break",
-   "label": "Address and Contact"
+   "label": "Address & Contact"
   },
   {
    "fieldname": "terms_tab",
@@ -1496,6 +1496,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Status"
