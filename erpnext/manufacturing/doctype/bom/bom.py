@@ -1019,7 +1019,6 @@ def get_bom_items_as_dict(
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
-				and ifnull(item.has_variants, 0) = 0
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				group by item_code, stock_uom
