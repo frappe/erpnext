@@ -10,6 +10,31 @@ frappe.ui.form.on("Item", {
 		frm.add_fetch('attribute', 'to_range', 'to_range');
 		frm.add_fetch('attribute', 'increment', 'increment');
 		frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');
+
+		frm.make_methods = {
+			'Sales Order': () => {
+				open_form(frm, "Sales Order", "Sales Order Item", "items");
+			},
+			'Delivery Note': () => {
+				open_form(frm, "Delivery Note", "Delivery Note Item", "items");
+			},
+			'Sales Invoice': () => {
+				open_form(frm, "Sales Invoice", "Sales Invoice Item", "items");
+			},
+			'Purchase Order': () => {
+				open_form(frm, "Purchase Order", "Purchase Order Item", "items");
+			},
+			'Purchase Receipt': () => {
+				open_form(frm, "Purchase Receipt", "Purchase Receipt Item", "items");
+			},
+			'Purchase Invoice': () => {
+				open_form(frm, "Purchase Invoice", "Purchase Invoice Item", "items");
+			},
+			'Material Request': () => {
+				open_form(frm, "Material Request", "Material Request Item", "items");
+			},
+		};
+
 	},
 	onload: function(frm) {
 		erpnext.item.setup_queries(frm);
@@ -813,3 +838,65 @@ frappe.ui.form.on("UOM Conversion Detail", {
 		}
 	}
 });
+<<<<<<< HEAD
+=======
+
+frappe.tour['Item'] = [
+	{
+		fieldname: "item_code",
+		title: "Item Code",
+		description: __("Enter an Item Code, the name will be auto-filled the same as Item Code on clicking inside the Item Name field.")
+	},
+	{
+		fieldname: "item_group",
+		title: "Item Group",
+		description: __("Select an Item Group.")
+	},
+	{
+		fieldname: "is_stock_item",
+		title: "Maintain Stock",
+		description: __("If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item.")
+	},
+	{
+		fieldname: "include_item_in_manufacturing",
+		title: "Include Item in Manufacturing",
+		description: __("This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked.")
+	},
+	{
+		fieldname: "opening_stock",
+		title: "Opening Stock",
+		description: __("Enter the opening stock units.")
+	},
+	{
+		fieldname: "valuation_rate",
+		title: "Valuation Rate",
+		description: __("There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>")
+	},
+	{
+		fieldname: "standard_rate",
+		title: "Standard Selling Rate",
+		description: __("When creating an Item, entering a value for this field will automatically create an Item Price at the backend.")
+	},
+	{
+		fieldname: "item_defaults",
+		title: "Item Defaults",
+		description: __("In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc.")
+	}
+
+
+];
+
+function open_form(frm, doctype, child_doctype, parentfield) {
+	frappe.model.with_doctype(doctype, () => {
+		let new_doc = frappe.model.get_new_doc(doctype);
+
+		let new_child_doc = frappe.model.add_child(new_doc, child_doctype, parentfield);
+		new_child_doc.item_code = frm.doc.name;
+		new_child_doc.item_name = frm.doc.item_name;
+		new_child_doc.uom = frm.doc.stock_uom;
+		new_child_doc.description = frm.doc.description;
+
+		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+	});
+}
+>>>>>>> 0439e41a44 (fix: Item details fetching on making transaction from item dashboard)
