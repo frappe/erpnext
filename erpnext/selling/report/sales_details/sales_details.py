@@ -89,6 +89,9 @@ class SalesPurchaseDetailsReport(object):
 		sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person" if sales_person_join else ""
 		contribution_field = ", sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage" if sales_person_join else ""
 
+		bill_no_field = ", s.bill_no" if frappe.get_meta(self.filters.doctype).has_field('bill_no') else ""
+		bill_date_field = ", s.bill_date" if frappe.get_meta(self.filters.doctype).has_field('bill_date') else ""
+
 		supplier_join = "inner join `tabSupplier` sup on sup.name = s.supplier" if self.filters.party_type == "Supplier" else ""
 
 		territory_field = ", s.territory" if self.filters.party_type == "Customer" else ""
@@ -127,7 +130,7 @@ class SalesPurchaseDetailsReport(object):
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
 				{item_cost_center_field} {parent_cost_center_field}
 				{item_project_field} {parent_project_field}
-				{stin_field}
+				{stin_field} {bill_no_field} {bill_date_field}
 			from `tab{doctype} Item` i
 			inner join `tab{doctype}` s on i.parent = s.name
 			left join `tabItem` im on im.name = i.item_code
@@ -146,6 +149,8 @@ class SalesPurchaseDetailsReport(object):
 			qty_field=qty_field,
 			amount_fields=amount_fields,
 			date_field=self.date_field,
+			bill_no_field=bill_no_field,
+			bill_date_field=bill_date_field,
 			doctype=self.filters.doctype,
 			stin_field=stin_field,
 			sales_person_field=sales_person_field,
@@ -312,7 +317,7 @@ class SalesPurchaseDetailsReport(object):
 						totals[f] = v
 
 			if 'voucher_no' in grouped_by:
-				fields_to_copy = ['date', 'sales_person', 'territory', 'party', 'party_name']
+				fields_to_copy = ['date', 'sales_person', 'territory', 'party', 'party_name', 'bill_no', 'bill_date']
 				for f in fields_to_copy:
 					if f in data[0]:
 						totals[f] = data[0][f]
@@ -531,6 +536,20 @@ class SalesPurchaseDetailsReport(object):
 			"width": 150
 		}
 
+		bill_no_field = {
+			"label": "Bill No",
+			"fieldtype": "Data",
+			"fieldname": "bill_no",
+			"width": 80
+		}
+
+		bill_date_field = {
+			"label": "Bill Date",
+			"fieldtype": "Date",
+			"fieldname": "bill_date",
+			"width": 80
+		}
+
 		if len(self.group_by) > 1:
 			columns = [
 				{
@@ -553,6 +572,12 @@ class SalesPurchaseDetailsReport(object):
 					"width": 150
 				},
 			]
+
+			if frappe.get_meta(self.filters.doctype).has_field('bill_no'):
+				columns += [bill_no_field]
+
+			if frappe.get_meta(self.filters.doctype).has_field('bill_date'):
+				columns += [bill_date_field]
 
 			group_list = [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]
 			if "Group by Transaction" not in group_list:
@@ -592,6 +617,12 @@ class SalesPurchaseDetailsReport(object):
 					"width": 140
 				},
 			]
+
+			if frappe.get_meta(self.filters.doctype).has_field('bill_no'):
+				columns += [bill_no_field, bill_date_field]
+
+			if frappe.get_meta(self.filters.doctype).has_field('bill_date'):
+				columns += [bill_date_field, bill_date_field]
 
 			if self.filters.doctype == "Sales Invoice":
 				columns.append({
