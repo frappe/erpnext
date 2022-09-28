@@ -643,13 +643,27 @@ class Asset(AccountsController):
 		self.db_set("status", status)
 
 	def get_status(self):
-		"""Returns status based on whether it is draft, submitted, scrapped or depreciated"""
+		"""Returns status based on whether it is draft, submitted, sold, scrapped or depreciated"""
 		if self.docstatus == 0:
 			status = "Draft"
 		elif self.docstatus == 1:
 			status = "Submitted"
 
-			if self.journal_entry_for_scrap:
+			item = frappe.qb.DocType("Sales Invoice Item").as_("item")
+			si = frappe.qb.DocType("Sales Invoice").as_("si")
+
+			is_asset_sold = (
+				frappe.qb.from_(item)
+				.select(item.parent)
+				.inner_join(si)
+				.on(item.parent == si.name)
+				.where(item.asset == self.name)
+				.where(si.docstatus == 1)
+			).run()
+
+			if is_asset_sold:
+				status = "Sold"
+			elif self.journal_entry_for_scrap:
 				status = "Scrapped"
 			elif self.finance_books:
 				idx = self.get_default_finance_book_idx() or 0
