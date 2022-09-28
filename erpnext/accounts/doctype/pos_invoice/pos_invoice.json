@@ -1553,7 +1553,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 13:00:24.166684",
+ "modified": "2022-09-27 13:00:24.166684",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
