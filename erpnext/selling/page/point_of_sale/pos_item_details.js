@@ -242,12 +242,8 @@ erpnext.PointOfSale.ItemDetails = class {
 				if (this.value) {
 					me.events.form_updated(me.current_item, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
-<<<<<<< HEAD
-						const available_qty = me.item_stock_map[me.item_row.item_code][this.value];
-=======
 						const available_qty = me.item_stock_map[me.item_row.item_code][this.value][0];
 						const is_stock_item = Boolean(me.item_stock_map[me.item_row.item_code][this.value][1]);
->>>>>>> e392ea1104 (fix: POS properly validate stock for bundle products)
 						if (available_qty === undefined) {
 							me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
 								// item stock map is updated now reset warehouse
