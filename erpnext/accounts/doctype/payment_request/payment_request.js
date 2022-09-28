@@ -9,6 +9,13 @@ frappe.ui.form.on("Payment Request", {
 				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
+	},
+	"bank_account": function(frm) {
+		frappe.db.get_value('Bank', frm.doc.bank, ['swift_number'])
+	.then(r => {
+		let values = r.message;
+		frm.set_value('swift_number', values.swift_number)
+	})
 	}
 })
 
