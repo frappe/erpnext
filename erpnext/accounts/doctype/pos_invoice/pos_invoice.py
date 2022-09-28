@@ -239,14 +239,14 @@ class POSInvoice(SalesInvoice):
 					frappe.bold(d.warehouse),
 					frappe.bold(d.qty),
 				)
-				if flt(available_stock) <= 0:
+				if is_stock_item and flt(available_stock) <= 0:
 					frappe.throw(
 						_("Row #{}: Item Code: {} is not available under warehouse {}.").format(
 							d.idx, item_code, warehouse
 						),
 						title=_("Item Unavailable"),
 					)
-				elif flt(available_stock) < flt(d.qty):
+				elif is_stock_item and flt(available_stock) < flt(d.qty):
 					frappe.throw(
 						_(
 							"Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}."
@@ -634,11 +634,12 @@ def get_stock_availability(item_code, warehouse):
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
 		return bin_qty - pos_sales_qty, is_stock_item
 	else:
-		is_stock_item = False
+		is_stock_item = True
 		if frappe.db.exists("Product Bundle", item_code):
 			return get_bundle_availability(item_code, warehouse), is_stock_item
 		else:
-			# Is a service item
+			is_stock_item = False
+			# Is a service item or non_stock item
 			return 0, is_stock_item
 
 
@@ -652,7 +653,9 @@ def get_bundle_availability(bundle_item_code, warehouse):
 		available_qty = item_bin_qty - item_pos_reserved_qty
 
 		max_available_bundles = available_qty / item.qty
-		if bundle_bin_qty > max_available_bundles:
+		if bundle_bin_qty > max_available_bundles and frappe.get_value(
+			"Item", item.item_code, "is_stock_item"
+		):
 			bundle_bin_qty = max_available_bundles
 
 	pos_sales_qty = get_pos_reserved_qty(bundle_item_code, warehouse)
@@ -744,3 +747,7 @@ def add_return_modes(doc, pos_profile):
 		]:
 			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
 			append_payment(payment_mode[0])
+
+
+def on_doctype_update():
+	frappe.db.add_index("POS Invoice", ["return_against"])
