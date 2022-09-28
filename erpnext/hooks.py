@@ -477,12 +477,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts",
 	],
 	"hourly": [
-<<<<<<< HEAD
 		"erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails",
-		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_mws_settings.schedule_get_order_details",
-=======
->>>>>>> 82a2f31ada (fix: Move subscription process to hourly long quque)
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
