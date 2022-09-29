@@ -841,7 +841,7 @@ def make_rm_stock_entry(
 			for fg_item_code in fg_item_code_list:
 				for rm_item in rm_items:
 
-					if rm_item.get("main_item_code") or rm_item.get("item_code") == fg_item_code:
+					if rm_item.get("main_item_code") == fg_item_code or rm_item.get("item_code") == fg_item_code:
 						rm_item_code = rm_item.get("rm_item_code")
 
 						items_dict = {
