@@ -619,10 +619,10 @@ class SalesPurchaseDetailsReport(object):
 			]
 
 			if frappe.get_meta(self.filters.doctype).has_field('bill_no'):
-				columns += [bill_no_field, bill_date_field]
+				columns += [bill_no_field]
 
 			if frappe.get_meta(self.filters.doctype).has_field('bill_date'):
-				columns += [bill_date_field, bill_date_field]
+				columns += [bill_date_field]
 
 			if self.filters.doctype == "Sales Invoice":
 				columns.append({
