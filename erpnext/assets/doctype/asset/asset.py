@@ -660,9 +660,7 @@ class Asset(AccountsController):
 		elif self.docstatus == 1:
 			status = "Submitted"
 
-			if self.is_sold():
-				status = "Sold"
-			elif self.journal_entry_for_scrap:
+			if self.journal_entry_for_scrap:
 				status = "Scrapped"
 			elif self.finance_books:
 				idx = self.get_default_finance_book_idx() or 0
@@ -845,7 +843,9 @@ class Asset(AccountsController):
 
 
 def update_maintenance_status():
-	assets = frappe.get_all("Asset", filters={"docstatus": 1, "maintenance_required": 1})
+	assets = frappe.get_all(
+		"Asset", filters={"docstatus": 1, "maintenance_required": 1, "disposal_date": ("is", "not set")}
+	)
 
 	for asset in assets:
 		asset = frappe.get_doc("Asset", asset.name)
