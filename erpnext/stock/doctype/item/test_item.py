@@ -5,6 +5,7 @@
 import json
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_objects
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, today
@@ -815,6 +816,30 @@ class TestItem(FrappeTestCase):
 		item.save()
 		item.reload()
 		self.assertEqual(item.is_stock_item, 1)
+
+	def test_serach_fields_for_item(self):
+		from erpnext.controllers.queries import item_query
+
+		make_property_setter("Item", None, "search_fields", "item_name", "Data", for_doctype="Doctype")
+
+		item = make_item(properties={"item_name": "Test Item", "description": "Test Description"})
+		data = item_query(
+			"Item", "Test Item", "", 0, 20, filters={"item_name": "Test Item"}, as_dict=True
+		)
+		self.assertEqual(data[0].name, item.name)
+		self.assertEqual(data[0].item_name, item.item_name)
+		self.assertTrue("description" not in data[0])
+
+		make_property_setter(
+			"Item", None, "search_fields", "item_name, description", "Data", for_doctype="Doctype"
+		)
+		data = item_query(
+			"Item", "Test Item", "", 0, 20, filters={"item_name": "Test Item"}, as_dict=True
+		)
+		self.assertEqual(data[0].name, item.name)
+		self.assertEqual(data[0].item_name, item.item_name)
+		self.assertEqual(data[0].description, item.description)
+		self.assertTrue("description" in data[0])
 
 
 def set_item_variant_settings(fields):
