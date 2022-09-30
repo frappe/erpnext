@@ -15,7 +15,6 @@ class QuickStockBalance(Document):
 
 @frappe.whitelist()
 def get_stock_item_details(warehouse, date, item=None, barcode=None):
-	print(warehouse, date, item, "########")
 	out = {}
 	if barcode:
 		out["item"] = frappe.db.get_value(
