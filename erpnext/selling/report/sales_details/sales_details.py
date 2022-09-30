@@ -430,7 +430,7 @@ class SalesPurchaseDetailsReport(object):
 			"Contents Qty": "alt_uom_qty",
 			"Transaction Qty": "qty"
 		}
-		return filter_to_field.get(self.filters.qty_field, "stock_qty")
+		return filter_to_field.get(self.filters.qty_field) or "stock_qty"
 
 	def get_conditions(self):
 		conditions = []

@@ -27,13 +27,18 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "customer",
+			fieldname: "party_type",
 			label: __("Customer"),
 			fieldtype: "Link",
-			options: "Customer"
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
 		},
 		{
-			fieldname: "customer_group",
+			fieldname: "party_group",
 			label: __("Customer Group"),
 			fieldtype: "Link",
 			options: "Customer Group"
@@ -46,7 +51,7 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			get_query: function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'include_disabled': 1}
+					filters: {'include_disabled': 1,'include_templates':1}
 				}
 			},
 		},
