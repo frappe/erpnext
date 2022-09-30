@@ -164,7 +164,194 @@ def get_data():
 					"type": "doctype",
 					"name": "Coupon Code",
 					"description": _("Define coupon codes."),
+				},
+				{
+					"type": "doctype",
+					"name": "Campaign",
+					"description": _("Sales campaigns."),
+				},
+			]
+		},
+		{
+			"label": _("Sales Persons & Territories"),
+			"items": [
+				{
+					"type": "doctype",
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Territory"),
+					"name": "Territory",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Territory",
+					"description": _("Manage Territory Tree."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Sales Person Target Variance"),
+					"name": "Sales Person Target Variance Based On Item Group",
+					"route": "#query-report/Sales Person Target Variance Based On Item Group",
+					"doctype": "Sales Person",
+					"dependencies": ["Sales Person"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Territory Target Variance"),
+					"name": "Territory Target Variance Based On Item Group",
+					"route": "#query-report/Territory Target Variance Based On Item Group",
+					"doctype": "Territory",
+					"dependencies": ["Territory"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Sales Person Commission Summary"),
+					"name": "Sales Person Commission Summary",
+					"doctype": "Sales Person",
+					"dependencies": ["Sales Person"],
+				},
+			]
+		},
+		{
+			"label": _("External Sales Partners"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Sales Partner",
+					"description": _("Manage Sales Partners."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Sales Partner Target Variance"),
+					"name": "Sales Partner Target Variance based on Item Group",
+					"route": "#query-report/Sales Partner Target Variance based on Item Group",
+					"doctype": "Sales Partner",
+					"dependencies": ["Sales Partner"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Partners Commission",
+					"doctype": "Customer"
 				}
+			]
+		},
+		{
+			"label": _("Key Reports"),
+			"icon": "fa fa-table",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Analytics",
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Details",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Credit Balance",
+					"doctype": "Customer"
+				},
+				{
+					"type": "page",
+					"name": "sales-funnel",
+					"label": _("Sales Funnel"),
+					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Order Items To Be Delivered",
+					"doctype": "Sales Order"
+				},
+			]
+		},
+		{
+			"label": _("Other Reports"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Lead Details",
+					"doctype": "Lead"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Address And Contacts",
+					"label": _("Customer Addresses And Contacts"),
+					"doctype": "Address",
+					"route_options": {
+						"party_type": "Customer"
+					}
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customers Without Any Sales Transactions",
+					"doctype": "Customer"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Acquisition and Loyalty",
+					"doctype": "Customer",
+					"icon": "fa fa-bar-chart",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Inactive Customers",
+				},
+			]
+		},
+		{
+			"label": _("Old Reports"),
+			"icon": "fa fa-list",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Person-wise Transaction Summary",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item-wise Sales History",
+					"doctype": "Item"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Available Stock for Packing Items",
+					"doctype": "Item",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Pending SO Items For Purchase Request",
+					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Ordered Items To Be Delivered",
+					"doctype": "Sales Order"
+				},
 			]
 		},
 		{
@@ -203,178 +390,6 @@ def get_data():
 				},
 			]
 		},
-		{
-			"label": _("Targets and Tracking"),
-			"items": [
-				{
-					"type": "doctype",
-					"label": _("Sales Person"),
-					"name": "Sales Person",
-					"icon": "fa fa-sitemap",
-					"link": "Tree/Sales Person",
-					"description": _("Manage Sales Person Tree."),
-				},
-				{
-					"type": "doctype",
-					"label": _("Territory"),
-					"name": "Territory",
-					"icon": "fa fa-sitemap",
-					"link": "Tree/Territory",
-					"description": _("Manage Territory Tree."),
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Partner",
-					"description": _("Manage Sales Partners."),
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"label": _("Territory Target Variance"),
-					"name": "Territory Target Variance Based On Item Group",
-					"route": "#query-report/Territory Target Variance Based On Item Group",
-					"doctype": "Territory",
-					"dependencies": ["Territory"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"label": _("Sales Person Target Variance"),
-					"name": "Sales Person Target Variance Based On Item Group",
-					"route": "#query-report/Sales Person Target Variance Based On Item Group",
-					"doctype": "Sales Person",
-					"dependencies": ["Sales Person"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"label": _("Sales Partner Target Variance"),
-					"name": "Sales Partner Target Variance based on Item Group",
-					"route": "#query-report/Sales Partner Target Variance based on Item Group",
-					"doctype": "Sales Partner",
-					"dependencies": ["Sales Partner"],
-				},
-				{
-					"type": "doctype",
-					"name": "Campaign",
-					"description": _("Sales campaigns."),
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"label": _("Sales Person Commission Summary"),
-					"name": "Sales Person Commission Summary",
-					"doctype": "Sales Person",
-					"dependencies": ["Sales Person"],
-				},
-			]
-		},
-		{
-			"label": _("Key Reports"),
-			"icon": "fa fa-table",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Analytics",
-					"onboard": 1,
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Details",
-				},
-				{
-					"type": "page",
-					"name": "sales-funnel",
-					"label": _("Sales Funnel"),
-					"icon": "fa fa-bar-chart",
-					"onboard": 1,
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customer Acquisition and Loyalty",
-					"doctype": "Customer",
-					"icon": "fa fa-bar-chart",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Inactive Customers",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Ordered Items To Be Delivered",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person-wise Transaction Summary",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Item-wise Sales History",
-					"doctype": "Item"
-				},
-			]
-		},
-		{
-			"label": _("Other Reports"),
-			"icon": "fa fa-list",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Lead Details",
-					"doctype": "Lead"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Address And Contacts",
-					"label": _("Customer Addresses And Contacts"),
-					"doctype": "Address",
-					"route_options": {
-						"party_type": "Customer"
-					}
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Available Stock for Packing Items",
-					"doctype": "Item",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Pending SO Items For Purchase Request",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customer Credit Balance",
-					"doctype": "Customer"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customers Without Any Sales Transactions",
-					"doctype": "Customer"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Partners Commission",
-					"doctype": "Customer"
-				}
-			]
-		},
-		
 	]
 
 	return out
