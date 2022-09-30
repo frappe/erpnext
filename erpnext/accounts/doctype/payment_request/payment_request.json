@@ -219,6 +219,7 @@
    "label": "Branch Code"
   },
   {
+   "fetch_from": "bank.swift_number",
    "fieldname": "swift_number",
    "fieldtype": "Read Only",
    "label": "SWIFT Number"
@@ -365,7 +366,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-28 12:39:30.160837",
+ "modified": "2020-09-18 12:24:14.178853",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
