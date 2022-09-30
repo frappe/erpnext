@@ -153,6 +153,9 @@ class StockLedgerEntry(Document):
 
 	def validate_batch(self):
 		if self.batch_no and self.voucher_type != "Stock Entry":
+			if self.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and self.actual_qty < 0:
+				return
+
 			expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
 			if expiry_date:
 				if getdate(self.posting_date) > getdate(expiry_date):

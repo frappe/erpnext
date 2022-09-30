@@ -4,7 +4,16 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	cstr,
+	flt,
+	get_first_day,
+	get_last_day,
+	getdate,
+	nowdate,
+)
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, split_asset
@@ -178,28 +187,48 @@ class TestAsset(AssetSetup):
 		self.assertEqual(doc.items[0].is_fixed_asset, 1)
 
 	def test_scrap_asset(self):
+		date = nowdate()
+		purchase_date = add_months(get_first_day(date), -2)
+
 		asset = create_asset(
 			calculate_depreciation=1,
-			available_for_use_date="2020-01-01",
-			purchase_date="2020-01-01",
+			available_for_use_date=purchase_date,
+			purchase_date=purchase_date,
 			expected_value_after_useful_life=10000,
 			total_number_of_depreciations=10,
 			frequency_of_depreciation=1,
 			submit=1,
 		)
 
-		post_depreciation_entries(date=add_months("2020-01-01", 4))
+		post_depreciation_entries(date=add_months(purchase_date, 2))
+		asset.load_from_db()
+
+		accumulated_depr_amount = flt(
+			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("gross_purchase_amount"),
+		)
+		self.assertEquals(accumulated_depr_amount, 18000.0)
 
 		scrap_asset(asset.name)
-
 		asset.load_from_db()
+
+		accumulated_depr_amount = flt(
+			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("gross_purchase_amount"),
+		)
+		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
+			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
+		)
+		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
+		self.assertEquals(accumulated_depr_amount, 18000.00 + pro_rata_amount)
+
 		self.assertEqual(asset.status, "Scrapped")
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 36000.0, 0.0),
+			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 64000.0, 0.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 82000.0 - pro_rata_amount, 0.0),
 		)
 
 		gle = frappe.db.sql(
@@ -216,19 +245,27 @@ class TestAsset(AssetSetup):
 		self.assertFalse(asset.journal_entry_for_scrap)
 		self.assertEqual(asset.status, "Partially Depreciated")
 
+		accumulated_depr_amount = flt(
+			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
+			asset.precision("gross_purchase_amount"),
+		)
+		self.assertEquals(accumulated_depr_amount, 18000.0)
+
 	def test_gle_made_by_asset_sale(self):
+		date = nowdate()
+		purchase_date = add_months(get_first_day(date), -2)
+
 		asset = create_asset(
 			calculate_depreciation=1,
-			available_for_use_date="2020-06-06",
-			purchase_date="2020-01-01",
+			available_for_use_date=purchase_date,
+			purchase_date=purchase_date,
 			expected_value_after_useful_life=10000,
-			total_number_of_depreciations=3,
-			frequency_of_depreciation=10,
-			depreciation_start_date="2020-12-31",
+			total_number_of_depreciations=10,
+			frequency_of_depreciation=1,
 			submit=1,
 		)
 
-		post_depreciation_entries(date="2021-01-01")
+		post_depreciation_entries(date=add_months(purchase_date, 2))
 
 		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
 		si.customer = "_Test Customer"
@@ -239,10 +276,15 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
+		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
+			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
+		)
+		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
+
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 20490.2, 0.0),
+			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 54509.8, 0.0),
+			("_Test Gain/Loss on Asset Disposal - _TC", 57000.0 - pro_rata_amount, 0.0),
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 
