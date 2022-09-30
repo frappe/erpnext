@@ -126,7 +126,9 @@ class BankClearance(Document):
 		if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
 			query = query.where((loan_repayment.repay_from_salary == 0))
 
-		query = query.orderby(loan_repayment.posting_date).orderby(loan_repayment.name, order=frappe.qb.desc)
+		query = query.orderby(loan_repayment.posting_date).orderby(
+			loan_repayment.name, order=frappe.qb.desc
+		)
 
 		loan_repayments = query.run(as_dict=True)
 
