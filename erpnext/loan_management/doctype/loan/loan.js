@@ -103,6 +103,14 @@ frappe.ui.form.on('Loan', {
 		frm.trigger("toggle_fields");
 	},
 
+	repayment_schedule_type: function(frm) {
+		if (frm.doc.repayment_schedule_type == "Pro-rated calendar months") {
+			frm.set_df_property("repayment_start_date", "label", "Interest Calculation Start Date");
+		} else {
+			frm.set_df_property("repayment_start_date", "label", "Repayment Start Date");
+		}
+	},
+
 	loan_type: function(frm) {
 		frm.toggle_reqd("repayment_method", frm.doc.is_term_loan);
 		frm.toggle_display("repayment_method", frm.doc.is_term_loan);
