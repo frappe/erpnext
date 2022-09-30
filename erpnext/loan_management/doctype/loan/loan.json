@@ -424,7 +424,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-09-13 02:05:25.017190",
+=======
+ "modified": "2022-09-29 11:50:31.957360",
+>>>>>>> 76c6ccab5d (feat: Repayment schedule types for term loans)
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
