@@ -257,9 +257,7 @@ def get_unmarked_days(employee, month, exclude_holidays=0):
 		start_day = joining_date.day
 
 	if (
-		relieving_date
-		and relieving_date.year == today.year
-		and relieving_date.month == month_map[month]
+		relieving_date and relieving_date.year == today.year and relieving_date.month == month_map[month]
 	):
 		end_day = relieving_date.day + 1
 
