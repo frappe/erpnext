@@ -69,9 +69,18 @@ class SubcontractingController(StockController):
 
 	def validate_items(self):
 		for item in self.items:
-			if not frappe.get_value("Item", item.item_code, "is_sub_contracted_item"):
+			is_stock_item, is_sub_contracted_item = frappe.get_value(
+				"Item", item.item_code, ["is_stock_item", "is_sub_contracted_item"]
+			)
+
+			if not is_stock_item:
+				msg = f"Item {item.item_name} must be a stock item."
+				frappe.throw(_(msg))
+
+			if not is_sub_contracted_item:
 				msg = f"Item {item.item_name} must be a subcontracted item."
 				frappe.throw(_(msg))
+
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
 				if not bom.is_active:
