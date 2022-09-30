@@ -22,9 +22,12 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
+	depreciate_asset,
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
+	reset_depreciation_schedule,
+	reverse_depreciation_entry_made_after_disposal,
 )
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
@@ -1081,22 +1084,24 @@ class SalesInvoice(SellingController):
 
 					if self.is_return:
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
 						)
 						asset.db_set("disposal_date", None)
 
 						if asset.calculate_depreciation:
-							self.reverse_depreciation_entry_made_after_disposal(asset)
-							self.reset_depreciation_schedule(asset)
+							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
+							reset_depreciation_schedule(asset, self.posting_date)
 
 					else:
+						if asset.calculate_depreciation:
+							depreciate_asset(asset, self.posting_date)
+							asset.reload()
+
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-							asset, item.base_net_amount, item.finance_book
+							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")
 						)
 						asset.db_set("disposal_date", self.posting_date)
-
-						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
