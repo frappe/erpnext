@@ -452,7 +452,7 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 				& (dn.is_return == 1)
 			)
 			.orderby(dn.posting_date, dn.posting_time, dn.name)
-			.run(as_dict=True, debug=True)
+			.run(as_dict=True)
 		)
 
 		amt_to_be_billed = flt(dnd.amount)
