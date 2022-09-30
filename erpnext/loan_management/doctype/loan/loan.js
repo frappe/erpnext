@@ -61,6 +61,10 @@ frappe.ui.form.on('Loan', {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.repayment_schedule_type == "Pro-rated calendar months") {
+			frm.set_df_property("repayment_start_date", "label", "Interest Calculation Start Date");
+		}
+
 		if (frm.doc.docstatus == 1) {
 			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
 				frm.add_custom_button(__('Request Loan Closure'), function() {
