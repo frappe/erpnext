@@ -439,9 +439,32 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 			)
 			billed_amt_agianst_dn = billed_amt_agianst_dn and billed_amt_agianst_dn[0][0] or 0
 
+		# check if delivery has returns and subtract them
+		dn_returns = (
+			frappe.qb.from_(dn)
+			.from_(dn_item)
+			.select(dn_item.name, dn_item.amount, dn_item.si_detail, dn_item.parent)
+			.where(
+				(dn.name == dn_item.parent)
+				& (dn_item.dn_detail == dnd.name)
+				& (dn.return_against == dnd.parent)
+				& (dn.docstatus == 1)
+				& (dn.is_return == 1)
+			)
+			.orderby(dn.posting_date, dn.posting_time, dn.name)
+			.run(as_dict=True, debug=True)
+		)
+
+		amt_to_be_billed = flt(dnd.amount)
+		for dnr in dn_returns:
+			if flt(abs(dnr.amount)) <= flt(amt_to_be_billed):
+				amt_to_be_billed -= flt(abs(dnr.amount))
+			else:
+				amt_to_be_billed = 0
+
 		# Distribute billed amount directly against SO between DNs based on FIFO
-		if billed_against_so and billed_amt_agianst_dn < dnd.amount:
-			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
+		if billed_against_so and billed_amt_agianst_dn < flt(amt_to_be_billed):
+			pending_to_bill = flt(amt_to_be_billed) - billed_amt_agianst_dn
 			if pending_to_bill <= billed_against_so:
 				billed_amt_agianst_dn += pending_to_bill
 				billed_against_so -= pending_to_bill
