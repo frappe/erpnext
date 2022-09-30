@@ -1042,6 +1042,7 @@ def create_loan_type(
 				"company": "_Test Company",
 				"loan_name": loan_name,
 				"is_term_loan": is_term_loan,
+				"repayment_schedule_type": "Monthly as per repayment start date",
 				"maximum_loan_amount": maximum_loan_amount,
 				"rate_of_interest": rate_of_interest,
 				"penalty_interest_rate": penalty_interest_rate,
