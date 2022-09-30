@@ -16,6 +16,7 @@
   "company",
   "is_term_loan",
   "disabled",
+  "repayment_schedule_type",
   "description",
   "account_details_section",
   "mode_of_payment",
@@ -157,12 +158,20 @@
    "label": "Disbursement Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fieldname": "repayment_schedule_type",
+   "fieldtype": "Select",
+   "label": "Repayment Schedule Type",
+   "mandatory_depends_on": "is_term_loan",
+   "options": "\nMonthly as per repayment start date\nPro-rated calendar months"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-25 16:23:57.009349",
+ "modified": "2022-09-28 21:31:01.278941",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
