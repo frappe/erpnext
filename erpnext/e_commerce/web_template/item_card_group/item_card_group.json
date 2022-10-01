@@ -37,8 +37,8 @@
   {
    "fieldname": "card_1_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -56,8 +56,8 @@
   {
    "fieldname": "card_2_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -76,8 +76,8 @@
   {
    "fieldname": "card_3_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -95,8 +95,8 @@
   {
    "fieldname": "card_4_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -114,8 +114,8 @@
   {
    "fieldname": "card_5_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -133,8 +133,8 @@
   {
    "fieldname": "card_6_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -152,8 +152,8 @@
   {
    "fieldname": "card_7_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -171,8 +171,8 @@
   {
    "fieldname": "card_8_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -190,8 +190,8 @@
   {
    "fieldname": "card_9_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -209,8 +209,8 @@
   {
    "fieldname": "card_10_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -228,8 +228,8 @@
   {
    "fieldname": "card_11_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -247,8 +247,8 @@
   {
    "fieldname": "card_12_item",
    "fieldtype": "Link",
-   "label": "Item",
-   "options": "Item",
+   "label": "Website Item",
+   "options": "Website Item",
    "reqd": 0
   },
   {
@@ -259,7 +259,7 @@
   }
  ],
  "idx": 0,
- "modified": "2021-02-24 16:05:31.242342",
+ "modified": "2021-12-21 14:44:59.821335",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Item Card Group",

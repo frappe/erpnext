@@ -10,6 +10,7 @@
   "company",
   "purpose",
   "customer",
+  "customer_name",
   "work_order",
   "material_request",
   "for_qty",
@@ -114,6 +115,7 @@
    "set_only_once": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "print_settings_section",
    "fieldtype": "Section Break",
    "label": "Print Settings"
@@ -125,11 +127,19 @@
    "fieldtype": "Check",
    "label": "Group Same Items",
    "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.purpose==='Delivery' && doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-10-05 15:08:40.369957",
+ "modified": "2022-07-19 11:03:04.442174",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
@@ -199,5 +209,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -19,9 +19,10 @@
   "description",
   "account_details_section",
   "mode_of_payment",
+  "disbursement_account",
   "payment_account",
-  "loan_account",
   "column_break_12",
+  "loan_account",
   "interest_income_account",
   "penalty_income_account",
   "amended_from"
@@ -79,7 +80,7 @@
   {
    "fieldname": "payment_account",
    "fieldtype": "Link",
-   "label": "Payment Account",
+   "label": "Repayment Account",
    "options": "Account",
    "reqd": 1
   },
@@ -149,15 +150,23 @@
    "fieldtype": "Currency",
    "label": "Auto Write Off Amount ",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "disbursement_account",
+   "fieldtype": "Link",
+   "label": "Disbursement Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 18:10:57.368490",
+ "modified": "2022-01-25 16:23:57.009349",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -181,5 +190,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

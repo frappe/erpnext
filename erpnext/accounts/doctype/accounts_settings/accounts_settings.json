@@ -19,6 +19,7 @@
   "book_asset_depreciation_entry_automatically",
   "unlink_advance_payment_on_cancelation_of_order",
   "enable_common_party_accounting",
+  "allow_multi_currency_invoices_against_single_party_account",
   "post_change_gl_entries",
   "enable_discount_accounting",
   "tax_settings_section",
@@ -276,14 +277,21 @@
    "fieldname": "enable_common_party_accounting",
    "fieldtype": "Check",
    "label": "Enable Common Party Accounting"
-  }
+  },
+  {
+    "default": "0",
+    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
+    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
+    "fieldtype": "Check",
+    "label": "Allow multi-currency invoices against single party account"
+   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-10-11 17:42:36.427699",
+ "modified": "2022-07-11 13:37:50.605141",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

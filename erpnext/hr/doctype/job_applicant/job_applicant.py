@@ -7,12 +7,15 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.naming import append_number_if_name_exists
 from frappe.utils import validate_email_address
 
 from erpnext.hr.doctype.interview.interview import get_interviewers
 
 
-class DuplicationError(frappe.ValidationError): pass
+class DuplicationError(frappe.ValidationError):
+	pass
+
 
 class JobApplicant(Document):
 	def onload(self):
@@ -21,10 +24,11 @@ class JobApplicant(Document):
 			self.get("__onload").job_offer = job_offer[0].name
 
 	def autoname(self):
-		keys = filter(None, (self.applicant_name, self.email_id, self.job_title))
-		if not keys:
-			frappe.throw(_("Name or Email is mandatory"), frappe.NameError)
-		self.name = " - ".join(keys)
+		self.name = self.email_id
+
+		# applicant can apply more than once for a different job title or reapply
+		if frappe.db.exists("Job Applicant", self.name):
+			self.name = append_number_if_name_exists("Job Applicant", self.name)
 
 	def validate(self):
 		if self.email_id:
@@ -34,8 +38,8 @@ class JobApplicant(Document):
 			self.set_status_for_employee_referral()
 
 		if not self.applicant_name and self.email_id:
-			guess = self.email_id.split('@')[0]
-			self.applicant_name = ' '.join([p.capitalize() for p in guess.split('.')])
+			guess = self.email_id.split("@")[0]
+			self.applicant_name = " ".join([p.capitalize() for p in guess.split(".")])
 
 	def set_status_for_employee_referral(self):
 		emp_ref = frappe.get_doc("Employee Referral", self.employee_referral)
@@ -43,6 +47,7 @@ class JobApplicant(Document):
 			emp_ref.db_set("status", "In Process")
 		elif self.status in ["Accepted", "Rejected"]:
 			emp_ref.db_set("status", self.status)
+
 
 @frappe.whitelist()
 def create_interview(doc, interview_round):
@@ -57,7 +62,11 @@ def create_interview(doc, interview_round):
 	round_designation = frappe.db.get_value("Interview Round", interview_round, "designation")
 
 	if round_designation and doc.designation and round_designation != doc.designation:
-		frappe.throw(_("Interview Round {0} is only applicable for the Designation {1}").format(interview_round, round_designation))
+		frappe.throw(
+			_("Interview Round {0} is only applicable for the Designation {1}").format(
+				interview_round, round_designation
+			)
+		)
 
 	interview = frappe.new_doc("Interview")
 	interview.interview_round = interview_round
@@ -68,16 +77,16 @@ def create_interview(doc, interview_round):
 	interviewer_detail = get_interviewers(interview_round)
 
 	for d in interviewer_detail:
-		interview.append("interview_details", {
-			"interviewer": d.interviewer
-		})
+		interview.append("interview_details", {"interviewer": d.interviewer})
 	return interview
+
 
 @frappe.whitelist()
 def get_interview_details(job_applicant):
-	interview_details = frappe.db.get_all("Interview",
-		filters={"job_applicant":job_applicant, "docstatus": ["!=", 2]},
-		fields=["name", "interview_round", "expected_average_rating", "average_rating", "status"]
+	interview_details = frappe.db.get_all(
+		"Interview",
+		filters={"job_applicant": job_applicant, "docstatus": ["!=", 2]},
+		fields=["name", "interview_round", "expected_average_rating", "average_rating", "status"],
 	)
 	interview_detail_map = {}
 

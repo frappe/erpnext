@@ -1,4 +1,3 @@
-
 import frappe
 
 
@@ -13,4 +12,6 @@ def execute():
 		row.item_code = web_item
 
 	homepage.flags.ignore_mandatory = True
+	homepage.flags.ignore_links = True
+
 	homepage.save()

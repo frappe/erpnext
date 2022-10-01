@@ -7,20 +7,30 @@ from six import iteritems
 from six.moves import range
 
 field_map = {
-	"Contact": [ "first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact" ],
-	"Address": [ "address_line1", "address_line2", "city", "state", "pincode", "country", "is_primary_address" ]
+	"Contact": ["first_name", "last_name", "phone", "mobile_no", "email_id", "is_primary_contact"],
+	"Address": [
+		"address_line1",
+		"address_line2",
+		"city",
+		"state",
+		"pincode",
+		"country",
+		"is_primary_address",
+	],
 }
+
 
 def execute(filters=None):
 	columns, data = get_columns(filters), get_data(filters)
 	return columns, data
+
 
 def get_columns(filters):
 	party_type = filters.get("party_type")
 	party_type_value = get_party_group(party_type)
 	return [
 		"{party_type}:Link/{party_type}".format(party_type=party_type),
-		"{party_value_type}::150".format(party_value_type = frappe.unscrub(str(party_type_value))),
+		"{party_value_type}::150".format(party_value_type=frappe.unscrub(str(party_type_value))),
 		"Address Line 1",
 		"Address Line 2",
 		"City",
@@ -33,8 +43,9 @@ def get_columns(filters):
 		"Phone",
 		"Mobile No",
 		"Email Id",
-		"Is Primary Contact:Check"
+		"Is Primary Contact:Check",
 	]
+
 
 def get_data(filters):
 	party_type = filters.get("party_type")
@@ -42,6 +53,7 @@ def get_data(filters):
 	party_group = get_party_group(party_type)
 
 	return get_party_addresses_and_contact(party_type, party, party_group)
+
 
 def get_party_addresses_and_contact(party_type, party, party_group):
 	data = []
@@ -52,9 +64,11 @@ def get_party_addresses_and_contact(party_type, party, party_group):
 		return []
 
 	if party:
-		filters = { "name": party }
+		filters = {"name": party}
 
-	fetch_party_list = frappe.get_list(party_type, filters=filters, fields=["name", party_group], as_list=True)
+	fetch_party_list = frappe.get_list(
+		party_type, filters=filters, fields=["name", party_group], as_list=True
+	)
 	party_list = [d[0] for d in fetch_party_list]
 	party_groups = {}
 	for d in fetch_party_list:
@@ -68,7 +82,7 @@ def get_party_addresses_and_contact(party_type, party, party_group):
 
 	for party, details in iteritems(party_details):
 		addresses = details.get("address", [])
-		contacts  = details.get("contact", [])
+		contacts = details.get("contact", [])
 		if not any([addresses, contacts]):
 			result = [party]
 			result.append(party_groups[party])
@@ -91,10 +105,11 @@ def get_party_addresses_and_contact(party_type, party, party_group):
 				data.append(result)
 	return data
 
+
 def get_party_details(party_type, party_list, doctype, party_details):
-	filters =  [
+	filters = [
 		["Dynamic Link", "link_doctype", "=", party_type],
-		["Dynamic Link", "link_name", "in", party_list]
+		["Dynamic Link", "link_name", "in", party_list],
 	]
 	fields = ["`tabDynamic Link`.link_name"] + field_map.get(doctype, [])
 
@@ -105,15 +120,18 @@ def get_party_details(party_type, party_list, doctype, party_details):
 
 	return party_details
 
+
 def add_blank_columns_for(doctype):
 	return ["" for field in field_map.get(doctype, [])]
 
+
 def get_party_group(party_type):
-	if not party_type: return
+	if not party_type:
+		return
 	group = {
 		"Customer": "customer_group",
 		"Supplier": "supplier_group",
-		"Sales Partner": "partner_type"
+		"Sales Partner": "partner_type",
 	}
 
 	return group[party_type]

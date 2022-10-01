@@ -9,7 +9,7 @@ from erpnext.utilities.transaction_base import delete_events
 
 
 class Department(NestedSet):
-	nsm_parent_field = 'parent_department'
+	nsm_parent_field = "parent_department"
 
 	def autoname(self):
 		root = get_root_of("Department")
@@ -26,7 +26,7 @@ class Department(NestedSet):
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
-		if not frappe.get_cached_value('Company',  self.company,  'abbr') in new:
+		if not frappe.get_cached_value("Company", self.company, "abbr") in new:
 			new = get_abbreviated_name(new, self.company)
 
 		return new
@@ -39,17 +39,20 @@ class Department(NestedSet):
 		super(Department, self).on_trash()
 		delete_events(self.doctype, self.name)
 
+
 def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
 
+
 def get_abbreviated_name(name, company):
-	abbr = frappe.get_cached_value('Company',  company,  'abbr')
-	new_name = '{0} - {1}'.format(name, abbr)
+	abbr = frappe.get_cached_value("Company", company, "abbr")
+	new_name = "{0} - {1}".format(name, abbr)
 	return new_name
+
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	condition = ''
+	condition = ""
 	var_dict = {
 		"name": get_root_of("Department"),
 		"parent": parent,
@@ -62,18 +65,26 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	else:
 		condition = "parent_department = %(parent)s"
 
-	return frappe.db.sql("""
+	return frappe.db.sql(
+		"""
 		select
 			name as value,
 			is_group as expandable
 		from `tab{doctype}`
 		where
 			{condition}
-		order by name""".format(doctype=doctype, condition=condition), var_dict, as_dict=1)
+		order by name""".format(
+			doctype=doctype, condition=condition
+		),
+		var_dict,
+		as_dict=1,
+	)
+
 
 @frappe.whitelist()
 def add_node():
 	from frappe.desk.treeview import make_tree_args
+
 	args = frappe.form_dict
 	args = make_tree_args(**args)
 

@@ -8,7 +8,8 @@ const DIFFERNCE_FIELD_NAMES = [
 	"fifo_value_diff",
 	"fifo_valuation_diff",
 	"valuation_diff",
-	"fifo_difference_diff"
+	"fifo_difference_diff",
+	"diff_value_diff"
 ];
 
 frappe.query_reports["Stock Ledger Invariant Check"] = {

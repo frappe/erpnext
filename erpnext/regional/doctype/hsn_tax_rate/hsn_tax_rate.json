@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-05-11 13:32:42.534779",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "minimum_taxable_value",
+  "tax_rate"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "minimum_taxable_value",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Minimum Taxable Value"
+  },
+  {
+   "columns": 2,
+   "fieldname": "tax_rate",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tax Rate"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-05-15 15:37:56.152470",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "HSN Tax Rate",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

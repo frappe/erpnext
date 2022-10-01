@@ -31,9 +31,11 @@ class PriceList(Document):
 				frappe.set_value("Buying Settings", "Buying Settings", "buying_price_list", self.name)
 
 	def update_item_price(self):
-		frappe.db.sql("""update `tabItem Price` set currency=%s,
+		frappe.db.sql(
+			"""update `tabItem Price` set currency=%s,
 			buying=%s, selling=%s, modified=NOW() where price_list=%s""",
-			(self.currency, cint(self.buying), cint(self.selling), self.name))
+			(self.currency, cint(self.buying), cint(self.selling), self.name),
+		)
 
 	def check_impact_on_shopping_cart(self):
 		"Check if Price List currency change impacts E Commerce Cart."
@@ -66,12 +68,14 @@ class PriceList(Document):
 	def delete_price_list_details_key(self):
 		frappe.cache().hdel("price_list_details", self.name)
 
+
 def get_price_list_details(price_list):
 	price_list_details = frappe.cache().hget("price_list_details", price_list)
 
 	if not price_list_details:
-		price_list_details = frappe.get_cached_value("Price List", price_list,
-			["currency", "price_not_uom_dependent", "enabled"], as_dict=1)
+		price_list_details = frappe.get_cached_value(
+			"Price List", price_list, ["currency", "price_not_uom_dependent", "enabled"], as_dict=1
+		)
 
 		if not price_list_details or not price_list_details.get("enabled"):
 			throw(_("Price List {0} is disabled or does not exist").format(price_list))

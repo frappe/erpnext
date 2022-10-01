@@ -66,7 +66,6 @@
    "search_index": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -224,7 +223,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-30 16:53:13.076104",
+ "modified": "2022-01-20 12:38:55.382621",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

@@ -51,7 +51,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -73,7 +72,6 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "label": "Patient Appointment",
-   "no_copy": 1,
    "options": "Patient Appointment",
    "print_hide": 1,
    "read_only": 1
@@ -83,7 +81,6 @@
    "fieldtype": "Link",
    "in_filter": 1,
    "label": "Patient Encounter",
-   "no_copy": 1,
    "options": "Patient Encounter",
    "print_hide": 1,
    "read_only": 1
@@ -259,7 +256,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-17 22:23:24.632286",
+ "modified": "2022-02-19 11:48:16.347334",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",

@@ -21,6 +21,7 @@ SLE_FIELDS = (
 	"stock_value",
 	"stock_value_difference",
 	"valuation_rate",
+	"voucher_detail_no",
 )
 
 
@@ -39,17 +40,14 @@ def get_stock_ledger_entries(filters):
 	return frappe.get_all(
 		"Stock Ledger Entry",
 		fields=SLE_FIELDS,
-		filters={
-			"item_code": filters.item_code,
-			"warehouse": filters.warehouse,
-			"is_cancelled": 0
-		},
+		filters={"item_code": filters.item_code, "warehouse": filters.warehouse, "is_cancelled": 0},
 		order_by="timestamp(posting_date, posting_time), creation",
 	)
 
 
 def add_invariant_check_fields(sles):
 	balance_qty = 0.0
+	balance_stock_value = 0.0
 	for idx, sle in enumerate(sles):
 		queue = json.loads(sle.stock_queue)
 
@@ -59,9 +57,15 @@ def add_invariant_check_fields(sles):
 			fifo_qty += qty
 			fifo_value += qty * rate
 
+		if sle.actual_qty < 0:
+			sle.consumption_rate = sle.stock_value_difference / sle.actual_qty
+
 		balance_qty += sle.actual_qty
+		balance_stock_value += sle.stock_value_difference
 		if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no:
-			balance_qty = sle.qty_after_transaction
+			balance_qty = frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "qty")
+			if balance_qty is None:
+				balance_qty = sle.qty_after_transaction
 
 		sle.fifo_queue_qty = fifo_qty
 		sle.fifo_stock_value = fifo_value
@@ -70,6 +74,7 @@ def add_invariant_check_fields(sles):
 			sle.stock_value / sle.qty_after_transaction if sle.qty_after_transaction else None
 		)
 		sle.expected_qty_after_transaction = balance_qty
+		sle.stock_value_from_diff = balance_stock_value
 
 		# set difference fields
 		sle.difference_in_qty = sle.qty_after_transaction - sle.expected_qty_after_transaction
@@ -81,6 +86,7 @@ def add_invariant_check_fields(sles):
 		sle.valuation_diff = (
 			sle.valuation_rate - sle.balance_value_by_qty if sle.balance_value_by_qty else None
 		)
+		sle.diff_value_diff = sle.stock_value_from_diff - sle.stock_value
 
 		if idx > 0:
 			sle.fifo_stock_diff = sle.fifo_stock_value - sles[idx - 1].fifo_stock_value
@@ -99,17 +105,17 @@ def get_columns():
 		},
 		{
 			"fieldname": "posting_date",
-			"fieldtype": "Date",
+			"fieldtype": "Data",
 			"label": "Posting Date",
 		},
 		{
 			"fieldname": "posting_time",
-			"fieldtype": "Time",
+			"fieldtype": "Data",
 			"label": "Posting Time",
 		},
 		{
 			"fieldname": "creation",
-			"fieldtype": "Datetime",
+			"fieldtype": "Data",
 			"label": "Creation",
 		},
 		{
@@ -141,9 +147,9 @@ def get_columns():
 			"label": "Incoming Rate",
 		},
 		{
-			"fieldname": "outgoing_rate",
+			"fieldname": "consumption_rate",
 			"fieldtype": "Float",
-			"label": "Outgoing Rate",
+			"label": "Consumption Rate",
 		},
 		{
 			"fieldname": "qty_after_transaction",
@@ -165,7 +171,6 @@ def get_columns():
 			"fieldtype": "Data",
 			"label": "FIFO Queue",
 		},
-
 		{
 			"fieldname": "fifo_queue_qty",
 			"fieldtype": "Float",
@@ -191,11 +196,20 @@ def get_columns():
 			"fieldtype": "Float",
 			"label": "D - E",
 		},
-
 		{
 			"fieldname": "stock_value_difference",
 			"fieldtype": "Float",
 			"label": "(F) Stock Value Difference",
+		},
+		{
+			"fieldname": "stock_value_from_diff",
+			"fieldtype": "Float",
+			"label": "Balance Stock Value using (F)",
+		},
+		{
+			"fieldname": "diff_value_diff",
+			"fieldtype": "Float",
+			"label": "K - D",
 		},
 		{
 			"fieldname": "fifo_stock_diff",
@@ -217,7 +231,6 @@ def get_columns():
 			"fieldtype": "Float",
 			"label": "(I) Valuation Rate as per FIFO",
 		},
-
 		{
 			"fieldname": "fifo_valuation_diff",
 			"fieldtype": "Float",

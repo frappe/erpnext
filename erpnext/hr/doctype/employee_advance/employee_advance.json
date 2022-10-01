@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2017-10-09 14:26:29.612365",
+ "creation": "2022-01-17 18:36:51.450395",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -121,7 +121,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nPaid\nUnpaid\nClaimed\nCancelled",
+   "options": "Draft\nPaid\nUnpaid\nClaimed\nReturned\nPartly Claimed and Returned\nCancelled",
    "read_only": 1
   },
   {
@@ -200,7 +200,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-11 18:38:38.617478",
+ "modified": "2022-05-23 19:33:52.345823",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
@@ -236,5 +236,6 @@
  "search_fields": "employee,employee_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "employee_name",
  "track_changes": 1
 }

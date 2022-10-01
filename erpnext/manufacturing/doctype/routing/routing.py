@@ -19,8 +19,11 @@ class Routing(Document):
 	def calculate_operating_cost(self):
 		for operation in self.operations:
 			if not operation.hour_rate:
-				operation.hour_rate = frappe.db.get_value("Workstation", operation.workstation, 'hour_rate')
-			operation.operating_cost = flt(flt(operation.hour_rate) * flt(operation.time_in_mins) / 60, 2)
+				operation.hour_rate = frappe.db.get_value("Workstation", operation.workstation, "hour_rate")
+			operation.operating_cost = flt(
+				flt(operation.hour_rate) * flt(operation.time_in_mins) / 60,
+				operation.precision("operating_cost"),
+			)
 
 	def set_routing_id(self):
 		sequence_id = 0
@@ -28,7 +31,10 @@ class Routing(Document):
 			if not row.sequence_id:
 				row.sequence_id = sequence_id + 1
 			elif sequence_id and row.sequence_id and cint(sequence_id) > cint(row.sequence_id):
-				frappe.throw(_("At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}")
-					.format(row.idx, row.sequence_id, sequence_id))
+				frappe.throw(
+					_("At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}").format(
+						row.idx, row.sequence_id, sequence_id
+					)
+				)
 
 			sequence_id = row.sequence_id

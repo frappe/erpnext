@@ -14,31 +14,39 @@ from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
 value_fields = ("income", "expense", "gross_profit_loss")
 
-def execute(filters=None):
-	if not filters.get('based_on'): filters["based_on"] = 'Cost Center'
 
-	based_on = filters.based_on.replace(' ', '_').lower()
+def execute(filters=None):
+	if not filters.get("based_on"):
+		filters["based_on"] = "Cost Center"
+
+	based_on = filters.based_on.replace(" ", "_").lower()
 	validate_filters(filters)
 	accounts = get_accounts_data(based_on, filters.get("company"))
 	data = get_data(accounts, filters, based_on)
 	columns = get_columns(filters)
 	return columns, data
 
+
 def get_accounts_data(based_on, company):
-	if based_on == 'cost_center':
-		return frappe.db.sql("""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
-			from `tabCost Center` where company=%s order by name""", company, as_dict=True)
-	elif based_on == 'project':
-		return frappe.get_all('Project', fields = ["name"], filters = {'company': company}, order_by = 'name')
+	if based_on == "cost_center":
+		return frappe.db.sql(
+			"""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
+			from `tabCost Center` where company=%s order by name""",
+			company,
+			as_dict=True,
+		)
+	elif based_on == "project":
+		return frappe.get_all("Project", fields=["name"], filters={"company": company}, order_by="name")
 	else:
 		filters = {}
 		doctype = frappe.unscrub(based_on)
-		has_company = frappe.db.has_column(doctype, 'company')
+		has_company = frappe.db.has_column(doctype, "company")
 
 		if has_company:
-			filters.update({'company': company})
+			filters.update({"company": company})
 
-		return frappe.get_all(doctype, fields = ["name"], filters = filters, order_by = 'name')
+		return frappe.get_all(doctype, fields=["name"], filters=filters, order_by="name")
+
 
 def get_data(accounts, filters, based_on):
 	if not accounts:
@@ -48,24 +56,28 @@ def get_data(accounts, filters, based_on):
 
 	gl_entries_by_account = {}
 
-	set_gl_entries_by_account(filters.get("company"), filters.get("from_date"),
-		filters.get("to_date"), based_on, gl_entries_by_account, ignore_closing_entries=not flt(filters.get("with_period_closing_entry")))
+	set_gl_entries_by_account(
+		filters.get("company"),
+		filters.get("from_date"),
+		filters.get("to_date"),
+		based_on,
+		gl_entries_by_account,
+		ignore_closing_entries=not flt(filters.get("with_period_closing_entry")),
+	)
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map, based_on)
-	data = filter_out_zero_value_rows(data, parent_children_map,
-		show_zero_values=filters.get("show_zero_values"))
+	data = filter_out_zero_value_rows(
+		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
+	)
 
 	return data
 
+
 def calculate_values(accounts, gl_entries_by_account, filters):
-	init = {
-		"income": 0.0,
-		"expense": 0.0,
-		"gross_profit_loss": 0.0
-	}
+	init = {"income": 0.0, "expense": 0.0, "gross_profit_loss": 0.0}
 
 	total_row = {
 		"cost_center": None,
@@ -77,7 +89,7 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 		"account": "'" + _("Total") + "'",
 		"parent_account": None,
 		"indent": 0,
-		"has_value": True
+		"has_value": True,
 	}
 
 	for d in accounts:
@@ -87,9 +99,9 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 
 		for entry in gl_entries_by_account.get(d.name, []):
 			if cstr(entry.is_opening) != "Yes":
-				if entry.type == 'Income':
+				if entry.type == "Income":
 					d["income"] += flt(entry.credit) - flt(entry.debit)
-				if entry.type == 'Expense':
+				if entry.type == "Expense":
 					d["expense"] += flt(entry.debit) - flt(entry.credit)
 
 				d["gross_profit_loss"] = d.get("income") - d.get("expense")
@@ -101,16 +113,18 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 
 	return total_row
 
+
 def accumulate_values_into_parents(accounts, accounts_by_name):
 	for d in reversed(accounts):
 		if d.parent_account:
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
 
+
 def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 	data = []
 	new_accounts = accounts
-	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
+	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
 	for d in accounts:
 		has_value = False
@@ -121,21 +135,24 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 			"indent": d.indent,
 			"fiscal_year": filters.get("fiscal_year"),
 			"currency": company_currency,
-			"based_on": based_on
+			"based_on": based_on,
 		}
-		if based_on == 'cost_center':
-			cost_center_doc = frappe.get_doc("Cost Center",d.name)
+		if based_on == "cost_center":
+			cost_center_doc = frappe.get_doc("Cost Center", d.name)
 			if not cost_center_doc.enable_distributed_cost_center:
-				DCC_allocation = frappe.db.sql("""SELECT parent, sum(percentage_allocation) as percentage_allocation
+				DCC_allocation = frappe.db.sql(
+					"""SELECT parent, sum(percentage_allocation) as percentage_allocation
 					FROM `tabDistributed Cost Center`
 					WHERE cost_center IN %(cost_center)s
 					AND parent NOT IN %(cost_center)s
-					GROUP BY parent""",{'cost_center': [d.name]})
+					GROUP BY parent""",
+					{"cost_center": [d.name]},
+				)
 				if DCC_allocation:
 					for account in new_accounts:
-						if account['name'] == DCC_allocation[0][0]:
+						if account["name"] == DCC_allocation[0][0]:
 							for value in value_fields:
-								d[value] += account[value]*(DCC_allocation[0][1]/100)
+								d[value] += account[value] * (DCC_allocation[0][1] / 100)
 
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
@@ -147,9 +164,10 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 		row["has_value"] = has_value
 		data.append(row)
 
-	data.extend([{},total_row])
+	data.extend([{}, total_row])
 
 	return data
+
 
 def get_columns(filters):
 	return [
@@ -158,43 +176,42 @@ def get_columns(filters):
 			"label": _(filters.get("based_on")),
 			"fieldtype": "Link",
 			"options": filters.get("based_on"),
-			"width": 300
+			"width": 300,
 		},
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),
 			"fieldtype": "Link",
 			"options": "Currency",
-			"hidden": 1
+			"hidden": 1,
 		},
 		{
 			"fieldname": "income",
 			"label": _("Income"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 305
-
+			"width": 305,
 		},
 		{
 			"fieldname": "expense",
 			"label": _("Expense"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 305
-
+			"width": 305,
 		},
 		{
 			"fieldname": "gross_profit_loss",
 			"label": _("Gross Profit / Loss"),
 			"fieldtype": "Currency",
 			"options": "currency",
-			"width": 307
-
-		}
+			"width": 307,
+		},
 	]
 
-def set_gl_entries_by_account(company, from_date, to_date, based_on, gl_entries_by_account,
-		ignore_closing_entries=False):
+
+def set_gl_entries_by_account(
+	company, from_date, to_date, based_on, gl_entries_by_account, ignore_closing_entries=False
+):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []
 
@@ -204,19 +221,20 @@ def set_gl_entries_by_account(company, from_date, to_date, based_on, gl_entries_
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")
 
-	gl_entries = frappe.db.sql("""select posting_date, {based_on} as based_on, debit, credit,
+	gl_entries = frappe.db.sql(
+		"""select posting_date, {based_on} as based_on, debit, credit,
 		is_opening, (select root_type from `tabAccount` where name = account) as type
 		from `tabGL Entry` where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
 		and {based_on} is not null
-		order by {based_on}, posting_date""".format(additional_conditions="\n".join(additional_conditions), based_on= based_on),
-		{
-			"company": company,
-			"from_date": from_date,
-			"to_date": to_date
-		},
-		as_dict=True)
+		and is_cancelled = 0
+		order by {based_on}, posting_date""".format(
+			additional_conditions="\n".join(additional_conditions), based_on=based_on
+		),
+		{"company": company, "from_date": from_date, "to_date": to_date},
+		as_dict=True,
+	)
 
 	for entry in gl_entries:
 		gl_entries_by_account.setdefault(entry.based_on, []).append(entry)

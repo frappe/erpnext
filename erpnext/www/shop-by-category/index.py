@@ -3,6 +3,7 @@ from frappe import _
 
 sitemap = 1
 
+
 def get_context(context):
 	context.body_class = "product-page"
 
@@ -18,13 +19,9 @@ def get_context(context):
 
 	context.no_cache = 1
 
+
 def get_slideshow(slideshow):
-	values = {
-		'show_indicators': 1,
-		'show_controls': 1,
-		'rounded': 1,
-		'slider_name': "Categories"
-	}
+	values = {"show_indicators": 1, "show_controls": 1, "rounded": 1, "slider_name": "Categories"}
 	slideshow = frappe.get_cached_doc("Website Slideshow", slideshow)
 	slides = slideshow.get({"doctype": "Website Slideshow Item"})
 	for index, slide in enumerate(slides, start=1):
@@ -37,9 +34,10 @@ def get_slideshow(slideshow):
 
 	return values
 
+
 def get_tabs(categories):
 	tab_values = {
-		'title': _("Shop by Category"),
+		"title": _("Shop by Category"),
 	}
 
 	categorical_data = get_category_records(categories)
@@ -48,15 +46,17 @@ def get_tabs(categories):
 		# pre-render cards for each tab
 		tab_values[f"tab_{index + 1}_content"] = frappe.render_template(
 			"erpnext/www/shop-by-category/category_card_section.html",
-			{"data": categorical_data[tab], "type": tab}
+			{"data": categorical_data[tab], "type": tab},
 		)
 	return tab_values
+
 
 def get_category_records(categories):
 	categorical_data = {}
 	for category in categories:
 		if category == "item_group":
-			categorical_data["item_group"] = frappe.db.sql("""
+			categorical_data["item_group"] = frappe.db.sql(
+				"""
 				Select
 					name, parent_item_group, is_group, image, route
 				from
@@ -65,7 +65,8 @@ def get_category_records(categories):
 					parent_item_group = 'All Item Groups'
 					and show_in_website = 1
 				""",
-				as_dict=1)
+				as_dict=1,
+			)
 		else:
 			doctype = frappe.unscrub(category)
 			fields = ["name"]
@@ -79,7 +80,7 @@ def get_category_records(categories):
 					from
 						`tab{doctype}`
 				""",
-				as_dict=1)
+				as_dict=1,
+			)
 
 	return categorical_data
-

@@ -12,6 +12,7 @@
   "vendor",
   "column_break1",
   "transaction_date",
+  "schedule_date",
   "status",
   "amended_from",
   "suppliers_section",
@@ -31,7 +32,9 @@
   "terms",
   "printing_settings",
   "select_print_heading",
-  "letter_head"
+  "letter_head",
+  "more_info",
+  "opportunity"
  ],
  "fields": [
   {
@@ -193,6 +196,23 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "opportunity",
+   "fieldtype": "Link",
+   "label": "Opportunity",
+   "options": "Opportunity",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -246,16 +266,22 @@
    "fieldname": "sec_break_email_2",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
+   "label": "Required Date"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 22:04:29.017134",
+ "modified": "2022-04-06 17:47:49.909000",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {

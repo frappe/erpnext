@@ -12,14 +12,19 @@ from frappe.model.rename_doc import bulk_rename
 class RenameTool(Document):
 	pass
 
+
 @frappe.whitelist()
 def get_doctypes():
-	return frappe.db.sql_list("""select name from tabDocType
-		where allow_rename=1 and module!='Core' order by name""")
+	return frappe.db.sql_list(
+		"""select name from tabDocType
+		where allow_rename=1 and module!='Core' order by name"""
+	)
+
 
 @frappe.whitelist()
 def upload(select_doctype=None, rows=None):
 	from frappe.utils.csvutils import read_csv_content_from_attached_file
+
 	if not select_doctype:
 		select_doctype = frappe.form_dict.select_doctype
 

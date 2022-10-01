@@ -1,6 +1,8 @@
 import unittest
 from functools import partial
 
+import frappe
+
 from erpnext.controllers import queries
 
 
@@ -54,6 +56,12 @@ class TestQueries(unittest.TestCase):
 		bundled_stock_items = query(txt="_test product bundle item 5", filters={"is_stock_item": 1})
 		self.assertEqual(len(bundled_stock_items), 0)
 
+		# empty customer/supplier should be stripped of instead of failure
+		query(txt="", filters={"customer": None})
+		query(txt="", filters={"customer": ""})
+		query(txt="", filters={"supplier": None})
+		query(txt="", filters={"supplier": ""})
+
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")
 
@@ -85,3 +93,6 @@ class TestQueries(unittest.TestCase):
 
 		wh = query(filters=[["Bin", "item_code", "=", "_Test Item"]])
 		self.assertGreaterEqual(len(wh), 1)
+
+	def test_default_uoms(self):
+		self.assertGreaterEqual(frappe.db.count("UOM", {"enabled": 1}), 10)

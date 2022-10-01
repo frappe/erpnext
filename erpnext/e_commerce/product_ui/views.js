@@ -424,6 +424,22 @@ erpnext.ProductView =  class {
 
 			me.change_route_with_filters();
 		});
+
+		// bind filter lookup input box
+		$('.filter-lookup-input').on('keydown', frappe.utils.debounce((e) => {
+			const $input = $(e.target);
+			const keyword = ($input.val() || '').toLowerCase();
+			const $filter_options = $input.next('.filter-options');
+
+			$filter_options.find('.filter-lookup-wrapper').show();
+			$filter_options.find('.filter-lookup-wrapper').each((i, el) => {
+				const $el = $(el);
+				const value = $el.data('value').toLowerCase();
+				if (!value.includes(keyword)) {
+					$el.hide();
+				}
+			});
+		}, 300));
 	}
 
 	change_route_with_filters() {
@@ -501,7 +517,7 @@ erpnext.ProductView =  class {
 
 			categories.forEach(category => {
 				sub_group_html += `
-					<a href="${ category.route || '#' }" style="text-decoration: none;">
+					<a href="/${ category.route || '#' }" style="text-decoration: none;">
 						<div class="category-pill">
 							${ category.name }
 						</div>

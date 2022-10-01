@@ -37,7 +37,7 @@ frappe.ui.form.on("Shopify Settings", "refresh", function(frm){
 
 	}
 
-	let app_link = "<a href='https://frappecloud.com/marketplace/apps/ecommerce-integrations' target='_blank'>Ecommerce Integrations</a>"
+	let app_link = "<a href='https://frappecloud.com/marketplace/apps/ecommerce_integrations' target='_blank'>Ecommerce Integrations</a>"
 	frm.dashboard.add_comment(__("Shopify Integration will be removed from ERPNext in Version 14. Please install {0} app to continue using it.", [app_link]), "yellow", true);
 
 })

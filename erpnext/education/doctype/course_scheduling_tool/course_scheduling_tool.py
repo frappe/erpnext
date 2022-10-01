@@ -24,11 +24,11 @@ class CourseSchedulingTool(Document):
 
 		self.validate_mandatory(days)
 		self.validate_date()
-		self.instructor_name = frappe.db.get_value(
-			"Instructor", self.instructor, "instructor_name")
+		self.instructor_name = frappe.db.get_value("Instructor", self.instructor, "instructor_name")
 
 		group_based_on, course = frappe.db.get_value(
-			"Student Group", self.student_group, ["group_based_on", "course"])
+			"Student Group", self.student_group, ["group_based_on", "course"]
+		)
 
 		if group_based_on == "Course":
 			self.course = course
@@ -54,35 +54,43 @@ class CourseSchedulingTool(Document):
 			course_schedules=course_schedules,
 			course_schedules_errors=course_schedules_errors,
 			rescheduled=rescheduled,
-			reschedule_errors=reschedule_errors
+			reschedule_errors=reschedule_errors,
 		)
 
 	def validate_mandatory(self, days):
 		"""Validates all mandatory fields"""
 		if not days:
 			frappe.throw(_("Please select at least one day to schedule the course."))
-		fields = ['course', 'room', 'instructor', 'from_time', 'to_time', 'course_start_date', 'course_end_date']
+
+		fields = [
+			"course",
+			"room",
+			"instructor",
+			"from_time",
+			"to_time",
+			"course_start_date",
+			"course_end_date",
+		]
 		for d in fields:
 			if not self.get(d):
-				frappe.throw(_("{0} is mandatory").format(
-					self.meta.get_label(d)))
+				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(d)))
 
 	def validate_date(self):
 		"""Validates if Course Start Date is greater than Course End Date"""
 		if self.course_start_date > self.course_end_date:
-			frappe.throw(
-				_("Course Start Date cannot be greater than Course End Date."))
+			frappe.throw(_("Course Start Date cannot be greater than Course End Date."))
 
 	def delete_course_schedule(self, rescheduled, reschedule_errors, days):
 		"""Delete all course schedule within the Date range and specified filters"""
-		schedules = frappe.get_list("Course Schedule",
+		schedules = frappe.get_list(
+			"Course Schedule",
 			fields=["name", "schedule_date"],
 			filters=[
 				["student_group", "=", self.student_group],
 				["course", "=", self.course],
 				["schedule_date", ">=", self.course_start_date],
-				["schedule_date", "<=", self.course_end_date]
-			]
+				["schedule_date", "<=", self.course_end_date],
+			],
 		)
 
 		for d in schedules:

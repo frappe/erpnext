@@ -11,40 +11,51 @@ from erpnext import get_default_company
 
 def get_root_of(doctype):
 	"""Get root element of a DocType with a tree structure"""
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)""" %
-		(doctype, doctype))
+	result = frappe.db.sql_list(
+		"""select name from `tab%s`
+		where lft=1 and rgt=(select max(rgt) from `tab%s` where docstatus < 2)"""
+		% (doctype, doctype)
+	)
 	return result[0] if result else None
+
 
 def get_ancestors_of(doctype, name):
 	"""Get ancestor elements of a DocType with a tree structure"""
 	lft, rgt = frappe.db.get_value(doctype, name, ["lft", "rgt"])
-	result = frappe.db.sql_list("""select name from `tab%s`
-		where lft<%s and rgt>%s order by lft desc""" % (doctype, "%s", "%s"), (lft, rgt))
+	result = frappe.db.sql_list(
+		"""select name from `tab%s`
+		where lft<%s and rgt>%s order by lft desc"""
+		% (doctype, "%s", "%s"),
+		(lft, rgt),
+	)
 	return result or []
+
 
 def before_tests():
 	frappe.clear_cache()
 	# complete setup if missing
 	from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+
 	if not frappe.get_list("Company"):
-		setup_complete({
-			"currency"			:"USD",
-			"full_name"			:"Test User",
-			"company_name"		:"Wind Power LLC",
-			"timezone"			:"America/New_York",
-			"company_abbr"		:"WP",
-			"industry"			:"Manufacturing",
-			"country"			:"United States",
-			"fy_start_date"		:"2011-01-01",
-			"fy_end_date"		:"2011-12-31",
-			"language"			:"english",
-			"company_tagline"	:"Testing",
-			"email"				:"test@erpnext.com",
-			"password"			:"test",
-			"chart_of_accounts" : "Standard",
-			"domains"			: ["Manufacturing"],
-		})
+		setup_complete(
+			{
+				"currency": "USD",
+				"full_name": "Test User",
+				"company_name": "Wind Power LLC",
+				"timezone": "America/New_York",
+				"company_abbr": "WP",
+				"industry": "Manufacturing",
+				"country": "United States",
+				"fy_start_date": "2011-01-01",
+				"fy_end_date": "2011-12-31",
+				"language": "english",
+				"company_tagline": "Testing",
+				"email": "test@erpnext.com",
+				"password": "test",
+				"chart_of_accounts": "Standard",
+				"domains": ["Manufacturing"],
+			}
+		)
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
 	frappe.db.sql("delete from `tabLeave Application`")
@@ -56,6 +67,7 @@ def before_tests():
 	set_defaults_for_tests()
 
 	frappe.db.commit()
+
 
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=None):
@@ -73,7 +85,7 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	filters = [
 		["date", "<=", get_datetime_str(transaction_date)],
 		["from_currency", "=", from_currency],
-		["to_currency", "=", to_currency]
+		["to_currency", "=", to_currency],
 	]
 
 	if args == "for_buying":
@@ -88,8 +100,8 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 	# cksgb 19/09/2016: get last entry in Currency Exchange with from_currency and to_currency.
 	entries = frappe.get_all(
-		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc",
-		limit=1)
+		"Currency Exchange", fields=["exchange_rate"], filters=filters, order_by="date desc", limit=1
+	)
 	if entries:
 		return flt(entries[0].exchange_rate)
 
@@ -100,12 +112,11 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
+
 			api_url = "https://api.exchangerate.host/convert"
-			response = requests.get(api_url, params={
-				"date": transaction_date,
-				"from": from_currency,
-				"to": to_currency
-			})
+			response = requests.get(
+				api_url, params={"date": transaction_date, "from": from_currency, "to": to_currency}
+			)
 			# expire in 6 hours
 			response.raise_for_status()
 			value = response.json()["result"]
@@ -113,20 +124,26 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 		return flt(value)
 	except Exception:
 		frappe.log_error(title="Get Exchange Rate")
-		frappe.msgprint(_("Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually").format(from_currency, to_currency, transaction_date))
+		frappe.msgprint(
+			_(
+				"Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
+			).format(from_currency, to_currency, transaction_date)
+		)
 		return 0.0
 
+
 def enable_all_roles_and_domains():
-	""" enable all roles and domain for testing """
+	"""enable all roles and domain for testing"""
 	# add all roles to users
 	domains = frappe.get_all("Domain")
 	if not domains:
 		return
 
 	from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-	frappe.get_single('Domain Settings').set_active_domains(\
-		[d.name for d in domains])
-	add_all_roles_to('Administrator')
+
+	frappe.get_single("Domain Settings").set_active_domains([d.name for d in domains])
+	add_all_roles_to("Administrator")
+
 
 def set_defaults_for_tests():
 	from frappe.utils.nestedset import get_root_of
@@ -145,11 +162,12 @@ def insert_record(records):
 			doc.insert(ignore_permissions=True)
 		except frappe.DuplicateEntryError as e:
 			# pass DuplicateEntryError and continue
-			if e.args and e.args[0]==doc.doctype and e.args[1]==doc.name:
+			if e.args and e.args[0] == doc.doctype and e.args[1] == doc.name:
 				# make sure DuplicateEntryError is for the exact same doc and not a related doc
 				pass
 			else:
 				raise
+
 
 def welcome_email():
 	site_name = get_default_company() or "ERPNext"

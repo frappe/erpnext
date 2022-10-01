@@ -3,11 +3,17 @@
 
 frappe.ui.form.on('GST Settings', {
 	refresh: function(frm) {
-		frm.add_custom_button('Send GST Update Reminder', () => {
+		frm.add_custom_button(__('Send GST Update Reminder'), () => {
 			return new Promise((resolve) => {
 				return frappe.call({
 					method: 'erpnext.regional.doctype.gst_settings.gst_settings.send_reminder'
 				}).always(() => { resolve(); });
+			});
+		});
+
+		frm.add_custom_button(__('Sync HSN Codes'), () => {
+			frappe.call({
+				"method": "erpnext.regional.doctype.gst_settings.gst_settings.update_hsn_codes"
 			});
 		});
 

@@ -33,6 +33,8 @@
    "reqd": 1
   },
   {
+   "fetch_from": "item_code.description",
+   "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -51,6 +53,8 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "item_code.stock_uom",
+   "fetch_if_empty": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -64,7 +68,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-02-28 14:06:05.725655",
+ "modified": "2022-06-27 05:30:18.475150",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Product Bundle Item",
@@ -72,5 +76,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

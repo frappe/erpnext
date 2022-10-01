@@ -36,7 +36,7 @@ frappe.ui.form.on('Tax Exemption 80G Certificate', {
 				'date_of_donation': '',
 				'amount': 0,
 				'mode_of_payment': '',
-				'razorpay_payment_id': ''
+				'payment_id': ''
 			});
 		}
 	},

@@ -8,7 +8,7 @@ import unittest
 import frappe
 from frappe import _
 from frappe.core.doctype.user_permission.test_user_permission import create_user
-from frappe.utils import add_days, getdate, nowtime
+from frappe.utils import add_days, get_time, getdate, nowtime
 
 from erpnext.hr.doctype.designation.test_designation import create_designation
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
@@ -18,23 +18,35 @@ from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_appli
 class TestInterview(unittest.TestCase):
 	def test_validations_for_designation(self):
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, designation='_Test_Sales_manager', save=0)
+		interview = create_interview_and_dependencies(
+			job_applicant.name, designation="_Test_Sales_manager", save=0
+		)
 		self.assertRaises(DuplicateInterviewRoundError, interview.save)
 
 	def test_notification_on_rescheduling(self):
 		job_applicant = create_job_applicant()
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=add_days(getdate(), -4))
+		interview = create_interview_and_dependencies(
+			job_applicant.name,
+			scheduled_on=add_days(getdate(), -4),
+			from_time="10:00:00",
+			to_time="11:00:00",
+		)
 
 		previous_scheduled_date = interview.scheduled_on
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 
-		interview.reschedule_interview(add_days(getdate(previous_scheduled_date), 2),
-			from_time=nowtime(), to_time=nowtime())
+		interview.reschedule_interview(
+			add_days(getdate(previous_scheduled_date), 2), from_time="11:00:00", to_time="12:00:00"
+		)
 		interview.reload()
 
 		self.assertEqual(interview.scheduled_on, add_days(getdate(previous_scheduled_date), 2))
+		self.assertEqual(get_time(interview.from_time), get_time("11:00:00"))
+		self.assertEqual(get_time(interview.to_time), get_time("12:00:00"))
 
-		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Your Interview session is rescheduled from%")})
+		notification = frappe.get_all(
+			"Email Queue", filters={"message": ("like", "%Your Interview session is rescheduled from%")}
+		)
 		self.assertIsNotNone(notification)
 
 	def test_notification_for_scheduling(self):
@@ -74,16 +86,17 @@ class TestInterview(unittest.TestCase):
 		frappe.db.rollback()
 
 
-def create_interview_and_dependencies(job_applicant, scheduled_on=None, from_time=None, to_time=None, designation=None, save=1):
+def create_interview_and_dependencies(
+	job_applicant, scheduled_on=None, from_time=None, to_time=None, designation=None, save=1
+):
 	if designation:
-		designation=create_designation(designation_name = "_Test_Sales_manager").name
+		designation = create_designation(designation_name="_Test_Sales_manager").name
 
 	interviewer_1 = create_user("test_interviewer1@example.com", "Interviewer")
 	interviewer_2 = create_user("test_interviewer2@example.com", "Interviewer")
 
 	interview_round = create_interview_round(
-		"Technical Round", ["Python", "JS"],
-		designation=designation, save=True
+		"Technical Round", ["Python", "JS"], designation=designation, save=True
 	)
 
 	interview = frappe.new_doc("Interview")
@@ -101,6 +114,7 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, from_tim
 
 	return interview
 
+
 def create_interview_round(name, skill_set, interviewers=[], designation=None, save=True):
 	create_skill_set(skill_set)
 	interview_round = frappe.new_doc("Interview Round")
@@ -114,14 +128,13 @@ def create_interview_round(name, skill_set, interviewers=[], designation=None, s
 		interview_round.append("expected_skill_set", {"skill": skill})
 
 	for interviewer in interviewers:
-		interview_round.append("interviewer", {
-			"user": interviewer
-		})
+		interview_round.append("interviewer", {"user": interviewer})
 
 	if save:
 		interview_round.save()
 
 	return interview_round
+
 
 def create_skill_set(skill_set):
 	for skill in skill_set:
@@ -129,6 +142,7 @@ def create_skill_set(skill_set):
 			doc = frappe.new_doc("Skill")
 			doc.skill_name = skill
 			doc.save()
+
 
 def create_interview_type(name="test_interview_type"):
 	if frappe.db.exists("Interview Type", name):
@@ -141,32 +155,41 @@ def create_interview_type(name="test_interview_type"):
 
 		return doc.name
 
+
 def setup_reminder_settings():
-	if not frappe.db.exists('Email Template', _('Interview Reminder')):
-		base_path = frappe.get_app_path('erpnext', 'hr', 'doctype')
-		response = frappe.read_file(os.path.join(base_path, 'interview/interview_reminder_notification_template.html'))
+	if not frappe.db.exists("Email Template", _("Interview Reminder")):
+		base_path = frappe.get_app_path("erpnext", "hr", "doctype")
+		response = frappe.read_file(
+			os.path.join(base_path, "interview/interview_reminder_notification_template.html")
+		)
 
-		frappe.get_doc({
-			'doctype': 'Email Template',
-			'name': _('Interview Reminder'),
-			'response': response,
-			'subject': _('Interview Reminder'),
-			'owner': frappe.session.user,
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Email Template",
+				"name": _("Interview Reminder"),
+				"response": response,
+				"subject": _("Interview Reminder"),
+				"owner": frappe.session.user,
+			}
+		).insert(ignore_permissions=True)
 
-	if not frappe.db.exists('Email Template', _('Interview Feedback Reminder')):
-		base_path = frappe.get_app_path('erpnext', 'hr', 'doctype')
-		response = frappe.read_file(os.path.join(base_path, 'interview/interview_feedback_reminder_template.html'))
+	if not frappe.db.exists("Email Template", _("Interview Feedback Reminder")):
+		base_path = frappe.get_app_path("erpnext", "hr", "doctype")
+		response = frappe.read_file(
+			os.path.join(base_path, "interview/interview_feedback_reminder_template.html")
+		)
 
-		frappe.get_doc({
-			'doctype': 'Email Template',
-			'name': _('Interview Feedback Reminder'),
-			'response': response,
-			'subject': _('Interview Feedback Reminder'),
-			'owner': frappe.session.user,
-		}).insert(ignore_permissions=True)
+		frappe.get_doc(
+			{
+				"doctype": "Email Template",
+				"name": _("Interview Feedback Reminder"),
+				"response": response,
+				"subject": _("Interview Feedback Reminder"),
+				"owner": frappe.session.user,
+			}
+		).insert(ignore_permissions=True)
 
-	hr_settings = frappe.get_doc('HR Settings')
-	hr_settings.interview_reminder_template = _('Interview Reminder')
-	hr_settings.feedback_reminder_notification_template = _('Interview Feedback Reminder')
+	hr_settings = frappe.get_doc("HR Settings")
+	hr_settings.interview_reminder_template = _("Interview Reminder")
+	hr_settings.feedback_reminder_notification_template = _("Interview Feedback Reminder")
 	hr_settings.save()

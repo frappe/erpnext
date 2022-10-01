@@ -9,12 +9,16 @@ def update_lead_phone_numbers(contact, method):
 
 			if len(contact.phone_nos) > 1:
 				# get the default phone number
-				primary_phones = [phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_phone]
+				primary_phones = [
+					phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_phone
+				]
 				if primary_phones:
 					phone = primary_phones[0]
 
 				# get the default mobile number
-				primary_mobile_nos = [phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_mobile_no]
+				primary_mobile_nos = [
+					phone_doc.phone for phone_doc in contact.phone_nos if phone_doc.is_primary_mobile_no
+				]
 				if primary_mobile_nos:
 					mobile_no = primary_mobile_nos[0]
 

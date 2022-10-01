@@ -1,18 +1,19 @@
-
-
 def get_data():
 	return {
-		'fieldname': 'loan',
-		'non_standard_fieldnames': {
-			'Loan Disbursement': 'against_loan',
-			'Loan Repayment': 'against_loan',
+		"fieldname": "loan",
+		"non_standard_fieldnames": {
+			"Loan Disbursement": "against_loan",
+			"Loan Repayment": "against_loan",
 		},
-		'transactions': [
+		"transactions": [
+			{"items": ["Loan Security Pledge", "Loan Security Shortfall", "Loan Disbursement"]},
 			{
-				'items': ['Loan Security Pledge', 'Loan Security Shortfall', 'Loan Disbursement']
+				"items": [
+					"Loan Repayment",
+					"Loan Interest Accrual",
+					"Loan Write Off",
+					"Loan Security Unpledge",
+				]
 			},
-			{
-				'items': ['Loan Repayment', 'Loan Interest Accrual', 'Loan Write Off', 'Loan Security Unpledge']
-			}
-		]
+		],
 	}

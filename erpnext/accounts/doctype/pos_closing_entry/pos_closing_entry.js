@@ -36,6 +36,15 @@ frappe.ui.form.on('POS Closing Entry', {
 		});
 
 		set_html_data(frm);
+
+		if (frm.doc.docstatus == 1) {
+			if (!frm.doc.posting_date) {
+				frm.set_value("posting_date", frappe.datetime.nowdate());
+			}
+			if (!frm.doc.posting_time) {
+				frm.set_value("posting_time", frappe.datetime.now_time());
+			}
+		}
 	},
 
 	refresh: function(frm) {
@@ -64,13 +73,15 @@ frappe.ui.form.on('POS Closing Entry', {
 	pos_opening_entry(frm) {
 		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user) {
 			reset_values(frm);
-			frm.trigger("set_opening_amounts");
-			frm.trigger("get_pos_invoices");
+			frappe.run_serially([
+				() => frm.trigger("set_opening_amounts"),
+				() => frm.trigger("get_pos_invoices")
+			]);
 		}
 	},
 
 	set_opening_amounts(frm) {
-		frappe.db.get_doc("POS Opening Entry", frm.doc.pos_opening_entry)
+		return frappe.db.get_doc("POS Opening Entry", frm.doc.pos_opening_entry)
 			.then(({ balance_details }) => {
 				balance_details.forEach(detail => {
 					frm.add_child("payment_reconciliation", {
@@ -83,7 +94,7 @@ frappe.ui.form.on('POS Closing Entry', {
 	},
 
 	get_pos_invoices(frm) {
-		frappe.call({
+		return frappe.call({
 			method: 'erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices',
 			args: {
 				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
@@ -100,7 +111,9 @@ frappe.ui.form.on('POS Closing Entry', {
 		});
 	},
 
-	before_save: function(frm) {
+	before_save: async function(frm) {
+		frappe.dom.freeze(__('Processing Sales! Please Wait...'));
+
 		frm.set_value("grand_total", 0);
 		frm.set_value("net_total", 0);
 		frm.set_value("total_quantity", 0);
@@ -110,17 +123,23 @@ frappe.ui.form.on('POS Closing Entry', {
 			row.expected_amount = row.opening_amount;
 		}
 
-		for (let row of frm.doc.pos_transactions) {
-			frappe.db.get_doc("POS Invoice", row.pos_invoice).then(doc => {
-				frm.doc.grand_total += flt(doc.grand_total);
-				frm.doc.net_total += flt(doc.net_total);
-				frm.doc.total_quantity += flt(doc.total_qty);
-				refresh_payments(doc, frm);
-				refresh_taxes(doc, frm);
-				refresh_fields(frm);
-				set_html_data(frm);
-			});
+		const pos_inv_promises = frm.doc.pos_transactions.map(
+			row => frappe.db.get_doc("POS Invoice", row.pos_invoice)
+		);
+
+		const pos_invoices = await Promise.all(pos_inv_promises);
+
+		for (let doc of pos_invoices) {
+			frm.doc.grand_total += flt(doc.grand_total);
+			frm.doc.net_total += flt(doc.net_total);
+			frm.doc.total_quantity += flt(doc.total_qty);
+			refresh_payments(doc, frm);
+			refresh_taxes(doc, frm);
+			refresh_fields(frm);
+			set_html_data(frm);
 		}
+
+		frappe.dom.unfreeze();
 	}
 });
 

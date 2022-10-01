@@ -8,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "items_section",
-  "title",
   "naming_series",
   "stock_entry_type",
   "outgoing_stock_entry",
@@ -47,9 +46,9 @@
   "items",
   "get_stock_and_rate",
   "section_break_19",
-  "total_incoming_value",
-  "column_break_22",
   "total_outgoing_value",
+  "column_break_22",
+  "total_incoming_value",
   "value_difference",
   "additional_costs_section",
   "additional_costs",
@@ -82,14 +81,6 @@
    "fieldname": "items_section",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break"
-  },
-  {
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
   },
   {
    "fieldname": "naming_series",
@@ -353,9 +344,9 @@
   },
   {
    "fieldname": "scan_barcode",
-   "options": "Barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -383,7 +374,7 @@
   {
    "fieldname": "total_incoming_value",
    "fieldtype": "Currency",
-   "label": "Total Incoming Value",
+   "label": "Total Incoming Value (Receipt)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -395,7 +386,7 @@
   {
    "fieldname": "total_outgoing_value",
    "fieldtype": "Currency",
-   "label": "Total Outgoing Value",
+   "label": "Total Outgoing Value (Consumption)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
@@ -403,7 +394,7 @@
   {
    "fieldname": "value_difference",
    "fieldtype": "Currency",
-   "label": "Total Value Difference (Out - In)",
+   "label": "Total Value Difference (Incoming - Outgoing)",
    "options": "Company:company:default_currency",
    "print_hide_if_no_value": 1,
    "read_only": 1
@@ -628,10 +619,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-20 19:19:31.514846",
+ "modified": "2022-05-02 05:21:39.060501",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -698,6 +690,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "title",
+ "states": [],
+ "title_field": "stock_entry_type",
  "track_changes": 1
 }

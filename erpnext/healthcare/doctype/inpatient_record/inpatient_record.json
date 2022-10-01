@@ -24,13 +24,12 @@
   "expected_discharge",
   "references",
   "admission_encounter",
-  "admission_practitioner",
+  "primary_practitioner",
   "medical_department",
   "admission_ordered_for",
   "expected_length_of_stay",
   "admission_service_unit_type",
   "cb_admission",
-  "primary_practitioner",
   "secondary_practitioner",
   "admission_instruction",
   "encounter_details_section",
@@ -134,11 +133,11 @@
    "read_only": 1
   },
   {
+   "fetch_from": "primary_practitioner.department",
    "fieldname": "medical_department",
    "fieldtype": "Link",
    "label": "Medical Department",
-   "options": "Medical Department",
-   "set_only_once": 1
+   "options": "Medical Department"
   },
   {
    "fieldname": "primary_practitioner",
@@ -210,13 +209,6 @@
   {
    "fieldname": "cb_admission",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "admission_practitioner",
-   "fieldtype": "Link",
-   "label": "Healthcare Practitioner",
-   "options": "Healthcare Practitioner",
-   "read_only": 1
   },
   {
    "fieldname": "admission_encounter",
@@ -412,7 +404,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-09 22:49:07.419692",
+ "modified": "2022-02-22 12:15:02.843426",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",
