@@ -571,6 +571,11 @@ class AccountsController(TransactionBase):
 			# if user changed the discount percentage then set user's discount percentage ?
 			if pricing_rule_args.get("price_or_product_discount") == "Price":
 				item.set("pricing_rules", pricing_rule_args.get("pricing_rules"))
+				if pricing_rule_args.get("apply_rule_on_other_items"):
+					other_items = json.loads(pricing_rule_args.get("apply_rule_on_other_items"))
+					if other_items and item.item_code not in other_items:
+						return
+
 				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
 				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
 				if pricing_rule_args.get("pricing_rule_for") == "Rate":
@@ -1873,6 +1878,17 @@ class AccountsController(TransactionBase):
 			or (self.currency != default_currency and flt(self.conversion_rate) == 1.00)
 		):
 			throw(_("Conversion rate cannot be 0 or 1"))
+
+	def check_finance_books(self, item, asset):
+		if (
+			len(asset.finance_books) > 1
+			and not item.get("finance_book")
+			and not self.get("finance_book")
+			and asset.finance_books[0].finance_book
+		):
+			frappe.throw(
+				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
+			)
 
 
 @frappe.whitelist()

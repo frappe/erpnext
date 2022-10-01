@@ -252,12 +252,6 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 		stock_qty = flt(args.get("stock_qty"))
 		amount = flt(args.get("price_list_rate")) * flt(args.get("qty"))
 
-		if pricing_rules[0].apply_rule_on_other:
-			field = frappe.scrub(pricing_rules[0].apply_rule_on_other)
-
-			if field and pricing_rules[0].get("other_" + field) != args.get(field):
-				return
-
 		pr_doc = frappe.get_cached_doc("Pricing Rule", pricing_rules[0].name)
 
 		if pricing_rules[0].mixed_conditions and doc:
@@ -274,7 +268,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 				amount += data[1]
 
 		if pricing_rules[0].apply_rule_on_other and not pricing_rules[0].mixed_conditions and doc:
-			pricing_rules = get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules) or []
+			pricing_rules = get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, args) or []
 		else:
 			pricing_rules = filter_pricing_rules_for_qty_amount(stock_qty, amount, pricing_rules, args)
 
@@ -352,16 +346,14 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 	if fieldname:
 		msg = _(
 			"If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item."
-		).format(
-			type_of_transaction, args.get(fieldname), bold(item_code), bold(args.rule_description)
-		)
+		).format(type_of_transaction, args.get(fieldname), bold(item_code), bold(args.title))
 
 		if fieldname in ["min_amt", "max_amt"]:
 			msg = _("If you {0} {1} worth item {2}, the scheme {3} will be applied on the item.").format(
 				type_of_transaction,
 				fmt_money(args.get(fieldname), currency=args.get("currency")),
 				bold(item_code),
-				bold(args.rule_description),
+				bold(args.title),
 			)
 
 		frappe.msgprint(msg)
@@ -454,17 +446,29 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 	return sum_qty, sum_amt, items
 
 
-def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules):
-	items = get_pricing_rule_items(pr_doc)
+def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
+	other_items = get_pricing_rule_items(pr_doc, other_items=True)
+	pricing_rule_apply_on = apply_on_table.get(pr_doc.get("apply_on"))
+	apply_on = frappe.scrub(pr_doc.get("apply_on"))
+
+	items = []
+	for d in pr_doc.get(pricing_rule_apply_on):
+		if apply_on == "item_group":
+			items.extend(get_child_item_groups(d.get(apply_on)))
+		else:
+			items.append(d.get(apply_on))
 
 	for row in doc.items:
-		if row.get(frappe.scrub(pr_doc.apply_rule_on_other)) in items:
-			pricing_rules = filter_pricing_rules_for_qty_amount(
-				row.get("stock_qty"), row.get("amount"), pricing_rules, row
-			)
+		if row.get(apply_on) in items:
+			if not row.get("qty"):
+				continue
+
+			stock_qty = row.get("qty") * (row.get("conversion_factor") or 1.0)
+			amount = stock_qty * (row.get("price_list_rate") or row.get("rate"))
+			pricing_rules = filter_pricing_rules_for_qty_amount(stock_qty, amount, pricing_rules, row)
 
 			if pricing_rules and pricing_rules[0]:
-				pricing_rules[0].apply_rule_on_other_items = items
+				pricing_rules[0].apply_rule_on_other_items = other_items
 				return pricing_rules
 
 
@@ -658,21 +662,21 @@ def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values
 				doc.append("items", args)
 
 
-def get_pricing_rule_items(pr_doc):
+def get_pricing_rule_items(pr_doc, other_items=False) -> list:
 	apply_on_data = []
 	apply_on = frappe.scrub(pr_doc.get("apply_on"))
 
 	pricing_rule_apply_on = apply_on_table.get(pr_doc.get("apply_on"))
 
-	for d in pr_doc.get(pricing_rule_apply_on):
-		if apply_on == "item_group":
-			apply_on_data.extend(get_child_item_groups(d.get(apply_on)))
-		else:
-			apply_on_data.append(d.get(apply_on))
-
-	if pr_doc.apply_rule_on_other:
+	if pr_doc.apply_rule_on_other and other_items:
 		apply_on = frappe.scrub(pr_doc.apply_rule_on_other)
 		apply_on_data.append(pr_doc.get("other_" + apply_on))
+	else:
+		for d in pr_doc.get(pricing_rule_apply_on):
+			if apply_on == "item_group":
+				apply_on_data.extend(get_child_item_groups(d.get(apply_on)))
+			else:
+				apply_on_data.append(d.get(apply_on))
 
 	return list(set(apply_on_data))
 

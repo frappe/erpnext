@@ -669,9 +669,6 @@ class PurchaseInvoice(BuyingController):
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
-		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-		)
 		provisional_accounting_for_non_stock_items = cint(
 			frappe.db.get_value(
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
@@ -1159,9 +1156,6 @@ class PurchaseInvoice(BuyingController):
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
-		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-		)
 
 		for tax in self.get("taxes"):
 			amount, base_amount = self.get_tax_amounts(tax, None)
@@ -1248,15 +1242,6 @@ class PurchaseInvoice(BuyingController):
 							item=tax,
 						)
 					)
-
-	@property
-	def enable_discount_accounting(self):
-		if not hasattr(self, "_enable_discount_accounting"):
-			self._enable_discount_accounting = cint(
-				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-			)
-
-		return self._enable_discount_accounting
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
@@ -1519,7 +1504,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.tax_withholding_category:
 			return
 
-		tax_withholding_details, advance_taxes = get_party_tax_withholding_details(
+		tax_withholding_details, advance_taxes, voucher_wise_amount = get_party_tax_withholding_details(
 			self, self.tax_withholding_category
 		)
 
@@ -1547,6 +1532,19 @@ class PurchaseInvoice(BuyingController):
 
 		for d in to_remove:
 			self.remove(d)
+
+		## Add pending vouchers on which tax was withheld
+		self.set("tax_withheld_vouchers", [])
+
+		for voucher_no, voucher_details in voucher_wise_amount.items():
+			self.append(
+				"tax_withheld_vouchers",
+				{
+					"voucher_name": voucher_no,
+					"voucher_type": voucher_details.get("voucher_type"),
+					"taxable_amount": voucher_details.get("amount"),
+				},
+			)
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
