@@ -603,6 +603,10 @@ def get_ewb_data(dt, dn):
 
 		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
+		if is_intrastate_transfer_eway_bill(data):
+			data.docType = "CHL"
+			data.subSupplyType = 8
+			
 		data.itemList = []
 		data.totalValue = doc.total
 
@@ -644,6 +648,8 @@ def get_ewb_data(dt, dn):
 
 	return data
 
+def is_intrastate_transfer_eway_bill(data):
+	return data.fromGstin == data.toGstin
 
 @frappe.whitelist()
 def generate_ewb_json(dt, dn):
