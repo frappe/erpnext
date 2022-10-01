@@ -35,7 +35,8 @@ class CourseSchedulingTool(Document):
 
 		if self.reschedule:
 			rescheduled, reschedule_errors = self.delete_course_schedule(
-				rescheduled, reschedule_errors, days)
+				rescheduled, reschedule_errors, days
+			)
 
 		date = self.course_start_date
 		while date < self.course_end_date:
