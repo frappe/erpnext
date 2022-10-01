@@ -44,7 +44,7 @@ def job(deserialized_data, from_doctype, to_doctype):
 				from_doctype,
 				to_doctype,
 				status="Failed",
-				log_date=str(date.today())
+				log_date=str(date.today()),
 			)
 		else:
 			update_logger(
