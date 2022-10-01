@@ -357,7 +357,7 @@ class PaymentReconciliation(Document):
 	def get_conditions(self, get_invoices=False, get_payments=False, get_return_invoices=False):
 		condition = " and company = '{0}' ".format(self.company)
 
-		if self.get("cost_center") and (get_invoices or get_payments or get_return_invoices):
+		if self.get("cost_center"):
 			condition = " and cost_center = '{0}' ".format(self.cost_center)
 
 		if get_invoices:
