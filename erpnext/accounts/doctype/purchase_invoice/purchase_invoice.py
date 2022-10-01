@@ -669,9 +669,6 @@ class PurchaseInvoice(BuyingController):
 
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
-		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-		)
 		provisional_accounting_for_non_stock_items = cint(
 			frappe.db.get_value(
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
@@ -1159,9 +1156,6 @@ class PurchaseInvoice(BuyingController):
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		valuation_tax = {}
-		enable_discount_accounting = cint(
-			frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-		)
 
 		for tax in self.get("taxes"):
 			amount, base_amount = self.get_tax_amounts(tax, None)
@@ -1248,15 +1242,6 @@ class PurchaseInvoice(BuyingController):
 							item=tax,
 						)
 					)
-
-	@property
-	def enable_discount_accounting(self):
-		if not hasattr(self, "_enable_discount_accounting"):
-			self._enable_discount_accounting = cint(
-				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-			)
-
-		return self._enable_discount_accounting
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
