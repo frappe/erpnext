@@ -39,7 +39,12 @@ def job(deserialized_data, from_doctype, to_doctype):
 			frappe.db.rollback(save_point="before_creation_state")
 			fail_count += 1
 			update_logger(
-				doc_name, str(frappe.get_traceback()), from_doctype, to_doctype, status="Failed", log_date=str(date.today())
+				doc_name,
+				str(frappe.get_traceback()),
+				from_doctype,
+				to_doctype,
+				status="Failed",
+				log_date=str(date.today())
 			)
 		else:
 			update_logger(
