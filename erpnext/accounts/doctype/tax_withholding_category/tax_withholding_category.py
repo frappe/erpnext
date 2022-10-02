@@ -335,6 +335,9 @@ def get_advance_vouchers(
 		"party": ["in", parties],
 	}
 
+	if party_type == "Customer":
+		filters.update({"against_voucher": ["is", "not set"]})
+
 	if company:
 		filters["company"] = company
 	if from_date and to_date:
