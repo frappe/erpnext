@@ -7,8 +7,8 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
-from six import iteritems
 from frappe.utils import add_days, flt, getdate, nowdate, today
+from six import iteritems
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
