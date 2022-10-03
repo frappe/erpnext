@@ -14,24 +14,36 @@
 {% endblock %}
 
 {% block header_actions %}
-	<div class="dropdown">
-		<button class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-			<span class="font-md">{{ _('Actions') }}</span>
-			<b class="caret"></b>
-		</button>
-		<ul class="dropdown-menu dropdown-menu-right" role="menu">
-			{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
+	<div class="row">
+		<div class="dropdown">
+			<button class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+				<span class="font-md">{{ _('Actions') }}</span>
+				<b class="caret"></b>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-right" role="menu">
+				{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
+					<a class="dropdown-item"
+						href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
+						data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}
+					</a>
+				{% endif %}
 				<a class="dropdown-item"
-					href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
-					data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}
+					href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank"
+					rel="noopener noreferrer">
+					{{ _("Print") }}
 				</a>
-			{% endif %}
-			<a class="dropdown-item"
-				href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank"
-				rel="noopener noreferrer">
-				{{ _("Print") }}
-			</a>
-		</ul>
+			</ul>
+		</div>
+		<div class="form-column col-sm-6">
+			<div class="page-header-actions-block" data-html-block="header-actions">
+				<p>
+					<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
+						class="btn btn-primary btn-sm" id="pay-for-order">
+						{{ _("Pay") }} {{doc.get_formatted("grand_total") }}
+					</a>
+				</p>
+			</div>
+		</div>
 	</div>
 {% endblock %}
 
@@ -119,18 +131,19 @@
 	{% if enabled_checkout and ((doc.doctype=="Sales Order" and doc.per_billed <= 0)
 		or (doc.doctype=="Sales Invoice" and doc.outstanding_amount> 0)) %}
 		<div class="panel panel-default">
-			<div class="panel-heading">
-				<div class="row">
-					<div class="form-column col-sm-6 address-title">
-						<strong>Payment</strong>
-					</div>
-				</div>
-			</div>
 			<div class="panel-collapse">
 				<div class="panel-body text-muted small">
 					<div class="row">
 						<div class="form-column col-sm-6">
 							{% if available_loyalty_points %}
+							<div class="panel-heading">
+								<div class="row">
+									<div class="form-column col-sm-6 address-title">
+										<strong>Loyalty Points</strong>
+									</div>
+								</div>
+							</div>
+
 							<div class="form-group">
 								<div class="h6">Enter Loyalty Points</div>
 								<div class="control-input-wrapper">
@@ -144,19 +157,6 @@
 							</div>
 							{% endif %}
 						</div>
-
-						<div class="form-column col-sm-6">
-							<div id="loyalty-points-status" style="text-align: right"></div>
-							<div class="page-header-actions-block" data-html-block="header-actions">
-								<p>
-									<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
-										class="btn btn-primary btn-sm" id="pay-for-order">
-										{{ _("Pay") }} {{doc.get_formatted("grand_total") }}
-									</a>
-								</p>
-							</div>
-						</div>
-
 					</div>
 				</div>
 			</div>
