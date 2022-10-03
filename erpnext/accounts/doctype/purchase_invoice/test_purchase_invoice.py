@@ -1574,6 +1574,35 @@ class TestPurchaseInvoice(unittest.TestCase, StockTestMixin):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
+	def test_without_tds(self):
+		make_purchase_invoice_tds()
+
+	def test_total_tds(self):
+		supplier = create_supplier(
+			supplier_name="_Test TDS Advance Supplier",
+			tax_withholding_category="TDS - 194 - Dividends - Individual",
+		)
+		pi = make_purchase_invoice_tds(supplier= "_Test TDS Advance Supplier",total_tds = 1)
+	
+		sum_tds = 0
+		for item in pi.items:
+			sum_tds += item.net_amount
+		
+		self.assertEqual(pi.tax_withholding_net_total, sum_tds)
+		for tax in pi.taxes:
+			self.assertEqual(tax.tax_amount, pi.tax_withholding_net_total * 0.10)
+
+	def test_partial_tds(self):
+		pi = make_purchase_invoice_tds(supplier= "_Test TDS Advance Supplier",partial_tds = 1)
+		
+		sum_tds = 0
+		for item in pi.items:
+			if item.apply_tds:
+				sum_tds += item.net_amount
+		
+		self.assertEqual(pi.tax_withholding_net_total, sum_tds)
+		for tax in pi.taxes:
+			self.assertEqual(tax.tax_amount, pi.tax_withholding_net_total * 0.10)
 
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 	gl_entries = frappe.db.sql(
@@ -1682,6 +1711,86 @@ def make_purchase_invoice(**args):
 			pi.submit()
 	return pi
 
+def make_purchase_invoice_tds(**args):
+	pi = frappe.new_doc("Purchase Invoice")
+	args = frappe._dict(args)
+	pi.posting_date = args.posting_date or today()
+	if args.posting_time:
+		pi.posting_time = args.posting_time
+	if args.update_stock:
+		pi.update_stock = 1
+	if args.is_paid:
+		pi.is_paid = 1
+
+	if args.cash_bank_account:
+		pi.cash_bank_account = args.cash_bank_account
+
+	pi.company = args.company or "_Test Company"
+	pi.supplier = args.supplier or "_Test Supplier"
+	pi.currency = args.currency or "INR"
+	pi.conversion_rate = args.conversion_rate or 1
+	pi.is_return = args.is_return
+	pi.return_against = args.return_against
+	pi.is_subcontracted = args.is_subcontracted or 0
+	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
+	pi.cost_center = args.parent_cost_center
+	
+	if args.total_tds or args.partial_tds:
+		pi.apply_tds = 1
+	
+	pi.extend(
+		"items",
+		[
+			{
+				"item_code": args.item or args.item_code or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty or 5,
+				"received_qty": args.received_qty or 0,
+				"rejected_qty": args.rejected_qty or 0,
+				"rate": args.rate or 5000,
+				"price_list_rate": args.price_list_rate or 5000,
+				"expense_account": args.expense_account or "_Test Account Cost for Goods Sold - _TC",
+				"discount_account": args.discount_account or None,
+				"discount_amount": args.discount_amount or 0,
+				"conversion_factor": 1.0,
+				"serial_no": args.serial_no,
+				"stock_uom": args.uom or "_Test UOM",
+				"cost_center": args.cost_center or "_Test Cost Center - _TC",
+				"project": args.project,
+				"rejected_warehouse": args.rejected_warehouse or "",
+				"rejected_serial_no": args.rejected_serial_no or "",
+				"asset_location": args.location or "",
+				"allow_zero_valuation_rate": args.get("allow_zero_valuation_rate") or 0,
+				"apply_tds": 1 if (args.total_tds or args.partial_tds) else 0
+			},
+			{
+				"item_code": args.item or args.item_code or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": args.qty or 5,
+				"received_qty": args.received_qty or 0,
+				"rejected_qty": args.rejected_qty or 0,
+				"rate": args.rate or 5000,
+				"price_list_rate": args.price_list_rate or 5000,
+				"expense_account": args.expense_account or "_Test Account Cost for Goods Sold - _TC",
+				"discount_account": args.discount_account or None,
+				"discount_amount": args.discount_amount or 0,
+				"conversion_factor": 1.0,
+				"serial_no": args.serial_no,
+				"stock_uom": args.uom or "_Test UOM",
+				"cost_center": args.cost_center or "_Test Cost Center - _TC",
+				"project": args.project,
+				"rejected_warehouse": args.rejected_warehouse or "",
+				"rejected_serial_no": args.rejected_serial_no or "",
+				"asset_location": args.location or "",
+				"allow_zero_valuation_rate": args.get("allow_zero_valuation_rate") or 0,
+				"apply_tds": 1 if (args.total_tds) else 0
+			},
+		]
+	)
+
+	pi.save()
+	pi.submit()
+	return pi
 
 def make_purchase_invoice_against_cost_center(**args):
 	pi = frappe.new_doc("Purchase Invoice")

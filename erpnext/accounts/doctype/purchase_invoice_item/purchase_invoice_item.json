@@ -40,6 +40,7 @@
   "discount_amount",
   "base_rate_with_margin",
   "sec_break2",
+  "apply_tds",
   "rate",
   "amount",
   "item_tax_template",
@@ -865,6 +866,12 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+    "default": "1",
+    "fieldname": "apply_tds",
+    "fieldtype": "Check",
+    "label": "Apply TDS"
   }
  ],
  "idx": 1,
