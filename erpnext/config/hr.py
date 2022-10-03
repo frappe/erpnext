@@ -382,6 +382,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Loan Type",
 				},
+    {
+					"type": "doctype",
+					"name": "Employee Loan Settlement",
+				},
 			]
 		},
 		{
