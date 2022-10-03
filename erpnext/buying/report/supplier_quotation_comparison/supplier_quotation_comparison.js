@@ -114,11 +114,11 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 	onload: (report) => {
 		// Create a button for setting the default supplier
 		report.page.add_inner_button(__("Select Default Supplier"), () => {
-			let reporter = frappe.query_reports["Quoted Item Comparison"];
+			let reporter = frappe.query_reports["Supplier Quotation Comparison"];
 
 			//Always make a new one so that the latest values get updated
 			reporter.make_default_supplier_dialog(report);
-		}, 'Tools');
+		}, __("Tools"));
 
 	},
 	make_default_supplier_dialog: (report) => {
@@ -126,7 +126,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 		if(!report.data) return;
 
 		let filters = report.get_values();
-		let item_code = filters.item;
+		let item_code = filters.item_code;
 
 		// Get a list of the suppliers (with a blank as well) for the user to select
 		let suppliers = $.map(report.data, (row, idx)=>{ return row.supplier_name })
@@ -152,7 +152,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			]
 		});
 
-		dialog.set_primary_action("Set Default Supplier", () => {
+		dialog.set_primary_action(__("Set Default Supplier"), () => {
 			let values = dialog.get_values();
 			if(values) {
 				// Set the default_supplier field of the appropriate Item to the selected supplier

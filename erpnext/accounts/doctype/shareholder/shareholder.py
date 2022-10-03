@@ -15,7 +15,7 @@ class Shareholder(Document):
 		load_address_and_contact(self)
 
 	def on_trash(self):
-		delete_contact_and_address('Shareholder', self.name)
+		delete_contact_and_address("Shareholder", self.name)
 
 	def before_save(self):
 		for entry in self.share_balance:

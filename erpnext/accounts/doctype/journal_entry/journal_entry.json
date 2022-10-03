@@ -3,7 +3,7 @@
  "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-03-25 10:53:52",
+ "creation": "2022-01-25 10:29:58.717206",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -13,6 +13,7 @@
   "voucher_type",
   "naming_series",
   "finance_book",
+  "process_deferred_accounting",
   "reversal_of",
   "tax_withholding_category",
   "column_break1",
@@ -136,7 +137,8 @@
    "fieldname": "finance_book",
    "fieldtype": "Link",
    "label": "Finance Book",
-   "options": "Finance Book"
+   "options": "Finance Book",
+   "read_only": 1
   },
   {
    "fieldname": "2_add_edit_gl_entries",
@@ -524,13 +526,20 @@
    "label": "Reversal Of",
    "options": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "process_deferred_accounting",
+   "fieldtype": "Link",
+   "label": "Process Deferred Accounting",
+   "options": "Process Deferred Accounting",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-04 13:39:36.485954",
+ "modified": "2022-06-23 22:01:32.348337",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -578,6 +587,7 @@
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

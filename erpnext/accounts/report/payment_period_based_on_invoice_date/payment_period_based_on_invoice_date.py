@@ -28,21 +28,28 @@ def execute(filters=None):
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		d.update({
-			"range1": 0,
-			"range2": 0,
-			"range3": 0,
-			"range4": 0,
-			"outstanding": payment_amount
-		})
+		d.update({"range1": 0, "range2": 0, "range3": 0, "range4": 0, "outstanding": payment_amount})
 
 		if d.against_voucher:
 			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
 
 		row = [
-			d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
-			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks,
-			d.age, d.range1, d.range2, d.range3, d.range4
+			d.voucher_type,
+			d.voucher_no,
+			d.party_type,
+			d.party,
+			d.posting_date,
+			d.against_voucher,
+			invoice.posting_date,
+			invoice.due_date,
+			d.debit,
+			d.credit,
+			d.remarks,
+			d.age,
+			d.range1,
+			d.range2,
+			d.range3,
+			d.range4,
 		]
 
 		if invoice.due_date:
@@ -52,11 +59,17 @@ def execute(filters=None):
 
 	return columns, data
 
+
 def validate_filters(filters):
-	if (filters.get("payment_type") == _("Incoming") and filters.get("party_type") == "Supplier") or \
-		(filters.get("payment_type") == _("Outgoing") and filters.get("party_type") == "Customer"):
-			frappe.throw(_("{0} payment entries can not be filtered by {1}")\
-				.format(filters.payment_type, filters.party_type))
+	if (filters.get("payment_type") == _("Incoming") and filters.get("party_type") == "Supplier") or (
+		filters.get("payment_type") == _("Outgoing") and filters.get("party_type") == "Customer"
+	):
+		frappe.throw(
+			_("{0} payment entries can not be filtered by {1}").format(
+				filters.payment_type, filters.party_type
+			)
+		)
+
 
 def get_columns(filters):
 	return [
@@ -64,108 +77,56 @@ def get_columns(filters):
 			"fieldname": "payment_document",
 			"label": _("Payment Document Type"),
 			"fieldtype": "Data",
-			"width": 100
+			"width": 100,
 		},
 		{
 			"fieldname": "payment_entry",
 			"label": _("Payment Document"),
 			"fieldtype": "Dynamic Link",
 			"options": "payment_document",
-			"width": 160
+			"width": 160,
 		},
-		{
-			"fieldname": "party_type",
-			"label": _("Party Type"),
-			"fieldtype": "Data",
-			"width": 100
-		},
+		{"fieldname": "party_type", "label": _("Party Type"), "fieldtype": "Data", "width": 100},
 		{
 			"fieldname": "party",
 			"label": _("Party"),
 			"fieldtype": "Dynamic Link",
 			"options": "party_type",
-			"width": 160
+			"width": 160,
 		},
-		{
-			"fieldname": "posting_date",
-			"label": _("Posting Date"),
-			"fieldtype": "Date",
-			"width": 100
-		},
+		{"fieldname": "posting_date", "label": _("Posting Date"), "fieldtype": "Date", "width": 100},
 		{
 			"fieldname": "invoice",
 			"label": _("Invoice"),
 			"fieldtype": "Link",
-			"options": "Purchase Invoice" if filters.get("payment_type") == _("Outgoing") else "Sales Invoice",
-			"width": 160
+			"options": "Purchase Invoice"
+			if filters.get("payment_type") == _("Outgoing")
+			else "Sales Invoice",
+			"width": 160,
 		},
 		{
 			"fieldname": "invoice_posting_date",
 			"label": _("Invoice Posting Date"),
 			"fieldtype": "Date",
-			"width": 100
+			"width": 100,
 		},
+		{"fieldname": "due_date", "label": _("Payment Due Date"), "fieldtype": "Date", "width": 100},
+		{"fieldname": "debit", "label": _("Debit"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "credit", "label": _("Credit"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "remarks", "label": _("Remarks"), "fieldtype": "Data", "width": 200},
+		{"fieldname": "age", "label": _("Age"), "fieldtype": "Int", "width": 50},
+		{"fieldname": "range1", "label": _("0-30"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "range2", "label": _("30-60"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "range3", "label": _("60-90"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "range4", "label": _("90 Above"), "fieldtype": "Currency", "width": 140},
 		{
-			"fieldname": "due_date",
-			"label": _("Payment Due Date"),
-			"fieldtype": "Date",
-			"width": 100
-		},
-		{
-			"fieldname": "debit",
-			"label": _("Debit"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "credit",
-			"label": _("Credit"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "remarks",
-			"label": _("Remarks"),
-			"fieldtype": "Data",
-			"width": 200
-		},
-		{
-			"fieldname": "age",
-			"label": _("Age"),
-			"fieldtype": "Int",
-			"width": 50
-		},
-		{
-			"fieldname": "range1",
-			"label": "0-30",
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "range2",
-			"label": "30-60",
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "range3",
-			"label": "60-90",
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "range4",
-			"label": _("90 Above"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-			{
 			"fieldname": "delay_in_payment",
 			"label": _("Delay in payment (Days)"),
 			"fieldtype": "Int",
-			"width": 100
-		}
+			"width": 100,
+		},
 	]
+
 
 def get_conditions(filters):
 	conditions = []
@@ -184,7 +145,9 @@ def get_conditions(filters):
 
 	if filters.party_type:
 		conditions.append("against_voucher_type=%(reference_type)s")
-		filters["reference_type"] = "Sales Invoice" if filters.party_type=="Customer" else "Purchase Invoice"
+		filters["reference_type"] = (
+			"Sales Invoice" if filters.party_type == "Customer" else "Purchase Invoice"
+		)
 
 	if filters.get("from_date"):
 		conditions.append("posting_date >= %(from_date)s")
@@ -194,12 +157,20 @@ def get_conditions(filters):
 
 	return "and " + " and ".join(conditions) if conditions else ""
 
+
 def get_entries(filters):
-	return frappe.db.sql("""select
+	return frappe.db.sql(
+		"""select
 		voucher_type, voucher_no, party_type, party, posting_date, debit, credit, remarks, against_voucher
 		from `tabGL Entry`
 		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') {0}
-	""".format(get_conditions(filters)), filters, as_dict=1)
+	""".format(
+			get_conditions(filters)
+		),
+		filters,
+		as_dict=1,
+	)
+
 
 def get_invoice_posting_date_map(filters):
 	invoice_details = {}

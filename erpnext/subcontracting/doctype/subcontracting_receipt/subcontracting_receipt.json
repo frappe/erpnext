@@ -1,0 +1,700 @@
+{
+    "actions": [],
+    "autoname": "naming_series:",
+    "creation": "2022-04-18 11:20:44.226738",
+    "doctype": "DocType",
+    "document_type": "Document",
+    "editable_grid": 1,
+    "engine": "InnoDB",
+    "field_order": [
+        "title",
+        "naming_series",
+        "supplier",
+        "supplier_name",
+        "column_break1",
+        "company",
+        "posting_date",
+        "posting_time",
+        "set_posting_time",
+        "is_return",
+        "return_against",
+        "accounting_dimensions_section",
+        "cost_center",
+        "dimension_col_break",
+        "project",
+        "section_addresses",
+        "supplier_address",
+        "contact_person",
+        "address_display",
+        "contact_display",
+        "contact_mobile",
+        "contact_email",
+        "col_break_address",
+        "shipping_address",
+        "shipping_address_display",
+        "billing_address",
+        "billing_address_display",
+        "sec_warehouse",
+        "set_warehouse",
+        "rejected_warehouse",
+        "col_break_warehouse",
+        "supplier_warehouse",
+        "items_section",
+        "items",
+        "section_break0",
+        "total_qty",
+        "column_break_27",
+        "total",
+        "raw_material_details",
+        "get_current_stock",
+        "supplied_items",
+        "additional_costs_section",
+        "distribute_additional_costs_based_on",
+        "additional_costs",
+        "total_additional_costs",
+        "section_break_46",
+        "in_words",
+        "bill_no",
+        "bill_date",
+        "more_info",
+        "status",
+        "column_break_39",
+        "per_returned",
+        "section_break_47",
+        "amended_from",
+        "range",
+        "column_break4",
+        "represents_company",
+        "subscription_detail",
+        "auto_repeat",
+        "printing_settings",
+        "letter_head",
+        "language",
+        "instructions",
+        "column_break_97",
+        "select_print_heading",
+        "other_details",
+        "remarks",
+        "transporter_info",
+        "transporter_name",
+        "column_break5",
+        "lr_no",
+        "lr_date"
+    ],
+    "fields": [
+        {
+            "allow_on_submit": 1,
+            "default": "{supplier_name}",
+            "fieldname": "title",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Title",
+            "no_copy": 1,
+            "print_hide": 1
+        },
+        {
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "label": "Series",
+            "no_copy": 1,
+            "options": "MAT-SCR-.YYYY.-\nMAT-SCR-RET-.YYYY.-",
+            "print_hide": 1,
+            "reqd": 1,
+            "set_only_once": 1
+        },
+        {
+            "bold": 1,
+            "fieldname": "supplier",
+            "fieldtype": "Link",
+            "in_global_search": 1,
+            "label": "Supplier",
+            "options": "Supplier",
+            "print_hide": 1,
+            "print_width": "150px",
+            "reqd": 1,
+            "search_index": 1,
+            "width": "150px"
+        },
+        {
+            "bold": 1,
+            "depends_on": "supplier",
+            "fetch_from": "supplier.supplier_name",
+            "fieldname": "supplier_name",
+            "fieldtype": "Data",
+            "in_global_search": 1,
+            "label": "Supplier Name",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break1",
+            "fieldtype": "Column Break",
+            "print_width": "50%",
+            "width": "50%"
+        },
+        {
+            "default": "Today",
+            "fieldname": "posting_date",
+            "fieldtype": "Date",
+            "in_list_view": 1,
+            "label": "Date",
+            "no_copy": 1,
+            "print_width": "100px",
+            "read_only_depends_on": "eval: !doc.set_posting_time",
+            "reqd": 1,
+            "search_index": 1,
+            "width": "100px"
+        },
+        {
+            "description": "Time at which materials were received",
+            "fieldname": "posting_time",
+            "fieldtype": "Time",
+            "label": "Posting Time",
+            "no_copy": 1,
+            "print_hide": 1,
+            "print_width": "100px",
+            "read_only_depends_on": "eval: !doc.set_posting_time",
+            "reqd": 1,
+            "width": "100px"
+        },
+        {
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "in_standard_filter": 1,
+            "label": "Company",
+            "options": "Company",
+            "print_hide": 1,
+            "print_width": "150px",
+            "remember_last_selected_value": 1,
+            "reqd": 1,
+            "width": "150px"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "section_addresses",
+            "fieldtype": "Section Break",
+            "label": "Address and Contact"
+        },
+        {
+            "fieldname": "supplier_address",
+            "fieldtype": "Link",
+            "label": "Select Supplier Address",
+            "options": "Address",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "contact_person",
+            "fieldtype": "Link",
+            "label": "Contact Person",
+            "options": "Contact",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "address_display",
+            "fieldtype": "Small Text",
+            "label": "Address",
+            "read_only": 1
+        },
+        {
+            "fieldname": "contact_display",
+            "fieldtype": "Small Text",
+            "in_global_search": 1,
+            "label": "Contact",
+            "read_only": 1
+        },
+        {
+            "fieldname": "contact_mobile",
+            "fieldtype": "Small Text",
+            "label": "Mobile No",
+            "read_only": 1
+        },
+        {
+            "fieldname": "contact_email",
+            "fieldtype": "Small Text",
+            "label": "Contact Email",
+            "options": "Email",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "col_break_address",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "shipping_address",
+            "fieldtype": "Link",
+            "label": "Select Shipping Address",
+            "options": "Address",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "shipping_address_display",
+            "fieldtype": "Small Text",
+            "label": "Shipping Address",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "sec_warehouse",
+            "fieldtype": "Section Break"
+        },
+        {
+            "description": "Sets 'Accepted Warehouse' in each row of the Items table.",
+            "fieldname": "set_warehouse",
+            "fieldtype": "Link",
+            "label": "Accepted Warehouse",
+            "options": "Warehouse",
+            "print_hide": 1
+        },
+        {
+            "description": "Sets 'Rejected Warehouse' in each row of the Items table.",
+            "fieldname": "rejected_warehouse",
+            "fieldtype": "Link",
+            "label": "Rejected Warehouse",
+            "no_copy": 1,
+            "options": "Warehouse",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "col_break_warehouse",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "supplier_warehouse",
+            "fieldtype": "Link",
+            "label": "Supplier Warehouse",
+            "no_copy": 1,
+            "options": "Warehouse",
+            "print_hide": 1,
+            "print_width": "50px",
+            "width": "50px"
+        },
+        {
+            "fieldname": "items_section",
+            "fieldtype": "Section Break",
+            "options": "fa fa-shopping-cart"
+        },
+        {
+            "allow_bulk_edit": 1,
+            "fieldname": "items",
+            "fieldtype": "Table",
+            "label": "Items",
+            "options": "Subcontracting Receipt Item",
+            "reqd": 1
+        },
+        {
+            "depends_on": "supplied_items",
+            "fieldname": "get_current_stock",
+            "fieldtype": "Button",
+            "label": "Get Current Stock",
+            "options": "get_current_stock",
+            "print_hide": 1
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "supplied_items",
+            "depends_on": "supplied_items",
+            "fieldname": "raw_material_details",
+            "fieldtype": "Section Break",
+            "label": "Raw Materials Consumed",
+            "options": "fa fa-table",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "supplied_items",
+            "fieldtype": "Table",
+            "label": "Consumed Items",
+            "no_copy": 1,
+            "options": "Subcontracting Receipt Supplied Item",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "section_break0",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "total_qty",
+            "fieldtype": "Float",
+            "label": "Total Quantity",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_27",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "total",
+            "fieldtype": "Currency",
+            "label": "Total",
+            "options": "currency",
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_46",
+            "fieldtype": "Section Break"
+        },
+        {
+            "fieldname": "in_words",
+            "fieldtype": "Data",
+            "label": "In Words",
+            "length": 240,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "bill_no",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Bill No",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "bill_date",
+            "fieldtype": "Date",
+            "hidden": 1,
+            "label": "Bill Date",
+            "print_hide": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "more_info",
+            "fieldtype": "Section Break",
+            "label": "More Information",
+            "options": "fa fa-file-text"
+        },
+        {
+            "default": "Draft",
+            "fieldname": "status",
+            "fieldtype": "Select",
+            "in_standard_filter": 1,
+            "label": "Status",
+            "no_copy": 1,
+            "options": "\nDraft\nCompleted\nReturn\nReturn Issued\nCancelled\nClosed",
+            "print_hide": 1,
+            "print_width": "150px",
+            "read_only": 1,
+            "reqd": 1,
+            "search_index": 1,
+            "width": "150px"
+        },
+        {
+            "fieldname": "amended_from",
+            "fieldtype": "Link",
+            "hidden": 1,
+            "ignore_user_permissions": 1,
+            "label": "Amended From",
+            "no_copy": 1,
+            "options": "Subcontracting Receipt",
+            "print_hide": 1,
+            "print_width": "150px",
+            "read_only": 1,
+            "width": "150px"
+        },
+        {
+            "fieldname": "range",
+            "fieldtype": "Data",
+            "hidden": 1,
+            "label": "Range",
+            "print_hide": 1
+        },
+        {
+            "fieldname": "column_break4",
+            "fieldtype": "Column Break",
+            "print_hide": 1,
+            "print_width": "50%",
+            "width": "50%"
+        },
+        {
+            "fieldname": "subscription_detail",
+            "fieldtype": "Section Break",
+            "label": "Auto Repeat Detail"
+        },
+        {
+            "fieldname": "auto_repeat",
+            "fieldtype": "Link",
+            "label": "Auto Repeat",
+            "no_copy": 1,
+            "options": "Auto Repeat",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "printing_settings",
+            "fieldtype": "Section Break",
+            "label": "Printing Settings"
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "letter_head",
+            "fieldtype": "Link",
+            "label": "Letter Head",
+            "options": "Letter Head",
+            "print_hide": 1
+        },
+        {
+            "allow_on_submit": 1,
+            "fieldname": "select_print_heading",
+            "fieldtype": "Link",
+            "label": "Print Heading",
+            "no_copy": 1,
+            "options": "Print Heading",
+            "print_hide": 1,
+            "report_hide": 1
+        },
+        {
+            "fieldname": "language",
+            "fieldtype": "Data",
+            "label": "Print Language",
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_97",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "other_details",
+            "fieldtype": "HTML",
+            "hidden": 1,
+            "label": "Other Details",
+            "options": "<div class=\"columnHeading\">Other Details</div>",
+            "print_hide": 1,
+            "print_width": "30%",
+            "width": "30%"
+        },
+        {
+            "fieldname": "instructions",
+            "fieldtype": "Small Text",
+            "label": "Instructions"
+        },
+        {
+            "fieldname": "remarks",
+            "fieldtype": "Small Text",
+            "label": "Remarks",
+            "print_hide": 1
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "transporter_name",
+            "fieldname": "transporter_info",
+            "fieldtype": "Section Break",
+            "label": "Transporter Details",
+            "options": "fa fa-truck"
+        },
+        {
+            "fieldname": "transporter_name",
+            "fieldtype": "Data",
+            "label": "Transporter Name"
+        },
+        {
+            "fieldname": "column_break5",
+            "fieldtype": "Column Break",
+            "print_width": "50%",
+            "width": "50%"
+        },
+        {
+            "fieldname": "lr_no",
+            "fieldtype": "Data",
+            "label": "Vehicle Number",
+            "no_copy": 1,
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "fieldname": "lr_date",
+            "fieldtype": "Date",
+            "label": "Vehicle Date",
+            "no_copy": 1,
+            "print_width": "100px",
+            "width": "100px"
+        },
+        {
+            "fieldname": "billing_address",
+            "fieldtype": "Link",
+            "label": "Select Billing Address",
+            "options": "Address"
+        },
+        {
+            "fieldname": "billing_address_display",
+            "fieldtype": "Small Text",
+            "label": "Billing Address",
+            "read_only": 1
+        },
+        {
+            "fetch_from": "supplier.represents_company",
+            "fieldname": "represents_company",
+            "fieldtype": "Link",
+            "ignore_user_permissions": 1,
+            "label": "Represents Company",
+            "options": "Company",
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "fieldname": "is_return",
+            "fieldtype": "Check",
+            "label": "Is Return",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "depends_on": "is_return",
+            "fieldname": "return_against",
+            "fieldtype": "Link",
+            "label": "Return Against Subcontracting Receipt",
+            "no_copy": 1,
+            "options": "Subcontracting Receipt",
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "column_break_39",
+            "fieldtype": "Column Break"
+        },
+        {
+            "depends_on": "eval:(!doc.__islocal && doc.is_return==0)",
+            "fieldname": "per_returned",
+            "fieldtype": "Percent",
+            "in_list_view": 1,
+            "label": "% Returned",
+            "no_copy": 1,
+            "print_hide": 1,
+            "read_only": 1
+        },
+        {
+            "fieldname": "section_break_47",
+            "fieldtype": "Section Break"
+        },
+        {
+            "collapsible": 1,
+            "fieldname": "accounting_dimensions_section",
+            "fieldtype": "Section Break",
+            "label": "Accounting Dimensions "
+        },
+        {
+            "fieldname": "cost_center",
+            "fieldtype": "Link",
+            "label": "Cost Center",
+            "options": "Cost Center"
+        },
+        {
+            "fieldname": "dimension_col_break",
+            "fieldtype": "Column Break"
+        },
+        {
+            "fieldname": "project",
+            "fieldtype": "Link",
+            "label": "Project",
+            "options": "Project"
+        },
+        {
+            "collapsible": 1,
+            "collapsible_depends_on": "total_additional_costs",
+            "depends_on": "eval:(doc.docstatus == 0 || doc.total_additional_costs)",
+            "fieldname": "additional_costs_section",
+            "fieldtype": "Section Break",
+            "label": "Additional Costs"
+        },
+        {
+            "default": "Qty",
+            "fieldname": "distribute_additional_costs_based_on",
+            "fieldtype": "Select",
+            "label": "Distribute Additional Costs Based On ",
+            "options": "Qty\nAmount"
+        },
+        {
+            "fieldname": "additional_costs",
+            "fieldtype": "Table",
+            "label": "Additional Costs",
+            "options": "Landed Cost Taxes and Charges"
+        },
+        {
+            "fieldname": "total_additional_costs",
+            "fieldtype": "Currency",
+            "label": "Total Additional Costs",
+            "print_hide_if_no_value": 1,
+            "read_only": 1
+        },
+        {
+            "default": "0",
+            "depends_on": "eval:doc.docstatus==0",
+            "fieldname": "set_posting_time",
+            "fieldtype": "Check",
+            "label": "Edit Posting Date and Time",
+            "print_hide": 1
+        }
+    ],
+    "in_create": 1,
+    "is_submittable": 1,
+    "links": [],
+    "modified": "2022-08-26 21:02:26.353870",
+    "modified_by": "Administrator",
+    "module": "Subcontracting",
+    "name": "Subcontracting Receipt",
+    "naming_rule": "By \"Naming Series\" field",
+    "owner": "Administrator",
+    "permissions": [
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Stock Manager",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Stock User",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "amend": 1,
+            "cancel": 1,
+            "create": 1,
+            "delete": 1,
+            "email": 1,
+            "print": 1,
+            "read": 1,
+            "report": 1,
+            "role": "Purchase User",
+            "share": 1,
+            "submit": 1,
+            "write": 1
+        },
+        {
+            "read": 1,
+            "report": 1,
+            "role": "Accounts User"
+        },
+        {
+            "permlevel": 1,
+            "read": 1,
+            "role": "Stock Manager",
+            "write": 1
+        }
+    ],
+    "search_fields": "status, posting_date, supplier",
+    "show_name_in_global_search": 1,
+    "sort_field": "modified",
+    "sort_order": "DESC",
+    "states": [],
+    "timeline_field": "supplier",
+    "title_field": "title",
+    "track_changes": 1
+}

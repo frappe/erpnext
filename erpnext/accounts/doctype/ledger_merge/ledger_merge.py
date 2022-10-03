@@ -4,24 +4,20 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils.background_jobs import is_job_queued
 
 from erpnext.accounts.doctype.account.account import merge_account
 
 
 class LedgerMerge(Document):
 	def start_merge(self):
-		from frappe.core.page.background_jobs.background_jobs import get_info
 		from frappe.utils.background_jobs import enqueue
 		from frappe.utils.scheduler import is_scheduler_inactive
 
 		if is_scheduler_inactive() and not frappe.flags.in_test:
-			frappe.throw(
-				_("Scheduler is inactive. Cannot merge accounts."), title=_("Scheduler Inactive")
-			)
+			frappe.throw(_("Scheduler is inactive. Cannot merge accounts."), title=_("Scheduler Inactive"))
 
-		enqueued_jobs = [d.get("job_name") for d in get_info()]
-
-		if self.name not in enqueued_jobs:
+		if not is_job_queued(self.name):
 			enqueue(
 				start_merge,
 				queue="default",
@@ -35,9 +31,11 @@ class LedgerMerge(Document):
 
 		return False
 
+
 @frappe.whitelist()
 def form_start_merge(docname):
 	return frappe.get_doc("Ledger Merge", docname).start_merge()
+
 
 def start_merge(docname):
 	ledger_merge = frappe.get_doc("Ledger Merge", docname)
@@ -51,26 +49,24 @@ def start_merge(docname):
 					ledger_merge.account,
 					ledger_merge.is_group,
 					ledger_merge.root_type,
-					ledger_merge.company
+					ledger_merge.company,
 				)
-				row.db_set('merged', 1)
+				row.db_set("merged", 1)
 				frappe.db.commit()
 				successful_merges += 1
-				frappe.publish_realtime("ledger_merge_progress", {
-						"ledger_merge": ledger_merge.name,
-						"current": successful_merges,
-						"total": total
-					}
+				frappe.publish_realtime(
+					"ledger_merge_progress",
+					{"ledger_merge": ledger_merge.name, "current": successful_merges, "total": total},
 				)
 			except Exception:
 				frappe.db.rollback()
-				frappe.log_error(title=ledger_merge.name)
+				ledger_merge.log_error("Ledger merge failed")
 			finally:
 				if successful_merges == total:
-					ledger_merge.db_set('status', 'Success')
+					ledger_merge.db_set("status", "Success")
 				elif successful_merges > 0:
-					ledger_merge.db_set('status', 'Partial Success')
+					ledger_merge.db_set("status", "Partial Success")
 				else:
-					ledger_merge.db_set('status', 'Error')
+					ledger_merge.db_set("status", "Error")
 
 	frappe.publish_realtime("ledger_merge_refresh", {"ledger_merge": ledger_merge.name})

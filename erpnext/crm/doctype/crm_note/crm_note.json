@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-06-04 15:49:23.416644",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "note",
+  "added_by",
+  "added_on"
+ ],
+ "fields": [
+  {
+   "columns": 5,
+   "fieldname": "note",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Note"
+  },
+  {
+   "fieldname": "added_by",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Added By",
+   "options": "User"
+  },
+  {
+   "fieldname": "added_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Added On"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-06-04 16:29:07.807252",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "CRM Note",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

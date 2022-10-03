@@ -3,11 +3,6 @@
 
 frappe.ui.form.on(cur_frm.doctype, {
 	refresh: function(frm) {
-		if (!frappe.boot.active_domains.includes("Non Profit")) {
-			frm.set_df_property('applicant_type', 'options', ['Employee', 'Customer']);
-			frm.refresh_field('applicant_type');
-		}
-
 		if (['Loan Disbursement', 'Loan Repayment', 'Loan Interest Accrual', 'Loan Write Off'].includes(frm.doc.doctype)
 			&& frm.doc.docstatus > 0) {
 

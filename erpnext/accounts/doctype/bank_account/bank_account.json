@@ -27,7 +27,6 @@
   "bank_account_no",
   "address_and_contact",
   "address_html",
-  "website",
   "column_break_13",
   "contact_html",
   "integration_details_section",
@@ -157,11 +156,6 @@
    "label": "Address HTML"
   },
   {
-   "fieldname": "website",
-   "fieldtype": "Data",
-   "label": "Website"
-  },
-  {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
@@ -208,7 +202,7 @@
   }
  ],
  "links": [],
- "modified": "2020-10-23 16:48:06.303658",
+ "modified": "2022-05-04 15:49:42.620630",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
@@ -243,5 +237,6 @@
  "search_fields": "bank,account",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

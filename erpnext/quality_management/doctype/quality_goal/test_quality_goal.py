@@ -13,12 +13,13 @@ class TestQualityGoal(unittest.TestCase):
 		self.assertTrue(goal)
 		goal.delete()
 
+
 def get_quality_goal():
-	return frappe.get_doc(dict(
-		doctype = 'Quality Goal',
-		goal = 'Test Quality Module',
-		frequency = 'Daily',
-		objectives = [
-			dict(objective = 'Check test cases', target='100', uom='Percent')
-		]
-	)).insert()
+	return frappe.get_doc(
+		dict(
+			doctype="Quality Goal",
+			goal="Test Quality Module",
+			frequency="Daily",
+			objectives=[dict(objective="Check test cases", target="100", uom="Percent")],
+		)
+	).insert()

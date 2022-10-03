@@ -75,11 +75,11 @@ def get_status(start_date, end_date):
 	Get a Contract's status based on the start, current and end dates
 
 	Args:
-		start_date (str): The start date of the contract
-		end_date (str): The end date of the contract
+	        start_date (str): The start date of the contract
+	        end_date (str): The end date of the contract
 
 	Returns:
-		str: 'Active' if within range, otherwise 'Inactive'
+	        str: 'Active' if within range, otherwise 'Inactive'
 	"""
 
 	if not end_date:
@@ -98,13 +98,13 @@ def update_status_for_contracts():
 	and submitted Contracts
 	"""
 
-	contracts = frappe.get_all("Contract",
-								filters={"is_signed": True,
-										"docstatus": 1},
-								fields=["name", "start_date", "end_date"])
+	contracts = frappe.get_all(
+		"Contract",
+		filters={"is_signed": True, "docstatus": 1},
+		fields=["name", "start_date", "end_date"],
+	)
 
 	for contract in contracts:
-		status = get_status(contract.get("start_date"),
-							contract.get("end_date"))
+		status = get_status(contract.get("start_date"), contract.get("end_date"))
 
 		frappe.db.set_value("Contract", contract.get("name"), "status", status)

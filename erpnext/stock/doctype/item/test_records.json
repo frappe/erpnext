@@ -11,7 +11,6 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item",
   "apply_warehouse_wise_reorder_level": 1,
-  "gst_hsn_code": "999800",
   "opening_stock": 10,
   "valuation_rate": 100,
   "item_defaults": [{
@@ -40,9 +39,7 @@
       "conversion_factor": 10.0
     }
   ],
-  "stock_uom": "_Test UOM",
-  "show_in_website": 1,
-  "website_warehouse": "_Test Warehouse - _TC"
+  "stock_uom": "_Test UOM"
  },
  {
   "description": "_Test Item 2",
@@ -56,9 +53,6 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item 2",
   "stock_uom": "_Test UOM",
-  "show_in_website": 1,
-  "website_warehouse": "_Test Warehouse - _TC",
-  "gst_hsn_code": "999800",
   "opening_stock": 10,
   "valuation_rate": 100,
   "item_defaults": [{
@@ -82,7 +76,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 100",
   "valuation_rate": 100,
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -111,7 +104,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 200",
   "stock_uom": "_Test UOM 1",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -133,7 +125,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Product Bundle Item",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -155,7 +146,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test FG Item",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -177,7 +167,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Non Stock Item",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -199,7 +188,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Serialized Item",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -222,7 +210,6 @@
   "item_name": "_Test Serialized Item With Series",
   "serial_no_series": "ABCD.#####",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -244,7 +231,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop Manufactured",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -266,7 +252,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test FG Item 2",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -288,7 +273,6 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Variant Item",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "has_variants": 1,
   "item_defaults": [{
     "company": "_Test Company",
@@ -311,8 +295,7 @@
        "warehouse_reorder_level": 20,
        "warehouse_reorder_qty": 20
       }
-  ],
-  "show_in_website": 1
+  ]
  },
  {
   "description": "_Test Item 1",
@@ -326,7 +309,6 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item Warehouse Group Wise Reorder",
   "apply_warehouse_wise_reorder_level": 1,
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse Group-C1 - _TC",
@@ -344,9 +326,7 @@
     "warehouse_reorder_qty": 20
    }
   ],
-  "stock_uom": "_Test UOM",
-  "show_in_website": 1,
-  "website_warehouse": "_Test Warehouse Group-C1 - _TC"
+  "stock_uom": "_Test UOM"
  },
  {
   "description": "_Test Item With Item Tax Template",
@@ -360,7 +340,6 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item With Item Tax Template",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -395,7 +374,6 @@
   "item_group": "_Test Item Group Tax Parent",
   "item_name": "_Test Item Inherit Group Item Tax Template 1",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -417,7 +395,6 @@
   "item_group": "_Test Item Group Tax Child Override",
   "item_name": "_Test Item Inherit Group Item Tax Template 2",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -439,7 +416,6 @@
   "item_group": "_Test Item Group Tax Child Override",
   "item_name": "_Test Item Override Group Item Tax Template",
   "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800",
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
@@ -469,7 +445,6 @@
   "item_code": "138-CMS Shoe",
   "item_group": "_Test Item Group",
   "item_name": "138-CMS Shoe",
-  "stock_uom": "_Test UOM",
-  "gst_hsn_code": "999800"
+  "stock_uom": "_Test UOM"
  }
 ]

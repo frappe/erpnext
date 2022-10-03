@@ -4,8 +4,8 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import add_market_se
 
 
 def execute():
-	frappe.reload_doc('crm', 'doctype', 'market_segment')
+	frappe.reload_doc("crm", "doctype", "market_segment")
 
-	frappe.local.lang = frappe.db.get_default("lang") or 'en'
+	frappe.local.lang = frappe.db.get_default("lang") or "en"
 
 	add_market_segments()

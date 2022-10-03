@@ -16,6 +16,8 @@
   "supplier_name",
   "apply_tds",
   "tax_withholding_category",
+  "is_subcontracted",
+  "supplier_warehouse",
   "column_break1",
   "company",
   "transaction_date",
@@ -23,6 +25,10 @@
   "order_confirmation_no",
   "order_confirmation_date",
   "amended_from",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "drop_ship",
   "customer",
   "customer_name",
@@ -51,12 +57,10 @@
   "price_list_currency",
   "plc_conversion_rate",
   "ignore_pricing_rule",
-  "sec_warehouse",
-  "is_subcontracted",
-  "col_break_warehouse",
-  "supplier_warehouse",
+  "section_break_45",
   "before_items_section",
   "scan_barcode",
+  "set_from_warehouse",
   "items_col_break",
   "set_warehouse",
   "items_section",
@@ -138,7 +142,8 @@
   "party_account_currency",
   "is_internal_supplier",
   "represents_company",
-  "inter_company_order_reference"
+  "inter_company_order_reference",
+  "is_old_subcontracting_flow"
  ],
  "fields": [
   {
@@ -154,7 +159,8 @@
    "hidden": 1,
    "label": "Title",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "naming_series",
@@ -435,14 +441,8 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule",
-   "no_copy": 1,
    "permlevel": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break",
-   "label": "Subcontracting"
   },
   {
    "description": "Sets 'Warehouse' in each row of the Items table.",
@@ -453,20 +453,14 @@
    "print_hide": 1
   },
   {
-   "fieldname": "col_break_warehouse",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Supply Raw Materials",
-   "options": "No\nYes",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
+   "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1138,16 +1132,58 @@
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
+  },
+  {
+   "fieldname": "section_break_45",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions "
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_old_subcontracting_flow",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Old Subcontracting Flow",
+   "read_only": 1
+  },
+  {
+   "depends_on": "is_internal_supplier",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-09-28 13:10:47.955401",
+ "modified": "2022-09-16 17:45:04.954055",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1194,6 +1230,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "supplier_name",
  "track_changes": 1

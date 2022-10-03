@@ -15,6 +15,7 @@ Here, the balance qty is 70.
 50 qty is (today-the 1st) days old
 20 qty is (today-the 2nd) days old
 
+> Note: We generate FIFO slots warehouse wise as stock reconciliations from different warehouses can cause incorrect values.
 ### Calculation of FIFO Slots
 
 #### Case 1: Outward from sufficient balance qty
@@ -71,3 +72,38 @@ Date | Qty | Queue
 3rd  | +5  | [[-5, 3-12-2021]]
 4th  | +10 | [[5, 4-12-2021]]
 4th  | +20 | [[5, 4-12-2021], [20, 4-12-2021]]
+
+### Concept of Transfer Qty Bucket
+In the case of **Repack**, Quantity that comes in, isn't really incoming. It is just new stock repurposed from old stock, due to incoming-outgoing of the same warehouse.
+
+Here, stock is consumed from the FIFO Queue. It is then re-added back to the queue.
+While adding stock back to the queue we need to know how much to add.
+For this we need to keep track of how much was previously consumed.
+Hence we use **Transfer Qty Bucket**.
+
+While re-adding stock, we try to add buckets that were consumed earlier (date intact), to maintain correctness.
+
+#### Case 1: Same Item-Warehouse in Repack
+Eg:
+-------------------------------------------------------------------------------------
+Date | Qty   | Voucher |             FIFO Queue           	   | Transfer Qty Buckets
+-------------------------------------------------------------------------------------
+1st  | +500  |  PR     | [[500, 1-12-2021]]   				   |
+2nd  | -50   |  Repack | [[450, 1-12-2021]]   				   | [[50, 1-12-2021]]
+2nd  | +50   |  Repack | [[450, 1-12-2021], [50, 1-12-2021]]   | []
+
+- The balance at the end is restored back to 500
+- However, the initial 500 qty bucket is now split into 450 and 50, with the same date
+- The net effect is the same as that before the Repack
+
+#### Case 2: Same Item-Warehouse in Repack with Split Consumption rows
+Eg:
+-------------------------------------------------------------------------------------
+Date | Qty   | Voucher |             FIFO Queue           	   | Transfer Qty Buckets
+-------------------------------------------------------------------------------------
+1st  | +500  |  PR     | [[500, 1-12-2021]]   				   |
+2nd  | -50   |  Repack | [[450, 1-12-2021]]   				   | [[50, 1-12-2021]]
+2nd  | -50   |  Repack | [[400, 1-12-2021]]   				   | [[50, 1-12-2021],
+-	 |		 |		   |									   |[50, 1-12-2021]]
+2nd  | +100  |  Repack | [[400, 1-12-2021], [50, 1-12-2021],   | []
+-	 |		 |		   | [50, 1-12-2021]]					   |

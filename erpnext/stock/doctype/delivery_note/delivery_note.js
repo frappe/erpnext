@@ -77,8 +77,6 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},

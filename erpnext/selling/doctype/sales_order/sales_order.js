@@ -59,13 +59,46 @@ frappe.ui.form.on("Sales Order", {
 				})
 			});
 		}
+
+		if (frm.doc.docstatus === 0 && frm.doc.is_internal_customer) {
+			frm.events.get_items_from_internal_purchase_order(frm);
+		}
 	},
+
+	get_items_from_internal_purchase_order(frm) {
+		frm.add_custom_button(__('Purchase Order'), () => {
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order',
+				source_doctype: 'Purchase Order',
+				target: frm,
+				setters: [
+					{
+						label: 'Supplier',
+						fieldname: 'supplier',
+						fieldtype: 'Link',
+						options: 'Supplier'
+					}
+				],
+				get_query_filters: {
+					company: frm.doc.company,
+					is_internal_supplier: 1,
+					docstatus: 1,
+					status: ['!=', 'Completed']
+				}
+			});
+		}, __('Get Items From'));
+	},
+
 	onload: function(frm) {
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
 		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
-			return erpnext.queries.warehouse(frm.doc);
+			return {
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+				]
+			};
 		});
 
 		frm.set_query('project', function(doc, cdt, cdn) {
@@ -77,7 +110,19 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 
-		erpnext.queries.setup_warehouse_query(frm);
+		frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
+			let row  = locals[cdt][cdn];
+			let query = {
+				filters: [
+					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
+				]
+			};
+			if (row.item_code) {
+				query.query = "erpnext.controllers.queries.warehouse_query";
+				query.filters.push(["Bin", "item_code", "=", row.item_code]);
+			}
+			return query;
+		});
 
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
@@ -152,7 +197,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						}
 					}
 
-					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+					if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
+						this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+					}
 
 					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
 					const order_is_maintenance = ["Maintenance"].indexOf(doc.order_type) !== -1;
@@ -562,6 +609,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Items"),
+			size: "large",
 			fields: [
 				{
 					"fieldtype": "Check",
@@ -663,7 +711,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			} else {
 				let po_items = [];
 				me.frm.doc.items.forEach(d => {
-					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					let ordered_qty = me.get_ordered_qty(d, me.frm.doc);
+					let pending_qty = (flt(d.stock_qty) - ordered_qty) / flt(d.conversion_factor);
 					if (pending_qty > 0) {
 						po_items.push({
 							"doctype": "Sales Order Item",
@@ -689,6 +738,24 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		dialog.show();
 	}
 
+	get_ordered_qty(item, so) {
+		let ordered_qty = item.ordered_qty;
+		if (so.packed_items && so.packed_items.length) {
+			// calculate ordered qty based on packed items in case of product bundle
+			let packed_items = so.packed_items.filter(
+				(pi) => pi.parent_detail_docname == item.name
+			);
+			if (packed_items && packed_items.length) {
+				ordered_qty = packed_items.reduce(
+					(sum, pi) => sum + flt(pi.ordered_qty),
+					0
+				);
+				ordered_qty = ordered_qty / packed_items.length;
+			}
+		}
+		return ordered_qty;
+	}
+
 	hold_sales_order(){
 		var me = this;
 		var d = new frappe.ui.Dialog({
@@ -707,7 +774,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __('Reason for hold: ')+data.reason_for_hold,
+						content: __('Reason for hold:') + ' ' + data.reason_for_hold,
 						comment_email: frappe.session.user,
 						comment_by: frappe.session.user_fullname
 					},

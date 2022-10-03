@@ -3,11 +3,11 @@
 
 <div class="mt-5 mb-6">
 	{% if cart_settings.enable_variants | int %}
-	<button class="btn btn-primary-light btn-configure"
-		data-item-code="{{ doc.name }}"
-		data-item-name="{{ doc.item_name }}"
+	<button class="btn btn-primary-light btn-configure font-md mr-2"
+		data-item-code="{{ doc.item_code }}"
+		data-item-name="{{ doc.web_item_name }}"
 	>
-		{{ _('Configure') }}
+		{{ _('Select Variant') }}
 	</button>
 	{% endif %}
 	{% if cart_settings.show_contact_us_button %}

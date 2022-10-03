@@ -4,11 +4,14 @@ on:
   pull_request:
     paths-ignore:
       - '**.js'
+      - '**.css'
       - '**.md'
+      - '**.html'
+      - '**.csv'
   workflow_dispatch:
 
 concurrency:
-  group: patch-develop-${{ github.event.number }}
+  group: patch-develop-${{ github.event_name }}-${{ github.event.number || github.event_name == 'workflow_dispatch' && github.run_id || '' }}
   cancel-in-progress: true
 
 jobs:
@@ -31,10 +34,18 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -f "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
+
       - name: Setup Python
-        uses: actions/setup-python@v2
+        uses: "gabrielfalcao/pyenv-action@v9"
         with:
-          python-version: 3.8
+          versions: 3.10:latest, 3.7:latest
 
       - name: Setup Node
         uses: actions/setup-node@v2
@@ -49,7 +60,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/*requirements.txt', '**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
@@ -79,7 +90,10 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install
-        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+        run: |
+          pip install frappe-bench
+          pyenv global $(pyenv versions | grep '3.10')
+          bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
         env:
           DB: mariadb
           TYPE: server
@@ -93,6 +107,7 @@ jobs:
           git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
           git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
 
+          pyenv global $(pyenv versions | grep '3.7')
           for version in $(seq 12 13)
           do
               echo "Updating to v$version"
@@ -104,7 +119,11 @@ jobs:
               git -C "apps/frappe" checkout -q -f $branch_name
               git -C "apps/erpnext" checkout -q -f $branch_name
 
-              bench setup requirements --python
+              rm -rf ~/frappe-bench/env
+              bench setup env
+              bench pip install -e ./apps/payments
+              bench pip install -e ./apps/erpnext
+
               bench --site test_site migrate
           done
 
@@ -112,4 +131,12 @@ jobs:
           echo "Updating to latest version"
           git -C "apps/frappe" checkout -q -f "${GITHUB_BASE_REF:-${GITHUB_REF##*/}}"
           git -C "apps/erpnext" checkout -q -f "$GITHUB_SHA"
+
+          pyenv global $(pyenv versions | grep '3.10')
+          rm -rf ~/frappe-bench/env
+          bench -v setup env
+          bench pip install -e ./apps/payments
+          bench pip install -e ./apps/erpnext
+
           bench --site test_site migrate
+          bench --site test_site install-app payments

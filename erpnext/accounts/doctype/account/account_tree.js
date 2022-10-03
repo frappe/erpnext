@@ -160,7 +160,7 @@ frappe.treeview_settings["Account"] = {
 			let root_company = treeview.page.fields_dict.root_company.get_value();
 
 			if(root_company) {
-				frappe.throw(__("Please add the account to root level Company - ") + root_company);
+				frappe.throw(__("Please add the account to root level Company - {0}"), [root_company]);
 			} else {
 				treeview.new_node();
 			}

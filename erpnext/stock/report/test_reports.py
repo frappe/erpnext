@@ -43,8 +43,18 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 		},
 	),
 	("Warehouse wise Item Balance Age and Value", {"_optional": True}),
-	("Item Variant Details", {"item": "_Test Variant Item",}),
-	("Total Stock Summary", {"group_by": "warehouse",}),
+	(
+		"Item Variant Details",
+		{
+			"item": "_Test Variant Item",
+		},
+	),
+	(
+		"Total Stock Summary",
+		{
+			"group_by": "warehouse",
+		},
+	),
 	("Batch Item Expiry Status", {}),
 	("Incorrect Stock Value Report", {"company": "_Test Company with perpetual inventory"}),
 	("Incorrect Serial No Valuation", {}),
@@ -54,12 +64,9 @@ REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
 	("Delayed Item Report", {"based_on": "Sales Invoice"}),
 	("Delayed Item Report", {"based_on": "Delivery Note"}),
 	("Stock Ageing", {"range1": 30, "range2": 60, "range3": 90, "_optional": True}),
-	("Stock Ledger Invariant Check",
-		{
-			"warehouse": "_Test Warehouse - _TC",
-			"item": "_Test Item"
-		}
-	),
+	("Stock Ledger Invariant Check", {"warehouse": "_Test Warehouse - _TC", "item": "_Test Item"}),
+	("FIFO Queue vs Qty After Transaction Comparison", {"warehouse": "_Test Warehouse - _TC"}),
+	("FIFO Queue vs Qty After Transaction Comparison", {"item_group": "All Item Groups"}),
 ]
 
 OPTIONAL_FILTERS = {
@@ -73,10 +80,11 @@ class TestReports(unittest.TestCase):
 	def test_execute_all_stock_reports(self):
 		"""Test that all script report in stock modules are executable with supported filters"""
 		for report, filter in REPORT_FILTER_TEST_CASES:
-			execute_script_report(
-				report_name=report,
-				module="Stock",
-				filters=filter,
-				default_filters=DEFAULT_FILTERS,
-				optional_filters=OPTIONAL_FILTERS if filter.get("_optional") else None,
-			)
+			with self.subTest(report=report):
+				execute_script_report(
+					report_name=report,
+					module="Stock",
+					filters=filter,
+					default_filters=DEFAULT_FILTERS,
+					optional_filters=OPTIONAL_FILTERS if filter.get("_optional") else None,
+				)

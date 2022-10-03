@@ -140,26 +140,6 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 		}
 	}
 
-	start_date(doc, cdt, cdn) {
-		this.set_no_of_visits(doc, cdt, cdn);
-	}
-
-	end_date(doc, cdt, cdn) {
-		this.set_no_of_visits(doc, cdt, cdn);
-	}
-
-	periodicity(doc, cdt, cdn) {
-		this.set_no_of_visits(doc, cdt, cdn);
-	}
-
-	set_no_of_visits(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		let me = this;
-		if (item.start_date && item.periodicity) {
-			me.frm.call('validate_end_date_visits');
-
-		}
-	}
 };
 
 extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));

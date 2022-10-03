@@ -96,6 +96,10 @@
   "delivery_note",
   "dn_detail",
   "delivered_qty",
+  "internal_transfer_section",
+  "purchase_order",
+  "column_break_92",
+  "purchase_order_item",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -182,6 +186,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -200,6 +205,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
@@ -207,6 +213,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Qty as per Stock UOM",
@@ -279,7 +286,6 @@
    "label": "Discount (%) on Price List Rate with Margin",
    "oldfieldname": "adj_rate",
    "oldfieldtype": "Float",
-   "precision": "2",
    "print_hide": 1
   },
   {
@@ -813,6 +819,7 @@
    "fieldtype": "Currency",
    "label": "Incoming Rate (Costing)",
    "no_copy": 1,
+   "options": "Company:company:default_currency",
    "print_hide": 1
   },
   {
@@ -832,16 +839,43 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.grant_commission",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:parent.is_internal_customer == 1",
+   "fieldname": "internal_transfer_section",
+   "fieldtype": "Section Break",
+   "label": "Internal Transfer"
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_92",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "label": "Purchase Order Item",
+   "print_hide": 1,
    "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-05 12:24:54.968907",
+ "modified": "2022-09-06 14:17:43.394309",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
@@ -849,5 +883,6 @@
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

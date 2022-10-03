@@ -4,7 +4,7 @@
 frappe.ui.form.on('Video', {
 	refresh: function (frm) {
 		frm.events.toggle_youtube_statistics_section(frm);
-		frm.add_custom_button("Watch Video", () => frappe.help.show_video(frm.doc.url, frm.doc.title));
+		frm.add_custom_button(__("Watch Video"), () => frappe.help.show_video(frm.doc.url, frm.doc.title));
 	},
 
 	toggle_youtube_statistics_section: (frm) => {

@@ -10,10 +10,14 @@
   "item_code",
   "supplier_part_no",
   "item_name",
+  "brand",
   "product_bundle",
+  "fg_item",
+  "fg_item_qty",
   "column_break_4",
   "schedule_date",
   "expected_delivery_date",
+  "item_group",
   "section_break_5",
   "description",
   "col_break1",
@@ -56,13 +60,17 @@
   "base_net_rate",
   "base_net_amount",
   "warehouse_and_reference",
+  "from_warehouse",
   "warehouse",
+  "column_break_54",
   "actual_qty",
   "company_total_stock",
+  "references_section",
   "material_request",
   "material_request_item",
   "sales_order",
   "sales_order_item",
+  "sales_order_packed_item",
   "supplier_quotation",
   "supplier_quotation_item",
   "col_break5",
@@ -70,8 +78,6 @@
   "against_blanket_order",
   "blanket_order",
   "blanket_order_rate",
-  "item_group",
-  "brand",
   "section_break_56",
   "received_qty",
   "returned_qty",
@@ -212,6 +218,7 @@
    "width": "60px"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -241,6 +248,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
@@ -437,13 +445,13 @@
   {
    "fieldname": "warehouse_and_reference",
    "fieldtype": "Section Break",
-   "label": "Warehouse and Reference"
+   "label": "Warehouse Settings"
   },
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Warehouse",
+   "label": "Target Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -571,16 +579,18 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.is_subcontracted == 'Yes'",
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
    "options": "BOM",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "read_only_depends_on": "eval:!parent.is_old_subcontracting_flow"
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.is_subcontracted == 'Yes'",
+   "depends_on": "eval:parent.is_old_subcontracting_flow",
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "label": "Include Exploded Items",
@@ -592,6 +602,7 @@
    "label": "Billed, Received & Returned"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Qty in Stock UOM",
@@ -752,7 +763,7 @@
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Available Qty at Warehouse",
+   "label": "Available Qty at Target Warehouse",
    "print_hide": 1,
    "read_only": 1
   },
@@ -837,21 +848,63 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_order_packed_item",
+   "fieldtype": "Data",
+   "label": "Sales Order Packed Item",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item",
+   "fieldtype": "Link",
+   "label": "Finished Good Item",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "options": "Item"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow",
+   "fieldname": "fg_item_qty",
+   "fieldtype": "Float",
+   "label": "Finished Good Item Qty",
+   "mandatory_depends_on": "eval:parent.is_subcontracted && !parent.is_old_subcontracting_flow"
+  },
+  {
+   "depends_on": "eval:parent.is_internal_supplier",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-30 20:06:26.712097",
+ "modified": "2022-09-07 11:12:38.634976",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
  "search_fields": "item_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

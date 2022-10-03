@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-04-27 17:40:37.965161",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "opportunity",
+  "amount",
+  "stage",
+  "deal_owner",
+  "column_break_4",
+  "probability",
+  "expected_closing",
+  "currency",
+  "contact_person"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "opportunity",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Opportunity",
+   "options": "Opportunity"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "opportunity.opportunity_amount",
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "currency"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "opportunity.sales_stage",
+   "fieldname": "stage",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Stage"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "opportunity.probability",
+   "fieldname": "probability",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Probability"
+  },
+  {
+   "columns": 1,
+   "fetch_from": "opportunity.expected_closing",
+   "fieldname": "expected_closing",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Closing"
+  },
+  {
+   "fetch_from": "opportunity.currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fetch_from": "opportunity.opportunity_owner",
+   "fieldname": "deal_owner",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Deal Owner"
+  },
+  {
+   "fetch_from": "opportunity.contact_person",
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Contact Person",
+   "options": "Contact"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-04-28 10:05:38.730368",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Prospect Opportunity",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

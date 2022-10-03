@@ -27,7 +27,8 @@
   "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "hide_tax_id"
+  "hide_tax_id",
+  "enable_discount_accounting"
  ],
  "fields": [
   {
@@ -80,7 +81,7 @@
    "description": "How often should Project and Company be updated based on Sales Transactions?",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
-   "label": "Sales Update Frequency",
+   "label": "Sales Update Frequency in Company and Project",
    "options": "Each Transaction\nDaily\nMonthly",
    "reqd": 1
   },
@@ -164,6 +165,13 @@
    "fieldname": "editable_bundle_item_rates",
    "fieldtype": "Check",
    "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Selling"
   }
  ],
  "icon": "fa fa-cog",
@@ -171,7 +179,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 12:32:17.004404",
+ "modified": "2022-05-31 19:39:48.398738",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -185,9 +193,19 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

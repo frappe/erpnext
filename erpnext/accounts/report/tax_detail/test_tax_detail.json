@@ -302,7 +302,7 @@
   "is_opening": "No",
   "is_paid": 0,
   "is_return": 0,
-  "is_subcontracted": "No",
+  "is_subcontracted": 0,
   "items": [
    {
     "allow_zero_valuation_rate": 0,

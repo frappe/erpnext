@@ -1,0 +1,31 @@
+name: Generate Semantic Release
+on:
+  push:
+    branches:
+      - version-13
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Entire Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup Node.js v14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Setup dependencies
+        run: |
+          npm install @semantic-release/git @semantic-release/exec --no-save
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GIT_AUTHOR_NAME: "Frappe PR Bot"
+          GIT_AUTHOR_EMAIL: "developers@frappe.io"
+          GIT_COMMITTER_NAME: "Frappe PR Bot"
+          GIT_COMMITTER_EMAIL: "developers@frappe.io"
+        run: npx semantic-release

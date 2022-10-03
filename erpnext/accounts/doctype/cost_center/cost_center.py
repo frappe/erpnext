@@ -10,11 +10,14 @@ from erpnext.accounts.utils import validate_field_number
 
 
 class CostCenter(NestedSet):
-	nsm_parent_field = 'parent_cost_center'
+	nsm_parent_field = "parent_cost_center"
 
 	def autoname(self):
 		from erpnext.accounts.utils import get_autoname_with_number
-		self.name = get_autoname_with_number(self.cost_center_number, self.cost_center_name, None, self.company)
+
+		self.name = get_autoname_with_number(
+			self.cost_center_number, self.cost_center_name, self.company
+		)
 
 	def validate(self):
 		self.validate_mandatory()
@@ -28,9 +31,12 @@ class CostCenter(NestedSet):
 
 	def validate_parent_cost_center(self):
 		if self.parent_cost_center:
-			if not frappe.db.get_value('Cost Center', self.parent_cost_center, 'is_group'):
-				frappe.throw(_("{0} is not a group node. Please select a group node as parent cost center").format(
-					frappe.bold(self.parent_cost_center)))
+			if not frappe.db.get_value("Cost Center", self.parent_cost_center, "is_group"):
+				frappe.throw(
+					_("{0} is not a group node. Please select a group node as parent cost center").format(
+						frappe.bold(self.parent_cost_center)
+					)
+				)
 
 	@frappe.whitelist()
 	def convert_group_to_ledger(self):
@@ -48,7 +54,9 @@ class CostCenter(NestedSet):
 		if self.if_allocation_exists_against_cost_center():
 			frappe.throw(_("Cost Center with Allocation records can not be converted to a group"))
 		if self.check_if_part_of_cost_center_allocation():
-			frappe.throw(_("Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group"))
+			frappe.throw(
+				_("Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group")
+			)
 		if self.check_gle_exists():
 			frappe.throw(_("Cost Center with existing transactions can not be converted to group"))
 		self.is_group = 1
@@ -59,24 +67,26 @@ class CostCenter(NestedSet):
 		return frappe.db.get_value("GL Entry", {"cost_center": self.name})
 
 	def check_if_child_exists(self):
-		return frappe.db.sql("select name from `tabCost Center` where \
-			parent_cost_center = %s and docstatus != 2", self.name)
+		return frappe.db.sql(
+			"select name from `tabCost Center` where \
+			parent_cost_center = %s and docstatus != 2",
+			self.name,
+		)
 
 	def if_allocation_exists_against_cost_center(self):
-		return frappe.db.get_value("Cost Center Allocation", filters = {
-			"main_cost_center": self.name,
-			"docstatus": 1
-		})
+		return frappe.db.get_value(
+			"Cost Center Allocation", filters={"main_cost_center": self.name, "docstatus": 1}
+		)
 
 	def check_if_part_of_cost_center_allocation(self):
-		return frappe.db.get_value("Cost Center Allocation Percentage", filters = {
-			"cost_center": self.name,
-			"docstatus": 1
-		})
+		return frappe.db.get_value(
+			"Cost Center Allocation Percentage", filters={"cost_center": self.name, "docstatus": 1}
+		)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
+
 		new_cost_center = get_name_with_abbr(newdn, self.company)
 
 		# Validate properties before merging
@@ -90,7 +100,9 @@ class CostCenter(NestedSet):
 		super(CostCenter, self).after_rename(olddn, newdn, merge)
 
 		if not merge:
-			new_cost_center = frappe.db.get_value("Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1)
+			new_cost_center = frappe.db.get_value(
+				"Cost Center", newdn, ["cost_center_name", "cost_center_number"], as_dict=1
+			)
 
 			# exclude company abbr
 			new_parts = newdn.split(" - ")[:-1]
@@ -99,7 +111,9 @@ class CostCenter(NestedSet):
 				if len(new_parts) == 1:
 					new_parts = newdn.split(" ")
 				if new_cost_center.cost_center_number != new_parts[0]:
-					validate_field_number("Cost Center", self.name, new_parts[0], self.company, "cost_center_number")
+					validate_field_number(
+						"Cost Center", self.name, new_parts[0], self.company, "cost_center_number"
+					)
 					self.cost_center_number = new_parts[0]
 					self.db_set("cost_center_number", new_parts[0])
 				new_parts = new_parts[1:]
@@ -110,8 +124,10 @@ class CostCenter(NestedSet):
 				self.cost_center_name = cost_center_name
 				self.db_set("cost_center_name", cost_center_name)
 
+
 def on_doctype_update():
 	frappe.db.add_index("Cost Center", ["lft", "rgt"])
+
 
 def get_name_with_number(new_account, account_number):
 	if account_number and not new_account[0].isdigit():

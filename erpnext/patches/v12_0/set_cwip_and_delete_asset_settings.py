@@ -3,8 +3,8 @@ from frappe.utils import cint
 
 
 def execute():
-	'''Get 'Disable CWIP Accounting value' from Asset Settings, set it in 'Enable Capital Work in Progress Accounting' field
-	in Company, delete Asset Settings '''
+	"""Get 'Disable CWIP Accounting value' from Asset Settings, set it in 'Enable Capital Work in Progress Accounting' field
+	in Company, delete Asset Settings"""
 
 	if frappe.db.exists("DocType", "Asset Settings"):
 		frappe.reload_doctype("Asset Category")

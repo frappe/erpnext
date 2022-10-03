@@ -14,7 +14,7 @@ frappe.listview_settings['Delivery Note'] = {
 			return [__("Completed"), "green", "per_billed,=,100"];
 		}
 	},
-	onload: function (doclist) {
+	onload: function (listview) {
 		const action = () => {
 			const selected_docs = doclist.get_checked_items();
 			const docnames = doclist.get_checked_items(true);
@@ -54,6 +54,16 @@ frappe.listview_settings['Delivery Note'] = {
 			};
 		};
 
-		doclist.page.add_actions_menu_item(__('Create Delivery Trip'), action, false);
+		// doclist.page.add_actions_menu_item(__('Create Delivery Trip'), action, false);
+
+		listview.page.add_action_item(__('Create Delivery Trip'), action);
+
+		listview.page.add_action_item(__("Sales Invoice"), ()=>{
+			erpnext.bulk_transaction_processing.create(listview, "Delivery Note", "Sales Invoice");
+		});
+
+		listview.page.add_action_item(__("Packaging Slip From Delivery Note"), ()=>{
+			erpnext.bulk_transaction_processing.create(listview, "Delivery Note", "Packing Slip");
+		});
 	}
 };

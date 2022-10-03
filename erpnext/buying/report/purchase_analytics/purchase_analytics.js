@@ -68,9 +68,6 @@ frappe.query_reports["Purchase Analytics"] = {
 		}
 
 	],
-	after_datatable_render: function(datatable_obj) {
-		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
-	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
@@ -130,11 +127,8 @@ frappe.query_reports["Purchase Analytics"] = {
 						labels: raw_data.labels,
 						datasets: new_datasets,
 					};
-					chart_options = {
-						data: new_data,
-						type: "line",
-					};
-					frappe.query_report.render_chart(chart_options);
+					const new_options = Object.assign({}, frappe.query_report.chart_options, {data: new_data});
+					frappe.query_report.render_chart(new_options);
 
 					frappe.query_report.raw_chart_data = new_data;
 				},

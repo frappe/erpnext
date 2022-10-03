@@ -1,14 +1,20 @@
-{% if doc.website_specifications -%}
-<div class="row item-website-specification mt-5">
-	<div class="col-md-12">
-		<table class="table table-bordered">
-		{% for d in doc.website_specifications -%}
+<!-- Is reused to render within tabs as well as independently -->
+{% if website_specifications %}
+<div class="{{ 'mt-2' if not show_tabs else 'mt-5'}} item-website-specification">
+	<div class="col-md-11">
+		{% if not show_tabs %}
+			<div class="product-title mb-5 mt-4">
+				Product Details
+			</div>
+		{% endif %}
+		<table class="table">
+		{% for d in website_specifications -%}
 			<tr>
-				<td class="text-muted" style="width: 30%;">{{ d.label }}</td>
-				<td>{{ d.description }}</td>
+				<td class="spec-label">{{ d.label }}</td>
+				<td class="spec-content">{{ d.description }}</td>
 			</tr>
 		{%- endfor %}
 		</table>
 	</div>
 </div>
-{%- endif %}
+{% endif %}

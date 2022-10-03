@@ -54,6 +54,22 @@ frappe.query_reports["Accounts Payable"] = {
 			}
 		},
 		{
+			"fieldname": "party_account",
+			"label": __("Payable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company,
+						'account_type': 'Payable',
+						'is_group': 0
+					}
+				};
+			}
+		},
+		{
 			"fieldname": "ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
@@ -120,6 +136,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
+		},
+		{
+			"fieldname": "show_future_payments",
+			"label": __("Show Future Payments"),
+			"fieldtype": "Check",
 		}
 	],
 

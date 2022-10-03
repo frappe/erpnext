@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-05-24 19:29:05",
+ "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -106,6 +106,7 @@
   "loyalty_redemption_cost_center",
   "section_break_49",
   "apply_discount_on",
+  "is_cash_or_non_trade_discount",
   "base_discount_amount",
   "additional_discount_account",
   "column_break_51",
@@ -174,8 +175,6 @@
   "debit_to",
   "party_account_currency",
   "is_opening",
-  "c_form_applicable",
-  "c_form_no",
   "column_break8",
   "unrealized_profit_loss_account",
   "remarks",
@@ -413,7 +412,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval: doc.is_return && doc.return_against",
+   "depends_on": "eval: doc.is_return",
    "fieldname": "update_billed_amount_in_sales_order",
    "fieldtype": "Check",
    "hide_days": 1,
@@ -650,8 +649,6 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Ignore Pricing Rule",
-   "no_copy": 1,
-   "permlevel": 0,
    "print_hide": 1
   },
   {
@@ -1718,28 +1715,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "c_form_applicable",
-   "fieldtype": "Select",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "C-Form Applicable",
-   "length": 4,
-   "no_copy": 1,
-   "options": "No\nYes",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "c_form_no",
-   "fieldtype": "Link",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "C-Form No",
-   "no_copy": 1,
-   "options": "C-Form",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break8",
    "fieldtype": "Column Break",
    "hide_days": 1,
@@ -1974,9 +1949,10 @@
   },
   {
    "default": "0",
+   "description": "Issue a debit note with 0 qty against an existing Sales Invoice",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
-   "label": "Is Debit Note"
+   "label": "Is Rate Adjustment Entry (Debit Note)"
   },
   {
    "default": "0",
@@ -1988,7 +1964,7 @@
   {
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
-   "label": "Additional Discount Account",
+   "label": "Discount Account",
    "options": "Account"
   },
   {
@@ -2026,6 +2002,13 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.apply_discount_on == \"Grand Total\"",
+   "fieldname": "is_cash_or_non_trade_discount",
+   "fieldtype": "Check",
+   "label": "Is Cash or Non Trade Discount"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2038,7 +2021,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-12-23 20:19:38.667508",
+ "modified": "2022-09-16 17:44:22.227332",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2089,6 +2072,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,

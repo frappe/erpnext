@@ -24,6 +24,10 @@
   "apply_putaway_rule",
   "is_return",
   "return_against",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "section_addresses",
   "supplier_address",
   "contact_person",
@@ -104,12 +108,7 @@
   "terms_section_break",
   "tc_name",
   "terms",
-  "bill_no",
-  "bill_date",
-  "accounting_details_section",
-  "provisional_expense_account",
   "more_info",
-  "project",
   "status",
   "amended_from",
   "range",
@@ -134,7 +133,8 @@
   "transporter_name",
   "column_break5",
   "lr_no",
-  "lr_date"
+  "lr_date",
+  "is_old_subcontracting_flow"
  ],
  "fields": [
   {
@@ -405,7 +405,6 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule",
-   "no_copy": 1,
    "permlevel": 1,
    "print_hide": 1
   },
@@ -437,17 +436,17 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
-   "label": "Raw Materials Consumed",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
    "oldfieldname": "is_subcontracted",
    "oldfieldtype": "Select",
-   "options": "No\nYes",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
+   "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -868,24 +867,6 @@
    "oldfieldtype": "Text Editor"
   },
   {
-   "fieldname": "bill_no",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Bill No",
-   "oldfieldname": "bill_no",
-   "oldfieldtype": "Data",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "bill_date",
-   "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Bill Date",
-   "oldfieldname": "bill_date",
-   "oldfieldtype": "Date",
-   "print_hide": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
@@ -1149,23 +1130,34 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "accounting_details_section",
+   "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Details"
+   "label": "Accounting Dimensions"
   },
   {
-   "fieldname": "provisional_expense_account",
+   "fieldname": "cost_center",
    "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_old_subcontracting_flow",
+   "fieldtype": "Check",
    "hidden": 1,
-   "label": "Provisional Expense Account",
-   "options": "Account"
+   "label": "Is Old Subcontracting Flow",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-01 11:40:52.690984",
+ "modified": "2022-09-16 17:45:58.430132",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

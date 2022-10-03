@@ -56,6 +56,12 @@ class TestQueries(unittest.TestCase):
 		bundled_stock_items = query(txt="_test product bundle item 5", filters={"is_stock_item": 1})
 		self.assertEqual(len(bundled_stock_items), 0)
 
+		# empty customer/supplier should be stripped of instead of failure
+		query(txt="", filters={"customer": None})
+		query(txt="", filters={"customer": ""})
+		query(txt="", filters={"supplier": None})
+		query(txt="", filters={"supplier": ""})
+
 	def test_bom_qury(self):
 		query = add_default_params(queries.bom, "BOM")
 

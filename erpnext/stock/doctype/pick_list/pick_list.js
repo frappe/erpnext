@@ -146,10 +146,6 @@ frappe.ui.form.on('Pick List', {
 			customer: frm.doc.customer
 		};
 		frm.get_items_btn = frm.add_custom_button(__('Get Items'), () => {
-			if (!frm.doc.customer) {
-				frappe.msgprint(__('Please select Customer first'));
-				return;
-			}
 			erpnext.utils.map_current_doc({
 				method: 'erpnext.selling.doctype.sales_order.sales_order.create_pick_list',
 				source_doctype: 'Sales Order',
@@ -162,6 +158,19 @@ frappe.ui.form.on('Pick List', {
 				get_query_filters: get_query_filters
 			});
 		});
+	},
+	scan_barcode: (frm) => {
+		const opts = {
+			frm,
+			items_table_name: 'locations',
+			qty_field: 'picked_qty',
+			max_qty_field: 'qty',
+			dont_allow_new_row: true,
+			prompt_qty: frm.doc.prompt_qty,
+			serial_no_field: "not_supported",  // doesn't make sense for picklist without a separate field.
+		};
+		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
+		barcode_scanner.process_scan();
 	}
 });
 

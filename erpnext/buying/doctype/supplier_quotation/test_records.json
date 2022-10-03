@@ -7,7 +7,7 @@
   "doctype": "Supplier Quotation", 
   "base_grand_total": 5000.0, 
   "grand_total": 5000.0, 
-  "is_subcontracted": "No", 
+  "is_subcontracted": 0, 
   "naming_series": "_T-Supplier Quotation-", 
   "base_net_total": 5000.0, 
   "items": [

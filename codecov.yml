@@ -21,7 +21,6 @@ coverage:
 comment:
   layout: "diff, files"
   require_changes: true
-  after_n_builds: 3
 
 ignore:
   - "erpnext/demo"

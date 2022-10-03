@@ -87,17 +87,6 @@ $.extend(erpnext, {
 	route_to_pending_reposts: (args) => {
 		frappe.set_route('List', 'Repost Item Valuation', args);
 	},
-
-	proceed_save_with_reminders_frequency_change: () => {
-		frappe.ui.hide_open_dialog();
-
-		frappe.call({
-			method: 'erpnext.hr.doctype.hr_settings.hr_settings.set_proceed_with_frequency_change',
-			callback: () => {
-				cur_frm.save();
-			}
-		});
-	}
 });
 
 
@@ -125,7 +114,7 @@ $.extend(erpnext.utils, {
 	},
 
 	add_indicator_for_multicompany: function(frm, info) {
-		frm.dashboard.stats_area.removeClass('hidden');
+		frm.dashboard.stats_area.show();
 		frm.dashboard.stats_area_row.addClass('flex');
 		frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
 
@@ -213,11 +202,39 @@ $.extend(erpnext.utils, {
 						filters.splice(index, 0, {
 							"fieldname": dimension["fieldname"],
 							"label": __(dimension["label"]),
-							"fieldtype": "Link",
-							"options": dimension["document_type"]
+							"fieldtype": "MultiSelectList",
+							get_data: function(txt) {
+								return frappe.db.get_link_options(dimension["document_type"], txt);
+							},
 						});
 					}
 				});
+			}
+		});
+	},
+
+	add_inventory_dimensions: function(report_name, index) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		frappe.call({
+			method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_dimensions",
+			callback: function(r) {
+				if (r.message && r.message.length) {
+					r.message.forEach((dimension) => {
+						let found = filters.some(el => el.fieldname === dimension['fieldname']);
+
+						if (!found) {
+							filters.splice(index, 0, {
+								"fieldname": dimension["fieldname"],
+								"label": __(dimension["doctype"]),
+								"fieldtype": "MultiSelectList",
+								get_data: function(txt) {
+									return frappe.db.get_link_options(dimension["doctype"], txt);
+								},
+							});
+						}
+					});
+				}
 			}
 		});
 	},
@@ -483,8 +500,12 @@ erpnext.utils.update_child_items = function(opts) {
 			if (frm.doc.doctype == 'Sales Order') {
 				filters = {"is_sales_item": 1};
 			} else if (frm.doc.doctype == 'Purchase Order') {
-				if (frm.doc.is_subcontracted == "Yes") {
-					filters = {"is_sub_contracted_item": 1};
+				if (frm.doc.is_subcontracted) {
+					if (frm.doc.is_old_subcontracting_flow) {
+						filters = {"is_sub_contracted_item": 1};
+					} else {
+						filters = {"is_stock_item": 0};
+					}
 				} else {
 					filters = {"is_purchase_item": 1};
 				}
@@ -711,7 +732,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
-			child_fieldname: opts.child_fielname,
+			child_fieldname: opts.child_fieldname,
 			child_columns: opts.child_columns,
 			size: opts.size,
 			action: function(selections, args) {

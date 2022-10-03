@@ -88,10 +88,12 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 			posting_date="2021-05-01",
 			parent_cost_center="Main - _CD",
 			cost_center="Main - _CD",
-			do_not_submit=True,
+			do_not_save=True,
 			rate=300,
 			price_list_rate=300,
 		)
+
+		si.items[0].income_account = "Sales - _CD"
 		si.items[0].enable_deferred_revenue = 1
 		si.items[0].service_start_date = "2021-05-01"
 		si.items[0].service_end_date = "2021-08-01"
@@ -269,11 +271,13 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 			posting_date="2021-05-01",
 			parent_cost_center="Main - _CD",
 			cost_center="Main - _CD",
-			do_not_submit=True,
+			do_not_save=True,
 			rate=300,
 			price_list_rate=300,
 		)
+
 		si.items[0].enable_deferred_revenue = 1
+		si.items[0].income_account = "Sales - _CD"
 		si.items[0].deferred_revenue_account = deferred_revenue_account
 		si.items[0].income_account = "Sales - _CD"
 		si.save()
@@ -317,6 +321,7 @@ class TestDeferredRevenueAndExpense(unittest.TestCase):
 			{"key": "aug_2021", "total": 0, "actual": 0},
 		]
 		self.assertEqual(report.period_total, expected)
+
 
 def create_company():
 	company = frappe.db.exists("Company", "_Test Company DR")

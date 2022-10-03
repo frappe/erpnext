@@ -67,6 +67,22 @@ frappe.query_reports["Accounts Receivable"] = {
 			}
 		},
 		{
+			"fieldname": "party_account",
+			"label": __("Receivable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			get_query: () => {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company,
+						'account_type': 'Receivable',
+						'is_group': 0
+					}
+				};
+			}
+		},
+		{
 			"fieldname": "ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
@@ -157,15 +173,15 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Check",
 		},
 		{
-			"fieldname": "show_remarks",
-			"label": __("Show Remarks"),
-			"fieldtype": "Check",
-		},
-		{
 			"fieldname": "tax_id",
 			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
+		},
+		{
+			"fieldname": "show_remarks",
+			"label": __("Show Remarks"),
+			"fieldtype": "Check",
 		},
 		{
 			"fieldname": "customer_name",
