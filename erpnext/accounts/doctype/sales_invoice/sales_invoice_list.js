@@ -19,5 +19,13 @@ frappe.listview_settings['Sales Invoice'] = {
 		};
 		return [__(doc.status), status_color[doc.status], "status,=,"+doc.status];
 	},
-	right_column: "grand_total"
+	right_column: "grand_total",
+	onload: function(me) {
+		if (Object.values(frappe.route_options).length == 0){
+			frappe.route_options = {
+				"company": frappe.get_cookie('company') ,
+				"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), -31),frappe.datetime.get_today()]]
+			};
+		}
+	},
 };
