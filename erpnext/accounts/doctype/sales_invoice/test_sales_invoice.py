@@ -7,8 +7,13 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
+<<<<<<< HEAD
 from frappe.utils import add_days, flt, getdate, nowdate
 from six import iteritems
+=======
+from frappe.tests.utils import change_settings
+from frappe.utils import add_days, flt, getdate, nowdate, today
+>>>>>>> 0b1727cf79 (fix: not able to return sold expired batches)
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -3396,6 +3401,37 @@ class TestSalesInvoice(unittest.TestCase):
 			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
 		)
 
+	def test_batch_expiry_for_sales_invoice_return(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = make_item(
+			"_Test Batch Item For Return Check",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBIRC.#####",
+			},
+		)
+
+		pr = make_purchase_receipt(qty=1, item_code=item.name)
+
+		batch_no = pr.items[0].batch_no
+		si = create_sales_invoice(qty=1, item_code=item.name, update_stock=1, batch_no=batch_no)
+
+		si.load_from_db()
+		batch_no = si.items[0].batch_no
+		self.assertTrue(batch_no)
+
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
+
+		return_si = make_return_doc(si.doctype, si.name)
+		return_si.save().submit()
+
+		self.assertTrue(return_si.docstatus == 1)
+
 
 def get_sales_invoice_for_e_invoice():
 	si = make_sales_invoice_for_ewaybill()
@@ -3666,6 +3702,7 @@ def create_sales_invoice(**args):
 			"serial_no": args.serial_no,
 			"conversion_factor": 1,
 			"incoming_rate": args.incoming_rate or 0,
+			"batch_no": args.batch_no or None,
 		},
 	)
 
