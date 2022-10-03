@@ -7,13 +7,8 @@ import unittest
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.model.naming import make_autoname
-<<<<<<< HEAD
-from frappe.utils import add_days, flt, getdate, nowdate
 from six import iteritems
-=======
-from frappe.tests.utils import change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
->>>>>>> 0b1727cf79 (fix: not able to return sold expired batches)
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
