@@ -155,18 +155,31 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		// Show buttons only when pos view is active
-		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos") {
-			this.frm.cscript.delivery_note_btn();
+		if (doc.docstatus == 0 && this.frm.page.current_view_name != "pos") {
+			me.frm.add_custom_button(__('Delivery Note'), function() {
+				me.get_items_from_delivery_note();
+			}, __("Get Items From"));
+
 			if (!doc.is_return) {
-				this.frm.cscript.sales_order_btn();
-				this.frm.cscript.quotation_btn();
+				me.frm.add_custom_button(__('Sales Order'), function() {
+					me.get_items_from_sales_order();
+				}, __("Get Items From"));
+
+				me.frm.add_custom_button(__('Quotation'), function() {
+					me.get_items_from_quotation();
+				}, __("Get Items From"));
 			}
+
+			me.frm.add_custom_button(__('Projects'), function() {
+				me.get_items_from_project();
+			}, __("Get Items From"));
+
 			this.add_get_applicable_items_button();
 			this.add_get_project_template_items_button();
 		}
-		this.frm.cscript.get_projects_btn();
 
 		this.set_default_print_format();
+
 		if (doc.docstatus == 1 && !doc.inter_company_reference) {
 			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
 				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
@@ -258,154 +271,140 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 	},
 
-	sales_order_btn: function() {
+	get_items_from_quotation: function() {
 		var me = this;
-		this.$sales_order_btn = this.frm.add_custom_button(__('Sales Order'),
-			function() {
-				erpnext.utils.map_current_doc({
-					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
-					source_doctype: "Sales Order",
-					target: me.frm,
-					setters: {
-						customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
-						project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
-					},
-					columns: ['customer_name', 'project'],
-					get_query: function() {
-						var filters = {
-							docstatus: 1,
-							status: ["not in", ["Closed", "On Hold"]],
-							per_completed: ["<", 99.99],
-							company: me.frm.doc.company,
-							bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
-						};
-						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
-						return {
-							query: "erpnext.controllers.queries.get_sales_order_to_be_billed",
-							filters: filters
-						};
-					}
-				})
-			}, __("Get Items From"));
-	},
 
-
-
-get_projects_btn: function() {
-	var me = this;
-	this.$get_projects_btn = this.frm.add_custom_button(__('Projects'),
-		function() {
-			erpnext.utils.map_current_doc({
-				method: "erpnext.projects.doctype.project.project.get_sales_invoice",
-				source_doctype: "Project",
-				target: me.frm,
-				setters: [
-					{
-						label: __("Customer"),
-						fieldname: 'customer',
-						fieldtype: 'Link',
-						options: 'Customer',
-						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
-					},
-					{
-						label: __("Project"),
-						fieldname: 'name',
-						fieldtype: 'Link',
-						options: 'Project',
-						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
-					},
-					{
-						label: __("Project Type"),
-						fieldname: 'project_type',
-						fieldtype: 'Link',
-						options: 'Project Type',
-						
-					}
-				],
-				columns: ['Sales Order', 'Delivery Note', 'customer_name', 'project_type'],
-				get_query: function() {
-					var filters = {
-						company: me.frm.doc.company,
-					};
-					var join_filters ={
-						docstatus: ["=", 1],
-						status: ["not in", ["Closed", "On Hold"]],
-						per_completed: ["<", 99.99],
-						// company: ["=", me.frm.doc.company],
-						bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
-					}
-					if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
-					return {
-						query: "erpnext.controllers.queries.get_sales_order_for_project",
-						filters: {"filters":filters, "join_filters":join_filters}
-						// join_filters:join_filters
-					};
+		erpnext.utils.map_current_doc({
+			method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
+			source_doctype: "Quotation",
+			target: me.frm,
+			date_field: "transaction_date",
+			setters: [
+				{
+					fieldtype: 'Link',
+					label: __('Customer'),
+					options: 'Customer',
+					fieldname: 'party_name',
+					default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer,
+				},
+				{
+					fieldtype: 'Link',
+					label: __('Project'),
+					options: 'Project',
+					fieldname: 'project',
+					default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
 				}
-			})
-		}, __("Get Items From"));
-},
-
-	quotation_btn: function() {
-		var me = this;
-		this.$quotation_btn = this.frm.add_custom_button(__('Quotation'),
-			function() {
-				erpnext.utils.map_current_doc({
-					method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
-					source_doctype: "Quotation",
-					target: me.frm,
-					setters: [{
-						fieldtype: 'Link',
-						label: __('Customer'),
-						options: 'Customer',
-						fieldname: 'party_name',
-						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer,
-					},{
-						fieldtype: 'Link',
-						label: __('Project'),
-						options: 'Project',
-						fieldname: 'project',
-						default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
-					}],
-					columns: ['customer_name', 'project'],
-					get_query_filters: {
-						docstatus: 1,
-						status: ["!=", "Lost"],
-						company: me.frm.doc.company,
-						quotation_to: 'Customer',
-					}
-				})
-			}, __("Get Items From"));
+			],
+			columns: ['customer_name', 'project'],
+			get_query_filters: {
+				docstatus: 1,
+				status: ["!=", "Lost"],
+				company: me.frm.doc.company,
+				quotation_to: 'Customer',
+			}
+		});
 	},
 
-	delivery_note_btn: function() {
+	get_items_from_sales_order: function() {
 		var me = this;
-		this.$delivery_note_btn = this.frm.add_custom_button(__('Delivery Note'),
-			function() {
-				erpnext.utils.map_current_doc({
-					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-					source_doctype: "Delivery Note",
-					target: me.frm,
-					date_field: "posting_date",
-					setters: {
-						customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
-						project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
-					},
-					columns: ['customer_name', 'project'],
-					get_query: function() {
-						var filters = {
-							docstatus: 1,
-							company: me.frm.doc.company,
-							is_return: cint(me.frm.doc.is_return),
-							bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
-						};
-						if(me.frm.doc.customer) filters["customer"] = me.frm.doc.customer;
-						return {
-							query: "erpnext.controllers.queries.get_delivery_notes_to_be_billed",
-							filters: filters
-						};
-					}
-				});
-			}, __("Get Items From"));
+
+		erpnext.utils.map_current_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
+			source_doctype: "Sales Order",
+			target: me.frm,
+			date_field: "transaction_date",
+			setters: {
+				customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+				project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
+			},
+			columns: ['customer_name', 'project'],
+			get_query: function() {
+				var filters = {
+					company: me.frm.doc.company,
+					bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
+				};
+				if (me.frm.doc.customer) {
+					filters["customer"] = me.frm.doc.customer;
+				}
+
+				return {
+					query: "erpnext.controllers.queries.get_sales_orders_to_be_billed",
+					filters: filters
+				};
+			}
+		});
+	},
+
+	get_items_from_delivery_note: function() {
+		var me = this;
+
+		erpnext.utils.map_current_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			source_doctype: "Delivery Note",
+			target: me.frm,
+			date_field: "posting_date",
+			setters: {
+				customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+				project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
+			},
+			columns: ['customer_name', 'project'],
+			get_query: function() {
+				var filters = {
+					company: me.frm.doc.company,
+					is_return: cint(me.frm.doc.is_return),
+					bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
+				};
+				if(me.frm.doc.customer) {
+					filters["customer"] = me.frm.doc.customer;
+				}
+
+				return {
+					query: "erpnext.controllers.queries.get_delivery_notes_to_be_billed",
+					filters: filters
+				};
+			}
+		});
+	},
+
+	get_items_from_project: function() {
+		var me = this;
+
+		erpnext.utils.map_current_doc({
+			method: "erpnext.projects.doctype.project.project.get_sales_invoice",
+			source_doctype: "Project",
+			target: me.frm,
+			date_field: "project_date",
+			setters: [
+				{
+					label: __("Customer"),
+					fieldname: 'customer',
+					fieldtype: 'Link',
+					options: 'Customer',
+					default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+				},
+				{
+					label: __("Project Type"),
+					fieldname: 'project_type',
+					fieldtype: 'Link',
+					options: 'Project Type',
+				}
+			],
+			columns: ['customer_name', 'project_type'],
+			get_query: function() {
+				var filters = {
+					company: me.frm.doc.company,
+					bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects)
+				};
+				if(me.frm.doc.customer) {
+					filters["customer"] = me.frm.doc.customer;
+				}
+
+				return {
+					query: "erpnext.controllers.queries.get_projects_to_be_billed",
+					filters: filters
+				};
+			}
+		});
 	},
 
 	tc_name: function() {

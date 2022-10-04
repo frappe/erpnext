@@ -1754,8 +1754,8 @@ def make_against_project(project_name, dt):
 
 
 @frappe.whitelist()
-def get_sales_invoice(project_name, depreciation_type=None):
-	from erpnext.controllers.queries import _get_delivery_notes_to_be_billed
+def get_sales_invoice(project_name, target_doc=None, depreciation_type=None):
+	from erpnext.controllers.queries import _get_sales_orders_to_be_billed, _get_delivery_notes_to_be_billed
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
 
@@ -1763,7 +1763,14 @@ def get_sales_invoice(project_name, depreciation_type=None):
 	project_details = get_project_details(project, "Sales Invoice")
 
 	# Create Sales Invoice
-	target_doc = frappe.new_doc("Sales Invoice")
+	if target_doc and isinstance(target_doc, string_types):
+		target_doc = json.loads(target_doc)
+
+	if target_doc:
+		target_doc = frappe.get_doc(target_doc)
+	else:
+		target_doc = frappe.new_doc("Sales Invoice")
+
 	target_doc.company = project.company
 	target_doc.project = project.name
 
@@ -1784,13 +1791,8 @@ def get_sales_invoice(project_name, depreciation_type=None):
 		target_doc = invoice_from_delivery_note(d.name, target_doc=target_doc)
 
 	# Get Sales Orders
-	sales_order_filters = {
-		"docstatus": 1,
-		"status": ["not in", ["Closed", "On Hold"]],
-		"per_completed": ["<", 99.99],
-	}
-	sales_order_filters.update(filters)
-	sales_orders = frappe.get_all("Sales Order", filters=sales_order_filters)
+	sales_order_filters = filters.copy()
+	sales_orders = _get_sales_orders_to_be_billed(filters=sales_order_filters)
 	for d in sales_orders:
 		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
 
