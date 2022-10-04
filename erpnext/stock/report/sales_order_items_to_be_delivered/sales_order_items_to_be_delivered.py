@@ -284,7 +284,7 @@ class OrderItemFulfilmentTracker:
 				"width": 80
 			},
 			{
-				"label": _("Received" if self.filters.doctype == "Sales Order" else "Delivered"),
+				"label": _("Delivered" if self.filters.doctype == "Sales Order" else "Received"),
 				"fieldname": "completed_qty",
 				"fieldtype": "Float",
 				"width": 80
