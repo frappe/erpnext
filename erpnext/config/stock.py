@@ -340,22 +340,4 @@ def get_data():
 				}
 			]
 		},
-		{
-			"label": _("Old Reports"),
-			"icon": "fa fa-table",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Item Shortage Report",
-					"doctype": "Bin"
-				},
-				{
-					"type": "report",
-					"is_query_report": False,
-					"name": "Item-wise Price List Rate",
-					"doctype": "Item Price",
-				},
-			]
-		},
 	]
