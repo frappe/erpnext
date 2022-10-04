@@ -44,6 +44,7 @@ erpnext.financial_statements = {
 	"parent_field": "parent_account",
 	"initial_depth": 3,
 	onload: function(report) {
+		console.log("test")
 		// dropdown for links to other financial statements
 		erpnext.financial_statements.filters = get_filters()
 
