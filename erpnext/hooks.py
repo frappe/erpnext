@@ -508,6 +508,7 @@ accounting_dimension_doctypes = [
 	"Landed Cost Item",
 	"Asset Value Adjustment",
 	"Asset Repair",
+	"Asset Capitalization",
 	"Loyalty Program",
 	"Stock Reconciliation",
 	"POS Profile",
