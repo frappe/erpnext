@@ -430,7 +430,7 @@ class SalesPurchaseDetailsReport(object):
 			"Contents Qty": "alt_uom_qty",
 			"Transaction Qty": "qty"
 		}
-		return filter_to_field.get(self.filters.qty_field, "stock_qty")
+		return filter_to_field.get(self.filters.qty_field) or "stock_qty"
 
 	def get_conditions(self):
 		conditions = []
@@ -513,7 +513,7 @@ class SalesPurchaseDetailsReport(object):
 				self.filters.project = [d.strip() for d in self.filters.project.split(',') if d]
 
 			if frappe.get_meta(self.filters.doctype + " Item").has_field("project") and frappe.get_meta(self.filters.doctype).has_field("project"):
-				conditions.append("IF(s.project IS NULL or s.project = '', i.project, s.project) in %(project)s")
+				conditions.append("IF(i.project IS NULL or i.project = '', s.project, i.project) in %(project)s")
 			elif frappe.get_meta(self.filters.doctype + " Item").has_field("project"):
 				conditions.append("i.project in %(project)s")
 			elif frappe.get_meta(self.filters.doctype).has_field("project"):

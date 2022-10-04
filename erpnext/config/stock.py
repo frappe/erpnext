@@ -277,34 +277,24 @@ def get_data():
 			"items": [
 				{
 					"type": "report",
-					"is_query_report": False,
-					"name": "Item-wise Price List Rate",
-					"doctype": "Item Price",
-					"onboard": 1,
-				},
-				{
-					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Analytics",
-					"onboard": 1,
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Ordered Items To Be Delivered",
-					"doctype": "Delivery Note"
+					"name": "Sales Order Items To Be Delivered",
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Purchase Order Items To Be Received",
-					"doctype": "Purchase Receipt"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Item Shortage Report",
-					"doctype": "Bin"
+					"name": "Requested Items To Be Transferred",
+					"doctype": "Material Request"
 				},
 			]
 		},
@@ -312,12 +302,6 @@ def get_data():
 			"label": _("Other Reports"),
 			"icon": "fa fa-list",
 			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Requested Items To Be Transferred",
-					"doctype": "Material Request"
-				},
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -356,5 +340,22 @@ def get_data():
 				}
 			]
 		},
-
+		{
+			"label": _("Old Reports"),
+			"icon": "fa fa-table",
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Item Shortage Report",
+					"doctype": "Bin"
+				},
+				{
+					"type": "report",
+					"is_query_report": False,
+					"name": "Item-wise Price List Rate",
+					"doctype": "Item Price",
+				},
+			]
+		},
 	]

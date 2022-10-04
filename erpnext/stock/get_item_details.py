@@ -570,6 +570,9 @@ def get_default_cost_center(item, args, selling_or_buying=None):
 
 
 def get_default_supplier(item, args):
+	if isinstance(item, string_types):
+		item = frappe.get_cached_doc("Item", item)
+
 	default_values = get_item_default_values(item, args)
 	return item.get("default_supplier") or default_values.get("default_supplier")
 

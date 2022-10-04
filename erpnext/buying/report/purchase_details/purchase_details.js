@@ -21,12 +21,6 @@ frappe.query_reports["Purchase Details"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "transaction_type",
-			label: __("Transaction Type"),
-			fieldtype: "Link",
-			options: "Transaction Type"
-		},
-		{
 			fieldname: "qty_field",
 			label: __("Quantity Type"),
 			fieldtype: "Select",
@@ -47,6 +41,12 @@ frappe.query_reports["Purchase Details"] = {
 			fieldtype: "Date",
 			default: frappe.datetime.get_today(),
 			reqd: 1
+		},
+		{
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type"
 		},
 		{
 			fieldname: "supplier",
