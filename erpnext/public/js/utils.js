@@ -703,8 +703,9 @@ erpnext.utils.map_current_doc = function(opts) {
 			callback: function(r) {
 				if(!r.exc) {
 					frappe.model.sync(r.message);
-					if (opts.after_cscript_method) {
-						cur_frm.cscript[opts.after_cscript_method]();
+					if (opts.after_cscript_method_eval) {
+						if (eval(opts.after_cscript_method_eval) && (opts.after_cscript_method))
+							cur_frm.cscript[opts.after_cscript_method]();
 					}
 					cur_frm.dirty();
 					cur_frm.refresh();

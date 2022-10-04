@@ -275,15 +275,28 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 			source_doctype: "Material Request",
 			source_name: this.frm.doc.supplier,
 			target: this.frm,
-			setters: {
-				company: me.frm.doc.company
-			},
+			setters:[
+					{
+						label: "Company",
+						fieldname: "company",
+						fieldtype: "Link",
+						options: "Company",
+						default: me.frm.doc.company
+					},
+					{
+						label: "Apply Price List Rate",
+						fieldname: "apply_price_list",
+						fieldtype: "Check",
+						description: "Rather then material request rate",
+						default: 0
+					}],
 			get_query_filters: {
 				docstatus: ["!=", 2],
 				supplier: this.frm.doc.supplier
 			},
 			get_query_method: "erpnext.stock.doctype.material_request.material_request.get_material_requests_based_on_supplier",
-			after_cscript_method: 'apply_price_list'
+			after_cscript_method_eval: "(opts.get_query_filters.apply_price_list==1);",
+			after_cscript_method:'apply_price_list'
 		});
 	}
 
