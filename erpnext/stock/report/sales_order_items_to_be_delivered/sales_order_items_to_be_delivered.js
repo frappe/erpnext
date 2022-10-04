@@ -13,12 +13,6 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			bold: 1
 		},
 		{
-			fieldname: "transaction_type",
-			label: __("Transaction Type"),
-			fieldtype: "Link",
-			options: "Transaction Type"
-		},
-		{
 			fieldname: "qty_field",
 			label: __("Quantity Type"),
 			fieldtype: "Select",
@@ -27,7 +21,19 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "party_type",
+			fieldname: "name",
+			label: __("Sales Order"),
+			fieldtype: "Link",
+			options: "Sales Order"
+		},
+		{
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type"
+		},
+		{
+			fieldname: "customer",
 			label: __("Customer"),
 			fieldtype: "Link",
 			options: "Customer",
@@ -38,7 +44,7 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			}
 		},
 		{
-			fieldname: "party_group",
+			fieldname: "customer_group",
 			label: __("Customer Group"),
 			fieldtype: "Link",
 			options: "Customer Group"
