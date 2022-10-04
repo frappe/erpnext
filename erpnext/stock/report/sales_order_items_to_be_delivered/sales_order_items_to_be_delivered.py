@@ -11,7 +11,6 @@ from six import iteritems, string_types
 class OrderItemFulfilmentTracker:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or dict())
-		self.filters.company = filters.company or frappe.db.get_single_value('Global Defaults', 'default_company')
 
 	def run(self, doctype):
 		self.filters.doctype = doctype
