@@ -320,41 +320,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Old Reports"),
-			"icon": "fa fa-list",
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person-wise Transaction Summary",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Item-wise Sales History",
-					"doctype": "Item"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Available Stock for Packing Items",
-					"doctype": "Item",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Pending SO Items For Purchase Request",
-					"doctype": "Sales Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Ordered Items To Be Delivered",
-					"doctype": "Sales Order"
-				},
-			]
-		},
-		{
 			"label": _("Settings"),
 			"icon": "fa fa-cog",
 			"items": [
