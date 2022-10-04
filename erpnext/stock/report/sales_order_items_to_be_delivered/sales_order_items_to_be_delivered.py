@@ -170,7 +170,7 @@ class OrderItemFulfilmentTracker:
 				"width": 80
 			},
 			{
-				"label": _("Item"),
+				"label": _("Item Code"),
 				"fieldname": "item_code",
 				"fieldtype": "Link",
 				"options": "Item",
@@ -182,6 +182,13 @@ class OrderItemFulfilmentTracker:
 				"fieldtype": "Link",
 				"options": "Item",
 				"width": 150
+			},
+			{
+				"label": _("Warehouse"),
+				"fieldname": "warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 90
 			},
 			{
 				"label": _("Qty"),
@@ -241,6 +248,12 @@ class OrderItemFulfilmentTracker:
 				"width": 100
 			},
 			{
+				"label": _("Status"),
+				"fieldname": "status",
+				"fieldtype": "Data",
+				"width": 120
+			},
+			{
 				"label": _("Item Group"),
 				"fieldname": "item_group",
 				"fieldtype": "Link",
@@ -253,19 +266,6 @@ class OrderItemFulfilmentTracker:
 				"fieldtype": "Link",
 				"options": "Brand",
 				"width": 60
-			},
-			{
-				"label": _("Warehouse"),
-				"fieldname": "warehouse",
-				"fieldtype": "Link",
-				"options": "Warehouse",
-				"width": 90
-			},
-			{
-				"label": _("Status"),
-				"fieldname": "status",
-				"fieldtype": "Data",
-				"width": 120
 			},
 		]
 
