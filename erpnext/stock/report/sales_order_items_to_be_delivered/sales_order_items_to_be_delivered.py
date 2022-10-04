@@ -155,6 +155,11 @@ class OrderItemFulfilmentTracker:
 			elif frappe.get_meta(self.filters.doctype).has_field("project"):
 				conditions.append("o.project in %(project)s")
 
+		if self.filters.get("warehouse"):
+			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
+			conditions.append("""i.warehouse in (select name from `tabWarehouse`
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
 		return "AND {}".format(" AND ".join(conditions)) if conditions else ""
 
 	def prepare_data(self):

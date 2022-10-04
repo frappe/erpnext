@@ -80,6 +80,17 @@ frappe.query_reports["Purchase Order Items To Be Received"] = {
 			options: "Item Source"
 		},
 		{
+			fieldname: "warehouse",
+			label: __("Warehouse"),
+			fieldtype: "Link",
+			options: "Warehouse",
+			get_query: function() {
+				return {
+					filters: {'company': frappe.query_report.get_filter_value("company")}
+				}
+			},
+		},
+		{
 			"fieldname":"project",
 			"label": __("Project"),
 			"fieldtype": "MultiSelectList",

@@ -117,6 +117,17 @@ frappe.query_reports["Sales Analytics"] = {
 			options: "Item Source"
 		},
 		{
+			fieldname: "warehouse",
+			label: __("Warehouse"),
+			fieldtype: "Link",
+			options: "Warehouse",
+			get_query: function() {
+				return {
+					filters: {'company': frappe.query_report.get_filter_value("company")}
+				}
+			},
+		},,
+		{
 			fieldname: "applies_to_item",
 			label: __("Applies to Item"),
 			fieldtype: "Link",
