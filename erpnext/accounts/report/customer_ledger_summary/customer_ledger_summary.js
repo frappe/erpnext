@@ -9,7 +9,8 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company")
+			"default": frappe.defaults.get_user_default("Company"),
+			"bold": 1,
 		},
 		{
 			"fieldname":"from_date",
