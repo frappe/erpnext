@@ -185,27 +185,27 @@ class Analytics(object):
 			conditions.append("s.company = %(company)s")
 
 		if self.filters.get("customer"):
-			conditions.append("s.customer=%(customer)s")
+			conditions.append("s.customer = %(customer)s")
 
 		if self.filters.get("customer_group"):
 			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
 			conditions.append("""s.customer_group in (select name from `tabCustomer Group`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("supplier"):
-			conditions.append("s.supplier=%(supplier)s")
+			conditions.append("s.supplier = %(supplier)s")
 
 		if self.filters.get("supplier_group"):
 			lft, rgt = frappe.db.get_value("Supplier Group", self.filters.supplier_group, ["lft", "rgt"])
 			conditions.append("""sup.supplier_group in (select name from `tabSupplier Group`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("item_code"):
 			is_template = frappe.db.get_value("Item", self.filters.get('item_code'), 'has_variants')
 			if is_template:
-				conditions.append("im.variant_of=%(item_code)s")
+				conditions.append("im.variant_of = %(item_code)s")
 			else:
-				conditions.append("im.name=%(item_code)s")
+				conditions.append("im.name = %(item_code)s")
 
 		if self.filters.get("applies_to_item"):
 			is_template = frappe.db.get_value("Item", self.filters.get('applies_to_item'), 'has_variants')
@@ -219,26 +219,26 @@ class Analytics(object):
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
 			conditions.append("""im.item_group in (select name from `tabItem Group`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("brand"):
-			conditions.append("im.brand=%(brand)s")
+			conditions.append("im.brand = %(brand)s")
 
 		if self.filters.get("item_source"):
-			conditions.append("im.item_source=%(item_source)s")
+			conditions.append("im.item_source = %(item_source)s")
 
 		if self.filters.get("territory"):
 			lft, rgt = frappe.db.get_value("Territory", self.filters.territory, ["lft", "rgt"])
 			conditions.append("""s.territory in (select name from `tabTerritory`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
-					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("order_type"):
-			conditions.append("s.order_type=%(order_type)s")
+			conditions.append("s.order_type = %(order_type)s")
 
 		if self.filters.get("transaction_type"):
 			conditions.append("s.transaction_type = %(transaction_type)s")

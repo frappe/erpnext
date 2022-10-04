@@ -118,21 +118,13 @@ class OrderItemFulfilmentTracker:
 
 		if self.filters.customer_group:
 			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
-			conditions.append("""
-				cus.customer_group IN (
-					SELECT name
-					FROM `tabCustomer Group`
-					WHERE lft>={0} AND rgt<={1} AND docstatus<2)
-				""".format(lft, rgt))
+			conditions.append("""cus.customer_group IN (SELECT name FROM `tabCustomer Group`
+				WHERE lft >= {0} AND rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.supplier_group:
 			lft, rgt = frappe.db.get_value("Supplier Group", self.filters.supplier_group, ["lft", "rgt"])
-			conditions.append("""
-				sup.supplier_group IN (
-					SELECT name
-					FROM `tabSupplier Group`
-					WHERE lft>={0} AND rgt<={1} AND docstatus<2)
-				""".format(lft, rgt))
+			conditions.append("""sup.supplier_group IN (SELECT name FROM `tabSupplier Group`
+				WHERE lft >= {0} AND rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.item_code:
 			if frappe.db.get_value("Item", self.filters.item_code, 'has_variants'):
@@ -142,11 +134,8 @@ class OrderItemFulfilmentTracker:
 
 		if self.filters.item_group:
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
-			conditions.append("""
-				im.item_group IN (
-					SELECT name
-					FROM `tabItem Group`
-					WHERE lft>=%s AND rgt<=%s AND docstatus<2)""" % (lft, rgt))
+			conditions.append("""im.item_group IN (SELECT name FROM `tabItem Group`
+				WHERE lft >= {0} AND rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.brand:
 			conditions.append("im.brand = %(brand)s")
