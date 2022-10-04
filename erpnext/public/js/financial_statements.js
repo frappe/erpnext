@@ -77,7 +77,7 @@ erpnext.financial_statements = {
 					"project": (project && project.length > 0) ? project[0].$input.val() : ""
 				};
 			}
-		frappe.set_route("query-report", report);
+	frappe.set_route("query-report", report);
 	},
 	"tree": true,
 	"name_field": "account",
