@@ -8,6 +8,7 @@ from frappe.utils import getdate, nowdate, flt, cint, cstr
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_accounts
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data
+from erpnext import get_default_currency
 from six import iteritems, string_types
 
 
@@ -24,8 +25,10 @@ class SalesPurchaseDetailsReport(object):
 		self.date_field = 'transaction_date' \
 			if self.filters.doctype in ['Sales Order', 'Purchase Order'] else 'posting_date'
 
-		company = self.filters.get('company') or frappe.db.get_single_value('Global Defaults', 'default_company')
-		self.company_currency = frappe.get_cached_value('Company', company, "default_currency") if company else None
+		if self.filters.get('company'):
+			self.company_currency = frappe.get_cached_value('Company', self.filters.get("company"), "default_currency")
+		else:
+			self.company_currency = get_default_currency()
 
 		self.amount_fields = []
 		self.rate_fields = []
