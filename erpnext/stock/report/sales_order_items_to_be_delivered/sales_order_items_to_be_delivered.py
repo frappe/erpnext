@@ -5,11 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, cstr, getdate
-from six import iteritems, string_types
+from six import string_types
 
 
 def execute(filters=None):
 	return OrderItemFulfilmentTracker(filters).run("Sales Order")
+
 
 class OrderItemFulfilmentTracker:
 	def __init__(self, filters=None):
@@ -26,11 +27,11 @@ class OrderItemFulfilmentTracker:
 		if self.filters.party_type == "Supplier":
 			self.show_party_name = frappe.defaults.get_global_default('supp_master_name') == "Naming Series"
 
-		self.get_columns()
+		columns = self.get_columns()
 		self.get_data()
 		self.prepare_data()
 
-		return self.columns, self.data
+		return columns, self.data
 
 	def get_data(self):
 		fieldnames = self.get_fieldnames()
@@ -42,35 +43,43 @@ class OrderItemFulfilmentTracker:
 		elif self.filters.party_type == "Supplier":
 			party_join = "inner join `tabSupplier` sup on sup.name = o.supplier"
 
-		orders = frappe.db.sql("""
+		sales_person_field = ""
+		sales_person_join = ""
+		if self.filters.party_type == "Customer":
+			sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person"
+			sales_person_join = "left join `tabSales Team` sp on sp.parent = o.name and sp.parenttype = %(doctype)s"
+
+		self.data = frappe.db.sql("""
 			SELECT
-				o.name, o.company, o.status, o.transaction_date, o.{schedule_date_field} as schedule_date,
+				o.name, o.company, o.status, o.transaction_date, i.{schedule_date_field} as schedule_date,
 				o.{party_field} as party, o.{party_name_field} as party_name, o.project, o.currency,
 				i.item_code, i.item_name, i.warehouse,
 				i.{qty_field} as qty, i.{completed_qty_field} as completed_qty,
 				i.rate, i.amount,
 				i.uom, i.stock_uom, i.alt_uom,
-				i.brand, i.item_group
+				i.brand, i.item_group {sales_person_field}
 			FROM `tab{doctype}` o
 			INNER JOIN `tab{doctype} Item` i ON i.parent = o.name
 			INNER JOIN `tabItem` im on im.name = i.item_code
 			{party_join}
+			{sales_person_join}
 			WHERE
 				o.docstatus = 1 AND o.status != 'Closed' AND i.{completed_qty_field} < i.qty AND im.is_stock_item = 1
 				{conditions}
+			GROUP BY o.name, i.name
 			ORDER BY o.transaction_date, o.creation
 		""".format(
-				party_field=fieldnames.party,
-				party_name_field=fieldnames.party_name,
-				schedule_date_field=fieldnames.schedule_date,
-				qty_field=fieldnames.qty,
-				completed_qty_field=fieldnames.completed_qty,
-				doctype=self.filters.doctype,
-				party_join=party_join,
-				conditions=conditions
-			), self.filters, as_dict=1)
-
-		self.data = orders
+			party_field=fieldnames.party,
+			party_name_field=fieldnames.party_name,
+			schedule_date_field=fieldnames.schedule_date,
+			qty_field=fieldnames.qty,
+			completed_qty_field=fieldnames.completed_qty,
+			doctype=self.filters.doctype,
+			sales_person_field=sales_person_field,
+			party_join=party_join,
+			sales_person_join=sales_person_join,
+			conditions=conditions,
+		), self.filters, as_dict=1)
 
 	def get_fieldnames(self):
 		fields = frappe._dict({})
@@ -126,6 +135,16 @@ class OrderItemFulfilmentTracker:
 			conditions.append("""sup.supplier_group IN (SELECT name FROM `tabSupplier Group`
 				WHERE lft >= {0} AND rgt <= {1})""".format(lft, rgt))
 
+		if self.filters.get("territory"):
+			lft, rgt = frappe.db.get_value("Territory", self.filters.territory, ["lft", "rgt"])
+			conditions.append("""o.territory in (select name from `tabTerritory`
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
+		if self.filters.get("sales_person"):
+			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
+			conditions.append("""sp.sales_person in (select name from `tabSales Person`
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
 		if self.filters.item_code:
 			if frappe.db.get_value("Item", self.filters.item_code, 'has_variants'):
 				conditions.append("im.variant_of = %(item_code)s")
@@ -179,7 +198,7 @@ class OrderItemFulfilmentTracker:
 			d["remaining_qty"] = d["qty"] - d["completed_qty"]
 			d["actual_qty"] = flt(stock_qty_map.get((d.item_code, d.warehouse)))
 
-			d["delay_days"] = max((getdate() - d["schedule_date"]).days, 0)
+			d["delay_days"] = max((getdate() - getdate(d["schedule_date"])).days, 0)
 
 			d["disable_item_formatter"] = cint(self.show_item_name)
 			d["disable_party_name_formatter"] = cint(self.show_party_name)
@@ -202,7 +221,6 @@ class OrderItemFulfilmentTracker:
 			stock_qty_map[key] = d.actual_qty
 
 		return stock_qty_map
-
 
 	def get_columns(self):
 		columns = [
@@ -284,18 +302,10 @@ class OrderItemFulfilmentTracker:
 				"width": 80
 			},
 			{
-				"label": _("Rate"),
-				"fieldname": "rate",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
-			},
-			{
-				"label": _("Amount"),
-				"fieldname": "amount",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
+				"label": _("Sales Person"),
+				"fieldtype": "Data",
+				"fieldname": "sales_person",
+				"width": 150
 			},
 			{
 				"label": _("Scheduled Date"),
@@ -323,6 +333,20 @@ class OrderItemFulfilmentTracker:
 				"width": 120
 			},
 			{
+				"label": _("Rate"),
+				"fieldname": "rate",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
+				"label": _("Amount"),
+				"fieldname": "amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
 				"label": _("Item Group"),
 				"fieldname": "item_group",
 				"fieldtype": "Link",
@@ -344,5 +368,7 @@ class OrderItemFulfilmentTracker:
 		if not self.show_party_name:
 			columns = [c for c in columns if c['fieldname'] != 'party_name']
 
-		self.columns = columns
-		return self.columns
+		if self.filters.party_type != "Customer":
+			columns = [c for c in columns if c['fieldname'] != 'sales_person']
+
+		return columns

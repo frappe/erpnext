@@ -99,7 +99,19 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 					company: frappe.query_report.get_filter_value("company")
 				});
 			}
-		}
+		},
+		{
+			fieldname: "territory",
+			label: __("Territory"),
+			fieldtype: "Link",
+			options: "Territory"
+		},
+		{
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "Link",
+			options: "Sales Person"
+		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
