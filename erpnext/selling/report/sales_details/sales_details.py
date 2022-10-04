@@ -92,7 +92,11 @@ class SalesPurchaseDetailsReport(object):
 		bill_no_field = ", s.bill_no" if frappe.get_meta(self.filters.doctype).has_field('bill_no') else ""
 		bill_date_field = ", s.bill_date" if frappe.get_meta(self.filters.doctype).has_field('bill_date') else ""
 
-		supplier_join = "inner join `tabSupplier` sup on sup.name = s.supplier" if self.filters.party_type == "Supplier" else ""
+		party_join = ""
+		if self.filters.party_type == "Customer":
+			party_join = "inner join `tabCustomer` cus on cus.name = s.customer"
+		elif self.filters.party_type == "Supplier":
+			party_join = "inner join `tabSupplier` sup on sup.name = s.supplier"
 
 		territory_field = ", s.territory" if self.filters.party_type == "Customer" else ""
 
@@ -106,7 +110,7 @@ class SalesPurchaseDetailsReport(object):
 		parent_project_field = ", s.project as parent_project" if frappe.get_meta(self.filters.doctype).has_field("project")\
 			else ""
 
-		party_group_field = ", s.customer_group as party_group, 'Customer Group' as party_group_dt" if self.filters.party_type == "Customer"\
+		party_group_field = ", cus.customer_group as party_group, 'Customer Group' as party_group_dt" if self.filters.party_type == "Customer"\
 			else ", sup.supplier_group as party_group, 'Supplier Group' as party_group_dt"
 
 		is_opening_condition = "and s.is_opening != 'Yes'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
@@ -134,7 +138,7 @@ class SalesPurchaseDetailsReport(object):
 			from `tab{doctype} Item` i
 			inner join `tab{doctype}` s on i.parent = s.name
 			left join `tabItem` im on im.name = i.item_code
-			{supplier_join}
+			{party_join}
 			{sales_person_join}
 			where s.docstatus = 1
 				and s.{date_field} between %(from_date)s and %(to_date)s
@@ -160,7 +164,7 @@ class SalesPurchaseDetailsReport(object):
 			parent_cost_center_field=parent_cost_center_field,
 			item_project_field=item_project_field,
 			parent_project_field=parent_project_field,
-			supplier_join=supplier_join,
+			party_join=party_join,
 			is_opening_condition=is_opening_condition,
 			filter_conditions=filter_conditions
 		), self.filters, as_dict=1)
@@ -173,7 +177,7 @@ class SalesPurchaseDetailsReport(object):
 				from `tab{doctype} Item` i
 				inner join `tab{doctype}` s on i.parent = s.name
 				left join `tabItem` im on im.name = i.item_code
-				{supplier_join}
+				{party_join}
 				{sales_person_join}
 				where s.docstatus = 1
 					and sp.parent = s.name and sp.parenttype = %(doctype)s
@@ -186,7 +190,7 @@ class SalesPurchaseDetailsReport(object):
 				doctype=self.filters.doctype,
 				sales_person_field=sales_person_field,
 				sales_person_join=sales_person_join,
-				supplier_join=supplier_join,
+				party_join=party_join,
 				is_opening_condition=is_opening_condition,
 				filter_conditions=filter_conditions
 			), self.filters, as_dict=1)
@@ -443,7 +447,7 @@ class SalesPurchaseDetailsReport(object):
 
 		if self.filters.get("customer_group"):
 			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
-			conditions.append("""s.customer_group in (select name from `tabCustomer Group`
+			conditions.append("""cus.customer_group in (select name from `tabCustomer Group`
 				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("supplier"):

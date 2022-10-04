@@ -10,8 +10,10 @@ from erpnext.accounts.report.financial_statements import get_cost_centers_with_c
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_default_currency
 
+
 def execute(filters=None):
 	return Analytics(filters).run()
+
 
 class Analytics(object):
 	def __init__(self, filters=None):
@@ -21,6 +23,9 @@ class Analytics(object):
 		self.months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 		self.get_period_date_ranges()
 		self.entity_names = {}
+
+		self.filters.party_type = "Customer" if self.filters.doctype in ['Sales Order', 'Delivery Note', 'Sales Invoice']\
+			else "Supplier"
 
 	def run(self):
 		self.get_columns()
@@ -98,7 +103,7 @@ class Analytics(object):
 
 		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory", "Item Group", "Sales Person"]:
 			if self.filters.tree_type == 'Customer Group':
-				entity_field = "s.customer_group"
+				entity_field = "cus.customer_group"
 			elif self.filters.tree_type == 'Supplier Group':
 				entity_field = "sup.supplier_group"
 			elif self.filters.tree_type == 'Territory':
@@ -116,8 +121,11 @@ class Analytics(object):
 		sales_team_join = "left join `tabSales Team` sp on sp.parent = s.name and sp.parenttype = %(doctype)s" \
 			if include_sales_person else ""
 
-		include_supplier = self.filters.tree_type == "Supplier Group" or self.filters.supplier_group
-		supplier_join = "inner join `tabSupplier` sup on sup.name = s.supplier" if include_supplier else ""
+		party_join = ""
+		if self.filters.party_type == "Customer":
+			party_join = "inner join `tabCustomer` cus on cus.name = s.customer"
+		elif self.filters.party_type == "Supplier":
+			party_join = "inner join `tabSupplier` sup on sup.name = s.supplier"
 
 		is_opening_condition = "and s.is_opening != 'Yes'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
 			else ""
@@ -137,7 +145,7 @@ class Analytics(object):
 			from `tab{doctype} Item` i
 			inner join `tab{doctype}` s on i.parent = s.name
 			left join `tabItem` im on im.name = i.item_code
-			{supplier_join}
+			{party_join}
 			{sales_team_join}
 			where s.docstatus = 1
 				and s.{date_field} between %(from_date)s and %(to_date)s
@@ -149,7 +157,7 @@ class Analytics(object):
 			date_field=self.date_field,
 			doctype=self.filters.doctype,
 			sales_team_join=sales_team_join,
-			supplier_join=supplier_join,
+			party_join=party_join,
 			is_opening_condition=is_opening_condition,
 			filter_conditions=self.get_conditions()
 		), self.filters, as_dict=1)
@@ -189,7 +197,7 @@ class Analytics(object):
 
 		if self.filters.get("customer_group"):
 			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
-			conditions.append("""s.customer_group in (select name from `tabCustomer Group`
+			conditions.append("""cus.customer_group in (select name from `tabCustomer Group`
 				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.get("supplier"):
