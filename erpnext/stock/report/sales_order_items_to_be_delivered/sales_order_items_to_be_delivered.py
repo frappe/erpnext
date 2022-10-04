@@ -59,7 +59,7 @@ class OrderItemFulfilmentTracker:
 				from `tabBin`
 				where (item_code, warehouse) in %s
 				group by item_code, warehouse
-			""", [item_warehouse_list], as_dict=1,debug=1)
+			""", [item_warehouse_list], as_dict=1)
 
 		stock_qty_map = {}
 		for d in stock_qty_data:
