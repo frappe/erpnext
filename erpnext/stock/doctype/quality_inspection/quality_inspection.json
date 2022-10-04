@@ -10,6 +10,7 @@
   "naming_series",
   "report_date",
   "status",
+  "manual_inspection",
   "column_break_4",
   "inspection_type",
   "reference_type",
@@ -231,6 +232,12 @@
    "label": "Status",
    "options": "\nAccepted\nRejected",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_inspection",
+   "fieldtype": "Check",
+   "label": "Manual Inspection"
   }
  ],
  "icon": "fa fa-search",
@@ -238,10 +245,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-18 19:59:55.710300",
+ "modified": "2022-10-04 22:00:13.995221",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -262,5 +270,6 @@
  "search_fields": "item_code, report_date, reference_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }
