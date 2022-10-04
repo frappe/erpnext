@@ -222,14 +222,18 @@ def get_data():
 					"is_query_report": True,
 					"name": "Procurement Tracker",
 					"reference_doctype": "Purchase Order",
-					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Purchase Order Items To Be Received",
+					"reference_doctype": "Purchase Order",
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Requested Items To Be Ordered",
 					"reference_doctype": "Material Request",
-					"onboard": 1,
 				},
 			]
 		},
