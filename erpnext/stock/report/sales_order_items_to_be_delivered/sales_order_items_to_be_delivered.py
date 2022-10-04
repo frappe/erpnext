@@ -17,7 +17,7 @@ class OrderItemFulfilmentTracker:
 
 	def run(self, doctype):
 		self.filters.doctype = doctype
-		self.filters.party_type = "Customer" if doctype == "Sales Order" else "Purchase Order"
+		self.filters.party_type = "Customer" if doctype == "Sales Order" else "Supplier"
 		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
 		self.show_party_name = False
@@ -313,7 +313,7 @@ class OrderItemFulfilmentTracker:
 				"label": _("Delay Days"),
 				"fieldname": "delay_days",
 				"fieldtype": "Int",
-				"width": 90
+				"width": 85
 			},
 			{
 				"label": _("Project"),

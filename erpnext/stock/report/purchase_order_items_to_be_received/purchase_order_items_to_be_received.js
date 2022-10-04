@@ -89,5 +89,28 @@ frappe.query_reports["Purchase Order Items To Be Received"] = {
 				});
 			}
 		}
-	]
+	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (column.fieldname == "remaining_qty") {
+			style['font-weight'] = 'bold';
+		}
+
+		if (column.fieldname == "actual_qty") {
+			if (flt(value) <= 0) {
+				style['color'] = 'red';
+			} else if (data && flt(value) < flt(data.remaining_qty)) {
+				style['color'] = 'orange';
+			}
+		}
+
+		if (column.fieldname == "delay_days") {
+			if (flt(value) > 0) {
+				style['color'] = 'red';
+			}
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
 }
