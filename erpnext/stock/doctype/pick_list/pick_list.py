@@ -183,7 +183,7 @@ class PickList(Document):
 				frappe.throw("Row #{0}: Item Code is Mandatory".format(item.idx))
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
-			key = (item_code, item.uom, reference)
+			key = (item_code, item.uom, item.warehouse, item.batch_no, reference)
 
 			item.idx = None
 			item.name = None

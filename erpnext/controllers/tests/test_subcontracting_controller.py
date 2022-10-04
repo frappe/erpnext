@@ -897,7 +897,7 @@ def make_stock_transfer_entry(**args):
 			"item_name": row.item_code,
 			"rate": row.rate or 100,
 			"stock_uom": row.stock_uom or "Nos",
-			"warehouse": row.warehuose or "_Test Warehouse - _TC",
+			"warehouse": row.warehouse or "_Test Warehouse - _TC",
 		}
 
 		item_details = args.itemwise_details.get(row.item_code)
@@ -1031,9 +1031,9 @@ def get_subcontracting_order(**args):
 	if not args.service_items:
 		service_items = [
 			{
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"item_code": "Subcontracted Service Item 7",
-				"qty": 5,
+				"qty": 10,
 				"rate": 100,
 				"fg_item": "Subcontracted Item SA7",
 				"fg_item_qty": 10,
@@ -1046,6 +1046,7 @@ def get_subcontracting_order(**args):
 		rm_items=service_items,
 		is_subcontracted=1,
 		supplier_warehouse=args.supplier_warehouse or "_Test Warehouse 1 - _TC",
+		company=args.company,
 	)
 
 	return create_subcontracting_order(po_name=po.name, **args)

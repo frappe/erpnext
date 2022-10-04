@@ -10,6 +10,9 @@ frappe.listview_settings['Asset'] = {
 		} else if (doc.status === "Sold") {
 			return [__("Sold"), "green", "status,=,Sold"];
 
+		} else if (["Capitalized", "Decapitalized"].includes(doc.status)) {
+			return [__(doc.status), "grey", "status,=," + doc.status];
+
 		} else if (doc.status === "Scrapped") {
 			return [__("Scrapped"), "grey", "status,=,Scrapped"];
 

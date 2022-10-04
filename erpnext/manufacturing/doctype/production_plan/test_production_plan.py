@@ -12,6 +12,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 )
 from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_se_from_wo
+from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -280,6 +281,31 @@ class TestProductionPlan(FrappeTestCase):
 
 		pln.reload()
 		pln.cancel()
+
+	def test_production_plan_subassembly_default_supplier(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree_1 = {"Test Laptop": {"Test Motherboard": {"Test Motherboard Wires": {}}}}
+		bom = create_nested_bom(bom_tree_1, prefix="")
+
+		item_doc = frappe.get_doc("Item", "Test Motherboard")
+		company = "_Test Company"
+
+		item_doc.is_sub_contracted_item = 1
+		for row in item_doc.item_defaults:
+			if row.company == company and not row.default_supplier:
+				row.default_supplier = "_Test Supplier"
+
+		if not item_doc.item_defaults:
+			item_doc.append("item_defaults", {"company": company, "default_supplier": "_Test Supplier"})
+
+		item_doc.save()
+
+		plan = create_production_plan(item_code="Test Laptop", use_multi_level_bom=1, do_not_submit=True)
+		plan.get_sub_assembly_items()
+		plan.set_default_supplier_for_subcontracting_order()
+
+		self.assertEqual(plan.sub_assembly_items[0].supplier, "_Test Supplier")
 
 	def test_production_plan_combine_subassembly(self):
 		"""
@@ -585,15 +611,21 @@ class TestProductionPlan(FrappeTestCase):
 		"""
 		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
+		make_stock_entry(item_code="_Test Item", target="Work In Progress - _TC", qty=2, basic_rate=100)
 		make_stock_entry(
-			item_code="Raw Material Item 1", target="Work In Progress - _TC", qty=2, basic_rate=100
-		)
-		make_stock_entry(
-			item_code="Raw Material Item 2", target="Work In Progress - _TC", qty=2, basic_rate=100
+			item_code="_Test Item Home Desktop 100", target="Work In Progress - _TC", qty=4, basic_rate=100
 		)
 
-		item = "Test Production Item 1"
-		so = make_sales_order(item_code=item, qty=1)
+		item = "_Test FG Item"
+
+		make_stock_entry(item_code=item, target="_Test Warehouse - _TC", qty=1)
+
+		so = make_sales_order(item_code=item, qty=2)
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].qty = 1
+		dn.save()
+		dn.submit()
 
 		pln = create_production_plan(
 			company=so.company, get_items_from="Sales Order", sales_order=so, skip_getting_mr_items=True

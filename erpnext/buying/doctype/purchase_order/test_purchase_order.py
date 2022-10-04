@@ -7,8 +7,10 @@ import json
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, getdate, nowdate
+from frappe.utils.data import today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.buying.doctype.purchase_order.purchase_order import make_inter_company_sales_order
 from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
 )
@@ -796,6 +798,111 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_internal_transfer_flow(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+			make_inter_company_purchase_invoice,
+		)
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_delivery_note,
+			make_sales_invoice,
+		)
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+
+		frappe.db.set_value("Selling Settings", None, "maintain_same_sales_rate", 1)
+		frappe.db.set_value("Buying Settings", None, "maintain_same_rate", 1)
+
+		prepare_data_for_internal_transfer()
+		supplier = "_Test Internal Supplier 2"
+
+		po = create_purchase_order(
+			company="_Test Company with perpetual inventory",
+			supplier=supplier,
+			warehouse="Stores - TCP1",
+			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
+			qty=2,
+			rate=1,
+		)
+
+		so = make_inter_company_sales_order(po.name)
+		so.items[0].delivery_date = today()
+		self.assertEqual(so.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
+		self.assertTrue(so.items[0].purchase_order)
+		self.assertTrue(so.items[0].purchase_order_item)
+		so.submit()
+
+		dn = make_delivery_note(so.name)
+		dn.items[0].target_warehouse = "_Test Internal Warehouse GIT - TCP1"
+		self.assertEqual(dn.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
+		self.assertTrue(dn.items[0].purchase_order)
+		self.assertTrue(dn.items[0].purchase_order_item)
+
+		self.assertEqual(po.items[0].name, dn.items[0].purchase_order_item)
+		dn.submit()
+
+		pr = make_inter_company_purchase_receipt(dn.name)
+		self.assertEqual(pr.items[0].warehouse, "Stores - TCP1")
+		self.assertTrue(pr.items[0].purchase_order)
+		self.assertTrue(pr.items[0].purchase_order_item)
+		self.assertEqual(po.items[0].name, pr.items[0].purchase_order_item)
+		pr.submit()
+
+		si = make_sales_invoice(so.name)
+		self.assertEqual(si.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
+		self.assertTrue(si.items[0].purchase_order)
+		self.assertTrue(si.items[0].purchase_order_item)
+		si.submit()
+
+		pi = make_inter_company_purchase_invoice(si.name)
+		self.assertTrue(pi.items[0].purchase_order)
+		self.assertTrue(pi.items[0].po_detail)
+		pi.submit()
+
+		po.load_from_db()
+		self.assertEqual(po.status, "Completed")
+
+
+def prepare_data_for_internal_transfer():
+	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+	from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+	company = "_Test Company with perpetual inventory"
+
+	create_internal_customer(
+		"_Test Internal Customer 2",
+		company,
+		company,
+	)
+
+	create_internal_supplier(
+		"_Test Internal Supplier 2",
+		company,
+		company,
+	)
+
+	warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
+
+	create_warehouse("_Test Internal Warehouse GIT", company=company)
+
+	make_purchase_receipt(company=company, warehouse=warehouse, qty=2, rate=100)
+
+	if not frappe.db.get_value("Company", company, "unrealized_profit_loss_account"):
+		account = "Unrealized Profit and Loss - TCP1"
+		if not frappe.db.exists("Account", account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "Unrealized Profit and Loss",
+					"parent_account": "Direct Income - TCP1",
+					"company": company,
+					"is_group": 0,
+					"account_type": "Income Account",
+				}
+			).insert()
+
+		frappe.db.set_value("Company", company, "unrealized_profit_loss_account", account)
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
@@ -847,6 +954,7 @@ def create_purchase_order(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"from_warehouse": args.from_warehouse,
 				"qty": args.qty or 10,
 				"rate": args.rate or 500,
 				"schedule_date": add_days(nowdate(), 1),

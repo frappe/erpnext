@@ -24,7 +24,8 @@ frappe.ui.form.on('Repost Item Valuation', {
 			frm.set_query("voucher_no", () => {
 				return {
 					filters: {
-						company: frm.doc.company
+						company: frm.doc.company,
+						docstatus: 1
 					}
 				};
 			});
@@ -57,6 +58,21 @@ frappe.ui.form.on('Repost Item Valuation', {
 		}
 
 		frm.trigger('show_reposting_progress');
+
+		if (frm.doc.status === 'Queued' && frm.doc.docstatus === 1) {
+			frm.trigger('execute_reposting');
+		}
+	},
+
+	execute_reposting(frm) {
+		frm.add_custom_button(__("Start Reposting"), () => {
+			frappe.call({
+				method: 'erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.execute_repost_item_valuation',
+				callback: function() {
+					frappe.msgprint(__('Reposting has been started in the background.'));
+				}
+			});
+		});
 	},
 
 	show_reposting_progress: function(frm) {

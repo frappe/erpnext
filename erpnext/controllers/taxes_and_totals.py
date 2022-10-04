@@ -41,6 +41,7 @@ class calculate_taxes_and_totals(object):
 		if self.doc.apply_discount_on == "Grand Total" and self.doc.get("is_cash_or_non_trade_discount"):
 			self.doc.grand_total -= self.doc.discount_amount
 			self.doc.base_grand_total -= self.doc.base_discount_amount
+			self.set_rounded_total()
 
 		self.calculate_shipping_charges()
 
@@ -768,6 +769,18 @@ class calculate_taxes_and_totals(object):
 				total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"),
 			)
+
+			if (
+				self.doc.doctype == "Sales Invoice"
+				and self.doc.get("is_pos")
+				and self.doc.get("pos_profile")
+				and self.doc.get("is_consolidated")
+			):
+				write_off_limit = flt(
+					frappe.db.get_value("POS Profile", self.doc.pos_profile, "write_off_limit")
+				)
+				if write_off_limit and abs(self.doc.outstanding_amount) <= write_off_limit:
+					self.doc.write_off_outstanding_amount_automatically = 1
 
 			if (
 				self.doc.doctype == "Sales Invoice"

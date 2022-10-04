@@ -226,7 +226,7 @@ $.extend(erpnext.utils, {
 						if (!found) {
 							filters.splice(index, 0, {
 								"fieldname": dimension["fieldname"],
-								"label": __(dimension["label"]),
+								"label": __(dimension["doctype"]),
 								"fieldtype": "MultiSelectList",
 								get_data: function(txt) {
 									return frappe.db.get_link_options(dimension["doctype"], txt);

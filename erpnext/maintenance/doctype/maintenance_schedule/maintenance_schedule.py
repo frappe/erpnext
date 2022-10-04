@@ -415,7 +415,7 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 			},
 			"Maintenance Schedule Item": {
 				"doctype": "Maintenance Visit Purpose",
-				"condition": lambda doc: doc.item_name == item_name,
+				"condition": lambda doc: doc.item_name == item_name if item_name else True,
 				"field_map": {"sales_person": "service_person"},
 				"postprocess": update_serial,
 			},

@@ -71,6 +71,9 @@ class TransactionBase(StatusUpdater):
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 	def validate_rate_with_reference_doc(self, ref_details):
+		if self.get("is_internal_supplier"):
+			return
+
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
 
 		if self.doctype in buying_doctypes:

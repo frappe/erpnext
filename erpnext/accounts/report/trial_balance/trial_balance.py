@@ -172,6 +172,7 @@ def get_rootwise_opening_balances(filters, report_type):
 	query_filters = {
 		"company": filters.company,
 		"from_date": filters.from_date,
+		"to_date": filters.to_date,
 		"report_type": report_type,
 		"year_start_date": filters.year_start_date,
 		"project": filters.project,
@@ -200,7 +201,7 @@ def get_rootwise_opening_balances(filters, report_type):
 		where
 			company=%(company)s
 			{additional_conditions}
-			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
+			and (posting_date < %(from_date)s or (ifnull(is_opening, 'No') = 'Yes' and posting_date <= %(to_date)s))
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
 			and is_cancelled = 0
 		group by account""".format(
