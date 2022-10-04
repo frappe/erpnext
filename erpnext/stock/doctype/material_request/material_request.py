@@ -465,7 +465,7 @@ def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filte
 		if default_supplier not in suppliers:
 			suppliers.append(default_supplier)
 
-	return [[d] for d in suppliers]
+	return [[d] for d in suppliers if d]
 
 
 @frappe.whitelist()

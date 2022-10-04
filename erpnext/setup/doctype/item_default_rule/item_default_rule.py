@@ -196,6 +196,8 @@ def get_filters_dict(item, transaction=None):
 
 	if isinstance(item, string_types):
 		item = frappe.get_cached_doc("Item", item)
+	if isinstance(transaction, Document):
+		transaction = transaction.as_dict()
 
 	filters = frappe._dict()
 	for f in item_filter_fields:
