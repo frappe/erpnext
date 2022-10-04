@@ -160,7 +160,7 @@ class TestQualityInspection(FrappeTestCase):
 		)
 
 		readings = [
-			{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "0.4"}
+			{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "1.0"}
 		]
 
 		qa = create_quality_inspection(
