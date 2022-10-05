@@ -60,7 +60,7 @@ def get_level():
 	if frappe.db.get_single_value("System Settings", "setup_complete"):
 		activation_level += 1
 
-	communication_number = frappe.db.count("Communication", dict(communication_medium="Email"))
+	communication_number = frappe.db.count("Communication", dict(communication_medium="Email", creation=("between", (add_to_date(now(), hours=-24), now()))))
 	if communication_number > 10:
 		activation_level += 1
 	sales_data.append({"Communication": communication_number})
