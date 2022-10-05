@@ -131,7 +131,7 @@ def get_sales_person_from_user():
 
 
 @frappe.whitelist()
-def get_sales_person_commission_details(sales_person):
+def get_sales_person_commission_details(sales_person=None):
 	out = frappe._dict()
 
 	if sales_person:
