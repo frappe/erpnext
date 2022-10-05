@@ -173,8 +173,8 @@ frappe.ui.form.on("Journal Entry", {
 var update_jv_details = function(doc, r) {
 	$.each(r, function(i, d) {
 		var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
-		row.account = d.account;
-		row.balance = d.balance;
+		frappe.model.set_value(row.doctype, row.name, "account", d.account)
+		frappe.model.set_value(row.doctype, row.name, "balance", d.balance)
 	});
 	refresh_field("accounts");
 }
