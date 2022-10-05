@@ -55,12 +55,13 @@ frappe.ui.form.on('Loan', {
 
 	make_jv: function (frm) {
 		var loan_amount=0
-		if(frm.doc.loan_settlement_type && frm.doc.loan_settlement_type == "Loan Enhancement"){
-			loan_amount = frm.doc.total_settlement_amount
-		}
-		else{
-			loan_amount = frm.doc.loan_amount
-		}
+		loan_amount = frm.doc.loan_amount
+		// if(frm.doc.loan_settlement_type && frm.doc.loan_settlement_type == "Loan Enhancement"){
+		// 	loan_amount = frm.doc.total_settlement_amount
+		// }
+		// else{
+		// 	loan_amount = frm.doc.loan_amount
+		// }
 		frappe.call({
 			args: {
 				"loan": frm.doc.name,
