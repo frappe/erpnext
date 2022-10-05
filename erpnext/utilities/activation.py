@@ -8,6 +8,8 @@ from frappe.utils import add_to_date, now
 
 import erpnext
 
+last_24hrs = add_to_date(now(), hours=-24)
+
 
 def get_level():
 	activation_level = 0
@@ -47,20 +49,15 @@ def get_level():
 		if new_records > min_count:
 			activation_level += 1
 		prev_count = count - new_records
-		records.append(
-			{
-				doctype: {
-					"new_records": new_records,
-					"prev_count": prev_count
-				}
-			}
-		)
+		records.append({doctype: {"new_records": new_records, "prev_count": prev_count}})
 		sales_data.append({doctype: count})
 
 	if frappe.db.get_single_value("System Settings", "setup_complete"):
 		activation_level += 1
 
-	communication_number = frappe.db.count("Communication", dict(communication_medium="Email", creation=("between", (add_to_date(now(), hours=-24), now()))))
+	communication_number = frappe.db.count(
+		"Communication", dict(communication_medium="Email", creation=("between", (last_24hrs, now())))
+	)
 	if communication_number > 10:
 		activation_level += 1
 	sales_data.append({"Communication": communication_number})
@@ -77,7 +74,8 @@ def get_level():
 
 
 def get_new_records(doctype):
-	return frappe.db.count(doctype, dict(creation=("between", (add_to_date(now(), hours=-24), now()))))
+	return frappe.db.count(doctype, dict(creation=("between", (last_24hrs, now()))))
+
 
 def get_help_messages():
 	"""Returns help messages to be shown on Desktop"""
