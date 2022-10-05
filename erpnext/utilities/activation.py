@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import add_to_date, now
 
 import erpnext
 
@@ -39,10 +40,21 @@ def get_level():
 		"Work Order": 5,
 	}
 
+	records = []
 	for doctype, min_count in doctypes.items():
 		count = frappe.db.count(doctype)
-		if count > min_count:
+		new_records = get_new_records(doctype)
+		if new_records > min_count:
 			activation_level += 1
+		prev_count = count - new_records
+		records.append(
+			{
+				doctype: {
+					"new_records": new_records,
+					"prev_count": prev_count
+				}
+			}
+		)
 		sales_data.append({doctype: count})
 
 	if frappe.db.get_single_value("System Settings", "setup_complete"):
@@ -59,10 +71,13 @@ def get_level():
 	):
 		activation_level += 1
 
-	level = {"activation_level": activation_level, "sales_data": sales_data}
+	level = {"activation_level": activation_level, "sales_data": sales_data, "records": records}
 
 	return level
 
+
+def get_new_records(doctype):
+	return frappe.db.count(doctype, dict(creation=("between", (add_to_date(now(), hours=-24), now()))))
 
 def get_help_messages():
 	"""Returns help messages to be shown on Desktop"""
