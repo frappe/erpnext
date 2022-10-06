@@ -56,7 +56,8 @@ class OrderItemFulfilmentTracker:
 			INNER JOIN `tabItem` im on im.name = i.item_code
 			{party_join}
 			WHERE
-				o.docstatus = 1 AND o.status != 'Closed' AND i.{completed_qty_field} < i.qty AND im.is_stock_item = 1
+				o.docstatus = 1 AND o.status != 'Closed' AND i.{completed_qty_field} < i.qty
+				AND (im.is_stock_item = 1 OR im.is_fixed_asset = 1)
 				{conditions}
 			ORDER BY o.transaction_date, o.creation
 		""".format(
