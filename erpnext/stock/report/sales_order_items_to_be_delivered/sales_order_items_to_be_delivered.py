@@ -64,7 +64,8 @@ class OrderItemFulfilmentTracker:
 			{party_join}
 			{sales_person_join}
 			WHERE
-				o.docstatus = 1 AND o.status != 'Closed' AND i.{completed_qty_field} < i.qty AND im.is_stock_item = 1
+				o.docstatus = 1 AND o.status != 'Closed' AND i.{completed_qty_field} < i.qty
+				AND (im.is_stock_item = 1 OR im.is_fixed_asset = 1)
 				{conditions}
 			GROUP BY o.name, i.name
 			ORDER BY o.transaction_date, o.creation
