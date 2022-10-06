@@ -30,6 +30,9 @@ class QualityInspection(Document):
 		if self.readings:
 			self.inspect_and_set_status()
 
+	def before_submit(self):
+		self.validate_readings_status_mandatory()
+
 	@frappe.whitelist()
 	def get_item_specification_details(self):
 		if not self.quality_inspection_template:
@@ -64,6 +67,11 @@ class QualityInspection(Document):
 
 	def on_cancel(self):
 		self.update_qc_reference()
+
+	def validate_readings_status_mandatory(self):
+		for reading in self.readings:
+			if not reading.status:
+				frappe.throw(_("Row #{0}: Status is mandatory").format(reading.idx))
 
 	def update_qc_reference(self):
 		quality_inspection = self.name if self.docstatus == 1 else ""
