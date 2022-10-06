@@ -132,6 +132,16 @@ class QualityInspection(Document):
 					# if not formula based check acceptance values set
 					self.set_status_based_on_acceptance_values(reading)
 
+		if not self.manual_inspection:
+			self.status = "Accepted"
+			for reading in self.readings:
+				if reading.status == "Rejected":
+					self.status = "Rejected"
+					frappe.msgprint(
+						_("Status set to rejected as there are one or more rejected readings."), alert=True
+					)
+					break
+
 	def set_status_based_on_acceptance_values(self, reading):
 		if not cint(reading.numeric):
 			result = reading.get("reading_value") == reading.get("value")
