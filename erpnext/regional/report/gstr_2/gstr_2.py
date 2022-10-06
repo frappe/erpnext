@@ -15,6 +15,8 @@ def execute(filters=None):
 
 class Gstr2Report(Gstr1Report):
 	def __init__(self, filters=None):
+		super(Gstr2Report, self).__init__()
+		self.invoice_columns = []
 		self.filters = frappe._dict(filters or {})
 		self.columns = []
 		self.data = []
