@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "transaction_number",
   "sect",
   "check",
   "column",
@@ -350,10 +351,17 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Cancel"
+  },
+  {
+   "fieldname": "transaction_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Transaction Number",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-03-21 15:36:53.600006",
+ "modified": "2022-10-05 21:04:10.415641",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",
