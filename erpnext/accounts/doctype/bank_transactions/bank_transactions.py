@@ -124,18 +124,22 @@ class BankTransactions(Document):
 		if self.check:
 			self.db_set('transaction_data', "Bank Check", update_modified=False)
 			self.db_set('date_data', self.check_date, update_modified=False)
+			self.db_set("transaction_number", self.no_bank_check, update_modified=False)
 		
 		if self.debit_note:
 			self.db_set('transaction_data', "Debit Note", update_modified=False)
 			self.db_set('date_data', self.check_date_nd, update_modified=False)
+			self.db_set("transaction_number", self.next_note_nd, update_modified=False)
 		
 		if self.credit_note:
 			self.db_set('transaction_data', "Credit Note", update_modified=False)
 			self.db_set('date_data', self.check_date_nc, update_modified=False)
+			self.db_set("transaction_number", self.next_note_nc, update_modified=False)
 		
 		if self.bank_deposit:
 			self.db_set('transaction_data', "Bank deposit", update_modified=False)
 			self.db_set('date_data', self.deposit_date, update_modified=False)
+			self.db_set("transaction_number", self.document, update_modified=False)
 	
 	def calculate_diferred_account(self):
 		doc = frappe.get_doc("Bank Account", self.bank_account)
