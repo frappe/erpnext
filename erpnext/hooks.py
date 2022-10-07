@@ -391,12 +391,12 @@ scheduler_events = {
 		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts",
 	],
 	"hourly": [
-		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.automatic_synchronization",
 		"erpnext.projects.doctype.project.project.hourly_reminder",
 		"erpnext.projects.doctype.project.project.collect_project_status",
 	],
 	"hourly_long": [
+		"erpnext.accounts.doctype.subscription.subscription.process_all",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
 		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction",
 	],
@@ -508,6 +508,7 @@ accounting_dimension_doctypes = [
 	"Landed Cost Item",
 	"Asset Value Adjustment",
 	"Asset Repair",
+	"Asset Capitalization",
 	"Loyalty Program",
 	"Stock Reconciliation",
 	"POS Profile",

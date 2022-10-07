@@ -343,7 +343,8 @@
    "no_copy": 1,
    "options": "POS Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -1553,7 +1554,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 13:00:24.166684",
+ "modified": "2022-09-30 03:49:50.455199",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

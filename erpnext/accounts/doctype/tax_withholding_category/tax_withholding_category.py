@@ -249,6 +249,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 				)
 			else:
 				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
+
+			# once tds is deducted, not need to add vouchers in the invoice
+			voucher_wise_amount = {}
 		else:
 			tax_amount = get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers)
 
@@ -334,6 +337,9 @@ def get_advance_vouchers(
 		"party_type": party_type,
 		"party": ["in", parties],
 	}
+
+	if party_type == "Customer":
+		filters.update({"against_voucher": ["is", "not set"]})
 
 	if company:
 		filters["company"] = company
@@ -422,7 +428,10 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 		):
 			# Get net total again as TDS is calculated on net total
 			# Grand is used to just check for threshold breach
-			net_total = frappe.db.get_value("Purchase Invoice", invoice_filters, "sum(net_total)") or 0.0
+			net_total = 0
+			if vouchers:
+				net_total = frappe.db.get_value("Purchase Invoice", invoice_filters, "sum(net_total)")
+
 			net_total += inv.net_total
 			supp_credit_amt = net_total - cumulative_threshold
 
