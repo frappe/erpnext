@@ -240,6 +240,9 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 				)
 			else:
 				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
+
+			# once tds is deducted, not need to add vouchers in the invoice
+			voucher_wise_amount = {}
 		else:
 			tax_amount = get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers)
 
