@@ -99,7 +99,7 @@ class BankClearance(Document):
 			.where(loan_disbursement.clearance_date.isnull())
 			.where(loan_disbursement.disbursement_account.isin([self.bank_account, self.account]))
 			.orderby(loan_disbursement.disbursement_date)
-			.orderby(loan_disbursement.name, frappe.qb.desc)
+			.orderby(loan_disbursement.name, order=frappe.qb.desc)
 		).run(as_dict=1)
 
 		loan_repayment = frappe.qb.DocType("Loan Repayment")
@@ -126,7 +126,9 @@ class BankClearance(Document):
 		if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
 			query = query.where((loan_repayment.repay_from_salary == 0))
 
-		query = query.orderby(loan_repayment.posting_date).orderby(loan_repayment.name, frappe.qb.desc)
+		query = query.orderby(loan_repayment.posting_date).orderby(
+			loan_repayment.name, order=frappe.qb.desc
+		)
 
 		loan_repayments = query.run(as_dict=True)
 

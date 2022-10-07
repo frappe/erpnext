@@ -98,7 +98,6 @@
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
-  "additional_discount_account",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
@@ -1388,12 +1387,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "additional_discount_account",
-   "fieldtype": "Link",
-   "label": "Additional Discount Account",
-   "options": "Account"
-  },
-  {
    "default": "0",
    "fieldname": "ignore_default_payment_terms_template",
    "fieldtype": "Check",
@@ -1445,7 +1438,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-13 23:39:54.525037",
+ "modified": "2022-09-27 11:07:55.766844",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

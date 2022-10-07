@@ -86,7 +86,7 @@ def get_fiscal_years(
 				)
 			)
 
-		query = query.orderby(FY.year_start_date, Order.desc)
+		query = query.orderby(FY.year_start_date, order=Order.desc)
 		fiscal_years = query.run(as_dict=True)
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)

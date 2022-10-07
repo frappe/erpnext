@@ -315,3 +315,4 @@ erpnext.patches.v14_0.fix_crm_no_of_employees
 erpnext.patches.v14_0.create_accounting_dimensions_in_subcontracting_doctypes
 erpnext.patches.v14_0.fix_subcontracting_receipt_gl_entries
 erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
+erpnext.patches.v14_0.create_accounting_dimensions_for_asset_capitalization
