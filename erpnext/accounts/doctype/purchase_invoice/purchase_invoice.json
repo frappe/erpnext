@@ -1428,6 +1428,7 @@
    "fieldname": "tax_withheld_vouchers",
    "fieldtype": "Table",
    "label": "Tax Withheld Vouchers",
+   "no_copy": 1,
    "options": "Tax Withheld Vouchers",
    "read_only": 1
   }
@@ -1436,7 +1437,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-13 23:39:54.525037",
+ "modified": "2022-10-07 14:19:14.214157",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
