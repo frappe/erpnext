@@ -247,8 +247,8 @@ class Project(StatusUpdater):
 			select sum(i.base_tax_inclusive_amount)
 			from `tabSales Invoice Item` i
 			inner join `tabSales Invoice` p on p.name = i.parent
-			where i.project = %s and p.project != %s and p.docstatus = 1
-		""", (self.name, self.name))
+			where i.project = %(project)s and ifnull(p.project, '') != %(project)s and p.docstatus = 1
+		""", {'project': self.name})
 		indirectly_billed = flt(indirectly_billed[0][0]) if indirectly_billed else 0
 
 		grand_total_precision = get_field_precision(frappe.get_meta("Sales Invoice").get_field("grand_total"),

@@ -545,7 +545,7 @@ class SellingController(StockController):
 			projects.append(self.get('project'))
 		for d in self.items:
 			if d.get('project'):
-				projects.append(self.get('project'))
+				projects.append(d.get('project'))
 
 		projects = list(set(projects))
 		for project in projects:
