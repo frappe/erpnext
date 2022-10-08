@@ -12,8 +12,11 @@ from six import string_types
 
 import erpnext
 from erpnext.assets.doctype.asset.depreciation import (
+	depreciate_asset,
 	get_gl_entries_on_asset_disposal,
 	get_value_after_depreciation_on_disposal_date,
+	reset_depreciation_schedule,
+	reverse_depreciation_entry_made_after_disposal,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import (
@@ -424,11 +427,15 @@ class AssetCapitalization(StockController):
 			asset = self.get_asset(item)
 
 			if asset.calculate_depreciation:
-				self.depreciate_asset(asset)
+				depreciate_asset(asset, self.posting_date)
 				asset.reload()
 
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
-				asset, item.asset_value, item.get("finance_book") or self.get("finance_book")
+				asset,
+				item.asset_value,
+				item.get("finance_book") or self.get("finance_book"),
+				self.get("doctype"),
+				self.get("name"),
 			)
 
 			asset.db_set("disposal_date", self.posting_date)
@@ -516,8 +523,8 @@ class AssetCapitalization(StockController):
 				self.set_consumed_asset_status(asset)
 
 				if asset.calculate_depreciation:
-					self.reverse_depreciation_entry_made_after_disposal(asset)
-					self.reset_depreciation_schedule(asset)
+					reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
+					reset_depreciation_schedule(asset, self.posting_date)
 
 	def get_asset(self, item):
 		asset = frappe.get_doc("Asset", item.asset)
