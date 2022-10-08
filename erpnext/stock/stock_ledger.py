@@ -1053,7 +1053,7 @@ class update_entries_after(object):
 			updated_values = {"actual_qty": data.qty_after_transaction, "stock_value": data.stock_value}
 			if data.valuation_rate is not None:
 				updated_values["valuation_rate"] = data.valuation_rate
-			frappe.db.set_value("Bin", bin_name, updated_values)
+			frappe.db.set_value("Bin", bin_name, updated_values, update_modified=True)
 
 
 def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
