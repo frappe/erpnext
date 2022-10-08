@@ -331,6 +331,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					query: "erpnext.controllers.queries.get_sales_orders_to_be_billed",
 					filters: filters
 				};
+			},
+			args: {
+				only_items: cint(me.frm.doc.claim_billing)
 			}
 		});
 	},
@@ -362,12 +365,17 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					query: "erpnext.controllers.queries.get_delivery_notes_to_be_billed",
 					filters: filters
 				};
+			},
+			args: {
+				only_items: cint(me.frm.doc.claim_billing)
 			}
 		});
 	},
 
 	get_items_from_project: function() {
 		var me = this;
+
+		me.frm.set_value('claim_billing', 1);
 
 		erpnext.utils.map_current_doc({
 			method: "erpnext.projects.doctype.project.project.get_sales_invoice",
@@ -393,7 +401,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			get_query: function() {
 				var filters = {
 					company: me.frm.doc.company,
-					claim_billing: cint(me.frm.doc.claim_billing)
+					claim_billing: 1
 				};
 				if(me.frm.doc.bill_to || me.frm.doc.customer) {
 					filters["customer"] = me.frm.doc.bill_to || me.frm.doc.customer;
@@ -403,6 +411,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					query: "erpnext.controllers.queries.get_projects_to_be_billed",
 					filters: filters
 				};
+			},
+			args: {
+				claim_billing: 1
 			}
 		});
 	},

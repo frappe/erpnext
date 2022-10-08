@@ -998,8 +998,11 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, only_items=None):
 	unbilled_dn_qty_map = get_unbilled_dn_qty_map(source_name)
+
+	if frappe.flags.args and only_items is None:
+		only_items = cint(frappe.flags.args.only_items)
 
 	def get_pending_qty(source):
 		billable_qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
@@ -1009,6 +1012,15 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	def item_condition(source, source_parent, target_parent):
 		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item and not d.delivery_note_item]:
 			return False
+
+		if cint(target_parent.get('claim_billing')):
+			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
+			if bill_to:
+				if source.claim_customer != bill_to:
+					return False
+			else:
+				if not source.claim_customer:
+					return False
 
 		return get_pending_qty(source)
 
@@ -1046,7 +1058,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
 
-	doclist = get_mapped_doc("Sales Order", source_name, {
+	mapping = {
 		"Sales Order": {
 			"doctype": "Sales Invoice",
 			"field_map": {
@@ -1080,7 +1092,13 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
+	}
+
+	if only_items:
+		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Sales Order Item"}
+
+	doclist = get_mapped_doc("Sales Order", source_name, mapping, target_doc, postprocess,
+		ignore_permissions=ignore_permissions, explicit_child_tables=only_items)
 
 	return doclist
 

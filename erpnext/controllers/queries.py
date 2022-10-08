@@ -535,7 +535,7 @@ def get_projects_to_be_billed(doctype="Project", txt="", searchfield="name", sta
 	# Build Filters
 	allowed_transaction_filters = []
 	exluded_custom_filters = ['name', 'project', 'claim_billing',
-		'transaction_date', 'posting_date', 'project_date']
+		'transaction_date', 'posting_date', 'project_date', 'customer']
 
 	sales_order_meta = frappe.get_meta("Sales Order")
 	delivery_note_meta = frappe.get_meta("Sales Order")
@@ -569,8 +569,13 @@ def get_projects_to_be_billed(doctype="Project", txt="", searchfield="name", sta
 		project_filters['name'] = filters.get('name')
 		sales_order_filters['project'] = filters.get('name')
 		delivery_note_filters['project'] = filters.get('name')
+
 	if filters.get('project_date'):
 		project_filters['project_date'] = filters.get('project_date')
+
+	if filters.get('customer'):
+		sales_order_filters['customer'] = filters.get('customer')
+		delivery_note_filters['customer'] = filters.get('customer')
 
 	# Get Sales Orders and Delivery Notes
 	sales_orders = _get_sales_orders_to_be_billed(filters=sales_order_filters)

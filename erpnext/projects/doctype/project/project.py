@@ -1754,10 +1754,13 @@ def make_against_project(project_name, dt):
 
 
 @frappe.whitelist()
-def get_sales_invoice(project_name, target_doc=None, depreciation_type=None):
+def get_sales_invoice(project_name, target_doc=None, depreciation_type=None, claim_billing=None):
 	from erpnext.controllers.queries import _get_sales_orders_to_be_billed, _get_delivery_notes_to_be_billed
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
+
+	if frappe.flags.args and claim_billing is None:
+		claim_billing = cint(frappe.flags.args.claim_billing)
 
 	project = frappe.get_doc("Project", project_name)
 	project_details = get_project_details(project, "Sales Invoice")
@@ -1771,13 +1774,14 @@ def get_sales_invoice(project_name, target_doc=None, depreciation_type=None):
 	else:
 		target_doc = frappe.new_doc("Sales Invoice")
 
-	target_doc.company = project.company
-	target_doc.project = project.name
-
 	# Set Project Details
-	for k, v in project_details.items():
-		if target_doc.meta.has_field(k):
-			target_doc.set(k, v)
+	if not claim_billing:
+		target_doc.company = project.company
+		target_doc.project = project.name
+
+		for k, v in project_details.items():
+			if target_doc.meta.has_field(k):
+				target_doc.set(k, v)
 
 	filters = {"project": project.name}
 	if project.company:
@@ -1788,50 +1792,55 @@ def get_sales_invoice(project_name, target_doc=None, depreciation_type=None):
 	delivery_note_filters['is_return'] = 0
 	delivery_notes = _get_delivery_notes_to_be_billed(filters=delivery_note_filters)
 	for d in delivery_notes:
-		target_doc = invoice_from_delivery_note(d.name, target_doc=target_doc)
+		target_doc = invoice_from_delivery_note(d.name, target_doc=target_doc, only_items=claim_billing)
 
 	# Get Sales Orders
 	sales_order_filters = filters.copy()
 	sales_orders = _get_sales_orders_to_be_billed(filters=sales_order_filters)
 	for d in sales_orders:
-		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc)
+		target_doc = invoice_from_sales_order(d.name, target_doc=target_doc, only_items=claim_billing)
 
-	# Remove Taxes (so they are reloaded)
-	target_doc.taxes_and_charges = None
-	target_doc.taxes = []
+	if not claim_billing:
+		# Remove Taxes (so they are reloaded)
+		target_doc.taxes_and_charges = None
+		target_doc.taxes = []
 
-	# Set Project Details
-	for k, v in project_details.items():
-		if target_doc.meta.has_field(k):
-			target_doc.set(k, v)
+		# Set Project Details
+		for k, v in project_details.items():
+			if target_doc.meta.has_field(k):
+				target_doc.set(k, v)
 
-	# Depreciation billing case
-	if project.default_depreciation_percentage or project.non_standard_depreciation and depreciation_type:
-		target_doc.depreciation_type = depreciation_type
-		if depreciation_type == "Depreciation Amount Only":
-			target_doc.bill_to = target_doc.customer
-		elif depreciation_type == "After Depreciation Amount":
-			if not project.bill_to and project.insurance_company:
-				target_doc.bill_to = project.insurance_company
+		# Depreciation billing case
+		if project.default_depreciation_percentage or project.non_standard_depreciation and depreciation_type:
+			target_doc.depreciation_type = depreciation_type
+			if depreciation_type == "Depreciation Amount Only":
+				target_doc.bill_to = target_doc.customer
+			elif depreciation_type == "After Depreciation Amount":
+				if not project.bill_to and project.insurance_company:
+					target_doc.bill_to = project.insurance_company
 
-	if depreciation_type != 'After Depreciation Amount':
-		target_doc.is_pos = project.cash_billing
+		# Cash or credit
+		if depreciation_type != 'After Depreciation Amount':
+			target_doc.is_pos = project.cash_billing
 
-	if target_doc.customer and target_doc.bill_to and target_doc.customer != target_doc.bill_to:
-		target_doc.contact_person = None
-		target_doc.customer_address = None
+		# Do not copy contact person and address if invoice billing customer is not project customer
+		target_billing_customer = target_doc.bill_to or target_doc.customer
+		if target_billing_customer != project.customer:
+			target_doc.contact_person = None
+			target_doc.customer_address = None
 
-	# Insurance Company Fetch Values
-	target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
+		# Insurance Company Fetch Values
+		target_doc.update(get_fetch_values(target_doc.doctype, 'insurance_company', target_doc.insurance_company))
 
 	# Missing Values and Forced Values
 	target_doc.run_method("set_missing_values")
 
-	# Set Depreciation Rates
-	set_depreciation_in_invoice_items(target_doc.get('items'), project)
+	if not claim_billing:
+		# Set Depreciation Rates
+		set_depreciation_in_invoice_items(target_doc.get('items'), project)
 
-	# Tax Table
-	target_doc.run_method("append_taxes_from_master")
+		# Tax Table
+		target_doc.run_method("append_taxes_from_master")
 
 	# Calculate Taxes and Totals
 	target_doc.run_method("calculate_taxes_and_totals")
@@ -1841,7 +1850,7 @@ def get_sales_invoice(project_name, target_doc=None, depreciation_type=None):
 		undelivered_sales_orders = []
 		has_undelivered_items = False
 		for d in target_doc.items:
-			if d.is_stock_item and not d.delivery_note:
+			if d.is_stock_item and not d.delivery_note and (not claim_billing or d.project == project.name):
 				has_undelivered_items = True
 				if d.sales_order and d.sales_order not in undelivered_sales_orders:
 					undelivered_sales_orders.append(d.sales_order)
@@ -1852,9 +1861,10 @@ def get_sales_invoice(project_name, target_doc=None, depreciation_type=None):
 			if undelivered_sales_orders_txt:
 				undelivered_sales_orders_txt = "<br><br>" + undelivered_sales_orders_txt
 
-			frappe.throw(_("There are Sales Orders with undelivered stock items. "
+			frappe.throw(_("{0} has Sales Orders with undelivered stock items. "
 				"If you want to bill undelivered stock items, please confirm billing amount and check "
-				"<b>'Allow Billing of Undelivered Materials'</b>{0}").format(undelivered_sales_orders_txt),
+				"<b>'Allow Billing of Undelivered Materials'</b>{1}")
+				.format(frappe.get_desk_link("Project", project.name), undelivered_sales_orders_txt),
 				title=_("Undelivered Sales Orders"))
 
 	return target_doc

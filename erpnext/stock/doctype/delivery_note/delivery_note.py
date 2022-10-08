@@ -575,7 +575,10 @@ def calculate_billed_qty_and_amount(billed_data, for_delivery_return=False):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None):
+def make_sales_invoice(source_name, target_doc=None, only_items=None):
+	if frappe.flags.args and only_items is None:
+		only_items = cint(frappe.flags.args.only_items)
+
 	def get_pending_qty(source_doc):
 		return source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
 
@@ -583,10 +586,14 @@ def make_sales_invoice(source_name, target_doc=None):
 		if source.name in [d.delivery_note_item for d in target_parent.get('items') if d.delivery_note_item]:
 			return False
 
-		# if source.claim_customer:
-		# 	bill_to = target_parent.get('bill_to') or target_parent.get('customer')
-		# 	if not bill_to or bill_to != source.claim_customer:
-		# 		return False
+		if cint(target_parent.get('claim_billing')):
+			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
+			if bill_to:
+				if source.claim_customer != bill_to:
+					return False
+			else:
+				if not source.claim_customer:
+					return False
 
 		if source_parent.get('is_return'):
 			return get_pending_qty(source) <= 0
@@ -622,7 +629,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
-	doc = get_mapped_doc("Delivery Note", source_name, {
+	mapping = {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
 			"field_map": {
@@ -664,7 +671,13 @@ def make_sales_invoice(source_name, target_doc=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}
+
+	if only_items:
+		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Delivery Note Item"}
+
+	doc = get_mapped_doc("Delivery Note", source_name, mapping, target_doc, set_missing_values,
+		explicit_child_tables=only_items)
 
 	return doc
 
