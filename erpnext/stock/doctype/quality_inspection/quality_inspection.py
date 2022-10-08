@@ -199,13 +199,14 @@ class QualityInspection(Document):
 		return actual_mean
 
 	def validate_qc_status(self):
-		if self.status == "Accepted":
-			for reading in self.readings:
-				if reading.status == "Rejected":
-					frappe.throw(
-						_("QC cannot be accepted with {} parameter rejected.")
-						.format(reading.specification)
-					)
+		if self.status != "Accepted":
+			return
+		for reading in self.readings:
+			if reading.status != "Rejected":
+				continue
+			frappe.throw(
+				_("QC cannot be accepted with {} parameter rejected.").format(reading.specification)
+			)
 
 
 @frappe.whitelist()
