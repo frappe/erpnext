@@ -770,3 +770,4 @@ execute:frappe.delete_doc_if_exists("Report", "Sales Person-wise Transaction Sum
 execute:frappe.delete_doc_if_exists("Report", "Item-wise Sales History")
 execute:frappe.delete_doc_if_exists("Report", "Available Stock for Packing Items")
 execute:frappe.delete_doc_if_exists("Report", "Pending SO Items For Purchase Request")
+erpnext.patches.v12_0.rename_claim_billing_fields

@@ -220,7 +220,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 
 		frappe.ui.form.on(this.frm.doctype,"project", function(frm) {
-			if (frm.doc.bill_multiple_projects && frm.doc.project) {
+			if (frm.doc.claim_billing && frm.doc.project) {
 				frm.doc.project = null;
 				frm.refresh_field('project');
 			}

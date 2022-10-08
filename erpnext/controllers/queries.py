@@ -443,19 +443,19 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 	select_fields = ", ".join(["`tabDelivery Note`.{0}".format(f) for f in fields])
 	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
 
-	bill_only_to_cond = ""
-	if cint(filters.get('bill_multiple_projects')):
+	claim_customer_cond = ""
+	if cint(filters.get('claim_billing')):
 		if filters.get('customer'):
-			bill_only_operation = "dni.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			claim_customer_op = "dni.claim_customer = {0}".format(frappe.db.escape(filters.get('customer')))
 			filters.pop("customer")
 		else:
-			bill_only_operation = "ifnull(dni.bill_only_to_customer, '') != ''"
+			claim_customer_op = "ifnull(dni.claim_customer, '') != ''"
 
-		bill_only_to_cond = """ and exists(select dni.name from `tabDelivery Note Item` dni
-			where dni.parent = `tabDelivery Note`.name and {0})""".format(bill_only_operation)
+		claim_customer_cond = """ and exists(select dni.name from `tabDelivery Note Item` dni
+			where dni.parent = `tabDelivery Note`.name and {0})""".format(claim_customer_op)
 
-	if "bill_multiple_projects" in filters:
-		filters.pop("bill_multiple_projects")
+	if "claim_billing" in filters:
+		filters.pop("claim_billing")
 
 	return frappe.db.sql("""
 		select {fields}
@@ -466,7 +466,7 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 			and `tabDelivery Note`.`status` not in ('Stopped', 'Closed')
 			and `tabDelivery Note`.per_completed < 100
 			and (`tabDelivery Note`.is_return = 0 or dr.per_completed < 100)
-			{bill_only_to_cond} {fcond} {mcond}
+			{claim_customer_cond} {fcond} {mcond}
 		order by `tabDelivery Note`.posting_date, `tabDelivery Note`.posting_time, `tabDelivery Note`.creation
 		{limit}
 	""".format(
@@ -474,7 +474,7 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 		key=searchfield,
 		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
 		mcond="" if ignore_permissions else get_match_cond(doctype),
-		bill_only_to_cond=bill_only_to_cond,
+		claim_customer_cond=claim_customer_cond,
 		limit=limit,
 		txt="%(txt)s",
 	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
@@ -492,19 +492,19 @@ def _get_sales_orders_to_be_billed(doctype="Sales Order", txt="", searchfield="n
 	select_fields = ", ".join(["`tabSales Order`.{0}".format(f) for f in fields])
 	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
 
-	bill_only_to_cond = ""
-	if cint(filters.get('bill_multiple_projects')):
+	claim_customer_cond = ""
+	if cint(filters.get('claim_billing')):
 		if filters.get('customer'):
-			bill_only_operation = "soi.bill_only_to_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			claim_customer_op = "soi.claim_customer = {0}".format(frappe.db.escape(filters.get('customer')))
 			filters.pop("customer")
 		else:
-			bill_only_operation = "ifnull(soi.bill_only_to_customer, '') != ''"
+			claim_customer_op = "ifnull(soi.claim_customer, '') != ''"
 
-		bill_only_to_cond = """ and exists(select soi.name from `tabSales Order Item` soi
-			where soi.parent = `tabSales Order`.name and {0})""".format(bill_only_operation)
+		claim_customer_cond = """ and exists(select soi.name from `tabSales Order Item` soi
+			where soi.parent = `tabSales Order`.name and {0})""".format(claim_customer_op)
 
-	if "bill_multiple_projects" in filters:
-		filters.pop("bill_multiple_projects")
+	if "claim_billing" in filters:
+		filters.pop("claim_billing")
 
 	return frappe.db.sql("""
 		select {fields}
@@ -513,7 +513,7 @@ def _get_sales_orders_to_be_billed(doctype="Sales Order", txt="", searchfield="n
 			and `tabSales Order`.`{key}` like {txt}
 			and `tabSales Order`.`status` not in ('Closed', 'On Hold')
 			and `tabSales Order`.per_completed < 100
-			{bill_only_to_cond} {fcond} {mcond}
+			{claim_customer_cond} {fcond} {mcond}
 		order by `tabSales Order`.transaction_date, `tabSales Order`.creation
 		{limit}
 	""".format(
@@ -521,7 +521,7 @@ def _get_sales_orders_to_be_billed(doctype="Sales Order", txt="", searchfield="n
 		key=searchfield,
 		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
 		mcond="" if ignore_permissions else get_match_cond(doctype),
-		bill_only_to_cond=bill_only_to_cond,
+		claim_customer_cond=claim_customer_cond,
 		limit=limit,
 		txt="%(txt)s",
 	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
@@ -533,8 +533,8 @@ def get_projects_to_be_billed(doctype="Project", txt="", searchfield="name", sta
 		filters=None, as_dict=True, ignore_permissions=False):
 
 	# Build Filters
-	allowed_transaction_filters = ['bill_only_to_customer']
-	exluded_custom_filters = ['name', 'project', 'bill_multiple_projects',
+	allowed_transaction_filters = []
+	exluded_custom_filters = ['name', 'project', 'claim_billing',
 		'transaction_date', 'posting_date', 'project_date']
 
 	sales_order_meta = frappe.get_meta("Sales Order")
@@ -556,8 +556,8 @@ def get_projects_to_be_billed(doctype="Project", txt="", searchfield="name", sta
 		if project_meta.has_field(f) and f not in exluded_custom_filters:
 			project_filters[f] = v
 
-	sales_order_filters['bill_multiple_projects'] = 1
-	delivery_note_filters['bill_multiple_projects'] = 1
+	sales_order_filters['claim_billing'] = 1
+	delivery_note_filters['claim_billing'] = 1
 
 	delivery_note_filters['is_return'] = 0
 

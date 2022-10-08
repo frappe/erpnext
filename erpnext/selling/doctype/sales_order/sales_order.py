@@ -353,8 +353,8 @@ class SalesOrder(SellingController):
 				for d in billed_by_sinv:
 					bill_to = d.bill_to or d.customer
 					so_row = self.getone('items', {'name': d.sales_order_item})
-					bill_only_to_customer = so_row.bill_only_to_customer if so_row else None
-					if not d.amount and bill_only_to_customer and bill_to != bill_only_to_customer:
+					claim_customer = so_row.claim_customer if so_row else None
+					if not d.amount and claim_customer and bill_to != claim_customer:
 						continue
 
 					out.billed_amount_map.setdefault(d.sales_order_item, 0)
@@ -1018,7 +1018,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.depreciation_percentage = None
 
 		if target_parent:
-			target_parent.set_item_rate_zero_for_bill_only_to_customer(source, target)
+			target_parent.set_rate_zero_for_claim_item(source, target)
 
 	def postprocess(source, target):
 		split_vehicle_items_by_qty(target)
@@ -1476,14 +1476,3 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 	if not total_produced_qty and frappe.flags.in_patch: return
 
 	frappe.db.set_value('Sales Order Item', sales_order_item, 'produced_qty', total_produced_qty)
-
-
-@frappe.whitelist()
-def get_biller(sales_order):
-	customer = {}
-	if sales_order:
-		sales_order = frappe.get_doc("Sales Order", sales_order)
-		if sales_order:
-			customer["customer_id"] = sales_order.items[0].bill_only_to_customer if sales_order and sales_order.items else ""
-			customer["customer_name"] = frappe.db.get_value("Customer", customer.get("customer_id"), "customer_name")
-	return 	customer

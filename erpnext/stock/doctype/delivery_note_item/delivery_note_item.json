@@ -117,7 +117,7 @@
   "sales_invoice",
   "sales_invoice_item",
   "delivery_note_item",
-  "bill_only_to_customer",
+  "claim_customer",
   "col_break4",
   "target_warehouse",
   "has_batch_no",
@@ -1250,17 +1250,17 @@
    "read_only": 1
   },
   {
-   "fieldname": "bill_only_to_customer",
+   "fieldname": "claim_customer",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "label": "Bill Only To Customer",
+   "label": "Claim Customer",
    "options": "Customer",
    "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-04-18 23:14:39.726662",
+ "modified": "2022-10-08 14:25:58.612112",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

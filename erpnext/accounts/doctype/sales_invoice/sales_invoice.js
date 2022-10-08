@@ -285,14 +285,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					label: __('Customer'),
 					options: 'Customer',
 					fieldname: 'party_name',
-					default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer,
+					default: me.frm.doc.customer || undefined,
 				},
 				{
 					fieldtype: 'Link',
 					label: __('Project'),
 					options: 'Project',
 					fieldname: 'project',
-					default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
+					default: me.frm.doc.project || undefined,
 				}
 			],
 			columns: ['customer_name', 'project'],
@@ -314,14 +314,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			target: me.frm,
 			date_field: "transaction_date",
 			setters: {
-				customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
-				project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
+				customer: me.frm.doc.customer || undefined,
+				project: me.frm.doc.project || undefined,
 			},
 			columns: ['customer_name', 'project'],
 			get_query: function() {
 				var filters = {
 					company: me.frm.doc.company,
-					bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
+					claim_billing: cint(me.frm.doc.claim_billing),
 				};
 				if (me.frm.doc.customer) {
 					filters["customer"] = me.frm.doc.customer;
@@ -344,15 +344,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			target: me.frm,
 			date_field: "posting_date",
 			setters: {
-				customer: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
-				project: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.project || undefined,
+				customer: me.frm.doc.customer || undefined,
+				project: me.frm.doc.project || undefined,
 			},
 			columns: ['customer_name', 'project'],
 			get_query: function() {
 				var filters = {
 					company: me.frm.doc.company,
 					is_return: cint(me.frm.doc.is_return),
-					bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects),
+					claim_billing: cint(me.frm.doc.claim_billing),
 				};
 				if(me.frm.doc.customer) {
 					filters["customer"] = me.frm.doc.customer;
@@ -380,7 +380,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					fieldname: 'customer',
 					fieldtype: 'Link',
 					options: 'Customer',
-					default: me.frm.doc.bill_multiple_projects ? undefined : me.frm.doc.customer || undefined,
+					default: me.frm.doc.bill_to || me.frm.doc.customer || undefined,
 				},
 				{
 					label: __("Project Type"),
@@ -393,10 +393,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			get_query: function() {
 				var filters = {
 					company: me.frm.doc.company,
-					bill_multiple_projects: cint(me.frm.doc.bill_multiple_projects)
+					claim_billing: cint(me.frm.doc.claim_billing)
 				};
-				if(me.frm.doc.customer) {
-					filters["customer"] = me.frm.doc.customer;
+				if(me.frm.doc.bill_to || me.frm.doc.customer) {
+					filters["customer"] = me.frm.doc.bill_to || me.frm.doc.customer;
 				}
 
 				return {
@@ -520,15 +520,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this._super();
 	},
 
-	bill_multiple_projects: function () {
+	claim_billing: function () {
 		this.set_project_read_only();
-		if (this.frm.doc.bill_multiple_projects) {
+		if (this.frm.doc.claim_billing) {
 			this.frm.set_value("project", null);
 		}
 	},
 
 	set_project_read_only: function () {
-		this.frm.set_df_property('project', 'read_only', cint(this.frm.doc.bill_multiple_projects));
+		this.frm.set_df_property('project', 'read_only', cint(this.frm.doc.claim_billing));
 	},
 
 	items_on_form_rendered: function() {

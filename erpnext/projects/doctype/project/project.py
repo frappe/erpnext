@@ -1009,7 +1009,7 @@ def get_stock_items(project, get_sales_invoice=True):
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
-			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
+			i.item_tax_detail, i.claim_customer, p.conversion_rate
 		from `tabDelivery Note Item` i
 		inner join `tabDelivery Note` p on p.name = i.parent
 		where p.docstatus = 1 and {0}
@@ -1027,7 +1027,7 @@ def get_stock_items(project, get_sales_invoice=True):
 			i.uom,
 			if(i.is_stock_item = 1, i.base_net_amount * (i.qty - i.delivered_qty) / i.qty, i.base_net_amount) as net_amount,
 			i.base_net_rate as net_rate,
-			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
+			i.item_tax_detail, i.claim_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
 		where p.docstatus = 1 and {0}
@@ -1100,7 +1100,7 @@ def get_service_items(project, get_sales_invoice=True):
 			i.qty, i.uom,
 			i.base_net_amount as net_amount,
 			i.base_net_rate as net_rate,
-			i.item_tax_detail, i.bill_only_to_customer, p.conversion_rate
+			i.item_tax_detail, i.claim_customer, p.conversion_rate
 		from `tabSales Order Item` i
 		inner join `tabSales Order` p on p.name = i.parent
 		where p.docstatus = 1 and {0}
@@ -1181,7 +1181,7 @@ def set_sales_data_customer_amounts(data, project):
 	for d in data:
 		d.has_customer_depreciation = 0
 
-		if d.get('bill_only_to_customer') and project.customer and d.get('bill_only_to_customer') != project.customer:
+		if d.get('claim_customer') and project.customer and d.get('claim_customer') != project.customer:
 			d.is_claim_item = 1
 			d.customer_net_amount = 0
 			d.customer_net_rate = 0

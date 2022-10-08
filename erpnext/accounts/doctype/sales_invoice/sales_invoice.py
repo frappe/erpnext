@@ -540,7 +540,7 @@ class SalesInvoice(SellingController):
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
 
-		if self.bill_multiple_projects:
+		if self.claim_billing:
 			self.project = None
 
 		if not self.debit_to:
@@ -714,7 +714,7 @@ class SalesInvoice(SellingController):
 		sales_order_compare = [["company", "="], ["currency", "="]]
 		delivery_note_compare = [["company", "="], ["currency", "="]]
 
-		if not self.get('bill_multiple_projects'):
+		if not self.get('claim_billing'):
 			sales_order_compare += [["customer", "="], ["project", "="]]
 			delivery_note_compare += [["customer", "="], ["project", "="]]
 
@@ -1514,9 +1514,9 @@ class SalesInvoice(SellingController):
 			vro.set_status(update=True)
 			vro.notify_update()
 
-	def set_item_rate_zero_for_bill_only_to_customer(self, source_row, target_row):
+	def set_rate_zero_for_claim_item(self, source_row, target_row):
 		bill_to = self.get('bill_to') or self.get('customer')
-		if bill_to and source_row.get('bill_only_to_customer') and bill_to != source_row.bill_only_to_customer:
+		if bill_to and source_row.get('claim_customer') and bill_to != source_row.claim_customer:
 			target_row.price_list_rate = 0
 			target_row.rate = 0
 			target_row.margin_rate_or_amount = 0

@@ -15,10 +15,10 @@
   "description",
   "campaign_schedules_section",
   "campaign_schedules",
-  "billing_section",
-  "bill_only_to_customer",
+  "claim_billing_section",
+  "claim_customer",
   "column_break_10",
-  "bill_only_to_customer_name"
+  "claim_customer_name"
  ],
  "fields": [
   {
@@ -68,34 +68,35 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "bill_only_to_customer",
-   "fieldname": "billing_section",
-   "fieldtype": "Section Break",
-   "label": "Billing"
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bill_only_to_customer",
+   "collapsible": 1,
+   "collapsible_depends_on": "claim_customer",
+   "fieldname": "claim_billing_section",
+   "fieldtype": "Section Break",
+   "label": "Claim Billing"
+  },
+  {
+   "fieldname": "claim_customer",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "label": "Bill Only To Customer",
+   "label": "Claim Customer",
    "options": "Customer"
   },
   {
-   "fetch_from": "bill_only_to_customer.customer_name",
-   "fieldname": "bill_only_to_customer_name",
+   "depends_on": "eval:doc.claim_customer && doc.claim_customer_name != doc.claim_customer",
+   "fetch_from": "claim_customer.customer_name",
+   "fieldname": "claim_customer_name",
    "fieldtype": "Data",
-   "label": "Bill Only To Customer Name",
+   "label": "Claim Customer Name",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-bullhorn",
  "idx": 1,
- "modified": "2022-04-24 00:59:39.677378",
+ "modified": "2022-10-08 14:25:10.874349",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Campaign",
