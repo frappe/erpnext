@@ -60,6 +60,7 @@ class QualityInspection(Document):
 		self.get_item_specification_details()
 
 	def on_submit(self):
+		self.validate_qc_status()
 		self.update_qc_reference()
 
 	def on_cancel(self):
@@ -196,6 +197,15 @@ class QualityInspection(Document):
 
 		actual_mean = mean(readings_list) if readings_list else 0
 		return actual_mean
+
+	def validate_qc_status(self):
+		if self.status == "Accepted":
+			for reading in self.readings:
+				if reading.status == "Rejected":
+					frappe.throw(
+						_("QC cannot be accepted with {} parameter rejected.")
+						.format(reading.specification)
+					)
 
 
 @frappe.whitelist()
