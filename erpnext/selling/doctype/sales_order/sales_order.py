@@ -998,7 +998,7 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, only_items=None):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, only_items=None, skip_postprocess=False):
 	unbilled_dn_qty_map = get_unbilled_dn_qty_map(source_name)
 
 	if frappe.flags.args and only_items is None:
@@ -1088,8 +1088,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, o
 	if only_items:
 		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Sales Order Item"}
 
-	doclist = get_mapped_doc("Sales Order", source_name, mapping, target_doc, postprocess,
-		ignore_permissions=ignore_permissions, explicit_child_tables=only_items)
+	doclist = get_mapped_doc("Sales Order", source_name, mapping, target_doc,
+		postprocess=postprocess if not skip_postprocess else None,
+		ignore_permissions=ignore_permissions,
+		explicit_child_tables=only_items)
 
 	return doclist
 

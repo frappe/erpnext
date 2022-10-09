@@ -575,7 +575,7 @@ def calculate_billed_qty_and_amount(billed_data, for_delivery_return=False):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, only_items=None):
+def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postprocess=False):
 	if frappe.flags.args and only_items is None:
 		only_items = cint(frappe.flags.args.only_items)
 
@@ -613,7 +613,7 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None):
 			target.serial_no = get_delivery_note_serial_no(source.item_code,
 				target.qty, source_parent.name)
 
-	def set_missing_values(source, target):
+	def postprocess(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -666,7 +666,8 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None):
 	if only_items:
 		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Delivery Note Item"}
 
-	doc = get_mapped_doc("Delivery Note", source_name, mapping, target_doc, set_missing_values,
+	doc = get_mapped_doc("Delivery Note", source_name, mapping, target_doc,
+		postprocess=postprocess if not skip_postprocess else None,
 		explicit_child_tables=only_items)
 
 	return doc
