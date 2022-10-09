@@ -619,16 +619,6 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None):
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
-		# set company address
-		if source.company_address:
-			target.update({'company_address': source.company_address})
-		else:
-			# set company address
-			target.update(get_company_address(target.company))
-
-		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
-
 	mapping = {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
