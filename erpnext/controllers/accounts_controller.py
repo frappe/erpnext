@@ -27,7 +27,7 @@ from collections import OrderedDict
 force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "alt_uom_size",
 	"item_tax_rate", "pricing_rules", "allow_zero_valuation_rate", "force_default_warehouse",
 	"is_stock_item", "is_fixed_asset" "has_batch_no", "has_serial_no", "is_vehicle",
-	"bill_only_to_customer", "sales_commission_category", "commission_rate")
+	"claim_customer", "sales_commission_category", "commission_rate")
 
 force_party_fields = ("customer_name", "bill_to_name", "supplier_name",
 	"customer_group", "supplier_group",

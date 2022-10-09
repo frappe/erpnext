@@ -41,8 +41,8 @@
   "default_supplier",
   "default_supplier_name",
   "column_break_29",
-  "bill_only_to_customer",
-  "bill_only_to_customer_name",
+  "claim_customer",
+  "claim_customer_name",
   "other_defaults_section",
   "show_item_code",
   "column_break_20",
@@ -291,23 +291,8 @@
    "label": "Party Defaults"
   },
   {
-   "fieldname": "bill_only_to_customer",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
-   "label": "Bill Only To Customer",
-   "options": "Customer"
-  },
-  {
    "fieldname": "column_break_29",
    "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "bill_only_to_customer.customer_name",
-   "fieldname": "bill_only_to_customer_name",
-   "fieldtype": "Data",
-   "label": "Bill Only To Customer Name",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_14",
@@ -343,9 +328,25 @@
    "in_standard_filter": 1,
    "label": "Sales Commission Category",
    "options": "Sales Commission Category"
+  },
+  {
+   "fieldname": "claim_customer",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Claim Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.claim_customer && doc.claim_customer_name != doc.claim_customer",
+   "fetch_from": "claim_customer.customer_name",
+   "fieldname": "claim_customer_name",
+   "fieldtype": "Data",
+   "label": "Claim Customer Name",
+   "read_only": 1
   }
  ],
- "modified": "2022-06-15 00:05:25.074172",
+ "modified": "2022-10-08 14:23:15.584604",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Default Rule",
