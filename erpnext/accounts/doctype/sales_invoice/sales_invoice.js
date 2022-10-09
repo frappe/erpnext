@@ -378,7 +378,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		me.frm.set_value('claim_billing', 1);
 
 		erpnext.utils.map_current_doc({
-			method: "erpnext.projects.doctype.project.project.get_sales_invoice",
+			method: "erpnext.projects.doctype.project.project.make_sales_invoice",
 			source_doctype: "Project",
 			target: me.frm,
 			date_field: "project_date",

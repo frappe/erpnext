@@ -880,7 +880,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 
 	_make_sales_invoice: function (depreciation_type) {
 		return frappe.call({
-			method: "erpnext.projects.doctype.project.project.get_sales_invoice",
+			method: "erpnext.projects.doctype.project.project.make_sales_invoice",
 			args: {
 				"project_name": this.frm.doc.name,
 				"depreciation_type": depreciation_type,

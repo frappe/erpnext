@@ -522,7 +522,7 @@ erpnext.vehicles.VehicleRegistrationOrderController = erpnext.vehicles.VehicleAd
 
 	make_sales_invoice: function () {
 		return frappe.call({
-			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.get_sales_invoice",
+			method: "erpnext.vehicles.doctype.vehicle_registration_order.vehicle_registration_order.make_sales_invoice",
 			args: {
 				"vehicle_registration_order": this.frm.doc.name,
 			},

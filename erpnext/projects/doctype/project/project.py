@@ -1754,7 +1754,7 @@ def make_against_project(project_name, dt):
 
 
 @frappe.whitelist()
-def get_sales_invoice(project_name, target_doc=None, depreciation_type=None, claim_billing=None):
+def make_sales_invoice(project_name, target_doc=None, depreciation_type=None, claim_billing=None):
 	from erpnext.controllers.queries import _get_sales_orders_to_be_billed, _get_delivery_notes_to_be_billed
 	from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
 	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
