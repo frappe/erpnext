@@ -92,7 +92,7 @@ class StockController(AccountsController):
 						# Depliation account cheching
 						
 						if self.get('is_depletion') == 1 :
-							from nrp_manufacturing.nrp_manufacturing.utils import get_config_by_name
+							from nrp_manufacturing.utils import get_config_by_name
 							depliation_config = get_config_by_name("depletion_account", [])
 							depliation_account = depliation_config.get(self.company)						
 							if depliation_account:
