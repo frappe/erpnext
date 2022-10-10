@@ -58,30 +58,31 @@ def execute(filters=None):
 		if sle.serial_no:
 			update_available_serial_nos(available_serial_nos, sle)
 
+		
+		
+			
+		sle['weight_uom'] = str(frappe.db.get_value("Item", sle['item_code'], "weight_uom"))
+		sle['alternate_uom'] = frappe.get_value("UOM Conversion Detail", {'parent': sle['item_code'] ,'is_alternate_uom': 1 }, 'uom')
+
+		sle['weight'] = flt(sle['qty_after_transaction']) * flt(frappe.db.get_value("Item",  sle.item_code, "weight_per_unit"))
+
+		if frappe.get_value("UOM Conversion Detail", {'parent': sle.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
+			sle['alternate_qty'] = flt(sle['qty_after_transaction']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': sle.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		else :
+			sle['alternate_qty'] =0
+		
+		if frappe.get_value("UOM Conversion Detail", {'parent': sle.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
+			sle['in_alternate_qty'] = flt(sle['in_qty']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': sle.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		else : 	sle['in_alternate_qty'] = 0
+		
+		if frappe.get_value("UOM Conversion Detail", {'parent': sle.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
+			sle['out_alternate_qty'] = flt(sle['out_qty']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': sle.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		else : sle['out_alternate_qty'] = 0	
+		
+		sle['in_weight'] = flt(sle['in_qty']) * flt(frappe.db.get_value("Item",  sle.item_code, "weight_per_unit"))
+		sle['out_weight'] = flt(sle['out_qty']) * flt(frappe.db.get_value("Item",  sle.item_code, "weight_per_unit"))
 		data.append(sle)
-		for d in data:
-			
-			d['weight_uom'] = str(frappe.db.get_value("Item", d['item_code'], "weight_uom"))
-			d['alternate_uom'] = frappe.get_value("UOM Conversion Detail", {'parent': d['item_code'] ,'is_alternate_uom': 1 }, 'uom')
-
-			d['weight'] = flt(d['qty_after_transaction']) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
-
-			if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-				d['alternate_qty'] = flt(d['qty_after_transaction']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-			else :
-				d['alternate_qty'] =0
-			
-			if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-				d['in_alternate_qty'] = flt(d['in_qty']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-			else : 	d['in_alternate_qty'] = 0
-			
-			if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-				d['out_alternate_qty'] = flt(d['out_qty']) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-			else : d['out_alternate_qty'] = 0	
-			
-			d['in_weight'] = flt(d['in_qty']) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
-			d['out_weight'] = flt(d['out_qty']) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
-
+		
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
 

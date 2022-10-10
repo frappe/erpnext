@@ -91,11 +91,15 @@ def execute(filters=None):
 					stock_ageing_data['latest_age'] = date_diff(to_date, fifo_queue[-1][1])
 
 				report_data.update(stock_ageing_data)
+			report_data['wuom'] = item_map.get(item).get("weight_uom")
+			report_data["weight"]= flt(item_map.get(item).get("weight_per_unit"))*flt(qty_dict.bal_qty)
+			if frappe.get_value("UOM Conversion Detail", {'parent': item ,'is_alternate_uom': 1 }, 'conversion_factor'):
+				report_data['alternate_qty'] = flt(qty_dict.bal_qty) / flt(frappe.get_value("UOM Conversion Detail", {'parent': item ,'is_alternate_uom': 1 }, 'conversion_factor'))
+			else : 	
+				report_data['alternate_qty'] = 0
+			
+			report_data["alternate_uom"] = frappe.get_value("UOM Conversion Detail", {'parent': item ,'is_alternate_uom': 1 }, 'uom') 
 
-			# THis is new COde
-			for r in report_data:
-				report_data['wuom'] = str(frappe.db.get_value("Item", report_data['item_code'], "weight_uom"))
-				report_data['alternate_uom'] = frappe.get_value("UOM Conversion Detail", {'parent': report_data['item_code'] ,'is_alternate_uom': 1 }, 'uom')
 
 			data.append(report_data)
 
@@ -233,16 +237,16 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-		# new code
-		if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
-			qty_dict.alternate_qty = flt(qty_dict.bal_qty) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
-		else : 	qty_dict.alternate_qty = 0
+		# # new code
+		# if frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'):
+		# 	qty_dict.alternate_qty = flt(qty_dict.bal_qty) / flt(frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'conversion_factor'))
+		# else : 	qty_dict.alternate_qty = 0
 		
-		qty_dict.alternate_uom = frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'uom') 
+		# qty_dict.alternate_uom = frappe.get_value("UOM Conversion Detail", {'parent': d.item_code ,'is_alternate_uom': 1 }, 'uom') 
 
-		qty_dict.weight = flt(qty_dict.bal_qty) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
+		# qty_dict.weight = flt(qty_dict.bal_qty) * flt(frappe.db.get_value("Item",  d.item_code, "weight_per_unit"))
 		
-		qty_dict.wuom = str(frappe.db.get_value("Item", d.item_code, "weight_uom"))
+		# qty_dict.wuom = str(frappe.db.get_value("Item", d.item_code, "weight_uom"))
 	
 	iwb_map = filter_items_with_no_transactions(iwb_map, float_precision)
 	
@@ -298,7 +302,7 @@ def get_item_details(items, sle, filters):
 
 	res = frappe.db.sql("""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom %s
+			item.name, item.item_name, item.weight_uom,item.weight_per_unit,item.description, item.item_group, item.brand, item.stock_uom %s
 		from
 			`tabItem` item
 			%s
