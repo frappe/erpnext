@@ -31,6 +31,7 @@
   "company",
   "stock_uom",
   "project",
+  "serial_and_batch_bundle",
   "batch_no",
   "column_break_26",
   "fiscal_year",
@@ -309,6 +310,13 @@
    "label": "Recalculate Incoming/Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "options": "Serial and Batch Bundle",
+   "search_index": 1
   }
  ],
  "hide_toolbar": 1,
@@ -317,7 +325,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-12-21 06:25:30.040801",
+ "modified": "2022-11-24 13:14:31.974743",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

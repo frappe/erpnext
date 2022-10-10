@@ -7,6 +7,8 @@ frappe.provide("erpnext.stock");
 
 frappe.ui.form.on("Purchase Receipt", {
 	setup: (frm) => {
+		frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
+
 		frm.make_methods = {
 			'Landed Cost Voucher': () => {
 				let lcv = frappe.model.get_new_doc('Landed Cost Voucher');

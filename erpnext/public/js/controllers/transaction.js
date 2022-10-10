@@ -119,9 +119,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 		});
 
-		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
-			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
-				return me.set_query_for_batch(doc, cdt, cdn);
+		if(this.frm.fields_dict["items"].grid.get_field('serial_and_batch_bundle')) {
+			this.frm.set_query("serial_and_batch_bundle", "items", function(doc, cdt, cdn) {
+				let item_row = locals[cdt][cdn];
+				return {
+					filters: {
+						'item_code': item_row.item_code
+					}
+				}
 			});
 		}
 

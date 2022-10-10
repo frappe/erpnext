@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+from frappe.utils import cint, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -328,24 +328,47 @@ class StockController(AccountsController):
 	def make_batches(self, warehouse_field):
 		"""Create batches if required. Called before submit"""
 		for d in self.items:
-			if d.get(warehouse_field) and not d.batch_no:
+			if d.get(warehouse_field) and not d.serial_and_batch_bundle:
 				has_batch_no, create_new_batch = frappe.get_cached_value(
 					"Item", d.item_code, ["has_batch_no", "create_new_batch"]
 				)
 
 				if has_batch_no and create_new_batch:
-					d.batch_no = (
+					batch_no = (
 						frappe.get_doc(
-							dict(
-								doctype="Batch",
-								item=d.item_code,
-								supplier=getattr(self, "supplier", None),
-								reference_doctype=self.doctype,
-								reference_name=self.name,
-							)
+							dict(doctype="Batch", item=d.item_code, supplier=getattr(self, "supplier", None))
 						)
 						.insert()
 						.name
+					)
+
+					d.serial_and_batch_bundle = (
+						frappe.get_doc(
+							{
+								"doctype": "Serial and Batch Bundle",
+								"item_code": d.item_code,
+								"voucher_type": self.doctype,
+								"voucher_no": self.name,
+								"ledgers": [
+									{
+										"batch_no": batch_no,
+										"qty": d.qty,
+										"warehouse": d.get(warehouse_field),
+									}
+								],
+							}
+						)
+						.submit()
+						.name
+					)
+
+					frappe.db.set_value(
+						"Batch",
+						batch_no,
+						{
+							"reference_doctype": "Serial and Batch Bundle",
+							"reference_name": d.serial_and_batch_bundle,
+						},
 					)
 
 	def check_expense_account(self, item):
@@ -387,27 +410,20 @@ class StockController(AccountsController):
 				)
 
 	def delete_auto_created_batches(self):
-		for d in self.items:
-			if not d.batch_no:
-				continue
+		for row in self.items:
+			if row.serial_and_batch_bundle:
+				frappe.db.set_value(
+					"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
+				)
 
-			frappe.db.set_value(
-				"Serial No", {"batch_no": d.batch_no, "status": "Inactive"}, "batch_no", None
-			)
-
-			d.batch_no = None
-			d.db_set("batch_no", None)
-
-		for data in frappe.get_all(
-			"Batch", {"reference_name": self.name, "reference_doctype": self.doctype}
-		):
-			frappe.delete_doc("Batch", data.name)
+				row.db_set("serial_and_batch_bundle", None)
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
 			{
 				"item_code": d.get("item_code", None),
 				"warehouse": d.get("warehouse", None),
+				"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"fiscal_year": get_fiscal_year(self.posting_date, company=self.company)[0],
@@ -420,7 +436,6 @@ class StockController(AccountsController):
 				),
 				"incoming_rate": 0,
 				"company": self.company,
-				"batch_no": cstr(d.get("batch_no")).strip(),
 				"serial_no": d.get("serial_no"),
 				"project": d.get("project") or self.get("project"),
 				"is_cancelled": 1 if self.docstatus == 2 else 0,

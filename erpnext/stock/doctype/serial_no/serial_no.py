@@ -189,6 +189,7 @@ class SerialNo(StockController):
 	def get_last_sle(self, serial_no=None):
 		entries = {}
 		sle_dict = self.get_stock_ledger_entries(serial_no)
+		print("sle_dict", sle_dict)
 		if sle_dict:
 			if sle_dict.get("incoming", []):
 				entries["purchase_sle"] = sle_dict["incoming"][0]
@@ -206,33 +207,23 @@ class SerialNo(StockController):
 		if not serial_no:
 			serial_no = self.name
 
+		print("serial_no", serial_no)
 		for sle in frappe.db.sql(
 			"""
-			SELECT voucher_type, voucher_no,
-				posting_date, posting_time, incoming_rate, actual_qty, serial_no
+			SELECT sle.voucher_type, sle.voucher_no, serial_and_batch_bundle,
+				sle.posting_date, sle.posting_time, sle.incoming_rate, sle.actual_qty, snb.serial_no
 			FROM
-				`tabStock Ledger Entry`
+				`tabStock Ledger Entry` sle, `tabSerial and Batch Ledger` snb
 			WHERE
-				item_code=%s AND company = %s
-				AND is_cancelled = 0
-				AND (serial_no = %s
-					OR serial_no like %s
-					OR serial_no like %s
-					OR serial_no like %s
-				)
+				sle.item_code=%s AND sle.company = %s
+				AND sle.is_cancelled = 0
+				AND snb.serial_no = %s and snb.parent = sle.serial_and_batch_bundle
 			ORDER BY
-				posting_date desc, posting_time desc, creation desc""",
-			(
-				self.item_code,
-				self.company,
-				serial_no,
-				serial_no + "\n%",
-				"%\n" + serial_no,
-				"%\n" + serial_no + "\n%",
-			),
+				sle.posting_date desc, sle.posting_time desc, sle.creation desc""",
+			(self.item_code, self.company, serial_no),
 			as_dict=1,
 		):
-			if serial_no.upper() in get_serial_nos(sle.serial_no):
+			if serial_no.upper() in get_serial_nos(sle.serial_and_batch_bundle):
 				if cint(sle.actual_qty) > 0:
 					sle_dict.setdefault("incoming", []).append(sle)
 				else:
@@ -262,6 +253,7 @@ class SerialNo(StockController):
 
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
+		print(last_sle)
 		self.set_purchase_details(last_sle.get("purchase_sle"))
 		self.set_sales_details(last_sle.get("delivery_sle"))
 		self.set_maintenance_status()
@@ -275,7 +267,7 @@ def process_serial_no(sle):
 
 
 def validate_serial_no(sle, item_det):
-	serial_nos = get_serial_nos(sle.serial_no) if sle.serial_no else []
+	serial_nos = get_serial_nos(sle.serial_and_batch_bundle) if sle.serial_and_batch_bundle else []
 	validate_material_transfer_entry(sle)
 
 	if item_det.has_serial_no == 0:
@@ -541,7 +533,7 @@ def update_serial_nos(sle, item_det):
 		return
 	if (
 		not sle.is_cancelled
-		and not sle.serial_no
+		and not sle.serial_and_batch_bundle
 		and cint(sle.actual_qty) > 0
 		and item_det.has_serial_no == 1
 		and item_det.serial_no_series
@@ -549,7 +541,7 @@ def update_serial_nos(sle, item_det):
 		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
 		sle.db_set("serial_no", serial_nos)
 		validate_serial_no(sle, item_det)
-	if sle.serial_no:
+	if sle.serial_and_batch_bundle:
 		auto_make_serial_nos(sle)
 
 
@@ -569,7 +561,7 @@ def get_new_serial_number(series):
 
 
 def auto_make_serial_nos(args):
-	serial_nos = get_serial_nos(args.get("serial_no"))
+	serial_nos = get_serial_nos(args.get("serial_and_batch_bundle"))
 	created_numbers = []
 	voucher_type = args.get("voucher_type")
 	item_code = args.get("item_code")
@@ -624,13 +616,14 @@ def get_item_details(item_code):
 	)[0]
 
 
-def get_serial_nos(serial_no):
-	if isinstance(serial_no, list):
-		return serial_no
+def get_serial_nos(serial_and_batch_bundle):
+	serial_nos = frappe.get_all(
+		"Serial and Batch Ledger",
+		filters={"parent": serial_and_batch_bundle, "serial_no": ("is", "set")},
+		fields=["serial_no"],
+	)
 
-	return [
-		s.strip() for s in cstr(serial_no).strip().upper().replace(",", "\n").split("\n") if s.strip()
-	]
+	return [d.serial_no for d in serial_nos]
 
 
 def clean_serial_no_string(serial_no: str) -> str:

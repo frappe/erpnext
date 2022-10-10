@@ -283,7 +283,12 @@ class PurchaseReceipt(BuyingController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 

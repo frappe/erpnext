@@ -40,7 +40,7 @@ class StockLedgerEntry(Document):
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
 		self.validate_mandatory()
-		self.validate_item()
+		self.validate_serial_batch_no_bundle()
 		self.validate_batch()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
@@ -79,47 +79,43 @@ class StockLedgerEntry(Document):
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))
 
-	def validate_item(self):
-		item_det = frappe.db.sql(
-			"""select name, item_name, has_batch_no, docstatus,
-			is_stock_item, has_variants, stock_uom, create_new_batch
-			from tabItem where name=%s""",
+	def validate_serial_batch_no_bundle(self):
+		item_detail = frappe.get_cached_value(
+			"Item",
 			self.item_code,
-			as_dict=True,
+			["has_serial_no", "has_batch_no", "is_stock_item", "has_variants", "stock_uom"],
+			as_dict=1,
 		)
 
-		if not item_det:
+		if not item_detail:
 			frappe.throw(_("Item {0} not found").format(self.item_code))
 
-		item_det = item_det[0]
-
-		if item_det.is_stock_item != 1:
-			frappe.throw(_("Item {0} must be a stock Item").format(self.item_code))
-
-		# check if batch number is valid
-		if item_det.has_batch_no == 1:
-			batch_item = (
-				self.item_code
-				if self.item_code == item_det.item_name
-				else self.item_code + ":" + item_det.item_name
-			)
-			if not self.batch_no:
-				frappe.throw(_("Batch number is mandatory for Item {0}").format(batch_item))
-			elif not frappe.db.get_value("Batch", {"item": self.item_code, "name": self.batch_no}):
-				frappe.throw(
-					_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, batch_item)
-				)
-
-		elif item_det.has_batch_no == 0 and self.batch_no and self.is_cancelled == 0:
-			frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
-
-		if item_det.has_variants:
+		if item_detail.has_variants:
 			frappe.throw(
 				_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock,
 			)
 
-		self.stock_uom = item_det.stock_uom
+		if item_detail.is_stock_item != 1:
+			frappe.throw(_("Item {0} must be a stock Item").format(self.item_code))
+
+		if item_detail.has_serial_no or item_detail.has_batch_no:
+			if not self.serial_and_batch_bundle:
+				frappe.throw(_(f"Serial No and Batch No are mandatory for Item {self.item_code}"))
+			elif self.item_code != frappe.get_cached_value(
+				"Serial and Batch Bundle", self.serial_and_batch_bundle, "item_code"
+			):
+				frappe.throw(
+					_(
+						f"Serial No and Batch No Bundle {self.serial_and_batch_bundle} is not for Item {self.item_code}"
+					)
+				)
+
+		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
+			frappe.throw(_(f"Serial No and Batch No are not allowed for Item {self.item_code}"))
+
+		if self.stock_uom != item_detail.stock_uom:
+			self.stock_uom = item_detail.stock_uom
 
 	def check_stock_frozen_date(self):
 		stock_settings = frappe.get_cached_doc("Stock Settings")

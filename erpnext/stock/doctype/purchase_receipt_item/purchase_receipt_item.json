@@ -91,14 +91,12 @@
   "delivery_note_item",
   "putaway_rule",
   "section_break_45",
-  "allow_zero_valuation_rate",
-  "bom",
-  "serial_no",
+  "update_serial_batch_bundle",
+  "serial_and_batch_bundle",
   "col_break5",
+  "allow_zero_valuation_rate",
   "include_exploded_items",
-  "batch_no",
-  "rejected_serial_no",
-  "item_tax_rate",
+  "bom",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -110,6 +108,7 @@
   "manufacturer_part_no",
   "accounting_details_section",
   "expense_account",
+  "item_tax_rate",
   "column_break_102",
   "provisional_expense_account",
   "accounting_dimensions_section",
@@ -565,37 +564,8 @@
   },
   {
    "fieldname": "section_break_45",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "label": "Serial No",
-   "no_copy": 1,
-   "oldfieldname": "serial_no",
-   "oldfieldtype": "Text"
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "batch_no",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Batch No",
-   "no_copy": 1,
-   "oldfieldname": "batch_no",
-   "oldfieldtype": "Link",
-   "options": "Batch",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "eval:!doc.is_fixed_asset",
-   "fieldname": "rejected_serial_no",
-   "fieldtype": "Small Text",
-   "label": "Rejected Serial No",
-   "no_copy": 1,
-   "print_hide": 1
+   "fieldtype": "Section Break",
+   "label": "Serial and Batch No"
   },
   {
    "fieldname": "item_tax_template",
@@ -1016,12 +986,23 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "options": "Serial and Batch Bundle"
+  },
+  {
+   "fieldname": "update_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-28 15:43:04.470104",
+ "modified": "2023-02-28 16:43:04.470104",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

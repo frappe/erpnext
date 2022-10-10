@@ -616,3 +616,195 @@ function check_can_calculate_pending_qty(me) {
 }
 
 //# sourceURL=serial_no_batch_selector.js
+
+
+erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
+	constructor(frm, item, callback) {
+		this.frm = frm;
+		this.item = item;
+		this.qty = item.qty;
+		this.callback = callback;
+		this.make();
+		this.render_data();
+	}
+
+	make() {
+		this.dialog = new frappe.ui.Dialog({
+			title: __('Update Serial No / Batch No'),
+			fields: this.get_dialog_fields(),
+			primary_action_label: __('Update'),
+			primary_action: () => this.update_ledgers()
+		});
+		this.dialog.show();
+	}
+
+	get_serial_no_filters() {
+		return {
+			'item_code': this.item.item_code,
+			'warehouse': ["=", ""],
+			'delivery_document_no': ["=", ""],
+		};
+	}
+
+	get_dialog_fields() {
+		let fields = [];
+
+		if (this.item.has_serial_no) {
+			fields.push({
+				fieldtype: 'Link',
+				fieldname: 'scan_serial_no',
+				label: __('Scan Serial No'),
+				options: 'Serial No',
+				get_query: () => {
+					return {
+						filters: this.get_serial_no_filters()
+					};
+				},
+				onchange: () => this.update_serial_batch_no()
+			});
+		}
+
+		if (this.item.has_batch_no && this.item.has_serial_no) {
+			fields.push({
+				fieldtype: 'Column Break',
+				label: __('Batch No')
+			});
+		}
+
+		if (this.item.has_batch_no) {
+			fields.push({
+				fieldtype: 'Link',
+				fieldname: 'scan_batch_no',
+				label: __('Scan Batch No'),
+				options: 'Batch',
+				onchange: () => this.update_serial_batch_no()
+			});
+		}
+
+		if (this.item.has_batch_no && this.item.has_serial_no) {
+			fields.push({
+				fieldtype: 'Section Break',
+			});
+		}
+
+		fields.push({
+			fieldname: 'ledgers',
+			fieldtype: 'Table',
+			allow_bulk_edit: true,
+			data: [],
+			fields: this.get_dialog_table_fields(),
+		});
+
+		return fields;
+	}
+
+	get_dialog_table_fields() {
+		let fields = []
+
+		if (this.item.has_serial_no) {
+			fields.push({
+				fieldtype: 'Link',
+				options: 'Serial No',
+				fieldname: 'serial_no',
+				label: __('Serial No'),
+				in_list_view: 1,
+				get_query: () => {
+					return {
+						filters: this.get_serial_no_filters()
+					}
+				}
+			})
+		} else if (this.item.has_batch_no) {
+			fields = [
+				{
+					fieldtype: 'Link',
+					options: 'Batch',
+					fieldname: 'batch_no',
+					label: __('Batch No'),
+					in_list_view: 1,
+				},
+				{
+					fieldtype: 'Float',
+					fieldname: 'qty',
+					label: __('Quantity'),
+					in_list_view: 1,
+				}
+			]
+		}
+
+		fields.push({
+			fieldtype: 'Data',
+			fieldname: 'name',
+			label: __('Name'),
+			hidden: 1,
+		})
+
+		return fields;
+	}
+
+	update_serial_batch_no() {
+		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
+
+		if (scan_serial_no) {
+			this.dialog.fields_dict.ledgers.df.data.push({
+				serial_no: scan_serial_no
+			});
+
+			this.dialog.fields_dict.scan_serial_no.set_value('');
+		} else if (scan_batch_no) {
+			this.dialog.fields_dict.ledgers.df.data.push({
+				batch_no: scan_batch_no
+			});
+
+			this.dialog.fields_dict.scan_batch_no.set_value('');
+		}
+
+		this.dialog.fields_dict.ledgers.grid.refresh();
+	}
+
+	update_ledgers() {
+		if (!this.frm.is_new()) {
+			let ledgers = this.dialog.get_values().ledgers;
+
+			if (ledgers && !ledgers.length) {
+				frappe.throw(__('Please add atleast one Serial No / Batch No'));
+			}
+
+			frappe.call({
+				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_no_ledgers',
+				args: {
+					ledgers: ledgers,
+					child_row: this.item
+				}
+			}).then(r => {
+				this.callback && this.callback(r.message);
+				this.dialog.hide();
+			})
+		}
+	}
+
+	render_data() {
+		if (!this.frm.is_new() && this.item.serial_and_batch_bundle) {
+			frappe.call({
+				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_no_ledgers',
+				args: {
+					item_code: this.item.item_code,
+					name: this.item.serial_and_batch_bundle,
+					voucher_no: this.item.parent,
+				}
+			}).then(r => {
+				if (r.message) {
+					this.set_data(r.message);
+				}
+			})
+		}
+	}
+
+	set_data(data) {
+		data.forEach(d => {
+			this.dialog.fields_dict.ledgers.df.data.push(d);
+		});
+
+		this.dialog.fields_dict.ledgers.grid.refresh();
+	}
+}
