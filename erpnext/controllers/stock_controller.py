@@ -89,8 +89,14 @@ class StockController(AccountsController):
 
 							sle = self.update_stock_ledger_entries(sle)
 						account_againts = ''
-						if self.get('is_depletion') == 1:
-							account_againts = '6.05.02.001 - Depletion Reserves - U6'
+						# Depliation account cheching
+						
+						if self.get('is_depletion') == 1 :
+							from nrp_manufacturing.nrp_manufacturing.utils import get_config_by_name
+							depliation_config = get_config_by_name("depletion_account", [])
+							depliation_account = depliation_config.get(self.company)						
+							if depliation_account:
+								account_againts = depliation_account['account']
 						else:
 							account_againts = item_row.expense_account
 						gl_list.append(self.get_gl_dict({
