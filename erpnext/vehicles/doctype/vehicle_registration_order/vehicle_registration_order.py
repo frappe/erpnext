@@ -931,7 +931,7 @@ def get_registration_receipt(vehicle_registration_order):
 
 
 @frappe.whitelist()
-def get_sales_invoice(vehicle_registration_order):
+def make_sales_invoice(vehicle_registration_order):
 	from erpnext.controllers.accounts_controller import get_taxes_and_charges, get_default_taxes_and_charges
 
 	vro = frappe.get_doc("Vehicle Registration Order", vehicle_registration_order)

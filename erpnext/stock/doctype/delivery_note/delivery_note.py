@@ -473,18 +473,18 @@ def update_directly_billed_qty_for_dn(delivery_note, delivery_note_item, update_
 	else:
 		is_delivery_return = delivery_note.get('is_return')
 
-	bill_only_to_customer = frappe.db.get_value("Delivery Note Item", delivery_note_item, "bill_only_to_customer")
-	bill_only_to_customer_cond = ""
-	if bill_only_to_customer:
-		bill_only_to_customer_cond = " and (inv.bill_to = {0} or i.amount != 0)"\
-			.format(frappe.db.escape(bill_only_to_customer))
+	claim_customer = frappe.db.get_value("Delivery Note Item", delivery_note_item, "claim_customer")
+	claim_customer_cond = ""
+	if claim_customer:
+		claim_customer_cond = " and (inv.bill_to = {0} or i.amount != 0)"\
+			.format(frappe.db.escape(claim_customer))
 
 	billed = frappe.db.sql("""
 		select i.qty, i.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 		from `tabSales Invoice Item` i
 		inner join `tabSales Invoice` inv on inv.name = i.parent
 		where i.delivery_note_item=%s and inv.docstatus = 1 {0}
-	""".format(bill_only_to_customer_cond), delivery_note_item, as_dict=1)
+	""".format(claim_customer_cond), delivery_note_item, as_dict=1)
 
 	billed_qty, billed_amt = calculate_billed_qty_and_amount(billed, for_delivery_return=is_delivery_return)
 	frappe.db.set_value("Delivery Note Item", delivery_note_item, {"billed_qty": billed_qty, "billed_amt": billed_amt},
@@ -492,11 +492,11 @@ def update_directly_billed_qty_for_dn(delivery_note, delivery_note_item, update_
 
 
 def update_indirectly_billed_qty_for_dn_against_so(sales_order_item, update_modified=True):
-	bill_only_to_customer = frappe.db.get_value("Sales Order Item", sales_order_item, "bill_only_to_customer")
-	bill_only_to_customer_cond = ""
-	if bill_only_to_customer:
-		bill_only_to_customer_cond = " and (inv.bill_to = {0} or item.amount != 0)" \
-			.format(frappe.db.escape(bill_only_to_customer))
+	claim_customer = frappe.db.get_value("Sales Order Item", sales_order_item, "claim_customer")
+	claim_customer_cond = ""
+	if claim_customer:
+		claim_customer_cond = " and (inv.bill_to = {0} or item.amount != 0)" \
+			.format(frappe.db.escape(claim_customer))
 
 	# Billed against Sales Order directly
 	billed_against_so = frappe.db.sql("""
@@ -504,7 +504,7 @@ def update_indirectly_billed_qty_for_dn_against_so(sales_order_item, update_modi
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
 		where inv.name = item.parent and inv.docstatus = 1
 			and item.sales_order_item=%s and (item.delivery_note_item is null or item.delivery_note_item = '') {0}
-	""".format(bill_only_to_customer_cond), sales_order_item, as_dict=1)
+	""".format(claim_customer_cond), sales_order_item, as_dict=1)
 
 	billed_qty_against_so, billed_amt_against_so = calculate_billed_qty_and_amount(billed_against_so)
 
@@ -535,7 +535,7 @@ def update_indirectly_billed_qty_for_dn_against_so(sales_order_item, update_modi
 				select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 				from `tabSales Invoice Item` item, `tabSales Invoice` inv
 				where inv.name=item.parent and item.delivery_note_item=%s and item.docstatus=1 {0}
-			""".format(bill_only_to_customer_cond), dnd.name, as_dict=1)
+			""".format(claim_customer_cond), dnd.name, as_dict=1)
 
 			billed_qty_against_dn, billed_amt_against_dn = calculate_billed_qty_and_amount(billed_against_dn)
 
@@ -575,7 +575,10 @@ def calculate_billed_qty_and_amount(billed_data, for_delivery_return=False):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None):
+def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postprocess=False):
+	if frappe.flags.args and only_items is None:
+		only_items = cint(frappe.flags.args.only_items)
+
 	def get_pending_qty(source_doc):
 		return source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
 
@@ -583,10 +586,14 @@ def make_sales_invoice(source_name, target_doc=None):
 		if source.name in [d.delivery_note_item for d in target_parent.get('items') if d.delivery_note_item]:
 			return False
 
-		if source.bill_only_to_customer:
+		if cint(target_parent.get('claim_billing')):
 			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
-			if not bill_to or bill_to != source.bill_only_to_customer:
-				return False
+			if bill_to:
+				if source.claim_customer != bill_to:
+					return False
+			else:
+				if not source.claim_customer:
+					return False
 
 		if source_parent.get('is_return'):
 			return get_pending_qty(source) <= 0
@@ -600,29 +607,19 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.depreciation_percentage = None
 
 		if target_parent:
-			target_parent.set_item_rate_zero_for_bill_only_to_customer(source, target)
+			target_parent.set_rate_zero_for_claim_item(source, target)
 
 		if source.serial_no and source_parent.per_billed > 0:
 			target.serial_no = get_delivery_note_serial_no(source.item_code,
 				target.qty, source_parent.name)
 
-	def set_missing_values(source, target):
+	def postprocess(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
-		# set company address
-		if source.company_address:
-			target.update({'company_address': source.company_address})
-		else:
-			# set company address
-			target.update(get_company_address(target.company))
-
-		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
-
-	doc = get_mapped_doc("Delivery Note", source_name, {
+	mapping = {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
 			"field_map": {
@@ -664,7 +661,14 @@ def make_sales_invoice(source_name, target_doc=None):
 			},
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}
+
+	if only_items:
+		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Delivery Note Item"}
+
+	doc = get_mapped_doc("Delivery Note", source_name, mapping, target_doc,
+		postprocess=postprocess if not skip_postprocess else None,
+		explicit_child_tables=only_items)
 
 	return doc
 

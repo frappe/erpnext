@@ -353,8 +353,8 @@ class SalesOrder(SellingController):
 				for d in billed_by_sinv:
 					bill_to = d.bill_to or d.customer
 					so_row = self.getone('items', {'name': d.sales_order_item})
-					bill_only_to_customer = so_row.bill_only_to_customer if so_row else None
-					if not d.amount and bill_only_to_customer and bill_to != bill_only_to_customer:
+					claim_customer = so_row.claim_customer if so_row else None
+					if not d.amount and claim_customer and bill_to != claim_customer:
 						continue
 
 					out.billed_amount_map.setdefault(d.sales_order_item, 0)
@@ -998,8 +998,11 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, only_items=None, skip_postprocess=False):
 	unbilled_dn_qty_map = get_unbilled_dn_qty_map(source_name)
+
+	if frappe.flags.args and only_items is None:
+		only_items = cint(frappe.flags.args.only_items)
 
 	def get_pending_qty(source):
 		billable_qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
@@ -1010,6 +1013,15 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item and not d.delivery_note_item]:
 			return False
 
+		if cint(target_parent.get('claim_billing')):
+			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
+			if bill_to:
+				if source.claim_customer != bill_to:
+					return False
+			else:
+				if not source.claim_customer:
+					return False
+
 		return get_pending_qty(source)
 
 	def update_item(source, target, source_parent, target_parent):
@@ -1018,7 +1030,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.depreciation_percentage = None
 
 		if target_parent:
-			target_parent.set_item_rate_zero_for_bill_only_to_customer(source, target)
+			target_parent.set_rate_zero_for_claim_item(source, target)
 
 	def postprocess(source, target):
 		split_vehicle_items_by_qty(target)
@@ -1030,15 +1042,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
-		if source.company_address:
-			target.update({'company_address': source.company_address})
-		else:
-			# set company address
-			target.update(get_company_address(target.company))
-
-		if target.company_address:
-			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
-
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
@@ -1046,7 +1049,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
 
-	doclist = get_mapped_doc("Sales Order", source_name, {
+	mapping = {
 		"Sales Order": {
 			"doctype": "Sales Invoice",
 			"field_map": {
@@ -1080,7 +1083,15 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
+	}
+
+	if only_items:
+		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Sales Order Item"}
+
+	doclist = get_mapped_doc("Sales Order", source_name, mapping, target_doc,
+		postprocess=postprocess if not skip_postprocess else None,
+		ignore_permissions=ignore_permissions,
+		explicit_child_tables=only_items)
 
 	return doclist
 

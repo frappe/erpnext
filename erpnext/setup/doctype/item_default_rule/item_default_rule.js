@@ -25,7 +25,7 @@ frappe.ui.form.on('Item Default Rule', {
 			}
 		});
 
-		frm.set_query("bill_only_to_customer", erpnext.queries.customer);
+		frm.set_query("claim_customer", erpnext.queries.customer);
 		frm.set_query('default_supplier', erpnext.queries.supplier);
 		frm.set_query("item_code", function () {
 			return {

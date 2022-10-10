@@ -287,7 +287,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
-		"bill_only_to_customer": get_bill_only_to_customer(item, args),
+		"claim_customer": get_claim_customer(item, args),
 	})
 
 	out.update(get_item_defaults_details(args))
@@ -729,26 +729,26 @@ def get_price_list_rate(args, item_doc, out):
 				args.name, args.conversion_rate))
 
 
-def get_bill_only_to_customer(item, args):
-	bill_only_to_customer = None
+def get_claim_customer(item, args):
+	claim_customer = None
 
 	# from campaign
 	if args.campaign:
-		bill_only_to_customer = frappe.get_cached_value("Campaign", args.campaign, 'bill_only_to_customer')
+		claim_customer = frappe.get_cached_value("Campaign", args.campaign, 'claim_customer')
 
 	# from item defaults
-	if not bill_only_to_customer:
+	if not claim_customer:
 		default_values = get_item_default_values(item, args)
-		bill_only_to_customer = default_values.get('bill_only_to_customer')
+		claim_customer = default_values.get('claim_customer')
 
 	# from project warranty bill_to
-	if not bill_only_to_customer:
-		bill_only_to_customer = get_bill_only_to_customer_from_project(args.project)
+	if not claim_customer:
+		claim_customer = get_claim_customer_from_project(args.project)
 
-	return bill_only_to_customer
+	return claim_customer
 
 
-def get_bill_only_to_customer_from_project(project):
+def get_claim_customer_from_project(project):
 	if not project:
 		return None
 

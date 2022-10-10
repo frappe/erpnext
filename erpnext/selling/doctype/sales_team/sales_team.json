@@ -74,6 +74,7 @@
    "width": "120px"
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "commission_rate",
    "fieldtype": "Percent",
@@ -104,6 +105,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "sales_commission_category",
    "fieldtype": "Link",
    "label": "Sales Commission Category",
@@ -121,7 +123,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-06-15 14:15:00.550271",
+ "modified": "2022-10-05 17:03:42.456330",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Team",

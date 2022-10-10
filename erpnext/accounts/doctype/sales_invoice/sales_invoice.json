@@ -19,7 +19,7 @@
   "remarks",
   "stin",
   "vehicle_registration_order",
-  "bill_multiple_projects",
+  "claim_billing",
   "is_return",
   "return_against",
   "reopen_order",
@@ -2189,13 +2189,6 @@
    "label": "FBR POS Transaction Details"
   },
   {
-   "default": "0",
-   "fieldname": "bill_multiple_projects",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Bill Multiple Projects"
-  },
-  {
    "fetch_from": "applies_to_item.variant_of",
    "fieldname": "applies_to_variant_of",
    "fieldtype": "Link",
@@ -2220,12 +2213,19 @@
    "no_copy": 1,
    "options": "Purchase Invoice",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "claim_billing",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Claim Billing"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-08-06 13:27:20.896525",
+ "modified": "2022-10-08 14:17:00.398515",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

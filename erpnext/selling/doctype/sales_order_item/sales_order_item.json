@@ -109,9 +109,9 @@
   "gross_profit",
   "drop_ship_section",
   "supplier",
-  "column_break_94",
   "delivered_by_supplier",
-  "bill_only_to_customer",
+  "column_break_94",
+  "claim_customer",
   "warehouse_and_reference",
   "warehouse",
   "force_default_warehouse",
@@ -1268,14 +1268,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bill_only_to_customer",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Bill Only To Customer",
-   "options": "Customer",
-   "read_only": 1
-  },
-  {
    "fieldname": "project_template",
    "fieldtype": "Link",
    "label": "Project Template",
@@ -1291,11 +1283,19 @@
    "no_copy": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "claim_customer",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Claim Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-04-18 23:12:26.581685",
+ "modified": "2022-10-08 15:29:30.407455",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

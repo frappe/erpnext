@@ -8,8 +8,8 @@ from frappe import _
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate, flt, cstr, cint
 from collections import defaultdict
-from erpnext.stock.get_item_details import _get_item_tax_template
 from frappe.utils import unique
+
 
 # searches for active employees
 @frappe.whitelist()
@@ -436,11 +436,26 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
 	return _get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict)
 
+
 def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfield="name", start=0, page_len=0,
 		filters=None, as_dict=True, ignore_permissions=False):
 	fields = get_fields("Delivery Note", ["name", "customer", "customer_name", "posting_date", "project"])
 	select_fields = ", ".join(["`tabDelivery Note`.{0}".format(f) for f in fields])
 	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	claim_customer_cond = ""
+	if cint(filters.get('claim_billing')):
+		if filters.get('customer'):
+			claim_customer_op = "dni.claim_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			filters.pop("customer")
+		else:
+			claim_customer_op = "ifnull(dni.claim_customer, '') != ''"
+
+		claim_customer_cond = """ and exists(select dni.name from `tabDelivery Note Item` dni
+			where dni.parent = `tabDelivery Note`.name and {0})""".format(claim_customer_op)
+
+	if "claim_billing" in filters:
+		filters.pop("claim_billing")
 
 	return frappe.db.sql("""
 		select {fields}
@@ -451,17 +466,146 @@ def _get_delivery_notes_to_be_billed(doctype="Delivery Note", txt="", searchfiel
 			and `tabDelivery Note`.`status` not in ('Stopped', 'Closed')
 			and `tabDelivery Note`.per_completed < 100
 			and (`tabDelivery Note`.is_return = 0 or dr.per_completed < 100)
-			{fcond} {mcond}
-			order by `tabDelivery Note`.posting_date, `tabDelivery Note`.posting_time, `tabDelivery Note`.creation
-			{limit}
+			{claim_customer_cond} {fcond} {mcond}
+		order by `tabDelivery Note`.posting_date, `tabDelivery Note`.posting_time, `tabDelivery Note`.creation
+		{limit}
 	""".format(
 		fields=select_fields,
 		key=searchfield,
 		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
 		mcond="" if ignore_permissions else get_match_cond(doctype),
+		claim_customer_cond=claim_customer_cond,
 		limit=limit,
 		txt="%(txt)s",
 	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_sales_orders_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
+	return _get_sales_orders_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def _get_sales_orders_to_be_billed(doctype="Sales Order", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True, ignore_permissions=False):
+	fields = get_fields(doctype, ["name", "customer", "customer_name", "transaction_date", "project"])
+	select_fields = ", ".join(["`tabSales Order`.{0}".format(f) for f in fields])
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	claim_customer_cond = ""
+	if cint(filters.get('claim_billing')):
+		if filters.get('customer'):
+			claim_customer_op = "soi.claim_customer = {0}".format(frappe.db.escape(filters.get('customer')))
+			filters.pop("customer")
+		else:
+			claim_customer_op = "ifnull(soi.claim_customer, '') != ''"
+
+		claim_customer_cond = """ and exists(select soi.name from `tabSales Order Item` soi
+			where soi.parent = `tabSales Order`.name and {0})""".format(claim_customer_op)
+
+	if "claim_billing" in filters:
+		filters.pop("claim_billing")
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabSales Order`
+		where `tabSales Order`.docstatus = 1
+			and `tabSales Order`.`{key}` like {txt}
+			and `tabSales Order`.`status` not in ('Closed', 'On Hold')
+			and `tabSales Order`.per_completed < 100
+			{claim_customer_cond} {fcond} {mcond}
+		order by `tabSales Order`.transaction_date, `tabSales Order`.creation
+		{limit}
+	""".format(
+		fields=select_fields,
+		key=searchfield,
+		fcond=get_filters_cond(doctype, filters, [], ignore_permissions=ignore_permissions),
+		mcond="" if ignore_permissions else get_match_cond(doctype),
+		claim_customer_cond=claim_customer_cond,
+		limit=limit,
+		txt="%(txt)s",
+	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_projects_to_be_billed(doctype="Project", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True, ignore_permissions=False):
+
+	# Build Filters
+	allowed_transaction_filters = []
+	exluded_custom_filters = ['name', 'project', 'claim_billing',
+		'transaction_date', 'posting_date', 'project_date', 'customer']
+
+	sales_order_meta = frappe.get_meta("Sales Order")
+	delivery_note_meta = frappe.get_meta("Sales Order")
+	project_meta = frappe.get_meta("Project")
+
+	filters = frappe._dict(filters)
+	sales_order_filters = frappe._dict()
+	delivery_note_filters = frappe._dict()
+	project_filters = frappe._dict()
+
+	for f, v in filters.items():
+		if (sales_order_meta.has_field(f) or f in allowed_transaction_filters) and f not in exluded_custom_filters:
+			sales_order_filters[f] = v
+
+		if (delivery_note_meta.has_field(f) or f in allowed_transaction_filters) and f not in exluded_custom_filters:
+			delivery_note_filters[f] = v
+
+		if project_meta.has_field(f) and f not in exluded_custom_filters:
+			project_filters[f] = v
+
+	sales_order_filters['claim_billing'] = 1
+	delivery_note_filters['claim_billing'] = 1
+
+	delivery_note_filters['is_return'] = 0
+
+	if filters.get('project'):
+		project_filters['name'] = filters.get('project')
+		sales_order_filters['project'] = filters.get('project')
+		delivery_note_filters['project'] = filters.get('project')
+	if filters.get('name'):
+		project_filters['name'] = filters.get('name')
+		sales_order_filters['project'] = filters.get('name')
+		delivery_note_filters['project'] = filters.get('name')
+
+	if filters.get('project_date'):
+		project_filters['project_date'] = filters.get('project_date')
+
+	if filters.get('customer'):
+		sales_order_filters['customer'] = filters.get('customer')
+		delivery_note_filters['customer'] = filters.get('customer')
+
+	# Get Sales Orders and Delivery Notes
+	sales_orders = _get_sales_orders_to_be_billed(filters=sales_order_filters)
+	delivery_notes = _get_delivery_notes_to_be_billed(filters=delivery_note_filters)
+
+	project_names = list(set([d.project for d in sales_orders if d.project] + [d.project for d in delivery_notes if d.project]))
+	if not project_names:
+		return []
+
+	# Project Query
+	fields = get_fields(doctype, ["name", "project_type", "customer", "customer_name", "project_date"])
+	select_fields = ", ".join(["`tabProject`.{0}".format(f) for f in fields])
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabProject`
+		where `tabProject`.`{key}` like {txt}
+			and `tabProject`.`name` in %(project_names)s
+			{fcond} {mcond}
+		order by `tabProject`.project_date, `tabProject`.creation
+		{limit}
+	""".format(
+		fields=select_fields,
+		key=searchfield,
+		fcond=get_filters_cond(doctype, project_filters, [], ignore_permissions=ignore_permissions),
+		mcond="" if ignore_permissions else get_match_cond(doctype),
+		limit=limit,
+		txt="%(txt)s",
+	), {"txt": ("%%%s%%" % txt), "project_names": project_names}, as_dict=as_dict)
 
 
 @frappe.whitelist()
@@ -542,6 +686,7 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.desk.reportview.execute("Account", filters = filter_list,
 		fields = ["name", "parent_account"],
 		limit_start=start, limit_page_length=page_len, as_list=True)
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -873,6 +1018,7 @@ def vehicle_color_query(doctype, txt, searchfield, start, page_len, filters):
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	item_condition = ""
+
 	def add_vehicle_color_condition(item_doc):
 		colors = [frappe.db.escape(d.vehicle_color) for d in item_doc.vehicle_colors]
 		return " and name in ({0})".format(", ".join(colors))
