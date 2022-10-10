@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import date_diff, flt, get_first_day, get_last_day, getdate
 
 from erpnext.utilities.product import get_price
+from dateutil import relativedelta
 
 
 class SubscriptionPlan(Document):
@@ -49,7 +50,7 @@ def get_plan_rate(
 		start_date = getdate(start_date)
 		end_date = getdate(end_date)
 
-		no_of_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
+		no_of_months = relativedelta.relativedelta(end_date, start_date).months + 1
 		cost = plan.cost * no_of_months
 
 		# Adjust cost if start or end date is not month start or end
