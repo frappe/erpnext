@@ -275,11 +275,13 @@
 		<div class="mb-3 review">
 			{{ ratings_with_title(review.rating, _(review.review_title), "sm", "user-review-title") }}
 
+			{% if _(review.comment) %}
 			<div class="product-description mb-4">
 				<p>
 					{{ _(review.comment) }}
 				</p>
 			</div>
+			{% endif %}
 
 			<div class="review-signature mb-2">
 				<span class="reviewer">{{ _(review.customer) }}</span>
