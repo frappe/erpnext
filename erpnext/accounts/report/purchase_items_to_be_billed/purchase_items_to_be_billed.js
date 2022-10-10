@@ -24,7 +24,7 @@ frappe.query_reports["Purchase Items To Be Billed"] = {
 			fieldname: "doctype",
 			label: __("Document Type"),
 			fieldtype: "Select",
-			options: "\nPurchase Order\nnPurchase Receipt",
+			options: "\nPurchase Order\nPurchase Receipt",
 		},
 		{
 			fieldname: "name",
@@ -112,5 +112,26 @@ frappe.query_reports["Purchase Items To Be Billed"] = {
 			fieldtype: "Link",
 			options: "Territory"
 		}
-	]
+	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (["remaining_qty", "remaining_amt"].includes(column.fieldname)) {
+			style['font-weight'] = 'bold';
+		}
+
+		if (["billed_qty", "billed_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'blue';
+			}
+		}
+
+		if (["returned_qty", "returned_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'orange';
+			}
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
 };

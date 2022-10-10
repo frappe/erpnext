@@ -122,21 +122,19 @@ frappe.query_reports["Sales Items To Be Billed"] = {
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
-		if (column.fieldname == "remaining_qty") {
+		if (["remaining_qty", "remaining_amt"].includes(column.fieldname)) {
 			style['font-weight'] = 'bold';
 		}
-		
-		if (column.fieldname == "billed_qty") {
-			if (flt(value) > 0) {
-				style['color'] = 'green';
-			} else {
-				style['color'] = 'red';
+
+		if (["billed_qty", "billed_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'blue';
 			}
 		}
 
-		if (column.fieldname == "delay_days") {
-			if (flt(value) > 5) {
-				style['color'] = 'red';
+		if (["returned_qty", "returned_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'orange';
 			}
 		}
 

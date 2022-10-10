@@ -226,6 +226,12 @@ class OrderItemFulfilmentTracker:
 	def get_columns(self):
 		columns = [
 			{
+				"label": _("Order Date"),
+				"fieldname": "transaction_date",
+				"fieldtype": "Date",
+				"width": 80
+			},
+			{
 				"label": _(self.filters.doctype),
 				"fieldname": "name",
 				"fieldtype": "Link",
@@ -244,12 +250,6 @@ class OrderItemFulfilmentTracker:
 				"fieldname": "party_name",
 				"fieldtype": "Data",
 				"width": 150
-			},
-			{
-				"label": _("Order Date"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 80
 			},
 			{
 				"label": _("Item Code"),

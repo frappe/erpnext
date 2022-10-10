@@ -114,6 +114,12 @@ frappe.query_reports["Purchase Items To Be Received"] = {
 			}
 		}
 
+		if (column.fieldname == "completed_qty") {
+			if (flt(value)) {
+				style['color'] = 'blue';
+			}
+		}
+
 		if (column.fieldname == "delay_days") {
 			if (flt(value) > 0) {
 				style['color'] = 'red';

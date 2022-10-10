@@ -48,9 +48,12 @@ class ItemsToBeBilled:
 			party_join = "inner join `tabSupplier` sup on sup.name = o.supplier"
 
 		common_fields = """
-			o.name, o.company, o.creation, o.{party_field} as party, o.{party_name_field} as party_name,
-			o.currency, i.item_code, i.item_name, i.warehouse, i.{qty_field} as qty, i.uom, i.stock_uom, i.alt_uom,
-			i.billed_qty, i.returned_qty, i.rate, i.amount, im.item_group, im.brand {sales_person_field}
+			o.name, o.company, o.creation, o.currency,
+			o.{party_field} as party, o.{party_name_field} as party_name,
+			i.item_code, i.item_name, i.warehouse,
+			i.{qty_field} as qty, i.uom, i.stock_uom, i.alt_uom,
+			i.billed_qty, i.returned_qty, i.billed_amt,
+			i.rate, i.amount, im.item_group, im.brand {sales_person_field}
 		""".format(
 			party_field=fieldnames.party,
 			party_name_field=fieldnames.party_name,
@@ -82,8 +85,6 @@ class ItemsToBeBilled:
 				party_join=party_join,
 				conditions=conditions,
 			), self.filters, as_dict=1)
-
-
 
 		delivery_data = []
 		if not self.filters.doctype or self.filters.doctype == delivery_doctype:
@@ -212,10 +213,15 @@ class ItemsToBeBilled:
 			else:
 				d.uom = d.stock_uom
 			d['rate'] = d['amount'] / d['qty'] if d['qty'] else d['rate']
-			d["remaining_qty"] = d["qty"] - d["billed_qty"]
+			d["remaining_qty"] = d["qty"] - d["billed_qty"] - d['returned_qty']
+
+			d["remaining_amt"] = d["amount"] - d["billed_amt"]
+			if d["amount"] >= 0:
+				d["remaining_amt"] = max(0, d["remaining_amt"])
+			else:
+				d["remaining_amt"] = min(0, d["remaining_amt"])
+
 			d["delay_days"] = max((getdate() - getdate(d["transaction_date"])).days, 0)
-			d["balance"] = d["remaining_qty"] * d["rate"]
-			d["paid"] = d["amount"] - d["balance"]
 
 			d["disable_item_formatter"] = cint(self.show_item_name)
 			d["disable_party_name_formatter"] = cint(self.show_party_name)
@@ -223,11 +229,16 @@ class ItemsToBeBilled:
 	def get_columns(self):
 		columns = [
 			{
+				"label": _("Date"),
+				"fieldname": "transaction_date",
+				"fieldtype": "Date",
+				"width": 80
+			},
+			{
 				"label": _("Type"),
 				"fieldname": "doctype",
-				"fieldtype": "Link",
-				"options": "DocType",
-				"width": 100
+				"fieldtype": "Data",
+				"width": 90 if self.filters.party_type == "Customer" else 110
 			},
 			{
 				"label": _("Document"),
@@ -250,12 +261,6 @@ class ItemsToBeBilled:
 				"width": 150
 			},
 			{
-				"label": _("Date"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 80
-			},
-			{
 				"label": _("Item Code"),
 				"fieldname": "item_code",
 				"fieldtype": "Link",
@@ -267,13 +272,6 @@ class ItemsToBeBilled:
 				"fieldname": "item_name",
 				"fieldtype": "Data",
 				"width": 150
-			},
-			{
-				"label": _("Rate"),
-				"fieldname": "rate",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
 			},
 			{
 				"label": _("UOM"),
@@ -307,12 +305,6 @@ class ItemsToBeBilled:
 				"width": 80
 			},
 			{
-				"label": _("Delay Days"),
-				"fieldname": "delay_days",
-				"fieldtype": "Int",
-				"width": 85
-			},
-			{
 				"label": _("Amount"),
 				"fieldname": "amount",
 				"fieldtype": "Currency",
@@ -320,15 +312,15 @@ class ItemsToBeBilled:
 				"width": 120
 			},
 			{
-				"label": _("Paid"),
-				"fieldname": "paid",
+				"label": _("Billed Amount"),
+				"fieldname": "billed_amt",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
 			},
 			{
-				"label": _("Balance"),
-				"fieldname": "balance",
+				"label": _("Remaining Amount"),
+				"fieldname": "remaining_amt",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
@@ -338,6 +330,12 @@ class ItemsToBeBilled:
 				"fieldtype": "Data",
 				"fieldname": "sales_person",
 				"width": 150
+			},
+			{
+				"label": _("Delay Days"),
+				"fieldname": "delay_days",
+				"fieldtype": "Int",
+				"width": 85
 			},
 			{
 				"label": _("Item Group"),
