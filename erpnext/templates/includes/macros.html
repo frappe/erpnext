@@ -215,7 +215,7 @@
 	</p>
 	<div class="rating {{ 'ratings-pill' if for_summary else ''}}">
 		{% for i in range(1,6) %}
-			{% set fill_class = 'star-click' if i <= avg_rating else '' %}
+			{% set fill_class = 'star-click' if i <= avg_rating*5 else '' %}
 			<svg class="icon icon-{{ size }} {{ fill_class }}">
 				<use href="#icon-star"></use>
 			</svg>
@@ -237,7 +237,7 @@
 		<!-- Ratings Summary -->
 		{% if reviews %}
 			{% set rating_title = frappe.utils.cstr(average_rating) + " " + _("out of 5") if not for_summary else ''%}
-			{{ ratings_with_title(average_whole_rating, rating_title, "md", "rating-summary-title", for_summary) }}
+			{{ ratings_with_title(average_whole_rating/5, rating_title, "md", "rating-summary-title", for_summary) }}
 		{% endif %}
 
 		<div class="mt-2">{{ frappe.utils.cstr(average_rating or 0) + " " + _("out of 5") }}</div>
