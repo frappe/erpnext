@@ -514,7 +514,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-09-14 12:03:18.969933",
+ "modified": "2022-10-10 10:22:27.605302",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -591,6 +591,7 @@
  "search_fields": "party_name, customer_name, scheduled_dt",
  "sort_field": "scheduled_dt",
  "sort_order": "DESC",
+ "timeline_field": "party_name",
  "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1

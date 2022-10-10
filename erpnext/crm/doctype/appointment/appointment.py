@@ -854,3 +854,26 @@ def send_appointment_reminder_notifications():
 	for name in appointments_to_remind:
 		doc = frappe.get_doc("Appointment", name)
 		doc.send_appointment_reminder_notification()
+
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Appointment", filters)
+
+	data = frappe.db.sql("""
+		select
+			`tabAppointment`.name, `tabAppointment`.customer_name, `tabAppointment`.status,
+			`tabAppointment`.scheduled_dt, `tabAppointment`.end_dt, `tabAppointment`.status
+		from
+			`tabAppointment`
+		where ifnull(`tabAppointment`.scheduled_dt, '0000-00-00') != '0000-00-00'
+			and `tabAppointment`.scheduled_dt between %(start)s and %(end)s
+			and `tabAppointment`.docstatus < 2
+			{conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+
+	return data
