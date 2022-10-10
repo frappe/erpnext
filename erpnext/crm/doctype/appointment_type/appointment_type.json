@@ -129,7 +129,7 @@
    "label": "Create Calendar Event"
   }
  ],
- "modified": "2022-07-28 15:01:39.788403",
+ "modified": "2022-10-10 17:27:00.077483",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Type",
@@ -175,7 +175,7 @@
    "share": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "idx",
  "sort_order": "DESC",
  "track_changes": 1
 }
