@@ -283,12 +283,22 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Sales Order Items To Be Delivered",
+					"name": "Sales Items To Be Delivered",
+				},
+				{
+					"type": "report",
+					"name": "Sales Items To Be Billed",
+					"is_query_report": True,
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase Order Items To Be Received",
+					"name": "Purchase Items To Be Received",
+				},
+				{
+					"type": "report",
+					"name": "Purchase Items To Be Billed",
+					"is_query_report": True,
 				},
 				{
 					"type": "report",

@@ -3,112 +3,133 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt, cint, cstr, getdate
 from six import string_types
 
 
 def execute(filters=None):
-	return OrderItemFulfilmentTracker(filters).run("Sales Order")
+	return ItemsToBeBilled(filters).run("Customer")
 
 
-class OrderItemFulfilmentTracker:
+class ItemsToBeBilled:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or dict())
 
-	def run(self, doctype):
-		self.filters.doctype = doctype
-		self.filters.party_type = "Customer" if doctype == "Sales Order" else "Supplier"
+	def run(self, party_type):
+		self.filters.party_type = party_type
 		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
 		self.show_party_name = False
-		if self.filters.party_type == "Customer":
+		if party_type == "Customer":
 			self.show_party_name = frappe.defaults.get_global_default('cust_master_name') == "Naming Series"
-		if self.filters.party_type == "Supplier":
+		if party_type == "Supplier":
 			self.show_party_name = frappe.defaults.get_global_default('supp_master_name') == "Naming Series"
 
-		columns = self.get_columns()
+		self.get_columns()
 		self.get_data()
 		self.prepare_data()
-
-		return columns, self.data
+		return self.columns, self.data
 
 	def get_data(self):
+		order_doctype = "Sales Order" if self.filters.party_type == "Customer" else "Purchase Order"
+		delivery_doctype = "Delivery Note" if self.filters.party_type == "Customer" else "Purchase Receipt"
+
 		fieldnames = self.get_fieldnames()
-		conditions = self.get_conditions()
 
 		party_join = ""
+		sales_person_join = ""
+		sales_person_field = ""
 		if self.filters.party_type == "Customer":
 			party_join = "inner join `tabCustomer` cus on cus.name = o.customer"
+			sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person"
+			sales_person_join = "left join `tabSales Team` sp on sp.parent = o.name and sp.parenttype = {0}"
 		elif self.filters.party_type == "Supplier":
 			party_join = "inner join `tabSupplier` sup on sup.name = o.supplier"
 
-		sales_person_field = ""
-		sales_person_join = ""
-		if self.filters.party_type == "Customer":
-			sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person"
-			sales_person_join = "left join `tabSales Team` sp on sp.parent = o.name and sp.parenttype = %(doctype)s"
-
-		self.data = frappe.db.sql("""
-			SELECT
-				o.name, o.company, o.status, o.transaction_date, i.{schedule_date_field} as schedule_date,
-				o.{party_field} as party, o.{party_name_field} as party_name, o.project, o.currency,
-				i.item_code, i.item_name, i.warehouse,
-				i.{qty_field} as qty, i.{completed_qty_field} as completed_qty,
-				i.rate, i.amount,
-				i.uom, i.stock_uom, i.alt_uom,
-				i.brand, i.item_group {sales_person_field}
-			FROM `tab{doctype}` o
-			INNER JOIN `tab{doctype} Item` i ON i.parent = o.name
-			INNER JOIN `tabItem` im on im.name = i.item_code
-			{party_join}
-			{sales_person_join}
-			WHERE
-				o.docstatus = 1 AND o.status != 'Closed' AND i.{completed_qty_field} < i.qty
-				AND (im.is_stock_item = 1 OR im.is_fixed_asset = 1)
-				{conditions}
-			GROUP BY o.name, i.name
-			ORDER BY o.transaction_date, o.creation
+		common_fields = """
+			o.name, o.company, o.creation, o.currency,
+			o.{party_field} as party, o.{party_name_field} as party_name,
+			i.item_code, i.item_name, i.warehouse,
+			i.{qty_field} as qty, i.uom, i.stock_uom, i.alt_uom,
+			i.billed_qty, i.returned_qty, i.billed_amt,
+			i.rate, i.amount, im.item_group, im.brand {sales_person_field}
 		""".format(
 			party_field=fieldnames.party,
 			party_name_field=fieldnames.party_name,
-			schedule_date_field=fieldnames.schedule_date,
 			qty_field=fieldnames.qty,
-			completed_qty_field=fieldnames.completed_qty,
-			doctype=self.filters.doctype,
 			sales_person_field=sales_person_field,
-			party_join=party_join,
-			sales_person_join=sales_person_join,
-			conditions=conditions,
-		), self.filters, as_dict=1)
+		)
+
+		order_data = []
+		if not self.filters.doctype or self.filters.doctype == order_doctype:
+			conditions = self.get_conditions(order_doctype)
+
+			order_data = frappe.db.sql("""
+				SELECT '{doctype}' as doctype, o.transaction_date, {common_fields}
+				FROM `tab{doctype}` o
+				INNER JOIN `tab{doctype} Item` i ON i.parent = o.name
+				INNER JOIN `tabItem` im on im.name = i.item_code
+				{sales_person_join}
+				{party_join}
+				WHERE
+					o.docstatus = 1 AND o.status != 'Closed'
+					AND (i.billed_qty + i.returned_qty) < i.qty
+					AND (im.is_stock_item = 0 AND im.is_fixed_asset = 0)
+					{conditions}
+				GROUP BY o.name, i.name
+			""".format(
+				doctype=order_doctype,
+				common_fields=common_fields,
+				sales_person_join=sales_person_join.format(frappe.db.escape(order_doctype)),
+				party_join=party_join,
+				conditions=conditions,
+			), self.filters, as_dict=1)
+
+		delivery_data = []
+		if not self.filters.doctype or self.filters.doctype == delivery_doctype:
+			conditions = self.get_conditions(delivery_doctype)
+			delivery_data = frappe.db.sql("""
+				SELECT '{doctype}' as doctype, o.posting_date as transaction_date, {common_fields}
+				FROM `tab{doctype}` o
+				INNER JOIN `tab{doctype} Item` i ON i.parent = o.name
+				INNER JOIN `tabItem` im on im.name = i.item_code
+				{sales_person_join}
+				{party_join}
+				WHERE
+					o.docstatus = 1 AND o.status != 'Closed'
+					AND (i.billed_qty + i.returned_qty) < i.qty
+					AND (im.is_stock_item = 1 OR im.is_fixed_asset = 1 OR ifnull(i.{order_reference_field}, '') = '')
+					{conditions}
+				GROUP BY o.name, i.name
+			""".format(
+				doctype=delivery_doctype,
+				common_fields=common_fields,
+				order_reference_field=scrub(order_doctype),
+				party_join=party_join,
+				sales_person_join=sales_person_join.format(frappe.db.escape(delivery_doctype)),
+				conditions=conditions,
+			), self.filters, as_dict=1)
+
+		self.data = order_data + delivery_data
+		self.data = sorted(self.data, key=lambda d: (getdate(d.transaction_date), d.creation))
 
 	def get_fieldnames(self):
 		fields = frappe._dict({})
-		if self.filters.doctype == "Sales Order":
-			fields.completed_qty = "delivered_qty"
-			fields.schedule_date = "delivery_date"
 
-			fields.party = "customer"
-			fields.party_name = "customer_name"
-		elif self.filters.doctype == "Purchase Order":
-			fields.completed_qty = "received_qty"
-			fields.schedule_date = "schedule_date"
+		fields.party = scrub(self.filters.party_type)
+		fields.party_name = fields.party + "_name"
 
-			fields.party = "supplier"
-			fields.party_name = "supplier_name"
-
-		fields.qty = self.get_qty_fieldname()
-		return fields
-
-	def get_qty_fieldname(self):
-		filter_to_field = {
+		qty_field_filters = {
 			"Stock Qty": "stock_qty",
 			"Contents Qty": "alt_uom_qty",
 			"Transaction Qty": "qty"
 		}
-		return filter_to_field.get(self.filters.qty_field) or "stock_qty"
+		fields.qty = qty_field_filters.get(self.filters.qty_field) or "stock_qty"
 
-	def get_conditions(self):
+		return fields
+
+	def get_conditions(self, doctype):
 		conditions = []
 
 		if self.filters.company:
@@ -136,12 +157,12 @@ class OrderItemFulfilmentTracker:
 			conditions.append("""sup.supplier_group IN (SELECT name FROM `tabSupplier Group`
 				WHERE lft >= {0} AND rgt <= {1})""".format(lft, rgt))
 
-		if self.filters.get("territory"):
+		if self.filters.territory:
 			lft, rgt = frappe.db.get_value("Territory", self.filters.territory, ["lft", "rgt"])
 			conditions.append("""o.territory in (select name from `tabTerritory`
 				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
-		if self.filters.get("sales_person"):
+		if self.filters.sales_person:
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
 				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
@@ -163,19 +184,19 @@ class OrderItemFulfilmentTracker:
 		if self.filters.item_source:
 			conditions.append("im.item_source = %(item_source)s")
 
-		if self.filters.get("project"):
+		if self.filters.project:
 			if isinstance(self.filters.project, string_types):
 				self.filters.project = cstr(self.filters.get("project")).strip()
 				self.filters.project = [d.strip() for d in self.filters.project.split(',') if d]
 
-			if frappe.get_meta(self.filters.doctype + " Item").has_field("project") and frappe.get_meta(self.filters.doctype).has_field("project"):
+			if frappe.get_meta(doctype + " Item").has_field("project") and frappe.get_meta(doctype).has_field("project"):
 				conditions.append("IF(i.project IS NULL or i.project = '', o.project, i.project) in %(project)s")
-			elif frappe.get_meta(self.filters.doctype + " Item").has_field("project"):
+			elif frappe.get_meta(doctype + " Item").has_field("project"):
 				conditions.append("i.project in %(project)s")
-			elif frappe.get_meta(self.filters.doctype).has_field("project"):
+			elif frappe.get_meta(doctype).has_field("project"):
 				conditions.append("o.project in %(project)s")
 
-		if self.filters.get("warehouse"):
+		if self.filters.warehouse:
 			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
 			conditions.append("""i.warehouse in (select name from `tabWarehouse`
 				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
@@ -183,8 +204,6 @@ class OrderItemFulfilmentTracker:
 		return "AND {}".format(" AND ".join(conditions)) if conditions else ""
 
 	def prepare_data(self):
-		stock_qty_map = self.get_stock_qty_map()
-
 		for d in self.data:
 			# Set UOM based on qty field
 			if self.filters.qty_field == "Transaction Qty":
@@ -193,43 +212,39 @@ class OrderItemFulfilmentTracker:
 				d.uom = d.alt_uom or d.stock_uom
 			else:
 				d.uom = d.stock_uom
-
 			d['rate'] = d['amount'] / d['qty'] if d['qty'] else d['rate']
+			d["remaining_qty"] = d["qty"] - d["billed_qty"] - d['returned_qty']
 
-			d["remaining_qty"] = d["qty"] - d["completed_qty"]
-			d["actual_qty"] = flt(stock_qty_map.get((d.item_code, d.warehouse)))
+			d["remaining_amt"] = d["amount"] - d["billed_amt"]
+			if d["amount"] >= 0:
+				d["remaining_amt"] = max(0, d["remaining_amt"])
+			else:
+				d["remaining_amt"] = min(0, d["remaining_amt"])
 
-			d["delay_days"] = max((getdate() - getdate(d["schedule_date"])).days, 0)
+			d["delay_days"] = max((getdate() - getdate(d["transaction_date"])).days, 0)
 
 			d["disable_item_formatter"] = cint(self.show_item_name)
 			d["disable_party_name_formatter"] = cint(self.show_party_name)
 
-	def get_stock_qty_map(self):
-		stock_qty_data = []
-
-		item_warehouse_list = list(set([(d.item_code, d.warehouse) for d in self.data]))
-		if item_warehouse_list:
-			stock_qty_data = frappe.db.sql("""
-				select item_code, warehouse, sum(actual_qty) as actual_qty
-				from `tabBin`
-				where (item_code, warehouse) in %s
-				group by item_code, warehouse
-			""", [item_warehouse_list], as_dict=1)
-
-		stock_qty_map = {}
-		for d in stock_qty_data:
-			key = (d.item_code, d.warehouse)
-			stock_qty_map[key] = d.actual_qty
-
-		return stock_qty_map
-
 	def get_columns(self):
 		columns = [
 			{
-				"label": _(self.filters.doctype),
+				"label": _("Date"),
+				"fieldname": "transaction_date",
+				"fieldtype": "Date",
+				"width": 80
+			},
+			{
+				"label": _("Type"),
+				"fieldname": "doctype",
+				"fieldtype": "Data",
+				"width": 90 if self.filters.party_type == "Customer" else 110
+			},
+			{
+				"label": _("Document"),
 				"fieldname": "name",
-				"fieldtype": "Link",
-				"options": self.filters.doctype,
+				"fieldtype": "Dynamic Link",
+				"options": "doctype",
 				"width": 140
 			},
 			{
@@ -246,12 +261,6 @@ class OrderItemFulfilmentTracker:
 				"width": 150
 			},
 			{
-				"label": _("Order Date"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 80
-			},
-			{
 				"label": _("Item Code"),
 				"fieldname": "item_code",
 				"fieldtype": "Link",
@@ -263,13 +272,6 @@ class OrderItemFulfilmentTracker:
 				"fieldname": "item_name",
 				"fieldtype": "Data",
 				"width": 150
-			},
-			{
-				"label": _("Warehouse"),
-				"fieldname": "warehouse",
-				"fieldtype": "Link",
-				"options": "Warehouse",
-				"width": 90
 			},
 			{
 				"label": _("UOM"),
@@ -285,8 +287,14 @@ class OrderItemFulfilmentTracker:
 				"width": 80
 			},
 			{
-				"label": _("Delivered" if self.filters.doctype == "Sales Order" else "Received"),
-				"fieldname": "completed_qty",
+				"label": _("Billed"),
+				"fieldname": "billed_qty",
+				"fieldtype": "Float",
+				"width": 80
+			},
+			{
+				"label": _("Returned"),
+				"fieldname": "returned_qty",
 				"fieldtype": "Float",
 				"width": 80
 			},
@@ -297,10 +305,25 @@ class OrderItemFulfilmentTracker:
 				"width": 80
 			},
 			{
-				"label": _("In Stock"),
-				"fieldname": "actual_qty",
-				"fieldtype": "Float",
-				"width": 80
+				"label": _("Amount"),
+				"fieldname": "amount",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
+				"label": _("Billed Amount"),
+				"fieldname": "billed_amt",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
+				"label": _("Remaining Amount"),
+				"fieldname": "remaining_amt",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
 			},
 			{
 				"label": _("Sales Person"),
@@ -309,43 +332,10 @@ class OrderItemFulfilmentTracker:
 				"width": 150
 			},
 			{
-				"label": _("Scheduled Date"),
-				"fieldname": "schedule_date",
-				"fieldtype": "Date",
-				"width": 100
-			},
-			{
 				"label": _("Delay Days"),
 				"fieldname": "delay_days",
 				"fieldtype": "Int",
 				"width": 85
-			},
-			{
-				"label": _("Project"),
-				"fieldname": "project",
-				"fieldtype": "Link",
-				"options": "Project",
-				"width": 100
-			},
-			{
-				"label": _("Status"),
-				"fieldname": "status",
-				"fieldtype": "Data",
-				"width": 120
-			},
-			{
-				"label": _("Rate"),
-				"fieldname": "rate",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
-			},
-			{
-				"label": _("Amount"),
-				"fieldname": "amount",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
 			},
 			{
 				"label": _("Item Group"),
@@ -361,6 +351,13 @@ class OrderItemFulfilmentTracker:
 				"options": "Brand",
 				"width": 60
 			},
+			{
+				"label": _("Warehouse"),
+				"fieldname": "warehouse",
+				"fieldtype": "Link",
+				"options": "Warehouse",
+				"width": 90
+			},
 		]
 
 		if not self.show_item_name:
@@ -372,4 +369,4 @@ class OrderItemFulfilmentTracker:
 		if self.filters.party_type != "Customer":
 			columns = [c for c in columns if c['fieldname'] != 'sales_person']
 
-		return columns
+		self.columns = columns

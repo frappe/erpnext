@@ -1,36 +1,39 @@
 {
  "add_total_row": 1,
- "creation": "2022-09-28 17:18:32.712875",
+ "creation": "2022-10-06 15:58:13.689814",
  "disable_prepared_report": 0,
  "disabled": 0,
  "docstatus": 0,
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-09-30 14:30:16.152557",
+ "modified": "2022-10-10 14:06:38.572230",
  "modified_by": "Administrator",
- "module": "Stock",
- "name": "Sales Order Items To Be Delivered",
+ "module": "Accounts",
+ "name": "Sales Items To Be Billed",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Sales Order",
- "report_name": "Sales Order Items To Be Delivered",
+ "report_name": "Sales Items To Be Billed",
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Stock User"
+   "role": "Sales User"
   },
   {
-   "role": "Sales User"
+   "role": "Maintenance User"
   },
   {
    "role": "Accounts User"
   },
   {
-   "role": "Sales User (Read Only)"
+   "role": "Cashier"
   },
   {
-   "role": "Delivery User"
+   "role": "Stock User"
+  },
+  {
+   "role": "Sales User (Read Only)"
   }
  ]
 }

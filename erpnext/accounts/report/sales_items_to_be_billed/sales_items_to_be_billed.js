@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Purchase Order Items To Be Received"] = {
+frappe.query_reports["Sales Items To Be Billed"] = {
 	"filters": [
 		{
 			fieldname: "company",
@@ -21,10 +21,16 @@ frappe.query_reports["Purchase Order Items To Be Received"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "doctype",
+			label: __("Document Type"),
+			fieldtype: "Select",
+			options: "\nSales Order\nDelivery Note",
+		},
+		{
 			fieldname: "name",
-			label: __("Purchase Order"),
-			fieldtype: "Link",
-			options: "Purchase Order"
+			label: __("Document"),
+			fieldtype: "Dynamic Link",
+			options: "doctype"
 		},
 		{
 			fieldname: "transaction_type",
@@ -33,21 +39,21 @@ frappe.query_reports["Purchase Order Items To Be Received"] = {
 			options: "Transaction Type"
 		},
 		{
-			fieldname: "supplier",
-			label: __("Supplier"),
+			fieldname: "customer",
+			label: __("Customer"),
 			fieldtype: "Link",
-			options: "Supplier",
+			options: "Customer",
 			get_query: function() {
 				return {
-					query: "erpnext.controllers.queries.supplier_query"
+					query: "erpnext.controllers.queries.customer_query"
 				};
 			}
 		},
 		{
-			fieldname: "supplier_group",
-			label: __("Supplier Group"),
+			fieldname: "customer_group",
+			label: __("Customer Group"),
 			fieldtype: "Link",
-			options: "Supplier Group"
+			options: "Customer Group"
 		},
 		{
 			fieldname: "item_code",
@@ -99,27 +105,39 @@ frappe.query_reports["Purchase Order Items To Be Received"] = {
 					company: frappe.query_report.get_filter_value("company")
 				});
 			}
-		}
+		},
+		{
+			fieldname: "territory",
+			label: __("Territory"),
+			fieldtype: "Link",
+			options: "Territory"
+		},
+		{
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "Link",
+			options: "Sales Person"
+		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
-		if (column.fieldname == "remaining_qty") {
+		if (["remaining_qty", "remaining_amt"].includes(column.fieldname)) {
 			style['font-weight'] = 'bold';
 		}
 
-		if (column.fieldname == "actual_qty") {
-			if (flt(value) <= 0) {
-				style['color'] = 'red';
+		if (["billed_qty", "billed_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'blue';
 			}
 		}
 
-		if (column.fieldname == "delay_days") {
-			if (flt(value) > 0) {
-				style['color'] = 'red';
+		if (["returned_qty", "returned_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'orange';
 			}
 		}
 
 		return default_formatter(value, row, column, data, {css: style});
 	},
-}
+};

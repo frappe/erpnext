@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Sales Order Items To Be Delivered"] = {
+frappe.query_reports["Purchase Items To Be Billed"] = {
 	"filters": [
 		{
 			fieldname: "company",
@@ -21,10 +21,16 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "doctype",
+			label: __("Document Type"),
+			fieldtype: "Select",
+			options: "\nPurchase Order\nPurchase Receipt",
+		},
+		{
 			fieldname: "name",
-			label: __("Sales Order"),
-			fieldtype: "Link",
-			options: "Sales Order"
+			label: __("Document"),
+			fieldtype: "Dynamic Link",
+			options: "doctype"
 		},
 		{
 			fieldname: "transaction_type",
@@ -33,21 +39,21 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			options: "Transaction Type"
 		},
 		{
-			fieldname: "customer",
-			label: __("Customer"),
+			fieldname: "supplier",
+			label: __("Supplier"),
 			fieldtype: "Link",
-			options: "Customer",
+			options: "Supplier",
 			get_query: function() {
 				return {
-					query: "erpnext.controllers.queries.customer_query"
+					query: "erpnext.controllers.queries.supplier_query"
 				};
 			}
 		},
 		{
-			fieldname: "customer_group",
-			label: __("Customer Group"),
+			fieldname: "supplier_group",
+			label: __("Supplier Group"),
 			fieldtype: "Link",
-			options: "Customer Group"
+			options: "Supplier Group"
 		},
 		{
 			fieldname: "item_code",
@@ -105,35 +111,27 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			label: __("Territory"),
 			fieldtype: "Link",
 			options: "Territory"
-		},
-		{
-			fieldname: "sales_person",
-			label: __("Sales Person"),
-			fieldtype: "Link",
-			options: "Sales Person"
-		},
+		}
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
-		if (column.fieldname == "remaining_qty") {
+		if (["remaining_qty", "remaining_amt"].includes(column.fieldname)) {
 			style['font-weight'] = 'bold';
 		}
 
-		if (column.fieldname == "actual_qty") {
-			if (flt(value) <= 0) {
-				style['color'] = 'red';
-			} else if (data && flt(value) < flt(data.remaining_qty)) {
-				style['color'] = 'orange';
+		if (["billed_qty", "billed_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'blue';
 			}
 		}
 
-		if (column.fieldname == "delay_days") {
-			if (flt(value) > 0) {
-				style['color'] = 'red';
+		if (["returned_qty", "returned_amt"].includes(column.fieldname)) {
+			if (flt(value)) {
+				style['color'] = 'orange';
 			}
 		}
 
 		return default_formatter(value, row, column, data, {css: style});
 	},
-}
+};
