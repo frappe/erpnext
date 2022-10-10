@@ -40,15 +40,8 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Ordered Items To Be Billed",
+					"name": "Sales Items To Be Billed",
 					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Delivered Items To Be Billed",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
 				},
 			]
 		},
@@ -86,15 +79,8 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Purchase Order Items To Be Billed",
+					"name": "Purchase Items To Be Billed",
 					"is_query_report": True,
-					"doctype": "Purchase Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Received Items To Be Billed",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
 				},
 			]
 		},
@@ -131,13 +117,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Payment Term",
-					"description": _("Payment Terms based on conditions")
-				},
-				{
-					"type": "doctype",
-					"name": "Payment Terms Template",
-					"description": _("Payment Terms Template")
+					"name": "Mode of Payment",
+					"description": _("e.g. Bank, Cash, Credit Card")
 				},
 			]
 		},
@@ -162,19 +143,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"label": _("Bank Reconciliation / Update Clearance Dates"),
-					"name": "Bank Reconciliation",
-					"description": _("Update bank payment dates with journals.")
+					"name": "Payment Term",
+					"description": _("Payment Terms based on conditions")
 				},
 				{
-					"type": "report",
-					"name": "Bank Reconciliation Statement",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Bank Clearance Summary",
-					"is_query_report": True,
+					"type": "doctype",
+					"name": "Payment Terms Template",
+					"description": _("Payment Terms Template")
 				},
 				{
 					"type": "report",
@@ -363,6 +338,23 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Profitability"),
+			"items": [
+				{
+					"type": "report",
+					"name": "Gross Profit",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Profitability Analysis",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+			]
+		},
+		{
 			"label": _("Opening and Closing"),
 			"items": [
 				{
@@ -422,17 +414,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Mode of Payment",
-					"description": _("e.g. Bank, Cash, Credit Card")
-				},
-				{
-					"type": "doctype",
 					"name": "Cheque Print Template",
 					"description": _("Setup cheque dimensions for printing")
-				},
-				{
-					"type": "doctype",
-					"name": "Transaction Type",
 				},
 				{
 					"type": "doctype",
@@ -455,6 +438,27 @@ def get_data():
 					"type": "doctype",
 					"name": "Subscription Settings"
 				}
+			]
+		},
+		{
+			"label": _("Bank Reconciliation"),
+			"items": [
+				{
+					"type": "doctype",
+					"label": _("Bank Reconciliation"),
+					"name": "Bank Reconciliation",
+					"description": _("Update bank payment dates with journals.")
+				},
+				{
+					"type": "report",
+					"name": "Bank Reconciliation Statement",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Bank Clearance Summary",
+					"is_query_report": True,
+				},
 			]
 		},
 		{
@@ -488,53 +492,11 @@ def get_data():
 					"type": "doctype",
 					"label": _("Bank Transaction"),
 					"name": "Bank Transaction",
-					"doctype": "Bank Transaction"
 				},
 				{
 					"type": "doctype",
 					"name": "Bank Guarantee"
 				},
-			]
-		},
-		{
-			"label": _("Profitability"),
-			"items": [
-				{
-					"type": "report",
-					"name": "Gross Profit",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Profitability Analysis",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-			]
-		},
-		{
-			"label": _("Other Reports"),
-			"icon": "fa fa-table",
-			"items": [
-				{
-					"type": "report",
-					"name": "Sales Partners Commission",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Payment Summary",
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Address And Contacts",
-					"doctype": "Address"
-				}
 			]
 		},
 		{

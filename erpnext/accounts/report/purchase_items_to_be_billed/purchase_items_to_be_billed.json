@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-10-07 18:35:11.892477",
+ "modified": "2022-10-10 14:07:04.393584",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Items To Be Billed",
@@ -21,16 +21,10 @@
    "role": "Stock User"
   },
   {
-   "role": "Purchase Manager"
-  },
-  {
    "role": "Purchase User"
   },
   {
    "role": "Accounts User"
-  },
-  {
-   "role": "Stock User"
   }
  ]
 }

@@ -274,8 +274,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Sales Order Items To Be Delivered",
+					"name": "Sales Items To Be Delivered",
 					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"name": "Sales Items To Be Billed",
+					"is_query_report": True,
 				},
 			]
 		},

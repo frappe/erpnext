@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Sales Order Items To Be Delivered"] = {
+frappe.query_reports["Purchase Items To Be Received"] = {
 	"filters": [
 		{
 			fieldname: "company",
@@ -22,9 +22,9 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 		},
 		{
 			fieldname: "name",
-			label: __("Sales Order"),
+			label: __("Purchase Order"),
 			fieldtype: "Link",
-			options: "Sales Order"
+			options: "Purchase Order"
 		},
 		{
 			fieldname: "transaction_type",
@@ -33,21 +33,21 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 			options: "Transaction Type"
 		},
 		{
-			fieldname: "customer",
-			label: __("Customer"),
+			fieldname: "supplier",
+			label: __("Supplier"),
 			fieldtype: "Link",
-			options: "Customer",
+			options: "Supplier",
 			get_query: function() {
 				return {
-					query: "erpnext.controllers.queries.customer_query"
+					query: "erpnext.controllers.queries.supplier_query"
 				};
 			}
 		},
 		{
-			fieldname: "customer_group",
-			label: __("Customer Group"),
+			fieldname: "supplier_group",
+			label: __("Supplier Group"),
 			fieldtype: "Link",
-			options: "Customer Group"
+			options: "Supplier Group"
 		},
 		{
 			fieldname: "item_code",
@@ -99,19 +99,7 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 					company: frappe.query_report.get_filter_value("company")
 				});
 			}
-		},
-		{
-			fieldname: "territory",
-			label: __("Territory"),
-			fieldtype: "Link",
-			options: "Territory"
-		},
-		{
-			fieldname: "sales_person",
-			label: __("Sales Person"),
-			fieldtype: "Link",
-			options: "Sales Person"
-		},
+		}
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
@@ -123,8 +111,6 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 		if (column.fieldname == "actual_qty") {
 			if (flt(value) <= 0) {
 				style['color'] = 'red';
-			} else if (data && flt(value) < flt(data.remaining_qty)) {
-				style['color'] = 'orange';
 			}
 		}
 
@@ -136,4 +122,4 @@ frappe.query_reports["Sales Order Items To Be Delivered"] = {
 
 		return default_formatter(value, row, column, data, {css: style});
 	},
-}
+};

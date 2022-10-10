@@ -147,7 +147,7 @@ frappe.query_reports["Item Prices"] = {
 		}
 
 		if (column.fieldname == "po_qty") {
-			link = "desk#query-report/Purchase Order Items To Be Received?item_code=" + data.item_code;
+			link = "desk#query-report/Purchase Items To Be Received?item_code=" + data.item_code;
 		}
 
 		if (['po_qty', 'actual_qty', 'standard_rate', 'avg_lc_rate'].includes(column.fieldname)) {

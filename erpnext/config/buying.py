@@ -226,14 +226,19 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase Order Items To Be Received",
-					"reference_doctype": "Purchase Order",
+					"name": "Requested Items To Be Ordered",
+					"reference_doctype": "Material Request",
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Requested Items To Be Ordered",
-					"reference_doctype": "Material Request",
+					"name": "Purchase Items To Be Received",
+					"reference_doctype": "Purchase Order",
+				},
+				{
+					"type": "report",
+					"name": "Purchase Items To Be Billed",
+					"is_query_report": True,
 				},
 			]
 		},

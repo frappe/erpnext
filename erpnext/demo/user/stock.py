@@ -24,7 +24,7 @@ def work():
 def make_purchase_receipt():
 	if random.random() < 0.6:
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		report = "Purchase Order Items To Be Received"
+		report = "Purchase Items To Be Received"
 		po_list =list(set([r[0] for r in query_report.run(report)["result"] if r[0]!="Total"]))[:random.randint(1, 10)]
 		for po in po_list:
 			pr = frappe.get_doc(make_purchase_receipt(po))
