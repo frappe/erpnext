@@ -224,6 +224,7 @@ class PurchaseReceipt(BuyingController):
 			self.update_billing_status()
 		else:
 			self.db_set("status", "Completed")
+			self.db_set("status", "Ready")
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
@@ -237,6 +238,8 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_po()
+		# Update Ammount in Account Payble DocType
+		frappe.db.set_value("Account Payable", self.purchase_order, 'total_payable_after_revision', self.total)
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
@@ -264,8 +267,6 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_prevdoc_status()
 		self.update_billing_status()
-
-		frappe.throw(_("Cannot delete or cancel because Purchase Order With Ready Status {0} is linked with Purchase Order {1}").format(self.name,self.purchase_order))
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
@@ -315,7 +316,7 @@ class PurchaseReceipt(BuyingController):
 					d.db_set('batch_no', '')
 					frappe.delete_doc('Batch', delete_batch)
 					d.batch_no = d.get("batch_number")
-					
+				
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		if erpnext.is_perpetual_inventory_enabled(self.company):
 			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
@@ -1055,6 +1056,7 @@ def make_logistic_notice(source_name, target_doc=None):
 		},
 		target_doc,
 		set_missing_values,
+		ignore_permissions = True
 	)
 
 	doclist.set_onload("ignore_price_list", True)
@@ -1189,3 +1191,15 @@ def get_item_account_wise_additional_cost(purchase_document):
 
 def on_doctype_update():
 	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
+
+@frappe.whitelist()
+def pr_batch_details(item_code,name, item_name,qty,batch_number,manufacturing_date,expiry_date):
+	exists = False
+	co = frappe.get_doc("Purchase Order", name)
+	if (exists == False):
+		for item in co.get("items"):
+			if (item.item_code == item_code):
+				item.batch_number = batch_number,
+				item.manufacturing_date=manufacturing_date,
+				item.expiry_date=expiry_date,
+	co.save()

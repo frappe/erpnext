@@ -326,9 +326,10 @@ class PurchaseOrder(BuyingController):
 		acc_payble_data = frappe.new_doc("Account Payable")
 		acc_payble_data.po_number = self.name
 		acc_payble_data.total = self.total
-		acc_payble_data.payment_outstanding	= self.total
 		acc_payble_data.total_payable_after_revision = self.total
-		acc_payble_data.insert(ignore_mandatory=True)
+		acc_payble_data.payment_outstanding = self.total
+		acc_payble_data.insert(ignore_mandatory=True, ignore_permissions = True)
+		acc_payble_data.save()
 
 	def on_cancel(self):
 		super(PurchaseOrder, self).on_cancel()
@@ -508,6 +509,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 		},
 		target_doc,
 		set_missing_values,
+		ignore_permissions = True
 	)
 
 	doc.set_onload("ignore_price_list", True)

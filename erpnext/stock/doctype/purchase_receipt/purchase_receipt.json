@@ -12,11 +12,10 @@
      "supplier_section",
      "title",
      "naming_series",
+     "supplier_name",
      "section_break_3",
      "supplier",
      "purchase_order",
-     "po_total",
-     "supplier_name",
      "supplier_delivery_note",
      "column_break1",
      "company",
@@ -241,6 +240,7 @@
       "depends_on": "eval:doc.docstatus==0",
       "fieldname": "set_posting_time",
       "fieldtype": "Check",
+      "hidden": 1,
       "label": "Edit Date",
       "print_hide": 1
      },
@@ -531,6 +531,7 @@
      {
       "fieldname": "total_qty",
       "fieldtype": "Float",
+      "hidden": 1,
       "label": "Total Quantity",
       "precision": "0",
       "read_only": 1
@@ -768,7 +769,6 @@
      {
       "fieldname": "base_grand_total",
       "fieldtype": "Currency",
-      "in_list_view": 1,
       "label": "Grand Total (Company Currency)",
       "oldfieldname": "grand_total",
       "oldfieldtype": "Currency",
@@ -910,6 +910,7 @@
       "options": "fa fa-file-text"
      },
      {
+      "allow_on_submit": 1,
       "default": "Draft",
       "fieldname": "status",
       "fieldtype": "Select",
@@ -917,7 +918,7 @@
       "no_copy": 1,
       "oldfieldname": "status",
       "oldfieldtype": "Select",
-      "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
+      "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed\nReady\nShipped",
       "print_hide": 1,
       "print_width": "150px",
       "read_only": 1,
@@ -1186,17 +1187,8 @@
      {
       "fieldname": "purchase_order",
       "fieldtype": "Link",
-      "hidden": 1,
       "label": "Purchase Order",
       "options": "Purchase Order"
-     },
-     {
-      "fetch_from": "purchase_order.total",
-      "fetch_if_empty": 1,
-      "fieldname": "po_total",
-      "fieldtype": "Currency",
-      "hidden": 1,
-      "label": "POTotal"
      }
     ],
     "hide_toolbar": 1,
@@ -1204,7 +1196,7 @@
     "idx": 261,
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-08-25 01:52:51.958537",
+    "modified": "2022-10-04 12:42:14.738020",
     "modified_by": "Administrator",
     "module": "Stock",
     "name": "Purchase Receipt",

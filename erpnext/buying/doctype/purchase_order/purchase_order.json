@@ -17,7 +17,6 @@
      "tax_withholding_category",
      "column_break1",
      "company",
-     "transaction_date",
      "schedule_date",
      "order_confirmation_no",
      "order_confirmation_date",
@@ -34,11 +33,11 @@
      "customer_contact_display",
      "customer_contact_mobile",
      "customer_contact_email",
+     "supplier_name",
      "section_addresses",
      "supplier",
      "column_break_29",
      "address_display",
-     "supplier_name",
      "supplier_code",
      "supplier_address",
      "contact_person",
@@ -50,7 +49,9 @@
      "shipping_address_display",
      "billing_address",
      "billing_address_display",
+     "transaction_date",
      "proposed_ready_date",
+     "ready_date",
      "currency_and_price_list",
      "currency",
      "conversion_rate",
@@ -231,7 +232,6 @@
       "default": "Today",
       "fieldname": "transaction_date",
       "fieldtype": "Date",
-      "hidden": 1,
       "in_list_view": 1,
       "label": "Date",
       "oldfieldname": "transaction_date",
@@ -365,12 +365,14 @@
      {
       "fieldname": "contact_mobile",
       "fieldtype": "Small Text",
+      "hidden": 1,
       "label": "Contact Mobile No",
       "read_only": 1
      },
      {
       "fieldname": "contact_email",
       "fieldtype": "Small Text",
+      "hidden": 1,
       "label": "Contact Email",
       "options": "Email",
       "print_hide": 1,
@@ -552,6 +554,7 @@
      {
       "fieldname": "total_qty",
       "fieldtype": "Float",
+      "hidden": 1,
       "label": "Total Quantity",
       "print_hide_if_no_value": 1,
       "read_only": 1
@@ -896,9 +899,11 @@
       "fieldname": "payment_terms_template",
       "fieldtype": "Link",
       "label": "Payment Terms Template",
-      "options": "Payment Terms Template"
+      "options": "Payment Terms Template",
+      "read_only": 1
      },
      {
+      "depends_on": "eval:doc.docstatus === 1",
       "fieldname": "payment_schedule",
       "fieldtype": "Table",
       "label": "Payment Schedule",
@@ -949,7 +954,7 @@
       "no_copy": 1,
       "oldfieldname": "status",
       "oldfieldtype": "Select",
-      "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nCancelled\nClosed\nDelivered",
+      "options": "\nDraft\nOn Hold\nTo Receive and Bill\nTo Bill\nTo Receive\nCompleted\nCancelled\nClosed\nOpen\nDelivered",
       "print_hide": 1,
       "read_only": 1,
       "reqd": 1,
@@ -991,7 +996,6 @@
       "depends_on": "eval:!doc.__islocal",
       "fieldname": "per_received",
       "fieldtype": "Percent",
-      "in_list_view": 1,
       "label": "% Received",
       "no_copy": 1,
       "print_hide": 1,
@@ -1001,7 +1005,6 @@
       "depends_on": "eval:!doc.__islocal",
       "fieldname": "per_billed",
       "fieldtype": "Percent",
-      "in_list_view": 1,
       "label": "% Billed",
       "no_copy": 1,
       "print_hide": 1,
@@ -1227,16 +1230,24 @@
      },
      {
       "allow_on_submit": 1,
-      "depends_on": "eval:(doc.po_status==\"Proposed Ready Date\" || doc.po_status==\"Ready\") && doc.docstatus == 1 ",
+      "depends_on": "eval:(doc.po_status==\"Proposed Ready Date\" || doc.po_status==\"Ready\" || doc.po_status==\"Shipped\") && doc.docstatus == 1 ",
       "fieldname": "proposed_ready_date",
       "fieldtype": "Date",
       "label": "Proposed Ready Date",
-      "mandatory_depends_on": "eval:doc.po_status==\"Proposed Ready Date\" && doc.docstatus == 1",
-      "read_only_depends_on": "eval:doc.po_status==\"Ready\""
+      "mandatory_depends_on": "eval:(doc.po_status==\"Proposed Ready Date\" || doc.po_status==\"Ready\") && doc.docstatus == 1",
+      "read_only_depends_on": "eval:doc.po_status==\"Ready\" || doc.po_status==\"Shipped\""
      },
      {
       "fieldname": "column_break_29",
       "fieldtype": "Column Break"
+     },
+     {
+      "allow_on_submit": 1,
+      "depends_on": "eval:(doc.po_status==\"Shipped\" || doc.po_status==\"Ready\") && doc.docstatus == 1",
+      "fieldname": "ready_date",
+      "fieldtype": "Date",
+      "label": "Ready Date",
+      "read_only": 1
      }
     ],
     "hide_toolbar": 1,
@@ -1244,7 +1255,7 @@
     "idx": 105,
     "is_submittable": 1,
     "links": [],
-    "modified": "2022-07-22 05:15:17.918730",
+    "modified": "2022-10-07 00:56:19.638694",
     "modified_by": "Administrator",
     "module": "Buying",
     "name": "Purchase Order",
@@ -1295,4 +1306,4 @@
     "sort_field": "modified",
     "sort_order": "DESC",
     "track_changes": 1
-   }
+}
