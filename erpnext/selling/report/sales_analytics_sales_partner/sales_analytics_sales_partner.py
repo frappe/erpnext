@@ -181,6 +181,7 @@ class Analytics(object):
 			"""
 			.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 			(self.filters.company,self.filters.sales_person, self.filters.from_date, self.filters.to_date), as_dict=1)
+			
 		else:
 			self.entries = frappe.db.sql("""
 				select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
@@ -235,12 +236,13 @@ class Analytics(object):
 
 		if self.filters.sales_person:
 			self.entries = frappe.db.sql("""
-				select i.item_group as entity, s.{value_field} as value_field, s.{date_field}
+				select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
 				from `tab{doctype} Item` i , `tab{doctype}` s join `tabSales Team` st on st.parent=s.name
 				where s.name = i.parent and i.docstatus = 1 and s.company = %s and st.sales_person = %s
 				and s.{date_field} between %s and %s
 			""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 			(self.filters.company,self.filters.sales_person, self.filters.from_date, self.filters.to_date), as_dict=1)
+			
 		else:
 			self.entries = frappe.db.sql("""
 				select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
