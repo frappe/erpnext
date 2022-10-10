@@ -88,10 +88,14 @@ class StockController(AccountsController):
 							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
-						
+						account_againts = ''
+						if self.get('is_depletion') == 1:
+							account_againts = '6.05.02.001 - Depletion Reserves - U6'
+						else:
+							account_againts = item_row.expense_account
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
-							"against": item_row.expense_account,
+							"against": account_againts,
 							"cost_center": item_row.cost_center,
 							"project": item_row.get("project") or self.get("project"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -101,7 +105,7 @@ class StockController(AccountsController):
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
-							"account": item_row.expense_account,
+							"account": account_againts,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"project": item_row.get("project") or self.get("project"),
