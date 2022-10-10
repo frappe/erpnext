@@ -48,7 +48,7 @@ erpnext.financial_statements = {
 			};
 
 		}
-		else if(["Fixed Asset","Accumulated Depreciation"].includes(data.account_type)){ 
+		else if(data.account_type == "Fixed Asset" || data.account_type == "Accumulated Depreciation"){
 			report="Asset Depreciations and Balances"
 			frappe.route_options = {
 				"company": frappe.query_report.get_filter_value('company'),
