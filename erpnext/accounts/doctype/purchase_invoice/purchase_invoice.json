@@ -39,13 +39,12 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "scan_barcode",
+  "col_break_warehouse",
   "update_stock",
-  "column_break_38",
   "set_warehouse",
   "set_from_warehouse",
-  "col_break_warehouse",
-  "rejected_warehouse",
   "is_subcontracted",
+  "rejected_warehouse",
   "supplier_warehouse",
   "items_section",
   "items",
@@ -186,7 +185,8 @@
   "inter_company_invoice_reference",
   "is_old_subcontracting_flow",
   "remarks",
-  "connections_tab"
+  "connections_tab",
+  "column_break_38"
  ],
  "fields": [
   {
@@ -667,6 +667,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Net Weight",
@@ -806,7 +807,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_44",
    "fieldtype": "Section Break",
    "label": "Additional Discount"
@@ -1340,7 +1340,7 @@
   },
   {
    "depends_on": "eval:doc.is_internal_supplier",
-   "description": "Unrealized Profit / Loss account for intra-company transfers",
+   "description": "Unrealized Profit/Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
@@ -1519,7 +1519,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-07 14:19:14.214157",
+ "modified": "2022-10-11 13:04:44.304389",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
