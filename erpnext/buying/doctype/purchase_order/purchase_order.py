@@ -323,10 +323,7 @@ class PurchaseOrder(BuyingController):
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 	def on_cancel(self):
-<<<<<<< HEAD
-=======
 		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
->>>>>>> d806e32030 (fix: PO cancel post advance payment cancel against PO)
 		super(PurchaseOrder, self).on_cancel()
 
 		if self.is_against_so():
