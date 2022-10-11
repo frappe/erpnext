@@ -17,6 +17,7 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	close_work_order,
 	make_job_card,
 	make_stock_entry,
+	make_stock_return_entry,
 	stop_unstop,
 )
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -1407,6 +1408,77 @@ class TestWorkOrder(FrappeTestCase):
 			get_serial_nos(manufacture_ste_doc2.items[1].serial_no)[0], batch_dict.get(batch_no)[0]
 		)
 		self.assertEqual(manufacture_ste_doc2.items[1].qty, 1)
+
+	def test_non_consumed_material_return_against_work_order(self):
+		frappe.db.set_value(
+			"Manufacturing Settings",
+			None,
+			"backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture",
+		)
+
+		item = make_item(
+			"Test FG Item To Test Return Case",
+			{
+				"is_stock_item": 1,
+			},
+		)
+
+		item_code = item.name
+		bom_doc = make_bom(
+			item=item_code,
+			source_warehouse="Stores - _TC",
+			raw_materials=["Test Batch MCC Keyboard", "Test Serial No BTT Headphone"],
+		)
+
+		# Create a work order
+		wo_doc = make_wo_order_test_record(production_item=item_code, qty=5)
+		wo_doc.save()
+
+		self.assertEqual(wo_doc.bom_no, bom_doc.name)
+
+		# Transfer material for manufacture
+		ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Material Transfer for Manufacture", 5))
+		for row in ste_doc.items:
+			row.qty += 2
+			row.transfer_qty += 2
+			nste_doc = test_stock_entry.make_stock_entry(
+				item_code=row.item_code, target="Stores - _TC", qty=row.qty, basic_rate=100
+			)
+
+			row.batch_no = nste_doc.items[0].batch_no
+			row.serial_no = nste_doc.items[0].serial_no
+
+		ste_doc.save()
+		ste_doc.submit()
+		ste_doc.load_from_db()
+
+		# Create a stock entry to manufacture the item
+		ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 5))
+		for row in ste_doc.items:
+			if row.s_warehouse and not row.t_warehouse:
+				row.qty -= 2
+				row.transfer_qty -= 2
+
+				if row.serial_no:
+					serial_nos = get_serial_nos(row.serial_no)
+					row.serial_no = "\n".join(serial_nos[0:5])
+
+		ste_doc.save()
+		ste_doc.submit()
+
+		wo_doc.load_from_db()
+		for row in wo_doc.required_items:
+			self.assertEqual(row.transferred_qty, 7)
+			self.assertEqual(row.consumed_qty, 5)
+
+		self.assertEqual(wo_doc.status, "Completed")
+		return_ste_doc = make_stock_return_entry(wo_doc.name)
+		return_ste_doc.save()
+
+		self.assertTrue(return_ste_doc.is_return)
+		for row in return_ste_doc.items:
+			self.assertEqual(row.qty, 2)
 
 
 def prepare_data_for_backflush_based_on_materials_transferred():
