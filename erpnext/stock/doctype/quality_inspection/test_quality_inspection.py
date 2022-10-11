@@ -160,7 +160,7 @@ class TestQualityInspection(FrappeTestCase):
 		)
 
 		readings = [
-			{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "0.4"}
+			{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "1.0"}
 		]
 
 		qa = create_quality_inspection(
@@ -183,6 +183,38 @@ class TestQualityInspection(FrappeTestCase):
 		se.reload()
 		se.cancel()
 		frappe.db.set_value("Stock Settings", None, "action_if_quality_inspection_is_rejected", "Stop")
+
+	def test_qi_status(self):
+		make_stock_entry(
+			item_code="_Test Item with QA", target="_Test Warehouse - _TC", qty=1, basic_rate=100
+		)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, status="Accepted", do_not_save=True
+		)
+		qa.readings[0].manual_inspection = 1
+		qa.save()
+
+		# Case - 1: When there are one or more readings with rejected status and parent manual inspection is unchecked, then parent status should be set to rejected.
+		qa.status = "Accepted"
+		qa.manual_inspection = 0
+		qa.readings[0].status = "Rejected"
+		qa.save()
+		self.assertEqual(qa.status, "Rejected")
+
+		# Case - 2: When all readings have accepted status and parent manual inspection is unchecked, then parent status should be set to accepted.
+		qa.status = "Rejected"
+		qa.manual_inspection = 0
+		qa.readings[0].status = "Accepted"
+		qa.save()
+		self.assertEqual(qa.status, "Accepted")
+
+		# Case - 3: When parent manual inspection is checked, then parent status should not be changed.
+		qa.status = "Accepted"
+		qa.manual_inspection = 1
+		qa.readings[0].status = "Rejected"
+		qa.save()
+		self.assertEqual(qa.status, "Accepted")
 
 
 def create_quality_inspection(**args):
