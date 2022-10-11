@@ -705,6 +705,10 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
+						credit_amount = item.base_net_amount
+						if self.is_internal_supplier and item.valuation_rate:
+							credit_amount = flt(item.valuation_rate * item.stock_qty)
+
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
 							self.get_gl_dict(
@@ -714,7 +718,7 @@ class PurchaseInvoice(BuyingController):
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"debit": -1 * flt(item.base_net_amount, item.precision("base_net_amount")),
+									"debit": -1 * flt(credit_amount, item.precision("base_net_amount")),
 								},
 								warehouse_account[item.from_warehouse]["account_currency"],
 								item=item,
