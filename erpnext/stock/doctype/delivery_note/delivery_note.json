@@ -41,7 +41,6 @@
   "ignore_pricing_rule",
   "items_section",
   "scan_barcode",
-  "column_break_25",
   "pick_list",
   "col_break_warehouse",
   "set_warehouse",
@@ -163,7 +162,8 @@
   "column_break5",
   "excise_page",
   "instructions",
-  "connections_tab"
+  "connections_tab",
+  "column_break_25"
  ],
  "fields": [
   {
@@ -613,6 +613,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Net Weight",
@@ -1386,7 +1387,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 14:55:31.964085",
+ "modified": "2022-10-11 13:06:58.655635",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

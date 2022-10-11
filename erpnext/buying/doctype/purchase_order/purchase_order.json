@@ -454,7 +454,6 @@
    "print_hide": 1
   },
   {
-   "description": "Sets 'Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "label": "Set Target Warehouse",
@@ -578,6 +577,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Net Weight",
@@ -707,7 +707,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "total_taxes_and_charges",
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
    "label": "Total Taxes and Charges",
@@ -781,7 +780,6 @@
    "read_only": 1
   },
   {
-   "description": "In Words will be visible once you save the Purchase Order.",
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
@@ -1234,7 +1232,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-28 18:20:49.494279",
+ "modified": "2022-10-11 13:01:41.674352",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

@@ -852,6 +852,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "hide_days": 1,
@@ -2108,7 +2109,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-09-28 19:23:38.265409",
+ "modified": "2022-10-11 13:07:36.488095",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
