@@ -107,6 +107,7 @@
    "fetch_if_empty": 1,
    "fieldname": "discount_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Discount Type",
    "options": "Percentage\nAmount"
   },
@@ -115,6 +116,7 @@
    "fetch_if_empty": 1,
    "fieldname": "discount",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Discount"
   },
   {
@@ -128,6 +130,7 @@
    "fetch_if_empty": 1,
    "fieldname": "discount_validity_based_on",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Discount Validity Based On",
    "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
   },
@@ -144,6 +147,7 @@
    "fetch_if_empty": 1,
    "fieldname": "discount_validity",
    "fieldtype": "Int",
+   "hidden": 1,
    "label": "Discount Validity",
    "mandatory_depends_on": "discount"
   },
@@ -155,7 +159,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-13 00:48:27.198431",
+ "modified": "2022-10-07 07:23:36.452455",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template Detail",
