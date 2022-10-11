@@ -332,6 +332,8 @@ class PurchaseOrder(BuyingController):
 		acc_payble_data.save()
 
 	def on_cancel(self):
+		if self.po_status == "Ready" or self.po_status == "Shipped":
+			frappe.throw(_("Cannot Cancel because Purchase Order <b>{0}</b> is in <b>{1}</b> Status").format(self.name, self.po_status))
 		super(PurchaseOrder, self).on_cancel()
 
 		if self.is_against_so():
@@ -345,7 +347,8 @@ class PurchaseOrder(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
-		frappe.db.set(self, "po_status", "Cancelled")# on Cancelled change po status
+		frappe.db.set(self, "po_status", "Cancelled")
+		frappe.db.set(self, "status", "Cancelled")# on Cancelled change po status
 
 		self.update_prevdoc_status()
 		# Must be called after updating ordered qty in Material Request
@@ -509,7 +512,6 @@ def make_purchase_receipt(source_name, target_doc=None):
 		},
 		target_doc,
 		set_missing_values,
-		ignore_permissions = True
 	)
 
 	doc.set_onload("ignore_price_list", True)

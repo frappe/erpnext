@@ -1226,7 +1226,7 @@
       "in_list_view": 1,
       "in_standard_filter": 1,
       "label": "PO Status",
-      "options": "Open\nProposed Ready Date\nReady\nShipped"
+      "options": "Open\nProposed Ready Date\nReady\nShipped\nCancelled"
      },
      {
       "allow_on_submit": 1,
