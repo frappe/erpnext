@@ -146,7 +146,7 @@ class StockController(AccountsController):
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
 
-						sle_rounding_diff += flt(sle.stock_value_difference, precision)
+						sle_rounding_diff += flt(sle.stock_value_difference)
 
 						self.check_expense_account(item_row)
 
@@ -190,19 +190,24 @@ class StockController(AccountsController):
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
-			if sle_rounding_diff > 0:
-				expense_account = item_row.get("expense_account")
-				target_warehouse_account = warehouse_account[item_row.get("target_warehouse")]["account"]
-				source_warehouse_account = warehouse_account[item_row.get("warehouse")]["account"]
+			if abs(sle_rounding_diff) > 0.1 and (
+				self.get("is_internal_customer") or self.get("is_internal_supplier")
+			):
+				asset_account = ""
+				if self.get("is_internal_customer"):
+					asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+				elif self.get("is_internal_supplier"):
+					asset_account = warehouse_account[item_row.get("from_warehouse")]["account"]
 
+				expense_account = item_row.get("expense_account")
 				gl_list.append(
 					self.get_gl_dict(
 						{
-							"account": target_warehouse_account or expense_account,
-							"against": expense_account,
+							"account": expense_account,
+							"against": asset_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get("project"),
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
 							"debit": sle_rounding_diff,
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						},
@@ -214,11 +219,11 @@ class StockController(AccountsController):
 				gl_list.append(
 					self.get_gl_dict(
 						{
-							"account": source_warehouse_account or expense_account,
-							"against": target_warehouse_account,
+							"account": asset_account,
+							"against": expense_account,
 							"cost_center": item_row.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"debit": -1 * sle_rounding_diff,
+							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
+							"credit": sle_rounding_diff,
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						},
