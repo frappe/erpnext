@@ -15,6 +15,7 @@
   "name_and_description_section",
   "naming_series",
   "variant_of",
+  "item_code",
   "item_name",
   "price_list_rate",
   "dossiers",
@@ -23,16 +24,17 @@
   "brand",
   "column_break_11",
   "stock_uom",
-  "item_code",
   "supplier",
   "otc_product",
   "pharmacopeia_data",
   "color_band",
+  "dosage",
   "column_break_19",
   "pack_size",
   "product_label",
   "barcode",
   "type_of_packing",
+  "shipper_size",
   "section_break_34",
   "physical_parameter",
   "column_break_25",
@@ -234,7 +236,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "label": "Deactivate"
   },
   {
    "default": "0",
@@ -1008,6 +1010,7 @@
   {
    "fieldname": "dossiers",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Dossiers"
   },
   {
@@ -1023,18 +1026,21 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Supplier",
    "options": "Supplier"
   },
   {
    "fieldname": "otc_product",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "OTC",
    "options": "\nYes\nNo"
   },
   {
    "fieldname": "pharmacopeia_data",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Pharmacopeia"
   },
   {
@@ -1133,6 +1139,17 @@
    "fieldtype": "Table",
    "label": "Product Marketing",
    "options": "Documents"
+  },
+  {
+   "fieldname": "dosage",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Dosage"
+  },
+  {
+   "fieldname": "shipper_size",
+   "fieldtype": "Data",
+   "label": "Shipper Size"
   }
  ],
  "hide_toolbar": 1,
@@ -1141,7 +1158,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-22 02:08:02.755290",
+ "modified": "2022-10-11 08:44:56.066734",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1204,7 +1221,6 @@
    "share": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,

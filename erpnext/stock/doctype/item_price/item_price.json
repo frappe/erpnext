@@ -18,7 +18,11 @@
   "item_description",
   "price_list",
   "customer",
+  "customer_code",
   "supplier",
+  "column_break_29",
+  "pack_size",
+  "supplier_code",
   "column_break_14",
   "batch_no",
   "buying",
@@ -33,10 +37,12 @@
   "valid_upto",
   "section_break_24",
   "note",
-  "reference"
+  "reference",
+  "reference_code"
  ],
  "fields": [
   {
+   "columns": 1,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -66,8 +72,10 @@
    "label": "Packing Unit"
   },
   {
+   "columns": 2,
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Product Name",
    "read_only": 1
@@ -77,7 +85,6 @@
    "fieldname": "brand",
    "fieldtype": "Read Only",
    "hidden": 1,
-   "in_list_view": 1,
    "label": "Brand",
    "read_only": 1
   },
@@ -97,8 +104,9 @@
    "fieldname": "price_list",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Price List",
+   "label": "Price Category",
    "options": "Price List",
    "reqd": 1
   },
@@ -154,6 +162,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "fieldname": "price_list_rate",
    "fieldtype": "Currency",
    "in_filter": 1,
@@ -202,6 +211,7 @@
    "label": "Note"
   },
   {
+   "columns": 2,
    "fieldname": "reference",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -216,6 +226,40 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.selling == 1",
+   "fetch_from": "customer.customer_code",
+   "fieldname": "customer_code",
+   "fieldtype": "Data",
+   "label": "Customer Code",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.buying == 1",
+   "fetch_from": "supplier.supplier_code",
+   "fieldname": "supplier_code",
+   "fieldtype": "Data",
+   "label": "Supplier Code",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "reference_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reference Code"
+  },
+  {
+   "fetch_from": "item_code.pack_size",
+   "fieldname": "pack_size",
+   "fieldtype": "Data",
+   "label": "Pack Size"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -223,7 +267,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-07-26 23:56:41.529855",
+ "modified": "2022-10-11 08:48:38.193063",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
