@@ -1,4 +1,5 @@
-frappe.listview_settings['Purchase Receipt'] = {
+/* ERPNext Status
+  frappe.listview_settings['Purchase Receipt'] = {
 	add_fields: ["supplier", "supplier_name", "base_grand_total", "is_subcontracted",
 		"transporter_name", "is_return", "status", "per_billed", "currency"],
 	get_indicator: function(doc) {
@@ -14,4 +15,16 @@ frappe.listview_settings['Purchase Receipt'] = {
 			return [__("Completed"), "green", "per_billed,=,100"];
 		}
 	}
+};  */
+
+frappe.listview_settings['Purchase Receipt'] = {
+    get_indicator: function(doc) {
+        if (doc.status === "Draft" || doc.docstatus === 0) {
+            return [__("Open"), "orange", "status,=,Draft"];
+        } else if (doc.status === "Ready" || doc.docstatus==1) {
+            return [__("Ready"), "green", "status,=,Ready"];
+        } else if (doc.status === "Shipped") {
+            return [__("Shipped"), "green", "status,=,Shipped"];
+        }
+    },
 };

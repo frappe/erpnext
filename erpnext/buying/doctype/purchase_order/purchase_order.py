@@ -328,10 +328,12 @@ class PurchaseOrder(BuyingController):
 		acc_payble_data.total = self.total
 		acc_payble_data.total_payable_after_revision = self.total
 		acc_payble_data.payment_outstanding = self.total
-		acc_payble_data.insert(ignore_mandatory=True)
+		acc_payble_data.insert(ignore_mandatory=True, ignore_permissions = True)
 		acc_payble_data.save()
-		
+
 	def on_cancel(self):
+		if self.po_status == "Ready" or self.po_status == "Shipped":
+			frappe.throw(_("Cannot Cancel because Purchase Order <b>{0}</b> is in <b>{1}</b> Status").format(self.name, self.po_status))
 		super(PurchaseOrder, self).on_cancel()
 
 		if self.is_against_so():
@@ -345,10 +347,10 @@ class PurchaseOrder(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
-		frappe.db.set(self, "status", "Cancelled")
+		frappe.db.set(self, "po_status", "Cancelled")
+		frappe.db.set(self, "status", "Cancelled")# on Cancelled change po status
 
 		self.update_prevdoc_status()
-
 		# Must be called after updating ordered qty in Material Request
 		# bin uses Material Request Items to recalculate & update
 		self.update_requested_qty()
@@ -357,6 +359,7 @@ class PurchaseOrder(BuyingController):
 		self.update_blanket_order()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
+		frappe.delete_doc("Account Payable", self.name)
 
 	def on_update(self):
 		pass
