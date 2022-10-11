@@ -104,7 +104,7 @@ class StockLedgerEntry(Document):
 				else self.item_code + ":" + item_det.item_name
 			)
 			if not self.batch_no:
-				frappe.throw(_("Batch number is mandatory for Item {0}").format(batch_item))
+				frappe.throw(_("Batch number is mandatory for Product {0}").format(batch_item))
 			elif not frappe.db.get_value("Batch", {"item": self.item_code, "name": self.batch_no}):
 				frappe.throw(
 					_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, batch_item)
