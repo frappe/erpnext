@@ -422,6 +422,8 @@ def get_pricing_rule_details(args, pricing_rule):
 
 
 def apply_price_discount_rule(pricing_rule, item_details, args):
+	from erpnext.stock.get_item_details import get_conversion_factor
+
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
 	if (
@@ -440,14 +442,19 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.currency == args.currency:
 			pricing_rule_rate = pricing_rule.rate
 
+		# TODO https://github.com/frappe/erpnext/pull/23636 solve this in some other way.
 		if pricing_rule_rate:
 			# Override already set price list rate (from item price)
 			# if pricing_rule_rate > 0
-			item_details.update(
-				{
-					"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
-				}
-			)
+			item_details.update({"price_list_rate": pricing_rule_rate})
+			if pricing_rule.get("uom") != args.get("uom"):
+				if pricing_rule.get("uom") and (pricing_rule.get("uom") != args.get("stock_uom")):
+					rule_conversion_factor = get_conversion_factor(pricing_rule.item_code, pricing_rule.uom).get(
+						"conversion_factor", 1
+					)
+					item_details.update({"price_list_rate": pricing_rule_rate / rule_conversion_factor})
+				else:
+					item_details.update({"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1)})
 		item_details.update({"discount_percentage": 0.0})
 
 	for apply_on in ["Discount Amount", "Discount Percentage"]:
