@@ -212,7 +212,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled"
+   "label": "Deactivate"
   },
   {
    "default": "0",
