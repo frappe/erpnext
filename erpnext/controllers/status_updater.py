@@ -39,6 +39,19 @@ status_map = {
 		["Ordered", "is_fully_ordered"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
+	"Customer Order": [
+		["Open", None],
+		[
+			"Open",
+			"eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1",
+		],
+		[
+			"Closed",
+			"eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.docstatus == 1",
+		],
+		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],	
+	],
 	"Sales Order": [
 		["Draft", None],
 		[
