@@ -444,17 +444,15 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 
 		# TODO https://github.com/frappe/erpnext/pull/23636 solve this in some other way.
 		if pricing_rule_rate:
+			is_blank_uom = pricing_rule.get("uom") != args.get("uom")
 			# Override already set price list rate (from item price)
 			# if pricing_rule_rate > 0
-			item_details.update({"price_list_rate": pricing_rule_rate})
-			if pricing_rule.get("uom") != args.get("uom"):
-				if pricing_rule.get("uom") and (pricing_rule.get("uom") != args.get("stock_uom")):
-					rule_conversion_factor = get_conversion_factor(pricing_rule.item_code, pricing_rule.uom).get(
-						"conversion_factor", 1
-					)
-					item_details.update({"price_list_rate": pricing_rule_rate / rule_conversion_factor})
-				else:
-					item_details.update({"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1)})
+			item_details.update(
+				{
+					"price_list_rate": pricing_rule_rate
+					* (args.get("conversion_factor", 1) if is_blank_uom else 1),
+				}
+			)
 		item_details.update({"discount_percentage": 0.0})
 
 	for apply_on in ["Discount Amount", "Discount Percentage"]:

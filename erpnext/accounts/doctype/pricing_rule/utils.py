@@ -111,7 +111,7 @@ def _get_pricing_rules(apply_on, args, values):
 		)
 
 		if apply_on_field == "item_code":
-			if args.get("uom") != args.get("stock_uom"):
+			if args.get("uom", None):
 				item_conditions += (
 					" and ({child_doc}.uom='{item_uom}' or IFNULL({child_doc}.uom, '')='')".format(
 						child_doc=child_doc, item_uom=args.get("uom")
