@@ -542,6 +542,14 @@ class update_entries_after(object):
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
+		if (
+			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+			and sle.voucher_detail_no
+			and sle.actual_qty < 0
+			and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
+		):
+			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
+
 		if get_serial_nos(sle.serial_no):
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -589,14 +597,6 @@ class update_entries_after(object):
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 		sle.stock_value_difference = stock_value_difference
 		sle.doctype = "Stock Ledger Entry"
-
-		if (
-			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
-			and sle.voucher_detail_no
-			and sle.actual_qty < 0
-			and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
-		):
-			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
 
 		frappe.get_doc(sle).db_update()
 
