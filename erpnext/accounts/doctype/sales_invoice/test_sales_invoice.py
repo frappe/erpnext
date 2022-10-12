@@ -3716,6 +3716,7 @@ def create_sales_invoice(**args):
 			"description": args.description or "_Test Item",
 			"gst_hsn_code": "999800",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
+			"target_warehouse": args.target_warehouse,
 			"qty": args.qty or 1,
 			"uom": args.uom or "Nos",
 			"stock_uom": args.uom or "Nos",
