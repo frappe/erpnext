@@ -1475,6 +1475,7 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 
 	return flt(number)
 
+
 def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	"""
 	For inter company transfer, incoming rate is the average of the outgoing rate
