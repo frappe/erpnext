@@ -422,7 +422,6 @@ def get_pricing_rule_details(args, pricing_rule):
 
 
 def apply_price_discount_rule(pricing_rule, item_details, args):
-	from erpnext.stock.get_item_details import get_conversion_factor
 
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
