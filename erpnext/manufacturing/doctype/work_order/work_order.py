@@ -20,6 +20,7 @@ from frappe.utils import (
 	nowdate,
 	time_diff_in_hours,
 )
+from pypika import functions as fn
 
 from erpnext.manufacturing.doctype.bom.bom import (
 	get_bom_item_rate,
@@ -859,6 +860,7 @@ class WorkOrder(Document):
 		if self.docstatus == 1:
 			# calculate transferred qty based on submitted stock entries
 			self.update_transferred_qty_for_required_items()
+			self.update_returned_qty()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
@@ -930,23 +932,62 @@ class WorkOrder(Document):
 			self.set_available_qty()
 
 	def update_transferred_qty_for_required_items(self):
-		"""update transferred qty from submitted stock entries for that item against
-		the work order"""
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
 
-		for d in self.required_items:
-			transferred_qty = frappe.db.sql(
-				"""select sum(qty)
-				from `tabStock Entry` entry, `tabStock Entry Detail` detail
-				where
-					entry.work_order = %(name)s
-					and entry.purpose = 'Material Transfer for Manufacture'
-					and entry.docstatus = 1
-					and detail.parent = entry.name
-					and (detail.item_code = %(item)s or detail.original_item = %(item)s)""",
-				{"name": self.name, "item": d.item_code},
-			)[0][0]
+		query = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on((ste_child.parent == ste.name))
+			.select(
+				ste_child.item_code,
+				ste_child.original_item,
+				fn.Sum(ste_child.qty).as_("qty"),
+			)
+			.where(
+				(ste.docstatus == 1)
+				& (ste.work_order == self.name)
+				& (ste.purpose == "Material Transfer for Manufacture")
+				& (ste.is_return == 0)
+			)
+			.groupby(ste_child.item_code)
+		)
 
-			d.db_set("transferred_qty", flt(transferred_qty), update_modified=False)
+		data = query.run(as_dict=1) or []
+		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+
+		for row in self.required_items:
+			row.db_set(
+				"transferred_qty", (transferred_items.get(row.item_code) or 0.0), update_modified=False
+			)
+
+	def update_returned_qty(self):
+		ste = frappe.qb.DocType("Stock Entry")
+		ste_child = frappe.qb.DocType("Stock Entry Detail")
+
+		query = (
+			frappe.qb.from_(ste)
+			.inner_join(ste_child)
+			.on((ste_child.parent == ste.name))
+			.select(
+				ste_child.item_code,
+				ste_child.original_item,
+				fn.Sum(ste_child.qty).as_("qty"),
+			)
+			.where(
+				(ste.docstatus == 1)
+				& (ste.work_order == self.name)
+				& (ste.purpose == "Material Transfer for Manufacture")
+				& (ste.is_return == 1)
+			)
+			.groupby(ste_child.item_code)
+		)
+
+		data = query.run(as_dict=1) or []
+		returned_dict = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+
+		for row in self.required_items:
+			row.db_set("returned_qty", (returned_dict.get(row.item_code) or 0.0), update_modified=False)
 
 	def update_consumed_qty_for_required_items(self):
 		"""
@@ -1470,3 +1511,25 @@ def get_reserved_qty_for_production(item_code: str, warehouse: str) -> float:
 			)
 		)
 	).run()[0][0] or 0.0
+
+
+@frappe.whitelist()
+def make_stock_return_entry(work_order):
+	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
+
+	non_consumed_items = get_available_materials(work_order)
+	if not non_consumed_items:
+		return
+
+	wo_doc = frappe.get_cached_doc("Work Order", work_order)
+
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.from_bom = 1
+	stock_entry.is_return = 1
+	stock_entry.work_order = work_order
+	stock_entry.purpose = "Material Transfer for Manufacture"
+	stock_entry.bom_no = wo_doc.bom_no
+	stock_entry.add_transfered_raw_materials_in_items()
+	stock_entry.set_stock_entry_type()
+
+	return stock_entry
