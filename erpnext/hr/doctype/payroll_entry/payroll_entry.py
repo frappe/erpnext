@@ -299,7 +299,7 @@ class PayrollEntry(Document):
 		if salary_slips:
 			salary_components = frappe.db.sql("""select salary_component, amount, parentfield
 				from `tabSalary Detail`
-				where parentfield = '%s' and parent in (%s)""" %
+				where parentfield = '%s' and parent in (%s) and do_not_include_in_total = 0""" %
 				(component_type, ', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=True)
 			return salary_components
 
