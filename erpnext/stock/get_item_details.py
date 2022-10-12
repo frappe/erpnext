@@ -604,9 +604,9 @@ def get_price_list_rate(args, item_doc, out):
 		# # variant
 		# if not price_list_rate and item_doc.variant_of:
 		# 	price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
-
-		##if item rate is zero
-		if price_list_rate == 0 and item_doc.get('last_purchase_rate'):
+		#comment last rate not get in case of purchase 
+		# ##if item rate is zero
+		if price_list_rate == 0 and item_doc.get('last_purchase_rate') and (args.parenttype == 'Purchase Order' or args.doctype == 'Purchase Order'):
 			out.price_list_rate = item_doc.last_purchase_rate
 
 		# insert in database
