@@ -21,6 +21,30 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "date_type",
+			label: __("Date Type"),
+			fieldtype: "Select",
+			options: ["Transaction Date", "Project Date"],
+			default: "Transaction Date",
+			reqd: 1
+		},
+		{
+			fieldname: "from_date",
+			label: __("From Date"),
+			fieldtype: "Date"
+		},
+		{
+			fieldname: "to_date",
+			label: __("To Date"),
+			fieldtype: "Date"
+		},
+		{
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type"
+		},
+		{
 			fieldname: "doctype",
 			label: __("Document Type"),
 			fieldtype: "Select",
@@ -33,33 +57,20 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			options: "doctype"
 		},
 		{
-			fieldname: "transaction_type",
-			label: __("Transaction Type"),
-			fieldtype: "Link",
-			options: "Transaction Type"
-		},
-		{
 			fieldname: "project_type",
 			label: __("Project Type"),
 			fieldtype: "Link",
 			options: "Project Type"
 		},
 		{
-			fieldname: "date_type",
-			label: __("Date Type"),
-			fieldtype: "Select",
-			options: ["Project Date", "Transaction Date"],
-			default: "Transaction Date"
-		},
-		{
-			fieldname: "from_date",
-			label: __("From Date"),
-			fieldtype: "Date"
-		},
-		{
-			fieldname: "to_date",
-			label: __("To Date"),
-			fieldtype: "Date"
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Project', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
+			}
 		},
 		{
 			fieldname: "claim_customer",
@@ -129,16 +140,6 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 					filters: {'company': frappe.query_report.get_filter_value("company")}
 				}
 			},
-		},
-		{
-			"fieldname":"project",
-			"label": __("Project"),
-			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
-				return frappe.db.get_link_options('Project', txt, {
-					company: frappe.query_report.get_filter_value("company")
-				});
-			}
 		},
 		{
 			fieldname: "territory",

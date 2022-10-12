@@ -55,8 +55,8 @@ class OrderItemFulfilmentTracker:
 				o.{party_field} as party, o.{party_name_field} as party_name, o.project, o.currency,
 				i.item_code, i.item_name, i.warehouse,
 				i.{qty_field} as qty, i.{completed_qty_field} as completed_qty,
-				i.rate, i.amount,
-				i.uom, i.stock_uom, i.alt_uom,
+				i.rate, i.amount, i.uom, i.stock_uom, i.alt_uom,
+				i.conversion_factor, i.alt_uom_size,
 				i.brand, i.item_group {sales_person_field}
 			FROM `tab{doctype}` o
 			INNER JOIN `tab{doctype} Item` i ON i.parent = o.name
@@ -187,12 +187,12 @@ class OrderItemFulfilmentTracker:
 
 		for d in self.data:
 			# Set UOM based on qty field
-			if self.filters.qty_field == "Transaction Qty":
-				d.uom = d.uom
-			elif self.filters.qty_field == "Contents Qty":
+			if self.filters.qty_field == "Contents Qty":
 				d.uom = d.alt_uom or d.stock_uom
-			else:
+				d.completed_qty = d.completed_qty * d.conversion_factor * d.alt_uom_size
+			elif self.filters.qty_field == "Stock Qty":
 				d.uom = d.stock_uom
+				d.completed_qty = d.completed_qty * d.conversion_factor
 
 			d['rate'] = d['amount'] / d['qty'] if d['qty'] else d['rate']
 

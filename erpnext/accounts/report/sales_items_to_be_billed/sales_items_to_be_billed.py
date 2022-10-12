@@ -51,20 +51,27 @@ class ItemsToBeBilled:
 		elif self.filters.party_type == "Supplier":
 			party_join = "inner join `tabSupplier` sup on sup.name = o.supplier"
 
-		project_type_join = "left join `tabProject` prj on prj.name = o.project"
+		project_type_join = ""
+		project_fields = ""
+		if self.filters.claim_billing:
+			project_type_join = "left join `tabProject` proj on proj.name = o.project"
+			project_fields = ", proj.project_type, proj.project_date"
 
 		common_fields = """
 			o.name, o.company, o.creation, o.currency, o.project,
 			o.{party_field} as party, o.{party_name_field} as party_name,
 			i.item_code, i.item_name, i.warehouse,
 			i.{qty_field} as qty, i.uom, i.stock_uom, i.alt_uom,
+			i.conversion_factor, i.alt_uom_size,
 			i.billed_qty, i.returned_qty, i.billed_amt,
-			i.rate, i.amount, im.item_group, im.brand, prj.project_type, prj.project_date {sales_person_field}
+			i.rate, i.amount, im.item_group, im.brand
+			{sales_person_field} {project_fields}
 		""".format(
 			party_field=fieldnames.party,
 			party_name_field=fieldnames.party_name,
 			qty_field=fieldnames.qty,
 			sales_person_field=sales_person_field,
+			project_fields=project_fields
 		)
 
 		order_data = []
@@ -122,8 +129,14 @@ class ItemsToBeBilled:
 				conditions=conditions,
 			), self.filters, as_dict=1)
 
-		self.data = order_data + delivery_data
-		self.data = sorted(self.data, key=lambda d: (getdate(d.transaction_date), d.creation))
+		data = order_data + delivery_data
+
+		if self.filters.date_type == "Project Date":
+			data = sorted(data, key=lambda d: (getdate(d.project_date), d.project))
+		else:
+			data = sorted(data, key=lambda d: (getdate(d.transaction_date), d.creation))
+
+		self.data = data
 
 	def get_fieldnames(self):
 		fields = frappe._dict({})
@@ -142,7 +155,7 @@ class ItemsToBeBilled:
 
 	def get_date_field(self, doctype):
 		if self.filters.date_type == "Project Date":
-			return "prj.project_date"
+			return "proj.project_date"
 		else:
 			if doctype in ["Sales Order", "Purchase Order"]:
 				return "o.transaction_date"
@@ -234,23 +247,27 @@ class ItemsToBeBilled:
 				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 		if self.filters.project_type:
-			conditions.append("prj.project_type = %(project_type)s")
+			conditions.append("proj.project_type = %(project_type)s")
 
 		return "AND {}".format(" AND ".join(conditions)) if conditions else ""
 
 	def prepare_data(self):
 		for d in self.data:
 			# Set UOM based on qty field
-			if self.filters.qty_field == "Transaction Qty":
-				d.uom = d.uom
-			elif self.filters.qty_field == "Contents Qty":
+			if self.filters.qty_field == "Contents Qty":
 				d.uom = d.alt_uom or d.stock_uom
-			else:
+				d.billed_qty = d.billed_qty * d.conversion_factor * d.alt_uom_size
+				d.returned_qty = d.returned_qty * d.conversion_factor * d.alt_uom_size
+			elif self.filters.qty_field == "Stock Qty":
 				d.uom = d.stock_uom
+				d.billed_qty = d.billed_qty * d.conversion_factor
+				d.returned_qty = d.returned_qty * d.conversion_factor
+
 			d['rate'] = d['amount'] / d['qty'] if d['qty'] else d['rate']
 			d["remaining_qty"] = d["qty"] - d["billed_qty"] - d['returned_qty']
 
 			d["remaining_amt"] = d["amount"] - d["billed_amt"]
+
 			if d["amount"] >= 0:
 				d["remaining_amt"] = max(0, d["remaining_amt"])
 			else:
