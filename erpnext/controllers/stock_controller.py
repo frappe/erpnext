@@ -142,12 +142,14 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		precision = self.get_debit_field_precision()
 		for item_row in voucher_details:
-
 			sle_list = sle_map.get(item_row.name)
+			sle_rounding_diff = 0.0
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
 						# from warehouse account
+
+						sle_rounding_diff += flt(sle.stock_value_difference)
 
 						self.check_expense_account(item_row)
 
@@ -190,6 +192,46 @@ class StockController(AccountsController):
 						)
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
+
+			if abs(sle_rounding_diff) > (1.0 / (10**precision)) and self.is_internal_transfer():
+				warehouse_asset_account = ""
+				if self.get("is_internal_customer"):
+					warehouse_asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+				elif self.get("is_internal_supplier"):
+					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
+
+				expense_account = frappe.db.get_value("Company", self.company, "default_expense_account")
+
+				gl_list.append(
+					self.get_gl_dict(
+						{
+							"account": expense_account,
+							"against": warehouse_asset_account,
+							"cost_center": item_row.cost_center,
+							"project": item_row.project or self.get("project"),
+							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
+							"debit": sle_rounding_diff,
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+						},
+						warehouse_account[sle.warehouse]["account_currency"],
+						item=item_row,
+					)
+				)
+
+				gl_list.append(
+					self.get_gl_dict(
+						{
+							"account": warehouse_asset_account,
+							"against": expense_account,
+							"cost_center": item_row.cost_center,
+							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
+							"credit": sle_rounding_diff,
+							"project": item_row.get("project") or self.get("project"),
+							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+						},
+						item=item_row,
+					)
+				)
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
