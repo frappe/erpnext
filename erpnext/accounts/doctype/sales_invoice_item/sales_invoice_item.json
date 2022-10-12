@@ -518,7 +518,6 @@
    "print_hide": 1
   },
   {
-   "default": ":Company",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -1430,7 +1429,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-06-15 00:19:54.757965",
+ "modified": "2022-10-12 21:53:54.705324",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

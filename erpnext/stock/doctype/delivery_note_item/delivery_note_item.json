@@ -647,7 +647,6 @@
    "print_hide": 1
   },
   {
-   "default": ":Company",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -1260,7 +1259,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-10-08 14:25:58.612112",
+ "modified": "2022-10-12 21:55:58.786232",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

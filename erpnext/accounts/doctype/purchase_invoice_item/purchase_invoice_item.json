@@ -516,7 +516,6 @@
    "print_hide": 1
   },
   {
-   "default": ":Company",
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "cost_center",
    "fieldtype": "Link",
@@ -1237,7 +1236,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-21 16:17:23.012622",
+ "modified": "2022-10-12 21:56:00.645093",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
