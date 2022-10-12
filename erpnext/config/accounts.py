@@ -43,6 +43,11 @@ def get_data():
 					"name": "Sales Items To Be Billed",
 					"is_query_report": True,
 				},
+				{
+					"type": "report",
+					"name": "Claim Items To Be Billed",
+					"is_query_report": True,
+				},
 			]
 		},
 		{
