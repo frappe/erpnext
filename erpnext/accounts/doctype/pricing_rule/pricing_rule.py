@@ -24,6 +24,7 @@ class PricingRule(Document):
 		self.validate_applicable_for_selling_or_buying()
 		self.validate_min_max_amt()
 		self.validate_min_max_qty()
+		self.validate_recursion()
 		self.cleanup_fields_value()
 		self.validate_rate_or_discount()
 		self.validate_max_discount()
@@ -33,9 +34,6 @@ class PricingRule(Document):
 
 		if not self.margin_type:
 			self.margin_rate_or_amount = 0.0
-
-		if not self.recurse_for:
-			self.recurse_for = 1
 
 	def validate_duplicate_apply_on(self):
 		if self.apply_on != "Transaction":
@@ -111,6 +109,15 @@ class PricingRule(Document):
 	def validate_min_max_amt(self):
 		if self.min_amt and self.max_amt and flt(self.min_amt) > flt(self.max_amt):
 			throw(_("Min Amt can not be greater than Max Amt"))
+
+	def validate_recursion(self):
+		if self.price_or_product_discount != "Product":
+			return
+		if self.free_item or self.same_item:
+			if not self.recurse_for:
+				self.recurse_for = 1
+			if self.recurse_for > self.min_qty:
+				throw(_("Min Qty should be greater than Recurse For"))
 
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "rate_or_discount"]:
