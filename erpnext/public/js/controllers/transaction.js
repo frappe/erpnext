@@ -1401,7 +1401,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				if (!r.exc && r.message) {
 					me._set_values_for_item_list(r.message);
 					if(item) me.set_gross_profit(item);
-					if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on")
+					if (me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on")
 				}
 			}
 		});
@@ -1571,9 +1571,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					&& d.pricing_rules === pr_row.pricing_rules))[0];
 			}
 
-			for (let key in pr_row) {
-				row_to_modify[key] = pr_row[key];
-			}
+			// to trigger item_code functionalities
+			frappe.model.set_value(
+				row_to_modify.doctype, row_to_modify.name, 'item_code', pr_row['item_code']
+			).then(function() {
+				for (let key in pr_row) {
+					if (key != "item_code") row_to_modify[key] = pr_row[key];
+				}
+			});
 		});
 
 		// free_item_data is a temporary variable
