@@ -2407,69 +2407,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-<<<<<<< HEAD
-=======
-	def test_inter_company_transaction_without_default_warehouse(self):
-		"Check mapping (expense account) of inter company SI to PI in absence of default warehouse."
-		# setup
-		old_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
-
-		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company 1")
-		frappe.local.enable_perpetual_inventory["_Test Company 1"] = 1
-
-		frappe.db.set_value(
-			"Company",
-			"_Test Company 1",
-			"stock_received_but_not_billed",
-			"Stock Received But Not Billed - _TC1",
-		)
-		frappe.db.set_value(
-			"Company",
-			"_Test Company 1",
-			"expenses_included_in_valuation",
-			"Expenses Included In Valuation - _TC1",
-		)
-
-		# begin test
-		si = create_sales_invoice(
-			company="Wind Power LLC",
-			customer="_Test Internal Customer",
-			debit_to="Debtors - WP",
-			warehouse="Stores - WP",
-			income_account="Sales - WP",
-			expense_account="Cost of Goods Sold - WP",
-			cost_center="Main - WP",
-			currency="USD",
-			update_stock=1,
-			do_not_save=1,
-		)
-		si.selling_price_list = "_Test Price List Rest of the World"
-		si.submit()
-
-		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
-
-		# in absence of warehouse Stock Received But Not Billed is set as expense account while mapping
-		# mapping is not obstructed
-		self.assertIsNone(target_doc.items[0].warehouse)
-		self.assertEqual(target_doc.items[0].expense_account, "Stock Received But Not Billed - _TC1")
-
-		target_doc.items[0].update({"cost_center": "Main - _TC1"})
-
-		# missing warehouse is validated on save, after mapping
-		self.assertRaises(WarehouseMissingError, target_doc.save)
-
-		target_doc.items[0].update({"warehouse": "Stores - _TC1"})
-		target_doc.save()
-
-		# after warehouse is set, linked account or default inventory account is set
-		self.assertEqual(target_doc.items[0].expense_account, "Stock In Hand - _TC1")
-
-		# tear down
-		frappe.local.enable_perpetual_inventory["_Test Company 1"] = old_perpetual_inventory
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", old_negative_stock)
-
->>>>>>> dc20b21fb5 (test: Internal tranfer precision loss test)
 	def test_sle_for_target_warehouse(self):
 		se = make_stock_entry(
 			item_code="138-CMS Shoe",
@@ -2573,7 +2510,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, target_doc.name, pi_gl_entries, add_days(nowdate(), -1))
 
-<<<<<<< HEAD
 	def test_eway_bill_json(self):
 		si = make_sales_invoice_for_ewaybill()
 
@@ -2855,7 +2791,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(einvoice["ItemList"][1]["Discount"], 0)
 		self.assertEqual(einvoice["ItemList"][1]["UnitPrice"], 20)
-=======
+
 	def test_internal_transfer_gl_precision_issues(self):
 		# Make a stock queue of an item with two valuations
 
@@ -2926,7 +2862,6 @@ class TestSalesInvoice(unittest.TestCase):
 				},
 			)
 		)
->>>>>>> dc20b21fb5 (test: Internal tranfer precision loss test)
 
 	def test_item_tax_net_range(self):
 		item = create_item("T Shirt")
