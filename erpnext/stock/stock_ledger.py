@@ -1473,16 +1473,7 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 	if abs(0.0 - flt(number)) < (1.0 / (10**precision)):
 		return 0.0
 
-<<<<<<< HEAD
 	return flt(number)
-=======
-def is_negative_stock_allowed(*, item_code: Optional[str] = None) -> bool:
-	if cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock", cache=True)):
-		return True
-	if item_code and cint(frappe.db.get_value("Item", item_code, "allow_negative_stock", cache=True)):
-		return True
-	return False
-
 
 def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 	"""
@@ -1504,4 +1495,3 @@ def get_incoming_rate_for_inter_company_transfer(sle) -> float:
 		)
 
 	return rate
->>>>>>> 683a47f7a1 (fix: consider sales rate as incoming rate for transit warehouse in purchase flow)
