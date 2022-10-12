@@ -495,6 +495,67 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertRaises(frappe.ValidationError, pos.submit)
 
+	def test_value_error_on_serial_no_validation(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+
+		se = make_serialized_item(
+			company="_Test Company",
+			target_warehouse="Stores - _TC",
+			cost_center="Main - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+		)
+		serial_nos = se.get("items")[0].serial_no
+
+		# make a pos invoice
+		pos = create_pos_invoice(
+			company="_Test Company",
+			debit_to="Debtors - _TC",
+			account_for_change_amount="Cash - _TC",
+			warehouse="Stores - _TC",
+			income_account="Sales - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			item=se.get("items")[0].item_code,
+			rate=1000,
+			qty=1,
+			do_not_save=1,
+		)
+		pos.get("items")[0].has_serial_no = 1
+		pos.get("items")[0].serial_no = serial_nos.split("\n")[0]
+		pos.set("payments", [])
+		pos.append(
+			"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 1000, "default": 1}
+		)
+		pos = pos.save().submit()
+
+		# make a return
+		pos_return = make_sales_return(pos.name)
+		pos_return.paid_amount = pos_return.grand_total
+		pos_return.save()
+		pos_return.submit()
+
+		# set docstatus to 2 for pos to trigger this issue
+		frappe.db.set_value("POS Invoice", pos.name, "docstatus", 2)
+
+		pos2 = create_pos_invoice(
+			company="_Test Company",
+			debit_to="Debtors - _TC",
+			account_for_change_amount="Cash - _TC",
+			warehouse="Stores - _TC",
+			income_account="Sales - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			item=se.get("items")[0].item_code,
+			rate=1000,
+			qty=1,
+			do_not_save=1,
+		)
+
+		pos2.get("items")[0].has_serial_no = 1
+		pos2.get("items")[0].serial_no = serial_nos.split("\n")[0]
+		# Value error should not be triggered on validation
+		pos2.save()
+
 	def test_loyalty_points(self):
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 			get_loyalty_program_details_with_points,
