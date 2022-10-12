@@ -623,7 +623,9 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	if pricing_rule.is_recursive:
 		transaction_qty = args.get("qty") if args else doc.total_qty
 		if transaction_qty:
-			qty = flt(transaction_qty) * qty
+			qty = flt(transaction_qty) * qty / pricing_rule.recurse_for
+			if pricing_rule.round_free_qty:
+				qty = round(qty)
 
 	free_item_data_args = {
 		"item_code": free_item,
