@@ -34,6 +34,9 @@ class PricingRule(Document):
 		if not self.margin_type:
 			self.margin_rate_or_amount = 0.0
 
+		if not self.recurse_for:
+			self.recurse_for = 1
+
 	def validate_duplicate_apply_on(self):
 		if self.apply_on != "Transaction":
 			apply_on_table = apply_on_dict.get(self.apply_on)
