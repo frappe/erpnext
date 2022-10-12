@@ -193,21 +193,22 @@ class StockController(AccountsController):
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
-			if abs(sle_rounding_diff) > 0.1 and (
+			if abs(sle_rounding_diff) < (1.0 / (10**precision)) and (
 				self.get("is_internal_customer") or self.get("is_internal_supplier")
 			):
-				asset_account = ""
+				warehouse_asset_account = ""
 				if self.get("is_internal_customer"):
-					asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
+					warehouse_asset_account = warehouse_account[item_row.get("target_warehouse")]["account"]
 				elif self.get("is_internal_supplier"):
-					asset_account = warehouse_account[item_row.get("from_warehouse")]["account"]
+					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
 
-				expense_account = item_row.get("expense_account")
+				expense_account = frappe.db.get_value("Company", self.company, "default_expense_account")
+
 				gl_list.append(
 					self.get_gl_dict(
 						{
 							"account": expense_account,
-							"against": asset_account,
+							"against": warehouse_asset_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get("project"),
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
@@ -222,7 +223,7 @@ class StockController(AccountsController):
 				gl_list.append(
 					self.get_gl_dict(
 						{
-							"account": asset_account,
+							"account": warehouse_asset_account,
 							"against": expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
