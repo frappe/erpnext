@@ -2,14 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-<<<<<<< HEAD
 import json
 import unittest
 from collections import defaultdict
-=======
-from cmath import pi
-from turtle import update
->>>>>>> 683a47f7a1 (fix: consider sales rate as incoming rate for transit warehouse in purchase flow)
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
