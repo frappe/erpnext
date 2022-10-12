@@ -190,7 +190,7 @@ class StockController(AccountsController):
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
-			if abs(sle_rounding_diff) < (1.0 / (10**precision)) and (
+			if abs(sle_rounding_diff) > (1.0 / (10**precision)) and (
 				self.get("is_internal_customer") or self.get("is_internal_supplier")
 			):
 				warehouse_asset_account = ""
