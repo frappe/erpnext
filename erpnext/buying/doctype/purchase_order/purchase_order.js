@@ -33,7 +33,7 @@ frappe.ui.form.on("Purchase Order", {
 	purchase_order_type: function(frm) {
 		frm.set_df_property('purchase_order_type','read_only',true);
 		if(frm.doc.purchase_order_type == "Local" || frm.doc.purchase_order_type == "Import"){
-			
+			frm.set_value("items", []);
 			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
 			rate_field.read_only = 1;
 			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
