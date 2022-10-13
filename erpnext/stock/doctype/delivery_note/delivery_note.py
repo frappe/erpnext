@@ -16,6 +16,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt, get_datetime
+from nrp_manufacturing.utils import get_config_by_name
 import time
 
 form_grid_templates = {
@@ -192,7 +193,7 @@ class DeliveryNote(SellingController):
 		time.sleep(1)
 		if(self.is_return==1):
 			self.queue_action('submit',queue_name="return")
-		elif(self.company=='Unit 6'):
+		elif(self.section in get_config_by_name('dn_queue_section',[])):
 			self.queue_action('submit',queue_name="dn_primary")
 		else:
 			self.queue_action('submit',queue_name="dn_secondary")
