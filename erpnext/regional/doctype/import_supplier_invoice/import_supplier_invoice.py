@@ -95,12 +95,13 @@ class ImportSupplierInvoice(Document):
 				)
 
 	def prepare_items_for_invoice(self, file_content, invoices_args):
-		qty = 1
 		rate, tax_rate = [0, 0]
 		uom = self.default_uom
 
 		# read file for item information
 		for line in file_content.find_all("DettaglioLinee"):
+			# set qty = 1 before cycle new item line
+			qty = 1
 			if line.find("PrezzoUnitario") and line.find("PrezzoTotale"):
 				rate = flt(line.PrezzoUnitario.text) or 0
 				line_total = flt(line.PrezzoTotale.text) or 0
