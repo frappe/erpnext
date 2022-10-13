@@ -64,6 +64,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'customer': d.customer,
 			'customer_name': customer_record.customer_name,
 			'customer_group': customer_record.customer_group,
+			'delivery_note_posting_date': d.delivery_note_posting_date
 		}
 
 		if additional_query_columns:
@@ -295,6 +296,12 @@ def get_columns(additional_table_columns, filters):
 			'width': 100
 		},
 		{
+			'label': _("Delivery Note Posting Date"),
+			'fieldname': 'delivery_note_posting_date',
+			'fieldtype': 'Date',
+			'width': 100
+		},
+		{
 			'label': _('Income Account'),
 			'fieldname': 'income_account',
 			'fieldtype': 'Link',
@@ -425,6 +432,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
 			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
+			(SELECT posting_date FROM `tabDelivery Note` WHERE name = `tabSales Invoice Item`.delivery_note) AS delivery_note_posting_date,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
 			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
