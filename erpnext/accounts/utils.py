@@ -1171,6 +1171,10 @@ def _delete_gl_entries(voucher_type, voucher_no):
 		where voucher_type=%s and voucher_no=%s""",
 		(voucher_type, voucher_no),
 	)
+	ple = qb.DocType("Payment Ledger Entry")
+	qb.from_(ple).delete().where(
+		(ple.voucher_type == voucher_type) & (ple.voucher_no == voucher_no)
+	).run()
 
 
 def sort_stock_vouchers_by_posting_date(
