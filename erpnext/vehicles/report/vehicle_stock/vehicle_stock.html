@@ -194,7 +194,8 @@
 				</td>
 
 				<td class="text-center" {% if (data[i].status_color) { %} style="color: {%= data[i].status_color %} !important;"{% } %}>
-					{%= cstr(data[i].status).split("(").join("<br>(") %}
+					<div>{%= cstr(data[i].status).split("(").join("<br>(") %}</div>
+					<div>{%= data[i].warehouse_name %}</div>
 				</td>
 			{% } %}
 		{% } %}

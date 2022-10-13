@@ -8,7 +8,7 @@ def get_data():
 		vehicle_domain_sections = [
 			{
 				'label': ['Stock'],
-				'items': ['Vehicle Booking Order', 'Vehicle Receipt', 'Vehicle Delivery']
+				'items': ['Vehicle Booking Order', 'Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Movement']
 			},
 			{
 				'label': ['Service'],

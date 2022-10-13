@@ -79,6 +79,11 @@ def get_data():
 					"name": "Vehicle Delivery",
 					"dependencies": ["Vehicle"],
 				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Movement",
+					"dependencies": ["Vehicle"],
+				},
 			],
 		},
 		{
@@ -132,6 +137,11 @@ def get_data():
 					"doctype": "Appointment",
 					"dependencies": ["Appointment"],
 					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Log",
+					"dependencies": ["Vehicle"],
 				},
 			],
 		},
@@ -257,17 +267,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Allocation Creation Tool",
-				},
-			]
-		},
-		{
-			"label": _("More / Work in Progress"),
-			"icon": "fa fa-cog",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Vehicle Log",
-					"dependencies": ["Vehicle"],
 				},
 			]
 		},

@@ -657,7 +657,7 @@ class update_entries_after(object):
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = ""
 
-		if voucher_type in ('Vehicle Receipt', 'Vehicle Delivery'):
+		if voucher_type in ('Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Movement'):
 			return 1
 
 		if voucher_type == "Stock Entry":

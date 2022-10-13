@@ -214,22 +214,41 @@ class SerialNo(StockController):
 				self.vehicle_owner_name = last_customer_log.get('vehicle_owner_name')
 
 	def get_last_sle(self, serial_no=None):
-		entries = {}
-		sle_dict = self.get_stock_ledger_entries(serial_no)
-		if sle_dict:
-			if sle_dict.get("incoming", []):
-				entries["purchase_sle"] = sle_dict["incoming"][0]
+		if not serial_no:
+			serial_no = self.name
 
-			if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
-				entries["last_sle"] = sle_dict["incoming"][0]
-			else:
-				entries["last_sle"] = sle_dict["outgoing"][0]
-				entries["delivery_sle"] = sle_dict["outgoing"][0]
+		sl_entries = self.get_stock_ledger_entries(serial_no)
+		entries = {}
+
+		for i in range(len(sl_entries)):
+			sle = sl_entries[i]
+			previous_sle = sl_entries[i - 1] if i - 1 >= 0 else None
+			next_sle = sl_entries[i + 1] if i + 1 < len(sl_entries) else None
+
+			is_transfer = False
+			transfer_sle = next_sle if cint(sle.actual_qty) < 0 else previous_sle
+
+			if transfer_sle and transfer_sle.voucher_type == sle.voucher_type and transfer_sle.voucher_no == sle.voucher_no \
+					and cint(transfer_sle.actual_qty) == cint(-1 * sle.actual_qty):
+				is_transfer = True
+
+			if not is_transfer:
+				if cint(sle.actual_qty) > 0:
+					# first receipt or receipt after delivery except returns
+					if not entries.get("purchase_sle") or (entries.get("delivery_sle") and sle.voucher_type not in ['Delivery Note', 'Sales Invoice']):
+						entries["purchase_sle"] = sle
+
+					entries["delivery_sle"] = None
+				else:
+					# last delivery
+					entries["delivery_sle"] = sle
+
+			# last sle
+			entries["last_sle"] = sle
 
 		return entries
 
 	def get_stock_ledger_entries(self, serial_no=None):
-		sle_dict = {}
 		if not serial_no:
 			serial_no = self.name
 
@@ -243,17 +262,11 @@ class SerialNo(StockController):
 				AND exists(select sr.name from `tabStock Ledger Entry Serial No` sr
 					where sr.parent = `tabStock Ledger Entry`.name and sr.serial_no = %s)
 			ORDER BY
-				posting_date desc, posting_time desc, creation desc
+				posting_date, posting_time, creation
 		""", (self.item_code, self.company, serial_no), as_dict=1)
 
-		for sle in sl_entries:
-			if serial_no.upper() in get_serial_nos(sle.serial_no):
-				if cint(sle.actual_qty) > 0:
-					sle_dict.setdefault("incoming", []).append(sle)
-				else:
-					sle_dict.setdefault("outgoing", []).append(sle)
-
-		return sle_dict
+		sl_entries = [sle for sle in sl_entries if serial_no.upper() in get_serial_nos(sle.serial_no)]
+		return sl_entries
 
 	def update_serial_no_reference(self, serial_no=None):
 		last_sle = self.get_last_sle(serial_no)
@@ -275,6 +288,9 @@ class SerialNo(StockController):
 				vehicle_doc = frappe.get_doc("Vehicle", self.vehicle)
 
 			vehicle_doc.via_stock_ledger = self.via_stock_ledger
+			if self.via_stock_ledger:
+				vehicle_doc.flags.ignore_version = True
+
 			vehicle_doc.save(ignore_permissions=True)
 			self.vehicle = vehicle_doc.name
 

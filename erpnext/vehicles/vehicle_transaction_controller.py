@@ -742,8 +742,10 @@ def get_vehicle_booking_order_details(args):
 
 		out.item_code = booking_details.item_code
 		out.vehicle = booking_details.vehicle
-		out.warehouse = booking_details.warehouse
 		out.supplier = booking_details.supplier
+
+		if args.doctype not in ['Vehicle Delivery', 'Vehicle Movement']:
+			out.warehouse = booking_details.warehouse
 
 	out.booking_customer_name = booking_details.customer_name
 	out.booking_tax_id = booking_details.tax_id
@@ -869,7 +871,7 @@ def get_vehicle_details(args, get_vehicle_booking_order=True, warn_reserved=True
 
 	if args.vehicle and get_vehicle_booking_order and not args.vehicle_booking_order:
 		status_filters = None
-		if args.doctype in ('Vehicle Receipt', 'Vehicle Delivery'):
+		if args.doctype in ('Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Movement'):
 			if cint(args.is_return):
 				status_filters = {'delivery_status': ['=', 'Delivered']}
 			else:

@@ -277,6 +277,10 @@ class VehicleStockReport(object):
 			if d.received_date:
 				d.age = (getdate(self.filters.to_date) - getdate(d.received_date)).days or 0
 
+			# Warehouse Name
+			if d.warehouse:
+				d.warehouse_name = frappe.db.get_value("Warehouse", d.warehouse, 'warehouse_name', cache=1)
+
 			# Stock Status
 			if d.qty > 0:
 				if d.vehicle_booking_order and not d.open_stock:
