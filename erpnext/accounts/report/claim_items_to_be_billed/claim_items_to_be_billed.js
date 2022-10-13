@@ -175,4 +175,86 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 
 		return default_formatter(value, row, column, data, {css: style});
 	},
+	onload: function(report) {
+		report.page.add_inner_button(__("Create Sale Invoice"), function() {
+			var filters = report.get_values();
+
+			let d = new frappe.ui.Dialog({
+				title: 'Select Claim Customer For Sales Invoice',
+				fields: [
+					{
+						label: 'Customer',
+						fieldname: 'customer',
+						fieldtype: 'Link',
+						options: 'Customer',
+						reqd: 1
+					}
+				],
+				primary_action_label: 'Create Sales Invoice',
+				primary_action: function(values){
+					frappe.new_doc("Sales Invoice", {
+						customer: values.customer,
+						claim_billing: 1,
+					}).then(r => {	
+						cur_frm.clear_table("items");
+
+						var data = frappe.query_report.datatable.datamanager.data;
+						console.log(data)
+
+						frappe.call({
+							type: "POST",
+							method: "erpnext.accounts.report.claim_items_to_be_billed.claim_items_to_be_billed.claim_items_invoice",
+							args: {
+								"data": data,
+								"target_doc": cur_frm.doc
+							},
+							callback: function (r) {
+								if (!r.exc) {
+									frappe.model.sync(r.message);
+									cur_frm.dirty();
+									cur_frm.refresh();
+								}
+							}
+						})
+
+						// frappe.call({
+						// 	type: "POST",
+						// 	method: "frappe.model.mapper.map_docs",
+						// 	args: {
+						// 		"method": "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
+						// 		"source_names": data.filter(el => el.doctype == "Sales Order").map(el => el.name),
+						// 		"target_doc": cur_frm.doc,
+						// 		"selected_children": data.filter(el=>el.doctype == "Sales Order").map(el => el.row_name)
+						// 	},
+						// 	callback: function (r) {
+						// 		if (!r.exc) {
+						// 			frappe.model.sync(r.message);
+						// 			cur_frm.dirty();
+						// 			cur_frm.refresh();
+						// 		}
+						// 	}
+						// });
+					});
+					d.hide();
+				}
+			});
+			d.show();
+			var data = frappe.query_report.datatable.datamanager.data;
+			
+			// var doc_ref = []
+			// for(let i=0; i<frappe.query_report.datatable.datamanager.data.length; i++){
+			// 	doc_ref.push(frappe.query_report.datatable.datamanager.data[i].name);
+			// }
+			
+			// console.log(frappe.query_report.datatable.datamanager.data)
+
+			// let data = frappe.query_report.datatable.datamanager.data;
+			// var doc_ref = []
+			// for(let i=0; i<data.length; i++){
+			// 	doc_ref.push({doc: data[i].doctype, name: data[i].name});
+			// }
+			
+			console.log(data)
+		});
+	}
 };

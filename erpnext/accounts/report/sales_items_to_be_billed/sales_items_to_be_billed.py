@@ -60,7 +60,7 @@ class ItemsToBeBilled:
 		common_fields = """
 			o.name, o.company, o.creation, o.currency, o.project,
 			o.{party_field} as party, o.{party_name_field} as party_name,
-			i.item_code, i.item_name, i.warehouse,
+			i.item_code, i.item_name, i.warehouse, i.name as row_name,
 			i.{qty_field} as qty, i.uom, i.stock_uom, i.alt_uom,
 			i.conversion_factor, i.alt_uom_size,
 			i.billed_qty, i.returned_qty, i.billed_amt,
