@@ -111,17 +111,17 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this._super();
 		var allow_receipt = false;
 		var is_drop_ship = false;
-		if(frm.doc.purchase_order_type == "Local" || frm.doc.purchase_order_type == "Import"){
+		if(this.frm.doc.purchase_order_type == "Local" || this.frm.doc.purchase_order_type == "Import"){
 			
-			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", this.frm.doc.name);
 			rate_field.read_only = 1;
-			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", this.frm.doc.name);
 			price_list_field.read_only = 1;
 			refresh_field("items");
 		}else{
-			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", this.frm.doc.name);
 			rate_field.read_only = 0;
-			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", this.frm.doc.name);
 			price_list_field.read_only = 0;
 			refresh_field("items");
 		}
