@@ -620,7 +620,7 @@ def get_price_list_rate(args, item_doc, out):
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
-			out.update(get_last_purchase_details(args.compnay,item_doc.name,args.name, args.conversion_rate))
+			out.update(get_last_purchase_details(args.company,item_doc.name,args.name, args.conversion_rate))
 
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
