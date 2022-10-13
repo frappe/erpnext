@@ -116,8 +116,6 @@ class PricingRule(Document):
 		if self.free_item or self.same_item:
 			if not self.recurse_for:
 				self.recurse_for = 1
-			if self.recurse_for > self.min_qty:
-				throw(_("Min Qty should be greater than Recurse For"))
 
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "rate_or_discount"]:
