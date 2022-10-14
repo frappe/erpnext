@@ -323,7 +323,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	out = frappe._dict(
 		{
 			"item_code": item.name,
-			# "item_name": item.item_name,
+			"item_name": item.item_name,
 			"description": cstr(item.description).strip(),
 			"image": cstr(item.image).strip(),
 			"warehouse": warehouse,
@@ -408,12 +408,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		if not out[d[1]]:
 			out[d[1]] = frappe.get_cached_value("Company", args.company, d[2]) if d[2] else None
 
-#In child table Show item code and description together 
-	# for fieldname in ("item_name", "item_group", "brand", "stock_uom"):
-	# 	out[fieldname] = item.get(fieldname)
-
-#In child table Show diff column  item code and description
-	for fieldname in ("item_group", "brand", "stock_uom"):
+	for fieldname in ("item_name", "item_group", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
 
 	if args.get("manufacturer"):
