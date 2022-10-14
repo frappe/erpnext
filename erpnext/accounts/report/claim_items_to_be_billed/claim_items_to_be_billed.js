@@ -217,7 +217,7 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 				primary_action: function(values){
 					frappe.call({
 						type: "POST",
-						method: "erpnext.accounts.report.claim_items_to_be_billed.claim_items_to_be_billed.claim_items_invoice",
+						method: "erpnext.accounts.report.claim_items_to_be_billed.claim_items_to_be_billed.make_claim_sales_invoice",
 						args: {
 							"customer": values.customer,
 							"data": data

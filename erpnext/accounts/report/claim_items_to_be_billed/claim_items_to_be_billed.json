@@ -8,7 +8,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "letter_head": "Hyundai South",
- "modified": "2022-10-11 14:07:23.474183",
+ "modified": "2022-10-14 13:27:28.417958",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Claim Items To Be Billed",
@@ -20,9 +20,6 @@
  "roles": [
   {
    "role": "Sales User"
-  },
-  {
-   "role": "Maintenance User"
   },
   {
    "role": "Accounts User"

@@ -15,7 +15,7 @@ def execute(filters=None):
 	return ItemsToBeBilled(filters).run("Customer", claim_billing=True)
 
 @frappe.whitelist()
-def claim_items_invoice(data, customer):
+def make_claim_sales_invoice(data, customer):
 	if isinstance(data, string_types):
 		data = json.loads(data)
 

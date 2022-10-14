@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2022-10-10 14:06:38.572230",
+ "modified": "2022-10-14 13:27:31.998728",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Items To Be Billed",
@@ -19,9 +19,6 @@
  "roles": [
   {
    "role": "Sales User"
-  },
-  {
-   "role": "Maintenance User"
   },
   {
    "role": "Accounts User"
