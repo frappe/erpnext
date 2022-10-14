@@ -44,10 +44,12 @@ class ItemsToBeBilled:
 		party_join = ""
 		sales_person_join = ""
 		sales_person_field = ""
+		claim_customer_field = ""
 		if self.filters.party_type == "Customer":
 			party_join = "inner join `tabCustomer` cus on cus.name = o.customer"
 			sales_person_field = ", GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person"
 			sales_person_join = "left join `tabSales Team` sp on sp.parent = o.name and sp.parenttype = {0}"
+			claim_customer_field = ", i.claim_customer"
 		elif self.filters.party_type == "Supplier":
 			party_join = "inner join `tabSupplier` sup on sup.name = o.supplier"
 
@@ -59,19 +61,20 @@ class ItemsToBeBilled:
 
 		common_fields = """
 			o.name, o.company, o.creation, o.currency, o.project,
-			o.{party_field} as party, o.{party_name_field} as party_name, i.claim_customer,
+			o.{party_field} as party, o.{party_name_field} as party_name,
 			i.item_code, i.item_name, i.warehouse, i.name as row_name,
 			i.{qty_field} as qty, i.uom, i.stock_uom, i.alt_uom,
 			i.conversion_factor, i.alt_uom_size,
 			i.billed_qty, i.returned_qty, i.billed_amt,
 			i.rate, i.amount, im.item_group, im.brand
-			{sales_person_field} {project_fields}
+			{sales_person_field} {project_fields} {claim_customer_field}
 		""".format(
 			party_field=fieldnames.party,
 			party_name_field=fieldnames.party_name,
 			qty_field=fieldnames.qty,
 			sales_person_field=sales_person_field,
-			project_fields=project_fields
+			project_fields=project_fields,
+			claim_customer_field=claim_customer_field,
 		)
 
 		order_data = []
