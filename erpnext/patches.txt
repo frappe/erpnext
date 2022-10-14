@@ -762,6 +762,7 @@ erpnext.patches.v12_0.restrict_vehicle_roles
 erpnext.patches.v12_0.add_delivery_user_role
 execute:frappe.delete_doc_if_exists("DocType", "Vehicle Booking Notification Count")
 erpnext.patches.v12_0.fix_leave_enchashment_duplicate_ledger
+erpnext.patches.v12_0.delete_desktop_icons
 execute:frappe.delete_doc_if_exists("Report", "Ordered Items To Be Delivered")
 execute:frappe.delete_doc_if_exists("Report", "Purchase Order Items To Be Received or Billed")
 execute:frappe.delete_doc_if_exists("Report", "Item Shortage Report")
