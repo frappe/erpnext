@@ -1892,6 +1892,7 @@ def make_sales_invoice(project_name, target_doc=None, depreciation_type=None, cl
 
 
 def postprocess_claim_billing(target_doc):
+	target_doc.ignore_pricing_rule = 1
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
 
