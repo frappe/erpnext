@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.model.mapper import map_docs
+from frappe import _
 from erpnext.accounts.report.sales_items_to_be_billed.sales_items_to_be_billed import ItemsToBeBilled
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as invoice_from_sales_order
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice as invoice_from_delivery_note
@@ -20,11 +20,15 @@ def make_claim_sales_invoice(data, customer):
 	if isinstance(data, string_types):
 		data = json.loads(data)
 
-	sales_orders = [item.get('name') for item in data if item.get('doctype') == "Sales Order"]
-	sales_order_rows = [item.get('row_name') for item in data if item.get('doctype') == "Sales Order"]
+	sales_orders = [d.get('name') for d in data if d.get('doctype') == "Sales Order" and d.get('claim_customer') == customer]
+	sales_order_rows = [d.get('row_name') for d in data if d.get('doctype') == "Sales Order" and d.get('claim_customer') == customer]
 
-	delivery_notes = [item.get('name') for item in data if item.get('doctype') == "Delivery Note"]
-	delivery_note_rows = [item.get('row_name') for item in data if item.get('doctype') == "Delivery Note"]
+	delivery_notes = [d.get('name') for d in data if d.get('doctype') == "Delivery Note" and d.get('claim_customer') == customer]
+	delivery_note_rows = [d.get('row_name') for d in data if d.get('doctype') == "Delivery Note" and d.get('claim_customer') == customer]
+
+	if not sales_orders and not delivery_notes:
+		frappe.throw(_("No unbilled Sales Orders or Delivery Notes in report against Claim {0}")
+			.format(frappe.get_desk_link("Customer", customer)))
 
 	target_doc = frappe.new_doc("Sales Invoice")
 	target_doc.customer = customer

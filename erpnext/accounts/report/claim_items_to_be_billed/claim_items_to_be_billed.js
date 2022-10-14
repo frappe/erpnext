@@ -222,6 +222,8 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 							"customer": values.customer,
 							"data": data
 						},
+						freeze: 1,
+						freeze_message: __("Creating Sales Invoice"),
 						callback: function (r) {
 							if (!r.exc) {
 								var doclist = frappe.model.sync(r.message);
