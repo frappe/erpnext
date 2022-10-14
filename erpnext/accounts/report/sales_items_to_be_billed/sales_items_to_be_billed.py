@@ -446,4 +446,7 @@ class ItemsToBeBilled:
 		else:
 			columns = [c for c in columns if c['fieldname'] != 'project_date']
 
+		if not self.filters.claim_billing:
+			columns = [c for c in columns if c['fieldname'] != 'project_type']
+
 		self.columns = columns
