@@ -14,6 +14,7 @@ from six import string_types
 def execute(filters=None):
 	return ItemsToBeBilled(filters).run("Customer", claim_billing=True)
 
+
 @frappe.whitelist()
 def make_claim_sales_invoice(data, customer):
 	if isinstance(data, string_types):
