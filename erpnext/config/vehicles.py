@@ -246,6 +246,11 @@ def get_data():
 					"doctype": "Vehicle Booking Payment",
 					"dependencies": ["Vehicle Booking Payment"],
 				},
+				{
+					"type": "report",
+					"name": "Claim Items To Be Billed",
+					"is_query_report": True,
+				},
 			]
 		},
 		{

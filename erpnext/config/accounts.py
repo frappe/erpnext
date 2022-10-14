@@ -338,7 +338,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Profitability"),
+			"label": _("More Reports"),
 			"items": [
 				{
 					"type": "report",
@@ -350,6 +350,11 @@ def get_data():
 					"type": "report",
 					"name": "Profitability Analysis",
 					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Claim Items To Be Billed",
 					"is_query_report": True,
 				},
 			]

@@ -102,6 +102,11 @@ def get_data():
 					"doctype": "Project",
 					"dependencies": ["Project"],
 				},
+				{
+					"type": "report",
+					"name": "Claim Items To Be Billed",
+					"is_query_report": True,
+				},
 			]
 		},
 	]

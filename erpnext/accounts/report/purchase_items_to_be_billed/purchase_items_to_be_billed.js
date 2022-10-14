@@ -16,8 +16,8 @@ frappe.query_reports["Purchase Items To Be Billed"] = {
 			fieldname: "qty_field",
 			label: __("Quantity Type"),
 			fieldtype: "Select",
-			options: ["Stock Qty", "Contents Qty", "Transaction Qty"],
-			default: "Stock Qty",
+			options: ["Transaction Qty", "Contents Qty", "Stock Qty"],
+			default: "Transaction Qty",
 			reqd: 1
 		},
 		{
