@@ -87,7 +87,7 @@ def return_data(filters):
 	salary_slips = frappe.get_all("Sales Invoice", ["*"], filters = conditions,  order_by = "name asc")
 
 	for salary_slip in salary_slips:		
-		row = [salary_slip.posting_date, salary_slip.name, salary_slip.customer, salary_slip.rtn, salary_slip.cai, salary_slip.discount_amount, salary_slip.patient_name, salary_slip.grand_total, _(salary_slip.status), salary_slip.tc_name, salary_slip.cashier]
+		row = [salary_slip.posting_date, salary_slip.name, salary_slip.customer, salary_slip.rtn, salary_slip.cai, salary_slip.patient_name, salary_slip.discount_amount, salary_slip.grand_total, _(salary_slip.status), salary_slip.tc_name, salary_slip.cashier]
 		data.append(row)
 
 	return data
