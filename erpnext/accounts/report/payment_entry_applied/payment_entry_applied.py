@@ -109,7 +109,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += ', "docstatus": 1'
-	conditions += ', "reason_payment": "Advancement"'
+	# conditions += ', "reason_payment": "Advancement"'
 	conditions += '}'
 
 	return conditions
