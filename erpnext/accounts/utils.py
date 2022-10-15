@@ -460,10 +460,6 @@ def reconcile_against_document(args):  # nosemgrep
 
 		frappe.flags.ignore_party_validation = False
 
-		if entry.voucher_type in ("Payment Entry", "Journal Entry"):
-			if hasattr(doc, "update_expense_claim"):
-				doc.update_expense_claim()
-
 
 def check_if_advance_entry_modified(args):
 	"""
