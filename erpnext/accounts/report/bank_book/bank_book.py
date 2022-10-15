@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from datetime import datetime
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -143,6 +144,9 @@ def execute(filters=None):
 	data.extend(group_arr or [])
 
 	return columns, data
+
+def sortByDate(elem):
+	return datetime.strptime(elem[1], '%Y/%m/%d')
 
 def get_conditions_deposit(filters, from_date, to_date):
 	conditions = ''
