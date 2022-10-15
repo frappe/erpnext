@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	update_linked_doc,
 	validate_inter_company_party,
 )
+from erpnext.accounts.party import get_party_account
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
@@ -796,6 +797,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
+
+		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
