@@ -375,7 +375,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "notes_tab",
    "fieldtype": "Tab Break",
-   "label": "Notes"
+   "label": "Comments"
   },
   {
    "collapsible": 1,
@@ -506,7 +506,7 @@
   {
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
-   "label": "Dashboard",
+   "label": "Connections",
    "show_dashboard": 1
   }
  ],
@@ -514,7 +514,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-08-09 18:26:17.101521",
+ "modified": "2022-10-13 12:42:04.277879",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
