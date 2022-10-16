@@ -8,6 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "business_activity",
+  "branch",
   "naming_series",
   "supplier",
   "supplier_name",
@@ -223,7 +225,7 @@
    "fetch_from": "supplier.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Read Only",
-   "label": "Tax Id",
+   "label": "Tax ID",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1367,7 +1369,7 @@
    "width": "50px"
   },
   {
-    "depends_on": "eval:doc.is_subcontracted",
+   "depends_on": "eval:doc.is_subcontracted",
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
    "label": "Supplier Warehouse",
@@ -1426,13 +1428,27 @@
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
    "read_only": 1
-   }
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Business Activity",
+   "options": "Business Activity"
+  }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-15 15:40:58.527065",
+ "modified": "2022-09-22 17:06:41.073662",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1492,6 +1508,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1

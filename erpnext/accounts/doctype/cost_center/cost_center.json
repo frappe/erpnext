@@ -2,6 +2,7 @@
  "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
+ "allow_rename": 1,
  "creation": "2013-01-23 19:57:17",
  "description": "Track separate Income and Expense for product verticals or divisions.",
  "doctype": "DocType",
@@ -18,7 +19,10 @@
   "disabled",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "branch_created",
+  "use_budget_from_parent",
+  "budget_cost_center"
  ],
  "fields": [
   {
@@ -119,13 +123,34 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "branch_created",
+   "fieldtype": "Check",
+   "label": "Branch Created",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_budget_from_parent",
+   "fieldtype": "Check",
+   "label": "Use Budget from Parent Cost Centers"
+  },
+  {
+   "depends_on": "eval:doc.use_budget_from_parent",
+   "fieldname": "budget_cost_center",
+   "fieldtype": "Link",
+   "label": "Budget Cost Center",
+   "mandatory_depends_on": "eval:doc.use_budget_from_parent",
+   "options": "Cost Center"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-08-26 14:18:13.053524",
+ "modified": "2022-09-28 12:36:21.032071",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",

@@ -29,6 +29,7 @@
   "rgt",
   "old_parent",
   "include_in_gross",
+  "default_party_type",
   "tab_break_22",
   "budget_check",
   "centralized_budget",
@@ -234,13 +235,19 @@
    "fieldname": "budget_check",
    "fieldtype": "Check",
    "label": "Ignore Budget Check"
+  },
+  {
+   "fieldname": "default_party_type",
+   "fieldtype": "Select",
+   "label": "Default Party Type",
+   "options": "\nCustomer\nEmployee\nSupplier"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-09-09 16:23:11.732448",
+ "modified": "2022-09-21 16:42:26.024334",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",

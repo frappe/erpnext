@@ -35,6 +35,29 @@ frappe.ui.form.on("Employee", {
 			return {
 				"filters": {
 					"company": frm.doc.company,
+					"disabled":0,
+					"is_division":0,
+					"is_section":0
+				}
+			};
+		});
+		frm.set_query("division", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+					"disabled":0,
+					"is_division":1,
+					"is_section":0
+				}
+			};
+		});
+		frm.set_query("section", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+					"disabled":0,
+					"is_division":0,
+					"is_section":1
 				}
 			};
 		});

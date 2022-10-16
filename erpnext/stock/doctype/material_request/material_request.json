@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "type_section",
+  "branch",
   "naming_series",
   "title",
   "material_request_type",
@@ -74,7 +75,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Purpose",
-   "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
+   "options": "\nPurchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
    "reqd": 1
   },
   {
@@ -280,11 +281,11 @@
    "label": "Warehouse"
   },
   {
-   "description": "Sets 'Target Warehouse' in each row of the Items table.",
+   "description": "Sets 'Receiving Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Set Target Warehouse",
+   "label": "Set Receiving Warehouse",
    "options": "Warehouse"
   },
   {
@@ -317,13 +318,20 @@
    "label": "Work Order",
    "options": "Work Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-25 11:49:28.155048",
+ "modified": "2022-09-27 15:15:17.311439",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "appropriation_on",
   "budget_against",
   "from_cost_center",
   "from_project",
@@ -107,12 +108,19 @@
   {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "appropriation_on",
+   "fieldtype": "Date",
+   "label": "Appropriation Date",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-11 10:07:01.008232",
+ "modified": "2022-10-13 17:54:13.719231",
  "modified_by": "Administrator",
  "module": "Budget",
  "name": "Budget Reappropiation",

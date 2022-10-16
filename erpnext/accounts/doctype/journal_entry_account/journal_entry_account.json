@@ -30,6 +30,7 @@
   "credit_in_account_currency",
   "credit",
   "sb_taxes",
+  "apply_tds",
   "add_deduct_tax",
   "tax_account",
   "rate",
@@ -213,7 +214,7 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nFull and Final Statement"
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nPBVA\nBonus\nLeave Travel Concession\nFull and Final Statement"
   },
   {
    "fieldname": "reference_name",
@@ -292,56 +293,78 @@
    "label": "Taxes"
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "add_deduct_tax",
    "fieldtype": "Select",
    "label": "Add Or Deduct",
-   "options": "\nAdd\nDeduct"
+   "mandatory_depends_on": "eval:doc.apply_tds",
+   "options": "\nAdd\nDeduct",
+   "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "tax_account",
    "fieldtype": "Link",
    "label": "Tax Account",
    "mandatory_depends_on": "add_deduct_tax",
-   "options": "Account"
+   "options": "Account",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "rate",
    "fieldtype": "Float",
    "label": "Rate",
-   "precision": "2"
+   "precision": "2",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_break_13",
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "taxable_amount",
    "fieldtype": "Currency",
    "label": "Taxable Amount in Company Currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "tax_amount",
    "fieldtype": "Currency",
    "label": "Tax Amount in Company Currency",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "taxable_amount_in_account_currency",
    "fieldtype": "Currency",
-   "label": "Taxable Amount in Account Currency"
+   "label": "Taxable Amount in Account Currency",
+   "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.apply_tds",
    "fieldname": "tax_amount_in_account_currency",
    "fieldtype": "Currency",
    "label": "Tax Amount in Account Currency",
+   "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply TDS"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-17 18:10:05.056312",
+ "modified": "2022-10-13 09:43:30.323400",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

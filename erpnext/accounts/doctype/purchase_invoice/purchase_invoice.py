@@ -31,6 +31,7 @@ from erpnext.accounts.party import get_due_date, get_party_account
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+from erpnext.budget.doctype.budget.budget import validate_expense_against_budget
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.buying_controller import BuyingController
@@ -522,13 +523,106 @@ class PurchaseInvoice(BuyingController):
 		self.update_advance_tax_references()
 
 		self.process_common_party_accounting()
+		self.consume_budget(cancel=False)
+		self.update_tds_receipt_entry()
+
+	def update_tds_receipt_entry(self):
+		if self.amended_from: 
+			tds_receipt_entry = frappe.db.get_value("TDS Receipt Entry", {"invoice_no": self.amended_from}, "name")
+			if tds_receipt_entry:
+				frappe.get_doc("TDS Receipt Entry", tds_receipt_entry).db_set("purchase_invoice", self.name)
+
+	def consume_budget(self, cancel=False):
+		if cancel:
+			frappe.db.sql("delete from `tabCommitted Budget` where reference_type='{}' and reference_no='{}'".format(self.doctype, self.name))
+			return
+		for item in self.get("items"):
+			expense, cost_center = item.expense_account, item.cost_center
+			if item.po_detail:
+				expense, cost_center = frappe.db.get_value("Purchase Order Item", item.po_detail, ["expense_account", "cost_center"])
+			else:
+				if frappe.db.get_value("Item", item.item_code, "is_fixed_asset"):
+					expense = get_asset_category_account('fixed_asset_account', item=item.item_code,
+																  company=self.company)
+			budget_cost_center = budget_account = ""
+			bud_acc_dtl = frappe.get_doc("Account", expense)
+			if bud_acc_dtl.centralized_budget:
+				budget_cost_center = bud_acc_dtl.cost_center
+			else:
+				#check Budget Cost for child cost centers
+				cc_doc = frappe.get_doc("Cost Center", cost_center)
+				budget_cost_center = cc_doc.budget_cost_center if cc_doc.use_budget_from_parent else cost_center
+			if expense:
+				if bud_acc_dtl.account_type in ("Fixed Asset", "Expense Account"):
+					reference_date = commited_budget_id = None
+					amount = item.base_net_amount if flt(item.base_net_amount,2) else flt(item.base_amount,2)
+					if frappe.db.get_single_value("Budget Settings", "budget_commit_on") == "Material Request":
+						mr_name = frappe.db.get_value("Purchase Order Item", {"parent":item.purchase_order, "item_code":item.item_code}, "material_request")
+						mr_child_id = frappe.db.get_value("Material Request Item", {"parent": mr_name, "item_code": item.item_code}, "name")
+						if mr_name:
+							reference_date = frappe.db.get_value("Material Request", mr_name, "creation_date") if mr_name else self.posting_date
+							commited_budget_id = frappe.db.get_value("Committed Budget", {"reference_type":"Material Request", "reference_no": mr_name, "reference_id": mr_child_id}, "name")
+					else:
+						reference_date = frappe.db.get_value("Purchase Order", item.purchase_order, "transaction_date") if item.purchase_order else self.posting_date
+						commited_budget_id = frappe.db.get_value("Committed Budget", {"reference_type":"Purchase Order", "reference_no":item.purchase_order, "reference_id":item.po_detail},"name")
+					args = frappe._dict({
+							"account": expense,
+							"cost_center": budget_cost_center,
+							"project": item.project,
+							"posting_date": self.posting_date,
+							"company": self.company,
+							"amount": flt(amount,2),
+						})
+					if not commited_budget_id:					
+						validate_expense_against_budget(args)
+						#Commit Budget
+						bud_obj = frappe.get_doc({
+							"doctype": "Committed Budget",
+							"account": expense,
+							"cost_center": budget_cost_center,
+							"project": item.project,
+							"reference_type": self.doctype,
+							"reference_no": self.name,
+							"reference_date": self.posting_date,
+							"company": self.company,
+							"amount": flt(amount,2),
+							"reference_id": item.name,
+							"item_code": item.item_code,
+							"company": self.company,
+							"closed":1
+						})
+						bud_obj.flags.ignore_permissions=1
+						bud_obj.submit()
+						commited_budget_id = bud_obj.name
+
+					consume = frappe.get_doc({
+						"doctype": "Consumed Budget",
+						"account": expense,
+						"cost_center": budget_cost_center,
+						"project": item.project,
+						"reference_type": self.doctype,
+						"reference_no": self.name,
+						"reference_date": reference_date if reference_date else self.posting_date,
+						"company": self.company,
+						"amount": flt(amount,2),
+						"reference_id": item.name,
+						"item_code": item.item_code,
+						"com_ref": commited_budget_id,
+					})
+					consume.flags.ignore_permissions=1
+					consume.submit()
+					com_doc = frappe.get_doc("Committed Budget", commited_budget_id)
+					if amount == com_doc.amount and not com_doc.closed:
+						frappe.db.sql("update `tabCommitted Budget` set closed = 1 where name = '{}'".format(commited_budget_id))
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
-			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
+			# update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
+			# above line commented as it was making outs zero when there is advance and advance account is different. we need to check on this
+			update_outstanding = "No"
 
 			if self.docstatus == 1:
 				make_gl_entries(
@@ -560,7 +654,7 @@ class PurchaseInvoice(BuyingController):
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
-
+	
 	def get_gl_entries(self, warehouse_account=None):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if self.auto_accounting_for_stock:
@@ -582,7 +676,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
-
+		self.make_advance_gl_entry(gl_entries)
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
 		gl_entries = merge_similar_entries(gl_entries)
@@ -592,6 +686,25 @@ class PurchaseInvoice(BuyingController):
 		self.make_gle_for_rounding_adjustment(gl_entries)
 		return gl_entries
 
+	# make advance gl entry customisation for advance incorporation by paying advance in different accounts
+	def make_advance_gl_entry(self, gl_entries):
+		for a in self.get("advances"):
+			if flt(a.allocated_amount) and a.advance_account:
+				advance_account_currency = get_account_currency(a.advance_account)
+			allocated_amount = round(flt(a.allocated_amount), 2)
+			
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": a.advance_account,
+					"against": self.supplier,
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"credit": allocated_amount,
+					"credit_in_account_currency": allocated_amount, 
+					"cost_center": a.cost_center,
+				},advance_account_currency)
+			)
+			
 	def check_asset_cwip_enabled(self):
 		# Check if there exists any item with cwip accounting enabled in it's asset category
 		for item in self.get("items"):
@@ -612,7 +725,7 @@ class PurchaseInvoice(BuyingController):
 			if (self.base_rounding_adjustment and self.base_rounded_total)
 			else self.base_grand_total,
 			self.precision("base_grand_total"),
-		)
+		) - flt(self.total_advance)
 
 		if grand_total and not self.is_internal_transfer():
 			# Did not use base_grand_total to book rounding loss gle
@@ -1428,6 +1541,7 @@ class PurchaseInvoice(BuyingController):
 			"Payment Ledger Entry",
 		)
 		self.update_advance_tax_references(cancel=1)
+		self.consume_budget(cancel=True)
 
 	def update_project(self):
 		project_list = []
@@ -1598,7 +1712,6 @@ class PurchaseInvoice(BuyingController):
 
 		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
 		total = get_total_in_party_account_currency(self)
-
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
@@ -1631,7 +1744,7 @@ class PurchaseInvoice(BuyingController):
 
 		if update:
 			self.db_set("status", self.status, update_modified=update_modified)
-
+		# frappe.throw(str(frappe.db.get_value(self.doctype,self.name,'outstanding_amount')))
 
 # to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
 def get_purchase_document_details(doc):
@@ -1793,3 +1906,24 @@ def make_purchase_receipt(source_name, target_doc=None):
 	doc.set_onload("ignore_price_list", True)
 
 	return doc
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator" or "System Manager" in user_roles: 
+		return
+
+	return """(
+		exists(select 1
+			from `tabEmployee` as e
+			where e.branch = `tabPurchase Invoice`.branch
+			and e.user_id = '{user}')
+		or
+		exists(select 1
+			from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
+			where e.user_id = '{user}'
+			and ab.employee = e.name
+			and bi.parent = ab.name
+			and bi.branch = `tabPurchase Invoice`.branch)
+	)""".format(user=user)

@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "items_section",
+  "branch",
   "naming_series",
   "stock_entry_type",
   "outgoing_stock_entry",
@@ -28,6 +29,7 @@
   "inspection_required",
   "from_bom",
   "apply_putaway_rule",
+  "in_transit",
   "sb1",
   "bom_no",
   "fg_completed_qty",
@@ -38,10 +40,12 @@
   "from_warehouse",
   "source_warehouse_address",
   "source_address_display",
+  "issued_by",
   "cb0",
   "to_warehouse",
   "target_warehouse_address",
   "target_address_display",
+  "received_by",
   "sb0",
   "scan_barcode",
   "items",
@@ -75,7 +79,8 @@
   "job_card",
   "amended_from",
   "credit_note",
-  "is_return"
+  "is_return",
+  "status"
  ],
  "fields": [
   {
@@ -148,19 +153,19 @@
    "search_index": 1
   },
   {
-    "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
-    "fieldname": "purchase_order",
-    "fieldtype": "Link",
-    "label": "Purchase Order",
-    "options": "Purchase Order"
+   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order"
   },
   {
-    "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
-    "fieldname": "subcontracting_order",
-    "fieldtype": "Link",
-    "label": "Subcontracting Order",
-    "options": "Subcontracting Order"
-   },
+   "depends_on": "eval:doc.purpose==\"Send to Subcontractor\"",
+   "fieldname": "subcontracting_order",
+   "fieldtype": "Link",
+   "label": "Subcontracting Order",
+   "options": "Subcontracting Order"
+  },
   {
    "depends_on": "eval:doc.purpose==\"Sales Return\"",
    "fieldname": "delivery_note_no",
@@ -320,12 +325,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Sets 'Target Warehouse' in each row of the items table.",
+   "description": "Sets 'Receiving Warehouse' in each row of the items table.",
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Default Target Warehouse",
+   "label": "Default Receiving Warehouse",
    "no_copy": 1,
    "oldfieldname": "to_warehouse",
    "oldfieldtype": "Link",
@@ -336,13 +341,13 @@
    "depends_on": "to_warehouse",
    "fieldname": "target_warehouse_address",
    "fieldtype": "Link",
-   "label": "Target Warehouse Address",
+   "label": "Receiving Warehouse Address",
    "options": "Address"
   },
   {
    "fieldname": "target_address_display",
    "fieldtype": "Small Text",
-   "label": "Target Warehouse Address",
+   "label": "Receiving Warehouse Address",
    "read_only": 1
   },
   {
@@ -620,6 +625,40 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "in_transit",
+   "fieldtype": "Check",
+   "label": "In Transit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "issued_by",
+   "fieldtype": "Data",
+   "label": "Issued By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_by",
+   "fieldtype": "Data",
+   "label": "Received By",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.in_transit==1 && doc.docstatus == 0",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nIn Transit\nSubmitted\nCancelled",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -627,7 +666,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-02 05:21:39.060501",
+ "modified": "2022-09-27 12:30:37.262233",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "customer_section",
+  "business_activity",
+  "branch",
   "title",
   "naming_series",
   "customer",
@@ -2010,6 +2012,20 @@
    "fieldname": "is_cash_or_non_trade_discount",
    "fieldtype": "Check",
    "label": "Is Cash or Non Trade Discount"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Business Activity",
+   "options": "Business Activity"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2022,7 +2038,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-07-11 17:43:56.435382",
+ "modified": "2022-09-21 00:25:08.779635",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-09-13 22:43:05.009642",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "leave_type",
+  "credits_per_month",
+  "credits_per_year"
+ ],
+ "fields": [
+  {
+   "fieldname": "leave_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Leave Type",
+   "options": "Leave Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credits_per_month",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Leave Credits/Month",
+   "precision": "2"
+  },
+  {
+   "fieldname": "credits_per_year",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Leave Credits/Year"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-13 22:43:05.009642",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Employee Group Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

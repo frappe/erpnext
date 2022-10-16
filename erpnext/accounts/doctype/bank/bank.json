@@ -21,7 +21,9 @@
   "data_import_configuration_section",
   "bank_transaction_mapping",
   "section_break_4",
-  "plaid_access_token"
+  "plaid_access_token",
+  "sb_branches",
+  "items"
  ],
  "fields": [
   {
@@ -98,13 +100,25 @@
    "label": "Plaid Access Token",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sb_branches",
+   "fieldtype": "Section Break",
+   "label": "Bank Branches"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Bank Item"
   }
  ],
  "links": [],
- "modified": "2020-07-17 14:00:13.105433",
+ "modified": "2022-09-24 12:09:00.174610",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -123,5 +137,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -10,6 +10,7 @@
   "purpose",
   "column_break_4",
   "transaction_date",
+  "transfer_type",
   "section_break_10",
   "assets",
   "reference",
@@ -37,6 +38,7 @@
    "reqd": 1
   },
   {
+   "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
@@ -90,15 +92,24 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.purpose == \"Transfer\"",
+   "fieldname": "transfer_type",
+   "fieldtype": "Select",
+   "label": "Transfer Type",
+   "mandatory_depends_on": "eval:doc.purpose == 'Transfer'",
+   "options": "\nCost Center To Cost Center\nEmployee To Employee"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 12:30:55.295670",
+ "modified": "2022-09-23 23:15:06.980828",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -148,5 +159,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

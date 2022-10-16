@@ -620,7 +620,7 @@ class JournalEntry(AccountsController):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			if d.add_deduct_tax:
+			if cint(self.apply_tds) and cint(d.apply_tds) and d.add_deduct_tax:
 				tax_amount = flt(d.tax_amount)
 				if(d.add_deduct_tax == "Add"):
 					tax_cr = tax_amount if flt(d.credit) else 0
@@ -676,7 +676,7 @@ class JournalEntry(AccountsController):
 			d.taxable_amount = flt(d.taxable_amount_in_account_currency * flt(d.exchange_rate), d.precision("taxable_amount"))
 
 			tax_amount = flt(d.taxable_amount_in_account_currency) * flt(d.rate) / 100
-			tax_amount = tax_amount if d.add_deduct_tax else 0
+			tax_amount = tax_amount if (cint(self.apply_tds) and cint(d.apply_tds) and d.add_deduct_tax) else 0
 			d.tax_amount_in_account_currency = flt(tax_amount, d.precision("tax_amount_in_account_currency"))
 			d.tax_amount = flt(d.tax_amount_in_account_currency * flt(d.exchange_rate), d.precision("tax_amount"))
 
@@ -813,7 +813,7 @@ class JournalEntry(AccountsController):
 				remarks = "\n".join(r)
 
 				with_tax = [d.account]
-				if d.tax_account and flt(d.rate) and flt(d.tax_amount):
+				if cint(self.apply_tds) and cint(d.apply_tds) and d.tax_account and flt(d.rate) and flt(d.tax_amount):
 					with_tax.append(d.tax_account)
 
 				for acc in with_tax:
@@ -1469,6 +1469,21 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
+
+@frappe.whitelist()
+def get_tds_account(tax_withholding_category):
+	account = frappe.db.sql("""select t.name,
+			ifnull((select tax_withholding_rate
+				from `tabTax Withholding Rate` r
+				where r.parent = t.name
+				limit 1),0) as tax_withholding_rate,
+			(select account
+				from `tabTax Withholding Account` a
+				where a.parent = t.name
+				limit 1) as tax_withholding_account
+		from `tabTax Withholding Category` t
+		where t.name = "{}" """.format(tax_withholding_category), as_dict=True)
+	return account[0] if account else None
 
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user

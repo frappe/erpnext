@@ -10,7 +10,8 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
-  "column_break0",
+  "business_activity",
+  "branch",
   "title",
   "naming_series",
   "supplier",
@@ -141,13 +142,6 @@
    "fieldname": "supplier_section",
    "fieldtype": "Section Break",
    "options": "fa fa-user"
-  },
-  {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_width": "50%",
-   "width": "50%"
   },
   {
    "allow_on_submit": 1,
@@ -1152,13 +1146,29 @@
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "oldfieldtype": "Column Break",
+   "options": "Branch",
+   "print_width": "50%",
+   "reqd": 1,
+   "width": "50%"
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "label": "Business Activity",
+   "options": "Business Activity"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-15 15:43:40.664382",
+ "modified": "2022-09-21 00:22:57.299368",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

@@ -373,6 +373,14 @@ class PurchaseOrder(BuyingController):
 		self.update_blanket_order()
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
+		
+		self.removed_committed_budget()
+
+	def removed_committed_budget(self):
+		frappe.db.sql("""Delete from `tabCommitted Budget` 
+						where reference_type='{reference_type}' 
+						and reference_no='{reference_no}'
+					""".format(reference_type=self.doctype, reference_no=self.name))
 
 	def on_update(self):
 		pass
@@ -692,6 +700,26 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 
 	return target_doc
 
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator" or "System Manager" in user_roles: 
+		return
+
+	return """(
+		exists(select 1
+			from `tabEmployee` as e
+			where e.branch = `tabPurchase Order`.branch
+			and e.user_id = '{user}')
+		or
+		exists(select 1
+			from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
+			where e.user_id = '{user}'
+			and ab.employee = e.name
+			and bi.parent = ab.name
+			and bi.branch = `tabPurchase Order`.branch)
+	)""".format(user=user)
 
 @frappe.whitelist()
 def is_subcontracting_order_created(po_name) -> bool:

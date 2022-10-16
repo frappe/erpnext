@@ -32,6 +32,8 @@
   "city",
   "state",
   "pin",
+  "section_break_branches",
+  "branches",
   "tree_details",
   "lft",
   "rgt",
@@ -238,13 +240,24 @@
    "fieldtype": "Link",
    "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:doc.is_group == 0",
+   "fieldname": "section_break_branches",
+   "fieldtype": "Section Break",
+   "label": "Branch Details"
+  },
+  {
+   "fieldname": "branches",
+   "fieldtype": "Table",
+   "options": "Warehouse Branch"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-03-01 02:37:48.034944",
+ "modified": "2022-09-14 12:18:36.584214",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

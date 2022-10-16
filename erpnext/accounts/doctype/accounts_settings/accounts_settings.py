@@ -54,3 +54,14 @@ class AccountsSettings(Document):
 	def validate_pending_reposts(self):
 		if self.acc_frozen_upto:
 			check_pending_reposting(self.acc_frozen_upto)
+@frappe.whitelist()
+def get_bank_account(branch=None):
+	Company = "State Mining Corporation Ltd"
+	default_bank_account = frappe.db.get_value('Company',Company,'pbva_account')
+	expense_bank_account = None
+	if branch:
+		expense_bank_account = frappe.db.get_value('Branch', branch, 'expense_bank_account')
+
+	if not expense_bank_account and not default_bank_account:
+		frappe.throw(_("Please set <b>Bank Expense Account</b> under <b>Branch</b> master"))
+	return default_bank_account if default_bank_account else expense_bank_account

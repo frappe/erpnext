@@ -51,6 +51,8 @@
   "primary_address",
   "default_payable_accounts",
   "accounts",
+  "default_advance_account_section",
+  "advance_account",
   "section_credit_limit",
   "payment_terms",
   "cb_21",
@@ -420,6 +422,18 @@
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
    "options": "Address"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "default_advance_account_section",
+   "fieldtype": "Section Break",
+   "label": "Default Advance Account"
+  },
+  {
+   "fieldname": "advance_account",
+   "fieldtype": "Table",
+   "label": "Advance Account",
+   "options": "Party Advance Account"
   }
  ],
  "icon": "fa fa-user",
@@ -432,7 +446,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 18:02:27.838623",
+ "modified": "2022-09-15 14:58:10.659375",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

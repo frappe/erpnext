@@ -13,15 +13,18 @@
  "field_order": [
   "details",
   "naming_series",
+  "item_old_code",
   "item_code",
   "item_name",
   "item_group",
+  "item_sub_group",
   "stock_uom",
   "column_break0",
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
   "has_variants",
+  "is_production_item",
   "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
@@ -30,6 +33,7 @@
   "auto_create_assets",
   "is_grouped_asset",
   "asset_category",
+  "asset_sub_category",
   "asset_naming_series",
   "over_delivery_receipt_allowance",
   "over_billing_allowance",
@@ -137,7 +141,7 @@
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Data",
-   "reqd": 1,
+   "read_only": 1,
    "unique": 1
   },
   {
@@ -161,6 +165,7 @@
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -174,7 +179,8 @@
    "oldfieldtype": "Link",
    "options": "Item Group",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "stock_uom",
@@ -213,7 +219,7 @@
    "oldfieldtype": "Select"
   },
   {
-   "default": "1",
+   "default": "0",
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "include_item_in_manufacturing",
    "fieldtype": "Check",
@@ -852,7 +858,7 @@
    "read_only": 1
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission"
@@ -903,6 +909,33 @@
    "fieldname": "accounting",
    "fieldtype": "Tab Break",
    "label": "Accounting"
+  },
+  {
+   "depends_on": "eval:doc.item_group",
+   "fieldname": "item_sub_group",
+   "fieldtype": "Link",
+   "label": "Item Sub Group",
+   "options": "Item Group"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_production_item",
+   "fieldtype": "Check",
+   "label": "Is Production Item"
+  },
+  {
+   "fieldname": "item_old_code",
+   "fieldtype": "Data",
+   "label": "Item Old Code",
+   "unique": 1
+  },
+  {
+   "depends_on": "is_fixed_asset",
+   "fieldname": "asset_sub_category",
+   "fieldtype": "Link",
+   "label": "Asset Sub Category",
+   "mandatory_depends_on": "is_fixed_asset",
+   "options": "Asset Sub Category"
   }
  ],
  "icon": "fa fa-tag",
@@ -910,7 +943,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-06-15 09:02:06.177691",
+ "modified": "2022-09-21 09:32:03.003240",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -974,7 +1007,6 @@
    "share": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,

@@ -9,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "entry_type_and_date",
+  "business_activity",
   "branch",
   "title",
   "voucher_type",
@@ -16,12 +17,12 @@
   "finance_book",
   "process_deferred_accounting",
   "reversal_of",
-  "tax_withholding_category",
   "column_break1",
   "from_template",
   "company",
   "posting_date",
   "apply_tds",
+  "tax_withholding_category",
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
@@ -517,7 +518,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:['Credit Note', 'Debit Note'].includes(doc.voucher_type)",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Apply Tax Withholding Amount "
@@ -557,13 +557,20 @@
    "fieldtype": "Link",
    "label": "Cheque Lot",
    "options": "Cheque Lot"
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Business Activity",
+   "options": "Business Activity"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-15 14:49:39.459047",
+ "modified": "2022-09-21 16:26:23.399016",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

@@ -298,8 +298,7 @@ def validate_balance_type(account, adv_adj=False):
 
 
 def update_outstanding_amt(
-	account, party_type, party, against_voucher_type, against_voucher, on_cancel=False
-):
+	account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
 	if party_type and party:
 		party_condition = " and party_type={0} and party={1}".format(
 			frappe.db.escape(party_type), frappe.db.escape(party)
@@ -330,7 +329,6 @@ def update_outstanding_amt(
 		)[0][0]
 		or 0.0
 	)
-
 	if against_voucher_type == "Purchase Invoice":
 		bal = -bal
 	elif against_voucher_type == "Journal Entry":
@@ -356,13 +354,11 @@ def update_outstanding_amt(
 		bal = against_voucher_amount + bal
 		if against_voucher_amount < 0:
 			bal = -bal
-
 		# Validation : Outstanding can not be negative for JV
 		if bal < 0 and not on_cancel:
 			frappe.throw(
 				_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal))
 			)
-
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 
@@ -371,7 +367,6 @@ def update_outstanding_amt(
 		frappe.db.set_value(against_voucher_type, against_voucher, "outstanding_amount", bal)
 
 		ref_doc.set_status(update=True)
-
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")

@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-09-19 12:25:40.021473",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "party_type",
+  "party",
+  "invoice_type",
+  "invoice_no",
+  "bill_amount",
+  "cb_3",
+  "tax_account",
+  "tds_amount",
+  "party_name",
+  "tpn",
+  "cost_center",
+  "business_activity",
+  "tds_remittance"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "\nCustomer\nSupplier\nEmployee"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "invoice_type",
+   "fieldtype": "Link",
+   "label": "Invoice Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "invoice_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Invoice No",
+   "options": "invoice_type"
+  },
+  {
+   "fieldname": "bill_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Bill Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tds_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "TDS Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "label": "Party Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tpn",
+   "fieldtype": "Data",
+   "label": "TPN"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Business Activity",
+   "options": "Business Activity"
+  },
+  {
+   "fieldname": "tax_account",
+   "fieldtype": "Link",
+   "label": "Tax Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tds_remittance",
+   "fieldtype": "Link",
+   "label": "TDS Remittance",
+   "options": "TDS Remittance",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-09-23 19:52:48.873805",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "TDS Remittance Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

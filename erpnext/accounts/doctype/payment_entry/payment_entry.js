@@ -1,6 +1,7 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 {% include "erpnext/public/js/controllers/accounts.js" %}
+{% include "erpnext/public/js/controllers/cheque_details.js" %};
 frappe.provide("erpnext.accounts.dimensions");
 
 cur_frm.cscript.tax_table = "Advance Taxes and Charges";
@@ -110,7 +111,11 @@ frappe.ui.form.on('Payment Entry', {
 				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"];
 			} else if (frm.doc.party_type == "Supplier") {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
-			} else {
+			} 
+			else if ( frm.doc.party_type == "Employee"){
+				var doctypes = ["Travel Request"]
+			}
+			else {
 				var doctypes = ["Journal Entry"];
 			}
 

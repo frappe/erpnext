@@ -165,6 +165,7 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	refresh: function(frm) {
+		frm.events.create_custom_buttons(frm)
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Material Request'), function() {
@@ -327,6 +328,49 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.trigger("setup_quality_inspection");
 		attach_bom_items(frm.doc.bom_no)
+		
+	},
+	
+	create_custom_buttons: function(frm){
+		if(frm.doc.__unsaved){
+			frm.set_value("in_transit", 0);
+			frm.set_value("status", "Draft");
+			return;
+		}
+
+		if(frm.doc.purpose == "Material Transfer" && frm.doc.from_warehouse && frm.doc.to_warehouse && frm.doc.docstatus === 0){
+			frm.page.clear_primary_action();
+			frappe.call({
+				method: 'erpnext.stock.doctype.stock_entry.stock_entry.has_warehouse_permission',
+				args: {
+					warehouse: frm.doc.to_warehouse
+				},
+				callback: (r) => {
+					if(!frm.doc.in_transit){
+						frm.page.set_primary_action(__('Transfer'), () => {
+							frm.set_value("in_transit", 1);
+							frm.set_value("issued_by", frappe.session.user_fullname);
+							frm.save().then(()=>{
+								frm.page.clear_primary_action();
+								frm.refresh();
+								// frm.events.refresh(frm);
+							});
+						});		
+					} else {
+						if(r.message){
+							frm.page.set_primary_action(__('Confirm Receipt'), () => {
+								frm.set_value("received_by", frappe.session.user_fullname);
+								frm.save('Submit').then(()=>{
+									frm.page.clear_primary_action();
+									frm.refresh();
+									// frm.events.refresh(frm);
+								});
+							});		
+						}
+					}
+				}
+			});
+		}
 	},
 
 	before_save: function(frm) {
@@ -663,7 +707,12 @@ frappe.ui.form.on('Stock Entry Detail', {
 			frappe.model.set_value(cdt, cdn, "allow_zero_valuation_rate", 0);
 		}
 	},
-
+	received_qty:function(frm,cdt,cdn){
+		var d = locals[cdt][cdn];
+		let diff_qty = flt(d.received_qty)-flt(d.qty);
+		frappe.model.set_value(cdt, cdn, "difference_qty", flt(diff_qty));
+		frappe.model.set_value(cdt, cdn, "difference_amount", flt(diff_qty)*flt(d.basic_rate));
+	},
 	t_warehouse: function(frm, cdt, cdn) {
 		frm.events.get_warehouse_details(frm, cdt, cdn);
 	},

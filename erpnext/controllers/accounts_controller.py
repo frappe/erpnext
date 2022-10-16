@@ -813,6 +813,7 @@ class AccountsController(TransactionBase):
 				"reference_row": d.reference_row,
 				"remarks": d.remarks,
 				"advance_amount": flt(d.amount),
+				"advance_account":d.advance_account,
 				"allocated_amount": allocated_amount,
 				"ref_exchange_rate": flt(d.exchange_rate),  # exchange_rate of advance entry
 			}
@@ -820,15 +821,17 @@ class AccountsController(TransactionBase):
 			self.append("advances", advance_row)
 
 	def get_advance_entries(self, include_unallocated=True):
+		# is advance intorduced as advance account is different 
+		is_advance = True
 		if self.doctype == "Sales Invoice":
-			party_account = self.debit_to
+			party_account = get_party_account('Customer', self.customer, self.company,is_advance)
 			party_type = "Customer"
 			party = self.customer
 			amount_field = "credit_in_account_currency"
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
 		else:
-			party_account = self.credit_to
+			party_account = get_party_account('Supplier', self.supplier, self.company,is_advance)
 			party_type = "Supplier"
 			party = self.supplier
 			amount_field = "debit_in_account_currency"
@@ -846,7 +849,6 @@ class AccountsController(TransactionBase):
 		)
 
 		res = journal_entries + payment_entries
-
 		return res
 
 	def is_inclusive_tax(self):
@@ -971,14 +973,15 @@ class AccountsController(TransactionBase):
 			party_type = "Customer"
 			party = self.customer
 			party_account = self.debit_to
-			dr_or_cr = "credit_in_account_currency"
+			dr_or_cr = "debit_in_account_currency"
 		else:
 			party_type = "Supplier"
 			party = self.supplier
 			party_account = self.credit_to
-			dr_or_cr = "debit_in_account_currency"
+			dr_or_cr = "credit_in_account_currency"
 
 		lst = []
+		# frappe.msgprint(str(self.outstanding_amount))
 		for d in self.get("advances"):
 			if flt(d.allocated_amount) > 0:
 				args = frappe._dict(
@@ -988,7 +991,7 @@ class AccountsController(TransactionBase):
 						"voucher_detail_no": d.reference_row,
 						"against_voucher_type": self.doctype,
 						"against_voucher": self.name,
-						"account": party_account,
+						"account": d.advance_account,
 						"party_type": party_type,
 						"party": party,
 						"is_advance": "Yes",
@@ -1015,7 +1018,6 @@ class AccountsController(TransactionBase):
 
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
-
 			reconcile_against_document(lst)
 
 	def on_cancel(self):
@@ -2073,7 +2075,7 @@ def get_advance_journal_entries(
 		select
 			'Journal Entry' as reference_type, t1.name as reference_name,
 			t1.remark as remarks, t2.{0} as amount, t2.name as reference_row,
-			t2.reference_name as against_order, t2.exchange_rate
+			t2.reference_name as against_order, t2.exchange_rate, t2.account as advance_account
 		from
 			`tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where
@@ -2122,14 +2124,13 @@ def get_advance_payment_entries(
 		else:
 			reference_condition = ""
 			order_list = []
-
 		payment_entries_against_order = frappe.db.sql(
 			"""
 			select
 				'Payment Entry' as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
-				t1.{0} as currency, t1.{4} as exchange_rate
+				t1.{0} as currency, t1.{1} as advance_account, t1.{4} as exchange_rate
 			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
 			where
 				t1.name = t2.parent and t1.{1} = %s and t1.payment_type = %s
@@ -2147,7 +2148,7 @@ def get_advance_payment_entries(
 		unallocated_payment_entries = frappe.db.sql(
 			"""
 				select 'Payment Entry' as reference_type, name as reference_name, posting_date,
-				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency
+				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency,{0} as advance_account
 				from `tabPayment Entry`
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s

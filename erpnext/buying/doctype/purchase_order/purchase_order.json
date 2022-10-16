@@ -9,6 +9,8 @@
  "engine": "InnoDB",
  "field_order": [
   "supplier_section",
+  "business_activity",
+  "branch",
   "title",
   "naming_series",
   "supplier",
@@ -383,7 +385,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
    "label": "Currency and Price List",
@@ -1138,7 +1139,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions "
@@ -1166,13 +1166,27 @@
    "hidden": 1,
    "label": "Is Old Subcontracting Flow",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Business Activity",
+   "options": "Business Activity"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-15 15:40:58.527065",
+ "modified": "2022-09-21 00:22:02.004939",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

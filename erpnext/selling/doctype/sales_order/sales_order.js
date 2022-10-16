@@ -232,7 +232,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				// payment request
 				if(flt(doc.per_billed)<100) {
 					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
-					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
+					this.frm.add_custom_button(__('Advance Payment'), () => this.make_payment_entry(), __('Create'));
 				}
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}

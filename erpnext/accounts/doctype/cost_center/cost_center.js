@@ -2,12 +2,18 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
-
-
-
 frappe.ui.form.on('Cost Center', {
 	onload: function(frm) {
 		frm.set_query("parent_cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 1
+				}
+			}
+		});
+
+		frm.set_query("budget_cost_center", function() {
 			return {
 				filters: {
 					company: frm.doc.company,

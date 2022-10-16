@@ -10,6 +10,7 @@
   "budget_against",
   "cost_center",
   "project",
+  "project_name",
   "column_break_3",
   "fiscal_year",
   "budget_type",
@@ -235,12 +236,20 @@
   {
    "fieldname": "section_break_13",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.budget_against == 'Project'",
+   "fetch_from": "project.project_name",
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "label": "Project Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-13 08:08:19.764661",
+ "modified": "2022-10-13 17:35:53.192499",
  "modified_by": "Administrator",
  "module": "Budget",
  "name": "Budget",

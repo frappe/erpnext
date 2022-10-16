@@ -44,6 +44,8 @@
   "sales_monthly_history",
   "monthly_sales_target",
   "total_monthly_sales",
+  "advance_received_from_customer",
+  "advance_paid_to_supplier",
   "column_break_goals",
   "default_selling_terms",
   "default_warehouse_for_sales_return",
@@ -69,6 +71,7 @@
   "default_discount_account",
   "payment_terms",
   "cost_center",
+  "company_cost_center",
   "default_finance_book",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
@@ -85,11 +88,34 @@
   "depreciation_expense_account",
   "series_for_depreciation_entry",
   "expenses_included_in_asset_valuation",
+  "pro_rate_asset_value",
+  "allow_back_date_scrap",
+  "reset_asset_value",
   "column_break_40",
-  "disposal_account",
+  "gain_disposal_account",
+  "loss_disposal_account",
   "depreciation_cost_center",
   "capital_work_in_progress_account",
   "asset_received_but_not_billed",
+  "hr_accounts_setting_section",
+  "salary_payable_account",
+  "salary_tax_account",
+  "overtime_allowance_account",
+  "employer_contribution_to_pf",
+  "leave_encashment_account",
+  "pbva_account",
+  "bonus_account",
+  "column_break_98",
+  "ltc_account",
+  "employee_payable_account",
+  "travel_in_country_account",
+  "travel_out_country_account",
+  "training_in_country_account",
+  "training_out_country_account",
+  "meeting_and_seminars_incountry_account",
+  "meeting_and_seminars_outcountry_account",
+  "travel_advance_account",
+  "salary_advance_account",
   "budget_detail",
   "exception_budget_approver_role",
   "registration_info",
@@ -404,6 +430,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "hidden": 1,
    "ignore_user_permissions": 1,
    "label": "Default Cost Center",
    "no_copy": 1,
@@ -498,13 +525,6 @@
   {
    "fieldname": "column_break_40",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "disposal_account",
-   "fieldtype": "Link",
-   "label": "Gain/Loss Account on Asset Disposal",
-   "no_copy": 1,
-   "options": "Account"
   },
   {
    "fieldname": "depreciation_cost_center",
@@ -694,6 +714,167 @@
    "label": "Default Provisional Account",
    "no_copy": 1,
    "options": "Account"
+  },
+  {
+   "fieldname": "advance_received_from_customer",
+   "fieldtype": "Link",
+   "label": "Advance Received from Customer",
+   "options": "Account"
+  },
+  {
+   "fieldname": "advance_paid_to_supplier",
+   "fieldtype": "Link",
+   "label": "Advance Paid to Supplier",
+   "options": "Account"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "hr_accounts_setting_section",
+   "fieldtype": "Section Break",
+   "label": "HR & Payroll Settings"
+  },
+  {
+   "fieldname": "salary_payable_account",
+   "fieldtype": "Link",
+   "label": "Salary Payable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "salary_tax_account",
+   "fieldtype": "Link",
+   "label": "Salary Tax Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "overtime_allowance_account",
+   "fieldtype": "Link",
+   "label": "Overtime Allowance Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "employer_contribution_to_pf",
+   "fieldtype": "Link",
+   "label": "Employer Contribution to PF",
+   "options": "Account"
+  },
+  {
+   "fieldname": "leave_encashment_account",
+   "fieldtype": "Link",
+   "label": "Leave Encashment Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "pbva_account",
+   "fieldtype": "Link",
+   "label": "PBVA Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "bonus_account",
+   "fieldtype": "Link",
+   "label": "Bonus Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "ltc_account",
+   "fieldtype": "Link",
+   "label": "LTC Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "travel_in_country_account",
+   "fieldtype": "Link",
+   "label": "Travel In-Country Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "travel_out_country_account",
+   "fieldtype": "Link",
+   "label": "Travel Out-Country Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_98",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "training_in_country_account",
+   "fieldtype": "Link",
+   "label": "Training In-Country Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "training_out_country_account",
+   "fieldtype": "Link",
+   "label": "Training Out Country Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "meeting_and_seminars_incountry_account",
+   "fieldtype": "Link",
+   "label": "Meeting & Seminars Account (In Country)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "meeting_and_seminars_outcountry_account",
+   "fieldtype": "Link",
+   "label": "Meeting & Seminars Account (Out Country)",
+   "options": "Account"
+  },
+  {
+   "fieldname": "travel_advance_account",
+   "fieldtype": "Link",
+   "label": "Travel Advance Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "salary_advance_account",
+   "fieldtype": "Link",
+   "label": "Salary Advance Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "employee_payable_account",
+   "fieldtype": "Link",
+   "label": "Employee Payable Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "gain_disposal_account",
+   "fieldtype": "Link",
+   "label": "Gain Account on Asset Disposal",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "fieldname": "loss_disposal_account",
+   "fieldtype": "Link",
+   "label": "Loss Account on Asset Disposal",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_back_date_scrap",
+   "fieldtype": "Check",
+   "label": "Allow Back Date Asset Scrapping"
+  },
+  {
+   "default": "0",
+   "fieldname": "reset_asset_value",
+   "fieldtype": "Check",
+   "label": "Reset Asset Value for Current FY for SALES & SCRAP"
+  },
+  {
+   "default": "0",
+   "fieldname": "pro_rate_asset_value",
+   "fieldtype": "Check",
+   "label": "Pro Rate Asset Value during Sale/Scrap"
+  },
+  {
+   "fieldname": "company_cost_center",
+   "fieldtype": "Link",
+   "label": "Default Cost Center",
+   "options": "Cost Center"
   }
  ],
  "icon": "fa fa-building",
@@ -701,7 +882,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-08-16 16:09:02.327724",
+ "modified": "2022-09-27 11:34:00.973156",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

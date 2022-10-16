@@ -36,6 +36,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
 	make_depreciation_entry,
+	reset_asset_value_for_scrap_sales
 )
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
@@ -755,7 +756,7 @@ class SalesInvoice(SellingController):
 					continue
 
 				for d in self.get("items"):
-					if d.item_code and not d.get(key.lower().replace(" ", "_")) and not self.get(value[1]):
+					if not d.is_fixed_asset and d.item_code and not d.get(key.lower().replace(" ", "_")) and not self.get(value[1]):
 						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
 
 	def validate_proj_cust(self):
@@ -914,11 +915,11 @@ class SalesInvoice(SellingController):
 		for d in self.get("items"):
 			if d.is_fixed_asset:
 				if not disposal_account:
-					disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(
+					loss_disposal_account, gain_disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(
 						self.company
 					)
 
-				d.income_account = disposal_account
+				d.income_account = gain_disposal_account
 				if not d.cost_center:
 					d.cost_center = depreciation_cost_center
 
@@ -982,7 +983,7 @@ class SalesInvoice(SellingController):
 
 		self.make_item_gl_entries(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
-
+		self.make_advance_gl_entry(gl_entries)
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
 
@@ -993,7 +994,23 @@ class SalesInvoice(SellingController):
 		self.make_gle_for_rounding_adjustment(gl_entries)
 
 		return gl_entries
-
+	
+	def make_advance_gl_entry(self, gl_entries):
+		for a in self.get("advances"):
+			if flt(a.allocated_amount) and a.advance_account:
+				advance_account_currency = get_account_currency(a.advance_account)
+			allocated_amount = round(flt(a.allocated_amount), 2)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": a.advance_account,
+					"party_type": "Customer",
+					"party": self.customer,
+					"debit": a.allocated_amount,
+					"debit_in_account_currency": a.allocated_amount,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": a.cost_center,
+				}, advance_account_currency))
 	def make_customer_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
@@ -1005,8 +1022,7 @@ class SalesInvoice(SellingController):
 			if (self.base_rounding_adjustment and self.base_rounded_total)
 			else self.base_grand_total,
 			self.precision("base_grand_total"),
-		)
-
+		) - flt(self.total_advance)
 		if grand_total and not self.is_internal_transfer():
 			# Did not use base_grand_total to book rounding loss gle
 			gl_entries.append(
@@ -1100,13 +1116,14 @@ class SalesInvoice(SellingController):
 							self.reset_depreciation_schedule(asset)
 
 					else:
+						reset_asset_value_for_scrap_sales(asset.name, self.posting_date)
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", self.posting_date)
 
-						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
+						# if asset.calculate_depreciation:
+						# 	self.depreciate_asset(asset)
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer

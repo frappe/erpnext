@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-10-07 18:49:00.737806",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -6,12 +7,16 @@
  "field_order": [
   "company",
   "asset",
+  "source_cost_center",
   "source_location",
   "from_employee",
+  "from_employee_name",
   "column_break_2",
   "asset_name",
   "target_location",
-  "to_employee"
+  "target_cost_center",
+  "to_employee",
+  "to_employee_name"
  ],
  "fields": [
   {
@@ -32,6 +37,7 @@
   {
    "fieldname": "source_location",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Source Location",
    "options": "Location"
@@ -39,6 +45,7 @@
   {
    "fieldname": "target_location",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Target Location",
    "options": "Location"
@@ -49,6 +56,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "From Employee",
+   "mandatory_depends_on": "eval: in_list([\"Employee To Employee\"], parent.transfer_type)",
    "options": "Employee"
   },
   {
@@ -57,6 +65,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "To Employee",
+   "mandatory_depends_on": "eval: in_list([\"Employee To Employee\"], parent.transfer_type)",
    "options": "Employee"
   },
   {
@@ -70,10 +79,41 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "source_cost_center",
+   "fieldtype": "Link",
+   "label": "Source Cost Center",
+   "mandatory_depends_on": "eval: in_list([\"Cost Center To Cost Center\"], parent.transfer_type)",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "target_cost_center",
+   "fieldtype": "Link",
+   "label": "Target Cost Center",
+   "mandatory_depends_on": "eval: in_list([\"Cost Center To Cost Center\"], parent.transfer_type)",
+   "options": "Cost Center"
+  },
+  {
+   "depends_on": "from_employee",
+   "fetch_from": "from_employee.employee_name",
+   "fieldname": "from_employee_name",
+   "fieldtype": "Data",
+   "label": "From Employee Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "to_employee",
+   "fetch_from": "to_employee.employee_name",
+   "fieldname": "to_employee_name",
+   "fieldtype": "Data",
+   "label": "To Employee Name",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-10-09 15:59:08.265141",
+ "links": [],
+ "modified": "2022-09-23 23:11:15.147235",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement Item",
@@ -82,5 +122,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

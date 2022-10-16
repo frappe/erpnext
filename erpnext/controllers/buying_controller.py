@@ -631,18 +631,19 @@ class BuyingController(SubcontractingController):
 			frappe.msgprint(message, title="Success", indicator="green")
 
 	def make_asset(self, row, is_grouped_asset=False):
-		if not row.asset_location:
-			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
+		if not row.cost_center:
+			frappe.throw(_("Row {0}: Enter cost center for the asset item {1}").format(row.idx, row.item_code))
 
 		item_data = frappe.db.get_value(
-			"Item", row.item_code, ["asset_naming_series", "asset_category"], as_dict=1
+			"Item", row.item_code, ["asset_naming_series", "asset_category","asset_sub_category"], as_dict=1
 		)
 
 		if is_grouped_asset:
 			purchase_amount = flt(row.base_amount + row.item_tax_amount)
 		else:
 			purchase_amount = flt(row.base_rate + row.item_tax_amount)
-
+		if not row.abbr:
+			row.abbr = frappe.db.get_value('Asset Category',item_data.get("asset_category"),'abbr')
 		asset = frappe.get_doc(
 			{
 				"doctype": "Asset",
@@ -650,14 +651,16 @@ class BuyingController(SubcontractingController):
 				"asset_name": row.item_name,
 				"naming_series": item_data.get("asset_naming_series") or "AST",
 				"asset_category": item_data.get("asset_category"),
-				"location": row.asset_location,
+				"asset_sub_category":item_data.get("asset_sub_category"),
+				"abbr":row.abbr,
+				"cost_center": row.cost_center,
 				"company": self.company,
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
 				"calculate_depreciation": 1,
 				"purchase_receipt_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
-				"asset_quantity": row.qty if is_grouped_asset else 0,
+				"asset_quantity": row.qty if is_grouped_asset else 1,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
 			}

@@ -135,7 +135,15 @@ frappe.ui.form.on('Asset', {
 					frappe.set_route("query-report", "General Ledger");
 				}, __("Manage"));
 			}
-
+			frm.add_custom_button(__('Journal Entry'), function () {
+				frappe.route_options = {
+					"Journal Entry Account.reference_type": frm.doc.doctype,
+					"Journal Entry Account.reference_name": frm.doc.name,
+				};
+				frappe.set_route("List", "Journal Entry");
+			}, __("View"));
+			cur_frm.page.set_inner_btn_group_as_primary(__('View'));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Manage'));
 			frm.trigger("setup_chart");
 		}
 
@@ -145,7 +153,22 @@ frappe.ui.form.on('Asset', {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 		}
 	},
-
+	available_for_use_date:function(frm){
+		if (frm.doc.available_for_use_date){
+			frappe.call({
+				method:'get_month_end',
+				doc:frm.doc,
+				args:{
+					available_for_use_date:frm.doc.available_for_use_date
+				},
+				callback:function(r){
+					frm.doc.finance_books.map(v=> v.depreciation_start_date = r.message)
+					frm.refresh_field('finance_books')
+				}
+			})
+			
+		}
+	},
 	toggle_reference_doc: function(frm) {
 		if (frm.doc.purchase_receipt && frm.doc.purchase_invoice && frm.doc.docstatus === 1) {
 			frm.set_df_property('purchase_invoice', 'read_only', 1);
@@ -196,7 +219,6 @@ frappe.ui.form.on('Asset', {
 		if(frm.doc.opening_accumulated_depreciation) {
 			last_depreciation_date = frappe.datetime.add_months(frm.doc.next_depreciation_date,
 				-1*frm.doc.frequency_of_depreciation);
-
 			x_intervals.push(last_depreciation_date);
 			asset_values.push(flt(frm.doc.gross_purchase_amount) -
 				flt(frm.doc.opening_accumulated_depreciation));
@@ -249,11 +271,13 @@ frappe.ui.form.on('Asset', {
 			method: "erpnext.assets.doctype.asset.asset.get_item_details",
 			args: {
 				item_code: frm.doc.item_code,
-				asset_category: frm.doc.asset_category
+				asset_category: frm.doc.asset_category,
+				asset_sub_category:frm.doc.asset_sub_category
 			},
 			callback: function(r, rt) {
 				if(r.message) {
 					frm.set_value('finance_books', r.message);
+					frm.refresh_field('finance_books')
 				}
 			}
 		})
@@ -285,7 +309,8 @@ frappe.ui.form.on('Asset', {
 				"asset": frm.doc.name,
 				"item_code": frm.doc.item_code,
 				"company": frm.doc.company,
-				"serial_no": frm.doc.serial_no
+				"serial_no": frm.doc.serial_no,
+				"cost_center":frm.doc.cost_center
 			},
 			method: "erpnext.assets.doctype.asset.asset.make_sales_invoice",
 			callback: function(r) {
@@ -496,6 +521,10 @@ frappe.ui.form.on('Asset Finance Book', {
 		if (frm.doc.available_for_use_date && book.depreciation_start_date == frm.doc.available_for_use_date) {
 			frappe.msgprint(__("Depreciation Posting Date should not be equal to Available for Use Date."));
 			book.depreciation_start_date = "";
+			frm.refresh_field("finance_books");
+		}
+		if (frm.doc.available_for_use_date){
+			book.depreciation_start_date = frappe.datetime.month_end(frm.doc.available_for_use_date)
 			frm.refresh_field("finance_books");
 		}
 	}

@@ -6,6 +6,8 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "business_activity",
+  "branch",
   "posting_date",
   "transaction_date",
   "account",
@@ -143,18 +145,18 @@
   },
   {
    "fieldname": "against_voucher",
-   "fieldtype": "Dynamic Link",
+   "fieldtype": "Data",
    "in_filter": 1,
    "label": "Against Voucher",
    "oldfieldname": "against_voucher",
    "oldfieldtype": "Data",
-   "options": "against_voucher_type",
    "search_index": 1
   },
   {
    "fieldname": "voucher_type",
    "fieldtype": "Link",
    "in_filter": 1,
+   "in_standard_filter": 1,
    "label": "Voucher Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
@@ -163,13 +165,12 @@
   },
   {
    "fieldname": "voucher_no",
-   "fieldtype": "Dynamic Link",
+   "fieldtype": "Data",
    "in_filter": 1,
    "in_standard_filter": 1,
    "label": "Voucher No",
    "oldfieldname": "voucher_no",
    "oldfieldtype": "Data",
-   "options": "voucher_type",
    "search_index": 1
   },
   {
@@ -253,15 +254,29 @@
    "fieldname": "is_cancelled",
    "fieldtype": "Check",
    "label": "Is Cancelled"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Data",
+   "label": "Business Activity",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-04-07 16:22:33.766994",
+ "links": [],
+ "modified": "2022-09-23 17:17:56.278608",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -290,5 +305,6 @@
  "quick_entry": 1,
  "search_fields": "voucher_no,account,posting_date,against_voucher",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

@@ -90,7 +90,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-09-09 09:45:50.526715",
+ "modified": "2022-09-17 16:03:56.004301",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations",
@@ -100,7 +100,7 @@
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 16.0,
+ "sequence_id": 17.0,
  "shortcuts": [],
  "title": "ERPNext Integrations"
 }

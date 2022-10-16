@@ -309,6 +309,22 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				}
 			});
 		}
+		if (this.frm.doc.company && !this.frm.doc.debit_to && this.frm.doc.customer) {
+			frappe.call({
+				method:
+					"erpnext.accounts.party.get_party_account",
+				args: {
+					party_type: 'Customer',
+					party: this.frm.doc.customer,
+					company: this.frm.doc.company
+				},
+				callback: (response) => {
+					if (response) me.frm.set_value("debit_to", response.message);
+					this.frm.refresh_field("debit_to")
+				},
+			});
+		}
+
 	}
 
 	make_inter_company_invoice() {
@@ -394,9 +410,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				args: {
 					"company": frm.doc.company
 				},
-				callback: function(r, rt) {
-					frappe.model.set_value(cdt, cdn, "income_account", r.message[0]);
-					frappe.model.set_value(cdt, cdn, "cost_center", r.message[1]);
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, "income_account", r.message[1]);
+					frappe.model.set_value(cdt, cdn, "cost_center", r.message[2]);
 				}
 			})
 		}

@@ -348,47 +348,65 @@ def set_account_and_due_date(
 
 
 @frappe.whitelist()
-def get_party_account(party_type, party=None, company=None):
+def get_party_account(party_type, party=None, company=None,is_advance=None):
 	"""Returns the account for the given `party`.
 	Will first search in party (Customer / Supplier) record, if not found,
 	will search in group (Customer Group / Supplier Group),
 	finally will return default."""
 	if not company:
 		frappe.throw(_("Please select a Company"))
-
+	# advance account pick made by Biren as it is actual requirement of companies as it uses different advance account
 	if not party and party_type in ["Customer", "Supplier"]:
-		default_account_name = (
-			"default_receivable_account" if party_type == "Customer" else "default_payable_account"
-		)
-
+		if is_advance:
+			default_account_name = (
+				"advance_received_from_customer" if party_type == "Customer" else "advance_paid_to_supplier"
+			)
+		else:
+			default_account_name = (
+				"default_receivable_account" if party_type == "Customer" else "default_payable_account"
+			)
 		return frappe.get_cached_value("Company", company, default_account_name)
-
-	account = frappe.db.get_value(
-		"Party Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
-	)
+	if is_advance:
+		account = frappe.db.get_value(
+			"Party Advance Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
+		)
+	else:
+		account = frappe.db.get_value(
+			"Party Account", {"parenttype": party_type, "parent": party, "company": company}, "account"
+		)
 
 	if not account and party_type in ["Customer", "Supplier"]:
 		party_group_doctype = "Customer Group" if party_type == "Customer" else "Supplier Group"
 		group = frappe.get_cached_value(party_type, party, scrub(party_group_doctype))
-		account = frappe.db.get_value(
-			"Party Account",
-			{"parenttype": party_group_doctype, "parent": group, "company": company},
-			"account",
-		)
+		if is_advance:
+			account = frappe.db.get_value(
+				"Party Advance Account",
+				{"parenttype": party_group_doctype, "parent": group, "company": company},
+				"account",
+			)
+		else:
+			account = frappe.db.get_value(
+				"Party Account",
+				{"parenttype": party_group_doctype, "parent": group, "company": company},
+				"account",
+			)
 
 	if not account and party_type in ["Customer", "Supplier"]:
-		default_account_name = (
-			"default_receivable_account" if party_type == "Customer" else "default_payable_account"
-		)
+		if is_advance:
+			default_account_name = (
+				"advance_received_from_customer" if party_type == "Customer" else "advance_paid_to_supplier"
+			)
+		else:
+			default_account_name = (
+				"default_receivable_account" if party_type == "Customer" else "default_payable_account"
+			)
 		account = frappe.get_cached_value("Company", company, default_account_name)
-
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
 		if account:
 			account_currency = frappe.db.get_value("Account", account, "account_currency", cache=True)
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
-
 	return account
 
 
@@ -552,7 +570,7 @@ def validate_due_date(
 	posting_date, due_date, party_type, party, company=None, bill_date=None, template_name=None
 ):
 	if getdate(due_date) < getdate(posting_date):
-		frappe.throw(_("Due Date cannot be before Posting / Supplier Invoice Date"))
+		frappe.throw(_("Due Date {} cannot be before Posting / Supplier Invoice Date {} ".format(due_date, posting_date)))
 	else:
 		if not template_name:
 			return

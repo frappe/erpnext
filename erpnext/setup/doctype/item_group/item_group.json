@@ -12,7 +12,9 @@
   "gs",
   "item_group_name",
   "parent_item_group",
+  "item_code_base",
   "is_group",
+  "is_sub_group",
   "image",
   "column_break_5",
   "defaults",
@@ -224,6 +226,22 @@
    "fieldname": "include_descendants",
    "fieldtype": "Check",
    "label": "Include Descendants"
+  },
+  {
+   "fieldname": "item_code_base",
+   "fieldtype": "Select",
+   "label": "Initial Item Code No.",
+   "length": 2,
+   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
+   "default": "0",
+   "fieldname": "is_sub_group",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Sub Group"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -232,7 +250,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2022-03-09 12:27:11.055782",
+ "modified": "2022-09-20 13:11:37.766662",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

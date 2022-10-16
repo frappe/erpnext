@@ -26,6 +26,7 @@
   "customer_group",
   "customer_type",
   "territory",
+  "country",
   "account_manager",
   "so_required",
   "dn_required",
@@ -51,6 +52,8 @@
   "primary_address",
   "default_receivable_accounts",
   "accounts",
+  "default_advance_account_section",
+  "advance_accounts",
   "credit_limit_section",
   "payment_terms",
   "credit_limits",
@@ -70,7 +73,9 @@
   "default_commission_rate",
   "sales_team_section",
   "sales_team",
-  "customer_pos_id"
+  "customer_pos_id",
+  "section_break_63",
+  "company"
  ],
  "fields": [
   {
@@ -498,6 +503,36 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_63",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "default_advance_account_section",
+   "fieldtype": "Section Break",
+   "label": "Default Advance Account"
+  },
+  {
+   "fieldname": "advance_accounts",
+   "fieldtype": "Table",
+   "label": "Advance Accounts",
+   "options": "Party Advance Account"
   }
  ],
  "icon": "fa fa-user",
@@ -511,7 +546,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-04-16 20:32:34.000304",
+ "modified": "2022-09-14 19:36:23.766970",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -6,6 +6,7 @@
  "creation": "2013-01-10 16:34:24",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "supplier_group_name",
   "parent_supplier_group",
@@ -14,6 +15,8 @@
   "payment_terms",
   "default_payable_account",
   "accounts",
+  "default_advance_account_section",
+  "advance_account",
   "lft",
   "rgt",
   "old_parent"
@@ -100,16 +103,28 @@
    "options": "Supplier Group",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "default_advance_account_section",
+   "fieldtype": "Section Break",
+   "label": "Default Advance Account"
+  },
+  {
+   "fieldname": "advance_account",
+   "fieldtype": "Table",
+   "label": "Advance Account",
+   "options": "Party Advance Account"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:10:49.228407",
+ "modified": "2022-09-15 14:42:13.256819",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_supplier_group",
  "owner": "Administrator",
  "permissions": [
@@ -159,5 +174,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_order": "ASC"
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
 }

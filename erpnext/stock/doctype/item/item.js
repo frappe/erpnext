@@ -49,7 +49,7 @@ frappe.ui.form.on("Item", {
 			frm.trigger('is_fixed_asset');
 			frm.trigger('auto_create_assets');
 		}
-
+		frm.events.apply_filter(frm)
 		// clear intro
 		frm.set_intro();
 
@@ -152,7 +152,19 @@ frappe.ui.form.on("Item", {
 
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
-
+	item_group:function(frm){
+		frm.events.apply_filter(frm)
+		if(frm.doc.item_group == 'Fixed Asset'){
+			frm.set_value('is_fixed_asset',1)
+			frm.trigger('is_fixed_asset')
+		}
+		// if(frm.doc.item_group == 'Fixed Asset'){
+		// 	frm.set_value("is_stock_item", frm.doc.is_fixed_asset ? 0 : 1);
+		// }
+	},
+	asset_category:function(frm){
+		frm.events.apply_filter(frm)
+	},
 	validate: function(frm){
 		erpnext.item.weight_to_validate(frm);
 	},
@@ -211,6 +223,36 @@ frappe.ui.form.on("Item", {
 
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
+	},
+	apply_filter:function(frm){
+		
+		if (frm.doc.item_group){
+			frm.set_query('item_sub_group',(doc)=>{
+				return {
+					filters: {
+								'parent_item_group':frm.doc.item_group,
+							   'is_sub_group':1
+							}
+				}
+				
+			})
+		}
+		if (frm.doc.asset_category){
+			frm.set_query('asset_sub_category',(doc)=>{
+				return {
+					filters: {'asset_category':frm.doc.asset_category}
+				}
+				
+			})
+		}
+		frm.set_query('item_group',(doc)=>{
+			return {
+				filters: {
+						   'is_sub_group':0
+						}
+			}
+			
+		})
 	}
 });
 

@@ -168,6 +168,22 @@ frappe.ui.form.on("Journal Entry", {
 					update_jv_details(frm.doc, doc.accounts);
 				});
 		}
+	},
+
+	apply_tds: function(frm){
+		$.each(frm.doc.accounts || [], function(i, row) {
+			if(row.add_deduct_tax){
+				frappe.model.set_value(row.doctype, row.name, "apply_tds", cint(frm.doc.apply_tds));
+			}
+		})
+	},
+
+	tax_withholding_category: function(frm){
+		$.each(frm.doc.accounts || [], function(i, row) {
+			if(row.add_deduct_tax){
+				erpnext.journal_entry.set_tds_account(frm, row.doctype, row.name);
+			}
+		})
 	}
 });
 
@@ -372,7 +388,7 @@ cur_frm.cscript.update_totals = function(doc) {
 	for(var i in accounts) {
 		td += flt(accounts[i].debit, precision("debit", accounts[i]));
 		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
-		if(accounts[i].add_deduct_tax){
+		if((doc.apply_tds) && cint(accounts[i].apply_tds) && accounts[i].add_deduct_tax){
 			tax_amount = flt(accounts[i].tax_amount);
 			if(accounts[i].add_deduct_tax == "Add"){
 				tax_cr += (flt(accounts[i].credit)) ? tax_amount : 0;
@@ -425,10 +441,16 @@ frappe.ui.form.on("Journal Entry Account", {
 	},
 
 	debit_in_account_currency: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "taxable_amount_in_account_currency",
+				flt(row.debit_in_account_currency) || flt(row.credit_in_account_currency));
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
 	},
 
 	credit_in_account_currency: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "taxable_amount_in_account_currency",
+				flt(row.debit_in_account_currency) || flt(row.credit_in_account_currency));
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
 	},
 
@@ -453,6 +475,11 @@ frappe.ui.form.on("Journal Entry Account", {
 	},
 
 	// following methods added by SHIV on 2022/09/17
+	apply_tds: function(frm, cdt, cdn){
+		erpnext.journal_entry.set_tds_account(frm, cdt, cdn);
+		cur_frm.cscript.update_totals(frm.doc);
+	},
+
 	add_deduct_tax: function(frm, cdt, cdn) {
 		erpnext.journal_entry.set_tax_in_company_currency(frm, cdt, cdn);
 		cur_frm.cscript.update_totals(frm.doc);
@@ -513,18 +540,14 @@ $.extend(erpnext.journal_entry, {
 
 	// added by SHIV on 2022/09/17
 	set_tax_in_company_currency: function(frm, cdt, cdn) {
+		console.log("set_tax_in_company_currency");
 		var row = locals[cdt][cdn], tax_amount = 0.0;
-
-		if(!flt(row.taxable_amount_in_account_currency)){
-			frappe.model.set_value(cdt, cdn, "taxable_amount_in_account_currency",
-				flt(row.debit_in_account_currency) || flt(row.credit_in_account_currency));
-		}
 
 		frappe.model.set_value(cdt, cdn, "taxable_amount",
 			flt(flt(row.taxable_amount_in_account_currency)*row.exchange_rate, precision("taxable_amount", row)));
 
 		tax_amount = flt(row.taxable_amount_in_account_currency) * flt(row.rate) / 100;
-		tax_amount = (row.add_deduct_tax) ? flt(tax_amount) : 0;
+		tax_amount = (cint(frm.doc.apply_tds) && cint(row.apply_tds) && row.add_deduct_tax) ? flt(tax_amount) : 0;
 
 		frappe.model.set_value(cdt, cdn, "tax_amount_in_account_currency",
 			flt(tax_amount, precision("tax_amount", row)));
@@ -533,6 +556,26 @@ $.extend(erpnext.journal_entry, {
 			flt(flt(tax_amount)*row.exchange_rate, precision("tax_amount", row)));
 
 		cur_frm.cscript.update_totals(frm.doc);
+	},
+
+	// added by SHIV on 2022/09/21
+	set_tds_account: function(frm, cdt, cdn){
+		var row = locals[cdt][cdn];
+
+		frappe.model.set_value(cdt, cdn, "tax_account", null);
+		frappe.model.set_value(cdt, cdn, "rate", 0);
+		frappe.call({
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_tds_account",
+			args: {
+				tax_withholding_category: frm.doc.tax_withholding_category || null
+			},
+			callback: function(r){
+				if(r.message){
+					frappe.model.set_value(cdt, cdn, "tax_account", r.message.tax_withholding_account);
+					frappe.model.set_value(cdt, cdn, "rate", r.message.tax_withholding_rate);
+				}
+			}
+		})
 	},
 
 	set_exchange_rate: function(frm, cdt, cdn) {

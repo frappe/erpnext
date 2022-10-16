@@ -20,25 +20,37 @@
   "last_name",
   "employee_name",
   "column_break_9",
+  "status",
   "gender",
   "date_of_birth",
-  "salutation",
-  "column_break1",
   "date_of_joining",
   "image",
-  "status",
+  "cell_number",
+  "old_id",
+  "employment_details_section",
+  "employment_type",
+  "employee_group",
+  "designation",
+  "reports_to",
+  "reports_to_name",
+  "business_activity",
+  "column_break_22",
+  "employment_status",
+  "increment_cycle",
+  "promotion_cycle",
+  "promotion_due_date",
   "erpnext_user",
-  "create_user",
   "create_user_permission",
+  "create_user",
   "company_details_section",
   "company",
   "department",
   "employee_number",
   "column_break_25",
-  "designation",
-  "reports_to",
-  "column_break_18",
+  "division",
+  "section",
   "branch",
+  "cost_center",
   "employment_details",
   "scheduled_confirmation_date",
   "column_break_32",
@@ -48,7 +60,6 @@
   "notice_number_of_days",
   "date_of_retirement",
   "contact_details",
-  "cell_number",
   "column_break_40",
   "personal_email",
   "company_email",
@@ -62,7 +73,6 @@
   "column_break_46",
   "permanent_address",
   "permanent_accommodation_type",
-  "emergency_contact_details",
   "person_to_be_contacted",
   "column_break_55",
   "emergency_phone_number",
@@ -78,7 +88,15 @@
   "salary_mode",
   "bank_details_section",
   "bank_name",
+  "bank_branch",
+  "bank_account_type",
   "bank_ac_no",
+  "cb_50",
+  "tpn_number",
+  "pf_number",
+  "pf_tiers",
+  "gis_number",
+  "gis_policy_number",
   "personal_details",
   "marital_status",
   "family_background",
@@ -115,7 +133,10 @@
   "lft",
   "rgt",
   "old_parent",
-  "connections_tab"
+  "connections_tab",
+  "user_id",
+  "unit",
+  "region"
  ],
  "fields": [
   {
@@ -135,13 +156,13 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
    "options": "EMP/",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "salutation",
@@ -149,22 +170,24 @@
    "label": "Salutation",
    "oldfieldname": "salutation",
    "oldfieldtype": "Select",
-   "options": "\nMr\nMs"
+   "options": "\nMr\nMs",
+   "reqd": 1
   },
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
-   "label": "First Name"
+   "label": "First Name",
+   "reqd": 1
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
    "oldfieldname": "employee_name",
-   "oldfieldtype": "Data",
-   "reqd": 1
+   "oldfieldtype": "Data"
   },
   {
    "fetch_from": "user_id.user_image",
@@ -174,12 +197,6 @@
    "hidden": 1,
    "label": "Image",
    "no_copy": 1
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "column_break1",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "fieldname": "company",
@@ -234,7 +251,8 @@
    "label": "Date of Joining",
    "oldfieldname": "date_of_joining",
    "oldfieldtype": "Date",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -334,7 +352,8 @@
    "label": "Department",
    "oldfieldname": "department",
    "oldfieldtype": "Link",
-   "options": "Department"
+   "options": "Department",
+   "reqd": 1
   },
   {
    "fieldname": "designation",
@@ -345,6 +364,7 @@
    "oldfieldname": "designation",
    "oldfieldtype": "Link",
    "options": "Designation",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -362,7 +382,8 @@
    "label": "Branch",
    "oldfieldname": "branch",
    "oldfieldtype": "Link",
-   "options": "Branch"
+   "options": "Branch",
+   "reqd": 1
   },
   {
    "description": "Applicable Holiday List",
@@ -393,10 +414,11 @@
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
    "fieldname": "bank_name",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Bank Name",
    "oldfieldname": "bank_name",
-   "oldfieldtype": "Link"
+   "oldfieldtype": "Link",
+   "options": "Bank"
   },
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
@@ -415,8 +437,8 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
-   "label": "Mobile",
-   "options": "Phone"
+   "label": "Mobile Number",
+   "unique": 1
   },
   {
    "fieldname": "prefered_contact_email",
@@ -716,10 +738,6 @@
    "label": "Company Details"
   },
   {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "address_section",
    "fieldtype": "Section Break",
@@ -786,13 +804,161 @@
   {
    "fieldname": "column_break_104",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Link",
+   "label": "Section",
+   "options": "Department"
+  },
+  {
+   "fieldname": "division",
+   "fieldtype": "Link",
+   "label": "Division",
+   "options": "Department"
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "employment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employment Details"
+  },
+  {
+   "fieldname": "employment_type",
+   "fieldtype": "Link",
+   "label": "Employment Type",
+   "options": "Employment Type"
+  },
+  {
+   "fieldname": "employee_group",
+   "fieldtype": "Link",
+   "label": "Employee Group",
+   "options": "Employee Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employment_status",
+   "fieldtype": "Select",
+   "label": "Employment Status",
+   "options": "\nIn Service\nEOL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "increment_cycle",
+   "fieldtype": "Select",
+   "label": "Increment Cycle",
+   "options": "\nJanuary\nJuly"
+  },
+  {
+   "fieldname": "promotion_cycle",
+   "fieldtype": "Select",
+   "label": "Promotion Cycle",
+   "options": "\nJanuary\nJuly"
+  },
+  {
+   "fieldname": "promotion_due_date",
+   "fieldtype": "Date",
+   "label": "Promotion Due Date"
+  },
+  {
+   "fetch_from": "reports_to.employee_name",
+   "fieldname": "reports_to_name",
+   "fieldtype": "Data",
+   "label": "Reports to Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_branch",
+   "fieldtype": "Link",
+   "label": "Bank Branch",
+   "options": "Bank Branch"
+  },
+  {
+   "fieldname": "bank_account_type",
+   "fieldtype": "Link",
+   "label": "Bank Account Type",
+   "options": "Bank Account Type"
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "label": "Business Activity",
+   "options": "Business Activity"
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_50",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tpn_number",
+   "fieldtype": "Data",
+   "label": "TPN Number"
+  },
+  {
+   "fieldname": "pf_number",
+   "fieldtype": "Data",
+   "label": "PF Number"
+  },
+  {
+   "fieldname": "pf_tiers",
+   "fieldtype": "Select",
+   "label": "PF Tiers",
+   "options": "\n1\n2"
+  },
+  {
+   "fieldname": "gis_number",
+   "fieldtype": "Data",
+   "label": "GIS Number"
+  },
+  {
+   "fieldname": "gis_policy_number",
+   "fieldtype": "Data",
+   "label": "GIS Policy Number"
+  },
+  {
+   "fieldname": "old_id",
+   "fieldtype": "Data",
+   "label": "Old ID"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "label": "Unit",
+   "options": "Unit"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Data",
+   "label": "Region"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-08-23 13:47:46.944993",
+ "modified": "2022-10-13 15:34:31.580742",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
@@ -835,7 +1001,7 @@
    "write": 1
   }
  ],
- "search_fields": "employee_name",
+ "search_fields": "employee_name, gender, designation , employment_type",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

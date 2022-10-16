@@ -19,6 +19,8 @@
   "old_parent",
   "default_receivable_account",
   "accounts",
+  "default_advance_account_section",
+  "advance_account",
   "credit_limit_section",
   "credit_limits"
  ],
@@ -133,16 +135,28 @@
    "fieldtype": "Table",
    "label": "Credit Limit",
    "options": "Customer Credit Limit"
+  },
+  {
+   "fieldname": "default_advance_account_section",
+   "fieldtype": "Section Break",
+   "label": "Default Advance Account"
+  },
+  {
+   "fieldname": "advance_account",
+   "fieldtype": "Table",
+   "label": "Advance Account",
+   "options": "Party Advance Account"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2021-02-08 17:01:52.162202",
+ "modified": "2022-09-14 19:38:04.258347",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_customer_group",
  "owner": "Administrator",
  "permissions": [
@@ -203,5 +217,6 @@
  "search_fields": "parent_customer_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

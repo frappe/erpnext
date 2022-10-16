@@ -10,11 +10,13 @@
   "reference_name",
   "remarks",
   "reference_row",
+  "ref_exchange_rate",
   "col_break1",
+  "cost_center",
+  "advance_account",
   "advance_amount",
   "allocated_amount",
-  "exchange_gain_loss",
-  "ref_exchange_rate"
+  "exchange_gain_loss"
  ],
  "fields": [
   {
@@ -112,13 +114,27 @@
    "label": "Reference Exchange Rate",
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "advance_account",
+   "fieldtype": "Link",
+   "label": "Advance Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-26 15:47:46.911595",
+ "modified": "2022-09-15 22:22:25.176496",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Advance",
@@ -126,5 +142,6 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

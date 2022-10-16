@@ -18,7 +18,7 @@ develop_version = "14.x.x-develop"
 app_include_js = "erpnext.bundle.js"
 app_include_css = [
 	"erpnext.bundle.css",
-	"/assets/erpnext/css/erp.custom.css"
+	# "/assets/erpnext/css/erp.custom.css"
 	]
 web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"
@@ -31,6 +31,8 @@ doctype_js = {
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
 }
+
+# fixtures = ['Custom Field', 'Property Setter']
 
 override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
 
@@ -312,7 +314,8 @@ doc_events = {
 		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
 	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
+		# commented for now as we keep facing system down
+		# "on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
 	},
 	"Sales Invoice": {
 		"on_submit": [
@@ -550,6 +553,32 @@ regional_overrides = {
 		"erpnext.controllers.accounts_controller.validate_regional": "erpnext.regional.italy.utils.sales_invoice_validate",
 	},
 }
+
+has_permission = {
+	# "Material Request":"erpnext.stock.doctype.material_request.material_request.has_record_permission", 
+	"Employee": "erpnext.setup.doctype.employee.employee.has_record_permission",
+	"Salary Structure": "hrms.payroll.doctype.salary_structure.salary_structure.has_record_permission",
+	"Salary Slip": "hrms.payroll.doctype.salary_slip.salary_slip.has_record_permission",
+	"Employee Promotion": "hrms.hr.doctype.employee_promotion.employee_promotion.has_record_permission",
+
+}
+
+permission_query_conditions = {
+	"Journal Entry": "erpnext.accounts.doctype.journal_entry.journal_entry.get_permission_query_conditions",
+	"Payment Entry": "erpnext.accounts.doctype.payment_entry.payment_entry.get_permission_query_conditions",
+	"Purchase Order": "erpnext.buying.doctype.purchase_order.purchase_order.get_permission_query_conditions",
+	"Purchase Invoice": "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_permission_query_conditions",
+	"Purchase Receipt": "erpnext.stock.doctype.purchase_receipt.purchase_receipt.get_permission_query_conditions",
+	"Material Request": "erpnext.stock.doctype.material_request.material_request.get_permission_query_conditions",
+	"Stock Entry": "erpnext.stock.doctype.stock_entry.stock_entry.get_permission_query_conditions",
+	"Employee": "erpnext.setup.doctype.employee.employee.get_permission_query_conditions",
+	"Salary Structure": "hrms.payroll.doctype.salary_structure.salary_structure.get_permission_query_conditions",
+	"Salary Slip": "hrms.payroll.doctype.salary_slip.salary_slip.get_permission_query_conditions",
+	"Employee Promotion": "hrms.hr.doctype.employee_promotion.employee_promotion.get_permission_query_conditions",
+	"Leave Application": "hrms.hr.doctype.leave_application.leave_application.get_permission_query_conditions",
+	"Leave Encashment": "hrms.hr.doctype.leave_encashment.leave_encashment.get_permission_query_conditions",
+}
+
 user_privacy_documents = [
 	{
 		"doctype": "Lead",

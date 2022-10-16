@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-frappe.provide("erpnext.accounts.dimensions");
+//frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on('Budget', {
 	onload: function(frm) {
@@ -21,12 +21,12 @@ frappe.ui.form.on('Budget', {
 				}
 			};
 		});
-
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+		//erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
 		frm.trigger("toggle_reqd_fields")
+		frm.get_field("accounts").grid.grid_pagination.page_length = 150
 	},
 
 	budget_against: function(frm) {

@@ -10,9 +10,9 @@ from frappe.permissions import (
 	remove_user_permission,
 	set_user_permission_if_allowed,
 )
-from frappe.utils import cstr, getdate, today, validate_email_address
+from frappe.utils import cstr, getdate, today, validate_email_address, cint,flt
 from frappe.utils.nestedset import NestedSet
-
+from frappe.model.naming import make_autoname
 from erpnext.utilities.transaction_base import delete_events
 
 
@@ -27,16 +27,10 @@ class InactiveEmployeeStatusError(frappe.ValidationError):
 class Employee(NestedSet):
 	nsm_parent_field = "reports_to"
 
-	def autoname(self):
-		set_name_by_naming_series(self)
-		self.employee = self.name
-
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 
 		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
-
-		self.employee = self.name
 		self.set_employee_name()
 		self.validate_date()
 		self.validate_email()
@@ -371,6 +365,17 @@ def create_user(employee, user=None, email=None):
 	user.insert()
 	return user.name
 
+@frappe.whitelist()
+def get_overtime_rate(employee):
+	basic = frappe.db.sql("select b.eligible_for_overtime_and_payment, a.amount as basic_pay from `tabSalary Detail` a, `tabSalary Structure` b where a.parent = b.name and a.salary_component = 'Basic Pay' and b.is_active = 'Yes' and b.employee = \'" + str(employee) + "\'", as_dict=True)
+	if basic:
+			if not cint(basic[0].eligible_for_overtime_and_payment):
+				if not frappe.db.get_value("Employee Grade", frappe.db.get_value("Employee", employee, "grade"), "eligible_for_overtime"):
+					frappe.throw(_("Employee is not eligible for Overtime"))
+
+			return ((flt(basic[0].basic_pay) * 1.5) / (30 * 8))
+	else:
+			frappe.throw("No Salary Structure found for the employee")
 
 def get_all_employee_emails(company):
 	"""Returns list of employee emails either based on user_id or company_email"""
@@ -451,3 +456,28 @@ def has_upload_permission(doc, ptype="read", user=None):
 	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
 		return True
 	return doc.user_id == user
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+	if "HR User" in user_roles or "HR Manager" in user_roles or "Accounts User" in user_roles:
+		return
+	else:
+		return """(
+			exists(select 1
+				from `tabEmployee` as e
+				where e.name = `tabEmployee`.name
+				and e.user_id = '{user}')
+		)""".format(user=user)
+
+def has_record_permission(doc, user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if "HR User" in user_roles or "HR Manager" in user_roles:
+		return True
+	else:			
+		if frappe.db.exists("Employee", {"name":doc.name, "user_id": user}):
+			return True
+		else:
+			return False 

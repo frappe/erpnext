@@ -29,6 +29,7 @@ def make_gl_entries(
 	update_outstanding="Yes",
 	from_repost=False,
 ):
+	# frappe.throw(str(update_outstanding))
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
@@ -303,7 +304,41 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.submit()
 
 	if not from_repost and gle.voucher_type != "Period Closing Voucher":
-		validate_expense_against_budget(args)
+		#Commit and Consume budget
+		if args.voucher_type in ['Journal Entry'] and args.against_voucher_type != 'Asset':
+			validate_expense_against_budget(args)
+			if frappe.db.get_value("Account", args.account, "account_type") in ["Expense Account","Fixed Asset","Temporary"]:
+				#Commit Budget
+				bud_obj = frappe.get_doc({
+					"doctype": "Committed Budget",
+					"account": args.account,
+					"cost_center": args.cost_center,
+					"project": args.project,
+					"reference_type": args.voucher_type,
+					"reference_no": args.voucher_no,
+					"reference_date": args.posting_date,
+					"amount": flt(args.debit_in_account_currency) - flt(args.credit_in_account_currency),
+					"company": args.company,
+					"closed": 1,
+				})
+				bud_obj.flags.ignore_permissions=1
+				bud_obj.submit()
+			
+				#Consume Budget
+				con_obj = frappe.get_doc({
+					"doctype": "Consumed Budget",
+					"account": args.account,
+					"cost_center": args.cost_center,
+					"project": args.project,
+					"reference_type": args.voucher_type,
+					"reference_no": args.voucher_no,
+					"reference_date": args.posting_date,
+					"amount": flt(args.debit_in_account_currency) - flt(args.credit_in_account_currency),
+					"company": args.company,
+					"com_ref": bud_obj.name,
+				})
+				con_obj.flags.ignore_permissions=1
+				con_obj.submit()
 
 
 def validate_cwip_accounts(gl_map):

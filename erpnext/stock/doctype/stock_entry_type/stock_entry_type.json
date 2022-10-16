@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "purpose",
-  "add_to_transit"
+  "add_to_transit",
+  "disabled"
  ],
  "fields": [
   {
@@ -26,13 +27,20 @@
    "fieldname": "add_to_transit",
    "fieldtype": "Check",
    "label": "Add to Transit"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "links": [],
- "modified": "2021-05-21 11:27:01.144110",
+ "modified": "2022-09-27 15:10:09.538899",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -87,5 +95,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

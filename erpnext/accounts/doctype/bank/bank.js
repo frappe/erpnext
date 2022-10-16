@@ -26,6 +26,14 @@ frappe.ui.form.on('Bank', {
 				new erpnext.integrations.refreshPlaidLink(frm.doc.plaid_access_token);
 			});
 		}
+
+		cur_frm.set_query("bank_branch", function(){
+			return {
+				"filters": [
+					["bank", "=", frm.docname],					
+				]
+			}
+		});
 	}
 });
 

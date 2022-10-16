@@ -1855,6 +1855,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				doc: this.frm.doc,
 				callback: function(r, rt) {
 					refresh_field("advances");
+					this.frm.dirty()
 				}
 			})
 		}
@@ -1865,7 +1866,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			method: cur_frm.cscript.get_method_for_payment(),
 			args: {
 				"dt": cur_frm.doc.doctype,
-				"dn": cur_frm.doc.name
+				"dn": cur_frm.doc.name,
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);

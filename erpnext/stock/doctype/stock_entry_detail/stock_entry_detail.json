@@ -15,12 +15,14 @@
   "sec_break1",
   "item_code",
   "item_name",
+  "subcontracted_item",
+  "quality_inspection",
   "col_break2",
   "is_finished_item",
   "is_scrap_item",
-  "quality_inspection",
   "is_process_loss",
-  "subcontracted_item",
+  "issue_type",
+  "issue_to",
   "section_break_8",
   "description",
   "column_break_10",
@@ -29,9 +31,11 @@
   "image_view",
   "quantity_section",
   "qty",
+  "difference_qty",
   "transfer_qty",
   "retain_sample",
   "column_break_20",
+  "received_qty",
   "uom",
   "stock_uom",
   "conversion_factor",
@@ -44,6 +48,7 @@
   "col_break3",
   "set_basic_rate_manually",
   "basic_amount",
+  "difference_amount",
   "amount",
   "serial_no_batch",
   "serial_no",
@@ -101,7 +106,7 @@
    "fieldname": "t_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Target Warehouse",
+   "label": "Receiving Warehouse",
    "oldfieldname": "t_warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse"
@@ -498,14 +503,14 @@
    "read_only": 1
   },
   {
-    "fieldname": "sco_rm_detail",
-    "fieldtype": "Data",
-    "hidden": 1,
-    "label": "SCO Supplied Item",
-    "no_copy": 1,
-    "print_hide": 1,
-    "read_only": 1
-   },
+   "fieldname": "sco_rm_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "SCO Supplied Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
   {
    "default": "0",
    "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
@@ -563,13 +568,47 @@
    "fieldname": "is_process_loss",
    "fieldtype": "Check",
    "label": "Is Process Loss"
+  },
+  {
+   "depends_on": "eval:parent.stock_entry_type == \"Material Transfer\"",
+   "fieldname": "difference_qty",
+   "fieldtype": "Float",
+   "label": "Difference Qty",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.stock_entry_type == \"Material Transfer\"",
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty"
+  },
+  {
+   "depends_on": "eval:parent.stock_entry_type == \"Material Transfer\"",
+   "fieldname": "difference_amount",
+   "fieldtype": "Currency",
+   "label": "Difference Amount",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.stock_entry_type == \"Material Issue\"",
+   "fieldname": "issue_type",
+   "fieldtype": "Select",
+   "label": "Issue Type",
+   "options": "\nEmployee"
+  },
+  {
+   "depends_on": "eval:doc.issue_type",
+   "fieldname": "issue_to",
+   "fieldtype": "Dynamic Link",
+   "label": "Issue To",
+   "options": "issue_type"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-17 05:06:33.621264",
+ "modified": "2022-09-27 15:30:48.804720",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

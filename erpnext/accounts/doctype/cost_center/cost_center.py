@@ -1,11 +1,10 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet
-
+from frappe.utils import cint
 from erpnext.accounts.utils import validate_field_number
 
 
@@ -22,6 +21,24 @@ class CostCenter(NestedSet):
 	def validate(self):
 		self.validate_mandatory()
 		self.validate_parent_cost_center()
+	def on_update(self):
+			self.create_branch()
+			if frappe.local.flags.ignore_on_update:
+				return
+			else:
+				super(CostCenter, self).on_update()
+
+	def create_branch(self):
+		if cint(self.is_group) == 1 or cint(self.branch_created) == 1:
+			return
+		company = frappe.defaults.get_defaults().company
+		b = frappe.new_doc("Branch")
+		b.branch = self.cost_center_name.strip()
+		b.cost_center = self.name
+		b.company = self.company
+		b.expense_bank_account = frappe.db.get_value("Company", company, "default_bank_account")
+		b.save()
+		self.db_set("branch_created", 1)
 
 	def validate_mandatory(self):
 		if self.cost_center_name != self.company and not self.parent_cost_center:

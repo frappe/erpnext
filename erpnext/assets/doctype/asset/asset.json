@@ -1,8 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "format:SMCL-{abbr}-{YY}-{####}",
  "creation": "2022-01-18 02:26:55.975005",
  "doctype": "DocType",
  "document_type": "Document",
@@ -22,14 +21,19 @@
   "naming_series",
   "asset_name",
   "asset_category",
+  "asset_sub_category",
+  "abbr",
   "location",
   "split_from",
-  "custodian",
   "department",
   "disposal_date",
+  "posting_date",
   "accounting_dimensions_section",
-  "cost_center",
+  "custodian",
+  "custodian_name",
   "dimension_col_break",
+  "branch",
+  "cost_center",
   "purchase_details_section",
   "purchase_receipt",
   "purchase_invoice",
@@ -38,9 +42,16 @@
   "gross_purchase_amount",
   "asset_quantity",
   "purchase_date",
+  "accounting_details_section",
+  "asset_account",
+  "column_break_36",
+  "credit_account",
+  "column_break_39",
+  "accumulated_depreciation_account",
   "section_break_23",
   "calculate_depreciation",
   "column_break_33",
+  "income_tax_opening_depreciation_amount",
   "opening_accumulated_depreciation",
   "number_of_depreciations_booked",
   "section_break_36",
@@ -165,10 +176,10 @@
   {
    "fieldname": "location",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Location",
-   "options": "Location",
-   "reqd": 1
+   "options": "Location"
   },
   {
    "fieldname": "custodian",
@@ -178,10 +189,13 @@
    "options": "Employee"
   },
   {
+   "fetch_from": "branch.cost_center",
+   "fetch_if_empty": 1,
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "reqd": 1
   },
   {
    "fieldname": "department",
@@ -228,7 +242,7 @@
    "reqd": 1
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "calculate_depreciation",
    "fieldtype": "Check",
    "label": "Calculate Depreciation"
@@ -244,6 +258,7 @@
    "fieldname": "opening_accumulated_depreciation",
    "fieldtype": "Currency",
    "label": "Opening Accumulated Depreciation",
+   "mandatory_depends_on": "is_existing_asset",
    "no_copy": 1,
    "options": "Company:company:default_currency"
   },
@@ -255,8 +270,6 @@
    "no_copy": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.calculate_depreciation || doc.is_existing_asset",
    "fieldname": "section_break_23",
    "fieldtype": "Section Break",
    "label": "Depreciation"
@@ -314,6 +327,7 @@
    "label": "Depreciation Schedule"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "schedules",
    "fieldtype": "Table",
    "label": "Depreciation Schedule",
@@ -446,18 +460,15 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Custodian Details"
   },
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "is_existing_asset",
    "fieldname": "purchase_details_section",
    "fieldtype": "Section Break",
    "label": "Purchase Details"
@@ -484,10 +495,90 @@
    "read_only": 1
   },
   {
+   "default": "1",
    "fieldname": "asset_quantity",
    "fieldtype": "Int",
    "label": "Asset Quantity",
+   "read_only": 1,
    "read_only_depends_on": "eval:!doc.is_existing_asset"
+  },
+  {
+   "depends_on": "is_existing_asset",
+   "fieldname": "income_tax_opening_depreciation_amount",
+   "fieldtype": "Currency",
+   "label": "Income Tax Opening Depreciation Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fetch_from": "custodian.employee_name",
+   "fieldname": "custodian_name",
+   "fieldtype": "Data",
+   "label": "Custodian Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "custodian.branch",
+   "fetch_if_empty": 1,
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "depends_on": "item_code",
+   "fetch_from": "item_code.asset_sub_category",
+   "fieldname": "asset_sub_category",
+   "fieldtype": "Link",
+   "label": "Asset Sub Category",
+   "options": "Asset Sub Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "asset_account",
+   "fieldtype": "Link",
+   "label": "Asset Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_existing_asset",
+   "fieldname": "accumulated_depreciation_account",
+   "fieldtype": "Link",
+   "label": "Accumulated Depreciation Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "item_code",
+   "fetch_from": "asset_category.abbr",
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "label": "Abbr",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -510,18 +601,17 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-07-20 10:15:12.887372",
+ "modified": "2022-09-27 21:24:23.256261",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
    "amend": 1,
    "cancel": 1,
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "import": 1,
@@ -534,7 +624,18 @@
    "write": 1
   },
   {
-   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -542,12 +643,13 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Quality Manager",
+   "role": "Administrator",
    "share": 1,
    "submit": 1,
    "write": 1
   }
  ],
+ "search_fields": "asset_name,custodian,cost_center",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

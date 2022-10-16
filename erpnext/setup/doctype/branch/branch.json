@@ -9,7 +9,18 @@
  "engine": "InnoDB",
  "field_order": [
   "branch",
-  "cost_center"
+  "abbr",
+  "cost_center",
+  "region",
+  "disabled",
+  "cb_3",
+  "company",
+  "letter_head",
+  "holiday_list",
+  "sb_accounts_settings",
+  "expense_bank_account",
+  "column_break_11",
+  "revenue_bank_account"
  ],
  "fields": [
   {
@@ -25,14 +36,78 @@
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "expense_bank_account",
+   "fieldtype": "Link",
+   "label": "Default Expense Bank Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "label": "Abbreviation"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List"
+  },
+  {
+   "fieldname": "sb_accounts_settings",
+   "fieldtype": "Section Break",
+   "label": "Accounts Settings"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "revenue_bank_account",
+   "fieldtype": "Link",
+   "label": "Default Revenue Bank Account",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "icon": "fa fa-code-fork",
  "idx": 1,
  "links": [],
- "modified": "2022-09-08 16:31:06.414285",
+ "modified": "2022-09-27 00:59:03.148711",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Branch",

@@ -1462,13 +1462,13 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"] and voucher_outstanding:
 		outstanding = voucher_outstanding[0]
 		ref_doc = frappe.get_doc(voucher_type, voucher_no)
-
 		# Didn't use db_set for optimisation purpose
+		# frappe.msgprint(str('{} : {} : {}'.format(outstanding,voucher_type,voucher_no)))
 		ref_doc.outstanding_amount = outstanding["outstanding_in_account_currency"]
 		frappe.db.set_value(
 			voucher_type, voucher_no, "outstanding_amount", outstanding["outstanding_in_account_currency"]
 		)
-
+		
 		ref_doc.set_status(update=True)
 
 

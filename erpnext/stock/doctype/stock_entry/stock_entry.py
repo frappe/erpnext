@@ -144,7 +144,7 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
-
+		self.update_status()
 		if not self.get("purpose") == "Manufacture":
 			# ignore scrap item wh difference and empty source/target wh
 			# in Manufacture Entry
@@ -200,6 +200,14 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("Not Started")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("In Transit")
+  
+	def update_status(self):
+		status = {0: "Draft",
+				1: "Submitted",
+				2: "Cancelled"}[self.docstatus]
+		if self.purpose == "Material Transfer" and self.in_transit and self.docstatus == 0:
+			status = "In Transit"
+		self.status = status
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -1082,9 +1090,18 @@ class StockEntry(StockController):
 	def get_sle_for_source_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
 			if cstr(d.s_warehouse):
+				# if self.stock_entry_type == "Material Transfer" and flt(d.difference_qty) < 0:
+				# 	sle = self.get_sl_entries(
+				# 		d, {"warehouse": cstr(d.s_warehouse), 
+				# 			"actual_qty": -(flt(d.transfer_qty) - flt(d.difference_qty)),
+				# 			"incoming_rate": 0
+				# 			})
+				# else:
 				sle = self.get_sl_entries(
-					d, {"warehouse": cstr(d.s_warehouse), "actual_qty": -flt(d.transfer_qty), "incoming_rate": 0}
-				)
+					d, {"warehouse": cstr(d.s_warehouse),
+						"actual_qty": -flt(d.transfer_qty),
+						"incoming_rate": 0
+						})
 				if cstr(d.t_warehouse):
 					sle.dependant_sle_voucher_detail_no = d.name
 				elif finished_item_row and (
@@ -1093,18 +1110,28 @@ class StockEntry(StockController):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
 
 				sl_entries.append(sle)
-
+			
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
 			if cstr(d.t_warehouse):
-				sle = self.get_sl_entries(
-					d,
-					{
-						"warehouse": cstr(d.t_warehouse),
-						"actual_qty": flt(d.transfer_qty),
-						"incoming_rate": flt(d.valuation_rate),
-					},
-				)
+				if self.stock_entry_type == "Material Transfer":
+					sle = self.get_sl_entries(
+						d,
+						{
+							"warehouse": cstr(d.t_warehouse),
+							"actual_qty": flt(d.transfer_qty) + flt(d.difference_qty),
+							"incoming_rate": flt(d.valuation_rate),
+						},
+					)
+				else:
+					sle = self.get_sl_entries(
+						d,
+						{
+							"warehouse": cstr(d.t_warehouse),
+							"actual_qty": flt(d.transfer_qty),
+							"incoming_rate": flt(d.valuation_rate),
+						},
+					)
 				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
 					sle.recalculate_rate = 1
 
@@ -2691,3 +2718,77 @@ def get_stock_entry_data(work_order):
 		)
 		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
 	).run(as_dict=1)
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator" or "System Manager" in user_roles:
+		return
+
+	return """(
+		`tabStock Entry`.owner = '{user}'
+		or
+		(
+			exists(select 1
+				from `tabEmployee` as e
+				where e.branch = `tabStock Entry`.branch
+				and e.user_id = '{user}')
+			or
+			exists(select 1
+				from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
+				where e.user_id = '{user}'
+				and ab.employee = e.name
+				and bi.parent = ab.name
+				and bi.branch = `tabStock Entry`.branch)
+		)
+		or
+		(
+			`tabStock Entry`.in_transit = 1
+			  and exists(select 1
+			from `tabWarehouse` w, `tabWarehouse Branch` as wb
+			where wb.parent = w.name
+			and w.name = `tabStock Entry`.to_warehouse
+			and (
+				   exists(select 1
+						   from `tabEmployee` e
+						 where e.user_id = '{user}'
+						 and e.branch = wb.branch)
+				or
+				exists(select 1
+					from `tabEmployee` e,`tabAssign Branch` ab, `tabBranch Item` bi
+					 where e.user_id = '{user}'
+					and ab.employee = e.name
+					  and bi.parent = ab.name
+					   and bi.branch = wb.branch)
+			)
+		))
+	)""".format(user=user)
+@frappe.whitelist()
+def has_warehouse_permission(warehouse):
+	user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator" or "System Manager" in user_roles:
+		return 1
+
+	res = frappe.db.sql("""
+			select 1
+			from `tabWarehouse` w, `tabWarehouse Branch` as wb
+			where wb.parent = w.name
+			and w.name = '{warehouse}'
+			and (
+				   exists(select 1
+						   from `tabEmployee` e
+						 where e.user_id = '{user}'
+						 and e.branch = wb.branch)
+				or
+				exists(select 1
+					from `tabEmployee` e,`tabAssign Branch` ab, `tabBranch Item` bi
+					 where e.user_id = '{user}'
+					and ab.employee = e.name
+					  and bi.parent = ab.name
+					   and bi.branch = wb.branch)
+			)
+			""".format(warehouse=warehouse, user=frappe.session.user))
+	return res[0][0] if res else 0

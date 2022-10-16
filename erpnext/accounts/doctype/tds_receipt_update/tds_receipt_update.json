@@ -1,0 +1,245 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "TDSRC.YY.####",
+ "creation": "2022-09-21 21:15:59.338692",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "purpose",
+  "branch",
+  "cost_center",
+  "cb_6",
+  "company",
+  "tax_withholding_category",
+  "region",
+  "fiscal_year",
+  "month",
+  "pbva",
+  "sb_filters",
+  "from_date",
+  "cb_9",
+  "to_date",
+  "sb_receipt_details",
+  "tds_receipt_number",
+  "cb_15",
+  "tds_receipt_date",
+  "cb_18",
+  "cheque_no",
+  "21",
+  "cheque_date",
+  "sb_invoice_details",
+  "items",
+  "sb_totals",
+  "total_bill_amount",
+  "cb_21",
+  "total_tax_amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Purpose",
+   "options": "\nOther Invoice\nEmployee Salary\nLeave Encashment\nPBVA\nBonus\nOvertime",
+   "reqd": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "TDS Receipt Update",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:in_list([\"Employee Salary\",\"Bonus\",\"PBVA\"], doc.purpose)",
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "mandatory_depends_on": "eval:in_list([\"Employee Salary\",\"Annual Bonus\",\"PBVA\"], doc.purpose)",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Region",
+   "options": "Region"
+  },
+  {
+   "depends_on": "eval:doc.purpose == \"Employee Salary\"",
+   "fieldname": "month",
+   "fieldtype": "Select",
+   "label": "Month",
+   "mandatory_depends_on": "eval:doc.purpose == \"Employee Salary\"",
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
+  },
+  {
+   "depends_on": "eval:in_list([\"PBVA\"], doc.purpose)",
+   "fieldname": "pbva",
+   "fieldtype": "Data",
+   "label": "PBVA",
+   "mandatory_depends_on": "eval:in_list([\"PBVA\"], doc.purpose)"
+  },
+  {
+   "fieldname": "sb_filters",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "depends_on": "eval:!in_list([\"Employee Salary\",\"Bonus\",\"PBVA\"], doc.purpose)",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory_depends_on": "eval:!in_list([\"Employee Salary\",\"Bonus\",\"PBVA\"], doc.purpose)"
+  },
+  {
+   "fieldname": "cb_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!in_list([\"Employee Salary\",\"Bonus\",\"PBVA\"], doc.purpose)",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory_depends_on": "eval:!in_list([\"Employee Salary\",\"Bonus\",\"PBVA\"], doc.purpose)"
+  },
+  {
+   "fieldname": "sb_receipt_details",
+   "fieldtype": "Section Break",
+   "label": "Receipt Details"
+  },
+  {
+   "fieldname": "tds_receipt_number",
+   "fieldtype": "Data",
+   "label": "TDS Receipt Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tds_receipt_date",
+   "fieldtype": "Date",
+   "label": "TDS Receipt Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Cheque Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_invoice_details",
+   "fieldtype": "Section Break",
+   "label": "Invoice Details"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "TDS Remittance Item"
+  },
+  {
+   "fieldname": "sb_totals",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_bill_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Bill Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tax_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Tax Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "label": "Cheque No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-09-23 14:03:33.136585",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "TDS Receipt Update",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
