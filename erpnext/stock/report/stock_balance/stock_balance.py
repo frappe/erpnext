@@ -10,10 +10,10 @@ from frappe import _
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
-from pypika.terms import ExistsCriterion
 
 import erpnext
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
 
@@ -270,18 +270,8 @@ def apply_conditions(query, filters):
 	if company := filters.get("company"):
 		query = query.where(sle.company == company)
 
-	if warehouse := filters.get("warehouse"):
-		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-		chilren_subquery = (
-			frappe.qb.from_(warehouse_table)
-			.select(warehouse_table.name)
-			.where(
-				(warehouse_table.lft >= lft)
-				& (warehouse_table.rgt <= rgt)
-				& (warehouse_table.name == sle.warehouse)
-			)
-		)
-		query = query.where(ExistsCriterion(chilren_subquery))
+	if filters.get("warehouse"):
+		query = apply_warehouse_filter(query, sle, filters)
 	elif warehouse_type := filters.get("warehouse_type"):
 		query = (
 			query.join(warehouse_table)
