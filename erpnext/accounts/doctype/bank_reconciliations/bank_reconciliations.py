@@ -15,6 +15,7 @@ class Bankreconciliations(Document):
 			self.add_bank_transactions()
 			self.delete_payments()
 			self.add_payments()
+			self.bank_book_value()
 
 		if self.docstatus == 1:
 			self.verificate_defference_amount()
@@ -34,7 +35,7 @@ class Bankreconciliations(Document):
 		self.mark_reconciled_payment_entry_cancel()
 
 	def transit_check(self):
-		filters_transactions= self.filters_bank_transactions_amounts()
+		filters_transactions= self.filters_bank_transactions_amounts("check")
 		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
 
 		bank_check_transit_amount = 0
@@ -50,6 +51,36 @@ class Bankreconciliations(Document):
 			bank_check_transit_amount += payment.paid_amount
 		
 		self.db_set('bank_check_transit_amount', bank_check_transit_amount, update_modified=False)
+
+		filters_transactions= self.filters_bank_transactions_amounts("debit")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		debit_note_transit = 0
+
+		for transaction in transactions:
+			debit_note_transit += transaction.amount_data
+		
+		self.db_set('debit_note_transit', debit_note_transit, update_modified=False)
+
+		filters_transactions= self.filters_bank_transactions_amounts("credit")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		credit_note_transit = 0
+
+		for transaction in transactions:
+			credit_note_transit += transaction.amount_data
+		
+		self.db_set('credit_note_transit', credit_note_transit, update_modified=False)
+
+		filters_transactions= self.filters_bank_transactions_amounts("deposit")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		bank_deposit_transit = 0
+
+		for transaction in transactions:
+			bank_deposit_transit += transaction.amount_data
+		
+		self.db_set('bank_deposit_transit', bank_deposit_transit, update_modified=False)
 	
 	def update_amount(self):
 		account = frappe.get_doc("Bank Account", self.bank_account)
@@ -61,10 +92,10 @@ class Bankreconciliations(Document):
 
 		self.db_set('transaction_amount', self.transaction_amount, update_modified=False)
 
-		if self.bank_amount == None:
+		if self.bank_amount == '':
 			self.bank_amount = 0
 			
-		self.defference_amount = self.transaction_amount - self.bank_amount
+		self.defference_amount = self.book_balance - self.bank_amount
 
 		self.actual_total_conciliation = self.total_last_reconciliations - self.transaction_amount
 
@@ -111,6 +142,18 @@ class Bankreconciliations(Document):
 		self.db_set('credit_note_amount', credit_note_amount, update_modified=False)
 		self.db_set('debit_note_amount', debit_note_amount, update_modified=False)
 		self.db_set('bank_deposit_amount', bank_deposit_amount, update_modified=False)
+	
+	def bank_book_value(self):
+		check = self.bank_check_amount + self.bank_check_transit_amount
+		debit_note = self.debit_note_amount + self.debit_note_transit
+		credit_note = self.credit_note_amount + self.credit_note_transit
+		deposit = self.bank_deposit_amount + self.bank_deposit_transit
+
+		debits_totals = debit_note + check
+		credits_totals = deposit + credit_note
+		book_balance = credits_totals - debits_totals
+
+		self.db_set('book_balance', book_balance, update_modified=False)
 
 	def set_new_row_detail(self, bank_trasaction, no_document, type, date, mode, amount):
 		row = self.append("detail", {})
@@ -274,13 +317,16 @@ class Bankreconciliations(Document):
 
 		return conditions
 	
-	def filters_bank_transactions_amounts(self):
+	def filters_bank_transactions_amounts(self, transaction):
 		conditions = ''
 
 		conditions += "{"
 		conditions += '"date_data": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
 		conditions += ', "status": "Transit"'
-		conditions += ', "check": 1'
+		if transaction == "check": conditions += ', "check": 1'
+		if transaction == "deposit": conditions += ', "bank_deposit": 1'
+		if transaction == "debit": conditions += ', "debit_note": 1'
+		if transaction == "credit": conditions += ', "credit_note": 1'
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
 		conditions += '}'
 
