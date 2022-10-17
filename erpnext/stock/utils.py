@@ -553,6 +553,15 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 @frappe.whitelist()
 def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
+	def set_cache(data: dict):
+		frappe.cache().set(f"erpnext:barcode_scan:{search_value}", json.dumps(data), 120)
+
+	def get_cache() -> Optional[Dict[str, Optional[str]]]:
+		if data := frappe.cache().get(f"erpnext:barcode_scan:{search_value}"):
+			return json.loads(data)
+
+	if scan_data := get_cache():
+		return scan_data
 
 	# search barcode no
 	barcode_data = frappe.db.get_value(
@@ -562,7 +571,9 @@ def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
 		as_dict=True,
 	)
 	if barcode_data:
-		return _update_item_info(barcode_data)
+		_update_item_info(barcode_data)
+		set_cache(barcode_data)
+		return barcode_data
 
 	# search serial no
 	serial_no_data = frappe.db.get_value(
@@ -572,7 +583,9 @@ def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
 		as_dict=True,
 	)
 	if serial_no_data:
-		return _update_item_info(serial_no_data)
+		_update_item_info(serial_no_data)
+		set_cache(serial_no_data)
+		return serial_no_data
 
 	# search batch no
 	batch_no_data = frappe.db.get_value(
@@ -582,6 +595,8 @@ def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
 		as_dict=True,
 	)
 	if batch_no_data:
+		_update_item_info(batch_no_data)
+		set_cache(batch_no_data)
 		return _update_item_info(batch_no_data)
 
 	return {}
