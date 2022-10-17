@@ -551,30 +551,37 @@ class SalesInvoice(SellingController):
 					needs_repost = 1
 					break
 
-			# Check for parent level
-			for index, item in enumerate(self.get("items")):
-				for field in ("income_account", "expense_account", "discount_account"):
-					if doc_before_update.get("items")[index].get(field) != item.get(field):
-						needs_repost = 1
-						break
+			# Check for child tables
+			if self.check_if_child_table_updated(
+				"items",
+				doc_before_update,
+				("income_account", "expense_account", "discount_account"),
+				accounting_dimensions,
+			):
+				needs_repost = 1
 
-				for dimension in accounting_dimensions:
-					if doc_before_update.get("items")[index].get(dimension) != item.get(dimension):
-						needs_repost = 1
-						break
-
-			for index, tax in enumerate(self.get("taxes")):
-				if doc_before_update.get("taxes")[index].get("account_head") != tax.get("account_head"):
-					needs_repost = 1
-					break
-
-				for dimension in accounting_dimensions:
-					if doc_before_update.get("taxes")[index].get(dimension) != tax.get(dimension):
-						needs_repost = 1
-						break
+			if self.check_if_child_table_updated(
+				"taxes", doc_before_update, ("account_head",), accounting_dimensions
+			):
+				needs_repost = 1
 
 		self.validate_accounts()
 		self.db_set("repost_required", needs_repost)
+
+	def check_if_child_table_updated(
+		self, child_table, doc_before_update, fields_to_check, accounting_dimensions
+	):
+		# Check if any field affecting accounting entry is altered
+		for index, item in enumerate(self.get(child_table)):
+			for field in fields_to_check:
+				if doc_before_update.get(child_table)[index].get(field) != item.get(field):
+					return True
+
+			for dimension in accounting_dimensions:
+				if doc_before_update.get(child_table)[index].get(dimension) != item.get(dimension):
+					return True
+
+		return False
 
 	@frappe.whitelist()
 	def repost_accounting_entries(self):
