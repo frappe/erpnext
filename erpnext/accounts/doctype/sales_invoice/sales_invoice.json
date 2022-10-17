@@ -207,6 +207,7 @@
   "is_internal_customer",
   "is_discounted",
   "remarks",
+  "repost_required",
   "connections_tab"
  ],
  "fields": [
@@ -1703,6 +1704,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
@@ -2097,6 +2099,14 @@
    "hide_seconds": 1,
    "label": "Write Off",
    "width": "50%"
+  },
+  {
+   "default": "0",
+   "fieldname": "repost_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Repost Required",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2109,7 +2119,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-10-11 13:07:36.488095",
+ "modified": "2022-10-15 19:15:49.526529",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
