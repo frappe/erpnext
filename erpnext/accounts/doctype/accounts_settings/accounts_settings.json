@@ -178,7 +178,7 @@
    "label": "Stale Days"
   },
   {
-   "default": "0",
+   "default": "1",
    "description": "Payment Terms from orders will be fetched into the invoices as is",
    "fieldname": "automatically_fetch_payment_terms",
    "fieldtype": "Check",
