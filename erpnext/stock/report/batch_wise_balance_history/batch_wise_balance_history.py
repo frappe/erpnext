@@ -6,7 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
 from pypika import functions as fn
-from pypika.terms import ExistsCriterion
+
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 
 
 def execute(filters=None):
@@ -102,25 +103,6 @@ def get_stock_ledger_entries(filters):
 			query = query.where(sle[field] == filters.get(field))
 
 	return query.run(as_dict=True)
-
-
-def apply_warehouse_filter(query, sle, filters):
-	if warehouse := filters.get("warehouse"):
-		warehouse_table = frappe.qb.DocType("Warehouse")
-
-		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-		chilren_subquery = (
-			frappe.qb.from_(warehouse_table)
-			.select(warehouse_table.name)
-			.where(
-				(warehouse_table.lft >= lft)
-				& (warehouse_table.rgt <= rgt)
-				& (warehouse_table.name == sle.warehouse)
-			)
-		)
-		query = query.where(ExistsCriterion(chilren_subquery))
-
-	return query
 
 
 def get_item_warehouse_batch_map(filters, float_precision):
