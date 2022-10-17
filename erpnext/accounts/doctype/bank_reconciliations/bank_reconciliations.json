@@ -13,8 +13,8 @@
   "bank_account",
   "detail",
   "payment_entry_detail",
+  "section1",
   "bank_check_amount",
-  "bank_check_transit_amount",
   "credit_note_amount",
   "debit_note_amount",
   "bank_deposit_amount",
@@ -25,7 +25,13 @@
   "actual_total_conciliation",
   "defference_amount",
   "amended_from",
-  "date_last_reconciliations"
+  "date_last_reconciliations",
+  "column1",
+  "bank_check_transit_amount",
+  "credit_note_transit",
+  "debit_note_transit",
+  "bank_deposit_transit",
+  "book_balance"
  ],
  "fields": [
   {
@@ -49,6 +55,7 @@
   {
    "fieldname": "transaction_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Transaction Amount",
    "read_only": 1
   },
@@ -164,10 +171,42 @@
    "fieldtype": "Date",
    "hidden": 1,
    "label": "date_last_reconciliations"
+  },
+  {
+   "fieldname": "column1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_note_transit",
+   "fieldtype": "Currency",
+   "label": "Credit Note Transit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "debit_note_transit",
+   "fieldtype": "Currency",
+   "label": "Debit Note Transit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_deposit_transit",
+   "fieldtype": "Currency",
+   "label": "Bank Deposit Transit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "book_balance",
+   "fieldtype": "Currency",
+   "label": "Book Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section1",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-07-01 15:45:11.159821",
+ "modified": "2022-10-15 16:13:29.570694",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank reconciliations",
