@@ -460,10 +460,6 @@ def reconcile_against_document(args):  # nosemgrep
 
 		frappe.flags.ignore_party_validation = False
 
-		if entry.voucher_type in ("Payment Entry", "Journal Entry"):
-			if hasattr(doc, "update_expense_claim"):
-				doc.update_expense_claim()
-
 
 def check_if_advance_entry_modified(args):
 	"""
@@ -1171,6 +1167,10 @@ def _delete_gl_entries(voucher_type, voucher_no):
 		where voucher_type=%s and voucher_no=%s""",
 		(voucher_type, voucher_no),
 	)
+	ple = qb.DocType("Payment Ledger Entry")
+	qb.from_(ple).delete().where(
+		(ple.voucher_type == voucher_type) & (ple.voucher_no == voucher_no)
+	).run()
 
 
 def sort_stock_vouchers_by_posting_date(

@@ -5,6 +5,9 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
+from pypika import functions as fn
+
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 
 
 def execute(filters=None):
@@ -64,36 +67,42 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
+# get all details
+def get_stock_ledger_entries(filters):
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
 
-	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % filters["to_date"]
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			sle.batch_no,
+			sle.posting_date,
+			fn.Sum(sle.actual_qty).as_("actual_qty"),
+		)
+		.where(
+			(sle.docstatus < 2)
+			& (sle.is_cancelled == 0)
+			& (sle.batch_no.isnotnull())
+			& (sle.batch_no != "")
+		)
+		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
+		.orderby(sle.item_code, sle.warehouse)
+	)
+
+	if to_date := filters.get("to_date"):
+		query = query.where(sle.posting_date <= to_date)
 	else:
 		frappe.throw(_("'To Date' is required"))
 
-	for field in ["item_code", "warehouse", "batch_no", "company"]:
+	query = apply_warehouse_filter(query, sle, filters)
+	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
-			conditions += " and {0} = {1}".format(field, frappe.db.escape(filters.get(field)))
+			query = query.where(sle[field] == filters.get(field))
 
-	return conditions
-
-
-# get all details
-def get_stock_ledger_entries(filters):
-	conditions = get_conditions(filters)
-	return frappe.db.sql(
-		"""
-		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
-		from `tabStock Ledger Entry`
-		where is_cancelled = 0 and docstatus < 2 and ifnull(batch_no, '') != '' %s
-		group by voucher_no, batch_no, item_code, warehouse
-		order by item_code, warehouse"""
-		% conditions,
-		as_dict=1,
-	)
+	return query.run(as_dict=True)
 
 
 def get_item_warehouse_batch_map(filters, float_precision):

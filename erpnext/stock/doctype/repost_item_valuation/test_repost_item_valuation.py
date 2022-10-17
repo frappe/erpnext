@@ -9,6 +9,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 from frappe.utils.data import add_to_date, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
 from erpnext.controllers.stock_controller import create_item_wise_repost_entries
 from erpnext.stock.doctype.item.test_item import make_item
@@ -272,3 +273,57 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			[{"credit": 50, "debit": 0}],
 			gle_filters={"account": "Stock In Hand - TCP1"},
 		)
+
+	def test_duplicate_ple_on_repost(self):
+		from erpnext.accounts import utils
+
+		# lower numbers to simplify test
+		orig_chunk_size = utils.GL_REPOSTING_CHUNK
+		utils.GL_REPOSTING_CHUNK = 2
+		self.addCleanup(setattr, utils, "GL_REPOSTING_CHUNK", orig_chunk_size)
+
+		rate = 100
+		item = self.make_item()
+		item.valuation_rate = 90
+		item.allow_negative_stock = 1
+		item.save()
+
+		company = "_Test Company with perpetual inventory"
+
+		# consume non-existing stock
+		sinv = create_sales_invoice(
+			company=company,
+			posting_date=today(),
+			debit_to="Debtors - TCP1",
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			warehouse="Stores - TCP1",
+			update_stock=1,
+			currency="INR",
+			item_code=item.name,
+			cost_center="Main - TCP1",
+			qty=1,
+			rate=rate,
+		)
+
+		# backdated receipt triggers repost
+		make_stock_entry(
+			item=item.name,
+			company=company,
+			qty=5,
+			rate=rate,
+			target="Stores - TCP1",
+			posting_date=add_to_date(today(), days=-1),
+		)
+
+		ple_entries = frappe.db.get_list(
+			"Payment Ledger Entry",
+			filters={"voucher_type": sinv.doctype, "voucher_no": sinv.name, "delinked": 0},
+		)
+
+		# assert successful deduplication on PLE
+		self.assertEqual(len(ple_entries), 1)
+
+		# outstanding should not be affected
+		sinv.reload()
+		self.assertEqual(sinv.outstanding_amount, 100)
