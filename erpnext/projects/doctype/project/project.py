@@ -494,13 +494,14 @@ class Project(StatusUpdater):
 	def get_cant_change_fields(self):
 		vehicle_received = self.get('vehicle_received_date')
 		has_sales_transaction = self.has_sales_transaction()
+		has_billable_transaction = self.has_billable_transaction()
 		has_vehicle_log = self.has_vehicle_log()
 		return frappe._dict({
 			'applies_to_vehicle': vehicle_received or has_vehicle_log,
 			'project_workshop': vehicle_received,
 			'customer': has_sales_transaction,
-			'bill_to': has_sales_transaction and self.is_warranty_claim,
-			'is_warranty_claim': has_sales_transaction and self.is_warranty_claim,
+			'bill_to': self.is_warranty_claim and has_billable_transaction,
+			'is_warranty_claim': self.is_warranty_claim and has_billable_transaction,
 		})
 
 	def has_sales_transaction(self):
@@ -516,6 +517,22 @@ class Project(StatusUpdater):
 			self._has_sales_transaction = False
 
 		return self._has_sales_transaction
+
+	def has_billable_transaction(self):
+		if getattr(self, '_has_billable_transaction', None):
+			return self._has_billable_transaction
+
+		has_billable_sales_order = frappe.db.get_value("Sales Order", {'project': self.name, 'docstatus': 1,
+			'per_returned': ['<', 100]})
+		has_billable_delivery_note = frappe.db.get_value("Delivery Note", {'project': self.name, 'docstatus': 1,
+			'is_return': 0, 'per_returned': ['<', 100]})
+
+		if has_billable_sales_order or has_billable_delivery_note:
+			self._has_billable_transaction = True
+		else:
+			self._has_billable_transaction = False
+
+		return self._has_billable_transaction
 
 	def has_vehicle_log(self):
 		if getattr(self, '_has_vehicle_log', None):
