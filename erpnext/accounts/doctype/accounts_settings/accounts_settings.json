@@ -180,7 +180,7 @@
    "label": "Enable Custom Cash Flow Format"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "automatically_fetch_payment_terms",
    "fieldtype": "Check",
    "label": "Automatically Fetch Payment Terms from Order"
@@ -354,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-07-11 13:37:50.605141",
+ "modified": "2022-10-17 15:12:54.642557",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
