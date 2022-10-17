@@ -6,6 +6,7 @@ import copy
 
 import frappe
 from frappe import _
+from frappe.desk.reportview import get_match_cond
 from frappe.model.document import Document
 from frappe.utils import add_days, add_months, format_date, getdate, today
 from frappe.utils.jinja import validate_template
@@ -274,8 +275,12 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 			link.link_doctype='Customer'
 			and link.link_name=%s
 			and contact.is_billing_contact=1
+			{mcond}
 		ORDER BY
-			contact.creation desc""",
+			contact.creation desc
+		""".format(
+			mcond=get_match_cond("Contact")
+		),
 		customer_name,
 	)
 
