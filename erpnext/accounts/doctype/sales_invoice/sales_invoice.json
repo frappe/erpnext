@@ -209,6 +209,7 @@
   "is_internal_customer",
   "is_discounted",
   "remarks",
+  "repost_required",
   "connections_tab"
  ],
  "fields": [
@@ -1706,6 +1707,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "No",
    "fieldname": "is_opening",
    "fieldtype": "Select",
@@ -2104,6 +2106,7 @@
    "width": "50%"
   },
   {
+<<<<<<< HEAD
    "fieldname": "incoterm",
    "fieldtype": "Link",
    "label": "Incoterm",
@@ -2114,6 +2117,14 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+=======
+   "default": "0",
+   "fieldname": "repost_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Repost Required",
+   "read_only": 1
+>>>>>>> 30da6ab2c1 (feat: Editable Sales Invoice)
   }
  ],
  "icon": "fa fa-file-text",
@@ -2126,7 +2137,11 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
+<<<<<<< HEAD
  "modified": "2023-01-28 19:45:47.538163",
+=======
+ "modified": "2022-10-15 19:15:49.526529",
+>>>>>>> 30da6ab2c1 (feat: Editable Sales Invoice)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
