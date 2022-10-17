@@ -7,6 +7,11 @@ from frappe import _
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+<<<<<<< HEAD
+=======
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+>>>>>>> 2481574a28 (chore: seperate function to apply filter for warehouse in case of QB)
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -226,9 +231,21 @@ def get_columns():
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ""
 	if items:
+<<<<<<< HEAD
 		item_conditions_sql = "and sle.item_code in ({})".format(
 			", ".join(frappe.db.escape(i) for i in items)
 		)
+=======
+		query = query.where(sle.item_code.isin(items))
+
+	for field in ["voucher_no", "batch_no", "project", "company"]:
+		if filters.get(field):
+			query = query.where(sle[field] == filters.get(field))
+
+	query = apply_warehouse_filter(query, sle, filters)
+
+	return query.run(as_dict=True)
+>>>>>>> 2481574a28 (chore: seperate function to apply filter for warehouse in case of QB)
 
 	sl_entries = frappe.db.sql(
 		"""

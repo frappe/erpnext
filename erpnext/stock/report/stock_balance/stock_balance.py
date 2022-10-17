@@ -7,9 +7,17 @@ from operator import itemgetter
 import frappe
 from frappe import _
 from frappe.utils import cint, date_diff, flt, getdate
+<<<<<<< HEAD
 from six import iteritems
 
 import erpnext
+=======
+from frappe.utils.nestedset import get_descendants_of
+
+import erpnext
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+>>>>>>> 2481574a28 (chore: seperate function to apply filter for warehouse in case of QB)
 from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, get_average_age
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_valuation_in_progress
@@ -227,8 +235,22 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
+<<<<<<< HEAD
 	if filters.get("company"):
 		conditions += " and sle.company = %s" % frappe.db.escape(filters.get("company"))
+=======
+	if company := filters.get("company"):
+		query = query.where(sle.company == company)
+
+	if filters.get("warehouse"):
+		query = apply_warehouse_filter(query, sle, filters)
+	elif warehouse_type := filters.get("warehouse_type"):
+		query = (
+			query.join(warehouse_table)
+			.on(warehouse_table.name == sle.warehouse)
+			.where(warehouse_table.warehouse_type == warehouse_type)
+		)
+>>>>>>> 2481574a28 (chore: seperate function to apply filter for warehouse in case of QB)
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value(

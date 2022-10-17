@@ -9,6 +9,7 @@ from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils import cint, flt
 from frappe.utils.nestedset import NestedSet
+from pypika.terms import ExistsCriterion
 
 from erpnext.stock import get_warehouse_account
 
@@ -267,3 +268,23 @@ def get_warehouses_based_on_account(account, company=None):
 		frappe.throw(_("Warehouse not found against the account {0}").format(account))
 
 	return warehouses
+
+
+# Will be use for frappe.qb
+def apply_warehouse_filter(query, sle, filters):
+	if warehouse := filters.get("warehouse"):
+		warehouse_table = frappe.qb.DocType("Warehouse")
+
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		chilren_subquery = (
+			frappe.qb.from_(warehouse_table)
+			.select(warehouse_table.name)
+			.where(
+				(warehouse_table.lft >= lft)
+				& (warehouse_table.rgt <= rgt)
+				& (warehouse_table.name == sle.warehouse)
+			)
+		)
+		query = query.where(ExistsCriterion(chilren_subquery))
+
+	return query
