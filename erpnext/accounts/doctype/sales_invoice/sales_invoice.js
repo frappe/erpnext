@@ -76,13 +76,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 						callback: (r) => {
 							if (!r.exc) {
 								frappe.msgprint(__('Accounting Entries are reposted'));
-								this.frm.trigger('refresh');
+								me.frm.refresh();
 							}
 						}
 					});
-				});
-
-			$(`["${encodeURIComponent("Repost Accounting Entries")}"]`).css('color', 'red');
+				}).removeClass('btn-default').addClass('btn-warning');
 		}
 
 		if (this.frm.doc.is_return) {

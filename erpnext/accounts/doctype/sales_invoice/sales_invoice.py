@@ -522,9 +522,10 @@ class SalesInvoice(SellingController):
 
 	def on_update_after_submit(self):
 		needs_repost = 0
+
 		# Check if any field affecting accounting entry is altered
 		doc_before_update = self.get_doc_before_save()
-		accounting_dimensions = get_accounting_dimensions()
+		accounting_dimensions = get_accounting_dimensions() + ["cost_center", "project"]
 
 		# Check if opening entry check updated
 		if doc_before_update.get("is_opening") != self.is_opening:
@@ -552,18 +553,23 @@ class SalesInvoice(SellingController):
 
 			# Check for parent level
 			for index, item in enumerate(self.get("items")):
-				for field in (
-					"income_account",
-					"expense_account",
-					"discount_account",
-					"deferred_revenue_account",
-				):
+				for field in ("income_account", "expense_account", "discount_account"):
 					if doc_before_update.get("items")[index].get(field) != item.get(field):
 						needs_repost = 1
 						break
 
 				for dimension in accounting_dimensions:
 					if doc_before_update.get("items")[index].get(dimension) != item.get(dimension):
+						needs_repost = 1
+						break
+
+			for index, tax in enumerate(self.get("taxes")):
+				if doc_before_update.get("taxes")[index].get("account_head") != tax.get("account_head"):
+					needs_repost = 1
+					break
+
+				for dimension in accounting_dimensions:
+					if doc_before_update.get("taxes")[index].get(dimension) != tax.get(dimension):
 						needs_repost = 1
 						break
 
