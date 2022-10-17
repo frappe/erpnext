@@ -5,6 +5,8 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
+from pypika import functions as fn
+from pypika.terms import ExistsCriterion
 
 
 def execute(filters=None):
@@ -64,36 +66,61 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
+# get all details
+def get_stock_ledger_entries(filters):
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
 
-	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % filters["to_date"]
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			sle.batch_no,
+			sle.posting_date,
+			fn.Sum(sle.actual_qty).as_("actual_qty"),
+		)
+		.where(
+			(sle.docstatus < 2)
+			& (sle.is_cancelled == 0)
+			& (sle.batch_no.isnotnull())
+			& (sle.batch_no != "")
+		)
+		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
+		.orderby(sle.item_code, sle.warehouse)
+	)
+
+	if to_date := filters.get("to_date"):
+		query = query.where(sle.posting_date <= to_date)
 	else:
 		frappe.throw(_("'To Date' is required"))
 
-	for field in ["item_code", "warehouse", "batch_no", "company"]:
+	query = apply_warehouse_filter(query, sle, filters)
+	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
-			conditions += " and {0} = {1}".format(field, frappe.db.escape(filters.get(field)))
+			query = query.where(sle[field] == filters.get(field))
 
-	return conditions
+	return query.run(as_dict=True)
 
 
-# get all details
-def get_stock_ledger_entries(filters):
-	conditions = get_conditions(filters)
-	return frappe.db.sql(
-		"""
-		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
-		from `tabStock Ledger Entry`
-		where is_cancelled = 0 and docstatus < 2 and ifnull(batch_no, '') != '' %s
-		group by voucher_no, batch_no, item_code, warehouse
-		order by item_code, warehouse"""
-		% conditions,
-		as_dict=1,
-	)
+def apply_warehouse_filter(query, sle, filters):
+	if warehouse := filters.get("warehouse"):
+		warehouse_table = frappe.qb.DocType("Warehouse")
+
+		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+		chilren_subquery = (
+			frappe.qb.from_(warehouse_table)
+			.select(warehouse_table.name)
+			.where(
+				(warehouse_table.lft >= lft)
+				& (warehouse_table.rgt <= rgt)
+				& (warehouse_table.name == sle.warehouse)
+			)
+		)
+		query = query.where(ExistsCriterion(chilren_subquery))
+
+	return query
 
 
 def get_item_warehouse_batch_map(filters, float_precision):
