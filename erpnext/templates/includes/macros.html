@@ -1,5 +1,5 @@
 {% macro product_image_square(website_image, css_class="") %}
-<div class="product-image product-image-square
+<div class="product-image product-image-square h-100 rounded
 	{% if not website_image -%} missing-image {%- endif %} {{ css_class }}"
 	{% if website_image -%}
 	style="background-image: url('{{ frappe.utils.quoted(website_image) | abs_url }}');"

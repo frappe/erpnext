@@ -6,11 +6,11 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime
 from frappe.utils import cint, flt
-from pypika.terms import ExistsCriterion
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import get_stock_balance_for
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 from erpnext.stock.utils import (
 	is_reposting_item_valuation_in_progress,
 	update_included_uom_in_report,
@@ -295,20 +295,7 @@ def get_stock_ledger_entries(filters, items):
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
 
-	if warehouse := filters.get("warehouse"):
-		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-
-		warehouse_table = frappe.qb.DocType("Warehouse")
-		chilren_subquery = (
-			frappe.qb.from_(warehouse_table)
-			.select(warehouse_table.name)
-			.where(
-				(warehouse_table.lft >= lft)
-				& (warehouse_table.rgt <= rgt)
-				& (warehouse_table.name == sle.warehouse)
-			)
-		)
-		query = query.where(ExistsCriterion(chilren_subquery))
+	query = apply_warehouse_filter(query, sle, filters)
 
 	return query.run(as_dict=True)
 

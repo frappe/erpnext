@@ -128,6 +128,9 @@ def repost(doc):
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
 			return
 
+		# This is to avoid TooManyWritesError in case of large reposts
+		frappe.db.MAX_WRITES_PER_TRANSACTION *= 4
+
 		doc.set_status("In Progress")
 		if not frappe.flags.in_test:
 			frappe.db.commit()
