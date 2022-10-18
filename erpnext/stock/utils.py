@@ -13,6 +13,8 @@ from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 import erpnext
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
+BarcodeScanResult = Dict[str, Optional[str]]
+
 
 class InvalidWarehouseCompany(frappe.ValidationError):
 	pass
@@ -552,11 +554,11 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 
 
 @frappe.whitelist()
-def scan_barcode(search_value: str) -> Dict[str, Optional[str]]:
-	def set_cache(data: dict):
+def scan_barcode(search_value: str) -> BarcodeScanResult:
+	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set(f"erpnext:barcode_scan:{search_value}", json.dumps(data), 120)
 
-	def get_cache() -> Optional[Dict[str, Optional[str]]]:
+	def get_cache() -> Optional[BarcodeScanResult]:
 		if data := frappe.cache().get(f"erpnext:barcode_scan:{search_value}"):
 			return json.loads(data)
 
