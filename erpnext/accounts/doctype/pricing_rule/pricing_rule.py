@@ -337,12 +337,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if isinstance(pricing_rule, string_types):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
-<<<<<<< HEAD
-				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
-=======
 				update_pricing_rule_uom(pricing_rule, args)
 				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
->>>>>>> 96b4211ea1 (fix: pricing rule for non stock UOM and conversions)
 
 			if pricing_rule.get("suggestion"):
 				continue
