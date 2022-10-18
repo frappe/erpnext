@@ -139,4 +139,3 @@ def get_item_details(filters):
 		item_map.setdefault(d.name, d)
 
 	return item_map
-	
