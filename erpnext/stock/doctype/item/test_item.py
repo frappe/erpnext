@@ -722,8 +722,8 @@ class TestItem(FrappeTestCase):
 
 		item.has_batch_no = None
 		item.save()
-		self.assertEqual(item.retain_sample, None)
-		self.assertEqual(item.sample_quantity, None)
+		self.assertEqual(item.retain_sample, False)
+		self.assertEqual(item.sample_quantity, 0)
 		item.delete()
 
 	def consume_item_code_with_differet_stock_transactions(
