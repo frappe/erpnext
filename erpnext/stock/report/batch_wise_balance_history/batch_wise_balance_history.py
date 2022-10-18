@@ -4,7 +4,6 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import cint, flt, getdate
 from pypika import functions as fn
 
@@ -72,8 +71,9 @@ def get_columns(filters):
 def get_stock_ledger_entries(filters):
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
+	if not filters.get("to_date"):
+		frappe.throw(_("'To Date' is required"))
 
-<<<<<<< HEAD
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
@@ -87,45 +87,17 @@ def get_stock_ledger_entries(filters):
 		.where(
 			(sle.docstatus < 2)
 			& (sle.is_cancelled == 0)
-			& (sle.batch_no.isnotnull())
-			& (sle.batch_no != "")
+			& (fn.IfNull(sle.batch_no, "") != "")
+			& (sle.posting_date <= filters["to_date"])
 		)
 		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
 		.orderby(sle.item_code, sle.warehouse)
 	)
-
-	if to_date := filters.get("to_date"):
-		query = query.where(sle.posting_date <= to_date)
-	else:
-		frappe.throw(_("'To Date' is required"))
 
 	query = apply_warehouse_filter(query, sle, filters)
 	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
-=======
-	if not filters.get("to_date"):
-		frappe.throw(_("'To Date' is required"))
-
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-	query = (
-		frappe.qb.from_(sle)
-		.select(
-			sle.item_code,
-			sle.batch_no,
-			sle.warehouse,
-			sle.posting_date,
-			Sum(sle.actual_qty).as_("actual_qty"),
-		)
-		.where((sle.is_cancelled == 0) & (sle.docstatus < 2) & (IfNull(sle.batch_no, "") != ""))
-		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
-		.orderby(sle.item_code, sle.warehouse)
-	)
-
-	for field in ("item_code", "warehouse", "batch_no", "company"):
-		if filters.get(field):
-			query = query.where(sle[field] == filters[field])
->>>>>>> 1c1f991d2f (refactor: rewrite `Batch-Wise Balance History Report` queries in `QB`)
 
 	return query.run(as_dict=True)
 
@@ -167,3 +139,4 @@ def get_item_details(filters):
 		item_map.setdefault(d.name, d)
 
 	return item_map
+	
