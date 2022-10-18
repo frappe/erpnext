@@ -720,7 +720,7 @@ class ReceivablePayableReport(object):
 			(not gle.against_voucher) or
 
 			# against sales order/purchase order
-			(gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
+			(gle.against_voucher_type in ["Sales Order", "Purchase Order", "Vehicle Registration Order"]) or
 
 			# sales invoice/purchase invoice
 			(gle.against_voucher==gle.voucher_no and gle.get(self.dr_or_cr) - gle.get(self.reverse_dr_or_cr) > 0) or
