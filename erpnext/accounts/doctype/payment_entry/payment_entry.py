@@ -998,6 +998,7 @@ class PaymentEntry(AccountsController):
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
+<<<<<<< HEAD
 				if d.allocated_amount and d.reference_doctype in (
 					"Sales Order",
 					"Purchase Order",
@@ -1005,6 +1006,12 @@ class PaymentEntry(AccountsController):
 					"Gratuity",
 				):
 					frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
+=======
+				if d.allocated_amount and d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+					frappe.get_doc(
+						d.reference_doctype, d.reference_name, for_update=True
+					).set_total_advance_paid()
+>>>>>>> 430492152f (fix: Advance paid amount in orders (#32642))
 
 	def update_expense_claim(self):
 		if self.payment_type in ("Pay") and self.party:
