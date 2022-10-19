@@ -556,11 +556,11 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 @frappe.whitelist()
 def scan_barcode(search_value: str) -> BarcodeScanResult:
 	def set_cache(data: BarcodeScanResult):
-		frappe.cache().set(f"erpnext:barcode_scan:{search_value}", json.dumps(data), 120)
+		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
 
 	def get_cache() -> Optional[BarcodeScanResult]:
-		if data := frappe.cache().get(f"erpnext:barcode_scan:{search_value}"):
-			return json.loads(data)
+		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
+			return data
 
 	if scan_data := get_cache():
 		return scan_data
