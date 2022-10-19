@@ -77,6 +77,7 @@
    "total",
    "net_total",
    "tax_withholding_net_total",
+   "base_tax_withholding_net_total",
    "taxes_section",
    "tax_category",
    "column_break_49",
@@ -1441,6 +1442,15 @@
     "fieldtype": "Table",
     "label": "Tax Withheld Vouchers",
     "options": "Tax Withheld Vouchers",
+    "read_only": 1
+   },
+   {
+    "fieldname": "base_tax_withholding_net_total",
+    "fieldtype": "Currency",
+    "label": "Base Tax Withholding Net Total",
+    "no_copy": 1,
+    "options": "currency",
+    "print_hide": 1,
     "read_only": 1
    }
   ],
