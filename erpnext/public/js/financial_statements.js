@@ -28,7 +28,7 @@ erpnext.financial_statements = {
 	},
 	"open_general_ledger": function(data) {
 		if (!data.account) return;
-		var project = $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; })
+		let project = $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; });
 
 		frappe.route_options = {
 			"account": data.account,
@@ -37,7 +37,16 @@ erpnext.financial_statements = {
 			"to_date": data.to_date || data.year_end_date,
 			"project": (project && project.length > 0) ? project[0].$input.val() : ""
 		};
-		frappe.set_route("query-report", "General Ledger");
+
+		let report = "General Ledger";
+
+		if (["Payable", "Receivable"].includes(data.account_type)) {
+			report = data.account_type == "Payable" ? "Accounts Payable" : "Accounts Receivable";
+			frappe.route_options["party_account"] = data.account;
+			frappe.route_options["report_date"] = data.year_end_date;
+		}
+
+		frappe.set_route("query-report", report);
 	},
 	"tree": true,
 	"name_field": "account",
