@@ -161,6 +161,32 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 							}
 						})
 					}, __("Get Items From"));
+				
+				if (me.frm.doc.is_internal_customer) {
+					this.frm.add_custom_button(__('Material Request'),
+						function() {
+							erpnext.utils.map_current_doc({
+								method: "erpnext.stock.doctype.material_request.material_request.make_delivery_note",
+								source_doctype: "Material Request",
+								target: me.frm,
+								setters: {
+									schedule_date: undefined,
+									status: undefined
+								},
+								get_query_filters: {
+									material_request_type: "Material Transfer",
+									docstatus: 1,
+									status: ["not in", ["Stopped", "Transferred"]],
+									per_received: ["<", 100],
+									per_ordered: ["=", 0],
+									company: me.frm.doc.company
+								},
+								allow_child_item_selection: true,
+								child_fieldname: "items",
+								child_columns: ["item_code", "qty"]
+							})
+						}, __("Get Items From"));
+				}
 			}
 		}
 

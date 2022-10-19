@@ -101,7 +101,7 @@ status_map = {
 		["Draft", None],
 		["Stopped", "eval:self.status == 'Stopped'"],
 		["Cancelled", "eval:self.docstatus == 2"],
-		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.docstatus == 1"],
+		["Pending", "eval:self.status != 'Stopped' and self.per_ordered == 0 and self.per_received == 0 and self.docstatus == 1"],
 		[
 			"Ordered",
 			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'",
@@ -117,6 +117,10 @@ status_map = {
 		[
 			"Received",
 			"eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'",
+		],
+		[
+			"Received",
+			"eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'",
 		],
 		[
 			"Partially Received",
