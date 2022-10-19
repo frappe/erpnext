@@ -3,12 +3,13 @@
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -126,6 +127,25 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		)
 		payment.posting_date = posting_date
 		return payment
+
+	def create_sales_order(
+		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+	):
+		so = make_sales_order(
+			company=self.company,
+			transaction_date=posting_date,
+			customer=self.customer,
+			item_code=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			debit_to=self.debit_to,
+			currency="INR",
+			qty=qty,
+			rate=100,
+			do_not_save=do_not_save,
+			do_not_submit=do_not_submit,
+		)
+		return so
 
 	def clear_old_entries(self):
 		doctype_list = [
@@ -406,3 +426,89 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		]
 		self.assertEqual(pl_entries_for_crnote[0], expected_values[0])
 		self.assertEqual(pl_entries_for_crnote[1], expected_values[1])
+
+	@change_settings(
+		"Accounts Settings",
+		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
+	)
+	def test_multi_payment_unlink_on_invoice_cancellation(self):
+		transaction_date = nowdate()
+		amount = 100
+		si = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+
+		for amt in [40, 40, 20]:
+			# payment 1
+			pe = get_payment_entry(si.doctype, si.name)
+			pe.paid_amount = amt
+			pe.get("references")[0].allocated_amount = amt
+			pe = pe.save().submit()
+
+		si.reload()
+		si.cancel()
+
+		entries = frappe.db.get_list(
+			"Payment Ledger Entry",
+			filters={"against_voucher_type": si.doctype, "against_voucher_no": si.name, "delinked": 0},
+		)
+		self.assertEqual(entries, [])
+
+		# with references removed, deletion should be possible
+		si.delete()
+		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, si.doctype, si.name)
+
+	@change_settings(
+		"Accounts Settings",
+		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
+	)
+	def test_multi_je_unlink_on_invoice_cancellation(self):
+		transaction_date = nowdate()
+		amount = 100
+		si = self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+
+		# multiple JE's against invoice
+		for amt in [40, 40, 20]:
+			je1 = self.create_journal_entry(
+				self.income_account, self.debit_to, amt, posting_date=transaction_date
+			)
+			je1.get("accounts")[1].party_type = "Customer"
+			je1.get("accounts")[1].party = self.customer
+			je1.get("accounts")[1].reference_type = si.doctype
+			je1.get("accounts")[1].reference_name = si.name
+			je1 = je1.save().submit()
+
+		si.reload()
+		si.cancel()
+
+		entries = frappe.db.get_list(
+			"Payment Ledger Entry",
+			filters={"against_voucher_type": si.doctype, "against_voucher_no": si.name, "delinked": 0},
+		)
+		self.assertEqual(entries, [])
+
+		# with references removed, deletion should be possible
+		si.delete()
+		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, si.doctype, si.name)
+
+	@change_settings(
+		"Accounts Settings",
+		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
+	)
+	def test_advance_payment_unlink_on_order_cancellation(self):
+		transaction_date = nowdate()
+		amount = 100
+		so = self.create_sales_order(qty=1, rate=amount, posting_date=transaction_date).save().submit()
+
+		pe = get_payment_entry(so.doctype, so.name).save().submit()
+
+		so.reload()
+		so.cancel()
+
+		entries = frappe.db.get_list(
+			"Payment Ledger Entry",
+			filters={"against_voucher_type": so.doctype, "against_voucher_no": so.name, "delinked": 0},
+		)
+		self.assertEqual(entries, [])
+
+		# with references removed, deletion should be possible
+		so.delete()
+		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, so.doctype, so.name)

@@ -5,6 +5,9 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate
+from pypika import functions as fn
+
+from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 
 
 def execute(filters=None):
@@ -64,36 +67,39 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
-	if not filters.get("from_date"):
-		frappe.throw(_("'From Date' is required"))
-
-	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % filters["to_date"]
-	else:
-		frappe.throw(_("'To Date' is required"))
-
-	for field in ["item_code", "warehouse", "batch_no", "company"]:
-		if filters.get(field):
-			conditions += " and {0} = {1}".format(field, frappe.db.escape(filters.get(field)))
-
-	return conditions
-
-
 # get all details
 def get_stock_ledger_entries(filters):
-	conditions = get_conditions(filters)
-	return frappe.db.sql(
-		"""
-		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
-		from `tabStock Ledger Entry`
-		where is_cancelled = 0 and docstatus < 2 and ifnull(batch_no, '') != '' %s
-		group by voucher_no, batch_no, item_code, warehouse
-		order by item_code, warehouse"""
-		% conditions,
-		as_dict=1,
+	if not filters.get("from_date"):
+		frappe.throw(_("'From Date' is required"))
+	if not filters.get("to_date"):
+		frappe.throw(_("'To Date' is required"))
+
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(
+			sle.item_code,
+			sle.warehouse,
+			sle.batch_no,
+			sle.posting_date,
+			fn.Sum(sle.actual_qty).as_("actual_qty"),
+		)
+		.where(
+			(sle.docstatus < 2)
+			& (sle.is_cancelled == 0)
+			& (fn.IfNull(sle.batch_no, "") != "")
+			& (sle.posting_date <= filters["to_date"])
+		)
+		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
+		.orderby(sle.item_code, sle.warehouse)
 	)
+
+	query = apply_warehouse_filter(query, sle, filters)
+	for field in ["item_code", "batch_no", "company"]:
+		if filters.get(field):
+			query = query.where(sle[field] == filters.get(field))
+
+	return query.run(as_dict=True)
 
 
 def get_item_warehouse_batch_map(filters, float_precision):
@@ -127,7 +133,9 @@ def get_item_warehouse_batch_map(filters, float_precision):
 
 def get_item_details(filters):
 	item_map = {}
-	for d in frappe.db.sql("select name, item_name, description, stock_uom from tabItem", as_dict=1):
+	for d in (frappe.qb.from_("Item").select("name", "item_name", "description", "stock_uom")).run(
+		as_dict=1
+	):
 		item_map.setdefault(d.name, d)
 
 	return item_map
