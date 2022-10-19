@@ -143,6 +143,9 @@ frappe.ui.form.on('Stock Entry', {
 	},
 
 	refresh: function(frm) {
+        if (frm.doc.queue_status == 'Queued'){
+            $('.primary-action').hide();
+        }
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Create Material Request'), function() {
@@ -696,6 +699,27 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		let transaction_controller= new erpnext.TransactionController({frm:this.frm});
 		transaction_controller.scan_barcode();
 	},
+
+    before_submit : function(){
+		var me = this;
+		frappe.ui.form.is_saving = true;
+		frappe.call({
+			method:"nrp_manufacturing.modules.gourmet.stock_entry.stock_entry.enqueue_doc",
+			args: {docname: me.frm.doc.name, status: status},
+			callback: function(r){
+                me.frm.reload_doc();
+			},
+			always: function(){
+				frappe.ui.form.is_saving = false;
+                // frappe.throw("The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage")
+                frappe.throw(
+					title='Notification',
+					msg='The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage',
+				)
+				return false;
+            }
+		})
+    },
 
 	on_submit: function() {
 		this.clean_up();
