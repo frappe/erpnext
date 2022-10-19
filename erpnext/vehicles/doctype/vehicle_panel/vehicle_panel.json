@@ -1,0 +1,71 @@
+{
+ "allow_rename": 1,
+ "autoname": "field:panel_name",
+ "creation": "2022-10-19 16:21:42.593816",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "panel_name",
+  "default_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "panel_name",
+   "fieldtype": "Data",
+   "label": "Panel Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "1",
+   "fieldname": "default_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Default Qty"
+  }
+ ],
+ "modified": "2022-10-19 17:13:39.989901",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Panel",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Projects User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Manager",
+   "share": 1
+  }
+ ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Vehicles",
+ "sort_field": "idx",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
