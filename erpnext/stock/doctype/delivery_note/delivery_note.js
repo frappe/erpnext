@@ -161,7 +161,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 							}
 						})
 					}, __("Get Items From"));
-				
+
 				if (me.frm.doc.is_internal_customer) {
 					this.frm.add_custom_button(__('Material Request'),
 						function() {
