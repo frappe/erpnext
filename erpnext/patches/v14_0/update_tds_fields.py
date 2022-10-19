@@ -20,3 +20,4 @@ def execute():
 			SET tax_withholding_net_total = net_total,
 			base_tax_withholding_net_total = base_net_total
 			WHERE apply_tds = 1 and docstatus = 1""")
+	
