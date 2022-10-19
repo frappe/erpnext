@@ -61,6 +61,9 @@ def get_party_details(inv):
 
 
 def get_party_tax_withholding_details(inv, tax_withholding_category=None):
+	if inv.doctype == "Payment Entry":
+		inv.tax_withholding_net_total = inv.net_total
+
 	pan_no = ""
 	parties = []
 	party_type, party = get_party_details(inv)
@@ -428,11 +431,11 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 		):
 			# Get net total again as TDS is calculated on net total
 			# Grand is used to just check for threshold breach
-			net_total = 0
-			if vouchers:
-				net_total = frappe.db.get_value("Purchase Invoice", invoice_filters, "sum(net_total)")
-
-			net_total += inv.net_total
+			net_total = (
+				frappe.db.get_value("Purchase Invoice", invoice_filters, "sum(tax_withholding_net_total)")
+				or 0.0
+			)
+			net_total += inv.tax_withholding_net_total
 			supp_credit_amt = net_total - cumulative_threshold
 
 		if ldc and is_valid_certificate(

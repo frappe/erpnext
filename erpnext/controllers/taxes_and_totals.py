@@ -64,6 +64,18 @@ class calculate_taxes_and_totals(object):
 		self._cleanup()
 		self.calculate_total_net_weight()
 
+	def calculate_tax_withholding_net_total(self):
+		if hasattr(self.doc, "tax_withholding_net_total"):
+			sum_net_amount = 0
+			sum_base_net_amount = 0
+			for item in self.doc.get("items"):
+				if hasattr(item, "apply_tds") and item.apply_tds:
+					sum_net_amount += item.net_amount
+					sum_base_net_amount += item.base_net_amount
+
+			self.doc.tax_withholding_net_total = sum_net_amount
+			self.doc.base_tax_withholding_net_total = sum_base_net_amount
+
 	def validate_item_tax_template(self):
 		for item in self.doc.get("items"):
 			if item.item_code and item.get("item_tax_template"):
