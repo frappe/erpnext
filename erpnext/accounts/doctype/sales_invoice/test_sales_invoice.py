@@ -3729,7 +3729,7 @@ def create_sales_invoice(**args):
 			"discount_amount": args.discount_amount or 0,
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 			"serial_no": args.serial_no,
-			"conversion_factor": 1,
+			"conversion_factor": args.get("conversion_factor", 1),
 			"incoming_rate": args.incoming_rate or 0,
 			"batch_no": args.batch_no or None,
 		},
