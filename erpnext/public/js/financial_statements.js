@@ -28,55 +28,24 @@ erpnext.financial_statements = {
 	},
 	"open_general_ledger": function(data) {
 		if (!data.account) return;
-		var project = $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; })
+		let project = $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; });
 
-		if (data.account_type == "Payable"){
-			report="Accounts Payable Summary"
-			frappe.route_options = {
-				"party_account": data.account,
-				"company": frappe.query_report.get_filter_value('company'),
-				"report_date": data.year_end_date
-			};
+		frappe.route_options = {
+			"account": data.account,
+			"company": frappe.query_report.get_filter_value('company'),
+			"from_date": data.from_date || data.year_start_date,
+			"to_date": data.to_date || data.year_end_date,
+			"project": (project && project.length > 0) ? project[0].$input.val() : ""
+		};
 
+		let report = "General Ledger";
+
+		if (["Payable", "Receivable"].includes(data.account_type)) {
+			report = data.account_type == "Payable" ? "Accounts Payable" : "Accounts Receivable";
+			frappe.route_options["party_account"] = data.account;
+			frappe.route_options["report_date"] = data.year_end_date;
 		}
-		else if(data.account_type == "Receivable"){
-			report="Accounts Receivable Summary"
-			frappe.route_options = {
-				"party_account": data.account,
-				"company": frappe.query_report.get_filter_value('company'),
-				"report_date": data.year_end_date
-			};
 
-		}
-		else if(data.account_type == "Fixed Asset" || data.account_type == "Accumulated Depreciation"){
-			report="Asset Depreciations and Balances"
-			frappe.route_options = {
-				"company": frappe.query_report.get_filter_value('company'),
-				"from_date": data.from_date || data.year_start_date,
-				"to_date": data.to_date || data.year_end_date,
-			};
-
-		}
-		else if(data.account_type == "Stock"){
-			report="Stock Balance"
-			frappe.route_options = {
-				"party_account": data.account,
-				"company": frappe.query_report.get_filter_value('company'),
-				"from_date": data.from_date || data.year_start_date,
-				"to_date": data.to_date || data.year_end_date,
-			};
-
-		}
-		else{
-			report="General Ledger"
-			frappe.route_options = {
-					"account": data.account,
-					"company": frappe.query_report.get_filter_value('company'),
-					"from_date": data.from_date || data.year_start_date,
-					"to_date": data.to_date || data.year_end_date,
-					"project": (project && project.length > 0) ? project[0].$input.val() : ""
-				};
-			}
 		frappe.set_route("query-report", report);
 	},
 	"tree": true,
