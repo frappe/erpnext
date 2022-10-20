@@ -19,12 +19,6 @@ frappe.query_reports["Vehicle Tracking Sheet"] = {
 			default: frappe.datetime.get_today()
 		},
 		{
-			fieldname:"status",
-			label: __("Status"),
-			fieldtype: "Select",
-			options: ["", "Open", "To Close", "Closed", "Closed or To Close", "Cancelled"]
-		},
-		{
 			fieldname: "project_workshop",
 			label: __("Project Workshop"),
 			fieldtype: "Link",
