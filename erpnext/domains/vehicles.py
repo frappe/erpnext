@@ -213,7 +213,7 @@ project_template_fields = [
 ]
 
 project_template_detail_fields = [
-	{"label": "Panel Job", "fieldname": "vehicle_panel_job", "fieldtype": "Check",
+	{"label": "Panel Job", "fieldname": "is_panel_job", "fieldtype": "Check",
 		"insert_after": "sales_order", "in_list_view": 1, "columns": 1}
 ]
 
