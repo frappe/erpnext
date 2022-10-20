@@ -96,9 +96,14 @@ class StockEntry(StockController):
 		import time
 		from nrp_manufacturing.utils import get_config_by_name
 		time.sleep(1)
-		se_bifurcations = get_config_by_name('stock_entry_queues')		
+		se_type = frappe.db.sql(f"""SELECT wo.item_section FROM `tabWork Order` as wo WHERE wo.name ='{self.work_order}' """)
+		if se_type:
+			se_type_section = se_type[0][0]+self.stock_entry_type
+		else:
+			se_type_section = self.stock_entry_type
+		se_bifurcations = get_config_by_name('stock_entry_queues')
 		for queue in se_bifurcations:
-			if self.stock_entry_type in se_bifurcations.get(queue):
+			if se_type_section in se_bifurcations.get(queue):
 				break
 		self.queue_action('submit',queue_name="se_"+queue)
 
