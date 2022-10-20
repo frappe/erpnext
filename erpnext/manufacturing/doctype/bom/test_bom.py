@@ -9,16 +9,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
-<<<<<<< HEAD
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query
-=======
-from erpnext.controllers.tests.test_subcontracting_controller import (
-	make_stock_in_entry,
-	set_backflush_based_on,
-)
-from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
->>>>>>> 9cfe527492 (fix: BOM cost update message)
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
 )
