@@ -24,22 +24,29 @@ class ProjectSalesSummaryReport(object):
 		conditions = self.get_conditions()
 
 		extra_rows = ""
+		panel_join = ""
 		if self.is_vehicle_service:
-			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered
-			"""
+			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered,
+				sum(ppd.qty) as panel_qty"""
+			panel_join = "left join `tabProject Panel Detail` ppd on ppd.parent = p.name"
+
 		self.data = frappe.db.sql("""
 			select p.name as project, p.project_type, p.project_workshop, p.project_status, p.project_name, p.project_date,
 				p.total_sales_amount, p.stock_sales_amount, p.service_sales_amount,
 				p.customer, p.customer_name, p.company,
 				p.service_advisor, p.service_manager,
 				p.applies_to_variant_of, p.applies_to_variant_of_name,
-				p.applies_to_item, p.applies_to_item_name {0}
+				p.applies_to_item, p.applies_to_item_name {extra_rows}
 			from `tabProject` p
 			left join `tabItem` im on im.name = p.applies_to_item
 			left join `tabCustomer` c on c.name = p.customer
-			where {1}
+			{panel_join}
+			where {conditions}
+			group by p.name
 			order by p.project_date, p.creation
-		""".format(extra_rows, conditions), self.filters, as_dict=1)
+		""".format(
+			extra_rows=extra_rows, conditions=conditions, panel_join=panel_join
+		), self.filters, as_dict=1)
 
 	def get_conditions(self):
 		conditions = []
@@ -136,6 +143,7 @@ class ProjectSalesSummaryReport(object):
 
 		if self.is_vehicle_service:
 			columns += [
+				{"label": _("Panels"), "fieldname": "panel_qty", "fieldtype": "Float", "width": 65, "precision": 1},
 				{"label": _("Service Advisor"), "fieldname": "service_advisor", "fieldtype": "Link", "options": "Sales Person", "width": 120},
 				{"label": _("Model"), "fieldname": "applies_to_variant_of_name", "fieldtype": "Data", "width": 120},
 				{"label": _("Variant Code"), "fieldname": "applies_to_item", "fieldtype": "Link", "options": "Item", "width": 120},
