@@ -453,7 +453,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				let row = frappe.get_doc(d.doctype, d.name)
 				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
 			});
-			frm.trigger("calculate_timesheet_totals");
+			this.frm.trigger("calculate_timesheet_totals");
 		}
 	}
 });
