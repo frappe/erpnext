@@ -1002,7 +1002,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 	},
 
 	is_panel_job: function(doc, cdt, cdn) {
-		for (let d of this.frm.doc.project_templates){
+		for (let d of (this.frm.doc.project_templates || [])){
 			if (d.name != cdn) {
 				d.is_panel_job = 0;
 			}
@@ -1029,6 +1029,14 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		this.toggle_vehicle_panels_visibility();
 	},
 
+	project_templates_add: function() {
+		this.toggle_vehicle_panels_visibility();
+	},
+
+	vehicle_panels_add: function() {
+		this.update_template_description();
+	},
+
 	vehicle_panels_remove: function() {
 		this.update_template_description();
 	},
@@ -1042,18 +1050,23 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 	},
 
 	set_was_panel_job: function () {
-		for (let d of this.frm.doc.project_templates) {
+		for (let d of (this.frm.doc.project_templates || [])) {
 			d.was_panel_job = cint(d.is_panel_job);
 		}
 	},
 
 	update_template_description: function() {
 		var description = "";
-		for (let d of this.frm.doc.vehicle_panels) {
-			description += `${d.idx} - ${d.vehicle_panel_side || ""} ${d.vehicle_panel || ""} ${d.vehicle_panel_job || ""}<br>`
+		for (let d of (this.frm.doc.vehicle_panels || [])) {
+			if (d.vehicle_panel_side && d.vehicle_panel && d.vehicle_panel_job) {
+				description += `${d.idx} - ${d.vehicle_panel_side} ${d.vehicle_panel} ${d.vehicle_panel_job}<br>`;
+			}
+		}
+		if (!description) {
+			return;
 		}
 
-		for (let d of this.frm.doc.project_templates) {
+		for (let d of (this.frm.doc.project_templates || [])) {
 			if (d.is_panel_job) {
 				d.description = description;
 			} else if (d.was_panel_job) {
