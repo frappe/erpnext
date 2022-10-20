@@ -88,7 +88,7 @@
    "modified_by": "Administrator",
    "name": "Vehicle-vehicle_category",
    "no_copy": 0,
-   "options": "LTV\nHTV",
+   "options": "LTV\nHTV\nShop Generator\nUnit Generator",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
