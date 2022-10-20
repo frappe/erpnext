@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, today
+from pypika.terms import ExistsCriterion
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_pos_reserved_qty
 from erpnext.stock.utils import (
@@ -218,10 +219,26 @@ def get_columns():
 
 
 def get_bin_list(filters):
-	conditions = []
+	bin = frappe.qb.DocType("Bin")
+	query = (
+		frappe.qb.from_(bin)
+		.select(
+			bin.item_code,
+			bin.warehouse,
+			bin.actual_qty,
+			bin.planned_qty,
+			bin.indented_qty,
+			bin.ordered_qty,
+			bin.reserved_qty,
+			bin.reserved_qty_for_production,
+			bin.reserved_qty_for_sub_contract,
+			bin.projected_qty,
+		)
+		.orderby(bin.item_code, bin.warehouse)
+	)
 
 	if filters.item_code:
-		conditions.append("item_code = '%s' " % filters.item_code)
+		query = query.where(bin.item_code == filters.item_code)
 
 	if filters.warehouse:
 		warehouse_details = frappe.db.get_value(
@@ -229,21 +246,20 @@ def get_bin_list(filters):
 		)
 
 		if warehouse_details:
-			conditions.append(
-				" exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)"
-				% (warehouse_details.lft, warehouse_details.rgt)
+			wh = frappe.qb.DocType("Warehouse")
+			query = query.where(
+				ExistsCriterion(
+					frappe.qb.from_(wh)
+					.select(wh.name)
+					.where(
+						(wh.lft >= warehouse_details.lft)
+						& (wh.rgt <= warehouse_details.rgt)
+						& (bin.warehouse == wh.name)
+					)
+				)
 			)
 
-	bin_list = frappe.db.sql(
-		"""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
-		ordered_qty, reserved_qty, reserved_qty_for_production, reserved_qty_for_sub_contract, projected_qty
-		from tabBin bin {conditions} order by item_code, warehouse
-		""".format(
-			conditions=" where " + " and ".join(conditions) if conditions else ""
-		),
-		as_dict=1,
-	)
+	bin_list = query.run(as_dict=True)
 
 	return bin_list
 
@@ -251,45 +267,43 @@ def get_bin_list(filters):
 def get_item_map(item_code, include_uom):
 	"""Optimization: get only the item doc and re_order_levels table"""
 
-	condition = ""
-	if item_code:
-		condition = "and item_code = {0}".format(frappe.db.escape(item_code, percent=False))
+	bin = frappe.qb.DocType("Bin")
+	item = frappe.qb.DocType("Item")
 
-	cf_field = cf_join = ""
-	if include_uom:
-		cf_field = ", ucd.conversion_factor"
-		cf_join = (
-			"left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
+	query = (
+		frappe.qb.from_(item)
+		.select(item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom)
+		.where(
+			(item.is_stock_item == 1)
+			& (item.disabled == 0)
+			& (
+				(item.end_of_life > today()) | (item.end_of_life.isnull()) | (item.end_of_life == "0000-00-00")
+			)
+			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
 		)
-
-	items = frappe.db.sql(
-		"""
-		select item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom{cf_field}
-		from `tabItem` item
-		{cf_join}
-		where item.is_stock_item = 1
-		and item.disabled=0
-		{condition}
-		and (item.end_of_life > %(today)s or item.end_of_life is null or item.end_of_life='0000-00-00')
-		and exists (select name from `tabBin` bin where bin.item_code=item.name)""".format(
-			cf_field=cf_field, cf_join=cf_join, condition=condition
-		),
-		{"today": today(), "include_uom": include_uom},
-		as_dict=True,
 	)
 
-	condition = ""
 	if item_code:
-		condition = "where parent={0}".format(frappe.db.escape(item_code, percent=False))
+		query = query.where(item.item_code == item_code)
+
+	if include_uom:
+		ucd = frappe.qb.DocType("UOM Conversion Detail")
+		query = query.left_join(ucd).on((ucd.parent == item.name) & (ucd.uom == include_uom))
+
+	items = query.run(as_dict=True)
+
+	ir = frappe.qb.DocType("Item Reorder")
+	query = frappe.qb.from_(ir).select("*")
+
+	if item_code:
+		query = query.where(ir.parent == item_code)
 
 	reorder_levels = frappe._dict()
-	for ir in frappe.db.sql(
-		"""select * from `tabItem Reorder` {condition}""".format(condition=condition), as_dict=1
-	):
-		if ir.parent not in reorder_levels:
-			reorder_levels[ir.parent] = []
+	for d in query.run(as_dict=True):
+		if d.parent not in reorder_levels:
+			reorder_levels[d.parent] = []
 
-		reorder_levels[ir.parent].append(ir)
+		reorder_levels[d.parent].append(d)
 
 	item_map = frappe._dict()
 	for item in items:

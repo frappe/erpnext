@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, getdate
 
 
@@ -54,30 +55,27 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
+def get_stock_ledger_entries(filters):
 	if not filters.get("from_date"):
 		frappe.throw(_("'From Date' is required"))
 
-	if filters.get("to_date"):
-		conditions += " and posting_date <= '%s'" % filters["to_date"]
-	else:
+	if not filters.get("to_date"):
 		frappe.throw(_("'To Date' is required"))
 
-	return conditions
-
-
-def get_stock_ledger_entries(filters):
-	conditions = get_conditions(filters)
-	return frappe.db.sql(
-		"""select item_code, batch_no, warehouse,
-		posting_date, actual_qty
-		from `tabStock Ledger Entry`
-		where is_cancelled = 0
-		and docstatus < 2 and ifnull(batch_no, '') != '' %s order by item_code, warehouse"""
-		% conditions,
-		as_dict=1,
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+	query = (
+		frappe.qb.from_(sle)
+		.select(sle.item_code, sle.batch_no, sle.warehouse, sle.posting_date, sle.actual_qty)
+		.where(
+			(sle.is_cancelled == 0)
+			& (sle.docstatus < 2)
+			& (IfNull(sle.batch_no, "") != "")
+			& (sle.posting_date <= filters["to_date"])
+		)
+		.orderby(sle.item_code, sle.warehouse)
 	)
+
+	return query.run(as_dict=True)
 
 
 def get_item_warehouse_batch_map(filters, float_precision):
@@ -112,7 +110,7 @@ def get_item_warehouse_batch_map(filters, float_precision):
 
 def get_item_details(filters):
 	item_map = {}
-	for d in frappe.db.sql("select name, item_name, description from tabItem", as_dict=1):
+	for d in (frappe.qb.from_("Item").select("name", "item_name", "description")).run(as_dict=True):
 		item_map.setdefault(d.name, d)
 
 	return item_map
