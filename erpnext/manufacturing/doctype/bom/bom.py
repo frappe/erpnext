@@ -385,6 +385,7 @@ class BOM(WebsiteGenerator):
 		if self.docstatus == 2:
 			return
 
+		self.flags.cost_updated = False
 		existing_bom_cost = self.total_cost
 
 		if self.docstatus == 1:
@@ -407,7 +408,11 @@ class BOM(WebsiteGenerator):
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
 
 		if not from_child_bom:
-			frappe.msgprint(_("Cost Updated"), alert=True)
+			msg = "Cost Updated"
+			if not self.flags.cost_updated:
+				msg = "No changes in cost found"
+
+			frappe.msgprint(_(msg), alert=True)
 
 	def update_parent_cost(self):
 		if self.total_cost:
@@ -593,10 +598,15 @@ class BOM(WebsiteGenerator):
 			# not via doc event, table is not regenerated and needs updation
 			self.calculate_exploded_cost()
 
+		old_cost = self.total_cost
+
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = (
 			self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
 		)
+
+		if self.total_cost != old_cost:
+			self.flags.cost_updated = True
 
 	def calculate_op_cost(self, update_hour_rate=False):
 		"""Update workstation rate and calculates totals"""
