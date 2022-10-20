@@ -806,6 +806,35 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(pln.status, "Completed")
 		self.assertEqual(pln.po_items[0].produced_qty, 5)
 
+	def test_material_request_item_for_purchase_uom(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
+		bom_item = make_item(
+			properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1", "purchase_uom": "Nos"}
+		).name
+
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": bom_item, "uom": "Nos"}):
+			doc = frappe.get_doc("Item", bom_item)
+			doc.append("uoms", {"uom": "Nos", "conversion_factor": 10})
+			doc.save()
+
+		make_bom(item=fg_item, raw_materials=[bom_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(
+			item_code=fg_item, planned_qty=10, ignore_existing_ordered_qty=1, stock_uom="_Test UOM 1"
+		)
+
+		pln.make_material_request()
+		for row in frappe.get_all(
+			"Material Request Item",
+			filters={"production_plan": pln.name},
+			fields=["item_code", "uom", "qty"],
+		):
+			self.assertEqual(row.item_code, bom_item)
+			self.assertEqual(row.uom, "Nos")
+			self.assertEqual(row.qty, 1)
+
 
 def create_production_plan(**args):
 	"""
