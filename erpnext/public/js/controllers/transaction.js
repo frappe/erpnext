@@ -1571,14 +1571,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					&& d.pricing_rules === pr_row.pricing_rules))[0];
 			}
 
-			// to trigger item_code functionalities
-			frappe.model.set_value(
-				row_to_modify.doctype, row_to_modify.name, 'item_code', pr_row['item_code']
-			).then(function() {
-				for (let key in pr_row) {
-					if (key != "item_code") row_to_modify[key] = pr_row[key];
-				}
-			});
+			for (let key in pr_row) {
+				row_to_modify[key] = pr_row[key];
+			}
+			this.frm.script_manager.copy_from_first_row("items", row_to_modify, ["expense_account", "income_account"]);
 		});
 
 		// free_item_data is a temporary variable
