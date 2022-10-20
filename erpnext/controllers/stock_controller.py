@@ -88,10 +88,20 @@ class StockController(AccountsController):
 							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
+						account_againts = ''
+						# Depliation account cheching
 						
+						if self.get('is_depletion') == 1 :
+							from nrp_manufacturing.utils import get_config_by_name
+							depliation_config = get_config_by_name("depletion_account", [])
+							depliation_account = depliation_config.get(self.company)						
+							if depliation_account:
+								account_againts = depliation_account['account']
+						else:
+							account_againts = item_row.expense_account
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
-							"against": item_row.expense_account,
+							"against": account_againts,
 							"cost_center": item_row.cost_center,
 							"project": item_row.get("project") or self.get("project"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -101,7 +111,7 @@ class StockController(AccountsController):
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
-							"account": item_row.expense_account,
+							"account": account_againts,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"project": item_row.get("project") or self.get("project"),

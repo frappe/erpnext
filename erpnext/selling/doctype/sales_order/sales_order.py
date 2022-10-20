@@ -604,6 +604,8 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 		else:
 			# set company address
 			target.update(get_company_address(target.company))
+		if source.order_type == 'Depletion':
+			target.is_depletion = 1
 
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
