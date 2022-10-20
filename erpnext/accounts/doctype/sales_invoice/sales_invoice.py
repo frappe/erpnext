@@ -2017,6 +2017,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			update_address(
 				target_doc, "shipping_address", "shipping_address_display", source_doc.customer_address
 			)
+			update_address(
+				target_doc, "billing_address", "billing_address_display", source_doc.customer_address
+			)
 
 			if currency:
 				target_doc.currency = currency
