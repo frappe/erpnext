@@ -362,7 +362,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			pdi_status_color = "green";
 		}
 
-		me.add_indicator_section(__("Fulfilment"), [
+		var fulfilment_items = [
 			{
 				contents: __('Priority: {0}', [cint(me.frm.doc.priority) ? 'High' : 'Normal']),
 				indicator: cint(me.frm.doc.priority) ? 'red' : 'blue'
@@ -372,6 +372,16 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 					me.frm.doc.delivery_status != "Delivered" && cint(me.frm.doc.delivery_overdue) ? __(" (Overdue)") : ""]),
 				indicator: delivery_status_color
 			},
+		];
+
+		if (me.frm.doc.__onload && me.frm.doc.__onload.vehicle_warehouse_name) {
+			fulfilment_items.push({
+				contents: __('Location: {0}', [me.frm.doc.__onload.vehicle_warehouse_name]),
+				indicator: 'lightblue'
+			});
+		}
+
+		fulfilment_items.push(...[
 			{
 				contents: __('Invoice Status: {0}{1}', [me.frm.doc.invoice_status,
 					me.frm.doc.invoice_status == "Issued" && me.frm.doc.invoice_issued_for ? " For " + me.frm.doc.invoice_issued_for : ""]),
@@ -386,6 +396,8 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				indicator: pdi_status_color
 			},
 		]);
+
+		me.add_indicator_section(__("Fulfilment"), fulfilment_items);
 
 		// Notification Status
 		var booking_confirmation_count = frappe.get_notification_count(me.frm, 'Booking Confirmation', 'SMS');

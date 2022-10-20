@@ -67,6 +67,7 @@ class VehicleBookingOrder(VehicleBookingController):
 			from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import set_can_change_onload
 			set_can_change_onload(self)
 			self.set_can_notify_onload()
+			self.set_vehicle_warehouse_onload()
 
 	def before_print(self):
 		super(VehicleBookingOrder, self).before_print()
@@ -549,6 +550,15 @@ class VehicleBookingOrder(VehicleBookingController):
 			return True
 
 		return False
+
+	def set_vehicle_warehouse_onload(self):
+		if self.delivery_status == "In Stock" and self.vehicle:
+			vehicle_warehouse = frappe.db.get_value("Vehicle", self.vehicle, 'warehouse')
+			vehicle_warehouse_name = frappe.db.get_value("Warehouse", vehicle_warehouse, 'warehouse_name')\
+				if vehicle_warehouse else None
+
+			self.set_onload('vehicle_warehouse', vehicle_warehouse)
+			self.set_onload('vehicle_warehouse_name', vehicle_warehouse_name)
 
 	def get_sms_args(self, notification_type=None):
 		return frappe._dict({
