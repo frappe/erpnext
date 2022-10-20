@@ -251,9 +251,11 @@ accounting_dimension_fields = [
 
 	{"label": "Vehicle Item Name", "fieldname": "applies_to_item_name", "fieldtype": "Data",
 		"insert_after": "vehicle_accounting_dimensions_cb_1", "read_only": 1, "fetch_from": "applies_to_vehicle.item_name"},
+	{"label": "Booking Customer Name", "fieldname": "booking_customer_name", "fieldtype": "Data",
+		"insert_after": "applies_to_item_name", "read_only": 1, "fetch_from": "vehicle_booking_order.customer_name"},
 
 	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_2", "fieldtype": "Column Break",
-		"insert_after": "applies_to_item_name"},
+		"insert_after": "booking_customer_name"},
 
 	{"label": "Chassis No", "fieldname": "vehicle_chassis_no", "fieldtype": "Data",
 		"insert_after": "vehicle_accounting_dimensions_cb_2", "read_only": 1, "fetch_from": "applies_to_vehicle.chassis_no"},

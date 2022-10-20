@@ -6,6 +6,9 @@ erpnext.vehicles.vehicle_accounting_dimensions.vehicle_copy_fields = [
 	'vehicle_engine_no',
 	'vehicle_license_plate',
 ]
+erpnext.vehicles.vehicle_accounting_dimensions.booking_copy_fileds = [
+	'booking_customer_name',
+]
 
 cur_frm.cscript.vehicle_booking_order = function(doc, dt, dn) {
 	if (dt && dn) {
@@ -20,6 +23,10 @@ cur_frm.cscript.vehicle_booking_order = function(doc, dt, dn) {
 			if (r) {
 				frappe.model.set_value(dt, dn, 'applies_to_vehicle', r.vehicle);
 			}
+		});
+	} else {
+		$.each(erpnext.vehicles.vehicle_accounting_dimensions.booking_copy_fileds, function (i, f) {
+			frappe.model.set_value(dt, dn, f, null);
 		});
 	}
 };
