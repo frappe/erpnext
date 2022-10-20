@@ -9,7 +9,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
-from erpnext.controllers.tests.test_subcontracting_controller import set_backflush_based_on
+from erpnext.controllers.tests.test_subcontracting_controller import (
+	make_stock_in_entry,
+	set_backflush_based_on,
+)
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
 from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
@@ -638,6 +641,28 @@ class TestBOM(FrappeTestCase):
 
 		bom.submit()
 		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
+
+	def test_bom_cost_update_flag(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 99, "last_purchase_rate": 89}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item])
+
+		create_stock_reconciliation(
+			item_code=rm_item, warehouse="_Test Warehouse - _TC", qty=100, rate=600
+		)
+
+		bom.load_from_db()
+		bom.update_cost()
+		self.assertTrue(bom.flags.cost_updated)
+
+		bom.load_from_db()
+		bom.update_cost()
+		self.assertFalse(bom.flags.cost_updated)
 
 
 def get_default_bom(item_code="_Test FG Item 2"):
