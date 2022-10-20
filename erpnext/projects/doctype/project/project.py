@@ -113,6 +113,13 @@ class Project(StatusUpdater):
 
 		self._previous_appointment = self.db_get('appointment')
 
+		self.set_vehicle_panel_details()
+
+	def set_vehicle_panel_details(self):
+		has_panel_project_template = [d for d in self.project_templates if d.is_panel_job]
+		if not has_panel_project_template:
+			self.vehicle_panels = []
+
 	def on_update(self):
 		self.update_appointment()
 		if 'Vehicles' in frappe.get_active_domains():

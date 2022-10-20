@@ -35,6 +35,8 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		this.set_sales_data_html();
 		this.set_service_advisor_from_user();
 		this.setup_dashboard();
+		this.set_was_panel_job();
+		this.toggle_vehicle_panels_visibility();
 	},
 
 	setup_queries: function () {
@@ -997,6 +999,69 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		});
 
 		dialog.show();
+	},
+
+	is_panel_job: function(doc, cdt, cdn) {
+		for (let d of this.frm.doc.project_templates){
+			if (d.name != cdn) {
+				d.is_panel_job = 0;
+			}
+		}
+
+		this.toggle_vehicle_panels_visibility();
+		this.update_template_description();
+		this.set_was_panel_job();
+	},
+
+	vehicle_panel: function(doc, cdt, cdn) {
+		this.update_template_description();
+	},
+
+	vehicle_panel_side: function(doc, cdt, cdn) {
+		this.update_template_description();
+	},
+
+	vehicle_panel_job: function(doc,cdt, cdn){
+		this.update_template_description();
+	},
+
+	project_templates_remove: function() {
+		this.toggle_vehicle_panels_visibility();
+	},
+
+	vehicle_panels_remove: function() {
+		this.update_template_description();
+	},
+
+	toggle_vehicle_panels_visibility: function() {
+		if (!this.frm.fields_dict.vehicle_panels) {
+			return;
+		}
+		var panel_template_rows = this.frm.doc.project_templates.filter(el => el.is_panel_job == 1);
+		this.frm.set_df_property('vehicle_panels', 'hidden', panel_template_rows.length ? 0 : 1);
+	},
+
+	set_was_panel_job: function () {
+		for (let d of this.frm.doc.project_templates) {
+			d.was_panel_job = cint(d.is_panel_job);
+		}
+	},
+
+	update_template_description: function() {
+		var description = "";
+		for (let d of this.frm.doc.vehicle_panels) {
+			description += `${d.idx} - ${d.vehicle_panel_side || ""} ${d.vehicle_panel || ""} ${d.vehicle_panel_job || ""}<br>`
+		}
+
+		for (let d of this.frm.doc.project_templates) {
+			if (d.is_panel_job) {
+				d.description = description;
+			} else if (d.was_panel_job) {
+				d.description = "";
+			}
+		}
+
+		this.frm.refresh_field('project_templates');
 	},
 });
 
