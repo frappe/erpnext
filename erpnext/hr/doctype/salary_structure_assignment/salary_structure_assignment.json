@@ -9,12 +9,12 @@
   "employee",
   "employee_name",
   "department",
-  "company",
-  "column_break_6",
   "designation",
-  "salary_structure",
+  "column_break_6",
+  "company",
   "from_date",
-  "income_tax_slab",
+  "salary_structure",
+  "income_tax_exempt",
   "section_break_7",
   "base",
   "column_break_9",
@@ -78,6 +78,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -115,14 +116,14 @@
    "read_only": 1
   },
   {
-   "fieldname": "income_tax_slab",
-   "fieldtype": "Link",
-   "label": "Income Tax Slab",
-   "options": "Income Tax Slab"
+   "default": "0",
+   "fieldname": "income_tax_exempt",
+   "fieldtype": "Check",
+   "label": "Income Tax Exempt"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-04-25 18:24:23.617088",
+ "modified": "2022-10-20 15:30:52.050855",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Structure Assignment",

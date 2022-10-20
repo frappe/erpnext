@@ -15,6 +15,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils.background_jobs import enqueue
 from erpnext.hr.doctype.additional_salary.additional_salary import get_additional_salary_component
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_salary_structure_assignment
+from erpnext.hr.doctype.income_tax_slab.income_tax_slab import get_applicable_income_tax_slab
 from erpnext.hr.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
@@ -594,6 +595,8 @@ class SalarySlip(TransactionBase):
 	def calculate_variable_tax(self, payroll_period, tax_component):
 		# get Tax slab from salary structure assignment for the employee and payroll period
 		tax_slab = self.get_income_tax_slabs(payroll_period)
+		if not tax_slab:
+			return 0
 
 		# get remaining numbers of sub-period (period for which one salary is processed)
 		remaining_sub_periods = get_period_factor(self.employee,
@@ -654,22 +657,18 @@ class SalarySlip(TransactionBase):
 		return current_tax_amount
 
 	def get_income_tax_slabs(self, payroll_period):
-		income_tax_slab, ss_assignment_name = frappe.db.get_value("Salary Structure Assignment",
-			{"employee": self.employee, "salary_structure": self.salary_structure, "docstatus": 1}, ["income_tax_slab", 'name'])
+		income_tax_exempt = cint(frappe.db.get_value("Salary Structure Assignment",
+			{"employee": self.employee, "salary_structure": self.salary_structure, "docstatus": 1}, ["income_tax_exempt"]))
 
+		if income_tax_exempt:
+			return None
+
+		income_tax_slab = get_applicable_income_tax_slab(payroll_period.start_date, self.company)
 		if not income_tax_slab:
-			frappe.throw(_("Income Tax Slab not set in Salary Structure Assignment: {0}").format(ss_assignment_name))
+			return None
 
-		income_tax_slab_doc = frappe.get_doc("Income Tax Slab", income_tax_slab)
-		if income_tax_slab_doc.disabled:
-			frappe.throw(_("Income Tax Slab: {0} is disabled").format(income_tax_slab))
-
-		if getdate(income_tax_slab_doc.effective_from) > getdate(payroll_period.start_date):
-			frappe.throw(_("Income Tax Slab must be effective on or before Payroll Period Start Date: {0}")
-				.format(payroll_period.start_date))
-
+		income_tax_slab_doc = frappe.get_cached_doc("Income Tax Slab", income_tax_slab)
 		return income_tax_slab_doc
-
 
 	def get_taxable_earnings_for_prev_period(self, start_date, end_date, allow_tax_exemption=False):
 		taxable_earnings = frappe.db.sql("""
