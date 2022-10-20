@@ -232,10 +232,10 @@ class Item(Document):
 
 	def clear_retain_sample(self):
 		if not self.has_batch_no:
-			self.retain_sample = None
+			self.retain_sample = False
 
 		if not self.retain_sample:
-			self.sample_quantity = None
+			self.sample_quantity = 0
 
 	def add_default_uom_in_conversion_factor_table(self):
 		if not self.is_new() and self.has_value_changed("stock_uom"):

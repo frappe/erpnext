@@ -995,7 +995,9 @@ class PaymentEntry(AccountsController):
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
 				if d.allocated_amount and d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
-					frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
+					frappe.get_doc(
+						d.reference_doctype, d.reference_name, for_update=True
+					).set_total_advance_paid()
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.reference_no = reference_doc.name
