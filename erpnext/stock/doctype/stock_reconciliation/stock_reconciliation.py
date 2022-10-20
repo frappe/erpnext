@@ -132,7 +132,9 @@ class StockReconciliation(StockController):
 					key.append(row.get(field))
 
 			if key in item_warehouse_combinations:
-				self.validation_messages.append(_get_msg(row_num, _("Duplicate entry")))
+				self.validation_messages.append(
+					_get_msg(row_num, _("Same item and warehouse combination already entered."))
+				)
 			else:
 				item_warehouse_combinations.append(key)
 
