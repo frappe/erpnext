@@ -599,7 +599,7 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 	if batch_no_data:
 		_update_item_info(batch_no_data)
 		set_cache(batch_no_data)
-		return _update_item_info(batch_no_data)
+		return batch_no_data
 
 	return {}
 
