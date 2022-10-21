@@ -7,7 +7,7 @@
   "vehicle_panel",
   "vehicle_panel_side",
   "vehicle_panel_job",
-  "qty"
+  "panel_qty"
  ],
  "fields": [
   {
@@ -39,14 +39,14 @@
    "default": "1",
    "fetch_from": "vehicle_panel.default_qty",
    "fetch_if_empty": 1,
-   "fieldname": "qty",
+   "fieldname": "panel_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty"
   }
  ],
  "istable": 1,
- "modified": "2022-10-20 16:49:32.330012",
+ "modified": "2022-10-21 13:14:07.415568",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Project Panel Detail",
