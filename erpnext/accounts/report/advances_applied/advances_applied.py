@@ -48,6 +48,24 @@ def execute(filters=None):
 			"width": 240
 		},
 		{
+			"label": _("Reference Doctype"),
+			"fieldname": "reference_doctype",
+			"width": 240
+		},
+		{
+			"label": _("Reference Name"),
+			"fieldname": "reference_name",
+			"fieldtype": "Dynamic Link",
+			"options": "reference_doctype",
+			"width": 240
+		},
+		{
+			"label": _("Amount Document"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
 			"label": _("Amount"),
 			"fieldname": "amount",
 			"fieldtype": "Currency",
@@ -66,17 +84,33 @@ def return_data(filters):
 	advances = frappe.get_all("Payment Entry", ["*"], filters = conditions)
 
 	for advance in advances:
-		amount = 0
-		if filters.get("applied") == 1:
-			amount = advance.total_allocated_amount
-		else:
-			amount = advance.unallocated_amount
-
-		row = [advance.name, advance.party, advance.payment_type, advance.posting_date, advance.mode_of_payment, advance.party_type, advance.party, amount]
-
-		data.append(row)
-	
+		is_serial, references = verificate_serial(filters, advance.naming_series, advance.name)
+		if is_serial:
+			amount = 0
+			if filters.get("applied") == 1:
+				amount = advance.total_allocated_amount
+				for reference in references:
+					row =  [advance.name, advance.party, advance.payment_type, advance.posting_date, advance.mode_of_payment, advance.party_type, advance.party, reference.reference_doctype, reference.reference_name, reference.allocated_amount, amount]
+					data.append(row)
+			else:
+				amount = advance.unallocated_amount
+				row = [advance.name, advance.party, advance.payment_type, advance.posting_date, advance.mode_of_payment, advance.party_type, advance.party, "", "", 0, amount]
+				data.append(row)
+		
 	return data
+
+def verificate_serial(filters, naming_series, name):
+	serial_split = naming_series.split("-")
+	serialString = serial_split[0] + "-" + serial_split[1]
+
+	is_serial = False
+	references =  frappe.get_all("Payment Entry Reference", ["*"], filters = {"parent": name})
+		
+	if serialString == filters.get("secuence"):
+		if len(references) > 0:
+			is_serial = True
+		
+	return is_serial, references
 
 def return_filters(filters, from_date, to_date):
 	conditions = ''	
