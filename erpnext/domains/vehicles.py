@@ -100,7 +100,10 @@ project_fields = [
 		"default": "Not Applicable", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
 
 	{"label": "Vehicle Booking Order", "fieldname": "vehicle_booking_order", "fieldtype": "Link",
-		"insert_after": "service_manager", "options": "Vehicle Booking Order", "read_only": 1, "no_copy": 1, "in_standard_filter": 1}
+		"insert_after": "service_manager", "options": "Vehicle Booking Order", "read_only": 1, "no_copy": 1, "in_standard_filter": 1},
+
+	{"label": "Vehicle Panel Detail", "fieldname": "vehicle_panels", "fieldtype": "Table",
+		"insert_after": "project_templates", "options": "Project Panel Detail", "hidden": 1},
 ]
 
 # Applies To Project Fields
@@ -141,7 +144,7 @@ project_change_vehicle_details_fields = [
 # Project Vehicle Reading Fields
 project_vehicle_reading_fields = [
 	{"label": "Vehicle Readings", "fieldname": "sec_vehicle_status", "fieldtype": "Section Break",
-		"insert_after": "project_templates", "collapsible": 0},
+		"insert_after": "vehicle_panels", "collapsible": 0},
 
 	{"label": "Odometer Reading (First)", "fieldname": "vehicle_first_odometer", "fieldtype": "Int",
 		"insert_after": "sec_vehicle_status", "no_copy": 1},
@@ -207,6 +210,11 @@ project_template_fields = [
 
 	{"label": "", "fieldname": "cb_vehicle_checklist_1", "fieldtype": "Column Break",
 		"insert_after": "customer_request_checklist"},
+]
+
+project_template_detail_fields = [
+	{"label": "Panel Job", "fieldname": "is_panel_job", "fieldtype": "Check",
+		"insert_after": "sales_order", "in_list_view": 1, "columns": 1}
 ]
 
 project_template_category_fields = deepcopy(project_template_fields)
@@ -345,6 +353,7 @@ data = {
 		{"doctype": "Project", "fieldname": "project_name", "property": "label", "value": "Voice of Customer"},
 		{"doctype": "Project Type", "fieldname": "previous_project_mandatory", "property": "label", "value": "Previous Repair Order Mandatory"},
 		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
+		{"doctype": "Project Template Detail", "fieldname": "project_template_name", "property": "columns", "value": 7},
 	],
 	'custom_fields': {
 		"Item": item_fields,
@@ -365,6 +374,7 @@ data = {
 		"Project Type": project_type_fields,
 		"Project Template": project_template_fields,
 		"Project Template Category": project_template_category_fields,
+		"Project Template Detail": project_template_detail_fields,
 		"Customer": customer_customer_vehicle_selector,
 	},
 	'default_portal_role': 'Customer'

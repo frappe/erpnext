@@ -190,7 +190,7 @@ def get_data():
 			],
 		},
 		{
-			"label": _("Masters"),
+			"label": _("Vehicle Sales Masters"),
 			"items": [
 				{
 					"type": "doctype",
@@ -210,9 +210,30 @@ def get_data():
 					"type": "doctype",
 					"name": "Vehicle Allocation"
 				},
+			]
+		},
+		{
+			"label": _("Vehicle Service Masters"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Project Workshop"
+				},
+				{
+					"type": "doctype",
+					"name": "Project Template"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Panel"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Panel Side"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Panel Job"
 				},
 			]
 		},

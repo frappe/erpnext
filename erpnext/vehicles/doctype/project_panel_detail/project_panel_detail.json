@@ -1,0 +1,59 @@
+{
+ "creation": "2022-10-19 16:55:55.091422",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_panel",
+  "vehicle_panel_side",
+  "vehicle_panel_job",
+  "panel_qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_panel",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle Panel",
+   "options": "Vehicle Panel",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_panel_side",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle Panel Side",
+   "options": "Vehicle Panel Side",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_panel_job",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle Panel Job",
+   "options": "Vehicle Panel Job",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "default": "1",
+   "fetch_from": "vehicle_panel.default_qty",
+   "fetch_if_empty": 1,
+   "fieldname": "panel_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-10-21 13:14:07.415568",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Project Panel Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
