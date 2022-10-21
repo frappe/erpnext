@@ -97,7 +97,10 @@ class Bankreconciliations(Document):
 			
 		self.defference_amount = self.book_balance - self.bank_amount
 
-		self.actual_total_conciliation = self.total_last_reconciliations - self.transaction_amount
+		self.actual_total_conciliation = self.total_last_reconciliations - self.transaction_amount + self.total_last_reconciliations
+
+		if self.actual_total_conciliation < 0:
+			self.actual_total_conciliation = self.actual_total_conciliation * -1
 
 		self.db_set('defference_amount', self.defference_amount, update_modified=False)
 		self.db_set('actual_total_conciliation', self.actual_total_conciliation, update_modified=False)
@@ -144,6 +147,16 @@ class Bankreconciliations(Document):
 		self.db_set('bank_deposit_amount', bank_deposit_amount, update_modified=False)
 	
 	def bank_book_value(self):
+		if self.bank_check_transit_amount == None: self.bank_check_transit_amount = 0
+		if self.bank_check_amount == None: self.bank_check_amount = 0
+		if self.debit_note_amount == None: self.debit_note_amount = 0
+		if self.debit_note_transit == None: self.debit_note_transit = 0
+		if self.credit_note_amount == None: self.credit_note_amount = 0
+		if self.credit_note_transit == None: self.credit_note_transit = 0
+		if self.bank_deposit_amount == None: self.bank_deposit_amount = 0
+		if self.bank_deposit_transit == None: self.bank_deposit_transit = 0
+		if self.total_last_reconciliations == None: self.total_last_reconciliations = 0
+
 		check = self.bank_check_amount + self.bank_check_transit_amount
 		debit_note = self.debit_note_amount + self.debit_note_transit
 		credit_note = self.credit_note_amount + self.credit_note_transit
@@ -151,7 +164,7 @@ class Bankreconciliations(Document):
 
 		debits_totals = debit_note + check
 		credits_totals = deposit + credit_note
-		book_balance = credits_totals - debits_totals
+		book_balance = credits_totals - debits_totals + self.total_last_reconciliations
 
 		self.db_set('book_balance', book_balance, update_modified=False)
 
@@ -261,7 +274,7 @@ class Bankreconciliations(Document):
 			if len(transaction) > 0:
 				doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 				doc.reconciliation_date = self.date
-				doc.total_reconciliation = self.bank_amount
+				doc.total_reconciliation = self.total_last_reconciliations
 
 		for detail in details:
 			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
