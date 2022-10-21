@@ -415,7 +415,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
-						status: ["!=" ["Closed", "On Hold"]],
+						status: ["not in" , "Closed", "On Hold"],						
 						per_ordered: ["<", 99.99],
 					}
 				})
