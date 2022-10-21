@@ -214,7 +214,7 @@ project_template_fields = [
 
 project_template_detail_fields = [
 	{"label": "Panel Job", "fieldname": "is_panel_job", "fieldtype": "Check",
-		"insert_after": "sales_order", "in_list_view": 1, "columns": 1}
+		"insert_after": "project_template_name", "in_list_view": 1, "columns": 1}
 ]
 
 project_template_category_fields = deepcopy(project_template_fields)
@@ -283,7 +283,7 @@ field_lists = [
 	project_vehicle_reading_fields, vehicle_owner_fields, sales_invoice_vehicle_owner_fields, service_person_fields,
 	material_request_service_person_fields, accounting_dimension_fields, accounting_dimension_table_fields,
 	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
-	project_template_fields, project_template_category_fields,
+	project_template_fields, project_template_category_fields, project_template_detail_fields,
 	customer_vehicle_selector_fields, project_customer_vehicle_selector,
 	appointment_customer_vehicle_selector, customer_customer_vehicle_selector
 ]

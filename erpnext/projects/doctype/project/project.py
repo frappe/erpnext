@@ -96,7 +96,7 @@ class Project(StatusUpdater):
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
-		self.validate_panel_qty()
+		self.validate_vehicle_panels()
 
 		self.set_percent_complete()
 		self.set_vehicle_status()
@@ -113,18 +113,6 @@ class Project(StatusUpdater):
 		self.send_welcome_email()
 
 		self._previous_appointment = self.db_get('appointment')
-
-		self.set_vehicle_panel_details()
-
-	def set_vehicle_panel_details(self):
-		has_panel_project_template = [d for d in self.project_templates if d.is_panel_job]
-		if not has_panel_project_template:
-			self.vehicle_panels = []
-
-	def validate_panel_qty(self):
-		for d in self.vehicle_panels:
-			if flt(d.panel_qty) < 0:
-				frappe.throw(_("Row {0}: Vehicle Panel Qty cannot be negative").format(d.idx))
 
 	def on_update(self):
 		self.update_appointment()
@@ -831,6 +819,20 @@ class Project(StatusUpdater):
 					.format(d.idx, frappe.bold(d.depreciation_item_code)))
 
 			item_codes_visited.add(d.depreciation_item_code)
+
+	def validate_vehicle_panels(self):
+		if not self.meta.has_field('vehicle_panels'):
+			return
+
+		panel_project_templates = [d for d in self.project_templates if d.get('is_panel_job')]
+		if not panel_project_templates:
+			self.vehicle_panels = []
+		elif len(panel_project_templates) > 1:
+			frappe.throw(_("There can only be one Vehicle Panel Project Template"))
+
+		for d in self.vehicle_panels:
+			if flt(d.panel_qty) < 0:
+				frappe.throw(_("Row {0}: Vehicle Panel Qty cannot be negative").format(d.idx))
 
 	def copy_from_template(self):
 		'''

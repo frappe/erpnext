@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "project_template",
+  "column_break_2",
   "project_template_name",
   "description_section",
   "description",
@@ -55,10 +56,14 @@
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
    "label": "Reference"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2022-04-17 16:59:39.415833",
+ "modified": "2022-10-21 14:37:59.562156",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template Detail",

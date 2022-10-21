@@ -34,9 +34,8 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		this.make_customer_vehicle_selector();
 		this.set_sales_data_html();
 		this.set_service_advisor_from_user();
+		this.setup_vehicle_panel_fields();
 		this.setup_dashboard();
-		this.set_was_panel_job();
-		this.toggle_vehicle_panels_visibility();
 	},
 
 	setup_queries: function () {
@@ -1001,44 +1000,43 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		dialog.show();
 	},
 
+	setup_vehicle_panel_fields: function () {
+		this.toggle_vehicle_panels_visibility();
+		this.set_was_panel_job();
+	},
+
 	is_panel_job: function(doc, cdt, cdn) {
-		for (let d of (this.frm.doc.project_templates || [])){
+		for (let d of (this.frm.doc.project_templates || [])) {
 			if (d.name != cdn) {
 				d.is_panel_job = 0;
 			}
 		}
 
 		this.toggle_vehicle_panels_visibility();
-		this.update_template_description();
+		this.update_panel_template_description();
 		this.set_was_panel_job();
 	},
-
-	vehicle_panel: function(doc, cdt, cdn) {
-		this.update_template_description();
+	project_templates_add: function() {
+		this.toggle_vehicle_panels_visibility();
 	},
-
-	vehicle_panel_side: function(doc, cdt, cdn) {
-		this.update_template_description();
-	},
-
-	vehicle_panel_job: function(doc,cdt, cdn){
-		this.update_template_description();
-	},
-
 	project_templates_remove: function() {
 		this.toggle_vehicle_panels_visibility();
 	},
 
-	project_templates_add: function() {
-		this.toggle_vehicle_panels_visibility();
+	vehicle_panel: function() {
+		this.update_panel_template_description();
 	},
-
+	vehicle_panel_side: function() {
+		this.update_panel_template_description();
+	},
+	vehicle_panel_job: function() {
+		this.update_panel_template_description();
+	},
 	vehicle_panels_add: function() {
-		this.update_template_description();
+		this.update_panel_template_description();
 	},
-
 	vehicle_panels_remove: function() {
-		this.update_template_description();
+		this.update_panel_template_description();
 	},
 
 	toggle_vehicle_panels_visibility: function() {
@@ -1055,16 +1053,18 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		}
 	},
 
-	update_template_description: function() {
-		var description = "";
+	update_panel_template_description: function() {
+		var description = [];
 		for (let d of (this.frm.doc.vehicle_panels || [])) {
 			if (d.vehicle_panel_side && d.vehicle_panel && d.vehicle_panel_job) {
-				description += `${d.idx} - ${d.vehicle_panel_side} ${d.vehicle_panel} ${d.vehicle_panel_job}<br>`;
+				description.push(`${d.idx} - ${d.vehicle_panel_side} ${d.vehicle_panel} ${d.vehicle_panel_job}`);
 			}
 		}
-		if (!description) {
+		if (!description.length) {
 			return;
 		}
+
+		description = description.join("<br>");
 
 		for (let d of (this.frm.doc.project_templates || [])) {
 			if (d.is_panel_job) {

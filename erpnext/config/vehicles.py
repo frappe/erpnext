@@ -190,54 +190,6 @@ def get_data():
 			],
 		},
 		{
-			"label": _("Vehicle Sales Masters"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Item",
-					"label": _("Vehicle Item (Variants and Models)"),
-					"description": _("Vehicle Item (Models and Variant) List"),
-					"onboard": 1,
-					"route_options": {
-						"is_vehicle": 1
-					}
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Allocation Period",
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Allocation"
-				},
-			]
-		},
-		{
-			"label": _("Vehicle Service Masters"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Project Workshop"
-				},
-				{
-					"type": "doctype",
-					"name": "Project Template"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Panel"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Panel Side"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Panel Job"
-				},
-			]
-		},
-		{
 			"label": _("Reports"),
 			"items": [
 				{
@@ -275,6 +227,62 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Vehicle Sales Masters"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"label": _("Vehicle Item (Variants and Models)"),
+					"description": _("Vehicle Item (Models and Variant) List"),
+					"onboard": 1,
+					"route_options": {
+						"is_vehicle": 1
+					}
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Withholding Tax Rule",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Creation Tool",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Period",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation"
+				},
+			]
+		},
+		{
+			"label": _("Vehicle Service Masters"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Project Workshop"
+				},
+				{
+					"type": "doctype",
+					"name": "Project Template"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Panel"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Panel Side"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Panel Job"
+				},
+			]
+		},
+		{
 			"label": _("Settings"),
 			"icon": "fa fa-cog",
 			"items": [
@@ -285,14 +293,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Pricing Component",
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Withholding Tax Rule",
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Allocation Creation Tool",
 				},
 			]
 		},
