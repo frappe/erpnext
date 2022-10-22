@@ -898,7 +898,7 @@ def set_next_document_values(source, target):
 	if target.meta.has_field('supplier'):
 		target.supplier = source.supplier
 
-	if target.meta.has_field('warehouse'):
+	if target.meta.has_field('warehouse') and target.doctype not in ['Vehicle Delivery', 'Vehicle Movement']:
 		target.warehouse = source.warehouse
 
 

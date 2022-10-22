@@ -183,7 +183,7 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 		}
 
 		frappe.dynamic_link = {
-			doc: doc,
+			doc: this.frm.doc,
 			fieldname: fieldname,
 			doctype: doctype
 		};
