@@ -359,15 +359,20 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 	abbreviations = []
 	for attr in variant.attributes:
-		item_attribute = frappe.db.sql(
-			"""select i.numeric_values, v.abbr
-			from `tabItem Attribute` i left join `tabItem Attribute Value` v
-				on (i.name=v.parent)
-			where i.name=%(attribute)s and (v.attribute_value=%(attribute_value)s or i.numeric_values = 1)""",
-			{"attribute": attr.attribute, "attribute_value": attr.attribute_value},
-			as_dict=True,
-		)
-
+		ia = frappe.qb.DocType("Item Attribute")
+		iav = frappe.qb.DocType("Item Attribute Value")
+		item_attribute = (
+			frappe.qb.from_(ia).left_join(iav)
+			.on(ia.name == iav.parent)
+			.select(
+				ia.numeric_values,
+				iav.abbr
+			)
+			.where(ia.name == attr.attribute)
+			.where(
+				(iav.attribute_value == attr.attribute_value) | (ia.numeric_values == 1))
+		).run(as_dict=1)
+		
 		if not item_attribute:
 			continue
 			# frappe.throw(_('Invalid attribute {0} {1}').format(frappe.bold(attr.attribute),
