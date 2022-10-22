@@ -903,6 +903,7 @@ def get_transfer_letter(vehicle_registration_order):
 	transfer.vehicle = vro.vehicle
 	transfer.vehicle_booking_order = vro.vehicle_booking_order
 	transfer.customer = vro.registration_customer or vro.customer
+	transfer.territory = vro.territory
 
 	transfer.run_method("set_missing_values")
 

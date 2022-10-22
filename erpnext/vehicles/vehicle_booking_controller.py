@@ -24,7 +24,7 @@ import json
 address_fields = ['address_line1', 'address_line2', 'city', 'state']
 
 force_fields = [
-	'customer_name', 'financer_name', 'lessee_name', 'customer_category', 'territory',
+	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
 	'item_name', 'item_group', 'brand', 'variant_of', 'variant_of_name', 'vehicle_allocation_required',
 	'customer_address',
 	'address_display', 'contact_display', 'financer_contact_display',
@@ -344,7 +344,7 @@ def get_party_name_and_category(args, party, financer):
 		out.financer_name = None
 
 	# Territory
-	out.territory = party.territory
+	out.territory = args.territory or party.territory
 
 	# Customer Category
 	is_individual = False

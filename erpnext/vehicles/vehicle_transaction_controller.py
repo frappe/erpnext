@@ -21,7 +21,7 @@ force_fields = [
 	'broker_name', 'transporter_name',
 	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status',
-	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'territory',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'booking_customer_name', 'booking_address_display', 'booking_email', 'booking_mobile', 'booking_phone',
 	'booking_tax_id', 'booking_tax_cnic', 'booking_tax_strn', 'receiver_contact_cnic', 'finance_type'
 	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
@@ -616,6 +616,11 @@ def get_customer_details(args):
 	if args.registration_customer:
 		registration_customer = frappe.get_cached_doc("Customer", args.registration_customer)
 
+	booking_details = frappe._dict()
+	if args.vehicle_booking_order:
+		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
+			['customer', 'territory', 'contact_person', 'customer_address'], as_dict=1)
+
 	# Customer Name
 	out.customer_name = customer.customer_name
 	out.financer_name = financer.customer_name
@@ -637,14 +642,17 @@ def get_customer_details(args):
 
 	# Customer Address
 	out.customer_address = args.customer_address
+	if not out.customer_address and booking_details.customer == customer_details.name:
+		out.customer_address = booking_details.customer_address
 	if not out.customer_address and customer_details.name:
 		out.customer_address = get_default_address("Customer", customer_details.name)
 
 	out.address_display = get_address_display(out.customer_address)
-	out.territory = customer_details.territory
 
 	# Contact
 	out.contact_person = args.contact_person
+	if not out.contact_person and booking_details.customer == customer_details.name:
+		out.contact_person = booking_details.contact_person
 	if not out.contact_person and customer_details.name:
 		out.contact_person = get_default_contact("Customer", customer_details.name)
 
@@ -652,6 +660,13 @@ def get_customer_details(args):
 
 	out.receiver_contact = args.receiver_contact
 	out.update(get_contact_details(out.receiver_contact, prefix='receiver_'))
+
+	# Territory
+	out.territory = None
+	if not out.territory and booking_details.customer == customer_details.name:
+		out.territory = booking_details.territory
+	if not out.territory:
+		out.territory = customer_details.territory
 
 	return out
 
@@ -666,7 +681,7 @@ def get_vehicle_booking_order_details(args):
 	booking_details = frappe._dict()
 	if args.vehicle_booking_order:
 		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
-			['customer', 'customer_name',
+			['customer', 'customer_name', 'territory',
 				'financer', 'finance_type', 'financer_name',
 				'supplier', 'supplier_name',
 				'transfer_customer', 'transfer_customer_name',
@@ -747,6 +762,7 @@ def get_vehicle_booking_order_details(args):
 		out.item_code = booking_details.item_code
 		out.vehicle = booking_details.vehicle
 		out.supplier = booking_details.supplier
+		out.territory = booking_details.territory
 
 		if args.doctype not in ['Vehicle Delivery', 'Vehicle Movement']:
 			out.warehouse = booking_details.warehouse

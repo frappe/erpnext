@@ -1067,12 +1067,10 @@
    "label": "Delivery Lead Time in Days"
   },
   {
-   "fetch_from": "customer.territory",
    "fieldname": "territory",
    "fieldtype": "Link",
    "label": "Territory",
-   "options": "Territory",
-   "read_only": 1
+   "options": "Territory"
   },
   {
    "default": "0",

@@ -609,8 +609,7 @@
    "fieldname": "territory",
    "fieldtype": "Link",
    "label": "Territory",
-   "options": "Territory",
-   "read_only": 1
+   "options": "Territory"
   },
   {
    "fieldname": "registration_details_section",
@@ -975,7 +974,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-08-05 15:09:03.876581",
+ "modified": "2022-10-22 15:44:06.523699",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Registration Order",

@@ -901,6 +901,9 @@ def set_next_document_values(source, target):
 	if target.meta.has_field('warehouse') and target.doctype not in ['Vehicle Delivery', 'Vehicle Movement']:
 		target.warehouse = source.warehouse
 
+	if target.meta.has_field('territory'):
+		target.territory = source.territory
+
 
 def update_overdue_status():
 	if 'Vehicles' not in frappe.get_active_domains():
