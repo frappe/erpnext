@@ -210,8 +210,8 @@ class VehicleTransactionController(StockController):
 					'docstatus', 'status',
 					'customer', 'financer', 'supplier',
 					'transfer_customer', 'transfer_financer',
-					'item_code', 'vehicle',
-					'vehicle_delivered_date', 'vehicle_received_date'
+					'item_code', 'vehicle', 'outstation_delivery',
+					'vehicle_delivered_date', 'vehicle_received_date',
 			], as_dict=1)
 
 			vehicle_customer = frappe.db.get_value("Vehicle", doc.get('vehicle'), 'customer') if doc.get('vehicle') else None
@@ -278,6 +278,10 @@ class VehicleTransactionController(StockController):
 
 			if self.doctype == "Vehicle Delivery" and cint(self.get('is_return')) and not vbo.vehicle_received_date:
 				frappe.throw(_("Cannot create Vehicle Delivery Return against {0} because Vehicle has not yet been received")
+					.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
+
+			if self.doctype == "Vehicle Receipt" and not cint(self.get('is_return')) and vbo.outstation_delivery:
+				frappe.throw(_("Cannot create Vehicle Receipt because {0} is Outstation Delivery")
 					.format(frappe.get_desk_link("Vehicle Booking Order", doc.vehicle_booking_order)))
 
 	def validate_project(self):

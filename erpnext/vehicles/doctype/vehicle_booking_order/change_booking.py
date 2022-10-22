@@ -26,7 +26,8 @@ def set_can_change_onload(vbo_doc):
 		"invoice_receipt": can_receive_invoice(vbo_doc),
 		"invoice_delivery": can_deliver_invoice(vbo_doc),
 		"vehicle_assign": can_assign_vehicle(vbo_doc),
-		"allocation_assign": can_assign_allocation(vbo_doc)
+		"allocation_assign": can_assign_allocation(vbo_doc),
+		"outstation_delivery": can_change_outstation_delivery(vbo_doc),
 	}
 	vbo_doc.set_onload("can_change", can_change)
 
@@ -61,6 +62,10 @@ def change_vehicle(vehicle_booking_order, vehicle):
 		update_vehicle_booked(previous_vehicle, 0)
 
 	change_vehicle_in_registration_order(vbo_doc)
+
+	if vbo_doc.outstation_delivery and vbo_doc.vehicle_received_date:
+		frappe.throw(_("Cannot select In Stock Vehicle {0} because {1} is Outstation Delivery")
+			.format(vehicle, vehicle_booking_order))
 
 	frappe.msgprint(_("Vehicle Changed Successfully"), indicator='green', alert=True)
 
@@ -101,6 +106,36 @@ def can_change_vehicle(vbo_doc, throw=False):
 	if check_invoice_delivered(vbo_doc, throw=throw):
 		return False
 	if check_invoice_issued(vbo_doc, throw=throw):
+		return False
+
+	return True
+
+
+@frappe.whitelist()
+def change_outstation_delivery(vehicle_booking_order, outstation_delivery):
+	vbo_doc = get_document_for_update(vehicle_booking_order)
+	can_change_outstation_delivery(vbo_doc, throw=True)
+
+	outstation_delivery = cint(outstation_delivery)
+
+	delivery_enabled_disabled = _("Disabled" if outstation_delivery else "Enabled")
+	if outstation_delivery == cint(vbo_doc.outstation_delivery):
+		frappe.throw(_("Outstation Delivery is already {0}").format(delivery_enabled_disabled))
+
+	vbo_doc.outstation_delivery = outstation_delivery
+	vbo_doc.set_delivery_status()
+	save_document_for_update(vbo_doc)
+
+	frappe.msgprint(_("Outstation Delivery {0}").format(delivery_enabled_disabled), indicator='green', alert=True)
+
+
+def can_change_outstation_delivery(vbo_doc, throw=False):
+	if check_cancelled(vbo_doc, throw):
+		return False
+
+	if check_vehicle_received(vbo_doc, throw=throw):
+		return False
+	if check_vehicle_delivered(vbo_doc, throw=throw):
 		return False
 
 	return True
@@ -633,7 +668,7 @@ def check_vehicle_assigned(vbo_doc, throw=False):
 
 
 def check_vehicle_received(vbo_doc, throw=False):
-	if vbo_doc.delivery_status != 'Not Received':
+	if vbo_doc.delivery_status in ['In Stock', 'Delivered']:
 		if throw:
 			frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already received")
 				.format(frappe.bold(vbo_doc.name)))

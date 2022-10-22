@@ -146,7 +146,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				}
 
 				// Transfer Letter button
-				if (['In Stock', 'Delivered'].includes(this.frm.doc.delivery_status) && !this.frm.doc.transfer_customer) {
+				if (!this.frm.doc.transfer_customer) {
 					if (this.can_change('vehicle_transfer')) {
 						this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'),
 							__("Registration"));
@@ -154,7 +154,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 				}
 
 				// PDI Buttons
-				if (this.frm.doc.delivery_status != "Not Received" && !['In Process', 'Done'].includes(this.frm.doc.pdi_status)) {
+				if (["In Stock", "Delivered"].includes(this.frm.doc.delivery_status) && !['In Process', 'Done'].includes(this.frm.doc.pdi_status)) {
 					if (frappe.model.can_create("Project")) {
 						this.frm.add_custom_button(__('Create PDI Repair Order'), () => this.make_next_document('Project'),
 							__("Service"));
@@ -187,6 +187,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			var select_delivery_period_label = this.frm.doc.delivery_period ? "Change Delivery Period" : "Select Delivery Period";
 			var change_priority_label = cint(this.frm.doc.priority) ? "Mark as Normal Priority" : "Mark as High Priority";
 			var change_cancellation_label = cint(this.frm.doc.status === "Cancelled Booking") ? "Re-Open Booking" : "Cancel Booking";
+			var change_outstation_delivery_label = cint(this.frm.doc.outstation_delivery) ? "Disable Outstation Delivery" : "Enable Outstation Delivery";
 
 			// Status Buttons
 			if (this.can_change('cancellation')) {
@@ -211,6 +212,11 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			if (this.can_change('delivery_period')) {
 				this.frm.add_custom_button(__(select_delivery_period_label), () => this.change_delivery_period(),
 					this.frm.doc.delivery_period ? __("Change") : null);
+			}
+
+			if (this.can_change('outstation_delivery')) {
+				this.frm.add_custom_button(__(change_outstation_delivery_label), () => this.change_outstation_delivery(),
+					__("Change"));
 			}
 
 			if (this.can_change('color')) {
@@ -249,14 +255,19 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 
 			if (unpaid) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
-			} else if (["To Assign Vehicle", "To Receive Vehicle"].includes(this.frm.doc.status) && !this.frm.doc.vehicle) {
+
+			} else if (!this.frm.doc.vehicle) {
 				this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
-			} else if (["To Receive Vehicle", "Delivery Overdue"].includes(this.frm.doc.status) && this.frm.doc.delivery_status === "Not Received") {
+
+			} else if (this.frm.doc.status === "To Receive Vehicle") {
 				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
+
 			} else if (this.frm.doc.status === "To Receive Invoice") {
 				this.frm.custom_buttons[__('Receive Invoice')] && this.frm.custom_buttons[__('Receive Invoice')].addClass('btn-primary');
-			} else if (["To Deliver Vehicle", "Delivery Overdue"].includes(this.frm.doc.status) && this.frm.doc.delivery_status === "In Stock") {
+
+			} else if (this.frm.doc.status === "To Deliver Vehicle") {
 				this.frm.custom_buttons[__('Deliver Vehicle')] && this.frm.custom_buttons[__('Deliver Vehicle')].addClass('btn-primary');
+
 			} else if (this.frm.doc.status === "To Deliver Invoice") {
 				this.frm.custom_buttons[__('Deliver Invoice')] && this.frm.custom_buttons[__('Deliver Invoice')].addClass('btn-primary');
 			}
@@ -323,9 +334,12 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			delivery_status_color = "orange";
 		} else if (me.frm.doc.delivery_status == "Delivered") {
 			delivery_status_color = "green";
+		} else if (me.frm.doc.delivery_status == "Not Applicable") {
+			delivery_status_color = "grey";
 		}
 
-		if (me.frm.doc.delivery_status != "Delivered" && cint(me.frm.doc.delivery_overdue)) {
+		var overdue_warning = ["Not Received", "In Stock"].includes(me.frm.doc.delivery_status) && cint(me.frm.doc.delivery_overdue);
+		if (overdue_warning) {
 			delivery_status_color = "red";
 		}
 
@@ -369,7 +383,7 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			},
 			{
 				contents: __('Delivery Status: {0}{1}', [me.frm.doc.delivery_status,
-					me.frm.doc.delivery_status != "Delivered" && cint(me.frm.doc.delivery_overdue) ? __(" (Overdue)") : ""]),
+					overdue_warning ? __(" (Overdue)") : ""]),
 				indicator: delivery_status_color
 			},
 		];
@@ -788,6 +802,30 @@ erpnext.vehicles.VehicleBookingOrder = erpnext.vehicles.VehicleBookingController
 			});
 		});
 		dialog.show();
+	},
+
+	change_outstation_delivery: function () {
+		var me = this;
+
+		var new_outstation_delivery = cint(me.frm.doc.outstation_delivery) ? 0 : 1;
+		var action_label = new_outstation_delivery ? "Enable Outstation Delivery" : "Disable Outstation Delivery";
+
+		frappe.confirm(__(`Are you sure you want to <b>${__(action_label)}</b> for this booking order?`),
+			function() {
+				frappe.call({
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_outstation_delivery",
+					args: {
+						vehicle_booking_order: me.frm.doc.name,
+						outstation_delivery: new_outstation_delivery
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
+			}
+		);
 	},
 
 	change_color: function () {

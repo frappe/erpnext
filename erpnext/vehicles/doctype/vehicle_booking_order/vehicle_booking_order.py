@@ -322,14 +322,16 @@ class VehicleBookingOrder(VehicleBookingController):
 		self.vehicle_delivered_date = vehicle_delivery.posting_date
 		self.lr_no = vehicle_receipt.lr_no
 
-		if not vehicle_receipt:
-			self.delivery_status = "Not Received"
-		elif not vehicle_delivery:
-			self.delivery_status = "In Stock"
-		else:
+		if vehicle_delivery:
 			self.delivery_status = "Delivered"
+		elif vehicle_receipt:
+			self.delivery_status = "In Stock"
+		elif self.outstation_delivery:
+			self.delivery_status = "Not Applicable"
+		else:
+			self.delivery_status = "Not Received"
 
-		if self.delivery_status != "Delivered" and getdate(self.delivery_date) < getdate(today()):
+		if self.delivery_status in ["Not Received", "In Stock"] and getdate(self.delivery_date) < getdate(today()):
 			self.delivery_overdue = 1
 		else:
 			self.delivery_overdue = 0
@@ -607,7 +609,7 @@ class VehicleBookingOrder(VehicleBookingController):
 				return False
 
 		if notification_type == "Booking Confirmation":
-			if self.delivery_status != "Not Received":
+			if self.delivery_status in ["In Stock", "Delivered"]:
 				if throw:
 					frappe.throw(_("Cannot send Booking Confirmation notification after receiving Vehicle"))
 				return False
@@ -929,7 +931,7 @@ def update_overdue_status():
 		update `tabVehicle Booking Order`
 		set delivery_overdue = 1
 		where docstatus = 1
-			and delivery_status != 'Delivered'
+			and delivery_status in ('Not Received', 'In Stock')
 			and delivery_date < CURDATE()
 			and customer_outstanding <= 0
 			and status != 'Cancelled Booking'
