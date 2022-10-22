@@ -91,6 +91,8 @@ def change_vehicle_in_registration_order(booking_doc):
 
 
 def can_change_vehicle(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -130,6 +132,8 @@ def change_outstation_delivery(vehicle_booking_order, outstation_delivery):
 
 
 def can_change_outstation_delivery(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -224,6 +228,8 @@ def change_item_in_registration_order(booking_doc):
 
 
 def can_change_item(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -273,6 +279,8 @@ def change_allocation(vehicle_booking_order, vehicle_allocation):
 
 
 def can_change_allocation(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -317,6 +325,8 @@ def change_delivery_period(vehicle_booking_order, delivery_period):
 
 
 def can_change_delivery_period(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -355,6 +365,8 @@ def change_color(vehicle_booking_order, color_1, color_2, color_3):
 
 
 def can_change_color(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -403,6 +415,8 @@ def change_customer_details(vehicle_booking_order, customer_is_company=None, cus
 
 
 def can_change_customer_details(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -437,6 +451,8 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 
 
 def can_change_payment_adjustment(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -484,6 +500,8 @@ def change_vehicle_price(vehicle_booking_order, vehicle_amount=0, fni_amount=0):
 
 
 def can_change_vehicle_price(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -517,6 +535,8 @@ def change_priority(vehicle_booking_order, priority):
 
 
 def can_change_priority(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if not check_allowed_after_vehicle_delivery(vbo_doc, throw=throw):
 		return False
 
@@ -575,6 +595,8 @@ def change_cancellation(vehicle_booking_order, cancelled):
 
 
 def can_change_cancellation(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if not has_cancel_booking_permission(throw):
 		return False
 
@@ -645,6 +667,13 @@ def save_document_for_update(doc, update_child_tables=True):
 
 	doc.notify_update()
 	doc.save_version()
+
+
+def check_no_write_permission(vbo_doc, throw=False):
+	if not frappe.has_permission(vbo_doc.doctype, 'write', doc=vbo_doc, throw=throw):
+		return True
+
+	return False
 
 
 def check_cancelled(vbo_doc, throw=False):
@@ -786,6 +815,8 @@ def check_allowed_after_supplier_payment(vbo_doc, throw=False):
 
 
 def can_assign_vehicle(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
@@ -793,6 +824,8 @@ def can_assign_vehicle(vbo_doc, throw=False):
 
 
 def can_assign_allocation(vbo_doc, throw=False):
+	if check_no_write_permission(vbo_doc, throw):
+		return False
 	if check_cancelled(vbo_doc, throw):
 		return False
 
