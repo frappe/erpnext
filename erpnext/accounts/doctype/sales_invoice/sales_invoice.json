@@ -1036,6 +1036,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_redemption_account",
    "fieldtype": "Link",
@@ -1334,6 +1335,7 @@
    "options": "fa fa-money"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "is_pos",
    "fieldname": "cash_bank_account",
    "fieldtype": "Link",
@@ -1433,6 +1435,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "is_pos",
    "fieldname": "account_for_change_amount",
    "fieldtype": "Link",
@@ -1481,6 +1484,7 @@
    "hide_seconds": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -1919,6 +1923,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.is_internal_customer",
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
@@ -1961,6 +1966,7 @@
    "label": "Disable Rounded Total"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "additional_discount_account",
    "fieldtype": "Link",
    "label": "Discount Account",
@@ -2119,7 +2125,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-10-15 19:15:49.526529",
+ "modified": "2022-10-23 10:52:47.416251",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
