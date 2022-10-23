@@ -278,7 +278,7 @@ class update_entries_after(object):
 				return
 
 		# update SLE and Serial Nos
-		sle.doctype="Stock Ledger Entry"
+		sle.doctype = "Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
 
 		for serial_no in serial_nos:

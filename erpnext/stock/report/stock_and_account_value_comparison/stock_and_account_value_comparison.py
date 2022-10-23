@@ -10,6 +10,7 @@ from erpnext import get_default_currency
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
 from frappe.model.meta import get_field_precision
 
+
 def execute(filters=None):
 	if not erpnext.is_perpetual_inventory_enabled(filters.company):
 		frappe.throw(_("Perpetual inventory required for the company {0} to view this report.")
@@ -19,6 +20,7 @@ def execute(filters=None):
 	columns = get_columns(filters)
 
 	return columns, data
+
 
 def get_data(report_filters):
 	report_filters = frappe._dict(report_filters)
@@ -55,6 +57,7 @@ def get_data(report_filters):
 
 	return data
 
+
 def get_stock_ledger_data(report_filters, filters):
 	if report_filters.account:
 		warehouses = get_warehouses_based_on_account(report_filters.account,
@@ -67,6 +70,7 @@ def get_stock_ledger_data(report_filters, filters):
 			"sum(stock_value_difference) as stock_value", "posting_date", "posting_time"],
 		group_by = "voucher_type, voucher_no",
 		order_by = "posting_date ASC, posting_time ASC")
+
 
 def get_gl_data(report_filters, filters):
 	if report_filters.account:
@@ -93,6 +97,7 @@ def get_gl_data(report_filters, filters):
 		voucher_wise_gl_data[key] = d
 
 	return voucher_wise_gl_data
+
 
 def get_columns(filters):
 	return [

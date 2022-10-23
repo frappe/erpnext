@@ -8,6 +8,7 @@ from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import update_gl_entries_after
 
+
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False, posting_date=None, posting_time=None):
 	"""
 	Repost everything!
@@ -41,6 +42,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 	frappe.db.auto_commit_on_many_writes = 0
 
+
 def repost_stock(item_code, warehouse, allow_zero_rate=False,
 	only_actual=False, only_bin=False, allow_negative_stock=False, posting_date=None, posting_time=None):
 
@@ -62,9 +64,11 @@ def repost_stock(item_code, warehouse, allow_zero_rate=False,
 
 		update_bin_qty(item_code, warehouse, qty_dict)
 
+
 def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False, posting_date=None, posting_time=None):
 	update_entries_after({"item_code": item_code, "warehouse": warehouse, "posting_date": posting_date, "posting_time": posting_time},
 		allow_zero_rate=allow_zero_rate, allow_negative_stock=allow_negative_stock)
+
 
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
@@ -73,6 +77,7 @@ def get_balance_qty_from_sle(item_code, warehouse):
 		limit 1""", (item_code, warehouse))
 
 	return flt(balance_qty[0][0]) if balance_qty else 0.0
+
 
 def get_reserved_qty(item_code, warehouse):
 	reserved_qty = frappe.db.sql("""
@@ -119,6 +124,7 @@ def get_reserved_qty(item_code, warehouse):
 
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 
+
 def get_indented_qty(item_code, warehouse):
 	no_partial_indent = frappe.get_cached_value("Stock Settings", None, "no_partial_indent")
 
@@ -154,6 +160,7 @@ def get_indented_qty(item_code, warehouse):
 
 	return requested_qty
 
+
 def get_ordered_qty(item_code, warehouse):
 	ordered_qty = frappe.db.sql("""
 		select sum((po_item.qty - po_item.received_qty)*po_item.conversion_factor)
@@ -164,6 +171,7 @@ def get_ordered_qty(item_code, warehouse):
 		and po_item.delivered_by_supplier = 0""", (item_code, warehouse))
 
 	return flt(ordered_qty[0][0]) if ordered_qty else 0
+
 
 def get_planned_qty(item_code, warehouse):
 	planned_qty = frappe.db.sql("""
@@ -187,6 +195,7 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 		bin.set_projected_qty()
 		bin.db_update()
 		bin.clear_cache()
+
 
 def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, posting_time=None,
 	 	fiscal_year=None):
@@ -248,6 +257,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			"posting_time": posting_time
 		})
 
+
 def reset_serial_no_status_and_warehouse(serial_nos=None):
 	if not serial_nos:
 		serial_nos = frappe.db.sql_list("""select name from `tabSerial No` where docstatus = 0""")
@@ -262,6 +272,7 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				sr.save()
 			except:
 				pass
+
 
 def repost_gle_for_stock_transactions(posting_date=None, posting_time=None, for_warehouses=None):
 	frappe.db.auto_commit_on_many_writes = 1
