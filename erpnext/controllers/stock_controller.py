@@ -426,7 +426,7 @@ class StockController(AccountsController):
 
 
 def update_gl_entries_for_reposted_stock_vouchers(exclude_voucher_type=None, exclude_voucher_no=None,
-		only_if_value_changed=False, warehouse_account=None, company=None):
+		only_if_value_changed=True, warehouse_account=None, company=None):
 	if frappe.flags.stock_ledger_vouchers_reposted:
 		stock_ledger_vouchers_reposted_sorted = sorted(frappe.flags.stock_ledger_vouchers_reposted,
 			key=lambda d: (d.posting_date, d.posting_time))
