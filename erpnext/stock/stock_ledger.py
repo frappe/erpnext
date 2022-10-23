@@ -1,21 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-
 import frappe, erpnext
 from frappe import _
-from frappe.utils import cint, flt, cstr, now
+from frappe.utils import cint, flt, now
 from erpnext.stock.utils import get_valuation_method
+from six import iteritems
 import json
 import datetime
 
-from six import iteritems
 
-# future reposting
-class NegativeStockError(frappe.ValidationError): pass
+class NegativeStockError(frappe.ValidationError):
+	pass
+
 
 _exceptions = frappe.local('stockledger_exceptions')
-# _exceptions = []
+
 
 def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if sl_entries:
@@ -55,11 +55,14 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
+
 def set_as_cancel(voucher_type, voucher_no):
-	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
-		modified=%s, modified_by=%s
-		where voucher_no=%s and voucher_type=%s""",
-		(now(), frappe.session.user, voucher_type, voucher_no))
+	frappe.db.sql("""
+		update `tabStock Ledger Entry`
+		set is_cancelled='Yes', modified=%s, modified_by=%s
+		where voucher_no=%s and voucher_type=%s
+	""", (now(), frappe.session.user, voucher_type, voucher_no))
+
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	args.update({"doctype": "Stock Ledger Entry"})
@@ -70,6 +73,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.insert()
 	sle.submit()
 	return sle
+
 
 def delete_cancelled_entry(voucher_type, voucher_no):
 	meta = frappe.get_meta("Stock Ledger Entry")
@@ -88,6 +92,7 @@ def delete_cancelled_entry(voucher_type, voucher_no):
 		where voucher_type=%s and voucher_no=%s
 	""", (voucher_type, voucher_no))
 
+
 def get_allow_negative_stock(sle=None):
 	if sle and sle.get('allow_negative_stock'):
 		return True
@@ -95,6 +100,7 @@ def get_allow_negative_stock(sle=None):
 	allow_negative_stock_role = frappe.db.get_single_value("Stock Settings", "restrict_negative_stock_to_role")
 	has_negative_stock_role_permission = not allow_negative_stock_role or allow_negative_stock_role in frappe.get_roles()
 	return cint(allow_negative_stock_setting and has_negative_stock_role_permission)
+
 
 class update_entries_after(object):
 	"""
@@ -755,6 +761,7 @@ class update_entries_after(object):
 				"voucher_no": sle.voucher_no,
 			}))
 
+
 def get_previous_sle(args, for_update=False):
 	"""
 		get the last sle on or before the current time-bucket,
@@ -777,6 +784,7 @@ def get_previous_sle(args, for_update=False):
 	args["name"] = args.get("sle", None) or ""
 	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update, batch_sle=batch_wise_valuation)
 	return sle and sle[0] or {}
+
 
 def get_stock_ledger_entries(previous_sle, operator=None,
 	order="desc", limit=None, for_update=False, batch_sle=False, debug=False, check_serial_no=False):
@@ -828,6 +836,7 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		order=order
 	), previous_sle, as_dict=1, debug=debug)
 
+
 def get_serial_nos_after_sle(args, for_update=False):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -842,6 +851,7 @@ def get_serial_nos_after_sle(args, for_update=False):
 			serial_nos = serial_nos - sle_serial_nos
 
 	return '\n'.join(serial_nos)
+
 
 def get_previous_serial_no_sles(sle, incoming_only=True):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -860,6 +870,7 @@ def get_previous_serial_no_sles(sle, incoming_only=True):
 				previous_sle_map[sr] = previous_sle
 
 	return previous_sle_map
+
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=None,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True, batch_wise_valuation=None):
@@ -928,6 +939,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate
+
 
 def get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no):
 	last_batch_valuation_rate = frappe.db.sql("""
