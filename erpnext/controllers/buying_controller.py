@@ -660,12 +660,18 @@ class BuyingController(StockController):
 					sl_entries.append(sle)
 
 				if flt(d.rejected_qty) != 0:
-					sl_entries.append(self.get_sl_entries(d, {
+					rejected_sle = self.get_sl_entries(d, {
 						"warehouse": d.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
 						"serial_no": cstr(d.rejected_serial_no).strip(),
 						"incoming_rate": 0.0
-					}))
+					})
+					if self.is_return:
+						rejected_sle.update({
+							"outgoing_rate": 0.0
+						})
+
+					sl_entries.append(rejected_sle)
 
 		self.make_sl_entries_for_supplier_warehouse(sl_entries)
 		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock,

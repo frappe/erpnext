@@ -309,11 +309,17 @@ class PurchaseReceipt(BuyingController):
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
 		for d in self.get("items"):
-			if d.item_code in stock_items and flt(d.qty):
+			if d.item_code in stock_items:
 				if warehouse_account.get(d.warehouse):
 					stock_value_diff = frappe.db.get_value("Stock Ledger Entry",
-						{"voucher_type": "Purchase Receipt", "voucher_no": self.name,
-						"voucher_detail_no": d.name, "warehouse": d.warehouse}, "stock_value_difference")
+						fieldname="sum(stock_value_difference)",
+						filters={
+							"voucher_type": "Purchase Receipt",
+							"voucher_no": self.name,
+							"voucher_detail_no": d.name,
+							"warehouse": d.warehouse
+						})
+
 					valuation_net_amount = self.get_item_valuation_net_amount(d)
 					valuation_item_tax_amount = self.get_item_valuation_tax_amount(d)
 
