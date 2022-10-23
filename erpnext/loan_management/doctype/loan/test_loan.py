@@ -56,6 +56,7 @@ class TestLoan(unittest.TestCase):
 			loan_account="Loan Account - _TC",
 			interest_income_account="Interest Income Account - _TC",
 			penalty_income_account="Penalty Income Account - _TC",
+			repayment_schedule_type="Monthly as per repayment start date",
 		)
 
 		create_loan_type(
@@ -115,6 +116,7 @@ class TestLoan(unittest.TestCase):
 			"Loan Account - _TC",
 			"Interest Income Account - _TC",
 			"Penalty Income Account - _TC",
+			repayment_schedule_type="Monthly as per repayment start date",
 		)
 
 		create_loan_type(
@@ -966,33 +968,57 @@ class TestLoan(unittest.TestCase):
 		)
 
 		# Check for first, second and last installment date
-		self.assertEqual(format_date(loan.get("repayment_schedule")[0].payment_date), "17-10-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[1].payment_date), "17-11-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[-1].payment_date), "17-09-2023")
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "17-10-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "17-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "17-09-2023"
+		)
 
 		loan.loan_type = "Term Loan Type 2"
 		loan.save()
 
 		# Check for first, second and last installment date
-		self.assertEqual(format_date(loan.get("repayment_schedule")[0].payment_date), "01-11-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[1].payment_date), "01-12-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[-1].payment_date), "01-10-2023")
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "01-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "01-12-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "01-10-2023"
+		)
 
 		loan.loan_type = "Term Loan Type 3"
 		loan.save()
 
 		# Check for first, second and last installment date
-		self.assertEqual(format_date(loan.get("repayment_schedule")[0].payment_date), "31-10-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[1].payment_date), "30-11-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[-1].payment_date), "30-09-2023")
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "31-10-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "30-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "30-09-2023"
+		)
 
 		loan.repayment_method = "Repay Fixed Amount per Period"
 		loan.monthly_repayment_amount = 1042
 		loan.save()
 
-		self.assertEqual(format_date(loan.get("repayment_schedule")[0].payment_date), "31-10-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[1].payment_date), "30-11-2022")
-		self.assertEqual(format_date(loan.get("repayment_schedule")[-1].payment_date), "30-09-2023")
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[0].payment_date, "dd-MM-yyyy"), "31-10-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[1].payment_date, "dd-MM-yyyy"), "30-11-2022"
+		)
+		self.assertEqual(
+			format_date(loan.get("repayment_schedule")[-1].payment_date, "dd-MM-yyyy"), "30-09-2023"
+		)
 
 
 def create_loan_scenario_for_penalty(doc):
