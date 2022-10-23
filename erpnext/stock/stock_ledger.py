@@ -25,6 +25,8 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 		if cancel:
 			set_as_cancel(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
 
+		bins_to_update = []
+
 		for sle in sl_entries:
 			sle_id = None
 			creation = None
@@ -42,9 +44,13 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 			args.update({
 				"sle_id": sle_id,
 				"creation": creation,
-				"is_amended": is_amended
+				"is_amended": is_amended,
+				"allow_negative_stock": sle_allow_negative_stock
 			})
-			update_bin(args, sle_allow_negative_stock or allow_negative_stock, via_landed_cost_voucher)
+			bins_to_update.append(args)
+
+		for args in bins_to_update:
+			update_bin(args, args.get('allow_negative_stock') or allow_negative_stock, via_landed_cost_voucher)
 
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
@@ -336,11 +342,13 @@ class update_entries_after(object):
 		for serial_no in serial_nos:
 			previous_sle = previous_sle_map.get(serial_no)
 			if not previous_sle:
+				item_link = frappe.get_desk_link("Item", sle.item_code)
 				serial_no_link = frappe.get_desk_link("Serial No", serial_no)
 				voucher_link = frappe.get_desk_link(sle.voucher_type, sle.voucher_no)
 				warehouse_link = frappe.get_desk_link("Warehouse", sle.warehouse)
-				frappe.throw(_("Incoming Rate for {0} in {1} cannot be found to process Stock Ledger Entries for {2} on {3} {4}")
-					.format(serial_no_link,
+				frappe.throw(_("Incoming Rate for {0} {1} in {2} cannot be found to process Stock Ledger Entries for {3} on {4} {5}")
+					.format(item_link,
+						serial_no_link,
 						warehouse_link,
 						voucher_link,
 						frappe.format(sle.posting_date),
