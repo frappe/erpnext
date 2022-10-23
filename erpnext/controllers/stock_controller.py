@@ -72,7 +72,7 @@ class StockController(AccountsController):
 		gl_list = []
 		warehouse_with_no_account = []
 
-		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
+		precision = frappe.get_precision("GL Entry", "debit")
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
@@ -473,21 +473,28 @@ def update_gl_entries_for_stock_voucher(stock_vouchers, exclude_voucher_type=Non
 
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
-	matched = True
+	key_fields = ('account', 'cost_center', 'party_type', 'party')
+	precision = frappe.get_precision("GL Entry", "debit")
+
+	existing_gle_map = {}
+	expected_gle_map = {}
+
+	for entry in existing_gle:
+		key = tuple(cstr(entry.get(k)) for k in key_fields)
+		existing_gle_map.setdefault(key, 0)
+		existing_gle_map[key] += flt(entry.debit) - flt(entry.credit)
+
 	for entry in expected_gle:
-		account_existed = False
-		for e in existing_gle:
-			if entry.account == e.account:
-				account_existed = True
-			if entry.account == e.account and entry.against_account == e.against_account \
-					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
-					and (entry.debit != e.debit or entry.credit != e.credit):
-				matched = False
-				break
-		if not account_existed:
-			matched = False
-			break
-	return matched
+		key = tuple(cstr(entry.get(k)) for k in key_fields)
+		expected_gle_map.setdefault(key, 0)
+		expected_gle_map[key] += flt(entry.debit) - flt(entry.credit)
+
+	for k, v in existing_gle_map.items():
+		existing_gle_map[k] = flt(v, precision)
+	for k, v in expected_gle_map.items():
+		expected_gle_map[k] = flt(v, precision)
+
+	return existing_gle_map == expected_gle_map
 
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, item_warehouse_list=None):
