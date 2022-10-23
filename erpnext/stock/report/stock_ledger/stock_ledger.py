@@ -92,7 +92,11 @@ def execute(filters=None):
 	set_party_name_in_list(data)
 
 	data = get_grouped_data(filters, data)
-	return columns, data
+
+	skip_total_row = False if filters.get('voucher_no') else True
+
+	return columns, data, None, None, None, skip_total_row
+
 
 def get_columns(filters, item_details, show_amounts=True, show_item_name=True):
 	columns = [
