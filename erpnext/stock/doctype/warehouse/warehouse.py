@@ -191,6 +191,9 @@ def get_warehouses_based_on_account(account, company=None):
 		else:
 			warehouses.append(d.name)
 
+	if not company:
+		company = frappe.db.get_value("Account", account, 'company')
+
 	if (not warehouses and company and
 		frappe.get_cached_value("Company", company, "default_inventory_account") == account):
 		warehouses = [d.name for d in frappe.get_all("Warehouse", filters={'is_group': 0})]

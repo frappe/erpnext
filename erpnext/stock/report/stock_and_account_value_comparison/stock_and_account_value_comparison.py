@@ -6,13 +6,12 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.utils import get_stock_accounts
-from erpnext import get_default_currency
 from erpnext.stock.doctype.warehouse.warehouse import get_warehouses_based_on_account
 from frappe.model.meta import get_field_precision
 
 
 def execute(filters=None):
-	if not erpnext.is_perpetual_inventory_enabled(filters.company):
+	if filters.company and not erpnext.is_perpetual_inventory_enabled(filters.company):
 		frappe.throw(_("Perpetual inventory required for the company {0} to view this report.")
 			.format(filters.company))
 
@@ -40,11 +39,8 @@ def get_data(report_filters):
 	stock_ledger_entries = get_stock_ledger_data(report_filters, filters)
 	voucher_wise_gl_data = get_gl_data(report_filters, filters)
 
-	currency = frappe.get_cached_value('Company', report_filters.company, "default_currency") if report_filters.company\
-		else get_default_currency()
-
-	stock_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"), currency)
-	gl_precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), currency)
+	stock_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"))
+	gl_precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"))
 	precision = max(stock_precision, gl_precision)
 
 	for d in stock_ledger_entries:
@@ -60,24 +56,22 @@ def get_data(report_filters):
 
 def get_stock_ledger_data(report_filters, filters):
 	if report_filters.account:
-		warehouses = get_warehouses_based_on_account(report_filters.account,
-			report_filters.company)
+		warehouses = get_warehouses_based_on_account(report_filters.account)
 
 		filters["warehouse"] = ("in", warehouses)
 
 	return frappe.get_all("Stock Ledger Entry", filters=filters,
 		fields = ["name", "voucher_type", "voucher_no",
 			"sum(stock_value_difference) as stock_value", "posting_date", "posting_time"],
-		group_by = "voucher_type, voucher_no",
-		order_by = "posting_date ASC, posting_time ASC")
+		group_by="voucher_type, voucher_no",
+		order_by="posting_date ASC, posting_time ASC")
 
 
 def get_gl_data(report_filters, filters):
 	if report_filters.account:
 		stock_accounts = [report_filters.account]
 	else:
-		stock_accounts = [k.name
-			for k in get_stock_accounts(report_filters.company)]
+		stock_accounts = [k.name for k in get_stock_accounts(report_filters.company)]
 
 	filters.update({
 		"account": ("in", stock_accounts)
@@ -87,9 +81,9 @@ def get_gl_data(report_filters, filters):
 		del filters["warehouse"]
 
 	gl_entries = frappe.get_all("GL Entry", filters=filters,
-		fields = ["name", "voucher_type", "voucher_no",
+		fields=["name", "voucher_type", "voucher_no",
 			"sum(debit_in_account_currency) - sum(credit_in_account_currency) as account_value"],
-		group_by = "voucher_type, voucher_no")
+		group_by="voucher_type, voucher_no")
 
 	voucher_wise_gl_data = {}
 	for d in gl_entries:

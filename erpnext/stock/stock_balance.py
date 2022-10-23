@@ -286,6 +286,25 @@ def repost_gle_for_stock_transactions(posting_date=None, posting_time=None, for_
 
 	frappe.db.auto_commit_on_many_writes = 0
 
+
+def repost_stock_mismatch_gle(company=None, from_date=None, to_date=None, auto_commit=False):
+	from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import get_data
+	mismatch_data = get_data({"company": company, "from_date": from_date, "to_date": to_date})
+
+	count = len(mismatch_data)
+	for i, d in enumerate(mismatch_data):
+		print("{0}/{1}: {2} | {3}".format(i + 1, count, d.voucher_type, d.voucher_no))
+		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
+		frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""",
+			(d.voucher_type, d.voucher_no))
+		doc.make_gl_entries(repost_future_gle=False, from_repost=True)
+
+		doc.clear_cache()
+
+		if auto_commit:
+			frappe.db.commit()
+
+
 def repost_all_stock_vouchers():
 	import datetime
 	import os

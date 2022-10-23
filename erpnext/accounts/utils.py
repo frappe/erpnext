@@ -1008,7 +1008,10 @@ def get_allow_project_in_entry_of_bs_account():
 	return frappe.local_cache("get_allow_project_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
 
 def get_stock_accounts(company):
-	return frappe.get_all("Account", filters = {
-		"account_type": "Stock",
-		"company": company
-	})
+	filters = {
+		"account_type": "Stock"
+	}
+	if company:
+		filters["company"] = company
+
+	return frappe.get_all("Account", filters=filters)
