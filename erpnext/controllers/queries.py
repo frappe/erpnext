@@ -83,13 +83,11 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	cust_master_name = frappe.defaults.get_user_default("cust_master_name")
 
-	if cust_master_name == "Customer Name":
-		fields = ["name", "customer_group", "territory"]
-	else:
-		fields = ["name", "customer_name", "customer_group", "territory"]
+	fields = ["name"]
+	if cust_master_name != "Customer Name":
+		fields = ["customer_name"]
 
 	fields = get_fields(doctype, fields)
-
 	searchfields = frappe.get_meta(doctype).get_search_fields()
 	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
 
@@ -122,10 +120,9 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Supplier"
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 
-	if supp_master_name == "Supplier Name":
-		fields = ["name", "supplier_group"]
-	else:
-		fields = ["name", "supplier_name", "supplier_group"]
+	fields = ["name"]
+	if supp_master_name != "Supplier Name":
+		fields = ["supplier_name"]
 
 	fields = get_fields(doctype, fields)
 
