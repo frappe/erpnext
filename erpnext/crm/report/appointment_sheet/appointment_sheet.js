@@ -23,7 +23,7 @@ frappe.query_reports["Appointment Sheet"] = {
 				var to_date = frappe.query_report.get_filter_value('to_date');
 				if (from_date && to_date) {
 					if (frappe.datetime.str_to_obj(from_date) > frappe.datetime.str_to_obj(to_date)) {
-						frappe.query_report.set_filter_value('to_date', from_date);
+						return frappe.query_report.set_filter_value('to_date', from_date);
 					}
 				}
 			}

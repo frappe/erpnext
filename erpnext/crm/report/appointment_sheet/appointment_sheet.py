@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate, cint, format_time, format_datetime, add_days
+from frappe.utils import getdate, nowdate, cint, format_time, format_datetime, now_datetime
 from erpnext.crm.doctype.appointment.appointment import get_appointments_for_reminder_notification,\
 	get_appointment_reminders_scheduled_time, get_reminder_date_from_appointment_date, automated_reminder_enabled
 
@@ -18,9 +18,6 @@ class AppointmentSheetReport(object):
 		self.filters = frappe._dict(filters or {})
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
-
-		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("From Date cannot be after To Date"))
 
 		self.is_vehicle_service = cint('Vehicles' in frappe.get_active_domains())
 
@@ -44,7 +41,8 @@ class AppointmentSheetReport(object):
 				a.appointment_for, a.party_name, a.customer_name,
 				a.contact_display, a.contact_mobile, a.contact_phone, a.contact_email,
 				a.applies_to_variant_of, a.applies_to_variant_of_name, a.applies_to_item, a.applies_to_item_name,
-				max(n.last_sent_dt) as last_sent_dt {0}
+				max(n.last_sent_dt) as last_sent_dt, a.confirmation_dt
+				{0}
 			from `tabAppointment` a
 			left join `tabNotification Count` n on n.parenttype = 'Appointment' and n.parent = a.name
 				and n.notification_type = 'Appointment Reminder' and n.notification_medium = 'SMS'
@@ -54,9 +52,11 @@ class AppointmentSheetReport(object):
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
 
 	def get_notification_schedule(self):
-		if automated_reminder_enabled():
-			current_date = self.filters.from_date
-			while getdate(current_date) <= getdate(self.filters.to_date):
+		if automated_reminder_enabled() or True:
+			now_dt = now_datetime()
+			scheduled_dates = set([d.scheduled_date for d in self.data if d.scheduled_dt > now_dt])
+
+			for current_date in scheduled_dates:
 				reminder_date = get_reminder_date_from_appointment_date(current_date)
 				scheduled_reminder_dt = get_appointment_reminders_scheduled_time(reminder_date)
 				appointments_for_reminder = get_appointments_for_reminder_notification(reminder_date)
@@ -64,8 +64,6 @@ class AppointmentSheetReport(object):
 				for d in self.data:
 					if d.appointment in appointments_for_reminder:
 						d.scheduled_reminder_dt = scheduled_reminder_dt
-
-				current_date = add_days(current_date, 1)
 
 		for d in self.data:
 			if d.last_sent_dt:
@@ -87,6 +85,8 @@ class AppointmentSheetReport(object):
 	def set_formatted_datetime(self, d):
 		d.scheduled_dt_fmt = format_datetime(d.scheduled_dt, datetime_format)
 		d.scheduled_time_fmt = format_time(d.scheduled_time, time_format)
+
+		d.confirmation_dt_fmt = format_datetime(d.confirmation_dt, datetime_format)
 
 	def get_conditions(self):
 		conditions = []
@@ -129,6 +129,7 @@ class AppointmentSheetReport(object):
 			{"label": _("Voice of Customer"), "fieldname": "voice_of_customer", "fieldtype": "Data", "width": 200},
 			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 200, "editable": 1},
 			{"label": _("Reminder"), "fieldname": "reminder", "fieldtype": "Data", "width": 200},
+			{"label": _("Confirmation Time"), "fieldname": "confirmation_dt_fmt", "fieldtype": "Data", "width": 140},
 		]
 
 		return columns
