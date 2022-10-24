@@ -78,7 +78,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def customer_query(doctype, txt, searchfield, start, page_len, filters):
+def customer_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	doctype = "Customer"
 	conditions = []
 	cust_master_name = frappe.defaults.get_user_default("cust_master_name")
@@ -110,13 +110,14 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 			}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+		as_dict=as_dict,
 	)
 
 
 # searches for supplier
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
-def supplier_query(doctype, txt, searchfield, start, page_len, filters):
+def supplier_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	doctype = "Supplier"
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 
@@ -142,6 +143,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 			**{"field": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
 		),
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
+		as_dict=as_dict,
 	)
 
 
