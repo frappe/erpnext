@@ -55,6 +55,16 @@ frappe.query_reports["Appointment Sheet"] = {
 			}
 		}
 
+		if (column.fieldname == 'status') {
+			if (frappe.listview_settings['Appointment']) {
+				var indicator = frappe.listview_settings['Appointment'].get_indicator(data);
+				if (indicator) {
+					var indicator_color = indicator[1];
+					return `<span class="indicator ${indicator_color}"><span>${data.status}</span></span>`;
+				}
+			}
+		}
+
 		return default_formatter(value, row, column, data, {css: style, link_href: link, link_target: "_blank"});
 	},
 

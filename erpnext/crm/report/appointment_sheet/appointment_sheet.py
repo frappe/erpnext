@@ -41,7 +41,7 @@ class AppointmentSheetReport(object):
 				a.appointment_for, a.party_name, a.customer_name,
 				a.contact_display, a.contact_mobile, a.contact_phone, a.contact_email,
 				a.applies_to_variant_of, a.applies_to_variant_of_name, a.applies_to_item, a.applies_to_item_name,
-				max(n.last_sent_dt) as last_sent_dt, a.confirmation_dt
+				max(n.last_sent_dt) as last_sent_dt, a.confirmation_dt, a.status
 				{0}
 			from `tabAppointment` a
 			left join `tabNotification Count` n on n.parenttype = 'Appointment' and n.parent = a.name
@@ -52,7 +52,7 @@ class AppointmentSheetReport(object):
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
 
 	def get_notification_schedule(self):
-		if automated_reminder_enabled() or True:
+		if automated_reminder_enabled():
 			now_dt = now_datetime()
 			scheduled_dates = set([d.scheduled_date for d in self.data if d.scheduled_dt > now_dt])
 
@@ -128,6 +128,7 @@ class AppointmentSheetReport(object):
 		columns += [
 			{"label": _("Voice of Customer"), "fieldname": "voice_of_customer", "fieldtype": "Data", "width": 200},
 			{"label": _("Remarks"), "fieldname": "remarks", "fieldtype": "Data", "width": 200, "editable": 1},
+			{'label': _("Status"), 'fieldname': 'status', 'fieldtype': 'Data', 'width': 70},
 			{"label": _("Reminder"), "fieldname": "reminder", "fieldtype": "Data", "width": 200},
 			{"label": _("Confirmation Time"), "fieldname": "confirmation_dt_fmt", "fieldtype": "Data", "width": 140},
 		]
