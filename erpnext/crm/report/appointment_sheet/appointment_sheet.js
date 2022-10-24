@@ -59,8 +59,9 @@ frappe.query_reports["Appointment Sheet"] = {
 			if (frappe.listview_settings['Appointment']) {
 				var indicator = frappe.listview_settings['Appointment'].get_indicator(data);
 				if (indicator) {
+					var indicator_title = indicator[0];
 					var indicator_color = indicator[1];
-					return `<span class="indicator ${indicator_color}"><span>${data.status}</span></span>`;
+					return `<span class="indicator ${indicator_color}"><span>${indicator_title || data.status}</span></span>`;
 				}
 			}
 		}

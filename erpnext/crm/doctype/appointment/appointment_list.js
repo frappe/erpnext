@@ -1,8 +1,22 @@
 frappe.listview_settings['Appointment'] = {
-	add_fields: ["status", "docstatus"],
+	add_fields: ["status", "docstatus", "end_dt"],
 	get_indicator: function (doc) {
 		if (doc.status == "Open") {
-			return [__(doc.status), "orange", "status,=," + doc.status];
+			var is_late = false;
+			if (doc.end_dt) {
+				var now_dt = moment(frappe.datetime.now_datetime(true));
+				var end_dt = frappe.datetime.str_to_obj(doc.end_dt);
+
+				if (now_dt.isAfter(end_dt)) {
+					is_late = true;
+				}
+			}
+
+			if (is_late) {
+				return [__("Late"), "yellow", "status,=," + doc.status];
+			} else {
+				return [__(doc.status), "orange", "status,=," + doc.status];
+			}
 		} else if (doc.status == "Rescheduled") {
 			 return [__(doc.status), "lightblue", "status,=," + doc.status];
 		} else if (doc.status == "Missed") {
