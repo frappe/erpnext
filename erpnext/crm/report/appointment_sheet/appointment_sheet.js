@@ -42,6 +42,22 @@ frappe.query_reports["Appointment Sheet"] = {
 			options: "Appointment Type",
 		},
 	],
+
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+		var link;
+
+		if (column.fieldname == 'reminder') {
+			if (data.last_sent_dt) {
+				style['color'] = 'green';
+			} else if (data.scheduled_reminder_dt) {
+				style['color'] = 'blue';
+			}
+		}
+
+		return default_formatter(value, row, column, data, {css: style, link_href: link, link_target: "_blank"});
+	},
+
 	onChange: function(new_value, column, data, rowIndex) {
 		if (column.fieldname == "remarks") {
 			return frappe.call({

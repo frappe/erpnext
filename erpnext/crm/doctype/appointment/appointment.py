@@ -801,12 +801,7 @@ def update_status(appointment, status):
 
 
 def send_appointment_reminder_notifications():
-	from frappe.core.doctype.sms_settings.sms_settings import is_automated_sms_enabled
-	from frappe.core.doctype.sms_template.sms_template import has_automated_sms_template
-
-	if not is_automated_sms_enabled():
-		return
-	if not has_automated_sms_template("Appointment", "Appointment Reminder"):
+	if not automated_reminder_enabled():
 		return
 
 	# Do not send until reminder scheduled time has passed
@@ -821,6 +816,16 @@ def send_appointment_reminder_notifications():
 	for name in appointments_to_remind:
 		doc = frappe.get_doc("Appointment", name)
 		doc.send_appointment_reminder_notification()
+
+
+def automated_reminder_enabled():
+	from frappe.core.doctype.sms_settings.sms_settings import is_automated_sms_enabled
+	from frappe.core.doctype.sms_template.sms_template import has_automated_sms_template
+
+	if is_automated_sms_enabled() and has_automated_sms_template("Appointment", "Appointment Reminder"):
+		return True
+	else:
+		return False
 
 
 def get_appointments_for_reminder_notification(reminder_date=None):
@@ -872,6 +877,19 @@ def get_appointment_reminders_scheduled_time(reminder_date=None):
 	reminder_dt = combine_datetime(reminder_date, reminder_time)
 
 	return reminder_dt
+
+
+def get_reminder_date_from_appointment_date(appointment_date):
+	appointment_settings = frappe.get_cached_doc("Appointment Booking Settings", None)
+
+	appointment_date = getdate(appointment_date)
+
+	remind_days_before = cint(appointment_settings.appointment_reminder_days_before)
+	if remind_days_before < 0:
+		remind_days_before = 0
+
+	reminder_date = add_days(appointment_date, -remind_days_before)
+	return reminder_date
 
 
 @frappe.whitelist()
