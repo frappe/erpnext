@@ -809,16 +809,26 @@ def send_appointment_reminder_notifications():
 	if not has_automated_sms_template("Appointment", "Appointment Reminder"):
 		return
 
-	today_date = getdate(today())
+	# Do not send until reminder scheduled time has passed
+	now_dt = now_datetime()
+	reminder_date = getdate(now_dt)
+	reminder_dt = get_appointment_reminders_scheduled_time(reminder_date)
+	if now_dt < reminder_dt:
+		return
 
+	appointments_to_remind = get_appointments_for_reminder_notification(reminder_date)
+
+	for name in appointments_to_remind:
+		doc = frappe.get_doc("Appointment", name)
+		doc.send_appointment_reminder_notification()
+
+
+def get_appointments_for_reminder_notification(reminder_date=None):
 	appointment_settings = frappe.get_cached_doc("Appointment Booking Settings", None)
 
-	appointment_reminder_time = appointment_settings.appointment_reminder_time or get_time("00:00:00")
-
-	appointment_reminder_dt = combine_datetime(today_date, appointment_reminder_time)
 	now_dt = now_datetime()
-	if now_dt < appointment_reminder_dt:
-		return
+	reminder_date = getdate(reminder_date)
+	reminder_dt = get_appointment_reminders_scheduled_time(reminder_date)
 
 	remind_days_before = cint(appointment_settings.appointment_reminder_days_before)
 	if remind_days_before < 0:
@@ -828,7 +838,7 @@ def send_appointment_reminder_notifications():
 	if appointment_reminder_confirmation_hours < 0:
 		appointment_reminder_confirmation_hours = 0
 
-	appointment_date = add_days(today_date, remind_days_before)
+	appointment_date = add_days(reminder_date, remind_days_before)
 
 	appointments_to_remind = frappe.db.sql_list("""
 		select a.name
@@ -838,22 +848,30 @@ def send_appointment_reminder_notifications():
 		where a.docstatus = 1
 			and a.status = 'Open'
 			and a.scheduled_date = %(appointment_date)s
-			and %(appointment_reminder_dt)s < a.scheduled_dt
+			and %(reminder_dt)s < a.scheduled_dt
 			and %(now_dt)s < a.scheduled_dt
-			and TIMESTAMPDIFF(MINUTE, a.confirmation_dt, %(appointment_reminder_dt)s) >= %(required_minutes)s
+			and TIMESTAMPDIFF(MINUTE, a.confirmation_dt, %(reminder_dt)s) >= %(required_minutes)s
 			and n.last_scheduled_dt is null
-			and (n.last_sent_dt is null or DATE(n.last_sent_dt) != %(today_date)s)
+			and (n.last_sent_dt is null or DATE(n.last_sent_dt) != %(reminder_date)s)
 	""", {
 		'appointment_date': appointment_date,
-		'appointment_reminder_dt': appointment_reminder_dt,
-		'today_date': today_date,
+		'reminder_dt': reminder_dt,
+		'reminder_date': reminder_date,
 		'now_dt': now_dt,
 		'required_minutes': appointment_reminder_confirmation_hours * 60,
 	})
 
-	for name in appointments_to_remind:
-		doc = frappe.get_doc("Appointment", name)
-		doc.send_appointment_reminder_notification()
+	return appointments_to_remind
+
+
+def get_appointment_reminders_scheduled_time(reminder_date=None):
+	appointment_settings = frappe.get_cached_doc("Appointment Booking Settings", None)
+
+	reminder_date = getdate(reminder_date)
+	reminder_time = appointment_settings.appointment_reminder_time or get_time("00:00:00")
+	reminder_dt = combine_datetime(reminder_date, reminder_time)
+
+	return reminder_dt
 
 
 @frappe.whitelist()
