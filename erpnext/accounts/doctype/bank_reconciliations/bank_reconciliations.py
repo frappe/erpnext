@@ -94,10 +94,10 @@ class Bankreconciliations(Document):
 
 		if self.bank_amount == '':
 			self.bank_amount = 0
-			
-		self.defference_amount = self.book_balance - self.bank_amount
 
 		self.actual_total_conciliation = self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount - self.wire_transfer_amount + self.total_last_reconciliations
+
+		self.defference_amount = self.actual_total_conciliation - self.bank_amount
 
 		if self.actual_total_conciliation < 0:
 			self.actual_total_conciliation = self.actual_total_conciliation * -1
