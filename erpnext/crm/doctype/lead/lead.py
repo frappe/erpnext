@@ -267,6 +267,8 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
+	return target_doc
+
 
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
