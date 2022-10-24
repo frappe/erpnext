@@ -2733,7 +2733,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.load_from_db()
 		si.items[0].income_account = "Service - _TC"
 		si.additional_discount_account = "_Test Account Sales - _TC"
-		si.taxes[0].account_head = "VAT 5% - _TC"
+		si.taxes[0].account_head = "TDS Payable - _TC"
 		si.save()
 
 		si.load_from_db()
@@ -2745,7 +2745,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Account Sales - _TC", 22.0, 0.0, nowdate()],
 			["Debtors - _TC", 88, 0.0, nowdate()],
 			["Service - _TC", 0.0, 100.0, nowdate()],
-			["VAT 5% - _TC", 0.0, 10.0, nowdate()],
+			["TDS Payable - _TC", 0.0, 10.0, nowdate()],
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
