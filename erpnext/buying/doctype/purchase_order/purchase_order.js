@@ -159,7 +159,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 							this.frm.add_custom_button(__('Resume'), () => this.unhold_purchase_order(), __("Status"));
 						}
 						this.frm.add_custom_button(__('Close'), () => this.close_purchase_order(), __("Status"));
-						this.frm.add_custom_button(__('Expire'), () => this.expired_purchase_order(), __("Status"));
+						//this.frm.add_custom_button(__('Expire'), () => this.expired_purchase_order(), __("Status"));
 					
 					}
 				}
