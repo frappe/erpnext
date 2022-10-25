@@ -58,6 +58,7 @@ class calculate_taxes_and_totals(object):
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
+		self.calculate_tax_withholding_net_total()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()

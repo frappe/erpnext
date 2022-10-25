@@ -1,7 +1,8 @@
 import frappe
 
 def execute():
-	frappe.db.sql("""
+	frappe.db.sql(
+		"""
 			UPDATE 
 					`tabPurchase Invoice Item`
 			INNER JOIN 
@@ -13,11 +14,17 @@ def execute():
 			WHERE 
 					`tabPurchase Invoice`.apply_tds = 1 
 					and `tabPurchase Invoice`.docstatus = 1
-			""")
+		"""
+	)
 
-	frappe.db.sql("""
-			UPDATE `tabPurchase Invoice`
-			SET tax_withholding_net_total = net_total,
-			base_tax_withholding_net_total = base_net_total
-			WHERE apply_tds = 1 and docstatus = 1""")
-	
+	frappe.db.sql(
+		"""
+			UPDATE 
+					`tabPurchase Invoice`
+			SET 
+					tax_withholding_net_total = net_total,
+					base_tax_withholding_net_total = base_net_total
+			WHERE 
+					apply_tds = 1 and docstatus = 1
+		"""
+	)
