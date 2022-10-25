@@ -46,14 +46,15 @@ status_map = {
 	],
 	"Purchase Order": [
 		["Draft", None],
-		["To Receive and Bill", "eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_received >= 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_received >= 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Delivered", "eval:self.status=='Delivered'"],
+		["To Receive and Bill", "eval:self.status !='Expired' and self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.status !='Expired' and  self.per_received >= 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Receive", "eval:self.status !='Expired' and self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Completed", "eval:self.status !='Expired' and self.per_received >= 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Delivered", "eval:self.status !='Expired' and self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["On Hold", "eval:self.status=='On Hold'"],
 		["Closed", "eval:self.status=='Closed'"],
+		["Expired","eval:self.status == 'Expired'"],
 	],
 	"Delivery Note": [
 		["Draft", None],
@@ -148,10 +149,13 @@ class StatusUpdater(Document):
 			for d in self.get_all_children():
 				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
 					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
-
-				if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return'):
-					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
-
+				
+				# Also ignore Shop returns
+				if self.doctype == "Delivery Note":
+					if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return') and self.return_type !='Shop Return':
+						frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
+				elif hasattr(d, 'qty') and d.qty > 0 and self.get('is_return') and self.is_return != 1:
+						frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
@@ -165,7 +169,13 @@ class StatusUpdater(Document):
 						item = item[0]
 						item['idx'] = d.idx
 						item['target_ref_field'] = args['target_ref_field'].replace('_', ' ')
-
+						
+						#site confige import
+						from nrp_manufacturing.utils import  get_config_by_name
+						#daily items list
+						daily_rate_item = get_config_by_name("DAILY_RATE_ITEMS", [])
+						if item.item_code in daily_rate_item:
+							return
 						# if not item[args['target_ref_field']]:
 						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
 						if args.get('no_allowance'):

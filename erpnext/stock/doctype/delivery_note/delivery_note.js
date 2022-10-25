@@ -51,6 +51,13 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
+		frm.set_query('driver', function(doc) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			}
+		});
 
 		frm.set_query('expense_account', 'items', function(doc, cdt, cdn) {
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
@@ -81,8 +88,12 @@ frappe.ui.form.on("Delivery Note", {
 	print_without_amount: function(frm) {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
 	},
-
+	
 	refresh: function(frm) {
+        if (frm.doc.queue_status == 'Queued'){
+            $('.primary-action').hide();
+        }
+
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Credit Note'), function() {
 				frappe.model.open_mapped_doc({
@@ -91,6 +102,40 @@ frappe.ui.form.on("Delivery Note", {
 				})
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+		
+		//load drivers
+		cur_frm.fields_dict['driver'].get_query = function (doc) {
+			return {
+				filters: [ 
+					["designation","LIKE" , "%Driver%"],
+					["company","=", frm.doc.company ]
+				]
+			}
+		}
+		frm.refresh_field('driver');
+		
+	},
+	customer_type:function(frm) {
+		if (frm.doc.customer_type === 'Employee'){
+			frm.set_df_property('transporter','hidden',true);
+			frm.set_df_property('transporter_name','hidden',true);		
+			frm.set_df_property('driver','hidden',false);
+			frm.set_df_property('driver_name','hidden',false);		
+			frm.set_df_property('driver_name','read_only',1);	
+			frm.set_value("transporter", '');
+			frm.set_value("transporter_name", null);
+			frm.set_df_property('driver', 'reqd', 1);
+			frm.set_df_property('transporter', 'reqd', 0)
+		}else if(frm.doc.customer_type === 'Supplier'){
+			frm.set_df_property('transporter','hidden',false);
+			frm.set_df_property('transporter_name','hidden',false);		
+			frm.set_df_property('driver','hidden',true);
+			frm.set_df_property('driver_name','hidden',true);	
+			frm.set_df_property('driver', 'reqd', 0)
+			frm.set_df_property('transporter', 'reqd', 1)
+			frm.set_value("driver_name", null);
+			frm.set_value("driver", null);
 		}
 	}
 });
@@ -103,7 +148,14 @@ frappe.ui.form.on("Delivery Note Item", {
 	cost_center: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows('items', 'cost_center', d.cost_center);
-	}
+	},
+	before_items_remove: function(frm, cdt, cdn) {
+	var deleted_row = frappe.get_doc(cdt, cdn);
+	let filterreturnitems = frm.doc.returnable_items.filter((item) => item.item_reference != deleted_row.item_code);		
+	frm.doc.returnable_items = filterreturnitems
+	frm.refresh_field("returnable_items")
+
+}
 });
 
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
@@ -258,7 +310,26 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	reopen_delivery_note : function() {
 		this.update_status("Submitted")
 	},
-
+    before_submit : function(){
+		var me = this;
+		frappe.ui.form.is_saving = true;
+		frappe.call({
+			method:"nrp_manufacturing.modules.gourmet.delivery_note.delivery_note.enqueue_doc",
+			args: {docname: me.frm.doc.name, status: status},
+			callback: function(r){
+                me.frm.reload_doc();
+			},
+			always: function(){
+				frappe.ui.form.is_saving = false;
+                // frappe.throw("The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage")
+                frappe.throw(
+					title='Notification',
+					msg='The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage',
+				)
+				return false;
+            }
+		})
+    },
 	update_status: function(status) {
 		var me = this;
 		frappe.ui.form.is_saving = true;
@@ -292,9 +363,17 @@ frappe.ui.form.on('Delivery Note', {
 		if(frm.doc.company) {
 			frm.trigger("unhide_account_head");
 		}
+
 	},
 
 	company: function(frm) {
+        if (["Unit 5","Unit 8","Unit 11"].includes(frm.doc.company)){
+            frm.set_df_property('shipping_type', 'hidden', false);
+            frm.set_df_property('shipping_type', 'reqd', 1);
+        }else{
+            frm.set_df_property('shipping_type', 'hidden', true);
+            frm.set_df_property('shipping_type', 'reqd', 0);
+        }
 		frm.trigger("unhide_account_head");
 	},
 
@@ -302,7 +381,17 @@ frappe.ui.form.on('Delivery Note', {
 		// unhide expense_account and cost_center if perpetual inventory is enabled in the company
 		var aii_enabled = erpnext.is_perpetual_inventory_enabled(frm.doc.company)
 		frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
-	}
+	},
+    refresh: function(frm){
+        if (["Unit 5","Unit 8","Unit 11"].includes(frm.doc.company)){
+            frm.set_df_property('shipping_type', 'hidden', false);
+            frm.set_df_property('shipping_type', 'reqd', 1);
+        }else{
+            frm.set_df_property('shipping_type', 'hidden', true);
+            frm.set_df_property('shipping_type', 'reqd', 0);
+        }
+
+    }
 })
 
 

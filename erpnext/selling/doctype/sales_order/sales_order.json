@@ -51,6 +51,7 @@
   "items_section",
   "scan_barcode",
   "items",
+  "returnable_items",
   "pricing_rule_details",
   "pricing_rules",
   "section_break_31",
@@ -1191,12 +1192,19 @@
    "hidden": 1,
    "label": "Skip Delivery Note",
    "print_hide": 1
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "returnable_items",
+   "fieldtype": "Table",
+   "label": "Returnable Items",
+   "options": "Sale Order Returnable Item"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-07-01 12:39:57.698621",
+ "modified": "2022-07-19 15:59:55.312432",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

@@ -382,6 +382,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Loan Type",
 				},
+    {
+					"type": "doctype",
+					"name": "Employee Loan Settlement",
+				},
 			]
 		},
 		{
@@ -401,25 +405,7 @@ def get_data():
 				},
 			]
 		},
-		{
-			"label": _("Fleet Management"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Vehicle"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Log"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Expenses",
-					"doctype": "Vehicle"
-				},
-			]
-		},
+		
 		{
 			"label": _("Settings"),
 			"icon": "fa fa-cog",

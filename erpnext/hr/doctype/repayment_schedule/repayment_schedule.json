@@ -9,7 +9,8 @@
   "interest_amount",
   "total_payment",
   "balance_loan_amount",
-  "paid"
+  "paid",
+  "loan_settlement_reference"
  ],
  "fields": [
   {
@@ -66,10 +67,16 @@
    "in_list_view": 1,
    "label": "Paid",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_settlement_reference",
+   "fieldtype": "Link",
+   "label": "Loan Settlement Reference",
+   "options": "Employee Loan Settlement"
   }
  ],
  "istable": 1,
- "modified": "2019-10-29 11:45:10.694557",
+ "modified": "2022-09-26 11:35:15.498120",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Repayment Schedule",

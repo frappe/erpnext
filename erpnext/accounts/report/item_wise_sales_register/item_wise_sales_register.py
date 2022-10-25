@@ -64,6 +64,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'customer': d.customer,
 			'customer_name': customer_record.customer_name,
 			'customer_group': customer_record.customer_group,
+			'delivery_note_posting_date': d.delivery_note_posting_date
 		}
 
 		if additional_query_columns:
@@ -295,6 +296,12 @@ def get_columns(additional_table_columns, filters):
 			'width': 100
 		},
 		{
+			'label': _("Delivery Note Posting Date"),
+			'fieldname': 'delivery_note_posting_date',
+			'fieldtype': 'Date',
+			'width': 100
+		},
+		{
 			'label': _('Income Account'),
 			'fieldname': 'income_account',
 			'fieldtype': 'Link',
@@ -377,6 +384,17 @@ def get_conditions(filters):
 	if filters.get("brand"):
 		conditions +=  """and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s"""
 
+	if filters.get('sales_invoice_status'):
+		if filters.get('sales_invoice_status') == 'All':
+			conditions += f" and `tabSales Invoice`.docstatus IN (0,1) "
+		elif filters.get('sales_invoice_status') == 'Submitted':
+			conditions += f" and `tabSales Invoice`.docstatus = 1 "
+		elif filters.get('sales_invoice_status') == 'Draft':
+			conditions += f" and `tabSales Invoice`.docstatus = 0 "		
+	else:
+		conditions += f" and `tabSales Invoice`.docstatus IN (0,1) "
+
+
 	if filters.get("item_group"):
 		conditions +=  """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
 
@@ -414,6 +432,7 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
 			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
+			(SELECT posting_date FROM `tabDelivery Note` WHERE name = `tabSales Invoice Item`.delivery_note) AS delivery_note_posting_date,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
 			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
@@ -423,8 +442,7 @@ def get_items(filters, additional_query_columns):
             (SELECT incoming_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = `tabSales Invoice Item`.batch_no and s_l_e.item_code = `tabSales Invoice Item`.item_code AND incoming_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1) AS incoming_rate,
             (SELECT outgoing_rate FROM `tabStock Ledger Entry` AS s_l_e WHERE s_l_e.batch_no = `tabSales Invoice Item`.batch_no and s_l_e.item_code = `tabSales Invoice Item`.item_code AND outgoing_rate > 0 ORDER BY s_l_e.creation ASC LIMIT 1) AS outgoing_rate
 		from `tabSales Invoice`, `tabSales Invoice Item`
-		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
-			and `tabSales Invoice`.docstatus = 1 {1}
+		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent {1}
 		""".format(additional_query_columns or '', conditions), filters, as_dict=1) #nosec
 
 def get_delivery_notes_against_sales_order(item_list):
@@ -449,7 +467,7 @@ def get_grand_total(filters, doctype):
 	return frappe.db.sql(""" SELECT
 		SUM(`tab{0}`.base_grand_total)
 		FROM `tab{0}`
-		WHERE `tab{0}`.docstatus = 1
+		WHERE `tab{0}`.docstatus IN (0,1)
 		and posting_date between %s and %s
 	""".format(doctype), (filters.get('from_date'), filters.get('to_date')))[0][0] #nosec
 
@@ -482,7 +500,7 @@ def get_tax_accounts(item_list, columns, company_currency,
 			charge_type, base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
-			parenttype = %s and docstatus = 1
+			parenttype = %s and docstatus IN (0,1)
 			and (description is not null and description != '')
 			and parent in (%s)
 			%s

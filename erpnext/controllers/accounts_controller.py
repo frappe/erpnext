@@ -24,7 +24,8 @@ from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_tem
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 class AccountMissingError(frappe.ValidationError): pass
-
+#site confige import
+from nrp_manufacturing.utils import  get_config_by_name
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
 class AccountsController(TransactionBase):
@@ -621,7 +622,13 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
+		#daily items list
+		daily_rate_item = get_config_by_name("DAILY_RATE_ITEMS", [])
+		
 		for item in self.get("items"):
+			#check to baypass daily item rate
+			if item.item_code in daily_rate_item:
+				return
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
 					item.get(item_ref_dn), based_on), self.precision(based_on, item))

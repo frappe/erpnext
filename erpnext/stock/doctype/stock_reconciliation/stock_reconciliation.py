@@ -214,6 +214,7 @@ class StockReconciliation(StockController):
 
 					if row.valuation_rate in ("", None):
 						row.valuation_rate = previous_sle.get("valuation_rate", 0)
+						
 
 				if row.qty and not row.valuation_rate and not row.allow_zero_valuation_rate:
 					frappe.throw(_("Valuation Rate required for Item {0} at row {1}").format(row.item_code, row.idx))
@@ -263,7 +264,8 @@ class StockReconciliation(StockController):
 					'actual_qty': -1 * row.current_qty,
 					'serial_no': row.current_serial_no,
 					'batch_no': row.batch_no,
-					'valuation_rate': row.current_valuation_rate
+					'valuation_rate': row.current_valuation_rate,
+					'incoming_rate':row.current_valuation_rate
 				})
 
 				if row.current_serial_no:
@@ -302,7 +304,8 @@ class StockReconciliation(StockController):
 						'actual_qty': -1,
 						'qty_after_transaction': qty_after_transaction,
 						'warehouse': warehouse,
-						'valuation_rate': previous_sle.get("valuation_rate")
+						'valuation_rate': previous_sle.get("valuation_rate"),
+						'incoming_rate': previous_sle.get("valuation_rate")
 					})
 
 					sl_entries.append(new_args)
@@ -364,6 +367,7 @@ class StockReconciliation(StockController):
 			"serial_no": '\n'.join(serial_nos) if serial_nos else '',
 			"batch_no": row.batch_no,
 			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
+			"incoming_rate": flt(row.valuation_rate, row.precision("valuation_rate")),
 			"stock_value_difference": flt((row.quantity_difference * row.valuation_rate), row.precision("valuation_rate"))
 		})
 

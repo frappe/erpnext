@@ -107,6 +107,8 @@ def validate_returned_items(doc):
 		elif d.item_name:
 			items_returned = True
 
+	if doc.get('is_return') and len(doc.get('items')) == 0:
+		items_returned = True
 	if not items_returned:
 		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
 
@@ -209,6 +211,9 @@ def make_return_doc(doctype, source_name, target_doc=None):
 	default_warehouse_for_sales_return = frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
+
+		if doc.is_return == 1 and (doc.doctype!='Purchase Invoice' or doc.doctype!='Sales Invoice'):
+			doc.naming_series = 'MAT-VC-.YYYY.-'
 		doc.is_return = 1
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
@@ -301,7 +306,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.price_list_rate = 0
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
-
+	def update_return_item(source_doc, target_doc, source_parent):
+		target_doc.actual_qty = -1* source_doc.actual_qty
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount
 
@@ -320,6 +326,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				"batch_no": "batch_no"
 			},
 			"postprocess": update_item
+		},
+		doctype +" Returnable Item": {
+			"doctype": doctype + " Returnable Item",
+			"postprocess": update_return_item
 		},
 		"Payment Schedule": {
 			"doctype": "Payment Schedule",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2017-08-10 15:38:00.080575",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -68,9 +67,8 @@
   }
  ],
  "istable": 1,
- "links": [],
- "modified": "2020-03-13 17:58:24.729526",
- "modified_by": "Administrator",
+ "modified": "2022-02-02 17:23:56.947017",
+ "modified_by": "support.adil@gourmetpakistan.com",
  "module": "Accounts",
  "name": "Payment Schedule",
  "owner": "Administrator",

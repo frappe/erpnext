@@ -92,10 +92,24 @@ class StockEntry(StockController):
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
+	def submit(self):
+		import time
+		from nrp_manufacturing.utils import get_config_by_name
+		time.sleep(1)
+		se_type = frappe.db.sql(f"""SELECT wo.item_section FROM `tabWork Order` as wo WHERE wo.name ='{self.work_order}' """)
+		if se_type:
+			se_type_section = se_type[0][0]+self.stock_entry_type
+		else:
+			se_type_section = self.stock_entry_type
+		se_bifurcations = get_config_by_name('stock_entry_queues')
+		for queue in se_bifurcations:
+			if se_type_section in se_bifurcations.get(queue):
+				break
+		self.queue_action('submit',queue_name="se_"+queue)
+
 	def on_submit(self):
 
 		self.update_stock_ledger()
-
 		update_serial_nos_after_submit(self, "items")
 		self.update_work_order()
 		self.validate_purchase_order()
@@ -110,11 +124,23 @@ class StockEntry(StockController):
 		stock_gl = frappe.new_doc('Stock GL Queue')
 		stock_gl.stock_entry = self.name
 		stock_gl.save(ignore_permissions=True)
-		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",stock_entry_name=stock_gl.stock_entry,queue="se_gl_queue",enqueue_after_commit=True)
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",stock_entry_name=stock_gl.stock_entry,queue="gl",enqueue_after_commit=True)
 		# #enqueue(StockEntry.make_gl_entries, self=self, queue='short')
 		# self.make_gl_entries()
+		# update slu
+		sles = frappe.db.sql(f'''SELECT * from `tabStock Ledger Entry` WHERE voucher_no = '{self.name}' ''', as_dict=True)
+		for sle in sles:
+			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=sle.name,warehouse=sle.warehouse,item_code=sle.item_code,created_on=sle.creation,queue="slu_primary",enqueue_after_commit=True)
+
+		frappe.db.sql("UPDATE `tabStock Entry` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
+
 
 	def on_cancel(self):
+
+		items_list = frappe.db.sql(f"""SELECT * FROM `tabStock Ledger Entry` WHERE voucher_no = '{self.name}'""",as_dict=True)
+		for item in items_list:        
+			frappe.db.sql(f"""UPDATE `tabStock Ledger Entry` set active_batch = 1 WHERE item_code = '{item.item_code}' and batch_no = '{item.batch_no}' and warehouse = '{item.warehouse}'""")
+			frappe.db.commit()
 
 		if self.purchase_order and self.purpose == "Send to Subcontractor":
 			self.update_purchase_order_supplied_items()
@@ -130,6 +156,7 @@ class StockEntry(StockController):
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
 		self.delete_linked_stock_entry()
+
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -512,7 +539,10 @@ class StockEntry(StockController):
 						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
 					if raw_material_cost and self.purpose == "Manufacture" and not d.allow_zero_valuation_rate:
-						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
+						if d.qty:
+							d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.qty), d.precision("basic_rate"))
+						else:
+							d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 					elif self.purpose == "Repack" and total_fg_qty:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)

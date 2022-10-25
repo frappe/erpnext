@@ -54,6 +54,14 @@ frappe.ui.form.on('Loan', {
 	},
 
 	make_jv: function (frm) {
+		var loan_amount=0
+		loan_amount = frm.doc.loan_amount
+		// if(frm.doc.loan_settlement_type && frm.doc.loan_settlement_type == "Loan Enhancement"){
+		// 	loan_amount = frm.doc.total_settlement_amount
+		// }
+		// else{
+		// 	loan_amount = frm.doc.loan_amount
+		// }
 		frappe.call({
 			args: {
 				"loan": frm.doc.name,
@@ -61,7 +69,7 @@ frappe.ui.form.on('Loan', {
 				"loan_account": frm.doc.loan_account,
 				"applicant_type": frm.doc.applicant_type,
 				"applicant": frm.doc.applicant,
-				"loan_amount": frm.doc.loan_amount,
+				"loan_amount": loan_amount,
 				"payment_account": frm.doc.payment_account
 			},
 			method: "erpnext.hr.doctype.loan.loan.make_jv_entry",

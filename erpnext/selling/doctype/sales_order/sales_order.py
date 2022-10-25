@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+import math
 import frappe
 import json
 import frappe.utils
@@ -165,6 +166,39 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
+    
+	def before_save(self):	
+		from nrp_manufacturing.utils import returnable_items
+		returnables = returnable_items(self.items,self.company)
+		self.returnable_items = {} # reset		
+		for returnable in returnables:
+			ordered_qty = 0
+			for item in self.items:
+				if item.item_code == returnable.item:
+					ordered_qty = item.qty
+					break
+			if ordered_qty == 0:
+				frappe.throw(f"Item {returnable.item_name} qty must be greater then zero")
+			if returnable.returnable_qty == 1:
+				qty = ordered_qty / returnable.item_qty
+			else:
+				res = returnable.item_qty / returnable.returnable_qty
+				qty = ordered_qty * res
+			qty = math.ceil(qty)
+            # check if item is ordered then please adjust the RI quantity
+			minus_qty = 0
+			for i in self.items:
+				if i.item_code == returnable.returnable_item:
+					minus_qty = i.qty
+					break
+			qty -= minus_qty
+			temp_item = self.append('returnable_items',{})
+			temp_item.item_code = returnable.returnable_item
+			temp_item.item_name = returnable.returnable_item_name
+			temp_item.rate = returnable.sale_price
+			temp_item.item_reference = returnable.item
+			temp_item.qty = qty
+			temp_item.is_allways_return = returnable.is_allways_return
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -570,6 +604,8 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 		else:
 			# set company address
 			target.update(get_company_address(target.company))
+		if source.order_type == 'Depletion':
+			target.is_depletion = 1
 
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
@@ -612,10 +648,21 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
+			# no need to update batch no field
+			"field_no_map" : ["batch_no"],
 			"postprocess": update_item,
 			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		}
-
+		mapper["Sale Order Returnable Item"] = {
+			"doctype": "Delivery Note Returnable Item",
+			"field_map": {
+				"item_code": "item_code",
+				"item_name": "item_name",
+				"rate": "rate",
+				"qty": "so_qty",
+				"item_reference": "item_reference",
+			},
+		}
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
 	return target_doc

@@ -12,7 +12,7 @@ from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.accounts.utils import get_fiscal_year
 
 class StockFreezeError(frappe.ValidationError): pass
-
+from nrp_manufacturing.utils import get_config_by_name
 exclude_from_linked_with = True
 
 class StockLedgerEntry(Document):
@@ -37,12 +37,23 @@ class StockLedgerEntry(Document):
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
-		self.actual_amt_check()
+		## Disable Funtion on warehouse wastages
+		## Check site configration
+		warehouse_site = get_config_by_name("RETURN_NOTE_WAREHOUSE")
+		warehouse_list = []
+		for warehouse in warehouse_site:
+			warehouse_list.append(warehouse_site[warehouse])
+		if warehouse_list:
+			if self.warehouse not in warehouse_list:
+				self.actual_amt_check()
 
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
-
+		# Setting Qty after transaction, Stock Value and Stock Queue
+		if self.voucher_type!='Stock Entry':
+			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=self.name,warehouse=self.warehouse,item_code=self.item_code,created_on=self.creation,queue="slu_secondary",enqueue_after_commit=True)
+		
 	#check for item quantity available in stock
 	def actual_amt_check(self):
 		if self.batch_no and not self.get("allow_negative_stock"):

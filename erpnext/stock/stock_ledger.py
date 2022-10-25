@@ -7,6 +7,8 @@ from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
 import json
+from nrp_manufacturing.utils import get_config_by_name
+
 
 from six import iteritems
 
@@ -30,6 +32,9 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
+				if sle.get('allow_negative_stock'):
+					allow_negative_stock = sle.get('allow_negative_stock')
+					sle.pop('allow_negative_stock')
 				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle.copy()
@@ -516,25 +521,46 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	# Get valuation rate from last sle for the same item and warehouse
 	if not company:
 		company = erpnext.get_default_company()
+	
+	## Make for Retuen check
+	warehouse_site = get_config_by_name("RETURN_NOTE_WAREHOUSE")
+	ware_house_name =''
+	if company in warehouse_site:
+		ware_house_name = warehouse_site[company]
 
-	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
-		where
+	### Valution rate for return Warehouse
+	if ware_house_name == warehouse:
+		# ###Custom price for item from site config
+		# price_for_gl_entry = get_config_by_name("MIX_CHOORA_FIXED_RETURN_PRICE")
+		# if  item_code in price_for_gl_entry:
+		# 	return  price_for_gl_entry[item_code]
+		# else:
+		last_valuation_rate = frappe.db.sql("""select valuation_rate
+			from `tabStock Ledger Entry`
+			where
 			item_code = %s
-			AND warehouse = %s
-			AND valuation_rate >= 0
-			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
-
-	if not last_valuation_rate:
-		# Get valuation rate from last sle for the item against any warehouse
+			AND valuation_rate > 0
+			AND voucher_no like %s 
+			order by posting_date desc, posting_time desc,batch_no desc, name desc limit 1""", (item_code,"%STE%"))
+	else:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
 			where
 				item_code = %s
-				AND valuation_rate > 0
-				AND NOT(voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
+				AND warehouse = %s
+				AND valuation_rate >= 0
+				AND NOT (voucher_no = %s AND voucher_type = %s)
+			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, voucher_no, voucher_type))
+
+		if not last_valuation_rate:
+			# Get valuation rate from last sle for the item against any warehouse
+			last_valuation_rate = frappe.db.sql("""select valuation_rate
+				from `tabStock Ledger Entry`
+				where
+					item_code = %s
+					AND valuation_rate > 0
+					AND NOT(voucher_no = %s AND voucher_type = %s)
+				order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
 
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0]) # as there is previous records, it might come with zero rate

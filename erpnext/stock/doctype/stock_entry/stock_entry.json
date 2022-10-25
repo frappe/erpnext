@@ -226,8 +226,7 @@
    "depends_on": "eval:doc.docstatus==0",
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
-   "label": "Edit Posting Date and Time",
-   "print_hide": 1
+   "label": "Edit Posting Date and Time"
   },
   {
    "default": "0",
@@ -627,8 +626,8 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
- "modified_by": "Administrator",
+ "modified": "2022-02-11 15:27:29.938216",
+ "modified_by": "support.adil@gourmetpakistan.com",
  "module": "Stock",
  "name": "Stock Entry",
  "owner": "Administrator",

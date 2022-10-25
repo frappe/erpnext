@@ -113,7 +113,7 @@ def update_stock(args, out):
 		(args.get("doctype") == "Sales Invoice" and args.get('update_stock'))) \
 		and out.warehouse and out.stock_qty > 0:
 
-		if out.has_batch_no and not args.get("batch_no"):
+		if out.has_batch_no and not args.get("batch_no") and args.get("doctype") != "Delivery Note":
 			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
 			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
 			if actual_batch_qty:
@@ -311,8 +311,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if item.stock_uom == args.uom:
 		out.conversion_factor = 1.0
 	else:
-		out.conversion_factor = args.conversion_factor or \
-			get_conversion_factor(item.name, args.uom).get("conversion_factor")
+		out.conversion_factor = get_conversion_factor(item.name, args.uom).get("conversion_factor")
+		#use this because if we create direct PO the Convertion of packsize is not working 
+		#out.conversion_factor = args.conversion_factor or \
+		#	get_conversion_factor(item.name, args.uom).get("conversion_factor")
 
 	args.conversion_factor = out.conversion_factor
 	out.stock_qty = out.qty * out.conversion_factor
@@ -320,7 +322,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	# calculate last purchase rate
 	if args.get('doctype') in purchase_doctypes:
 		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
-		out.last_purchase_rate = item_last_purchase_rate(args.name, args.conversion_rate, item.name, out.conversion_factor)
+		out.last_purchase_rate = item_last_purchase_rate(args.company,args.name, args.conversion_rate, item.name, out.conversion_factor)
 
 	# if default specified in item is for another company, fetch from company
 	for d in [
@@ -578,12 +580,34 @@ def get_price_list_rate(args, item_doc, out):
 		args.update(pl_details)
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
+## Oblige Rate Check company wise 
+		oblige_rate = 0
+		if args.parenttype == 'Purchase Order' or args.doctype == 'Purchase Order':
+			oblige_rate = flt(frappe.db.get_value('Item Daily Rate Table', {
+                            'category':'Buying Rate','company':args.company, 'item_code': item_doc.name, 'supplier_code': args.supplier, 'docstatus': '1', 'date': ["<=", frappe.utils.now()]}, 'new_rate'))
 
-		price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+		if  oblige_rate== None or oblige_rate == 0:
+			price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
 
-		# variant
-		if not price_list_rate and item_doc.variant_of:
-			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+			# variant
+			if not price_list_rate and item_doc.variant_of:
+				item_wise_rate = get_price_list_rate_for(args, item_doc.variant_of)
+
+			
+			out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
+			/ flt(args.conversion_rate)
+		else:
+			out.price_list_rate = oblige_rate
+			price_list_rate=oblige_rate
+		#price_list_rate = get_price_list_rate_for(args, item_doc.name) or 0
+
+		# # variant
+		# if not price_list_rate and item_doc.variant_of:
+		# 	price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
+		#comment last rate not get in case of purchase 
+		# ##if item rate is zero
+		if price_list_rate == 0 and item_doc.get('last_purchase_rate') and (args.parenttype == 'Purchase Order' or args.doctype == 'Purchase Order'):
+			out.price_list_rate = item_doc.last_purchase_rate
 
 		# insert in database
 		if not price_list_rate:
@@ -596,8 +620,7 @@ def get_price_list_rate(args, item_doc, out):
 
 		if not out.price_list_rate and args.transaction_type=="buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
-			out.update(get_last_purchase_details(item_doc.name,
-				args.name, args.conversion_rate))
+			out.update(get_last_purchase_details(args.company,item_doc.name,args.name, args.conversion_rate))
 
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""

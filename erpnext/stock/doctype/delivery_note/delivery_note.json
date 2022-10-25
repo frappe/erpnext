@@ -55,6 +55,10 @@
   "items_section",
   "scan_barcode",
   "items",
+  "returnable_items_section",
+  "manually_manage_return_items",
+  "remove_return_items",
+  "returnable_items",
   "pricing_rule_details",
   "pricing_rules",
   "packing_list",
@@ -101,6 +105,7 @@
   "tc_name",
   "terms",
   "transporter_info",
+  "customer_type",
   "transporter",
   "driver",
   "lr_no",
@@ -526,8 +531,7 @@
    "label": "Items",
    "oldfieldname": "delivery_note_details",
    "oldfieldtype": "Table",
-   "options": "Delivery Note Item",
-   "reqd": 1
+   "options": "Delivery Note Item"
   },
   {
    "fieldname": "pricing_rule_details",
@@ -902,7 +906,7 @@
    "fieldname": "driver",
    "fieldtype": "Link",
    "label": "Driver",
-   "options": "Driver",
+   "options": "Employee",
    "print_hide": 1
   },
   {
@@ -1230,14 +1234,44 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "returnable_items_section",
+   "fieldtype": "Section Break",
+   "label": "Returnable Items"
+  },
+  {
+   "fieldname": "returnable_items",
+   "fieldtype": "Table",
+   "label": "Returnable items",
+   "options": "Delivery Note Returnable Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "manually_manage_return_items",
+   "fieldtype": "Check",
+   "label": "Manually Manage Return items"
+  },
+  {
+   "default": "0",
+   "fieldname": "remove_return_items",
+   "fieldtype": "Check",
+   "label": "Remove Return items"
+  },
+  {
+   "fieldname": "customer_type",
+   "fieldtype": "Select",
+   "label": "Customer Type",
+   "options": "\nEmployee\nSupplier",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2021-11-25 17:21:50.478758",
- "modified_by": "attiqur.rehman@gourmetpakistan.com",
+ "modified": "2022-07-28 13:40:04.932386",
+ "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
  "owner": "Administrator",

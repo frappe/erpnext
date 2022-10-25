@@ -880,6 +880,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
@@ -930,18 +931,6 @@
    "label": "% Received",
    "no_copy": 1,
    "oldfieldname": "per_received",
-   "oldfieldtype": "Currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "per_billed",
-   "fieldtype": "Percent",
-   "in_list_view": 1,
-   "label": "% Billed",
-   "no_copy": 1,
-   "oldfieldname": "per_billed",
    "oldfieldtype": "Currency",
    "print_hide": 1,
    "read_only": 1
@@ -1050,13 +1039,24 @@
    "fieldtype": "Link",
    "label": "Set Reserve Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_billed",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Billed",
+   "no_copy": 1,
+   "oldfieldname": "per_billed",
+   "oldfieldtype": "Currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2021-01-22 20:27:11.418690",
+ "modified": "2022-09-05 15:21:06.227652",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

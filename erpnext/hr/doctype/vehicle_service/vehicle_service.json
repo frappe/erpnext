@@ -8,43 +8,138 @@
   "service_item",
   "type",
   "frequency",
-  "expense_amount"
+  "expense_amount",
+  "item_code",
+  "item_name",
+  "qty",
+  "quantity",
+  "previous_odm",
+  "current_odm",
+  "variance_odm",
+  "business_group",
+  "uom",
+  "vehicle",
+  "item_group",
+  "item_category"
  ],
  "fields": [
   {
    "fieldname": "service_item",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Service Item",
-   "options": "\nBrake Oil\nBrake Pad\nClutch Plate\nEngine Oil\nOil Change\nWheels",
-   "reqd": 1
+   "options": "\nBrake Oil\nBrake Pad\nClutch Plate\nEngine Oil\nOil Change\nWheels"
   },
   {
    "fieldname": "type",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Type",
-   "options": "\nInspection\nService\nChange",
-   "reqd": 1
+   "options": "\nInspection\nService\nChange"
   },
   {
    "fieldname": "frequency",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Frequency",
-   "options": "\nMileage\nMonthly\nQuarterly\nHalf Yearly\nYearly",
-   "reqd": 1
+   "options": "\nMileage\nMonthly\nQuarterly\nHalf Yearly\nYearly"
   },
   {
    "fieldname": "expense_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "Expense",
+   "label": "Expense"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Quantity"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_odm",
+   "fieldtype": "Float",
+   "label": "Previous ODM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_odm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Current ODM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "variance_odm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Variance ODM",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "Item_code.business_group",
+   "fieldname": "business_group",
+   "fieldtype": "Data",
+   "label": "Business Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Data",
+   "label": "vehicle",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Data",
+   "label": "Item group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_category",
+   "fieldname": "item_category",
+   "fieldtype": "Data",
+   "label": "Item Category",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "QTY",
    "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-18 16:49:46.645004",
+ "modified": "2022-09-08 12:09:09.140210",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Service",

@@ -3,6 +3,14 @@
 
 // render
 frappe.listview_settings['Purchase Invoice'] = {
+	onload: function(me) {
+		if (Object.values(frappe.route_options).length == 0){
+			frappe.route_options = {
+				// "status": "Draft",
+				"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), -60),frappe.datetime.get_today()]]
+			};
+		}
+	},
 	add_fields: ["supplier", "supplier_name", "base_grand_total", "outstanding_amount", "due_date", "company",
 		"currency", "is_return", "release_date", "on_hold"],
 	get_indicator: function(doc) {

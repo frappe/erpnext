@@ -27,6 +27,7 @@
   "valuation_rate",
   "standard_rate",
   "is_fixed_asset",
+  "is_chora",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
@@ -345,8 +346,7 @@
   {
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
-   "label": "Shelf Life In Days",
-   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
+   "label": "Shelf Life In Days"
   },
   {
    "default": "2099-12-31",
@@ -1059,16 +1059,20 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_chora",
+   "fieldtype": "Check",
+   "label": "Is Chora"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
- "index_web_pages_for_search": 1,
- "links": [],
  "max_attachments": 1,
- "modified": "2021-03-18 11:24:58.384992",
+ "modified": "2022-05-31 14:56:34.982569",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

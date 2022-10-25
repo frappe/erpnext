@@ -30,12 +30,49 @@ frappe.ui.form.on("Purchase Order", {
 
 	},
 
+	purchase_order_type: function(frm) {
+		frm.set_df_property('purchase_order_type','read_only',true);
+		if(frm.doc.purchase_order_type == "Local" || frm.doc.purchase_order_type == "Import"){
+			frm.set_value("items", []);
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			rate_field.read_only = 1;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			price_list_field.read_only = 1;
+			refresh_field("items");
+		}else{
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			rate_field.read_only = 0;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			price_list_field.read_only = 0;
+			refresh_field("items");
+		}
+
+	},
+
 	onload: function(frm) {
 		set_schedule_date(frm);
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
 		}
 
+		if(frm.doc.purchase_order_type != ""){
+			frm.set_df_property('purchase_order_type','read_only',true);
+		}
+
+		if(frm.doc.purchase_order_type == "Local" || frm.doc.purchase_order_type == "Import"){
+			
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			rate_field.read_only = 1;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			price_list_field.read_only = 1;
+			refresh_field("items");
+		}else{
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", frm.doc.name);
+			rate_field.read_only = 0;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", frm.doc.name);
+			price_list_field.read_only = 0;
+			refresh_field("items");
+		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
@@ -53,6 +90,7 @@ frappe.ui.form.on("Purchase Order Item", {
 			}
 		}
 	}
+	
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
@@ -73,6 +111,20 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this._super();
 		var allow_receipt = false;
 		var is_drop_ship = false;
+		if(this.frm.doc.purchase_order_type == "Local" || this.frm.doc.purchase_order_type == "Import"){
+			
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", this.frm.doc.name);
+			rate_field.read_only = 1;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", this.frm.doc.name);
+			price_list_field.read_only = 1;
+			refresh_field("items");
+		}else{
+			var rate_field = frappe.meta.get_docfield("Purchase Order Item","rate", this.frm.doc.name);
+			rate_field.read_only = 0;
+			var price_list_field = frappe.meta.get_docfield("Purchase Order Item","price_list_rate", this.frm.doc.name);
+			price_list_field.read_only = 0;
+			refresh_field("items");
+		}
 
 		for (var i in cur_frm.doc.items) {
 			var item = cur_frm.doc.items[i];
@@ -86,9 +138,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				break;
 			}
 		}
-
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
-
 		if(doc.docstatus == 1) {
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
 				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
@@ -109,6 +159,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 							this.frm.add_custom_button(__('Resume'), () => this.unhold_purchase_order(), __("Status"));
 						}
 						this.frm.add_custom_button(__('Close'), () => this.close_purchase_order(), __("Status"));
+						//this.frm.add_custom_button(__('Expire'), () => this.expired_purchase_order(), __("Status"));
+					
 					}
 				}
 
@@ -120,12 +172,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			} else if(in_list(["Closed", "Delivered"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
-					this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
+					// as per requirment of of DF & DI ticket no 24333
+					//this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
 				}
 			}
 			if(doc.status != "Closed") {
-				if (doc.status != "On Hold") {
-					if(flt(doc.per_received) < 100 && allow_receipt) {
+				if (doc.status != "On Hold") {					
+					if(flt(doc.per_received) < 100 && allow_receipt && doc.status != "Expired") {
 						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
 						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
@@ -170,6 +223,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 	},
 
+	// before_save: function(frm) {
+	// 	var supplier_list = frappe.utils.get_config_by_name("supplier_expire_check")
+	// 	if(supplier_list.includes(frm.supplier)){		
+	// 		this.frm.set_df_property('expiry_date','read_only',false);
+	// 	}else{
+	// 		this.frm.set_value("expiry_date", '');
+	// 		this.frm.set_df_property('expiry_date','read_only',true);			
+	// 	}
+		
+	// },
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
@@ -354,7 +417,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
-						status: ["!=", "Stopped"],
+						status: ["not in" , "Closed", "On Hold"],						
 						per_ordered: ["<", 99.99],
 					}
 				})
@@ -502,6 +565,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	close_purchase_order: function(){
 		cur_frm.cscript.update_status('Close', 'Closed')
+	},
+	expired_purchase_order: function(){
+		cur_frm.cscript.update_status('Expire', 'Expired')
 	},
 
 	delivered_by_supplier: function(){
