@@ -48,6 +48,7 @@ class Appointment(StatusUpdater):
 		self.set_onload('contact_nos', get_all_contact_nos(self.appointment_for, self.party_name))
 
 		self.set_can_notify_onload()
+		self.set_scheduled_reminder_onload()
 
 		if self.meta.has_field('applies_to_vehicle'):
 			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(self.get_customer(),
@@ -500,6 +501,19 @@ class Appointment(StatusUpdater):
 
 		self.set_onload('can_notify', can_notify)
 
+	def set_scheduled_reminder_onload(self):
+		self.set_onload('scheduled_reminder', self.get_reminder_schedule())
+
+	def get_reminder_schedule(self):
+		if self.docstatus != 1 or not self.scheduled_date or not automated_reminder_enabled():
+			return None
+
+		reminder_date = get_reminder_date_from_appointment_date(self.scheduled_date)
+		appointments_for_reminder = get_appointments_for_reminder_notification(reminder_date, appointments=self.name)
+
+		if self.name in appointments_for_reminder:
+			return get_appointment_reminders_scheduled_time(reminder_date)
+
 	def validate_notification(self, notification_type=None, throw=False):
 		if not notification_type:
 			if throw:
@@ -828,7 +842,7 @@ def automated_reminder_enabled():
 		return False
 
 
-def get_appointments_for_reminder_notification(reminder_date=None):
+def get_appointments_for_reminder_notification(reminder_date=None, appointments=None):
 	appointment_settings = frappe.get_cached_doc("Appointment Booking Settings", None)
 
 	now_dt = now_datetime()
@@ -845,6 +859,11 @@ def get_appointments_for_reminder_notification(reminder_date=None):
 
 	appointment_date = add_days(reminder_date, remind_days_before)
 
+	if appointments and isinstance(appointments, string_types):
+		appointments = [appointments]
+
+	appointments_condition = " and a.name in %(appointments)s" if appointments else ""
+
 	appointments_to_remind = frappe.db.sql_list("""
 		select a.name
 		from `tabAppointment` a
@@ -858,12 +877,14 @@ def get_appointments_for_reminder_notification(reminder_date=None):
 			and TIMESTAMPDIFF(MINUTE, a.confirmation_dt, %(reminder_dt)s) >= %(required_minutes)s
 			and n.last_scheduled_dt is null
 			and (n.last_sent_dt is null or DATE(n.last_sent_dt) != %(reminder_date)s)
-	""", {
+			{0}
+	""".format(appointments_condition), {
 		'appointment_date': appointment_date,
 		'reminder_dt': reminder_dt,
 		'reminder_date': reminder_date,
 		'now_dt': now_dt,
 		'required_minutes': appointment_reminder_confirmation_hours * 60,
+		'appointments': appointments,
 	})
 
 	return appointments_to_remind

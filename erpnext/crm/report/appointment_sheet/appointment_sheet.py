@@ -23,7 +23,7 @@ class AppointmentSheetReport(object):
 
 	def run(self):
 		self.get_data()
-		self.get_notification_schedule()
+		self.get_reminder_data()
 		self.process_data()
 		columns = self.get_columns()
 		return columns, self.data
@@ -51,7 +51,7 @@ class AppointmentSheetReport(object):
 			order by a.scheduled_dt, a.creation
 		""".format(extra_rows, conditions), self.filters, as_dict=1)
 
-	def get_notification_schedule(self):
+	def get_reminder_data(self):
 		if automated_reminder_enabled():
 			now_dt = now_datetime()
 			scheduled_dates = set([d.scheduled_date for d in self.data if d.scheduled_dt > now_dt])

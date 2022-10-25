@@ -182,10 +182,17 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 			: __("Not Sent");
 
 		var reminder_count = frappe.get_notification_count(me.frm, 'Appointment Reminder', 'SMS');
-		var reminder_color = reminder_count ? "green"
-			: this.can_notify('Appointment Reminder') ? "yellow" : "grey";
-		var reminder_status = reminder_count ? __("{0} SMS", [reminder_count])
-			: __("Not Sent");
+		var reminder_status = __("Not Sent");
+		var reminder_color = "grey";
+
+		if (reminder_count) {
+			reminder_color = "green";
+			reminder_status = __("{0} SMS", [reminder_count]);
+		} else if (me.frm.doc.__onload && me.frm.doc.__onload.scheduled_reminder) {
+			var scheduled_reminder_str = frappe.datetime.str_to_user(me.frm.doc.__onload.scheduled_reminder);
+			reminder_color = "blue";
+			reminder_status = __("Scheduled ({0})", [scheduled_reminder_str]);
+		}
 
 		var cancellation_count = frappe.get_notification_count(me.frm, 'Appointment Cancellation', 'SMS');
 		var cancellation_color = cancellation_count ? "green"
