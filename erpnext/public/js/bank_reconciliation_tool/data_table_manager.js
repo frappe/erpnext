@@ -121,8 +121,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				${__("Actions")}
 			</a>
 			`,
-			
-		];	
+		];
 	}
 
 	get_datatable() {
