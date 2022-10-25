@@ -128,9 +128,9 @@ class StockEntry(StockController):
 		# #enqueue(StockEntry.make_gl_entries, self=self, queue='short')
 		# self.make_gl_entries()
 		# update slu
-		sles = frappe.db.sql(f'''SELECT * from `tabStock Ledger Entry` WHERE voucher_no = '{self.name}' ''', as_dict=True)
-		for sle in sles:
-			frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=sle.name,warehouse=sle.warehouse,item_code=sle.item_code,created_on=sle.creation,queue="slu_primary",enqueue_after_commit=True)
+		# sles = frappe.db.sql(f'''SELECT * from `tabStock Ledger Entry` WHERE voucher_no = '{self.name}' ''', as_dict=True)
+		# for sle in sles:
+		# 	frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=sle.name,warehouse=sle.warehouse,item_code=sle.item_code,created_on=sle.creation,queue="slu_primary",enqueue_after_commit=True)
 
 		frappe.db.sql("UPDATE `tabStock Entry` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
 
