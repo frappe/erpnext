@@ -44,8 +44,8 @@ frappe.query_reports["Budget Variance Report"] = {
 			fieldname: "budget_against",
 			label: __("Budget Against"),
 			fieldtype: "Select",
-			options: ["Cost Center", "Project"],
-			default: "Cost Center",
+			options: ["Company","Cost Center", "Project"],
+			default: "Company",
 			reqd: 1,
 			on_change: function() {
 				frappe.query_report.set_filter_value("budget_against_filter", []);
