@@ -317,7 +317,9 @@ class Analytics(object):
 		elif self.filters.range == "Monthly":
 			period = _(str(self.months[posting_date.month - 1])) + " " + str(posting_date.year)
 		elif self.filters.range == "Quarterly":
-			period = _("Quarter {0} {1}").format(str(((posting_date.month - 1) // 3) + 1), str(posting_date.year))
+			period = _("Quarter {0} {1}").format(
+				str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
+			)
 		else:
 			year = get_fiscal_year(posting_date, company=self.filters.company)
 			period = str(year[0])
