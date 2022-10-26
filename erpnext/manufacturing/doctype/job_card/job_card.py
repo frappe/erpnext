@@ -133,7 +133,7 @@ class JobCard(Document):
 				(%(from_time)s <= jctl.from_time and %(to_time)s >= jctl.to_time) {0}
 			)
 			and jctl.name != %(name)s and jc.name != %(parent)s and jc.docstatus < 2 {1}
-			order by jctl.to_time desc limit 1""".format(
+			order by jctl.to_time desc""".format(
 				extra_cond, validate_overlap_for
 			),
 			{
