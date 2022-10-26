@@ -124,28 +124,3 @@ jobs:
         env:
           TYPE: server
           CI_BUILD_ID: ${{ github.run_id }}
-          ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
-
-      - name: Upload coverage data
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-${{ matrix.container }}
-          path: /home/runner/frappe-bench/sites/coverage.xml
-
-  coverage:
-    name: Coverage Wrap Up
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone
-        uses: actions/checkout@v2
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-
-      - name: Upload coverage data
-        uses: codecov/codecov-action@v2
-        with:
-          name: MariaDB
-          fail_ci_if_error: true
-          verbose: true
