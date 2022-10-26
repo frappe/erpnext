@@ -6,23 +6,28 @@
  "field_order": [
   "item_code",
   "col_break1",
-  "qty",
-  "item_group",
-  "brand",
-  "section_break_6",
-  "uom",
   "item_name",
-  "description",
+  "section_break_6",
+  "qty",
+  "uom",
   "column_break_8",
+  "basic_rate",
+  "first_additional",
+  "description_section",
+  "description",
+  "column_break_11",
   "image",
   "image_view",
-  "basic_rate"
+  "item_group",
+  "brand"
  ],
  "fields": [
   {
+   "columns": 7,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
@@ -33,6 +38,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
+   "default": "1",
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -48,7 +55,8 @@
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
    "options": "Item Group",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "brand",
@@ -58,7 +66,8 @@
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
    "options": "Brand",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "section_break_6",
@@ -76,7 +85,6 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "in_list_view": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data"
@@ -116,11 +124,29 @@
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "first_additional",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "First/Additional",
+   "options": "\nFirst\nAdditional\nReplacement"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:38:00.124004",
+ "modified": "2022-10-25 13:59:52.054362",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Item",

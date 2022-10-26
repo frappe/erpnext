@@ -21,17 +21,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	},
 
 	onload: function () {
-		if (cur_frm.fields_dict.lead_owner.df.options.match(/^User/)) {
-			cur_frm.fields_dict.lead_owner.get_query = function (doc, cdt, cdn) {
-				return { query: "frappe.core.doctype.user.user.user_query" }
-			}
-		}
-
-		if (cur_frm.fields_dict.contact_by.df.options.match(/^User/)) {
-			cur_frm.fields_dict.contact_by.get_query = function (doc, cdt, cdn) {
-				return { query: "frappe.core.doctype.user.user.user_query" }
-			}
-		}
 	},
 
 	refresh: function () {

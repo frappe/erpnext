@@ -239,6 +239,26 @@ customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
 [d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['collapsible_depends_on'] = "eval:true"
 [d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['depends_on'] = "eval:!doc.__islocal"
 
+# Opportunity Fields
+opportunity_rating_fields = [
+	{"label": "Key Features You Like", "fieldname": "liked_features", "fieldtype": "Small Text",
+		"insert_after": "feedback_cb_1"},
+	{"label": "Interior", "fieldname": "rating_interior", "fieldtype": "Rating",
+		"insert_after": "ratings_section"},
+	{"label": "", "fieldname": "rating_cb_1", "fieldtype": "Column Break",
+		"insert_after": "rating_interior"},
+	{"label": "Exterior", "fieldname": "rating_exterior", "fieldtype": "Rating",
+		"insert_after": "rating_cb_1"},
+	{"label": "", "fieldname": "rating_cb_2", "fieldtype": "Column Break",
+		"insert_after": "rating_exterior"},
+	{"label": "Specifications", "fieldname": "rating_specifications", "fieldtype": "Rating",
+		"insert_after": "rating_cb_2"},
+	{"label": "", "fieldname": "rating_cb_3", "fieldtype": "Column Break",
+		"insert_after": "rating_specifications"},
+	{"label": "Price", "fieldname": "rating_price", "fieldtype": "Rating",
+		"insert_after": "rating_cb_3"},
+]
+
 # Accounting Dimensions
 accounting_dimension_fields = [
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
@@ -284,8 +304,8 @@ field_lists = [
 	material_request_service_person_fields, accounting_dimension_fields, accounting_dimension_table_fields,
 	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
 	project_template_fields, project_template_category_fields, project_template_detail_fields,
-	customer_vehicle_selector_fields, project_customer_vehicle_selector,
-	appointment_customer_vehicle_selector, customer_customer_vehicle_selector
+	customer_vehicle_selector_fields, project_customer_vehicle_selector, appointment_customer_vehicle_selector,
+	customer_customer_vehicle_selector, opportunity_rating_fields
 ]
 
 for field_list in field_lists:
@@ -376,6 +396,7 @@ data = {
 		"Project Template Category": project_template_category_fields,
 		"Project Template Detail": project_template_detail_fields,
 		"Customer": customer_customer_vehicle_selector,
+		"Opportunity": opportunity_rating_fields,
 	},
 	'default_portal_role': 'Customer'
 }

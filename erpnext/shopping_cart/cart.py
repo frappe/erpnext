@@ -176,7 +176,6 @@ def create_lead_for_item_inquiry(lead, subject, message):
 	lead = frappe.parse_json(lead)
 	lead_doc = frappe.new_doc('Lead')
 	lead_doc.update(lead)
-	lead_doc.set('lead_owner', '')
 
 	try:
 		lead_doc.save(ignore_permissions=True)

@@ -26,78 +26,20 @@ class Opportunity(TransactionBase):
 			["Closed", "eval:self.status=='Closed'"]
 		]
 
-	def after_insert(self):
-		if self.opportunity_from == "Lead":
-			frappe.get_doc("Lead", self.party_name).set_status(update=True)
-
 	def validate(self):
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Opportunity", self.name, "contact_date") if \
-				(not cint(self.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Opportunity", self.name, "contact_by") if \
-				(not cint(self.get("__islocal"))) else None,
-		})
-
-		self.make_new_lead_if_required()
-
 		self.validate_item_details()
-		self.validate_uom_is_integer("uom", "qty")
 		self.validate_cust_name()
+		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.title:
 			self.title = self.customer_name
 
-		if not self.with_items:
-			self.items = []
+	def after_insert(self):
+		if self.opportunity_from == "Lead":
+			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
-	def make_new_lead_if_required(self):
-		"""Set lead against new opportunity"""
-		if (not self.get("party_name")) and self.contact_email:
-			# check if customer is already created agains the self.contact_email
-			customer = frappe.db.sql("""select
-				distinct `tabDynamic Link`.link_name as customer
-				from
-					`tabContact`,
-					`tabDynamic Link`
-				where `tabContact`.email_id='{0}'
-				and
-					`tabContact`.name=`tabDynamic Link`.parent
-				and
-					ifnull(`tabDynamic Link`.link_name, '')<>''
-				and
-					`tabDynamic Link`.link_doctype='Customer'
-			""".format(self.contact_email), as_dict=True)
-			if customer and customer[0].customer:
-				self.party_name = customer[0].customer
-				self.opportunity_from = "Customer"
-				return
-
-			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
-			if not lead_name:
-				sender_name = get_fullname(self.contact_email)
-				if sender_name == self.contact_email:
-					sender_name = None
-
-				if not sender_name and ('@' in self.contact_email):
-					email_name = self.contact_email.split('@')[0]
-
-					email_split = email_name.split('.')
-					sender_name = ''
-					for s in email_split:
-						sender_name += s.capitalize() + ' '
-
-				lead = frappe.get_doc({
-					"doctype": "Lead",
-					"email_id": self.contact_email,
-					"lead_name": sender_name or 'Unknown'
-				})
-
-				lead.flags.ignore_email_validation = True
-				lead.insert(ignore_permissions=True)
-				lead_name = lead.name
-
-			self.opportunity_from = "Lead"
-			self.party_name = lead_name
+	def on_trash(self):
+		self.delete_events()
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
@@ -114,9 +56,6 @@ class Opportunity(TransactionBase):
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
-	def on_trash(self):
-		self.delete_events()
-
 	def has_active_quotation(self):
 		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
 			"opportunity": self.name,
@@ -124,22 +63,13 @@ class Opportunity(TransactionBase):
 			"status": ("not in", ['Lost', 'Closed'])
 		})
 
-		if not self.with_items:
-			quotation = frappe.get_all('Quotation', {
-				'opportunity': self.name,
-				'status': ("not in", ['Lost', 'Closed']),
-				'docstatus': 1
-			}, 'name')
+		quotation = frappe.get_all('Quotation', {
+			'opportunity': self.name,
+			'status': ("not in", ['Lost', 'Closed']),
+			'docstatus': 1
+		}, 'name')
 
-			return quotation or vehicle_quotation
-		else:
-			quotation = frappe.db.sql("""
-				select q.name
-				from `tabQuotation` q, `tabQuotation Item` qi
-				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-				and q.status not in ('Lost', 'Closed')""", self.name)
-
-			return quotation or vehicle_quotation
+		return quotation or vehicle_quotation
 
 	def has_ordered_quotation(self):
 		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
@@ -183,35 +113,6 @@ class Opportunity(TransactionBase):
 			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
 			self.customer_name = company_name or lead_name
 
-	def on_update(self):
-		self.add_calendar_event()
-
-	def add_calendar_event(self, opts=None, force=False):
-		if not opts:
-			opts = frappe._dict()
-
-		opts.description = ""
-		opts.contact_date = self.contact_date
-
-		if self.party_name and self.opportunity_from == 'Customer':
-			if self.contact_person:
-				opts.description = 'Contact '+cstr(self.contact_person)
-			else:
-				opts.description = 'Contact customer '+cstr(self.party_name)
-		elif self.party_name and self.opportunity_from == 'Lead':
-			if self.contact_display:
-				opts.description = 'Contact '+cstr(self.contact_display)
-			else:
-				opts.description = 'Contact lead '+cstr(self.party_name)
-
-		opts.subject = opts.description
-		opts.description += '. By : ' + cstr(self.contact_by)
-
-		if self.to_discuss:
-			opts.description += ' To Discuss : ' + cstr(self.to_discuss)
-
-		super(Opportunity, self).add_calendar_event(opts, force)
-
 	def validate_item_details(self):
 		if not self.get('items'):
 			return
@@ -230,16 +131,23 @@ class Opportunity(TransactionBase):
 
 @frappe.whitelist()
 def get_item_details(item_code):
-	item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand
-		from `tabItem` where name = %s""", item_code, as_dict=1)
+	item_details = frappe.db.sql("""
+		select item_name, stock_uom, image, description, item_group, brand
+		from `tabItem`
+		where name = %s
+	""", item_code, as_dict=1)
+
+	item_details = item_details[0] if item_details else frappe._dict()
+
 	return {
-		'item_name': item and item[0]['item_name'] or '',
-		'uom': item and item[0]['stock_uom'] or '',
-		'description': item and item[0]['description'] or '',
-		'image': item and item[0]['image'] or '',
-		'item_group': item and item[0]['item_group'] or '',
-		'brand': item and item[0]['brand'] or ''
+		'item_name': item.item_name,
+		'description': item.description,
+		'uom': item.stock_uom,
+		'image': item.image,
+		'item_group': item.item_group,
+		'brand': item.brand,
 	}
+
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
@@ -269,10 +177,10 @@ def make_quotation(source_name, target_doc=None):
 		if taxes.get('taxes'):
 			quotation.update(taxes)
 
+		quotation.opportunity = source.name
+
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
-		if not source.with_items:
-			quotation.opportunity = source.name
 
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
@@ -296,6 +204,7 @@ def make_quotation(source_name, target_doc=None):
 
 	return doclist
 
+
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Opportunity", source_name, {
@@ -313,6 +222,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist
+
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
@@ -333,6 +243,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 	return doclist
 
+
 @frappe.whitelist()
 def set_multiple_status(names, status):
 	names = json.loads(names)
@@ -340,6 +251,7 @@ def set_multiple_status(names, status):
 		opp = frappe.get_doc("Opportunity", name)
 		opp.status = status
 		opp.save()
+
 
 def auto_close_opportunity():
 	""" auto close the `Replied` Opportunities after 7 days """
@@ -354,6 +266,7 @@ def auto_close_opportunity():
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
+
 
 @frappe.whitelist()
 def make_opportunity_from_communication(communication, company, ignore_communication_links=False):

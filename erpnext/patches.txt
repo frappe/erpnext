@@ -780,3 +780,4 @@ execute:frappe.delete_doc_if_exists("Report", "Sales Payment Summary")
 execute:frappe.delete_doc_if_exists("Report", "Sales Order Items To Be Delivered")
 execute:frappe.delete_doc_if_exists("Report", "Purchase Order Items To Be Received")
 erpnext.patches.v12_0.set_booking_customer_name_in_jv
+erpnext.patches.v12_0.resetup_vehicle_domain #25-10-2022

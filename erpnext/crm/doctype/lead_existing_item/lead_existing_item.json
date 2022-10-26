@@ -1,0 +1,40 @@
+{
+ "creation": "2022-10-24 17:21:08.197947",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name"
+  }
+ ],
+ "modified": "2022-10-24 17:22:42.123881",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Lead Existing Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

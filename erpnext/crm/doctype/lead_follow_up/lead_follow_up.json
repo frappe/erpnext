@@ -1,0 +1,55 @@
+{
+ "creation": "2022-10-24 18:25:35.063309",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "time",
+  "remarks",
+  "contacted"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Time"
+  },
+  {
+   "columns": 5,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "contacted",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Contacted"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-10-25 11:53:16.286001",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Lead Follow Up",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
