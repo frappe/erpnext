@@ -42,11 +42,11 @@ class StockEntry(StockController):
 		super(StockEntry, self).__init__(*args, **kwargs)
 		self.status_updater = []
 
-	def save(self, *args, **kwargs):
-		#checking for the editting method
-		if self.name and self.docstatus == 0:
-			frappe.throw("You are not allowed to change, please delete and create new")
-		super().save(*args, **kwargs) # call the base save method		
+	# def save(self, *args, **kwargs):
+	# 	#checking for the editting method
+	# 	# if self.name and self.docstatus == 0:
+	# 	# 	frappe.throw("You are not allowed to change, please delete and create new")
+	# 	super().save(*args, **kwargs) # call the base save method		
 
 	def get_feed(self):
 		return self.stock_entry_type
