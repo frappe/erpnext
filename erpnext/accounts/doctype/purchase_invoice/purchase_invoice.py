@@ -652,6 +652,8 @@ class PurchaseInvoice(BuyingController):
 				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
 					expense_account = (item.expense_account
 						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
+					
+					account_currency = get_account_currency(expense_account)
 
 					if not item.is_fixed_asset:
 						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
