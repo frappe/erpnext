@@ -1043,6 +1043,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		if (!this.frm.fields_dict.vehicle_panels) {
 			return;
 		}
+
 		var panel_template_rows = this.frm.doc.project_templates.filter(el => el.is_panel_job == 1);
 		this.frm.set_df_property('vehicle_panels', 'hidden', panel_template_rows.length ? 0 : 1);
 	},
@@ -1056,8 +1057,8 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 	update_panel_template_description: function() {
 		var description = [];
 		for (let d of (this.frm.doc.vehicle_panels || [])) {
-			if (d.vehicle_panel_side && d.vehicle_panel && d.vehicle_panel_job) {
-				description.push(`${d.idx} - ${d.vehicle_panel_side} ${d.vehicle_panel} ${d.vehicle_panel_job}`);
+			if (d.vehicle_panel && d.vehicle_panel_job) {
+				description.push(`${d.idx} -${d.vehicle_panel_side ? " " + d.vehicle_panel_side : ""} ${d.vehicle_panel} ${d.vehicle_panel_job}`);
 			}
 		}
 		if (!description.length) {
