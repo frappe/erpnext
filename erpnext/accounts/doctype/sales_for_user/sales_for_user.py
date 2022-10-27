@@ -125,7 +125,10 @@ class SalesForUser(Document):
 
 							for mode in modes:
 								if payment.mode_of_payment == mode:
-									values_modes[conta] += payment.amount
+									if payment.mode_of_payment == "Efectivo":
+										values_modes[conta] += payment.amount - salary_slip.change_amount
+									else:
+										values_modes[conta] += payment.amount
 								
 								conta += 1
 
