@@ -18,7 +18,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
-from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounts.party import get_party_account, get_party_account_currency
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -533,6 +533,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			target.set_advances()
 
 		target.set_payment_schedule()
+		target.credit_to = get_party_account("Supplier", source.supplier, source.company)
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)

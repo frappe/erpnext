@@ -83,11 +83,12 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			}
 		}
 
-		if(doc.docstatus == 1 && !(['Lost', 'Ordered']).includes(doc.status)) {
-			if(!doc.valid_till || frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
-				cur_frm.add_custom_button(__('Sales Order'),
-					cur_frm.cscript['Make Sales Order'], __('Create'));
-			}
+		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
+			this.frm.add_custom_button(
+				__("Sales Order"),
+				this.frm.cscript["Make Sales Order"],
+				__("Create")
+			);
 
 			if(doc.status!=="Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {

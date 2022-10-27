@@ -269,6 +269,18 @@ def get_serial_no_for_item(args):
 	return item_details
 
 
+def update_pricing_rule_uom(pricing_rule, args):
+	child_doc = {"Item Code": "items", "Item Group": "item_groups", "Brand": "brands"}.get(
+		pricing_rule.apply_on
+	)
+
+	apply_on_field = frappe.scrub(pricing_rule.apply_on)
+
+	for row in pricing_rule.get(child_doc):
+		if row.get(apply_on_field) == args.get(apply_on_field):
+			pricing_rule.uom = row.uom
+
+
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
@@ -325,7 +337,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if isinstance(pricing_rule, string_types):
 				pricing_rule = frappe.get_cached_doc("Pricing Rule", pricing_rule)
-				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
+				update_pricing_rule_uom(pricing_rule, args)
+				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule) or []
 
 			if pricing_rule.get("suggestion"):
 				continue
@@ -439,12 +452,15 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.currency == args.currency:
 			pricing_rule_rate = pricing_rule.rate
 
+		# TODO https://github.com/frappe/erpnext/pull/23636 solve this in some other way.
 		if pricing_rule_rate:
+			is_blank_uom = pricing_rule.get("uom") != args.get("uom")
 			# Override already set price list rate (from item price)
 			# if pricing_rule_rate > 0
 			item_details.update(
 				{
-					"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
+					"price_list_rate": pricing_rule_rate
+					* (args.get("conversion_factor", 1) if is_blank_uom else 1),
 				}
 			)
 		item_details.update({"discount_percentage": 0.0})

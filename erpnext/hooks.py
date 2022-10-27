@@ -334,8 +334,6 @@ has_website_permission = {
 	"Patient": "erpnext.healthcare.web_form.personal_details.personal_details.has_website_permission",
 }
 
-dump_report_map = "erpnext.startup.report_data_map.data_map"
-
 before_tests = "erpnext.setup.utils.before_tests"
 
 standard_queries = {
