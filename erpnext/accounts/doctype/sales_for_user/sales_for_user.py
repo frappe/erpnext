@@ -117,7 +117,7 @@ class SalesForUser(Document):
 				
 						for payment in payments:
 							if payment.mode_of_payment == "Efectivo":
-								cash += payment.amount
+								cash += payment.amount - salary_slip.change_amount
 							if payment.mode_of_payment == "Tarjetas de credito":
 								cards += payment.amount
 
