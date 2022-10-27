@@ -242,8 +242,6 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 		if int(primary_mandatory):
 			if primary_email == "":
 				continue
-		# elif (billing_email == "") and (primary_email == ""):
-		# 	continue
 
 		customer_list.append(
 			{"name": customer.name, "primary_email": primary_email, "billing_email": billing_email}
