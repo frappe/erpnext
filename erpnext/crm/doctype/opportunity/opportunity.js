@@ -22,6 +22,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		erpnext.toggle_naming_series();
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
+		this.set_sales_person_from_user();
 		this.setup_buttons();
 	},
 
@@ -115,6 +116,18 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	set_dynamic_link: function() {
 		var doctype = this.frm.doc.opportunity_from == 'Lead' ? 'Lead' : 'Customer';
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'party_name', doctype: doctype}
+	},
+
+	set_sales_person_from_user: function() {
+		if (!this.frm.get_field('sales_person') || this.frm.doc.sales_person || !this.frm.doc.__islocal) {
+			return;
+		}
+
+		erpnext.utils.get_sales_person_from_user(sales_person => {
+			if (sales_person) {
+				this.frm.set_value('sales_person', sales_person);
+			}
+		});
 	},
 
 	opportunity_from: function() {
