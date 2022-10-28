@@ -46,6 +46,8 @@
   "address_display",
   "section_break_14",
   "sales_stage",
+  "column_break_39",
+  "delivery_period",
   "column_break_17",
   "opportunity_amount",
   "column_break_37",
@@ -432,11 +434,21 @@
    "fieldtype": "Data",
    "label": "Contact Phone",
    "read_only": 1
+  },
+  {
+   "fieldname": "delivery_period",
+   "fieldtype": "Link",
+   "label": "Delivery Period",
+   "options": "Vehicle Allocation Period"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2022-10-28 12:50:02.261112",
+ "modified": "2022-10-28 18:56:55.745295",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
