@@ -1,5 +1,6 @@
 from frappe import _
 
+
 def get_data():
 	return {
 		"fieldname": "purchase_receipt_no",
@@ -18,7 +19,10 @@ def get_data():
 		},
 		"transactions": [
 			{"label": _("Related"), "items": ["Purchase Invoice", "Landed Cost Voucher", "Asset"]},
-			{"label": _("Reference"), "items": ["Material Request", "Purchase Order", "Quality Inspection", "Project"]},
+			{
+				"label": _("Reference"),
+				"items": ["Material Request", "Purchase Order", "Quality Inspection", "Project"],
+			},
 			{"label": _("Returns"), "items": ["Purchase Receipt"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
 		],
