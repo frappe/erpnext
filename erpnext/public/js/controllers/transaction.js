@@ -426,6 +426,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
+				item.pricing_rules = ''
 				return this.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
 					child: item,
@@ -1045,6 +1046,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	uom(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+		item.pricing_rules = ''
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
@@ -1121,6 +1123,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	qty(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
+		item.pricing_rules = ''
 		this.conversion_factor(doc, cdt, cdn, true);
 		this.calculate_stock_uom_rate(doc, cdt, cdn);
 		this.apply_pricing_rule(item, true);
