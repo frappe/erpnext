@@ -21,7 +21,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		erpnext.toggle_naming_series();
 		this.set_dynamic_field_label();
-		this.set_contact_schedule();
 		this.set_dynamic_link();
 		this.setup_buttons();
 	},
@@ -119,6 +118,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	},
 
 	opportunity_from: function() {
+		this.set_dynamic_link();
 		this.set_dynamic_field_label();
 		this.frm.set_value("party_name","");
 	},
@@ -136,13 +136,28 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	},
 
 	party_name: function() {
-		if (this.frm.doc.opportunity_from == "Customer") {
-			return erpnext.utils.get_party_details(this.frm);
-		} else if (this.frm.doc.opportunity_from == "Lead") {
-			return erpnext.utils.map_current_doc({
-				method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-				source_name: this.frm.doc.party_name,
-				frm: this.frm
+		return this.get_customer_details();
+	},
+
+	get_customer_details: function() {
+		var me = this;
+
+		if (me.frm.doc.company && me.frm.doc.opportunity_from && me.frm.doc.party_name) {
+			return frappe.call({
+				method: "erpnext.crm.doctype.opportunity.opportunity.get_customer_details",
+				args: {
+					args: {
+						doctype: me.frm.doc.doctype,
+						company: me.frm.doc.company,
+						opportunity_from: me.frm.doc.opportunity_from,
+						party_name: me.frm.doc.party_name,
+					}
+				},
+				callback: function (r) {
+					if (r.message && !r.exc) {
+						return me.frm.set_value(r.message);
+					}
+				}
 			});
 		}
 	},

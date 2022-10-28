@@ -196,21 +196,17 @@ def set_lead_for_customer(lead, customer):
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source, target)
+		target.opportunity_from = 'Lead'
+		target.run_method('set_missing_values')
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	target_doc = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {
-				"campaign_name": "campaign",
-				"doctype": "opportunity_from",
 				"name": "party_name",
-				"lead_name": "contact_display",
-				"company_name": "customer_name",
-				"email_id": "contact_email",
-				"mobile_no": "contact_mobile"
 			}
-		}}, target_doc, set_missing_values)
+		}
+	}, target_doc, set_missing_values)
 
 	return target_doc
 
@@ -218,20 +214,19 @@ def make_opportunity(source_name, target_doc=None):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source, target)
+		target.quotation_to = "Lead"
+		target.run_method("set_missing_values")
+		target.run_method("set_other_charges")
+		target.run_method("calculate_taxes_and_totals")
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	target_doc = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
 				"name": "party_name"
 			}
-		}}, target_doc, set_missing_values)
-
-	target_doc.quotation_to = "Lead"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
-	target_doc.run_method("calculate_taxes_and_totals")
+		}
+	}, target_doc, set_missing_values)
 
 	return target_doc
 
@@ -239,41 +234,20 @@ def make_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source, target)
+		target.quotation_to = "Lead"
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	target_doc = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Vehicle Quotation",
 			"field_map": {
 				"name": "party_name"
 			}
-		}}, target_doc, set_missing_values)
-
-	target_doc.quotation_to = "Lead"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("calculate_taxes_and_totals")
+		}
+	}, target_doc, set_missing_values)
 
 	return target_doc
-
-
-def _set_missing_values(source, target):
-	address = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Address',
-		}, ['parent'], limit=1)
-
-	contact = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Contact',
-		}, ['parent'], limit=1)
-
-	if address:
-		target.customer_address = address[0].parent
-
-	if contact:
-		target.contact_person = contact[0].parent
 
 
 @frappe.whitelist()

@@ -15,7 +15,8 @@ from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignment, clear as clear_assignments, close_all_assignments
 from six import string_types
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact, get_all_contact_nos
+from frappe.contacts.doctype.contact.contact import get_default_contact, get_all_contact_nos
+from erpnext.accounts.party import get_contact_details
 from erpnext.crm.doctype.lead.lead import _get_lead_contact_details, get_customer_from_lead
 from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
@@ -723,11 +724,10 @@ def get_customer_details(args):
 	out.address_display = get_address_display(out.customer_address)
 
 	# Contact
+	lead = party if party.doctype == "Lead" else None
+
 	out.contact_person = args.contact_person or get_default_contact(party.doctype, party.name)
-	if party.doctype == "Lead" and not out.contact_person:
-		out.update(_get_lead_contact_details(party))
-	else:
-		out.update(get_contact_details(out.contact_person))
+	out.update(get_contact_details(out.contact_person, lead=lead))
 
 	out.secondary_contact_person = args.secondary_contact_person
 	secondary_contact_details = get_contact_details(out.secondary_contact_person)

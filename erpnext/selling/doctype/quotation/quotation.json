@@ -336,7 +336,7 @@
    "fieldname": "contact_display",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Contact",
+   "label": "Contact Name",
    "read_only": 1
   },
   {
@@ -1436,7 +1436,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2022-08-06 13:28:17.710939",
+ "modified": "2022-10-28 13:06:40.659134",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

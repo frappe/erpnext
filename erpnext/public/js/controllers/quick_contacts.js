@@ -22,12 +22,15 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 		var display_fieldname = prefix + "contact_display";
 		var contact = me.frm.doc[contact_fieldname];
 
-		if (contact) {
+		var lead = frappe.dynamic_link.doctype == "Lead" ? me.frm.doc[frappe.dynamic_link.fieldname] : null;
+
+		if (contact || lead) {
 			me.set_dynamic_link();
 			return frappe.call({
-				method: "frappe.contacts.doctype.contact.contact.get_contact_details",
+				method: "erpnext.accounts.party.get_contact_details",
 				args: {
-					contact: contact,
+					contact: contact || "",
+					lead: lead,
 					get_contact_no_list: 1,
 					link_doctype: frappe.dynamic_link.doctype,
 					link_name: me.frm.doc[frappe.dynamic_link.fieldname]

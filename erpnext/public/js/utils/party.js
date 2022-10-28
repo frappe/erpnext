@@ -316,7 +316,7 @@ erpnext.utils.get_contact_details = function(frm) {
 	if (frm.updating_party_details) return;
 
 	var lead;
-	if (frm.doc.party_name && ['quotation_to', 'appointment_for', 'opportunity_from'].includes("Lead")) {
+	if (frm.doc.party_name && [frm.doc.quotation_to, frm.doc.appointment_for, frm.doc.opportunity_from].includes("Lead")) {
 		lead = frm.doc.party_name;
 	}
 

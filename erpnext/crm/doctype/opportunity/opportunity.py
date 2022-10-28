@@ -2,17 +2,26 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
-from frappe.utils import cstr, cint, get_fullname
+import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.email.inbox import link_communication_to_document
+from frappe.contacts.doctype.address.address import get_default_address, get_address_display
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_party_account_currency
-from frappe.email.inbox import link_communication_to_document
+from erpnext.accounts.party import get_contact_details, get_party_account_currency
+from six import string_types
+import json
+
 
 subject_field = "title"
 sender_field = "contact_email"
+
+force_fields = [
+	'customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'customer_group', 'territory',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone'
+]
 
 
 class Opportunity(TransactionBase):
@@ -27,12 +36,11 @@ class Opportunity(TransactionBase):
 		]
 
 	def validate(self):
+		self.set_missing_values()
 		self.validate_item_details()
 		self.validate_cust_name()
 		self.validate_uom_is_integer("uom", "qty")
-
-		if not self.title:
-			self.title = self.customer_name
+		self.set_title()
 
 	def after_insert(self):
 		if self.opportunity_from == "Lead":
@@ -40,6 +48,18 @@ class Opportunity(TransactionBase):
 
 	def on_trash(self):
 		self.delete_events()
+
+	def set_title(self):
+		self.title = self.customer_name
+
+	def set_missing_values(self):
+		self.set_customer_details()
+
+	def set_customer_details(self):
+		customer_details = get_customer_details(self.as_dict())
+		for k, v in customer_details.items():
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+				self.set(k, v)
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
@@ -127,6 +147,45 @@ class Opportunity(TransactionBase):
 			item = frappe.db.get_value("Item", d.item_code, item_fields, as_dict=True)
 			for key in item_fields:
 				if not d.get(key): d.set(key, item.get(key))
+
+
+@frappe.whitelist()
+def get_customer_details(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+	out = frappe._dict()
+
+	if not args.opportunity_from or not args.party_name:
+		frappe.throw(_("Party is mandatory"))
+
+	if args.opportunity_from not in ['Customer', 'Lead']:
+		frappe.throw(_("Opportunity From must be either Customer or Lead"))
+
+	party = frappe.get_cached_doc(args.opportunity_from, args.party_name)
+
+	# Customer Name
+	if party.doctype == "Lead":
+		out.customer_name = party.company_name or party.lead_name
+	else:
+		out.customer_name = party.customer_name
+
+	# Tax IDs
+	out.tax_id = party.get('tax_id')
+	out.tax_cnic = party.get('tax_cnic')
+	out.tax_strn = party.get('tax_strn')
+
+	# Address
+	out.customer_address = args.customer_address or get_default_address(party.doctype, party.name)
+	out.address_display = get_address_display(out.customer_address)
+
+	# Contact
+	lead = party if party.doctype == "Lead" else None
+	out.contact_person = args.contact_person or get_default_contact(party.doctype, party.name)
+	out.update(get_contact_details(out.contact_person, lead=lead))
+
+	return out
 
 
 @frappe.whitelist()

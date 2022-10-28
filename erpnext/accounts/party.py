@@ -195,23 +195,31 @@ def set_contact_details(party_details, party, party_type, contact_person=None, p
 	if not party_details.contact_person:
 		party_details.contact_person = get_default_contact(party_type, party.name)
 
-	party_details.update(get_contact_details(party_details.contact_person, project=project_details))
+	lead = None
+	if party_type == "Lead":
+		lead = party
+
+	party_details.update(get_contact_details(party_details.contact_person, project=project_details, lead=lead))
 
 
 @frappe.whitelist()
-def get_contact_details(contact, project=None, lead=None):
+def get_contact_details(contact, project=None, lead=None, get_contact_no_list=False, link_doctype=None, link_name=None):
 	from frappe.contacts.doctype.contact.contact import get_contact_details
 	from erpnext.crm.doctype.lead.lead import _get_lead_contact_details
 
-	if isinstance(project, string_types):
+	if project and isinstance(project, string_types):
 		project = frappe.db.get_value("Project", project, ['contact_person', 'contact_mobile', 'contact_phone'], as_dict=1)
+	if lead and isinstance(lead, string_types):
+		lead = frappe.get_doc("Lead", lead)
 
 	out = frappe._dict()
 
 	if contact:
-		out = get_contact_details(contact)
+		out = get_contact_details(contact, get_contact_no_list=get_contact_no_list, link_doctype=link_doctype, link_name=link_name)
 	elif lead:
 		out = _get_lead_contact_details(lead)
+	else:
+		out = get_contact_details(None)
 
 	if project and cstr(contact) == cstr(project.get('contact_person')):
 		out.contact_mobile = project.contact_mobile
