@@ -7,7 +7,16 @@ import math
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, flt, get_last_day, getdate, now_datetime, nowdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	date_diff,
+	flt,
+	get_last_day,
+	getdate,
+	now_datetime,
+	nowdate,
+)
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry
@@ -107,30 +116,81 @@ class Loan(AccountsController):
 		if not self.repayment_start_date:
 			frappe.throw(_("Repayment Start Date is mandatory for term loans"))
 
+		schedule_type_details = frappe.db.get_value(
+			"Loan Type", self.loan_type, ["repayment_schedule_type", "repayment_date_on"], as_dict=1
+		)
+
 		self.repayment_schedule = []
 		payment_date = self.repayment_start_date
 		balance_amount = self.loan_amount
-		while balance_amount > 0:
-			interest_amount = flt(balance_amount * flt(self.rate_of_interest) / (12 * 100))
-			principal_amount = self.monthly_repayment_amount - interest_amount
-			balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
-			if balance_amount < 0:
-				principal_amount += balance_amount
-				balance_amount = 0.0
 
-			total_payment = principal_amount + interest_amount
-			self.append(
-				"repayment_schedule",
-				{
-					"payment_date": payment_date,
-					"principal_amount": principal_amount,
-					"interest_amount": interest_amount,
-					"total_payment": total_payment,
-					"balance_loan_amount": balance_amount,
-				},
+		while balance_amount > 0:
+			interest_amount, principal_amount, balance_amount, total_payment = self.get_amounts(
+				payment_date,
+				balance_amount,
+				schedule_type_details.repayment_schedule_type,
+				schedule_type_details.repayment_date_on,
 			)
-			next_payment_date = add_single_month(payment_date)
-			payment_date = next_payment_date
+
+			if schedule_type_details.repayment_schedule_type == "Pro-rated calendar months":
+				next_payment_date = get_last_day(payment_date)
+				if schedule_type_details.repayment_date_on == "Start of the next month":
+					next_payment_date = add_days(next_payment_date, 1)
+
+				payment_date = next_payment_date
+
+			self.add_repayment_schedule_row(
+				payment_date, principal_amount, interest_amount, total_payment, balance_amount
+			)
+
+			if (
+				schedule_type_details.repayment_schedule_type == "Monthly as per repayment start date"
+				or schedule_type_details.repayment_date_on == "End of the current month"
+			):
+				next_payment_date = add_single_month(payment_date)
+				payment_date = next_payment_date
+
+	def get_amounts(self, payment_date, balance_amount, schedule_type, repayment_date_on):
+		if schedule_type == "Monthly as per repayment start date":
+			days = 1
+			months = 12
+		else:
+			expected_payment_date = get_last_day(payment_date)
+			if repayment_date_on == "Start of the next month":
+				expected_payment_date = add_days(expected_payment_date, 1)
+
+			if expected_payment_date == payment_date:
+				# using 30 days for calculating interest for all full months
+				days = 30
+				months = 365
+			else:
+				days = date_diff(get_last_day(payment_date), payment_date)
+				months = 365
+
+		interest_amount = flt(balance_amount * flt(self.rate_of_interest) * days / (months * 100))
+		principal_amount = self.monthly_repayment_amount - interest_amount
+		balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
+		if balance_amount < 0:
+			principal_amount += balance_amount
+			balance_amount = 0.0
+
+		total_payment = principal_amount + interest_amount
+
+		return interest_amount, principal_amount, balance_amount, total_payment
+
+	def add_repayment_schedule_row(
+		self, payment_date, principal_amount, interest_amount, total_payment, balance_loan_amount
+	):
+		self.append(
+			"repayment_schedule",
+			{
+				"payment_date": payment_date,
+				"principal_amount": principal_amount,
+				"interest_amount": interest_amount,
+				"total_payment": total_payment,
+				"balance_loan_amount": balance_loan_amount,
+			},
+		)
 
 	def set_repayment_period(self):
 		if self.repayment_method == "Repay Fixed Amount per Period":
