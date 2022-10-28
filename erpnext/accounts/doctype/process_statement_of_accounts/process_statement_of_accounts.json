@@ -27,6 +27,7 @@
   "customers",
   "preferences",
   "orientation",
+  "include_break",
   "include_ageing",
   "ageing_based_on",
   "section_break_14",
@@ -284,10 +285,16 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
+  },
+  {
+   "default": "1",
+   "fieldname": "include_break",
+   "fieldtype": "Check",
+   "label": "Page Break After Each SoA"
   }
  ],
  "links": [],
- "modified": "2021-09-06 21:00:45.732505",
+ "modified": "2022-10-17 17:47:08.662475",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
@@ -321,5 +328,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
