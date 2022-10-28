@@ -216,7 +216,7 @@
   {
    "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance'])",
    "fieldname": "reference_due_date",
-   "fieldtype": "Select",
+   "fieldtype": "Date",
    "label": "Reference Due Date",
    "no_copy": 1
   },
@@ -284,7 +284,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-13 17:07:17.999191",
+ "modified": "2022-10-26 20:03:10.906259",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
