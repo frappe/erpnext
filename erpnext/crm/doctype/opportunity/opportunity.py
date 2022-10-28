@@ -18,10 +18,12 @@ import json
 subject_field = "title"
 sender_field = "contact_email"
 
-force_fields = [
+force_party_fields = [
 	'customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'customer_group', 'territory',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone'
 ]
+
+force_item_fields = ("item_group", "brand")
 
 
 class Opportunity(TransactionBase):
@@ -37,8 +39,6 @@ class Opportunity(TransactionBase):
 
 	def validate(self):
 		self.set_missing_values()
-		self.validate_item_details()
-		self.validate_cust_name()
 		self.validate_uom_is_integer("uom", "qty")
 		self.set_title()
 
@@ -54,12 +54,23 @@ class Opportunity(TransactionBase):
 
 	def set_missing_values(self):
 		self.set_customer_details()
+		self.set_item_details()
 
 	def set_customer_details(self):
 		customer_details = get_customer_details(self.as_dict())
 		for k, v in customer_details.items():
-			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+			if self.meta.has_field(k) and (not self.get(k) or k in force_party_fields):
 				self.set(k, v)
+
+	def set_item_details(self):
+		for d in self.items:
+			if not d.item_code:
+				continue
+
+			item_details = get_item_details(d.item_code)
+			for k, v in item_details.items():
+				if d.meta.has_field(k) and (not d.get(k) or k in force_party_fields):
+					d.set(k, v)
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
@@ -126,28 +137,6 @@ class Opportunity(TransactionBase):
 				return False
 			return True
 
-	def validate_cust_name(self):
-		if self.party_name and self.opportunity_from == 'Customer':
-			self.customer_name = frappe.db.get_value("Customer", self.party_name, "customer_name")
-		elif self.party_name and self.opportunity_from == 'Lead':
-			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
-			self.customer_name = company_name or lead_name
-
-	def validate_item_details(self):
-		if not self.get('items'):
-			return
-
-		# set missing values
-		item_fields = ("item_name", "description", "item_group", "brand")
-
-		for d in self.items:
-			if not d.item_code:
-				continue
-
-			item = frappe.db.get_value("Item", d.item_code, item_fields, as_dict=True)
-			for key in item_fields:
-				if not d.get(key): d.set(key, item.get(key))
-
 
 @frappe.whitelist()
 def get_customer_details(args):
@@ -190,21 +179,15 @@ def get_customer_details(args):
 
 @frappe.whitelist()
 def get_item_details(item_code):
-	item_details = frappe.db.sql("""
-		select item_name, stock_uom, image, description, item_group, brand
-		from `tabItem`
-		where name = %s
-	""", item_code, as_dict=1)
-
-	item_details = item_details[0] if item_details else frappe._dict()
+	item_details = frappe.get_cached_doc("Item", item_code) if item_code else frappe._dict()
 
 	return {
-		'item_name': item.item_name,
-		'description': item.description,
-		'uom': item.stock_uom,
-		'image': item.image,
-		'item_group': item.item_group,
-		'brand': item.brand,
+		'item_name': item_details.item_name,
+		'description': item_details.description,
+		'uom': item_details.stock_uom,
+		'image': item_details.image,
+		'item_group': item_details.item_group,
+		'brand': item_details.brand,
 	}
 
 
