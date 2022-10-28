@@ -275,6 +275,11 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 
 def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	doctype = "Purchase Invoice" if party_type == "Supplier" else "Sales Invoice"
+	field = (
+		"base_tax_withholding_net_total as base_net_total"
+		if party_type == "Supplier"
+		else "base_net_total"
+	)
 	voucher_wise_amount = {}
 	vouchers = []
 
@@ -291,9 +296,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
 
-	invoices_details = frappe.get_all(
-		doctype, filters=filters, fields=["name", "base_tax_withholding_net_total as base_net_total"]
-	)
+	invoices_details = frappe.get_all(doctype, filters=filters, fields=["name", field])
 
 	for d in invoices_details:
 		vouchers.append(d.name)
