@@ -77,12 +77,14 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 		sinv.insert()
 		sinv.submit()
 		columns, data, message, chart = execute(
-			{
-				"company": "_Test Company",
-				"period_start_date": "2021-06-01",
-				"period_end_date": "2021-06-30",
-				"item": item.item_code,
-			}
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
 		)
 
 		expected_value = [
@@ -167,12 +169,14 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 		sinv.insert()
 		sinv.submit()
 		columns, data, message, chart = execute(
-			{
-				"company": "_Test Company",
-				"period_start_date": "2021-06-01",
-				"period_end_date": "2021-06-30",
-				"item": item.item_code,
-			}
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
 		)
 
 		# report defaults to company currency.
