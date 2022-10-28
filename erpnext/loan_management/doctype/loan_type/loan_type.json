@@ -16,6 +16,8 @@
   "company",
   "is_term_loan",
   "disabled",
+  "repayment_schedule_type",
+  "repayment_date_on",
   "description",
   "account_details_section",
   "mode_of_payment",
@@ -157,12 +159,30 @@
    "label": "Disbursement Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "description": "The schedule type that will be used for generating the term loan schedules (will affect the payment date and monthly repayment amount)",
+   "fieldname": "repayment_schedule_type",
+   "fieldtype": "Select",
+   "label": "Repayment Schedule Type",
+   "mandatory_depends_on": "is_term_loan",
+   "options": "\nMonthly as per repayment start date\nPro-rated calendar months"
+  },
+  {
+   "depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
+   "description": "Select whether the repayment date should be the end of the current month or start of the upcoming month",
+   "fieldname": "repayment_date_on",
+   "fieldtype": "Select",
+   "label": "Repayment Date On",
+   "mandatory_depends_on": "eval:doc.repayment_schedule_type == \"Pro-rated calendar months\"",
+   "options": "\nStart of the next month\nEnd of the current month"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-25 16:23:57.009349",
+ "modified": "2022-10-22 17:43:03.954201",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

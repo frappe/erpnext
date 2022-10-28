@@ -919,6 +919,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
    "fieldname": "discount_and_margin_section",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -1000,7 +1001,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-12 03:37:59.516609",
+ "modified": "2022-10-26 16:06:02.524435",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
