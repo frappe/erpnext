@@ -1,31 +1,25 @@
 import frappe
 
+from erpnext.accounts.utils import get_fiscal_year
+
 
 def execute():
-	frappe.db.sql(
-		"""
-			UPDATE
-					`tabPurchase Invoice Item`
-			INNER JOIN
-					`tabPurchase Invoice`
-			ON
-					`tabPurchase Invoice`.name = `tabPurchase Invoice Item`.parent
-			SET
-					`tabPurchase Invoice Item`.apply_tds = 1
-			WHERE
-					`tabPurchase Invoice`.apply_tds = 1
-					and `tabPurchase Invoice`.docstatus = 1
-		"""
-	)
+	# Only do for current fiscal year, no need to repost for all years
+	for company in frappe.get_all("Company"):
+		fiscal_year_details = get_fiscal_year(company=company.name, as_dict=True)
 
-	frappe.db.sql(
-		"""
-			UPDATE
-					`tabPurchase Invoice`
-			SET
-					tax_withholding_net_total = net_total,
-					base_tax_withholding_net_total = base_net_total
-			WHERE
-					apply_tds = 1 and docstatus = 1
-		"""
-	)
+		purchase_invoice = frappe.qb.DocType("Purchase Invoice")
+
+		frappe.qb.update(purchase_invoice).set(
+			purchase_invoice.tax_withholding_net_total, purchase_invoice.net_total
+		).set(
+			purchase_invoice.base_tax_withholding_net_total, purchase_invoice.base_net_total
+		).where(
+			purchase_invoice.company == company.name
+		).where(
+			purchase_invoice.apply_tds == 1
+		).where(
+			purchase_invoice.posting_date >= fiscal_year_details.year_start_date
+		).where(
+			purchase_invoice.docstatus == 1
+		).run()
