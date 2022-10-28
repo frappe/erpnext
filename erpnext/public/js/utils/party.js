@@ -315,11 +315,17 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 erpnext.utils.get_contact_details = function(frm) {
 	if (frm.updating_party_details) return;
 
+	var lead;
+	if (frm.doc.party_name && ['quotation_to', 'appointment_for', 'opportunity_from'].includes("Lead")) {
+		lead = frm.doc.party_name;
+	}
+
 	return frappe.call({
 		method: "erpnext.accounts.party.get_contact_details",
 		args: {
 			contact: frm.doc.contact_person || "",
 			project: frm.doc.project,
+			lead: lead,
 		},
 		callback: function(r) {
 			if (r.message) {
