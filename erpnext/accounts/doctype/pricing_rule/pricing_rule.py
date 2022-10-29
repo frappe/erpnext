@@ -116,6 +116,8 @@ class PricingRule(Document):
 		if self.free_item or self.same_item:
 			if not self.recurse_for:
 				self.recurse_for = 1
+		if self.is_recursive and flt(self.apply_recursion_over) > flt(self.min_qty):
+			throw(_("Min Qty should be greater than Recurse Over Qty"))
 
 	def cleanup_fields_value(self):
 		for logic_field in ["apply_on", "applicable_for", "rate_or_discount"]:
