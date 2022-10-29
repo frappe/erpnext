@@ -564,12 +564,21 @@ def calculate_billed_qty_and_amount(billed_data, for_delivery_return=False):
 	billed_qty = 0
 	billed_amt = 0
 
+	depreciation_types = set()
+
 	for d in billed_data:
 		if for_delivery_return or not d.is_return or (d.reopen_order and not d.update_stock):
 			billed_amt += d.amount
 
+			depreciation_types.add(d.depreciation_type or 'No Depreciation')
 			if d.depreciation_type != 'Depreciation Amount Only':
 				billed_qty += d.qty
+
+	if 'No Depreciation' not in depreciation_types:
+		has_depreciation_amount = 'Depreciation Amount Only' in depreciation_types
+		has_after_depreciation_amount = 'After Depreciation Amount' in depreciation_types
+		if not has_depreciation_amount or not has_after_depreciation_amount:
+			billed_qty = 0
 
 	return billed_qty, billed_amt
 
