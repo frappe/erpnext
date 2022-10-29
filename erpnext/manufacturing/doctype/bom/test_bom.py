@@ -583,6 +583,28 @@ class TestBOM(FrappeTestCase):
 		bom.submit()
 		self.assertEqual(bom.exploded_items[0].rate, bom.items[0].base_rate)
 
+	def test_bom_cost_update_flag(self):
+		rm_item = make_item(
+			properties={"is_stock_item": 1, "valuation_rate": 99, "last_purchase_rate": 89}
+		).name
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item])
+
+		create_stock_reconciliation(
+			item_code=rm_item, warehouse="_Test Warehouse - _TC", qty=100, rate=600
+		)
+
+		bom.load_from_db()
+		bom.update_cost()
+		self.assertTrue(bom.flags.cost_updated)
+
+		bom.load_from_db()
+		bom.update_cost()
+		self.assertFalse(bom.flags.cost_updated)
+
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

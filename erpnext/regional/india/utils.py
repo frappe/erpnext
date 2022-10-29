@@ -257,9 +257,16 @@ def get_regional_address_details(party_details, doctype, company):
 
 	update_party_details(party_details, doctype)
 
+	customer_gst_category = frappe.get_value(
+		"Customer", party_details.customer, ["gst_category", "export_type"]
+	)
+
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
 
-	if is_internal_transfer(party_details, doctype):
+	if is_internal_transfer(party_details, doctype) or customer_gst_category == (
+		"SEZ",
+		"Without Payment of Tax",
+	):
 		party_details.taxes_and_charges = ""
 		party_details.taxes = []
 		return party_details
@@ -603,6 +610,10 @@ def get_ewb_data(dt, dn):
 
 		data = get_address_details(data, doc, company_address, billing_address, dispatch_address)
 
+		if is_intrastate_transfer_eway_bill(data):
+			data.docType = "CHL"
+			data.subSupplyType = 8
+
 		data.itemList = []
 		data.totalValue = doc.total
 
@@ -643,6 +654,10 @@ def get_ewb_data(dt, dn):
 	data = {"version": "1.0.0421", "billLists": ewaybills}
 
 	return data
+
+
+def is_intrastate_transfer_eway_bill(data):
+	return data.fromGstin == data.toGstin
 
 
 @frappe.whitelist()
