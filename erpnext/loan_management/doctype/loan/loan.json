@@ -415,35 +415,18 @@
    "label": "Is NPA"
   },
   {
-<<<<<<< HEAD
-   "allow_on_submit": 1,
-   "default": "0",
-   "depends_on": "repay_from_salary",
-   "fieldname": "manually_update_paid_amount_in_salary_slip",
-   "fieldtype": "Check",
-   "label": "Manually Update Paid Amount in Salary Slip"
-=======
    "depends_on": "is_term_loan",
    "fetch_from": "loan_type.repayment_schedule_type",
    "fieldname": "repayment_schedule_type",
    "fieldtype": "Data",
    "label": "Repayment Schedule Type",
    "read_only": 1
->>>>>>> 2ddee50f27 (chore: Update labels as per repayment type)
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2022-09-13 02:05:25.017190",
-=======
- "modified": "2022-09-29 11:50:31.957360",
->>>>>>> 76c6ccab5d (feat: Repayment schedule types for term loans)
-=======
  "modified": "2022-09-30 10:36:47.902903",
->>>>>>> 2ddee50f27 (chore: Update labels as per repayment type)
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

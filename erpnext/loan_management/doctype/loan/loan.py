@@ -7,10 +7,6 @@ import math
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.utils import add_months, flt, get_last_day, getdate, now_datetime, nowdate
-from six import string_types
-=======
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -21,7 +17,7 @@ from frappe.utils import (
 	now_datetime,
 	nowdate,
 )
->>>>>>> 76c6ccab5d (feat: Repayment schedule types for term loans)
+from six import string_types
 
 import erpnext
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry
