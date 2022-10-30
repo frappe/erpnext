@@ -415,6 +415,14 @@
    "label": "Is NPA"
   },
   {
+   "allow_on_submit": 1,
+   "default": "0",
+   "depends_on": "repay_from_salary",
+   "fieldname": "manually_update_paid_amount_in_salary_slip",
+   "fieldtype": "Check",
+   "label": "Manually Update Paid Amount in Salary Slip"
+  },
+  {
    "depends_on": "is_term_loan",
    "fetch_from": "loan_type.repayment_schedule_type",
    "fieldname": "repayment_schedule_type",
@@ -426,7 +434,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-31 10:36:47.902903",
+ "modified": "2022-09-32 10:36:47.902903",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
