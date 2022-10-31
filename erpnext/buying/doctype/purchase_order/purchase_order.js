@@ -84,7 +84,35 @@ frappe.ui.form.on("Purchase Order", {
 				});
 			}, __('Create'));
 		}
+<<<<<<< HEAD
 	}
+=======
+	},
+
+	onload: function(frm) {
+		set_schedule_date(frm);
+		if (!frm.doc.transaction_date){
+			frm.set_value('transaction_date', frappe.datetime.get_today())
+		}
+
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
+
+		// On cancel and amending a purchase order with advance payment, reset advance paid amount
+		if (frm.is_new()) {
+			frm.set_value("advance_paid", 0)
+		}
+	},
+
+	apply_tds: function(frm) {
+		if (!frm.doc.apply_tds) {
+			frm.set_value("tax_withholding_category", '');
+		} else {
+			frm.set_value("tax_withholding_category", frm.supplier_tds);
+		}
+	},
+>>>>>>> 92f37ca111 (fix: Reset advance paid amount on Oreder cancel and amend)
 });
 
 frappe.ui.form.on("Purchase Order Item", {
