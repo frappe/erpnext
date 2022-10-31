@@ -226,7 +226,7 @@ class AccountsController(TransactionBase):
 		for item in self.get("items"):
 			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 				if not item.get(field_map.get(self.doctype)):
-					default_deferred_account = frappe.db.get_value(
+					default_deferred_account = frappe.get_cached_value(
 						"Company", self.company, "default_" + field_map.get(self.doctype)
 					)
 					if not default_deferred_account:
@@ -634,7 +634,7 @@ class AccountsController(TransactionBase):
 		if (self.is_new() or self.is_pos_profile_changed()) and not self.get("taxes"):
 			if self.company and not self.get("taxes_and_charges"):
 				# get the default tax master
-				self.taxes_and_charges = frappe.db.get_value(
+				self.taxes_and_charges = frappe.get_cached_value(
 					tax_master_doctype, {"is_default": 1, "company": self.company}
 				)
 
@@ -644,7 +644,7 @@ class AccountsController(TransactionBase):
 		if (
 			self.doctype == "Sales Invoice"
 			and self.is_pos
-			and self.pos_profile != frappe.db.get_value("Sales Invoice", self.name, "pos_profile")
+			and self.pos_profile != frappe.get_cached_value("Sales Invoice", self.name, "pos_profile")
 		):
 			return True
 
@@ -661,7 +661,7 @@ class AccountsController(TransactionBase):
 
 	def validate_enabled_taxes_and_charges(self):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
-		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
+		if frappe.get_cached_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(
 				_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges)
 			)
@@ -669,7 +669,7 @@ class AccountsController(TransactionBase):
 	def validate_tax_account_company(self):
 		for d in self.get("taxes"):
 			if d.account_head:
-				tax_account_company = frappe.db.get_value("Account", d.account_head, "company")
+				tax_account_company = frappe.get_cached_value("Account", d.account_head, "company")
 				if tax_account_company != self.company:
 					frappe.throw(
 						_("Row #{0}: Account {1} does not belong to company {2}").format(
@@ -917,7 +917,9 @@ class AccountsController(TransactionBase):
 					party_account = self.credit_to if is_purchase_invoice else self.debit_to
 					party_type = "Supplier" if is_purchase_invoice else "Customer"
 
-					gain_loss_account = frappe.db.get_value("Company", self.company, "exchange_gain_loss_account")
+					gain_loss_account = frappe.get_cached_value(
+						"Company", self.company, "exchange_gain_loss_account"
+					)
 					if not gain_loss_account:
 						frappe.throw(
 							_("Please set default Exchange Gain/Loss Account in Company {}").format(self.get("company"))
@@ -1014,7 +1016,7 @@ class AccountsController(TransactionBase):
 							else self.grand_total
 						),
 						"outstanding_amount": self.outstanding_amount,
-						"difference_account": frappe.db.get_value(
+						"difference_account": frappe.get_cached_value(
 							"Company", self.company, "exchange_gain_loss_account"
 						),
 						"exchange_gain_loss": flt(d.get("exchange_gain_loss")),
@@ -1392,7 +1394,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
+			self._abbr = frappe.get_cached_value("Company", self.company, "abbr")
 
 		return self._abbr
 
@@ -1778,7 +1780,7 @@ class AccountsController(TransactionBase):
 		"""
 
 		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
-			unrealized_profit_loss_account = frappe.db.get_value(
+			unrealized_profit_loss_account = frappe.get_cached_value(
 				"Company", self.company, "unrealized_profit_loss_account"
 			)
 
@@ -1893,7 +1895,9 @@ class AccountsController(TransactionBase):
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
-	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
+	return frappe.get_cached_value(
+		"Account", account_head, ["tax_rate", "account_name"], as_dict=True
+	)
 
 
 @frappe.whitelist()
@@ -1902,11 +1906,11 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 		return {}
 
 	if tax_template and company:
-		tax_template_company = frappe.db.get_value(master_doctype, tax_template, "company")
+		tax_template_company = frappe.get_cached_value(master_doctype, tax_template, "company")
 		if tax_template_company == company:
 			return
 
-	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1, "company": company})
+	default_tax = frappe.get_cached_value(master_doctype, {"is_default": 1, "company": company})
 
 	return {
 		"taxes_and_charges": default_tax,

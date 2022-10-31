@@ -326,7 +326,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
-	default_warehouse_for_sales_return = frappe.db.get_value(
+	default_warehouse_for_sales_return = frappe.get_cached_value(
 		"Company", company, "default_warehouse_for_sales_return"
 	)
 
@@ -340,11 +340,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
-				doc.select_print_heading = frappe.db.get_value("Print Heading", _("Credit Note"))
+				doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Credit Note"))
 
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
-			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
+			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
