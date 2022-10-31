@@ -128,6 +128,12 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
 	new_gl_map = []
 	for d in gl_map:
 		cost_center = d.get("cost_center")
+
+		# Validate budget against main cost center
+		validate_expense_against_budget(
+			d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision)
+		)
+
 		if cost_center and cost_center_allocation.get(cost_center):
 			for sub_cost_center, percentage in cost_center_allocation.get(cost_center, {}).items():
 				gle = copy.deepcopy(d)
