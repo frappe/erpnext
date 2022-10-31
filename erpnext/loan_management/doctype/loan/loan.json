@@ -20,6 +20,7 @@
   "manually_update_paid_amount_in_salary_slip",
   "section_break_8",
   "loan_type",
+  "repayment_schedule_type",
   "loan_amount",
   "rate_of_interest",
   "is_secured_loan",
@@ -167,7 +168,8 @@
    "depends_on": "is_term_loan",
    "fieldname": "repayment_start_date",
    "fieldtype": "Date",
-   "label": "Repayment Start Date"
+   "label": "Repayment Start Date",
+   "mandatory_depends_on": "is_term_loan"
   },
   {
    "fieldname": "column_break_11",
@@ -419,12 +421,20 @@
    "fieldname": "manually_update_paid_amount_in_salary_slip",
    "fieldtype": "Check",
    "label": "Manually Update Paid Amount in Salary Slip"
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fetch_from": "loan_type.repayment_schedule_type",
+   "fieldname": "repayment_schedule_type",
+   "fieldtype": "Data",
+   "label": "Repayment Schedule Type",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-13 02:05:25.017190",
+ "modified": "2022-11-01 10:36:47.902903",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
