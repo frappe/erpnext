@@ -1210,6 +1210,7 @@ def get_outstanding(args):
 		args = json.loads(args)
 
 	company_currency = erpnext.get_company_currency(args.get("company"))
+	due_date = None
 
 	if args.get("doctype") == "Journal Entry":
 		condition = " and party=%(party)s" if args.get("party") else ""
@@ -1234,9 +1235,11 @@ def get_outstanding(args):
 		invoice = frappe.db.get_value(
 			args["doctype"],
 			args["docname"],
-			["outstanding_amount", "conversion_rate", scrub(party_type)],
+			["outstanding_amount", "conversion_rate", scrub(party_type), "due_date"],
 			as_dict=1,
 		)
+
+		due_date = invoice.get("due_date")
 
 		exchange_rate = (
 			invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
@@ -1260,6 +1263,7 @@ def get_outstanding(args):
 			"exchange_rate": exchange_rate,
 			"party_type": party_type,
 			"party": invoice.get(scrub(party_type)),
+			"reference_due_date": due_date,
 		}
 
 

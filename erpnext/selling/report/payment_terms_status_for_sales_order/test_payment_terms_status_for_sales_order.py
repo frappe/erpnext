@@ -2,7 +2,7 @@ import datetime
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days
+from frappe.utils import add_days, nowdate
 
 from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -77,12 +77,14 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 		sinv.insert()
 		sinv.submit()
 		columns, data, message, chart = execute(
-			{
-				"company": "_Test Company",
-				"period_start_date": "2021-06-01",
-				"period_end_date": "2021-06-30",
-				"item": item.item_code,
-			}
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
 		)
 
 		expected_value = [
@@ -167,12 +169,14 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 		sinv.insert()
 		sinv.submit()
 		columns, data, message, chart = execute(
-			{
-				"company": "_Test Company",
-				"period_start_date": "2021-06-01",
-				"period_end_date": "2021-06-30",
-				"item": item.item_code,
-			}
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"period_start_date": "2021-06-01",
+					"period_end_date": "2021-06-30",
+					"item": item.item_code,
+				}
+			)
 		)
 
 		# report defaults to company currency.
@@ -338,3 +342,60 @@ class TestPaymentTermsStatusForSalesOrder(FrappeTestCase):
 			with self.subTest(filters=filters):
 				columns, data, message, chart = execute(filters)
 				self.assertEqual(data, expected_values_for_group_filters[idx])
+
+	def test_04_due_date_filter(self):
+		self.create_payment_terms_template()
+		item = create_item(item_code="_Test Excavator 1", is_stock_item=0)
+		transaction_date = nowdate()
+		so = make_sales_order(
+			transaction_date=add_days(transaction_date, -30),
+			delivery_date=add_days(transaction_date, -15),
+			item=item.item_code,
+			qty=10,
+			rate=100000,
+			do_not_save=True,
+		)
+		so.po_no = ""
+		so.taxes_and_charges = ""
+		so.taxes = ""
+		so.payment_terms_template = self.template.name
+		so.save()
+		so.submit()
+
+		# make invoice with 60% of the total sales order value
+		sinv = make_sales_invoice(so.name)
+		sinv.taxes_and_charges = ""
+		sinv.taxes = ""
+		sinv.items[0].qty = 6
+		sinv.insert()
+		sinv.submit()
+		columns, data, message, chart = execute(
+			frappe._dict(
+				{
+					"company": "_Test Company",
+					"item": item.item_code,
+					"from_due_date": add_days(transaction_date, -30),
+					"to_due_date": add_days(transaction_date, -15),
+				}
+			)
+		)
+
+		expected_value = [
+			{
+				"name": so.name,
+				"customer": so.customer,
+				"submitted": datetime.date.fromisoformat(add_days(transaction_date, -30)),
+				"status": "Completed",
+				"payment_term": None,
+				"description": "_Test 50-50",
+				"due_date": datetime.date.fromisoformat(add_days(transaction_date, -15)),
+				"invoice_portion": 50.0,
+				"currency": "INR",
+				"base_payment_amount": 500000.0,
+				"paid_amount": 500000.0,
+				"invoices": "," + sinv.name,
+			},
+		]
+		# Only the first term should be pulled
+		self.assertEqual(len(data), 1)
+		self.assertEqual(data, expected_value)

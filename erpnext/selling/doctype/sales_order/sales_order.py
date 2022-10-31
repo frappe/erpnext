@@ -627,6 +627,7 @@ def make_project(source_name, target_doc=None):
 				"field_map": {
 					"name": "sales_order",
 					"base_grand_total": "estimated_costing",
+					"net_total": "total_sales_amount",
 				},
 			},
 		},

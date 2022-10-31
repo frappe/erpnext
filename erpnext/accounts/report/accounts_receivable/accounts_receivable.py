@@ -748,7 +748,7 @@ class ReceivablePayableReport(object):
 
 		self.add_accounting_dimensions_filters()
 
-	def get_cost_center_conditions(self, conditions):
+	def get_cost_center_conditions(self):
 		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
 		cost_center_list = [
 			center.name
