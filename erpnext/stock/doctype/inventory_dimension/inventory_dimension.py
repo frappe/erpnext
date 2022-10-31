@@ -121,18 +121,24 @@ class InventoryDimension(Document):
 
 		if self.apply_to_all_doctypes:
 			for doctype in get_inventory_documents():
-				custom_fields.setdefault(doctype[0], dimension_fields)
-		else:
+				if not field_exists(doctype[0], self.source_fieldname):
+					custom_fields.setdefault(doctype[0], dimension_fields)
+		elif not field_exists(self.document_type, self.source_fieldname):
 			custom_fields.setdefault(self.document_type, dimension_fields)
 
 		if not frappe.db.get_value(
 			"Custom Field", {"dt": "Stock Ledger Entry", "fieldname": self.target_fieldname}
-		):
+		) and not field_exists("Stock Ledger Entry", self.target_fieldname):
 			dimension_field = dimension_fields[1]
 			dimension_field["fieldname"] = self.target_fieldname
 			custom_fields["Stock Ledger Entry"] = dimension_field
 
-		create_custom_fields(custom_fields)
+		if custom_fields:
+			create_custom_fields(custom_fields)
+
+
+def field_exists(doctype, fieldname) -> str or None:
+	return frappe.db.get_value("DocField", {"parent": doctype, "fieldname": fieldname}, "name")
 
 
 @frappe.whitelist()
