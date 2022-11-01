@@ -890,23 +890,32 @@ class calculate_taxes_and_totals(object):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
 	def set_total_amount_to_default_mop(self, total_amount_to_pay):
-		default_mode_of_payment = frappe.db.get_value(
-			"POS Payment Method",
-			{"parent": self.doc.pos_profile, "default": 1},
-			["mode_of_payment"],
-			as_dict=1,
-		)
-
-		if default_mode_of_payment:
-			self.doc.payments = []
-			self.doc.append(
-				"payments",
-				{
-					"mode_of_payment": default_mode_of_payment.mode_of_payment,
-					"amount": total_amount_to_pay,
-					"default": 1,
-				},
+		total_paid_amount = 0
+		for payment in self.doc.get("payments"):
+			total_paid_amount += (
+				payment.amount if self.doc.party_account_currency == self.doc.currency else payment.base_amount
 			)
+
+		pending_amount = total_amount_to_pay - total_paid_amount
+
+		if pending_amount > 0:
+			default_mode_of_payment = frappe.db.get_value(
+				"POS Payment Method",
+				{"parent": self.doc.pos_profile, "default": 1},
+				["mode_of_payment"],
+				as_dict=1,
+			)
+
+			if default_mode_of_payment:
+				self.doc.payments = []
+				self.doc.append(
+					"payments",
+					{
+						"mode_of_payment": default_mode_of_payment.mode_of_payment,
+						"amount": pending_amount,
+						"default": 1,
+					},
+				)
 
 
 def get_itemised_tax_breakup_html(doc):
