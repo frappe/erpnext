@@ -451,14 +451,7 @@ class StockController(AccountsController):
 
 				# Get value based on doctype name
 				if not sl_dict.get(dimension.target_fieldname):
-					fieldname = frappe.get_cached_value(
-						"DocField", {"parent": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
-					)
-
-					if not fieldname:
-						fieldname = frappe.get_cached_value(
-							"Custom Field", {"dt": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
-						)
+					fieldname = next((field.fieldname for field in frappe.get_meta(self.doctype).fields if field.options == dimension.fetch_from_parent), None)
 
 					if fieldname and self.get(fieldname):
 						sl_dict[dimension.target_fieldname] = self.get(fieldname)
