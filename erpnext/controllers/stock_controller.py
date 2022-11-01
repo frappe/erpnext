@@ -451,7 +451,6 @@ class StockController(AccountsController):
 
 				# Get value based on doctype name
 				if not sl_dict.get(dimension.target_fieldname):
-
 					fieldname = next(
 						(
 							field.fieldname
