@@ -146,6 +146,7 @@ frappe.ui.form.on('Stock Entry', {
         if (frm.doc.queue_status == 'Queued'){
             $('.primary-action').hide();
         }
+
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Create Material Request'), function() {
@@ -173,7 +174,28 @@ frappe.ui.form.on('Stock Entry', {
 				});
 			});
 		}
+		frm.set_query('reference_gate_pass', function () {
+			if(!frm.doc.company){
+                frappe.msgprint("Please select Company First");
+				return {
+					filters: {
+						"docstatus": 3
+					}
+				}
+			}else{
+    			return {
+    			    query: 'nrp_manufacturing.nrp_manufacturing.doctype.gate_pass.gate_pass.get_reference_gate_pass_dn',
+        			filters: {
+        			'type': "OUT",
+        			'company': frm.doc.company,
+        			"docstatus":0,
+        			'gate_pass_type':'Stock Dispatch'
+        		}
 
+    			};
+			    
+			}
+		});
 		if(frm.doc.items) {
 			const has_alternative = frm.doc.items.find(i => i.allow_alternative_item === 1);
 
@@ -707,15 +729,20 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			method:"nrp_manufacturing.modules.gourmet.stock_entry.stock_entry.enqueue_doc",
 			args: {docname: me.frm.doc.name, status: status},
 			callback: function(r){
-                me.frm.reload_doc();
+				
+				setTimeout(() => {
+					console.log(r,'bajwa11')
+					me.frm.reload_doc();
+				}, 5000);
+               
 			},
 			always: function(){
 				frappe.ui.form.is_saving = false;
                 // frappe.throw("The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage")
-                frappe.throw(
-					title='Notification',
-					msg='The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage',
-				)
+                // frappe.throw(
+				// 	title='Notification',
+				// 	msg='The delivery note has been enqueued as a background job. In case there is any issue on processing, the system will add a comment about the error on this delivery note and revert to the Draft stage',
+				// )
 				return false;
             }
 		})
