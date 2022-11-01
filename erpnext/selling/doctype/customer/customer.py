@@ -125,14 +125,15 @@ class Customer(TransactionBase):
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
-		self.update_primary_contact()
-		self.update_primary_address()
 
 		if self.flags.old_lead != self.lead_name:
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
+
+		self.update_primary_contact()
+		self.update_primary_address()
 
 		self.update_customer_groups()
 
