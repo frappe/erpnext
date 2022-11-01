@@ -101,6 +101,11 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		// On cancel and amending a purchase order with advance payment, reset advance paid amount
+		if (frm.is_new()) {
+			frm.set_value("advance_paid", 0)
+		}
 	},
 
 	apply_tds: function(frm) {

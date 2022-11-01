@@ -27,6 +27,7 @@ from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_childr
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.utilities.transaction_base import validate_uom_is_integer
 
 
@@ -648,13 +649,23 @@ class ProductionPlan(Document):
 			else:
 				material_request = material_request_map[key]
 
+			conversion_factor = 1.0
+			if (
+				material_request_type == "Purchase"
+				and item_doc.purchase_uom
+				and item_doc.purchase_uom != item_doc.stock_uom
+			):
+				conversion_factor = (
+					get_conversion_factor(item_doc.name, item_doc.purchase_uom).get("conversion_factor") or 1.0
+				)
+
 			# add item
 			material_request.append(
 				"items",
 				{
 					"item_code": item.item_code,
 					"from_warehouse": item.from_warehouse,
-					"qty": item.quantity,
+					"qty": item.quantity / conversion_factor,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
 					"sales_order": item.sales_order,
