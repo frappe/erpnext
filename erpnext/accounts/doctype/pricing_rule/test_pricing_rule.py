@@ -943,6 +943,45 @@ class TestPricingRule(unittest.TestCase):
 		si.delete()
 		rule.delete()
 
+	def test_pricing_rule_for_product_free_item_rounded_qty_and_recursion(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"rate": 0,
+			"min_qty": 3,
+			"max_qty": 7,
+			"price_or_product_discount": "Product",
+			"same_item": 1,
+			"free_qty": 1,
+			"round_free_qty": 1,
+			"is_recursive": 1,
+			"recurse_for": 2,
+			"company": "_Test Company",
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=5)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+		self.assertEqual(so.items[1].qty, 2)
+
+		so = make_sales_order(item_code="_Test Item", qty=7)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+		self.assertEqual(so.items[1].qty, 4)
+
 
 test_dependencies = ["Campaign"]
 
