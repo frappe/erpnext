@@ -1,0 +1,165 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2022-10-31 15:03:35.424877",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "asset",
+  "column_break_2",
+  "naming_series",
+  "depreciation_details_section",
+  "finance_book",
+  "depreciation_method",
+  "rate_of_depreciation",
+  "column_break_8",
+  "total_number_of_depreciations",
+  "frequency_of_depreciation_months",
+  "depreciation_schedule_section",
+  "depreciation_schedule",
+  "details_section",
+  "notes",
+  "column_break_15",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Asset",
+   "options": "Asset",
+   "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "ACC-ADS-.YYYY.-"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Asset Depreciation Schedule",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Details"
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book",
+   "read_only": 1
+  },
+  {
+   "fieldname": "depreciation_method",
+   "fieldtype": "Select",
+   "label": "Depreciation Method",
+   "options": "\nStraight Line\nDouble Declining Balance\nWritten Down Value\nManual",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.depreciation_method == 'Written Down Value'",
+   "description": "In Percentage",
+   "fieldname": "rate_of_depreciation",
+   "fieldtype": "Percent",
+   "label": "Rate of Depreciation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "total_number_of_depreciations",
+   "fieldname": "total_number_of_depreciations",
+   "fieldtype": "Int",
+   "label": "Total Number of Depreciations",
+   "read_only": 1
+  },
+  {
+   "depends_on": "frequency_of_depreciation_months",
+   "fieldname": "frequency_of_depreciation_months",
+   "fieldtype": "Int",
+   "label": "Frequency of Depreciation (Months)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "depreciation_schedule_section",
+   "fieldtype": "Section Break",
+   "label": "Depreciation Schedule"
+  },
+  {
+   "fieldname": "depreciation_schedule",
+   "fieldtype": "Table",
+   "label": "Depreciation Schedule",
+   "options": "Depreciation Schedule"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "notes",
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nActive\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-01 11:44:15.256470",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Asset Depreciation Schedule",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
