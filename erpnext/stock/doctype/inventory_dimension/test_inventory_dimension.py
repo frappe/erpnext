@@ -191,6 +191,21 @@ class TestInventoryDimension(FrappeTestCase):
 
 		self.assertEqual(sle_rack, "Rack 1")
 
+	def test_check_standard_dimensions(self):
+		create_inventory_dimension(
+			reference_document="Project",
+			type_of_transaction="Outward",
+			dimension_name="Project",
+			apply_to_all_doctypes=0,
+			document_type="Stock Ledger Entry",
+		)
+
+		self.assertFalse(
+			frappe.db.get_value(
+				"Custom Field", {"fieldname": "project", "dt": "Stock Ledger Entry"}, "name"
+			)
+		)
+
 
 def prepare_test_data():
 	if not frappe.db.exists("DocType", "Shelf"):
