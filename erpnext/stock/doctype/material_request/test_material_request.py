@@ -591,6 +591,7 @@ class TestMaterialRequest(FrappeTestCase):
 		mr.material_request_type = "Material Issue"
 		mr.submit()
 
+		self.assertTrue(frappe.db.exists("Material Request", mr.name))
 		# testing bin value after material request is submitted
 		self.assertEqual(_get_requested_qty(), existing_requested_qty - 54.0)
 
