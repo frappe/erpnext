@@ -240,7 +240,11 @@ customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
 [d for d in customer_customer_vehicle_selector if d['fieldname'] == 'sec_customer_vehicle_selector'][0]['depends_on'] = "eval:!doc.__islocal"
 
 # Opportunity Fields
-opportunity_rating_fields = [
+opportunity_fields = [
+	{"label": "", "fieldname": "delivery_cb", "fieldtype": "Column Break",
+		"insert_after": "sales_stage"},
+	{"label": "Delivery Period", "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period",
+		"insert_after": "delivery_cb"},
 	{"label": "Key Features You Like", "fieldname": "liked_features", "fieldtype": "Small Text",
 		"insert_after": "feedback_cb_1"},
 	{"label": "Interior", "fieldname": "rating_interior", "fieldtype": "Rating",
@@ -305,7 +309,7 @@ field_lists = [
 	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
 	project_template_fields, project_template_category_fields, project_template_detail_fields,
 	customer_vehicle_selector_fields, project_customer_vehicle_selector, appointment_customer_vehicle_selector,
-	customer_customer_vehicle_selector, opportunity_rating_fields
+	customer_customer_vehicle_selector, opportunity_fields
 ]
 
 for field_list in field_lists:
@@ -396,7 +400,7 @@ data = {
 		"Project Template Category": project_template_category_fields,
 		"Project Template Detail": project_template_detail_fields,
 		"Customer": customer_customer_vehicle_selector,
-		"Opportunity": opportunity_rating_fields,
+		"Opportunity": opportunity_fields,
 	},
 	'default_portal_role': 'Customer'
 }
