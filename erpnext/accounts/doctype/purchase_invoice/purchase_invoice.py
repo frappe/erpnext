@@ -1376,12 +1376,7 @@ class PurchaseInvoice(BuyingController):
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-<<<<<<< HEAD
-			"Purchase Invoice",
-=======
-			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
->>>>>>> f7c9258770 (fix: Issues while cancel/amending Purchase Invoice with TDS enabled)
 		)
 
 		self.update_advance_tax_references(cancel=1)
