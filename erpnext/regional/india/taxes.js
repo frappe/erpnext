@@ -47,6 +47,12 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 					}
 				}
 			});
+		},
+
+		reverse_charge: function(frm) {
+			if (frm.doc.reverse_charge == "Y") {
+				frm.set_value('eligibility_for_itc', 'ITC on Reverse Charge');
+			}
 		}
 	});
 }
