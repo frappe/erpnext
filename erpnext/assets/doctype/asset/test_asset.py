@@ -221,7 +221,7 @@ class TestAsset(AssetSetup):
 			asset.precision("gross_purchase_amount"),
 		)
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
-			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
+			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 		self.assertEquals(accumulated_depr_amount, 18000.00 + pro_rata_amount)
@@ -283,7 +283,7 @@ class TestAsset(AssetSetup):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
-			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
+			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 
