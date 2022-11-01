@@ -200,9 +200,7 @@ class StockController(AccountsController):
 				elif self.get("is_internal_supplier"):
 					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
 
-				expense_account = frappe.get_cached_value(
-					"Company", self.company, "default_expense_account"
-				)
+				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
 
 				gl_list.append(
 					self.get_gl_dict(

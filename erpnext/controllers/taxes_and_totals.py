@@ -1034,9 +1034,7 @@ class init_landed_taxes_and_totals(object):
 		company_currency = erpnext.get_company_currency(self.doc.company)
 		for d in self.doc.get(self.tax_field):
 			if not d.account_currency:
-				account_currency = frappe.get_cached_value(
-					"Account", d.expense_account, "account_currency"
-				)
+				account_currency = frappe.get_cached_value("Account", d.expense_account, "account_currency")
 				d.account_currency = account_currency or company_currency
 
 	def set_exchange_rate(self):
