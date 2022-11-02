@@ -2,7 +2,6 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:11",
  "description": "Supplier of Goods or Services.",
@@ -528,7 +527,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-15 04:38:05.520796",
+ "modified": "2022-11-02 00:18:14.361999",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
