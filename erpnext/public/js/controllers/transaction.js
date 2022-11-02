@@ -1207,7 +1207,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"base_rounding_adjustment"], company_currency);
 
 		this.frm.set_currency_labels(["total", "net_total", "total_taxes_and_charges", "discount_amount",
-			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted", "tax_withholding_net_total",
+			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted","tax_withholding_net_total",
 			"rounded_total", "in_words", "paid_amount", "write_off_amount", "operating_cost",
 			"scrap_material_cost", "rounding_adjustment", "raw_material_cost",
 			"total_cost"], this.frm.doc.currency);
