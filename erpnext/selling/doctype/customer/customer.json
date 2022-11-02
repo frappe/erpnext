@@ -2,7 +2,6 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-11 14:26:44",
  "description": "Buyer of Goods and Services.",
@@ -588,7 +587,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-18 07:20:17.914547",
+ "modified": "2022-11-02 00:25:40.766204",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
