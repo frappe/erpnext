@@ -275,6 +275,11 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 
 def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	doctype = "Purchase Invoice" if party_type == "Supplier" else "Sales Invoice"
+	field = (
+		"base_tax_withholding_net_total as base_net_total"
+		if party_type == "Supplier"
+		else "base_net_total"
+	)
 	voucher_wise_amount = {}
 	vouchers = []
 
@@ -291,7 +296,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			{"apply_tds": 1, "tax_withholding_category": tax_details.get("tax_withholding_category")}
 		)
 
-	invoices_details = frappe.get_all(doctype, filters=filters, fields=["name", "base_net_total"])
+	invoices_details = frappe.get_all(doctype, filters=filters, fields=["name", field])
 
 	for d in invoices_details:
 		vouchers.append(d.name)
@@ -431,11 +436,11 @@ def get_tds_amount(ldc, parties, inv, tax_details, tax_deducted, vouchers):
 		):
 			# Get net total again as TDS is calculated on net total
 			# Grand is used to just check for threshold breach
-			net_total = 0
-			if vouchers:
-				net_total = frappe.db.get_value("Purchase Invoice", invoice_filters, "sum(net_total)")
-
-			net_total += inv.net_total
+			net_total = (
+				frappe.db.get_value("Purchase Invoice", invoice_filters, "sum(tax_withholding_net_total)")
+				or 0.0
+			)
+			net_total += inv.tax_withholding_net_total
 			supp_credit_amt = net_total - cumulative_threshold
 
 		if ldc and is_valid_certificate(
