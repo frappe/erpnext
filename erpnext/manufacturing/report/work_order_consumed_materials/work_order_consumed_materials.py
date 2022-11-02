@@ -1,6 +1,8 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import defaultdict
+
 import frappe
 from frappe import _
 
@@ -18,7 +20,11 @@ def get_data(report_filters):
 	filters = get_filter_condition(report_filters)
 
 	wo_items = {}
-	for d in frappe.get_all("Work Order", filters=filters, fields=fields):
+
+	work_orders = frappe.get_all("Work Order", filters=filters, fields=fields)
+	returned_materials = get_returned_materials(work_orders)
+
+	for d in work_orders:
 		d.extra_consumed_qty = 0.0
 		if d.consumed_qty and d.consumed_qty > d.required_qty:
 			d.extra_consumed_qty = d.consumed_qty - d.required_qty
@@ -37,6 +43,28 @@ def get_data(report_filters):
 			data.append(row)
 
 	return data
+
+
+def get_returned_materials(work_orders):
+	raw_materials_qty = defaultdict(float)
+
+	raw_materials = frappe.get_all(
+		"Stock Entry",
+		fields=["`tabStock Entry Detail`.`item_code`", "`tabStock Entry Detail`.`qty`"],
+		filters=[
+			["Stock Entry", "is_return", "=", 1],
+			["Stock Entry Detail", "docstatus", "=", 1],
+			["Stock Entry", "work_order", "in", [d.name for d in work_orders]],
+		],
+	)
+
+	for d in raw_materials:
+		raw_materials_qty[d.item_code] += d.qty
+
+	for row in work_orders:
+		row.returned_qty = 0.0
+		if raw_materials_qty.get(row.raw_material_item_code):
+			row.returned_qty = raw_materials_qty.get(row.raw_material_item_code)
 
 
 def get_fields():
@@ -65,7 +93,7 @@ def get_filter_condition(report_filters):
 	for field in ["name", "production_item", "company", "status"]:
 		value = report_filters.get(field)
 		if value:
-			key = f"`{field}`"
+			key = f"{field}"
 			filters.update({key: value})
 
 	return filters
@@ -109,6 +137,12 @@ def get_columns():
 		{
 			"label": _("Extra Consumed Qty"),
 			"fieldname": "extra_consumed_qty",
+			"fieldtype": "Float",
+			"width": 100,
+		},
+		{
+			"label": _("Returned Qty"),
+			"fieldname": "returned_qty",
 			"fieldtype": "Float",
 			"width": 100,
 		},

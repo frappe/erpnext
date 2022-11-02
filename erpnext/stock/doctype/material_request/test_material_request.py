@@ -590,6 +590,7 @@ class TestMaterialRequest(FrappeTestCase):
 		mr = frappe.copy_doc(test_records[0])
 		mr.material_request_type = "Material Issue"
 		mr.submit()
+		frappe.db.value_cache = {}
 
 		# testing bin value after material request is submitted
 		self.assertEqual(_get_requested_qty(), existing_requested_qty - 54.0)
