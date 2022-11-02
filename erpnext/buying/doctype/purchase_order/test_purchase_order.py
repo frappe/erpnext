@@ -5,7 +5,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate
 from frappe.utils.data import today
 
@@ -709,12 +709,9 @@ class TestPurchaseOrder(FrappeTestCase):
 		pi.insert()
 		self.assertTrue(pi.get("payment_schedule"))
 
+	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-
-		frappe.db.set_value(
-			"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 1
-		)
 
 		po_doc = create_purchase_order()
 
@@ -734,10 +731,6 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		pe_doc = frappe.get_doc("Payment Entry", pe.name)
 		pe_doc.cancel()
-
-		frappe.db.set_value(
-			"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
-		)
 
 	def test_schedule_date(self):
 		po = create_purchase_order(do_not_submit=True)
