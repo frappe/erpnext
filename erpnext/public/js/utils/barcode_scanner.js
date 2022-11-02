@@ -119,6 +119,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				row = frappe.model.add_child(this.frm.doc, cur_grid.doctype, this.items_table_name);
 				// trigger any row add triggers defined on child table.
 				this.frm.script_manager.trigger(`${this.items_table_name}_add`, row.doctype, row.name);
+				this.frm.has_items = false;
 			}
 
 			if (this.is_duplicate_serial_no(row, serial_no)) {
@@ -172,8 +173,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				frappe.prompt(__("Please enter quantity for item {0}", [item_code]), ({value}) => {
 					increment(value).then((value) => resolve(value));
 				});
-			} else {
+			} else if (this.frm.has_items) {
 				this.prepare_item_for_scan(row, item_code, barcode, batch_no, serial_no);
+			} else {
+				increment().then((value) => resolve(value));
 			}
 		});
 	}
@@ -222,7 +225,6 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 						return;
 					}
 
-					debugger
 					if (e.target.value) {
 						this.scan_api_call(e.target.value, (r) => {
 							if (r.message) {
@@ -295,7 +297,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	update_dialog_values(scanned_item, r) {
-		const {item_code, barcode, batch_no, serial_no, uom} = r.message;
+		const {item_code, barcode, batch_no, serial_no} = r.message;
 
 		this.dialog.set_value("barcode_scanner", "");
 		if (item_code === scanned_item &&
@@ -372,7 +374,6 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	}
 
 	async set_batch_no(row, batch_no) {
-		debugger
 		if (batch_no && frappe.meta.has_field(row.doctype, this.batch_no_field)) {
 			await frappe.model.set_value(row.doctype, row.name, this.batch_no_field, batch_no);
 		}
