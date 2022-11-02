@@ -3,7 +3,7 @@ frappe.listview_settings['Stock Entry'] = {
 		if (Object.values(frappe.route_options).length == 0){
 			frappe.route_options = {
 				"company": frappe.get_cookie('company') ,
-				"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), -60),frappe.datetime.get_today()]]
+				"creation":["Between",[frappe.datetime.add_days(frappe.datetime.get_today(), - 30),frappe.datetime.get_today()]]
 			};
 		}
 	},

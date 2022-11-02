@@ -146,7 +146,6 @@ frappe.ui.form.on('Stock Entry', {
         if (frm.doc.queue_status == 'Queued'){
             $('.primary-action').hide();
         }
-
 		if(!frm.doc.docstatus) {
 			frm.trigger('validate_purpose_consumption');
 			frm.add_custom_button(__('Create Material Request'), function() {
@@ -728,13 +727,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		frappe.call({
 			method:"nrp_manufacturing.modules.gourmet.stock_entry.stock_entry.enqueue_doc",
 			args: {docname: me.frm.doc.name, status: status},
-			callback: function(r){
-				
+			callback: function(r){				
 				setTimeout(() => {
-					console.log(r,'bajwa11')
-					me.frm.reload_doc();
-				}, 5000);
-               
+					location.reload();
+				}, 5000);               
 			},
 			always: function(){
 				frappe.ui.form.is_saving = false;
