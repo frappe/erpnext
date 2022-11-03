@@ -385,7 +385,7 @@ def get_party_account(party_type, party=None, company=None):
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
 		if account:
-			account_currency = frappe.get_cached_value("Account", account, "account_currency", cache=True)
+			account_currency = frappe.get_cached_value("Account", account, "account_currency")
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
@@ -402,7 +402,7 @@ def get_party_bank_account(party_type, party):
 def get_party_account_currency(party_type, party, company):
 	def generator():
 		party_account = get_party_account(party_type, party, company)
-		return frappe.get_cached_value("Account", party_account, "account_currency", cache=True)
+		return frappe.get_cached_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
 
@@ -474,9 +474,7 @@ def validate_party_accounts(doc):
 		else:
 			companies.append(account.company)
 
-		party_account_currency = frappe.get_cached_value(
-			"Account", account.account, "account_currency", cache=True
-		)
+		party_account_currency = frappe.get_cached_value("Account", account.account, "account_currency")
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value(
 				"Company", frappe.db.get_default("Company"), "default_currency"
