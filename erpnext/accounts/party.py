@@ -296,7 +296,7 @@ def get_default_price_list(party):
 		return party.default_price_list
 
 	if party.doctype == "Customer":
-		return frappe.db.get_value("Customer Group", party.customer_group, "default_price_list")
+		return frappe.get_cached_value("Customer Group", party.customer_group, "default_price_list")
 
 
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
@@ -385,7 +385,7 @@ def get_party_account(party_type, party=None, company=None):
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
 		if account:
-			account_currency = frappe.db.get_value("Account", account, "account_currency", cache=True)
+			account_currency = frappe.get_cached_value("Account", account, "account_currency", cache=True)
 		if (account and account_currency != existing_gle_currency) or not account:
 			account = get_party_gle_account(party_type, party, company)
 
@@ -402,7 +402,7 @@ def get_party_bank_account(party_type, party):
 def get_party_account_currency(party_type, party, company):
 	def generator():
 		party_account = get_party_account(party_type, party, company)
-		return frappe.db.get_value("Account", party_account, "account_currency", cache=True)
+		return frappe.get_cached_value("Account", party_account, "account_currency", cache=True)
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
 
@@ -474,7 +474,7 @@ def validate_party_accounts(doc):
 		else:
 			companies.append(account.company)
 
-		party_account_currency = frappe.db.get_value(
+		party_account_currency = frappe.get_cached_value(
 			"Account", account.account, "account_currency", cache=True
 		)
 		if frappe.db.get_default("Company"):
@@ -482,7 +482,9 @@ def validate_party_accounts(doc):
 				"Company", frappe.db.get_default("Company"), "default_currency"
 			)
 		else:
-			company_default_currency = frappe.db.get_value("Company", account.company, "default_currency")
+			company_default_currency = frappe.get_cached_value(
+				"Company", account.company, "default_currency"
+			)
 
 		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 
@@ -801,7 +803,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 	)
 
 	for d in companies:
-		company_default_currency = frappe.db.get_value("Company", d.company, "default_currency")
+		company_default_currency = frappe.get_cached_value("Company", d.company, "default_currency")
 		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
 		if party_account_currency == company_default_currency:

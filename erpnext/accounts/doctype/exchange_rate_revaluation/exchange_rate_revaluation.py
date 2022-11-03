@@ -222,7 +222,7 @@ class ExchangeRateRevaluation(Document):
 
 @frappe.whitelist()
 def get_account_details(account, company, posting_date, party_type=None, party=None):
-	account_currency, account_type = frappe.db.get_value(
+	account_currency, account_type = frappe.get_cached_value(
 		"Account", account, ["account_currency", "account_type"]
 	)
 	if account_type in ["Receivable", "Payable"] and not (party_type and party):

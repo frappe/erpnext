@@ -335,7 +335,8 @@ class POSInvoice(SalesInvoice):
 		if (
 			self.change_amount
 			and self.account_for_change_amount
-			and frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company
+			and frappe.get_cached_value("Account", self.account_for_change_amount, "company")
+			!= self.company
 		):
 			frappe.throw(
 				_("The selected change account {} doesn't belongs to Company {}.").format(
@@ -486,7 +487,7 @@ class POSInvoice(SalesInvoice):
 				customer_price_list, customer_group, customer_currency = frappe.db.get_value(
 					"Customer", self.customer, ["default_price_list", "customer_group", "default_currency"]
 				)
-				customer_group_price_list = frappe.db.get_value(
+				customer_group_price_list = frappe.get_cached_value(
 					"Customer Group", customer_group, "default_price_list"
 				)
 				selling_price_list = (
@@ -532,7 +533,7 @@ class POSInvoice(SalesInvoice):
 
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
-			self.party_account_currency = frappe.db.get_value(
+			self.party_account_currency = frappe.get_cached_value(
 				"Account", self.debit_to, "account_currency", cache=True
 			)
 		if not self.due_date and self.customer:

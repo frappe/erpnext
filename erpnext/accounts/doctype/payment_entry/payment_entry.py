@@ -256,7 +256,7 @@ class PaymentEntry(AccountsController):
 			self.validate_account_type(self.paid_to, ["Bank", "Cash"])
 
 	def validate_account_type(self, account, account_types):
-		account_type = frappe.db.get_value("Account", account, "account_type")
+		account_type = frappe.get_cached_value("Account", account, "account_type")
 		# if account_type not in account_types:
 		# 	frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 
@@ -743,7 +743,7 @@ class PaymentEntry(AccountsController):
 
 	def validate_transaction_reference(self):
 		bank_account = self.paid_to if self.payment_type == "Receive" else self.paid_from
-		bank_account_type = frappe.db.get_value("Account", bank_account, "account_type")
+		bank_account_type = frappe.get_cached_value("Account", bank_account, "account_type")
 
 		if bank_account_type == "Bank":
 			if not self.reference_no or not self.reference_date:
@@ -1321,7 +1321,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 				d.voucher_type, d.voucher_no, "payment_terms_template"
 			)
 			if payment_term_template:
-				allocate_payment_based_on_payment_terms = frappe.db.get_value(
+				allocate_payment_based_on_payment_terms = frappe.get_cached_value(
 					"Payment Terms Template", payment_term_template, "allocate_payment_based_on_payment_terms"
 				)
 				if allocate_payment_based_on_payment_terms:
@@ -1553,7 +1553,7 @@ def get_account_details(account, date, cost_center=None):
 		{
 			"account_currency": get_account_currency(account),
 			"account_balance": account_balance,
-			"account_type": frappe.db.get_value("Account", account, "account_type"),
+			"account_type": frappe.get_cached_value("Account", account, "account_type"),
 		}
 	)
 
@@ -1722,9 +1722,9 @@ def get_payment_entry(
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
 		frappe.msgprint(_("{0} is on hold till {1}").format(doc.name, doc.release_date))
 	else:
-		if doc.doctype in ("Sales Invoice", "Purchase Invoice") and frappe.get_value(
+		if doc.doctype in ("Sales Invoice", "Purchase Invoice") and frappe.get_cached_value(
 			"Payment Terms Template",
-			{"name": doc.payment_terms_template},
+			doc.payment_terms_template,
 			"allocate_payment_based_on_payment_terms",
 		):
 

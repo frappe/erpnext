@@ -58,7 +58,7 @@ class Account(NestedSet):
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
 		if self.parent_account:
-			par = frappe.db.get_value(
+			par = frappe.get_cached_value(
 				"Account", self.parent_account, ["name", "is_group", "company"], as_dict=1
 			)
 			if not par:
@@ -82,7 +82,7 @@ class Account(NestedSet):
 
 	def set_root_and_report_type(self):
 		if self.parent_account:
-			par = frappe.db.get_value(
+			par = frappe.get_cached_value(
 				"Account", self.parent_account, ["report_type", "root_type"], as_dict=1
 			)
 
@@ -92,7 +92,9 @@ class Account(NestedSet):
 				self.root_type = par.root_type
 
 		if self.is_group:
-			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
+			db_value = frappe.get_cached_value(
+				"Account", self.name, ["report_type", "root_type"], as_dict=1
+			)
 			if db_value:
 				if self.report_type != db_value.report_type:
 					frappe.db.sql(
@@ -113,7 +115,7 @@ class Account(NestedSet):
 	def validate_root_details(self):
 		# does not exists parent
 		if frappe.db.exists("Account", self.name):
-			if not frappe.db.get_value("Account", self.name, "parent_account"):
+			if not frappe.get_cached_value("Account", self.name, "parent_account"):
 				throw(_("Root cannot be edited."), RootNotEditable)
 
 		if not self.parent_account and not self.is_group:
@@ -127,7 +129,9 @@ class Account(NestedSet):
 			return
 		ancestors = get_root_company(self.company)
 		if ancestors:
-			if frappe.get_value("Company", self.company, "allow_account_creation_against_child_company"):
+			if frappe.get_cached_value(
+				"Company", self.company, "allow_account_creation_against_child_company"
+			):
 				return
 			if not frappe.db.get_value(
 				"Account", {"account_name": self.account_name, "company": ancestors[0]}, "name"
@@ -138,7 +142,7 @@ class Account(NestedSet):
 			if not descendants:
 				return
 			parent_acc_name_map = {}
-			parent_acc_name, parent_acc_number = frappe.db.get_value(
+			parent_acc_name, parent_acc_number = frappe.get_cached_value(
 				"Account", self.parent_account, ["account_name", "account_number"]
 			)
 			filters = {
@@ -162,7 +166,7 @@ class Account(NestedSet):
 		if self.get("__islocal"):
 			return
 
-		existing_is_group = frappe.db.get_value("Account", self.name, "is_group")
+		existing_is_group = frappe.get_cached_value("Account", self.name, "is_group")
 		if cint(self.is_group) != cint(existing_is_group):
 			if self.check_gle_exists():
 				throw(_("Account with existing transaction cannot be converted to ledger"))
@@ -173,7 +177,7 @@ class Account(NestedSet):
 				throw(_("Account with child nodes cannot be set as ledger"))
 
 	def validate_frozen_accounts_modifier(self):
-		old_value = frappe.db.get_value("Account", self.name, "freeze_account")
+		old_value = frappe.get_cached_value("Account", self.name, "freeze_account")
 		if old_value and old_value != self.freeze_account:
 			frozen_accounts_modifier = frappe.db.get_value(
 				"Accounts Settings", None, "frozen_accounts_modifier"
@@ -223,9 +227,9 @@ class Account(NestedSet):
 				)
 
 			# validate if parent of child company account to be added is a group
-			if frappe.db.get_value("Account", self.parent_account, "is_group") and not frappe.db.get_value(
-				"Account", parent_acc_name_map[company], "is_group"
-			):
+			if frappe.get_cached_value(
+				"Account", self.parent_account, "is_group"
+			) and not frappe.get_cached_value("Account", parent_acc_name_map[company], "is_group"):
 				msg = _(
 					"While creating account for Child Company {0}, parent account {1} found as a ledger account."
 				).format(company_bold, parent_acc_name_bold)
@@ -377,17 +381,17 @@ def validate_account_number(name, account_number, company):
 
 @frappe.whitelist()
 def update_account_number(name, account_name, account_number=None, from_descendant=False):
-	account = frappe.db.get_value("Account", name, "company", as_dict=True)
+	account = frappe.get_cached_value("Account", name, "company", as_dict=True)
 	if not account:
 		return
 
-	old_acc_name, old_acc_number = frappe.db.get_value(
+	old_acc_name, old_acc_number = frappe.get_cached_value(
 		"Account", name, ["account_name", "account_number"]
 	)
 
 	# check if account exists in parent company
 	ancestors = get_ancestors_of("Company", account.company)
-	allow_independent_account_creation = frappe.get_value(
+	allow_independent_account_creation = frappe.get_cached_value(
 		"Company", account.company, "allow_account_creation_against_child_company"
 	)
 
@@ -438,7 +442,7 @@ def merge_account(old, new, is_group, root_type, company):
 	if not frappe.db.exists("Account", new):
 		throw(_("Account {0} does not exist").format(new))
 
-	val = list(frappe.db.get_value("Account", new, ["is_group", "root_type", "company"]))
+	val = list(frappe.get_cached_value("Account", new, ["is_group", "root_type", "company"]))
 
 	if val != [cint(is_group), root_type, company]:
 		throw(
@@ -447,9 +451,9 @@ def merge_account(old, new, is_group, root_type, company):
 			)
 		)
 
-	if is_group and frappe.db.get_value("Account", new, "parent_account") == old:
+	if is_group and frappe.get_cached_value("Account", new, "parent_account") == old:
 		frappe.db.set_value(
-			"Account", new, "parent_account", frappe.db.get_value("Account", old, "parent_account")
+			"Account", new, "parent_account", frappe.get_cached_value("Account", old, "parent_account")
 		)
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
