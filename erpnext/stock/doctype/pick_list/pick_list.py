@@ -688,6 +688,7 @@ def create_stock_entry(pick_list):
 
 @frappe.whitelist()
 def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filters, as_dict):
+<<<<<<< HEAD
 	wo = frappe.qb.DocType("Work Order")
 	return (
 		frappe.qb.from_(wo)
@@ -704,6 +705,34 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 		.limit(cint(page_length))
 		.offset(start)
 	).run(as_dict=as_dict)
+=======
+	return frappe.db.sql(
+		"""
+		SELECT
+			`name`, `company`, `planned_start_date`
+		FROM
+			`tabWork Order`
+		WHERE
+			`status` not in ('Completed', 'Stopped')
+			AND `qty` > `material_transferred_for_manufacturing`
+			AND `docstatus` = 1
+			AND `company` = %(company)s
+			AND `name` like %(txt)s
+		ORDER BY
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			name
+		LIMIT
+			%(start)s, %(page_length)s""",
+		{
+			"txt": "%%%s%%" % txt,
+			"_txt": txt.replace("%", ""),
+			"start": start,
+			"page_length": frappe.utils.cint(page_length),
+			"company": filters.get("company"),
+		},
+		as_dict=as_dict,
+	)
+>>>>>>> 4d9bbd4c9c (fix: mysql syntax issue)
 
 
 @frappe.whitelist()
