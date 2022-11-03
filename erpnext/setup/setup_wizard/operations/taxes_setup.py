@@ -81,7 +81,7 @@ def simple_to_detailed(templates):
 
 def from_detailed_data(company_name, data):
 	"""Create Taxes and Charges Templates from detailed data."""
-	coa_name = frappe.db.get_value("Company", company_name, "chart_of_accounts")
+	coa_name = frappe.get_cached_value("Company", company_name, "chart_of_accounts")
 	coa_data = data.get("chart_of_accounts", {})
 	tax_templates = coa_data.get(coa_name) or coa_data.get("*", {})
 	tax_categories = data.get("tax_categories")
@@ -132,7 +132,7 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 		tax_row_defaults = {
 			"category": "Total",
 			"charge_type": "On Net Total",
-			"cost_center": frappe.db.get_value("Company", company_name, "cost_center"),
+			"cost_center": frappe.get_cached_value("Company", company_name, "cost_center"),
 		}
 
 		if doctype == "Purchase Taxes and Charges Template":

@@ -110,7 +110,7 @@ class TransactionDeletionRecord(Document):
 					self.delete_child_tables(docfield["parent"], docfield["fieldname"])
 					self.delete_docs_linked_with_specified_company(docfield["parent"], docfield["fieldname"])
 
-					naming_series = frappe.db.get_value("DocType", docfield["parent"], "autoname")
+					naming_series = frappe.get_cached_value("DocType", docfield["parent"], "autoname")
 					if naming_series:
 						if "#" in naming_series:
 							self.update_naming_series(naming_series, docfield["parent"])

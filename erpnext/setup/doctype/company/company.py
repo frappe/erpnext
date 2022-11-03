@@ -100,7 +100,7 @@ class Company(NestedSet):
 
 		for account in accounts:
 			if self.get(account[1]):
-				for_company = frappe.db.get_value("Account", self.get(account[1]), "company")
+				for_company = frappe.get_cached_value("Account", self.get(account[1]), "company")
 				if for_company != self.name:
 					frappe.throw(
 						_("Account {0} does not belong to company: {1}").format(self.get(account[1]), self.name)
@@ -374,7 +374,7 @@ class Company(NestedSet):
 
 	def validate_parent_company(self):
 		if self.parent_company:
-			is_group = frappe.get_value("Company", self.parent_company, "is_group")
+			is_group = frappe.get_cached_value("Company", self.parent_company, "is_group")
 
 			if not is_group:
 				frappe.throw(_("Parent Company must be a group company"))
@@ -587,7 +587,7 @@ class Company(NestedSet):
 	def check_parent_changed(self):
 		frappe.flags.parent_company_changed = False
 
-		if not self.is_new() and self.parent_company != frappe.db.get_value(
+		if not self.is_new() and self.parent_company != frappe.get_cached_value(
 			"Company", self.name, "parent_company"
 		):
 			frappe.flags.parent_company_changed = True

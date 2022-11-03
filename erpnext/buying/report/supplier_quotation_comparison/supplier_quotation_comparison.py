@@ -169,7 +169,7 @@ def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
 				data_points_map[qty].append(None)
 
 	dataset = []
-	currency_symbol = frappe.db.get_value("Currency", frappe.db.get_default("currency"), "symbol")
+	currency_symbol = frappe.get_cached_value("Currency", frappe.db.get_default("currency"), "symbol")
 	for qty in qty_list:
 		datapoints = {
 			"name": currency_symbol + " (Qty " + str(qty) + " )",

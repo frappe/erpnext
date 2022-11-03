@@ -25,7 +25,7 @@ class CustomerGroup(NestedSet):
 
 
 def get_parent_customer_groups(customer_group):
-	lft, rgt = frappe.db.get_value("Customer Group", customer_group, ["lft", "rgt"])
+	lft, rgt = frappe.get_cached_value("Customer Group", customer_group, ["lft", "rgt"])
 
 	return frappe.db.sql(
 		"""select name from `tabCustomer Group`

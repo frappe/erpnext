@@ -15,7 +15,7 @@ class PartyType(Document):
 def get_party_type(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters and filters.get("account"):
-		account_type = frappe.db.get_value("Account", filters.get("account"), "account_type")
+		account_type = frappe.get_cached_value("Account", filters.get("account"), "account_type")
 		cond = "and account_type = '%s'" % account_type
 
 	return frappe.db.sql(
