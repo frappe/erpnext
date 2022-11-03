@@ -63,7 +63,7 @@ def get_party_details(inv):
 def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	if inv.doctype == "Payment Entry":
 		inv.tax_withholding_net_total = inv.net_total
-	
+
 	pan_no = ""
 	parties = []
 	party_type, party = get_party_details(inv)
