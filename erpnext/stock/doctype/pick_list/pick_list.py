@@ -691,7 +691,12 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			AND `company` = %(company)s
 			AND `name` like %(txt)s
 		ORDER BY
+<<<<<<< HEAD
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999), name
+=======
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			name
+>>>>>>> 4d9bbd4c9c (fix: mysql syntax issue)
 		LIMIT
 			%(start)s, %(page_length)s""",
 		{
