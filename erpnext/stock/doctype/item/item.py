@@ -78,6 +78,11 @@ class Item(WebsiteGenerator):
 		# if self.is_sales_item and not self.get('is_item_from_hub'):
 		# 	self.publish_in_hub = 1
 
+		if self.brand != 'Non-Gourmet' and self.is_shop_item == 1:
+			next_pos_item_id = frappe.db.sql("SELECT max(pos_item_id) + 1 AS id FROM `tabItem`")
+			if next_pos_item_id:
+				self.pos_item_id = next_pos_item_id[0][0]
+
 	def after_insert(self):
 		'''set opening stock and item price'''
 		if self.standard_rate:
