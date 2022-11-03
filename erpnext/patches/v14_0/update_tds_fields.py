@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import nowdate
 
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -6,7 +7,7 @@ from erpnext.accounts.utils import get_fiscal_year
 def execute():
 	# Only do for current fiscal year, no need to repost for all years
 	for company in frappe.get_all("Company"):
-		fiscal_year_details = get_fiscal_year(company=company.name, as_dict=True)
+		fiscal_year_details = get_fiscal_year(date=nowdate(), company=company.name, as_dict=True)
 
 		purchase_invoice = frappe.qb.DocType("Purchase Invoice")
 
