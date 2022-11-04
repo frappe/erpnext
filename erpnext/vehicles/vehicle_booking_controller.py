@@ -35,7 +35,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image', 'fni_amount']
+dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image']
 
 
 class VehicleBookingController(AccountsController):
@@ -76,8 +76,12 @@ class VehicleBookingController(AccountsController):
 		if self.get('item_code'):
 			item_details = get_item_details(self.as_dict())
 			for k, v in item_details.items():
-				if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
-					self.set(k, v)
+				if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+					if k == 'fni_amount':
+						if self.get(k) is None:
+							self.set(k, v)
+					elif k not in dont_update_if_missing:
+						self.set(k, v)
 
 			if cint(item_details.get('lead_time_days')) > 0:
 				if item_details.get('delivery_date'):
