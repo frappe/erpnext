@@ -1747,6 +1747,69 @@ class TestSalesOrder(FrappeTestCase):
 		sales_order.save()
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
 
+	def test_sales_order_partial_advance_payment(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+			create_payment_entry,
+			get_payment_entry,
+		)
+		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+
+		# Make a customer
+		customer = get_customer_dict("QA Logistics")
+		frappe.get_doc(customer).insert()
+
+		# Make a Sales Order
+		so = make_sales_order(
+			customer="QA Logistics",
+			item_list=[
+				{"item_code": "_Test Item", "qty": 1, "rate": 200},
+				{"item_code": "_Test Item 2", "qty": 1, "rate": 300},
+			],
+		)
+
+		# Create a advance payment against that Sales Order
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = so.currency
+		pe.paid_to_account_currency = so.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = so.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		# Make standalone advance payment entry
+		create_payment_entry(
+			payment_type="Receive",
+			party_type="Customer",
+			party="QA Logistics",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Bank - _TC",
+			save=1,
+			submit=1,
+		)
+
+		si = make_sales_invoice(so.name)
+
+		item = si.get("items")[1]
+		si.remove(item)
+
+		si.allocate_advances_automatically = 1
+		si.save()
+
+		self.assertEqual(len(si.get("advances")), 1)
+		self.assertEqual(si.get("advances")[0].allocated_amount, 200)
+		self.assertEqual(si.get("advances")[0].reference_name, pe.name)
+
+		si.submit()
+		pe.load_from_db()
+
+		self.assertEqual(pe.references[0].reference_name, si.name)
+		self.assertEqual(pe.references[0].allocated_amount, 200)
+		self.assertEqual(pe.references[1].reference_name, so.name)
+		self.assertEqual(pe.references[1].allocated_amount, 300)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
