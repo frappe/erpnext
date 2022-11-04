@@ -415,7 +415,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	get_existing_blank_row() {
 		return this.items_table.find((d) => !d.item_code);
 	}
-	
+
 	play_success_sound() {
 		this.success_sound && frappe.utils.play_sound(this.success_sound);
 	}
