@@ -59,6 +59,7 @@
   "feedback_cb_1",
   "ratings_section",
   "next_contact",
+  "to_discuss",
   "contact_schedule"
  ],
  "fields": [
@@ -432,6 +433,12 @@
    "fieldtype": "Data",
    "label": "Contact Phone",
    "read_only": 1
+  },
+  {
+   "fieldname": "to_discuss",
+   "fieldtype": "Small Text",
+   "label": "To Discuss",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-info-sign",

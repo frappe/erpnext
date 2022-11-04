@@ -9,17 +9,20 @@ frappe.provide("erpnext.crm");
 erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.custom_make_buttons = {
+			'Customer': 'Customer',
 			'Quotation': 'Quotation',
 			'Vehicle Quotation': 'Vehicle Quotation',
+			'Vehicle Booking Order': 'Vehicle Booking Order',
 			'Supplier Quotation': 'Supplier Quotation',
 		};
 
-		this.frm.email_field = "contact_email";
+		this.frm.email_field = 'contact_email';
 	},
 
 	refresh: function() {
 		erpnext.hide_company();
 		erpnext.toggle_naming_series();
+
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
 		this.set_sales_person_from_user();
@@ -38,33 +41,48 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		if (!me.frm.doc.__islocal) {
-			if(me.frm.doc.status !== "Lost") {
-				me.frm.add_custom_button(__('Quotation'), () => me.create_quotation(),
-					__('Create'));
-
-				if(me.frm.doc.items && me.frm.doc.items.length) {
-					me.frm.add_custom_button(__('Supplier Quotation'), () => me.make_supplier_quotation(),
-					__('Create'));
-				}
-			}
-
 			if(me.frm.perm[0].write) {
 				if (me.frm.doc.status !== "Quotation") {
-					me.frm.add_custom_button(__('Lost'), () => me.set_as_lost_dialog());
+					me.frm.add_custom_button(__('Lost'), () => me.frm.events.set_as_lost_dialog(me.frm),
+						__("Status"));
 				}
 
 				if (me.frm.doc.status === "Open") {
 					me.frm.add_custom_button(__("Close"), () => {
 						me.frm.set_value("status", "Closed");
 						me.frm.save();
-					});
+					}, __("Status"));
 				} else {
 					me.frm.add_custom_button(__("Reopen"), () => {
-						me.frm.set_value("lost_reasons",[])
+						me.frm.set_value("lost_reasons", [])
 						me.frm.set_value("status", "Open");
 						me.frm.save();
-					});
+					}, __("Status"));
 				}
+			}
+
+			if(me.frm.doc.status !== "Lost") {
+				if(!me.frm.doc.__onload.customer) {
+					me.frm.add_custom_button(__('Customer'), () => me.create_customer(),
+						__('Create'));
+				}
+
+				me.frm.add_custom_button(__('Quotation'), () => me.create_quotation(),
+					__('Create'));
+
+				if (me.frm.doc.items && me.frm.doc.items.length) {
+					me.frm.add_custom_button(__('Supplier Quotation'), () => me.make_supplier_quotation(),
+						__('Create'));
+				}
+
+				if (frappe.boot.active_domains.includes("Vehicles")) {
+					me.frm.add_custom_button(__("Vehicle Quotation"), () => me.make_vehicle_quotation(),
+						__('Create'));
+					me.frm.add_custom_button(__("Vehicle Booking Order"), () => me.make_vehicle_booking_order(),
+						__('Create'));
+				}
+
+				me.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 		}
 	},
@@ -99,6 +117,16 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				filters: {'is_sales_item': 1}
 			};
 		});
+
+		if (me.frm.fields_dict.delivery_period) {
+			me.frm.set_query("delivery_period", function () {
+				if (me.frm.doc.transaction_date) {
+					return {
+						filters: {to_date: [">=", me.frm.doc.transaction_date]}
+					}
+				}
+			});
+		}
 	},
 
 	set_dynamic_field_label: function(){
@@ -199,17 +227,34 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		var me = this;
 		frappe.db.get_single_value("CRM Settings", "follow_up_period").then((r) => {
 			var followups = []
-			for (let i = 1; i < 4; i++){
+			for (let i = 1; i <= 3; i++){
 				followups.push({date: frappe.datetime.add_days(this.frm.doc.transaction_date, i*r)});
 			}
 			me.frm.set_value('contact_schedule', followups);
-			me.frm.refresh_field('contact_schedule');
 		})
+	},
+
+	create_customer: function () {
+		erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.party_name);
 	},
 
 	create_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
+			frm: this.frm
+		})
+	},
+
+	make_vehicle_quotation: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_vehicle_quotation",
+			frm: this.frm
+		})
+	},
+
+	make_vehicle_booking_order: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_vehicle_booking_order",
 			frm: this.frm
 		})
 	},

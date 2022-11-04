@@ -374,6 +374,8 @@ erpnext.utils.make_customer_from_lead = function (frm, lead) {
 		return;
 	}
 
+	frm.check_if_unsaved();
+
 	var dialog = new frappe.ui.Dialog({
 		title: __("Convert Lead to Customer"),
 		fields: [

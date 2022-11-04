@@ -30,7 +30,7 @@ class Lead(SellingController):
 
 	def onload(self):
 		customer = get_customer_from_lead(self.name)
-		self.get("__onload").is_customer = customer
+		self.set_onload('customer', customer)
 		load_address_and_contact(self)
 
 	def validate(self):
@@ -156,7 +156,6 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			"doctype": "Customer",
 			"field_map": {
 				"name": "lead_name",
-				"company_name": "customer_name",
 				"lead_name": "contact_first_name",
 			}
 		}

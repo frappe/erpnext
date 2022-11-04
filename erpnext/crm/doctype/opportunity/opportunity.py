@@ -11,6 +11,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_party_account_currency
+from erpnext.crm.doctype.lead.lead import get_customer_from_lead
 from six import string_types
 import json
 
@@ -51,6 +52,12 @@ class Opportunity(TransactionBase):
 
 	def set_title(self):
 		self.title = self.customer_name
+
+	def onload(self):
+		if self.opportunity_from == "Customer":
+			self.set_onload('customer', self.party_name)
+		elif self.opportunity_from == "Lead":
+			self.set_onload('customer', get_customer_from_lead(self.party_name))
 
 	def set_missing_values(self):
 		self.set_customer_details()
@@ -267,6 +274,78 @@ def make_request_for_quotation(source_name, target_doc=None):
 
 
 @frappe.whitelist()
+def make_vehicle_quotation(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		set_vehicle_item_from_opportunity(source, target)
+		add_sales_person_from_opportunity(source, target)
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	target_doc = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Vehicle Quotation",
+			"field_map": {
+				"name": "opportunity",
+				'delivery_period': 'delivery_period',
+				'opportunity_from': 'quotation_to',
+				'party_name': 'party_name',
+			}
+		}
+	}, target_doc, set_missing_values)
+
+	return target_doc
+
+
+@frappe.whitelist()
+def make_vehicle_booking_order(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		customer = get_customer_from_opportunity(source)
+		if customer:
+			target.customer = customer.name
+			target.customer_name = customer.customer_name
+
+		set_vehicle_item_from_opportunity(source, target)
+		add_sales_person_from_opportunity(source, target)
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_payment_schedule")
+		target.run_method("set_due_date")
+
+	target_doc = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Vehicle Booking Order",
+			"field_map": {
+				"name": "opportunity",
+				"remarks": "remarks",
+				"delivery_period": "delivery_period",
+				"delivery_date": "delivery_date",
+				"vehicle": "vehicle",
+			}
+		},
+	}, target_doc, set_missing_values)
+
+	return target_doc
+
+
+def set_vehicle_item_from_opportunity(source, target):
+	for d in source.items:
+		item = frappe.get_cached_doc("Item", d.item_code) if d.item_code else frappe._dict()
+		if item.is_vehicle:
+			target.item_code = item.name
+			return
+
+
+def add_sales_person_from_opportunity(source, target):
+	if source.get('sales_person') and not target.get('sales_team'):
+		target.append('sales_team', {
+			'sales_person': source.sales_person,
+			'allocated_percentage': 100,
+		})
+
+
+@frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
@@ -331,3 +410,13 @@ def make_opportunity_from_communication(communication, company, ignore_communica
 	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
 
 	return opportunity.name
+
+
+def get_customer_from_opportunity(source):
+	if source and source.get('party_name'):
+		if source.get('opportunity_from') == 'Lead':
+			customer = get_customer_from_lead(source.get('party_name'), throw=True)
+			return frappe.get_cached_doc('Customer', customer)
+
+		elif source.get('opportunity_from') == 'Customer':
+			return frappe.get_cached_doc('Customer', source.get('party_name'))

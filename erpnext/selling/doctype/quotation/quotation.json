@@ -32,7 +32,6 @@
   "more_info_cb_3",
   "campaign",
   "opportunity",
-  "enq_det",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -966,16 +965,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "enq_det",
-   "fieldtype": "Text",
-   "hidden": 1,
-   "label": "Opportunity Item",
-   "oldfieldname": "enq_det",
-   "oldfieldtype": "Text",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "supplier_quotation",
    "fieldtype": "Link",
    "label": "Supplier Quotation",
@@ -1436,7 +1425,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2022-10-28 13:06:40.659134",
+ "modified": "2022-11-01 19:16:38.654038",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
