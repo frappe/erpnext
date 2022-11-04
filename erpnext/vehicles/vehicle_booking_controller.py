@@ -481,6 +481,15 @@ def get_item_details(args):
 			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
 			out.delivery_period = get_delivery_period(out.delivery_date)
 
+	delivery_period = out.delivery_period or args.delivery_period
+	if delivery_period and not out.delivery_date and not args.delivery_date:
+		out.delivery_date = None
+
+	delivery_period_details = get_delivery_period_details(delivery_period, item.name)
+	out.vehicle_allocation_required = delivery_period_details.vehicle_allocation_required
+	if delivery_period_details.delivery_date and not args.delivery_date and not out.delivery_date:
+		out.delivery_date = delivery_period_details.delivery_date
+
 	tax_status = args.tax_status
 	if args.doctype == "Vehicle Quotation":
 		tax_status = tax_status or 'Filer'
@@ -508,16 +517,16 @@ def get_item_details(args):
 			if not out.tc_name:
 				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
 
-	out.vehicle_allocation_required = get_vehicle_allocation_required(item.name,
-		delivery_period=out.delivery_period or args.delivery_period)
-
 	return out
 
 
 @frappe.whitelist()
 def get_delivery_period_details(delivery_period, item_code=None):
 	out = frappe._dict()
-	out.delivery_date = frappe.get_cached_value("Vehicle Allocation Period", delivery_period, 'to_date')
+
+	if delivery_period:
+		out.delivery_date = frappe.get_cached_value("Vehicle Allocation Period", delivery_period, 'to_date')
+
 	out.vehicle_allocation_required = get_vehicle_allocation_required(item_code, delivery_period)
 	return out
 
