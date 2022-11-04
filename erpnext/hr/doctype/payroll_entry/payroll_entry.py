@@ -446,7 +446,9 @@ class PayrollEntry(Document):
 					"debit_in_account_currency": rows_deb[cont_rows],
 					"credit_in_account_currency": rows_cred[cont_rows],
 					"reference_type": self.doctype,
-					"reference_name": self.name
+					"reference_name": self.name,
+					"party_type": "Employee",
+					"party": "EMP/00160"
 				}
 			)			
 
@@ -460,7 +462,9 @@ class PayrollEntry(Document):
 		 		"debit_in_account_currency": 0,
 		 		"credit_in_account_currency": difference,
 		 		"reference_type": self.doctype,
-		 		"reference_name": self.name
+		 		"reference_name": self.name,
+				"party_type": "Employee",
+				"party": "EMP/00160"
 		 	}
 		)
 
