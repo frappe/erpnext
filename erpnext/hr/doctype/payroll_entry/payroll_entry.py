@@ -448,7 +448,7 @@ class PayrollEntry(Document):
 					"reference_type": self.doctype,
 					"reference_name": self.name,
 					"party_type": "Employee",
-					"party": "party_type"
+					"party": "EMP/00160"
 				}
 			)			
 
@@ -464,7 +464,7 @@ class PayrollEntry(Document):
 		 		"reference_type": self.doctype,
 		 		"reference_name": self.name,
 				"party_type": "Employee",
-				"party": "party_type"
+				"party": "EMP/00160"
 		 	}
 		)
 
