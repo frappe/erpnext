@@ -1600,12 +1600,6 @@
    "label": "Accounting Dimensions"
   },
   {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   }
