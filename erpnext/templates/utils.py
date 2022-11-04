@@ -7,7 +7,7 @@ import frappe
 
 
 @frappe.whitelist(allow_guest=True)
-def send_message(subject="Website Query", message="", sender="", status="Open"):
+def send_message(subject="Website Query", message="", sender="", phone_no="", full_name="", organization=""):
 	from frappe.www.contact import send_message as website_send_message
 	lead = customer = None
 
@@ -22,17 +22,19 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		if not lead:
 			new_lead = frappe.get_doc(dict(
 				doctype='Lead',
-				email_id = sender,
-				lead_name = sender.split('@')[0].title()
+				email_id=sender,
+				lead_name=full_name or sender.split('@')[0].title(),
+				company_name=organization,
+				phone=phone_no,
 			)).insert(ignore_permissions=True)
 
 	opportunity = frappe.get_doc(dict(
-		doctype ='Opportunity',
-		opportunity_from = 'Customer' if customer else 'Lead',
-		status = 'Open',
-		title = subject,
-		contact_email = sender,
-		to_discuss = message
+		doctype='Opportunity',
+		opportunity_from='Customer' if customer else 'Lead',
+		status='Open',
+		title=subject,
+		contact_email=sender,
+		to_discuss=message,
 	))
 
 	if customer:
@@ -45,7 +47,7 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 	opportunity.insert(ignore_permissions=True)
 
 	comm = frappe.get_doc({
-		"doctype":"Communication",
+		"doctype": "Communication",
 		"subject": subject,
 		"content": message,
 		"sender": sender,

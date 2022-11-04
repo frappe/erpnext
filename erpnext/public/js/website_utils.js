@@ -10,7 +10,7 @@ frappe.send_message = function(opts, btn) {
 		type: "POST",
 		method: "erpnext.templates.utils.send_message",
 		btn: btn,
-		args: opts,
+		args: opts.args,
 		callback: opts.callback
 	});
 };

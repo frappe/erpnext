@@ -336,6 +336,7 @@ class SalesOrder(SellingController):
 		out.billed_qty_map = {}
 		out.billed_amount_map = {}
 		out.delivery_return_qty_map = {}
+		out.depreciation_billing_status = {}
 
 		if self.docstatus == 1:
 			row_names = [d.name for d in self.items]
@@ -360,9 +361,20 @@ class SalesOrder(SellingController):
 					out.billed_amount_map.setdefault(d.sales_order_item, 0)
 					out.billed_amount_map[d.sales_order_item] += d.amount
 
+					out.depreciation_billing_status.setdefault(d.sales_order_item, set())
+					out.depreciation_billing_status[d.sales_order_item].add(d.depreciation_type or 'No Depreciation')
+
 					if d.depreciation_type != 'Depreciation Amount Only':
 						out.billed_qty_map.setdefault(d.sales_order_item, 0)
 						out.billed_qty_map[d.sales_order_item] += d.qty
+
+				# Do not mark as billed if both depreciation type invoices not created
+				for so_item, depreciation_types in out.depreciation_billing_status.items():
+					if 'No Depreciation' not in depreciation_types:
+						has_depreciation_amount = 'Depreciation Amount Only' in depreciation_types
+						has_after_depreciation_amount = 'After Depreciation Amount' in depreciation_types
+						if not has_depreciation_amount or not has_after_depreciation_amount:
+							out.billed_qty_map[so_item] = 0
 
 				# Returned By Delivery Note
 				out.delivery_return_qty_map = dict(frappe.db.sql("""

@@ -27,7 +27,7 @@ class ProjectSalesSummaryReport(object):
 		panel_join = ""
 		if self.is_vehicle_service:
 			extra_rows = """, p.vehicle_license_plate, p.vehicle_chassis_no, p.vehicle_engine_no, p.vehicle_unregistered,
-				sum(ppd.qty) as panel_qty"""
+				sum(ppd.panel_qty) as panel_qty"""
 			panel_join = "left join `tabProject Panel Detail` ppd on ppd.parent = p.name"
 
 		self.data = frappe.db.sql("""
