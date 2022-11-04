@@ -31,10 +31,11 @@ class Opportunity(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(Opportunity, self).__init__(*args, **kwargs)
 		self.status_map = [
+			["Open", None],
 			["Lost", "eval:self.status=='Lost'"],
 			["Lost", "has_lost_quotation"],
 			["Quotation", "has_active_quotation"],
-			["Converted", "has_ordered_quotation"],
+			["Converted", "is_converted"],
 			["Closed", "eval:self.status=='Closed'"]
 		]
 
@@ -44,8 +45,7 @@ class Opportunity(TransactionBase):
 		self.set_title()
 
 	def after_insert(self):
-		if self.opportunity_from == "Lead":
-			frappe.get_doc("Lead", self.party_name).set_status(update=True)
+		self.update_lead_status()
 
 	def on_trash(self):
 		self.delete_events()
@@ -94,6 +94,12 @@ class Opportunity(TransactionBase):
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
+	def update_lead_status(self):
+		if self.opportunity_from == "Lead" and self.party_name:
+			doc = frappe.get_doc("Lead", self.party_name)
+			doc.set_status(update=True)
+			doc.notify_update()
+
 	def has_active_quotation(self):
 		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
 			"opportunity": self.name,
@@ -109,37 +115,43 @@ class Opportunity(TransactionBase):
 
 		return quotation or vehicle_quotation
 
-	def has_ordered_quotation(self):
-		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
+	def is_converted(self):
+		if self.has_ordered_quotation():
+			return True
+
+		vehicle_booking_order = frappe.db.get_value("Vehicle Booking Order", {
 			"opportunity": self.name,
 			"docstatus": 1,
-			"status": 'Ordered'
 		})
 
-		quotation = frappe.db.sql("""
-			select q.name
-			from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-			and q.status = 'Ordered'""", self.name)
+		if vehicle_booking_order:
+			return True
 
-		return quotation or vehicle_quotation
+		return False
+
+	def has_ordered_quotation(self):
+		quotation = frappe.db.get_value("Quotation", {
+			"opportunity": self.name,
+			"docstatus": 1,
+			"status": "Ordered",
+		})
+
+		return quotation
 
 	def has_lost_quotation(self):
-		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
+		lost_vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
 			"opportunity": self.name,
 			"docstatus": 1,
 			"status": 'Lost'
 		})
 
-		lost_quotation = frappe.db.sql("""
-			select name
-			from `tabQuotation`
-			where  docstatus=1
-				and opportunity =%s
-				and status = 'Lost'
-			""", self.name)
+		lost_quotation = frappe.db.get_value("Quotation", {
+			"opportunity": self.name,
+			"docstatus": 1,
+			"status": 'Lost'
+		})
 
-		if lost_quotation or vehicle_quotation:
+		if lost_quotation or lost_vehicle_quotation:
 			if self.has_active_quotation():
 				return False
 			return True
@@ -237,7 +249,7 @@ def make_quotation(source_name, target_doc=None):
 			"field_map": {
 				"opportunity_from": "quotation_to",
 				"opportunity_type": "order_type",
-				"name": "enq_no",
+				"name": "opportunity",
 			}
 		},
 		"Opportunity Item": {

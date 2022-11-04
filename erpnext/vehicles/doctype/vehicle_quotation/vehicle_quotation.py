@@ -136,6 +136,7 @@ def _make_vehicle_booking_order(source_name, target_doc=None, ignore_permissions
 				"color": "color_1",
 				"delivery_date": "delivery_date",
 				"vehicle": "vehicle",
+				"opportunity": "opportunity"
 			},
 			"field_no_map": ['tc_name', 'terms']
 		},

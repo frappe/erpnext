@@ -8,8 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "image",
-  "vehicle_quotation",
+  "opportunity",
   "column_break_3",
+  "vehicle_quotation",
   "title",
   "naming_series",
   "section_break_6",
@@ -600,7 +601,6 @@
    "options": "Company:company:default_currency"
   },
   {
-   "default": "0",
    "fieldname": "fni_amount",
    "fieldtype": "Currency",
    "label": "Freight and Insurance",
@@ -1166,12 +1166,20 @@
    "in_standard_filter": 1,
    "label": "Is Outstation Delivery",
    "no_copy": 1
+  },
+  {
+   "fieldname": "opportunity",
+   "fieldtype": "Link",
+   "label": "Opportunity",
+   "no_copy": 1,
+   "options": "Opportunity",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-10-22 15:41:47.822821",
+ "modified": "2022-11-03 18:40:36.753014",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
