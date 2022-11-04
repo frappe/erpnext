@@ -341,11 +341,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
+		this.validate_has_items();
 	}
 
 	scan_barcode() {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
 		barcode_scanner.process_scan();
+	}
+
+	validate_has_items () {
+		let table = this.frm.doc.items;
+		this.frm.has_items = (table && table.length
+			&& table[0].qty && table[0].item_code);
 	}
 
 	apply_default_taxes() {
