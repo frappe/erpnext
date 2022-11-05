@@ -404,8 +404,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			"stock_value_difference",
 		)
 
-		# Service Cost(100 * 10) + Raw Materials Cost(50 * 10) + Additional Costs(100) = 1600
-		self.assertEqual(stock_value_difference, 1600)
+		# Service Cost(100 * 10) + Raw Materials Cost(100 * 10) + Additional Costs(10 * 10) = 2100
+		self.assertEqual(stock_value_difference, 2100)
 		self.assertFalse(get_gl_entries("Subcontracting Receipt", scr.name))
 
 	def test_subcontracting_receipt_gl_entry(self):
