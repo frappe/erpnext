@@ -57,6 +57,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def before_validate(self):
 		super(SubcontractingReceipt, self).before_validate()
+		self.set_items_bom()
 		self.set_items_cost_center()
 		self.set_items_expense_account()
 
@@ -192,6 +193,24 @@ class SubcontractingReceipt(SubcontractingController):
 						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
 					).format(item.idx)
 				)
+
+	def set_items_bom(self):
+		if self.is_return:
+			for item in self.items:
+				if not item.bom:
+					item.bom = frappe.db.get_value(
+						"Subcontracting Receipt Item",
+						{"name": item.subcontracting_receipt_item, "parent": self.return_against},
+						"bom",
+					)
+		else:
+			for item in self.items:
+				if not item.bom:
+					item.bom = frappe.db.get_value(
+						"Subcontracting Order Item",
+						{"name": item.subcontracting_order_item, "parent": item.subcontracting_order},
+						"bom",
+					)
 
 	def set_items_cost_center(self):
 		if self.company:
