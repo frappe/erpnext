@@ -343,11 +343,13 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr1_return = make_return_subcontracting_receipt(scr_name=scr1.name, qty=-3)
 		scr1.load_from_db()
 		self.assertEqual(scr1_return.status, "Return")
+		self.assertIsNotNone(scr1_return.items[0].bom)
 		self.assertEqual(scr1.items[0].returned_qty, 3)
 
 		scr2_return = make_return_subcontracting_receipt(scr_name=scr1.name, qty=-7)
 		scr1.load_from_db()
 		self.assertEqual(scr2_return.status, "Return")
+		self.assertIsNotNone(scr2_return.items[0].bom)
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
