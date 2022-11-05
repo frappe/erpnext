@@ -64,7 +64,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 
-		if (this.frm.doc.repost_required) {
+		if (this.frm.doc.repost_required && this.frm.doc.docstatus===1) {
 			this.frm.set_intro(__("Accounting entries for this invoice needs to be reposted. Please click on 'Repost' button to update."));
 			this.frm.add_custom_button(__('Repost Accounting Entries'),
 				() => {
