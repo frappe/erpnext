@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -804,15 +804,12 @@ class AccountsController(TransactionBase):
 		self.set("advances", [])
 		advance_allocated = 0
 		for d in res:
-			if d.against_order:
-				allocated_amount = flt(d.amount)
+			if self.get("party_account_currency") == self.company_currency:
+				amount = self.get("base_rounded_total") or self.base_grand_total
 			else:
-				if self.get("party_account_currency") == self.company_currency:
-					amount = self.get("base_rounded_total") or self.base_grand_total
-				else:
-					amount = self.get("rounded_total") or self.grand_total
+				amount = self.get("rounded_total") or self.grand_total
 
-				allocated_amount = min(amount - advance_allocated, d.amount)
+			allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			advance_row = {
@@ -1334,30 +1331,20 @@ class AccountsController(TransactionBase):
 		return stock_items
 
 	def set_total_advance_paid(self):
-		if self.doctype == "Sales Order":
-			dr_or_cr = "credit_in_account_currency"
-			rev_dr_or_cr = "debit_in_account_currency"
-			party = self.customer
-		else:
-			dr_or_cr = "debit_in_account_currency"
-			rev_dr_or_cr = "credit_in_account_currency"
-			party = self.supplier
-
-		advance = frappe.db.sql(
-			"""
-			select
-				account_currency, sum({dr_or_cr}) - sum({rev_dr_cr}) as amount
-			from
-				`tabGL Entry`
-			where
-				against_voucher_type = %s and against_voucher = %s and party=%s
-				and docstatus = 1
-		""".format(
-				dr_or_cr=dr_or_cr, rev_dr_cr=rev_dr_or_cr
-			),
-			(self.doctype, self.name, party),
-			as_dict=1,
-		)  # nosec
+		ple = frappe.qb.DocType("Payment Ledger Entry")
+		party = self.customer if self.doctype == "Sales Order" else self.supplier
+		advance = (
+			frappe.qb.from_(ple)
+			.select(ple.account_currency, Abs(Sum(ple.amount)).as_("amount"))
+			.where(
+				(ple.against_voucher_type == self.doctype)
+				& (ple.against_voucher_no == self.name)
+				& (ple.party == party)
+				& (ple.delinked == 0)
+				& (ple.company == self.company)
+			)
+			.run(as_dict=True)
+		)
 
 		if advance:
 			advance = advance[0]

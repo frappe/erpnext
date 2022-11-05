@@ -312,8 +312,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		}
 	}
 
-	get_outstanding(doctype, docname, company, child, due_date) {
-		var me = this;
+	get_outstanding(doctype, docname, company, child) {
 		var args = {
 			"doctype": doctype,
 			"docname": docname,
