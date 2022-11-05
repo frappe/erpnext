@@ -327,7 +327,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		for row in scr.supplied_items:
 			self.assertEqual(transferred_batch.get(row.batch_no), row.consumed_qty)
 
-	def test_subcontracting_order_partial_return(self):
+	def test_subcontracting_receipt_partial_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
@@ -351,7 +351,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
-	def test_subcontracting_order_over_return(self):
+	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
