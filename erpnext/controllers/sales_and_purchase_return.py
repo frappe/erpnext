@@ -503,7 +503,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			doctype
 			+ " Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no"},
+				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
 				"postprocess": update_item,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
