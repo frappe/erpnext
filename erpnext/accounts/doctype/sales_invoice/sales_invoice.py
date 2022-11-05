@@ -374,6 +374,7 @@ class SalesInvoice(SellingController):
 			self.repost_future_sle_and_gle()
 
 		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("repost_required", 0)
 
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
