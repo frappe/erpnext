@@ -10,6 +10,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
+from frappe.query_builder import Case
+from frappe.query_builder.functions import Locate
 from frappe.utils import cint, floor, flt, today
 from frappe.utils.nestedset import get_descendants_of
 
@@ -678,6 +680,7 @@ def create_stock_entry(pick_list):
 
 @frappe.whitelist()
 def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filters, as_dict):
+<<<<<<< HEAD
 	return frappe.db.sql(
 		"""
 		SELECT
@@ -708,6 +711,24 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 		},
 		as_dict=as_dict,
 	)
+=======
+	wo = frappe.qb.DocType("Work Order")
+	return (
+		frappe.qb.from_(wo)
+		.select(wo.name, wo.company, wo.planned_start_date)
+		.where(
+			(wo.status.notin(["Completed", "Stopped"]))
+			& (wo.qty > wo.material_transferred_for_manufacturing)
+			& (wo.docstatus == 1)
+			& (wo.company == filters.get("company"))
+			& (wo.name.like("%{0}%".format(txt)))
+		)
+		.orderby(Case().when(Locate(txt, wo.name) > 0, Locate(txt, wo.name)).else_(99999))
+		.orderby(wo.name)
+		.limit(cint(page_length))
+		.offset(start)
+	).run(as_dict=as_dict)
+>>>>>>> 2f145f9912 (refactor: rewrite query in `QB`)
 
 
 @frappe.whitelist()
