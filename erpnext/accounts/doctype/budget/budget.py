@@ -107,7 +107,7 @@ class Budget(Document):
 		self.naming_series = f"{{{frappe.scrub(self.budget_against)}}}./.{self.fiscal_year}/.###"
 
 
-def validate_expense_against_budget(args):
+def validate_expense_against_budget(args, expense_amount=0):
 	args = frappe._dict(args)
 
 	if args.get("company") and not args.fiscal_year:
@@ -175,13 +175,13 @@ def validate_expense_against_budget(args):
 			)  # nosec
 
 			if budget_records:
-				validate_budget_records(args, budget_records)
+				validate_budget_records(args, budget_records, expense_amount)
 
 
-def validate_budget_records(args, budget_records):
+def validate_budget_records(args, budget_records, expense_amount):
 	for budget in budget_records:
 		if flt(budget.budget_amount):
-			amount = get_amount(args, budget)
+			amount = expense_amount or get_amount(args, budget)
 			yearly_action, monthly_action = get_actions(args, budget)
 
 			if monthly_action in ["Stop", "Warn"]:
