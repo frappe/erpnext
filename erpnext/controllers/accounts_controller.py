@@ -151,6 +151,7 @@ class AccountsController(TransactionBase):
 		self.validate_inter_company_reference()
 
 		self.disable_pricing_rule_on_internal_transfer()
+		self.disable_tax_included_prices_for_internal_transfer()
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -397,6 +398,20 @@ class AccountsController(TransactionBase):
 				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
 				alert=1,
 			)
+
+	def disable_tax_included_prices_for_internal_transfer(self):
+		if self.is_internal_transfer():
+			tax_updated = False
+			for tax in self.get("taxes"):
+				if tax.get("included_in_print_rate"):
+					tax.included_in_print_rate = 0
+					tax_updated = True
+
+			if tax_updated:
+				frappe.msgprint(
+					_("Disabled tax included prices since this {} is an internal transfer").format(self.doctype),
+					alert=1,
+				)
 
 	def validate_due_date(self):
 		if self.get("is_pos"):
@@ -804,15 +819,12 @@ class AccountsController(TransactionBase):
 		self.set("advances", [])
 		advance_allocated = 0
 		for d in res:
-			if d.against_order:
-				allocated_amount = flt(d.amount)
+			if self.get("party_account_currency") == self.company_currency:
+				amount = self.get("base_rounded_total") or self.base_grand_total
 			else:
-				if self.get("party_account_currency") == self.company_currency:
-					amount = self.get("base_rounded_total") or self.base_grand_total
-				else:
-					amount = self.get("rounded_total") or self.grand_total
+				amount = self.get("rounded_total") or self.grand_total
 
-				allocated_amount = min(amount - advance_allocated, d.amount)
+			allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			advance_row = {
