@@ -468,6 +468,65 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 
+	def test_supplied_items_consumed_qty(self):
+		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
+		set_backflush_based_on("Material Transferred for Subcontract")
+
+		# Create Material Receipt for RM's
+		make_stock_entry(
+			item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100
+		)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			qty=100,
+			target="_Test Warehouse 1 - _TC",
+			basic_rate=100,
+		)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 10,
+			},
+		]
+
+		# Create Subcontracting Order
+		sco = get_subcontracting_order(service_items=service_items)
+
+		# Transfer RM's
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 20  # Extra 10 Qty
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create Subcontracting Receipt
+		scr = make_subcontracting_receipt(sco.name)
+		scr.rejected_warehouse = "_Test Warehouse 1 - _TC"
+
+		scr.items[0].qty = 5  # Accepted Qty
+		scr.items[0].rejected_qty = 3
+		scr.save()
+
+		# consumed_qty should be ((received_qty) * (transfered_qty / qty)) = ((5 + 3) * (20 / 10)) = 16
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 16)
+
+		# Set Backflush Based On as "BOM"
+		set_backflush_based_on("BOM")
+
+		scr.items[0].rejected_qty = 4
+		scr.save()
+
+		# consumed_qty should be ((received_qty) * (qty_consumed_per_unit)) = ((5 + 4) * (1)) = 9
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 9)
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
