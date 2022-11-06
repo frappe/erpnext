@@ -57,6 +57,8 @@
   "column_break_28",
   "total",
   "net_total",
+  "tax_withholding_net_total",
+  "base_tax_withholding_net_total",
   "taxes_section",
   "taxes_and_charges",
   "column_break_58",
@@ -89,7 +91,6 @@
   "section_break_44",
   "apply_discount_on",
   "base_discount_amount",
-  "additional_discount_account",
   "column_break_46",
   "additional_discount_percentage",
   "discount_amount",
@@ -1422,6 +1423,26 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "collapsible_depends_on": "tax_withheld_vouchers",
    "fieldname": "tax_withheld_vouchers_section",
    "fieldtype": "Section Break",
@@ -1519,7 +1540,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:04:44.304389",
+ "modified": "2022-11-04 01:02:44.544878",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
