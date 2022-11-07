@@ -168,9 +168,9 @@ def get_reserved_qty(item_code, warehouse):
 					select qty, parent_detail_docname, parent, name
 					from `tabPacked Item` dnpi_in
 					where item_code = %s and warehouse = %s
-					and parenttype="Sales Order"
+					and parenttype="Customer Order"
 					and item_code != parent_item
-					and exists (select * from `tabSales Order` so
+					and exists (select * from `tabCustomer Order` so
 					where name = dnpi_in.parent and docstatus = 1 and status != 'Closed')
 				) dnpi)
 			union
