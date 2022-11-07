@@ -9865,8 +9865,6 @@ Leave Type Allocation,Zuordnung Abwesenheitsarten,
 From Lead,Aus Lead,
 From Opportunity,Aus Chance,
 Publish in Website,Auf Webseite veröffentlichen,
-<<<<<<< HEAD
-=======
 Total Allocated Leave(s),Gesamte zugewiesene Urlaubstage,
 Expired Leave(s),Verfallene Urlaubstage,
 Used Leave(s),Verbrauchte Urlaubstage,
@@ -9899,4 +9897,3 @@ Total Asset,Aktiva,
 Total Liability,Verbindlichkeiten,
 Total Equity,Eigenkapital,
 Warehouse wise Stock Value,Warenwert nach Lager,
->>>>>>> d2b6490bca (chore: add german translations (#32846))
