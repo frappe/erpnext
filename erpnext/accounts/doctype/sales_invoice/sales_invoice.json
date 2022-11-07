@@ -2112,6 +2112,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Repost Required",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
@@ -2125,7 +2126,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-10-23 10:52:47.416251",
+ "modified": "2022-11-07 16:02:07.972258",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
