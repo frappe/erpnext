@@ -91,8 +91,8 @@ def get_columns(filters):
 	columns = [
 		_("Item") + ":Link/Item:180",
 		_("Item Group") + "::100",
-		_("Value") + ":Currency:100",
-		_("Age") + ":Float:60",
+		_("Value") + ":Currency:120",
+		_("Age") + ":Float:80",
 	]
 	return columns
 
@@ -123,7 +123,7 @@ def get_warehouse_list(filters):
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-		columns += [_("Total Qty") + ":Int:50"]
+		columns += [_("Total Qty") + ":Int:90"]
 
 	for wh in warehouse_list:
-		columns += [_(wh.name) + ":Int:54"]
+		columns += [_(wh.name) + ":Int:120"]
