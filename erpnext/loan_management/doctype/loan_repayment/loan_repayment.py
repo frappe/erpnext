@@ -576,8 +576,8 @@ def regenerate_repayment_schedule(loan, cancel=0):
 	loan_doc = frappe.get_doc("Loan", loan)
 	next_accrual_date = None
 	accrued_entries = 0
-	last_repayment_amount = 0
-	last_balance_amount = 0
+	last_repayment_amount = None
+	last_balance_amount = None
 
 	for term in reversed(loan_doc.get("repayment_schedule")):
 		if not term.is_accrued:
@@ -585,9 +585,9 @@ def regenerate_repayment_schedule(loan, cancel=0):
 			loan_doc.remove(term)
 		else:
 			accrued_entries += 1
-			if not last_repayment_amount:
+			if last_repayment_amount is None:
 				last_repayment_amount = term.total_payment
-			if not last_balance_amount:
+			if last_balance_amount is None:
 				last_balance_amount = term.balance_loan_amount
 
 	loan_doc.save()
