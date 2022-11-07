@@ -827,9 +827,16 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 
-			dr_or_cr = (
-				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
-			)
+			party_account_type = erpnext.get_party_account_type(self.party_type)
+
+			if party_account_type == "Receivable" and self.payment_type == "Receive":
+				dr_or_cr = "credit"
+			elif party_account_type == "Payable" and self.payment_type == "Pay":
+				dr_or_cr = "debit"
+			elif party_account_type == "Receivable" and self.payment_type == "Pay":
+				dr_or_cr = "debit"
+			elif party_account_type == "Payable" and self.payment_type == "Receive":
+				dr_or_cr = "credit"
 
 			for d in self.get("references"):
 				cost_center = self.cost_center
