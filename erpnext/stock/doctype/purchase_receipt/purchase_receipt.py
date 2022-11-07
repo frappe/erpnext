@@ -218,6 +218,11 @@ class PurchaseReceipt(BuyingController):
 		frappe.get_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
 		)
+		# Pending case:
+		# for d in self.get("items"):
+		# 	available_quty = get_batch_qty(d.batch_no, d.warehouse, d.item_code)
+		# 	if (d.qty > available_quty):
+		# 		frappe.throw("Product does not have enough stock in warehouse")
 
 		self.update_prevdoc_status()
 		if flt(self.per_billed) < 100:
@@ -974,7 +979,7 @@ def make_logistic_notice(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All products have already been Shipped"))
+			frappe.throw(_("All products have already been Added in Logistic Notice but not Shipped."))
 
 		doc = frappe.get_doc(target)
 		# doc.payment_terms_template = get_payment_terms_template(
@@ -995,10 +1000,10 @@ def make_logistic_notice(source_name, target_doc=None):
 			target_doc.conversion_factor, target_doc.precision("conversion_factor")
 		)
 		returned_qty_map[source_doc.name] = returned_qty
-
 		# filters = {"item_code": source_doc.batch_no, "warehouse": source_doc.warehouse, "batch_no": source_doc.item_code}
-		target_doc.available_qty = get_batch_qty(source_doc.batch_no, source_doc.warehouse, source_doc.item_code)
-		target_doc.qty = target_doc.available_qty
+		# target_doc.available_qty = get_batch_qty(source_doc.batch_no, source_doc.warehouse, source_doc.item_code)
+		target_doc.qty = source_doc.remaining_qty
+		target_doc.available_qty  = source_doc.remaining_qty
 		# target.qty = flt(obj.qty) - flt(obj.received_qty)
 
 		# available_batch_qty = get_batch_qty(item.batch_no, item.warehouse, item.item_code)
@@ -1050,7 +1055,7 @@ def make_logistic_notice(source_name, target_doc=None):
 					"asset_category": "asset_category",
 				},
 				"postprocess": update_item,
-				"filter": lambda d: get_batch_qty(d.batch_no, "Supplier - U", d.item_code) == 0,
+				"filter": lambda d: d.remaining_qty == 0,
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
 		},
@@ -1199,6 +1204,7 @@ def pr_batch_details(item_code,name, item_name,qty,batch_number,manufacturing_da
 	if (exists == False):
 		for item in co.get("items"):
 			if (item.item_code == item_code):
+				item.item_name == item_name
 				item.batch_number = batch_number,
 				item.manufacturing_date=manufacturing_date,
 				item.expiry_date=expiry_date,
