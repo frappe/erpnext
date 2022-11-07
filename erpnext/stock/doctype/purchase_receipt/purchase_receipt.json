@@ -135,7 +135,9 @@
   "transporter_name",
   "column_break5",
   "lr_no",
-  "lr_date"
+  "lr_date",
+  "logistic_notice_details_update_section",
+  "logistic_notice_update_in_pr"
  ],
  "fields": [
   {
@@ -1190,6 +1192,20 @@
    "label": "Purchase Order",
    "options": "Purchase Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "logistic_notice_details_update_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Logistic Notice Details Update"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "logistic_notice_update_in_pr",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Logistic Notice Update in PR",
+   "options": "Logistic Update in Purchase Receipt"
   }
  ],
  "hide_toolbar": 1,
@@ -1197,7 +1213,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-04 09:03:43.185393",
+ "modified": "2022-11-07 01:56:18.566376",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

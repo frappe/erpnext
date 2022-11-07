@@ -102,6 +102,10 @@ status_map = {
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
+	"Logistic Notice": [
+		["Open", None],
+		["Open", "eval:self.per_billed < 100 and self.docstatus == 1"],
+	],
 	"Purchase Receipt": [
 		["Draft", None],
 		["Ready", "eval:self.per_billed < 100 and self.docstatus == 1"],

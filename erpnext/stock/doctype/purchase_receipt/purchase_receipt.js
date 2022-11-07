@@ -228,12 +228,14 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					}, __('Create'))
 				} */
 
-				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+				// cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 
 				// ***** MAKE LOGISITIC NOTICE BUTTON ***** //
 				// if(flt(this.frm.doc.per_received) < 100 && allow_receipt) {// ** need to add condition**//
 				// }
-				cur_frm.add_custom_button(__('Logistic Notice'), this.make_logistic_notice, __('Create'));
+				if (cur_frm.doc.status != "Shipped") {
+					cur_frm.add_custom_button(__('Logistic Notice'), this.make_logistic_notice, __('Create'));
+				}
 			}
 		}
 
@@ -249,7 +251,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_logistic_notice",
 			frm: cur_frm,
-			// freeze_message: __("Creating Logistic Notice ...")
+			freeze_message: __("Creating Logistic Notice ...")
 		})
 	},
 
@@ -363,6 +365,8 @@ frappe.ui.form.on('Purchase Receipt Item', {
 		});
 	},
 	qty: function(frm, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn,"remaining_qty", d.qty);
 		validate_sample_quantity(frm, cdt, cdn);
 	},
 	sample_quantity: function(frm, cdt, cdn) {

@@ -2,7 +2,6 @@
  "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-11 14:26:44",
  "description": "Buyer of Goods and Services.",
@@ -52,8 +51,10 @@
   "primary_address_and_contact_detail",
   "customer_primary_contact",
   "customer_primary_address",
+  "customer_types",
   "column_break_43",
   "primary_address",
+  "country",
   "default_receivable_accounts",
   "accounts",
   "reference",
@@ -574,6 +575,18 @@
   {
    "fieldname": "column_break_43",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "customer_types",
+   "fieldtype": "Select",
+   "label": "Customer Types",
+   "options": "\nPrivate Sales\nGovt Sales"
   }
  ],
  "hide_toolbar": 1,
@@ -588,7 +601,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-07-18 07:20:17.914547",
+ "modified": "2022-11-04 02:21:42.055122",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
