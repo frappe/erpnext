@@ -54,7 +54,7 @@ class StockController(AccountsController):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 		provisional_accounting_for_non_stock_items = cint(
-			frappe.db.get_value(
+			frappe.get_cached_value(
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
 			)
 		)
@@ -197,7 +197,7 @@ class StockController(AccountsController):
 				elif self.get("is_internal_supplier"):
 					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
 
-				expense_account = frappe.db.get_value("Company", self.company, "default_expense_account")
+				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
 
 				gl_list.append(
 					self.get_gl_dict(
@@ -232,7 +232,7 @@ class StockController(AccountsController):
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
-				if frappe.db.get_value("Warehouse", wh, "company"):
+				if frappe.get_cached_value("Warehouse", wh, "company"):
 					frappe.throw(
 						_(
 							"Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}."
@@ -420,6 +420,42 @@ class StockController(AccountsController):
 		sl_dict.update(args)
 		return sl_dict
 
+<<<<<<< HEAD
+=======
+	def update_inventory_dimensions(self, row, sl_dict) -> None:
+		# To handle delivery note and sales invoice
+		if row.get("item_row"):
+			row = row.get("item_row")
+
+		dimensions = get_evaluated_inventory_dimension(row, sl_dict, parent_doc=self)
+		for dimension in dimensions:
+			if not dimension:
+				continue
+
+			if row.get(dimension.source_fieldname):
+				sl_dict[dimension.target_fieldname] = row.get(dimension.source_fieldname)
+
+			if not sl_dict.get(dimension.target_fieldname) and dimension.fetch_from_parent:
+				sl_dict[dimension.target_fieldname] = self.get(dimension.fetch_from_parent)
+
+				# Get value based on doctype name
+				if not sl_dict.get(dimension.target_fieldname):
+					fieldname = next(
+						(
+							field.fieldname
+							for field in frappe.get_meta(self.doctype).fields
+							if field.options == dimension.fetch_from_parent
+						),
+						None,
+					)
+
+					if fieldname and self.get(fieldname):
+						sl_dict[dimension.target_fieldname] = self.get(fieldname)
+
+				if sl_dict[dimension.target_fieldname] and self.docstatus == 1:
+					row.db_set(dimension.source_fieldname, sl_dict[dimension.target_fieldname])
+
+>>>>>>> 4efc947f14 (perf: use `get_cached_value` instead of `db.get_value` in controllers (#32776))
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
 
