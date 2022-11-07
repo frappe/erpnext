@@ -182,6 +182,7 @@
    "options": "Supplier",
    "print_hide": 1,
    "print_width": "150px",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1,
    "width": "150px"
@@ -816,7 +817,7 @@
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Grand Total",
+   "label": "Grand Total(USD)",
    "oldfieldname": "grand_total_import",
    "oldfieldtype": "Currency",
    "options": "currency",
