@@ -568,6 +568,17 @@ class SalesInvoice(SellingController):
 					needs_repost = 1
 
 			self.validate_accounts()
+
+			# validate if deferred revenue is enabled for any item
+			# Don't allow to update the invoice if deferred revenue is enabled
+			for item in self.get("items"):
+				if item.enable_deferred_revenue:
+					frappe.throw(
+						_(
+							"Deferred Revenue is enabled for item {0}. You cannot update the invoice after submission."
+						).format(item.item_code)
+					)
+
 			self.db_set("repost_required", needs_repost)
 
 	def check_if_child_table_updated(
