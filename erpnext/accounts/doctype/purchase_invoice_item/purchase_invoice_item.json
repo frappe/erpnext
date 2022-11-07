@@ -40,6 +40,7 @@
   "discount_amount",
   "base_rate_with_margin",
   "sec_break2",
+  "apply_tds",
   "rate",
   "amount",
   "item_tax_template",
@@ -821,6 +822,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
    "fieldname": "section_break_26",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -867,12 +869,18 @@
    "label": "Product Bundle",
    "options": "Product Bundle",
    "read_only": 1
+  },
+  {
+    "default": "1",
+    "fieldname": "apply_tds",
+    "fieldtype": "Check",
+    "label": "Apply TDS"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-26 10:35:43.969807",
+ "modified": "2022-10-26 16:05:37.304788",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

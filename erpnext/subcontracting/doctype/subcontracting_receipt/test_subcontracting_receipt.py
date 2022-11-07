@@ -327,7 +327,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		for row in scr.supplied_items:
 			self.assertEqual(transferred_batch.get(row.batch_no), row.consumed_qty)
 
-	def test_subcontracting_order_partial_return(self):
+	def test_subcontracting_receipt_partial_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
@@ -343,15 +343,17 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr1_return = make_return_subcontracting_receipt(scr_name=scr1.name, qty=-3)
 		scr1.load_from_db()
 		self.assertEqual(scr1_return.status, "Return")
+		self.assertIsNotNone(scr1_return.items[0].bom)
 		self.assertEqual(scr1.items[0].returned_qty, 3)
 
 		scr2_return = make_return_subcontracting_receipt(scr_name=scr1.name, qty=-7)
 		scr1.load_from_db()
 		self.assertEqual(scr2_return.status, "Return")
+		self.assertIsNotNone(scr2_return.items[0].bom)
 		self.assertEqual(scr1.status, "Return Issued")
 		self.assertEqual(scr1.items[0].returned_qty, 10)
 
-	def test_subcontracting_order_over_return(self):
+	def test_subcontracting_receipt_over_return(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
@@ -402,8 +404,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			"stock_value_difference",
 		)
 
-		# Service Cost(100 * 10) + Raw Materials Cost(50 * 10) + Additional Costs(100) = 1600
-		self.assertEqual(stock_value_difference, 1600)
+		# Service Cost(100 * 10) + Raw Materials Cost(100 * 10) + Additional Costs(10 * 10) = 2100
+		self.assertEqual(stock_value_difference, 2100)
 		self.assertFalse(get_gl_entries("Subcontracting Receipt", scr.name))
 
 	def test_subcontracting_receipt_gl_entry(self):
@@ -465,6 +467,65 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.reload()
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
+
+	def test_supplied_items_consumed_qty(self):
+		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
+		set_backflush_based_on("Material Transferred for Subcontract")
+
+		# Create Material Receipt for RM's
+		make_stock_entry(
+			item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100
+		)
+		make_stock_entry(
+			item_code="_Test Item Home Desktop 100",
+			qty=100,
+			target="_Test Warehouse 1 - _TC",
+			basic_rate=100,
+		)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 1",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "_Test FG Item",
+				"fg_item_qty": 10,
+			},
+		]
+
+		# Create Subcontracting Order
+		sco = get_subcontracting_order(service_items=service_items)
+
+		# Transfer RM's
+		rm_items = get_rm_items(sco.supplied_items)
+		rm_items[0]["qty"] = 20  # Extra 10 Qty
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create Subcontracting Receipt
+		scr = make_subcontracting_receipt(sco.name)
+		scr.rejected_warehouse = "_Test Warehouse 1 - _TC"
+
+		scr.items[0].qty = 5  # Accepted Qty
+		scr.items[0].rejected_qty = 3
+		scr.save()
+
+		# consumed_qty should be ((received_qty) * (transfered_qty / qty)) = ((5 + 3) * (20 / 10)) = 16
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 16)
+
+		# Set Backflush Based On as "BOM"
+		set_backflush_based_on("BOM")
+
+		scr.items[0].rejected_qty = 4
+		scr.save()
+
+		# consumed_qty should be ((received_qty) * (qty_consumed_per_unit)) = ((5 + 4) * (1)) = 9
+		self.assertEqual(scr.supplied_items[0].consumed_qty, 9)
 
 
 def make_return_subcontracting_receipt(**args):

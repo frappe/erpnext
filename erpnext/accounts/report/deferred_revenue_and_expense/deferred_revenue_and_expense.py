@@ -396,7 +396,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 				"labels": [period.label for period in self.period_list],
 				"datasets": [
 					{
-						"name": "Actual Posting",
+						"name": _("Actual Posting"),
 						"chartType": "bar",
 						"values": [x.actual for x in self.period_total],
 					}
@@ -410,7 +410,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 
 		if self.filters.with_upcoming_postings:
 			chart["data"]["datasets"].append(
-				{"name": "Expected", "chartType": "line", "values": [x.total for x in self.period_total]}
+				{"name": _("Expected"), "chartType": "line", "values": [x.total for x in self.period_total]}
 			)
 
 		return chart

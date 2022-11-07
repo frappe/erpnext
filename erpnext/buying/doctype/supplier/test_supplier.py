@@ -3,6 +3,7 @@
 
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_records
 
 from erpnext.accounts.party import get_due_date
@@ -151,6 +152,44 @@ class TestSupplier(FrappeTestCase):
 
 		# Rollback
 		address.delete()
+
+	def test_serach_fields_for_supplier(self):
+		from erpnext.controllers.queries import supplier_query
+
+		frappe.db.set_value("Buying Settings", None, "supp_master_name", "Naming Series")
+
+		supplier_name = create_supplier(supplier_name="Test Supplier 1").name
+
+		make_property_setter(
+			"Supplier", None, "search_fields", "supplier_group", "Data", for_doctype="Doctype"
+		)
+
+		data = supplier_query(
+			"Supplier", supplier_name, "name", 0, 20, filters={"name": supplier_name}, as_dict=True
+		)
+
+		self.assertEqual(data[0].name, supplier_name)
+		self.assertEqual(data[0].supplier_group, "Services")
+		self.assertTrue("supplier_type" not in data[0])
+
+		make_property_setter(
+			"Supplier",
+			None,
+			"search_fields",
+			"supplier_group, supplier_type",
+			"Data",
+			for_doctype="Doctype",
+		)
+		data = supplier_query(
+			"Supplier", supplier_name, "name", 0, 20, filters={"name": supplier_name}, as_dict=True
+		)
+
+		self.assertEqual(data[0].name, supplier_name)
+		self.assertEqual(data[0].supplier_group, "Services")
+		self.assertEqual(data[0].supplier_type, "Company")
+		self.assertTrue("supplier_type" in data[0])
+
+		frappe.db.set_value("Buying Settings", None, "supp_master_name", "Supplier Name")
 
 
 def create_supplier(**args):

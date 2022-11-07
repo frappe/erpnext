@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -151,6 +151,7 @@ class AccountsController(TransactionBase):
 		self.validate_inter_company_reference()
 
 		self.disable_pricing_rule_on_internal_transfer()
+		self.disable_tax_included_prices_for_internal_transfer()
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -226,7 +227,7 @@ class AccountsController(TransactionBase):
 		for item in self.get("items"):
 			if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 				if not item.get(field_map.get(self.doctype)):
-					default_deferred_account = frappe.db.get_value(
+					default_deferred_account = frappe.get_cached_value(
 						"Company", self.company, "default_" + field_map.get(self.doctype)
 					)
 					if not default_deferred_account:
@@ -397,6 +398,20 @@ class AccountsController(TransactionBase):
 				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
 				alert=1,
 			)
+
+	def disable_tax_included_prices_for_internal_transfer(self):
+		if self.is_internal_transfer():
+			tax_updated = False
+			for tax in self.get("taxes"):
+				if tax.get("included_in_print_rate"):
+					tax.included_in_print_rate = 0
+					tax_updated = True
+
+			if tax_updated:
+				frappe.msgprint(
+					_("Disabled tax included prices since this {} is an internal transfer").format(self.doctype),
+					alert=1,
+				)
 
 	def validate_due_date(self):
 		if self.get("is_pos"):
@@ -661,7 +676,7 @@ class AccountsController(TransactionBase):
 
 	def validate_enabled_taxes_and_charges(self):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
-		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
+		if frappe.get_cached_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(
 				_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges)
 			)
@@ -669,7 +684,7 @@ class AccountsController(TransactionBase):
 	def validate_tax_account_company(self):
 		for d in self.get("taxes"):
 			if d.account_head:
-				tax_account_company = frappe.db.get_value("Account", d.account_head, "company")
+				tax_account_company = frappe.get_cached_value("Account", d.account_head, "company")
 				if tax_account_company != self.company:
 					frappe.throw(
 						_("Row #{0}: Account {1} does not belong to company {2}").format(
@@ -804,15 +819,12 @@ class AccountsController(TransactionBase):
 		self.set("advances", [])
 		advance_allocated = 0
 		for d in res:
-			if d.against_order:
-				allocated_amount = flt(d.amount)
+			if self.get("party_account_currency") == self.company_currency:
+				amount = self.get("base_rounded_total") or self.base_grand_total
 			else:
-				if self.get("party_account_currency") == self.company_currency:
-					amount = self.get("base_rounded_total") or self.base_grand_total
-				else:
-					amount = self.get("rounded_total") or self.grand_total
+				amount = self.get("rounded_total") or self.grand_total
 
-				allocated_amount = min(amount - advance_allocated, d.amount)
+			allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
 			advance_row = {
@@ -917,7 +929,9 @@ class AccountsController(TransactionBase):
 					party_account = self.credit_to if is_purchase_invoice else self.debit_to
 					party_type = "Supplier" if is_purchase_invoice else "Customer"
 
-					gain_loss_account = frappe.db.get_value("Company", self.company, "exchange_gain_loss_account")
+					gain_loss_account = frappe.get_cached_value(
+						"Company", self.company, "exchange_gain_loss_account"
+					)
 					if not gain_loss_account:
 						frappe.throw(
 							_("Please set default Exchange Gain/Loss Account in Company {}").format(self.get("company"))
@@ -1014,7 +1028,7 @@ class AccountsController(TransactionBase):
 							else self.grand_total
 						),
 						"outstanding_amount": self.outstanding_amount,
-						"difference_account": frappe.db.get_value(
+						"difference_account": frappe.get_cached_value(
 							"Company", self.company, "exchange_gain_loss_account"
 						),
 						"exchange_gain_loss": flt(d.get("exchange_gain_loss")),
@@ -1334,30 +1348,20 @@ class AccountsController(TransactionBase):
 		return stock_items
 
 	def set_total_advance_paid(self):
-		if self.doctype == "Sales Order":
-			dr_or_cr = "credit_in_account_currency"
-			rev_dr_or_cr = "debit_in_account_currency"
-			party = self.customer
-		else:
-			dr_or_cr = "debit_in_account_currency"
-			rev_dr_or_cr = "credit_in_account_currency"
-			party = self.supplier
-
-		advance = frappe.db.sql(
-			"""
-			select
-				account_currency, sum({dr_or_cr}) - sum({rev_dr_cr}) as amount
-			from
-				`tabGL Entry`
-			where
-				against_voucher_type = %s and against_voucher = %s and party=%s
-				and docstatus = 1
-		""".format(
-				dr_or_cr=dr_or_cr, rev_dr_cr=rev_dr_or_cr
-			),
-			(self.doctype, self.name, party),
-			as_dict=1,
-		)  # nosec
+		ple = frappe.qb.DocType("Payment Ledger Entry")
+		party = self.customer if self.doctype == "Sales Order" else self.supplier
+		advance = (
+			frappe.qb.from_(ple)
+			.select(ple.account_currency, Abs(Sum(ple.amount)).as_("amount"))
+			.where(
+				(ple.against_voucher_type == self.doctype)
+				& (ple.against_voucher_no == self.name)
+				& (ple.party == party)
+				& (ple.delinked == 0)
+				& (ple.company == self.company)
+			)
+			.run(as_dict=True)
+		)
 
 		if advance:
 			advance = advance[0]
@@ -1392,7 +1396,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_abbr(self):
 		if not hasattr(self, "_abbr"):
-			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
+			self._abbr = frappe.get_cached_value("Company", self.company, "abbr")
 
 		return self._abbr
 
@@ -1778,7 +1782,7 @@ class AccountsController(TransactionBase):
 		"""
 
 		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
-			unrealized_profit_loss_account = frappe.db.get_value(
+			unrealized_profit_loss_account = frappe.get_cached_value(
 				"Company", self.company, "unrealized_profit_loss_account"
 			)
 
@@ -1893,7 +1897,9 @@ class AccountsController(TransactionBase):
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
-	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
+	return frappe.get_cached_value(
+		"Account", account_head, ["tax_rate", "account_name"], as_dict=True
+	)
 
 
 @frappe.whitelist()
@@ -1902,7 +1908,7 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 		return {}
 
 	if tax_template and company:
-		tax_template_company = frappe.db.get_value(master_doctype, tax_template, "company")
+		tax_template_company = frappe.get_cached_value(master_doctype, tax_template, "company")
 		if tax_template_company == company:
 			return
 
