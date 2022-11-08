@@ -14,7 +14,6 @@ from erpnext.accounts.utils import (
 	QueryPaymentLedger,
 	get_outstanding_invoices,
 	reconcile_against_document,
-	update_reference_in_payment_entry,
 )
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
@@ -84,7 +83,7 @@ class PaymentReconciliation(Document):
 			select
 				"Journal Entry" as reference_type, t1.name as reference_name,
 				t1.posting_date, t1.remark as remarks, t2.name as reference_row,
-				{dr_or_cr} as amount, t2.is_advance,
+				{dr_or_cr} as amount, t2.is_advance, t2.exchange_rate,
 				t2.account_currency as currency
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
@@ -213,26 +212,21 @@ class PaymentReconciliation(Document):
 			inv.currency = entry.get("currency")
 			inv.outstanding_amount = flt(entry.get("outstanding_amount"))
 
-	def get_difference_amount(self, allocated_entry):
-		if allocated_entry.get("reference_type") != "Payment Entry":
-			return
+	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
+		difference_amount = 0
+		if payment_entry.get("exchange_rate") != invoice.get("exchange_rate"):
+			allocated_amount_in_ref_rate = payment_entry.get("exchange_rate") * allocated_amount
+			allocated_amount_in_inv_rate = invoice.get("exchange_rate") * allocated_amount
+			difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
 
-		dr_or_cr = (
-			"credit_in_account_currency"
-			if erpnext.get_party_account_type(self.party_type) == "Receivable"
-			else "debit_in_account_currency"
-		)
-
-		row = self.get_payment_details(allocated_entry, dr_or_cr)
-
-		doc = frappe.get_doc(allocated_entry.reference_type, allocated_entry.reference_name)
-		update_reference_in_payment_entry(row, doc, do_not_save=True)
-
-		return doc.difference_amount
+		return difference_amount
 
 	@frappe.whitelist()
 	def allocate_entries(self, args):
 		self.validate_entries()
+
+		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"))
+
 		entries = []
 		for pay in args.get("payments"):
 			pay.update({"unreconciled_amount": pay.get("amount")})
@@ -246,7 +240,8 @@ class PaymentReconciliation(Document):
 					inv["outstanding_amount"] = flt(inv.get("outstanding_amount")) - flt(pay.get("amount"))
 					pay["amount"] = 0
 
-				res.difference_amount = self.get_difference_amount(res)
+				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
+				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
 
 				if pay.get("amount") == 0:
 					entries.append(res)
@@ -276,6 +271,7 @@ class PaymentReconciliation(Document):
 				"amount": pay.get("amount"),
 				"allocated_amount": allocated_amount,
 				"difference_amount": pay.get("difference_amount"),
+				"currency": inv.get("currency"),
 			}
 		)
 
@@ -341,6 +337,41 @@ class PaymentReconciliation(Document):
 
 		if not self.get("payments"):
 			frappe.throw(_("No records found in the Payments table"))
+
+	def get_invoice_exchange_map(self, invoices):
+		sales_invoices = [
+			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Sales Invoice"
+		]
+		purchase_invoices = [
+			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Purchase Invoice"
+		]
+		invoice_exchange_map = frappe._dict()
+
+		if sales_invoices:
+			sales_invoice_map = frappe._dict(
+				frappe.db.get_all(
+					"Sales Invoice",
+					filters={"name": ("in", sales_invoices)},
+					fields=["name", "conversion_rate"],
+					as_list=1,
+				)
+			)
+
+			invoice_exchange_map.update(sales_invoice_map)
+
+		if purchase_invoices:
+			purchase_invoice_map = frappe._dict(
+				frappe.db.get_all(
+					"Purchase Invoice",
+					filters={"name": ("in", purchase_invoices)},
+					fields=["name", "conversion_rate"],
+					as_list=1,
+				)
+			)
+
+			invoice_exchange_map.update(purchase_invoice_map)
+
+		return invoice_exchange_map
 
 	def validate_allocation(self):
 		unreconciled_invoices = frappe._dict()
