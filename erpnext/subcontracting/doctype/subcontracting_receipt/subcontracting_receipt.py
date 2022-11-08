@@ -160,7 +160,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in self.items:
 			if item.name in rm_supp_cost:
 				item.rm_supp_cost = rm_supp_cost[item.name]
-				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
+				item.rm_cost_per_qty = item.rm_supp_cost / item.received_qty
 				rm_supp_cost.pop(item.name)
 
 			if item.recalculate_rate:
@@ -267,7 +267,7 @@ class SubcontractingReceipt(SubcontractingController):
 		warehouse_with_no_account = []
 
 		for item in self.items:
-			if flt(item.rate) and flt(item.qty):
+			if flt(item.rate) and flt(item.received_qty):
 				if warehouse_account.get(item.warehouse):
 					stock_value_diff = frappe.db.get_value(
 						"Stock Ledger Entry",
@@ -323,7 +323,21 @@ class SubcontractingReceipt(SubcontractingController):
 							account=item.expense_account,
 							cost_center=item.cost_center,
 							debit=0.0,
-							credit=flt(item.service_cost_per_qty) * flt(item.qty),
+							credit=flt(item.service_cost_per_qty) * flt(item.received_qty),
+							remarks=remarks,
+							against_account=warehouse_account_name,
+							account_currency=get_account_currency(item.expense_account),
+							item=item,
+						)
+
+					# Expense Account (Debit)
+					if flt(item.rejected_qty):
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=item.expense_account,
+							cost_center=item.cost_center,
+							debit=flt(item.rejected_qty) * flt(item.rate),
+							credit=0.0,
 							remarks=remarks,
 							against_account=warehouse_account_name,
 							account_currency=get_account_currency(item.expense_account),

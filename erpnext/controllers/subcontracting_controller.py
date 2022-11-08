@@ -741,6 +741,7 @@ class SubcontractingController(StockController):
 					sco_doc.update_status()
 
 	def set_missing_values_in_additional_costs(self):
+		qty_field = "received_qty" if self.doctype == "Subcontracting Receipt" else "qty"
 		self.total_additional_costs = sum(flt(item.amount) for item in self.get("additional_costs"))
 
 		if self.total_additional_costs:
@@ -749,9 +750,9 @@ class SubcontractingController(StockController):
 				for item in self.items:
 					item.additional_cost_per_qty = (
 						(item.amount * self.total_additional_costs) / total_amt
-					) / item.qty
+					) / item.get(qty_field)
 			else:
-				total_qty = sum(flt(item.qty) for item in self.get("items"))
+				total_qty = sum(flt(item.get(qty_field)) for item in self.get("items"))
 				additional_cost_per_qty = self.total_additional_costs / total_qty
 				for item in self.items:
 					item.additional_cost_per_qty = additional_cost_per_qty
