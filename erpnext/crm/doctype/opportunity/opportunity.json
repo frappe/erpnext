@@ -13,24 +13,26 @@
   "opportunity_from",
   "party_name",
   "customer_name",
-  "customer_group",
   "column_break0",
-  "source",
-  "information_source",
+  "sales_person",
+  "opportunity_type",
   "lead_classification",
-  "column_break_9",
+  "column_break_13",
   "company",
   "transaction_date",
   "status",
-  "sales_person",
+  "sales_stage",
   "mins_to_first_response",
   "lost_reason_section",
   "order_lost_reason",
-  "column_break_15",
+  "column_break_9",
   "lost_reasons",
   "more_info",
-  "opportunity_type",
   "column_break_20",
+  "information_source",
+  "column_break_11",
+  "source",
+  "column_break_15",
   "territory",
   "column_break_22",
   "campaign",
@@ -44,14 +46,12 @@
   "column_break_29",
   "customer_address",
   "address_display",
+  "items_section",
+  "items",
   "section_break_14",
-  "sales_stage",
-  "column_break_17",
   "opportunity_amount",
   "column_break_37",
   "currency",
-  "items_section",
-  "items",
   "previously_owned_section",
   "existing_items",
   "feedback_section",
@@ -166,9 +166,10 @@
    "label": "Follow Up"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
-   "label": "Sales"
+   "label": "Amount"
   },
   {
    "fieldname": "currency",
@@ -181,10 +182,6 @@
    "fieldtype": "Currency",
    "label": "Opportunity Amount",
    "options": "currency"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "sales_stage",
@@ -213,7 +210,7 @@
    "collapsible": 1,
    "fieldname": "contact_info",
    "fieldtype": "Section Break",
-   "label": "Contact Info",
+   "label": "Contact And Address",
    "options": "fa fa-bullhorn"
   },
   {
@@ -237,16 +234,6 @@
    "label": "Territory",
    "options": "Territory",
    "print_hide": 1
-  },
-  {
-   "fieldname": "customer_group",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Customer Group",
-   "oldfieldname": "customer_group",
-   "oldfieldtype": "Link",
-   "options": "Customer Group",
-   "read_only": 1
   },
   {
    "fieldname": "column_break3",
@@ -338,7 +325,9 @@
   },
   {
    "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "width": "50%"
   },
   {
    "depends_on": "eval:doc.status===\"Lost\"",
@@ -439,11 +428,21 @@
    "fieldtype": "Small Text",
    "label": "To Discuss",
    "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2022-11-01 17:51:00.449886",
+ "modified": "2022-11-07 17:02:15.366592",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

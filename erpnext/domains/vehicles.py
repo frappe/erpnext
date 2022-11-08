@@ -241,10 +241,28 @@ customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
 
 # Opportunity Fields
 opportunity_fields = [
-	{"label": "", "fieldname": "delivery_cb", "fieldtype": "Column Break",
+	{"label": "Financing", "fieldname": "vehicle_sb_1", "fieldtype": "Section Break",
 		"insert_after": "sales_stage"},
+	{"label": "Financer", "fieldname": "financer", "fieldtype": "Link", "options": "Customer",
+		"insert_after": "vehicle_sb_1"},
+	{"label": "", "fieldname": "vehcle_cb_1", "fieldtype": "Column Break",
+		"insert_after": "financer"},
+	{"label": "Financer Name", "fieldname": "financer_name", "fieldtype": "Data", "fetch_from": "financer.customer_name", "read_only": 1,
+		"insert_after": "vehcle_cb_1", "depends_on": "eval:doc.financer && doc.financer_name != doc.financer"},
+	{"label": "", "fieldname": "vehcle_cb_2", "fieldtype": "Column Break",
+		"insert_after": "financer_name"},
+	{"label": "Finance Type", "fieldname": "finance_type", "fieldtype": "Select", "options": "\nFinanced\nLeased",
+		"insert_after": "vehcle_cb_2", "depends_on": "financer"},
+
+	{"label": "", "fieldname": "vehicle_sb_2", "fieldtype": "Section Break",
+		"insert_after": "items"},
 	{"label": "Delivery Period", "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period",
-		"insert_after": "delivery_cb"},
+		"insert_after": "vehicle_sb_2"},
+	{"label": "", "fieldname": "vehcle_cb_3", "fieldtype": "Column Break",
+		"insert_after": "delivery_period"},
+	{"label": "First/Additional", "fieldname": "first_additional", "fieldtype": "Select", "options": "\nFirst\nAdditional\nReplacement",
+		"insert_after": "vehcle_cb_3"},
+
 	{"label": "Key Features You Like", "fieldname": "liked_features", "fieldtype": "Small Text",
 		"insert_after": "feedback_cb_1"},
 	{"label": "Interior", "fieldname": "rating_interior", "fieldtype": "Rating",
@@ -261,6 +279,11 @@ opportunity_fields = [
 		"insert_after": "rating_specifications"},
 	{"label": "Price", "fieldname": "rating_price", "fieldtype": "Rating",
 		"insert_after": "rating_cb_3"},
+]
+
+opportunity_item_fields = [
+	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "in_list_view": 1,
+		"insert_after": "item_name"},
 ]
 
 # Accounting Dimensions
@@ -309,7 +332,7 @@ field_lists = [
 	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
 	project_template_fields, project_template_category_fields, project_template_detail_fields,
 	customer_vehicle_selector_fields, project_customer_vehicle_selector, appointment_customer_vehicle_selector,
-	customer_customer_vehicle_selector, opportunity_fields
+	customer_customer_vehicle_selector, opportunity_fields, opportunity_item_fields
 ]
 
 for field_list in field_lists:
@@ -401,6 +424,7 @@ data = {
 		"Project Template Detail": project_template_detail_fields,
 		"Customer": customer_customer_vehicle_selector,
 		"Opportunity": opportunity_fields,
+		"Opportunity Item": opportunity_item_fields,
 	},
 	'default_portal_role': 'Customer'
 }
