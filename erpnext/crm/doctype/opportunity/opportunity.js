@@ -166,7 +166,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	opportunity_from: function() {
 		this.set_dynamic_link();
 		this.set_dynamic_field_label();
-		this.frm.set_value("party_name","");
+		this.frm.set_value("party_name", "");
 	},
 
 	contact_person: function() {
@@ -178,7 +178,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	},
 
 	transaction_date: function() {
-		this.set_contact_schedule();
+
 	},
 
 	party_name: function() {
@@ -226,17 +226,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
-	},
-
-	set_contact_schedule: function() {
-		var me = this;
-		frappe.db.get_single_value("CRM Settings", "follow_up_period").then((r) => {
-			var followups = []
-			for (let i = 1; i <= 3; i++){
-				followups.push({date: frappe.datetime.add_days(this.frm.doc.transaction_date, i*r)});
-			}
-			me.frm.set_value('contact_schedule', followups);
-		})
 	},
 
 	create_customer: function () {

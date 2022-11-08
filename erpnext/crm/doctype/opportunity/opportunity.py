@@ -39,11 +39,20 @@ class Opportunity(TransactionBase):
 			["Closed", "eval:self.status=='Closed'"]
 		]
 
+	def get_feed(self):
+		return _("From {0}").format(self.get("customer_name") or self.get('party_name'))
+
+	def onload(self):
+		if self.opportunity_from == "Customer":
+			self.set_onload('customer', self.party_name)
+		elif self.opportunity_from == "Lead":
+			self.set_onload('customer', get_customer_from_lead(self.party_name))
+
 	def validate(self):
 		self.set_missing_values()
 		self.validate_uom_is_integer("uom", "qty")
-		self.set_title()
 		self.validate_financer()
+		self.set_title()
 
 	def after_insert(self):
 		self.update_lead_status()
@@ -53,21 +62,6 @@ class Opportunity(TransactionBase):
 
 	def set_title(self):
 		self.title = self.customer_name
-
-	def validate_financer(self):
-		if self.get('financer'):
-			if self.get('opportunity_from') == "Customer" and self.get('party_name') == self.get('financer'):
-				frappe.throw(_("Customer and Financer cannot be the same"))
-
-		elif self.meta.has_field('financer'):
-			self.financer_name = ''
-			self.finance_type = ''
-
-	def onload(self):
-		if self.opportunity_from == "Customer":
-			self.set_onload('customer', self.party_name)
-		elif self.opportunity_from == "Lead":
-			self.set_onload('customer', get_customer_from_lead(self.party_name))
 
 	def set_missing_values(self):
 		self.set_customer_details()
@@ -88,6 +82,15 @@ class Opportunity(TransactionBase):
 			for k, v in item_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_party_fields):
 					d.set(k, v)
+
+	def validate_financer(self):
+		if self.get('financer'):
+			if self.get('opportunity_from') == "Customer" and self.get('party_name') == self.get('financer'):
+				frappe.throw(_("Customer and Financer cannot be the same"))
+
+		elif self.meta.has_field('financer'):
+			self.financer_name = None
+			self.finance_type = None
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():

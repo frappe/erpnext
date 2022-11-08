@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import (cstr, validate_email_address, cint, comma_and, has_gravatar, now, getdate, nowdate)
+from frappe.utils import validate_email_address, cint, comma_and, has_gravatar
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -61,9 +61,7 @@ class Lead(SellingController):
 					.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
 
 	def on_trash(self):
-		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""",
-			self.name)
-
+		frappe.db.sql("update `tabIssue` set lead = '' where lead = %s", self.name)
 		self.delete_events()
 
 	def validate_tax_id(self):
