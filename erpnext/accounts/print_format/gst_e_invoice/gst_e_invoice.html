@@ -50,6 +50,10 @@
 				<div class="col-xs-4"><label>Document No</label></div>
 				<div class="col-xs-8 value">{{ einvoice.DocDtls.No }}</div>
 			</div>
+			<div class="row data-field">
+				<div class="col-xs-4"><label>Document Date</label></div>
+				<div class="col-xs-8 value">{{ einvoice.DocDtls.Dt }}</div>
+			</div>
 		</div>
 		<div class="col-xs-4 column-break">
 			<img src="{{ doc.qrcode_image }}" width="175px" style="float: right;">
