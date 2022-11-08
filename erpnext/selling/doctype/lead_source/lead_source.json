@@ -24,7 +24,7 @@
    "label": "Details"
   }
  ],
- "modified": "2020-03-03 15:37:08.955452",
+ "modified": "2022-11-08 17:12:12.642740",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Lead Source",
@@ -50,6 +50,18 @@
    "read": 1,
    "report": 1,
    "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
    "share": 1,
    "write": 1
   }
