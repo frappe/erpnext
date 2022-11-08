@@ -12,6 +12,9 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 				},
 			};
 		});
+		let no_bank_transactions_text =
+			`<div class="text-muted text-center">${__("No Matching Bank Transactions Found")}</div>`
+		set_field_options("no_bank_transactions", no_bank_transactions_text);
 	},
 
 	onload: function (frm) {

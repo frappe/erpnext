@@ -291,7 +291,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	batches = get_batches(item_code, warehouse, qty, throw, serial_no)
 
 	for batch in batches:
-		if cint(qty) <= cint(batch.qty):
+		if flt(qty) <= flt(batch.qty):
 			batch_no = batch.batch_id
 			break
 
