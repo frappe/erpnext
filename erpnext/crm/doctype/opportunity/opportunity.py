@@ -223,35 +223,26 @@ def get_item_details(item_code):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
-		quotation = frappe.get_doc(target)
+		company_currency = frappe.get_cached_value('Company',  target.company,  "default_currency")
 
-		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
-
-		if quotation.quotation_to == 'Customer' and quotation.party_name:
-			party_account_currency = get_party_account_currency("Customer", quotation.party_name, quotation.company)
+		if target.quotation_to == 'Customer' and target.party_name:
+			party_account_currency = get_party_account_currency("Customer", target.party_name, target.company)
 		else:
 			party_account_currency = company_currency
 
-		quotation.currency = party_account_currency or company_currency
+		target.currency = party_account_currency or company_currency
 
-		if company_currency == quotation.currency:
+		if company_currency == target.currency:
 			exchange_rate = 1
 		else:
-			exchange_rate = get_exchange_rate(quotation.currency, company_currency,
-				quotation.transaction_date, args="for_selling")
+			exchange_rate = get_exchange_rate(target.currency, company_currency,
+				target.transaction_date, args="for_selling")
 
-		quotation.conversion_rate = exchange_rate
+		target.conversion_rate = exchange_rate
 
-		# get default taxes
-		taxes = get_default_taxes_and_charges("Sales Taxes and Charges Template", company=quotation.company)
-		if taxes.get('taxes'):
-			quotation.update(taxes)
-
-		quotation.opportunity = source.name
-
-		quotation.run_method("set_missing_values")
-		quotation.run_method("calculate_taxes_and_totals")
+		target.run_method("set_missing_values")
+		target.run_method("append_taxes_from_master")
+		target.run_method("calculate_taxes_and_totals")
 
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {

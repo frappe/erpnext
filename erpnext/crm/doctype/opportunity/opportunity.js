@@ -99,13 +99,11 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		});
 
 		me.frm.set_query('party_name', function() {
-			me.frm.set_query("party_name", function () {
-				if (me.frm.doc.appointment_for === "Customer") {
-					return erpnext.queries.customer();
-				} else if (me.frm.doc.appointment_for === "Lead") {
-					return erpnext.queries.lead();
-				}
-			});
+			if (me.frm.doc.appointment_for === "Customer") {
+				return erpnext.queries.customer();
+			} else if (me.frm.doc.appointment_for === "Lead") {
+				return erpnext.queries.lead();
+			}
 		});
 
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
