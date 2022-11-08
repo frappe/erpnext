@@ -118,6 +118,13 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			};
 		});
 
+		if(me.frm.fields_dict["items"].grid.get_field('vehicle_color')) {
+			me.frm.set_query("vehicle_color", "items", function(doc, cdt, cdn) {
+				var row = frappe.get_doc(cdt, cdn);
+				return erpnext.queries.vehicle_color({item_code: row.item_code});
+			});
+		}
+
 		if (me.frm.fields_dict.delivery_period) {
 			me.frm.set_query("delivery_period", function () {
 				if (me.frm.doc.transaction_date) {
