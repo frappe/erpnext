@@ -8,11 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "image",
-  "opportunity",
-  "column_break_3",
   "title",
   "naming_series",
-  "section_break_6",
   "quotation_to",
   "party_name",
   "lessee_name",
@@ -21,6 +18,7 @@
   "financer",
   "financer_name",
   "finance_type",
+  "opportunity",
   "column_break_9",
   "company",
   "transaction_date",
@@ -722,14 +720,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "quotation_validity_days",
    "fieldtype": "Int",
@@ -886,7 +876,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-10-22 15:43:01.824770",
+ "modified": "2022-11-08 18:15:59.644484",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",
