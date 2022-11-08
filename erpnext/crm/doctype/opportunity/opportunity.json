@@ -101,6 +101,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.party_name && doc.customer_name != doc.party_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
