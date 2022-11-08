@@ -14,25 +14,13 @@
    "label": "Item Name"
   }
  ],
- "modified": "2022-10-24 17:22:42.123881",
+ "istable": 1,
+ "modified": "2022-11-08 17:15:45.248321",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Existing Item",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
