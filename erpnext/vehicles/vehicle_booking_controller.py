@@ -89,6 +89,10 @@ class VehicleBookingController(AccountsController):
 				if item_details.get('delivery_period'):
 					self.delivery_period = item_details.get('delivery_period')
 
+			if cint(item_details.get('quotation_validity_days')) > 0 and self.is_new() and self.get('quotation_validity_days') is None:
+				self.quotation_validity_days = cint(item_details.get('quotation_validity_days'))
+				self.valid_till = item_details.get('valid_till')
+
 		self.set_vehicle_details()
 
 	def set_vehicle_details(self, update=False):
