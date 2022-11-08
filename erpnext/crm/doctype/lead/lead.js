@@ -20,6 +20,7 @@ erpnext.crm.LeadController = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 
 		this.set_dynamic_link();
+		this.set_sales_person_from_user();
 		this.setup_buttons();
 
 		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
@@ -42,6 +43,18 @@ erpnext.crm.LeadController = frappe.ui.form.Controller.extend({
 
 	set_dynamic_link: function() {
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'name', doctype: 'Lead'}
+	},
+
+	set_sales_person_from_user: function() {
+		if (!this.frm.get_field('sales_person') || this.frm.doc.sales_person || !this.frm.doc.__islocal) {
+			return;
+		}
+
+		erpnext.utils.get_sales_person_from_user(sales_person => {
+			if (sales_person) {
+				this.frm.set_value('sales_person', sales_person);
+			}
+		});
 	},
 
 	setup_buttons: function () {
