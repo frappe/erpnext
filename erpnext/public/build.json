@@ -52,6 +52,7 @@
 		"public/js/utils/item_quick_entry.js",
 		"public/js/templates/lcv_manual_distribution.html",
 		"public/js/utils/customer_quick_entry.js",
+		"public/js/utils/lead_quick_entry.js",
 		"public/js/utils/vehicle_quick_entry.js",
 		"public/js/utils/insurance_surveyor_quick_entry.js",
 		"public/js/utils/contact_quick_entry_erpnext.js",
