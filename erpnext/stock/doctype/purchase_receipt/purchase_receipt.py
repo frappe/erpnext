@@ -783,7 +783,7 @@ def update_billed_amount_based_on_po(po_details, update_modified=True):
 		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
 
 		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = pr_items_billed_amount.get(pr_item.name, 0)
+		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
 		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
@@ -843,6 +843,9 @@ def get_purchase_receipts_against_po_details(po_details):
 def get_billed_amount_against_pr(pr_items):
 	# Get billed amount directly against Purchase Receipt
 
+	if not pr_items:
+		return {}
+
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
@@ -857,6 +860,8 @@ def get_billed_amount_against_pr(pr_items):
 
 def get_billed_amount_against_po(po_items):
 	# Get billed amount directly against Purchase Order
+	if not po_items:
+		return {}
 
 	purchase_invoice_item = frappe.qb.DocType("Purchase Invoice Item")
 
