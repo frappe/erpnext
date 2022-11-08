@@ -146,7 +146,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
-				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
+				if(this.frm.doc.status !== 'Closed' && (flt(this.frm.doc.per_received) < 100 || flt(this.frm.doc.per_billed) < 100)) {
 					this.frm.add_custom_button(__('Update Items'), () => {
 						erpnext.utils.update_child_items({
 							frm: this.frm,
