@@ -30,19 +30,11 @@ class Lead(SellingController):
 
 	def onload(self):
 		customer = get_customer_from_lead(self.name)
-		self.get("__onload").is_customer = customer
+		self.set_onload('customer', customer)
 		load_address_and_contact(self)
 
 	def validate(self):
 		self.set_lead_name()
-		self._prev = frappe._dict({
-			"contact_date": frappe.db.get_value("Lead", self.name, "contact_date") if \
-				(not cint(self.get("__islocal"))) else None,
-			"ends_on": frappe.db.get_value("Lead", self.name, "ends_on") if \
-				(not cint(self.get("__islocal"))) else None,
-			"contact_by": frappe.db.get_value("Lead", self.name, "contact_by") if \
-				(not cint(self.get("__islocal"))) else None,
-		})
 
 		self.validate_organization_lead()
 		self.validate_tax_id()
@@ -55,34 +47,8 @@ class Lead(SellingController):
 			if not self.flags.ignore_email_validation:
 				validate_email_address(self.email_id, True)
 
-			if self.email_id == self.lead_owner:
-				frappe.throw(_("Lead Owner cannot be same as the Lead"))
-
-			if self.email_id == self.contact_by:
-				frappe.throw(_("Next Contact By cannot be same as the Lead Email Address"))
-
 			if self.is_new() or not self.image:
 				self.image = has_gravatar(self.email_id)
-
-		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
-			frappe.throw(_("Next Contact Date cannot be in the past"))
-
-		if (self.ends_on and self.contact_date and
-			(getdate(self.ends_on) < getdate(self.contact_date))):
-			frappe.throw(_("Ends On date cannot be before Next Contact Date."))
-
-	def on_update(self):
-		self.add_calendar_event()
-
-	def add_calendar_event(self, opts=None, force=False):
-		super(Lead, self).add_calendar_event({
-			"owner": self.lead_owner,
-			"starts_on": self.contact_date,
-			"ends_on": self.ends_on or "",
-			"subject": ('Contact ' + cstr(self.lead_name)),
-			"description": ('Contact ' + cstr(self.lead_name)) + \
-				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
-		}, force)
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
@@ -190,7 +156,6 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			"doctype": "Customer",
 			"field_map": {
 				"name": "lead_name",
-				"company_name": "customer_name",
 				"lead_name": "contact_first_name",
 			}
 		}
@@ -230,21 +195,17 @@ def set_lead_for_customer(lead, customer):
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source, target)
+		target.opportunity_from = 'Lead'
+		target.run_method('set_missing_values')
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	target_doc = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Opportunity",
 			"field_map": {
-				"campaign_name": "campaign",
-				"doctype": "opportunity_from",
 				"name": "party_name",
-				"lead_name": "contact_display",
-				"company_name": "customer_name",
-				"email_id": "contact_email",
-				"mobile_no": "contact_mobile"
 			}
-		}}, target_doc, set_missing_values)
+		}
+	}, target_doc, set_missing_values)
 
 	return target_doc
 
@@ -252,60 +213,40 @@ def make_opportunity(source_name, target_doc=None):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source, target)
+		target.quotation_to = "Lead"
+		target.run_method("set_missing_values")
+		target.run_method("reset_taxes_and_charges")
+		target.run_method("calculate_taxes_and_totals")
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	target_doc = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
 				"name": "party_name"
 			}
-		}}, target_doc, set_missing_values)
+		}
+	}, target_doc, set_missing_values)
 
-	target_doc.quotation_to = "Lead"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
-	target_doc.run_method("calculate_taxes_and_totals")
+	return target_doc
 
 
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		_set_missing_values(source, target)
+		target.quotation_to = "Lead"
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
 
-	target_doc = get_mapped_doc("Lead", source_name,
-		{"Lead": {
+	target_doc = get_mapped_doc("Lead", source_name, {
+		"Lead": {
 			"doctype": "Vehicle Quotation",
 			"field_map": {
 				"name": "party_name"
 			}
-		}}, target_doc, set_missing_values)
-
-	target_doc.quotation_to = "Lead"
-	target_doc.run_method("set_missing_values")
-	target_doc.run_method("calculate_taxes_and_totals")
+		}
+	}, target_doc, set_missing_values)
 
 	return target_doc
-
-
-def _set_missing_values(source, target):
-	address = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Address',
-		}, ['parent'], limit=1)
-
-	contact = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Contact',
-		}, ['parent'], limit=1)
-
-	if address:
-		target.customer_address = address[0].parent
-
-	if contact:
-		target.contact_person = contact[0].parent
 
 
 @frappe.whitelist()

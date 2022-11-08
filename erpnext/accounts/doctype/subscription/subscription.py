@@ -260,7 +260,7 @@ class Subscription(Document):
 		# Taxes
 		if self.tax_template:
 			invoice.taxes_and_charges = self.tax_template
-			invoice.set_taxes()
+			invoice.reset_taxes_and_charges()
 
 		# Due date
 		invoice.append(

@@ -51,11 +51,13 @@ class VehicleBookingOrder(VehicleBookingController):
 
 	def on_submit(self):
 		self.update_vehicle_quotation()
+		self.update_opportunity()
 		self.update_allocation_status()
 		self.update_vehicle_status()
 
 	def on_cancel(self):
 		self.update_vehicle_quotation()
+		self.update_opportunity()
 		self.update_allocation_status()
 		self.update_vehicle_status()
 		self.db_set('status', 'Cancelled')
@@ -183,14 +185,19 @@ class VehicleBookingOrder(VehicleBookingController):
 					.format(self.vehicle_quotation))
 
 	def update_vehicle_quotation(self):
-		if self.vehicle_quotation:
+		if self.get('vehicle_quotation'):
 			doc = frappe.get_doc("Vehicle Quotation", self.vehicle_quotation)
 			if doc.docstatus == 2:
 				frappe.throw(_("Vehicle Quotation {0} is cancelled").format(self.vehicle_quotation))
 
 			doc.set_status(update=True)
 			doc.notify_update()
-			doc.update_opportunity()
+
+	def update_opportunity(self):
+		if self.get('opportunity'):
+			doc = frappe.get_doc("Opportunity", self.opportunity)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def update_vehicle_status(self):
 		if self.vehicle:

@@ -77,6 +77,7 @@
   },
   {
    "allow_on_submit": 1,
+   "depends_on": "eval:doc.party_name && doc.customer_name != doc.party_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -514,7 +515,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-10-10 10:22:27.605302",
+ "modified": "2022-11-08 17:22:47.609656",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

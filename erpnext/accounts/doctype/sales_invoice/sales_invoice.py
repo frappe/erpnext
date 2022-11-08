@@ -678,7 +678,7 @@ class SalesInvoice(SellingController):
 
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
-				self.set_taxes()
+				self.set_taxes_and_charges()
 
 		return pos
 

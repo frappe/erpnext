@@ -18,13 +18,6 @@ doctype_rule_map = {
 		'points': 2,
 		'for_doc_event': 'New'
 	},
-	'Opportunity': {
-		'points': 10,
-		'for_doc_event': 'Custom',
-		'condition': 'doc.status=="Converted"',
-		'rule_name': _('On Converting Opportunity'),
-		'user_field': 'converted_by'
-	},
 	'Sales Order': {
 		'points': 10,
 		'for_doc_event': 'Submit',

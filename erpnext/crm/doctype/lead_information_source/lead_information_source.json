@@ -1,13 +1,11 @@
 {
- "allow_rename": 1,
  "autoname": "field:source_name",
- "creation": "2016-09-16 01:47:47.382372",
+ "creation": "2022-10-24 18:05:07.906471",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "source_name",
-  "details"
+  "source_name"
  ],
  "fields": [
   {
@@ -15,19 +13,13 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Source Name",
-   "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "details",
-   "fieldtype": "Text Editor",
-   "label": "Details"
   }
  ],
- "modified": "2022-11-08 17:12:12.642740",
+ "modified": "2022-11-08 17:12:10.642129",
  "modified_by": "Administrator",
- "module": "Selling",
- "name": "Lead Source",
+ "module": "CRM",
+ "name": "Lead Information Source",
  "owner": "Administrator",
  "permissions": [
   {
@@ -38,12 +30,13 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Manager",
+   "role": "System Manager",
    "share": 1,
    "write": 1
   },
   {
    "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -68,5 +61,6 @@
  ],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

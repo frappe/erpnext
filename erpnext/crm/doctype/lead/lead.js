@@ -1,10 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext");
-cur_frm.email_field = "email_id";
+frappe.provide("erpnext.crm");
 
-erpnext.LeadController = frappe.ui.form.Controller.extend({
+erpnext.crm.LeadController = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
 			'Customer': 'Customer',
@@ -13,75 +12,92 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			'Vehicle Quotation': 'Vehicle Quotation',
 		}
 
-		this.frm.fields_dict.customer.get_query = function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.customer_query" }
-		}
-
-		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
-	},
-
-	onload: function () {
-		if (cur_frm.fields_dict.lead_owner.df.options.match(/^User/)) {
-			cur_frm.fields_dict.lead_owner.get_query = function (doc, cdt, cdn) {
-				return { query: "frappe.core.doctype.user.user.user_query" }
-			}
-		}
-
-		if (cur_frm.fields_dict.contact_by.df.options.match(/^User/)) {
-			cur_frm.fields_dict.contact_by.get_query = function (doc, cdt, cdn) {
-				return { query: "frappe.core.doctype.user.user.user_query" }
-			}
-		}
+		this.frm.email_field = 'email_id';
 	},
 
 	refresh: function () {
-		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		frappe.dynamic_link = { doc: doc, fieldname: 'name', doctype: 'Lead' }
 
-		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {
-			this.frm.add_custom_button(__("Customer"), this.create_customer, __('Create'));
-			this.frm.add_custom_button(__("Opportunity"), this.create_opportunity, __('Create'));
-			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __('Create'));
+		this.set_dynamic_link();
+		this.set_sales_person_from_user();
+		this.setup_buttons();
 
-			if (frappe.boot.active_domains.includes("Vehicles")) {
-				this.frm.add_custom_button(__("Vehicle Quotation"), this.make_vehicle_quotation, __('Create'));
-			}
-		}
+		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
 
 		if (!this.frm.doc.__islocal) {
-			frappe.contacts.render_address_and_contact(cur_frm);
+			frappe.contacts.render_address_and_contact(this.frm);
 		} else {
-			frappe.contacts.clear_address_and_contact(cur_frm);
+			frappe.contacts.clear_address_and_contact(this.frm);
+		}
+	},
+
+	validate: function() {
+		erpnext.utils.format_ntn(this.frm, "tax_id");
+		erpnext.utils.format_cnic(this.frm, "tax_cnic");
+		erpnext.utils.format_strn(this.frm, "tax_strn");
+
+		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no");
+		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no_2");
+	},
+
+	set_dynamic_link: function() {
+		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'name', doctype: 'Lead'}
+	},
+
+	set_sales_person_from_user: function() {
+		if (!this.frm.get_field('sales_person') || this.frm.doc.sales_person || !this.frm.doc.__islocal) {
+			return;
+		}
+
+		erpnext.utils.get_sales_person_from_user(sales_person => {
+			if (sales_person) {
+				this.frm.set_value('sales_person', sales_person);
+			}
+		});
+	},
+
+	setup_buttons: function () {
+		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.customer) {
+			this.frm.add_custom_button(__("Customer"), () => this.create_customer(),
+				__('Create'));
+			this.frm.add_custom_button(__("Opportunity"), () => this.create_opportunity(),
+				__('Create'));
+			this.frm.add_custom_button(__("Quotation"), () => this.make_quotation(),
+				__('Create'));
+
+			if (frappe.boot.active_domains.includes("Vehicles")) {
+				this.frm.add_custom_button(__("Vehicle Quotation"), () => this.make_vehicle_quotation(),
+					__('Create'));
+			}
 		}
 	},
 
 	create_customer: function () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
-			frm: cur_frm
+			frm: this.frm
 		})
 	},
 
 	create_opportunity: function () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-			frm: cur_frm
+			frm: this.frm
 		})
 	},
 
 	make_quotation: function () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
-			frm: cur_frm
+			frm: this.frm
 		})
 	},
 
 	make_vehicle_quotation: function () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_vehicle_quotation",
-			frm: cur_frm
+			frm: this.frm
 		})
 	},
 
@@ -94,23 +110,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.organization_lead == 1) {
 			this.frm.set_value("lead_name", this.frm.doc.company_name);
 		}
-	},
-
-	contact_date: function () {
-		if (this.frm.doc.contact_date) {
-			let d = moment(this.frm.doc.contact_date);
-			d.add(1, "hours");
-			this.frm.set_value("ends_on", d.format(frappe.defaultDatetimeFormat));
-		}
-	},
-
-	validate: function() {
-		erpnext.utils.format_ntn(this.frm, "tax_id");
-		erpnext.utils.format_cnic(this.frm, "tax_cnic");
-		erpnext.utils.format_strn(this.frm, "tax_strn");
-
-		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no");
-		erpnext.utils.format_mobile_pakistan(this.frm, "mobile_no_2");
 	},
 
 	tax_id: function() {
@@ -134,4 +133,4 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 	}
 });
 
-$.extend(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
+$.extend(cur_frm.cscript, new erpnext.crm.LeadController({ frm: cur_frm }));

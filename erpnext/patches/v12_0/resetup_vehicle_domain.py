@@ -10,6 +10,7 @@ def execute():
 	frappe.reload_doc("projects", "doctype", "project_type")
 	frappe.reload_doc("projects", "doctype", "project_template")
 	frappe.reload_doc("projects", "doctype", "project_template_category")
+	frappe.reload_doc("crm", "doctype", "opportunity")
 
 	domain = 'Vehicles'
 	if domain in frappe.get_active_domains():

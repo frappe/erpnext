@@ -35,7 +35,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image', 'fni_amount']
+dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image']
 
 
 class VehicleBookingController(AccountsController):
@@ -76,14 +76,22 @@ class VehicleBookingController(AccountsController):
 		if self.get('item_code'):
 			item_details = get_item_details(self.as_dict())
 			for k, v in item_details.items():
-				if self.meta.has_field(k) and (not self.get(k) or k in force_fields) and k not in dont_update_if_missing:
-					self.set(k, v)
+				if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
+					if k == 'fni_amount':
+						if self.get(k) is None:
+							self.set(k, v)
+					elif k not in dont_update_if_missing:
+						self.set(k, v)
 
 			if cint(item_details.get('lead_time_days')) > 0:
 				if item_details.get('delivery_date'):
 					self.delivery_date = item_details.get('delivery_date')
 				if item_details.get('delivery_period'):
 					self.delivery_period = item_details.get('delivery_period')
+
+			if cint(item_details.get('quotation_validity_days')) > 0 and self.is_new() and self.get('quotation_validity_days') is None:
+				self.quotation_validity_days = cint(item_details.get('quotation_validity_days'))
+				self.valid_till = item_details.get('valid_till')
 
 		self.set_vehicle_details()
 
@@ -481,6 +489,15 @@ def get_item_details(args):
 			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
 			out.delivery_period = get_delivery_period(out.delivery_date)
 
+	delivery_period = out.delivery_period or args.delivery_period
+	if delivery_period and not out.delivery_date and not args.delivery_date:
+		out.delivery_date = None
+
+	delivery_period_details = get_delivery_period_details(delivery_period, item.name)
+	out.vehicle_allocation_required = delivery_period_details.vehicle_allocation_required
+	if delivery_period_details.delivery_date and not args.delivery_date and not out.delivery_date:
+		out.delivery_date = delivery_period_details.delivery_date
+
 	tax_status = args.tax_status
 	if args.doctype == "Vehicle Quotation":
 		tax_status = tax_status or 'Filer'
@@ -508,16 +525,16 @@ def get_item_details(args):
 			if not out.tc_name:
 				out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
 
-	out.vehicle_allocation_required = get_vehicle_allocation_required(item.name,
-		delivery_period=out.delivery_period or args.delivery_period)
-
 	return out
 
 
 @frappe.whitelist()
 def get_delivery_period_details(delivery_period, item_code=None):
 	out = frappe._dict()
-	out.delivery_date = frappe.get_cached_value("Vehicle Allocation Period", delivery_period, 'to_date')
+
+	if delivery_period:
+		out.delivery_date = frappe.get_cached_value("Vehicle Allocation Period", delivery_period, 'to_date')
+
 	out.vehicle_allocation_required = get_vehicle_allocation_required(item_code, delivery_period)
 	return out
 

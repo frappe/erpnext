@@ -45,7 +45,7 @@ def make_claim_sales_invoice(data, customer):
 
 	target_doc.ignore_pricing_rule = 1
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc

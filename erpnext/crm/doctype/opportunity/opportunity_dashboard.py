@@ -1,16 +1,21 @@
 from __future__ import unicode_literals
+import frappe
 from frappe import _
 
 def get_data():
+	vehicle_domain_links = []
+	if 'Vehicles' in frappe.get_active_domains():
+		vehicle_domain_links.append({
+			'label': _('Vehicle Booking'),
+			'items': ['Vehicle Quotation', 'Vehicle Booking Order']
+		})
+
 	return {
-		'fieldname': 'prevdoc_docname',
-		'non_standard_fieldnames': {
-			'Supplier Quotation': 'opportunity',
-			'Quotation': 'opportunity'
-		},
+		'fieldname': 'opportunity',
 		'transactions': [
 			{
+				'label': _("Pre Sales"),
 				'items': ['Quotation', 'Supplier Quotation']
 			},
-		]
+		] + vehicle_domain_links
 	}

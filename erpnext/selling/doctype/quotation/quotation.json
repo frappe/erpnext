@@ -32,7 +32,6 @@
   "more_info_cb_3",
   "campaign",
   "opportunity",
-  "enq_det",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -336,7 +335,7 @@
    "fieldname": "contact_display",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Contact",
+   "label": "Contact Name",
    "read_only": 1
   },
   {
@@ -966,16 +965,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "enq_det",
-   "fieldtype": "Text",
-   "hidden": 1,
-   "label": "Opportunity Item",
-   "oldfieldname": "enq_det",
-   "oldfieldtype": "Text",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "supplier_quotation",
    "fieldtype": "Link",
    "label": "Supplier Quotation",
@@ -1436,7 +1425,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2022-08-06 13:28:17.710939",
+ "modified": "2022-11-01 19:16:38.654038",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -125,14 +125,15 @@ class Customer(TransactionBase):
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
-		self.update_primary_contact()
-		self.update_primary_address()
 
 		if self.flags.old_lead != self.lead_name:
 			self.update_lead_status()
 
 		if self.flags.is_new_doc:
 			self.create_lead_address_contact()
+
+		self.update_primary_contact()
+		self.update_primary_address()
 
 		self.update_customer_groups()
 
@@ -381,7 +382,7 @@ def make_quotation(source_name, target_doc=None):
 
 	target_doc.quotation_to = "Customer"
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("set_other_charges")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	price_list, currency = frappe.db.get_value("Customer", source_name, ['default_price_list', 'default_currency'])

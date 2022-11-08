@@ -15,7 +15,8 @@ from erpnext.stock.get_item_details import get_applies_to_details
 from frappe.model.naming import set_name_by_naming_series
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact, get_all_contact_nos
+from frappe.contacts.doctype.contact.contact import get_default_contact, get_all_contact_nos
+from erpnext.accounts.party import get_contact_details
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.projects.doctype.project_status.project_status import get_auto_project_status, set_manual_project_status,\
 	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
@@ -1909,7 +1910,7 @@ def make_sales_invoice(project_name, target_doc=None, depreciation_type=None, cl
 		target_doc.run_method("set_missing_values")
 
 		set_depreciation_in_invoice_items(target_doc.get('items'), project)
-		target_doc.run_method("append_taxes_from_master")
+		target_doc.run_method("reset_taxes_and_charges")
 
 		target_doc.run_method("calculate_taxes_and_totals")
 
@@ -1970,7 +1971,7 @@ def get_delivery_note(project_name):
 
 	# Missing Values and Forced Values
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
@@ -2022,7 +2023,7 @@ def get_sales_order(project_name, items_type=None):
 
 	# Missing Values and Forced Values
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc

@@ -176,7 +176,6 @@ def create_lead_for_item_inquiry(lead, subject, message):
 	lead = frappe.parse_json(lead)
 	lead_doc = frappe.new_doc('Lead')
 	lead_doc.update(lead)
-	lead_doc.set('lead_owner', '')
 
 	try:
 		lead_doc.save(ignore_permissions=True)
@@ -365,12 +364,9 @@ def set_taxes(quotation, cart_settings):
 		quotation.transaction_date, quotation.company, customer_group=customer_group, supplier_group=None,
 		tax_category=quotation.tax_category, billing_address=quotation.customer_address,
 		shipping_address=quotation.shipping_address_name, use_for_shopping_cart=1)
-#
-# 	# clear table
-	quotation.set("taxes", [])
-#
-# 	# append taxes
-	quotation.append_taxes_from_master()
+
+	# reset taxes table
+	quotation.reset_taxes_and_charges()
 
 def get_party(user=None):
 	if not user:
