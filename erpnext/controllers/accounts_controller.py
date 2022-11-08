@@ -152,6 +152,7 @@ class AccountsController(TransactionBase):
 		self.validate_inter_company_reference()
 
 		self.disable_pricing_rule_on_internal_transfer()
+		self.disable_tax_included_prices_for_internal_transfer()
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -394,6 +395,20 @@ class AccountsController(TransactionBase):
 				_("Disabled pricing rules since this {} is an internal transfer").format(self.doctype),
 				alert=1,
 			)
+
+	def disable_tax_included_prices_for_internal_transfer(self):
+		if self.is_internal_transfer():
+			tax_updated = False
+			for tax in self.get("taxes"):
+				if tax.get("included_in_print_rate"):
+					tax.included_in_print_rate = 0
+					tax_updated = True
+
+			if tax_updated:
+				frappe.msgprint(
+					_("Disabled tax included prices since this {} is an internal transfer").format(self.doctype),
+					alert=1,
+				)
 
 	def validate_due_date(self):
 		if self.get("is_pos"):

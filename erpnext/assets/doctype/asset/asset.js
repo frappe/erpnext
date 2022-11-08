@@ -384,7 +384,11 @@ frappe.ui.form.on('Asset', {
 
 	set_values_from_purchase_doc: function(frm, doctype, purchase_doc) {
 		frm.set_value('company', purchase_doc.company);
-		frm.set_value('purchase_date', purchase_doc.posting_date);
+		if (purchase_doc.bill_date) {
+			frm.set_value('purchase_date', purchase_doc.bill_date);
+		} else {
+			frm.set_value('purchase_date', purchase_doc.posting_date);
+		}
 		const item = purchase_doc.items.find(item => item.item_code === frm.doc.item_code);
 		if (!item) {
 			doctype_field = frappe.scrub(doctype)

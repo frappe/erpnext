@@ -835,10 +835,7 @@ def remove_return_pos_invoices(party_type, party, invoice_list):
 			else:
 				return invoice_list
 
-			# remove pos return invoices from invoice_list
-			for idx, inv in enumerate(invoice_list, 0):
-				if inv.voucher_no in return_pos:
-					del invoice_list[idx]
+			invoice_list = [x for x in invoice_list if x.voucher_no not in return_pos]
 
 	return invoice_list
 

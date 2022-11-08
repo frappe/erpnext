@@ -983,8 +983,6 @@ def validate_reverse_charge_transaction(doc, method):
 
 			frappe.throw(msg)
 
-		doc.eligibility_for_itc = "ITC on Reverse Charge"
-
 
 def update_itc_availed_fields(doc, method):
 	country = frappe.get_cached_value("Company", doc.company, "country")
