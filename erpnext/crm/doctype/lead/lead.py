@@ -215,7 +215,7 @@ def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.quotation_to = "Lead"
 		target.run_method("set_missing_values")
-		target.run_method("set_other_charges")
+		target.run_method("reset_taxes_and_charges")
 		target.run_method("calculate_taxes_and_totals")
 
 	target_doc = get_mapped_doc("Lead", source_name, {

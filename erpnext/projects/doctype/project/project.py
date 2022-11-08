@@ -1910,7 +1910,7 @@ def make_sales_invoice(project_name, target_doc=None, depreciation_type=None, cl
 		target_doc.run_method("set_missing_values")
 
 		set_depreciation_in_invoice_items(target_doc.get('items'), project)
-		target_doc.run_method("append_taxes_from_master")
+		target_doc.run_method("reset_taxes_and_charges")
 
 		target_doc.run_method("calculate_taxes_and_totals")
 
@@ -1971,7 +1971,7 @@ def get_delivery_note(project_name):
 
 	# Missing Values and Forced Values
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
@@ -2023,7 +2023,7 @@ def get_sales_order(project_name, items_type=None):
 
 	# Missing Values and Forced Values
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc

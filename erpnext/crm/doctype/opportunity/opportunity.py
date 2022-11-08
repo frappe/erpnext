@@ -241,7 +241,7 @@ def make_quotation(source_name, target_doc=None):
 		target.conversion_rate = exchange_rate
 
 		target.run_method("set_missing_values")
-		target.run_method("append_taxes_from_master")
+		target.run_method("reset_taxes_and_charges")
 		target.run_method("calculate_taxes_and_totals")
 
 	doclist = get_mapped_doc("Opportunity", source_name, {

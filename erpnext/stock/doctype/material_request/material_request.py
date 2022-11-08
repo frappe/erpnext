@@ -295,7 +295,7 @@ def set_missing_values(source, target_doc):
 	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) < getdate(nowdate()):
 		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
-	target_doc.run_method("append_taxes_from_master")
+	target_doc.run_method("reset_taxes_and_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 
