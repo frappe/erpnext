@@ -96,28 +96,27 @@ def get_opening_balances(filters):
 
 
 def get_rootwise_opening_balances(filters, report_type):
-	additional_conditions = ""
-	if not filters.show_unclosed_fy_pl_balances:
-		additional_conditions = " and posting_date >= %(year_start_date)s" \
-			if report_type == "Profit and Loss" else ""
+	additional_conditions = []
+	if not filters.show_unclosed_fy_pl_balances and report_type == "Profit and Loss":
+		additional_conditions.append("posting_date >= %(year_start_date)s")
 
 	if not flt(filters.with_period_closing_entry):
-		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+		additional_conditions.append("ifnull(voucher_type, '') != 'Period Closing Voucher'")
 
 	if filters.cost_center:
 		lft, rgt = frappe.db.get_value('Cost Center', filters.cost_center, ['lft', 'rgt'])
-		additional_conditions += """ and cost_center in (select name from `tabCost Center`
-			where lft >= %s and rgt <= %s)""" % (lft, rgt)
+		additional_conditions.append("""cost_center in (select name from `tabCost Center`
+			where lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 	if filters.project:
-		additional_conditions += " and project = %(project)s"
+		additional_conditions.append("project = %(project)s")
 
 	if filters.finance_book:
-		fb_conditions = " AND finance_book = %(finance_book)s"
+		fb_conditions = "finance_book = %(finance_book)s"
 		if filters.include_default_book_entries:
-			fb_conditions = " AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
+			fb_conditions = "(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
 
-		additional_conditions += fb_conditions
+		additional_conditions.append(fb_conditions)
 
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
@@ -137,28 +136,51 @@ def get_rootwise_opening_balances(filters, report_type):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
-					additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
+					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
 				else:
-					additional_conditions += "and {0} in (%({0})s)".format(dimension.fieldname)
+					additional_conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 				query_filters.update({
 					dimension.fieldname: filters.get(dimension.fieldname)
 				})
+
+	hooks = frappe.get_hooks('set_gl_conditions')
+	for method in hooks:
+		frappe.get_attr(method)(filters, additional_conditions, alias="`tabGL Entry`")
+
+	additional_conditions = " and {0}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
 	gle = frappe.db.sql("""
 		select
 			account, sum(debit) as opening_debit, sum(credit) as opening_credit
 		from `tabGL Entry`
 		where
-			company=%(company)s
+			company = %(company)s
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
-		group by account""".format(additional_conditions=additional_conditions), query_filters , as_dict=True)
+		group by account
+	""".format(additional_conditions=additional_conditions), query_filters, as_dict=True)
 
 	opening = frappe._dict()
 	for d in gle:
 		opening.setdefault(d.account, d)
+
+	hooks = frappe.get_hooks('get_opening_account_balances')
+	for method in hooks:
+		opening_balances = frappe.get_attr(method)(filters)
+		if opening_balances is None:
+			continue
+
+		for account, opening_entry in opening_balances.items():
+			opening_data = opening.setdefault(account, frappe._dict({
+				'account': account, 'opening_debit': 0, 'opening_credit': 0
+			}))
+
+			if opening_entry.opening_balance >= 0:
+				opening_data['opening_debit'] += opening_entry.opening_balance
+			else:
+				opening_data['opening_credit'] += -1 * opening_entry.opening_balance
 
 	return opening
 

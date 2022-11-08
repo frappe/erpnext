@@ -149,8 +149,8 @@ def get_data(
 			gl_entries_by_account, ignore_closing_entries=ignore_closing_entries
 		)
 
-	calculate_values(
-		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
+	calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values,
+		ignore_accumulated_values_for_fy, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
@@ -168,8 +168,8 @@ def get_appropriate_currency(company, filters=None):
 		return frappe.get_cached_value('Company',  company,  "default_currency")
 
 
-def calculate_values(
-		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy):
+def calculate_values(accounts_by_name, gl_entries_by_account, period_list, accumulated_values,
+		ignore_accumulated_values_for_fy, filters):
 	for entries in itervalues(gl_entries_by_account):
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
@@ -189,6 +189,28 @@ def calculate_values(
 
 			if entry.posting_date < period_list[0].year_start_date:
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
+
+	hooks = frappe.get_hooks('get_opening_account_balances')
+	if hooks:
+		for method in hooks:
+			opening_balances = frappe.get_attr(method)(filters)
+			if opening_balances is None:
+				continue
+
+			for account, entry in opening_balances.items():
+				d = accounts_by_name.get(account)
+				if not d:
+					continue
+
+				for period in period_list:
+					if entry.posting_date <= period.to_date:
+						if (accumulated_values or entry.posting_date >= period.from_date) and \
+							(not ignore_accumulated_values_for_fy or
+								entry.fiscal_year == period.to_date_fiscal_year):
+							d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+
+				if entry.posting_date < period_list[0].year_start_date:
+					d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
