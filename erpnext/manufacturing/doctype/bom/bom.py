@@ -206,8 +206,8 @@ class BOM(WebsiteGenerator):
 		self.manage_default_bom()
 
 	def on_cancel(self):
-		frappe.db.set(self, "is_active", 0)
-		frappe.db.set(self, "is_default", 0)
+		self.db_set("is_active", 0)
+		self.db_set("is_default", 0)
 
 		# check if used in any other bom
 		self.validate_bom_links()
@@ -449,10 +449,10 @@ class BOM(WebsiteGenerator):
 			not frappe.db.exists(dict(doctype="BOM", docstatus=1, item=self.item, is_default=1))
 			and self.is_active
 		):
-			frappe.db.set(self, "is_default", 1)
+			self.db_set("is_default", 1)
 			frappe.db.set_value("Item", self.item, "default_bom", self.name)
 		else:
-			frappe.db.set(self, "is_default", 0)
+			self.db_set("is_default", 0)
 			item = frappe.get_doc("Item", self.item)
 			if item.default_bom == self.name:
 				frappe.db.set_value("Item", self.item, "default_bom", None)
