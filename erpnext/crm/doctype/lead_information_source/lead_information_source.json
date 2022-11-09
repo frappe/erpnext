@@ -13,10 +13,11 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Source Name",
+   "reqd": 1,
    "unique": 1
   }
  ],
- "modified": "2022-11-08 17:12:10.642129",
+ "modified": "2022-11-09 12:29:50.273382",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Information Source",
