@@ -367,12 +367,8 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-<<<<<<< HEAD
-		frappe.db.set(self, "status", "Cancelled")
-=======
 		self.db_set("status", "Cancelled")
-		self.db_set("repost_required", 0)
->>>>>>> 7e1742956c (refactor: Remove usage of deprecated methods (#32914))
+
 
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
