@@ -35,7 +35,11 @@ force_fields = [
 ]
 force_fields += address_fields
 
-dont_update_if_missing = ['quotation_validity_days', 'valid_till', 'tc_name', 'image']
+dont_update_if_missing = [
+	'quotation_validity_days', 'valid_till',
+	'lead_time_days', 'delivery_date', 'delivery_period',
+	'tc_name', 'image'
+]
 
 
 class VehicleBookingController(AccountsController):
@@ -83,15 +87,24 @@ class VehicleBookingController(AccountsController):
 					elif k not in dont_update_if_missing:
 						self.set(k, v)
 
-			if cint(item_details.get('lead_time_days')) > 0:
-				if item_details.get('delivery_date'):
-					self.delivery_date = item_details.get('delivery_date')
-				if item_details.get('delivery_period'):
-					self.delivery_period = item_details.get('delivery_period')
+			if self.is_new():
+				if self.meta.has_field('lead_time_days') and cint(item_details.get('lead_time_days')) > 0\
+						and self.get('lead_time_days') is None:
+					self.lead_time_days = cint(item_details.get('lead_time_days'))
 
-			if cint(item_details.get('quotation_validity_days')) > 0 and self.is_new() and self.get('quotation_validity_days') is None:
-				self.quotation_validity_days = cint(item_details.get('quotation_validity_days'))
-				self.valid_till = item_details.get('valid_till')
+				if self.meta.has_field('quotation_validity_days') and cint(item_details.get('quotation_validity_days')) > 0\
+						and self.get('quotation_validity_days') is None:
+					self.quotation_validity_days = cint(item_details.get('quotation_validity_days'))
+					self.valid_till = item_details.get('valid_till')
+
+			if self.get('lead_time_days'):
+				self.delivery_period = item_details.get('delivery_period')
+				self.delivery_date = item_details.get('delivery_date')
+			else:
+				self.delivery_period = self.get('delivery_period') or item_details.get('delivery_period')
+				if self.delivery_period:
+					delivery_period_date = frappe.get_cached_value("Vehicle Allocation Period", self.delivery_period, 'to_date')
+					self.delivery_date = self.get('delivery_date') or delivery_period_date
 
 		self.set_vehicle_details()
 
@@ -147,11 +160,11 @@ class VehicleBookingController(AccountsController):
 				frappe.throw(_("Vehicle {0} is not {1}").format(self.vehicle, frappe.bold(self.item_name or self.item_code)))
 
 	def validate_lead_time(self):
-		if self.lead_time_days < 0:
+		if cint(self.get('lead_time_days')) < 0:
 			frappe.throw(_("Delivery Lead Time cannot be negative"))
 
 		min_lead_time_days = cint(frappe.get_cached_value("Vehicles Settings", None, "minimum_lead_time_days"))
-		if self.lead_time_days and min_lead_time_days and self.lead_time_days < min_lead_time_days:
+		if cint(self.lead_time_days) and min_lead_time_days and cint(self.lead_time_days) < min_lead_time_days:
 			frappe.throw(_("Delivery Lead Time cannot be less than {0} days").format(min_lead_time_days))
 
 	def validate_delivery_date(self):
@@ -483,17 +496,14 @@ def get_item_details(args):
 				out.valid_till = add_days(getdate(args.transaction_date), out.quotation_validity_days - 1)
 
 	if args.doctype and frappe.get_meta(args.doctype).has_field('lead_time_days'):
-		out.lead_time_days = cint(args.lead_time_days) if 'lead_time_days' in args else cint(item.lead_time_days)
-
+		out.lead_time_days = cint(args.lead_time_days) or cint(item.lead_time_days)
 		if out.lead_time_days:
 			out.delivery_date = add_days(getdate(args.transaction_date), cint(out.lead_time_days))
 			out.delivery_period = get_delivery_period(out.delivery_date)
 
 	delivery_period = out.delivery_period or args.delivery_period
-	if delivery_period and not out.delivery_date and not args.delivery_date:
-		out.delivery_date = None
-
 	delivery_period_details = get_delivery_period_details(delivery_period, item.name)
+
 	out.vehicle_allocation_required = delivery_period_details.vehicle_allocation_required
 	if delivery_period_details.delivery_date and not args.delivery_date and not out.delivery_date:
 		out.delivery_date = delivery_period_details.delivery_date
