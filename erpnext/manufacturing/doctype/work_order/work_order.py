@@ -373,7 +373,7 @@ class WorkOrder(Document):
 
 	def on_cancel(self):
 		self.validate_cancel()
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		if self.production_plan and frappe.db.exists(
 			"Production Plan Item Reference", {"parent": self.production_plan}
