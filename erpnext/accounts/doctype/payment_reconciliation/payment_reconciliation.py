@@ -214,9 +214,11 @@ class PaymentReconciliation(Document):
 
 	def get_difference_amount(self, payment_entry, invoice, allocated_amount):
 		difference_amount = 0
-		if payment_entry.get("exchange_rate") != invoice.get("exchange_rate"):
-			allocated_amount_in_ref_rate = payment_entry.get("exchange_rate") * allocated_amount
-			allocated_amount_in_inv_rate = invoice.get("exchange_rate") * allocated_amount
+		if invoice.get("exchange_rate") and payment_entry.get("exchange_rate", 1) != invoice.get(
+			"exchange_rate", 1
+		):
+			allocated_amount_in_ref_rate = payment_entry.get("exchange_rate", 1) * allocated_amount
+			allocated_amount_in_inv_rate = invoice.get("exchange_rate", 1) * allocated_amount
 			difference_amount = allocated_amount_in_ref_rate - allocated_amount_in_inv_rate
 
 		return difference_amount
