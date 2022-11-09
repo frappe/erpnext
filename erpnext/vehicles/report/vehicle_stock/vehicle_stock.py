@@ -349,6 +349,11 @@ class VehicleStockReport(object):
 		elif self.filters.invoice_status == "Invoice Not Received":
 			data = [d for d in data if not d.invoice_received_date and not d.invoice_delivery_date]
 
+		if self.filters.warehouse:
+			self.filters.warehouses = frappe.get_all("Warehouse", filters={"name": ['subtree of', self.filters.warehouse]})
+			self.filters.warehouses = [d.name for d in self.filters.warehouses]
+			data = [d for d in data if d.warehouse in self.filters.warehouses]
+
 		return data
 
 	def get_grouped_data(self):
@@ -625,13 +630,6 @@ class VehicleStockReport(object):
 
 		if self.filters.item_codes:
 			conditions.append("item_code in %(item_codes)s")
-
-		if self.filters.warehouse:
-			warehouse_details = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"], as_dict=1)
-			if warehouse_details:
-				conditions.append("exists (select name from `tabWarehouse` wh \
-					where wh.lft >= {0} and wh.rgt <= {1} and `tabStock Ledger Entry`.warehouse = wh.name)"\
-					.format(warehouse_details.lft, warehouse_details.rgt))
 
 		if self.filters.vehicle:
 			conditions.append("serial_no = %(vehicle)s")
