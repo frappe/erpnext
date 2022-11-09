@@ -19,6 +19,7 @@
   "financer_name",
   "finance_type",
   "opportunity",
+  "opportunity_item",
   "column_break_9",
   "company",
   "transaction_date",
@@ -870,12 +871,20 @@
    "fieldtype": "Data",
    "label": "Contact Designation",
    "read_only": 1
+  },
+  {
+   "fieldname": "opportunity_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Opportunity Item",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-11-08 18:21:53.280292",
+ "modified": "2022-11-09 13:19:08.824493",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Quotation",

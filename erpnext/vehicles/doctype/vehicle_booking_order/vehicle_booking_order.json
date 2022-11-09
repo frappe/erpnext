@@ -25,6 +25,7 @@
   "amended_from",
   "section_break_6",
   "opportunity",
+  "opportunity_item",
   "column_break_3",
   "vehicle_quotation",
   "transfer_details_section",
@@ -1174,12 +1175,20 @@
    "no_copy": 1,
    "options": "Opportunity",
    "read_only": 1
+  },
+  {
+   "fieldname": "opportunity_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Opportunity Item",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-11-08 18:18:00.218333",
+ "modified": "2022-11-09 13:18:52.265935",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

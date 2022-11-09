@@ -350,6 +350,7 @@ def set_vehicle_item_from_opportunity(source, target):
 		item = frappe.get_cached_doc("Item", d.item_code) if d.item_code else frappe._dict()
 		if item.is_vehicle:
 			target.item_code = item.name
+			target.opportunity_item = d.name
 			if target.meta.has_field('color'):
 				target.color = d.vehicle_color
 			elif target.meta.has_field('color_1'):
