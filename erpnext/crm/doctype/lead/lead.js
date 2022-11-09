@@ -63,13 +63,14 @@ erpnext.crm.LeadController = frappe.ui.form.Controller.extend({
 				__('Create'));
 			this.frm.add_custom_button(__("Opportunity"), () => this.create_opportunity(),
 				__('Create'));
-			this.frm.add_custom_button(__("Quotation"), () => this.make_quotation(),
-				__('Create'));
 
 			if (frappe.boot.active_domains.includes("Vehicles")) {
 				this.frm.add_custom_button(__("Vehicle Quotation"), () => this.make_vehicle_quotation(),
 					__('Create'));
 			}
+
+			this.frm.add_custom_button(__("Quotation"), () => this.make_quotation(),
+				__('Create'));
 		}
 	},
 

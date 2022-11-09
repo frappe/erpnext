@@ -67,18 +67,18 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 						__('Create'));
 				}
 
+				if (frappe.boot.active_domains.includes("Vehicles")) {
+					me.frm.add_custom_button(__("Vehicle Quotation"), () => me.make_vehicle_quotation(),
+						__('Create'));
+					me.frm.add_custom_button(__("Vehicle Booking Order"), () => me.make_vehicle_booking_order(),
+						__('Create'));
+				}
+
 				me.frm.add_custom_button(__('Quotation'), () => me.create_quotation(),
 					__('Create'));
 
 				if (me.frm.doc.items && me.frm.doc.items.length) {
 					me.frm.add_custom_button(__('Supplier Quotation'), () => me.make_supplier_quotation(),
-						__('Create'));
-				}
-
-				if (frappe.boot.active_domains.includes("Vehicles")) {
-					me.frm.add_custom_button(__("Vehicle Quotation"), () => me.make_vehicle_quotation(),
-						__('Create'));
-					me.frm.add_custom_button(__("Vehicle Booking Order"), () => me.make_vehicle_booking_order(),
 						__('Create'));
 				}
 
