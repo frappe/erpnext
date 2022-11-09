@@ -1044,7 +1044,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 			return;
 		}
 
-		var panel_template_rows = this.frm.doc.project_templates.filter(el => el.is_panel_job == 1);
+		var panel_template_rows = (this.frm.doc.project_templates || []).filter(el => el.is_panel_job == 1);
 		this.frm.set_df_property('vehicle_panels', 'hidden', panel_template_rows.length ? 0 : 1);
 	},
 
