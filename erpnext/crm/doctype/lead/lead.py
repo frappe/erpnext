@@ -211,7 +211,7 @@ def make_opportunity(source_name, target_doc=None):
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.quotation_to = "Lead"
+		add_sales_person_from_source(source, target)
 		target.run_method("set_missing_values")
 		target.run_method("reset_taxes_and_charges")
 		target.run_method("calculate_taxes_and_totals")
@@ -220,7 +220,8 @@ def make_quotation(source_name, target_doc=None):
 		"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
-				"name": "party_name"
+				"name": "party_name",
+				"doctype": "quotation_to",
 			}
 		}
 	}, target_doc, set_missing_values)
@@ -231,7 +232,7 @@ def make_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		target.quotation_to = "Lead"
+		add_sales_person_from_source(source, target)
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -239,12 +240,21 @@ def make_vehicle_quotation(source_name, target_doc=None):
 		"Lead": {
 			"doctype": "Vehicle Quotation",
 			"field_map": {
-				"name": "party_name"
+				"name": "party_name",
+				"doctype": "quotation_to",
 			}
 		}
 	}, target_doc, set_missing_values)
 
 	return target_doc
+
+
+def add_sales_person_from_source(source, target):
+	if target.meta.has_field('sales_team') and source.get('sales_person') and not target.get('sales_team'):
+		target.append('sales_team', {
+			'sales_person': source.sales_person,
+			'allocated_percentage': 100,
+		})
 
 
 @frappe.whitelist()

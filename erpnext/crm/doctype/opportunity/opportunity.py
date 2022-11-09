@@ -11,7 +11,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_party_account_currency
-from erpnext.crm.doctype.lead.lead import get_customer_from_lead
+from erpnext.crm.doctype.lead.lead import get_customer_from_lead, add_sales_person_from_source
 from six import string_types
 import json
 
@@ -293,7 +293,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 def make_vehicle_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		set_vehicle_item_from_opportunity(source, target)
-		add_sales_person_from_opportunity(source, target)
+		add_sales_person_from_source(source, target)
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -322,7 +322,7 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 			target.customer_name = customer.customer_name
 
 		set_vehicle_item_from_opportunity(source, target)
-		add_sales_person_from_opportunity(source, target)
+		add_sales_person_from_source(source, target)
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -355,14 +355,6 @@ def set_vehicle_item_from_opportunity(source, target):
 			elif target.meta.has_field('color_1'):
 				target.color_1 = d.vehicle_color
 			return
-
-
-def add_sales_person_from_opportunity(source, target):
-	if source.get('sales_person') and not target.get('sales_team'):
-		target.append('sales_team', {
-			'sales_person': source.sales_person,
-			'allocated_percentage': 100,
-		})
 
 
 @frappe.whitelist()
