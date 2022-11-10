@@ -119,10 +119,10 @@ class Quotation(SellingController):
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
-			frappe.db.set(self, "status", "Lost")
+			self.db_set("status", "Lost")
 
 			if detailed_reason:
-				frappe.db.set(self, "order_lost_reason", detailed_reason)
+				self.db_set("order_lost_reason", detailed_reason)
 
 			for reason in lost_reasons_list:
 				if reason.get("lost_reason") in lost_reasons_lst:
