@@ -5,6 +5,9 @@
 
 frappe.ui.form.on("Customer", {
 	setup: function(frm) {
+		frm.custom_make_buttons = {
+			'Lead': 'Lead',
+		}
 
 		frm.make_methods = {
 			'Quotation': () => frappe.model.open_mapped_doc({
@@ -17,7 +20,6 @@ frappe.ui.form.on("Customer", {
 			})
 		}
 
-		frm.add_fetch('lead_name', 'company_name', 'customer_name');
 		frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 		frm.set_query('customer_group', {'is_group': 0});
 		frm.set_query('default_price_list', { 'selling': 1});

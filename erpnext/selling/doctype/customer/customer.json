@@ -158,6 +158,7 @@
    "options": "Bank Account"
   },
   {
+   "depends_on": "eval:doc.__islocal",
    "fieldname": "lead_name",
    "fieldtype": "Link",
    "label": "From Lead",
@@ -166,6 +167,7 @@
    "oldfieldtype": "Link",
    "options": "Lead",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1
   },
   {
@@ -663,7 +665,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2022-07-29 14:03:43.290879",
+ "modified": "2022-11-09 19:34:22.463023",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
