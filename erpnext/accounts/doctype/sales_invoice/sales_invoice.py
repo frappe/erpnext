@@ -369,7 +369,6 @@ class SalesInvoice(SellingController):
 
 		self.db_set("status", "Cancelled")
 
-
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
 		):
