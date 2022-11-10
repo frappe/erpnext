@@ -8,14 +8,14 @@ app_icon = "fa fa-th"
 app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
-source_link = "https://github.com/frappe/erpnext"
+source_link = "https://github.com/jrGabrillo/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 required_apps = ["payments"]
 
 
 develop_version = "14.x.x-develop"
 
-app_include_js = ["erpnext.bundle.js", "esco.js"]
+app_include_js = "erpnext.bundle.js"
 app_include_css = "erpnext.bundle.css"
 web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"

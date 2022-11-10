@@ -86,4 +86,4 @@ body:
   - type: markdown
     attributes:
       value: |
-        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/frappe/erpnext/blob/develop/CODE_OF_CONDUCT.md)
+        By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/jrGabrillo/erpnext/blob/develop/CODE_OF_CONDUCT.md)

@@ -104,8 +104,8 @@ jobs:
           wget https://erpnext.com/files/v10-erpnext.sql.gz
           bench --site test_site --force restore ~/frappe-bench/v10-erpnext.sql.gz
 
-          git -C "apps/frappe" remote set-url upstream https://github.com/frappe/frappe.git
-          git -C "apps/erpnext" remote set-url upstream https://github.com/frappe/erpnext.git
+          git -C "apps/frappe" remote set-url upstream https://github.com/jrGabrillo/frappe.git
+          git -C "apps/erpnext" remote set-url upstream https://github.com/jrGabrillo/erpnext.git
 
           pyenv global $(pyenv versions | grep '3.7')
           for version in $(seq 12 13)

@@ -164,7 +164,7 @@ def add_standard_navbar_items():
 		{
 			"item_label": "Report an Issue",
 			"item_type": "Route",
-			"route": "https://github.com/frappe/erpnext/issues",
+			"route": "https://github.com/jrGabrillo/erpnext/issues",
 			"is_standard": 1,
 		},
 	]

@@ -20,7 +20,7 @@ pull_request_rules:
       comment:
           message: |
             @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
-            https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
+            https://github.com/jrGabrillo/erpnext/wiki/Pull-Request-Checklist#which-branch
 
   - name: Auto-close PRs on pre-release branch
     conditions:

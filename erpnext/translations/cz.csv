@@ -587,7 +587,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +189,Maintenance
 DocType: Material Request,Material Transfer,Přesun materiálu
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +56,Opening (Dr),Opening (Dr)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +406,Posting timestamp must be after {0},Časová značka zadání musí být po {0}
-apps/frappe/frappe/config/setup.py +59,Settings,Nastavení
+apps/jrGabrillo/frappe/config/setup.py +59,Settings,Nastavení
 DocType: Landed Cost Taxes and Charges,Landed Cost Taxes and Charges,Přistál nákladů daně a poplatky
 DocType: Production Order Operation,Actual Start Time,Skutečný čas začátku
 DocType: BOM Operation,Operation Time,Provozní doba
@@ -1007,7 +1007,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +13,Investme
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +45,Either debit or credit amount is required for {0},Buď debetní nebo kreditní částka je vyžadována pro {0}
 DocType: Item Attribute Value,"This will be appended to the Item Code of the variant. For example, if your abbreviation is ""SM"", and the item code is ""T-SHIRT"", the item code of the variant will be ""T-SHIRT-SM""","To bude připojen na položku zákoníku varianty. Například, pokud vaše zkratka je ""SM"", a položka je kód ""T-SHIRT"", položka kód varianty bude ""T-SHIRT-SM"""
 DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary Slip.,"Čistá Pay (slovy) budou viditelné, jakmile uložíte výplatní pásce."
-apps/frappe/frappe/core/doctype/user/user_list.js +12,Active,Aktivní
+apps/jrGabrillo/frappe/core/doctype/user/user_list.js +12,Active,Aktivní
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +149,Blue,Modrý
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +120,Further nodes can be only created under 'Group' type nodes,"Další uzly mohou být pouze vytvořena v uzlech typu ""skupiny"""
 DocType: Item,UOMs,UOMs
@@ -1359,7 +1359,7 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 DocType: Salary Structure Deduction,Salary Structure Deduction,Plat Struktura Odpočet
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +157,Selective laser sintering,Selektivní laserové spékání
 apps/erpnext/erpnext/stock/doctype/item/item.py +286,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Měrná jednotka {0} byl zadán více než jednou v konverzním faktorem tabulce
-apps/frappe/frappe/core/page/data_import_tool/data_import_tool.js +74,Import Successful!,Import byl úspěšný!
+apps/jrGabrillo/frappe/core/page/data_import_tool/data_import_tool.js +74,Import Successful!,Import byl úspěšný!
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Náklady na vydaných položek
 DocType: Email Digest,Expenses Booked,Náklady rezervováno
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +168,Quantity must not be more than {0},Množství nesmí být větší než {0}
@@ -1369,7 +1369,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +34,From Dat
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +209,Serial No {0} quantity {1} cannot be a fraction,Pořadové číslo {0} {1} množství nemůže být zlomek
 apps/erpnext/erpnext/config/buying.py +59,Supplier Type master.,Dodavatel Type master.
 DocType: Purchase Order Item,Supplier Part Number,Dodavatel Číslo dílu
-apps/frappe/frappe/core/page/permission_manager/permission_manager.js +372,Add,Přidat
+apps/jrGabrillo/frappe/core/page/permission_manager/permission_manager.js +372,Add,Přidat
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +87,Conversion rate cannot be 0 or 1,Míra konverze nemůže být 0 nebo 1
 DocType: Accounts Settings,Credit Controller,Credit Controller
 DocType: Delivery Note,Vehicle Dispatch Date,Vozidlo Dispatch Datum
@@ -1661,7 +1661,7 @@ DocType: Leave Control Panel,Leave blank if considered for all employee types,"P
 DocType: Landed Cost Voucher,Distribute Charges Based On,Distribuovat poplatků na základě
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +253,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Účet {0} musí být typu ""dlouhodobého majetku"", protože položka {1} je majetková položka"
 DocType: HR Settings,HR Settings,Nastavení HR
-apps/frappe/frappe/config/setup.py +130,Printing,Tisk
+apps/jrGabrillo/frappe/config/setup.py +130,Printing,Tisk
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +107,Expense Claim is pending approval. Only the Expense Approver can update status.,Úhrada výdajů čeká na schválení. Pouze schalovatel výdajů může aktualizovat stav.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +99,The day(s) on which you are applying for leave are holiday. You need not apply for leave.,"Den (y), na které žádáte o dovolené jsou dovolenou. Potřebujete nevztahuje na dovolenou."
 sites/assets/js/desk.min.js +684,and,a
@@ -1759,7 +1759,7 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order_list.js +19,Se
 DocType: POS Setting,Taxes and Charges,Daně a poplatky
 DocType: Item,"A Product or a Service that is bought, sold or kept in stock.","Produkt nebo služba, která se Nakupuje, Prodává nebo Skladuje."
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +94,Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row,"Nelze vybrat druh náboje jako ""On předchozí řady Částka"" nebo ""On předchozí řady Celkem"" pro první řadu"
-apps/frappe/frappe/core/doctype/doctype/boilerplate/controller_list.html +31,Completed,Dokončeno
+apps/jrGabrillo/frappe/core/doctype/doctype/boilerplate/controller_list.html +31,Completed,Dokončeno
 DocType: Web Form,Select DocType,Zvolte DocType
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +103,Broaching,Protahování
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +11,Banking,Bankovnictví
@@ -2125,7 +2125,7 @@ DocType: Stock Reconciliation Item,Current Qty,Aktuální Množství
 DocType: BOM Item,"See ""Rate Of Materials Based On"" in Costing Section","Viz ""Hodnotit materiálů na bázi"" v kapitole Costing"
 DocType: Appraisal Goal,Key Responsibility Area,Key Odpovědnost Area
 DocType: Item Reorder,Material Request Type,Materiál Typ požadavku
-apps/frappe/frappe/desk/moduleview.py +61,Documents,Dokumenty
+apps/jrGabrillo/frappe/desk/moduleview.py +61,Documents,Dokumenty
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +17,Ref,Ref
 DocType: Cost Center,Cost Center,Nákladové středisko
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.js +48,Voucher #,Voucher #
@@ -2332,7 +2332,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +160,Please select {0},"P
 DocType: C-Form,C-Form No,C-Form No
 DocType: BOM,Exploded_items,Exploded_items
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +90,Researcher,Výzkumník
-apps/frappe/frappe/custom/doctype/customize_form/customize_form.js +87,Update,Aktualizovat
+apps/jrGabrillo/frappe/custom/doctype/customize_form/customize_form.js +87,Update,Aktualizovat
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +75,Please save the Newsletter before sending,Uložte Newsletter před odesláním
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +23,Name or Email is mandatory,Jméno nebo e-mail je povinné
 apps/erpnext/erpnext/config/stock.py +74,Incoming quality inspection.,Vstupní kontrola jakosti.
@@ -2569,7 +2569,7 @@ DocType: Blog Category,Parent Website Route,nadřazená cesta internetové strá
 DocType: Sales Order,Not Billed,Ne Účtovaný
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +107,Both Warehouse must belong to same Company,Oba Sklady musí patřit do stejné společnosti
 sites/assets/js/erpnext.min.js +20,No contacts added yet.,Žádné kontakty přidán dosud.
-apps/frappe/frappe/workflow/doctype/workflow/workflow_list.js +7,Not active,Neaktivní
+apps/jrGabrillo/frappe/workflow/doctype/workflow/workflow_list.js +7,Not active,Neaktivní
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +43,Against Invoice Posting Date,Proti faktury Datum zveřejnění
 DocType: Purchase Receipt Item,Landed Cost Voucher Amount,Přistál Náklady Voucher Částka
 DocType: Time Log,Batched for Billing,Zarazeno pro fakturaci
@@ -2614,7 +2614,7 @@ DocType: Employee,Confirmation Date,Potvrzení Datum
 DocType: C-Form,Total Invoiced Amount,Celkem Fakturovaná částka
 DocType: Communication,Sales User,Uživatel prodeje
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +46,Min Qty can not be greater than Max Qty,Min množství nemůže být větší než Max Množství
-apps/frappe/frappe/core/page/permission_manager/permission_manager.js +421,Set,Nastavit
+apps/jrGabrillo/frappe/core/page/permission_manager/permission_manager.js +421,Set,Nastavit
 DocType: Item,Warehouse-wise Reorder Levels,Změna Úrovně dle skladu
 DocType: Lead,Lead Owner,Olovo Majitel
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +241,Warehouse is required,Je zapotřebí Warehouse
@@ -2655,7 +2655,7 @@ apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js +14,This is a ro
 ,Stock Ledger,Reklamní Ledger
 DocType: Salary Slip Deduction,Salary Slip Deduction,Plat Slip Odpočet
 apps/erpnext/erpnext/stock/doctype/item/item.py +368,"To set reorder level, item must be a Purchase Item","Chcete-li nastavit úroveň Objednací, položka musí být Nákup položky"
-apps/frappe/frappe/desk/doctype/note/note_list.js +3,Notes,Poznámky
+apps/jrGabrillo/frappe/desk/doctype/note/note_list.js +3,Notes,Poznámky
 DocType: Opportunity,From,Od
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +192,Select a group node first.,Vyberte první uzel skupinu.
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +88,Purpose must be one of {0},Cíl musí být jedním z {0}
@@ -2678,7 +2678,7 @@ DocType: Task,depends_on,záleží na
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +81,Opportunity Lost,Příležitost Ztracena
 DocType: Features Setup,"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Sleva Pole bude k dispozici v objednávce, doklad o koupi, nákupní faktury"
 DocType: Report,Report Type,Typ výpisu
-apps/frappe/frappe/core/doctype/user/user.js +136,Loading,Nahrávám
+apps/jrGabrillo/frappe/core/doctype/user/user.js +136,Loading,Nahrávám
 DocType: BOM Replace Tool,BOM Replace Tool,BOM Nahradit Tool
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,Země moudrý výchozí adresa Templates
 apps/erpnext/erpnext/accounts/party.py +196,Due / Reference Date cannot be after {0},Vzhledem / Referenční datum nemůže být po {0}
@@ -2877,7 +2877,7 @@ DocType: Serial No,AMC Expiry Date,AMC Datum vypršení platnosti
 ,Sales Register,Sales Register
 DocType: Quotation,Quotation Lost Reason,Důvod ztráty nabídky
 DocType: Address,Plant,Rostlina
-apps/frappe/frappe/desk/moduleview.py +64,Setup,Nastavení
+apps/jrGabrillo/frappe/desk/moduleview.py +64,Setup,Nastavení
 apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is nothing to edit.,Není nic upravovat.
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +38,Cold rolling,Válcování za studena
 DocType: Customer Group,Customer Group Name,Zákazník Group Name
@@ -3278,7 +3278,7 @@ DocType: Payment Reconciliation,Minimum Amount,Minimální částka
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +68,Update Finished Goods,Dokončení aktualizace zboží
 DocType: Item,"Automatically set. If this item has variants, then it cannot be selected in sales orders etc.","Automatické nastavení. Pokud je tato položka má varianty, pak to nemůže být zvolen do prodejních objednávek atd"
 DocType: Workstation,per hour,za hodinu
-apps/frappe/frappe/core/doctype/doctype/doctype.py +97,Series {0} already used in {1},Série {0} jsou již použity v {1}
+apps/jrGabrillo/frappe/core/doctype/doctype/doctype.py +97,Series {0} already used in {1},Série {0} jsou již použity v {1}
 DocType: Warehouse,Account for the warehouse (Perpetual Inventory) will be created under this Account.,"Účet pro skladu (průběžné inventarizace), bude vytvořena v rámci tohoto účtu."
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +95,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Warehouse nelze vypustit, neboť existuje zásob, kniha pro tento sklad."
 DocType: Company,Distribution,Distribuce
@@ -3531,7 +3531,7 @@ apps/erpnext/erpnext/accounts/doctype/account/account.py +63,You are not authori
 DocType: Payment Reconciliation,Get Unreconciled Entries,Získat smířit záznamů
 DocType: Purchase Receipt,Date on which lorry started from supplier warehouse,"Ode dne, kdy začal nákladního vozidla od dodavatele skladu"
 DocType: Cost Center,Budgets,Rozpočty
-apps/frappe/frappe/core/page/modules_setup/modules_setup.py +11,Updated,Aktualizováno
+apps/jrGabrillo/frappe/core/page/modules_setup/modules_setup.py +11,Updated,Aktualizováno
 DocType: Employee,Emergency Contact Details,Nouzové kontaktní údaje
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +394,What does it do?,Co to dělá?
 DocType: Delivery Note,To Warehouse,Do skladu
@@ -3571,7 +3571,7 @@ DocType: Authorization Rule,Based On,Založeno na
 DocType: Stock Settings,Stock Frozen Upto,Reklamní Frozen aľ
 apps/erpnext/erpnext/config/projects.py +13,Project activity / task.,Projektová činnost / úkol.
 apps/erpnext/erpnext/config/hr.py +65,Generate Salary Slips,Generování výplatních páskách
-apps/frappe/frappe/utils/__init__.py +85,{0} is not a valid email id,{0} není platné id emailu
+apps/jrGabrillo/frappe/utils/__init__.py +85,{0} is not a valid email id,{0} není platné id emailu
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +41,"Buying must be checked, if Applicable For is selected as {0}","Nákup musí být zkontrolováno, v případě potřeby pro vybrán jako {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Sleva musí být menší než 100
 DocType: ToDo,Low,Nízké
@@ -3625,7 +3625,7 @@ apps/erpnext/erpnext/config/hr.py +53,Offer candidate a Job.,Nabídka kandidát 
 DocType: Notification Control,Prompt for Email on Submission of,Výzva pro e-mail na předkládání
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +61,Item {0} must be a stock Item,Položka {0} musí být skladem
 apps/erpnext/erpnext/config/accounts.py +102,Default settings for accounting transactions.,Výchozí nastavení účetních transakcí.
-apps/frappe/frappe/model/naming.py +40,{0} is required,{0} je vyžadováno
+apps/jrGabrillo/frappe/model/naming.py +40,{0} is required,{0} je vyžadováno
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +20,Vacuum molding,Vakuové tváření
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +57,Expected Date cannot be before Material Request Date,Očekávané datum nemůže být před Materiál Poptávka Datum
 DocType: Contact Us Settings,City,Město
@@ -3787,7 +3787,7 @@ DocType: Employee,Education,Vzdělání
 DocType: Selling Settings,Campaign Naming By,Kampaň Pojmenování By
 DocType: Employee,Current Address Is,Aktuální adresa je
 DocType: Address,Office,Kancelář
-apps/frappe/frappe/desk/moduleview.py +67,Standard Reports,Standardní výpisy
+apps/jrGabrillo/frappe/desk/moduleview.py +67,Standard Reports,Standardní výpisy
 apps/erpnext/erpnext/config/accounts.py +13,Accounting journal entries.,Zápisy v účetním deníku.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +210,Please select Employee Record first.,"Prosím, vyberte zaměstnance záznam první."
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +35,To create a Tax Account,Chcete-li vytvořit daňovém účtu
@@ -3822,7 +3822,7 @@ DocType: Hub Settings,Hub Settings,Nastavení Hub
 DocType: Project,Gross Margin %,Hrubá Marže %
 DocType: BOM,With Operations,S operacemi
 ,Monthly Salary Register,Měsíční plat Register
-apps/frappe/frappe/website/template.py +120,Next,Další
+apps/jrGabrillo/frappe/website/template.py +120,Next,Další
 DocType: Warranty Claim,If different than customer address,Pokud se liší od adresy zákazníka
 DocType: BOM Operation,BOM Operation,BOM Operation
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +117,Electropolishing,Elektrolytické
