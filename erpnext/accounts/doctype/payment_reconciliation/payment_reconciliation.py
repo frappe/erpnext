@@ -78,6 +78,7 @@ class PaymentReconciliation(Document):
 			"t2.against_account like %(bank_cash_account)s" if self.bank_cash_account else "1=1"
 		)
 
+		# nosemgrep
 		journal_entries = frappe.db.sql(
 			"""
 			select
