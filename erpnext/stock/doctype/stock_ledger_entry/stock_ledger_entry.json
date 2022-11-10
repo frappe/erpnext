@@ -31,11 +31,13 @@
   "company",
   "stock_uom",
   "project",
-  "batch_no",
-  "column_break_26",
   "fiscal_year",
-  "serial_no",
   "is_cancelled",
+  "column_break_26",
+  "batch_no",
+  "manufacturing_date",
+  "expiry_date",
+  "serial_no",
   "to_rename"
  ],
  "fields": [
@@ -309,6 +311,20 @@
    "label": "Recalculate Incoming/Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "batch_no.manufacturing_date",
+   "fieldname": "manufacturing_date",
+   "fieldtype": "Data",
+   "label": "Manufacturing Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "batch_no.expiry_date",
+   "fieldname": "expiry_date",
+   "fieldtype": "Date",
+   "label": "Expiry date",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -317,7 +333,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-10-08 13:44:51.857631",
+ "modified": "2022-11-10 04:06:56.400316",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

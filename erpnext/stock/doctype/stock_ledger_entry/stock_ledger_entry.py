@@ -50,6 +50,10 @@ class StockLedgerEntry(Document):
 		self.validate_with_last_transaction_posting_time()
 
 	def on_submit(self):
+		expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
+		frappe.db.set_value(self.doctype, self.name, "expiry_date", expiry_date)
+		manufacturing_date = frappe.db.get_value("Batch", self.batch_no, "manufacturing_date")
+		frappe.db.set_value(self.doctype, self.name, "manufacturing_date", manufacturing_date)
 		self.check_stock_frozen_date()
 		self.calculate_batch_qty()
 
