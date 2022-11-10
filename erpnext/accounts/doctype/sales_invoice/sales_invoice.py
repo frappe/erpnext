@@ -367,7 +367,7 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
@@ -2306,7 +2306,7 @@ def get_loyalty_programs(customer):
 	lp_details = get_loyalty_programs(customer)
 
 	if len(lp_details) == 1:
-		frappe.db.set(customer, "loyalty_program", lp_details[0])
+		customer.db_set("loyalty_program", lp_details[0])
 		return lp_details
 	else:
 		return lp_details

@@ -1410,7 +1410,7 @@ class PurchaseInvoice(BuyingController):
 			self.repost_future_sle_and_gle()
 
 		self.update_project()
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.ignore_linked_doctypes = (
