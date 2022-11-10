@@ -23,6 +23,7 @@
   "fetch_customers",
   "column_break_6",
   "primary_mandatory",
+  "show_net_values_in_party_account",
   "column_break_17",
   "customers",
   "preferences",
@@ -284,10 +285,29 @@
    "fieldtype": "Link",
    "label": "Terms and Conditions",
    "options": "Terms and Conditions"
+<<<<<<< HEAD
   }
  ],
  "links": [],
  "modified": "2021-09-06 21:00:45.732505",
+=======
+  },
+  {
+   "default": "1",
+   "fieldname": "include_break",
+   "fieldtype": "Check",
+   "label": "Page Break After Each SoA"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_net_values_in_party_account",
+   "fieldtype": "Check",
+   "label": "Show Net Values in Party Account"
+  }
+ ],
+ "links": [],
+ "modified": "2022-11-10 17:44:17.165991",
+>>>>>>> 51521fc19f (feat: Add net value filter on PSOA)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
