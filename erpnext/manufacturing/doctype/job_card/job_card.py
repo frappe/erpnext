@@ -54,6 +54,9 @@ class JobCard(Document):
 		self.set_onload("job_card_excess_transfer", excess_transfer)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
 
+	def before_validate(self):
+		self.set_wip_warehouse()
+
 	def validate(self):
 		self.validate_time_logs()
 		self.set_status()
@@ -638,6 +641,12 @@ class JobCard(Document):
 
 		if update_status:
 			self.db_set("status", self.status)
+
+	def set_wip_warehouse(self):
+		if not self.wip_warehouse:
+			self.wip_warehouse = frappe.db.get_single_value(
+				"Manufacturing Settings", "default_wip_warehouse"
+			)
 
 	def validate_operation_id(self):
 		if (
