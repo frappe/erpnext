@@ -33,3 +33,6 @@ frappe.ui.form.on("Event", {
 		}, __("Add Participants"));
 	}
 });
+
+
+console.log('esco event!!!');

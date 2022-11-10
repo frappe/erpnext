@@ -969,3 +969,5 @@ function attach_selector_button(inner_text, append_loction, context, grid_row) {
 		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
 	});
 }
+
+console.log('esco!!!');

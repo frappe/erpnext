@@ -233,3 +233,5 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 		this.update_invoice();
 	}
 }
+
+console.log('esco payment!!!');

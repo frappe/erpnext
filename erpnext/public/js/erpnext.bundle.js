@@ -26,3 +26,4 @@ import "./templates/crm_activities.html";
 import "./templates/crm_notes.html";
 
 // import { sum } from 'frappe/public/utils/util.js'
+console.log('esco bundle!!!');
