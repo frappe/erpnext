@@ -186,6 +186,8 @@ erpnext.utils.add_item = function(frm) {
 erpnext.utils.get_address_display = function(frm, address_field, display_field, is_your_company_address) {
 	if (frm.updating_party_details) return;
 
+	var lead = erpnext.utils.get_lead_from_doc(frm);
+
 	if (!address_field) {
 		if (frm.doctype != "Purchase Order" && frm.doc.customer) {
 			address_field = "customer_address";
@@ -195,19 +197,19 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 	}
 
 	if (!display_field) display_field = "address_display";
-	if (frm.doc[address_field]) {
-		frappe.call({
-			method: "frappe.contacts.doctype.address.address.get_address_display",
-			args: {"address_dict": frm.doc[address_field] },
-			callback: function(r) {
-				if (r.message) {
-					frm.set_value(display_field, r.message)
-				}
+
+	frappe.call({
+		method: "erpnext.accounts.party.get_address_display",
+		args: {
+			address: frm.doc[address_field] || "",
+			lead: lead
+		},
+		callback: function(r) {
+			if (r.message) {
+				frm.set_value(display_field, r.message)
 			}
-		})
-	} else {
-		frm.set_value(display_field, '');
-	}
+		}
+	})
 };
 
 erpnext.utils.set_taxes_from_address = function(frm, triggered_from_field, billing_address_field, shipping_address_field) {
@@ -475,3 +477,9 @@ erpnext.utils.get_party_name_field = function(party_type) {
 		'Member': 'member_name'};
 	return dict[party_type] || "name";
 };
+
+erpnext.utils.get_lead_from_doc = function(frm) {
+	if (frm.doc.party_name && [frm.doc.quotation_to, frm.doc.appointment_for, frm.doc.opportunity_from].includes("Lead")) {
+		return frm.doc.party_name
+	}
+}

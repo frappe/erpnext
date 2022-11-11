@@ -7,7 +7,8 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate, add_days
 from frappe.model.utils import get_fetch_values
-from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from erpnext.accounts.party import get_address_display
+from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
 from erpnext.crm.doctype.lead.lead import get_lead_contact_details
 from erpnext.stock.get_item_details import get_default_warehouse, get_item_price, get_default_supplier, get_default_terms
@@ -283,10 +284,15 @@ def get_customer_details(args, get_withholding_tax=True):
 	out.husband_name = party.get('husband_name')
 
 	# Address
+	lead = None
 	out.customer_address = args.customer_address
 	if not out.customer_address:
 		out.customer_address = get_default_address("Customer", financer.name) if is_leased else get_default_address(party_type, party.name)
-	out.update(get_address_details(out.customer_address))
+
+	if party_type == "Lead" and not is_leased:
+		lead = party
+
+	out.update(get_address_details(out.customer_address, lead=lead))
 
 	# Contact
 	out.contact_person = args.contact_person or get_default_contact(party_type, party.name)
@@ -435,12 +441,19 @@ def get_customer_contact_details(args, customer_contact=None, financer_contact=N
 	return out
 
 @frappe.whitelist()
-def get_address_details(address):
+def get_address_details(address, lead=None):
+	from erpnext.crm.doctype.lead.lead import get_lead_address_details
+
 	out = frappe._dict()
 
-	address_dict = frappe.db.get_value("Address", address, "*", as_dict=True, cache=True) or {}
+	if address:
+		address_dict = frappe.db.get_value("Address", address, "*", as_dict=True, cache=True)
+	elif lead:
+		address_dict = get_lead_address_details(lead)
+	else:
+		address_dict = frappe._dict()
 
-	out.address_display = get_address_display(address_dict)
+	out.address_display = get_address_display(address_dict, lead=lead)
 	for f in address_fields:
 		out[f] = address_dict.get(f)
 

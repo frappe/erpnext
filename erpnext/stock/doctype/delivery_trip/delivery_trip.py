@@ -8,7 +8,7 @@ import datetime
 
 import frappe
 from frappe import _
-from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.accounts.party import get_address_display
 from frappe.model.document import Document
 from frappe.utils import cint, get_datetime, get_link_to_form
 

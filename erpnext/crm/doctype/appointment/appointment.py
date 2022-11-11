@@ -14,10 +14,10 @@ from frappe.utils.verified_command import get_signed_params
 from erpnext.hr.doctype.employee.employee import get_employee_from_user
 from frappe.desk.form.assign_to import add as add_assignment, clear as clear_assignments, close_all_assignments
 from six import string_types
-from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact, get_all_contact_nos
-from erpnext.accounts.party import get_contact_details
-from erpnext.crm.doctype.lead.lead import _get_lead_contact_details, get_customer_from_lead
+from erpnext.accounts.party import get_contact_details, get_address_display
+from erpnext.crm.doctype.lead.lead import get_customer_from_lead
 from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
 from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
@@ -719,13 +719,13 @@ def get_customer_details(args):
 	out.tax_cnic = party.get('tax_cnic')
 	out.tax_strn = party.get('tax_strn')
 
-	# Address
-	out.customer_address = args.customer_address or get_default_address(party.doctype, party.name)
-	out.address_display = get_address_display(out.customer_address)
-
-	# Contact
 	lead = party if party.doctype == "Lead" else None
 
+	# Address
+	out.customer_address = args.customer_address or get_default_address(party.doctype, party.name)
+	out.address_display = get_address_display(out.customer_address, lead=lead)
+
+	# Contact
 	out.contact_person = args.contact_person or get_default_contact(party.doctype, party.name)
 	out.update(get_contact_details(out.contact_person, lead=lead))
 

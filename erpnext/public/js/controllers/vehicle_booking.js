@@ -473,11 +473,13 @@ erpnext.vehicles.VehicleBookingController = frappe.ui.form.Controller.extend({
 
 	customer_address: function() {
 		var me = this;
+		var lead = this.frm.doc.quotation_to === 'Lead' ? this.frm.doc.party_name : null;
 
 		frappe.call({
 			method: "erpnext.vehicles.vehicle_booking_controller.get_address_details",
 			args: {
 				address: cstr(this.frm.doc.customer_address),
+				lead: lead,
 			},
 			callback: function (r) {
 				if (r.message && !r.exc) {
