@@ -47,6 +47,10 @@ class PaymentReconciliation(Document):
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
 		condition = self.get_conditions(get_payments=True)
+
+		if self.get("cost_center"):
+			condition += " and cost_center = '{0}' ".format(self.cost_center)
+
 		payment_entries = get_advance_payment_entries(
 			self.party_type,
 			self.party,
@@ -61,6 +65,10 @@ class PaymentReconciliation(Document):
 
 	def get_jv_entries(self):
 		condition = self.get_conditions()
+
+		if self.get("cost_center"):
+			condition += " and t2.cost_center = '{0}' ".format(self.cost_center)
+
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -113,6 +121,10 @@ class PaymentReconciliation(Document):
 
 	def get_dr_or_cr_notes(self):
 		condition = self.get_conditions(get_return_invoices=True)
+
+		if self.get("cost_center"):
+			condition += " and doc.cost_center = '{0}' ".format(self.cost_center)
+
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -171,6 +183,9 @@ class PaymentReconciliation(Document):
 		# Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
 
 		condition = self.get_conditions(get_invoices=True)
+
+		if self.get("cost_center"):
+			condition += " and cost_center = '{0}' ".format(self.cost_center)
 
 		non_reconciled_invoices = get_outstanding_invoices(
 			self.party_type, self.party, self.receivable_payable_account, condition=condition
@@ -356,9 +371,6 @@ class PaymentReconciliation(Document):
 
 	def get_conditions(self, get_invoices=False, get_payments=False, get_return_invoices=False):
 		condition = " and company = '{0}' ".format(self.company)
-
-		if self.get("cost_center"):
-			condition = " and cost_center = '{0}' ".format(self.cost_center)
 
 		if get_invoices:
 			condition += (
