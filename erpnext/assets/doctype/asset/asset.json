@@ -508,9 +508,14 @@
    "group": "Value",
    "link_doctype": "Asset Value Adjustment",
    "link_fieldname": "asset"
+  },
+  {
+   "group": "Depreciation",
+   "link_doctype": "Asset Depreciation Schedule",
+   "link_fieldname": "asset"
   }
  ],
- "modified": "2022-07-20 10:15:12.887372",
+ "modified": "2022-11-01 15:25:27.669803",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

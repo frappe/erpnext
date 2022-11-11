@@ -8,15 +8,15 @@
  "engine": "InnoDB",
  "field_order": [
   "asset",
-  "column_break_2",
   "naming_series",
-  "depreciation_details_section",
+  "column_break_2",
   "finance_book",
+  "depreciation_details_section",
   "depreciation_method",
-  "rate_of_depreciation",
-  "column_break_8",
   "total_number_of_depreciations",
-  "frequency_of_depreciation_months",
+  "column_break_8",
+  "frequency_of_depreciation",
+  "rate_of_depreciation",
   "depreciation_schedule_section",
   "depreciation_schedule",
   "details_section",
@@ -93,13 +93,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "frequency_of_depreciation_months",
-   "fieldname": "frequency_of_depreciation_months",
-   "fieldtype": "Int",
-   "label": "Frequency of Depreciation (Months)",
-   "read_only": 1
-  },
-  {
    "fieldname": "depreciation_schedule_section",
    "fieldtype": "Section Break",
    "label": "Depreciation Schedule"
@@ -133,13 +126,20 @@
   {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "frequency_of_depreciation",
+   "fieldname": "frequency_of_depreciation",
+   "fieldtype": "Int",
+   "label": "Frequency of Depreciation (Months)",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-01 11:44:15.256470",
+ "modified": "2022-11-01 17:23:33.873283",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",

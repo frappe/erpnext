@@ -15,6 +15,7 @@ from frappe.utils import (
 	flt,
 	get_datetime,
 	get_last_day,
+	is_last_day_of_the_month,
 	getdate,
 	month_diff,
 	nowdate,
@@ -26,6 +27,10 @@ from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
+)
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	make_draft_asset_depreciation_schedules,
+	modify_draft_asset_depreciation_schedules,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import AccountsController
@@ -40,6 +45,7 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		if not self.split_from:
 			self.prepare_depreciation_data()
+			modify_draft_asset_depreciation_schedules(self)
 		self.validate_gross_and_purchase_amount()
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
@@ -62,6 +68,10 @@ class Asset(AccountsController):
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
 		self.db_set("booked_fixed_asset", 0)
 
+	def after_insert(self):
+		if not self.split_from:
+			make_draft_asset_depreciation_schedules(self)
+
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
 			reference_doc = "Purchase Invoice" if self.purchase_invoice else "Purchase Receipt"
@@ -83,8 +93,6 @@ class Asset(AccountsController):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
-			self.make_depreciation_schedule(date_of_disposal)
-			self.set_accumulated_depreciation(date_of_disposal, date_of_return)
 		else:
 			self.finance_books = []
 			self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(
@@ -1070,32 +1078,6 @@ def get_total_days(date, frequency):
 		period_start_date = get_last_day(period_start_date)
 
 	return date_diff(date, period_start_date)
-
-
-def is_last_day_of_the_month(date):
-	last_day_of_the_month = get_last_day(date)
-
-	return getdate(last_day_of_the_month) == getdate(date)
-
-
-@erpnext.allow_regional
-def get_depreciation_amount(asset, depreciable_value, row):
-	if row.depreciation_method in ("Straight Line", "Manual"):
-		# if the Depreciation Schedule is being prepared for the first time
-		if not asset.flags.increase_in_asset_life:
-			depreciation_amount = (
-				flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations)
-
-		# if the Depreciation Schedule is being modified after Asset Repair
-		else:
-			depreciation_amount = (
-				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
-	else:
-		depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
-
-	return depreciation_amount
 
 
 @frappe.whitelist()

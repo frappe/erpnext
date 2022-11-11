@@ -865,7 +865,9 @@ class TestDepreciationBasics(AssetSetup):
 	def test_get_depreciation_amount(self):
 		"""Tests if get_depreciation_amount() returns the right value."""
 
-		from erpnext.assets.doctype.asset.asset import get_depreciation_amount
+		from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+			get_depreciation_amount
+		)
 
 		asset = create_asset(item_code="Macbook Pro", available_for_use_date="2019-12-31")
 
