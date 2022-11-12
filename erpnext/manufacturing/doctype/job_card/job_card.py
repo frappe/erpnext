@@ -7,6 +7,8 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import IfNull, Max, Min
 from frappe.utils import (
 	add_days,
 	add_to_date,
@@ -112,43 +114,44 @@ class JobCard(Document):
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
 
+		jc = frappe.qb.DocType("Job Card")
+		jctl = frappe.qb.DocType("Job Card Time Log")
+
+		time_conditions = [
+			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
+			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
+			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
+		]
+
+		if check_next_available_slot:
+			time_conditions.append(((jctl.from_time >= args.from_time) & (jctl.to_time >= args.to_time)))
+
+		query = (
+			frappe.qb.from_(jctl)
+			.from_(jc)
+			.select(jc.name.as_("name"), jctl.to_time)
+			.where(
+				(jctl.parent == jc.name)
+				& (Criterion.any(time_conditions))
+				& (jctl.name != f"{args.name or 'No Name'}")
+				& (jc.name != f"{args.parent or 'No Name'}")
+				& (jc.docstatus < 2)
+			)
+			.orderby(jctl.to_time, order=frappe.qb.desc)
+		)
+
 		if self.workstation:
 			production_capacity = (
 				frappe.get_cached_value("Workstation", self.workstation, "production_capacity") or 1
 			)
-			validate_overlap_for = " and jc.workstation = %(workstation)s "
+			query = query.where(jc.workstation == self.workstation)
 
 		if args.get("employee"):
 			# override capacity for employee
 			production_capacity = 1
-			validate_overlap_for = " and jctl.employee = %(employee)s "
+			query = query.where(jctl.employee == args.get("employee"))
 
-		extra_cond = ""
-		if check_next_available_slot:
-			extra_cond = " or (%(from_time)s <= jctl.from_time and %(to_time)s <= jctl.to_time)"
-
-		existing = frappe.db.sql(
-			"""select jc.name as name, jctl.to_time from
-			`tabJob Card Time Log` jctl, `tabJob Card` jc where jctl.parent = jc.name and
-			(
-				(%(from_time)s > jctl.from_time and %(from_time)s < jctl.to_time) or
-				(%(to_time)s > jctl.from_time and %(to_time)s < jctl.to_time) or
-				(%(from_time)s <= jctl.from_time and %(to_time)s >= jctl.to_time) {0}
-			)
-			and jctl.name != %(name)s and jc.name != %(parent)s and jc.docstatus < 2 {1}
-			order by jctl.to_time desc""".format(
-				extra_cond, validate_overlap_for
-			),
-			{
-				"from_time": args.from_time,
-				"to_time": args.to_time,
-				"name": args.name or "No Name",
-				"parent": args.parent or "No Name",
-				"employee": args.get("employee"),
-				"workstation": self.workstation,
-			},
-			as_dict=True,
-		)
+		existing = query.run(as_dict=True)
 
 		if existing and production_capacity > len(existing):
 			return
@@ -488,18 +491,21 @@ class JobCard(Document):
 			)
 
 	def update_work_order_data(self, for_quantity, time_in_mins, wo):
-		time_data = frappe.db.sql(
-			"""
-				SELECT
-					min(from_time) as start_time, max(to_time) as end_time
-				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
-				WHERE
-					jctl.parent = jc.name and jc.work_order = %s and jc.operation_id = %s
-					and jc.docstatus = 1 and IFNULL(jc.is_corrective_job_card, 0) = 0
-			""",
-			(self.work_order, self.operation_id),
-			as_dict=1,
-		)
+		jc = frappe.qb.DocType("Job Card")
+		jctl = frappe.qb.DocType("Job Card Time Log")
+
+		time_data = (
+			frappe.qb.from_(jc)
+			.from_(jctl)
+			.select(Min(jctl.from_time).as_("start_time"), Max(jctl.to_time).as_("end_time"))
+			.where(
+				(jctl.parent == jc.name)
+				& (jc.work_order == self.work_order)
+				& (jc.operation_id == self.operation_id)
+				& (jc.docstatus == 1)
+				& (IfNull(jc.is_corrective_job_card, 0) == 0)
+			)
+		).run(as_dict=True)
 
 		for data in wo.operations:
 			if data.get("name") == self.operation_id:
