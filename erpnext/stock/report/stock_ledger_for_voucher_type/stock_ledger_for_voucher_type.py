@@ -15,6 +15,14 @@ def execute(filters=None):
 	opening_row = get_opening_balance(filters, columns)
 
 	data = []
+	sales_invoice = []
+	stock_entry = []
+	cancellation = []
+	inventory_adj = []
+	purchase_inv = []
+	inventory_dow = []
+	stock_rec = []
+	other = []
 	conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
@@ -39,50 +47,114 @@ def execute(filters=None):
 				"stock_value": stock_value
 			})
 
-		is_row = True
-
 		if sle.voucher_type == 'Sales Invoice':
-			is_row = False
 			invoice = frappe.get_doc('Sales Invoice', sle.voucher_no)
-			req_data = [sle.date, sle.item_code, sle.item_name, sle.item_group, sle.brand, sle.description, sle.warehouse, 
-			sle.stock_uom, sle.actual_qty, sle.qty_after_transaction, sle.incoming_rate, sle.valuation_rate, sle.stock_value, 
-			sle.voucher_type, sle.voucher_no, invoice.patient_name, sle.batch_no, sle.serial_no, sle.project, sle.company]
-
-			data.append(req_data)
+			sales_invoice += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":invoice.patient_name, "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
 		
 		if sle.voucher_type == 'Stock Entry':
 			is_row = False
 			invoice = frappe.get_doc('Stock Entry', sle.voucher_no)
-			req_data = [sle.date, sle.item_code, sle.item_name, sle.item_group, sle.brand, sle.description, sle.warehouse, 
-			sle.stock_uom, sle.actual_qty, sle.qty_after_transaction, sle.incoming_rate, sle.valuation_rate, sle.stock_value, 
-			sle.voucher_type, sle.voucher_no, invoice.patient_name, sle.batch_no, sle.serial_no, sle.project, sle.company]
-
-			data.append(req_data)
+			stock_entry += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":invoice.patient_name, "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
 		
 		if sle.voucher_type == 'Cancellation Of Invoices':
 			is_row = False
 			invoice = frappe.get_doc('Cancellation Of Invoices', sle.voucher_no)
-			req_data = [sle.date, sle.item_code, sle.item_name, sle.item_group, sle.brand, sle.description, sle.warehouse, 
-			sle.stock_uom, sle.actual_qty, sle.qty_after_transaction, sle.incoming_rate, sle.valuation_rate, sle.stock_value, 
-			sle.voucher_type, sle.voucher_no, invoice.patient_name, sle.batch_no, sle.serial_no, sle.project, sle.company]
+			cancellation += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":invoice.patient_name, "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
 
-			data.append(req_data)
+		if sle.voucher_type == 'Inventory Adjustment':
+			is_row = False
+			inventory_adj += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":"", "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
+
+		if sle.voucher_type == 'Purchase Invoice':
+			is_row = False
+			purchase_inv += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":"", "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
+
+
+		if sle.voucher_type == 'Inventory Download':
+			is_row = False
+			inventory_dow += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":"", "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
+		
+
+		if sle.voucher_type == 'Stock Reconciliation':
+			is_row = False
+			stock_rec += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":"", "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
+
 
 		if is_row:
-			req_data = [sle.date, sle.item_code, sle.item_name, sle.item_group, sle.brand, sle.description, sle.warehouse, 
-			sle.stock_uom, sle.actual_qty, sle.qty_after_transaction, sle.incoming_rate, sle.valuation_rate, sle.stock_value, 
-			sle.voucher_type, sle.voucher_no, "", sle.batch_no, sle.serial_no, sle.project, sle.company]
-
-			data.append(req_data)
+			other += [{'indent': 1.0, "transaction": "", "date": sle.date, "item_code":sle.item_code, "item_name":sle.item_name, "item_group":sle.item_group, "brand":sle.brand, "description":sle.description, "warehouse":sle.warehouse, 
+			"stock_uom":sle.stock_uom, "actual_qty":sle.actual_qty, "qty_after_transaction":sle.qty_after_transaction, "incoming_rate":sle.incoming_rate, "valuation_rate":sle.valuation_rate, "stock_value":sle.stock_value, 
+			"voucher_type":sle.voucher_type, "voucher_no":sle.voucher_no, "patient":"", "batch_no":sle.batch_no, "serial_no":sle.serial_no, "project":sle.project, "company":sle.company}]
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
+	
+	sales_invoice_row = [{'indent': 0.0, "transaction": "Factura de venta"}]	
+
+	stock_entry_row = [{}]
+
+	stock_entry_row += [{'indent': 0.0, "transaction": "Entrada de inventario"}]
+
+	cancellation_row = [{}]
+
+	cancellation_row += [{'indent': 0.0, "transaction": "Anulación de factura"}]
+		
+	inventory_adj_row = [{}]
+
+	inventory_adj_row += [{'indent': 0.0, "transaction": "Ajuste de inventario"}]
+		
+	purchase_inv_row = [{}]
+
+	purchase_inv_row += [{'indent': 0.0, "transaction": "Factura de compra"}]
+		
+	inventory_dow_row = [{}]
+
+	inventory_dow_row += [{'indent': 0.0, "transaction": "Descarga de Inventario"}]
+		
+	stock_rec_row = [{}]
+
+	stock_rec_row += [{'indent': 0.0, "transaction": "Reconciliación de inventarios"}]
+
+	other_row = [{}]
+
+	other_row += [{'indent': 0.0, "transaction": "Otros"}]
+	
+	data.extend(sales_invoice_row or [])
+	data.extend(sales_invoice or [])
+	data.extend(stock_entry_row or [])
+	data.extend(stock_entry or [])
+	data.extend(cancellation_row or [])
+	data.extend(cancellation or [])
+	data.extend(inventory_adj_row or [])
+	data.extend(inventory_adj or [])
+	data.extend(purchase_inv_row or [])
+	data.extend(purchase_inv or [])
+	data.extend(inventory_dow_row or [])
+	data.extend(inventory_dow or [])
+	data.extend(stock_rec_row or [])
+	data.extend(stock_rec or [])
+	data.extend(other_row or [])
+	data.extend(other or [])
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
 def get_columns():
 	columns = [
+		{"label": _("Transaction"), "fieldname": "transaction", "width": 100},
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
 		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 130},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},

@@ -64,6 +64,14 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Stock Ledger For Voucher Type",
+					"doctype": "Stock Ledger Entry",
+					"onboard": 1,
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Stock Ledger",
 					"doctype": "Stock Ledger Entry",
 					"onboard": 1,
