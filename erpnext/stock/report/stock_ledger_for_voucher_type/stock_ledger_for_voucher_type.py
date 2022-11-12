@@ -46,6 +46,8 @@ def execute(filters=None):
 				"qty_after_transaction": actual_qty,
 				"stock_value": stock_value
 			})
+			
+		is_row = True
 
 		if sle.voucher_type == 'Sales Invoice':
 			invoice = frappe.get_doc('Sales Invoice', sle.voucher_no)

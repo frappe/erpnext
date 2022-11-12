@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from datetime import datetime, timedelta, date
 import pandas as pd
+from pandas import ExcelWriter
 
 class AccountStatementPayment(Document):
 	def validate(self):
@@ -124,4 +125,7 @@ class AccountStatementPayment(Document):
 
 		data = pd.DataFrame({"Nombre": name_list,"Cuenta del paciente": patient_statement_list, "Cliente": customer_list, "Nombre del paciente": patient_name_list, "Compañia": company_list, "Razon de venta": reason_for_sale_list})
 
-		data.to_excel('Estado_Cuenta.xlsx', sheet_name='sheet1', index=False)
+		# data = data[["Nombre", "Cuenta del paciente", "Cliente", "Nombre del paciente", "Compañia", "Razon de venta"]]
+		writer = ExcelWriter('c://estado_euenta.xlsx')
+		data.to_excel(writer, 'Hoja de datos', index=False)
+		writer.save()
