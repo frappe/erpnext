@@ -687,10 +687,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 
 		update_rejected_serial_nos = (
 			True
-			if (
-				controller.doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt")
-				and d.rejected_qty
-			)
+			if (controller.doctype in ("Purchase Receipt", "Purchase Invoice") and d.rejected_qty)
 			else False
 		)
 		accepted_serial_nos_updated = False

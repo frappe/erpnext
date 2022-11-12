@@ -19,15 +19,6 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			};
 		});
 
-		frm.set_query('rejected_warehouse', () => {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
-
 		frm.set_query('supplier_warehouse', () => {
 			return {
 				filters: {
@@ -38,13 +29,6 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		});
 
 		frm.set_query('warehouse', 'items', () => ({
-			filters: {
-				company: frm.doc.company,
-				is_group: 0
-			}
-		}));
-
-		frm.set_query('rejected_warehouse', 'items', () => ({
 			filters: {
 				company: frm.doc.company,
 				is_group: 0
@@ -97,16 +81,6 @@ frappe.ui.form.on('Subcontracting Receipt', {
 			}, __("View"));
 		}
 
-		if (!frm.doc.is_return && frm.doc.docstatus == 1 && frm.doc.per_returned < 100) {
-			frm.add_custom_button(__('Subcontract Return'), function () {
-				frappe.model.open_mapped_doc({
-					method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return',
-					frm: frm
-				});
-			}, __('Create'));
-			frm.page.set_inner_btn_group_as_primary(__('Create'));
-		}
-
 		if (frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Subcontracting Order'), function () {
 				if (!frm.doc.supplier) {
@@ -135,10 +109,6 @@ frappe.ui.form.on('Subcontracting Receipt', {
 
 	set_warehouse: (frm) => {
 		set_warehouse_in_children(frm.doc.items, 'warehouse', frm.doc.set_warehouse);
-	},
-
-	rejected_warehouse: (frm) => {
-		set_warehouse_in_children(frm.doc.items, 'rejected_warehouse', frm.doc.rejected_warehouse);
 	},
 });
 
