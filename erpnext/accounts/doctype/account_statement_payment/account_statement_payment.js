@@ -14,6 +14,23 @@ frappe.ui.form.on('Account Statement Payment', {
 	// 		}
 	// 	});
 	// }, 
+	refresh: function (frm) {
+		frm.events.make_custom_buttons(frm);
+	},
+
+	make_custom_buttons: function (frm) {
+		frm.add_custom_button(__("Excel"),
+			() => frm.events.export_to_excel(frm), __('Create'));
+
+		frm.page.set_inner_btn_group_as_primary(__('Create'));
+	},
+
+	export_to_excel: function (frm) {
+		frappe.call({
+			method: "export_to_excel",
+			doc: frm.doc,
+		});
+	},
 
 	calculate: function(frm) {
 		frappe.call({

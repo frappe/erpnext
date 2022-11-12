@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from datetime import datetime, timedelta, date
+import pandas as pd
 
 class AccountStatementPayment(Document):
 	def validate(self):
@@ -112,3 +113,15 @@ class AccountStatementPayment(Document):
 	def delete_products_detail(self):
 		for product in self.get("products_detail"):
 			frappe.delete_doc("Account Statement Payment Item Detail", product.name)
+	
+	def export_to_excel(self):
+		name_list = [self.name]
+		patient_statement_list = [self.patient_statement]
+		customer_list = [self.customer]
+		patient_name_list = [self.patient_name]
+		company_list = [self.company]
+		reason_for_sale_list = [self.reason_for_sale]
+
+		data = pd.DataFrame({"Nombre": name_list,"Cuenta del paciente": patient_statement_list, "Cliente": customer_list, "Nombre del paciente": patient_name_list, "Compañia": company_list, "Razon de venta": reason_for_sale_list})
+
+		data.to_excel('Estado_Cuenta.xlsx', sheet_name='sheet1', index=False)
