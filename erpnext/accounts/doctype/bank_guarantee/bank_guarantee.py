@@ -22,15 +22,18 @@ class BankGuarantee(Document):
 
 
 @frappe.whitelist()
-def get_voucher_details(bank_guarantee_type, reference_name):
+def get_voucher_details(bank_guarantee_type: str, reference_name: str):
+	if not isinstance(reference_name, str):
+		raise TypeError("reference_name must be a string")
+
 	fields_to_fetch = ["grand_total"]
 
-	doctype = "Sales Order" if bank_guarantee_type == "Receiving" else "Purchase Order"
-
-	if doctype == "Sales Order":
+	if bank_guarantee_type == "Receiving":
+		doctype = "Sales Order"
 		fields_to_fetch.append("customer")
 		fields_to_fetch.append("project")
 	else:
+		doctype = "Purchase Order"
 		fields_to_fetch.append("supplier")
 
 	return frappe.db.get_value(doctype, reference_name, fields_to_fetch, as_dict=True)
