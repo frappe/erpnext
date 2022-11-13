@@ -3,14 +3,9 @@
 
 
 import frappe
-<<<<<<< HEAD
-from frappe import _, scrub
-from frappe.utils import cint, flt
-=======
 from frappe import _, qb, scrub
 from frappe.query_builder import Order
 from frappe.utils import cint, flt, formatdate
->>>>>>> e4d16c31da (fix: GP incorrect buying amount if no upd on SI and Delivery Note)
 
 from erpnext.controllers.queries import get_match_cond
 from erpnext.stock.utils import get_incoming_rate
