@@ -33,6 +33,4 @@ def get_voucher_details(bank_guarantee_type, reference_name):
 	else:
 		fields_to_fetch.append("supplier")
 
-	bg_doctype = frappe.qb.DocType("Bank Guarantee")
-
 	return frappe.db.get_value(doctype, reference_name, fields_to_fetch, as_dict=True)
