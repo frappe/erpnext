@@ -19,9 +19,7 @@
   "section_break_8",
   "hour_rate",
   "description_tab",
-  "description",
-  "holiday_tab",
-  "holiday_list"
+  "description"
  ],
  "fields": [
   {
@@ -82,12 +80,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "holiday_list",
-   "fieldtype": "Link",
-   "label": "Holiday List",
-   "options": "Holiday List"
-  },
-  {
    "fieldname": "description",
    "fieldtype": "Small Text",
    "in_list_view": 1,
@@ -107,18 +99,13 @@
    "label": "Description"
   },
   {
-   "fieldname": "holiday_tab",
-   "fieldtype": "Tab Break",
-   "label": "Holiday"
-  },
-  {
    "fieldname": "section_break_8",
    "fieldtype": "Section Break"
   }
  ],
  "icon": "icon-wrench",
  "links": [],
- "modified": "2022-11-04 17:30:33.397719",
+ "modified": "2022-11-16 23:11:36.224249",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation Type",

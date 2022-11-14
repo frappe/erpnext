@@ -3,10 +3,20 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 
 class WorkstationType(Document):
-	pass
+	def before_save(self):
+		self.set_hour_rate()
+
+	def set_hour_rate(self):
+		self.hour_rate = (
+			flt(self.hour_rate_labour)
+			+ flt(self.hour_rate_electricity)
+			+ flt(self.hour_rate_consumable)
+			+ flt(self.hour_rate_rent)
+		)
 
 
 def get_workstations(workstation_type):
