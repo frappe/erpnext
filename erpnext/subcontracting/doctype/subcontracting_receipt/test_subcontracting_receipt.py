@@ -327,50 +327,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		for row in scr.supplied_items:
 			self.assertEqual(transferred_batch.get(row.batch_no), row.consumed_qty)
 
-	def test_subcontracting_receipt_partial_return(self):
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr1 = make_subcontracting_receipt(sco.name)
-		scr1.save()
-		scr1.submit()
-
-		scr1_return = make_return_subcontracting_receipt(scr_name=scr1.name, qty=-3)
-		scr1.load_from_db()
-		self.assertEqual(scr1_return.status, "Return")
-		self.assertIsNotNone(scr1_return.items[0].bom)
-		self.assertEqual(scr1.items[0].returned_qty, 3)
-
-		scr2_return = make_return_subcontracting_receipt(scr_name=scr1.name, qty=-7)
-		scr1.load_from_db()
-		self.assertEqual(scr2_return.status, "Return")
-		self.assertIsNotNone(scr2_return.items[0].bom)
-		self.assertEqual(scr1.status, "Return Issued")
-		self.assertEqual(scr1.items[0].returned_qty, 10)
-
-	def test_subcontracting_receipt_over_return(self):
-		sco = get_subcontracting_order()
-		rm_items = get_rm_items(sco.supplied_items)
-		itemwise_details = make_stock_in_entry(rm_items=rm_items)
-		make_stock_transfer_entry(
-			sco_no=sco.name,
-			rm_items=rm_items,
-			itemwise_details=copy.deepcopy(itemwise_details),
-		)
-		scr1 = make_subcontracting_receipt(sco.name)
-		scr1.save()
-		scr1.submit()
-
-		from erpnext.controllers.status_updater import OverAllowanceError
-
-		args = frappe._dict(scr_name=scr1.name, qty=-15)
-		self.assertRaises(OverAllowanceError, make_return_subcontracting_receipt, **args)
-
 	def test_subcontracting_receipt_no_gl_entry(self):
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
@@ -509,43 +465,20 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		# Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
-		scr.rejected_warehouse = "_Test Warehouse 1 - _TC"
 
-		scr.items[0].qty = 5  # Accepted Qty
-		scr.items[0].rejected_qty = 3
+		scr.items[0].qty = 8  # Accepted Qty
 		scr.save()
 
-		# consumed_qty should be ((received_qty) * (transfered_qty / qty)) = ((5 + 3) * (20 / 10)) = 16
+		# consumed_qty should be (qty * (transfered_qty / for_qty)) = (8 * (20 / 10)) = 16
 		self.assertEqual(scr.supplied_items[0].consumed_qty, 16)
 
 		# Set Backflush Based On as "BOM"
 		set_backflush_based_on("BOM")
-
-		scr.items[0].rejected_qty = 4
+		scr.items[0].qty = 9  # Accepted Qty
 		scr.save()
 
-		# consumed_qty should be ((received_qty) * (qty_consumed_per_unit)) = ((5 + 4) * (1)) = 9
+		# consumed_qty should be (qty * qty_consumed_per_unit) = (9 * 1) = 9
 		self.assertEqual(scr.supplied_items[0].consumed_qty, 9)
-
-
-def make_return_subcontracting_receipt(**args):
-	args = frappe._dict(args)
-	return_doc = make_return_doc("Subcontracting Receipt", args.scr_name)
-	return_doc.supplier_warehouse = (
-		args.supplier_warehouse or args.warehouse or "_Test Warehouse 1 - _TC"
-	)
-
-	if args.qty:
-		for item in return_doc.items:
-			item.qty = args.qty
-
-	if not args.do_not_save:
-		return_doc.save()
-		if not args.do_not_submit:
-			return_doc.submit()
-
-	return_doc.load_from_db()
-	return return_doc
 
 
 def get_items(**args):
@@ -561,7 +494,6 @@ def get_items(**args):
 			"qty": 5.0,
 			"rate": 50.0,
 			"received_qty": 5.0,
-			"rejected_qty": 0.0,
 			"stock_uom": "_Test UOM",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"cost_center": args.cost_center or "Main - _TC",
@@ -576,7 +508,6 @@ def get_items(**args):
 			"qty": 5.0,
 			"rate": 50.0,
 			"received_qty": 5.0,
-			"rejected_qty": 0.0,
 			"stock_uom": "_Test UOM",
 			"warehouse": args.warehouse or "_Test Warehouse 1 - _TC",
 			"cost_center": args.cost_center or "Main - _TC",
