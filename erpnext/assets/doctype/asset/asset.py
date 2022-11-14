@@ -30,6 +30,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	make_draft_asset_depreciation_schedules,
+	get_asset_depreciation_schedule_name,
 	convert_draft_asset_depreciation_schedules_into_active,
 	update_draft_asset_depreciation_schedules,
 )
@@ -48,8 +49,7 @@ class Asset(AccountsController):
 			self.prepare_depreciation_data()
 			update_draft_asset_depreciation_schedules(self)
 		self.validate_gross_and_purchase_amount()
-		if self.get("schedules"):
-			self.validate_expected_value_after_useful_life()
+		self.validate_expected_value_after_useful_life()
 
 		self.status = self.get_status()
 
@@ -244,57 +244,17 @@ class Asset(AccountsController):
 
 		return value_after_depreciation
 
-	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
-	# JE: Journal Entry, FB: Finance Book
-	def clear_depreciation_schedule(self):
-		start = []
-		num_of_depreciations_completed = 0
-		depr_schedule = []
-
-		for schedule in self.get("schedules"):
-			# to update start when there are JEs linked with all the schedule rows corresponding to an FB
-			if len(start) == (int(schedule.finance_book_id) - 2):
-				start.append(num_of_depreciations_completed)
-				num_of_depreciations_completed = 0
-
-			# to ensure that start will only be updated once for each FB
-			if len(start) == (int(schedule.finance_book_id) - 1):
-				if schedule.journal_entry:
-					num_of_depreciations_completed += 1
-					depr_schedule.append(schedule)
-				else:
-					start.append(num_of_depreciations_completed)
-					num_of_depreciations_completed = 0
-
-		# to update start when all the schedule rows corresponding to the last FB are linked with JEs
-		if len(start) == (len(self.finance_books) - 1):
-			start.append(num_of_depreciations_completed)
-
-		# when the Depreciation Schedule is being created for the first time
-		if start == []:
-			start = [0] * len(self.finance_books)
-		else:
-			self.schedules = depr_schedule
-
-		return start
-
 	def get_from_date(self, finance_book):
-		if not self.get("schedules"):
+		asset_depr_schedule_name = get_asset_depreciation_schedule_name(
+			self.name, finance_book
+		)
+
+		if not asset_depr_schedule_name:
 			return self.available_for_use_date
 
-		if len(self.finance_books) == 1:
-			return self.schedules[-1].schedule_date
+		asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 
-		from_date = ""
-		for schedule in self.get("schedules"):
-			if schedule.finance_book == finance_book:
-				from_date = schedule.schedule_date
-
-		if from_date:
-			return from_date
-
-		# since depr for available_for_use_date is not yet booked
-		return add_days(self.available_for_use_date, -1)
+		return asset_depr_schedule.get("depreciation_schedule")[-1].schedule_date
 
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
@@ -398,26 +358,29 @@ class Asset(AccountsController):
 		return depreciation_amount_for_last_row
 
 	def get_depreciation_amount_for_first_row(self, finance_book):
-		if self.has_only_one_finance_book():
-			return self.schedules[0].depreciation_amount
-		else:
-			for schedule in self.schedules:
-				if schedule.finance_book == finance_book:
-					return schedule.depreciation_amount
+		asset_depr_schedule_name = get_asset_depreciation_schedule_name(self.name, finance_book)
 
-	def has_only_one_finance_book(self):
-		if len(self.finance_books) == 1:
-			return True
+		asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+
+		return asset_depr_schedule.get("depreciation_schedule")[0].depreciation_amount
 
 	def get_value_after_depreciation(self, idx):
 		return flt(self.get("finance_books")[cint(idx) - 1].value_after_depreciation)
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
+			asset_depr_schedule_name = get_asset_depreciation_schedule_name(
+				self.name, row.finance_book
+			)
+
+			if not asset_depr_schedule_name:
+				return
+
+			asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+
 			accumulated_depreciation_after_full_schedule = [
 				d.accumulated_depreciation_amount
-				for d in self.get("schedules")
-				if cint(d.finance_book_id) == row.idx
+				for d in asset_depr_schedule.get("depreciation_schedule")
 			]
 
 			if accumulated_depreciation_after_full_schedule:
@@ -466,10 +429,20 @@ class Asset(AccountsController):
 			movement.cancel()
 
 	def delete_depreciation_entries(self):
-		for d in self.get("schedules"):
-			if d.journal_entry:
-				frappe.get_doc("Journal Entry", d.journal_entry).cancel()
-				d.db_set("journal_entry", None)
+		for row in self.get("finance_books"):
+			asset_depr_schedule_name = get_asset_depreciation_schedule_name(
+				self.name, row.finance_book
+			)
+
+			if not asset_depr_schedule_name:
+				return
+
+			asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+
+			for d in asset_depr_schedule.get("depreciation_schedule"):
+				if d.journal_entry:
+					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
+					d.db_set("journal_entry", None)
 
 		self.db_set(
 			"value_after_depreciation",

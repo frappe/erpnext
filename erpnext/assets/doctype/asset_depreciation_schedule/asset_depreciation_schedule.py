@@ -29,7 +29,7 @@ def make_draft_asset_depreciation_schedules(asset):
 
 def update_draft_asset_depreciation_schedules(asset):
 	for row in asset.get("finance_books"):
-		asset_depr_schedule_name = get_draft_asset_depreciation_schedule_name(
+		asset_depr_schedule_name = get_asset_depreciation_schedule_name(
 			asset.name, row.finance_book
 		)
 
@@ -62,7 +62,7 @@ def set_draft_asset_depreciation_schedule_details(asset_depr_schedule, asset_nam
 
 def convert_draft_asset_depreciation_schedules_into_active(asset):
 	for row in asset.get("finance_books"):
-		asset_depr_schedule_name = get_draft_asset_depreciation_schedule_name(
+		asset_depr_schedule_name = get_asset_depreciation_schedule_name(
 			asset.name, row.finance_book
 		)
 
@@ -80,7 +80,7 @@ def make_new_active_asset_depreciation_schedules_from_existing(
 	asset, date_of_disposal=None, date_of_return=None
 ):
 	for row in asset.get("finance_books"):
-		old_asset_depr_schedule_name = get_active_asset_depreciation_schedule(
+		old_asset_depr_schedule_name = get_asset_depreciation_schedule_name(
 			asset.name, row.finance_book
 		)
 
@@ -112,17 +112,14 @@ def make_depreciation_schedule(asset_depr_schedule, asset, row, date_of_disposal
 	_make_depreciation_schedule(asset_depr_schedule, asset, row, start, date_of_disposal)
 
 
-def get_draft_asset_depreciation_schedule_name(asset_name, finance_book):
+def get_asset_depreciation_schedule_name(asset_name, finance_book):
 	return frappe.db.get_value(
-		"Asset Depreciation Schedule",
-		{"asset": asset_name, "finance_book": finance_book, "status": "Draft", "docstatus": 0},
-	)
-
-
-def get_active_asset_depreciation_schedule(asset_name, finance_book):
-	return frappe.db.get_value(
-		"Asset Depreciation Schedule",
-		{"asset": asset_name, "finance_book": finance_book, "status": "Active", "docstatus": 1},
+		doctype="Asset Depreciation Schedule",
+		filters=[
+			["asset", "=", asset_name],
+			["finance_book", "=", finance_book],
+			["docstatus", "<", 2],
+		]
 	)
 
 
