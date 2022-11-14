@@ -77,9 +77,10 @@
   {
    "fetch_from": "item_code.brand",
    "fieldname": "brand",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Brand",
+   "options": "Brand",
    "read_only": 1
   },
   {
@@ -218,11 +219,10 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-02 16:33:55.612992",
+ "modified": "2022-11-14 17:26:49.052007",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
- "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
