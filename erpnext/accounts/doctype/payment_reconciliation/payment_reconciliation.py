@@ -239,7 +239,7 @@ class PaymentReconciliation(Document):
 					frappe.throw(_("{0}: {1} not found in Invoice Details table")
 						.format(p.invoice_type, p.invoice_number))
 
-				if flt(p.allocated_amoice_unt) > flt(p.amount):
+				if flt(p.allocated_amount) > flt(p.amount):
 					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2}")
 						.format(p.idx, p.allocated_amount, p.amount))
 
