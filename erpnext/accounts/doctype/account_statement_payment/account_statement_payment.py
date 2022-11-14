@@ -126,6 +126,6 @@ class AccountStatementPayment(Document):
 		data = pd.DataFrame({"Nombre": name_list,"Cuenta del paciente": patient_statement_list, "Cliente": customer_list, "Nombre del paciente": patient_name_list, "Compañia": company_list, "Razon de venta": reason_for_sale_list})
 
 		# data = data[["Nombre", "Cuenta del paciente", "Cliente", "Nombre del paciente", "Compañia", "Razon de venta"]]
-		writer = ExcelWriter('c://estado_euenta.xlsx')
+		writer = ExcelWriter('estado_euenta.xlsx')
 		data.to_excel(writer, 'Hoja de datos', index=False)
 		writer.save()
