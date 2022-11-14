@@ -30,8 +30,8 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	make_draft_asset_depreciation_schedules,
-	modify_draft_asset_depreciation_schedules,
 	convert_draft_asset_depreciation_schedules_into_active,
+	update_draft_asset_depreciation_schedules,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import AccountsController
@@ -46,7 +46,7 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		if not self.split_from:
 			self.prepare_depreciation_data()
-			modify_draft_asset_depreciation_schedules(self)
+			update_draft_asset_depreciation_schedules(self)
 		self.validate_gross_and_purchase_amount()
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()

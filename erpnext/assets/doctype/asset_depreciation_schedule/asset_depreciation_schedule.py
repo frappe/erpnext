@@ -27,7 +27,7 @@ def make_draft_asset_depreciation_schedules(asset):
 		prepare_draft_asset_depreciation_schedule_data(asset_depr_schedule, asset, row)
 
 
-def modify_draft_asset_depreciation_schedules(asset):
+def update_draft_asset_depreciation_schedules(asset):
 	for row in asset.get("finance_books"):
 		asset_depr_schedule_name = get_draft_asset_depreciation_schedule_name(
 			asset.name, row.finance_book
