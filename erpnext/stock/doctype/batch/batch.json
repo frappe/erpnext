@@ -15,8 +15,9 @@
   "item_name",
   "image",
   "parent_batch",
-  "manufacturing_date",
+  "purchase_order",
   "column_break_3",
+  "manufacturing_date",
   "batch_qty",
   "stock_uom",
   "expiry_date",
@@ -191,6 +192,12 @@
    "fieldtype": "Float",
    "label": "Produced Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Data",
+   "label": "Purchase Order #",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -199,7 +206,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2022-07-13 01:39:19.303785",
+ "modified": "2022-11-14 01:24:25.690949",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

@@ -316,6 +316,7 @@ class PurchaseReceipt(BuyingController):
 					batch_data.batch_id = d.get("batch_number")
 					batch_data.manufacturing_date= d.get("manufacturing_date")
 					batch_data.expiry_date= d.get("expiry_date")
+					batch_data.purchase_order = self.purchase_order
 					batch_data.insert(ignore_mandatory=True)
 					delete_batch = d.batch_no
 					d.db_set('batch_no', '')
