@@ -54,6 +54,8 @@ class StockLedgerEntry(Document):
 		frappe.db.set_value(self.doctype, self.name, "expiry_date", expiry_date)
 		manufacturing_date = frappe.db.get_value("Batch", self.batch_no, "manufacturing_date")
 		frappe.db.set_value(self.doctype, self.name, "manufacturing_date", manufacturing_date)
+		purchase_order = frappe.db.get_value("Batch", self.batch_no, "purchase_order")
+		frappe.db.set_value(self.doctype, self.name, "purchase_order", purchase_order)
 		self.check_stock_frozen_date()
 		self.calculate_batch_qty()
 

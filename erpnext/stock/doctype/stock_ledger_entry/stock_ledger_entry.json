@@ -38,7 +38,8 @@
   "manufacturing_date",
   "expiry_date",
   "serial_no",
-  "to_rename"
+  "to_rename",
+  "purchase_order"
  ],
  "fields": [
   {
@@ -325,6 +326,12 @@
    "fieldtype": "Date",
    "label": "Expiry date",
    "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Data",
+   "label": "Purchase Order",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
@@ -333,7 +340,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-10 04:06:56.400316",
+ "modified": "2022-11-14 01:47:13.958230",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
