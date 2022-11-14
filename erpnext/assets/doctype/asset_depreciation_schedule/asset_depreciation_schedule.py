@@ -56,6 +56,7 @@ def set_draft_asset_depreciation_schedule_details(asset_depr_schedule, asset_nam
 	asset_depr_schedule.total_number_of_depreciations = row.total_number_of_depreciations
 	asset_depr_schedule.frequency_of_depreciation = row.frequency_of_depreciation
 	asset_depr_schedule.rate_of_depreciation = row.rate_of_depreciation
+	asset_depr_schedule.expected_value_after_useful_life = row.expected_value_after_useful_life
 	asset_depr_schedule.status = "Draft"
 
 
