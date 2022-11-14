@@ -31,6 +31,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	make_draft_asset_depreciation_schedules,
 	modify_draft_asset_depreciation_schedules,
+	convert_draft_asset_depreciation_schedules_into_active,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import AccountsController
@@ -58,6 +59,7 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
+		convert_draft_asset_depreciation_schedules_into_active(self)
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -406,45 +408,6 @@ class Asset(AccountsController):
 	def has_only_one_finance_book(self):
 		if len(self.finance_books) == 1:
 			return True
-
-	def set_accumulated_depreciation(
-		self, date_of_sale=None, date_of_return=None, ignore_booked_entry=False
-	):
-		straight_line_idx = [
-			d.idx for d in self.get("schedules") if d.depreciation_method == "Straight Line"
-		]
-		finance_books = []
-
-		for i, d in enumerate(self.get("schedules")):
-			if ignore_booked_entry and d.journal_entry:
-				continue
-
-			if int(d.finance_book_id) not in finance_books:
-				accumulated_depreciation = flt(self.opening_accumulated_depreciation)
-				value_after_depreciation = flt(self.get_value_after_depreciation(d.finance_book_id))
-				finance_books.append(int(d.finance_book_id))
-
-			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
-			value_after_depreciation -= flt(depreciation_amount)
-
-			# for the last row, if depreciation method = Straight Line
-			if (
-				straight_line_idx
-				and i == max(straight_line_idx) - 1
-				and not date_of_sale
-				and not date_of_return
-			):
-				book = self.get("finance_books")[cint(d.finance_book_id) - 1]
-				depreciation_amount += flt(
-					value_after_depreciation - flt(book.expected_value_after_useful_life),
-					d.precision("depreciation_amount"),
-				)
-
-			d.depreciation_amount = depreciation_amount
-			accumulated_depreciation += d.depreciation_amount
-			d.accumulated_depreciation_amount = flt(
-				accumulated_depreciation, d.precision("accumulated_depreciation_amount")
-			)
 
 	def get_value_after_depreciation(self, idx):
 		return flt(self.get("finance_books")[cint(idx) - 1].value_after_depreciation)

@@ -29,7 +29,9 @@ def make_draft_asset_depreciation_schedules(asset):
 
 def modify_draft_asset_depreciation_schedules(asset):
 	for row in asset.get("finance_books"):
-		asset_depr_schedule_name = get_draft_asset_depreciation_schedule_name(asset.name, row)
+		asset_depr_schedule_name = get_draft_asset_depreciation_schedule_name(
+			asset.name, row.finance_book
+		)
 
 		if not asset_depr_schedule_name:
 			return
@@ -57,11 +59,29 @@ def set_draft_asset_depreciation_schedule_details(asset_depr_schedule, asset_nam
 	asset_depr_schedule.status = "Draft"
 
 
+def convert_draft_asset_depreciation_schedules_into_active(asset):
+	for row in asset.get("finance_books"):
+		asset_depr_schedule_name = get_draft_asset_depreciation_schedule_name(
+			asset.name, row.finance_book
+		)
+
+		if not asset_depr_schedule_name:
+			return
+
+		asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+
+		asset_depr_schedule.status = "Active"
+
+		asset_depr_schedule.submit()
+
+
 def make_new_active_asset_depreciation_schedules_from_existing(
 	asset, date_of_disposal=None, date_of_return=None
 ):
 	for row in asset.get("finance_books"):
-		old_asset_depr_schedule_name = get_active_asset_depreciation_schedule(asset.name, row)
+		old_asset_depr_schedule_name = get_active_asset_depreciation_schedule(
+			asset.name, row.finance_book
+		)
 
 		if not old_asset_depr_schedule_name:
 			return
@@ -79,7 +99,7 @@ def make_new_active_asset_depreciation_schedules_from_existing(
 		asset_depr_schedule.save()
 
 
-def make_depreciation_schedule(asset_depr_schedule, asset, row, date_of_disposal):
+def make_depreciation_schedule(asset_depr_schedule, asset, row, date_of_disposal=None):
 	if row.depreciation_method != "Manual" and not asset_depr_schedule.get("depreciation_schedule"):
 		asset_depr_schedule.depreciation_schedule = []
 
@@ -293,7 +313,12 @@ def add_depr_schedule_row(
 
 
 def set_accumulated_depreciation(
-	asset_depr_schedule, asset, row, date_of_disposal, date_of_return, ignore_booked_entry=False
+	asset_depr_schedule,
+	asset,
+	row,
+	date_of_disposal=None,
+	date_of_return=None,
+	ignore_booked_entry=False
 ):
 	straight_line_idx = [
 		d.idx for d in asset_depr_schedule.get("depreciation_schedule")
