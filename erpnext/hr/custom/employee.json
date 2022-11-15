@@ -2049,7 +2049,7 @@
    "modified_by": "Administrator",
    "name": "Employee-attendance_flag",
    "no_copy": 0,
-   "options": "Normal\nUnder Observation\nNeed to Approach\nNot Responding\nResponse Justified\nUnjustified Response\nPossible Elimination\nNeed to Eliminate\nEliminated",
+   "options": "Normal\nRejected to Hire\nUnder Observation\nNeed to Approach\nNot Responding\nResponse Justified\nUnjustified Response\nPossible Elimination\nElimination Warning\nNeed to Eliminate\nEliminated",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
