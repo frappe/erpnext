@@ -10,6 +10,12 @@ def execute(filters=None):
 	
 	columns = [
 		{
+			"fieldname": "date",
+			"label": _("Date"),
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
 			"fieldname": "entry",
 			"label": _("Payment Entry"),
 			"fieldtype": "Link",
@@ -54,6 +60,11 @@ def execute(filters=None):
 			"label": _("Reason For Payment"),
 			"fieldtype": "Data",
 			"width": 120
+		},
+		{
+			"label": _("Created By"),
+			"fieldname": "created_by",
+			"width": 240
 		}
 	]
 	
@@ -66,11 +77,11 @@ def return_data(filters):
 	if filters.get("from_date"): from_date = filters.get("from_date")
 	if filters.get("to_date"): to_date = filters.get("to_date")
 	conditions = return_filters(filters, from_date, to_date)
-	entries = frappe.get_all("Payment Entry", ["*"], filters = conditions)
+	entries = frappe.get_all("Payment Entry", ["*"], filters = conditions, order_by = "name asc")
 
 	for entry in entries:		
 		if verificate_serial(filters, entry.naming_series):
-			row = [entry.name, filters.get("serial"), entry.party, entry.company, entry.paid_amount, entry.mode_of_payment, entry.reason_payment]
+			row = [entry.posting_date, entry.name, filters.get("secuence"), entry.party, entry.company, entry.paid_amount, entry.mode_of_payment, entry.reason_payment, entry.user]
 			data.append(row)
 
 	return data

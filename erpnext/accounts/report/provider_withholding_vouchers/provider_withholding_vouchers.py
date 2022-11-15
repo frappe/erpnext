@@ -73,8 +73,19 @@ def execute(filters=None):
 			"width": 240
 		},
 		{
+			"label": _("Reference Date"),
+			"fieldname": "reference_date",
+			"fieldtype": "Date",
+			"width": 240
+		},
+		{
 			"label": _("Transaction No"),
 			"fieldname": "transaction_no",
+			"width": 240
+		},
+		{
+			"label": _("Reference CAI"),
+			"fieldname": "reference_cai",
 			"width": 240
 		},
 		{
@@ -141,18 +152,21 @@ def build_data(retention):
 		bill_no = ""
 		transaction_number = ""
 		date = retention.due_date
+		cai_reference = ""
 
 		if reference.reference_doctype == "Purchase Invoice":
 			invoice = frappe.get_doc("Purchase Invoice", reference.reference_name)
 			transaction_number = invoice.bill_no
 			date = invoice.posting_date
+			cai_reference = reference.cai 
 		else:
 			if reference.reference_doctype == "Supplier Documents":
 				document = frappe.get_doc("Supplier Documents", reference.reference_name)
 				transaction_number = reference.transaction_number
 				date = document.posting_date
+				cai_reference = reference.cai
 
-		row = [retention.name, retention.status, retention.posting_date, retention.supplier, retention.rtn, retention.cai, date, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, transaction_number, bill_no, reference.net_total, amount, retention.owner]
+		row = [retention.name, retention.status, retention.posting_date, retention.supplier, retention.rtn, retention.cai, date, retention.due_date, percentage, reference.reference_doctype, reference.reference_name, date, transaction_number, cai_reference, bill_no, reference.net_total, amount, retention.owner]
 		data.append(row)
 
 	return data

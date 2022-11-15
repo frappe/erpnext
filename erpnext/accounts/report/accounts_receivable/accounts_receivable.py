@@ -57,8 +57,9 @@ class ReceivablePayableReport(object):
 
 		for document in documents:
 			paid = document.total - document.outstanding_amount
-			row = [document.posting_date, document.customer, _("Customer Documents"), document.name, "", document.due_date, "", document.posting_date, document.total, paid, 0.0, document.outstanding_amount, 0, 0.0, 0.0, 0.0, 0.0, 0.0, "HNL", "", "No hay observaciones"]
-			self.data.append(row)
+			row = [document.posting_date, document.customer, "",_("Customer Documents"), document.name, document.document_number, document.due_date, document.total, paid, 0.0, document.outstanding_amount, 0, 0.0, 0.0, 0.0, 0.0, "HNL", "", "", "", "No hay observaciones"]
+			if document.outstanding_amount > 0:
+				self.data.append(row)
 
 	def return_filters_customer_documents(self, report_date):
 		conditions = ''	
@@ -217,9 +218,11 @@ class ReceivablePayableReport(object):
 						# if there is overpayment, add another row
 						self.allocate_extra_payments_or_credits(row)
 					else:
-						self.append_row(row)
+						if d.outstanding > 0:
+							self.append_row(row)
 				else:
-					self.append_row(row)
+					if d.outstanding > 0:
+						self.append_row(row)
 
 	def append_row(self, row):
 		newrow = False
@@ -417,7 +420,8 @@ class ReceivablePayableReport(object):
 
 		if additional_row:
 			additional_row.outstanding = additional_row.invoiced - additional_row.paid - additional_row.credit_note
-			self.append_row(additional_row)
+			if additional_row.outstanding > 0:
+				self.append_row(additional_row)
 
 	def get_future_payments(self):
 		if self.filters.show_future_payments:

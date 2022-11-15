@@ -8,6 +8,51 @@ from frappe import _
 def execute(filters=None):
 	if not filters: filters = {}
 	columns= [_("Date") + "::240", _("No Document") + "::240", _("Amount") + ":Currency:120", _("Party Name") + "::240", _("Remarks") + "::240", _("Created By") + "::240"] 
+	columns = [		
+		{
+			"label": _("Voucher Type"),
+			"fieldname": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Voucher No"),
+			"fieldname": "voucher_no",
+			"fieldtype": "Dynamic Link",
+			"options": "voucher_type",
+			"width": 240
+		},
+		{
+			"label": _("Date"),
+			"fieldname": "date",
+			"width": 240
+		},
+		{
+			"label": _("No Debit Note"),
+			"fieldname": "no_debit_note",
+			"width": 240
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 120
+		},
+		{
+			"label": _("Party Name"),
+			"fieldname": "party_name",
+			"width": 240
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 240
+		},
+		{
+			"label": _("Created By"),
+			"fieldname": "created_by",
+			"width": 240
+		},
+	]
 	data = return_data(filters)
 	return columns, data
 
@@ -22,7 +67,7 @@ def return_data(filters):
 	payments = frappe.get_all("Bank Transactions", ["*"], filters = conditions)
 
 	for pay in payments:
-		row = [pay.check_date_nd, pay.next_note_nd, pay.amount_nd, pay.person_name, pay.movement_detail, pay.created_by]
+		row = ["Bank Transactions", pay.name, pay.check_date_nd, pay.next_note_nd, pay.amount_nd, pay.person_name, pay.movement_detail, pay.created_by]
 		data.append(row)
 	
 	conditions = return_filters_payment_entries(filters, from_date, to_date)
@@ -30,7 +75,7 @@ def return_data(filters):
 	payments = frappe.get_all("Payment Entry", ["*"], filters = conditions)
 
 	for pay in payments:
-		row = [pay.posting_date, pay.name, pay.paid_amount, pay.party_name, pay.remarks, pay.created_by]
+		row = ["Payment Entry", pay.name, pay.posting_date, pay.name, pay.paid_amount, pay.party_name, pay.remarks, pay.created_by]
 		data.append(row)
 
 	return data
