@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "autoname": "hash",
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
  "doctype": "DocType",
@@ -219,10 +220,11 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-14 17:26:49.052007",
+ "modified": "2022-11-15 08:26:04.041861",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
