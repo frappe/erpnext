@@ -106,19 +106,11 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		ORDER BY
 			item.name asc
 		LIMIT
-<<<<<<< HEAD
-			{start}, {page_length}""".format(
-			start=start,
-			page_length=page_length,
-			lft=lft,
-			rgt=rgt,
-=======
 			{page_length} offset {start}""".format(
 			start=cint(start),
 			page_length=cint(page_length),
 			lft=cint(lft),
 			rgt=cint(rgt),
->>>>>>> c013db6ea1 ( fix: cast POS query inputs to integers  (#32975))
 			condition=condition,
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition,
