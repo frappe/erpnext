@@ -58,7 +58,6 @@ class SubcontractingReceipt(SubcontractingController):
 	def before_validate(self):
 		super(SubcontractingReceipt, self).before_validate()
 		self.set_items_bom()
-		self.set_received_qty()
 		self.set_items_cost_center()
 		self.set_items_expense_account()
 
@@ -212,10 +211,6 @@ class SubcontractingReceipt(SubcontractingController):
 						{"name": item.subcontracting_order_item, "parent": item.subcontracting_order},
 						"bom",
 					)
-
-	def set_received_qty(self):
-		for item in self.items:
-			item.received_qty = flt(item.qty) + flt(item.rejected_qty)
 
 	def set_items_cost_center(self):
 		if self.company:
