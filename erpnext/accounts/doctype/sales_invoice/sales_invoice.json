@@ -2109,11 +2109,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2022-10-11 13:07:36.488095",
-=======
  "modified": "2022-11-15 09:33:47.870616",
->>>>>>> 9f5d613c78 (fix: Write Off section visibility for non POS Invoices)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
