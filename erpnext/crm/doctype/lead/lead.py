@@ -325,6 +325,9 @@ def get_lead_address_details(lead):
 		for f in lead_address_fields:
 			lead_address_details[f] = lead.get(f)
 
+	if not lead_address_details.get('address_line1'):
+		lead_address_details = frappe._dict()
+
 	return lead_address_details
 
 
