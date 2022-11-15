@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import validate_email_address, cint, comma_and, has_gravatar
+from frappe.utils import validate_email_address, cint, comma_and, has_gravatar, clean_whitespace
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -22,19 +22,17 @@ class Lead(SellingController):
 			["Lost Quotation", "has_lost_quotation"],
 			["Opportunity", "has_opportunity"],
 			["Quotation", "has_quotation"],
-			["Converted", "has_customer"],
+			["Converted", "eval:self.customer"],
 		]
 
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)
 
 	def onload(self):
-		customer = get_customer_from_lead(self.name)
-		self.set_onload('customer', customer)
 		load_address_and_contact(self)
 
 	def validate(self):
-		self.set_lead_name()
+		self.validate_lead_name()
 
 		self.validate_organization_lead()
 		self.validate_tax_id()
@@ -84,8 +82,11 @@ class Lead(SellingController):
 			self.gender = None
 			self.salutation = None
 
-	def has_customer(self):
-		return frappe.db.get_value("Customer", {"lead_name": self.name})
+	def update_customer_reference(self, customer, update_modified=True):
+		self.db_set('customer', customer)
+
+		status = 'Converted' if customer else 'Interested'
+		self.set_status(status=status, update=True, update_modified=update_modified)
 
 	def has_opportunity(self):
 		return frappe.db.get_value("Opportunity", {"party_name": self.name, "status": ["!=", "Lost"]})
@@ -124,7 +125,10 @@ class Lead(SellingController):
 
 		return quotation or vehicle_quotation
 
-	def set_lead_name(self):
+	def validate_lead_name(self):
+		self.lead_name = clean_whitespace(self.lead_name)
+		self.company_name = clean_whitespace(self.company_name)
+
 		if not self.lead_name:
 			# Check for leads being created through data import
 			if not self.company_name and not self.flags.ignore_mandatory:
@@ -166,7 +170,7 @@ def get_customer_from_lead(lead, throw=False):
 	if not lead:
 		return None
 
-	customer = frappe.db.get_value("Customer", {"lead_name": lead})
+	customer = frappe.db.get_value("Lead", lead, "customer")
 	if not customer and throw:
 		frappe.throw(_("Please convert Lead to Customer first"))
 
@@ -174,20 +178,18 @@ def get_customer_from_lead(lead, throw=False):
 
 
 @frappe.whitelist()
-def set_lead_for_customer(lead, customer):
-	doc = frappe.get_doc("Customer", customer)
+def set_customer_for_lead(lead, customer):
+	lead_doc = frappe.get_doc("Lead", lead)
 
-	# check if customer linked to another lead
-	if doc.lead_name and doc.lead_name != lead:
-		frappe.throw(_("{0} is already linked to another {1}")
-			.format(frappe.get_desk_link("Customer", customer), frappe.get_desk_link("Lead", lead)))
+	lead_doc.update_customer_reference(customer)
+	lead_doc.notify_update()
 
-	doc.lead_name = lead
-	doc.save()
-
-	frappe.msgprint(_("{0} converted to {1}")
-		.format(frappe.get_desk_link("Lead", lead), frappe.get_desk_link("Customer", customer)),
-		indicator="green")
+	if customer:
+		frappe.msgprint(_("{0} converted to {1}")
+			.format(frappe.get_desk_link("Lead", lead), frappe.get_desk_link("Customer", customer)),
+			indicator="green")
+	else:
+		frappe.msgprint(_("{0} unlinked with Customer").format(frappe.get_desk_link("Lead", lead)))
 
 
 @frappe.whitelist()

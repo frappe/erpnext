@@ -17,9 +17,9 @@
   "col_break123",
   "source",
   "territory",
-  "customer",
   "column_break_9",
   "status",
+  "customer",
   "sales_person",
   "contact_section",
   "salutation",
@@ -147,14 +147,14 @@
    "options": "Lead Source"
   },
   {
-   "depends_on": "eval:doc.source == 'Existing Customer'",
    "fieldname": "customer",
    "fieldtype": "Link",
-   "label": "From Customer",
+   "label": "Customer",
    "no_copy": 1,
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
-   "options": "Customer"
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fieldname": "image",
@@ -392,7 +392,7 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2022-11-07 13:46:07.946279",
+ "modified": "2022-11-10 15:13:39.001516",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

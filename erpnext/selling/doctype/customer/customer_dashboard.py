@@ -39,8 +39,8 @@ def get_data():
 				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
 			{
-				'label': _('Payments and Vouchers'),
-				'items': ['Payment Entry', 'Journal Entry']
+				'label': _('Accounting'),
+				'items': ['Payment Entry', 'Journal Entry', 'Subscription']
 			},
 			{
 				'label': _('Support & Projects'),
@@ -51,8 +51,8 @@ def get_data():
 				'items': ['Pricing Rule', 'Item Price']
 			},
 			{
-				'label': _('Subscriptions'),
-				'items': ['Subscription']
+				'label': _('From Lead'),
+				'items': ['Lead']
 			}
 		]
 	}
