@@ -140,13 +140,12 @@ class TestInventoryDimension(FrappeTestCase):
 		self.assertRaises(DoNotChangeError, inv_dim1.save)
 
 	def test_inventory_dimension_for_purchase_receipt_and_delivery_note(self):
-		create_inventory_dimension(
-			reference_document="Rack",
-			type_of_transaction="Both",
-			dimension_name="Rack",
-			apply_to_all_doctypes=1,
-			fetch_from_parent="Rack",
+		inv_dimension = create_inventory_dimension(
+			reference_document="Rack", dimension_name="Rack", apply_to_all_doctypes=1
 		)
+
+		self.assertEqual(inv_dimension.type_of_transaction, "Both")
+		self.assertEqual(inv_dimension.fetch_from_parent, "Rack")
 
 		create_custom_field(
 			"Purchase Receipt", dict(fieldname="rack", label="Rack", fieldtype="Link", options="Rack")
