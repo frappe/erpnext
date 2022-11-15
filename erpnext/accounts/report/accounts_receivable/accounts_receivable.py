@@ -218,11 +218,9 @@ class ReceivablePayableReport(object):
 						# if there is overpayment, add another row
 						self.allocate_extra_payments_or_credits(row)
 					else:
-						if d.outstanding > 0:
-							self.append_row(row)
-				else:
-					if d.outstanding > 0:
 						self.append_row(row)
+				else:
+					self.append_row(row)
 
 	def append_row(self, row):
 		newrow = False
@@ -234,13 +232,13 @@ class ReceivablePayableReport(object):
 
 			if document.docstatus == 1:
 				newrow = True
-		
-		if newrow:
-			self.allocate_future_payments(row)
-			self.set_invoice_details(row)
-			self.set_party_details(row)
-			self.set_ageing(row)
-			self.data.append(row)
+		if row.outstanding > 0:
+			if newrow:
+				self.allocate_future_payments(row)
+				self.set_invoice_details(row)
+				self.set_party_details(row)
+				self.set_ageing(row)
+				self.data.append(row)
 
 	def set_invoice_details(self, row):
 		invoice_details = self.invoice_details.get(row.voucher_no, {})
