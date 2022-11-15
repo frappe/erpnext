@@ -6,6 +6,7 @@ import json
 from typing import Dict, Optional
 
 import frappe
+from frappe.utils import cint
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
@@ -108,10 +109,10 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			item.name asc
 		LIMIT
 			{page_length} offset {start}""".format(
-			start=start,
-			page_length=page_length,
-			lft=lft,
-			rgt=rgt,
+			start=cint(start),
+			page_length=cint(page_length),
+			lft=cint(lft),
+			rgt=cint(rgt),
 			condition=condition,
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition,
