@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import getdate, formatdate, format_time, format_datetime, get_time, now_datetime, date_diff

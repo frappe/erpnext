@@ -3,7 +3,6 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 
 from erpnext.controllers.print_settings import print_settings_for_item_table

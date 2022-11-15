@@ -4,7 +4,6 @@
 # Basic interface to Amazon MWS
 # Based on http://code.google.com/p/amazon-mws-python
 # Extended to include finances object
-from __future__ import unicode_literals
 
 import urllib
 import hashlib

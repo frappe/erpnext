@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from erpnext.patches.v8_10.change_default_customer_credit_days import make_payment_term, make_template
 

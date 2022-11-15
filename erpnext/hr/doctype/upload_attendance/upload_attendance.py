@@ -3,7 +3,6 @@
 
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, add_days, date_diff, getdate
 from frappe import _

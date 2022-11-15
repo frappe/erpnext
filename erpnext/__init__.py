@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 import inspect
 import frappe
 from erpnext.hooks import regional_overrides

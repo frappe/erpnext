@@ -1,7 +1,6 @@
 # Copyright (c) 2017, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 

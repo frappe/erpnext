@@ -2,7 +2,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_vehicle_odometer, get_customer_vehicle_selector_data
 from frappe import _

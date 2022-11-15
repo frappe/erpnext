@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
 from erpnext.stock import get_warehouse_account_map

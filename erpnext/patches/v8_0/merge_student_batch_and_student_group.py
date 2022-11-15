@@ -1,7 +1,6 @@
 # Copyright (c) 2017, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe.model.utils.rename_field import *
 from frappe.model.mapper import get_mapped_doc

@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order

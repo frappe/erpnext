@@ -2,7 +2,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from erpnext.vehicles.utils import get_booking_payments, separate_customer_and_supplier_payments, separate_advance_and_balance_payments
 from frappe import _

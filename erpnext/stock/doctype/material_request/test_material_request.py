@@ -4,7 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe, unittest, erpnext
 from frappe.utils import flt, today
 from erpnext.stock.doctype.material_request.material_request \

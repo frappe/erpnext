@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt
 from erpnext.setup.utils import get_exchange_rate

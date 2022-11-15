@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.model.utils.rename_field import update_reports, update_users_report_view_settings, update_property_setters
 

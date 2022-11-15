@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 import json
 from frappe.model.utils.rename_field import update_reports, rename_field, update_property_setters

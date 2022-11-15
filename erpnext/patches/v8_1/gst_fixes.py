@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from erpnext.regional.india.setup import update_address_template

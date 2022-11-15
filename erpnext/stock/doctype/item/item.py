@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 
 import itertools
 import json
@@ -18,7 +17,7 @@ from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
 
-from frappe.website.render import clear_cache
+from frappe.website.utils import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
 from six import iteritems, string_types

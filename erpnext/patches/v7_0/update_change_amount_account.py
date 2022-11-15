@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 

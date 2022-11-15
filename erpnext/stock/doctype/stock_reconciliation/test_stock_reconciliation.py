@@ -4,7 +4,6 @@
 # ERPNext - web based ERP (http://erpnext.com)
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt, nowdate, nowtime
 from erpnext.accounts.utils import get_stock_and_account_balance

@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr

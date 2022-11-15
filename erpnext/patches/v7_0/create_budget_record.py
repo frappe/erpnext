@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 
 from erpnext.accounts.doctype.budget.budget import DuplicateBudgetError

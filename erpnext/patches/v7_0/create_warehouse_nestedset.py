@@ -1,5 +1,4 @@
 
-from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.utils import cint

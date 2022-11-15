@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 

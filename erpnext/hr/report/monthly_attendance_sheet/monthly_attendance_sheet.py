@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _, scrub
 from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today, formatdate

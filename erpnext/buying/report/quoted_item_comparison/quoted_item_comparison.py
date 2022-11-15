@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 from erpnext.setup.utils import get_exchange_rate
 from frappe.utils import flt, cint
 import frappe

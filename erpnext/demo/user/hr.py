@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe, erpnext
 import random
 import datetime

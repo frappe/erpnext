@@ -1,4 +1,3 @@
-from __future__ import print_function, unicode_literals
 import frappe
 import os
 from frappe.utils import get_files_path

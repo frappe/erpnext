@@ -1,4 +1,3 @@
-from __future__ import unicode_literals
 import frappe
 
 from erpnext.setup.install import create_compact_item_print_custom_field

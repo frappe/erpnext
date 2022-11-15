@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import print_function, unicode_literals
 import frappe
 from frappe.email import sendmail_to_system_managers
 from frappe.utils import get_link_to_form
