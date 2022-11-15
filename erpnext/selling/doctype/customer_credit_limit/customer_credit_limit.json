@@ -12,7 +12,7 @@
  ],
  "fields": [
   {
-   "columns": 4,
+   "columns": 3,
    "fieldname": "credit_limit",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -31,6 +31,7 @@
    "options": "Company"
   },
   {
+   "columns": 3,
    "default": "0",
    "fieldname": "bypass_credit_limit_check",
    "fieldtype": "Check",
@@ -40,7 +41,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2019-12-31 15:43:05.822328",
+ "modified": "2022-11-08 15:19:13.927194",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Credit Limit",
@@ -48,5 +49,6 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

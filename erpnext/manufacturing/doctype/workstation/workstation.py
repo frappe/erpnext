@@ -100,6 +100,7 @@ def get_default_holiday_list():
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	if from_datetime and to_datetime:
+
 		if not cint(
 			frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")
 		):

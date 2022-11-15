@@ -649,23 +649,13 @@ class ProductionPlan(Document):
 			else:
 				material_request = material_request_map[key]
 
-			conversion_factor = 1.0
-			if (
-				material_request_type == "Purchase"
-				and item_doc.purchase_uom
-				and item_doc.purchase_uom != item_doc.stock_uom
-			):
-				conversion_factor = (
-					get_conversion_factor(item_doc.name, item_doc.purchase_uom).get("conversion_factor") or 1.0
-				)
-
 			# add item
 			material_request.append(
 				"items",
 				{
 					"item_code": item.item_code,
 					"from_warehouse": item.from_warehouse,
-					"qty": item.quantity / conversion_factor,
+					"qty": item.quantity,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
 					"sales_order": item.sales_order,
@@ -1053,11 +1043,25 @@ def get_material_request_items(
 	if include_safety_stock:
 		required_qty += flt(row["safety_stock"])
 
+	item_details = frappe.get_cached_value(
+		"Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1
+	)
+
+	conversion_factor = 1.0
+	if (
+		row.get("default_material_request_type") == "Purchase"
+		and item_details.purchase_uom
+		and item_details.purchase_uom != item_details.stock_uom
+	):
+		conversion_factor = (
+			get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
+		)
+
 	if required_qty > 0:
 		return {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": required_qty,
+			"quantity": required_qty / conversion_factor,
 			"required_bom_qty": total_qty,
 			"stock_uom": row.get("stock_uom"),
 			"warehouse": warehouse
