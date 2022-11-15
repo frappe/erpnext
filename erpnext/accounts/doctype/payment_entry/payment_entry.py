@@ -62,7 +62,6 @@ class PaymentEntry(AccountsController):
 		self.set_missing_values()
 		self.validate_payment_type()
 		self.validate_party_details()
-		self.validate_bank_accounts()
 		self.set_exchange_rate()
 		self.validate_mandatory()
 		self.validate_reference_documents()
@@ -242,23 +241,6 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			if not frappe.db.exists(self.party_type, self.party):
 				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
-
-			if self.party_account and self.party_type in ("Customer", "Supplier"):
-				self.validate_account_type(
-					self.party_account, [erpnext.get_party_account_type(self.party_type)]
-				)
-
-	def validate_bank_accounts(self):
-		if self.payment_type in ("Pay", "Internal Transfer"):
-			self.validate_account_type(self.paid_from, ["Bank", "Cash"])
-
-		if self.payment_type in ("Receive", "Internal Transfer"):
-			self.validate_account_type(self.paid_to, ["Bank", "Cash"])
-
-	def validate_account_type(self, account, account_types):
-		account_type = frappe.db.get_value("Account", account, "account_type")
-		# if account_type not in account_types:
-		# 	frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
