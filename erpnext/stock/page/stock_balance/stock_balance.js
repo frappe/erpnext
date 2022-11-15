@@ -68,7 +68,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 
 	// page.sort_selector.wrapper.css({'margin-right': '15px', 'margin-top': '4px'});
 
-	frappe.require('assets/js/item-dashboard.min.js', function() {
+	frappe.require('item-dashboard.bundle.js', function() {
 		page.item_dashboard = new erpnext.stock.ItemDashboard({
 			parent: page.main,
 		})

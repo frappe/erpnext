@@ -56,7 +56,6 @@
 		"frappe": true,
 		"Vue": true,
 		"erpnext": true,
-		"hub": true,
 		"$": true,
 		"jQuery": true,
 		"moment": true,
