@@ -27,6 +27,13 @@ class POSInvoice(SalesInvoice):
 	def __init__(self, *args, **kwargs):
 		super(POSInvoice, self).__init__(*args, **kwargs)
 
+	def before_submit(self):
+		if self.is_return:
+			total_amount_in_payments = sum([entry.amount for entry in self.payments])
+			invoice_total = self.rounded_total or self.grand_total
+			if total_amount_in_payments and total_amount_in_payments < invoice_total:
+				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
+
 	def validate(self):
 		if not cint(self.is_pos):
 			frappe.throw(
@@ -356,18 +363,11 @@ class POSInvoice(SalesInvoice):
 			frappe.msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def validate_payment_amount(self):
-		total_amount_in_payments = 0
 		for entry in self.payments:
-			total_amount_in_payments += entry.amount
 			if not self.is_return and entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
-
-		if self.is_return:
-			invoice_total = self.rounded_total or self.grand_total
-			if total_amount_in_payments and total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (
