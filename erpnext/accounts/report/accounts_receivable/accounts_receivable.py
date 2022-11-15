@@ -28,6 +28,7 @@ def execute(filters=None):
 	args = {
 		"party_type": "Customer",
 		"naming_by": ["Selling Settings", "cust_master_name"],
+		"party": "Consumidor Final"
 	}
 	return ReceivablePayableReport(filters).run(args)
 
