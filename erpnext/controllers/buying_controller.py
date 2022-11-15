@@ -13,7 +13,6 @@ from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from frappe.contacts.doctype.address.address import get_address_display
 import json
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
@@ -53,7 +52,6 @@ class BuyingController(StockController):
 		self.set_alt_uom_qty()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
-		self.set_supplier_address()
 		self.validate_asset_return()
 
 		if self.doctype=="Purchase Invoice":
@@ -159,16 +157,6 @@ class BuyingController(StockController):
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
 				d.db_set('cost_center', lc_voucher_data[0][1])
-
-	def set_supplier_address(self):
-		address_dict = {
-			'supplier_address': 'address_display',
-			'shipping_address': 'shipping_address_display'
-		}
-
-		for address_field, address_display_field in address_dict.items():
-			if self.get(address_field):
-				self.set(address_display_field, get_address_display(self.get(address_field)))
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words

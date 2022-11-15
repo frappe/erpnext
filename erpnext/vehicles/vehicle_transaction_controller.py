@@ -8,8 +8,8 @@ from frappe.utils import cstr, getdate, cint
 from erpnext.controllers.stock_controller import StockController
 from erpnext.vehicles.utils import validate_vehicle_item
 from erpnext.vehicles.doctype.vehicle.vehicle import warn_vehicle_reserved
-from erpnext.accounts.party import validate_party_frozen_disabled
-from frappe.contacts.doctype.address.address import get_address_display, get_default_address
+from erpnext.accounts.party import validate_party_frozen_disabled, get_address_display
+from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_vehicle_log, get_vehicle_odometer
 import json

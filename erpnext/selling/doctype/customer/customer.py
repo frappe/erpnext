@@ -9,10 +9,10 @@ import frappe.defaults
 from frappe.utils import flt, cint, cstr, today, clean_whitespace
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
+from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_address_display
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
-from frappe.contacts.doctype.address.address import get_default_address, get_address_display
+from frappe.contacts.doctype.address.address import get_default_address
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
@@ -213,10 +213,6 @@ class Customer(TransactionBase):
 					notify=cint(self.flags.pull_address), update_modified=cint(self.flags.pull_address))
 
 			elif push_or_pull == "push":
-				self.primary_address = get_address_display(address.as_dict())
-				frappe.db.set_value("Customer", self.name, 'primary_address', self.primary_address,
-					notify=cint(self.flags.pull_address), update_modified=cint(self.flags.pull_address))
-
 				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(address.get(d['address_field']))
 					for d in primary_address_fields])
 
@@ -231,6 +227,10 @@ class Customer(TransactionBase):
 
 					address.flags.from_linked_document = ("Customer", self.name)
 					address.save(ignore_permissions=True)
+
+				self.primary_address = get_address_display(address.as_dict())
+				frappe.db.set_value("Customer", self.name, 'primary_address', self.primary_address,
+					notify=cint(self.flags.pull_address), update_modified=cint(self.flags.pull_address))
 
 	def update_customer_in_lead(self):
 		'''If Customer created from Lead, update lead status to "Converted"
@@ -628,3 +628,8 @@ def get_primary_contact_details(contact_name):
 		out[field['customer_field']] = doc.get(field['contact_field'])
 
 	return out
+
+
+def get_timeline_data(*args, **kwargs):
+	from erpnext.accounts.party import get_timeline_data
+	return get_timeline_data(*args, **kwargs)

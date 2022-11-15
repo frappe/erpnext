@@ -33,6 +33,14 @@
   "column_break_28",
   "fax",
   "website",
+  "address_section",
+  "address_line1",
+  "address_line2",
+  "column_break_30",
+  "city",
+  "state",
+  "column_break_33",
+  "country",
   "identification_section",
   "tax_cnic",
   "column_break_27",
@@ -41,10 +49,10 @@
   "tax_strn",
   "notes_section",
   "notes",
-  "contact_info",
+  "address_and_contact_section",
   "column_break2",
-  "address_desc",
   "address_html",
+  "column_break_39",
   "contact_html",
   "more_info",
   "market_segment",
@@ -173,21 +181,6 @@
    "fieldname": "notes",
    "fieldtype": "Text Editor",
    "label": "Notes"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "contact_info",
-   "fieldtype": "Section Break",
-   "label": "Address",
-   "oldfieldtype": "Column Break",
-   "options": "fa fa-map-marker"
-  },
-  {
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "address_desc",
-   "fieldtype": "HTML",
-   "label": "Address Desc",
-   "print_hide": 1
   },
   {
    "fieldname": "address_html",
@@ -387,12 +380,63 @@
   {
    "fieldname": "column_break_46",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "Province"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "More Addresses and Contacts",
+   "oldfieldtype": "Column Break",
+   "options": "fa fa-map-marker"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2022-11-10 15:13:39.001516",
+ "modified": "2022-11-10 18:36:13.129096",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

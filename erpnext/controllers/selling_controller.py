@@ -9,7 +9,6 @@ from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
 from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
-from frappe.contacts.doctype.address.address import get_address_display
 from erpnext.setup.doctype.sales_person.sales_person import get_sales_person_commission_details
 
 from erpnext.controllers.stock_controller import StockController
@@ -53,7 +52,6 @@ class SellingController(StockController):
 		self.set_alt_uom_qty()
 		self.set_po_nos()
 		self.set_gross_profit()
-		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 
@@ -449,17 +447,6 @@ class SellingController(StockController):
 		if not self.get('bill_to'):
 			self.bill_to = self.customer
 			self.bill_to_name = self.customer_name
-
-	def set_customer_address(self):
-		address_dict = {
-			'customer_address': 'address_display',
-			'shipping_address_name': 'shipping_address',
-			'company_address': 'company_address_display'
-		}
-
-		for address_field, address_display_field in address_dict.items():
-			if self.get(address_field):
-				self.set(address_display_field, get_address_display(self.get(address_field)))
 
 	def validate_for_duplicate_items(self):
 		check_list, chk_dupl_itm = [], []

@@ -9,8 +9,7 @@ from frappe.core.doctype.user_permission.user_permission import get_permitted_do
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, cstr, cint, add_months, get_last_day)
-from frappe.contacts.doctype.address.address import (get_address_display,
-	get_default_address, get_company_address)
+from frappe.contacts.doctype.address.address import get_default_address, get_company_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
@@ -224,6 +223,22 @@ def get_contact_details(contact, project=None, lead=None, get_contact_no_list=Fa
 	if project and cstr(contact) == cstr(project.get('contact_person')):
 		out.contact_mobile = project.contact_mobile
 		out.contact_phone = project.contact_phone
+
+	return out
+
+
+@frappe.whitelist()
+def get_address_display(address, lead=None):
+	from frappe.contacts.doctype.address.address import get_address_display
+	from erpnext.crm.doctype.lead.lead import get_lead_address_details
+
+	out = None
+
+	if address:
+		out = get_address_display(address)
+	elif lead:
+		lead_address_details = get_lead_address_details(lead)
+		out = get_address_display(lead_address_details)
 
 	return out
 

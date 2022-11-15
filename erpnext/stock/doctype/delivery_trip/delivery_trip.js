@@ -167,8 +167,8 @@ frappe.ui.form.on('Delivery Stop', {
 		var row = locals[cdt][cdn];
 		if (row.address) {
 			frappe.call({
-				method: "frappe.contacts.doctype.address.address.get_address_display",
-				args: { "address_dict": row.address },
+				method: "erpnext.accounts.party.get_address_display",
+				args: { "address": row.address },
 				callback: function (r) {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, "customer_address", r.message);

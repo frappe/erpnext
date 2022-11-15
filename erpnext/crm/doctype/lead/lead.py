@@ -311,6 +311,23 @@ def _get_lead_contact_details(lead):
 	return out
 
 
+def get_lead_address_details(lead):
+	if not lead:
+		lead = frappe._dict()
+
+	lead_address_fields = ['address_line1', 'address_line2', 'city', 'state', 'country']
+	if isinstance(lead, str):
+		lead_address_details = frappe.db.get_value('Lead', lead,
+			fieldname=lead_address_fields,
+			as_dict=1)
+	else:
+		lead_address_details = frappe._dict()
+		for f in lead_address_fields:
+			lead_address_details[f] = lead.get(f)
+
+	return lead_address_details
+
+
 @frappe.whitelist()
 def make_lead_from_communication(communication, ignore_communication_links=False):
 	""" raise a issue from email """

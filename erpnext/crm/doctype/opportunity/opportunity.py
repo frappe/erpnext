@@ -6,11 +6,11 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
-from frappe.contacts.doctype.address.address import get_default_address, get_address_display
+from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import get_contact_details, get_party_account_currency
+from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
 from erpnext.crm.doctype.lead.lead import get_customer_from_lead, add_sales_person_from_source
 from six import string_types
 import json
@@ -197,12 +197,13 @@ def get_customer_details(args):
 	out.tax_cnic = party.get('tax_cnic')
 	out.tax_strn = party.get('tax_strn')
 
+	lead = party if party.doctype == "Lead" else None
+
 	# Address
 	out.customer_address = args.customer_address or get_default_address(party.doctype, party.name)
-	out.address_display = get_address_display(out.customer_address)
+	out.address_display = get_address_display(out.customer_address, lead=lead)
 
 	# Contact
-	lead = party if party.doctype == "Lead" else None
 	out.contact_person = args.contact_person or get_default_contact(party.doctype, party.name)
 	out.update(get_contact_details(out.contact_person, lead=lead))
 

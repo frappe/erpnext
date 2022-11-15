@@ -100,7 +100,7 @@ frappe.ui.form.LeadQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			},
 			{
 				fieldtype: "Section Break",
-				label: __("Primary Contact Details"),
+				label: __("Contact Details"),
 			},
 			{
 				label: __("Mobile Number (Primary)"),
@@ -130,6 +130,40 @@ frappe.ui.form.LeadQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				label: __("Email Id"),
 				fieldname: "email_id",
 				fieldtype: "Data"
+			},
+
+			{
+				fieldtype: "Section Break",
+				label: __("Address Details"),
+			},
+			{
+				label: __("Address Line 1"),
+				fieldname: "address_line1",
+				fieldtype: "Data"
+			},
+			{
+				label: __("Address Line 2"),
+				fieldname: "address_line2",
+				fieldtype: "Data"
+			},
+			{
+				fieldtype: "Column Break"
+			},
+			{
+				label: __("City"),
+				fieldname: "city",
+				fieldtype: "Data"
+			},
+			{
+				label: __("State"),
+				fieldname: "state",
+				fieldtype: "Data"
+			},
+			{
+				label: __("Country"),
+				fieldname: "country",
+				fieldtype: "Link",
+				options: "Country"
 			},
 
 			{
