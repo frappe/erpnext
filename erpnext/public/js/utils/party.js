@@ -205,7 +205,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field, 
 			lead: lead
 		},
 		callback: function(r) {
-			if (r.message) {
+			if (!r.exc) {
 				frm.set_value(display_field, r.message)
 			}
 		}
