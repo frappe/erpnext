@@ -18,7 +18,6 @@ dependencies = [
     "plaid-python~=7.2.1",
     "taxjar~=1.9.2",
     "WooCommerce==2.1.1",
-    "braintree==3.57.1",
     "PyGithub==1.44.1",
 ]
 

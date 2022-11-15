@@ -9,7 +9,7 @@ from frappe.utils import flt, nowdate, get_url
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry, get_company_defaults
-from frappe.integrations.utils import get_payment_gateway_controller
+from payments.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
