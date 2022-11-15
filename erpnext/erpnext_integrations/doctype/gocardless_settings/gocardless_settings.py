@@ -8,7 +8,9 @@ import gocardless_pro
 from frappe import _
 from six.moves.urllib.parse import urlencode
 from frappe.utils import get_url, call_hook_method, flt, cint
-from frappe.integrations.utils import create_request_log, create_payment_gateway
+from frappe.integrations.utils import create_request_log
+from payments.utils import create_payment_gateway
+
 
 class GoCardlessSettings(Document):
 	supported_currencies = ["EUR", "DKK", "GBP", "SEK"]
