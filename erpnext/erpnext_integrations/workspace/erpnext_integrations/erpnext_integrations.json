@@ -1,0 +1,136 @@
+{
+ "charts": [],
+ "content": "[\n {\n  \"data\": {\n   \"card_name\": \"Payments\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"GoCardless Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"GoCardless Mandate\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Woocommerce Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shopify Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Amazon MWS Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Plaid Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Exotel Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"FBR POS Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n }\n]",
+ "creation": "2022-11-16 04:31:56.341313",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "integration",
+ "idx": 0,
+ "label": "ERPNext Integrations",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payments",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "GoCardless Settings",
+   "link_count": 0,
+   "link_to": "GoCardless Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "GoCardless Mandate",
+   "link_count": 0,
+   "link_to": "GoCardless Mandate",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Settings",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Woocommerce Settings",
+   "link_count": 0,
+   "link_to": "Woocommerce Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shopify Settings",
+   "link_count": 0,
+   "link_to": "Shopify Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Amazon MWS Settings",
+   "link_count": 0,
+   "link_to": "Amazon MWS Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Plaid Settings",
+   "link_count": 0,
+   "link_to": "Plaid Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Exotel Settings",
+   "link_count": 0,
+   "link_to": "Exotel Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "FBR POS Settings",
+   "link_count": 0,
+   "link_to": "FBR POS Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2022-11-16 12:44:07.746895",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "ERPNext Integrations",
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 13.0,
+ "shortcuts": [],
+ "title": "ERPNext Integrations"
+}
