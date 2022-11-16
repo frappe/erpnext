@@ -12,6 +12,7 @@ class QualityInspection(Document):
 		if not self.readings and self.item_code:
 			self.get_item_specification_details()
 
+	@frappe.whitelist()
 	def get_item_specification_details(self):
 		if not self.quality_inspection_template:
 			self.quality_inspection_template = frappe.db.get_value('Item',
@@ -27,6 +28,7 @@ class QualityInspection(Document):
 			child.value = d.value
 			child.status = "Accepted"
 
+	@frappe.whitelist()
 	def get_quality_inspection_template(self):
 		template = ''
 		if self.bom_no:

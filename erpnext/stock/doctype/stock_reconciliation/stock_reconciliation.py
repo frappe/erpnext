@@ -53,6 +53,7 @@ class StockReconciliation(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 
+	@frappe.whitelist()
 	def update_item_details(self):
 		self.validate_posting_time()
 		self.set_loose_qty()

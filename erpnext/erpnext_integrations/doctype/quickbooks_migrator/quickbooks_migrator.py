@@ -52,7 +52,7 @@ class QuickBooksMigrator(Document):
 		if self.authorization_endpoint:
 			self.authorization_url = self.oauth.authorization_url(self.authorization_endpoint)[0]
 
-
+	@frappe.whitelist()
 	def migrate(self):
 		frappe.enqueue_doc("QuickBooks Migrator", "QuickBooks Migrator", "_migrate", queue="long")
 

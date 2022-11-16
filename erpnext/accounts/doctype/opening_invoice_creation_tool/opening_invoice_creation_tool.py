@@ -61,6 +61,7 @@ class OpeningInvoiceCreationTool(Document):
 
 		return invoices_summary, max_count
 
+	@frappe.whitelist()
 	def make_invoices(self):
 		names = []
 		mandatory_error_msg = _("Row {0}: {1} is required to create the Opening {2} Invoices")

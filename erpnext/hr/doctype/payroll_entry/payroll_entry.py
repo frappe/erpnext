@@ -84,6 +84,7 @@ class PayrollEntry(Document):
 			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date}, as_dict=True)
 			return emp_list
 
+	@frappe.whitelist()
 	def fill_employee_details(self):
 		self.set('employees', [])
 		employees = self.get_emp_list()
@@ -119,6 +120,7 @@ class PayrollEntry(Document):
 			if not self.get(fieldname):
 				frappe.throw(_("Please set {0}").format(self.meta.get_label(fieldname)))
 
+	@frappe.whitelist()
 	def create_salary_slips(self):
 		"""
 			Creates salary slip for selected employees if already not created
@@ -172,6 +174,7 @@ class PayrollEntry(Document):
 		self.db_set("salary_slips_created", 1)
 		self.notify_update()
 
+	@frappe.whitelist()
 	def update_salary_slips(self):
 		"""
 			Creates salary slip for selected employees if already not created
@@ -208,6 +211,7 @@ class PayrollEntry(Document):
 		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
+	@frappe.whitelist()
 	def submit_salary_slips(self):
 		self.check_permission('write')
 		ss_list = self.get_sal_slip_list(0, as_dict=True)
@@ -481,6 +485,7 @@ class PayrollEntry(Document):
 
 		return salary_slips
 
+	@frappe.whitelist()
 	def get_disbursement_mode_details(self):
 		salary_slips = self.get_salary_slips_for_payment()
 		salary_modes = set([ss.salary_mode for ss in salary_slips if ss.salary_mode])
@@ -510,6 +515,7 @@ class PayrollEntry(Document):
 
 		return bank_employee_map
 
+	@frappe.whitelist()
 	def make_payment_entry(self, payment_account, salary_mode=None, bank_name=None, employee=None):
 		from erpnext.accounts.utils import get_currency_precision
 

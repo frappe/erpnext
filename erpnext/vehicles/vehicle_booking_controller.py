@@ -226,6 +226,7 @@ class VehicleBookingController(AccountsController):
 	def get_withholding_tax_amount(self, tax_status):
 		return get_withholding_tax_amount(self.delivery_date or self.transaction_date, self.item_code, tax_status, self.company)
 
+	@frappe.whitelist()
 	def get_party_tax_status(self):
 		party_type, customer, financer = get_party_doc(self.as_dict())
 		return get_party_tax_status(self.as_dict(), customer, financer)

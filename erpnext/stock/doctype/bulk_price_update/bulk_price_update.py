@@ -11,6 +11,7 @@ from erpnext.stock.report.item_prices.item_prices import _set_item_pl_rate
 
 
 class BulkPriceUpdate(Document):
+	@frappe.whitelist()
 	def update_prices(self):
 		self._validate_mandatory()
 		self.validate_rows()
@@ -53,6 +54,7 @@ class BulkPriceUpdate(Document):
 
 			visited.add(key)
 
+	@frappe.whitelist()
 	def get_current_rates(self, row=None):
 		for d in self.get('items'):
 			if row and d.name != row:

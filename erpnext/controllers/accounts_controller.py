@@ -616,6 +616,7 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
+	@frappe.whitelist()
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
@@ -636,6 +637,7 @@ class AccountsController(TransactionBase):
 
 		return {}
 
+	@frappe.whitelist()
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 

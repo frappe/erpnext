@@ -198,6 +198,7 @@ class StockEntry(StockController):
 		self.validate_completed_qty('transferred_qty', 'qty', self.items,
 			allowance_type=None, from_doctype=from_doctype, row_names=row_names)
 
+	@frappe.whitelist()
 	def auto_select_batches(self):
 		auto_select_and_split_batches(self, 's_warehouse')
 
@@ -934,6 +935,7 @@ class StockEntry(StockController):
 
 			pro_doc.notify_update()
 
+	@frappe.whitelist()
 	def get_item_details(self, args=None, for_update=False):
 		if not args.get('item_code'):
 			frappe.throw(_("Item Code not provided"))
@@ -1002,6 +1004,7 @@ class StockEntry(StockController):
 
 		return ret
 
+	@frappe.whitelist()
 	def set_items_for_stock_in(self):
 		self.items = []
 
@@ -1026,6 +1029,7 @@ class StockEntry(StockController):
 					'batch_no': d.batch_no
 				})
 
+	@frappe.whitelist()
 	def get_items(self):
 		self.set('items', [])
 		self.validate_work_order()

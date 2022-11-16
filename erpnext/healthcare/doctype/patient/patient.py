@@ -60,6 +60,7 @@ class Patient(Document):
 			age_str = str(age.years) + " year(s) " + str(age.months) + " month(s) " + str(age.days) + " day(s)"
 		return age_str
 
+	@frappe.whitelist()
 	def invoice_patient_registration(self):
 		frappe.db.set_value("Patient", self.name, "status", "Active")
 		send_registration_sms(self)

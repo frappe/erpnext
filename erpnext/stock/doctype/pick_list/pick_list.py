@@ -31,6 +31,7 @@ class PickList(Document):
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)))
 
+	@frappe.whitelist()
 	def set_item_locations(self, save=False):
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()

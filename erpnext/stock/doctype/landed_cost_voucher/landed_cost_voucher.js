@@ -129,29 +129,6 @@ erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.
 		set_field_options("landed_cost_help", help_content);
 	}
 
-	get_referenced_taxes() {
-		var me = this;
-		if(me.frm.doc.credit_to && me.frm.doc.party) {
-			return frappe.call({
-				method: "get_referenced_taxes",
-				doc: me.frm.doc,
-				callback: function(r) {
-					if(r.message) {
-						me.frm.doc.taxes = [];
-						$.each(r.message, function(i, d) {
-							var tax = me.frm.add_child("taxes");
-							tax.remarks = d.remarks;
-							tax.account_head = d.account_head;
-							tax.amount = d.amount;
-						});
-						me.calculate_taxes_and_totals();
-						me.update_manual_distribution();
-					}
-				}
-			});
-		}
-	}
-
 	allocate_advances_automatically() {
 		if(this.frm.doc.allocate_advances_automatically) {
 			this.get_advances();

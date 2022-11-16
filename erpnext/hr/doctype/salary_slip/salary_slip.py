@@ -128,6 +128,7 @@ class SalarySlip(TransactionBase):
 			self.start_date = date_details.start_date
 			self.end_date = date_details.end_date
 
+	@frappe.whitelist()
 	def get_emp_and_leave_details(self):
 		'''First time, load all the components from salary structure'''
 		if self.employee:
@@ -1080,6 +1081,7 @@ class SalarySlip(TransactionBase):
 			else:
 				self.relieving_date = None
 
+	@frappe.whitelist()
 	def process_salary_based_on_leave(self, lwp=0, late_days=0):
 		self.get_leave_details(lwp=lwp, late_days=late_days)
 		self.calculate_net_pay()
@@ -1099,6 +1101,7 @@ class SalarySlip(TransactionBase):
 			self.append('advances', data)
 			total_pending_advance += data.total_advance
 
+	@frappe.whitelist()
 	def calculate_mode_of_payment(self):
 		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
 

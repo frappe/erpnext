@@ -12,6 +12,7 @@ from erpnext.education.utils import OverlapError
 
 class CourseSchedulingTool(Document):
 
+	@frappe.whitelist()
 	def schedule_course(self):
 		"""Creates course schedules as per specified parameters"""
 

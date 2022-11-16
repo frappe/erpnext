@@ -253,6 +253,7 @@ class SellingController(StockController):
 				}))
 		return il
 
+	@frappe.whitelist()
 	def auto_select_batches(self):
 		if (self.doctype == "Delivery Note" or self.get('update_stock')) and not self.get('is_return'):
 			auto_select_and_split_batches(self, 'warehouse')

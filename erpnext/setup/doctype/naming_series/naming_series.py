@@ -12,6 +12,7 @@ from frappe.permissions import get_doctypes_with_read
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
 class NamingSeries(Document):
+	@frappe.whitelist()
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
 				from `tabDocField` df where fieldname='naming_series'""")
@@ -29,6 +30,7 @@ class NamingSeries(Document):
 		options = list(filter(lambda x: x, [cstr(n).strip() for n in ol]))
 		return options
 
+	@frappe.whitelist()
 	def update_series(self, arg=None):
 		"""update series list"""
 		self.validate_series_set()
@@ -115,6 +117,7 @@ class NamingSeries(Document):
 		if not re.match("^[\w\- /.#{}]*$", n, re.UNICODE):
 			throw(_('Special Characters except "-", "#", ".", "/", "{" and "}" not allowed in naming series'))
 
+	@frappe.whitelist()
 	def get_options(self, arg=None):
 		dt = arg or self.select_doc_for_series
 		if dt:
@@ -124,6 +127,7 @@ class NamingSeries(Document):
 	def get_prefix(self):
 		return self.prefix or self.new_prefix
 
+	@frappe.whitelist()
 	def get_current(self, arg=None):
 		"""get series current"""
 		prefix = self.get_prefix()
@@ -140,6 +144,7 @@ class NamingSeries(Document):
 		if frappe.db.get_value('Series', series, 'name', order_by="name") == None:
 			frappe.db.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
 
+	@frappe.whitelist()
 	def update_series_start(self):
 		prefix = self.get_prefix()
 		if prefix:

@@ -58,6 +58,7 @@ class JobCard(Document):
 
 		return existing[0] if existing else None
 
+	@frappe.whitelist()
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return

@@ -595,6 +595,7 @@ class SalesOrder(SellingController):
 		if exc_list:
 			frappe.throw('\n'.join(exc_list))
 
+	@frappe.whitelist()
 	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []

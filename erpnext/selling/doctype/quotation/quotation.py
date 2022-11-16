@@ -138,6 +138,7 @@ class Quotation(SellingController):
 		return frappe.db.get_value("Sales Order Item", {"quotation": self.name, "docstatus": 1})\
 			or frappe.db.get_value("Sales Invoice Item", {"quotation": self.name, "docstatus": 1})
 
+	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order_or_invoice():
 			frappe.db.set(self, 'status', 'Lost')

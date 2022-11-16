@@ -91,6 +91,7 @@ class Opportunity(TransactionBase):
 			self.financer_name = None
 			self.finance_type = None
 
+	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')

@@ -97,6 +97,7 @@ class ClinicalProcedure(Document):
 
 		return allow_start
 
+	@frappe.whitelist()
 	def make_material_transfer(self):
 		stock_entry = frappe.new_doc("Stock Entry")
 

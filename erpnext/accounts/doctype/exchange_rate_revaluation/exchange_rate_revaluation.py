@@ -26,6 +26,7 @@ class ExchangeRateRevaluation(Document):
 		if not (self.company and self.posting_date):
 			frappe.throw(_("Please select Company and Posting Date to getting entries"))
 
+	@frappe.whitelist()
 	def get_accounts_data(self, account=None):
 		accounts = []
 		self.validate_mandatory()
@@ -94,6 +95,7 @@ class ExchangeRateRevaluation(Document):
 			message = _("No outstanding invoices found")
 		frappe.msgprint(message)
 
+	@frappe.whitelist()
 	def make_jv_entry(self):
 		if self.total_gain_loss == 0:
 			return

@@ -70,6 +70,7 @@ class ExpenseClaim(AccountsController):
 
 		self.set_status()
 
+	@frappe.whitelist()
 	def set_advances(self):
 		self.set("advances", [])
 

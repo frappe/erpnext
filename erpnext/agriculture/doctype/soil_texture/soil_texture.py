@@ -11,6 +11,7 @@ class SoilTexture(Document):
 	soil_edit_order = [2, 1, 0]
 	soil_types = ['clay_composition', 'sand_composition', 'silt_composition']
 
+	@frappe.whitelist()
 	def load_contents(self):
 		docs = frappe.get_all("Agriculture Analysis Criteria", filters={'linked_doctype':'Soil Texture'})
 		for doc in docs:
@@ -24,6 +25,7 @@ class SoilTexture(Document):
 		if sum(self.get(soil_type) for soil_type in self.soil_types) != 100:
 			frappe.throw(_('Soil compositions do not add up to 100'))
 
+	@frappe.whitelist()
 	def update_soil_edit(self, soil_type):
 		self.soil_edit_order[self.soil_types.index(soil_type)] = max(self.soil_edit_order)+1
 		self.soil_type = self.get_soil_type()

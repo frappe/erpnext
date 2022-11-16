@@ -160,6 +160,7 @@ class RequestforQuotation(BuyingController):
 		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
 		return attachments
 
+	@frappe.whitelist()
 	def update_rfq_supplier_status(self, sup_name=None):
 		for supplier in self.suppliers:
 			if sup_name == None or supplier.supplier == sup_name:

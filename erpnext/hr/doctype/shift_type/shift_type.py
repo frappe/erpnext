@@ -15,6 +15,7 @@ from erpnext.hr.doctype.attendance.attendance import mark_absent
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class ShiftType(Document):
+	@frappe.whitelist()
 	def process_auto_attendance(self):
 		if not self.process_attendance_after:
 			frappe.msgprint(_("Cannot Process Auto Attendance because <b>'Process Attendance After'</b> is not set"))

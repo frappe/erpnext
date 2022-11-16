@@ -62,22 +62,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 		frm.events.update_item_details(frm);
 	},
 
-	// loose_uom: function (frm) {
-	// 	frm.events.update_conversion_factor(frm);
-	// },
-	//
-	// update_conversion_factor: function(frm) {
-	// 	frappe.call({
-	// 		method: "update_conversion_factor",
-	// 		doc: frm.doc,
-	// 		freeze: true,
-	// 		callback: function (r) {
-	// 			frm.dirty();
-	// 			frm.refresh_fields();
-	// 		}
-	// 	});
-	// },
-
 	get_items: function(frm) {
 		frappe.call({
 			method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",

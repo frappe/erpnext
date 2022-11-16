@@ -75,6 +75,7 @@ class Loan(AccountsController):
 
 			self.repayment_periods = repayment_periods
 
+	@frappe.whitelist()
 	def update_repayment_schedule(self):
 		if self.rate_of_interest:
 			frappe.throw(_("Cannot change repayment schedule for loan with interest"))

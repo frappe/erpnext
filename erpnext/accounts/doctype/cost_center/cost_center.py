@@ -24,6 +24,7 @@ class CostCenter(NestedSet):
 		elif self.cost_center_name == self.company and self.parent_cost_center:
 			frappe.throw(_("Root cannot have a parent cost center"))
 
+	@frappe.whitelist()
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			frappe.throw(_("Cannot convert Cost Center to ledger as it has child nodes"))
@@ -34,6 +35,7 @@ class CostCenter(NestedSet):
 			self.save()
 			return 1
 
+	@frappe.whitelist()
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
 			frappe.throw(_("Cost Center with existing transactions can not be converted to group"))

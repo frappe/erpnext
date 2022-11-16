@@ -48,6 +48,7 @@ class LandedCostVoucher(AccountsController):
 		self.update_landed_cost()
 		self.make_gl_entries(cancel=True)
 
+	@frappe.whitelist()
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):

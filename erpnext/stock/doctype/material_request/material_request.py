@@ -258,6 +258,7 @@ class MaterialRequest(BuyingController):
 		self.total_alt_uom_qty = sum([flt(d.alt_uom_qty) for d in self.items])
 		self.total_alt_uom_qty = flt(self.total_alt_uom_qty, self.precision("total_alt_uom_qty"))
 
+	@frappe.whitelist()
 	def get_bom_items(self, bom, company, qty=1, fetch_exploded=1, warehouse=None):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
 
@@ -269,6 +270,7 @@ class MaterialRequest(BuyingController):
 		self.set_missing_item_details(for_validate=True)
 		self.calculate_totals()
 
+	@frappe.whitelist()
 	def round_up_qty(self):
 		for d in self.items:
 			d.qty = ceil(flt(d.qty))

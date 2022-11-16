@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import clean_whitespace, add_years, get_first_day, get_last_day, add_months
 
 class VehicleAllocationCreationTool(Document):
+	@frappe.whitelist()
 	def create(self):
 		self._validate_mandatory()
 
@@ -33,6 +34,7 @@ class VehicleAllocationCreationTool(Document):
 		frappe.msgprint(_("{0} Vehicle Allocations successfully created").format(len(self.allocation_detail)))
 		self.allocation_detail = []
 
+	@frappe.whitelist()
 	def determine_delivery_periods(self):
 		if not self.allocation_period:
 			frappe.throw(_("Please set Allocation Period first"))
