@@ -1,6 +1,7 @@
-from frappe import _
-import frappe
 import json
+
+import frappe
+
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company
@@ -11,6 +12,7 @@ def get_company_for_dashboards():
 		if company_list:
 			return company_list[0].name
 	return None
+
 
 def get_default_dashboards():
 	company = frappe.get_doc("Company", get_company_for_dashboards())
@@ -24,18 +26,24 @@ def get_default_dashboards():
 				"doctype": "Dashboard",
 				"dashboard_name": "Accounts",
 				"charts": [
-					{ "chart": "Outgoing Bills (Sales Invoice)" },
-					{ "chart": "Incoming Bills (Purchase Invoice)" },
-					{ "chart": "Bank Balance" },
-					{ "chart": "Income" },
-					{ "chart": "Expenses" }
-				]
-			}
+					{"chart": "Outgoing Bills (Sales Invoice)"},
+					{"chart": "Incoming Bills (Purchase Invoice)"},
+					{"chart": "Bank Balance"},
+					{"chart": "Income"},
+					{"chart": "Expenses"},
+					{"chart": "Patient Appointments"},
+				],
+			},
+			{
+				"doctype": "Dashboard",
+				"dashboard_name": "Project",
+				"charts": [{"chart": "Project Summary", "width": "Full"}],
+			},
 		],
 		"Charts": [
 			{
 				"doctype": "Dashboard Chart",
-				"time_interval": "Monthly",
+				"time_interval": "Quarterly",
 				"chart_name": "Income",
 				"timespan": "Last Year",
 				"color": None,
@@ -45,11 +53,11 @@ def get_default_dashboards():
 				"timeseries": 1,
 				"owner": "Administrator",
 				"type": "Line",
-				"width": "Half"
+				"width": "Half",
 			},
 			{
 				"doctype": "Dashboard Chart",
-				"time_interval": "Monthly",
+				"time_interval": "Quarterly",
 				"chart_name": "Expenses",
 				"timespan": "Last Year",
 				"color": None,
@@ -59,21 +67,21 @@ def get_default_dashboards():
 				"timeseries": 1,
 				"owner": "Administrator",
 				"type": "Line",
-				"width": "Half"
+				"width": "Half",
 			},
 			{
 				"doctype": "Dashboard Chart",
-				"time_interval": "Monthly",
+				"time_interval": "Quarterly",
 				"chart_name": "Bank Balance",
 				"timespan": "Last Year",
 				"color": "#ffb868",
-				"filters_json": json.dumps({"company": company.name, "account": bank_account, "accumulated_values": 1}),
+				"filters_json": json.dumps({"company": company.name, "account": bank_account}),
 				"source": "Account Balance Timeline",
 				"chart_type": "Custom",
 				"timeseries": 1,
 				"owner": "Administrator",
 				"type": "Line",
-				"width": "Half"
+				"width": "Half",
 			},
 			{
 				"doctype": "Dashboard Chart",
@@ -89,7 +97,7 @@ def get_default_dashboards():
 				"owner": "Administrator",
 				"document_type": "Purchase Invoice",
 				"type": "Bar",
-				"width": "Half"
+				"width": "Half",
 			},
 			{
 				"doctype": "Dashboard Chart",
@@ -105,10 +113,11 @@ def get_default_dashboards():
 				"owner": "Administrator",
 				"document_type": "Sales Invoice",
 				"type": "Bar",
-				"width": "Half"
-			}
-		]
+				"width": "Half",
+			},
+		],
 	}
+
 
 def get_account(account_type, company):
 	accounts = frappe.get_list("Account", filters={"account_type": account_type, "company": company})
