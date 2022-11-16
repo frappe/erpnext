@@ -100,10 +100,10 @@ class Opportunity(TransactionBase):
 
 		for d in self.get('contact_schedule'):
 			if not d.get('contact_date') and not d.get('schedule_date'):
-				frappe.throw(_("Row #{0}: Please set contact or schedule Date in follow up".format(d.idx)))
+				frappe.throw(_("Row #{0}: Please set Contact or Schedule Date in follow up".format(d.idx)))
 
 			if d.is_new() and not d.get('contact_date') and getdate(d.get('schedule_date')) < getdate(today()):
-				frappe.throw(_("Row #{0}: Can't Schedule a follow up for past dates".format(d.idx)))
+				frappe.throw(_("Row #{0}: Can't schedule a follow up for past dates".format(d.idx)))
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
@@ -450,20 +450,18 @@ def get_customer_from_opportunity(source):
 
 
 @frappe.whitelist()
-def create_communication_from_follow_up(args):
-	args = json.loads(args)
-	args = frappe._dict(args)
+def submit_communication(name, contact_date, remarks):
 
-	if not args.remarks:
-		frappe.throw(_('Remarks are mandatory for follow_up'))
+	if not remarks:
+		frappe.throw(_('Remarks are mandatory for follow up'))
 
-	opp = frappe.get_cached_doc('Opportunity', args.name)
-	follow_up = next((f for f in opp.contact_schedule if not f.contact_date), None)
+	opp = frappe.get_cached_doc('Opportunity', name)
+	follow_up = [f for f in opp.contact_schedule if not f.contact_date]
 	if follow_up:
-		follow_up.contact_date = args.contact_date
+		follow_up[0].contact_date = contact_date
 	else:
 		opp.append("contact_schedule", {
-			"contact_date": args.contact_date,
+			"contact_date": contact_date,
 		})
 
 	opp.save()
@@ -475,8 +473,8 @@ def create_communication_from_follow_up(args):
 
 	comm.sender = frappe.session.user
 	comm.sent_or_received = 'Sent'
-	comm.subject = "Communication"
-	comm.content = args.remarks
+	comm.subject = "Opportunity Communication"
+	comm.content = remarks
 	comm.communication_type = "Feedback"
 
 	if opp.get('party_doctype') and opp.get('party'):

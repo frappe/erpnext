@@ -43,10 +43,10 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if (!me.frm.doc.__islocal) {
 			if(me.frm.perm[0].write) {
 
-				me.frm.add_custom_button(__('Schedule Follow Up'), () => this.add_follow_up(),
+				me.frm.add_custom_button(__('Schedule Follow Up'), () => this.schedule_follow_up(),
 					__("Communication"));
 
-				me.frm.add_custom_button(__('Submit Communication'), () => this.submit_follow_up(),
+				me.frm.add_custom_button(__('Submit Communication'), () => this.submit_communication(),
 					__("Communication"));
 
 				if (me.frm.doc.status !== "Quotation") {
@@ -231,7 +231,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	add_follow_up: function() {
+	schedule_follow_up: function() {
 		var me = this;
 
 		var dialog = new frappe.ui.Dialog({
@@ -279,12 +279,12 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				me.frm.refresh();
 				dialog.hide();
 			},
-			primary_action_label: __('Add')
+			primary_action_label: __('Schedule')
 		});
 		dialog.show();
 	},
 
-	submit_follow_up: function() {
+	submit_communication: function() {
 		this.frm.check_if_unsaved();
 
 		var me = this;
@@ -329,12 +329,13 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			],
 			primary_action: function() {
 				var data = d.get_values();
-				data.name = me.frm.doc.name;
-
+				
 				frappe.call({
-					method: "erpnext.crm.doctype.opportunity.opportunity.create_communication_from_follow_up",
+					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
 					args: {
-						args: data
+						name: me.frm.doc.name,
+						contact_date: data.contact_date,
+						remarks: data.remarks
 					},
 					callback: function (r) {
 						if (!r.exc) {
@@ -344,7 +345,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				});
 				d.hide();
 			},
-			primary_action_label: __('Add')
+			primary_action_label: __('Submit')
 		});
 		d.show();
 	},
