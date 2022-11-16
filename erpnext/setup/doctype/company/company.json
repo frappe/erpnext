@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
@@ -8,7 +9,7 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "details",
+  "company_details_tab",
   "company_name",
   "abbr",
   "change_abbr",
@@ -29,6 +30,24 @@
   "column_break_19",
   "date_of_incorporation",
   "date_of_commencement",
+  "company_address_and_contact_section",
+  "company_logo",
+  "phone_no",
+  "mobile_no",
+  "fax",
+  "column_break_26",
+  "email",
+  "website",
+  "column_break1",
+  "address_html",
+  "invoice_letterhead_section",
+  "invoice_letterhead",
+  "company_info",
+  "company_description",
+  "column_break_109",
+  "registration_details",
+  "delete_transactions_section",
+  "delete_company_transactions",
   "sales_settings",
   "default_selling_terms",
   "payment_terms",
@@ -47,7 +66,23 @@
   "default_leave_policy",
   "column_break_24",
   "standard_working_hours",
-  "default_settings",
+  "accounts_settings",
+  "tax_settings_section",
+  "tax_id",
+  "tax_strn",
+  "provincial_strn",
+  "column_break_67",
+  "tax_status",
+  "sales_tax_account",
+  "service_tax_account",
+  "column_break_61",
+  "further_tax_account",
+  "extra_tax_account",
+  "advance_tax_account",
+  "column_break_64",
+  "selling_apply_discount_after_taxes",
+  "buying_apply_discount_after_taxes",
+  "default_accounts_section",
   "default_bank_account",
   "default_cash_account",
   "default_receivable_account",
@@ -73,21 +108,6 @@
   "default_payroll_payable_account",
   "default_expense_claim_payable_account",
   "default_letter_of_credit_account",
-  "tax_settings_section",
-  "tax_id",
-  "tax_strn",
-  "provincial_strn",
-  "column_break_67",
-  "tax_status",
-  "sales_tax_account",
-  "service_tax_account",
-  "column_break_61",
-  "further_tax_account",
-  "extra_tax_account",
-  "advance_tax_account",
-  "column_break_64",
-  "selling_apply_discount_after_taxes",
-  "buying_apply_discount_after_taxes",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
   "default_inventory_account",
@@ -109,33 +129,11 @@
   "asset_received_but_not_billed",
   "budget_detail",
   "exception_budget_approver_role",
-  "invoice_letterhead_section",
-  "invoice_letterhead",
-  "company_address_and_contact_section",
-  "company_logo",
-  "phone_no",
-  "mobile_no",
-  "fax",
-  "email",
-  "website",
-  "column_break1",
-  "address_html",
-  "company_info",
-  "company_description",
-  "column_break_109",
-  "registration_details",
-  "registration_info",
-  "delete_company_transactions",
   "lft",
   "rgt",
   "old_parent"
  ],
  "fields": [
-  {
-   "fieldname": "details",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break"
-  },
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
@@ -203,7 +201,7 @@
   },
   {
    "fieldname": "sales_settings",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Sales Settings"
   },
   {
@@ -315,12 +313,6 @@
    "fieldname": "date_of_establishment",
    "fieldtype": "Date",
    "label": "Date of Establishment"
-  },
-  {
-   "fieldname": "default_settings",
-   "fieldtype": "Section Break",
-   "label": "Accounts Settings",
-   "oldfieldtype": "Section Break"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -514,7 +506,7 @@
   {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "auto_accounting_for_stock_settings",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Stock Settings"
   },
   {
@@ -561,8 +553,8 @@
   {
    "collapsible": 1,
    "fieldname": "fixed_asset_depreciation_settings",
-   "fieldtype": "Section Break",
-   "label": "Fixed Asset Depreciation Settings"
+   "fieldtype": "Tab Break",
+   "label": "Fixed Asset Settings"
   },
   {
    "fieldname": "accumulated_depreciation_account",
@@ -628,8 +620,8 @@
   {
    "collapsible": 1,
    "fieldname": "budget_detail",
-   "fieldtype": "Section Break",
-   "label": "Budget Detail"
+   "fieldtype": "Tab Break",
+   "label": "Budgeting"
   },
   {
    "fieldname": "exception_budget_approver_role",
@@ -638,11 +630,10 @@
    "options": "Role"
   },
   {
-   "collapsible": 1,
    "description": "For reference only.",
    "fieldname": "company_info",
    "fieldtype": "Section Break",
-   "label": "Company Info"
+   "label": "Company Description"
   },
   {
    "fieldname": "date_of_incorporation",
@@ -693,12 +684,6 @@
    "label": "Website",
    "oldfieldname": "website",
    "oldfieldtype": "Data"
-  },
-  {
-   "fieldname": "registration_info",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break",
-   "width": "50%"
   },
   {
    "description": "Company registration numbers for your reference. Tax numbers etc.",
@@ -856,12 +841,12 @@
   },
   {
    "fieldname": "buying_settings_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Buying Settings"
   },
   {
    "fieldname": "hr_settings_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "HR Settings"
   },
   {
@@ -920,16 +905,47 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile No"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounts_settings",
+   "fieldtype": "Tab Break",
+   "label": "Accounts Settings",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "default_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Default Accounts"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "delete_transactions_section",
+   "fieldtype": "Section Break",
+   "label": "Delete Transactions",
+   "oldfieldtype": "Section Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "company_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Company Details",
+   "oldfieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2022-08-05 14:53:17.287528",
+ "links": [],
+ "modified": "2022-11-16 00:49:54.721817",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_company",
  "owner": "Administrator",
  "permissions": [
@@ -986,5 +1002,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }
