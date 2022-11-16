@@ -887,6 +887,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po.status, "Completed")
 		self.assertEqual(mr.status, "Received")
 
+
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
 	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
