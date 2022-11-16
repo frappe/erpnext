@@ -4,45 +4,35 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "date",
-  "time",
-  "remarks",
-  "contacted"
+  "schedule_date",
+  "contact_date",
+  "to_discuss"
  ],
  "fields": [
   {
-   "columns": 2,
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "reqd": 1
-  },
-  {
-   "columns": 2,
-   "fieldname": "time",
-   "fieldtype": "Time",
-   "in_list_view": 1,
-   "label": "Time"
-  },
-  {
-   "columns": 5,
-   "fieldname": "remarks",
+   "columns": 6,
+   "fieldname": "to_discuss",
    "fieldtype": "Small Text",
    "in_list_view": 1,
-   "label": "Remarks"
+   "label": "To Discuss"
   },
   {
-   "columns": 1,
-   "default": "0",
-   "fieldname": "contacted",
-   "fieldtype": "Check",
+   "columns": 2,
+   "fieldname": "schedule_date",
+   "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Contacted"
+   "label": "Schedule Date"
+  },
+  {
+   "columns": 2,
+   "fieldname": "contact_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Contact Date"
   }
  ],
  "istable": 1,
- "modified": "2022-10-25 11:53:16.286001",
+ "modified": "2022-11-15 15:30:52.599256",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Follow Up",
