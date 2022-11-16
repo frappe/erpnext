@@ -2,58 +2,43 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:workstation_name",
- "creation": "2013-01-10 16:34:17",
+ "autoname": "field:workstation_type",
+ "creation": "2022-11-04 17:03:23.334818",
+ "default_view": "List",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "workstation_name",
-  "production_capacity",
-  "column_break_3",
   "workstation_type",
   "over_heads",
   "hour_rate_electricity",
   "hour_rate_consumable",
-  "column_break_11",
+  "column_break_5",
   "hour_rate_rent",
   "hour_rate_labour",
-  "section_break_11",
+  "section_break_8",
   "hour_rate",
-  "workstaion_description",
-  "description",
-  "working_hours_section",
-  "holiday_list",
-  "working_hours"
+  "description_tab",
+  "description"
  ],
  "fields": [
   {
-   "fieldname": "workstation_name",
+   "fieldname": "workstation_type",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Workstation Name",
+   "label": "Workstation Type",
    "oldfieldname": "workstation_name",
    "oldfieldtype": "Data",
    "reqd": 1,
    "unique": 1
   },
   {
-   "fieldname": "description",
-   "fieldtype": "Text",
-   "in_list_view": 1,
-   "label": "Description",
-   "oldfieldname": "description",
-   "oldfieldtype": "Text",
-   "width": "300px"
-  },
-  {
    "fieldname": "over_heads",
-   "fieldtype": "Tab Break",
+   "fieldtype": "Section Break",
    "label": "Operating Costs",
    "oldfieldtype": "Section Break"
   },
   {
-   "bold": 1,
    "description": "per hour",
    "fieldname": "hour_rate_electricity",
    "fieldtype": "Currency",
@@ -62,7 +47,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "bold": 1,
    "description": "per hour",
    "fieldname": "hour_rate_consumable",
    "fieldtype": "Currency",
@@ -71,11 +55,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "fieldname": "column_break_11",
-   "fieldtype": "Column Break"
-  },
-  {
-   "bold": 1,
    "description": "per hour",
    "fieldname": "hour_rate_rent",
    "fieldtype": "Currency",
@@ -84,7 +63,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "bold": 1,
    "description": "Wages per hour",
    "fieldname": "hour_rate_labour",
    "fieldtype": "Currency",
@@ -102,58 +80,35 @@
    "read_only": 1
   },
   {
-   "fieldname": "working_hours_section",
-   "fieldtype": "Tab Break",
-   "label": "Working Hours"
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "width": "300px"
   },
   {
-   "fieldname": "working_hours",
-   "fieldtype": "Table",
-   "label": "Working Hours",
-   "options": "Workstation Working Hour"
-  },
-  {
-   "fieldname": "holiday_list",
-   "fieldtype": "Link",
-   "label": "Holiday List",
-   "options": "Holiday List"
-  },
-  {
-   "default": "1",
-   "fieldname": "production_capacity",
-   "fieldtype": "Int",
-   "label": "Production Capacity",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_3",
+   "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
   {
    "collapsible": 1,
-   "fieldname": "workstaion_description",
+   "fieldname": "description_tab",
    "fieldtype": "Tab Break",
    "label": "Description"
   },
   {
-   "bold": 1,
-   "fieldname": "workstation_type",
-   "fieldtype": "Link",
-   "label": "Workstation Type",
-   "options": "Workstation Type"
-  },
-  {
-   "fieldname": "section_break_11",
+   "fieldname": "section_break_8",
    "fieldtype": "Section Break"
   }
  ],
  "icon": "icon-wrench",
- "idx": 1,
  "links": [],
- "modified": "2022-11-04 17:39:01.549346",
+ "modified": "2022-11-16 23:11:36.224249",
  "modified_by": "Administrator",
  "module": "Manufacturing",
- "name": "Workstation",
+ "name": "Workstation Type",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
