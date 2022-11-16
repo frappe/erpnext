@@ -96,9 +96,8 @@ class WorkOrder(Document):
 	def validate_workstation_type(self):
 		for row in self.operations:
 			if not row.workstation and not row.workstation_type:
-				frappe.throw(
-					_(f"Row {row.idx}: Workstation or Workstation Type is mandatory for {row.operation}")
-				)
+				msg = f"Row {row.idx}: Workstation or Workstation Type is mandatory for an operation {row.operation}"
+				frappe.throw(_(msg))
 
 	def validate_sales_order(self):
 		if self.sales_order:
