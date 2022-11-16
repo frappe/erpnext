@@ -451,14 +451,13 @@ def get_customer_from_opportunity(source):
 
 @frappe.whitelist()
 def submit_communication(name, contact_date, remarks):
-
 	if not remarks:
 		frappe.throw(_('Remarks are mandatory for follow up'))
 
 	opp = frappe.get_cached_doc('Opportunity', name)
 	follow_up = [f for f in opp.contact_schedule if not f.contact_date]
 	if follow_up:
-		follow_up[0].contact_date = contact_date
+		follow_up[0].contact_date = getdate(contact_date)
 	else:
 		opp.append("contact_schedule", {
 			"contact_date": contact_date,
