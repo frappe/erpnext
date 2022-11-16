@@ -844,8 +844,8 @@ class TestPurchaseOrder(FrappeTestCase):
 			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
 			qty=2,
 			rate=1,
-			material_request = mr.name,
-			material_request_item = mr.items[0].name,
+			material_request=mr.name,
+			material_request_item=mr.items[0].name,
 		)
 
 		so = make_inter_company_sales_order(po.name)
