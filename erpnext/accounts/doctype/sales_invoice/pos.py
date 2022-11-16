@@ -601,7 +601,7 @@ def submit_invoice(si_doc, name, doc, name_list):
 		if frappe.message_log:
 			frappe.message_log.pop()
 		frappe.db.rollback()
-		frappe.log_error(frappe.get_traceback())
+		si_doc.log_error(message=frappe.get_traceback())
 		name_list = save_invoice(doc, name, name_list)
 
 	return name_list
@@ -620,6 +620,6 @@ def save_invoice(doc, name, name_list):
 			name_list.append(name)
 	except Exception:
 		frappe.db.rollback()
-		frappe.log_error(frappe.get_traceback())
+		frappe.log_error(message=frappe.get_traceback())
 
 	return name_list

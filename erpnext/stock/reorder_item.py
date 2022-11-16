@@ -116,7 +116,7 @@ def create_material_request(material_requests):
 		else:
 			exceptions_list.append(frappe.get_traceback())
 
-		frappe.log_error(frappe.get_traceback())
+		frappe.log_error(message=frappe.get_traceback())
 
 	for request_type in material_requests:
 		for company in material_requests[request_type]:

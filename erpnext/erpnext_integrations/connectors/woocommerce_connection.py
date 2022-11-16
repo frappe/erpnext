@@ -24,7 +24,7 @@ def order(*args, **kwargs):
 		_order(*args, **kwargs)
 	except Exception:
 		error_message = frappe.get_traceback()+"\n\n Request Data: \n"+json.loads(frappe.request.data).__str__()
-		frappe.log_error(error_message, "WooCommerce Error")
+		frappe.log_error(message=error_message, title="WooCommerce Error")
 		raise
 
 def _order(*args, **kwargs):

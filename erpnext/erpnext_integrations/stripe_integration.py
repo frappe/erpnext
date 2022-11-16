@@ -20,7 +20,7 @@ def create_stripe_subscription(gateway_controller, data):
 		return create_subscription_on_stripe(stripe_settings)
 
 	except Exception:
-		frappe.log_error(frappe.get_traceback())
+		frappe.log_error(message=frappe.get_traceback())
 		return{
 			"redirect_to": frappe.redirect_to_message(_('Server Error'), _("It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.")),
 			"status": 401
@@ -43,10 +43,10 @@ def create_subscription_on_stripe(stripe_settings):
 
 			else:
 				stripe_settings.integration_request.db_set('status', 'Failed', update_modified=False)
-				frappe.log_error('Subscription N°: ' + subscription.id, 'Stripe Payment not completed')
+				frappe.log_error(message='Subscription N°: ' + subscription.id, title='Stripe Payment not completed')
 
 		except Exception:
 			stripe_settings.integration_request.db_set('status', 'Failed', update_modified=False)
-			frappe.log_error(frappe.get_traceback())
+			frappe.log_error(message=frappe.get_traceback())
 
 		return stripe_settings.finalize_request()

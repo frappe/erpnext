@@ -37,7 +37,7 @@ class BOMUpdateTool(Document):
 				if bom_obj.meta.get('track_changes') and not bom_obj.flags.ignore_version:
 					bom_obj.save_version()
 			except Exception:
-				frappe.log_error(frappe.get_traceback())
+				frappe.log_error(message=frappe.get_traceback(), reference_doctype="BOM", reference_name=bom)
 
 	def validate_bom(self):
 		if cstr(self.current_bom) == cstr(self.new_bom):

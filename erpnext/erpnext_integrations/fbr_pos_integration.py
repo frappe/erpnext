@@ -150,7 +150,8 @@ def post_fbr_pos_invoices_without_number():
 		except FBRPOSRequestError:
 			pass
 		except Exception:
-			frappe.log_error(frappe.as_unicode(frappe.get_traceback()), get_error_title(invoice.name))
+			frappe.log_error(message=frappe.as_unicode(frappe.get_traceback()), title=get_error_title(invoice.name),
+				reference_doctype="Sales Invoice", reference_name=name)
 
 
 def calculate_fbr_pos_values(invoice):

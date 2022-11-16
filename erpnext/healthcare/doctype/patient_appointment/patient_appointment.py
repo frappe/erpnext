@@ -309,7 +309,7 @@ def send_confirmation_msg(doc):
 		try:
 			send_message(doc, message)
 		except Exception:
-			frappe.log_error(frappe.get_traceback(), _("Appointment Confirmation Message Not Sent"))
+			frappe.log_error(message=frappe.get_traceback(), title=_("Appointment Confirmation Message Not Sent"))
 			frappe.msgprint(_("Appointment Confirmation Message Not Sent"), indicator="orange")
 
 @frappe.whitelist()
