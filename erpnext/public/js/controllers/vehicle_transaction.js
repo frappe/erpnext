@@ -1,24 +1,24 @@
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.extend({
-	setup: function () {
+erpnext.vehicles.VehicleTransactionController = class VehicleTransactionController extends erpnext.stock.StockController {
+	setup() {
 		if (this.frm.fields_dict.posting_time) {
 			this.setup_posting_date_time_check();
 		}
-	},
+	}
 
-	onload: function() {
+	onload() {
 		this.setup_queries();
-	},
+	}
 
-	refresh: function () {
+	refresh() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_customer_dynamic_link();
 		this.setup_route_options();
-	},
+	}
 
-	setup_queries: function () {
+	setup_queries() {
 		var me = this;
 
 		this.setup_warehouse_query();
@@ -91,9 +91,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			});
 		}
-	},
+	}
 
-	setup_route_options: function () {
+	setup_route_options() {
 		var vehicle_field = this.frm.get_docfield("vehicle");
 		var transporter_field = this.frm.get_docfield("transporter");
 		var driver_field = this.frm.get_docfield("driver");
@@ -122,17 +122,17 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			};
 		}
-	},
+	}
 
-	set_customer_dynamic_link: function () {
+	set_customer_dynamic_link() {
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
 			fieldname: 'customer',
 			doctype: 'Customer'
 		};
-	},
+	}
 
-	set_receiver_dynamic_link: function () {
+	set_receiver_dynamic_link() {
 		var doctype = 'Customer';
 		var fieldname = 'customer';
 
@@ -149,49 +149,49 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 			fieldname: fieldname,
 			doctype: doctype
 		};
-	},
+	}
 
-	customer: function () {
+	customer() {
 		this.get_customer_details();
-	},
+	}
 
-	financer: function () {
+	financer() {
 		this.get_customer_details();
-	},
+	}
 
-	vehicle_owner: function () {
+	vehicle_owner() {
 		this.get_customer_details();
-	},
+	}
 
-	registration_customer: function () {
+	registration_customer() {
 		this.get_customer_details();
-	},
+	}
 
-	vehicle: function (doc, cdt, cdn) {
+	vehicle(doc, cdt, cdn) {
 		doc = this.frm.doc;
 		if (cdt && cdn) {
 			doc = frappe.get_doc(cdt, cdn);
 		}
 		this.get_vehicle_details(doc);
-	},
+	}
 
-	vehicle_booking_order: function (doc, cdt, cdn) {
+	vehicle_booking_order(doc, cdt, cdn) {
 		doc = this.frm.doc;
 		if (cdt && cdn) {
 			doc = frappe.get_doc(cdt, cdn);
 		}
 		this.get_vehicle_booking_order_details(doc);
-	},
+	}
 
-	project: function (doc, cdt, cdn) {
+	project(doc, cdt, cdn) {
 		doc = this.frm.doc;
 		if (cdt && cdn) {
 			doc = frappe.get_doc(cdt, cdn);
 		}
 		this.get_project_details(doc);
-	},
+	}
 
-	get_customer_details: function () {
+	get_customer_details() {
 		var me = this;
 
 		return frappe.call({
@@ -215,9 +215,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			}
 		});
-	},
+	}
 
-	get_vehicle_booking_order_details: function (doc) {
+	get_vehicle_booking_order_details(doc) {
 		var me = this;
 		if (!doc) {
 			doc = me.frm.doc;
@@ -248,9 +248,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			}
 		});
-	},
+	}
 
-	get_project_details: function (doc) {
+	get_project_details(doc) {
 		var me = this;
 		if (!doc) {
 			doc = me.frm.doc;
@@ -285,9 +285,9 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			}
 		});
-	},
+	}
 
-	get_vehicle_details: function (doc) {
+	get_vehicle_details(doc) {
 		var me = this;
 		if (!doc) {
 			doc = me.frm.doc;
@@ -316,23 +316,23 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			}
 		});
-	},
+	}
 
-	customer_address: function () {
+	customer_address() {
 		if (this.frm.fields_dict.address_display) {
 			erpnext.utils.get_address_display(this.frm, "customer_address", "address_display");
 		}
-	},
+	}
 
-	contact_person: function () {
+	contact_person() {
 		this.get_contact_details(this.frm.doc.contact_person, "");
-	},
+	}
 
-	receiver_contact: function () {
+	receiver_contact() {
 		this.get_contact_details(this.frm.doc.receiver_contact, "receiver_");
-	},
+	}
 
-	get_contact_details: function (contact, prefix) {
+	get_contact_details(contact, prefix) {
 		var me = this;
 		return frappe.call({
 			method: "erpnext.vehicles.vehicle_transaction_controller.get_contact_details",
@@ -346,6 +346,6 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			}
 		});
-	},
-});
+	}
+};
 

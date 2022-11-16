@@ -2,9 +2,9 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.vehicles");
-erpnext.vehicles.VehicleInvoiceController = erpnext.vehicles.VehicleTransactionController.extend({
-	setup_queries: function () {
-		this._super();
+erpnext.vehicles.VehicleInvoiceController = class VehicleInvoiceController extends erpnext.vehicles.VehicleTransactionController {
+	setup_queries() {
+		super.setup_queries();
 
 		var me = this;
 		this.frm.set_query("vehicle", function () {
@@ -31,6 +31,6 @@ erpnext.vehicles.VehicleInvoiceController = erpnext.vehicles.VehicleTransactionC
 			};
 		});
 	}
-});
+};
 
-$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleInvoiceController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.vehicles.VehicleInvoiceController({frm: cur_frm}));

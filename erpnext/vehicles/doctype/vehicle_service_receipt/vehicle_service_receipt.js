@@ -3,13 +3,13 @@
 
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.VehicleServiceReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
-	refresh: function () {
-		this._super();
-	},
+erpnext.vehicles.VehicleServiceReceiptController = class VehicleServiceReceiptController extends erpnext.vehicles.VehicleTransactionController{
+	refresh() {
+		super.refresh();
+	}
 
-	setup_queries: function () {
-		this._super();
+	setup_queries() {
+		super.setup_queries();
 
 		var me = this;
 
@@ -22,7 +22,7 @@ erpnext.vehicles.VehicleServiceReceiptController = erpnext.vehicles.VehicleTrans
 				filters: filters
 			};
 		});
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleServiceReceiptController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.vehicles.VehicleServiceReceiptController({frm: cur_frm}));

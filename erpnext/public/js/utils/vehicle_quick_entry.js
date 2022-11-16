@@ -1,17 +1,17 @@
 frappe.provide('frappe.ui.form');
 
-frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert) {
+frappe.ui.form.VehicleQuickEntryForm = class VehicleQuickEntryForm extends frappe.ui.form.QuickEntryForm {
+	init(doctype, after_insert) {
 		this.skip_redirect_on_error = true;
-		this._super(doctype, after_insert);
-	},
+		super.init(doctype, after_insert);
+	}
 
-	render_dialog: function() {
-		this._super();
+	render_dialog() {
+		super.render_dialog();
 		this.init_post_render_dialog_operations();
-	},
+	}
 
-	init_post_render_dialog_operations: function () {
+	init_post_render_dialog_operations() {
 		var me = this;
 
 		me.dialog.fields_dict["engine_no"].df.onchange = () => {
@@ -75,5 +75,5 @@ frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		me.dialog.get_field("color").get_query = function () {
 			return erpnext.queries.vehicle_color({item_code: me.dialog.get_value('item_code')});
 		}
-	},
-})
+	}
+};

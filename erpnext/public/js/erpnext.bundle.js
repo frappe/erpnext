@@ -9,6 +9,7 @@ import "./templates/lcv_manual_distribution.html"
 // Controllers
 import "./utils/party.js"
 import "./controllers/stock_controller.js"
+import "./payment/payments.js"
 import "./controllers/taxes_and_totals.js"
 import "./controllers/transaction.js"
 
@@ -37,7 +38,6 @@ import "./pos/pos_item.html"
 import "./pos/pos_tax_row.html"
 import "./pos/pos_invoice_list.html"
 import "./pos/customer_toolbar.html"
-import "./payment/payments.js"
 import "./payment/pos_payment.html"
 import "./payment/payment_details.html"
 

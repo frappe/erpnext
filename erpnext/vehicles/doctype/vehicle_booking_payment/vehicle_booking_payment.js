@@ -3,25 +3,25 @@
 
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
-	setup: function () {
+erpnext.vehicles.VehicleBookingPayment = class VehicleBookingPayment extends frappe.ui.form.Controller {
+	setup() {
 		this.frm.custom_make_buttons = {
 			'Vehicle Booking Payment': 'Create Deposit',
 		}
-	},
+	}
 
-	refresh: function() {
+	refresh() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_instruments_table_read_only();
 		this.add_create_buttons();
-	},
+	}
 
-	onload: function () {
+	onload() {
 		this.setup_queries();
-	},
+	}
 
-	setup_queries: function () {
+	setup_queries() {
 		var me = this;
 
 		this.frm.set_query('party_type', function () {
@@ -58,9 +58,9 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				filters: filters
 			}
 		});
-	},
+	}
 
-	add_create_buttons: function () {
+	add_create_buttons() {
 		if (this.frm.doc.docstatus === 1 && this.frm.doc.payment_type === "Receive") {
 			var undeposited = (this.frm.doc.instruments || []).filter(d => !cint(d.deposited));
 			if (undeposited && undeposited.length) {
@@ -69,23 +69,23 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				this.frm.custom_buttons[__(label)] && this.frm.custom_buttons[__(label)].addClass('btn-primary');
 			}
 		}
-	},
+	}
 
-	payment_type: function () {
+	payment_type() {
 		this.set_instruments_table_read_only();
 		if (this.frm.doc.payment_type === "Receive") {
 			this.frm.set_value("party_type", "Customer");
 		} else if (this.frm.doc.payment_type === "Pay") {
 			this.frm.set_value("party_type", "Supplier");
 		}
-	},
+	}
 
-	party_type: function () {
+	party_type() {
 		this.frm.set_value("party", "");
 		this.get_vehicle_booking_party();
-	},
+	}
 
-	party: function () {
+	party() {
 		var me = this;
 
 		if (me.frm.doc.party_type && me.frm.doc.party) {
@@ -103,14 +103,14 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
-	},
+	}
 
-	vehicle_booking_order: function () {
+	vehicle_booking_order() {
 		this.get_vehicle_booking_party();
 		this.get_undeposited_instruments();
-	},
+	}
 
-	get_vehicle_booking_party: function () {
+	get_vehicle_booking_party() {
 		var me = this;
 
 		if (me.frm.doc.vehicle_booking_order && me.frm.doc.party_type) {
@@ -127,17 +127,17 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
-	},
+	}
 
-	amount: function () {
+	amount() {
 		this.calculate_total_amount();
-	},
+	}
 
-	instruments_remove: function () {
+	instruments_remove() {
 		this.calculate_total_amount();
-	},
+	}
 
-	calculate_total_amount: function () {
+	calculate_total_amount() {
 		var me = this;
 
 		me.frm.doc.total_amount = 0;
@@ -149,13 +149,13 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 		me.frm.doc.total_amount = flt(me.frm.doc.total_amount, precision('total_amount'));
 		me.frm.doc.in_words = "";
 		me.frm.refresh_fields();
-	},
+	}
 
-	instruments_row_focused: function () {
+	instruments_row_focused() {
 		this.set_instruments_table_read_only();
-	},
+	}
 
-	set_instruments_table_read_only: function () {
+	set_instruments_table_read_only() {
 		var editable = cint(this.frm.doc.payment_type !== "Pay");
 		$.each(this.frm.get_field('instruments').grid.grid_rows || [], function (i, grid_row) {
 			$.each(grid_row.docfields || [], function (i, df) {
@@ -164,9 +164,9 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				}
 			});
 		});
-	},
+	}
 
-	get_undeposited_instruments: function () {
+	get_undeposited_instruments() {
 		var me = this;
 
 		if (me.frm.doc.payment_type === "Pay" && me.frm.doc.vehicle_booking_order) {
@@ -189,9 +189,9 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
-	},
+	}
 
-	make_deposit_entry: function () {
+	make_deposit_entry() {
 		return frappe.call({
 			method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_deposit_entry",
 			args: {
@@ -203,6 +203,6 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 			}
 		});
 	}
-});
+};
 
-$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleBookingPayment({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.vehicles.VehicleBookingPayment({frm: cur_frm}));

@@ -7,15 +7,15 @@ frappe.provide("erpnext.crm");
 {% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
 {% include "erpnext/public/js/controllers/quick_contacts.js" %};
 
-erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
-	setup: function () {
+erpnext.crm.AppointmentController = class AppointmentController extends erpnext.contacts.QuickContacts {
+	setup() {
 		this.frm.custom_make_buttons = {
 			'Project': 'Project',
 			'Appointment': 'Reschedule',
 		}
-	},
+	}
 
-	refresh: function() {
+	refresh() {
 		erpnext.hide_company();
 		this.setup_buttons();
 		this.set_dynamic_field_label();
@@ -28,14 +28,14 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 
 		this.make_appointment_slot_picker();
 		this.make_customer_vehicle_selector();
-	},
+	}
 
-	onload: function () {
-		this._super();
+	onload() {
+		super.onload();
 		this.setup_queries();
-	},
+	}
 
-	setup_buttons: function () {
+	setup_buttons() {
 		this.setup_notification_buttons();
 
 		if (this.frm.doc.calendar_event) {
@@ -84,9 +84,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-	},
+	}
 
-	setup_notification_buttons: function() {
+	setup_notification_buttons() {
 		if(this.frm.doc.docstatus === 1) {
 			if (this.can_notify("Appointment Confirmation")) {
 				var confirmation_count = frappe.get_notification_count(this.frm, 'Appointment Confirmation', 'SMS');
@@ -116,9 +116,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 			this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
 				__("Notify"));
 		}
-	},
+	}
 
-	setup_queries: function () {
+	setup_queries() {
 		var me = this;
 
 		me.frm.set_query("appointment_for", function () {
@@ -147,9 +147,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		me.frm.set_query('secondary_contact_person', () => {
 			return erpnext.queries.contact_query(me.frm.doc);
 		});
-	},
+	}
 
-	setup_route_options: function () {
+	setup_route_options() {
 		var me = this;
 		var vehicle_field = me.frm.get_docfield("applies_to_vehicle");
 		if (vehicle_field) {
@@ -165,9 +165,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		}
-	},
+	}
 
-	setup_dashboard: function() {
+	setup_dashboard() {
 		if (this.frm.doc.docstatus == 0) {
 			return;
 		}
@@ -205,31 +205,31 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		if (me.frm.doc.docstatus == 2) {
 			me.frm.dashboard.add_indicator(__('Appointment Cancellation: {0}', [cancellation_status]), cancellation_color);
 		}
-	},
+	}
 
-	set_dynamic_link: function () {
+	set_dynamic_link() {
 		var doctype = this.frm.doc.appointment_for == 'Lead' ? 'Lead' : 'Customer';
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'party_name', doctype: doctype}
-	},
+	}
 
-	scheduled_date: function () {
+	scheduled_date() {
 		this.set_scheduled_date_time();
 		this.reload_appointment_slot_picker();
-	},
-	scheduled_time: function () {
+	}
+	scheduled_time() {
 		this.set_scheduled_date_time();
 		this.refresh_appointment_slot_picker()
-	},
-	appointment_duration: function () {
+	}
+	appointment_duration() {
 		this.set_scheduled_date_time();
 		this.refresh_appointment_slot_picker()
-	},
+	}
 
-	appointment_type: function () {
+	appointment_type() {
 		this.reload_appointment_slot_picker();
-	},
+	}
 
-	set_scheduled_timeslot: function (timeslot_start, timeslot_duration) {
+	set_scheduled_timeslot(timeslot_start, timeslot_duration) {
 		if (timeslot_start) {
 			var previous_date = this.frm.doc.scheduled_date;
 			var timeslot_start_obj = frappe.datetime.str_to_obj(timeslot_start);
@@ -250,9 +250,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				this.refresh_appointment_slot_picker();
 			}
 		}
-	},
+	}
 
-	set_scheduled_date_time: function () {
+	set_scheduled_date_time() {
 		if (this.frm.doc.scheduled_date) {
 			var scheduled_date_obj = frappe.datetime.str_to_obj(this.frm.doc.scheduled_date);
 			this.frm.doc.scheduled_day_of_week = moment(scheduled_date_obj).format('dddd');
@@ -277,28 +277,28 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		this.frm.refresh_field('scheduled_dt');
 		this.frm.refresh_field('end_dt');
 		this.frm.refresh_field('scheduled_day_of_week');
-	},
+	}
 
-	make_appointment_slot_picker: function () {
+	make_appointment_slot_picker() {
 		if (this.frm.fields_dict.appointment_slot_picker_html) {
 			this.frm.appointment_slot_picker = erpnext.crm.make_appointment_slot_picker(this.frm,
 				this.frm.fields_dict.appointment_slot_picker_html.wrapper);
 		}
-	},
+	}
 
-	reload_appointment_slot_picker: function () {
+	reload_appointment_slot_picker() {
 		if (this.frm.appointment_slot_picker) {
 			this.frm.appointment_slot_picker.load_slots_and_render();
 		}
-	},
+	}
 
-	refresh_appointment_slot_picker: function () {
+	refresh_appointment_slot_picker() {
 		if (this.frm.appointment_slot_picker) {
 			this.frm.appointment_slot_picker.render_slot_picker();
 		}
-	},
+	}
 
-	make_customer_vehicle_selector: function () {
+	make_customer_vehicle_selector() {
 		if (this.frm.fields_dict.customer_vehicle_selector_html) {
 			this.frm.customer_vehicle_selector = erpnext.vehicles.make_customer_vehicle_selector(this.frm,
 				this.frm.fields_dict.customer_vehicle_selector_html.wrapper,
@@ -307,31 +307,31 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				'appointment_for'
 			);
 		}
-	},
+	}
 
-	reload_customer_vehicle_selector: function () {
+	reload_customer_vehicle_selector() {
 		if (this.frm.customer_vehicle_selector) {
 			this.frm.customer_vehicle_selector.load_and_render();
 		}
-	},
+	}
 
-	appointment_for: function () {
+	appointment_for() {
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
 		this.frm.set_value("party_name", null);
 		this.reload_customer_vehicle_selector();
-	},
+	}
 
-	party_name: function () {
+	party_name() {
 		this.get_customer_details();
 		this.reload_customer_vehicle_selector();
-	},
+	}
 
-	customer_address: function() {
+	customer_address() {
 		erpnext.utils.get_address_display(this.frm, "customer_address");
-	},
+	}
 
-	get_customer_details: function () {
+	get_customer_details() {
 		var me = this;
 
 		if (me.frm.doc.company && me.frm.doc.appointment_for && me.frm.doc.party_name) {
@@ -355,9 +355,9 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				}
 			});
 		}
-	},
+	}
 
-	set_dynamic_field_label: function () {
+	set_dynamic_field_label() {
 		if (this.frm.doc.appointment_for) {
 			this.frm.set_df_property("party_name", "label", __(this.frm.doc.appointment_for));
 			this.frm.set_df_property("customer_address", "label", __(this.frm.doc.appointment_for + " Address"));
@@ -367,28 +367,28 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 			this.frm.set_df_property("customer_address", "label", __("Address"));
 			this.frm.set_df_property("contact_person", "label", __("Contact Person"));
 		}
-	},
+	}
 
-	applies_to_item: function () {
+	applies_to_item() {
 		this.get_applies_to_details();
-	},
-	applies_to_vehicle: function () {
+	}
+	applies_to_vehicle() {
 		this.set_applies_to_read_only();
 		this.get_applies_to_details();
 		this.reload_customer_vehicle_selector();
-	},
+	}
 
-	vehicle_chassis_no: function () {
+	vehicle_chassis_no() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_chassis_no');
-	},
-	vehicle_engine_no: function () {
+	}
+	vehicle_engine_no() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_engine_no');
-	},
-	vehicle_license_plate: function () {
+	}
+	vehicle_license_plate() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
-	},
+	}
 
-	get_applies_to_details: function () {
+	get_applies_to_details() {
 		var me = this;
 		var args = this.get_applies_to_args();
 		return frappe.call({
@@ -402,18 +402,18 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	get_applies_to_args: function () {
+	get_applies_to_args() {
 		return {
 			applies_to_item: this.frm.doc.applies_to_item,
 			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
 			doctype: this.frm.doc.doctype,
 			name: this.frm.doc.name,
 		}
-	},
+	}
 
-	set_applies_to_read_only: function() {
+	set_applies_to_read_only() {
 		var me = this;
 		var read_only_fields = [
 			'applies_to_item', 'applies_to_item_name',
@@ -426,25 +426,25 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
 			}
 		});
-	},
+	}
 
-	make_project: function () {
+	make_project() {
 		this.frm.check_if_unsaved();
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.appointment.appointment.get_project",
 			frm: this.frm
 		});
-	},
+	}
 
-	reschedule_appointment: function () {
+	reschedule_appointment() {
 		this.frm.check_if_unsaved();
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.appointment.appointment.get_rescheduled_appointment",
 			frm: this.frm
 		});
-	},
+	}
 
-	update_status: function(status) {
+	update_status(status) {
 		var me = this;
 		me.frm.check_if_unsaved();
 
@@ -458,24 +458,24 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 				me.frm.reload_doc();
 			},
 		});
-	},
+	}
 
-	can_notify: function (what) {
+	can_notify(what) {
 		if (this.frm.doc.__onload && this.frm.doc.__onload.can_notify) {
 			return this.frm.doc.__onload.can_notify[what];
 		} else {
 			return false;
 		}
-	},
+	}
 
-	send_sms: function(notification_type) {
+	send_sms(notification_type) {
 		new frappe.SMSManager(this.frm.doc, {
 			notification_type: notification_type,
 			mobile_no: this.frm.doc.contact_mobile,
 			party_doctype: this.frm.doc.appointment_for,
 			party: this.frm.doc.party_name,
 		});
-	},
-});
+	}
+};
 
 cur_frm.script_manager.make(erpnext.crm.AppointmentController);

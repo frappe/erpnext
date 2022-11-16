@@ -1,13 +1,13 @@
 frappe.provide('frappe.ui.form');
 
-frappe.ui.form.ContactQuickEntryForm = frappe.ui.form._ContactQuickEntryForm.extend({
-	init: function(doctype, after_insert) {
-		this._super(doctype, after_insert);
-	},
+frappe.ui.form.ContactQuickEntryForm = class ContactQuickEntryForm extends frappe.ui.form._ContactQuickEntryForm {
+	init(doctype, after_insert) {
+		super.init(doctype, after_insert);
+	}
 
-	render_dialog: function() {
+	render_dialog() {
 		var me = this;
-		me._super();
+		super.render_dialog();
 
 		if (me.dialog.fields_dict["tax_cnic"]) {
 			me.dialog.fields_dict["tax_cnic"].df.onchange = () => {
@@ -31,5 +31,5 @@ frappe.ui.form.ContactQuickEntryForm = frappe.ui.form._ContactQuickEntryForm.ext
 			me.dialog.doc.mobile_no_2 = value;
 			me.dialog.get_field('mobile_no_2').refresh();
 		};
-	},
-});
+	}
+};

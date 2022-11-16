@@ -3,13 +3,13 @@
 
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.VehicleGatePass = erpnext.vehicles.VehicleTransactionController.extend({
-	refresh: function () {
-		this._super();
-	},
+erpnext.vehicles.VehicleGatePass = class VehicleGatePass extends erpnext.vehicles.VehicleTransactionController {
+	refresh() {
+		super.refresh();
+	}
 
-	setup_queries: function () {
-		this._super();
+	setup_queries() {
+		super.setup_queries();
 
 		var me = this;
 
@@ -32,7 +32,7 @@ erpnext.vehicles.VehicleGatePass = erpnext.vehicles.VehicleTransactionController
 				filters: filters
 			};
 		});
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleGatePass({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.vehicles.VehicleGatePass({frm: cur_frm}));

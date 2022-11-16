@@ -30,8 +30,8 @@ frappe.ui.form.on('Installation Note', {
 frappe.provide("erpnext.selling");
 
 // TODO commonify this code
-erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
-	refresh: function() {
+erpnext.selling.InstallationNote = class InstallationNote extends frappe.ui.form.Controller {
+	refresh() {
 		var me = this;
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('From Delivery Note'),
@@ -54,7 +54,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 				}, "fa fa-download", "btn-default"
 			);
 		}
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.selling.InstallationNote({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.selling.InstallationNote({frm: cur_frm}));

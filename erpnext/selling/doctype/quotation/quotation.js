@@ -5,9 +5,9 @@
 {% include 'erpnext/selling/quotation_common.js' %}
 
 
-erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
-	setup: function() {
-		this._super();
+erpnext.selling.QuotationController = class QuotationController extends erpnext.selling.SellingController {
+	setup() {
+		super.setup();
 
 		this.frm.custom_make_buttons = {
 			'Sales Order': 'Sales Order',
@@ -16,10 +16,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		};
 
 		this.setup_queries();
-	},
+	}
 
-	refresh: function(doc, dt, dn) {
-		this._super(doc, dt, dn);
+	refresh(doc, dt, dn) {
+		super.refresh(doc, dt, dn);
 
 		this.set_dynamic_link();
 
@@ -36,10 +36,10 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.setup_buttons();
 		this.toggle_reqd_lead_customer();
 		this.set_dynamic_field_label();
-	},
+	}
 
-	setup_queries: function () {
-		this._super();
+	setup_queries() {
+		super.setup_queries();
 
 		var me = this;
 
@@ -61,14 +61,14 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		me.frm.set_query('customer_address', me.address_query);
 		me.frm.set_query('shipping_address_name', me.address_query);
-	},
+	}
 
-	set_dynamic_link: function () {
+	set_dynamic_link() {
 		var doctype = this.frm.doc.quotation_to == 'Lead' ? 'Lead' : 'Customer';
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'party_name', doctype: doctype}
-	},
+	}
 
-	setup_buttons: function () {
+	setup_buttons() {
 		var me = this;
 
 		if (me.frm.doc.docstatus == 0) {
@@ -147,27 +147,27 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			me.add_get_applicable_items_button();
 			me.add_get_project_template_items_button();
 		}
-	},
+	}
 
-	set_dynamic_field_label: function(){
+	set_dynamic_field_label() {
 		if (this.frm.doc.quotation_to) {
 			this.frm.set_df_property("party_name", "label", __(this.frm.doc.quotation_to));
 			this.frm.set_df_property("customer_address", "label", __(this.frm.doc.quotation_to + " Address"));
 		}
-	},
+	}
 
-	toggle_reqd_lead_customer: function() {
+	toggle_reqd_lead_customer() {
 		// to overwrite the customer_filter trigger from queries.js
 		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
-	},
+	}
 
-	quotation_to: function() {
+	quotation_to() {
 		this.toggle_reqd_lead_customer();
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
-	},
+	}
 
-	party_name: function() {
+	party_name() {
 		var me = this;
 
 		if(me.frm.doc.quotation_to=="Lead" && me.frm.doc.party_name) {
@@ -177,13 +177,13 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		return erpnext.utils.get_party_details(this.frm, null, null, function(r) {
 			me.apply_price_list();
 		});
-	},
+	}
 
-	tc_name: function() {
+	tc_name() {
 		this.get_terms();
-	},
+	}
 
-	address_query: function(doc) {
+	address_query(doc) {
 		return {
 			query: 'frappe.contacts.doctype.address.address.address_query',
 			filters: {
@@ -191,20 +191,20 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				link_name: doc.party_name
 			}
 		};
-	},
+	}
 
-	validate_company_and_party: function(party_field) {
+	validate_company_and_party(party_field) {
 		if(!this.frm.doc.quotation_to) {
 			frappe.msgprint(__("Please select a value for {0} quotation_to {1}", [this.frm.doc.doctype, this.frm.doc.name]));
 			return false;
 		} else if (this.frm.doc.quotation_to == "Lead") {
 			return true;
 		} else {
-			return this._super(party_field);
+			return super.validate_company_and_party(party_field);
 		}
-	},
+	}
 
-	get_lead_details: function() {
+	get_lead_details() {
 		var me = this;
 		if(!this.frm.doc.quotation_to === "Lead") {
 			return;
@@ -227,22 +227,22 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				}
 			}
 		})
-	},
+	}
 
-	make_sales_order: function () {
+	make_sales_order() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 			frm: cur_frm
 		})
-	},
+	}
 
-	make_sales_invoice: function () {
+	make_sales_invoice() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.quotation.quotation.make_sales_invoice",
 			frm: cur_frm
 		})
-	},
-});
+	}
+};
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
 

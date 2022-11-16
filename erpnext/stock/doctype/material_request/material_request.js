@@ -241,7 +241,7 @@ frappe.ui.form.on('Material Request', {
 				fieldname:'default_supplier',
 				fieldtype: 'Link',
 				options: 'Supplier',
-				description: __('Select a Supplier from the Default Supplier List of the items below.'),
+				description: __('Please select a Supplier from the Default Supplier List of the items below.'),
 				get_query: () => {
 					return{
 						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",
@@ -347,28 +347,28 @@ frappe.ui.form.on("Material Request Item", {
 	}
 });
 
-erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
-	tc_name: function() {
+erpnext.buying.MaterialRequestController = class MaterialRequestController extends erpnext.buying.BuyingController {
+	tc_name() {
 		this.get_terms();
-	},
+	}
 
-	item_code: function() {
+	item_code() {
 		// to override item code trigger from transaction.js
-	},
+	}
 
-	validate_company_and_party: function() {
+	validate_company_and_party() {
 		return true;
-	},
+	}
 
-	calculate_taxes_and_totals: function() {
+	calculate_taxes_and_totals() {
 		return;
-	},
+	}
 
-	validate: function() {
+	validate() {
 		set_schedule_date(this.frm);
-	},
+	}
 
-	add_rounding_button: function () {
+	add_rounding_button() {
 		var me = this;
 		if (me.frm.doc.docstatus === 0) {
 			me.frm.fields_dict.items.grid.add_custom_button(__("Round Up Qty"),  function () {
@@ -383,9 +383,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				});
 			})
 		}
-	},
+	}
 
-	del_zero_qty_rows_button: function () {
+	del_zero_qty_rows_button() {
 		var me = this;
 		if (me.frm.doc.docstatus === 0) {
 			me.frm.fields_dict.items.grid.add_custom_button(__("Remove 0 Qty rows"),  function () {
@@ -399,9 +399,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				return frappe.run_serially(actions);
 			});
 		}
-	},
+	}
 
-	onload: function(doc, cdt, cdn) {
+	onload(doc, cdt, cdn) {
 		this.frm.set_query("item_code", "items", function() {
 			if (doc.material_request_type == "Customer Provided") {
 				return{
@@ -415,22 +415,22 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				}
 			}
 		});
-	},
+	}
 
-	set_warehouse: function(frm) {
+	set_warehouse(frm) {
 		this.autofill_warehouse(cur_frm.doc.items, "warehouse", cur_frm.doc.set_warehouse);
-	},
+	}
 
-	autofill_warehouse : function (child_table, warehouse_field, warehouse, force) {
+	autofill_warehouse (child_table, warehouse_field, warehouse, force) {
 		if ((warehouse || force) && child_table && child_table.length) {
 			let doctype = child_table[0].doctype;
 			$.each(child_table || [], function(i, item) {
 				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
 			});
 		}
-	},
+	}
 
-	items_add: function(doc, cdt, cdn) {
+	items_add(doc, cdt, cdn) {
 		let row = frappe.get_doc(cdt, cdn);
 		// var item = frappe.get_doc(cdt, cdn);
 		if(!row.warehouse && doc.set_warehouse) {
@@ -442,9 +442,9 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		} else {
 			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
 		}
-	},
+	}
 
-	calculate_total_qty: function () {
+	calculate_total_qty() {
 		var total_qty = frappe.utils.sum((this.frm.doc.items || []).map(d => flt(d.qty)));
 		total_qty = flt(total_qty, precision('total_qty'));
 
@@ -453,11 +453,11 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 		this.frm.set_value("total_qty", total_qty);
 		this.frm.set_value("total_alt_uom_qty", total_alt_uom_qty);
-	},
-});
+	}
+};
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {

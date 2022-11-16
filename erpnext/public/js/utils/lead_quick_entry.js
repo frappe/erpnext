@@ -1,20 +1,20 @@
 frappe.provide('frappe.ui.form');
 
-frappe.ui.form.LeadQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert) {
+frappe.ui.form.LeadQuickEntryForm = class LeadQuickEntryForm extends frappe.ui.form.QuickEntryForm {
+	init(doctype, after_insert) {
 		this.skip_redirect_on_error = true;
-		this._super(doctype, after_insert);
-	},
+		super.init(doctype, after_insert);
+	}
 
-	render_dialog: function() {
+	render_dialog() {
 		this.mandatory = this.mandatory.concat(this.get_lead_fields());
 		this.mandatory = this.mandatory.filter(d => d.fieldname != 'status');
-		this._super();
+		super.render_dialog();
 		this.init_post_render_dialog_operations();
 		this.set_sales_person_from_user();
-	},
+	}
 
-	init_post_render_dialog_operations: function () {
+	init_post_render_dialog_operations() {
 		var me = this;
 
 		me.dialog.fields_dict["tax_id"].df.onchange = () => {
@@ -52,9 +52,9 @@ frappe.ui.form.LeadQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			me.dialog.doc.mobile_no_2 = value;
 			me.dialog.get_field('mobile_no_2').refresh();
 		};
-	},
+	}
 
-	set_sales_person_from_user: function() {
+	set_sales_person_from_user() {
 		var me = this;
 		if (!me.dialog.get_field('sales_person') || me.dialog.doc.sales_person || !me.dialog.doc.__islocal) {
 			return;
@@ -66,9 +66,9 @@ frappe.ui.form.LeadQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				me.dialog.get_field('sales_person').refresh();
 			}
 		});
-	},
+	}
 
-	get_lead_fields: function() {
+	get_lead_fields() {
 		return [
 			{
 				fieldtype: "Section Break",
@@ -192,5 +192,5 @@ frappe.ui.form.LeadQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				fieldtype: "Data"
 			},
 		];
-	},
-})
+	}
+};

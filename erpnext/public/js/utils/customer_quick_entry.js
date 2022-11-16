@@ -1,18 +1,18 @@
 frappe.provide('frappe.ui.form');
 
-frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert) {
+frappe.ui.form.CustomerQuickEntryForm = class CustomerQuickEntryForm extends frappe.ui.form.QuickEntryForm {
+	init(doctype, after_insert) {
 		this.skip_redirect_on_error = true;
-		this._super(doctype, after_insert);
-	},
+		super.init(doctype, after_insert);
+	}
 
-	render_dialog: function() {
+	render_dialog() {
 		this.mandatory = this.mandatory.concat(this.get_variant_fields());
-		this._super();
+		super.render_dialog();
 		this.init_post_render_dialog_operations();
-	},
+	}
 
-	init_post_render_dialog_operations: function () {
+	init_post_render_dialog_operations() {
 		var me = this;
 
 		me.dialog.fields_dict["tax_id"].df.onchange = () => {
@@ -52,9 +52,9 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			me.dialog.doc.mobile_no_2 = value;
 			me.dialog.get_field('mobile_no_2').refresh();
 		};
-	},
+	}
 
-	get_variant_fields: function() {
+	get_variant_fields() {
 		var variant_fields = [{
 			fieldtype: "Section Break",
 			label: __("Identification & Tax Id"),
@@ -167,5 +167,5 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		}];
 
 		return variant_fields;
-	},
-})
+	}
+};

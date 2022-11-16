@@ -1,5 +1,5 @@
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.VehicleAdditionalServiceController = erpnext.vehicles.VehicleTransactionController.extend({
+erpnext.vehicles.VehicleAdditionalServiceController = class VehicleAdditionalServiceController extends erpnext.vehicles.VehicleTransactionController {
 
-});
+};

@@ -7,17 +7,17 @@ frappe.provide('erpnext.projects');
 {% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
 {% include "erpnext/public/js/controllers/quick_contacts.js" %};
 
-erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
-	setup: function() {
+erpnext.projects.ProjectController = class ProjectController extends erpnext.contacts.QuickContacts {
+	setup() {
 		this.setup_make_methods();
-	},
+	}
 
-	onload: function () {
-		this._super();
+	onload() {
+		super.onload();
 		this.setup_queries();
-	},
+	}
 
-	refresh: function () {
+	refresh() {
 		erpnext.hide_company();
 		this.set_dynamic_link();
 		this.setup_route_options();
@@ -36,9 +36,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		this.set_service_advisor_from_user();
 		this.setup_vehicle_panel_fields();
 		this.setup_dashboard();
-	},
+	}
 
-	setup_queries: function () {
+	setup_queries() {
 		var me = this;
 
 		me.frm.set_query('customer', 'erpnext.controllers.queries.customer_query');
@@ -88,13 +88,13 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 
 		me.frm.set_query("project_template", "project_templates",
 			() => erpnext.queries.project_template(me.frm.doc.applies_to_item));
-	},
+	}
 
-	set_dynamic_link: function () {
+	set_dynamic_link() {
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'};
-	},
+	}
 
-	setup_route_options: function () {
+	setup_route_options() {
 		var me = this;
 
 		var sales_order_field = me.frm.get_docfield("sales_order");
@@ -124,26 +124,26 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		}
-	},
+	}
 
-	setup_naming_series: function () {
+	setup_naming_series() {
 		if (frappe.defaults.get_default("project_naming_by")!="Naming Series") {
 			this.frm.toggle_display("naming_series", false);
 		} else {
 			erpnext.toggle_naming_series();
 		}
-	},
+	}
 
-	setup_web_link: function () {
+	setup_web_link() {
 		if (this.frm.doc.__islocal) {
 			this.frm.web_link && this.frm.web_link.remove();
 		} else {
 			this.frm.add_web_link("/projects?project=" + encodeURIComponent(this.frm.doc.name));
 			this.frm.trigger('show_dashboard');
 		}
-	},
+	}
 
-	setup_make_methods: function () {
+	setup_make_methods() {
 		var me = this;
 
 		me.frm.custom_make_buttons = {
@@ -162,9 +162,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		$.each(make_method_doctypes, function (i, dt) {
 			me.frm.make_methods[dt] = () => me.open_form(dt);
 		});
-	},
+	}
 
-	setup_buttons: function() {
+	setup_buttons() {
 		var me = this;
 
 		if (me.frm.doc.status == "Open") {
@@ -247,9 +247,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				me.frm.add_custom_button(__("Sales Order (All)"), () => me.make_sales_order(), __("Create"));
 			}
 		}
-	},
+	}
 
-	setup_dashboard: function() {
+	setup_dashboard() {
 		if (this.frm.doc.__islocal) {
 			return;
 		}
@@ -367,9 +367,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		}
 
 		me.add_indicator_section(__("Billing"), billing_items);
-	},
+	}
 
-	add_indicator_section: function (title, items) {
+	add_indicator_section(title, items) {
 		var items_html = '';
 		$.each(items || [], function (i, d) {
 			items_html += `<div class="badge-link small">
@@ -385,9 +385,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		html.appendTo(this.frm.dashboard.stats_area_row);
 
 		return html
-	},
+	}
 
-	toggle_vehicle_odometer_fields: function () {
+	toggle_vehicle_odometer_fields() {
 		if (this.frm.fields_dict.vehicle_first_odometer && this.frm.fields_dict.vehicle_last_odometer) {
 			var first_odometer_read_only = cint(this.frm.doc.vehicle_first_odometer);
 
@@ -397,16 +397,16 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 
 			this.frm.set_df_property("vehicle_first_odometer", "read_only", first_odometer_read_only);
 		}
-	},
+	}
 
-	set_cant_change_read_only: function () {
+	set_cant_change_read_only() {
 		const cant_change_fields = (this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields) || {};
 		$.each(cant_change_fields, (fieldname, cant_change) => {
 			this.frm.set_df_property(fieldname, 'read_only', cant_change ? 1 : 0);
 		});
-	},
+	}
 
-	set_applies_to_read_only: function() {
+	set_applies_to_read_only() {
 		var me = this;
 		var read_only_fields = [
 			'applies_to_item', 'applies_to_item_name',
@@ -423,9 +423,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				me.frm.set_df_property(f, "read_only", read_only);
 			}
 		});
-	},
+	}
 
-	create_duplicate: function() {
+	create_duplicate() {
 		var me = this;
 		return new Promise(resolve => {
 			frappe.prompt('Project Name', (data) => {
@@ -440,9 +440,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				resolve();
 			});
 		});
-	},
+	}
 
-	set_project_status: function(project_status) {
+	set_project_status(project_status) {
 		var me = this;
 
 		me.frm.check_if_unsaved();
@@ -450,9 +450,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
 				{project: me.frm.doc.name, project_status: project_status}).then(() => me.frm.reload_doc());
 		});
-	},
+	}
 
-	set_project_ready_to_close: function () {
+	set_project_ready_to_close() {
 		var me = this;
 
 		me.frm.check_if_unsaved();
@@ -460,9 +460,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 			frappe.xcall('erpnext.projects.doctype.project.project.set_project_ready_to_close',
 				{project: me.frm.doc.name}).then(() => me.frm.reload_doc());
 		});
-	},
+	}
 
-	reopen_project: function () {
+	reopen_project() {
 		var me = this;
 
 		me.frm.check_if_unsaved();
@@ -470,14 +470,14 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 			frappe.xcall('erpnext.projects.doctype.project.project.reopen_project_status',
 				{project: me.frm.doc.name}).then(() => me.frm.reload_doc());
 		});
-	},
+	}
 
-	customer: function () {
+	customer() {
 		this.get_customer_details();
 		this.reload_customer_vehicle_selector();
-	},
+	}
 
-	get_customer_details: function () {
+	get_customer_details() {
 		var me = this;
 
 		return frappe.call({
@@ -499,37 +499,37 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	customer_address: function() {
+	customer_address() {
 		erpnext.utils.get_address_display(this.frm, "customer_address");
-	},
+	}
 
-	applies_to_item: function () {
+	applies_to_item() {
 		this.get_applies_to_details();
-	},
-	applies_to_vehicle: function () {
+	}
+	applies_to_vehicle() {
 		this.set_applies_to_read_only();
 		this.get_applies_to_details();
 		this.reload_customer_vehicle_selector();
-	},
-	vehicle_owner: function () {
+	}
+	vehicle_owner() {
 		if (!this.frm.doc.vehicle_owner) {
 			this.frm.doc.vehicle_owner_name = null;
 		}
-	},
+	}
 
-	vehicle_chassis_no: function () {
+	vehicle_chassis_no() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_chassis_no');
-	},
-	vehicle_engine_no: function () {
+	}
+	vehicle_engine_no() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_engine_no');
-	},
-	vehicle_license_plate: function () {
+	}
+	vehicle_license_plate() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
-	},
+	}
 
-	get_applies_to_details: function () {
+	get_applies_to_details() {
 		var me = this;
 		var args = this.get_applies_to_args();
 		return frappe.call({
@@ -543,18 +543,18 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	get_applies_to_args: function () {
+	get_applies_to_args() {
 		return {
 			applies_to_item: this.frm.doc.applies_to_item,
 			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
 			doctype: this.frm.doc.doctype,
 			name: this.frm.doc.name,
 		}
-	},
+	}
 
-	serial_no: function () {
+	serial_no() {
 		var me = this;
 		if (me.frm.doc.serial_no) {
 			frappe.call({
@@ -569,14 +569,14 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			});
 		}
-	},
+	}
 
-	project_template: function (doc, cdt, cdn) {
+	project_template(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.get_project_template_details(row);
-	},
+	}
 
-	get_project_template_details: function (row) {
+	get_project_template_details(row) {
 		var me = this;
 
 		if (row && row.project_template) {
@@ -605,9 +605,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			});
 		}
-	},
+	}
 
-	make_vehicle_checklist: function () {
+	make_vehicle_checklist() {
 		if (this.frm.fields_dict.vehicle_checklist_html) {
 			var is_read_only = cint(this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields && this.frm.doc.__onload.cant_change_fields.vehicle_checklist);
 
@@ -618,9 +618,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				is_read_only,
 				__("Vehicle Checklist"));
 		}
-	},
+	}
 
-	make_customer_request_checklist: function () {
+	make_customer_request_checklist() {
 		if (this.frm.fields_dict.customer_request_checklist_html) {
 			var is_read_only = cint(this.frm.doc.__onload && this.frm.doc.__onload.cant_change_fields && this.frm.doc.__onload.cant_change_fields.customer_request_checklist);
 
@@ -631,15 +631,15 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				is_read_only,
 				__("Customer Request Checklist"));
 		}
-	},
+	}
 
-	refresh_customer_request_checklist: function () {
+	refresh_customer_request_checklist() {
 		if (this.frm.customer_request_checklist_editor) {
 			this.frm.customer_request_checklist_editor.refresh();
 		}
-	},
+	}
 
-	make_customer_vehicle_selector: function () {
+	make_customer_vehicle_selector() {
 		if (this.frm.fields_dict.customer_vehicle_selector_html) {
 			this.frm.customer_vehicle_selector = erpnext.vehicles.make_customer_vehicle_selector(this.frm,
 				this.frm.fields_dict.customer_vehicle_selector_html.wrapper,
@@ -647,29 +647,29 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				'customer',
 			);
 		}
-	},
+	}
 
-	reload_customer_vehicle_selector: function () {
+	reload_customer_vehicle_selector() {
 		if (this.frm.customer_vehicle_selector) {
 			this.frm.customer_vehicle_selector.load_and_render();
 		}
-	},
+	}
 
-	set_sales_data_html: function () {
+	set_sales_data_html() {
 		this.frm.get_field("stock_items_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.stock_items_html || '');
 		this.frm.get_field("service_items_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.service_items_html || '');
 		this.frm.get_field("sales_summary_html").$wrapper.html(this.frm.doc.__onload && this.frm.doc.__onload.sales_summary_html || '');
-	},
+	}
 
-	project_workshop: function () {
+	project_workshop() {
 		this.get_project_workshop_details();
-	},
+	}
 
-	project_type: function () {
+	project_type() {
 		this.get_project_type_defaults();
-	},
+	}
 
-	get_project_workshop_details: function () {
+	get_project_workshop_details() {
 		var me = this;
 
 		if (me.frm.doc.project_workshop) {
@@ -685,9 +685,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			});
 		}
-	},
+	}
 
-	get_project_type_defaults: function () {
+	get_project_type_defaults() {
 		var me = this;
 
 		if (me.frm.doc.project_type) {
@@ -703,9 +703,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			});
 		}
-	},
+	}
 
-	set_service_advisor_from_user: function () {
+	set_service_advisor_from_user() {
 		if (!this.frm.get_field('service_advisor') || this.frm.doc.service_advisor || !this.frm.doc.__islocal) {
 			return;
 		}
@@ -715,9 +715,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				this.frm.set_value('service_advisor', sales_person);
 			}
 		});
-	},
+	}
 
-	select_appointment: function () {
+	select_appointment() {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Appointment"),
@@ -762,9 +762,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		});
 
 		dialog.show();
-	},
+	}
 
-	get_appointment_details: function (appointment) {
+	get_appointment_details(appointment) {
 		var me = this;
 
 		if (appointment) {
@@ -791,27 +791,27 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				"appointment_dt": null,
 			});
 		}
-	},
+	}
 
-	collect_progress: function() {
+	collect_progress() {
 		this.frm.set_df_property("message", "reqd", this.frm.doc.collect_progress);
-	},
+	}
 
-	percent_complete: function () {
+	percent_complete() {
 		this.set_percent_complete_read_only();
-	},
+	}
 
-	set_percent_complete_read_only: function () {
+	set_percent_complete_read_only() {
 		var read_only = cint(this.frm.doc.percent_complete_method != "Manual");
 		this.frm.set_df_property("percent_complete", "read_only", read_only);
-	},
+	}
 
-	set_status_read_only: function () {
+	set_status_read_only() {
 		var read_only = this.frm.doc.project_status ? 1 : 0;
 		this.frm.set_df_property("status", "read_only", read_only);
-	},
+	}
 
-	open_form: function (doctype) {
+	open_form(doctype) {
 		var me = this;
 
 		var item_table_fieldnames = {
@@ -842,9 +842,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				cur_frm.refresh_field(items_fieldname);
 			}
 		});
-	},
+	}
 
-	make_sales_invoice: function () {
+	make_sales_invoice() {
 		var me = this;
 		me.frm.check_if_unsaved();
 
@@ -877,9 +877,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		} else {
 			me._make_sales_invoice();
 		}
-	},
+	}
 
-	_make_sales_invoice: function (depreciation_type) {
+	_make_sales_invoice(depreciation_type) {
 		return frappe.call({
 			method: "erpnext.projects.doctype.project.project.make_sales_invoice",
 			args: {
@@ -893,9 +893,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	make_delivery_note: function () {
+	make_delivery_note() {
 		var me = this;
 		me.frm.check_if_unsaved();
 		return frappe.call({
@@ -910,9 +910,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	make_sales_order: function (items_type) {
+	make_sales_order(items_type) {
 		var me = this;
 		me.frm.check_if_unsaved();
 		return frappe.call({
@@ -928,9 +928,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	make_vehicle_receipt: function () {
+	make_vehicle_receipt() {
 		this.frm.check_if_unsaved();
 		return frappe.call({
 			method: "erpnext.projects.doctype.project.project.get_vehicle_service_receipt",
@@ -944,9 +944,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	make_vehicle_gate_pass: function () {
+	make_vehicle_gate_pass() {
 		this.frm.check_if_unsaved();
 		return frappe.call({
 			method: "erpnext.projects.doctype.project.project.get_vehicle_gate_pass",
@@ -960,9 +960,9 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 				}
 			}
 		});
-	},
+	}
 
-	make_odometer_log: function () {
+	make_odometer_log() {
 		var me = this;
 		if (!me.frm.doc.applies_to_vehicle) {
 			return;
@@ -998,14 +998,14 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		});
 
 		dialog.show();
-	},
+	}
 
-	setup_vehicle_panel_fields: function () {
+	setup_vehicle_panel_fields() {
 		this.toggle_vehicle_panels_visibility();
 		this.set_was_panel_job();
-	},
+	}
 
-	is_panel_job: function(doc, cdt, cdn) {
+	is_panel_job(doc, cdt, cdn) {
 		for (let d of (this.frm.doc.project_templates || [])) {
 			if (d.name != cdn) {
 				d.is_panel_job = 0;
@@ -1015,46 +1015,46 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		this.toggle_vehicle_panels_visibility();
 		this.update_panel_template_description();
 		this.set_was_panel_job();
-	},
-	project_templates_add: function() {
+	}
+	project_templates_add() {
 		this.toggle_vehicle_panels_visibility();
-	},
-	project_templates_remove: function() {
+	}
+	project_templates_remove() {
 		this.toggle_vehicle_panels_visibility();
-	},
+	}
 
-	vehicle_panel: function() {
+	vehicle_panel() {
 		this.update_panel_template_description();
-	},
-	vehicle_panel_side: function() {
+	}
+	vehicle_panel_side() {
 		this.update_panel_template_description();
-	},
-	vehicle_panel_job: function() {
+	}
+	vehicle_panel_job() {
 		this.update_panel_template_description();
-	},
-	vehicle_panels_add: function() {
+	}
+	vehicle_panels_add() {
 		this.update_panel_template_description();
-	},
-	vehicle_panels_remove: function() {
+	}
+	vehicle_panels_remove() {
 		this.update_panel_template_description();
-	},
+	}
 
-	toggle_vehicle_panels_visibility: function() {
+	toggle_vehicle_panels_visibility() {
 		if (!this.frm.fields_dict.vehicle_panels) {
 			return;
 		}
 
 		var panel_template_rows = (this.frm.doc.project_templates || []).filter(el => el.is_panel_job == 1);
 		this.frm.set_df_property('vehicle_panels', 'hidden', panel_template_rows.length ? 0 : 1);
-	},
+	}
 
-	set_was_panel_job: function () {
+	set_was_panel_job() {
 		for (let d of (this.frm.doc.project_templates || [])) {
 			d.was_panel_job = cint(d.is_panel_job);
 		}
-	},
+	}
 
-	update_panel_template_description: function() {
+	update_panel_template_description() {
 		var description = [];
 		for (let d of (this.frm.doc.vehicle_panels || [])) {
 			if (d.vehicle_panel && d.vehicle_panel_job) {
@@ -1076,7 +1076,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		}
 
 		this.frm.refresh_field('project_templates');
-	},
-});
+	}
+};
 
-$.extend(cur_frm.cscript, new erpnext.projects.ProjectController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.projects.ProjectController({frm: cur_frm}));

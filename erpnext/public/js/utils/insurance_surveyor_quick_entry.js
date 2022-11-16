@@ -1,12 +1,12 @@
 frappe.provide('frappe.ui.form');
 
-frappe.ui.form.InsuranceSurveyorQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
-	init: function(doctype, after_insert) {
-		this._super(doctype, after_insert);
-	},
+frappe.ui.form.InsuranceSurveyorQuickEntryForm = class InsuranceSurveyorQuickEntryForm extends frappe.ui.form.QuickEntryForm {
+	init(doctype, after_insert) {
+		super.init(doctype, after_insert);
+	}
 
-	render_dialog: function() {
-		this._super();
+	render_dialog() {
+		super.render_dialog();
 		if (this.dialog.get_field("insurance_company")) {
 			this.dialog.get_field("insurance_company").get_query = function () {
 				return {
@@ -15,5 +15,5 @@ frappe.ui.form.InsuranceSurveyorQuickEntryForm = frappe.ui.form.QuickEntryForm.e
 				}
 			}
 		}
-	},
-});
+	}
+};

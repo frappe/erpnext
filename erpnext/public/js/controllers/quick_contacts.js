@@ -1,18 +1,18 @@
 frappe.provide('erpnext.contacts');
 
-erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
-	onload: function () {
+erpnext.contacts.QuickContacts = class QuickContacts extends frappe.ui.form.Controller {
+	onload() {
 		this.setup_contact_no_fields();
-	},
+	}
 
-	contact_person: function() {
+	contact_person() {
 		this.get_contact_details();
-	},
-	secondary_contact_person: function() {
+	}
+	secondary_contact_person() {
 		this.get_contact_details("secondary_");
-	},
+	}
 
-	get_contact_details: function(prefix) {
+	get_contact_details(prefix) {
 		var me = this;
 
 		if (!prefix) {
@@ -51,17 +51,17 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 		} else {
 			me.frm.set_value(display_fieldname, "");
 		}
-	},
+	}
 
-	contact_mobile: function () {
+	contact_mobile() {
 		this.get_contact_from_number();
-	},
+	}
 
-	secondary_contact_mobile: function () {
+	secondary_contact_mobile() {
 		this.get_contact_from_number("secondary_");
-	},
+	}
 
-	get_contact_from_number: function(prefix) {
+	get_contact_from_number(prefix) {
 		if (!prefix) {
 			prefix = "";
 		}
@@ -97,18 +97,18 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 		});
 
 		return frappe.run_serially(tasks);
-	},
+	}
 
 
-	contact_mobile_2: function () {
+	contact_mobile_2() {
 		this.add_new_contact_number('contact_mobile_2', 'is_primary_mobile_no');
-	},
+	}
 
-	contact_phone: function () {
+	contact_phone() {
 		this.add_new_contact_number('contact_phone', 'is_primary_phone');
-	},
+	}
 
-	add_new_contact_number: function (number_field, number_type, prefix) {
+	add_new_contact_number(number_field, number_type, prefix) {
 		if (!prefix) {
 			prefix = "";
 		}
@@ -134,9 +134,9 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 
 			return true;
 		}
-	},
+	}
 
-	setup_contact_no_fields: function (contact_nos) {
+	setup_contact_no_fields(contact_nos) {
 		this.set_dynamic_link();
 
 		if (contact_nos) {
@@ -148,15 +148,15 @@ erpnext.contacts.QuickContacts = frappe.ui.form.Controller.extend({
 		frappe.contacts.set_contact_no_select_options(this.frm, 'contact_phone', 'is_primary_phone', true);
 
 		frappe.contacts.set_contact_no_select_options(this.frm, 'secondary_contact_mobile', 'is_primary_mobile_no', true);
-	},
+	}
 
-	get_all_contact_nos: function () {
+	get_all_contact_nos() {
 		this.set_dynamic_link();
 		return frappe.run_serially([
 			() => frappe.contacts.get_all_contact_nos(this.frm, frappe.dynamic_link.doctype,
 				this.frm.doc[frappe.dynamic_link.fieldname]),
 			() => this.setup_contact_no_fields()
 		]);
-	},
-});
+	}
+};
 

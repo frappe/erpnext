@@ -264,8 +264,8 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 	},
 });
 
-erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
-	setup: function() {
+erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.stock.StockController {
+	setup() {
 		var me = this;
 
 		this.remove_sidebar();
@@ -295,21 +295,21 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				}
 			}
 		}
-	},
+	}
 
-	refresh: function() {
+	refresh() {
 		if(this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();
 			}
 		}
-	},
+	}
 
-	conversion_factor: function(doc, cdt, cdn) {
+	conversion_factor(doc, cdt, cdn) {
 		this.frm.events.set_amount_quantity(doc, cdt, cdn);
-	},
+	}
 
-});
+};
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});

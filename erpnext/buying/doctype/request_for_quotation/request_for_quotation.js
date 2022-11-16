@@ -253,10 +253,10 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 	}
 })
 
-erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
-	refresh: function() {
+erpnext.buying.RequestforQuotationController = class RequestforQuotationController extends erpnext.buying.BuyingController {
+	refresh() {
 		var me = this;
-		this._super();
+		super.refresh();
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Material Request'),
 				function() {
@@ -327,17 +327,17 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 			}, __("Get Items From"));
 
 		}
-	},
+	}
 
-	calculate_taxes_and_totals: function() {
+	calculate_taxes_and_totals() {
 		return;
-	},
+	}
 
-	tc_name: function() {
+	tc_name() {
 		this.get_terms();
 	}
-});
+};
 
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
