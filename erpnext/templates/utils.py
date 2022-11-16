@@ -34,7 +34,6 @@ def send_message(subject="Website Query", message="", sender="", phone_no="", fu
 		status='Open',
 		title=subject,
 		contact_email=sender,
-		to_discuss=message,
 	))
 
 	if customer:
