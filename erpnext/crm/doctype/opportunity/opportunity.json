@@ -59,7 +59,6 @@
   "feedback_cb_1",
   "ratings_section",
   "next_contact",
-  "to_discuss",
   "contact_schedule"
  ],
  "fields": [
@@ -425,12 +424,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "to_discuss",
-   "fieldtype": "Small Text",
-   "label": "To Discuss",
-   "no_copy": 1
-  },
-  {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -443,7 +436,7 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2022-11-07 17:02:15.366592",
+ "modified": "2022-11-16 17:29:46.511118",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

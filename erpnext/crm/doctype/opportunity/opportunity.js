@@ -42,6 +42,13 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 
 		if (!me.frm.doc.__islocal) {
 			if(me.frm.perm[0].write) {
+
+				me.frm.add_custom_button(__('Schedule Follow Up'), () => this.schedule_follow_up(),
+					__("Communication"));
+
+				me.frm.add_custom_button(__('Submit Communication'), () => this.submit_communication(),
+					__("Communication"));
+
 				if (me.frm.doc.status !== "Quotation") {
 					me.frm.add_custom_button(__('Lost'), () => me.frm.events.set_as_lost_dialog(me.frm),
 						__("Status"));
@@ -177,10 +184,6 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		erpnext.utils.get_address_display(this.frm, 'customer_address', 'address_display', false);
 	}
 
-	transaction_date() {
-
-	}
-
 	party_name() {
 		return this.get_customer_details();
 	}
@@ -226,6 +229,125 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 				}
 			});
 		}
+	}
+
+	schedule_follow_up() {
+		var me = this;
+
+		var dialog = new frappe.ui.Dialog({
+			title: __('Schedule a Follow Up'),
+			doc: {},
+			fields: [
+				{
+					label : "Follow Up in Days",
+					fieldname: "follow_up_days",
+					fieldtype: "Int",
+					default: 0,
+					onchange: () => {
+						let today = frappe.datetime.nowdate();
+						let contact_date = frappe.datetime.add_days(today, dialog.get_value('follow_up_days'));
+						dialog.set_value('schedule_date', contact_date)
+					}
+				},
+				{
+					fieldtype: "Column Break"
+				},
+				{
+					label : "Schedule Date",
+					fieldname: "schedule_date",
+					fieldtype: "Date",
+					reqd: 1,
+					onchange: () => {
+						var today = frappe.datetime.get_today();
+						var schedule_date = dialog.get_value('schedule_date');
+						dialog.doc.follow_up_days = frappe.datetime.get_diff(schedule_date, today);
+						dialog.get_field('follow_up_days').refresh();
+					}
+				},
+				{
+					fieldtype: "Section Break"
+				},
+				{
+					label : "To Discuss",
+					fieldname: "to_discuss",
+					fieldtype: "Small Text",
+				},
+			],
+			primary_action: function() {
+				var data = dialog.get_values();
+				me.frm.add_child('contact_schedule', data);
+				me.frm.refresh();
+				dialog.hide();
+			},
+			primary_action_label: __('Schedule')
+		});
+		dialog.show();
+	}
+
+	submit_communication() {
+		this.frm.check_if_unsaved();
+
+		var me = this;
+		var row = this.frm.doc.contact_schedule.find(element => !element.contact_date);
+
+		var d = new frappe.ui.Dialog({
+			title: __('Submit Follow Up'),
+			fields: [
+				{
+					"label" : "Schedule Date",
+					"fieldname": "schedule_date",
+					"fieldtype": "Date",
+					"default": row && row.schedule_date,
+					"read_only": 1
+				},
+				{
+					fieldtype: "Column Break"
+				},
+				{
+					"label" : "Contact Date",
+					"fieldname": "contact_date",
+					"fieldtype": "Date",
+					"reqd": 1,
+					"default": frappe.datetime.nowdate()
+				},
+				{
+					fieldtype: "Section Break"
+				},
+				{
+					"label" : "To Discuss",
+					"fieldname": "to_discuss",
+					"fieldtype": "Small Text",
+					"default": row && row.to_discuss,
+					"read_only": 1
+				},
+				{
+					"label" : "Remarks",
+					"fieldname": "remarks",
+					"fieldtype": "Small Text",
+					"reqd": 1
+				},
+			],
+			primary_action: function() {
+				var data = d.get_values();
+				
+				frappe.call({
+					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
+					args: {
+						name: me.frm.doc.name,
+						contact_date: data.contact_date,
+						remarks: data.remarks
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
+				d.hide();
+			},
+			primary_action_label: __('Submit')
+		});
+		d.show();
 	}
 
 	create_customer() {

@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import today, getdate
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
@@ -52,6 +53,7 @@ class Opportunity(TransactionBase):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_financer()
 		self.set_title()
+		self.validate_follow_up()
 
 	def after_insert(self):
 		self.update_lead_status()
@@ -90,6 +92,17 @@ class Opportunity(TransactionBase):
 		elif self.meta.has_field('financer'):
 			self.financer_name = None
 			self.finance_type = None
+
+	def validate_follow_up(self):
+		if not self.get('contact_schedule'):
+			return
+
+		for d in self.get('contact_schedule'):
+			if not d.get('contact_date') and not d.get('schedule_date'):
+				frappe.throw(_("Row #{0}: Please set Contact or Schedule Date in follow up".format(d.idx)))
+
+			if d.is_new() and not d.get('contact_date') and getdate(d.get('schedule_date')) < getdate(today()):
+				frappe.throw(_("Row #{0}: Can't schedule a follow up for past dates".format(d.idx)))
 
 	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
@@ -434,3 +447,39 @@ def get_customer_from_opportunity(source):
 
 		elif source.get('opportunity_from') == 'Customer':
 			return frappe.get_cached_doc('Customer', source.get('party_name'))
+
+
+@frappe.whitelist()
+def submit_communication(name, contact_date, remarks):
+	if not remarks:
+		frappe.throw(_('Remarks are mandatory for follow up'))
+
+	opp = frappe.get_cached_doc('Opportunity', name)
+	follow_up = [f for f in opp.contact_schedule if not f.contact_date]
+	if follow_up:
+		follow_up[0].contact_date = getdate(contact_date)
+	else:
+		opp.append("contact_schedule", {
+			"contact_date": contact_date,
+		})
+
+	opp.save()
+
+	comm = frappe.new_doc("Communication")
+	comm.reference_doctype = opp.doctype
+	comm.reference_name = opp.name
+	comm.reference_owner = opp.owner
+
+	comm.sender = frappe.session.user
+	comm.sent_or_received = 'Sent'
+	comm.subject = "Opportunity Communication"
+	comm.content = remarks
+	comm.communication_type = "Feedback"
+
+	if opp.get('party_doctype') and opp.get('party'):
+		comm.append("timeline_links", {
+			"link_doctype": opp.party_doctype,
+			"link_name": opp.party
+	})
+
+	comm.insert()
