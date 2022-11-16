@@ -833,6 +833,10 @@ class TestPurchaseOrder(FrappeTestCase):
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
 
+		mr = make_material_request(
+			qty=2, company="_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+		)
+
 		po = create_purchase_order(
 			company="_Test Company with perpetual inventory",
 			supplier=supplier,
@@ -840,6 +844,8 @@ class TestPurchaseOrder(FrappeTestCase):
 			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
 			qty=2,
 			rate=1,
+			material_request = mr.name,
+			material_request_item = mr.items[0].name,
 		)
 
 		so = make_inter_company_sales_order(po.name)
@@ -875,53 +881,10 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertTrue(pi.items[0].purchase_order)
 		self.assertTrue(pi.items[0].po_detail)
 		pi.submit()
+		mr.reload()
 
 		po.load_from_db()
 		self.assertEqual(po.status, "Completed")
-
-	def test_internal_transfer_flow_with_mr(self):
-		from erpnext.selling.doctype.sales_order.sales_order import (
-			make_delivery_note,
-		)
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-
-		frappe.db.set_value("Selling Settings", None, "maintain_same_sales_rate", 1)
-		frappe.db.set_value("Buying Settings", None, "maintain_same_rate", 1)
-
-		supplier = "_Test Internal Supplier 2"
-
-		mr = make_material_request(qty=2, company="_Test Company with perpetual inventory", warehouse="Stores - TCP1")
-		po = make_purchase_order(mr.name)
-		po.supplier = supplier
-		po.from_warehouse="_Test Internal Warehouse New 1 - TCP1",
-		po.rate=1,
-		po.save()
-		po.submit()
-
-		so = make_inter_company_sales_order(po.name)
-		so.items[0].delivery_date = today()
-		self.assertEqual(so.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
-		self.assertTrue(so.items[0].material_request)
-		self.assertTrue(so.items[0].material_request_item)
-		so.submit()
-
-		dn = make_delivery_note(so.name)
-		dn.items[0].target_warehouse = "_Test Internal Warehouse GIT - TCP1"
-		self.assertEqual(dn.items[0].warehouse, "_Test Internal Warehouse New 1 - TCP1")
-		self.assertTrue(dn.items[0].material_request)
-		self.assertTrue(dn.items[0].material_request_item)
-
-		self.assertEqual(mr.items[0].name, dn.items[0].material_request_item)
-		dn.submit()
-
-		pr = make_inter_company_purchase_receipt(dn.name)
-		self.assertEqual(pr.items[0].warehouse, "Stores - TCP1")
-		self.assertTrue(pr.items[0].material_request)
-		self.assertTrue(pr.items[0].material_request_item)
-		self.assertEqual(mr.items[0].name, pr.items[0].material_request_item)
-		pr.submit()
-
-		po.load_from_db()
 		self.assertEqual(mr.status, "Received")
 
 def prepare_data_for_internal_transfer():
@@ -1023,6 +986,8 @@ def create_purchase_order(**args):
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),
 				"against_blanket_order": args.against_blanket_order,
+				"material_request": args.material_request,
+				"material_request_item": args.material_request_item,
 			},
 		)
 
