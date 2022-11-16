@@ -316,10 +316,9 @@ class ProductionPlan(Document):
 		frappe.flags.mute_messages = False
 
 		if wo_list:
-			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
-				(p, p) for p in wo_list]
+			wo_list = [frappe.utils.get_link_to_form("Work Order", p, target="_blank") for p in wo_list]
 			msgprint(_("{0} created").format(comma_and(wo_list)))
-		else :
+		else:
 			msgprint(_("No Work Orders created"))
 
 	def make_work_order_for_sub_assembly_items(self, item):
@@ -421,10 +420,9 @@ class ProductionPlan(Document):
 		frappe.flags.mute_messages = False
 
 		if material_request_list:
-			material_request_list = ["""<a href="#Form/Material Request/{0}">{1}</a>""".format(m.name, m.name) \
-				for m in material_request_list]
+			material_request_list = [frappe.utils.get_link_to_form("Material Request", m.name) for m in material_request_list]
 			msgprint(_("{0} created").format(comma_and(material_request_list)))
-		else :
+		else:
 			msgprint(_("No material request created"))
 
 @frappe.whitelist()

@@ -128,7 +128,7 @@ frappe.ui.form.on('Assessment Result Tool', {
 						result_table.find(`span[data-student=${assessment_result.student}].total-score-grade`).html(assessment_result.grade);
 						let link_span = result_table.find(`span[data-student=${assessment_result.student}].total-result-link`);
 						$(link_span).css("display", "block");
-						$(link_span).find("a").attr("href", "#Form/Assessment Result/"+assessment_result.name);
+						$(link_span).find("a").attr("href", "/app/assessment-result/"+assessment_result.name);
 					}
 				});
 			}

@@ -124,7 +124,7 @@ def get_healthcare_services_to_invoice(patient):
 				service_item = get_healthcare_service_item('clinical_procedure_consumable_item')
 				if not service_item:
 					msg = _(("Please Configure {0} in ").format("Clinical Procedure Consumable Item") \
-						+ """<b><a href="#Form/Healthcare Settings">Healthcare Settings</a></b>""")
+						+ frappe.utils.get_link_to_form("Healthcare Settings", "Healthcare Settings"))
 					frappe.throw(msg)
 				for procedure in procedures:
 					procedure_obj = frappe.get_doc("Clinical Procedure", procedure['name'])
@@ -183,7 +183,7 @@ def throw_config_service_item(is_ip):
 		service_item_lable = "Inpatient Visit Charge Item"
 
 	msg = _(("Please Configure {0} in ").format(service_item_lable) \
-		+ """<b><a href="#Form/Healthcare Settings">Healthcare Settings</a></b>""")
+		+ frappe.utils.get_link_to_form("Healthcare Settings", "Healthcare Settings"))
 	frappe.throw(msg)
 
 def throw_config_practitioner_charge(is_ip, practitioner):
@@ -192,7 +192,7 @@ def throw_config_practitioner_charge(is_ip, practitioner):
 		charge_name = "Inpatient Visit Charge"
 
 	msg = _(("Please Configure {0} for Healthcare Practitioner").format(charge_name) \
-		+ """ <b><a href="#Form/Healthcare Practitioner/{0}">{0}</a></b>""".format(practitioner))
+		+ frappe.utils.get_link_to_form("Healthcare Practitioner", practitioner))
 	frappe.throw(msg)
 
 def get_practitioner_service_item(practitioner, service_item_field):
@@ -538,6 +538,6 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 		><div class='col-md-12 col-sm-12'>" \
 		+ section_html + html +"</div></div>"
 	if doc_html:
-		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='#Form/%s/%s'></a></div>" %(doctype, docname) + doc_html + "</div>"
+		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='/app/%s/%s'></a></div>" %(doctype, docname) + doc_html + "</div>"
 
 	return {'html': doc_html}

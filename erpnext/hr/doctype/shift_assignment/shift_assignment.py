@@ -40,7 +40,7 @@ class ShiftAssignment(Document):
 	def throw_overlap_error(self, d):
 		msg = _("Employee {0} has already applied for {1} on {2} : ").format(self.employee,
 			d['shift_type'], formatdate(d['date'])) \
-			+ """ <b><a href="#Form/Shift Assignment/{0}">{0}</a></b>""".format(d["name"])
+			+ frappe.utils.get_link_to_form("Shift Assignment", d["name"])
 		frappe.throw(msg, OverlapError)
 
 @frappe.whitelist()

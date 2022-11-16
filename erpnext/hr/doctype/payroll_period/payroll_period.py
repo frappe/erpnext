@@ -40,7 +40,7 @@ class PayrollPeriod(Document):
 		if overlap_doc:
 			msg = _("A {0} exists between {1} and {2} (").format(self.doctype,
 				formatdate(self.start_date), formatdate(self.end_date)) \
-				+ """ <b><a href="#Form/{0}/{1}">{1}</a></b>""".format(self.doctype, overlap_doc[0].name) \
+				+ frappe.utils.get_link_to_form(self.doctype, overlap_doc[0].name) \
 				+ _(") for {0}").format(self.company)
 			frappe.throw(msg)
 

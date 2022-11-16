@@ -60,8 +60,7 @@ class ProgramEnrollment(Document):
 				fees.submit()
 				fee_list.append(fees.name)
 		if fee_list:
-			fee_list = ["""<a href="#Form/Fees/%s" target="_blank">%s</a>""" % \
-				(fee, fee) for fee in fee_list]
+			fee_list = [frappe.utils.get_link_to_form("Fees", fee, target="_blank") for fee in fee_list]
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
 

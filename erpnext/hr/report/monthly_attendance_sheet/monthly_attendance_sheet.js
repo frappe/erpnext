@@ -56,7 +56,7 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 		var link;
 
 		if (['total_present', 'total_absent', 'total_half_day', 'total_leave', 'total_late_entry', 'total_early_exit'].includes(column.fieldname) && data.employee) {
-			link = `desk#query-report/Employee Checkin Sheet?employee=${encodeURIComponent(data.employee)}&from_date=${data.from_date}&to_date=${data.to_date}`;
+			link = `/app/query-report/Employee Checkin Sheet?employee=${encodeURIComponent(data.employee)}&from_date=${data.from_date}&to_date=${data.to_date}`;
 		}
 
 		if (column.fieldname == 'total_present' && flt(value)) {
@@ -88,7 +88,7 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 			var status = data[status_fieldname]
 
 			if (data[attendance_fieldname]) {
-				link = "desk#Form/Attendance/" + encodeURIComponent(data[attendance_fieldname]);
+				link = "/app/attendance/" + encodeURIComponent(data[attendance_fieldname]);
 			}
 
 			if (status == "Holiday") {

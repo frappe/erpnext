@@ -112,7 +112,7 @@ var btn_invoice_registration = function (frm) {
 			if(!data.exc){
 				if(data.message.invoice){
 					/* frappe.show_alert(__('Sales Invoice {0} created',
-					['<a href="#Form/Sales Invoice/'+data.message.invoice+'">' + data.message.invoice+ '</a>'])); */
+					['<a href="/app/sales-invoice/'+data.message.invoice+'">' + data.message.invoice+ '</a>'])); */
 					frappe.set_route("Form", "Sales Invoice", data.message.invoice);
 				}
 				cur_frm.reload_doc();

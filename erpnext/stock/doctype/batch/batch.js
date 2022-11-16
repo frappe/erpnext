@@ -105,7 +105,7 @@ frappe.ui.form.on('Batch', {
 									},
 									callback: (r) => {
 										frappe.show_alert(__('Stock Entry {0} created',
-											['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
+											['<a href="/app/stock-entry/'+r.message.name+'">' + r.message.name+ '</a>']));
 										frm.refresh();
 									},
 								});

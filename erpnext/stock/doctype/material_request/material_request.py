@@ -590,8 +590,7 @@ def raise_work_orders(material_request):
 				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
 
 	if work_orders:
-		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
-			(p, p) for p in work_orders]
+		message = [frappe.utils.get_link_to_form("Work Order", p, target="_blank") for p in work_orders]
 		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
 
 	if errors:

@@ -158,7 +158,7 @@ class Issue(Document):
 			"comment_type": "Info",
 			"reference_doctype": "Issue",
 			"reference_name": replicated_issue.name,
-			"content": " - Split the Issue from <a href='#Form/Issue/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
+			"content": " - Split the Issue from {0}".format(frappe.utils.get_link_to_form("Issue", self.name)),
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name

@@ -61,14 +61,14 @@ frappe.query_reports["Employee Checkin Sheet"] = {
 
 		if (['attendance_status', 'attendance_abbr', 'working_hours'].includes(column.fieldname)) {
 			if (data['attendance']) {
-				link = "desk#Form/Attendance/" + encodeURIComponent(data['attendance']);
+				link = "/app/attendance/" + encodeURIComponent(data['attendance']);
 			}
 		}
 
 		if (column.checkin_idx) {
 			var checkin_name = data['checkin_' + column.checkin_idx];
 			if (checkin_name) {
-				link = "desk#Form/Employee Checkin/" + encodeURIComponent(checkin_name);
+				link = "/app/employee-checkin/" + encodeURIComponent(checkin_name);
 			}
 		}
 

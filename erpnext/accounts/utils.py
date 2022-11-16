@@ -626,7 +626,7 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where original_reference_type=%s and original_reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		msg_jv_list = ["<a href='#Form/Journal Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_jv))]
+		msg_jv_list = [frappe.utils.get_link_to_form("Journal Entry", jv) for jv in list(set(linked_jv))]
 		frappe.msgprint(_("Journal Entries {0} are un-linked").format(", ".join(msg_jv_list)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
@@ -658,7 +658,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 
 			pe_doc.db_update()
 
-		msg_pe_list = ["<a href='#Form/Payment Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_pe))]
+		msg_pe_list = [frappe.utils.get_link_to_form("Payment Entry", jv) for jv in list(set(linked_pe))]
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format(", ".join(msg_pe_list)))
 
 @frappe.whitelist()

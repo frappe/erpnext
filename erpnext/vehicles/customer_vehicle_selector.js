@@ -164,7 +164,7 @@ erpnext.vehicles.CustomerVehicleSelector = Class.extend({
 			`;
 			var $vehicle_html = $(vehicle_html).appendTo(container);
 			if (me.is_master_document_view()) {
-				$('.panel', $vehicle_html).wrap(`<a href='#Form/Vehicle/${encodeURIComponent(vehicle.name)}'></a>`);
+				$('.panel', $vehicle_html).wrap(`<a href='/app/vehicle/${encodeURIComponent(vehicle.name)}'></a>`);
 			}
 		});
 	},
@@ -203,7 +203,7 @@ erpnext.vehicles.CustomerVehicleSelector = Class.extend({
 
 			var $customer_html = $(customer_html).appendTo(container);
 			if (me.is_master_document_view()) {
-				$('.panel', $customer_html).wrap(`<a href='#Form/Customer/${encodeURIComponent(customer.name)}'></a>`);
+				$('.panel', $customer_html).wrap(`<a href='/app/customer/${encodeURIComponent(customer.name)}'></a>`);
 			}
 		});
 	},

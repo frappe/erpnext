@@ -142,12 +142,12 @@ frappe.query_reports["Item Prices"] = {
 
 			var item_price_field = "item_price_" + frappe.scrub(column.price_list);
 			if (data.hasOwnProperty(item_price_field) && data[item_price_field]) {
-				link = "desk#Form/Item Price/" + data[item_price_field];
+				link = "/app/item-price/" + data[item_price_field];
 			}
 		}
 
 		if (column.fieldname == "po_qty") {
-			link = "desk#query-report/Purchase Items To Be Received?item_code=" + data.item_code;
+			link = "/app/query-report/Purchase Items To Be Received?item_code=" + data.item_code;
 		}
 
 		if (['po_qty', 'actual_qty', 'standard_rate', 'avg_lc_rate'].includes(column.fieldname)) {

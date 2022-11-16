@@ -362,7 +362,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 										frappe.msgprint({
 											message: __('Work Orders Created: {0}',
 												[r.message.map(function(d) {
-													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
+													return repl('<a href="/app/work-order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'
 										})
