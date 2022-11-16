@@ -63,6 +63,7 @@ class QualityProcedure(NestedSet):
 
 
 @frappe.whitelist()
+@frappe.validate_tree_doctype
 def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=False):
 	if parent is None or parent == "All Quality Procedures":
 		parent = ""

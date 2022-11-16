@@ -190,6 +190,7 @@ def _ring_area(coords):
 
 
 @frappe.whitelist()
+@frappe.validate_tree_doctype
 def get_children(doctype, parent=None, location=None, is_root=False):
 	if parent is None or parent == "All Locations":
 		parent = ""

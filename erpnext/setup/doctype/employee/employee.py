@@ -406,6 +406,7 @@ def get_employee_emails(employee_list):
 
 
 @frappe.whitelist()
+@frappe.validate_tree_doctype
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
 
 	filters = [["status", "=", "Active"]]

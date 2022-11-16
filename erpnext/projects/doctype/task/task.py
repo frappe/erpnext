@@ -342,8 +342,8 @@ def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
 
 
 @frappe.whitelist()
+@frappe.validate_tree_doctype
 def get_children(doctype, parent, task=None, project=None, is_root=False):
-
 	filters = [["docstatus", "<", "2"]]
 
 	if task:

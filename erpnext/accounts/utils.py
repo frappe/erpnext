@@ -925,6 +925,7 @@ def get_companies():
 
 
 @frappe.whitelist()
+@frappe.validate_tree_doctype
 def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_accounts
 

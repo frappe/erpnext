@@ -51,6 +51,7 @@ def get_abbreviated_name(name, company):
 
 
 @frappe.whitelist()
+@frappe.validate_tree_doctype
 def get_children(doctype, parent=None, company=None, is_root=False):
 	fields = ["name as value", "is_group as expandable"]
 	filters = {}
