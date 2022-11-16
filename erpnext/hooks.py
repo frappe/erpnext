@@ -345,9 +345,9 @@ get_site_info = 'erpnext.utilities.get_site_info'
 
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
 
-jenv = {
+jinja = {
 	'methods': [
-		'format_item_name:erpnext.stock.utils.format_item_name'
+		'erpnext.stock.utils.format_item_name'
 	]
 }
 
