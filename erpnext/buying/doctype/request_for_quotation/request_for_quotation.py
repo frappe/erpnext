@@ -479,7 +479,7 @@ def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filt
 		conditions += "and rfq.transaction_date = '{0}'".format(filters.get("transaction_date"))
 
 	rfq_data = frappe.db.sql(
-		"""
+		f"""
 		select
 			distinct rfq.name, rfq.transaction_date,
 			rfq.company
@@ -487,15 +487,18 @@ def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filt
 			`tabRequest for Quotation` rfq, `tabRequest for Quotation Supplier` rfq_supplier
 		where
 			rfq.name = rfq_supplier.parent
-			and rfq_supplier.supplier = '{0}'
+			and rfq_supplier.supplier = %(supplier)s
 			and rfq.docstatus = 1
-			and rfq.company = '{1}'
-			{2}
+			and rfq.company = %(company)s
+			{conditions}
 		order by rfq.transaction_date ASC
-		limit %(page_len)s offset %(start)s """.format(
-			filters.get("supplier"), filters.get("company"), conditions
-		),
-		{"page_len": page_len, "start": start},
+		limit %(page_len)s offset %(start)s """,
+		{
+			"page_len": page_len,
+			"start": start,
+			"company": filters.get("company"),
+			"supplier": filters.get("supplier"),
+		},
 		as_dict=1,
 	)
 
