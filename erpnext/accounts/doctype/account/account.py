@@ -92,9 +92,7 @@ class Account(NestedSet):
 				self.root_type = par.root_type
 
 		if self.is_group:
-			db_value = frappe.get_cached_value(
-				"Account", self.name, ["report_type", "root_type"], as_dict=1
-			)
+			db_value = self.get_doc_before_save()
 			if db_value:
 				if self.report_type != db_value.report_type:
 					frappe.db.sql(
@@ -113,14 +111,13 @@ class Account(NestedSet):
 			)
 
 	def validate_root_details(self):
-		# does not exists parent
-		account_values = frappe.get_cached_value("Account", self.name, ["parent_account"], as_dict=1)
-		if account_values:
-			if not account_values.parent_account:
-				throw(_("Root cannot be edited."), RootNotEditable)
+		doc_before_save = self.get_doc_before_save()
+
+		if doc_before_save and not doc_before_save.parent_account:
+			throw(_("Root cannot be edited."), RootNotEditable)
 
 		if not self.parent_account and not self.is_group:
-			frappe.throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
+			throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
 
 	def validate_root_company_and_sync_account_to_children(self):
 		# ignore validation while creating new compnay or while syncing to child companies
@@ -164,27 +161,28 @@ class Account(NestedSet):
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
 	def validate_group_or_ledger(self):
-		if self.get("__islocal"):
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save or cint(doc_before_save.is_group) == cint(self.is_group):
 			return
 
-		existing_is_group = frappe.get_cached_value("Account", self.name, "is_group")
-		if cint(self.is_group) != cint(existing_is_group):
-			if self.check_gle_exists():
-				throw(_("Account with existing transaction cannot be converted to ledger"))
-			elif self.is_group:
-				if self.account_type and not self.flags.exclude_account_type_check:
-					throw(_("Cannot covert to Group because Account Type is selected."))
-			elif self.check_if_child_exists():
-				throw(_("Account with child nodes cannot be set as ledger"))
+		if self.check_gle_exists():
+			throw(_("Account with existing transaction cannot be converted to ledger"))
+		elif self.is_group:
+			if self.account_type and not self.flags.exclude_account_type_check:
+				throw(_("Cannot covert to Group because Account Type is selected."))
+		elif self.check_if_child_exists():
+			throw(_("Account with child nodes cannot be set as ledger"))
 
 	def validate_frozen_accounts_modifier(self):
-		old_value = frappe.get_cached_value("Account", self.name, "freeze_account")
-		if old_value and old_value != self.freeze_account:
-			frozen_accounts_modifier = frappe.db.get_value(
-				"Accounts Settings", None, "frozen_accounts_modifier"
-			)
-			if not frozen_accounts_modifier or frozen_accounts_modifier not in frappe.get_roles():
-				throw(_("You are not authorized to set Frozen value"))
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save or doc_before_save.freeze_account == self.freeze_account:
+			return
+
+		frozen_accounts_modifier = frappe.get_cached_value(
+			"Accounts Settings", "Accounts Settings", "frozen_accounts_modifier"
+		)
+		if not frozen_accounts_modifier or frozen_accounts_modifier not in frappe.get_roles():
+			throw(_("You are not authorized to set Frozen value"))
 
 	def validate_balance_must_be_debit_or_credit(self):
 		from erpnext.accounts.utils import get_balance_on
@@ -440,25 +438,24 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 @frappe.whitelist()
 def merge_account(old, new, is_group, root_type, company):
 	# Validate properties before merging
-	account_data = frappe.get_cached_value(
-		"Account", new, ["is_group", "root_type", "company", "parent_account"], as_dict=True
-	)
-	if not account_data:
+	new_account = frappe.get_cached_doc("Account", new)
+
+	if not new_account:
 		throw(_("Account {0} does not exist").format(new))
 
-	val = list(account_data.values())[:3]  # is_group, root_type, company
-
-	if val != [cint(is_group), root_type, company]:
+	if (new_account.is_group, new_account.root_type, new_account.company) != (
+		cint(is_group),
+		root_type,
+		company,
+	):
 		throw(
 			_(
 				"""Merging is only possible if following properties are same in both records. Is Group, Root Type, Company"""
 			)
 		)
 
-	if is_group and account_data.parent_account == old:
-		frappe.db.set_value(
-			"Account", new, "parent_account", frappe.get_cached_value("Account", old, "parent_account")
-		)
+	if is_group and new_account.parent_account == old:
+		new_account.db_set("parent_account", frappe.get_cached_value("Account", old, "parent_account"))
 
 	frappe.rename_doc("Account", old, new, merge=1, force=1)
 

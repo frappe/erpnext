@@ -286,10 +286,10 @@ def get_accounts_with_children(accounts):
 
 	all_accounts = []
 	for d in accounts:
-		account_data = frappe.get_cached_value("Account", d, ["lft", "rgt"], as_dict=1)
-		if account_data:
+		account = frappe.get_cached_doc("Account", d)
+		if account:
 			children = frappe.get_all(
-				"Account", filters={"lft": [">=", account_data.lft], "rgt": ["<=", account_data.rgt]}
+				"Account", filters={"lft": [">=", account.lft], "rgt": ["<=", account.rgt]}
 			)
 			all_accounts += [c.name for c in children]
 		else:
