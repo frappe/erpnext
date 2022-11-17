@@ -69,6 +69,7 @@
   "tax_category",
   "column_break_49",
   "shipping_rule",
+  "incoterm",
   "section_break_51",
   "taxes",
   "totals",
@@ -1534,13 +1535,23 @@
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text",
    "print_hide": 1
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-11-22 12:44:29.935567",
+=======
+ "modified": "2022-11-17 17:30:45.559785",
+>>>>>>> 77105306f2 (feat: add incoterm to purchasing transactions)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
