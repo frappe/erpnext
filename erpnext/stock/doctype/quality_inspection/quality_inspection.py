@@ -219,74 +219,10 @@ class QualityInspection(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters):
-<<<<<<< HEAD
-	if filters.get("from"):
-		from frappe.desk.reportview import get_match_cond
-
-		mcond = get_match_cond(filters["from"])
-		cond, qi_condition = "", "and (quality_inspection is null or quality_inspection = '')"
-
-		if filters.get("parent"):
-			if (
-				filters.get("from") in ["Purchase Invoice Item", "Purchase Receipt Item"]
-				and filters.get("inspection_type") != "In Process"
-			):
-				cond = """and item_code in (select name from `tabItem` where
-					inspection_required_before_purchase = 1)"""
-			elif (
-				filters.get("from") in ["Sales Invoice Item", "Delivery Note Item"]
-				and filters.get("inspection_type") != "In Process"
-			):
-				cond = """and item_code in (select name from `tabItem` where
-					inspection_required_before_delivery = 1)"""
-			elif filters.get("from") == "Stock Entry Detail":
-				cond = """and s_warehouse is null"""
-
-			if filters.get("from") in ["Supplier Quotation Item"]:
-				qi_condition = ""
-
-			return frappe.db.sql(
-				"""
-					SELECT item_code
-					FROM `tab{doc}`
-					WHERE parent=%(parent)s and docstatus < 2 and item_code like %(txt)s
-					{qi_condition} {cond} {mcond}
-					ORDER BY item_code limit {start}, {page_len}
-				""".format(
-					doc=filters.get("from"),
-					cond=cond,
-					mcond=mcond,
-					start=start,
-					page_len=page_len,
-					qi_condition=qi_condition,
-				),
-				{"parent": filters.get("parent"), "txt": "%%%s%%" % txt},
-			)
-
-		elif filters.get("reference_name"):
-			return frappe.db.sql(
-				"""
-					SELECT production_item
-					FROM `tab{doc}`
-					WHERE name = %(reference_name)s and docstatus < 2 and production_item like %(txt)s
-					{qi_condition} {cond} {mcond}
-					ORDER BY production_item
-					LIMIT {start}, {page_len}
-				""".format(
-					doc=filters.get("from"),
-					cond=cond,
-					mcond=mcond,
-					start=start,
-					page_len=page_len,
-					qi_condition=qi_condition,
-				),
-				{"reference_name": filters.get("reference_name"), "txt": "%%%s%%" % txt},
-			)
-=======
 	from frappe.desk.reportview import get_match_cond
 
 	from_doctype = cstr(filters.get("doctype"))
-	if not from_doctype or not frappe.db.exist("DocType", from_doctype):
+	if not from_doctype or not frappe.db.exists("DocType", from_doctype):
 		return []
 
 	mcond = get_match_cond(from_doctype)
@@ -348,7 +284,6 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			),
 			{"reference_name": filters.get("reference_name"), "txt": "%%%s%%" % txt},
 		)
->>>>>>> 34e4903ed7 (refactor: search queries (#33004))
 
 
 @frappe.whitelist()

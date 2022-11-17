@@ -10,12 +10,8 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
-<<<<<<< HEAD
-from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
-from six import string_types
-=======
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
->>>>>>> 34e4903ed7 (refactor: search queries (#33004))
+from six import string_types
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
