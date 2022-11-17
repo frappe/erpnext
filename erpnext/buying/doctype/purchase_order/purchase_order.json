@@ -1118,7 +1118,8 @@
    "fetch_from": "supplier.is_internal_supplier",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
-   "label": "Is Internal Supplier"
+   "label": "Is Internal Supplier",
+   "read_only": 1
   },
   {
    "fetch_from": "supplier.represents_company",
@@ -1169,7 +1170,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-16 17:45:04.954055",
+ "modified": "2022-11-17 12:34:36.033363",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
