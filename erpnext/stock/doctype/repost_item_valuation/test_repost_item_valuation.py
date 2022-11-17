@@ -343,10 +343,10 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		accounts_settings = frappe.get_doc("Accounts Settings")
 		accounts_settings.acc_frozen_upto = today
-		accounts_settings.frozen_accounts_modifier = ''
+		accounts_settings.frozen_accounts_modifier = ""
 		accounts_settings.save()
 
 		self.assertRaises(frappe.ValidationError, riv.save)
 
-		accounts_settings.acc_frozen_upto = ''
+		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
