@@ -63,7 +63,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 		});
 
 		listview.page.add_action_item(__("Payment"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment");
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment Entry");
 		});
 	}
 };
