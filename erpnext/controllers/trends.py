@@ -80,7 +80,7 @@ def get_data(filters, conditions):
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"
 
-	year_start_date, year_end_date = frappe.db.get_value(
+	year_start_date, year_end_date = frappe.get_cached_value(
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
 	)
 
@@ -275,7 +275,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	from dateutil.relativedelta import relativedelta
 
 	if not year_start_date:
-		year_start_date, year_end_date = frappe.db.get_value(
+		year_start_date, year_end_date = frappe.get_cached_value(
 			"Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"]
 		)
 

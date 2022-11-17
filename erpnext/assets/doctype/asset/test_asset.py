@@ -221,7 +221,7 @@ class TestAsset(AssetSetup):
 			asset.precision("gross_purchase_amount"),
 		)
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
-			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
+			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 		self.assertEquals(accumulated_depr_amount, 18000.00 + pro_rata_amount)
@@ -230,9 +230,17 @@ class TestAsset(AssetSetup):
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
+			(
+				"_Test Accumulated Depreciations - _TC",
+				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 82000.0 - pro_rata_amount, 0.0),
+			(
+				"_Test Gain/Loss on Asset Disposal - _TC",
+				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 		)
 
 		gle = frappe.db.sql(
@@ -283,14 +291,22 @@ class TestAsset(AssetSetup):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
-			asset.finance_books[0], 9000, add_months(get_last_day(purchase_date), 1), date
+			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
+			(
+				"_Test Accumulated Depreciations - _TC",
+				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 57000.0 - pro_rata_amount, 0.0),
+			(
+				"_Test Gain/Loss on Asset Disposal - _TC",
+				flt(57000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 

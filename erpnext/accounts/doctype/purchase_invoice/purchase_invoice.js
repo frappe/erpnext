@@ -569,6 +569,10 @@ frappe.ui.form.on("Purchase Invoice", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		if (frm.is_new()) {
+			frm.clear_table("tax_withheld_vouchers");
+		}
 	},
 
 	is_subcontracted: function(frm) {

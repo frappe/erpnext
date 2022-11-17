@@ -71,6 +71,9 @@ class PurchaseInvoice(BuyingController):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
+		if self.is_new():
+			self.set("tax_withheld_vouchers", [])
+
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ""
@@ -1407,7 +1410,7 @@ class PurchaseInvoice(BuyingController):
 			self.repost_future_sle_and_gle()
 
 		self.update_project()
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.ignore_linked_doctypes = (
@@ -1415,7 +1418,7 @@ class PurchaseInvoice(BuyingController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Payment Ledger Entry",
-			"Purchase Invoice",
+			"Tax Withheld Vouchers",
 		)
 		self.update_advance_tax_references(cancel=1)
 
@@ -1460,6 +1463,7 @@ class PurchaseInvoice(BuyingController):
 
 	def update_billing_status_in_pr(self, update_modified=True):
 		updated_pr = []
+		po_details = []
 		for d in self.get("items"):
 			if d.pr_detail:
 				billed_amt = frappe.db.sql(
@@ -1477,7 +1481,10 @@ class PurchaseInvoice(BuyingController):
 				)
 				updated_pr.append(d.purchase_receipt)
 			elif d.po_detail:
-				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
+				po_details.append(d.po_detail)
+
+		if po_details:
+			updated_pr += update_billed_amount_based_on_po(po_details, update_modified)
 
 		for pr in set(updated_pr):
 			from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage

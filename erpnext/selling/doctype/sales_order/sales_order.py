@@ -193,6 +193,9 @@ class SalesOrder(SellingController):
 			{"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
 		)
 
+		if cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")):
+			self.validate_rate_with_reference_doc([["Quotation", "prev_docname", "quotation_item"]])
+
 	def update_enquiry_status(self, prevdoc, flag):
 		enq = frappe.db.sql(
 			"select t2.prevdoc_docname from `tabQuotation` t1, `tabQuotation Item` t2 where t2.parent = t1.name and t1.name=%s",
@@ -246,7 +249,7 @@ class SalesOrder(SellingController):
 		self.update_project()
 		self.update_prevdoc_status("cancel")
 
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")
 
 		self.update_blanket_order()
 
