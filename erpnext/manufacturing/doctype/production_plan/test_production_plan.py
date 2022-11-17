@@ -826,6 +826,11 @@ class TestProductionPlan(FrappeTestCase):
 		)
 
 		pln.make_material_request()
+
+		for row in pln.mr_items:
+			self.assertEqual(row.uom, "Nos")
+			self.assertEqual(row.quantity, 1)
+
 		for row in frappe.get_all(
 			"Material Request Item",
 			filters={"production_plan": pln.name},

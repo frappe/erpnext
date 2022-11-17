@@ -81,8 +81,7 @@
   },
   {
    "fieldname": "no_bank_transactions",
-   "fieldtype": "HTML",
-   "options": "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
+   "fieldtype": "HTML"
   }
  ],
  "hide_toolbar": 1,

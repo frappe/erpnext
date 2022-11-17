@@ -67,7 +67,7 @@ erpnext.PointOfSale.Controller = class {
 				{
 					fieldtype: 'Link', label: __('POS Profile'),
 					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
-					get_query: () => pos_profile_query,
+					get_query: () => pos_profile_query(),
 					onchange: () => fetch_pos_payment_methods()
 				},
 				{
@@ -101,9 +101,11 @@ erpnext.PointOfSale.Controller = class {
 			primary_action_label: __('Submit')
 		});
 		dialog.show();
-		const pos_profile_query = {
-			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-			filters: { company: dialog.fields_dict.company.get_value() }
+		const pos_profile_query = () => {
+			return {
+				query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+				filters: { company: dialog.fields_dict.company.get_value() }
+			}
 		};
 	}
 

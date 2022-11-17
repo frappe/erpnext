@@ -1146,10 +1146,10 @@ def repost_gle_for_stock_vouchers(
 				if not existing_gle or not compare_existing_and_expected_gle(
 					existing_gle, expected_gle, precision
 				):
-					_delete_gl_entries(voucher_type, voucher_no)
+					_delete_accounting_ledger_entries(voucher_type, voucher_no)
 					voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 			else:
-				_delete_gl_entries(voucher_type, voucher_no)
+				_delete_accounting_ledger_entries(voucher_type, voucher_no)
 
 		if not frappe.flags.in_test:
 			frappe.db.commit()
@@ -1161,16 +1161,26 @@ def repost_gle_for_stock_vouchers(
 			)
 
 
-def _delete_gl_entries(voucher_type, voucher_no):
-	frappe.db.sql(
-		"""delete from `tabGL Entry`
-		where voucher_type=%s and voucher_no=%s""",
-		(voucher_type, voucher_no),
-	)
+def _delete_pl_entries(voucher_type, voucher_no):
 	ple = qb.DocType("Payment Ledger Entry")
 	qb.from_(ple).delete().where(
 		(ple.voucher_type == voucher_type) & (ple.voucher_no == voucher_no)
 	).run()
+
+
+def _delete_gl_entries(voucher_type, voucher_no):
+	gle = qb.DocType("GL Entry")
+	qb.from_(gle).delete().where(
+		(gle.voucher_type == voucher_type) & (gle.voucher_no == voucher_no)
+	).run()
+
+
+def _delete_accounting_ledger_entries(voucher_type, voucher_no):
+	"""
+	Remove entries from both General and Payment Ledger for specified Voucher
+	"""
+	_delete_gl_entries(voucher_type, voucher_no)
+	_delete_pl_entries(voucher_type, voucher_no)
 
 
 def sort_stock_vouchers_by_posting_date(

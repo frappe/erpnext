@@ -89,6 +89,9 @@ class SubcontractingController(StockController):
 				if bom.item != item.item_code:
 					msg = f"Please select an valid BOM for Item {item.item_name}."
 					frappe.throw(_(msg))
+			else:
+				msg = f"Please select a BOM for Item {item.item_name}."
+				frappe.throw(_(msg))
 
 	def __get_data_before_save(self):
 		item_dict = {}
