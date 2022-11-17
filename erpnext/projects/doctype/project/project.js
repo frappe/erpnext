@@ -257,9 +257,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		var me = this;
 		var company_currency = erpnext.get_currency(me.frm.doc.company);
 
-		me.frm.dashboard.stats_area.removeClass('hidden');
-		me.frm.dashboard.stats_area_row.addClass('flex');
-		me.frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+		me.frm.dashboard.stats_area.show();
 
 		// Work Status
 		var vehicle_status_color;
