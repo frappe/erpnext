@@ -10,6 +10,7 @@
   "completed_qty",
   "column_break_4",
   "bom",
+  "workstation_type",
   "workstation",
   "sequence_id",
   "section_break_10",
@@ -196,12 +197,18 @@
   {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-29 16:37:18.824489",
+ "modified": "2022-11-09 01:37:56.563068",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
@@ -209,5 +216,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
