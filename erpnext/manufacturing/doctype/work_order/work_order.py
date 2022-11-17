@@ -87,10 +87,17 @@ class WorkOrder(Document):
 		self.validate_transfer_against()
 		self.validate_operation_time()
 		self.status = self.get_status()
+		self.validate_workstation_type()
 
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
 
 		self.set_required_items(reset_only_qty=len(self.get("required_items")))
+
+	def validate_workstation_type(self):
+		for row in self.operations:
+			if not row.workstation and not row.workstation_type:
+				msg = f"Row {row.idx}: Workstation or Workstation Type is mandatory for an operation {row.operation}"
+				frappe.throw(_(msg))
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -491,11 +498,6 @@ class WorkOrder(Document):
 	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(index, row)
 
-		if not row.workstation:
-			frappe.throw(
-				_("Row {0}: select the workstation against the operation {1}").format(row.idx, row.operation)
-			)
-
 		original_start_time = row.planned_start_time
 		job_card_doc = create_job_card(
 			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
@@ -662,6 +664,7 @@ class WorkOrder(Document):
 					"description",
 					"workstation",
 					"idx",
+					"workstation_type",
 					"base_hour_rate as hour_rate",
 					"time_in_mins",
 					"parent as bom",
@@ -1398,6 +1401,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 	doc.update(
 		{
 			"work_order": work_order.name,
+			"workstation_type": row.get("workstation_type"),
 			"operation": row.get("operation"),
 			"workstation": row.get("workstation"),
 			"posting_date": nowdate(),
