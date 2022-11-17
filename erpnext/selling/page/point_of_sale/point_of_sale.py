@@ -68,8 +68,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	if search_term:
 		result = search_by_term(search_term, warehouse, price_list) or []
-		if result:
-			return result
+		if result: return result
 
 	if not frappe.db.exists("Item Group", item_group):
 		item_group = get_root_of("Item Group")
@@ -120,34 +119,32 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		{"warehouse": warehouse},
 		as_dict=1,
 	)
+	
+	# return (empty) list if there are no results
+	if not items_data: return result
 
-	if items_data:
-		items = [d.item_code for d in items_data]
-		item_prices_data = frappe.get_all(
+	for item in items_data:
+		item.actual_qty, _ = get_stock_availability(item.item_code, warehouse)
+		item.uom = item.stock_uom
+
+		item_price = frappe.get_all(
 			"Item Price",
-			fields=["item_code", "price_list_rate", "currency"],
-			filters={"price_list": price_list, "item_code": ["in", items]},
+			fields=["price_list_rate", "currency", "uom"],
+			filters={
+				"price_list": price_list,
+				"item_code": item.item_code,
+			},
 		)
 
-		item_prices = {}
-		for d in item_prices_data:
-			item_prices[d.item_code] = d
+		if not item_price: result.append(item)
 
-		for item in items_data:
-			item_code = item.item_code
-			item_price = item_prices.get(item_code) or {}
-			item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
-
-			row = {}
-			row.update(item)
-			row.update(
-				{
-					"price_list_rate": item_price.get("price_list_rate"),
-					"currency": item_price.get("currency"),
-					"actual_qty": item_stock_qty,
-				}
-			)
-			result.append(row)
+		for price in item_price:
+			result.append({
+				**item,
+				"price_list_rate": price.get("price_list_rate"),
+				"currency": price.get("currency"),
+				"uom": price.uom or item.uom,
+			})
 
 	return {"items": result}
 
