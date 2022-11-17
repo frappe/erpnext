@@ -482,4 +482,4 @@ def submit_communication(name, contact_date, remarks):
 			"link_name": opp.party
 	})
 
-	comm.insert()
+	comm.insert(ignore_permissions=True)
