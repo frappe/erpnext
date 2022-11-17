@@ -380,13 +380,11 @@ def validate_account_number(name, account_number, company):
 
 @frappe.whitelist()
 def update_account_number(name, account_name, account_number=None, from_descendant=False):
-	account = frappe.get_cached_value("Account", name, "company", as_dict=True)
+	account = frappe.get_cached_doc("Account", name)
 	if not account:
 		return
 
-	old_acc_name, old_acc_number = frappe.get_cached_value(
-		"Account", name, ["account_name", "account_number"]
-	)
+	old_acc_name, old_acc_number = account.account_name, account.account_number
 
 	# check if account exists in parent company
 	ancestors = get_ancestors_of("Company", account.company)
