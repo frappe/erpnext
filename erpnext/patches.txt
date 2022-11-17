@@ -1,3 +1,4 @@
+[pre_model_sync]
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
 erpnext.patches.v8_9.set_print_zero_amount_taxes
@@ -128,7 +129,6 @@ erpnext.patches.v5_0.update_item_name_in_bom
 erpnext.patches.v5_0.rename_customer_issue
 erpnext.patches.v5_0.rename_total_fields
 erpnext.patches.v5_0.new_crm_module
-erpnext.patches.v5_0.rename_customer_issue
 erpnext.patches.v5_0.update_material_transfer_for_manufacture
 execute:frappe.reload_doc('crm', 'doctype', 'opportunity_item')
 erpnext.patches.v5_0.update_item_description_and_image
@@ -320,7 +320,6 @@ erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_1.update_total_billing_hours
 erpnext.patches.v7_1.update_component_type
-erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_0.update_missing_employee_in_timesheet
 erpnext.patches.v7_0.update_status_for_timesheet
 erpnext.patches.v7_0.set_party_name_in_payment_entry
@@ -391,7 +390,6 @@ erpnext.patches.v8_0.set_null_to_serial_nos_for_disabled_sales_invoices
 erpnext.patches.v8_0.enable_booking_asset_depreciation_automatically
 erpnext.patches.v8_0.set_project_copied_from
 erpnext.patches.v8_0.update_status_as_paid_for_completed_expense_claim
-erpnext.patches.v7_2.stock_uom_in_selling
 erpnext.patches.v8_0.revert_manufacturers_table_from_item
 erpnext.patches.v8_0.disable_instructor_role
 erpnext.patches.v8_0.merge_student_batch_and_student_group
@@ -458,7 +456,6 @@ erpnext.patches.v9_0.copy_old_fees_field_data
 execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v9_0.set_pos_profile_name
 erpnext.patches.v9_0.remove_non_existing_warehouse_from_stock_settings
-execute:frappe.delete_doc_if_exists("DocType", "Program Fee")
 erpnext.patches.v8_10.change_default_customer_credit_days
 erpnext.patches.v9_0.update_employee_loan_details
 erpnext.patches.v9_2.delete_healthcare_domain_default_items
@@ -501,7 +498,6 @@ erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
 erpnext.patches.v10_0.update_territory_and_customer_group
 erpnext.patches.v10_0.update_warehouse_address_details
-erpnext.patches.v10_0.update_reserved_qty_for_purchase_order
 erpnext.patches.v10_0.update_hub_connector_domain
 erpnext.patches.v10_0.set_student_party_type
 erpnext.patches.v10_0.update_project_in_sle
@@ -782,3 +778,5 @@ erpnext.patches.v12_0.set_booking_customer_name_in_jv
 erpnext.patches.v12_0.resetup_vehicle_domain #08-11-2022 #16-11-2022
 erpnext.patches.v12_0.move_customer_reference_to_lead
 erpnext.patches.v14_0.delete_datev_doctypes
+
+[post_model_sync]
