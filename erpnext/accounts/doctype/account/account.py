@@ -114,8 +114,9 @@ class Account(NestedSet):
 
 	def validate_root_details(self):
 		# does not exists parent
-		if frappe.db.exists("Account", self.name):
-			if not frappe.get_cached_value("Account", self.name, "parent_account"):
+		account_values = frappe.get_cached_value("Account", self.name, ["parent_account"], as_dict=1)
+		if account_values:
+			if not account_values.parent_account:
 				throw(_("Root cannot be edited."), RootNotEditable)
 
 		if not self.parent_account and not self.is_group:
@@ -439,10 +440,13 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 @frappe.whitelist()
 def merge_account(old, new, is_group, root_type, company):
 	# Validate properties before merging
-	if not frappe.db.exists("Account", new):
+	account_data = frappe.get_cached_value(
+		"Account", new, ["is_group", "root_type", "company", "parent_account"], as_dict=True
+	)
+	if not account_data:
 		throw(_("Account {0} does not exist").format(new))
 
-	val = list(frappe.get_cached_value("Account", new, ["is_group", "root_type", "company"]))
+	val = list(account_data.values())[:3]  # is_group, root_type, company
 
 	if val != [cint(is_group), root_type, company]:
 		throw(
@@ -451,7 +455,7 @@ def merge_account(old, new, is_group, root_type, company):
 			)
 		)
 
-	if is_group and frappe.get_cached_value("Account", new, "parent_account") == old:
+	if is_group and account_data.parent_account == old:
 		frappe.db.set_value(
 			"Account", new, "parent_account", frappe.get_cached_value("Account", old, "parent_account")
 		)

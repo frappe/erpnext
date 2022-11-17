@@ -286,9 +286,11 @@ def get_accounts_with_children(accounts):
 
 	all_accounts = []
 	for d in accounts:
-		if frappe.db.exists("Account", d):
-			lft, rgt = frappe.get_cached_value("Account", d, ["lft", "rgt"])
-			children = frappe.get_all("Account", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+		account_data = frappe.get_cached_value("Account", d, ["lft", "rgt"], as_dict=1)
+		if account_data:
+			children = frappe.get_all(
+				"Account", filters={"lft": [">=", account_data.lft], "rgt": ["<=", account_data.rgt]}
+			)
 			all_accounts += [c.name for c in children]
 		else:
 			frappe.throw(_("Account: {0} does not exist").format(d))
