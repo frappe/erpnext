@@ -221,7 +221,7 @@ class PartyLedgerSummaryReport(object):
 		if self.filters.party_type == "Customer":
 			if self.filters.get("customer_group"):
 				lft, rgt = frappe.get_cached_value(
-					"Customer Group", self.filters.get("customer_group"), ["lft" "rgt"]
+					"Customer Group", self.filters["customer_group"], ["lft", "rgt"]
 				)
 
 				conditions.append(
