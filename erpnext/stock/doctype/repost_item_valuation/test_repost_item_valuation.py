@@ -344,11 +344,16 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		accounts_settings = frappe.get_doc("Accounts Settings")
 		accounts_settings.acc_frozen_upto = today
-		accounts_settings.frozen_accounts_modifier = ''
+		accounts_settings.frozen_accounts_modifier = ""
 		accounts_settings.save()
 
 		self.assertRaises(frappe.ValidationError, riv.save)
 
+<<<<<<< HEAD
 		accounts_settings.acc_frozen_upto = ''
 		accounts_settings.save()
 >>>>>>> 61f05132db (feat: validate repost item valuation against accounts freeze date)
+=======
+		accounts_settings.acc_frozen_upto = ""
+		accounts_settings.save()
+>>>>>>> be15419bd5 (chore: pre-commit)
