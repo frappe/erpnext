@@ -302,7 +302,7 @@ def check_for_nexus(doc, tax_dict):
 			item.tax_collectable = flt(0)
 			item.taxable_amount = flt(0)
 
-		for tax in doc.taxes:
+		for tax in list(doc.taxes):
 			if tax.account_head == TAX_ACCOUNT_HEAD:
 				doc.taxes.remove(tax)
 		return
