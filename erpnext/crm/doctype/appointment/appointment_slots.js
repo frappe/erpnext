@@ -108,16 +108,13 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 				indicator_color = "darkgrey";
 			}
 
-			// panel styling
+			// card styling
 			var muted = "";
 			if (slot.available <= 0) {
 				muted = "text-muted";
 			}
 
-			var panel_class = "panel-default";
-			if (me.timeslot_in_scheduled_time(slot)) {
-				panel_class = "panel-primary";
-			}
+			var selected_class = me.timeslot_in_scheduled_time(slot) ? "selected" : "";
 
 			// availability text
 			var availability_text;
@@ -137,12 +134,12 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 
 			var slot_html = `
 			<div class="col-md-2 col-sm-3 col-xs-6">
-				<div class="panel ${panel_class} ${muted} appointment-timeslot"
+				<div class="card ${selected_class} ${muted} appointment-timeslot"
 						data-timeslot-start="${slot.timeslot_start}"
 						data-timeslot-end="${slot.timeslot_end}"
 						data-timeslot-duration="${slot.timeslot_duration}">
-					<div class="panel-body text-center" style="padding: 10px;">
-						<div class="panel-title">
+					<div class="card-body text-center" style="padding: 10px;">
+						<div class="card-title bold">
 							<span class="indicator ${indicator_color}" style="font-size: 15px; color: inherit">
 								${moment(slot.timeslot_start).format('hh:mm A')}
 							</span>

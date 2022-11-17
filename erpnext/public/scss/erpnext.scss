@@ -490,3 +490,65 @@ body[data-route="pos"] {
 .exercise-col {
 	padding: 10px;
 }
+
+// Appointment
+.appointment-slot-picker {
+	.appointment-timeslot {
+		margin-bottom: 15px;
+
+		.card-title {
+			margin-bottom: 0;
+		}
+
+		&.selected {
+			border-color: var(--primary);
+		}
+	}
+
+	&.editable {
+		.appointment-timeslot {
+			cursor: pointer;
+
+			&:hover {
+				box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.25);
+			}
+		}
+	}
+}
+
+// Customer Vehicle Selector
+.customer-vehicle-selector {
+	.customer-vehicle-col {
+		margin-bottom: 10px;
+		&:last-child {
+			margin-bottom: 15px;
+		}
+	}
+
+	.customer-vehicle-card {
+		font-size: 9pt;
+		border-radius: 4px;
+
+		.card-body, .card-header {
+			padding: 10px 10px 10px 15px;
+		}
+
+		.card-header {
+			border-radius: unset;
+		}
+
+		&.selected {
+			border-color: #5e64ff;
+		}
+	}
+
+	&.editable {
+		.customer-vehicle-card {
+			cursor: pointer;
+
+			&:hover {
+				box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.25);
+			}
+		}
+	}
+}
