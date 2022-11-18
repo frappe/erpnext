@@ -601,9 +601,10 @@ class JournalEntry(AccountsController):
 					d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_credit_amount(self):
-		for d in self.get("accounts"):
-			if not flt(d.debit) and not flt(d.credit):
-				frappe.throw(_("Row {0}: Both Debit and Credit values cannot be zero").format(d.idx))
+		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
+			for d in self.get("accounts"):
+				if not flt(d.debit) and not flt(d.credit):
+					frappe.throw(_("Row {0}: Both Debit and Credit values cannot be zero").format(d.idx))
 
 	def validate_total_debit_and_credit(self):
 		self.set_total_debit_credit()
@@ -648,16 +649,17 @@ class JournalEntry(AccountsController):
 		self.set_exchange_rate()
 
 	def set_amounts_in_company_currency(self):
-		for d in self.get("accounts"):
-			d.debit_in_account_currency = flt(
-				d.debit_in_account_currency, d.precision("debit_in_account_currency")
-			)
-			d.credit_in_account_currency = flt(
-				d.credit_in_account_currency, d.precision("credit_in_account_currency")
-			)
+		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
+			for d in self.get("accounts"):
+				d.debit_in_account_currency = flt(
+					d.debit_in_account_currency, d.precision("debit_in_account_currency")
+				)
+				d.credit_in_account_currency = flt(
+					d.credit_in_account_currency, d.precision("credit_in_account_currency")
+				)
 
-			d.debit = flt(d.debit_in_account_currency * flt(d.exchange_rate), d.precision("debit"))
-			d.credit = flt(d.credit_in_account_currency * flt(d.exchange_rate), d.precision("credit"))
+				d.debit = flt(d.debit_in_account_currency * flt(d.exchange_rate), d.precision("debit"))
+				d.credit = flt(d.credit_in_account_currency * flt(d.exchange_rate), d.precision("credit"))
 
 	def set_exchange_rate(self):
 		for d in self.get("accounts"):
