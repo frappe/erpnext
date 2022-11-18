@@ -88,9 +88,11 @@
   "allow_zero_valuation_rate",
   "column_break_71",
   "internal_transfer_section",
+  "material_request",
   "purchase_order",
   "column_break_82",
   "purchase_order_item",
+  "material_request_item",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -818,13 +820,24 @@
    "fieldtype": "Check",
    "label": "Has Item Scanned",
    "read_only": 1
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-02 12:54:07.225623",
+ "modified": "2022-11-09 12:17:50.850142",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
