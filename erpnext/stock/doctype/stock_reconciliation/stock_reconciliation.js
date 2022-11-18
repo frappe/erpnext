@@ -252,7 +252,7 @@ erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.st
 	setup() {
 		var me = this;
 
-		this.remove_sidebar();
+		this.frm.page.toggle_sidebar();
 
 		this.setup_posting_date_time_check();
 

@@ -10,7 +10,7 @@ frappe.provide("erpnext.accounts.expense_entry");
 
 frappe.ui.form.on('Expense Entry', {
 	setup: function(frm) {
-		frm.cscript.remove_sidebar();
+		frm.page.toggle_sidebar();
 
 		frm.set_query('payable_account', function() {
 			if(!frm.doc.company) {
