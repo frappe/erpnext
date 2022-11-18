@@ -127,10 +127,15 @@ frappe.ui.form.on("Purchase Order Item", {
 			cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			cur_frm.refresh_fields();
 		}
+		frappe.model.set_value(cdt, cdn,"remaining_qty", 1);
 	},
 	items_remove: function (frm) {
 		frm.events.set_total_allocated_amount(frm);
 		frm.events.set_total_quantity(frm);
+	},
+	qty: function(frm,cdt,cdn) {
+		var item = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn,"remaining_qty", item.qty);
 	},
 });
 
@@ -168,13 +173,29 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
 
+		var total_remaining_qty = 0;
+		var total_proposed_qty = 0;
+		$.each(doc.items || [], function (i, row) {
+			if (row.qty) {
+				total_remaining_qty += flt(row.remaining_qty);
+				total_proposed_qty += flt(row.proposed_qty);
+			}
+		})
 		if(doc.docstatus == 1) {
 			this.frm.fields_dict.items_section.wrapper.addClass("hide-border");
 			if(!this.frm.doc.set_warehouse) {
 				this.frm.fields_dict.items_section.wrapper.removeClass("hide-border");
 			}
-
-			if(!in_list(["Closed", "Delivered"], doc.status)) {
+			if(doc.docstatus > 0 && total_proposed_qty > 0) {
+				cur_frm.fields_dict['items'].grid.wrapper.find('.btn-open-row').hide();
+				cur_frm.add_custom_button(__("Purchase Order Report"), function() {
+					frappe.route_options = {
+						purchase_order: doc.name,
+					};
+					frappe.set_route("query-report", "Purchase Order Report");
+				}, __("View"));
+			}
+			if(!in_list(["Closed", "Ready", "Shipped", "Proposed Ready Date", "Open"], doc.status)) {
 				/* if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
 					this.frm.add_custom_button(__('Update Items'), () => {
 						erpnext.utils.update_child_items({
@@ -185,16 +206,18 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						})
 					});
 				} */
-				/* if (this.frm.has_perm("submit")) {
-					if(flt(doc.per_billed, 6) < 100 || flt(doc.per_received, 6) < 100) {
-						if (doc.status != "On Hold") {
+				if (this.frm.has_perm("submit")) {
+					if(flt(doc.per_received, 6) < 100) {
+						/* if (doc.status != "On Hold") {
 							this.frm.add_custom_button(__('Hold'), () => this.hold_purchase_order(), __("Status"));
 						} else{
 							this.frm.add_custom_button(__('Resume'), () => this.unhold_purchase_order(), __("Status"));
+						} */
+						if (doc.status != "Ready") {
+							this.frm.add_custom_button(__('Ready'), () => this.direct_ready_purchase_order(), __("Status"));
 						}
-						this.frm.add_custom_button(__('Close'), () => this.close_purchase_order(), __("Status"));
 					}
-				} */
+				}
 
 				/* if(is_drop_ship && doc.status!="Delivered") {
 					this.frm.add_custom_button(__('Delivered'),
@@ -202,24 +225,31 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				} */
-			/* } else if(in_list(["Closed", "Delivered"], doc.status)) {
+			} else if(flt(doc.per_received, 6) < 100 && in_list(["Closed", "Delivered", "Ready"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
 					this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
 				}
-			} */
+			}
+		
+			// this.frm.add_custom_button(__('Proposed Ready Date'), () =>
+			// cur_frm.cscript.update_status('Proposed Ready Date', 'Proposed Ready Date'), __("Status"));
 
-
-
+			
+			
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
 					// ***** START Proposed Ready Date & Ready PO Custom Button Instead of Purchase Receipt ***** //
-					if(flt(doc.per_received) < 100 && allow_receipt && doc.po_status != "Ready" && doc.po_status != "Shipped"  && doc.po_status == "Proposed Ready Date") {
+					if(flt(doc.per_received) < 100 && allow_receipt && !in_list(["Ready", "Shipped", "Open"], doc.status)) {
 						cur_frm.add_custom_button(__('Ready PO'), this.make_purchase_receipt,);
 					}
-					if (doc.po_status != "Proposed Ready Date" && doc.po_status != "Ready" && doc.po_status != "Shipped") {
+					if (!in_list(["Ready", "Shipped", "Proposed Ready Date", "Partially Ready"], doc.status)) {
 						cur_frm.add_custom_button(__("Proposed Ready Date"), function() {
 							cur_frm.doc.po_status="Proposed Ready Date";
-							cur_frm.refresh_fields('po_status');
+							cur_frm.doc.status="Proposed Ready Date";
+							cur_frm.refresh_fields('po_status', 'status');
+							if (cur_frm.doc.proposed_ready_date) {
+								cur_frm.cscript.update_status("Proposed Ready Date", "Proposed Ready Date")
+							}
 						}, __("Update Status"));
 					}
 						// if(flt(doc.per_received) < 100 && allow_receipt) {
@@ -269,7 +299,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			} else if(doc.docstatus===0) {
 				cur_frm.cscript.add_from_mappers();
 			}
-		}
+		
 	},
 
 	get_items_from_open_material_requests: function() {
@@ -644,6 +674,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.cscript.update_status('Close', 'Closed')
 	},
 
+	direct_ready_purchase_order: function(){
+		cur_frm.cscript.update_status('Ready', 'Ready')
+	},
+	
 	delivered_by_supplier: function(){
 		cur_frm.cscript.update_status('Deliver', 'Delivered')
 	},

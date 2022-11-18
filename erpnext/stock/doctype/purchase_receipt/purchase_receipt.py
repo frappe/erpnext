@@ -228,7 +228,6 @@ class PurchaseReceipt(BuyingController):
 		if flt(self.per_billed) < 100:
 			self.update_billing_status()
 		else:
-			self.db_set("status", "Completed")
 			self.db_set("status", "Ready")
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -243,8 +242,6 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_po()
-		# Update Ammount in Account Payble DocType
-		frappe.db.set_value("Account Payable", self.purchase_order, 'total_payable_after_revision', self.total)
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
@@ -1198,15 +1195,63 @@ def get_item_account_wise_additional_cost(purchase_document):
 def on_doctype_update():
 	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
 
+# @frappe.whitelist()
+# def pr_batch_details(item_code,name, item_name,qty,batch_number,manufacturing_date,expiry_date):
+# 	exists = False
+# 	co = frappe.get_doc("Purchase Order", name)
+# 	if (exists == False):
+# 		for item in co.get("items"):
+# 			if (item.item_code == item_code):
+# 				item.item_name == item_name
+# 				item.batch_number = batch_number,
+# 				item.manufacturing_date=manufacturing_date,
+# 				item.expiry_date=expiry_date,
+# 	co.save()
+
+# Update pr_update child table in purchase order doctype
 @frappe.whitelist()
-def pr_batch_details(item_code,name, item_name,qty,batch_number,manufacturing_date,expiry_date):
+def purchase_order_pr_item_remove(purchase_order, pr_name):
+	to_remove = []
+	po = frappe.get_doc("Purchase Order", purchase_order)
+	for po_details in po.get("purchase_receipt_update"):
+		#remove rows with condition ,  you can drop the if checking and append to the list right away to remove them all 
+		if po_details.purchase_receipt == pr_name:        
+			to_remove.append(po_details)
+	[po.remove(po_details) for po_details in to_remove]
+	po.save()
+
+@frappe.whitelist()
+def purchase_order_pr_item(purchase_order, pr_name, product_code, product_name, qty,rate, amount, status, batch, mfg_date, exp_date, against_pr):
 	exists = False
-	co = frappe.get_doc("Purchase Order", name)
+	po = frappe.get_doc("Purchase Order", purchase_order)
 	if (exists == False):
-		for item in co.get("items"):
-			if (item.item_code == item_code):
-				item.item_name == item_name
-				item.batch_number = batch_number,
-				item.manufacturing_date=manufacturing_date,
-				item.expiry_date=expiry_date,
-	co.save()
+		d = po.append("purchase_receipt_update",
+			{
+				"purchase_receipt": pr_name,
+				"product_code": product_code,
+				"product_name": product_name,
+				"pr_qty": qty,
+				"pr_price": rate,
+				"pr_amount": amount,
+				"pr_status": status,
+				"against_pr": against_pr,
+				"batch": batch,
+				"mfg_date": mfg_date,
+				"exp_date": exp_date
+			})
+	po.save()
+
+@frappe.whitelist()
+def set_proposed_qty_in_po(purchase_order):
+	po = frappe.get_doc("Purchase Order", purchase_order)
+	for po_detail in po.get("items"):
+		proposed_quantity = 0
+		
+		for po_pr_details in po.get("purchase_receipt_update"):
+			if(po_detail.item_code == po_pr_details.product_code):
+				proposed_quantity += po_pr_details.pr_qty
+
+		po_detail.proposed_qty = proposed_quantity
+		po_detail.remaining_qty = flt(po_detail.qty) - flt(po_detail.proposed_qty) 
+	po.save()
+	

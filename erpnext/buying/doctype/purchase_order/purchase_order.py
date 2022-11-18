@@ -360,8 +360,14 @@ class PurchaseOrder(BuyingController):
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 		frappe.delete_doc("Account Payable", self.name)
 
-	def on_update(self):
-		pass
+	# def on_update_after_submit(self):
+	# 	if self.status == "Ready":
+	# 		total_received_amt = 0
+	# 		for d in self.get("items"):
+	# 			total_received_amt += d.rate
+	# 		# Update Ammount in Account Payble DocType
+	# 		frappe.msgprint("total_received_amt")
+	# 		frappe.db.set_value("Account Payable", self.name, 'total_payable_after_revision', self.total_received_amt)
 
 	def update_status_updater(self):
 		self.status_updater.append(
@@ -469,6 +475,8 @@ def close_or_unclose_purchase_orders(names, status):
 
 
 def set_missing_values(source, target):
+	if len(target.get("items")) == 0:
+			frappe.throw(_("All products have been Added in Purchase Order With Ready Status but not Submitted."))
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 
@@ -476,7 +484,7 @@ def set_missing_values(source, target):
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
-		target.qty = flt(obj.qty) - flt(obj.received_qty)
+		target.qty = flt(obj.qty) - flt(obj.proposed_qty)
 		target.remaining_qty = target.qty
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
 		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
@@ -506,7 +514,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 					"remaining_qty": "qty"
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
+				"condition": lambda doc: abs(doc.proposed_qty) < abs(doc.qty)
 				and doc.delivered_by_supplier != 1,
 			},
 			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
@@ -693,6 +701,12 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
+	if po.status == "Ready":
+		total_received_amt = 0
+		for d in po.get("items"):
+			total_received_amt += d.rate
+			# Update Ammount in Account Payble DocType
+		frappe.db.set_value("Account Payable", po.name, 'total_payable_after_revision', 0)
 
 
 @frappe.whitelist()
