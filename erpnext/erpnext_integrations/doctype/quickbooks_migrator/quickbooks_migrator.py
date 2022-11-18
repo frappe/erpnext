@@ -1345,7 +1345,7 @@ class QuickBooksMigrator(Document):
 		)[0]["name"]
 
 	def _publish(self, *args, **kwargs):
-		frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs)
+		frappe.publish_realtime("quickbooks_progress_update", *args, **kwargs, user=self.modified_by)
 
 	def _get_unique_account_name(self, quickbooks_name, number=0):
 		if number:
