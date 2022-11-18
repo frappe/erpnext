@@ -25,7 +25,7 @@ frappe.ui.form.on('POS Closing Entry', {
 
 		frappe.realtime.on('closing_process_complete', async function(data) {
 			await frm.reload_doc();
-			if (frm.doc.status == 'Failed' && frm.doc.error_message && data.user == frappe.session.user) {
+			if (frm.doc.status == 'Failed' && frm.doc.error_message) {
 				frappe.msgprint({
 					title: __('POS Closing Failed'),
 					message: frm.doc.error_message,
