@@ -75,24 +75,19 @@ status_map = {
 		["On Hold", "eval:self.status=='On Hold'"],
 	],
 	"Purchase Order": [
-		["Draft", None],
+		["Open", None],
 		[
-			"To Receive and Bill",
-			"eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1",
-		],
-		["To Bill", "eval:self.per_received >= 100 and self.per_billed < 100 and self.docstatus == 1"],
-		[
-			"To Receive",
-			"eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1",
+			"Partially Ready",
+			"eval:self.per_received < 100 and self.per_received > 0 and self.per_billed < 100 and self.docstatus == 1",
 		],
 		[
-			"Completed",
-			"eval:self.per_received >= 100 and self.per_billed == 100 and self.docstatus == 1",
+			"Ready",
+			"eval:self.per_received >= 100 and self.docstatus == 1",
 		],
-		["Delivered", "eval:self.status=='Delivered'"],
+		["Proposed Ready Date", "eval:self.status=='Proposed Ready Date' and self.per_received == 0"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["On Hold", "eval:self.status=='On Hold'"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Ready", "eval:self.status=='Ready'"],
+		["Shipped", "eval:self.po_status=='Shipped'"]
 	],
 	"Delivery Note": [
 		["Draft", None],
@@ -104,10 +99,11 @@ status_map = {
 	],
 	"Logistic Notice": [
 		["Open", None],
-		["Open", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["Open", "eval:self.per_billed < 100 and self.docstatus == 1 and self.ship_to != 'Customer'"],
+		["Delivered To Customer", "eval:self.per_billed < 100 and self.docstatus == 1 and self.ship_to == 'Customer'"],
 	],
 	"Purchase Receipt": [
-		["Draft", None],
+		["Open", None],
 		["Ready", "eval:self.per_billed < 100 and self.docstatus == 1"],
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],

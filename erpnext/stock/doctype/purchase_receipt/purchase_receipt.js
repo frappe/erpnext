@@ -245,6 +245,38 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		} */
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+
+		if(this.frm.doc.docstatus !=1 && !this.frm.doc.__islocal) {
+			this.frm.add_custom_button(__('Delete'), function() {
+					if (cur_frm.doc.name){
+						// for remove rows
+						frappe.call({
+							method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.purchase_order_pr_item_remove",
+							args: {
+								pr_name: cur_frm.doc.name,
+								purchase_order: cur_frm.doc.purchase_order,
+							},
+							async: false,
+							callback: function (r) {
+							}
+						})
+						frappe.call({
+							method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.set_proposed_qty_in_po",
+							args: {
+								purchase_order: cur_frm.doc.purchase_order},
+							async: false,
+							callback: function (r) {
+							}
+						})
+						frappe.model.delete_doc(cur_frm.doc.doctype, cur_frm.doc.name, function() {
+							window.history.back();
+						});
+						// frappe.model.delete_doc("Batch", cur_frm.doc.name, function() {
+						// 	this.recent_order_list.refresh_list();
+						// });
+				}
+			})
+		}
 	},
 
 	make_logistic_notice: function() {
@@ -433,6 +465,67 @@ frappe.ui.form.on("Purchase Receipt", "before_save", function (frm) {
 	})
 })
 frappe.ui.form.on('Purchase Receipt',  {
+	after_save : function(frm) {
+		if (frm.doc.name){
+			// for remove rows
+			frappe.call({
+				method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.purchase_order_pr_item_remove",
+				args: {
+					pr_name: frm.doc.name,
+					purchase_order: frm.doc.purchase_order},
+				async: false,
+				callback: function (r) {
+					console.log(r.message)
+				}
+			})
+		}
+		
+		// To change status in CO sni update child table
+		if (frm.doc.docstatus === 0) {
+			var status = "Open"
+		} else if (frm.doc.docstatus === 1) {
+			var status = "Ready"
+		}
+		$.each(frm.doc.items || [], function(i, d) {
+			// for append rows
+			frappe.call({
+				method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.purchase_order_pr_item",
+				async: false,
+				args: {
+					purchase_order: frm.doc.purchase_order,
+					pr_name: frm.doc.name,
+					product_code: d.item_code,
+					product_name: d.item_name, 
+					qty: d.qty,
+					rate: d.rate,
+					amount: d.amount,
+					status: status,
+					against_pr: d.name,
+					batch: d.batch_number,
+					mfg_date: d.manufacturing_date,
+					exp_date: d.expiry_date
+				},
+				callback: function (r) {
+					console.log(r.message)
+				}
+			})
+		});
+		frappe.call({
+			method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.set_proposed_qty_in_po",
+			args: {
+				purchase_order: frm.doc.purchase_order},
+			async: false,
+			callback: function (r) {
+				console.log(r.message)
+			}
+		})
+		
+		/* On Save, also submit this form */
+		// frappe.call({
+		// 	"method": "frappe.client.submit",
+		// 	"args": {"doc": cur_frm.doc},
+		// })
+	},
    after_cancel : function(frm) {
         frappe.call({
             "method": "frappe.client.set_value",
@@ -455,7 +548,7 @@ frappe.ui.form.on('Purchase Receipt',  {
 });
 
 
-frappe.ui.form.on("Purchase Receipt", "before_submit", function (frm) {
+/* frappe.ui.form.on("Purchase Receipt", "before_submit", function (frm) {
 	$.each(frm.doc.items || [], function(i, d) {
 		frappe.call({
 			method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.pr_batch_details",
@@ -471,4 +564,4 @@ frappe.ui.form.on("Purchase Receipt", "before_submit", function (frm) {
 			},
 		})
 	});
-})
+}) */
