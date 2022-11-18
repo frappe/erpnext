@@ -232,12 +232,12 @@ def get_conditions(filters):
 
 					conditions += (
 						common_condition
-						+ "and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+						+ "and ifnull(`tabPurchase Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
 					)
 				else:
 					conditions += (
 						common_condition
-						+ "and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+						+ "and ifnull(`tabPurchase Invoice`.{0}, '') in %({0})s)".format(dimension.fieldname)
 					)
 
 	return conditions
