@@ -222,7 +222,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 
 	from_doctype = cstr(filters.get("doctype"))
-	if not from_doctype or not frappe.db.exist("DocType", from_doctype):
+	if not from_doctype or not frappe.db.exists("DocType", from_doctype):
 		return []
 
 	mcond = get_match_cond(from_doctype)
