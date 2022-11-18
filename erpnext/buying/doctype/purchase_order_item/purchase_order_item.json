@@ -141,7 +141,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "in_global_search": 1,
-   "label": "Item Name",
+   "label": "Product Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
    "print_hide": 1
