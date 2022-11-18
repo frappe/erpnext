@@ -51,8 +51,8 @@ class VehicleQuotation(VehicleBookingController):
 		elif self.quotation_to == "Lead":
 			self.set_onload('customer', get_customer_from_lead(self.party_name))
 
-	def before_print(self):
-		super(VehicleQuotation, self).before_print()
+	def before_print(self, print_settings=None):
+		super(VehicleQuotation, self).before_print(print_settings=print_settings)
 		self.total_discount = -self.total_discount
 
 	def validate_vehicle_qty(self):

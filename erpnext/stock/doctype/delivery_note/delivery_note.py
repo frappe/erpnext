@@ -95,7 +95,7 @@ class DeliveryNote(SellingController):
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import unlink_inter_company_doc
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_reference)
 
-	def before_print(self):
+	def before_print(self, print_settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
 			if self.get("print_without_amount"):
@@ -113,7 +113,7 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-		super(DeliveryNote, self).before_print()
+		super(DeliveryNote, self).before_print(print_settings=print_settings)
 
 	def set_title(self):
 		self.title = self.customer_name or self.customer

@@ -65,8 +65,8 @@ class VehicleRegistrationOrder(VehicleAdditionalServiceController):
 	def on_cancel(self):
 		self.update_vehicle_booking_order_registration()
 
-	def before_print(self):
-		super(VehicleRegistrationOrder, self).before_print()
+	def before_print(self, print_settings=None):
+		super(VehicleRegistrationOrder, self).before_print(print_settings=print_settings)
 		self.customer_total_in_words = frappe.utils.money_in_words(self.customer_total, erpnext.get_company_currency(self.company))
 		self.get_customer_payments()
 

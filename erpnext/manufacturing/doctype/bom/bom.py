@@ -96,7 +96,7 @@ class BOM(WebsiteGenerator):
 			if self.get('item'):
 				self.update(get_fetch_values(self.doctype, 'item', self.item))
 
-	def before_print(self):
+	def before_print(self, print_settings=None):
 		self.company_address_doc = erpnext.get_company_address(self)
 
 		if self.docstatus == 0:

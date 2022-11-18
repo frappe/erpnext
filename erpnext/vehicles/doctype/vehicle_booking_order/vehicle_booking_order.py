@@ -70,8 +70,8 @@ class VehicleBookingOrder(VehicleBookingController):
 			self.set_can_notify_onload()
 			self.set_vehicle_warehouse_onload()
 
-	def before_print(self):
-		super(VehicleBookingOrder, self).before_print()
+	def before_print(self, print_settings=None):
+		super(VehicleBookingOrder, self).before_print(print_settings=print_settings)
 		self.get_payment_details()
 
 	def set_title(self):

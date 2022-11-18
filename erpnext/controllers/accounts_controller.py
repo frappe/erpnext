@@ -208,7 +208,7 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
 			self.validate_non_invoice_documents_schedule()
 
-	def before_print(self):
+	def before_print(self, print_settings=None):
 		if self.doctype == "Sales Invoice":
 			self.delivery_notes = list(set(item.delivery_note for item in self.items if item.get("delivery_note")))
 		if self.doctype == "Purchase Invoice":

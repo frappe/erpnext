@@ -32,7 +32,7 @@ class PayrollEntry(Document):
 			if self.validate_employee_attendance():
 				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 				
-	def before_print(self):
+	def before_print(self, print_settings=None):
 		bank_details = self.get_bank_details()
 		self.bank_details = bank_details
 

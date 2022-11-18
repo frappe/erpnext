@@ -66,7 +66,7 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 
-	def before_print(self):
+	def before_print(self, print_settings=None):
 		self.company_address_doc = erpnext.get_company_address(self)
 
 	def on_submit(self):
