@@ -18,9 +18,9 @@ frappe.listview_settings['Appointment'] = {
 				return [__(doc.status), "orange", "status,=," + doc.status];
 			}
 		} else if (doc.status == "Rescheduled") {
-			 return [__(doc.status), "lightblue", "status,=," + doc.status];
+			 return [__(doc.status), "light-blue", "status,=," + doc.status];
 		} else if (doc.status == "Missed") {
-			return [__(doc.status), "darkgrey", "status,=," + doc.status];
+			return [__(doc.status), "grey", "status,=," + doc.status];
 		} else if (doc.status == "Closed") {
 			return [__(doc.status), "green", "status,=," + doc.status];
 		}

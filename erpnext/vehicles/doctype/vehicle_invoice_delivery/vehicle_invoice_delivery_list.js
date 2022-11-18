@@ -2,7 +2,7 @@ frappe.listview_settings['Vehicle Invoice Delivery'] = {
 	add_fields: ["is_copy"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_copy)) {
-			return [__("Copy"), "darkgrey", "is_copy,=,1"];
+			return [__("Copy"), "grey", "is_copy,=,1"];
 		} else {
 			return [__("Original"), "green", "is_copy,=,0"];
 		}

@@ -12,18 +12,18 @@ frappe.listview_settings['Purchase Invoice'] = {
 	get_indicator: function(doc) {
 		// Debit Note Issued
 		if(doc.status == 'Debit Note Issued') {
-			return [__("Debit Note Issued"), "darkgrey", "status,=,Debit Note Issued"];
+			return [__("Debit Note Issued"), "grey", "status,=,Debit Note Issued"];
 
 		// Outstanding Amount Positive
 		} else if(flt(doc.outstanding_amount) > 0) {
 
 			// On Hold Without Release Date
 			if(cint(doc.on_hold) && !doc.release_date) {
-				return [__("On Hold"), "darkgrey", "status,=,On Hold"];
+				return [__("On Hold"), "light-grey", "status,=,On Hold"];
 
 			// Temporarily On Hold
 			} else if(cint(doc.on_hold) && doc.release_date && frappe.datetime.get_diff(doc.release_date, frappe.datetime.nowdate()) > 0) {
-				return [__("Temporarily On Hold"), "darkgrey", "status,=,On Hold|release_date,is,set"];
+				return [__("Temporarily On Hold"), "light-grey", "status,=,On Hold|release_date,is,set"];
 
 			// Overdue Unpaid
 			} else if(frappe.datetime.get_diff(doc.due_date) < 0) {
@@ -38,7 +38,7 @@ frappe.listview_settings['Purchase Invoice'] = {
 
 		// Return
 		} else if(cint(doc.is_return)) {
-			return [__("Return"), "darkgrey", "is_return,=,Yes|docstatus,=,1"];
+			return [__("Return"), "grey", "is_return,=,Yes|docstatus,=,1"];
 
 		// Paid
 		} else if(flt(doc.outstanding_amount) == 0) {

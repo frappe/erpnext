@@ -2,7 +2,7 @@ frappe.listview_settings['Vehicle Receipt'] = {
 	add_fields: ["is_return"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_return)) {
-			return [__("Returned"), "darkgrey", "is_return,=,1"];
+			return [__("Returned"), "grey", "is_return,=,1"];
 		} else {
 			return [__("Received"), "green", "is_return,=,0"];
 		}

@@ -105,13 +105,13 @@ erpnext.crm.AppointmentSlotPicker = Class.extend({
 					indicator_color = "green";
 				}
 			} else {
-				indicator_color = "darkgrey";
+				indicator_color = "grey";
 			}
 
 			// card styling
 			var muted = "";
 			if (slot.available <= 0) {
-				muted = "text-muted";
+				muted = "text-faded";
 			}
 
 			var selected_class = me.timeslot_in_scheduled_time(slot) ? "selected" : "";

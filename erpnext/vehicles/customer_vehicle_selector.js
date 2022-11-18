@@ -130,7 +130,7 @@ erpnext.vehicles.CustomerVehicleSelector = Class.extend({
 				image_html = `<img src="${vehicle.image}" style="max-height: 60px;" alt="Vehicle Image">`;
 			}
 
-			var indicator_color = vehicle.is_current ? "blue" : "darkgrey";
+			var indicator_color = vehicle.is_current ? "blue" : "grey";
 
 			var selected_class = vehicle.name == me.get_selected_vehicle() ? "selected" : "";
 
@@ -178,7 +178,7 @@ erpnext.vehicles.CustomerVehicleSelector = Class.extend({
 		}
 
 		$.each(me.customers || [], function (i, customer) {
-			var indicator_color = customer.is_current ? "blue" : "darkgrey";
+			var indicator_color = customer.is_current ? "blue" : "grey";
 
 			var selected_class = customer.name == me.get_selected_customer() ? "selected" : "";
 

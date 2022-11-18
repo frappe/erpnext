@@ -6,9 +6,9 @@ frappe.listview_settings['Vehicle Quotation'] = {
 		} else if(doc.status==="Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];
 		} else if(doc.status==="Lost") {
-			return [__("Lost"), "darkgrey", "status,=,Lost"];
+			return [__("Lost"), "grey", "status,=,Lost"];
 		} else if(doc.status==="Expired") {
-			return [__("Expired"), "darkgrey", "status,=,Expired"];
+			return [__("Expired"), "light-grey", "status,=,Expired"];
 		}
 	},
 	onload: function(listview) {

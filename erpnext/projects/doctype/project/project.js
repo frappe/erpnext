@@ -262,7 +262,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		// Work Status
 		var vehicle_status_color;
 		if (me.frm.doc.vehicle_status == "Not Applicable") {
-			vehicle_status_color = "grey";
+			vehicle_status_color = "light-grey";
 		} else if (me.frm.doc.vehicle_status == "Not Received") {
 			vehicle_status_color = "red";
 		} else if (me.frm.doc.vehicle_status == "In Workshop") {
@@ -273,7 +273,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 
 		var delivery_status_color;
 		if (me.frm.doc.delivery_status == "Not Applicable") {
-			delivery_status_color = "grey";
+			delivery_status_color = "light-grey";
 		} else if (me.frm.doc.delivery_status == "Not Delivered") {
 			delivery_status_color = "orange";
 		} else if (me.frm.doc.delivery_status == "Partly Delivered") {
@@ -306,7 +306,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		// Billing Status
 		var billing_status_color;
 		if (me.frm.doc.billing_status == "Not Applicable") {
-			billing_status_color = "grey";
+			billing_status_color = "light-grey";
 		} else if (me.frm.doc.billing_status == "Not Billed") {
 			billing_status_color = "orange";
 		} else if (me.frm.doc.billing_status == "Partly Billed") {
@@ -315,8 +315,8 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 			billing_status_color = "green";
 		}
 
-		var total_billable_color = me.frm.doc.total_billable_amount ? "blue" : "grey";
-		var customer_billable_color = me.frm.doc.customer_billable_amount ? "blue" : "grey";
+		var total_billable_color = me.frm.doc.total_billable_amount ? "blue" : "light-grey";
+		var customer_billable_color = me.frm.doc.customer_billable_amount ? "blue" : "light-grey";
 
 		var billed_amount_color;
 		if (me.frm.doc.total_billed_amount) {
@@ -331,7 +331,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 			if (me.frm.doc.total_billable_amount) {
 				billed_amount_color = 'orange';
 			} else {
-				billed_amount_color = 'grey';
+				billed_amount_color = 'light-grey';
 			}
 		}
 
@@ -370,13 +370,11 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 	add_indicator_section(title, items) {
 		var items_html = '';
 		$.each(items || [], function (i, d) {
-			items_html += `<div class="badge-link small">
-				<span class="indicator ${d.indicator}">${d.contents}</span>
-			</div>`
+			items_html += `<span class="indicator ${d.indicator}">${d.contents}</span>`
 		});
 
 		var html = $(`<div class="flex-column col-sm-4 col-md-4">
-			<div><h6>${title}</h6></div>
+			<div><h5>${title}</h5></div>
 			${items_html}
 		</div>`);
 

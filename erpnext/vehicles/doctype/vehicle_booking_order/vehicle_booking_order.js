@@ -282,9 +282,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		var me = this;
 		var company_currency = erpnext.get_currency(me.frm.doc.company);
 
-		me.frm.dashboard.stats_area.removeClass('hidden');
-		me.frm.dashboard.stats_area_row.addClass('flex');
-		me.frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+		me.frm.dashboard.stats_area.show();
 
 		// Payment Status
 		var customer_outstanding_color = me.frm.doc.customer_outstanding ? "orange" : "green";
@@ -300,7 +298,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 
 		var payment_adjustment_color;
 		if (!me.frm.doc.payment_adjustment) {
-			payment_adjustment_color = 'grey';
+			payment_adjustment_color = 'light-grey';
 		} else if (me.frm.doc.payment_adjustment > 0) {
 			payment_adjustment_color = 'blue';
 		} else {
@@ -335,7 +333,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		} else if (me.frm.doc.delivery_status == "Delivered") {
 			delivery_status_color = "green";
 		} else if (me.frm.doc.delivery_status == "Not Applicable") {
-			delivery_status_color = "grey";
+			delivery_status_color = "light-grey";
 		}
 
 		var overdue_warning = ["Not Received", "In Stock"].includes(me.frm.doc.delivery_status) && cint(me.frm.doc.delivery_overdue);
@@ -356,7 +354,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 
 		var registration_status_color;
 		if (me.frm.doc.registration_status == "Not Ordered") {
-			registration_status_color = "grey";
+			registration_status_color = "light-grey";
 		} else if (me.frm.doc.registration_status == "Ordered") {
 			registration_status_color = "blue";
 		} else if (me.frm.doc.registration_status == "In Process") {
@@ -367,7 +365,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 
 		var pdi_status_color;
 		if (me.frm.doc.pdi_status == "Not Requested") {
-			pdi_status_color = "grey";
+			pdi_status_color = "light-grey";
 		} else if (me.frm.doc.pdi_status == "Requested") {
 			pdi_status_color = "blue";
 		} else if (me.frm.doc.pdi_status == "In Process") {
@@ -391,7 +389,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		if (me.frm.doc.__onload && me.frm.doc.__onload.vehicle_warehouse_name) {
 			fulfilment_items.push({
 				contents: __('Location: {0}', [me.frm.doc.__onload.vehicle_warehouse_name]),
-				indicator: 'lightblue'
+				indicator: 'light-blue'
 			});
 		}
 
@@ -416,37 +414,37 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		// Notification Status
 		var booking_confirmation_count = frappe.get_notification_count(me.frm, 'Booking Confirmation', 'SMS');
 		var booking_confirmation_color = booking_confirmation_count ? "green"
-			: this.can_notify('Booking Confirmation') ? "yellow" : "grey";
+			: this.can_notify('Booking Confirmation') ? "yellow" : "light-grey";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
 		var balance_payment_count = frappe.get_notification_count(me.frm, 'Balance Payment Due', 'SMS');
 		var balance_payment_color = balance_payment_count ? "green"
-			: this.can_notify('Balance Payment Due') ? "yellow" : "grey";
+			: this.can_notify('Balance Payment Due') ? "yellow" : "light-grey";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
 			: __("Not Sent");
 
 		var payment_confirmation_count = frappe.get_notification_count(me.frm, 'Balance Payment Confirmation', 'SMS');
 		var payment_confirmation_color = payment_confirmation_count ? "green"
-			: this.can_notify('Balance Payment Confirmation') ? "yellow" : "grey";
+			: this.can_notify('Balance Payment Confirmation') ? "yellow" : "light-grey";
 		var payment_confirmation_status = payment_confirmation_count ? __("{0} SMS", [payment_confirmation_count])
 			: __("Not Sent");
 
 		var ready_for_delivery_count = frappe.get_notification_count(me.frm, 'Ready For Delivery', 'SMS');
 		var ready_for_delivery_color = ready_for_delivery_count ? "green"
-			: this.can_notify('Ready For Delivery') ? "yellow" : "grey";
+			: this.can_notify('Ready For Delivery') ? "yellow" : "light-grey";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
 
 		var congratulations_count = frappe.get_notification_count(me.frm, 'Congratulations', 'SMS');
 		var congratulations_color = congratulations_count ? "green"
-			: this.can_notify('Congratulations') ? "yellow" : "grey";
+			: this.can_notify('Congratulations') ? "yellow" : "light-grey";
 		var congratulations_status = congratulations_count ? __("{0} SMS", [congratulations_count])
 			: __("Not Sent");
 
 		var booking_cancellation_count = frappe.get_notification_count(me.frm, 'Booking Cancellation', 'SMS');
 		var booking_cancellation_color = booking_cancellation_count ? "green"
-			: this.can_notify('Booking Cancellation') ? "yellow" : "grey";
+			: this.can_notify('Booking Cancellation') ? "yellow" : "light-grey";
 		var booking_cancellation_status = booking_cancellation_count ? __("{0} SMS", [booking_cancellation_count])
 			: __("Not Sent");
 
@@ -486,13 +484,11 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 	add_indicator_section(title, items) {
 		var items_html = '';
 		$.each(items || [], function (i, d) {
-			items_html += `<div class="badge-link small">
-				<span class="indicator ${d.indicator}">${d.contents}</span>
-			</div>`
+			items_html += `<span class="indicator ${d.indicator}">${d.contents}</span>`
 		});
 
 		var html = $(`<div class="flex-column col-sm-4 col-md-4">
-			<div><h6>${title}</h6></div>
+			<div><h5>${title}</h5></div>
 			${items_html}
 		</div>`);
 

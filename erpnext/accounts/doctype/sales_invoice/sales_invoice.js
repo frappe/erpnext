@@ -28,7 +28,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 					if (doc.returned_qty) {
 						return "yellow";
 					} else if (doc.base_returned_amount) {
-						return "darkgrey";
+						return "grey";
 					}
 				}
 			}

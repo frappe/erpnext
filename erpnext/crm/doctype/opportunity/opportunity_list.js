@@ -9,9 +9,9 @@ frappe.listview_settings['Opportunity'] = {
 		} else if (["Converted", "Closed"].includes(doc.status)) {
 			indicator[1] = "green";
 		} else if (doc.status == "Lost") {
-			indicator[1] = "darkgrey";
+			indicator[1] = "light-grey";
 		} else if (doc.status == "Replied") {
-			indicator[1] = "purple";
+			indicator[1] = "light-blue";
 		}
 		return indicator;
 	},

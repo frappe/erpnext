@@ -10,7 +10,7 @@ frappe.listview_settings['Attendance'] = {
 		} else if (doc.status == "On Leave") {
 			return [__(doc.status), "blue", "status,=," + doc.status];
 		} else {
-			return [__(doc.status), "darkgrey", "status,=," + doc.status];
+			return [__(doc.status), "grey", "status,=," + doc.status];
 		}
 	}
 };

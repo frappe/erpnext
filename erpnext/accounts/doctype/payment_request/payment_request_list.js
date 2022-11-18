@@ -2,7 +2,7 @@ frappe.listview_settings['Payment Request'] = {
 	add_fields: ["status"],
 	get_indicator: function(doc) {
 		if(doc.status == "Draft") {
-			return [__("Draft"), "darkgrey", "status,=,Draft"];
+			return [__("Draft"), "grey", "status,=,Draft"];
 		}
 		if(doc.status == "Requested") {
 			return [__("Requested"), "green", "status,=,Requested"];
