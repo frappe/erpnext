@@ -13,7 +13,6 @@ def migrate_shipments():
 		return
 
 	OLD_VALUES = [
-		# old_value: (code, title),
 		"EXW (Ex Works)",
 		"FCA (Free Carrier)",
 		"FOB (Free On Board)",
