@@ -532,6 +532,14 @@ class update_entries_after(object):
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
+		if (
+			sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
+			and sle.voucher_detail_no
+			and sle.actual_qty < 0
+			and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
+		):
+			sle.outgoing_rate = get_incoming_rate_for_inter_company_transfer(sle)
+
 		if get_serial_nos(sle.serial_no):
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -579,6 +587,7 @@ class update_entries_after(object):
 		sle.stock_queue = json.dumps(self.wh_data.stock_queue)
 		sle.stock_value_difference = stock_value_difference
 		sle.doctype = "Stock Ledger Entry"
+
 		frappe.get_doc(sle).db_update()
 
 		if not self.args.get("sle_id"):
@@ -641,22 +650,7 @@ class update_entries_after(object):
 				and sle.voucher_detail_no
 				and frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_internal_supplier")
 			):
-				field = (
-					"delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
-				)
-				doctype = (
-					"Delivery Note Item" if sle.voucher_type == "Purchase Receipt" else "Sales Invoice Item"
-				)
-				refernce_name = frappe.get_cached_value(
-					sle.voucher_type + " Item", sle.voucher_detail_no, field
-				)
-
-				if refernce_name:
-					rate = frappe.get_cached_value(
-						doctype,
-						refernce_name,
-						"incoming_rate",
-					)
+				rate = get_incoming_rate_for_inter_company_transfer(sle)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"
@@ -731,14 +725,12 @@ class update_entries_after(object):
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
-			frappe.db.set_value(
-				sle.voucher_type + " Item",
-				sle.voucher_detail_no,
-				{
-					"base_net_rate": outgoing_rate,
-					"valuation_rate": outgoing_rate,
-				},
-			)
+			if sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"] and frappe.get_cached_value(
+				sle.voucher_type, sle.voucher_no, "is_internal_supplier"
+			):
+				frappe.db.set_value(
+					f"{sle.voucher_type} Item", sle.voucher_detail_no, "valuation_rate", sle.outgoing_rate
+				)
 		else:
 			frappe.db.set_value(
 				"Purchase Receipt Item Supplied", sle.voucher_detail_no, "rate", outgoing_rate
@@ -1482,3 +1474,25 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 		return 0.0
 
 	return flt(number)
+
+
+def get_incoming_rate_for_inter_company_transfer(sle) -> float:
+	"""
+	For inter company transfer, incoming rate is the average of the outgoing rate
+	"""
+	rate = 0.0
+
+	field = "delivery_note_item" if sle.voucher_type == "Purchase Receipt" else "sales_invoice_item"
+
+	doctype = "Delivery Note Item" if sle.voucher_type == "Purchase Receipt" else "Sales Invoice Item"
+
+	reference_name = frappe.get_cached_value(sle.voucher_type + " Item", sle.voucher_detail_no, field)
+
+	if reference_name:
+		rate = frappe.get_cached_value(
+			doctype,
+			reference_name,
+			"incoming_rate",
+		)
+
+	return rate

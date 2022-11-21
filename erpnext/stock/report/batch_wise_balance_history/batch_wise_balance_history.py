@@ -74,9 +74,20 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
-	for field in ["item_code", "warehouse", "batch_no", "company"]:
+	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
 			conditions += " and {0} = {1}".format(field, frappe.db.escape(filters.get(field)))
+
+	if filters.get("warehouse"):
+		warehouse_details = frappe.db.get_value(
+			"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
+		)
+		if warehouse_details:
+			conditions += (
+				" and exists (select name from `tabWarehouse` wh \
+				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"
+				% (warehouse_details.lft, warehouse_details.rgt)
+			)
 
 	return conditions
 
@@ -87,7 +98,7 @@ def get_stock_ledger_entries(filters):
 	return frappe.db.sql(
 		"""
 		select item_code, batch_no, warehouse, posting_date, sum(actual_qty) as actual_qty
-		from `tabStock Ledger Entry`
+		from `tabStock Ledger Entry` as sle
 		where is_cancelled = 0 and docstatus < 2 and ifnull(batch_no, '') != '' %s
 		group by voucher_no, batch_no, item_code, warehouse
 		order by item_code, warehouse"""

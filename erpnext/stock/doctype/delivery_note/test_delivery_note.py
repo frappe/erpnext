@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cstr, flt, nowdate, nowtime
+from frappe.utils import add_days, cstr, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.utils import get_balance_on
@@ -1050,9 +1050,22 @@ class TestDeliveryNote(FrappeTestCase):
 			do_not_submit=True,
 		)
 
+		dn.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": "Tax 1",
+				"rate": 14,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1,
+			},
+		)
+
 		self.assertEqual(dn.items[0].rate, 500)  # haven't saved yet
 		dn.save()
 		self.assertEqual(dn.ignore_pricing_rule, 1)
+		self.assertEqual(dn.taxes[0].included_in_print_rate, 0)
 
 		# rate should reset to incoming rate
 		self.assertEqual(dn.items[0].rate, rate)
@@ -1063,6 +1076,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.save()
 
 		self.assertEqual(dn.items[0].rate, rate)
+		self.assertEqual(dn.items[0].net_rate, rate)
 
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
@@ -1091,6 +1105,36 @@ class TestDeliveryNote(FrappeTestCase):
 			frappe.db.exists("GL Entry", {"voucher_no": dn.name, "voucher_type": dn.doctype})
 		)
 
+	def test_batch_expiry_for_delivery_note(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			"_Test Batch Item For Return Check",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TBIRC.#####",
+			},
+		)
+
+		pi = make_purchase_receipt(qty=1, item_code=item.name)
+
+		dn = create_delivery_note(qty=1, item_code=item.name, batch_no=pi.items[0].batch_no)
+
+		dn.load_from_db()
+		batch_no = dn.items[0].batch_no
+		self.assertTrue(batch_no)
+
+		frappe.db.set_value("Batch", batch_no, "expiry_date", add_days(today(), -1))
+
+		return_dn = make_return_doc(dn.doctype, dn.name)
+		return_dn.save().submit()
+
+		self.assertTrue(return_dn.docstatus == 1)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
@@ -1117,6 +1161,7 @@ def create_delivery_note(**args):
 			"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 			"serial_no": args.serial_no,
+			"batch_no": args.batch_no or None,
 			"target_warehouse": args.target_warehouse,
 		},
 	)

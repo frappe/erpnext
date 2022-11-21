@@ -819,7 +819,9 @@ class Asset(AccountsController):
 
 
 def update_maintenance_status():
-	assets = frappe.get_all("Asset", filters={"docstatus": 1, "maintenance_required": 1})
+	assets = frappe.get_all(
+		"Asset", filters={"docstatus": 1, "maintenance_required": 1, "disposal_date": ("is", "not set")}
+	)
 
 	for asset in assets:
 		asset = frappe.get_doc("Asset", asset.name)
