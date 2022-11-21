@@ -812,10 +812,11 @@ def insert_item_price(args):
 		frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")
 	):
 		if frappe.has_permission("Item Price", "write"):
+			rate = args.rate + args.discount_amount if args.get("discount_amount") else args.rate
 			price_list_rate = (
-				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				(rate / args.get("conversion_factor"))
 				if args.get("conversion_factor")
-				else (args.rate + args.discount_amount)
+				else rate
 			)
 
 			item_price = frappe.db.get_value(
