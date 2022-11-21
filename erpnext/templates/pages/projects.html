@@ -33,13 +33,13 @@
 
   <hr>
 
-  {% if doc.tasks %}
   <div class="row align-items-center">
     <div class="col-sm-6 my-account-header"> <h4>Tasks</h4></div>
     <div class="col-sm-6 text-right">
       <a class="btn btn-secondary btn-light btn-sm" href='/tasks/new?project={{ doc.project_name }}'>{{ _("New task") }}</a>
     </div>
   </div>
+  {% if doc.tasks %}
   <div class="website-list">
     <div class="result">
       <div class="web-list-item transaction-list-item">
@@ -55,11 +55,11 @@
     </div>
   </div>
   {% else %}
-    <p class="font-weight-bold">{{ _("No Tasks") }}</p>
+    {{ empty_state('Task')}}
   {% endif %}
 
-  {% if doc.timesheets %}
   <h4 class="my-account-header">Timesheets</h4>
+  {% if doc.timesheets %}
     <div class="website-list">
       <div class="result">
         <div class="web-list-item transaction-list-item">
@@ -76,7 +76,7 @@
       </div>
     </div>
   {% else %}
-    <p class="font-weight-bold mt-5">{{ _("No Timesheets") }}</p>
+    {{ empty_state('Timesheet')}}
   {% endif %}
 
   {% if doc.attachments %}
@@ -121,7 +121,21 @@
       aria-valuemax="100" style="width:{{ percent_complete|round|int }}%;">
     </div>
   </div>
-{% else %}
-  <hr>
 {% endif %}
+{% endmacro %}
+
+
+{% macro empty_state(section_name) %}
+<div class="frappe-list align-items-center">
+  <div class=" text-muted flex justify-center align-center" style="">
+    <div class=" text-muted flex text-center">
+      <div class="msg-box no-border">
+        <div>
+          <img src="/assets/frappe/images/ui-states/list-empty-state.svg" alt="Generic Empty State" class="null-state">
+        </div>
+        <p>You haven't created a {{ section_name }} yet</p>
+      </div>
+    </div>
+  </div>
+  </div>
 {% endmacro %}
