@@ -75,7 +75,7 @@ erpnext.crm.LeadController = class LeadController extends frappe.ui.form.Control
 			this.frm.add_custom_button(__("Customer"), () => this.make_or_set_customer(),
 				__("Change"));
 		}
-	},
+	}
 
 	make_or_set_customer() {
 		erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.name);
