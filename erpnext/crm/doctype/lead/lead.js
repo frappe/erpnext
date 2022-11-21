@@ -58,22 +58,24 @@ erpnext.crm.LeadController = class LeadController extends frappe.ui.form.Control
 	}
 
 	setup_buttons() {
-		if(!this.frm.doc.__islocal && !this.frm.doc.customer) {
-			this.frm.add_custom_button(__("Customer"), () => this.make_or_set_customer(),
-				__('Create'));
-			this.frm.add_custom_button(__("Opportunity"), () => this.create_opportunity(),
-				__('Create'));
-
-			if (frappe.boot.active_domains.includes("Vehicles")) {
-				this.frm.add_custom_button(__("Vehicle Quotation"), () => this.make_vehicle_quotation(),
+		if (!this.frm.doc.__islocal) {
+			if (!this.frm.doc.customer) {
+				this.frm.add_custom_button(__("Customer"), () => this.make_or_set_customer(),
 					__('Create'));
-			}
+				this.frm.add_custom_button(__("Opportunity"), () => this.create_opportunity(),
+					__('Create'));
 
-			this.frm.add_custom_button(__("Quotation"), () => this.make_quotation(),
-				__('Create'));
-		} else {
-			this.frm.add_custom_button(__("Customer"), () => this.make_or_set_customer(),
-				__("Change"));
+				if (frappe.boot.active_domains.includes("Vehicles")) {
+					this.frm.add_custom_button(__("Vehicle Quotation"), () => this.make_vehicle_quotation(),
+						__('Create'));
+				}
+
+				this.frm.add_custom_button(__("Quotation"), () => this.make_quotation(),
+					__('Create'));
+			} else {
+				this.frm.add_custom_button(__("Customer"), () => this.make_or_set_customer(),
+					__("Change"));
+			}
 		}
 	}
 
