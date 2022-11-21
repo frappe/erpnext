@@ -228,7 +228,6 @@ erpnext.patches.v13_0.migrate_stripe_api
 erpnext.patches.v13_0.reset_clearance_date_for_intracompany_payment_entries
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "TaxJar Settings")
 execute:frappe.reload_doc("erpnext_integrations", "doctype", "Product Tax Category")
-erpnext.patches.v13_0.custom_fields_for_taxjar_integration          #08-11-2021
 erpnext.patches.v13_0.set_operation_time_based_on_operating_cost
 erpnext.patches.v13_0.create_gst_payment_entry_fields #27-11-2021
 erpnext.patches.v13_0.fix_invoice_statuses
