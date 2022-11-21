@@ -200,6 +200,12 @@ class SalesOrder(SellingController):
 			temp_item.qty = qty
 			temp_item.is_allways_return = returnable.is_allways_return
 
+	def submit(self):
+		if self.request_from == 'RMS':
+			self.queue_action('submit',queue_name="dn_primary")
+		else:
+			self._submit()
+
 	def on_submit(self):
 		self.check_credit_limit()
 		self.update_reserved_qty()
