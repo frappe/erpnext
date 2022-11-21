@@ -298,20 +298,22 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
 		gl_map[0].company, gl_map[0].voucher_type, gl_map[0].voucher_no
 	)
-	round_off_account_exists = False
 	round_off_gle = frappe._dict()
-	for d in gl_map:
-		if d.account == round_off_account:
-			round_off_gle = d
-			if d.debit:
-				debit_credit_diff -= flt(d.debit)
-			else:
-				debit_credit_diff += flt(d.credit)
-			round_off_account_exists = True
+	round_off_account_exists = False
 
-	if round_off_account_exists and abs(debit_credit_diff) < (1.0 / (10**precision)):
-		gl_map.remove(round_off_gle)
-		return
+	if gl_map[0].voucher_type != "Period Closing Voucher":
+		for d in gl_map:
+			if d.account == round_off_account:
+				round_off_gle = d
+				if d.debit:
+					debit_credit_diff -= flt(d.debit) - flt(d.credit)
+				else:
+					debit_credit_diff += flt(d.credit)
+				round_off_account_exists = True
+
+		if round_off_account_exists and abs(debit_credit_diff) < (1.0 / (10**precision)):
+			gl_map.remove(round_off_gle)
+			return
 
 	if not round_off_gle:
 		for k in ["voucher_type", "voucher_no", "company", "posting_date", "remarks"]:
@@ -334,7 +336,6 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	)
 
 	update_accounting_dimensions(round_off_gle)
-
 	if not round_off_account_exists:
 		gl_map.append(round_off_gle)
 
