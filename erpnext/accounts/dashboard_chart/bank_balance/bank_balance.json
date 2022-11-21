@@ -1,0 +1,35 @@
+{
+ "chart_name": "Bank Balance",
+ "chart_type": "Custom",
+ "color": "#ffb868",
+ "creation": "2020-08-10 13:08:58.794042",
+ "custom_options": "{\n    \"lineOptions\": {\n        \"dotSize\": 8\n    },\n    \"axisOptions\": {\n        \"xAxisMode\": \"tick\",\n        \"xIsSeries\": true\n    }\n}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "dynamic_filters_json": "{}",
+ "filters_json": "{\"accumulated_values\":1,\"account_type\":\"Bank\"}",
+ "group_by_type": "Count",
+ "heatmap_year": "2022",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-11-20 23:38:00.894716",
+ "modified": "2022-11-20 23:38:14.846565",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Balance",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }
+ ],
+ "source": "Account Balance Timeline",
+ "time_interval": "Weekly",
+ "timeseries": 1,
+ "timespan": "Last Quarter",
+ "type": "Line",
+ "use_report_chart": 0,
+ "y_axis": []
+}

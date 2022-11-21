@@ -1,0 +1,32 @@
+{
+ "chart_name": "Profit and Loss",
+ "chart_type": "Custom",
+ "creation": "2020-08-10 13:08:58.749034",
+ "custom_options": "{\n    \"colors\": [\"blue\", \"red\", \"green\"],\n    \"barOptions\": {\n        \"spaceRatio\": 0.25\n    }\n}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{\"accumulated_values\":0,\"root_type\":\"Income, Expense, \",\"group_by\":\"Root Type\"}",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-11-20 23:31:40.712970",
+ "modified": "2022-11-20 23:37:55.897163",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Profit and Loss",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  }
+ ],
+ "source": "Account Balance Timeline",
+ "time_interval": "Monthly",
+ "timeseries": 1,
+ "timespan": "Last Quarter",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "y_axis": []
+}

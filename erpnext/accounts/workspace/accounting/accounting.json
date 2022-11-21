@@ -1,6 +1,15 @@
 {
- "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounting</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounts Receivable\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounts Payable\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounting Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"General Ledger\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Taxes\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Tax Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Cost Center and Budgeting\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Financial Statements\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"More Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Opening and Closing\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Multi Currency\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Subscription Management\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bank Reconciliation\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bank Reconciliation\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Banking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Share Management\",\"col\":3}}]",
+ "charts": [
+  {
+   "chart_name": "Bank Balance",
+   "label": "Bank Balance"
+  },
+  {
+   "chart_name": "Profit and Loss",
+   "label": "Profit and Loss"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounting</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"General Ledger\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Entry\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Receivable\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Payable\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chart Of Accounts\",\"col\":3}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Charts</b></span>\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Bank Balance\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Profit and Loss\",\"col\":6}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounting Documents</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounts Receivable\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounts Payable\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Accounting Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"General Ledger\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Taxes\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Tax Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Cost Center and Budgeting\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Financial Statements\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"More Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Opening and Closing\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Multi Currency\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Subscription Management\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bank Reconciliation\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Bank Reconciliation\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Banking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Share Management\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.606346",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -1066,7 +1075,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:47:34.435269",
+ "modified": "2022-11-20 23:33:41.119305",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -1078,11 +1087,72 @@
  "sequence_id": 1.0,
  "shortcuts": [
   {
-   "color": "Green",
+   "color": "Yellow",
    "doc_view": "List",
+   "format": "{} Draft",
+   "label": "Expense Entry",
+   "link_to": "Expense Entry",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} Unpaid",
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "stats_filter": "{\"outstanding_amount\":[\">\",0],\"docstatus\":[\"=\",\"1\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Yellow",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "Journal Entry",
+   "link_to": "Journal Entry",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Accounts Receivable",
+   "link_to": "Accounts Receivable",
+   "stats_filter": "",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "General Ledger",
+   "link_to": "General Ledger",
+   "stats_filter": "",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "Tree",
+   "label": "Chart Of Accounts",
+   "link_to": "Account",
+   "stats_filter": "",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} Unpaid",
    "label": "Sales Invoice",
    "link_to": "Sales Invoice",
+   "stats_filter": "{\"outstanding_amount\":[\">\",0],\"docstatus\":[\"=\",\"1\"]}",
    "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Accounts Payable",
+   "link_to": "Accounts Payable",
+   "stats_filter": "",
+   "type": "Report"
   }
  ],
  "title": "Accounting"
