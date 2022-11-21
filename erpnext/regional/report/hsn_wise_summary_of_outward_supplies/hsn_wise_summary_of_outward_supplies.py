@@ -35,7 +35,7 @@ def _execute(filters=None):
 	data = []
 	added_item = []
 	for d in item_list:
-		if (d.parent, d.item_code) not in added_item:
+		if (d.parent, d.gst_hsn_code, d.item_code) not in added_item:
 			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty]
 			total_tax = 0
 			tax_rate = 0
@@ -52,7 +52,7 @@ def _execute(filters=None):
 				item_tax = itemised_tax.get((d.parent, d.item_code), {}).get(tax, {})
 				row += [item_tax.get("tax_amount", 0)]
 			data.append(row)
-			added_item.append((d.parent, d.item_code))
+			added_item.append((d.parent, d.gst_hsn_code, d.item_code))
 	if data:
 		data = get_merged_data(columns, data)  # merge same hsn code data
 	return columns, data
@@ -161,11 +161,9 @@ def get_items(filters):
 		GROUP BY
 			`tabSales Invoice Item`.parent,
 			`tabSales Invoice Item`.item_code,
-			`tabSales Invoice Item`.gst_hsn_code,
-			`tabSales Invoice Item`.uom
+			`tabSales Invoice Item`.gst_hsn_code
 		ORDER BY
-			`tabSales Invoice Item`.gst_hsn_code,
-			`tabSales Invoice Item`.uom
+			`tabSales Invoice Item`.gst_hsn_code
 		""".format(
 			conditions=conditions
 		),

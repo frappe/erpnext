@@ -690,7 +690,7 @@ erpnext.work_order = {
 				}
 			}
 
-			if(!frm.doc.skip_transfer){
+			if (frm.doc.status != 'Stopped') {
 				// If "Material Consumption is check in Manufacturing Settings, allow Material Consumption
 				if ((flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing))
 				&& frm.doc.status != 'Stopped' && frm.doc.status != 'Completed' && frm.doc.status != 'Cancelled') {
@@ -722,6 +722,7 @@ erpnext.work_order = {
 							})
 						}
 					}
+				}
 
 					// var finish_btn = frm.add_custom_button(__('Partial'), function() {
 					// 	erpnext.work_order.make_se(frm, 'Manufacture');
@@ -759,22 +760,15 @@ erpnext.work_order = {
 								}
 							}
 						});
-					}, __('Finish'))}
-					if(doc.material_transferred_for_manufacturing>=doc.qty) {
-						// all materials transferred for manufacturing, make this primary
-						finish_btn.addClass('btn-primary');
-					}
+					}, __('Finish'))
 				}
-			} else {
-				if ((flt(doc.produced_qty) < flt(doc.qty)) && frm.doc.status != 'Stopped') {
-					var finish_btn = frm.add_custom_button(__('Finish'), function() {
-						erpnext.work_order.make_se(frm, 'Manufacture');
-					});
+				if(doc.material_transferred_for_manufacturing>=doc.qty) {
+					// all materials transferred for manufacturing, make this primary
 					finish_btn.addClass('btn-primary');
 				}
+				
 			}
 		}
-
 	},
 	calculate_cost: function(doc) {
 		if (doc.operations){

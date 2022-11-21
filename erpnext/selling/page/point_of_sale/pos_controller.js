@@ -67,7 +67,7 @@ erpnext.PointOfSale.Controller = class {
 				{
 					fieldtype: 'Link', label: __('POS Profile'),
 					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
-					get_query: () => pos_profile_query,
+					get_query: () => pos_profile_query(),
 					onchange: () => fetch_pos_payment_methods()
 				},
 				{
@@ -101,9 +101,11 @@ erpnext.PointOfSale.Controller = class {
 			primary_action_label: __('Submit')
 		});
 		dialog.show();
-		const pos_profile_query = {
-			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-			filters: { company: dialog.fields_dict.company.get_value() }
+		const pos_profile_query = () => {
+			return {
+				query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+				filters: { company: dialog.fields_dict.company.get_value() }
+			}
 		};
 	}
 
@@ -660,7 +662,7 @@ erpnext.PointOfSale.Controller = class {
 			} else {
 				return;
 			}
-		} else if (available_qty < qty_needed) {
+		} else if (is_stock_item && available_qty < qty_needed) {
 			frappe.throw({
 				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
 				indicator: 'orange'
@@ -694,7 +696,7 @@ erpnext.PointOfSale.Controller = class {
 			callback(res) {
 				if (!me.item_stock_map[item_code])
 					me.item_stock_map[item_code] = {};
-				me.item_stock_map[item_code][warehouse] = res.message[0];
+				me.item_stock_map[item_code][warehouse] = res.message;
 			}
 		});
 	}

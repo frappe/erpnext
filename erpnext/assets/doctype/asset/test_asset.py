@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import add_days, add_months, cstr, flt, get_last_day, getdate, nowdate
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.assets.doctype.asset.asset import make_sales_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice, update_maintenance_status
 from erpnext.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 	restore_asset,
@@ -237,6 +237,34 @@ class TestAsset(AssetSetup):
 		si.cancel()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
+
+	def test_asset_with_maintenance_required_status_after_sale(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2020-06-06",
+			purchase_date="2020-01-01",
+			expected_value_after_useful_life=10000,
+			total_number_of_depreciations=3,
+			frequency_of_depreciation=10,
+			maintenance_required=1,
+			depreciation_start_date="2020-12-31",
+			submit=1,
+		)
+
+		post_depreciation_entries(date="2021-01-01")
+
+		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
+		si.customer = "_Test Customer"
+		si.due_date = nowdate()
+		si.get("items")[0].rate = 25000
+		si.insert()
+		si.submit()
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
+		update_maintenance_status()
+
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 	def test_expense_head(self):
 		pr = make_purchase_receipt(
@@ -1353,6 +1381,7 @@ def create_asset(**args):
 			"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
 			"gross_purchase_amount": args.gross_purchase_amount or 100000,
 			"purchase_receipt_amount": args.purchase_receipt_amount or 100000,
+			"maintenance_required": args.maintenance_required or 0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"available_for_use_date": args.available_for_use_date or "2020-06-06",
 			"location": args.location or "Test Location",

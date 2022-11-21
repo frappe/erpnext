@@ -114,18 +114,11 @@ frappe.ui.form.on("Sales Order", {
 			return query;
 		});
 
-		frappe.call({
-			method: 'erpnext.selling.doctype.customer_pricing_rule.customer_pricing_rule.fetch_order_warehouse_num',
-			args: {
-				'so_num': frm.doc.name
-			},
-			callback: function(resp){
-				if(resp.message && frm.doc.docstatus !== 1){
-					frappe.model.set_value(cdt,cdn,'order_warehouse_rule_number', resp.message[0])
-					frappe.model.set_value(cdt,cdn,'set_warehouse', resp.message[1])
-				}
-			}
-		})
+		// On cancel and amending a sales order with advance payment, reset advance paid amount
+		if (frm.is_new()) {
+			frm.set_value("advance_paid", 0)
+		}
+
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
 

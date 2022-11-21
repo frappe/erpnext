@@ -67,6 +67,9 @@ class PurchaseInvoice(BuyingController):
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
+		if self.is_new():
+			self.set("tax_withheld_vouchers", [])
+
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ""
@@ -695,6 +698,10 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
+						credit_amount = item.base_net_amount
+						if self.is_internal_supplier and item.valuation_rate:
+							credit_amount = flt(item.valuation_rate * item.stock_qty)
+
 						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
 						gl_entries.append(
 							self.get_gl_dict(
@@ -704,7 +711,7 @@ class PurchaseInvoice(BuyingController):
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"debit": -1 * flt(item.base_net_amount, item.precision("base_net_amount")),
+									"debit": -1 * flt(credit_amount, item.precision("base_net_amount")),
 								},
 								warehouse_account[item.from_warehouse]["account_currency"],
 								item=item,
@@ -1364,7 +1371,14 @@ class PurchaseInvoice(BuyingController):
 		frappe.db.set(self, "status", "Cancelled")
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Tax Withheld Vouchers",
+		)
+
 		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
