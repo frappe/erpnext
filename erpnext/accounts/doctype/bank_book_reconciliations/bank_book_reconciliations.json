@@ -24,7 +24,6 @@
   "transaction_amount",
   "actual_total_conciliation",
   "defference_amount",
-  "amended_from",
   "date_last_reconciliations",
   "column1",
   "bank_check_transit_amount",
@@ -39,7 +38,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Serie",
-   "options": "BAN-REC-.YYYY.-"
+   "options": "BAN-BOO-REC-.YYYY.-"
   },
   {
    "fieldname": "from_date",
@@ -161,7 +160,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Bank reconciliations",
+   "options": "Bank Book Reconciliations",
    "print_hide": 1,
    "read_only": 1
   },
@@ -216,7 +215,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-15 10:01:32.305828",
+ "modified": "2022-11-21 22:36:25.975687",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Book Reconciliations",
