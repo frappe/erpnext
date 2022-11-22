@@ -9,7 +9,7 @@ from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condit
 import datetime
 
 
-date_format = "dd/MM/Y"
+date_format = "dd/MM/y"
 time_format = "hh:mm a"
 datetime_format = "{0}, {1}".format(date_format, time_format)
 

@@ -73,7 +73,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 	for opts in period_list:
 		key = opts["to_date"].strftime("%b_%Y").lower()
 		if periodicity == "Monthly" and not accumulated_values:
-			label = formatdate(opts["to_date"], "MMM YYYY")
+			label = formatdate(opts["to_date"], "MMM yyyy")
 		else:
 			if not accumulated_values:
 				label = get_label(periodicity, opts["from_date"], opts["to_date"])
@@ -114,12 +114,12 @@ def get_months(start_date, end_date):
 
 def get_label(periodicity, from_date, to_date):
 	if periodicity == "Yearly":
-		if formatdate(from_date, "YYYY") == formatdate(to_date, "YYYY"):
-			label = formatdate(from_date, "YYYY")
+		if formatdate(from_date, "yyyy") == formatdate(to_date, "yyyy"):
+			label = formatdate(from_date, "yyyy")
 		else:
-			label = formatdate(from_date, "YYYY") + "-" + formatdate(to_date, "YYYY")
+			label = formatdate(from_date, "yyyy") + "-" + formatdate(to_date, "yyyy")
 	else:
-		label = formatdate(from_date, "MMM YY") + "-" + formatdate(to_date, "MMM YY")
+		label = formatdate(from_date, "MMM yy") + "-" + formatdate(to_date, "MMM yy")
 
 	return label
 

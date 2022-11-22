@@ -8,7 +8,7 @@ from frappe.utils import getdate, nowdate, cint, format_time, format_datetime, n
 from erpnext.crm.doctype.appointment.appointment import get_appointments_for_reminder_notification,\
 	get_appointment_reminders_scheduled_time, get_reminder_date_from_appointment_date, automated_reminder_enabled
 
-date_format = "d/MM/Y"
+date_format = "d/MM/y"
 time_format = "hh:mm a"
 datetime_format = "{0}, {1}".format(date_format, time_format)
 

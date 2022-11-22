@@ -203,7 +203,7 @@ class Appointment(StatusUpdater):
 		holiday = appointment_type_doc.is_holiday(self.scheduled_dt, self.company)
 		if holiday:
 			frappe.msgprint(_("{0} is a holiday: {1}")
-				.format(frappe.bold(formatdate(self.scheduled_dt, "EEEE, d MMMM, Y")), holiday),
+				.format(frappe.bold(formatdate(self.scheduled_dt, "EEEE, d MMMM, y")), holiday),
 				raise_exception=appointment_type_doc.validate_availability)
 
 		# check if already booked
@@ -461,7 +461,7 @@ class Appointment(StatusUpdater):
 			timeslot_str = frappe.bold(self.get_formatted_dt())
 		elif getdate(self.scheduled_dt) == getdate(self.end_dt):
 			timeslot_str = _("{0} {1} till {2}").format(
-				frappe.bold(format_datetime(self.scheduled_dt, "EEEE, d MMMM, Y")),
+				frappe.bold(format_datetime(self.scheduled_dt, "EEEE, d MMMM, y")),
 				frappe.bold(format_datetime(self.scheduled_dt, "hh:mm:ss a")),
 				frappe.bold(format_datetime(self.end_dt, "hh:mm:ss a"))
 			)
@@ -478,7 +478,7 @@ class Appointment(StatusUpdater):
 			dt = self.scheduled_dt
 
 		if dt:
-			return format_datetime(self.scheduled_dt, "EEEE, d MMMM, Y hh:mm:ss a")
+			return format_datetime(self.scheduled_dt, "EEEE, d MMMM, y hh:mm:ss a")
 		else:
 			return ""
 
