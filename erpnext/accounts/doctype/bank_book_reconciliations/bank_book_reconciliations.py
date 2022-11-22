@@ -141,12 +141,12 @@ class BankBookReconciliations(Document):
 				no_document = transaction.document
 				bank_deposit_amount += transaction.amount_data
 
-			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Pre-reconcilied", transaction.amount_data)
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('bank_check_amount', bank_check_amount, update_modified=False)
 		self.db_set('credit_note_amount', credit_note_amount, update_modified=False)
 		self.db_set('debit_note_amount', debit_note_amount, update_modified=False)
-		self.db_set('bank_deposit_amount', bank_deposit_amount, update_modified=Falfilters_bank_transactionsse)
+		self.db_set('bank_deposit_amount', bank_deposit_amount, update_modified=False)
 	
 	def bank_book_value(self):
 		if self.bank_check_transit_amount == None: self.bank_check_transit_amount = 0
