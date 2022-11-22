@@ -10,7 +10,7 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 from six import string_types
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
@@ -504,13 +504,13 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'
-			and mr.company = '{1}'
-			{2}
+			and mr.company = %s
+			{1}
 		order by mr_item.item_code ASC
-		limit {3} offset {4} """.format(
-			", ".join(["%s"] * len(supplier_items)), filters.get("company"), conditions, page_len, start
+		limit {2} offset {3} """.format(
+			", ".join(["%s"] * len(supplier_items)), conditions, cint(page_len), cint(start)
 		),
-		tuple(supplier_items),
+		tuple(supplier_items) + (filters.get("company"),),
 		as_dict=1,
 	)
 
