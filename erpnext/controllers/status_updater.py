@@ -105,10 +105,7 @@ status_map = {
 	"Purchase Receipt": [
 		["Open", None],
 		["Ready", "eval:self.per_billed < 100 and self.docstatus == 1"],
-		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
-		["Cancelled", "eval:self.docstatus==2"],
-		["Closed", "eval:self.status=='Closed'"],
+		["Shipped", "eval:self.status=='Shipped'"]
 	],
 	"Material Request": [
 		["Draft", None],

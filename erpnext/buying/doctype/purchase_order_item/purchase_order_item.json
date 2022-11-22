@@ -944,19 +944,19 @@
   },
   {
    "allow_on_submit": 1,
+   "columns": 1,
    "fieldname": "shipped_qty",
    "fieldtype": "Float",
    "label": "Shipped Qty",
-   "read_only": 1,
-   "precision": "0"
-
+   "precision": "0",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-18 06:13:02.016663",
+ "modified": "2022-11-22 00:32:16.597516",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

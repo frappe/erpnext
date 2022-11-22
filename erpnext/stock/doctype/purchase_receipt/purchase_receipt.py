@@ -209,7 +209,19 @@ class PurchaseReceipt(BuyingController):
 			):
 				check_list.append(d.purchase_order)
 				check_on_hold_or_closed_status("Purchase Order", d.purchase_order)
-
+	
+	def before_submit(self):
+		# Create Batch before submit
+		for d in self.get("items"):	
+			d.batch_no = d.get("batch_number")
+			batch_data = frappe.new_doc("Batch")
+			batch_data.item = d.get("item_code")
+			batch_data.batch_id = d.get("batch_number")
+			batch_data.manufacturing_date= d.get("manufacturing_date")
+			batch_data.expiry_date= d.get("expiry_date")
+			batch_data.purchase_order = self.purchase_order
+			batch_data.insert(ignore_mandatory=True)
+	
 	# on submit
 	def on_submit(self):
 		super(PurchaseReceipt, self).on_submit()
@@ -301,24 +313,12 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries)
 
-	# Create Batch
+	# Validate Batch
 	def before_save(self):
 		for d in self.get("items"):
 			if d.batch_no != d.get("batch_number"):
 				if frappe.db.exists({"doctype": "Batch", "batch_id": d.get("batch_number")}):
 					frappe.throw(_("For Product {0}, Batch {1} already exists.").format(d.item_code, d.batch_number,d.manufacturing_date))
-				else:
-					batch_data = frappe.new_doc("Batch")
-					batch_data.item = d.get("item_code")
-					batch_data.batch_id = d.get("batch_number")
-					batch_data.manufacturing_date= d.get("manufacturing_date")
-					batch_data.expiry_date= d.get("expiry_date")
-					batch_data.purchase_order = self.purchase_order
-					batch_data.insert(ignore_mandatory=True)
-					delete_batch = d.batch_no
-					d.db_set('batch_no', '')
-					frappe.delete_doc('Batch', delete_batch)
-					d.batch_no = d.get("batch_number")
 				
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		if erpnext.is_perpetual_inventory_enabled(self.company):
