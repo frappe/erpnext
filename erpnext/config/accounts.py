@@ -417,6 +417,12 @@ def get_data():
               		"description": _("Create Bank reconciliations"),
             	},
 				{
+					"type": "doctype",
+					"label": _("Bank Book Reconciliations"),
+					"name": "Bank Book Reconciliations",
+					"description": _("Bank Book Reconciliations")
+				},
+				{
               		"type": "doctype",
               		"name": "Cancel Bank Checks",
               		"label": _("Cancel Bank Checks"),
