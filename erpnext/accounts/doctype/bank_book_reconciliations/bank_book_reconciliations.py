@@ -41,14 +41,27 @@ class BankBookReconciliations(Document):
 		bank_check_transit_amount = 0
 
 		for transaction in transactions:
+			no_document = transaction.no_bank_check
 			bank_check_transit_amount += transaction.amount_data
+
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 
 		filters_payments = self.filters_payment_amount()
 
 		payments = frappe.get_all("Payment Entry", ["*"], filters = filters_payments)
 
-		for payment in payments:
-			bank_check_transit_amount += payment.paid_amount
+		for payment in payments:			
+			is_validate = False
+
+			if payment.mode_of_payment == "Cheque":
+				bank_check_transit_amount += payment.paid_amount
+				is_validate = True
+			if payment.mode_of_payment == "Transferencia Bancaria":
+				wire_transfer_amount += payment.paid_amount
+				is_validate = True
+
+			if is_validate:
+				self.set_new_row_payments(payment.name, payment.payment_type, payment.posting_date, payment.paid_amount)
 		
 		self.db_set('bank_check_transit_amount', bank_check_transit_amount, update_modified=False)
 
@@ -58,7 +71,9 @@ class BankBookReconciliations(Document):
 		debit_note_transit = 0
 
 		for transaction in transactions:
+			no_document = transaction.next_note_nd
 			debit_note_transit += transaction.amount_data
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('debit_note_transit', debit_note_transit, update_modified=False)
 
@@ -68,7 +83,9 @@ class BankBookReconciliations(Document):
 		credit_note_transit = 0
 
 		for transaction in transactions:
+			no_document = transaction.next_note_nc
 			credit_note_transit += transaction.amount_data
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('credit_note_transit', credit_note_transit, update_modified=False)
 
@@ -78,7 +95,9 @@ class BankBookReconciliations(Document):
 		bank_deposit_transit = 0
 
 		for transaction in transactions:
+			no_document = transaction.document
 			bank_deposit_transit += transaction.amount_data
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('bank_deposit_transit', bank_deposit_transit, update_modified=False)
 	
@@ -88,7 +107,7 @@ class BankBookReconciliations(Document):
 		self.db_set('total_last_reconciliations', account.total_reconciliation, update_modified=False)
 		self.db_set('date_last_reconciliations', account.reconciliation_date, update_modified=False)
 
-		self.transaction_amount = self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount + self.wire_transfer_amount
+		self.transaction_amount = self.credit_note_transit - self.bank_check_transit_amount - self.debit_note_transit + self.bank_deposit_transit + self.wire_transfer_amount
 
 		self.db_set('transaction_amount', self.transaction_amount, update_modified=False)
 
@@ -97,7 +116,7 @@ class BankBookReconciliations(Document):
 
 		# self.actual_total_conciliation = self.bank_amount + self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount + self.wire_transfer_amount
 
-		self.actual_total_conciliation = self.bank_amount + self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount + self.wire_transfer_amount
+		self.actual_total_conciliation = self.bank_amount + self.credit_note_transit - self.bank_check_transit_amount - self.debit_note_transit + self.bank_deposit_transit
 
 		self.defference_amount = self.actual_total_conciliation - self.bank_amount
 
@@ -123,25 +142,18 @@ class BankBookReconciliations(Document):
 		bank_deposit_amount = 0
 
 		for transaction in transactions:
-			no_document = ""	
 
 			if transaction.check:
-				no_document = transaction.no_bank_check
 				bank_check_amount += transaction.amount_data
 		
 			if transaction.debit_note:
-				no_document = transaction.next_note_nd
 				debit_note_amount += transaction.amount_data
 
 			if transaction.credit_note:
-				no_document = transaction.next_note_nc
 				credit_note_amount += transaction.amount_data
 			
 			if transaction.bank_deposit:
-				no_document = transaction.document
 				bank_deposit_amount += transaction.amount_data
-
-			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('bank_check_amount', bank_check_amount, update_modified=False)
 		self.db_set('credit_note_amount', credit_note_amount, update_modified=False)
@@ -193,17 +205,11 @@ class BankBookReconciliations(Document):
 		wire_transfer_amount = 0
 
 		for payment in payments:
-			is_validate = False
 
 			if payment.mode_of_payment == "Cheque":
 				bank_check_amount += payment.paid_amount
-				is_validate = True
 			if payment.mode_of_payment == "Transferencia Bancaria":
 				wire_transfer_amount += payment.paid_amount
-				is_validate = True
-
-			if is_validate:
-				self.set_new_row_payments(payment.name, payment.payment_type, payment.posting_date, payment.paid_amount)
 		
 		self.db_set('bank_check_amount', bank_check_amount, update_modified=False)
 		self.db_set('wire_transfer_amount', wire_transfer_amount, update_modified=False)
@@ -325,7 +331,7 @@ class BankBookReconciliations(Document):
 
 		conditions += "{"
 		conditions += '"date_data": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
-		conditions += ', "status": "Transit"'
+		conditions += ', "status": "Pre-reconciled"'
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
 
 		conditions += '}'
@@ -336,7 +342,7 @@ class BankBookReconciliations(Document):
 		conditions = ''
 
 		conditions += "{"
-		conditions += '"date_data": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
+		conditions += '"date_data": ["<=", "{}"]'.format(self.to_date)
 		conditions += ', "status": "Transit"'
 		if transaction == "check": conditions += ', "check": 1'
 		if transaction == "deposit": conditions += ', "bank_deposit": 1'
@@ -352,7 +358,7 @@ class BankBookReconciliations(Document):
 
 		conditions += "{"
 		conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
-		conditions += ', "prereconcilied": 0'
+		conditions += ', "prereconcilied": 1'
 		conditions += ', "reconciled": 0'
 		conditions += ', "company": "{}"'.format(self.company)
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
@@ -364,10 +370,9 @@ class BankBookReconciliations(Document):
 		conditions = ''
 		
 		conditions += "{"
-		conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
+		conditions += '"posting_date": ["<=", "{}"]'.format(self.to_date)
 		conditions += ', "prereconcilied": 0'
 		conditions += ', "reconciled": 0'
-		conditions += ', "mode_of_payment": "Cheque"'
 		conditions += ', "company": "{}"'.format(self.company)
 		conditions += ', "status": "Submitted"'
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
