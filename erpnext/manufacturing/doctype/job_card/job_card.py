@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 import datetime
 import json
+from typing import Optional
 
 import frappe
 from frappe import _, bold
@@ -26,6 +27,7 @@ from frappe.utils import (
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
+from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
 
 
 class OverlapError(frappe.ValidationError):
@@ -129,7 +131,7 @@ class JobCard(Document):
 		query = (
 			frappe.qb.from_(jctl)
 			.from_(jc)
-			.select(jc.name.as_("name"), jctl.to_time)
+			.select(jc.name.as_("name"), jctl.to_time, jc.workstation, jc.workstation_type)
 			.where(
 				(jctl.parent == jc.name)
 				& (Criterion.any(time_conditions))
@@ -139,6 +141,9 @@ class JobCard(Document):
 			)
 			.orderby(jctl.to_time, order=frappe.qb.desc)
 		)
+
+		if self.workstation_type:
+			query = query.where(jc.workstation_type == self.workstation_type)
 
 		if self.workstation:
 			production_capacity = (
@@ -156,7 +161,20 @@ class JobCard(Document):
 		if existing and production_capacity > len(existing):
 			return
 
+		if self.workstation_type:
+			if workstation := self.get_workstation_based_on_available_slot(existing):
+				self.workstation = workstation
+				return None
+
 		return existing[0] if existing else None
+
+	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
+		workstations = get_workstations(self.workstation_type)
+		if workstations:
+			busy_workstations = [row.workstation for row in existing]
+			for workstation in workstations:
+				if workstation not in busy_workstations:
+					return workstation
 
 	def schedule_time_logs(self, row):
 		row.remaining_time_in_mins = row.time_in_mins
@@ -170,6 +188,9 @@ class JobCard(Document):
 		# get the last record based on the to time from the job card
 		data = self.get_overlap_for(args, check_next_available_slot=True)
 		if data:
+			if not self.workstation:
+				self.workstation = data.workstation
+
 			row.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
 
 	def check_workstation_time(self, row):

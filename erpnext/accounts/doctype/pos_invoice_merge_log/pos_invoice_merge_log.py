@@ -431,7 +431,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 
 	finally:
 		frappe.db.commit()
-		frappe.publish_realtime("closing_process_complete", {"user": frappe.session.user})
+		frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 
 
 def cancel_merge_logs(merge_logs, closing_entry=None):
@@ -458,7 +458,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 
 	finally:
 		frappe.db.commit()
-		frappe.publish_realtime("closing_process_complete", {"user": frappe.session.user})
+		frappe.publish_realtime("closing_process_complete", user=frappe.session.user)
 
 
 def enqueue_job(job, **kwargs):

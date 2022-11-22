@@ -45,21 +45,6 @@ frappe.ui.form.on("Journal Entry Template", {
 
 		frm.trigger("clear_child");
 		switch(frm.doc.voucher_type){
-			case "Opening Entry":
-				frm.set_value("is_opening", "Yes");
-				frappe.call({
-					type:"GET",
-					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
-					args: {
-						"company": frm.doc.company
-					},
-					callback: function(r) {
-						if(r.message) {
-							add_accounts(frm.doc, r.message);
-						}
-					}
-				});
-				break;
 			case "Bank Entry":
 			case "Cash Entry":
 				frappe.call({

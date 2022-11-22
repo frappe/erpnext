@@ -121,7 +121,7 @@ def set_account_currency(filters):
 				if is_same_account_currency:
 					account_currency = currency
 
-		elif filters.get("party"):
+		elif filters.get("party") and filters.get("party_type"):
 			gle_currency = frappe.db.get_value(
 				"GL Entry",
 				{"party_type": filters.party_type, "party": filters.party[0], "company": filters.company},
@@ -134,7 +134,7 @@ def set_account_currency(filters):
 				account_currency = (
 					None
 					if filters.party_type in ["Employee", "Shareholder", "Member"]
-					else frappe.db.get_value(filters.party_type, filters.party[0], "default_currency")
+					else frappe.get_cached_value(filters.party_type, filters.party[0], "default_currency")
 				)
 
 		filters["account_currency"] = account_currency or filters.company_currency
