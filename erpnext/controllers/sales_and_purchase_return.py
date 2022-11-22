@@ -335,7 +335,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 		doc.is_return = 1
 		doc.return_against = source.name
 		doc.set_warehouse = ""
-		if doctype == "Sales Invoice" or doctype == "POS Invoice":
+		if doctype in ("Sales Invoice", "POS Invoice"):
 			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
@@ -350,38 +350,58 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if tax.charge_type == "Actual":
 				tax.tax_amount = -1 * tax.tax_amount
 
-		if doc.get("is_return"):
-			if doc.doctype == "Sales Invoice" or doc.doctype == "POS Invoice":
-				doc.consolidated_invoice = ""
-				doc.set("payments", [])
-				for data in source.payments:
-					paid_amount = 0.00
-					base_paid_amount = 0.00
-					data.base_amount = flt(
-						data.amount * source.conversion_rate, source.precision("base_paid_amount")
-					)
-					paid_amount += data.amount
-					base_paid_amount += data.base_amount
-					doc.append(
-						"payments",
-						{
-							"mode_of_payment": data.mode_of_payment,
-							"type": data.type,
-							"amount": -1 * paid_amount,
-							"base_amount": -1 * base_paid_amount,
-							"account": data.account,
-							"default": data.default,
-						},
-					)
-				if doc.is_pos:
-					doc.paid_amount = -1 * source.paid_amount
-			elif doc.doctype == "Purchase Invoice":
-				doc.paid_amount = -1 * source.paid_amount
-				doc.base_paid_amount = -1 * source.base_paid_amount
-				doc.payment_terms_template = ""
-				doc.payment_schedule = []
+		if doc.doctype in ("Sales Invoice", "POS Invoice") and doc.is_pos:
+			default_mode_of_payment = frappe.db.get_value(
+				"POS Payment Method",
+				{"parent": doc.pos_profile, "default": 1},
+				["mode_of_payment"],
+				as_dict=1,
+			)
 
-		if doc.get("is_return") and hasattr(doc, "packed_items"):
+			pending_amount = doc.net_total or 0 - doc.outstanding_amount or 0
+
+			if default_mode_of_payment and pending_amount > 0:
+				doc.payments = []
+				doc.append(
+					"payments",
+					{
+						"mode_of_payment": default_mode_of_payment.mode_of_payment,
+						"amount": -1 * pending_amount,
+						"default": 1,
+					},
+				)
+
+		if doc.doctype in ("Sales Invoice", "POS Invoice") and not doc.is_pos:
+			doc.consolidated_invoice = ""
+			doc.set("payments", [])
+
+			for data in source.payments:
+				data.base_amount = flt(
+					data.amount * source.conversion_rate,
+					source.precision("base_paid_amount")
+				)
+				paid_amount = data.amount
+				base_paid_amount = data.base_amount
+
+				doc.append(
+					"payments",
+					{
+						"mode_of_payment": data.mode_of_payment,
+						"type": data.type,
+						"amount": -1 * paid_amount,
+						"base_amount": -1 * base_paid_amount,
+						"account": data.account,
+						"default": data.default,
+					},
+				)
+
+		if doc.doctype == "Purchase Invoice":
+			doc.paid_amount = -1 * source.paid_amount
+			doc.base_paid_amount = -1 * source.base_paid_amount
+			doc.payment_terms_template = ""
+			doc.payment_schedule = []
+
+		if hasattr(doc, "packed_items"):
 			for d in doc.get("packed_items"):
 				d.qty = d.qty * -1
 
