@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate, get_first_day, get_last_day, global_date_format, flt
+from frappe.utils import getdate, get_first_day, get_last_day, formatdate, flt
 from frappe.model.document import Document
 
 class VehicleAllocationPeriod(Document):
@@ -25,7 +25,7 @@ class VehicleAllocationPeriod(Document):
 			self.from_date = get_first_day(self.from_date)
 			self.to_date = get_last_day(self.from_date)
 
-			self.period_name = global_date_format(self.from_date, "MMMM Y")
+			self.period_name = formatdate(self.from_date, "MMMM y")
 
 	def validate_to_date(self):
 		if not self.to_date:
