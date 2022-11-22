@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, qb, scrub
 from frappe.query_builder import Order
-from frappe.utils import cint, flt, formatdate
+from frappe.utils import cint, flt
 
 from erpnext.controllers.queries import get_match_cond
 from erpnext.stock.utils import get_incoming_rate
