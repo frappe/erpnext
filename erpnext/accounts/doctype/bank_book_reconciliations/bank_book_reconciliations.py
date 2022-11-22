@@ -57,7 +57,7 @@ class BankBookReconciliations(Document):
 				bank_check_transit_amount += payment.paid_amount
 				is_validate = True
 			if payment.mode_of_payment == "Transferencia Bancaria":
-				wire_transfer_amount += payment.paid_amount
+				# wire_transfer_amount += payment.paid_amount
 				is_validate = True
 
 			if is_validate:
