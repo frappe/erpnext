@@ -565,12 +565,14 @@ class SellingController(StockController):
 
 @frappe.whitelist()
 def get_rate_as_cost(item_code, warehouse, batch_no, serial_no, posting_date, posting_time, qty, voucher_type,
-					 voucher_no, company, delivery_note=None, delivery_note_item=None):
+		voucher_no, company, delivery_note=None, delivery_note_item=None):
 	qty = -1 * qty
-	cost_rate = 0
 	if delivery_note and delivery_note_item:
-		sum_of_stock_value_difference = frappe.db.sql("""SELECT SUM(stock_value_difference) from `tabStock Ledger Entry` 
-			where voucher_type = 'Delivery Note' and voucher_detail_no = '{0}' """.format(delivery_note_item))
+		sum_of_stock_value_difference = frappe.db.sql("""
+			SELECT SUM(stock_value_difference)
+			FROM `tabStock Ledger Entry` 
+			WHERE voucher_type = 'Delivery Note' AND voucher_no = %s AND voucher_detail_no = %s
+		""", (delivery_note, delivery_note_item))
 
 		cost_rate = flt(sum_of_stock_value_difference[0][0]) / qty
 
