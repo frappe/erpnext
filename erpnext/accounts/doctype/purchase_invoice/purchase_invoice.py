@@ -84,6 +84,7 @@ class PurchaseInvoice(BuyingController):
 		self.create_remarks()
 		self.validate_purchase_receipt_if_update_stock()
 		self.validate_purchase_receipt_in_same_fy()
+		self.check_valuation_amounts_with_previous_doc()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_reference)
 
 		self.set_returned_status()
@@ -93,9 +94,6 @@ class PurchaseInvoice(BuyingController):
 	def before_save(self):
 		if not self.on_hold:
 			self.release_date = ''
-
-	def before_submit(self):
-		self.check_valuation_amounts_with_previous_doc()
 
 	def on_submit(self):
 		super(PurchaseInvoice, self).on_submit()
@@ -287,19 +285,12 @@ class PurchaseInvoice(BuyingController):
 						# if rate is different
 						if abs(item.base_net_rate - pr_item.base_net_rate) > 0.1/10**self.precision("base_net_rate", "items"):
 							does_revalue = True
-							if not cint(self.revalue_purchase_receipt):
-								frappe.throw(_("Row {0}: Item Rate does not match the Rate in Purchase Receipt. "
-									"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx), ConfirmRevaluePurchaseReceipt)
 
 						# if item tax amount is different
 						if abs(item.item_tax_amount - pr_item.item_tax_amount) > 0.1/10**self.precision("item_tax_amount", "items"):
 							does_revalue = True
-							if not cint(self.revalue_purchase_receipt):
-								frappe.throw(_("Row {0}: Item Valuation Tax Amount does not match the Valuation Tax Amount in Purchase Receipt. "
-									"Set 'Revalue Purchase Receipt' to confirm.").format(item.idx), ConfirmRevaluePurchaseReceipt)
 
-		if not does_revalue:
-			self.revalue_purchase_receipt = 0
+		self.revalue_purchase_receipt = cint(does_revalue)
 
 	def validate_return_against(self):
 		if cint(self.is_return) and self.return_against:
