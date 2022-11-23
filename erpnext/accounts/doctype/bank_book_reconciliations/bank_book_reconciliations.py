@@ -207,7 +207,7 @@ class BankBookReconciliations(Document):
 		deposit = self.bank_deposit_amount + self.bank_deposit_transit
 
 		debits_totals = debit_note + check
-		credits_totals = deposit + credit_note + s
+		credits_totals = deposit + credit_note + self.wire_transfer_amount
 		book_balance = credits_totals - debits_totals + self.total_last_reconciliations
 
 		self.db_set('book_balance', book_balance, update_modified=False)
