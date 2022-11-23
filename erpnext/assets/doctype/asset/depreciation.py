@@ -10,6 +10,9 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	make_temp_asset_depreciation_schedule,
+)
 
 
 def post_depreciation_entries(date=None, commit=True):
@@ -499,24 +502,27 @@ def get_disposal_account_and_cost_center(company):
 def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book=None):
 	asset_doc = frappe.get_doc("Asset", asset)
 
-	if asset_doc.calculate_depreciation:
-		asset_doc.prepare_depreciation_data(getdate(disposal_date))
-
-		finance_book_id = 1
-		if finance_book:
-			for fb in asset_doc.finance_books:
-				if fb.finance_book == finance_book:
-					finance_book_id = fb.idx
-					break
-
-		asset_schedules = [
-			sch for sch in asset_doc.schedules if cint(sch.finance_book_id) == finance_book_id
-		]
-		accumulated_depr_amount = asset_schedules[-1].accumulated_depreciation_amount
-
-		return flt(
-			flt(asset_doc.gross_purchase_amount) - accumulated_depr_amount,
-			asset_doc.precision("gross_purchase_amount"),
-		)
-	else:
+	if not asset_doc.calculate_depreciation:
 		return flt(asset_doc.value_after_depreciation)
+
+	idx = 1
+	if finance_book:
+		for d in asset.finance_books:
+			if d.finance_book == finance_book:
+				idx = d.idx
+				break
+
+	row = asset_doc.finance_books[idx - 1]
+
+	temp_asset_depreciation_schedule = make_temp_asset_depreciation_schedule(
+		asset_doc, row, getdate(disposal_date)
+	)
+
+	depr_schedule = temp_asset_depreciation_schedule.get("depreciation_schedule")
+
+	accumulated_depr_amount = depr_schedule[-1].accumulated_depreciation_amount
+
+	return flt(
+		flt(asset_doc.gross_purchase_amount) - accumulated_depr_amount,
+		asset_doc.precision("gross_purchase_amount"),
+	)

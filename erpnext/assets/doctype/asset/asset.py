@@ -8,15 +8,14 @@ import math
 import frappe
 from frappe import _
 from frappe.utils import (
-	add_days,
 	add_months,
 	cint,
 	date_diff,
 	flt,
 	get_datetime,
 	get_last_day,
-	is_last_day_of_the_month,
 	getdate,
+	is_last_day_of_the_month,
 	month_diff,
 	nowdate,
 	today,
@@ -28,13 +27,13 @@ from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
 )
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	make_draft_asset_depreciation_schedules,
-	get_asset_depreciation_schedule_name,
 	convert_draft_asset_depreciation_schedules_into_active,
+	get_asset_depreciation_schedule,
+	make_draft_asset_depreciation_schedules,
 	update_draft_asset_depreciation_schedules,
 )
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -245,9 +244,7 @@ class Asset(AccountsController):
 		return value_after_depreciation
 
 	def get_from_date(self, finance_book):
-		asset_depr_schedule_name = get_asset_depreciation_schedule_name(
-			self.name, finance_book
-		)
+		asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, finance_book)
 
 		if not asset_depr_schedule_name:
 			return self.available_for_use_date
@@ -358,7 +355,7 @@ class Asset(AccountsController):
 		return depreciation_amount_for_last_row
 
 	def get_depreciation_amount_for_first_row(self, finance_book):
-		asset_depr_schedule_name = get_asset_depreciation_schedule_name(self.name, finance_book)
+		asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, finance_book)
 
 		asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 
@@ -369,9 +366,7 @@ class Asset(AccountsController):
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule_name = get_asset_depreciation_schedule_name(
-				self.name, row.finance_book
-			)
+			asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, row.finance_book)
 
 			if not asset_depr_schedule_name:
 				return
@@ -379,8 +374,7 @@ class Asset(AccountsController):
 			asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 
 			accumulated_depreciation_after_full_schedule = [
-				d.accumulated_depreciation_amount
-				for d in asset_depr_schedule.get("depreciation_schedule")
+				d.accumulated_depreciation_amount for d in asset_depr_schedule.get("depreciation_schedule")
 			]
 
 			if accumulated_depreciation_after_full_schedule:
@@ -430,9 +424,7 @@ class Asset(AccountsController):
 
 	def delete_depreciation_entries(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule_name = get_asset_depreciation_schedule_name(
-				self.name, row.finance_book
-			)
+			asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, row.finance_book)
 
 			if not asset_depr_schedule_name:
 				return

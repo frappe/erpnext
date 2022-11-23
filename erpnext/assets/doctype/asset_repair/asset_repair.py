@@ -8,6 +8,9 @@ from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depreciation_schedule,
+)
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -279,8 +282,11 @@ class AssetRepair(AccountsController):
 			asset.number_of_depreciations_booked
 		)
 
+		asset_depr_schedule = get_asset_depreciation_schedule(asset.name, row.finance_book)
+		depr_schedule = asset_depr_schedule.get("depreciation_schedule")
+
 		# the Schedule Date in the final row of the old Depreciation Schedule
-		last_schedule_date = asset.schedules[len(asset.schedules) - 1].schedule_date
+		last_schedule_date = asset_depr_schedule[len(asset_depr_schedule) - 1].schedule_date
 
 		# the Schedule Date in the final row of the new Depreciation Schedule
 		asset.to_date = add_months(last_schedule_date, extra_months)
@@ -310,8 +316,11 @@ class AssetRepair(AccountsController):
 			asset.number_of_depreciations_booked
 		)
 
+		asset_depr_schedule = get_asset_depreciation_schedule(asset.name, row.finance_book)
+		depr_schedule = asset_depr_schedule.get("depreciation_schedule")
+
 		# the Schedule Date in the final row of the modified Depreciation Schedule
-		last_schedule_date = asset.schedules[len(asset.schedules) - 1].schedule_date
+		last_schedule_date = asset_depr_schedule[len(asset_depr_schedule) - 1].schedule_date
 
 		# the Schedule Date in the final row of the original Depreciation Schedule
 		asset.to_date = add_months(last_schedule_date, -extra_months)
