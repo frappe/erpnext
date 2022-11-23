@@ -71,6 +71,8 @@ frappe.ui.form.on('Inventory Dimension', {
 					if (r.message && r.message.length) {
 						frm.set_df_property("fetch_from_parent", "options",
 							[""].concat(r.message));
+					} else {
+						frm.set_df_property("fetch_from_parent", "hidden", 1);
 					}
 				}
 			});
