@@ -83,7 +83,7 @@ class calculate_taxes_and_totals(object):
 						item.rate = item.price_list_rate - item.discount_amount
 
 				if has_margin_field:
-					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
+					self.calculate_margin(item)
 
 				if has_margin_field and flt(item.rate_with_margin):
 					rate_before_discount = item.rate_with_margin
@@ -858,9 +858,9 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
-
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
+
 		if flt(item.price_list_rate):
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
 				for d in get_applied_pricing_rules(item.pricing_rules):
@@ -875,9 +875,14 @@ class calculate_taxes_and_totals(object):
 						item.margin_rate_or_amount = 0.0
 
 			rate_db_precision = 6 if item.precision('price_list_rate') <= 6 else 9
-			rate_before_discount = flt(flt(item.rate) + flt(item.discount_amount), rate_db_precision)
-			if item.margin_type and rate_before_discount > flt(item.price_list_rate):
+			discount_amount = flt(item.price_list_rate) * flt(item.discount_percentage) / 100
+			rate_before_discount = flt(flt(item.rate) + discount_amount, rate_db_precision)
+			if rate_before_discount > flt(item.price_list_rate):
 				margin_amount = rate_before_discount - flt(item.price_list_rate)
+
+				if not item.margin_type:
+					item.margin_type = "Amount"
+
 				if item.margin_type == "Amount":
 					item.margin_rate_or_amount = margin_amount
 				elif item.margin_type == "Percentage":
@@ -888,7 +893,8 @@ class calculate_taxes_and_totals(object):
 				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
 				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
 
-		return rate_with_margin, base_rate_with_margin
+		item.rate_with_margin = rate_with_margin
+		item.base_rate_with_margin = base_rate_with_margin
 
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
