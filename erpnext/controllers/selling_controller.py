@@ -552,16 +552,20 @@ class SellingController(StockController):
 	@frappe.whitelist()
 	def set_rate_as_cost(self):
 		for item in self.items:
-			cost_rate = get_rate_as_cost(item.item_code, item.warehouse, item.batch_no, item.serial_no, self.posting_date, self.posting_time, item.qty, self.doctype, self.name, self.company, item.delivery_note, item.delivery_note_item)
-			item.rate = cost_rate
-			item.discount_percentage = 0
-			item.margin_rate_or_amount = 0
+			if item.item_code:
+				cost_rate = get_rate_as_cost(item.item_code, item.warehouse, item.batch_no, item.serial_no,
+					self.posting_date, self.posting_time, item.qty, self.doctype, self.name,
+					self.company, item.delivery_note, item.delivery_note_item)
+				item.rate = cost_rate
+				item.discount_percentage = 0
+				item.margin_rate_or_amount = 0
 
 		self.calculate_taxes_and_totals()
 
 
 @frappe.whitelist()
-def get_rate_as_cost(item_code, warehouse, batch_no, serial_no, posting_date, posting_time, qty, voucher_type, voucher_no, company, delivery_note=None, delivery_note_item=None):
+def get_rate_as_cost(item_code, warehouse, batch_no, serial_no, posting_date, posting_time, qty, voucher_type,
+					 voucher_no, company, delivery_note=None, delivery_note_item=None):
 	qty = -1 * qty
 	cost_rate = 0
 	if delivery_note and delivery_note_item:
