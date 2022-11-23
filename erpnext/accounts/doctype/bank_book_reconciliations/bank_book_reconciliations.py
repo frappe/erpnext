@@ -38,11 +38,8 @@ class BankBookReconciliations(Document):
 		filters_transactions= self.filters_bank_transactions_amounts("check")
 		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
 
-		bank_check_transit_amount = 0
-
 		for transaction in transactions:
 			no_document = transaction.no_bank_check
-			bank_check_transit_amount += transaction.amount_data
 
 			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 
@@ -54,7 +51,6 @@ class BankBookReconciliations(Document):
 			is_validate = False
 
 			if payment.mode_of_payment == "Cheque":
-				bank_check_transit_amount += payment.paid_amount
 				is_validate = True
 			if payment.mode_of_payment == "Transferencia Bancaria":
 				# wire_transfer_amount += payment.paid_amount
@@ -62,42 +58,75 @@ class BankBookReconciliations(Document):
 
 			if is_validate:
 				self.set_new_row_payments(payment.name, payment.payment_type, payment.posting_date, payment.paid_amount)
+
+		filters_transactions= self.filters_bank_transactions_amounts("debit")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		for transaction in transactions:
+			no_document = transaction.next_note_nd
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
+
+		filters_transactions= self.filters_bank_transactions_amounts("credit")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		for transaction in transactions:
+			no_document = transaction.next_note_nc
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
+
+		filters_transactions= self.filters_bank_transactions_amounts("deposit")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		for transaction in transactions:
+			no_document = transaction.document
+			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
+	
+	def transit_check_amount(self):
+		filters_transactions= self.filters_bank_transactions_amounts_by_range("check")
+		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
+
+		bank_check_transit_amount = 0
+
+		for transaction in transactions:
+			bank_check_transit_amount += transaction.amount_data
+
+		filters_payments = self.filters_payment_amount_by_range()
+
+		payments = frappe.get_all("Payment Entry", ["*"], filters = filters_payments)
+
+		for payment in payments:		
+
+			if payment.mode_of_payment == "Cheque":
+				bank_check_transit_amount += payment.paid_amount
 		
 		self.db_set('bank_check_transit_amount', bank_check_transit_amount, update_modified=False)
 
-		filters_transactions= self.filters_bank_transactions_amounts("debit")
+		filters_transactions= self.filters_bank_transactions_amounts_by_range("debit")
 		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
 
 		debit_note_transit = 0
 
 		for transaction in transactions:
-			no_document = transaction.next_note_nd
 			debit_note_transit += transaction.amount_data
-			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('debit_note_transit', debit_note_transit, update_modified=False)
 
-		filters_transactions= self.filters_bank_transactions_amounts("credit")
+		filters_transactions= self.filters_bank_transactions_amounts_by_range("credit")
 		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
 
 		credit_note_transit = 0
 
 		for transaction in transactions:
-			no_document = transaction.next_note_nc
 			credit_note_transit += transaction.amount_data
-			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('credit_note_transit', credit_note_transit, update_modified=False)
 
-		filters_transactions= self.filters_bank_transactions_amounts("deposit")
+		filters_transactions= self.filters_bank_transactions_amounts_by_range("deposit")
 		transactions = frappe.get_all("Bank Transactions", ["*"], filters = filters_transactions)
 
 		bank_deposit_transit = 0
 
 		for transaction in transactions:
-			no_document = transaction.document
 			bank_deposit_transit += transaction.amount_data
-			self.set_new_row_detail(transaction.name, no_document, transaction.transaction_data, transaction.date_data, "Transit", transaction.amount_data)
 		
 		self.db_set('bank_deposit_transit', bank_deposit_transit, update_modified=False)
 	
@@ -116,7 +145,7 @@ class BankBookReconciliations(Document):
 
 		# self.actual_total_conciliation = self.bank_amount + self.credit_note_amount - self.bank_check_amount - self.debit_note_amount + self.bank_deposit_amount + self.wire_transfer_amount
 
-		self.actual_total_conciliation = self.bank_amount + self.credit_note_transit - self.bank_check_transit_amount - self.debit_note_transit + self.bank_deposit_transit
+		self.actual_total_conciliation = self.bank_amount + self.credit_note_transit - self.bank_check_transit_amount - self.debit_note_transit + self.bank_deposit_transit + self.wire_transfer_amount
 
 		self.defference_amount = self.actual_total_conciliation - self.bank_amount
 
@@ -170,6 +199,7 @@ class BankBookReconciliations(Document):
 		if self.bank_deposit_amount == None: self.bank_deposit_amount = 0
 		if self.bank_deposit_transit == None: self.bank_deposit_transit = 0
 		if self.total_last_reconciliations == None: self.total_last_reconciliations = 0
+		if self.wire_transfer_amount == None: self.wire_transfer_amount = 0
 
 		check = self.bank_check_amount + self.bank_check_transit_amount
 		debit_note = self.debit_note_amount + self.debit_note_transit
@@ -177,7 +207,7 @@ class BankBookReconciliations(Document):
 		deposit = self.bank_deposit_amount + self.bank_deposit_transit
 
 		debits_totals = debit_note + check
-		credits_totals = deposit + credit_note
+		credits_totals = deposit + credit_note + s
 		book_balance = credits_totals - debits_totals + self.total_last_reconciliations
 
 		self.db_set('book_balance', book_balance, update_modified=False)
@@ -375,6 +405,44 @@ class BankBookReconciliations(Document):
 		conditions += ', "reconciled": 0'
 		conditions += ', "company": "{}"'.format(self.company)
 		conditions += ', "status": "Submitted"'
+		conditions += ', "bank_account": "{}"'.format(self.bank_account)
+		conditions += '}'
+
+		return conditions
+	
+	def filters_payment_amount_by_range(self):
+		conditions = ''
+		
+		conditions += "{"
+		conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
+		conditions += ', "prereconcilied": 0'
+		conditions += ', "reconciled": 0'
+		conditions += ', "company": "{}"'.format(self.company)
+		conditions += ', "status": "Submitted"'
+		conditions += ', "bank_account": "{}"'.format(self.bank_account)
+		conditions += '}'
+
+		return conditions
+
+	def filters_bank_transaction_by_name(self, name):
+		conditions = ''
+
+		conditions += "{"
+		conditions += '"date_data": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
+		conditions += ', "name": "{}"',format(name)
+
+		conditions += '}'
+
+	def filters_bank_transactions_amounts_by_range(self, transaction):
+		conditions = ''
+
+		conditions += "{"
+		conditions += '"date_data": ["between", ["{}", "{}"]]'.format(self.from_date, self.to_date)
+		conditions += ', "status": "Transit"'
+		if transaction == "check": conditions += ', "check": 1'
+		if transaction == "deposit": conditions += ', "bank_deposit": 1'
+		if transaction == "debit": conditions += ', "debit_note": 1'
+		if transaction == "credit": conditions += ', "credit_note": 1'
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
 		conditions += '}'
 
