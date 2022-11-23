@@ -148,7 +148,7 @@ class BankBookReconciliations(Document):
 
 		self.actual_total_conciliation = self.bank_amount + self.credit_note_transit - self.bank_check_transit_amount - self.debit_note_transit + self.bank_deposit_transit + self.wire_transfer_amount
 
-		self.defference_amount = self.actual_total_conciliation - self.bank_amount
+		self.defference_amount = self.actual_total_conciliation - self.book_balance
 
 		if self.actual_total_conciliation < 0:
 			self.actual_total_conciliation = self.actual_total_conciliation * -1
@@ -191,6 +191,11 @@ class BankBookReconciliations(Document):
 		self.db_set('bank_deposit_amount', bank_deposit_amount, update_modified=False)
 	
 	def bank_book_value(self):
+		account = frappe.get_doc("Bank Account", self.bank_account)
+		
+		self.db_set('total_last_reconciliations', account.total_reconciliation, update_modified=False)
+		self.db_set('date_last_reconciliations', account.reconciliation_date, update_modified=False)
+
 		if self.bank_check_transit_amount == None: self.bank_check_transit_amount = 0
 		if self.bank_check_amount == None: self.bank_check_amount = 0
 		if self.debit_note_amount == None: self.debit_note_amount = 0
