@@ -5,6 +5,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import getdate, nowdate
 from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext import get_default_currency
 from six import iteritems, itervalues
 
@@ -25,6 +26,7 @@ class PartyLedgerSummaryReport(object):
 		self.set_account_currency()
 
 		self.get_gl_entries()
+		self.filter_gl_entries()
 		self.get_return_invoices()
 		self.get_party_adjustment_amounts()
 
@@ -238,8 +240,9 @@ class PartyLedgerSummaryReport(object):
 
 		self.gl_entries = frappe.db.sql("""
 			select
-				gle.posting_date, gle.party, gle.voucher_type, gle.voucher_no, gle.against_voucher_type,
-				gle.against_voucher, gle.debit, gle.credit, gle.debit_in_account_currency, gle.credit_in_account_currency,
+				gle.posting_date, gle.account, gle.party_type, gle.party, gle.cost_center,
+				gle.voucher_type, gle.voucher_no, gle.against_voucher_type, gle.against_voucher,
+				gle.debit, gle.credit, gle.debit_in_account_currency, gle.credit_in_account_currency,
 				gle.is_opening {join_field}
 			from `tabGL Entry` gle
 			{join}
@@ -249,6 +252,38 @@ class PartyLedgerSummaryReport(object):
 			order by gle.posting_date
 		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
 
+	def filter_gl_entries(self):
+		def get_voucher_key(d):
+			return (d.voucher_type, d.voucher_no, d.account, d.party_type, d.party)
+
+		def get_against_voucher_key(d):
+			if d.against_voucher and d.against_voucher_type:
+				return (d.against_voucher_type, d.against_voucher, d.account, d.party_type, d.party)
+
+		out = self.gl_entries
+
+		if self.filters.cost_center:
+			if not self.filters.cost_centers:
+				self.filters.cost_centers = get_cost_centers_with_children(self.filters.get("cost_center"))
+
+			out = []
+
+			self.filters.vouchers_in_cost_center = set()
+			in_cost_center = set()
+
+			for gle in self.gl_entries:
+				voucher_key = get_voucher_key(gle)
+				if gle.cost_center and gle.cost_center in self.filters.cost_centers:
+					in_cost_center.add(voucher_key)
+
+			for gle in self.gl_entries:
+				against_voucher_key = get_against_voucher_key(gle)
+				if (gle.cost_center and gle.cost_center in self.filters.cost_centers) or against_voucher_key in in_cost_center:
+					self.filters.vouchers_in_cost_center.add((gle.voucher_type, gle.voucher_no))
+					out.append(gle)
+
+		self.gl_entries = out
+
 	def prepare_conditions(self):
 		conditions = [""]
 
@@ -256,13 +291,13 @@ class PartyLedgerSummaryReport(object):
 			conditions.append("gle.company=%(company)s")
 
 		if self.filters.finance_book:
-			conditions.append("ifnull(finance_book,'') in (%(finance_book)s, '')")
+			conditions.append("ifnull(gle.finance_book,'') in (%(finance_book)s, '')")
 
 		if self.filters.get("party"):
-			conditions.append("party=%(party)s")
+			conditions.append("gle.party=%(party)s")
 
 		if self.filters.get("account"):
-			conditions.append("account=%(account)s")
+			conditions.append("gle.account=%(account)s")
 		else:
 			account_filters = {
 				"account_type": ('in', ['Receivable', 'Payable'])
@@ -271,17 +306,14 @@ class PartyLedgerSummaryReport(object):
 				account_filters["company"] = self.filters.company
 
 			accounts = [d.name for d in frappe.get_all("Account", filters=account_filters)]
-			conditions.append("account in ({0})".format(", ".join([frappe.db.escape(d) for d in accounts])))
-
-		if self.filters.get("cost_center"):
-			conditions.append("cost_center=%(cost_center)s")
+			conditions.append("gle.account in ({0})".format(", ".join([frappe.db.escape(d) for d in accounts])))
 
 		if self.filters.party_type == "Customer":
 			if self.filters.get("customer_group"):
 				lft, rgt = frappe.db.get_value("Customer Group",
 					self.filters.get("customer_group"), ["lft", "rgt"])
 
-				conditions.append("""party in (select name from tabCustomer
+				conditions.append("""gle.party in (select name from tabCustomer
 					where exists(select name from `tabCustomer Group` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.customer_group))""".format(lft, rgt))
 
@@ -289,25 +321,25 @@ class PartyLedgerSummaryReport(object):
 				lft, rgt = frappe.db.get_value("Territory",
 					self.filters.get("territory"), ["lft", "rgt"])
 
-				conditions.append("""party in (select name from tabCustomer
+				conditions.append("""gle.party in (select name from tabCustomer
 					where exists(select name from `tabTerritory` where lft >= {0} and rgt <= {1}
 						and name=tabCustomer.territory))""".format(lft, rgt))
 
 			if self.filters.get("payment_terms_template"):
-				conditions.append("party in (select name from tabCustomer where payment_terms=%(payment_terms_template)s)")
+				conditions.append("gle.party in (select name from tabCustomer where payment_terms=%(payment_terms_template)s)")
 
 			if self.filters.get("sales_partner"):
-				conditions.append("party in (select name from tabCustomer where default_sales_partner=%(sales_partner)s)")
+				conditions.append("gle.party in (select name from tabCustomer where default_sales_partner=%(sales_partner)s)")
 
 			if self.filters.get("sales_person"):
 				lft, rgt = frappe.db.get_value("Sales Person", self.filters.get("sales_person"), ["lft", "rgt"])
 				conditions.append("""exists(select name from `tabSales Team` steam where
 					steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
-					and steam.parent = party and steam.parenttype = party_type)""".format(lft, rgt))
+					and steam.parent = gle.party and steam.parenttype = gle.party_type)""".format(lft, rgt))
 
 		if self.filters.party_type == "Supplier":
 			if self.filters.get("supplier_group"):
-				conditions.append("""party in (select name from tabSupplier
+				conditions.append("""gle.party in (select name from tabSupplier
 					where supplier_group=%(supplier_group)s)""")
 
 		if self.filters.party_type == "Employee":
@@ -366,8 +398,9 @@ class PartyLedgerSummaryReport(object):
 
 		adjustment_voucher_entries = {}
 		for gle in gl_entries:
-			adjustment_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])
-			adjustment_voucher_entries[(gle.voucher_type, gle.voucher_no)].append(gle)
+			if self.filters.vouchers_in_cost_center is None or (gle.voucher_type, gle.voucher_no) in self.filters.vouchers_in_cost_center:
+				adjustment_voucher_entries.setdefault((gle.voucher_type, gle.voucher_no), [])
+				adjustment_voucher_entries[(gle.voucher_type, gle.voucher_no)].append(gle)
 
 		self.adjustment_details = get_adjustment_details(adjustment_voucher_entries,
 			self.invoice_dr_or_cr, self.reverse_dr_or_cr)

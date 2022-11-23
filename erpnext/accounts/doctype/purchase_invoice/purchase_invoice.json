@@ -1240,7 +1240,8 @@
    "fieldtype": "Check",
    "label": "Revalue Purchase Receipt",
    "no_copy": 1,
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_84",
@@ -1837,7 +1838,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-20 22:09:47.492611",
+ "modified": "2022-11-23 12:44:54.144456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
