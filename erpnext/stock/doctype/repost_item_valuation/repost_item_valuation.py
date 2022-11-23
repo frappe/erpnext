@@ -37,8 +37,9 @@ class RepostItemValuation(Document):
 		if not acc_settings.acc_frozen_upto:
 			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
-			if acc_settings.frozen_accounts_modifier and frappe.session.user in get_users_with_role(
+			if (
 				acc_settings.frozen_accounts_modifier
+				and frappe.session.user in get_users_with_role(acc_settings.frozen_accounts_modifier)
 			):
 				frappe.msgprint(_("Caution: This might alter frozen accounts."))
 				return
