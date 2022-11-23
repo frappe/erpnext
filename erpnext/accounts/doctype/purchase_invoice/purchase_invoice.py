@@ -153,8 +153,8 @@ class PurchaseInvoice(BuyingController):
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
-			self.party_account_currency = frappe.db.get_value(
-				"Account", self.credit_to, "account_currency", cache=True
+			self.party_account_currency = frappe.get_cached_value(
+				"Account", self.credit_to, "account_currency"
 			)
 		if not self.due_date:
 			self.due_date = get_due_date(
@@ -175,7 +175,7 @@ class PurchaseInvoice(BuyingController):
 			if not self.credit_to:
 				self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
 
-		account = frappe.db.get_value(
+		account = frappe.get_cached_value(
 			"Account", self.credit_to, ["account_type", "report_type", "account_currency"], as_dict=True
 		)
 
@@ -673,7 +673,7 @@ class PurchaseInvoice(BuyingController):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		provisional_accounting_for_non_stock_items = cint(
-			frappe.db.get_value(
+			frappe.get_cached_value(
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
 			)
 		)
@@ -984,7 +984,7 @@ class PurchaseInvoice(BuyingController):
 				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount / self.conversion_rate)
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
 
-				item_exp_acc_type = frappe.db.get_value("Account", item.expense_account, "account_type")
+				item_exp_acc_type = frappe.get_cached_value("Account", item.expense_account, "account_type")
 				if not item.expense_account or item_exp_acc_type not in [
 					"Asset Received But Not Billed",
 					"Fixed Asset",

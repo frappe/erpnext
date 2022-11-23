@@ -44,6 +44,7 @@
   "discount_amount",
   "base_rate_with_margin",
   "sec_break2",
+  "apply_tds",
   "rate",
   "amount",
   "item_tax_template",
@@ -889,6 +890,12 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply TDS"
   }
  ],
  "idx": 1,
