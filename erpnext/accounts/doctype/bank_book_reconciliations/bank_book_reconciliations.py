@@ -15,7 +15,6 @@ class BankBookReconciliations(Document):
 			self.add_bank_transactions()
 			self.delete_payments()
 			self.add_payments()
-			self.bank_book_value()
 
 		if self.docstatus == 1:
 			self.verificate_defference_amount()
@@ -26,9 +25,10 @@ class BankBookReconciliations(Document):
 
 	def on_update(self):
 		if self.docstatus == 0:
-			self.update_amount()
 			self.transit_check()
 			self.transit_check_amount()
+			self.bank_book_value()
+			self.update_amount()
 	
 	def on_cancel(self):
 		self.conciliation_transactions_cancel()
@@ -209,7 +209,7 @@ class BankBookReconciliations(Document):
 
 		debits_totals = debit_note + check
 		credits_totals = deposit + credit_note + self.wire_transfer_amount
-		book_balance = credits_totals - debits_totals + self.total_last_reconciliations
+		book_balance = self.total_last_reconciliations + credits_totals - debits_totals
 
 		self.db_set('book_balance', book_balance, update_modified=False)
 
