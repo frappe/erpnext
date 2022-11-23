@@ -267,12 +267,12 @@ class Bankreconciliations(Document):
 	
 	def modified_total_reconcilitiation_account(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
-
+		doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 		if len(details) > 0:
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
 
 			if len(transaction) > 0:
-				doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
+				
 				doc.reconciliation_date = self.date
 				doc.total_reconciliation = self.total_last_reconciliations
 
