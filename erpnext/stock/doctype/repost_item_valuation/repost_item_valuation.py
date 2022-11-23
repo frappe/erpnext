@@ -36,11 +36,12 @@ class RepostItemValuation(Document):
 		)
 		if not acc_settings.acc_frozen_upto:
 			return
-		if acc_settings.frozen_accounts_modifier and self.owner in get_users_with_role(
-			acc_settings.frozen_accounts_modifier
-		):
-			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
+			if acc_settings.frozen_accounts_modifier and frappe.session.user in get_users_with_role(
+				acc_settings.frozen_accounts_modifier
+			):
+				frappe.msgprint(_("Caution: This might alter frozen accounts."))
+				return
 			frappe.throw(
 				_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto)
 			)
