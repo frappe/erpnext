@@ -170,4 +170,4 @@ def auto_create_fiscal_year():
 
 def get_from_and_to_date(fiscal_year):
 	fields = ["year_start_date as from_date", "year_end_date as to_date"]
-	return frappe.db.get_value("Fiscal Year", fiscal_year, fields, as_dict=1)
+	return frappe.get_cached_value("Fiscal Year", fiscal_year, fields, as_dict=1)
