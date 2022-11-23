@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -47,23 +48,6 @@
   "tax_id",
   "tax_cnic",
   "tax_strn",
-  "customer_group",
-  "address_and_contact",
-  "customer_address",
-  "address_display",
-  "col_break4",
-  "shipping_address_name",
-  "shipping_address",
-  "territory",
-  "column_break_57",
-  "contact_person",
-  "contact_display",
-  "contact_mobile",
-  "contact_phone",
-  "contact_email",
-  "column_break_65",
-  "company_address",
-  "company_address_display",
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
@@ -220,44 +204,63 @@
   "column_break_155",
   "outstanding_amount",
   "sec_fbr_pos_transaction_details",
-  "payment_schedule_section",
-  "payment_terms_template",
-  "payment_schedule",
-  "terms_section_break",
-  "tc_name",
-  "terms",
-  "edit_printing_settings",
-  "letter_head",
-  "column_break_191",
-  "select_print_heading",
-  "column_break_84",
-  "language",
-  "group_same_items",
-  "sales_team_section_break",
-  "sales_partner",
-  "column_break10",
-  "commission_rate",
-  "column_break_207",
-  "total_commission",
   "accounting_dimensions_section",
   "debit_to",
   "party_account_currency",
   "dimension_col_break",
   "is_opening",
-  "column_break_208",
-  "status",
   "c_form_applicable",
   "c_form_no",
   "is_discounted",
+  "address_and_contact_tab",
+  "sec_address",
+  "customer_address",
+  "address_display",
+  "cb_1",
+  "shipping_address_name",
+  "shipping_address",
+  "customer_group",
+  "territory",
+  "cb_2",
+  "company_address",
+  "company_address_display",
+  "sec_contact",
+  "contact_person",
+  "contact_display",
+  "cb_3",
+  "contact_phone",
+  "contact_mobile",
+  "contact_email",
+  "terms_tab",
+  "sec_payment_terms",
+  "payment_terms_template",
+  "payment_schedule",
+  "sec_terms_and_conditions",
+  "tc_name",
+  "terms",
+  "print_settings_tab",
+  "letter_head",
+  "group_same_items",
+  "cb_4",
+  "select_print_heading",
+  "language",
+  "status_tab",
+  "status",
   "subscription_section",
   "from_date",
-  "column_break_215",
+  "cb_5",
   "to_date",
-  "column_break_140",
+  "cb_6",
   "auto_repeat",
   "update_auto_repeat_reference",
   "against_income_account",
-  "pos_total_qty"
+  "pos_total_qty",
+  "commission_tab",
+  "sales_partner",
+  "cb_7",
+  "commission_rate",
+  "cb_8",
+  "total_commission"
  ],
  "fields": [
   {
@@ -475,16 +478,10 @@
    "label": "Customer's Purchase Order Date"
   },
   {
-   "collapsible": 1,
-   "fieldname": "address_and_contact",
-   "fieldtype": "Section Break",
-   "label": "Address and Contact"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
-   "label": "Customer Address",
+   "label": "Customer Address Name",
    "options": "Address",
    "print_hide": 1
   },
@@ -499,7 +496,6 @@
    "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
-   "in_global_search": 1,
    "label": "Contact Person",
    "options": "Contact",
    "print_hide": 1
@@ -508,7 +504,7 @@
    "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Data",
-   "label": "Contact",
+   "label": "Contact Name",
    "read_only": 1
   },
   {
@@ -537,14 +533,10 @@
    "print_hide": 1
   },
   {
-   "fieldname": "col_break4",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
-   "label": "Shipping Address",
+   "label": "Shipping Address Name",
    "options": "Address",
    "print_hide": 1
   },
@@ -560,7 +552,7 @@
    "allow_on_submit": 1,
    "fieldname": "company_address",
    "fieldtype": "Link",
-   "label": "Company Address",
+   "label": "Company Address Name",
    "options": "Address",
    "print_hide": 1
   },
@@ -1147,13 +1139,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "payment_schedule_section",
-   "fieldtype": "Section Break",
-   "label": "Payment Terms"
-  },
-  {
-   "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_terms_template",
    "fieldtype": "Link",
    "label": "Payment Terms Template",
@@ -1162,7 +1147,6 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule",
    "fieldtype": "Table",
    "label": "Payment Schedule",
@@ -1316,42 +1300,22 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "terms",
-   "fieldname": "terms_section_break",
-   "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
-   "oldfieldtype": "Section Break"
-  },
-  {
    "fieldname": "tc_name",
    "fieldtype": "Link",
    "label": "Terms",
-   "oldfieldname": "tc_name",
-   "oldfieldtype": "Link",
    "options": "Terms and Conditions",
    "print_hide": 1
   },
   {
    "fieldname": "terms",
    "fieldtype": "Text Editor",
-   "label": "Terms and Conditions Details",
-   "oldfieldname": "terms",
-   "oldfieldtype": "Text Editor"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "edit_printing_settings",
-   "fieldtype": "Section Break",
-   "label": "Printing Settings"
+   "label": "Terms and Conditions"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "letter_head",
    "fieldtype": "Link",
    "label": "Letter Head",
-   "oldfieldname": "letter_head",
-   "oldfieldtype": "Select",
    "options": "Letter Head",
    "print_hide": 1
   },
@@ -1371,17 +1335,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_84",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "select_print_heading",
    "fieldtype": "Link",
    "label": "Print Heading",
    "no_copy": 1,
-   "oldfieldname": "select_print_heading",
-   "oldfieldtype": "Link",
    "options": "Print Heading",
    "print_hide": 1,
    "report_hide": 1
@@ -1413,13 +1371,12 @@
    "read_only": 1
   },
   {
-   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
+   "options": "Draft\nReturn\nCredit Note Issued\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1493,46 +1450,22 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "sales_partner",
-   "fieldname": "sales_team_section_break",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Commission",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-group",
-   "print_hide": 1
-  },
-  {
    "fieldname": "sales_partner",
    "fieldtype": "Link",
    "label": "Sales Partner",
-   "oldfieldname": "sales_partner",
-   "oldfieldtype": "Link",
    "options": "Sales Partner",
    "print_hide": 1
   },
   {
-   "fieldname": "column_break10",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1,
-   "width": "50%"
-  },
-  {
    "fieldname": "commission_rate",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Commission Rate (%)",
-   "oldfieldname": "commission_rate",
-   "oldfieldtype": "Currency",
    "print_hide": 1
   },
   {
    "fieldname": "total_commission",
    "fieldtype": "Currency",
    "label": "Total Commission",
-   "oldfieldname": "total_commission",
-   "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_hide": 1
   },
@@ -1555,8 +1488,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "auto_repeat",
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1578,10 +1509,6 @@
    "label": "To Date",
    "no_copy": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "column_break_140",
-   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
@@ -1606,8 +1533,6 @@
    "hidden": 1,
    "label": "Against Income Account",
    "no_copy": 1,
-   "oldfieldname": "against_income_account",
-   "oldfieldtype": "Small Text",
    "print_hide": 1,
    "report_hide": 1
   },
@@ -1617,7 +1542,6 @@
    "hidden": 1,
    "label": "Total Qty",
    "print_hide": 1,
-   "print_hide_if_no_value": 1,
    "read_only": 1
   },
   {
@@ -1687,14 +1611,6 @@
    "label": "Order Type",
    "options": "\nSales\nMaintenance\nShopping Cart",
    "print_hide": 1
-  },
-  {
-   "fieldname": "column_break_57",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_65",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_75",
@@ -1931,23 +1847,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_207",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_184",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_191",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_215",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_208",
    "fieldtype": "Column Break"
   },
   {
@@ -2220,16 +2120,100 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Claim Billing"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "sec_address",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_contact",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "depends_on": "eval:(!doc.is_pos && !doc.is_return)",
+   "fieldname": "sec_payment_terms",
+   "fieldtype": "Section Break",
+   "label": "Payment Terms"
+  },
+  {
+   "fieldname": "sec_terms_and_conditions",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "print_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Print Settings"
+  },
+  {
+   "fieldname": "cb_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_tab",
+   "fieldtype": "Tab Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "cb_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "commission_tab",
+   "fieldtype": "Tab Break",
+   "hidden": 1,
+   "label": "Commission",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "cb_7",
+   "fieldtype": "Column Break",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "cb_8",
+   "fieldtype": "Column Break",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-10-08 14:17:00.398515",
+ "links": [],
+ "modified": "2022-11-23 16:35:34.707222",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -2340,6 +2324,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,

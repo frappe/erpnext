@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:45",
@@ -23,15 +24,6 @@
   "is_subcontracted",
   "more_info_cb_2",
   "opportunity",
-  "status",
-  "address_section",
-  "supplier_address",
-  "address_display",
-  "column_break_15",
-  "contact_person",
-  "contact_display",
-  "contact_mobile",
-  "contact_email",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -119,16 +111,29 @@
   "rounding_adjustment",
   "base_rounding_adjustment",
   "disable_rounded_total",
-  "terms_section_break",
+  "address_and_contact_tab",
+  "sec_address",
+  "supplier_address",
+  "address_display",
+  "cb_1",
+  "sec_contact",
+  "contact_person",
+  "contact_display",
+  "cb_2",
+  "contact_phone",
+  "contact_mobile",
+  "contact_email",
+  "terms_tab",
   "tc_name",
   "terms",
-  "printing_settings",
+  "print_settings_tab",
   "letter_head",
-  "column_break_117",
-  "select_print_heading",
-  "column_break_72",
-  "language",
   "group_same_items",
+  "cb_3",
+  "select_print_heading",
+  "language",
+  "status_tab",
+  "status",
   "subscription_section",
   "auto_repeat",
   "update_auto_repeat_reference"
@@ -230,12 +235,6 @@
    "search_index": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "address_section",
-   "fieldtype": "Section Break",
-   "label": "Address and Contact"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "supplier_address",
    "fieldtype": "Link",
@@ -269,7 +268,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Mobile No",
    "read_only": 1
   },
@@ -717,35 +716,16 @@
    "label": "Disable Rounded Total"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "terms",
-   "fieldname": "terms_section_break",
-   "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-legal"
-  },
-  {
    "fieldname": "tc_name",
    "fieldtype": "Link",
    "label": "Terms",
-   "oldfieldname": "tc_name",
-   "oldfieldtype": "Link",
    "options": "Terms and Conditions",
    "print_hide": 1
   },
   {
    "fieldname": "terms",
    "fieldtype": "Text Editor",
-   "label": "Terms and Conditions",
-   "oldfieldname": "terms",
-   "oldfieldtype": "Text Editor"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "printing_settings",
-   "fieldtype": "Section Break",
-   "label": "Printing Settings"
+   "label": "Terms and Conditions"
   },
   {
    "allow_on_submit": 1,
@@ -753,8 +733,6 @@
    "fieldtype": "Link",
    "label": "Print Heading",
    "no_copy": 1,
-   "oldfieldname": "select_print_heading",
-   "oldfieldtype": "Link",
    "options": "Print Heading",
    "print_hide": 1,
    "report_hide": 1
@@ -768,16 +746,10 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_72",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "letter_head",
    "fieldtype": "Link",
    "label": "Letter Head",
-   "oldfieldname": "letter_head",
-   "oldfieldtype": "Select",
    "options": "Letter Head",
    "print_hide": 1
   },
@@ -789,7 +761,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "auto_repeat",
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat Section"
@@ -823,9 +794,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "oldfieldname": "status",
-   "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled",
+   "options": "Draft\nSubmitted\nStopped\nCancelled",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -858,10 +827,6 @@
   },
   {
    "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_15",
    "fieldtype": "Column Break"
   },
   {
@@ -1082,10 +1047,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_117",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -1103,15 +1064,66 @@
   {
    "fieldname": "more_info_cb_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "sec_address",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_contact",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "print_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Print Settings"
+  },
+  {
+   "fieldname": "cb_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status_tab",
+   "fieldtype": "Tab Break",
+   "label": "Status"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2022-08-05 15:03:11.825310",
+ "links": [],
+ "modified": "2022-11-23 17:17:18.562070",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1190,6 +1202,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "transaction_date",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1,
