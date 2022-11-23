@@ -43,7 +43,7 @@ class PaymentRequest(Document):
 
 	def validate_payment_request_amount(self):
 		existing_payment_request_amount = get_existing_payment_request_amount(
-			self.reference_doctype, self.reference_name
+			self.reference_doctype, self.reference_name, self.mode_of_payment
 		)
 
 		if existing_payment_request_amount:
@@ -52,7 +52,7 @@ class PaymentRequest(Document):
 				hasattr(ref_doc, "order_type")
 				and getattr(ref_doc, "order_type") != "Shopping Cart"
 			):
-				ref_amount = get_amount(ref_doc, self.payment_account)
+				ref_amount = get_amount(ref_doc, self.payment_account, self.mode_of_payment)
 
 				if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
 					frappe.throw(
@@ -266,6 +266,7 @@ class PaymentRequest(Document):
 			party_amount=party_amount,
 			bank_account=self.payment_account,
 			bank_amount=bank_amount,
+			mode_of_payment=self.mode_of_payment,
 		)
 
 		payment_entry.update(
@@ -400,7 +401,11 @@ def make_payment_request(**args):
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
-	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+	grand_total = get_amount(
+		ref_doc,
+		payment_account=gateway_account.get("payment_account"),
+		mode_of_payment=args.mode_of_payment,
+	)
 	if args.loyalty_points and args.dt == "Sales Order":
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 			validate_loyalty_points,
@@ -429,7 +434,12 @@ def make_payment_request(**args):
 	if args.order_type == "Shopping Cart":
 		existing_payment_request = frappe.db.get_value(
 			"Payment Request",
-			{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ("!=", 2)},
+			{
+				"reference_doctype": args.dt,
+				"reference_name": args.dn,
+				"mode_of_payment": args.mode_of_payment,
+				"docstatus": ("!=", 2),
+			},
 		)
 
 	if existing_payment_request:
@@ -443,10 +453,11 @@ def make_payment_request(**args):
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
 	else:
 		if args.order_type != "Shopping Cart":
-			existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
+			existing_payment_request_amount = get_existing_payment_request_amount(
+				args.dt, args.dn, args.mode_of_payment
+			)
 
-			if existing_payment_request_amount:
-				grand_total -= existing_payment_request_amount
+			grand_total -= existing_payment_request_amount
 
 		pr = frappe.new_doc("Payment Request")
 		pr.update(
@@ -488,9 +499,10 @@ def make_payment_request(**args):
 	return pr.as_dict()
 
 
-def get_amount(ref_doc, payment_account=None):
+def get_amount(ref_doc, payment_account=None, mode_of_payment=None):
 	"""get amount based on doctype"""
 	dt = ref_doc.doctype
+	grand_total = 0.0
 	if dt in ["Sales Order", "Purchase Order"]:
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
@@ -501,10 +513,16 @@ def get_amount(ref_doc, payment_account=None):
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
 
 	elif dt == "POS Invoice":
-		for pay in ref_doc.payments:
-			if pay.type == "Phone" and pay.account == payment_account:
-				grand_total = pay.amount
-				break
+		if mode_of_payment:
+			for pay in ref_doc.payments:
+				if pay.mode_of_payment == mode_of_payment:
+					grand_total = pay.amount
+					break
+		if payment_account and not grand_total:
+			for pay in ref_doc.payments:
+				if pay.account == payment_account:
+					grand_total = pay.amount
+					break
 
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
@@ -516,7 +534,7 @@ def get_amount(ref_doc, payment_account=None):
 		frappe.throw(_("Payment Entry is already created"))
 
 
-def get_existing_payment_request_amount(ref_dt, ref_dn):
+def get_existing_payment_request_amount(ref_dt, ref_dn, mode_of_payment):
 	"""
 	Get the existing payment request which are unpaid or partially paid for payment channel other than Phone
 	and get the summation of existing paid payment request for Phone payment channel.
@@ -528,12 +546,13 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 		where
 			reference_doctype = %s
 			and reference_name = %s
+			and mode_of_payment = %s
 			and docstatus = 1
 			and (status != 'Paid'
 			or (payment_channel = 'Phone'
 				and status = 'Paid'))
 	""",
-		(ref_dt, ref_dn),
+		(ref_dt, ref_dn, mode_of_payment),
 	)
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 
@@ -592,13 +611,17 @@ def update_payment_req_status(doc, method):
 			{
 				"reference_doctype": ref.reference_doctype,
 				"reference_name": ref.reference_name,
+				"mode_of_payment": doc.mode_of_payment,
 				"docstatus": 1,
 			},
 		)
 
 		if payment_request_name:
 			ref_details = get_reference_details(
-				ref.reference_doctype, ref.reference_name, doc.party_account_currency
+				ref.reference_doctype,
+				ref.reference_name,
+				doc.party_account_currency,
+				doc.mode_of_payment,
 			)
 			pay_req_doc = frappe.get_doc("Payment Request", payment_request_name)
 			status = pay_req_doc.status
