@@ -175,6 +175,7 @@ website_route_rules = [
 		},
 	},
 	{"from_route": "/project", "to_route": "Project"},
+	{"from_route": "/tasks", "to_route": "Task"},
 ]
 
 standard_portal_menu_items = [
