@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -37,7 +36,23 @@
   "incoterms",
   "more_info_cb_3",
   "inter_company_reference",
-  "other_details",
+  "section_addresses",
+  "supplier_address",
+  "address_display",
+  "col_break_address",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "column_break_29",
+  "shipping_address",
+  "shipping_address_display",
+  "section_break_14",
+  "pol_address",
+  "pol_address_display",
+  "col_break_27",
+  "poa_address",
+  "poa_address_display",
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
@@ -142,49 +157,32 @@
   "rounding_adjustment",
   "base_rounding_adjustment",
   "disable_rounded_total",
-  "address_and_contact_tab",
-  "sec_address",
-  "supplier_address",
-  "address_display",
-  "cb_1",
-  "shipping_address",
-  "shipping_address_display",
-  "sec_contact",
-  "contact_person",
-  "contact_display",
-  "cb_2",
-  "contact_phone",
-  "contact_mobile",
-  "contact_email",
-  "sec_port_address",
-  "pol_address",
-  "pol_address_display",
-  "cb_3",
-  "poa_address",
-  "poa_address_display",
-  "terms_tab",
+  "terms_section_break",
   "tc_name",
   "terms",
-  "transporter_info_tab",
-  "transporter_name",
-  "lr_no",
-  "lr_date",
-  "cb_4",
-  "instructions",
-  "print_settings_tab",
-  "letter_head",
-  "group_same_items",
-  "cb_5",
-  "select_print_heading",
-  "language",
-  "status_tab",
+  "billing_and_receiving_status_section",
   "status",
-  "sec_billing",
+  "column_break_136",
   "per_completed",
-  "cb_6",
+  "column_break_138",
   "per_billed",
   "per_returned",
-  "sec_subscription",
+  "printing_settings",
+  "letter_head",
+  "select_print_heading",
+  "other_details",
+  "column_break_152",
+  "instructions",
+  "column_break_155",
+  "language",
+  "group_same_items",
+  "transporter_info",
+  "transporter_name",
+  "column_break5",
+  "lr_no",
+  "column_break_160",
+  "lr_date",
+  "subscription_detail",
   "auto_repeat"
  ],
  "fields": [
@@ -329,6 +327,79 @@
    "label": "Return Against Purchase Receipt",
    "no_copy": 1,
    "options": "Purchase Receipt",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_addresses",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "supplier_address",
+   "fieldtype": "Link",
+   "label": "Select Supplier Address",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_person",
+   "fieldtype": "Link",
+   "label": "Contact Person",
+   "options": "Contact",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "address_display",
+   "fieldtype": "Small Text",
+   "label": "Address",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_display",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "label": "Contact",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_mobile",
+   "fieldtype": "Small Text",
+   "label": "Mobile No",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_email",
+   "fieldtype": "Small Text",
+   "label": "Contact Email",
+   "options": "Email",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_address",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Select Shipping Address",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Small Text",
+   "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
   },
@@ -851,6 +922,31 @@
    "label": "Disable Rounded Total"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "terms",
+   "fieldname": "terms_section_break",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-legal"
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "oldfieldname": "tc_name",
+   "oldfieldtype": "Link",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions",
+   "oldfieldname": "terms",
+   "oldfieldtype": "Text Editor"
+  },
+  {
    "fieldname": "bill_no",
    "fieldtype": "Data",
    "hidden": 1,
@@ -878,6 +974,23 @@
    "options": "fa fa-file-text"
   },
   {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "oldfieldname": "status",
+   "oldfieldtype": "Select",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn\nCancelled\nClosed",
+   "print_hide": 1,
+   "print_width": "150px",
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "hidden": 1,
@@ -893,12 +1006,133 @@
    "width": "150px"
   },
   {
+   "fieldname": "per_billed",
+   "fieldtype": "Percent",
+   "label": "% Billed",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "subscription_detail",
+   "fieldtype": "Section Break",
+   "label": "Auto Repeat Detail"
+  },
+  {
+   "fieldname": "auto_repeat",
+   "fieldtype": "Link",
+   "label": "Auto Repeat",
+   "no_copy": 1,
+   "options": "Auto Repeat",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "printing_settings",
+   "fieldtype": "Section Break",
+   "label": "Printing Settings"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "select_print_heading",
+   "fieldtype": "Link",
+   "label": "Print Heading",
+   "no_copy": 1,
+   "oldfieldname": "select_print_heading",
+   "oldfieldtype": "Link",
+   "options": "Print Heading",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Data",
+   "label": "Print Language",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "group_same_items",
+   "fieldtype": "Check",
+   "label": "Group same items",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "other_details",
+   "fieldtype": "HTML",
+   "hidden": 1,
+   "label": "Other Details",
+   "oldfieldtype": "HTML",
+   "options": "<div class=\"columnHeading\">Other Details</div>",
+   "print_hide": 1,
+   "print_width": "30%",
+   "width": "30%"
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Small Text",
+   "label": "Instructions",
+   "oldfieldname": "instructions",
+   "oldfieldtype": "Text"
+  },
+  {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "in_standard_filter": 1,
    "label": "Remarks",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "transporter_name",
+   "fieldname": "transporter_info",
+   "fieldtype": "Section Break",
+   "label": "Transporter Details",
+   "options": "fa fa-truck"
+  },
+  {
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "label": "Transporter Name",
+   "oldfieldname": "transporter_name",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "column_break5",
+   "fieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "fieldname": "lr_no",
+   "fieldtype": "Data",
+   "label": "Vehicle Number",
+   "no_copy": 1,
+   "oldfieldname": "lr_no",
+   "oldfieldtype": "Data",
+   "print_width": "100px",
+   "width": "100px"
+  },
+  {
+   "fieldname": "lr_date",
+   "fieldtype": "Date",
+   "label": "Vehicle Date",
+   "no_copy": 1,
+   "oldfieldname": "lr_date",
+   "oldfieldtype": "Date",
+   "print_width": "100px",
+   "width": "100px"
   },
   {
    "fieldname": "scan_barcode",
@@ -931,6 +1165,47 @@
    "fieldtype": "Select",
    "label": "Incoterms",
    "options": "\nCIF (Cost, Insurance and Freight)\nCIP (Carriage and Insurance Paid to)\nCFR (Cost and Freight)\nCPT (Carriage paid to)\nDAT (Delivered at Terminal)\nDAP (Delivered at Place)\nDDP (Delivery Duty Paid)\nEXW (Ex Works)\nFAS (Free Alongside Ship)\nFCA (Free Carrier)\nFOB (Free on Board)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Port Address"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "pol_address",
+   "fieldtype": "Link",
+   "label": "Port Of Loading",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "pol_address_display",
+   "fieldtype": "Small Text",
+   "label": "Port Of Loading Address",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "poa_address",
+   "fieldtype": "Link",
+   "label": "Port Of Arrival",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "poa_address_display",
+   "fieldtype": "Small Text",
+   "label": "Port Of Arrival Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "col_break_44",
@@ -1157,6 +1432,48 @@
    "fieldtype": "Section Break"
   },
   {
+   "collapsible": 1,
+   "fieldname": "billing_and_receiving_status_section",
+   "fieldtype": "Section Break",
+   "label": "Billing and Receiving Status"
+  },
+  {
+   "fieldname": "column_break_136",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "per_completed",
+   "fieldtype": "Percent",
+   "label": "% Completed",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_138",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "per_returned",
+   "fieldtype": "Percent",
+   "label": "% Returned",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_152",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_155",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_160",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -1168,6 +1485,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "col_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "column_break_122",
    "fieldtype": "Column Break"
   },
@@ -1176,14 +1497,6 @@
    "fieldtype": "Link",
    "label": "Transaction Type",
    "options": "Transaction Type"
-  },
-  {
-   "fieldname": "other_details",
-   "fieldtype": "HTML",
-   "hidden": 1,
-   "label": "Other Details",
-   "options": "<div class=\"columnHeading\">Other Details</div>",
-   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -1253,306 +1566,15 @@
    "no_copy": 1,
    "options": "Delivery Note",
    "read_only": 1
-  },
-  {
-   "depends_on": "supplier",
-   "fieldname": "address_and_contact_tab",
-   "fieldtype": "Tab Break",
-   "label": "Address and Contact"
-  },
-  {
-   "fieldname": "sec_address",
-   "fieldtype": "Section Break",
-   "label": "Address"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "supplier_address",
-   "fieldtype": "Link",
-   "label": "Supplier Address Name",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "address_display",
-   "fieldtype": "Small Text",
-   "label": "Supplier Address",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_1",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "shipping_address",
-   "fieldtype": "Link",
-   "label": "Shipping Address Name",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
-   "label": "Shipping Address",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "sec_contact",
-   "fieldtype": "Section Break",
-   "label": "Contact"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "contact_person",
-   "fieldtype": "Link",
-   "label": "Contact Person",
-   "options": "Contact",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "contact_display",
-   "fieldtype": "Small Text",
-   "in_global_search": 1,
-   "label": "Contact Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "contact_phone",
-   "fieldtype": "Data",
-   "label": "Phone No",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "contact_mobile",
-   "fieldtype": "Data",
-   "label": "Mobile No",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "contact_email",
-   "fieldtype": "Data",
-   "label": "Contact Email",
-   "options": "Email",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "sec_port_address",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Port Address"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "pol_address",
-   "fieldtype": "Link",
-   "label": "Port Of Loading Address Name",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "pol_address_display",
-   "fieldtype": "Small Text",
-   "label": "Port Of Loading Address",
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "poa_address",
-   "fieldtype": "Link",
-   "label": "Port Of Arrival Address Name",
-   "options": "Address",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "poa_address_display",
-   "fieldtype": "Small Text",
-   "label": "Port Of Arrival Address",
-   "read_only": 1
-  },
-  {
-   "fieldname": "terms_tab",
-   "fieldtype": "Tab Break",
-   "label": "Terms"
-  },
-  {
-   "fieldname": "tc_name",
-   "fieldtype": "Link",
-   "label": "Terms",
-   "options": "Terms and Conditions",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "terms",
-   "fieldtype": "Text Editor",
-   "label": "Terms and Conditions"
-  },
-  {
-   "fieldname": "transporter_info_tab",
-   "fieldtype": "Tab Break",
-   "label": "Transporter Info"
-  },
-  {
-   "fieldname": "transporter_name",
-   "fieldtype": "Data",
-   "label": "Transporter Name"
-  },
-  {
-   "fieldname": "lr_no",
-   "fieldtype": "Data",
-   "label": "Transport Receipt No"
-  },
-  {
-   "fieldname": "lr_date",
-   "fieldtype": "Date",
-   "label": "Transport Receipt Date"
-  },
-  {
-   "fieldname": "cb_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "instructions",
-   "fieldtype": "Small Text",
-   "label": "Instructions"
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "print_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Print Settings"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "letter_head",
-   "fieldtype": "Link",
-   "label": "Letter Head",
-   "options": "Letter Head",
-   "print_hide": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "group_same_items",
-   "fieldtype": "Check",
-   "label": "Group same items",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "cb_5",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "select_print_heading",
-   "fieldtype": "Link",
-   "label": "Print Heading",
-   "no_copy": 1,
-   "options": "Print Heading",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
-   "fieldname": "language",
-   "fieldtype": "Data",
-   "label": "Print Language",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.__islocal",
-   "fieldname": "status_tab",
-   "fieldtype": "Tab Break",
-   "label": "Status"
-  },
-  {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "no_copy": 1,
-   "options": "Draft\nTo Bill\nCompleted\nReturn\nCancelled\nClosed",
-   "print_hide": 1,
-   "read_only": 1,
-   "reqd": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "sec_billing",
-   "fieldtype": "Section Break",
-   "label": "Billing"
-  },
-  {
-   "fieldname": "per_completed",
-   "fieldtype": "Percent",
-   "label": "% Completed",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "cb_6",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "per_billed",
-   "fieldtype": "Percent",
-   "label": "% Billed",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "per_returned",
-   "fieldtype": "Percent",
-   "label": "% Returned",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "sec_subscription",
-   "fieldtype": "Section Break",
-   "label": "Auto Repeat"
-  },
-  {
-   "fieldname": "auto_repeat",
-   "fieldtype": "Link",
-   "label": "Auto Repeat",
-   "no_copy": 1,
-   "options": "Auto Repeat",
-   "print_hide": 1,
-   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "links": [],
- "modified": "2022-11-21 14:14:47.602985",
+ "modified": "2022-08-06 13:28:09.416823",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1652,7 +1674,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
- "states": [],
  "timeline_field": "supplier",
  "title_field": "title",
  "track_changes": 1,
