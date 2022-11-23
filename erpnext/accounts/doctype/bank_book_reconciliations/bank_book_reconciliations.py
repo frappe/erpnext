@@ -27,7 +27,8 @@ class BankBookReconciliations(Document):
 	def on_update(self):
 		if self.docstatus == 0:
 			self.update_amount()
-			self.transit_check()		
+			self.transit_check()
+			self.transit_check_amount()
 	
 	def on_cancel(self):
 		self.conciliation_transactions_cancel()
