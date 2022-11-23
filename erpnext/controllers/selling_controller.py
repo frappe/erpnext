@@ -548,3 +548,42 @@ class SellingController(StockController):
 			doc.set_gross_margin(update=True)
 			doc.set_status(update=True)
 			doc.notify_update()
+
+	@frappe.whitelist()
+	def set_rate_as_cost(self):
+		for item in self.items:
+			cost_rate = get_rate_as_cost(item.item_code, item.warehouse, item.batch_no, item.serial_no, self.posting_date, self.posting_time, item.qty, self.doctype, self.name, self.company, item.delivery_note, item.delivery_note_item)
+			item.rate = cost_rate
+			item.discount_percentage = 0
+			item.margin_rate_or_amount = 0
+
+		self.calculate_taxes_and_totals()
+
+
+@frappe.whitelist()
+def get_rate_as_cost(item_code, warehouse, batch_no, serial_no, posting_date, posting_time, qty, voucher_type, voucher_no, company, delivery_note=None, delivery_note_item=None):
+	qty = -1 * qty
+	cost_rate = 0
+	if delivery_note and delivery_note_item:
+		sum_of_stock_value_difference = frappe.db.sql("""SELECT SUM(stock_value_difference) from `tabStock Ledger Entry` 
+			where voucher_type = 'Delivery Note' and voucher_detail_no = '{0}' """.format(delivery_note_item))
+
+		cost_rate = flt(sum_of_stock_value_difference[0][0]) / qty
+
+	else:
+		from erpnext.stock.utils import get_incoming_rate
+		args = frappe._dict({
+			"item_code": item_code,
+			"warehouse": warehouse,
+			"batch_no": batch_no,
+			"serial_no": serial_no,
+			"posting_date": posting_date,
+			"posting_time": posting_time,
+			"qty": qty,
+			"voucher_type": voucher_type,
+			"voucher_no": voucher_no,
+			"company": company
+		})
+		cost_rate = get_incoming_rate(args, raise_error_if_no_rate=False)
+
+	return cost_rate
