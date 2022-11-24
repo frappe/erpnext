@@ -825,7 +825,9 @@ def update_maintenance_status():
 
 	for asset in assets:
 		asset = frappe.get_doc("Asset", asset.name)
-		if frappe.db.exists("Asset Repair", {"asset_name": asset.name, "repair_status": "Pending"}):
+		if frappe.db.exists(
+			"Asset Repair", {"asset_name": asset.name, "repair_status": "Pending", "docstatus": 0}
+		):
 			asset.set_status("Out of Order")
 		elif frappe.db.exists(
 			"Asset Maintenance Task", {"parent": asset.name, "next_due_date": today()}
