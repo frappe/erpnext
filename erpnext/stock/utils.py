@@ -352,3 +352,9 @@ def update_included_uom_in_dict_report(columns, result, include_uom, conversion_
 					row[fieldname + "_alt"] = flt(row.get(fieldname)) * conversion_factors[row_idx]
 				else:
 					row[fieldname + "_alt"] = flt(row.get(fieldname)) / conversion_factors[row_idx]
+
+
+def has_valuation_read_permission():
+	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
+	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+	return show_amounts
