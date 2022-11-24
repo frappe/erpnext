@@ -29,6 +29,7 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	cancel_asset_depreciation_schedules,
 	convert_draft_asset_depreciation_schedules_into_active,
 	get_asset_depreciation_schedule,
 	make_draft_asset_depreciation_schedules,
@@ -64,6 +65,7 @@ class Asset(AccountsController):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
 		self.delete_depreciation_entries()
+		cancel_asset_depreciation_schedules(self)
 		self.set_status()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
@@ -244,14 +246,14 @@ class Asset(AccountsController):
 		return value_after_depreciation
 
 	def get_from_date(self, finance_book):
-		asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, finance_book)
+		asset_depr_schedule = get_asset_depreciation_schedule(self.name, finance_book)
 
-		if not asset_depr_schedule_name:
+		if not asset_depr_schedule:
 			return self.available_for_use_date
 
-		asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule)
 
-		return asset_depr_schedule.get("depreciation_schedule")[-1].schedule_date
+		return asset_depr_schedule_doc.get("depreciation_schedule")[-1].schedule_date
 
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
@@ -355,26 +357,26 @@ class Asset(AccountsController):
 		return depreciation_amount_for_last_row
 
 	def get_depreciation_amount_for_first_row(self, finance_book):
-		asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, finance_book)
+		asset_depr_schedule = get_asset_depreciation_schedule(self.name, finance_book)
 
-		asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule)
 
-		return asset_depr_schedule.get("depreciation_schedule")[0].depreciation_amount
+		return asset_depr_schedule_doc.get("depreciation_schedule")[0].depreciation_amount
 
 	def get_value_after_depreciation(self, idx):
 		return flt(self.get("finance_books")[cint(idx) - 1].value_after_depreciation)
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, row.finance_book)
+			asset_depr_schedule = get_asset_depreciation_schedule(self.name, row.finance_book)
 
-			if not asset_depr_schedule_name:
+			if not asset_depr_schedule:
 				return
 
-			asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+			asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule)
 
 			accumulated_depreciation_after_full_schedule = [
-				d.accumulated_depreciation_amount for d in asset_depr_schedule.get("depreciation_schedule")
+				d.accumulated_depreciation_amount for d in asset_depr_schedule_doc.get("depreciation_schedule")
 			]
 
 			if accumulated_depreciation_after_full_schedule:
@@ -424,14 +426,14 @@ class Asset(AccountsController):
 
 	def delete_depreciation_entries(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule_name = get_asset_depreciation_schedule(self.name, row.finance_book)
+			asset_depr_schedule = get_asset_depreciation_schedule(self.name, row.finance_book)
 
-			if not asset_depr_schedule_name:
+			if not asset_depr_schedule:
 				return
 
-			asset_depr_schedule = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+			asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule)
 
-			for d in asset_depr_schedule.get("depreciation_schedule"):
+			for d in asset_depr_schedule_doc.get("depreciation_schedule"):
 				if d.journal_entry:
 					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
 					d.db_set("journal_entry", None)

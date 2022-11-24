@@ -11,7 +11,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	make_temp_asset_depreciation_schedule,
+	get_temp_asset_depreciation_schedule_doc,
 )
 
 
@@ -514,7 +514,7 @@ def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_
 
 	row = asset_doc.finance_books[idx - 1]
 
-	temp_asset_depreciation_schedule = make_temp_asset_depreciation_schedule(
+	temp_asset_depreciation_schedule = get_temp_asset_depreciation_schedule_doc(
 		asset_doc, row, getdate(disposal_date)
 	)
 
