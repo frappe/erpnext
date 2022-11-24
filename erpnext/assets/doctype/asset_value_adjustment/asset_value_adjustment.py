@@ -117,7 +117,6 @@ class AssetValueAdjustment(Document):
 			d.value_after_depreciation = asset_value
 
 			current_asset_depr_schedule = get_asset_depr_schedule(asset.name, d.finance_book)
-
 			current_asset_depr_schedule_doc = frappe.get_doc(
 				"Asset Depreciation Schedule", current_asset_depr_schedule
 			)
@@ -125,6 +124,10 @@ class AssetValueAdjustment(Document):
 			new_asset_depr_schedule_doc = frappe.copy_doc(
 				current_asset_depr_schedule_doc, ignore_no_copy=False
 			)
+			new_asset_depr_schedule_doc.notes = "Asset value adjustment"
+
+			current_asset_depr_schedule_doc.cancel()
+			new_asset_depr_schedule_doc.insert()
 
 			depr_schedule = new_asset_depr_schedule_doc.get("depreciation_schedule")
 
@@ -156,10 +159,6 @@ class AssetValueAdjustment(Document):
 			for asset_data in depr_schedule:
 				if not asset_data.journal_entry:
 					asset_data.db_update()
-
-			current_asset_depr_schedule_doc.cancel()
-
-			new_asset_depr_schedule_doc.notes = "Asset value adjustment"
 
 			new_asset_depr_schedule_doc.submit()
 
