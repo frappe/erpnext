@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cint, flt, cstr, comma_or
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, has_valuation_read_permission
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
 from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
 from erpnext.setup.doctype.sales_person.sales_person import get_sales_person_commission_details
@@ -548,3 +548,50 @@ class SellingController(StockController):
 			doc.set_gross_margin(update=True)
 			doc.set_status(update=True)
 			doc.notify_update()
+
+	@frappe.whitelist()
+	def set_rate_as_cost(self):
+		if not has_valuation_read_permission():
+			frappe.throw(_("You do not have permission to get cost as rate"))
+
+		for item in self.items:
+			if item.item_code:
+				cost_rate = self.get_rate_as_cost(item)
+				item.rate = cost_rate
+				item.discount_percentage = 0
+				item.margin_rate_or_amount = 0
+
+		self.calculate_taxes_and_totals()
+
+	def get_rate_as_cost(self, item):
+		qty = -1 * flt(item.qty)
+		if item.delivery_note and item.delivery_note_item:
+			sum_of_stock_value_diff = frappe.db.sql("""
+				SELECT SUM(stock_value_difference)
+				FROM `tabStock Ledger Entry` 
+				WHERE voucher_type = 'Delivery Note' AND voucher_no = %s AND voucher_detail_no = %s
+			""", (item.delivery_note, item.delivery_note_item))
+
+			sum_of_stock_value_diff = flt(sum_of_stock_value_diff[0][0]) if sum_of_stock_value_diff[0][0] else 0
+			if qty:
+				cost_rate = sum_of_stock_value_diff / qty
+			else:
+				cost_rate = sum_of_stock_value_diff
+
+		else:
+			from erpnext.stock.utils import get_incoming_rate
+			args = frappe._dict({
+				"item_code": item.item_code,
+				"warehouse": item.warehouse,
+				"batch_no": item.batch_no,
+				"serial_no": item.serial_no,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"qty": item.qty,
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"company": self.company
+			})
+			cost_rate = get_incoming_rate(args, raise_error_if_no_rate=False)
+
+		return cost_rate

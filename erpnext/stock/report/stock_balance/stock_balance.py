@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, cint, getdate, now, date_diff
-from erpnext.stock.utils import update_included_uom_in_dict_report
+from erpnext.stock.utils import update_included_uom_in_dict_report, has_valuation_read_permission
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.reportview import build_match_conditions
 
@@ -32,8 +32,7 @@ def execute(filters=None):
 
 	validate_filters(filters)
 
-	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
-	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+	show_amounts = has_valuation_read_permission()
 
 	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 

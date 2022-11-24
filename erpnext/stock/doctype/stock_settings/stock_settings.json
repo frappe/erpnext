@@ -16,7 +16,7 @@
   "section_break_7",
   "over_delivery_receipt_allowance",
   "column_break_12",
-  "restrict_amounts_in_report_to_role",
+  "restrict_stock_valuation_to_role",
   "action_if_quality_inspection_is_not_submitted",
   "column_break_10",
   "restrict_negative_stock_to_role",
@@ -205,12 +205,6 @@
    "label": "Naming Series Prefix"
   },
   {
-   "fieldname": "restrict_amounts_in_report_to_role",
-   "fieldtype": "Link",
-   "label": "Restrict Amounts in Stock Reports to Role",
-   "options": "Role"
-  },
-  {
    "fieldname": "restrict_negative_stock_to_role",
    "fieldtype": "Link",
    "label": "Restrict Allow Negative Stock For Role",
@@ -265,12 +259,18 @@
   {
    "fieldname": "column_break_32",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "restrict_stock_valuation_to_role",
+   "fieldtype": "Link",
+   "label": "Restrict Stock Valuation Amounts to Role",
+   "options": "Role"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2022-04-09 14:14:59.614739",
+ "modified": "2022-11-24 15:18:30.767726",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

@@ -632,5 +632,24 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			})
 		}
-	}
+	},
+
+	add_set_cost_as_rate_button: function () {
+		var me = this;
+		me.frm.add_custom_button(__("Set Rate as Cost"), function() {
+			me.set_cost_as_rate();
+		}, __("Prices"));
+	},
+
+	set_cost_as_rate: function() {
+		var me = this;
+		frappe.call({
+			method: "set_rate_as_cost",
+			doc: me.frm.doc,
+			callback: function() {
+				me.frm.refresh_fields();
+			}
+		});
+	},
+
 });
