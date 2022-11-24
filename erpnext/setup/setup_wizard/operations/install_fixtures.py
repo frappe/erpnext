@@ -427,6 +427,14 @@ def install_defaults(args=None):
 
 	make_records(records)
 
+	selling_settings = frappe.get_doc("Selling Settings")
+	selling_settings.selling_price_list = _("Standard Selling")
+	selling_settings.save()
+
+	buying_settings = frappe.get_doc("Buying Settings")
+	buying_settings.buying_price_list = _("Standard Buying")
+	buying_settings.save()
+
 	# enable default currency
 	frappe.db.set_value("Currency", args.get("currency"), "enabled", 1)
 
@@ -492,7 +500,7 @@ def install_defaults(args=None):
 		# Shopping cart: needs price lists
 		{
 			"doctype": "Shopping Cart Settings",
-			"enabled": 1,
+			"enabled": 0,
 			'company': args.company_name,
 			# uh oh
 			'price_list': frappe.db.get_value("Price List", {"selling": 1}),

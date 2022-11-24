@@ -48,8 +48,11 @@ class ShoppingCartSettings(Document):
 		if expected_to_exist:
 			# manqala 20/09/2016: modify query so that it uses date in the selection from Currency Exchange.
 			# exchange rates defined with date less than the date on which this document is being saved will be selected
-			exists = frappe.db.sql_list("""select CONCAT(from_currency,'-',to_currency) from `tabCurrency Exchange`
-				where from_currency in (%s) and to_currency = "%s" and date <= curdate()""" % (", ".join(["%s"]*len(from_currency)), to_currency), tuple(from_currency))
+			exists = frappe.db.sql_list("""
+				select CONCAT(from_currency,'-',to_currency)
+				from `tabCurrency Exchange`
+				where from_currency in (%s) and to_currency = "%s" and date <= curdate()
+			""" % (", ".join(["%s"]*len(from_currency)), to_currency), tuple(from_currency))
 			# manqala end
 
 			missing = list(set(expected_to_exist).difference(exists))
