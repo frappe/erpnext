@@ -552,7 +552,7 @@ class SellingController(StockController):
 	@frappe.whitelist()
 	def set_rate_as_cost(self):
 		if not has_valuation_read_permission():
-			frappe.throw('User not allowed to read valuation rate')
+			frappe.throw(_("You do not have permission to get cost as rate"))
 
 		for item in self.items:
 			if item.item_code:
@@ -566,17 +566,17 @@ class SellingController(StockController):
 	def get_rate_as_cost(self, item):
 		qty = -1 * flt(item.qty)
 		if item.delivery_note and item.delivery_note_item:
-			sum_of_stock_value_difference = frappe.db.sql("""
+			sum_of_stock_value_diff = frappe.db.sql("""
 				SELECT SUM(stock_value_difference)
 				FROM `tabStock Ledger Entry` 
 				WHERE voucher_type = 'Delivery Note' AND voucher_no = %s AND voucher_detail_no = %s
 			""", (item.delivery_note, item.delivery_note_item))
 
-			sum_of_stock_value_difference = flt(sum_of_stock_value_difference[0][0])
+			sum_of_stock_value_diff = flt(sum_of_stock_value_diff[0][0]) if sum_of_stock_value_diff[0][0] else 0
 			if qty:
-				cost_rate = sum_of_stock_value_difference / qty
+				cost_rate = sum_of_stock_value_diff / qty
 			else:
-				cost_rate = sum_of_stock_value_difference
+				cost_rate = sum_of_stock_value_diff
 
 		else:
 			from erpnext.stock.utils import get_incoming_rate
