@@ -44,5 +44,11 @@ frappe.dashboards.chart_sources["Account Balance Timeline"] = {
 			fieldtype: "Select",
 			options: ["", "Account", "Root Type"],
 		},
+		{
+			fieldname: "add_pnl_dataset",
+			label: __("Add Profit and Loss Dataset"),
+			fieldtype: "Check",
+			depends_on: "eval:doc.group_by == 'Root Type'",
+		},
 	]
 };

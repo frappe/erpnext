@@ -84,7 +84,8 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss):
 		"data": {
 			'labels': labels,
 			'datasets': datasets
-		}
+		},
+		"colors": ["blue", "orange", "green"]
 	}
 
 	if not filters.accumulated_values:

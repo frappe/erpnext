@@ -20,7 +20,7 @@ class AccountBalanceTimeline(object):
 		self.chart_name = self.chart.name or self.chart.chart_name or chart_name
 
 		self.filters = frappe.parse_json(filters) or frappe.parse_json(self.chart.filters_json) or frappe._dict()
-		
+
 		self.timespan = timespan or self.chart.timespan
 		self.timegrain = time_interval or self.chart.time_interval
 
@@ -36,7 +36,7 @@ class AccountBalanceTimeline(object):
 		self.get_currency()
 
 		# compile balance values
-		labels = [formatdate(date) for date in self.dates]
+		labels = self.get_labels()
 		datasets = self.build_result()
 
 		return {
@@ -45,6 +45,12 @@ class AccountBalanceTimeline(object):
 			"fieldtype": "Currency",
 			"options": self.currency,
 		}
+
+	def get_labels(self):
+		if self.timegrain == "Monthly":
+			return [formatdate(date, "MMMM y") for date in self.dates]
+		else:
+			return [formatdate(date) for date in self.dates]
 
 	def validate_filters(self):
 		self.filters.accumulated_values = cint(self.filters.accumulated_values)
@@ -81,11 +87,11 @@ class AccountBalanceTimeline(object):
 		if not accounts and accounts_filters:
 			accounts = frappe.get_all("Account", filters=accounts_filters, pluck='name')
 
-		for account in accounts[:]:
+		for account in accounts.copy():
 			child_accounts = get_descendants_of("Account", account, ignore_permissions=True)
 			for child_account in child_accounts:
 				if child_account not in accounts:
-					accounts.append(child_accounts)
+					accounts.append(child_account)
 
 		if not accounts:
 			frappe.throw(
@@ -130,35 +136,58 @@ class AccountBalanceTimeline(object):
 		datasets = []
 
 		if self.filters.group_by == "Account":
-			gle_map = {}
-			for gle in self.gl_entries:
-				gle_map.setdefault(gle.account, []).append(gle)
-
-			for account, filtered_gles in gle_map.items():
-				if filtered_gles:
-					dataset = self.build_dataset(filtered_gles, dataset_name=account)
-					# dataset["chartType"] = "bar"
-					datasets.append(dataset)
+			self.build_account_result(datasets)
 		elif self.filters.group_by == "Root Type":
-			gle_map = {}
-			for gle in self.gl_entries:
-				gle_map.setdefault(gle.root_type, []).append(gle)
-
-			for root_type, filtered_gles in gle_map.items():
-				if filtered_gles:
-					dataset = self.build_dataset(filtered_gles, dataset_name=root_type, root_type=root_type)
-					# dataset["chartType"] = "bar"
-					datasets.append(dataset)
-
-		# datasets = sorted(datasets, key=lambda d: d['values'][-1], reverse=True)
-
-		total_dataset = self.build_dataset(self.gl_entries, dataset_name=self.get_dataset_name())
-		# if self.filters.group_by:
-		# 	total_dataset["chartType"] = "line"
-
-		datasets.append(total_dataset)
+			self.build_root_type_result(datasets)
+		else:
+			total_dataset = self.build_dataset(self.gl_entries, dataset_name=self.get_dataset_name())
+			datasets.append(total_dataset)
 
 		return datasets
+
+	def build_account_result(self, datasets):
+		gle_map = {}
+		for gle in self.gl_entries:
+			gle_map.setdefault(gle.account, []).append(gle)
+
+		for account, filtered_gles in gle_map.items():
+			if filtered_gles:
+				dataset = self.build_dataset(filtered_gles, dataset_name=account)
+				datasets.append(dataset)
+
+	def build_root_type_result(self, datasets):
+		gle_map = {}
+		for gle in self.gl_entries:
+			gle_map.setdefault(gle.root_type, []).append(gle)
+
+		all_root_types = frappe.get_meta("Account").get_field("root_type").options.split("\n")
+		root_types = []
+		root_type_gles = []
+		for root_type in all_root_types:
+			if gle_map.get(root_type):
+				root_types.append(root_type)
+				root_type_gles.append((root_type, gle_map.get(root_type)))
+
+		root_type_datasets = {}
+		for root_type, filtered_gles in root_type_gles:
+			if filtered_gles:
+				dataset = self.build_dataset(filtered_gles, dataset_name=root_type, root_type=root_type)
+				root_type_datasets[root_type] = dataset
+				datasets.append(dataset)
+
+		if cint(self.filters.add_pnl_dataset) and "Income" in root_type_datasets and "Expense" in root_type_datasets:
+			income_dataset = root_type_datasets["Income"]
+			expense_dataset = root_type_datasets["Expense"]
+
+			pnl_values = []
+			for i in range(len(income_dataset['values'])):
+				pnl_values.append(income_dataset['values'][i] - expense_dataset['values'][i])
+
+			pnl_dataset = {
+				"name": _("Profit/Loss"),
+				"values": pnl_values
+			}
+			datasets.append(pnl_dataset)
 
 	def build_dataset(self, gl_entries, dataset_name, root_type=None):
 		dataset = {
