@@ -4,15 +4,14 @@
 import frappe
 from frappe import _, scrub
 from frappe.utils import cint, flt
-from erpnext.stock.utils import update_included_uom_in_dict_report
+from erpnext.stock.utils import update_included_uom_in_dict_report, has_valuation_read_permission
 from erpnext.accounts.party import set_party_name_in_list
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from frappe.desk.reportview import build_match_conditions
 from six import iteritems
 
 def execute(filters=None):
-	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
-	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+	show_amounts = has_valuation_read_permission()
 
 	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 

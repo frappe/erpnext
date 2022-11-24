@@ -5,6 +5,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import flt, nowdate, getdate, cstr, cint
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from erpnext.stock.utils import has_valuation_read_permission
 from erpnext.stock.doctype.item.item import convert_item_uom_for
 from six import iteritems, string_types
 from frappe.model.meta import get_field_precision
@@ -65,7 +66,6 @@ def get_printable_data(columns, data, filters):
 def get_data(filters):
 	conditions = get_item_conditions(filters, for_item_dt=False)
 	item_conditions = get_item_conditions(filters, for_item_dt=True)
-	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 
 	price_lists, selected_price_list = get_price_lists(filters)
 	price_lists_cond = " and p.price_list in ({0})".format(", ".join([frappe.db.escape(d) for d in price_lists or ['']]))
@@ -169,7 +169,7 @@ def get_data(filters):
 				if d.price_list == filters.standard_price_list:
 					items_map[d.item_code].standard_rate = d.price_list_rate
 
-				show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+				show_amounts = has_valuation_read_permission()
 				if show_amounts:
 					price.item_price = d.name
 
@@ -330,8 +330,7 @@ def get_columns(filters, price_lists):
 				"force_currency_symbol": 1
 			})
 
-	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
-	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
+	show_amounts = has_valuation_read_permission()
 	if not show_amounts:
 		columns = list(filter(lambda d: not d.get('restricted'), columns))
 		'''for c in columns:

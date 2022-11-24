@@ -889,6 +889,11 @@ erpnext.utils.map_current_doc = function(opts) {
 	}
 }
 
+erpnext.utils.has_valuation_read_permission = function() {
+	let allowed_role = frappe.defaults.get_default('restrict_stock_valuation_to_role');
+	return !allowed_role || frappe.user.has_role(allowed_role);
+}
+
 frappe.form.link_formatters['Item'] = function(value, doc) {
 	if(doc && doc.item_name && doc.item_name !== value && !doc.disable_item_formatter) {
 		return value ? value + ': ' + doc.item_name : doc.item_name;

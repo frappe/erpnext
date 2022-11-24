@@ -10,16 +10,29 @@ from frappe.utils.html_utils import clean_html
 
 class StockSettings(Document):
 	def validate(self):
-		for key in ["item_naming_by", "item_group", "stock_uom",
+		self.update_global_defaults()
+		self.validate_freeze_date()
+		self.make_property_setters()
+		self.validate_warehouses()
+		self.cant_change_valuation_method()
+		self.validate_clean_description_html()
+
+		if self.enable_dynamic_bundling:
+			make_bundling_fields()
+
+	def update_global_defaults(self):
+		for key in ["item_naming_by", "item_group", "stock_uom", "restrict_stock_valuation_to_role",
 			"allow_negative_stock", "default_warehouse", "set_qty_in_transactions_based_on_serial_no_input"]:
 				frappe.db.set_default(key, self.get(key, ""))
 
+	def validate_freeze_date(self):
 		stock_frozen_limit = 356
 		submitted_stock_frozen = self.stock_frozen_upto_days or 0
 		if submitted_stock_frozen > stock_frozen_limit:
 			self.stock_frozen_upto_days = stock_frozen_limit
-			frappe.msgprint (_("`Freeze Stocks Older Than` should be smaller than %d days.") %stock_frozen_limit)
+			frappe.msgprint(_("`Freeze Stocks Older Than` should be smaller than %d days.") % stock_frozen_limit)
 
+	def make_property_setters(self):
 		# show/hide barcode field
 		for name in ["barcode", "barcodes", "scan_barcode"]:
 			frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
@@ -27,13 +40,6 @@ class StockSettings(Document):
 
 		frappe.make_property_setter({'doctype': 'Item', 'fieldname': 'item_naming_by', 'property': 'default',
 			'value': self.item_naming_by})
-
-		self.validate_warehouses()
-		self.cant_change_valuation_method()
-		self.validate_clean_description_html()
-
-		if self.enable_dynamic_bundling:
-			make_bundling_fields()
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
@@ -69,6 +75,7 @@ def clean_all_descriptions():
 			clean_description = clean_html(item.description)
 		if item.description != clean_description:
 			frappe.db.set_value('Item', item.name, 'description', clean_description)
+
 
 def make_bundling_fields():
 	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
