@@ -18,7 +18,7 @@
   }
  ],
  "links": [],
- "modified": "2022-11-22 14:21:22.782453",
+ "modified": "2022-11-24 17:22:49.840145",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Sales Stage",
@@ -41,8 +41,19 @@
    "email": 1,
    "export": 1,
    "print": 1,
+   "read": 1,
    "report": 1,
    "role": "Sales User",
+   "select": 1,
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
    "select": 1,
    "share": 1
   }

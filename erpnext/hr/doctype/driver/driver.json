@@ -122,7 +122,7 @@
  ],
  "icon": "fa fa-user",
  "links": [],
- "modified": "2022-11-22 14:21:28.609903",
+ "modified": "2022-11-24 17:22:25.426331",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Driver",
@@ -171,6 +171,18 @@
    "role": "Sales User",
    "select": 1,
    "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "select": 1,
+   "share": 1,
+   "write": 1
   }
  ],
  "quick_entry": 1,
