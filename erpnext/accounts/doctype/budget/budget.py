@@ -59,7 +59,7 @@ class Budget(Document):
 		account_list = []
 		for d in self.get("accounts"):
 			if d.account:
-				account_details = frappe.db.get_value(
+				account_details = frappe.get_cached_value(
 					"Account", d.account, ["is_group", "company", "report_type"], as_dict=1
 				)
 
@@ -306,7 +306,7 @@ def get_other_condition(args, budget, for_doc):
 
 	if args.get("fiscal_year"):
 		date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
-		start_date, end_date = frappe.db.get_value(
+		start_date, end_date = frappe.get_cached_value(
 			"Fiscal Year", args.get("fiscal_year"), ["year_start_date", "year_end_date"]
 		)
 
@@ -379,7 +379,7 @@ def get_accumulated_monthly_budget(monthly_distribution, posting_date, fiscal_ye
 		):
 			distribution.setdefault(d.month, d.percentage_allocation)
 
-	dt = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
+	dt = frappe.get_cached_value("Fiscal Year", fiscal_year, "year_start_date")
 	accumulated_percentage = 0.0
 
 	while dt <= getdate(posting_date):

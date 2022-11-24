@@ -174,7 +174,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		order_by_statement = "order by account, posting_date, creation"
 
 	if filters.get("include_default_book_entries"):
-		filters["company_fb"] = frappe.db.get_value(
+		filters["company_fb"] = frappe.get_cached_value(
 			"Company", filters.get("company"), "default_finance_book"
 		)
 
@@ -286,9 +286,11 @@ def get_accounts_with_children(accounts):
 
 	all_accounts = []
 	for d in accounts:
-		if frappe.db.exists("Account", d):
-			lft, rgt = frappe.db.get_value("Account", d, ["lft", "rgt"])
-			children = frappe.get_all("Account", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+		account = frappe.get_cached_doc("Account", d)
+		if account:
+			children = frappe.get_all(
+				"Account", filters={"lft": [">=", account.lft], "rgt": ["<=", account.rgt]}
+			)
 			all_accounts += [c.name for c in children]
 		else:
 			frappe.throw(_("Account: {0} does not exist").format(d))

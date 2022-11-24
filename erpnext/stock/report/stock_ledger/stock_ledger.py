@@ -58,6 +58,12 @@ def execute(filters=None):
 		if sle.serial_no:
 			update_available_serial_nos(available_serial_nos, sle)
 
+		if sle.actual_qty:
+			sle["in_out_rate"] = flt(sle.stock_value_difference / sle.actual_qty, precision)
+
+		elif sle.voucher_type == "Stock Reconciliation":
+			sle["in_out_rate"] = sle.valuation_rate
+
 		data.append(sle)
 
 		if include_uom:
@@ -185,10 +191,18 @@ def get_columns(filters):
 				"convertible": "rate",
 			},
 			{
-				"label": _("Valuation Rate"),
+				"label": _("Avg Rate (Balance Stock)"),
 				"fieldname": "valuation_rate",
 				"fieldtype": "Currency",
-				"width": 110,
+				"width": 180,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
+				"label": _("Valuation Rate"),
+				"fieldname": "in_out_rate",
+				"fieldtype": "Currency",
+				"width": 140,
 				"options": "Company:company:default_currency",
 				"convertible": "rate",
 			},
