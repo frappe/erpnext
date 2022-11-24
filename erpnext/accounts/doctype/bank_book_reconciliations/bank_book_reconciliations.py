@@ -9,6 +9,14 @@ from frappe import _
 
 class BankBookReconciliations(Document):
 	def validate(self):		
+		if self.docstatus == 0:
+			self.verificate_bank_account()
+			self.delete_bank_transactions()
+			self.add_bank_transactions()
+			self.delete_payments()
+			self.add_payments()
+			self.transit_check()
+
 		if self.docstatus == 1:
 			self.verificate_defference_amount()
 			self.conciliation_transactions()
@@ -18,12 +26,7 @@ class BankBookReconciliations(Document):
 
 	def on_update(self):
 		if self.docstatus == 0:
-			self.verificate_bank_account()
-			self.delete_bank_transactions()
-			self.add_bank_transactions()
-			self.delete_payments()
-			self.add_payments()
-			self.transit_check()
+			
 			self.transit_check_amount()
 			self.bank_book_value()
 			self.update_amount()
