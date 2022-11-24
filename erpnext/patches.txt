@@ -782,3 +782,4 @@ execute:frappe.delete_doc_if_exists("Report", "Purchase Order Items To Be Receiv
 erpnext.patches.v12_0.set_booking_customer_name_in_jv
 erpnext.patches.v12_0.resetup_vehicle_domain #08-11-2022
 erpnext.patches.v12_0.move_customer_reference_to_lead
+erpnext.patches.v12_0.rename_stock_valuation_restriction_field
