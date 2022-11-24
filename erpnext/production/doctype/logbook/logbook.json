@@ -1,0 +1,319 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:LB-{YY}-{MM}-{DD}-{###}",
+ "creation": "2022-11-04 14:37:46.522032",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "equipment_hiring_form",
+  "column_break_2",
+  "cost_center",
+  "posting_date",
+  "equipment_details_section",
+  "equipment",
+  "equipment_category",
+  "supplier",
+  "column_break_4",
+  "equipment_type",
+  "equipment_model",
+  "hired_equipment",
+  "section_break_12",
+  "column_break_6",
+  "scheduled_working_hour",
+  "target_hours",
+  "total_downtime_hours",
+  "column_break_16",
+  "daily_output",
+  "total_hours",
+  "target_trip",
+  "reading_based_on",
+  "section_break_6",
+  "items",
+  "total_ot",
+  "section_break_8",
+  "downtimes",
+  "section_break_16",
+  "paid",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fetch_from": "equipment_hiring_form.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment_hiring_form.equipment",
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Log Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_model",
+   "fieldname": "equipment_model",
+   "fieldtype": "Link",
+   "label": "Equipment Model",
+   "options": "Equipment Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.branch",
+   "fieldname": "equipment_hiring_form",
+   "fieldtype": "Link",
+   "label": "Equipment Hiring Form",
+   "options": "Equipment Hiring Form",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment_hiring_form.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scheduled_working_hour",
+   "fieldtype": "Float",
+   "label": "Scheduled Working Hour",
+   "precision": "1",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "daily_output",
+   "fieldtype": "Float",
+   "label": "Daily Output (MT)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "total_hours",
+   "fieldtype": "Float",
+   "label": "Total Working Hour",
+   "precision": "1",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment_hiring_form.target_hour",
+   "fieldname": "target_hours",
+   "fieldtype": "Int",
+   "label": "Target Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_downtime_hours",
+   "fieldtype": "Float",
+   "label": "Total Downtime Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reading_based_on",
+   "fieldtype": "Read Only",
+   "label": "Reading Based On",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.reading_based_on == \"Trip\"",
+   "fieldname": "target_trip",
+   "fieldtype": "Int",
+   "label": "Target Trip"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Hour Details"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Logbook Item",
+   "options": "Logbook Item"
+  },
+  {
+   "fieldname": "total_ot",
+   "fieldtype": "Float",
+   "label": "Total OT Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Downtime Details"
+  },
+  {
+   "fieldname": "downtimes",
+   "fieldtype": "Table",
+   "options": "Downtime Item"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Logbook",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "paid",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Paid",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "equipment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Equipment Details"
+  },
+  {
+   "default": "0",
+   "fetch_from": "equipment.hired_equipment",
+   "fieldname": "hired_equipment",
+   "fieldtype": "Check",
+   "label": "Hired Equipment",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-21 12:05:40.916708",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Logbook",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EME Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EME User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

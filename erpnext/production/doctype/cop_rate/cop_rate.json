@@ -61,7 +61,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "COP List",
-   "options": "COP List",
+   "options": "Cost Of Product List",
    "reqd": 1
   },
   {
@@ -96,7 +96,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-17 13:41:53.664883",
+ "modified": "2022-11-07 23:25:00.294740",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "COP Rate",
@@ -118,5 +118,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "item_code",
  "track_changes": 1
 }

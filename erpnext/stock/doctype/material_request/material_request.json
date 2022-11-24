@@ -27,6 +27,10 @@
   "items_section",
   "scan_barcode",
   "items",
+  "sb_approver",
+  "approver",
+  "approver_name",
+  "approver_designation",
   "more_info",
   "per_ordered",
   "column_break2",
@@ -64,10 +68,8 @@
    "default": "{material_request_type}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
+   "no_copy": 1
   },
   {
    "fieldname": "material_request_type",
@@ -75,13 +77,13 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Purpose",
-   "options": "\nPurchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
+   "options": "\nPurchase\nMaterial Transfer\nMaterial Issue",
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.material_request_type==\"Customer Provided\"",
    "fieldname": "customer",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer",
    "options": "Customer",
    "print_hide": 1
@@ -281,11 +283,10 @@
    "label": "Warehouse"
   },
   {
-   "description": "Sets 'Receiving Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Set Receiving Warehouse",
+   "label": "Requesting Warehouse",
    "options": "Warehouse"
   },
   {
@@ -297,10 +298,9 @@
   },
   {
    "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
-   "description": "Sets 'Source Warehouse' in each row of the Items table.",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
-   "label": "Set Source Warehouse",
+   "label": "Source Warehouse",
    "options": "Warehouse"
   },
   {
@@ -325,13 +325,38 @@
    "label": "Branch",
    "options": "Branch",
    "reqd": 1
+  },
+  {
+   "fieldname": "sb_approver",
+   "fieldtype": "Section Break",
+   "label": "Approver Details"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_name",
+   "fieldtype": "Data",
+   "label": "Approver Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_designation",
+   "fieldtype": "Link",
+   "label": "Approver Designation",
+   "options": "Designation",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 15:15:17.311439",
+ "modified": "2022-11-22 13:06:39.084286",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
@@ -393,6 +418,54 @@
    "read": 1,
    "report": 1,
    "role": "Purchase User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MR CEO",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "MR GM",
    "share": 1,
    "submit": 1,
    "write": 1

@@ -1,0 +1,329 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:POLR-{YY}-{MM}-{DD}-{###}",
+ "creation": "2022-10-20 14:46:05.098826",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1",
+  "branch",
+  "cost_center",
+  "company",
+  "column_break_3",
+  "posting_date",
+  "posting_time",
+  "warehouse",
+  "direct_consumption",
+  "section_break_6",
+  "equipment",
+  "own_fb",
+  "equipment_type",
+  "fuelbook",
+  "section_break_15",
+  "equipment_category",
+  "fuelbook_branch",
+  "supplier",
+  "section_break_4",
+  "pol_type",
+  "item_name",
+  "cur_km_reading",
+  "column_break_6",
+  "qty",
+  "stock_uom",
+  "km_difference",
+  "column_break_8",
+  "rate",
+  "mileage",
+  "advance_details_section",
+  "get_pol_expense",
+  "items",
+  "section_break_10",
+  "total_amount",
+  "column_break_12",
+  "memo_number",
+  "section_break_8",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Location Information"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.branch",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "description": "If the POL is consumed directly by the vehicle, check this. This will consume the POL too",
+   "fieldname": "direct_consumption",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Direct Consumption"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Equipment Details"
+  },
+  {
+   "fieldname": "own_fb",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Own FB"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "fuelbook.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "POL Type & Quantity"
+  },
+  {
+   "fieldname": "pol_type",
+   "fieldtype": "Link",
+   "label": "Fuel Type Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "pol_type.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "pol_type.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Data",
+   "label": "Stock UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate Per Unit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break",
+   "label": "Amount Details"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Bill Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "memo_number",
+   "fieldtype": "Data",
+   "label": "Cash Memo Number"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cur_km_reading",
+   "fieldtype": "Float",
+   "label": "Current KM Reading",
+   "reqd": 1
+  },
+  {
+   "fieldname": "km_difference",
+   "fieldtype": "Float",
+   "label": "KM Difference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mileage",
+   "fieldtype": "Float",
+   "label": "Mileage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "advance_details_section",
+   "fieldtype": "Section Break",
+   "label": "Expenses Details"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "POL Receive Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "POL Receive",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.fuelbook",
+   "fieldname": "fuelbook",
+   "fieldtype": "Link",
+   "label": "Fuelbook",
+   "options": "Fuelbook",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0",
+   "fieldname": "get_pol_expense",
+   "fieldtype": "Button",
+   "label": "Get Pol Expense"
+  },
+  {
+   "fetch_from": "fuelbook.branch",
+   "fieldname": "fuelbook_branch",
+   "fieldtype": "Link",
+   "label": "Fuelbook Branch",
+   "options": "Branch",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-04 12:22:32.014953",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "POL Receive",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

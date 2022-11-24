@@ -18,6 +18,21 @@ def get_number_of_days(end_date=None, start_date=None):
     
     return num_of_days
 
+def get_period_date(fiscal_year, period, cumulative=None):
+    if not period or not fiscal_year:
+        frappe.throw("Either Fiscal Year or Report Period is missing")
+
+    values = ["from_date", "to_date"]
+    if cumulative:
+        values = ["c_from_date", "c_to_date"]
+    from_date, to_date = frappe.db.get_value("Report Period", period, values)
+    if from_date and to_date:
+        from_date = str(fiscal_year) + str(from_date)
+        to_date = str(fiscal_year) + str(to_date)
+        return from_date, to_date
+    else:
+        frappe.throw("Report Period Not Defined Properly")
+
 # Ver 20160627.1 by SSK, Fetching the latest
 @frappe.whitelist()
 def get_loss_tolerance():

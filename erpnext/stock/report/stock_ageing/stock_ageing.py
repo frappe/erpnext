@@ -39,6 +39,7 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 
 		earliest_age, latest_age = 0, 0
 		details = item_dict["details"]
+		# frappe.msgprint(str(item_dict['details']))
 
 		fifo_queue = sorted(filter(_func, item_dict["fifo_queue"]), key=_func)
 
@@ -48,7 +49,12 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
-		range1, range2, range3, above_range3 = get_range_age(filters, fifo_queue, to_date, item_dict)
+		range1, range2, range3, range4, above_range4 = get_range_age(filters, fifo_queue, to_date, item_dict)
+		range1_val = flt(range1) * flt(details.valuatIon_rate)
+		range2_val = flt(range2) * flt(details.valuatIon_rate)
+		range3_val = flt(range3) * flt(details.valuatIon_rate)
+		range4_val = flt(range4) * flt(details.valuatIon_rate)
+		above_range4_val = flt(above_range4) * flt(details.valuatIon_rate)
 
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
 
@@ -58,11 +64,18 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 		row.extend(
 			[
 				flt(item_dict.get("total_qty"), precision),
+				flt(item_dict.get("total_qty"), precision)*flt(details.valuatIon_rate),
 				average_age,
 				range1,
+				range1_val,
 				range2,
+				range2_val,
 				range3,
-				above_range3,
+				range3_val,
+				range4,
+				range4_val,
+				above_range4,
+				above_range4_val,
 				earliest_age,
 				latest_age,
 				details.stock_uom,
@@ -93,8 +106,7 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
-	range1 = range2 = range3 = above_range3 = 0.0
-
+	range1 = range2 = range3 = range4 = above_range4 = 0.0
 	for item in fifo_queue:
 		age = date_diff(to_date, item[1])
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
@@ -105,10 +117,12 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 			range2 = flt(range2 + qty, precision)
 		elif age <= filters.range3:
 			range3 = flt(range3 + qty, precision)
+		elif age <= filters.range4:
+			range4 = flt(range4 + qty, precision)
 		else:
-			above_range3 = flt(above_range3 + qty, precision)
+			above_range4 = flt(above_range4 + qty, precision)
 
-	return range1, range2, range3, above_range3
+	return range1, range2, range3, range4, above_range4
 
 
 def get_columns(filters: Filters) -> List[Dict]:
@@ -154,6 +168,7 @@ def get_columns(filters: Filters) -> List[Dict]:
 	columns.extend(
 		[
 			{"label": _("Available Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 100},
+			{"label": _("Available Qty (Value)"), "fieldname": "value", "fieldtype": "Float", "width": 100},
 			{"label": _("Average Age"), "fieldname": "average_age", "fieldtype": "Float", "width": 100},
 		]
 	)
@@ -198,11 +213,14 @@ def setup_ageing_columns(filters: Filters, range_columns: List):
 		f"0 - {filters['range1']}",
 		f"{cint(filters['range1']) + 1} - {cint(filters['range2'])}",
 		f"{cint(filters['range2']) + 1} - {cint(filters['range3'])}",
-		f"{cint(filters['range3']) + 1} - {_('Above')}",
+		f"{cint(filters['range3']) + 1} - {cint(filters['range4'])}",
+		f"{cint(filters['range4']) + 1} - {_('Above')}",
 	]
 	for i, label in enumerate(ranges):
 		fieldname = "range" + str(i + 1)
+		fieldname_val = "range" + str(i + 1)+"_val"
 		add_column(range_columns, label=f"Age ({label})", fieldname=fieldname)
+		add_column(range_columns, label=f"Age ({label}) Value", fieldname=fieldname_val)
 
 
 def add_column(
@@ -397,6 +415,7 @@ class FIFOSlots:
 				item.stock_uom,
 				item.has_serial_no,
 				sle.actual_qty,
+				sle.valuatIon_rate,
 				sle.posting_date,
 				sle.voucher_type,
 				sle.voucher_no,

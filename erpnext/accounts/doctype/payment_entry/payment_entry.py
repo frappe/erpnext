@@ -91,6 +91,7 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_payment_schedule()
 		self.set_status()
+		self.update_employee_advance()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
@@ -109,6 +110,16 @@ class PaymentEntry(AccountsController):
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
+	def update_employee_advance(self):
+		reference_d = frappe.db.sql("""
+			select reference_doctype from `tabPayment Entry Reference` where parent = '{}' 
+			""".format(self.name))[0][0]
+		reference_n = frappe.db.sql("""
+			select reference_name from `tabPayment Entry Reference` where parent = '{}' 
+			""".format(self.name))[0][0]
+		if reference_d == "Employee Advance":
+			frappe.db.sql("""update `tabEmployee Advance` set pending_amount = 0 where name = '{}'
+			""".format(reference_n))
 
 	def validate_duplicate_entry(self):
 		reference_names = []
@@ -244,9 +255,12 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
 
 			if self.party_account and self.party_type in ("Customer", "Supplier"):
-				self.validate_account_type(
-					self.party_account, [erpnext.get_party_account_type(self.party_type)]
-				)
+				if frappe.db.get_value('Account',self.party_account,'is_an_advance_account'):
+					party_account_type = ["Receivable", "Payable"]
+					self.validate_account_type(self.party_account, party_account_type)
+				else:
+					self.validate_account_type(self.party_account,
+						[erpnext.get_party_account_type(self.party_type)])
 
 	def validate_bank_accounts(self):
 		if self.payment_type in ("Pay", "Internal Transfer"):
@@ -257,8 +271,8 @@ class PaymentEntry(AccountsController):
 
 	def validate_account_type(self, account, account_types):
 		account_type = frappe.db.get_value("Account", account, "account_type")
-		# if account_type not in account_types:
-		# 	frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
+		if account_type not in account_types:
+			frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
@@ -352,11 +366,10 @@ class PaymentEntry(AccountsController):
 						frappe.throw(_("{0} {1} must be submitted").format(d.reference_doctype, d.reference_name))
 
 	def get_valid_reference_doctypes(self):
-		frappe.throw('here')
 		if self.party_type == "Customer":
 			return ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
 		elif self.party_type == "Supplier":
-			return ("Purchase Order", "Purchase Invoice", "Journal Entry")
+			return ("Purchase Order", "Purchase Invoice", "Journal Entry","Repair And Service Invoice")
 		elif self.party_type == "Shareholder":
 			return ("Journal Entry",)
 		elif self.party_type == "Employee":
@@ -1642,7 +1655,7 @@ def get_payment_entry(
 	reference_doc = None
 	is_advance = False
 	if dt in ['Sales Order','Purchase Order']:
-		# payment are made from SO or PO
+		# advance payment are made from SO or PO
 		is_advance = True
 	doc = frappe.get_doc(dt, dn)
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
@@ -1650,7 +1663,6 @@ def get_payment_entry(
 
 	if not party_type:
 		party_type = set_party_type(dt)
-
 	party_account = set_party_account(dt, dn, doc, party_type,is_advance)
 	party_account_currency = set_party_account_currency(dt, party_account, doc)
 	if not payment_type:
@@ -1759,7 +1771,7 @@ def get_payment_entry(
 						"allocated_amount": outstanding_amount,
 					},
 				)
-
+	# frappe.throw(str(pe.references[0].outstanding_amount))
 	pe.setup_party_account_field()
 	pe.set_missing_values()
 
@@ -1796,7 +1808,7 @@ def get_bank_cash_account(doc, bank_account):
 def set_party_type(dt):
 	if dt in ("Sales Invoice", "Sales Order", "Dunning"):
 		party_type = "Customer"
-	elif dt in ("Purchase Invoice", "Purchase Order"):
+	elif dt in ("Purchase Invoice", "Purchase Order","Repair And Service Invoice","Transporter Invoice","EME Invoice"):
 		party_type = "Supplier"
 	return party_type
 
@@ -1806,13 +1818,15 @@ def set_party_account(dt, dn, doc, party_type,is_advance=None):
 		party_account = get_party_account_based_on_invoice_discounting(dn) or doc.debit_to
 	elif dt == "Purchase Invoice":
 		party_account = doc.credit_to
+	elif dt in ["Transporter Invoice","EME Invoice","Repair And Service Invoice"]:
+		party_account = doc.credit_account
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company,is_advance)
 	return party_account
 
 
 def set_party_account_currency(dt, party_account, doc):
-	if dt not in ("Sales Invoice", "Purchase Invoice"):
+	if dt not in ("Sales Invoice", "Purchase Invoice","Transporter Invoice","EME Invoice","Repair And Service Invoice"):
 		party_account_currency = get_account_currency(party_account)
 	else:
 		party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
@@ -1842,6 +1856,9 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 	elif dt == "Dunning":
 		grand_total = doc.grand_total
 		outstanding_amount = doc.grand_total
+	elif dt in ["Transporter Invoice","EME Invoice","Repair And Service Invoice"]:
+		grand_total = doc.grand_total
+		outstanding_amount = doc.outstanding_amount
 	else:
 		if party_account_currency == doc.company_currency:
 			grand_total = flt(doc.get("base_rounded_total") or doc.get("base_grand_total"))

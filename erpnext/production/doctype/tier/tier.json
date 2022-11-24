@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:tier",
+ "creation": "2022-10-19 10:08:33.116597",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tier",
+  "minimum_labor_required",
+  "disabled",
+  "labor_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "tier",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tier",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "minimum_labor_required",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Minimum Labor Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "labor_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Labor Type",
+   "options": "\nBhutanese\nIndian\nOthers"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-10 14:13:16.391070",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Tier",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Master",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

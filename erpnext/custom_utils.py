@@ -319,7 +319,7 @@ def get_branch_warehouse(branch):
 
 @frappe.whitelist()
 def get_branch_from_cost_center(cost_center):
-	return frappe.db.get_value("Branch", {"cost_center": cost_center, "is_disabled": 0}, "name")
+	return frappe.db.get_value("Branch", {"cost_center": cost_center, "disabled": 0}, "name")
 
 @frappe.whitelist()
 def kick_users():
@@ -368,8 +368,8 @@ def get_production_groups(group):
 	if not group:
 		frappe.throw("Invalid Production Group")
 	groups = []
-	for a in frappe.db.sql("select item_sub_group from `tabProduction Group Item` where parent = %s", group, as_dict=1):
-		groups.append(str(a.item_sub_group))
+	for a in frappe.db.sql("select item_code from `tabProduction Group Item` where parent = %s", group, as_dict=1):
+		groups.append(str(a.item_code))
 	return groups
                    
 # Following code added by SHIV on 2021/05/13

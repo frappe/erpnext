@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "creation": "2022-10-19 15:31:01.745615",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter_code",
+  "item_name",
+  "ratio",
+  "column_break_4",
+  "qty",
+  "uom"
+ ],
+ "fields": [
+  {
+   "fieldname": "parameter_code",
+   "fieldtype": "Link",
+   "label": "Parameter Code",
+   "options": "Production Parameter",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parameter Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ratio",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Ratio/Percent"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-10-31 11:26:05.832045",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Production Waste",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

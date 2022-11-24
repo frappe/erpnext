@@ -3,6 +3,9 @@
 
 frappe.provide("erpnext.accounts.dimensions");
 
+cur_frm.add_fetch("asset","credit_account", "credit_account");
+cur_frm.add_fetch("asset","asset_account", "fixed_asset_account");
+
 frappe.ui.form.on('Asset Value Adjustment', {
 	setup: function(frm) {
 		frm.add_fetch('company', 'cost_center', 'cost_center');
@@ -39,6 +42,9 @@ frappe.ui.form.on('Asset Value Adjustment', {
 	asset: function(frm) {
 		frm.trigger("set_current_asset_value");
 	},
+	difference_amount: function(frm){
+		frm.trigger("set_new_asset_value");
+	},
 
 	finance_book: function(frm) {
 		frm.trigger("set_current_asset_value");
@@ -58,6 +64,11 @@ frappe.ui.form.on('Asset Value Adjustment', {
 					}
 				}
 			});
+		}
+	},
+	set_new_asset_value: function(frm){
+		if (frm.doc.current_asset_value && frm.doc.difference_amount) {
+			frm.set_value('new_asset_value', frm.doc.current_asset_value+frm.doc.difference_amount);
 		}
 	}
 });

@@ -313,7 +313,6 @@ def update_outstanding_amt(
 		)
 	else:
 		account_condition = " and account = {0}".format(frappe.db.escape(account))
-
 	# get final outstanding amt
 	bal = flt(
 		frappe.db.sql(

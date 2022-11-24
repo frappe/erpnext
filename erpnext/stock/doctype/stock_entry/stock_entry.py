@@ -152,6 +152,7 @@ class StockEntry(StockController):
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
 
 	def on_submit(self):
+		self.validate_received_qty()
 		self.update_stock_ledger()
 
 		update_serial_nos_after_submit(self, "items")
@@ -175,7 +176,11 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("In Transit")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("Completed")
-
+	def validate_received_qty(self):
+		if self.stock_entry_type == "Material Transfer":
+			for item in self.items:
+				if flt(item.received_qty) <= 0:
+					frappe.throw(_("Row {0}: Received Qty cannot be less than or equal to <b>0</b>").format(item.idx), title=_("Zero recived quantity"))
 	def on_cancel(self):
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
@@ -1297,12 +1302,14 @@ class StockEntry(StockController):
 			ret.update(get_uom_details(args.get("item_code"), args.get("uom"), args.get("qty")))
 
 		if self.purpose == "Material Issue":
-			ret["expense_account"] = (
-				item.get("expense_account")
-				or item_group_defaults.get("expense_account")
-				or frappe.get_cached_value("Company", self.company, "default_expense_account")
-			)
-
+			if self.stock_entry_type == "Write Off":
+				ret["expense_account"] = (frappe.get_cached_value("Company", self.company, "write_off_account"))
+			else:
+				ret["expense_account"] = (
+					item.get("expense_account")
+					or item_group_defaults.get("expense_account")
+					or frappe.get_cached_value("Company", self.company, "default_expense_account")
+				)
 		for company_field, field in {
 			"stock_adjustment_account": "expense_account",
 			"cost_center": "cost_center",
@@ -2106,6 +2113,9 @@ class StockEntry(StockController):
 			stock_entries = {}
 			stock_entries_child_list = []
 			for d in self.items:
+				# check received qty
+				if flt(d.received_qty) <= 0:
+					frappe.throw("Received qty cannot be 0")
 				if not (d.against_stock_entry and d.ste_detail):
 					continue
 

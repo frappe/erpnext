@@ -137,17 +137,15 @@ class PaymentLedgerEntry(Document):
 			self.validate_allowed_dimensions()
 			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
-
 		# update outstanding amount
 		if (
-			self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees"]
+			self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice"]
 			and self.flags.update_outstanding == "Yes"
 			and not frappe.flags.is_reverse_depr_entry
 		):
 			update_voucher_outstanding(
 				self.against_voucher_type, self.against_voucher_no, self.account, self.party_type, self.party
 			)
-
 
 def on_doctype_update():
 	frappe.db.add_index("Payment Ledger Entry", ["against_voucher_no", "against_voucher_type"])

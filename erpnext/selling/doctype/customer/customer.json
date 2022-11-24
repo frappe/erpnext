@@ -17,22 +17,22 @@
   "gender",
   "default_bank_account",
   "tax_id",
-  "tax_category",
   "tax_withholding_category",
+  "tax_category",
+  "territory",
+  "account_manager",
   "lead_name",
   "opportunity_name",
   "image",
-  "column_break0",
-  "customer_group",
-  "customer_type",
-  "territory",
-  "country",
-  "account_manager",
   "so_required",
   "dn_required",
   "is_internal_customer",
-  "represents_company",
   "disabled",
+  "column_break0",
+  "customer_group",
+  "customer_type",
+  "country",
+  "represents_company",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
@@ -97,6 +97,7 @@
    "depends_on": "eval:doc.customer_type!='Company'",
    "fieldname": "salutation",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salutation",
    "options": "Salutation"
   },
@@ -116,28 +117,30 @@
    "depends_on": "eval:doc.customer_type != 'Company'",
    "fieldname": "gender",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Gender",
    "options": "Gender"
   },
   {
-   "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual",
+   "options": "\nDomestic Customer\nInternational Customer",
    "reqd": 1
   },
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
    "fieldname": "lead_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "From Lead",
    "no_copy": 1,
    "oldfieldname": "lead_name",
@@ -161,6 +164,7 @@
   {
    "fieldname": "account_manager",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Account Manager",
    "options": "User"
   },
@@ -185,17 +189,18 @@
    "oldfieldname": "territory",
    "oldfieldtype": "Link",
    "options": "Territory",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax ID"
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -268,6 +273,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address and Contact",
    "options": "fa fa-map-marker"
   },
@@ -306,19 +312,18 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "customer_primary_contact",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Contact",
    "options": "Contact"
   },
   {
-   "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
-   "fieldtype": "Read Only",
+   "fieldtype": "Phone",
    "label": "Mobile No"
   },
   {
-   "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "label": "Email Id"
   },
   {
@@ -329,14 +334,14 @@
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Customer Primary Address",
    "options": "Address"
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
-   "label": "Primary Address",
-   "read_only": 1
+   "fieldtype": "Small Text",
+   "label": "Primary Address"
   },
   {
    "collapsible": 1,
@@ -406,6 +411,7 @@
    "collapsible": 1,
    "fieldname": "column_break_38",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Loyalty Points"
   },
   {
@@ -427,6 +433,7 @@
    "collapsible_depends_on": "default_sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Partner and Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group"
@@ -452,6 +459,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "sales_team_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Team"
   },
   {
@@ -499,6 +507,7 @@
   {
    "fieldname": "opportunity_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "From Opportunity",
    "no_copy": 1,
    "options": "Opportunity",
@@ -546,7 +555,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-09-14 19:36:23.766970",
+ "modified": "2022-11-17 09:49:57.345267",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

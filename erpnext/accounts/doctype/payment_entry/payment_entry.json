@@ -217,7 +217,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "payment_accounts_section",
    "fieldtype": "Section Break",
    "label": "Accounts"
@@ -766,7 +765,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-26 20:24:32.620753",
+ "modified": "2022-11-07 14:20:59.740456",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

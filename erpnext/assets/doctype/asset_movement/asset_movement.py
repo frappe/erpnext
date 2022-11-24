@@ -12,7 +12,7 @@ class AssetMovement(Document):
 		self.validate_cost_center()
 		self.validate_employee()
 		self.validate_asset()
-
+		
 	def validate_asset(self):
 		for d in self.assets:
 			status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])

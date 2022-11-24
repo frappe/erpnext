@@ -8,8 +8,13 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "item_name",
+  "issue_to_employee",
+  "issue_to_equipment",
   "col_break1",
+  "item_name",
+  "item_sub_group",
+  "issued_employee_name",
+  "issued_equipment_name",
   "schedule_date",
   "issue_type",
   "issue_to",
@@ -167,7 +172,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Receiving Warehouse",
+   "label": "Requesting Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -391,6 +396,7 @@
    "depends_on": "eval:in_list([\"Manufacture\", \"Purchase\"], parent.material_request_type)",
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Manufacture"
   },
   {
@@ -443,7 +449,8 @@
   },
   {
    "fieldname": "qty_info_sec_break",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "qty_info_col_break",
@@ -461,22 +468,59 @@
    "depends_on": "eval:parent.material_request_type == \"Material Issue\"",
    "fieldname": "issue_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Issue Type",
-   "options": "\nEmployee"
+   "options": "\nEmployee\nEquipment"
   },
   {
    "depends_on": "eval:parent.material_request_type == \"Material Issue\" && doc.issue_type",
    "fieldname": "issue_to",
    "fieldtype": "Dynamic Link",
+   "hidden": 1,
    "label": "Issue To",
    "options": "issue_type"
+  },
+  {
+   "fetch_from": "issue_to_employee.employee_name",
+   "fieldname": "issued_employee_name",
+   "fieldtype": "Data",
+   "label": "Issued Employee Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:(parent.material_request_type != \"Purchase\") && (parent.material_request_type != \"Material Transfer\") ",
+   "fieldname": "issue_to_employee",
+   "fieldtype": "Link",
+   "label": "Issue To Employee",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:(parent.material_request_type != \"Purchase\") && (parent.material_request_type != \"Material Transfer\") ",
+   "fieldname": "issue_to_equipment",
+   "fieldtype": "Link",
+   "label": "Issue To Equipment",
+   "options": "Equipment"
+  },
+  {
+   "fetch_from": "issue_to_equipment.equipment_name",
+   "fieldname": "issued_equipment_name",
+   "fieldtype": "Data",
+   "label": "Issued Equipment Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_sub_group",
+   "fieldname": "item_sub_group",
+   "fieldtype": "Data",
+   "label": "Item Sub Group",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-27 15:13:06.113410",
+ "modified": "2022-11-17 10:22:36.480694",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

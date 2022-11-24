@@ -22,6 +22,7 @@
   "posting_time",
   "set_posting_time",
   "is_return",
+  "location_required",
   "issue_credit_note",
   "return_against",
   "accounting_dimensions_section",
@@ -110,15 +111,6 @@
   "terms_section_break",
   "tc_name",
   "terms",
-  "transporter_info",
-  "transporter",
-  "driver",
-  "lr_no",
-  "vehicle_no",
-  "col_break34",
-  "transporter_name",
-  "driver_name",
-  "lr_date",
   "more_info",
   "campaign",
   "source",
@@ -302,6 +294,7 @@
    "collapsible": 1,
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Customer PO Details"
   },
   {
@@ -323,10 +316,9 @@
   {
    "fieldname": "po_date",
    "fieldtype": "Date",
-   "label": "Customer's Purchase Order Date",
+   "label": "Purchase Order Date",
    "oldfieldname": "po_date",
    "oldfieldtype": "Data",
-   "print_hide": 1,
    "print_width": "100px",
    "width": "100px"
   },
@@ -335,6 +327,7 @@
    "depends_on": "customer",
    "fieldname": "contact_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address and Contact",
    "options": "fa fa-bullhorn"
   },
@@ -423,6 +416,7 @@
    "collapsible": 1,
    "fieldname": "currency_and_price_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Currency and Price List",
    "options": "fa fa-tag"
   },
@@ -623,6 +617,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -885,79 +880,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "transporter",
-   "fieldname": "transporter_info",
-   "fieldtype": "Section Break",
-   "label": "Transporter Info",
-   "options": "fa fa-truck",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "transporter",
-   "fieldtype": "Link",
-   "label": "Transporter",
-   "options": "Supplier",
-   "print_hide": 1,
-   "print_width": "150px",
-   "width": "150px"
-  },
-  {
-   "fieldname": "driver",
-   "fieldtype": "Link",
-   "label": "Driver",
-   "options": "Driver",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "lr_no",
-   "fieldtype": "Data",
-   "label": "Transport Receipt No",
-   "oldfieldname": "lr_no",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "print_width": "100px",
-   "width": "100px"
-  },
-  {
-   "fieldname": "vehicle_no",
-   "fieldtype": "Data",
-   "label": "Vehicle No",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "col_break34",
-   "fieldtype": "Column Break",
-   "print_width": "50%",
-   "width": "50%"
-  },
-  {
-   "fetch_from": "transporter.name",
-   "fieldname": "transporter_name",
-   "fieldtype": "Data",
-   "label": "Transporter Name",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fetch_from": "driver.full_name",
-   "fieldname": "driver_name",
-   "fieldtype": "Data",
-   "label": "Driver Name",
-   "print_hide": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "lr_date",
-   "fieldtype": "Date",
-   "label": "Transport Receipt Date",
-   "oldfieldname": "lr_date",
-   "oldfieldtype": "Date",
-   "print_hide": 1,
-   "print_width": "100px",
-   "width": "100px"
-  },
-  {
-   "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Information",
@@ -1162,6 +1084,7 @@
    "collapsible_depends_on": "total_commission",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Commission",
    "oldfieldtype": "Section Break",
    "options": "fa fa-group",
@@ -1211,6 +1134,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "section_break1",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Sales Team",
    "print_hide": 1
   },
@@ -1313,6 +1237,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
@@ -1341,13 +1266,20 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "default": "0",
+   "fieldname": "location_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Location Required"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-21 00:24:41.942150",
+ "modified": "2022-11-14 12:34:06.380253",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

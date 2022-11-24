@@ -3,6 +3,7 @@
 
 frappe.ui.form.on("Supplier", {
 	setup: function (frm) {
+		frm.events.set_filter(frm)
 		frm.set_query('default_price_list', { 'buying': 1 });
 		if (frm.doc.__islocal == 1) {
 			frm.set_value("represents_company", "");
@@ -52,7 +53,7 @@ frappe.ui.form.on("Supplier", {
 		} else {
 			erpnext.toggle_naming_series();
 		}
-
+		frm.events.set_filter(frm)
 		if (frm.doc.__islocal) {
 			hide_field(['address_html','contact_html']);
 			frappe.contacts.clear_address_and_contact(frm);
@@ -92,6 +93,40 @@ frappe.ui.form.on("Supplier", {
 			// indicators
 			erpnext.utils.set_party_dashboard_indicators(frm);
 		}
+	},
+	dzongkhag:function(frm){
+		frm.events.set_filter(frm)
+	},
+	gewog:function(frm){
+		frm.events.set_filter(frm)
+	},
+	set_filter:function(frm){
+		frm.set_query("dzongkhag",function(){
+			return {
+				filters:{
+					disabled:0,
+					is_dzongkhag:1
+				}
+			}
+		})
+		frm.set_query("gewog",function(){
+			return {
+				filters:{
+					disabled:0,
+					is_gewog:1,
+					parent_dzongkhag:frm.doc.dzongkhag
+				}
+			}
+		})
+		frm.set_query("village",function(){
+			return {
+				filters:{
+					disabled:0,
+					is_village:1,
+					parent_dzongkhag:frm.doc.gewog
+				}
+			}
+		})
 	},
 	get_supplier_group_details: function(frm) {
 		frappe.call({

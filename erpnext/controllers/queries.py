@@ -816,3 +816,45 @@ def get_fields(doctype, fields=None):
 		fields.insert(1, meta.title_field.strip())
 
 	return unique(fields)
+@frappe.whitelist()
+def get_equipment_no(doctype,txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("select equipment_number  from `tabEquipment` where is_disabled != 1")
+
+@frappe.whitelist()
+def filter_branch_wh(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("branch"):
+		frappe.throw("Select Branch First")
+	
+	return frappe.db.sql(
+		""" select a.name from `tabWarehouse` a, `tabWarehouse Branch` b
+		where a.name = b.parent and b.branch = %(branch)s and a.name like %(txt)s
+		limit %(page_len)s offset %(start)s""",
+		{"branch": filters.get("branch"), "start": start, "page_len": page_len, "txt": "%%%s%%" % txt},
+	)
+@frappe.whitelist()
+def filter_cop(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("branch"):
+		frappe.throw("Select Branch First")
+	
+	return frappe.db.sql(
+		""" select a.name from `tabCost Of Product List` a, `tabCop Branch` b
+		where a.name = b.parent and b.branch = %(branch)s and a.name like %(txt)s
+		limit %(page_len)s offset %(start)s""",
+		{"branch": filters.get("branch"), "start": start, "page_len": page_len, "txt": "%%%s%%" % txt},
+	)
+#filtering warehouse based on branch
+@frappe.whitelist()
+def filter_branch_warehouse(doctype, txt, searchfield, start, page_len, filters):
+		# frappe.throw("here")
+		return frappe.db.sql("""
+		select a.name from `tabWarehouse` a, `tabWarehouse Branch` b where a.name = b.parent and b.branch = '{}'
+		""".format(filters.get('branch')))
+
+#filtering warehouse based on branch
+@frappe.whitelist()
+def filter_cost_center_warehouse(doctype, txt, searchfield, start, page_len, filters):
+		# frappe.throw("here")
+		branch = frappe.db.get_value("Branch",{"cost_center":filters.get("cost_center")},"name")
+		return frappe.db.sql("""
+		select a.name from `tabWarehouse` a, `tabWarehouse Branch` b where a.name = b.parent and b.branch = '{}'
+		""".format(branch))

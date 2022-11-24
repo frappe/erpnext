@@ -1744,7 +1744,6 @@ class PurchaseInvoice(BuyingController):
 
 		if update:
 			self.db_set("status", self.status, update_modified=update_modified)
-		# frappe.throw(str(frappe.db.get_value(self.doctype,self.name,'outstanding_amount')))
 
 # to get details of purchase invoice/receipt from which this doc was created for exchange rate difference handling
 def get_purchase_document_details(doc):

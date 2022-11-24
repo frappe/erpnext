@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "creation": "2022-11-01 18:12:28.412865",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "deduction_type",
+  "account",
+  "column_break_3",
+  "percent",
+  "charge_amount",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "mandatory_depends_on": "eval:doc.deduction_type == \"Other Deductions\"",
+   "options": "Account",
+   "read_only": 1,
+   "read_only_depends_on": "eval:doc.deduction_type != \"Other Deductions\""
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only_depends_on": "eval:doc.deduction_type != \"Other Deductions\""
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "deduction_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Deduction Type",
+   "options": "\nTDS Deduction\nClearing Charge/Trip\nWeighbridge Charge/Trip\nSecurity Deposit\nOther Deductions",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:in_list([\"Security Deposit\",\"TDS Deduction\"],doc.deduction_type)",
+   "fieldname": "percent",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Percent(%)",
+   "mandatory_depends_on": "eval:in_list([\"Security Deposit\",\"TDS Deduction\"],doc.deduction_type)",
+   "options": "\n2\n3\n5\n10"
+  },
+  {
+   "depends_on": "eval:in_list([\"Clearing Charge/Trip\",\"Weighbridge Charge/Trip\"],doc.deduction_type)",
+   "fieldname": "charge_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Charge Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-03 22:12:35.365942",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Transporter Invoice Deduction",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

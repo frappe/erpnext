@@ -13,7 +13,6 @@ from erpnext.accounts.report.financial_statements import (
 	get_period_list,
 )
 
-
 def execute(filters=None):
 	period_list = get_period_list(
 		filters.from_fiscal_year,
@@ -24,7 +23,6 @@ def execute(filters=None):
 		filters.periodicity,
 		company=filters.company,
 	)
-
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)

@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "items_section",
+  "title",
   "branch",
   "naming_series",
   "stock_entry_type",
@@ -300,7 +301,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Default Source Warehouse",
+   "label": "Source Warehouse",
    "no_copy": 1,
    "oldfieldname": "from_warehouse",
    "oldfieldtype": "Link",
@@ -311,6 +312,7 @@
    "depends_on": "from_warehouse",
    "fieldname": "source_warehouse_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Source Warehouse Address",
    "options": "Address"
   },
@@ -330,7 +332,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Default Receiving Warehouse",
+   "label": "Receiving Warehouse",
    "no_copy": 1,
    "oldfieldname": "to_warehouse",
    "oldfieldtype": "Link",
@@ -341,6 +343,7 @@
    "depends_on": "to_warehouse",
    "fieldname": "target_warehouse_address",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Receiving Warehouse Address",
    "options": "Address"
   },
@@ -522,6 +525,7 @@
    "fieldname": "remarks",
    "fieldtype": "Text",
    "label": "Remarks",
+   "mandatory_depends_on": "eval:doc.stock_entry_type == \"Write Off\"",
    "no_copy": 1,
    "oldfieldname": "remarks",
    "oldfieldtype": "Text",
@@ -582,6 +586,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
@@ -659,6 +664,12 @@
    "label": "Status",
    "options": "\nDraft\nIn Transit\nSubmitted\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Stock Entry Title",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -666,7 +677,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 12:30:37.262233",
+ "modified": "2022-11-18 11:32:19.389595",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

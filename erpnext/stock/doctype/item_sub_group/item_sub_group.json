@@ -7,7 +7,13 @@
  "engine": "InnoDB",
  "field_order": [
   "item_group",
-  "item_sub_group"
+  "item_sub_group",
+  "section_break_3",
+  "reading_required",
+  "reading_parameter",
+  "column_break_6",
+  "minimum_value",
+  "maximum_value"
  ],
  "fields": [
   {
@@ -23,10 +29,39 @@
    "fieldtype": "Data",
    "label": "Item Sub Group",
    "unique": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "reading_required",
+   "fieldtype": "Check",
+   "label": "Royalty Based On Reading"
+  },
+  {
+   "fieldname": "reading_parameter",
+   "fieldtype": "Data",
+   "label": "Reading Parameter"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "minimum_value",
+   "fieldtype": "Float",
+   "label": "Minimum Value"
+  },
+  {
+   "fieldname": "maximum_value",
+   "fieldtype": "Float",
+   "label": "Maximum Value"
   }
  ],
  "links": [],
- "modified": "2022-09-20 09:59:34.132936",
+ "modified": "2022-11-08 16:45:02.862966",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Sub Group",

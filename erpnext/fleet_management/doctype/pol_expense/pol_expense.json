@@ -1,0 +1,307 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:POLE-{YY}-{MM}-{####}",
+ "creation": "2022-10-19 15:24:00.939251",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "equipment",
+  "fuel_book",
+  "fuelbook_branch",
+  "column_break_5",
+  "entry_date",
+  "cost_center",
+  "is_opening",
+  "payment_details_section",
+  "party_type",
+  "payment_type",
+  "party",
+  "credit_account",
+  "column_break_11",
+  "currency",
+  "amount",
+  "adjusted_amount",
+  "balance_amount",
+  "cheque_details_section",
+  "use_cheque_lot",
+  "select_cheque_lot",
+  "column_break_25",
+  "pay_to_recd_from",
+  "cheque_no",
+  "cheque_date",
+  "sb_additional_info",
+  "company",
+  "branch",
+  "section_break_31",
+  "journal_entry",
+  "user_remark",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "entry_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Entry Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Supplier",
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Party Type",
+   "options": "Party Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Details"
+  },
+  {
+   "fetch_from": "party_type.account_type",
+   "fieldname": "payment_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Payment Type",
+   "read_only": 1
+  },
+  {
+   "default": "BTN",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "POL Expense",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.fuelbook",
+   "fieldname": "fuel_book",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fuel Book",
+   "options": "Fuelbook",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "fuel_book.branch",
+   "fieldname": "fuelbook_branch",
+   "fieldtype": "Link",
+   "label": "Fuelbook Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "fuelbook_branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "adjusted_amount",
+   "fieldtype": "Float",
+   "label": "Adjusted Amount",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "balance_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Balance Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_additional_info",
+   "fieldtype": "Section Break",
+   "label": "ADDITIONAL INFORMATION"
+  },
+  {
+   "depends_on": "eval:doc.workflow_state ==\"Waiting Approval\";",
+   "fieldname": "cheque_details_section",
+   "fieldtype": "Section Break",
+   "label": "Cheque Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_cheque_lot",
+   "fieldtype": "Check",
+   "label": "Assign Using Cheque Lot"
+  },
+  {
+   "depends_on": "eval:doc.use_cheque_lot",
+   "fieldname": "select_cheque_lot",
+   "fieldtype": "Link",
+   "label": "Cheque Lot",
+   "options": "Cheque Lot"
+  },
+  {
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "label": "Cheque Number"
+  },
+  {
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Cheque Date"
+  },
+  {
+   "fieldname": "pay_to_recd_from",
+   "fieldtype": "Data",
+   "label": "Pay To / Recd From"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_opening",
+   "fieldtype": "Check",
+   "label": "Is Opening"
+  },
+  {
+   "fieldname": "section_break_31",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "user_remark",
+   "fieldtype": "Small Text",
+   "label": "Narration"
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-10-24 11:11:37.065419",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "POL Expense",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

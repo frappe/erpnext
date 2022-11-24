@@ -1,6 +1,5 @@
 from frappe import _
 
-
 def get_data():
 	return {
 		"fieldname": "purchase_invoice",

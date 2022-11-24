@@ -1,14 +1,16 @@
 {
  "actions": [],
+ "autoname": "format:AVD-{YY}-{MM}-{####}",
  "creation": "2018-05-11 00:22:43.695151",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "company",
   "asset",
+  "asset_name",
   "asset_category",
   "column_break_4",
+  "company",
   "date",
   "finance_book",
   "amended_from",
@@ -20,7 +22,10 @@
   "journal_entry",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break"
+  "branch",
+  "dimension_col_break",
+  "fixed_asset_account",
+  "credit_account"
  ],
  "fields": [
   {
@@ -39,13 +44,14 @@
   {
    "fetch_from": "asset.asset_category",
    "fieldname": "asset_category",
-   "fieldtype": "Read Only",
-   "label": "Asset Category"
+   "fieldtype": "Link",
+   "label": "Asset Category",
+   "options": "Asset Category"
   },
   {
    "fieldname": "finance_book",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "hidden": 1,
    "label": "Finance Book",
    "options": "Finance Book"
   },
@@ -79,16 +85,18 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "New Asset Value",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "difference_amount",
    "fieldtype": "Currency",
-   "label": "Difference Amount",
+   "label": "Adjustment Amount",
    "no_copy": 1,
-   "read_only": 1
+   "reqd": 1
   },
   {
+   "fetch_from": "asset.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -120,15 +128,44 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "asset.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "fixed_asset_account",
+   "fieldtype": "Link",
+   "label": "Fixed Asset Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "asset.asset_name",
+   "fieldname": "asset_name",
+   "fieldtype": "Data",
+   "label": "Asset Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 14:10:23.085181",
+ "modified": "2022-11-09 16:42:41.627456",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Value Adjustment",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -177,9 +214,9 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "asset",
  "track_changes": 1
 }

@@ -1,0 +1,36 @@
+{
+ "add_total_row": 0,
+ "columns": [],
+ "creation": "2022-11-14 16:32:09.434962",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "SMCL Letter Head",
+ "modified": "2022-11-14 16:32:09.434962",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Production Progress Report",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Production",
+ "report_name": "Production Progress Report",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Production User"
+  },
+  {
+   "role": "Production Manager"
+  },
+  {
+   "role": "Administrator"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

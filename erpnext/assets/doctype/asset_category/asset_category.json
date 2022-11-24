@@ -9,9 +9,9 @@
  "engine": "InnoDB",
  "field_order": [
   "asset_category_name",
-  "column_break_3",
   "depreciation_options",
   "enable_cwip_accounting",
+  "column_break_3",
   "abbr",
   "finance_book_detail",
   "finance_books",
@@ -70,11 +70,11 @@
    "fieldname": "abbr",
    "fieldtype": "Data",
    "label": "Abbrevation",
-   "reqd": 1
+   "report_hide": 1
   }
  ],
  "links": [],
- "modified": "2022-09-27 16:58:10.700803",
+ "modified": "2022-10-27 15:25:15.127250",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Category",

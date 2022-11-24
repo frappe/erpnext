@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:mineral_raising_group",
+ "creation": "2022-10-19 10:07:28.280979",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "mineral_raising_group",
+  "tier",
+  "tier_type",
+  "contract_end_date",
+  "column_break_5",
+  "default_oms",
+  "minimum_labor_required",
+  "minimum_labor"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "contract_end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Contract End Date"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_oms",
+   "fieldtype": "Float",
+   "label": "Default OMS"
+  },
+  {
+   "fieldname": "minimum_labor",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Minimum Labor",
+   "mandatory_depends_on": "eval:doc.minimum_labor_required"
+  },
+  {
+   "fieldname": "tier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Tier",
+   "options": "Tier"
+  },
+  {
+   "fetch_from": "tier.labor_type",
+   "fieldname": "tier_type",
+   "fieldtype": "Data",
+   "label": "Labor Type",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "tier.minimum_labor_required",
+   "fieldname": "minimum_labor_required",
+   "fieldtype": "Check",
+   "label": "Minimum Labor Required",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mineral_raising_group",
+   "fieldtype": "Data",
+   "label": "Mineral Raising Group",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-14 11:16:29.562429",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Mineral Raising Group",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

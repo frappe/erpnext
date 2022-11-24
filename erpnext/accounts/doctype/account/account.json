@@ -17,6 +17,7 @@
   "company",
   "root_type",
   "report_type",
+  "is_an_advance_account",
   "account_currency",
   "inter_company_account",
   "column_break1",
@@ -30,6 +31,13 @@
   "old_parent",
   "include_in_gross",
   "default_party_type",
+  "warehouse",
+  "bank_account_details_section",
+  "bank_name",
+  "bank_branch",
+  "column_break_34",
+  "bank_account_type",
+  "bank_account_no",
   "tab_break_22",
   "budget_check",
   "centralized_budget",
@@ -241,13 +249,58 @@
    "fieldtype": "Select",
    "label": "Default Party Type",
    "options": "\nCustomer\nEmployee\nSupplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_an_advance_account",
+   "fieldtype": "Check",
+   "label": "Is An Advance Account"
+  },
+  {
+   "depends_on": "eval:doc.account_type == \"Stock\"",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "bank_account_details_section",
+   "fieldtype": "Section Break",
+   "label": "BANK ACCOUNT DETAILS"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "fieldname": "bank_branch",
+   "fieldtype": "Link",
+   "label": "Bank Branch",
+   "options": "Financial Institution Branch"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account_type",
+   "fieldtype": "Link",
+   "label": "Bank Account Type",
+   "options": "Bank Account Type"
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Bank Account No"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-09-21 16:42:26.024334",
+ "modified": "2022-11-23 12:09:11.632142",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",

@@ -3,7 +3,7 @@
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "naming_series:",
+ "autoname": "prompt",
  "creation": "2022-02-21 11:54:09.632218",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -11,26 +11,27 @@
  "engine": "InnoDB",
  "field_order": [
   "basic_details_tab",
+  "connections_tab",
   "basic_information",
   "employee",
-  "naming_series",
   "salutation",
   "first_name",
   "middle_name",
   "last_name",
   "employee_name",
+  "user_id",
   "column_break_9",
   "status",
   "gender",
   "date_of_birth",
   "date_of_joining",
   "image",
-  "cell_number",
   "old_id",
   "employment_details_section",
   "employment_type",
   "employee_group",
   "designation",
+  "region",
   "reports_to",
   "reports_to_name",
   "business_activity",
@@ -49,6 +50,7 @@
   "column_break_25",
   "division",
   "section",
+  "unit",
   "branch",
   "cost_center",
   "employment_details",
@@ -65,6 +67,7 @@
   "company_email",
   "column_break4",
   "prefered_contact_email",
+  "cell_number",
   "prefered_email",
   "unsubscribed",
   "address_section",
@@ -132,11 +135,7 @@
   "feedback",
   "lft",
   "rgt",
-  "old_parent",
-  "connections_tab",
-  "user_id",
-  "unit",
-  "region"
+  "old_parent"
  ],
  "fields": [
   {
@@ -154,17 +153,6 @@
    "report_hide": 1
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "EMP/",
-   "read_only": 1
-  },
-  {
    "fieldname": "salutation",
    "fieldtype": "Select",
    "label": "Salutation",
@@ -176,13 +164,12 @@
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
-   "label": "First Name",
-   "reqd": 1
+   "hidden": 1,
+   "label": "First Name"
   },
   {
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
@@ -436,9 +423,8 @@
   },
   {
    "fieldname": "cell_number",
-   "fieldtype": "Data",
-   "label": "Mobile Number",
-   "unique": 1
+   "fieldtype": "Phone",
+   "label": "Mobile Number"
   },
   {
    "fieldname": "prefered_contact_email",
@@ -776,7 +762,7 @@
   },
   {
    "fieldname": "connections_tab",
-   "fieldtype": "Tab Break",
+   "fieldtype": "Section Break",
    "label": "Connections",
    "show_dashboard": 1
   },
@@ -820,23 +806,19 @@
   {
    "fieldname": "middle_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Middle Name"
   },
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Last Name"
   },
   {
    "fieldname": "employment_details_section",
    "fieldtype": "Section Break",
    "label": "Employment Details"
-  },
-  {
-   "fieldname": "employment_type",
-   "fieldtype": "Link",
-   "label": "Employment Type",
-   "options": "Employment Type"
   },
   {
    "fieldname": "employee_group",
@@ -945,6 +927,7 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Unit",
    "options": "Unit"
   },
@@ -952,18 +935,24 @@
    "fieldname": "region",
    "fieldtype": "Data",
    "label": "Region"
+  },
+  {
+   "fieldname": "employment_type",
+   "fieldtype": "Link",
+   "label": "Employment Type",
+   "options": "Employment Type"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-10-13 15:34:31.580742",
+ "modified": "2022-11-10 15:04:27.988766",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
  "name_case": "Title Case",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1001,7 +990,7 @@
    "write": 1
   }
  ],
- "search_fields": "employee_name, gender, designation , employment_type",
+ "search_fields": "employee_name, gender, designation, employment_type",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

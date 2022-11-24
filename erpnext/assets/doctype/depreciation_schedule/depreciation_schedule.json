@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "finance_book",
+  "schedule_start_date",
   "schedule_date",
   "depreciation_amount",
   "accumulated_depreciation_amount",
@@ -18,7 +19,8 @@
   "journal_entry",
   "make_depreciation_entry",
   "finance_book_id",
-  "depreciation_method"
+  "depreciation_method",
+  "depreciation_entry"
  ],
  "fields": [
   {
@@ -112,11 +114,21 @@
    "fieldtype": "Int",
    "label": "No. Of Days",
    "read_only": 1
+  },
+  {
+   "fieldname": "depreciation_entry",
+   "fieldtype": "Data",
+   "label": "Depreciation Entry"
+  },
+  {
+   "fieldname": "schedule_start_date",
+   "fieldtype": "Date",
+   "label": "Schedule Start Date"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-09-21 10:26:38.670740",
+ "modified": "2022-11-20 18:54:00.208968",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Depreciation Schedule",

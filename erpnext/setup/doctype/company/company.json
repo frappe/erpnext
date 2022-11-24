@@ -61,6 +61,8 @@
   "exchange_gain_loss_account",
   "unrealized_exchange_gain_loss_account",
   "unrealized_profit_loss_account",
+  "security_deposit_account",
+  "weighbridge_account",
   "column_break0",
   "allow_account_creation_against_child_company",
   "default_payable_account",
@@ -73,6 +75,9 @@
   "cost_center",
   "company_cost_center",
   "default_finance_book",
+  "clearing_account",
+  "tds_accounts_section",
+  "tds_account_item",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
   "enable_provisional_accounting_for_non_stock_items",
@@ -116,13 +121,27 @@
   "meeting_and_seminars_outcountry_account",
   "travel_advance_account",
   "salary_advance_account",
+  "imprest_advance_account",
+  "other_settings_tab",
   "budget_detail",
   "exception_budget_approver_role",
   "registration_info",
   "registration_details",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "fleet_setting_section",
+  "pol_advance_account",
+  "repair_and_service_expense_account",
+  "production_account_settings_section",
+  "default_production_account",
+  "column_break_124",
+  "default_unloading_account",
+  "coal_raising_settings_section",
+  "coal_raising_credit_account",
+  "coal_raising_expense_account",
+  "column_break_131",
+  "coal_raising_penalty_account"
  ],
  "fields": [
   {
@@ -190,8 +209,9 @@
    "label": "Company Description"
   },
   {
+   "collapsible": 1,
    "fieldname": "sales_settings",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Buying & Selling Settings"
   },
   {
@@ -300,8 +320,9 @@
    "label": "Date of Establishment"
   },
   {
+   "collapsible": 1,
    "fieldname": "default_settings",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Accounts Settings",
    "oldfieldtype": "Section Break"
   },
@@ -452,9 +473,10 @@
    "options": "Payment Terms Template"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "auto_accounting_for_stock_settings",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Stock Settings"
   },
   {
@@ -626,6 +648,7 @@
    "description": "Company registration numbers for your reference. Tax numbers etc.",
    "fieldname": "registration_details",
    "fieldtype": "Code",
+   "hidden": 1,
    "label": "Registration Details",
    "oldfieldname": "registration_details",
    "oldfieldtype": "Code"
@@ -693,7 +716,7 @@
   {
    "collapsible": 1,
    "fieldname": "fixed_asset_defaults",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Fixed Asset Defaults"
   },
   {
@@ -730,7 +753,7 @@
   {
    "collapsible": 1,
    "fieldname": "hr_accounts_setting_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "HR & Payroll Settings"
   },
   {
@@ -875,6 +898,119 @@
    "fieldtype": "Link",
    "label": "Default Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "fleet_setting_section",
+   "fieldtype": "Section Break",
+   "label": "Fleet Setting"
+  },
+  {
+   "fieldname": "pol_advance_account",
+   "fieldtype": "Link",
+   "label": "POL Advance Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "other_settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Other Settings"
+  },
+  {
+   "fieldname": "production_account_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Production Account Settings"
+  },
+  {
+   "fieldname": "default_production_account",
+   "fieldtype": "Link",
+   "label": "Default Production Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "repair_and_service_expense_account",
+   "fieldtype": "Link",
+   "label": "Repair And Service Expense Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "security_deposit_account",
+   "fieldtype": "Link",
+   "label": "Security Deposit Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "weighbridge_account",
+   "fieldtype": "Link",
+   "label": "Weighbridge Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "clearing_account",
+   "fieldtype": "Link",
+   "label": "Clearing Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_124",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_unloading_account",
+   "fieldtype": "Link",
+   "label": "Default Unloading Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "tds_account_item",
+   "fieldtype": "Table",
+   "label": "TDS Account Item",
+   "options": "TDS Account Item"
+  },
+  {
+   "fieldname": "tds_accounts_section",
+   "fieldtype": "Section Break",
+   "label": "TDS Accounts"
+  },
+  {
+   "fieldname": "coal_raising_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Coal Raising Settings"
+  },
+  {
+   "fieldname": "coal_raising_credit_account",
+   "fieldtype": "Link",
+   "label": "Coal Raising Credit Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "coal_raising_expense_account",
+   "fieldtype": "Link",
+   "label": "Coal Raising Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "coal_raising_penalty_account",
+   "fieldtype": "Link",
+   "label": "Coal Raising Penalty Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_131",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "imprest_advance_account",
+   "fieldtype": "Link",
+   "label": "Imprest Advance Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -882,7 +1018,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-09-27 11:34:00.973156",
+ "modified": "2022-11-18 10:12:58.918539",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:employee_group_name",
  "creation": "2018-11-19 12:33:31.351364",
  "doctype": "DocType",
@@ -216,7 +217,7 @@
   }
  ],
  "links": [],
- "modified": "2022-09-26 12:24:02.826254",
+ "modified": "2022-11-08 12:11:55.638882",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee Group",

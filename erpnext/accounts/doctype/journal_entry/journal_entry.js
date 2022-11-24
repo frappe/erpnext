@@ -10,8 +10,11 @@ frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
 		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice'];
+		draw_tds_table(frm)
 	},
-
+	onload:function(frm){
+		draw_tds_table(frm)
+	},
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 
@@ -51,6 +54,7 @@ frappe.ui.form.on("Journal Entry", {
 					frm.trigger("make_inter_company_journal_entry");
 				}, __('Make'));
 		}
+		draw_tds_table(frm)
 	},
 
 	make_inter_company_journal_entry: function(frm) {
@@ -176,6 +180,7 @@ frappe.ui.form.on("Journal Entry", {
 				frappe.model.set_value(row.doctype, row.name, "apply_tds", cint(frm.doc.apply_tds));
 			}
 		})
+		draw_tds_table(frm)
 	},
 
 	tax_withholding_category: function(frm){
@@ -187,6 +192,33 @@ frappe.ui.form.on("Journal Entry", {
 	}
 });
 
+var draw_tds_table = function(frm){
+	let is_tds = false
+	let i = 1
+	let row = "<tbody><tr><td style='width:4%;'><div style='height:15px;width:15px;border-radius:5px;background:#ebeef0;'></div></td>"
+		row += "<td style='width:4%;'>No.</td> <td style='width:16.8%;'> Accounts </td><td style='width:16.8%;'> Party </td>"
+		row += "<td style='width:16.8%;'> Cost Center </td> <td style='width:16.8%;text-align:right;'> Debit </td><td style='width:16.8%;text-align:right;'>Credit</td>"
+		row += "<td style='width:5%;text-align:center;'><i class='fa fa-gear'></i></td></tr></tbody>"
+		row += "<tbody>"
+	frm.doc.accounts.map(v=>{
+		if (flt(v.apply_tds) == 1){
+			is_tds = true
+			row += "<tr><th style='width:4%;'><div style='height:13px;width:13px;border-radius:3px;background:#ebeef0;'></div></th>"
+			row	+=	"<th style='width:4%;'>"+i+"</th> "
+			row	+=	"<th style='width:16.8%;'> "+ v.tax_account+" </th>"
+			row	+=	"<th style='width:16.8%;'> "+ v.party +" </th>"
+			row	+= "<th style='width:16.8%;'>"+ v.cost_center+" </th>"
+			row	+=	"<th style='width:16.8%;text-align:right;'> 0 </th>"
+			row	+=	"<th style='width:16.8%;text-align:right;'>"+v.tax_amount+"</th> <th style='width:8%;'></th></tr>"
+			i += 1
+		}
+	})
+	row += "</tbody>"
+	if(is_tds)$(cur_frm.fields_dict.tds_table.wrapper).html('<table class="table table-bordered">'+row+'</table>');
+	else $(cur_frm.fields_dict.tds_table.wrapper).html('');
+
+	// frm.refresh_field("tds_table")
+}
 var update_jv_details = function(doc, r) {
 	$.each(r, function(i, d) {
 		var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");

@@ -1,0 +1,117 @@
+{
+ "creation": "2021-06-15 15:33:09.142560",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "file_name",
+  "uploaded",
+  "status",
+  "last_updated",
+  "column_break_3",
+  "noof_transactions",
+  "successful",
+  "failed",
+  "sb_error",
+  "local_path",
+  "remote_path",
+  "error"
+ ],
+ "fields": [
+  {
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "File Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "uploaded",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Uploaded",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nDraft\nPending\nIn progress\nUpload Failed\nWaiting Acknowledgement\nProcessing Acknowledgement\nFailed\nPartial Payment\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "last_updated",
+   "fieldtype": "Datetime",
+   "label": "Status Last Updated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "noof_transactions",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "No of Transactions",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "successful",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Successful",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "failed",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Failed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_error",
+   "fieldtype": "Section Break",
+   "label": "ERROR LOG"
+  },
+  {
+   "fieldname": "local_path",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Local Path",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remote_path",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Remote Path",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "error",
+   "fieldtype": "Code",
+   "label": "Error",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-07-20 14:41:42.986570",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Payment Upload",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

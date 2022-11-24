@@ -26,6 +26,7 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "reference_date_for_payment",
   "due_date",
   "return_against",
   "amended_from",
@@ -426,6 +427,7 @@
    "collapsible_depends_on": "po_no",
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Customer PO Details"
@@ -761,11 +763,13 @@
    "depends_on": "eval: !doc.is_return",
    "fieldname": "time_sheet_list",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Time Sheet List"
   },
   {
+   "collapsible_depends_on": "eval:doc.total_billing_amount > 0",
    "fieldname": "timesheets",
    "fieldtype": "Table",
    "hide_days": 1,
@@ -775,6 +779,7 @@
    "print_hide": 1
   },
   {
+   "collapsible_depends_on": "eval:doc.total_billing_amount > 0",
    "default": "0",
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
@@ -973,6 +978,7 @@
    "collapsible": 1,
    "fieldname": "loyalty_points_redemption",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Loyalty Points Redemption"
@@ -1052,6 +1058,7 @@
    "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_49",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Additional Discount"
@@ -1250,6 +1257,7 @@
    "collapsible_depends_on": "advances",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Advance Payments",
@@ -1290,6 +1298,7 @@
    "collapsible_depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Payment Terms"
@@ -1436,6 +1445,7 @@
    "depends_on": "grand_total",
    "fieldname": "column_break4",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Write Off",
@@ -1502,6 +1512,7 @@
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Terms and Conditions",
@@ -1592,6 +1603,7 @@
    "depends_on": "customer",
    "fieldname": "more_information",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "More Information"
@@ -1672,6 +1684,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Accounting Details",
@@ -1741,6 +1754,7 @@
    "collapsible_depends_on": "sales_partner",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Commission",
@@ -1815,6 +1829,7 @@
    "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Subscription Section"
@@ -1883,6 +1898,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Accounting Dimensions"
@@ -2026,6 +2042,11 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "fieldname": "reference_date_for_payment",
+   "fieldtype": "Date",
+   "label": "Reference Date for Payment"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2038,7 +2059,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-09-21 00:25:08.779635",
+ "modified": "2022-11-17 10:01:54.093567",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

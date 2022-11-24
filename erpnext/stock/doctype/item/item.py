@@ -62,7 +62,6 @@ class Item(Document):
 		elif not self.item_group:
 			frappe.msgprint('Item Group is required to generate item code',raise_exception=1)
 		self.item_code = self.name = make_autoname('ABC{}.#####'.format(frappe.db.get_value('Item Group',self.item_group,'item_code_base')))[3:]
-		# frappe.throw(self.item_code)
 
 	def after_insert(self):
 		"""set opening stock and item price"""

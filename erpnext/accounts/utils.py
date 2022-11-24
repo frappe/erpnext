@@ -124,7 +124,9 @@ def get_fiscal_years(
 	if verbose == 1:
 		frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
-
+@frappe.whitelist()
+def get_account_type(account,company):
+	return frappe.db.get_value("Account",{"name":account,"company":company},"account_type")
 
 @frappe.whitelist()
 def get_fiscal_year_filter_field(company=None):
@@ -910,7 +912,11 @@ def get_account_name(
 		},
 		"name",
 	)
-
+@frappe.whitelist()
+def get_tds_account(percent,company):
+	if not percent:
+		frappe.throw("TDS Percent is mandatory")
+	return frappe.db.get_value("TDS Account Item",{"parent":company,"tds_percent":percent}, "account")
 
 @frappe.whitelist()
 def get_companies():
@@ -1454,23 +1460,21 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 
 	if party:
 		common_filter.append(ple.party == party)
-
 	ple_query = QueryPaymentLedger()
-
+	# frappe.throw(str(ple_query))
 	# on cancellation outstanding can be an empty list
 	voucher_outstanding = ple_query.get_voucher_outstandings(vouchers, common_filter=common_filter)
-	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"] and voucher_outstanding:
+	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice"] and voucher_outstanding:
 		outstanding = voucher_outstanding[0]
 		ref_doc = frappe.get_doc(voucher_type, voucher_no)
 		# Didn't use db_set for optimisation purpose
-		# frappe.msgprint(str('{} : {} : {}'.format(outstanding,voucher_type,voucher_no)))
+		# frappe.throw('here')
 		ref_doc.outstanding_amount = outstanding["outstanding_in_account_currency"]
 		frappe.db.set_value(
 			voucher_type, voucher_no, "outstanding_amount", outstanding["outstanding_in_account_currency"]
 		)
-		
 		ref_doc.set_status(update=True)
-
+	# frappe.throw('Biren Working here')
 
 def delink_original_entry(pl_entry):
 	if pl_entry:
@@ -1688,5 +1692,4 @@ class QueryPaymentLedger(object):
 		self.get_payments = get_payments
 		self.get_invoices = get_invoices
 		self.query_for_outstanding()
-
 		return self.voucher_outstandings

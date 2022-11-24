@@ -1,0 +1,102 @@
+{
+ "actions": [],
+ "creation": "2022-10-19 15:08:11.832579",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "column_break_4",
+  "equipment_type",
+  "threshold_trip",
+  "section_break_4",
+  "lower_rate",
+  "column_break_6",
+  "higher_rate",
+  "column_break_8",
+  "unloading_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "threshold_trip",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Threshold Trip",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "lower_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Lower Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "higher_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Higher Rate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "unloading_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Unloading Rate",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-10-31 15:41:14.344654",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Transporter Rate Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

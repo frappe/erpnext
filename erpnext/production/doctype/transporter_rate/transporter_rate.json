@@ -1,0 +1,180 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{TR}-{YY}-{MM}-{###}",
+ "creation": "2022-10-19 15:06:22.121458",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "rate_base",
+  "from_warehouse",
+  "receiving_warehouse",
+  "equipment_type",
+  "expense_account",
+  "column_break01",
+  "from_date",
+  "to_date",
+  "disabled",
+  "section_break_14",
+  "items",
+  "distance_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "rate_base",
+   "fieldtype": "Select",
+   "label": "Rate Based On",
+   "options": "\nWarehouse\nCustomer\nLocation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "From Warehouse",
+   "mandatory_depends_on": "eval:doc.rate_base != \"Location\";",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:doc.rate_base!=\"Location\"",
+   "fieldname": "receiving_warehouse",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Receiving Warehouse/Party",
+   "mandatory_depends_on": "eval:doc.rate_base != \"Location\";",
+   "options": "rate_base"
+  },
+  {
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Equipment Type",
+   "options": "Equipment Type"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "label": "Rate Details (per MT)"
+  },
+  {
+   "depends_on": "eval:doc.rate_base!=\"Location\"",
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Transporter Rate Item"
+  },
+  {
+   "depends_on": "eval:doc.rate_base==\"Location\"",
+   "fieldname": "distance_rate",
+   "fieldtype": "Table",
+   "options": "Transporter Distance Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  }
+ ],
+ "links": [],
+ "modified": "2022-11-04 15:25:43.949209",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Transporter Rate",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Master",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "SMCL Sales Master",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

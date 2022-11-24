@@ -5,7 +5,23 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, date_diff, flt, formatdate, getdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	date_diff,
+	flt,
+	get_datetime,
+	get_last_day,
+	get_first_day,
+	getdate,
+	month_diff,
+	nowdate,
+	today,
+	get_year_ending,
+	get_year_start,
+	formatdate,
+)
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -18,14 +34,21 @@ class AssetValueAdjustment(Document):
 	def validate(self):
 		self.validate_date()
 		self.set_current_asset_value()
-		self.set_difference_amount()
+		self.set_new_asset_value()
 
 	def on_submit(self):
 		self.make_depreciation_entry()
 		self.reschedule_depreciations(self.new_asset_value)
 
 	def on_cancel(self):
+		doc = frappe.get_doc("Journal Entry", self.journal_entry)
+		doc.cancel()
 		self.reschedule_depreciations(self.current_asset_value)
+		self.remove_adjustment_value()
+	
+	def remove_adjustment_value(self):
+		doc = frappe.get_doc("Asset", self.asset)
+		doc.db_set("additional_value", doc.additional_value - self.difference_amount)
 
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value("Asset", self.asset, "purchase_date")
@@ -37,43 +60,43 @@ class AssetValueAdjustment(Document):
 				title=_("Incorrect Date"),
 			)
 
-	def set_difference_amount(self):
-		self.difference_amount = flt(self.current_asset_value - self.new_asset_value)
+	def set_new_asset_value(self):
+		self.new_asset_value = flt(self.current_asset_value + self.difference_amount)
 
 	def set_current_asset_value(self):
-		if not self.current_asset_value and self.asset:
-			self.current_asset_value = get_current_asset_value(self.asset, self.finance_book)
+		actual_current_asset_value = get_current_asset_value(self.asset, self.finance_book)
+		if self.current_asset_value != actual_current_asset_value:
+			self.current_asset_value = flt(actual_current_asset_value,2)
+			frappe.msgprint(
+					_("Current Asset value reset with a new Asset Value <b>{}</b>").format(
+						actual_current_asset_value
+					),
+					title=_("Incorrect Asset Value"),
+				)
 
 	def make_depreciation_entry(self):
-		asset = frappe.get_doc("Asset", self.asset)
-		(
-			fixed_asset_account,
-			accumulated_depreciation_account,
-			depreciation_expense_account,
-		) = get_depreciation_accounts(asset)
-
-		depreciation_cost_center, depreciation_series = frappe.get_cached_value(
-			"Company", asset.company, ["depreciation_cost_center", "series_for_depreciation_entry"]
-		)
-
 		je = frappe.new_doc("Journal Entry")
-		je.voucher_type = "Depreciation Entry"
-		je.naming_series = depreciation_series
+		je.voucher_type = "Journal Entry"
 		je.posting_date = self.date
 		je.company = self.company
-		je.remark = "Depreciation Entry against {0} worth {1}".format(self.asset, self.difference_amount)
+		je.remark = "Asset Adjustment Entry against {0} worth {1}".format(self.asset, self.difference_amount)
 		je.finance_book = self.finance_book
+		je.branch = self.branch
 
 		credit_entry = {
-			"account": accumulated_depreciation_account,
+			"account": self.credit_account,
 			"credit_in_account_currency": self.difference_amount,
-			"cost_center": depreciation_cost_center or self.cost_center,
+			"cost_center": self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": self.asset,
 		}
 
 		debit_entry = {
-			"account": depreciation_expense_account,
+			"account": self.fixed_asset_account,
 			"debit_in_account_currency": self.difference_amount,
-			"cost_center": depreciation_cost_center or self.cost_center,
+			"cost_center": self.cost_center,
+			"reference_type": "Asset",
+			"reference_name": self.asset,
 		}
 
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
@@ -102,8 +125,11 @@ class AssetValueAdjustment(Document):
 		je.submit()
 
 		self.db_set("journal_entry", je.name)
+		doc = frappe.get_doc("Asset", self.asset)
+		doc.db_set("additional_value", self.difference_amount)
 
 	def reschedule_depreciations(self, asset_value):
+		depreciation_start_date = get_last_day(add_days(self.date, -20))
 		asset = frappe.get_doc("Asset", self.asset)
 		country = frappe.get_value("Company", self.company, "country")
 
@@ -112,9 +138,9 @@ class AssetValueAdjustment(Document):
 
 			if d.depreciation_method in ("Straight Line", "Manual"):
 				end_date = max(s.schedule_date for s in asset.schedules if cint(s.finance_book_id) == d.idx)
-				total_days = date_diff(end_date, self.date)
+				total_days = date_diff(end_date, depreciation_start_date)
 				rate_per_day = flt(d.value_after_depreciation) / flt(total_days)
-				from_date = self.date
+				from_date = depreciation_start_date
 			else:
 				no_of_depreciations = len(
 					[
@@ -124,9 +150,11 @@ class AssetValueAdjustment(Document):
 
 			value_after_depreciation = d.value_after_depreciation
 			for data in asset.schedules:
-				if cint(data.finance_book_id) == d.idx and not data.journal_entry:
+				if getdate(data.schedule_date) <= getdate(depreciation_start_date) and not data.journal_entry:
+						frappe.throw("Monthly depreciation on <b>{}</b> for <b>{}</b> is <b>Pending</b>. Run the depreciation before Asset Value Adjustment".format(getdate(data.schedule_date),self.asset))
+				if cint(data.finance_book_id) == d.idx:
 					if d.depreciation_method in ("Straight Line", "Manual"):
-						days = date_diff(data.schedule_date, from_date)
+						days = date_diff(data.schedule_date, from_date) 
 						depreciation_amount = days * rate_per_day
 						from_date = data.schedule_date
 					else:
@@ -135,14 +163,12 @@ class AssetValueAdjustment(Document):
 					if depreciation_amount:
 						value_after_depreciation -= flt(depreciation_amount)
 						data.depreciation_amount = depreciation_amount
-
 			d.db_update()
 
 		asset.set_accumulated_depreciation(ignore_booked_entry=True)
 		for asset_data in asset.schedules:
 			if not asset_data.journal_entry:
 				asset_data.db_update()
-
 
 @frappe.whitelist()
 def get_current_asset_value(asset, finance_book=None):

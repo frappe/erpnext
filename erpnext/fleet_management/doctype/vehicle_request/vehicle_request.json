@@ -1,0 +1,414 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "VR.YY.MM.DD.###",
+ "creation": "2022-11-03 16:21:12.928497",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break01",
+  "employee",
+  "column_break01",
+  "employee_name",
+  "column_break02",
+  "designation",
+  "column_break03",
+  "grade",
+  "section_break003",
+  "branch",
+  "cost_center",
+  "parent_cost_center",
+  "column_break001",
+  "posting_date",
+  "travel_information",
+  "from_date",
+  "vehicle_type",
+  "approver",
+  "columb_break04",
+  "to_date",
+  "approver_id",
+  "place",
+  "column_break04",
+  "purpose",
+  "total_days_and_hours",
+  "section_break_003",
+  "vehicle",
+  "vehicle_model",
+  "vehicle_number",
+  "kilometer_reading",
+  "previous_km",
+  "cb01",
+  "driver",
+  "driver_name",
+  "contact_number",
+  "time_of_departure",
+  "rejection_reason",
+  "section_break03",
+  "items",
+  "reason_for_extension",
+  "workflow_state",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break01",
+   "fieldtype": "Section Break",
+   "label": "Employee Information"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee ",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "column_break02",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Read Only",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "column_break03",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.grade",
+   "fieldname": "grade",
+   "fieldtype": "Read Only",
+   "label": "Grade"
+  },
+  {
+   "fieldname": "section_break003",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break001",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Request Date",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "travel_information",
+   "fieldtype": "Section Break",
+   "label": "Travel Information"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Datetime",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.reports_to",
+   "fieldname": "approver",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Approver"
+  },
+  {
+   "fieldname": "columb_break04",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "to_date",
+   "fieldtype": "Datetime",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "approver_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Approver ID"
+  },
+  {
+   "fieldname": "place",
+   "fieldtype": "Data",
+   "label": "Place of Visit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break04",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Small Text",
+   "label": "Purpose",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_003",
+   "fieldtype": "Section Break",
+   "label": "Approval Detail",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "rejection_reason",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "cb01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break03",
+   "fieldtype": "Section Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Duty for (Name of the Official):",
+   "options": "Vehicle Request Item"
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Workflow State",
+   "options": "Workflow State"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Request",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "driver.cell_number",
+   "fieldname": "contact_number",
+   "fieldtype": "Data",
+   "label": "Contact Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "kilometer_reading",
+   "fieldtype": "Data",
+   "label": "Kilometer Reading"
+  },
+  {
+   "fieldname": "time_of_departure",
+   "fieldtype": "Datetime",
+   "label": "Time Of Departure"
+  },
+  {
+   "fetch_from": "vehicle.equipment_type",
+   "fieldname": "vehicle_type",
+   "fieldtype": "Link",
+   "label": "Vehicle Type",
+   "options": "Equipment Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Equipment"
+  },
+  {
+   "fetch_from": "vehicle.equipment_model",
+   "fieldname": "vehicle_model",
+   "fieldtype": "Link",
+   "label": "Vehicle Model",
+   "options": "Equipment Model",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.registeration_number",
+   "fieldname": "vehicle_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vehicle Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Driver",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "driver.employee_name",
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reason_for_extension",
+   "fieldtype": "Small Text",
+   "ignore_user_permissions": 1,
+   "label": "Reason for Extension"
+  },
+  {
+   "fieldname": "total_days_and_hours",
+   "fieldtype": "Read Only",
+   "label": "Total Days & Hours",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "cost_center.parent_cost_center",
+   "fieldname": "parent_cost_center",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Parent Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_km",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Previous KM",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-14 16:02:58.185784",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "Vehicle Request",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "ADM User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "CEO",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Branch Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

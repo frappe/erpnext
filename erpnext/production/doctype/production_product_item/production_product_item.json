@@ -1,0 +1,278 @@
+{
+ "actions": [],
+ "creation": "2022-10-19 14:47:55.607726",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "item_group",
+  "item_sub_group",
+  "item_type",
+  "column_break_3",
+  "challan_no",
+  "qty",
+  "cop",
+  "uom",
+  "production_type",
+  "section_break_11",
+  "transporter_payment_eligible",
+  "vehicle_sb",
+  "equipment",
+  "equipment_model",
+  "equipment_type",
+  "transportation_expense_account",
+  "group",
+  "vehicle_cb",
+  "unloading_by",
+  "transporter_rate",
+  "rate",
+  "amount",
+  "section_break_20",
+  "transport_payment_done",
+  "sb_accounting",
+  "expense_account",
+  "cost_center",
+  "column_break_25",
+  "warehouse",
+  "ratio",
+  "price_template",
+  "project"
+ ],
+ "fields": [
+  {
+   "fieldname": "production_type",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "production_type",
+   "options": "\nPlanned\nAdhoc"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Material Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Material Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Material Type",
+   "options": "Item Type"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "challan_no",
+   "fieldtype": "Data",
+   "label": "Challan No"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Material Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Quantity",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "cop",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "COP Rate",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.transporter_payment_eligible",
+   "fieldname": "vehicle_sb",
+   "fieldtype": "Section Break",
+   "label": "Transporter Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "transporter_payment_eligible",
+   "fieldtype": "Check",
+   "label": "Transporter Payment Eligible"
+  },
+  {
+   "fieldname": "transportation_expense_account",
+   "fieldtype": "Link",
+   "label": "Transportation Expense Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.transporter_payment_eligible",
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "options": "Equipment"
+  },
+  {
+   "fieldname": "vehicle_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment.equipment_model",
+   "fieldname": "equipment_model",
+   "fieldtype": "Data",
+   "label": "Equipment Model",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Data",
+   "label": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unloading_by",
+   "fieldtype": "Select",
+   "label": "Unloading By",
+   "options": "\nTransporter\nCompany"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Transportation Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Transportation Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transporter_rate",
+   "fieldtype": "Link",
+   "label": "Transporter Rate",
+   "options": "Transporter Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Group",
+   "options": "Mineral Raising Group"
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "transport_payment_done",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Transport Payment Done"
+  },
+  {
+   "fieldname": "sb_accounting",
+   "fieldtype": "Section Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ratio",
+   "fieldtype": "Percent",
+   "label": "Ratio/Percent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "price_template",
+   "fieldtype": "Data",
+   "label": "Price Template",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "item_code.item_sub_group",
+   "fieldname": "item_sub_group",
+   "fieldtype": "Link",
+   "label": "Item Sub Group",
+   "options": "Item Sub Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Project",
+   "options": "Project",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-10 16:36:43.881554",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Production Product Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

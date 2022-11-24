@@ -1,0 +1,61 @@
+{
+ "creation": "2020-05-14 03:10:30.494319",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "note_type",
+  "amount",
+  "column_break_3",
+  "debit_note",
+  "pi_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "note_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Debit Note Type",
+   "options": "\nIntra-Bank Payment\nInter-Bank Payment\nINR Payment",
+   "read_only": 1,
+   "width": "2"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1,
+   "width": "2"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "debit_note",
+   "fieldtype": "Attach",
+   "hidden": 1,
+   "label": "Debit Note",
+   "width": "3"
+  },
+  {
+   "fieldname": "pi_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PI Number",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-07-20 14:40:32.103218",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Payment Debit Note",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

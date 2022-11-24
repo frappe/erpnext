@@ -16,6 +16,7 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
+from erpnext.accounts.utils import get_tds_account,get_account_type
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import (
 	get_account_currency,
@@ -821,6 +822,7 @@ class JournalEntry(AccountsController):
 					tax_amount_in_account_currency, tax_amount = 0, 0
 					tax_amount_in_account_currency_dr, tax_amount_in_account_currency_cr = 0, 0
 					tax_amount_dr, tax_amount_cr = 0, 0
+					
 					if tax_account:
 						tax_amount_in_account_currency = flt(d.tax_amount_in_account_currency)
 						tax_amount = flt(d.tax_amount)
@@ -837,7 +839,6 @@ class JournalEntry(AccountsController):
 
 							tax_amount_dr = tax_amount if flt(d.credit) else 0
 							tax_amount_cr = tax_amount if flt(d.debit) else 0
-
 					gl_map.append(
 						self.get_gl_dict(
 							{

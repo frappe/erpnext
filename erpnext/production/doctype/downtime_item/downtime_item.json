@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-11-04 14:49:40.211552",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "downtime_reason",
+  "equipment",
+  "column_break_2",
+  "downtime_type",
+  "hours"
+ ],
+ "fields": [
+  {
+   "fieldname": "downtime_reason",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Downtime Reason",
+   "options": "Downtime Reason"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "downtime_reason.type",
+   "fieldname": "downtime_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Downtime Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "label": "Equipment",
+   "options": "Equipment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hours",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Hours"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-05 17:11:25.162865",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Downtime Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

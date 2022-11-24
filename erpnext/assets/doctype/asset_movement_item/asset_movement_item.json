@@ -16,7 +16,8 @@
   "target_location",
   "target_cost_center",
   "to_employee",
-  "to_employee_name"
+  "to_employee_name",
+  "remark"
  ],
  "fields": [
   {
@@ -109,11 +110,16 @@
    "fieldtype": "Data",
    "label": "To Employee Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "remark",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-09-23 23:11:15.147235",
+ "modified": "2022-11-06 17:31:32.683989",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement Item",

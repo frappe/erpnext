@@ -1,0 +1,309 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:EHF-{YY}-{MM}-{DD}-{###}",
+ "creation": "2022-11-04 14:23:39.421255",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1",
+  "branch",
+  "cost_center",
+  "col_break_3",
+  "request_date",
+  "contact_number",
+  "section_break_3",
+  "equipment",
+  "equipment_model",
+  "hired_equipment",
+  "column_break_11",
+  "equipment_category",
+  "equipment_type",
+  "supplier",
+  "section_break_15",
+  "start_date",
+  "target_hour",
+  "column_break_18",
+  "end_date",
+  "reading_based_on",
+  "hiring_rate",
+  "ehf_rate",
+  "hiring_rate_history_section",
+  "hiring_rate_history",
+  "equipment_hiring_extension",
+  "efh_extension",
+  "section_break_32",
+  "tc_name",
+  "terms",
+  "sb12",
+  "company",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "request_date",
+   "fieldtype": "Date",
+   "label": "Request Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "contact_number",
+   "fieldtype": "Phone",
+   "label": "Contact Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Equipment Details"
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Owner",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Data",
+   "label": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_model",
+   "fieldname": "equipment_model",
+   "fieldtype": "Data",
+   "label": "Equipment Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "target_hour",
+   "fieldtype": "Int",
+   "label": "Target Hour",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Equipment Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "Equipment End Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reading_based_on",
+   "fieldtype": "Data",
+   "label": "Reading Based On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hiring_rate",
+   "fieldtype": "Section Break",
+   "label": "Hiring Rate"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "ehf_rate",
+   "fieldtype": "Table",
+   "options": "EHF Rate"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "hiring_rate_history",
+   "fieldtype": "Table",
+   "label": "Hiring Rate History",
+   "options": "Hiring History"
+  },
+  {
+   "fieldname": "equipment_hiring_extension",
+   "fieldtype": "Section Break",
+   "label": "Equipment Hiring Extension"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "efh_extension",
+   "fieldtype": "Table",
+   "options": "EHF Extension"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Equipment Hiring Form",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_32",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms and Conditions",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor"
+  },
+  {
+   "fieldname": "sb12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "hiring_rate_history_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Hiring Rate History"
+  },
+  {
+   "default": "0",
+   "fetch_from": "equipment.hired_equipment",
+   "fieldname": "hired_equipment",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Hired Equipment"
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-07 09:44:42.107801",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Equipment Hiring Form",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EME User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EME Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "equipment,branch,equipment,equipment_category",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

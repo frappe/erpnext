@@ -18,6 +18,9 @@
   "auto_insert_price_list_rate_if_missing",
   "column_break_12",
   "update_existing_price_list_rate",
+  "data_14",
+  "mr_status_notification_template",
+  "mr_approval_notification_template",
   "stock_validations_tab",
   "section_break_9",
   "over_delivery_receipt_allowance",
@@ -339,6 +342,24 @@
   {
    "fieldname": "column_break_121",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "data_14",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "mr_status_notification_template",
+   "fieldtype": "Link",
+   "label": "MR Status Notification Template",
+   "options": "Email Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mr_approval_notification_template",
+   "fieldtype": "Link",
+   "label": "MR Approvel Notification",
+   "options": "Email Template",
+   "reqd": 1
   }
  ],
  "icon": "icon-cog",
@@ -346,7 +367,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-02-05 15:33:43.692736",
+ "modified": "2022-11-21 09:59:09.652385",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

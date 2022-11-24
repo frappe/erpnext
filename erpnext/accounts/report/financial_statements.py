@@ -16,7 +16,18 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_fiscal_year
-
+def get_daily_period_list(from_date, to_date):
+	current_date = getdate(from_date)
+	period_list = []
+	while True:
+		period = frappe._dict({	"key": current_date,
+								"label":str(current_date)[8:10]+"/"+str(current_date)[5:7]+"/"+str(current_date)[0:4],
+								"posting_date":current_date})
+		period_list.append(period)
+		current_date = add_days(current_date, 1)
+		if current_date > getdate(to_date):
+			break
+	return period_list
 
 def get_period_list(
 	from_fiscal_year,

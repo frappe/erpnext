@@ -1,0 +1,222 @@
+{
+ "creation": "2020-05-13 10:44:15.364707",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transaction_type",
+  "transaction_id",
+  "transaction_date",
+  "transaction_reference",
+  "column_break_0",
+  "employee",
+  "supplier",
+  "beneficiary_name",
+  "bank_name",
+  "bank_branch",
+  "bank_account_type",
+  "financial_system_code",
+  "bank_account_no",
+  "vehicle_no",
+  "column_break_3",
+  "amount",
+  "remarks",
+  "sb_inr_settings",
+  "inr_bank_code",
+  "inr_purpose_code",
+  "sb_payment_status",
+  "pi_number",
+  "file_name",
+  "status",
+  "bank_journal_no",
+  "column_break_6",
+  "error_message"
+ ],
+ "fields": [
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_id",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Transaction ID",
+   "options": "transaction_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Transaction Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_reference",
+   "fieldtype": "Data",
+   "label": "Transaction Reference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "beneficiary_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Beneficiary Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Beneficiary Bank",
+   "options": "Financial Institution",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_branch",
+   "fieldtype": "Link",
+   "label": "Beneficiary Branch",
+   "options": "Financial Institution Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "financial_system_code",
+   "fieldtype": "Data",
+   "label": "Financial System Code",
+   "options": "financial_institution_branch.financial_system_code",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account_no",
+   "fieldtype": "Data",
+   "label": "Beneficiary Bank Account No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "sb_inr_settings",
+   "fieldtype": "Section Break",
+   "label": "INR PAYMENT DETAILS"
+  },
+  {
+   "depends_on": "eval:doc.bank_name === 'INR'",
+   "fieldname": "inr_bank_code",
+   "fieldtype": "Select",
+   "label": "INR Bank Code",
+   "options": "\n01 - AXIS BANK\n02- SBI\n03 -Others\n04 - SCB"
+  },
+  {
+   "depends_on": "eval:doc.bank_name === 'INR'",
+   "fieldname": "inr_purpose_code",
+   "fieldtype": "Select",
+   "label": "INR Purpose Code",
+   "options": "\n01- INVT IN EQUITY SHARE\n02- INVT IN MUTUAL FUND\n03- INVT IN DEBENTURES\n04- BILL PAYMENT\n05- CREDIT TO NRE A/c\n06- PAYMENT TO HOTELS\n07- TRAVEL & TOURISM\n08- INVT IN REAL ESTATE\n09- PYMNT TO ESTATE DEVELOPER\n10- LIC PREMIUM\n11- EDUCATIONAL EXPENSES\n12- FAMILY MAINTENANCE\n13- POSTMASTER / UTI PREMIUM\n14- PROPERTY Pymnt-Co-op Hsg.Soc\n15- PROPERTY Pymnt-Govt. Hsg.Scheme\n16- MEDICAL EXPENSES\n17- UTILITY PAYMENTS\n18- TAX PAYMENTS\n19- EMI FOR LOAN REPAYMENT\n20- COMPENSATION OF EMPLOYEES\n21- SALARY"
+  },
+  {
+   "fieldname": "sb_payment_status",
+   "fieldtype": "Section Break",
+   "label": "PAYMENT STATUS"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "file_name",
+   "fieldtype": "Data",
+   "label": "File Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nPending\nIn progress\nUpload Failed\nWaiting Acknowledgement\nProcessing Acknowledgement\nFailed\nPartial Payment\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "bank_journal_no",
+   "fieldtype": "Data",
+   "label": "Bank Journal No",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "error_message",
+   "fieldtype": "Code",
+   "label": "Bank Response Message",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_account_type",
+   "fieldtype": "Data",
+   "label": "Bank Account Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pi_number",
+   "fieldtype": "Data",
+   "label": "PI Number",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle No."
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-10-28 11:45:47.241780",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Payment Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

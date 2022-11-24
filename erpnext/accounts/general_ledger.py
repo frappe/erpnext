@@ -305,41 +305,43 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 
 	if not from_repost and gle.voucher_type != "Period Closing Voucher":
 		#Commit and Consume budget
-		if args.voucher_type in ['Journal Entry'] and args.against_voucher_type != 'Asset':
-			validate_expense_against_budget(args)
-			if frappe.db.get_value("Account", args.account, "account_type") in ["Expense Account","Fixed Asset","Temporary"]:
-				#Commit Budget
-				bud_obj = frappe.get_doc({
-					"doctype": "Committed Budget",
-					"account": args.account,
-					"cost_center": args.cost_center,
-					"project": args.project,
-					"reference_type": args.voucher_type,
-					"reference_no": args.voucher_no,
-					"reference_date": args.posting_date,
-					"amount": flt(args.debit_in_account_currency) - flt(args.credit_in_account_currency),
-					"company": args.company,
-					"closed": 1,
-				})
-				bud_obj.flags.ignore_permissions=1
-				bud_obj.submit()
-			
-				#Consume Budget
-				con_obj = frappe.get_doc({
-					"doctype": "Consumed Budget",
-					"account": args.account,
-					"cost_center": args.cost_center,
-					"project": args.project,
-					"reference_type": args.voucher_type,
-					"reference_no": args.voucher_no,
-					"reference_date": args.posting_date,
-					"amount": flt(args.debit_in_account_currency) - flt(args.credit_in_account_currency),
-					"company": args.company,
-					"com_ref": bud_obj.name,
-				})
-				con_obj.flags.ignore_permissions=1
-				con_obj.submit()
-
+		transactions = [d.transaction for d in frappe.get_all("Budget Transaction", fields='transaction')]
+		if args.voucher_type in transactions and args.against_voucher_type != 'Asset':
+			account_types = [d.account_type for d in frappe.get_all("Budget Settings Account Types", fields='account_type')]
+			if frappe.db.get_value("Account", args.account, "account_type") in account_types:
+				validate_expense_against_budget(args)
+				if not args.is_cancelled:
+					#Commit Budget
+					bud_obj = frappe.get_doc({
+						"doctype": "Committed Budget",
+						"account": args.account,
+						"cost_center": args.cost_center,
+						"project": args.project,
+						"reference_type": args.voucher_type,
+						"reference_no": args.voucher_no,
+						"reference_date": args.posting_date,
+						"amount": flt(args.debit_in_account_currency),
+						"company": args.company,
+						"closed": 1,
+					})
+					bud_obj.flags.ignore_permissions=1
+					bud_obj.submit()
+				
+					#Consume Budget
+					con_obj = frappe.get_doc({
+						"doctype": "Consumed Budget",
+						"account": args.account,
+						"cost_center": args.cost_center,
+						"project": args.project,
+						"reference_type": args.voucher_type,
+						"reference_no": args.voucher_no,
+						"reference_date": args.posting_date,
+						"amount": flt(args.debit_in_account_currency),
+						"company": args.company,
+						"com_ref": bud_obj.name,
+					})
+					con_obj.flags.ignore_permissions=1
+					con_obj.submit()
 
 def validate_cwip_accounts(gl_map):
 	"""Validate that CWIP account are not used in Journal Entry"""

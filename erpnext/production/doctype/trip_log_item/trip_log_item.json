@@ -1,0 +1,178 @@
+{
+ "actions": [],
+ "creation": "2022-10-31 13:38:56.123317",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "distance",
+  "distance_uom",
+  "item_code",
+  "item_name",
+  "column_break_6",
+  "qty",
+  "rate",
+  "amount",
+  "section_break_9",
+  "eligible_for_transporter_payment",
+  "transporter_details_section",
+  "equipment",
+  "equipment_type",
+  "equipment_category",
+  "column_break_13",
+  "equipment_model",
+  "transporter_rate",
+  "expense_account",
+  "transport_payment_done"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "distance",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Distance",
+   "options": "Distance",
+   "reqd": 1
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vechicle/Equipment",
+   "mandatory_depends_on": "eval:doc.eligible_for_transporter_payment",
+   "options": "Equipment"
+  },
+  {
+   "columns": 1,
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "eligible_for_transporter_payment",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Eligible For Transporter Payment"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Vehicle/Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Vehicle/Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_model",
+   "fieldname": "equipment_model",
+   "fieldtype": "Link",
+   "label": "Vehicle/Equipment Model",
+   "options": "Equipment Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.eligible_for_transporter_payment",
+   "fieldname": "transporter_rate",
+   "fieldtype": "Link",
+   "label": "Transporter Rate",
+   "options": "Transporter Rate",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "transport_payment_done",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Transport Payment Done",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.eligible_for_transporter_payment",
+   "fieldname": "transporter_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transporter Details"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.eligible_for_transporter_payment",
+   "fetch_from": "transporter_rate.expense_account",
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Expense Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "distance.uom",
+   "fieldname": "distance_uom",
+   "fieldtype": "Link",
+   "label": "Distance UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty(MT)"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-10-31 15:59:44.469679",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Trip Log Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

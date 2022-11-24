@@ -18,6 +18,7 @@
   "tax_id",
   "tax_category",
   "tax_withholding_category",
+  "supplier_tpn_no",
   "image",
   "column_break0",
   "supplier_group",
@@ -27,11 +28,36 @@
   "is_internal_supplier",
   "represents_company",
   "disabled",
+  "inter_company",
+  "company",
   "is_transporter",
   "warn_rfqs",
   "warn_pos",
   "prevent_rfqs",
   "prevent_pos",
+  "is_pol_supplier",
+  "section_break_27",
+  "bank_infromation_section",
+  "bank",
+  "bank_name",
+  "bank_branch",
+  "inr_bank_code",
+  "column_break_33",
+  "inr_purpose_code",
+  "bank_account_type",
+  "account_number",
+  "column_break_100",
+  "ifs_code",
+  "section_break_43",
+  "dzongkhag",
+  "column_break_44",
+  "gewog",
+  "column_break_46",
+  "village",
+  "payment_due_terms_section",
+  "credit_days_based_on",
+  "column_break_34",
+  "credit_days",
   "allowed_to_transact_section",
   "companies",
   "section_break_7",
@@ -46,7 +72,7 @@
   "supplier_primary_contact",
   "mobile_no",
   "email_id",
-  "column_break_44",
+  "column_break_62",
   "supplier_primary_address",
   "primary_address",
   "default_payable_accounts",
@@ -296,6 +322,7 @@
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address and Contacts",
    "oldfieldtype": "Column Break",
    "options": "fa fa-map-marker"
@@ -391,19 +418,19 @@
    "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "supplier_primary_contact",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Supplier Primary Contact",
    "options": "Contact"
   },
   {
-   "fetch_from": "supplier_primary_contact.mobile_no",
    "fieldname": "mobile_no",
-   "fieldtype": "Read Only",
+   "fieldtype": "Phone",
    "label": "Mobile No"
   },
   {
    "fetch_from": "supplier_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "label": "Email Id"
   },
   {
@@ -412,16 +439,16 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
-   "label": "Primary Address",
-   "read_only": 1
+   "fieldtype": "Small Text",
+   "label": "Address"
   },
   {
    "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "supplier_primary_address",
    "fieldtype": "Link",
    "label": "Supplier Primary Address",
-   "options": "Address"
+   "options": "Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -434,6 +461,149 @@
    "fieldtype": "Table",
    "label": "Advance Account",
    "options": "Party Advance Account"
+  },
+  {
+   "fieldname": "supplier_tpn_no",
+   "fieldtype": "Data",
+   "label": "Supplier TPN No",
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_pol_supplier",
+   "fieldtype": "Check",
+   "label": "Is POL Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "inter_company",
+   "fieldtype": "Check",
+   "label": "DHI Owned Company?"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "section_break_27",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "ifs_code",
+   "fieldtype": "Data",
+   "label": "IFS Code"
+  },
+  {
+   "fetch_from": "bank.bank_name",
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_due_terms_section",
+   "fieldtype": "Section Break",
+   "label": "Payment due terms"
+  },
+  {
+   "fieldname": "credit_days_based_on",
+   "fieldtype": "Select",
+   "label": "Payment days Based On",
+   "options": "\nFixed Days\nLast Day of the Next Month",
+   "reqd": 1
+  },
+  {
+   "fieldname": "credit_days",
+   "fieldtype": "Int",
+   "label": "Payment due days",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_100",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_infromation_section",
+   "fieldtype": "Section Break",
+   "label": "BANK INFROMATION"
+  },
+  {
+   "fieldname": "bank_branch",
+   "fieldtype": "Link",
+   "label": "Bank Branch",
+   "options": "Financial Institution Branch"
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number"
+  },
+  {
+   "fieldname": "inr_bank_code",
+   "fieldtype": "Select",
+   "label": "Bank Code",
+   "options": "\n01 - AXIS BANK\n02- SBI\n03 -Others\n04 - SCB"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.bank_name_new == \"INR\"",
+   "fieldname": "inr_purpose_code",
+   "fieldtype": "Select",
+   "label": "Purpose Code",
+   "options": "\n01- INVT IN EQUITY SHARE\n02- INVT IN MUTUAL FUND\n03- INVT IN DEBENTURES\n04- BILL PAYMENT\n05- CREDIT TO NRE A/c\n06- PAYMENT TO HOTELS\n07- TRAVEL & TOURISM\n08- INVT IN REAL ESTATE\n09- PYMNT TO ESTATE DEVELOPER\n10- LIC PREMIUM\n11- EDUCATIONAL EXPENSES\n12- FAMILY MAINTENANCE\n13- POSTMASTER / UTI PREMIUM\n14- PROPERTY Pymnt-Co-op Hsg.Soc\n15- PROPERTY Pymnt-Govt. Hsg.Scheme\n16- MEDICAL EXPENSES\n17- UTILITY PAYMENTS\n18- TAX PAYMENTS\n19- EMI FOR LOAN REPAYMENT\n20- COMPENSATION OF EMPLOYEES\n21- SALARY"
+  },
+  {
+   "fieldname": "bank_account_type",
+   "fieldtype": "Link",
+   "label": "Bank Account Type",
+   "options": "Bank Account Type"
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Financial Institution"
+  },
+  {
+   "fieldname": "dzongkhag",
+   "fieldtype": "Link",
+   "label": "Dzongkhag",
+   "options": "Dzongkhag"
+  },
+  {
+   "depends_on": "eval:doc.dzongkhag",
+   "fieldname": "gewog",
+   "fieldtype": "Link",
+   "label": "Gewog",
+   "options": "Dzongkhag"
+  },
+  {
+   "fieldname": "column_break_46",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.dzongkhag && doc.gewog",
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "label": "Village",
+   "options": "Dzongkhag"
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_43",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-user",
@@ -446,7 +616,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-09-15 14:58:10.659375",
+ "modified": "2022-11-15 12:15:42.946605",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -506,7 +676,6 @@
    "role": "Accounts Manager"
   }
  ],
- "quick_entry": 1,
  "search_fields": "supplier_name, supplier_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

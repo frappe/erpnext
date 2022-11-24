@@ -169,7 +169,7 @@ class Budget(Document):
 			row = self.append('accounts', {})
 			row.update(d)
 
-def committed_consumed_budget(reference=None, reference_no=None):
+def delete_committed_consumed_budget(reference=None, reference_no=None):
 	if reference and reference_no:
 		frappe.db.sql("""Delete from `tabCommitted Budget` 
 						where reference_type='{reference_type}' 
@@ -183,7 +183,7 @@ def committed_consumed_budget(reference=None, reference_no=None):
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
 	if args.is_cancelled:
-		committed_consumed_budget(args.voucher_type, args.voucher_no)
+		delete_committed_consumed_budget(args.voucher_type, args.voucher_no)
 		return
 	if args.get("company") and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
@@ -200,7 +200,10 @@ def validate_expense_against_budget(args):
 	if not args.account:
 		frappe.throw("Budget Head/Account is missing. Please provide account to check budget")
 
-	account_type = frappe.db.get_value("Account", args.account, "account_type")
+	account_dtl = frappe.get_doc("Account", args.account)
+	account_type = account_dtl.account_type
+	if account_dtl.budget_check:
+		return
 	'''
 	if not frappe.db.exists("Budget Settings Account Types", {"parent":"Budget Settings","account_type":account_type}):
 		frappe.throw("Budget check against account <b>{}</b> is not allowed as the Account Type is {}. \
@@ -312,17 +315,23 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 		if frappe.db.get_single_value("Budget Settings","allow_budget_deviation"):
 			deviation_percent = frappe.db.get_single_value("Budget Settings","deviation")
 			if deviation_percent > 0:
-				budget_amount = budget_amount  + (deviation_percent*budget_amount)/100	
+				budget_amount = budget_amount  + (deviation_percent*budget_amount)/100
+		available_budget = 	flt(budget_amount) - flt(committed[0].total)
+	else:
+		available_budget = flt(budget_amount)
+		total_expense_amount = flt(actual_expense)
+
 	if total_expense_amount > budget_amount:
 		diff = total_expense_amount - budget_amount
 		currency = frappe.get_cached_value("Company", args.company, "default_currency")
 
-		msg = _("{0} Budget for Account {1} against {2} {3} is {4}. It will exceed by {5}").format(
+		msg = _("{0} Budget for Account {1} against {2} {3} is {4} and available budget is {5}. It exceed by {6}").format(
 			_(action_for),
 			frappe.bold(args.account),
 			args.budget_against_field,
 			frappe.bold(budget_against),
 			frappe.bold(fmt_money(budget_amount, currency=currency)),
+			frappe.bold(fmt_money(available_budget, currency=currency)),
 			frappe.bold(fmt_money(diff, currency=currency)),
 		)
 
@@ -338,6 +347,7 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			frappe.msgprint(msg, indicator="orange")
 
 def commit_budget(args):
+	amount = args.amount if args.amount else args.debit
 	if frappe.db.get_single_value("Budget Settings", "budget_commit_on") == args.doctype and args.amount > 0:
 		doc = frappe.get_doc(
 			{
@@ -349,7 +359,7 @@ def commit_budget(args):
 				"reference_no": args.parent,
 				"reference_date": args.posting_date,
 				"reference_id": args.name,
-				"amount": flt(args.amount,2),
+				"amount": flt(amount,2),
 				"item_code": args.item_code,
 				"company": args.company
 			}
@@ -373,10 +383,10 @@ def get_actions(args, budget):
 
 def get_amount(args, budget):
 	amount = 0
-	if args.get("doctype") == "Journal Entry" or args.voucher_type == "Journal Entry":
-		amount = args.debit
-	else:
+	if args.amount:
 		amount = args.amount
+	else:
+		amount = args.debit
 	return amount
 
 

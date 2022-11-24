@@ -4,12 +4,14 @@ import frappe
 from frappe import _, msgprint, scrub
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from erpnext.budget.doctype.budget.budget import validate_expense_against_budget
 
 class BudgetReappropiation(Document):
 	def validate(self):
 		self.validate_budget()
 
 	def on_submit(self):
+		self.budget_check()
 		self.budget_appropriate(cancel=False)
 
 	def on_cancel(self):
@@ -64,19 +66,17 @@ class BudgetReappropiation(Document):
 	
 	# Check the budget amount in the from cost center and account
 	def budget_check(self):
-		budget_against_field = frappe.scrub(self.budget_against)
-		from_budget_against = self.from_cost_center if self.budget_against == "Cost Center" else self.from_project
-		
-		budgets = frappe.db.sql("""select from_account, sum(amount) as amount 
-							from `tabBudget Reappropiation Detail` 
-							where parent = %s 
-							group by from_account
-						""", self.name, as_dict=True)
-		for a in budgets:
-			cost_center = from_budget_against
-			project = from_budget_against
-			from_account = a.from_account
-			check_budget_available(cost_center, a.from_account, str(self.fiscal_year) + "-01-01", a.amount, project)
+		args = frappe._dict()
+		args.budget_against = self.budget_against
+		args.cost_center = self.from_cost_center if self.budget_against == "Cost Center" else None
+		args.project = self.from_project if self.budget_against == "Project" else None
+		args.posting_date = self.appropriation_on
+		args.fiscal_year = self.fiscal_year
+		args.company = self.company
+		for a in self.get('items'):
+			args.account = a.from_account
+			args.amount = a.amount
+		validate_expense_against_budget(args)
 
 	# Added by Thukten on 13th September, 2022
 	def budget_appropriate(self, cancel=False):

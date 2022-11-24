@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:equipment_type",
+ "creation": "2022-10-17 13:46:24.897592",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "equipment_category",
+  "equipment_type",
+  "is_container",
+  "doesnt_have_own_tank",
+  "disabled"
+ ],
+ "fields": [
+  {
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "equipment_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Equipment Type",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "description": "* When ticked \"Is Container?\", system will allow the user to transfer/issue POL from equipments of this type.",
+   "fieldname": "is_container",
+   "fieldtype": "Check",
+   "label": "Is Container?"
+  },
+  {
+   "default": "0",
+   "description": "If Checked, will not allow Direct Consumption in Receive POL/Receive in Issue POL/HSD Consumption in Logbook",
+   "fieldname": "doesnt_have_own_tank",
+   "fieldtype": "Check",
+   "label": "Doesn't have Own Tank"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-08 16:44:21.076991",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "Equipment Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

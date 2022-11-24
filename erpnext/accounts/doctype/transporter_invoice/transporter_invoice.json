@@ -1,0 +1,600 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:TI-{YY}-{MM}-{DD}-{###}",
+ "creation": "2022-11-01 18:18:35.242032",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_tab",
+  "branch",
+  "cost_center",
+  "posting_date",
+  "column_break_3",
+  "from_date",
+  "to_date",
+  "column_break_6",
+  "equipment",
+  "registration_no",
+  "equipment_category",
+  "column_break_12",
+  "equipment_type",
+  "equipment_model",
+  "supplier",
+  "get_details",
+  "section_break_17",
+  "total_trip",
+  "gross_amount",
+  "outstanding_amount",
+  "column_break_19",
+  "other_deductions",
+  "net_payable",
+  "amount_payable",
+  "grand_total",
+  "section_break_13",
+  "delivery_charges",
+  "delivery_account",
+  "column_break_21",
+  "transfer_charges",
+  "transfer_account",
+  "transportation_amount",
+  "unloading_amount",
+  "within_warehouse_trip",
+  "within_warehouse_amount",
+  "production_transport_amount",
+  "production_trip_count",
+  "pol_amount",
+  "section_break_017",
+  "deduction_amount",
+  "columb_break_017",
+  "gl_account",
+  "section_break_34",
+  "cheque_no",
+  "column_break_36",
+  "cheque_date",
+  "column_break_38",
+  "clearance_date",
+  "section_break_23",
+  "items",
+  "section_break_25",
+  "pols",
+  "section_break_38",
+  "company",
+  "amended_from",
+  "column_break_42",
+  "currency",
+  "other_deductions_tab",
+  "sb_other_deductions",
+  "deductions",
+  "section_break_61",
+  "clearing_amount",
+  "weighbridge_amount",
+  "column_break_64",
+  "security_deposit_amount",
+  "tds_amount",
+  "sb_totals",
+  "unloading_account",
+  "debit_account",
+  "credit_account",
+  "remarks",
+  "column_break_75",
+  "total_html",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.from_date && doc.to_date",
+   "fieldname": "column_break_6",
+   "fieldtype": "Section Break",
+   "label": "Equipment Details"
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.registeration_number",
+   "fieldname": "registration_no",
+   "fieldtype": "Data",
+   "label": "Registration No",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0",
+   "fieldname": "get_details",
+   "fieldtype": "Button",
+   "label": "Get Details"
+  },
+  {
+   "fieldname": "sb_totals",
+   "fieldtype": "Tab Break",
+   "label": "SUMMARY"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Link",
+   "label": "Credit Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "unloading_account",
+   "fieldtype": "Link",
+   "label": "Unloading Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount_payable",
+   "fieldtype": "Currency",
+   "label": "Total Amount Payable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "delivery_charges",
+   "fieldtype": "Currency",
+   "label": "Delivery Charge"
+  },
+  {
+   "fieldname": "delivery_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Delivery Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "transfer_charges",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Transfer Charges"
+  },
+  {
+   "fieldname": "transfer_account",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Transfer Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "transportation_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total Transportation Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "unloading_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Unloading Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "within_warehouse_trip",
+   "fieldtype": "Int",
+   "label": "Trips Within Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "within_warehouse_amount",
+   "fieldtype": "Currency",
+   "label": "Transportation Amount within warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_transport_amount",
+   "fieldtype": "Currency",
+   "label": "Production Transportation Amt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gross_amount",
+   "fieldtype": "Currency",
+   "label": "Gross Amount",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_trip",
+   "fieldtype": "Int",
+   "label": "Total No.of Trips",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_trip_count",
+   "fieldtype": "Int",
+   "label": "Production Trip Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pol_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "POL Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "net_payable",
+   "fieldtype": "Currency",
+   "label": "Net Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "other_deductions",
+   "fieldtype": "Currency",
+   "label": "Other Deductions & TDS",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_017",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Other Deductions"
+  },
+  {
+   "fieldname": "deduction_amount",
+   "fieldtype": "Currency",
+   "label": "Deduction Amount"
+  },
+  {
+   "fieldname": "columb_break_017",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gl_account",
+   "fieldtype": "Link",
+   "label": "GL Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "tds_amount",
+   "fieldtype": "Currency",
+   "label": "TDS Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "security_deposit_amount",
+   "fieldtype": "Currency",
+   "label": "Security Deposit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weighbridge_amount",
+   "fieldtype": "Currency",
+   "label": "Weighbridge Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "clearing_amount",
+   "fieldtype": "Currency",
+   "label": "Clearing Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_other_deductions",
+   "fieldtype": "Section Break",
+   "label": "Other Deductions"
+  },
+  {
+   "fieldname": "deductions",
+   "fieldtype": "Table",
+   "options": "Transporter Invoice Deduction"
+  },
+  {
+   "fieldname": "section_break_34",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Banking Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "label": "Cheque No"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "label": "Cheque Date"
+  },
+  {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break",
+   "label": "Transportation Details"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Transporter Invoice Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break",
+   "label": "POL Details"
+  },
+  {
+   "fieldname": "pols",
+   "fieldtype": "Table",
+   "options": "Transporter Invoice Pol",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_38",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transporter Invoice",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment.equipment_model",
+   "fieldname": "equipment_model",
+   "fieldtype": "Link",
+   "label": "Equipment Model",
+   "options": "Equipment Model",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_75",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_deductions_tab",
+   "fieldtype": "Tab Break",
+   "label": "Deductions"
+  },
+  {
+   "fieldname": "basic_tab",
+   "fieldtype": "Tab Break",
+   "label": "Basic Info"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Equipment Owner",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_61",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_64",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-14 16:05:00.566194",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Transporter Invoice",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

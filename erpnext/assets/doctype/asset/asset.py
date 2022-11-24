@@ -52,7 +52,7 @@ class Asset(AccountsController):
 	def on_submit(self):
 		self.validate_in_use_date()
 		self.set_status()
-		self.make_asset_movement()
+		#self.make_asset_movement()
 		self.make_asset_je_entry()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
@@ -479,7 +479,8 @@ class Asset(AccountsController):
 	):
 		self.append(
 			"schedules",
-			{
+			{	
+				"schedule_start_date": get_first_day(schedule_date),
 				"schedule_date": schedule_date,
 				"depreciation_amount": depreciation_amount,
 				"depreciation_method": depreciation_method,
@@ -685,15 +686,14 @@ class Asset(AccountsController):
 		for i, d in enumerate(self.get("schedules")):
 			if ignore_booked_entry and d.journal_entry:
 				continue
-
 			if int(d.finance_book_id) not in finance_books:
-				accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 				value_after_depreciation = flt(self.get_value_after_depreciation(d.finance_book_id))
+				#accumulated_depreciation = flt(self.opening_accumulated_depreciation)
+				#Change made by Thukten for Asset Value Adjustment
+				accumulated_depreciation = flt(self.gross_purchase_amount + self.additional_value - value_after_depreciation,2)
 				finance_books.append(int(d.finance_book_id))
-
 			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
 			value_after_depreciation -= flt(depreciation_amount)
-
 			# for the last row, if depreciation method = Straight Line
 			if (
 				straight_line_idx

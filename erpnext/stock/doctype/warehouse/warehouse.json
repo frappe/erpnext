@@ -15,6 +15,7 @@
   "default_in_transit_warehouse",
   "is_group",
   "column_break_4",
+  "create_account_under",
   "account",
   "company",
   "disabled",
@@ -26,9 +27,9 @@
   "email_id",
   "phone_no",
   "mobile_no",
-  "column_break0",
   "address_line_1",
   "address_line_2",
+  "column_break0",
   "city",
   "state",
   "pin",
@@ -122,11 +123,11 @@
   },
   {
    "fieldname": "email_id",
-   "fieldtype": "Data",
-   "hidden": 1,
+   "fieldtype": "Link",
    "label": "Email Address",
    "oldfieldname": "email_id",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "User"
   },
   {
    "fieldname": "phone_no",
@@ -138,7 +139,7 @@
   },
   {
    "fieldname": "mobile_no",
-   "fieldtype": "Data",
+   "fieldtype": "Phone",
    "label": "Mobile No",
    "oldfieldname": "mobile_no",
    "oldfieldtype": "Int",
@@ -251,13 +252,20 @@
    "fieldname": "branches",
    "fieldtype": "Table",
    "options": "Warehouse Branch"
+  },
+  {
+   "fieldname": "create_account_under",
+   "fieldtype": "Link",
+   "label": "Parent Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-09-14 12:18:36.584214",
+ "modified": "2022-11-22 12:25:35.078307",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

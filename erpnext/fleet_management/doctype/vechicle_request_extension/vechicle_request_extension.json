@@ -1,0 +1,153 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-11-07 10:11:11.836134",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_request",
+  "column_break_2",
+  "vechicle",
+  "column_break_4",
+  "vehicle_number",
+  "section_break_6",
+  "from_date",
+  "column_break_8",
+  "to_date",
+  "column_break_10",
+  "new_to_date",
+  "section_break_12",
+  "reason_for_extension",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "vehicle_request",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vehicle Request",
+   "options": "Vehicle Request",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_request.vehicle",
+   "fieldname": "vechicle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Vechicle",
+   "options": "Equipment",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_request.vehicle_number",
+   "fieldname": "vehicle_number",
+   "fieldtype": "Data",
+   "label": "Vehicle Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "new_to_date",
+   "fieldtype": "Datetime",
+   "label": "New To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vechicle Request Extension",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_request.from_date",
+   "fieldname": "from_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Previous From Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "vehicle_request.to_date",
+   "fieldname": "to_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Previous To Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reason_for_extension",
+   "fieldtype": "Small Text",
+   "label": "Reason for Extension",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-07 10:16:12.145540",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "Vechicle Request Extension",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

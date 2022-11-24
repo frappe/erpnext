@@ -66,6 +66,13 @@ frappe.query_reports["Stock Ageing"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
+			"reqd": 1
+		},
+		{
 			"fieldname":"show_warehouse_wise_stock",
 			"label": __("Show Warehouse-wise Stock"),
 			"fieldtype": "Check",

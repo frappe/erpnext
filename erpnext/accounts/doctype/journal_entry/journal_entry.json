@@ -25,6 +25,7 @@
   "tax_withholding_category",
   "2_add_edit_gl_entries",
   "accounts",
+  "tds_table",
   "section_break99",
   "use_cheque_lot",
   "cheque_lot",
@@ -272,7 +273,7 @@
   },
   {
    "fieldname": "total_amount_in_words",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Total Amount in Words",
    "no_copy": 1,
@@ -512,7 +513,7 @@
    "depends_on": "eval:doc.apply_tds",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
-   "label": "Tax Withholding Category",
+   "label": "Tax Category",
    "mandatory_depends_on": "eval:doc.apply_tds",
    "options": "Tax Withholding Category"
   },
@@ -520,7 +521,7 @@
    "default": "0",
    "fieldname": "apply_tds",
    "fieldtype": "Check",
-   "label": "Apply Tax Withholding Amount "
+   "label": "Apply Tax Amount "
   },
   {
    "depends_on": "eval:doc.docstatus",
@@ -564,13 +565,24 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "fieldname": "tds_table",
+   "fieldtype": "HTML",
+   "label": "TDS Table",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "links": [],
- "modified": "2022-09-21 16:26:23.399016",
+ "links": [
+  {
+   "link_doctype": "Asset Value Adjustment",
+   "link_fieldname": "journal_entry"
+  }
+ ],
+ "modified": "2022-11-18 12:05:10.610995",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

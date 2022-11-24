@@ -577,6 +577,14 @@ permission_query_conditions = {
 	"Employee Promotion": "hrms.hr.doctype.employee_promotion.employee_promotion.get_permission_query_conditions",
 	"Leave Application": "hrms.hr.doctype.leave_application.leave_application.get_permission_query_conditions",
 	"Leave Encashment": "hrms.hr.doctype.leave_encashment.leave_encashment.get_permission_query_conditions",
+	"POL Expense": "erpnext.fleet_management.doctype.pol_expense.pol_expense.get_permission_query_conditions",
+	"POL Receive": "erpnext.fleet_management.doctype.pol_receive.pol_receive.get_permission_query_conditions",
+	"Repair And Services": "erpnext.fleet_management.doctype.repair_and_services.repair_and_services.get_permission_query_conditions",
+	"Repair And Services Invoice": "erpnext.fleet_management.doctype.repair_and_services_invoice.repair_and_services_invoice.get_permission_query_conditions",
+	"Trip Log": "erpnext.production.doctype.trip_log.trip_log.get_permission_query_conditions",
+	"Vehicle Request": "erpnext.fleet_management.doctype.vehicle_request.vehicle_request.get_permission_query_conditions",
+	"Transporter Invoice": "erpnext.accounts.doctype.transporter_invoice.transporter_invoice.get_permission_query_conditions",
+	"EME Invoice": "erpnext.accounts.doctype.eme_invoice.eme_invoice.get_permission_query_conditions",
 }
 
 user_privacy_documents = [

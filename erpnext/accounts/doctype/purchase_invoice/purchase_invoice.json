@@ -7,7 +7,6 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "title",
   "business_activity",
   "branch",
   "naming_series",
@@ -17,6 +16,7 @@
   "due_date",
   "tax_withholding_category",
   "column_break1",
+  "title",
   "company",
   "posting_date",
   "posting_time",
@@ -180,10 +180,8 @@
    "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
+   "label": "Invoice Title",
+   "no_copy": 1
   },
   {
    "fieldname": "naming_series",
@@ -1448,7 +1446,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-22 17:06:41.073662",
+ "modified": "2022-11-16 14:05:07.379391",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

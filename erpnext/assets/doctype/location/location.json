@@ -8,11 +8,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "branch",
   "location_name",
   "parent_location",
   "cb_details",
   "is_container",
   "is_group",
+  "disabled",
+  "distance",
   "sb_location_details",
   "latitude",
   "longitude",
@@ -39,6 +42,7 @@
   {
    "fieldname": "parent_location",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Parent Location",
    "options": "Location",
    "search_index": 1
@@ -52,6 +56,7 @@
    "description": "Check if it is a hydroponic unit",
    "fieldname": "is_container",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Container"
   },
   {
@@ -59,12 +64,14 @@
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Is Group"
   },
   {
    "fieldname": "sb_location_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Location Details"
   },
   {
@@ -137,15 +144,37 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "distance",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Distance(KM)"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2020-05-08 16:11:11.375701",
+ "modified": "2022-11-16 13:16:08.228800",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
  "name_case": "Title Case",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_location",
  "owner": "Administrator",
  "permissions": [
@@ -224,5 +253,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

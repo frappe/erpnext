@@ -28,6 +28,8 @@ class EmployeeBoardingController(Document):
 		project_name = _(self.doctype) + " : "
 		if self.doctype == "Employee Onboarding":
 			project_name += self.job_applicant
+		if self.doctype == "Employee Separation":
+			project_name += self.employee
 		else:
 			project_name += self.employee
 

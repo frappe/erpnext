@@ -1,0 +1,145 @@
+{
+ "actions": [],
+ "creation": "2022-11-12 12:40:39.477619",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mineral_raising_group",
+  "manual_qty",
+  "machine_qty",
+  "machine_sharing_qty",
+  "total_quantity",
+  "column_break_5",
+  "tier",
+  "labor_type",
+  "no_labour",
+  "machine_payable",
+  "column_break_10",
+  "total_penalty",
+  "grand_total",
+  "column_break_13",
+  "total_amount",
+  "section_break_16",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "manual_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Manual Quantity(A)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "machine_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Machine Quantity(B)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "machine_sharing_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Machine Sharing Quantity(C)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tier",
+   "options": "Tier",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_labour",
+   "fieldtype": "Int",
+   "label": "No. Labour",
+   "read_only": 1
+  },
+  {
+   "fieldname": "machine_payable",
+   "fieldtype": "Currency",
+   "label": "Machine Payable",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Quantity(A+B+C)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Section Break",
+   "label": "Amount Detials"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_penalty",
+   "fieldtype": "Currency",
+   "label": "Total Penalty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Net Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mineral_raising_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mineral Raising Group",
+   "options": "Mineral Raising Group",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "mineral_raising_group.tier_type",
+   "fieldname": "labor_type",
+   "fieldtype": "Data",
+   "label": "Labor Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-12 17:41:10.165455",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Coal Raising Payment Items",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -19,11 +19,11 @@
   "order_type",
   "skip_delivery_note",
   "column_break1",
-  "amended_from",
   "company",
   "transaction_date",
   "delivery_date",
   "po_no",
+  "location_required",
   "po_date",
   "tax_id",
   "accounting_dimensions_section",
@@ -149,7 +149,12 @@
   "to_date",
   "column_break_108",
   "auto_repeat",
-  "update_auto_repeat_reference"
+  "update_auto_repeat_reference",
+  "header_and_footer_text_section",
+  "sales_order_header_text",
+  "column_break_144",
+  "sales_order_footer_text",
+  "amended_from"
  ],
  "fields": [
   {
@@ -161,15 +166,12 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{customer_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
+   "no_copy": 1
   },
   {
    "fieldname": "naming_series",
@@ -544,6 +546,7 @@
   {
    "fieldname": "sec_warehouse",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1
   },
@@ -680,6 +683,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Taxes and Charges",
@@ -714,6 +718,7 @@
   {
    "fieldname": "section_break_40",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1
   },
@@ -825,6 +830,7 @@
    "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_48",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Additional Discount and Coupon Code"
@@ -1324,6 +1330,7 @@
    "collapsible_depends_on": "commission_rate",
    "fieldname": "sales_team_section_break",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Commission",
@@ -1380,6 +1387,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "section_break1",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Sales Team",
@@ -1402,6 +1410,7 @@
    "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Auto Repeat Section",
@@ -1525,6 +1534,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
@@ -1550,13 +1560,39 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "default": "0",
+   "description": "<b>Tick this to include location during Delivery</b>",
+   "fieldname": "location_required",
+   "fieldtype": "Check",
+   "label": "Location Required"
+  },
+  {
+   "fieldname": "header_and_footer_text_section",
+   "fieldtype": "Section Break",
+   "label": "Header and Footer Text"
+  },
+  {
+   "fieldname": "sales_order_header_text",
+   "fieldtype": "Text Editor",
+   "label": "Sales Order Header Text"
+  },
+  {
+   "fieldname": "column_break_144",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_order_footer_text",
+   "fieldtype": "Text Editor",
+   "label": "Sales Order Footer Text"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-21 00:24:10.741477",
+ "modified": "2022-11-17 09:43:35.203581",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

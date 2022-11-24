@@ -1,0 +1,231 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-11-08 21:07:20.724139",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_code",
+  "item_name",
+  "item_group",
+  "item_sub_group",
+  "qty",
+  "uom",
+  "cop",
+  "company",
+  "currency",
+  "branch",
+  "cost_center",
+  "warehouse",
+  "column_break_12",
+  "transfer_to_warehouse",
+  "transportation_rate",
+  "transportation_amount",
+  "posting_date",
+  "ref_doc",
+  "amended_from",
+  "location",
+  "adhoc_production",
+  "production_type",
+  "equipment_number",
+  "equipment_model",
+  "unloading_by",
+  "transporter_type",
+  "mineral_raising_group",
+  "coal_raising_type"
+ ],
+ "fields": [
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Qty"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "cop",
+   "fieldtype": "Currency",
+   "label": "COP"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transfer_to_warehouse",
+   "fieldtype": "Link",
+   "label": "Transfer to Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "transportation_rate",
+   "fieldtype": "Currency",
+   "label": "Transportation Rate"
+  },
+  {
+   "fieldname": "transportation_amount",
+   "fieldtype": "Currency",
+   "label": "Transportation Amount"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "ref_doc",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference Document",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Production Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "adhoc_production",
+   "fieldtype": "Link",
+   "label": "Adhoc Production",
+   "options": "Adhoc Production",
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_type",
+   "fieldtype": "Data",
+   "label": "Production Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "equipment_number",
+   "fieldtype": "Data",
+   "label": "Equipment Number"
+  },
+  {
+   "fieldname": "equipment_model",
+   "fieldtype": "Data",
+   "label": "Equipment Model"
+  },
+  {
+   "fieldname": "unloading_by",
+   "fieldtype": "Data",
+   "label": "Unloading"
+  },
+  {
+   "fieldname": "transporter_type",
+   "fieldtype": "Data",
+   "label": "Transporter Type"
+  },
+  {
+   "fieldname": "coal_raising_type",
+   "fieldtype": "Data",
+   "label": "Coal Raising Type"
+  },
+  {
+   "fetch_from": "item_code.item_sub_group",
+   "fieldname": "item_sub_group",
+   "fieldtype": "Link",
+   "label": "Item Sub Group",
+   "options": "Item Sub Group"
+  },
+  {
+   "fieldname": "mineral_raising_group",
+   "fieldtype": "Link",
+   "label": "Mineral Raising Group",
+   "options": "Mineral Raising Group"
+  }
+ ],
+ "in_create": 1,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-13 22:10:11.243769",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Production Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

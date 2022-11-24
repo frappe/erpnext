@@ -1,0 +1,280 @@
+{
+ "allow_import": 1,
+ "autoname": "UT.YYYY.MM.####",
+ "creation": "2021-05-27 09:22:49.958588",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "cost_center",
+  "expense_account",
+  "bank_account",
+  "column_break_4",
+  "posting_date",
+  "utility_services",
+  "business_activity",
+  "payment_status",
+  "tds_account",
+  "tds_percent",
+  "bank_balance",
+  "utility_bill_details_section",
+  "get_details",
+  "item",
+  "section_break_8",
+  "total_bill_amount",
+  "column_break_10",
+  "total_tds_amount",
+  "column_break_22",
+  "net_payable_amount",
+  "workflow_state",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "description": "*You can change the value from Utility Service records",
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Branch Expense Account",
+   "options": "Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "description": "*Utility bill payment will be done from this bank account no.",
+   "fieldname": "bank_account",
+   "fieldtype": "Data",
+   "label": "Bank Account",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "utility_services",
+   "fieldtype": "Link",
+   "label": "Utility Services",
+   "options": "Utility Services",
+   "reqd": 1
+  },
+  {
+   "default": "Common",
+   "fieldname": "business_activity",
+   "fieldtype": "Link",
+   "label": "Business Activity",
+   "options": "Business Activity"
+  },
+  {
+   "depends_on": "eval:doc.tds_percent > 0",
+   "fieldname": "tds_account",
+   "fieldtype": "Link",
+   "label": "TDS Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tds_percent",
+   "fieldtype": "Select",
+   "label": "TDS percent",
+   "options": "\n2\n3\n5\n10"
+  },
+  {
+   "fieldname": "utility_bill_details_section",
+   "fieldtype": "Section Break",
+   "label": "Utility Bill Details"
+  },
+  {
+   "depends_on": "eval:doc.utility_services",
+   "fieldname": "get_details",
+   "fieldtype": "Button",
+   "label": "Fetch Utility Outstanding"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Table",
+   "options": "Utility Bill Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_bill_amount",
+   "fieldtype": "Currency",
+   "label": "Total Bill Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tds_amount",
+   "fieldtype": "Currency",
+   "label": "Total TDS Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "net_payable_amount",
+   "fieldtype": "Currency",
+   "label": "Net Payable Amount",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Workflow State",
+   "no_copy": 1,
+   "options": "Workflow State",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Utility Bill",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "bank_balance",
+   "fieldtype": "Currency",
+   "label": "Bank Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "no_copy": 1,
+   "options": "Draft\nPending\nPayment Successful\nPayment Failed\nPartial Payment",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2022-11-22 12:51:43.005002",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Utility Bill",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Unit Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Admin",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "cost_center",
+ "track_changes": 1
+}

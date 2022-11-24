@@ -1,0 +1,169 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:PRO-SET-{###}",
+ "creation": "2022-10-20 12:37:36.427239",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "based_on",
+  "raw_material",
+  "raw_material_name",
+  "product",
+  "product_name",
+  "item_type",
+  "column_break_4",
+  "from_date",
+  "to_date",
+  "disabled",
+  "section_break_2",
+  "item",
+  "company"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "label": "Setting Based On",
+   "options": "\nRaw Material\nProduct"
+  },
+  {
+   "depends_on": "eval:doc.based_on == \"Raw Material\"",
+   "fieldname": "raw_material",
+   "fieldtype": "Link",
+   "label": "Raw Material",
+   "options": "Item",
+   "unique": 1
+  },
+  {
+   "depends_on": "eval:doc.based_on == \"Raw Material\"",
+   "fetch_from": "raw_material.item_name",
+   "fieldname": "raw_material_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Raw Material Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.based_on == \"Product\"",
+   "fieldname": "product",
+   "fieldtype": "Link",
+   "label": "Product Material",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.based_on == \"Product\"",
+   "fetch_from": "product.item_name",
+   "fieldname": "product_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Product Material Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_type",
+   "fieldtype": "Link",
+   "label": "Material Type",
+   "options": "Item Type"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Material Detail"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Table",
+   "options": "Production Settings Item"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disable"
+  }
+ ],
+ "links": [],
+ "modified": "2022-11-14 10:46:39.428233",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Production Settings",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Master",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "based_on,raw_material,raw_material_name,product,product_name",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "branch"
+}

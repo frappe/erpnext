@@ -1,0 +1,98 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:name_period",
+ "creation": "2022-11-14 17:00:32.914173",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name_period",
+  "section_break_2",
+  "from_date",
+  "to_date",
+  "column_break_5",
+  "c_from_date",
+  "c_to_date",
+  "section_break_8",
+  "order"
+ ],
+ "fields": [
+  {
+   "fieldname": "name_period",
+   "fieldtype": "Data",
+   "label": "Report Period Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Data",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Data",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "c_from_date",
+   "fieldtype": "Data",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "c_to_date",
+   "fieldtype": "Data",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "order",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Order",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-11-14 17:11:09.518170",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Report Period",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

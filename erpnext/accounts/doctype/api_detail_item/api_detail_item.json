@@ -1,0 +1,43 @@
+{
+ "creation": "2021-05-20 03:38:40.081119",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "param",
+  "pre_defined_value",
+  "defined_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "param",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Param"
+  },
+  {
+   "default": "0",
+   "fieldname": "pre_defined_value",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Pre Defined Value"
+  },
+  {
+   "depends_on": "eval:doc.pre_defined_value",
+   "fieldname": "defined_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Defined Value"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-06-20 23:11:56.351251",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "API Detail Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

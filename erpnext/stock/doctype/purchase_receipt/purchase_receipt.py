@@ -236,6 +236,7 @@ class PurchaseReceipt(BuyingController):
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
 		self.set_consumed_qty_in_subcontract_order()
+		self.update_asset_receive_entries()
 
 	def check_next_docstatus(self):
 		submit_rv = frappe.db.sql(
@@ -272,6 +273,30 @@ class PurchaseReceipt(BuyingController):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
+		self.delete_asset_receive_entries()
+
+	#Update asset entries if asset
+	def update_asset_receive_entries(self):
+		for a in self.items:
+			item_group = frappe.db.get_value("Item", a.item_code, "item_group")
+			if item_group and item_group == "Fixed Asset":
+				ae = frappe.new_doc("Asset Received Entries")
+				ae.item_code = a.item_code
+				ae.child_ref = a.name
+				ae.item_name = a.item_name
+				ae.qty = a.qty
+				ae.company = self.company
+				ae.received_date = self.posting_date
+				ae.reference_type = "Purchase Receipt"
+				ae.ref_doc = self.name
+				ae.branch = self.branch
+				ae.cost_center = a.cost_center
+				ae.warehouse = a.warehouse
+				ae.flags.ignore_permissions = True
+				ae.submit()
+	#Delete asset entries. Taken from old code base
+	def delete_asset_receive_entries(self):
+		frappe.db.sql("delete from `tabAsset Received Entries` where ref_doc = %s", self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map

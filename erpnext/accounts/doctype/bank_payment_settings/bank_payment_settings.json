@@ -1,0 +1,211 @@
+{
+ "autoname": "field:financial_institution",
+ "creation": "2020-05-07 09:56:40.201778",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "financial_institution",
+  "promo_code",
+  "paying_customer",
+  "column_break_3",
+  "enable_one_to_one",
+  "transaction_limit",
+  "sb_connectivity",
+  "hostname",
+  "port",
+  "connection_type",
+  "username",
+  "password",
+  "private_key_path",
+  "but_test_connectivity",
+  "column_break_0",
+  "upload_path",
+  "acknowledgement_path",
+  "report_path",
+  "upload_path_html",
+  "transaction_time_settings_section",
+  "from_time",
+  "column_break_22",
+  "to_time"
+ ],
+ "fields": [
+  {
+   "fieldname": "financial_institution",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Financial Institution",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "promo_code",
+   "fieldtype": "Data",
+   "label": "Promo Code",
+   "reqd": 1
+  },
+  {
+   "fieldname": "paying_customer",
+   "fieldtype": "Data",
+   "label": "Paying Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_one_to_one",
+   "fieldtype": "Check",
+   "label": "Enable One-to-One Payment"
+  },
+  {
+   "depends_on": "eval:doc.enable_one_to_one",
+   "fieldname": "transaction_limit",
+   "fieldtype": "Int",
+   "label": "Max. no.of transactions for One-One Payment"
+  },
+  {
+   "fieldname": "sb_connectivity",
+   "fieldtype": "Section Break",
+   "label": "SFTP SETTINGS"
+  },
+  {
+   "fieldname": "hostname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Hostname",
+   "reqd": 1
+  },
+  {
+   "fieldname": "port",
+   "fieldtype": "Int",
+   "label": "Port",
+   "reqd": 1
+  },
+  {
+   "fieldname": "connection_type",
+   "fieldtype": "Select",
+   "label": "Connection Type",
+   "options": "\nNormal\nKey file",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.connection_type",
+   "fieldname": "username",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Username",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.connection_type == \"Normal\"",
+   "fieldname": "password",
+   "fieldtype": "Password",
+   "label": "Password"
+  },
+  {
+   "depends_on": "eval:doc.connection_type == \"Key file\"",
+   "fieldname": "private_key_path",
+   "fieldtype": "Data",
+   "label": "Private Key Path"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "but_test_connectivity",
+   "fieldtype": "Button",
+   "label": "<span style=\"margin: 0px; padding: 10px;\">Test Connectivity</span>"
+  },
+  {
+   "fieldname": "column_break_0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upload_path",
+   "fieldtype": "Data",
+   "label": "Upload Path"
+  },
+  {
+   "fieldname": "acknowledgement_path",
+   "fieldtype": "Data",
+   "label": "Acknowledgement Path"
+  },
+  {
+   "fieldname": "report_path",
+   "fieldtype": "Data",
+   "label": "Report Path"
+  },
+  {
+   "fieldname": "upload_path_html",
+   "fieldtype": "HTML",
+   "label": "File Upload Path HTML",
+   "options": "<h3>File Upload Path Help</h3>\n\n<p>Notes:</p>\n\n<ol>\n<li>Folders will be recursively created if not exist</li>\n<li>Use Forward slash <code>`/`</code> for path separator\n</li><li>Enclose date formats in curly brackets\n<ul>\n\t<li><code>{dd} = 31</code></li>\n\t<li><code>{mm}/{Mon}/{Month} = 01/Jan/January</code></li>\n\t<li><code>{yy}/{yyyy} = 20/2020</code></li>\n</ul>\n</li></ol>\n\n<h4>Examples</h4>\n<ol>\n<li><code>cdcl_testing/CDCL/BOBL/{yyyy}/{Mon}/{dd.mm.yyyy}</code>\n<pre><code>cdcl_testing/CDCL/BOBL/2020/May/31.01.2020</code></pre></li>\n</ol>"
+  },
+  {
+   "fieldname": "transaction_time_settings_section",
+   "fieldtype": "Section Break",
+   "label": "TRANSACTION TIME SETTINGS"
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "From Time"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "To Time"
+  }
+ ],
+ "modified": "2022-03-26 22:36:01.826998",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Payment Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Admin",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

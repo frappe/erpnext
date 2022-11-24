@@ -981,7 +981,6 @@ class AccountsController(TransactionBase):
 			dr_or_cr = "credit_in_account_currency"
 
 		lst = []
-		# frappe.msgprint(str(self.outstanding_amount))
 		for d in self.get("advances"):
 			if flt(d.allocated_amount) > 0:
 				args = frappe._dict(

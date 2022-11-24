@@ -12,12 +12,16 @@
   "column_break_3",
   "company",
   "is_group",
+  "is_department",
   "is_division",
   "is_section",
   "disabled",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "approver",
+  "approver_name",
+  "approver_level"
  ],
  "fields": [
   {
@@ -97,13 +101,40 @@
    "fieldname": "is_section",
    "fieldtype": "Check",
    "label": "Is Section"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_department",
+   "fieldtype": "Check",
+   "label": "Is Department"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "Employee"
+  },
+  {
+   "fetch_from": "approver.employee_name",
+   "fieldname": "approver_name",
+   "fieldtype": "Data",
+   "label": "Approver Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "approver.designation",
+   "fieldname": "approver_level",
+   "fieldtype": "Link",
+   "label": "Approver Level",
+   "options": "Designation",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-09-13 16:35:24.827699",
+ "modified": "2022-11-22 12:46:28.690812",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Department",

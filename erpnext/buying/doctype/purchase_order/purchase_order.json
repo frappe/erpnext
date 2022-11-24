@@ -144,7 +144,11 @@
   "is_internal_supplier",
   "represents_company",
   "inter_company_order_reference",
-  "is_old_subcontracting_flow"
+  "is_old_subcontracting_flow",
+  "order_header_and_footer_section",
+  "po_header",
+  "column_break_140",
+  "po_footer_text"
  ],
  "fields": [
   {
@@ -1180,13 +1184,32 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "fieldname": "order_header_and_footer_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Order Header and Footer"
+  },
+  {
+   "fieldname": "po_header",
+   "fieldtype": "Text Editor",
+   "label": "Purchase Order Header"
+  },
+  {
+   "fieldname": "column_break_140",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "po_footer_text",
+   "fieldtype": "Text Editor",
+   "label": "Purchase Order Footer"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-21 00:22:02.004939",
+ "modified": "2022-11-14 14:38:59.615465",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

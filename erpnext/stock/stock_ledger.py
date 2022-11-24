@@ -47,7 +47,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		if cancel:
 			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get("voucher_type"), sl_entries[0].get("voucher_no"))
-
 		args = get_args_for_future_sle(sl_entries[0])
 		future_sle_exists(args, sl_entries)
 
@@ -166,7 +165,6 @@ def validate_cancellation(args):
 			["name", "status"],
 			as_dict=1,
 		)
-
 		if repost_entry:
 			if repost_entry.status == "In Progress":
 				frappe.throw(

@@ -9,8 +9,9 @@
  "field_order": [
   "barcode",
   "item_code",
-  "item_name",
+  "item_type",
   "col_break1",
+  "item_name",
   "customer_item_code",
   "section_break_6",
   "description",
@@ -59,6 +60,27 @@
   "base_net_amount",
   "billed_amt",
   "incoming_rate",
+  "transporter_info_section",
+  "others_equipment",
+  "equipment",
+  "vehicle_no",
+  "transporter_name",
+  "vehicle_type",
+  "column_break_59",
+  "is_volumetric",
+  "gross_vehicle_weight",
+  "tare_weight",
+  "volumetric_weight",
+  "weight_slip_no",
+  "pol_slip_no",
+  "location_base_info_section",
+  "from_warehouse",
+  "distance",
+  "transporter_rate_ref",
+  "column_break_70",
+  "location",
+  "transporter_rate",
+  "transporter_rate_expense_account",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -142,6 +164,7 @@
    "collapsible": 1,
    "fieldname": "section_break_6",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Description"
   },
   {
@@ -259,6 +282,7 @@
    "collapsible": 1,
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Discount and Margin"
   },
   {
@@ -431,6 +455,7 @@
    "collapsible": 1,
    "fieldname": "item_weight_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Item Weight Details"
   },
   {
@@ -777,13 +802,154 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "transporter_info_section",
+   "fieldtype": "Section Break",
+   "label": "Transporter Info"
+  },
+  {
+   "default": "0",
+   "fieldname": "others_equipment",
+   "fieldtype": "Check",
+   "label": "Others Equipment"
+  },
+  {
+   "depends_on": "eval:!doc.others_equipment",
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "label": "Vehicle/Equipment",
+   "mandatory_depends_on": "eval:!doc.others_equipment",
+   "options": "Equipment"
+  },
+  {
+   "fetch_from": "equipment.registeration_number",
+   "fieldname": "vehicle_no",
+   "fieldtype": "Data",
+   "label": "Vehicle No",
+   "mandatory_depends_on": "eval:doc.others_equipment"
+  },
+  {
+   "fetch_from": "equipment.supplier",
+   "fieldname": "transporter_name",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Transporter Name",
+   "mandatory_depends_on": "eval:doc.others_equipment",
+   "options": "Supplier"
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "vehicle_type",
+   "fieldtype": "Link",
+   "label": "Vehicle Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_59",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "weight_slip_no",
+   "fieldtype": "Data",
+   "label": "Weight Slip No"
+  },
+  {
+   "fieldname": "pol_slip_no",
+   "fieldtype": "Data",
+   "label": "POL Slip No"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_volumetric",
+   "fieldtype": "Check",
+   "label": "Is Volumetric"
+  },
+  {
+   "depends_on": "eval:!doc.is_volumetric",
+   "fieldname": "gross_vehicle_weight",
+   "fieldtype": "Float",
+   "label": "Gross Vehicle Weight",
+   "mandatory_depends_on": "eval:!doc.is_volumetric"
+  },
+  {
+   "depends_on": "eval:!doc.is_volumetric",
+   "fieldname": "tare_weight",
+   "fieldtype": "Float",
+   "label": "Tare Weight",
+   "mandatory_depends_on": "eval:!doc.is_volumetric"
+  },
+  {
+   "depends_on": "eval:doc.is_volumetric",
+   "fieldname": "volumetric_weight",
+   "fieldtype": "Float",
+   "label": "Volumetric Weight",
+   "mandatory_depends_on": "eval:doc.is_volumetric"
+  },
+  {
+   "depends_on": "eval:parent.location_required",
+   "fieldname": "location_base_info_section",
+   "fieldtype": "Section Break",
+   "label": "Location Base Info"
+  },
+  {
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "From Warehouse",
+   "mandatory_depends_on": "eval:parent.location_required",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "distance",
+   "fieldtype": "Link",
+   "label": "Distance",
+   "options": "Distance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transporter_rate_ref",
+   "fieldtype": "Link",
+   "label": "Transporter Rate Ref",
+   "options": "Transporter Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_70",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "mandatory_depends_on": "eval:parent.location_required",
+   "options": "Location"
+  },
+  {
+   "fieldname": "transporter_rate",
+   "fieldtype": "Currency",
+   "label": "Transporter Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transporter_rate_expense_account",
+   "fieldtype": "Link",
+   "label": "Transporter Rate Expense Account",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_type",
+   "fieldtype": "Link",
+   "label": "Item Type",
+   "options": "Item Type"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-17 05:25:47.711177",
+ "modified": "2022-11-17 10:57:23.388871",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

@@ -72,12 +72,10 @@ class StockController(AccountsController):
 				if not gl_entries:
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
-
 		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus == 1:
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
 			make_gl_entries(gl_entries, from_repost=from_repost)
-
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -137,12 +135,10 @@ class StockController(AccountsController):
 
 		sle_map = self.get_stock_ledger_details()
 		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
-
 		gl_list = []
 		warehouse_with_no_account = []
 		precision = self.get_debit_field_precision()
 		for item_row in voucher_details:
-
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
@@ -173,7 +169,6 @@ class StockController(AccountsController):
 								item=item_row,
 							)
 						)
-
 						gl_list.append(
 							self.get_gl_dict(
 								{
@@ -190,7 +185,6 @@ class StockController(AccountsController):
 						)
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
-
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
@@ -199,7 +193,6 @@ class StockController(AccountsController):
 							"Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}."
 						).format(wh, self.company)
 					)
-
 		return process_gl_map(gl_list, precision=precision)
 
 	def get_debit_field_precision(self):
@@ -229,14 +222,12 @@ class StockController(AccountsController):
 			return details
 		else:
 			details = self.get("items")
-
 			if default_expense_account or default_cost_center:
 				for d in details:
 					if default_expense_account and not d.get("expense_account"):
 						d.expense_account = default_expense_account
 					if default_cost_center and not d.get("cost_center"):
 						d.cost_center = default_cost_center
-
 			return details
 
 	def get_items_and_warehouses(self) -> Tuple[List[str], List[str]]:
@@ -424,7 +415,6 @@ class StockController(AccountsController):
 
 	def make_sl_entries(self, sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
-
 		make_sl_entries(sl_entries, allow_negative_stock, via_landed_cost_voucher)
 
 	def make_gl_entries_on_cancel(self):

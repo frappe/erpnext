@@ -20,7 +20,13 @@ frappe.ui.form.on("Warehouse", {
 				},
 			};
 		});
-
+		frm.set_query("create_account_under", function () {
+			return {
+				filters: {
+					is_group: 1,
+				},
+			};
+		});
 		frm.set_query("account", function (doc) {
 			return {
 				filters: {

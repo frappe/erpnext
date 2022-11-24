@@ -573,10 +573,12 @@ class BuyingController(SubcontractingController):
 	def process_fixed_asset(self):
 		if self.doctype == "Purchase Invoice" and not self.update_stock:
 			return
-
+		#Code Commented by Thukten as this is replaced by Asset Issue Details
+		'''
 		asset_items = self.get_asset_items()
 		if asset_items:
 			self.auto_make_assets(asset_items)
+		'''
 
 	def auto_make_assets(self, asset_items):
 		items_data = get_asset_item_details(asset_items)

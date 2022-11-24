@@ -38,13 +38,68 @@ class Warehouse(NestedSet):
 
 	def validate(self):
 		self.warn_about_multiple_warehouse_account()
-
+		self.create_account_head()
 	def on_update(self):
 		self.update_nsm_model()
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
 
+	def create_account_head(self):
+		if not self.get_account():
+			if self.get("__islocal") or not frappe.db.get_value(
+					"Stock Ledger Entry", {"warehouse": self.name}):
+
+				self.validate_parent_account()
+				ac_doc = frappe.get_doc({
+					"doctype": "Account",
+					'account_name': self.warehouse_name,
+					'parent_account': self.create_account_under,
+					'is_group': self.is_group,
+					'company':self.company,
+					"account_type": "Stock",
+					"freeze_account": "No"
+				})
+				ac_doc.flags.ignore_permissions = True
+
+				try:
+					ac_doc.insert()
+					frappe.msgprint(_("Account head {0} created").format(ac_doc.name))
+					self.account = ac_doc.name
+				except frappe.DuplicateEntryError as e:
+					if not (e.args and e.args[0]=='Account'):
+						# if this is not due to creation of Account
+						raise
+
+	def validate_parent_account(self):
+		if not self.company:
+			frappe.throw(_("Warehouse {0}: Company is mandatory").format(self.name))
+
+		if not self.create_account_under:
+			parent_account = frappe.db.sql("""select name from tabAccount
+				where account_type='Stock' and company=%s and is_group=1
+				and (warehouse is null or warehouse = '')""", self.company)
+
+			if parent_account:
+				frappe.db.set_value("Warehouse", self.name, "create_account_under", parent_account[0][0])
+				self.create_account_under = parent_account[0][0]
+		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
+			frappe.throw(_("Warehouse {0}: Parent account {1} does not belong to the company {2}")
+				.format(self.name, self.create_account_under, self.company))
+
+	def get_account(self, warehouse=None):
+		filters = {
+			"account_type": "Stock",
+			"company": self.company,
+			"is_group": self.is_group
+		}
+
+		if warehouse:
+			filters.update({"warehouse": warehouse})
+		else:
+			filters.update({"account_name": self.warehouse_name})
+
+		return frappe.db.get_value("Account", filters)
 	def on_trash(self):
 		# delete bin
 		bins = frappe.get_all("Bin", fields="*", filters={"warehouse": self.name})

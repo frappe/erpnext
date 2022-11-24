@@ -1,0 +1,137 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:COAL-RAIS-{###}",
+ "creation": "2022-10-21 11:10:45.540928",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_date",
+  "oms1_tier1",
+  "oms2_tier1",
+  "column_break_5",
+  "to_date",
+  "working_hr",
+  "rate_per_mt_tier2",
+  "applicable_items",
+  "items",
+  "applicable_branches_section",
+  "branchs"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "working_hr",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Scheduled Working Hr(Tire1 & Tire2))",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicable_items",
+   "fieldtype": "Section Break",
+   "label": "Applicable Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Coal Raising Master Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicable_branches_section",
+   "fieldtype": "Section Break",
+   "label": "Applicable Branches"
+  },
+  {
+   "fieldname": "oms1_tier1",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate for OMS1(Tier 1)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "oms2_tier1",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate for OMS2(Tier 1)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate_per_mt_tier2",
+   "fieldtype": "Float",
+   "label": "Rate Per MT(Tier 2)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "branchs",
+   "fieldtype": "Table",
+   "label": "Branchs",
+   "options": "Coal Raising Branch"
+  }
+ ],
+ "links": [],
+ "modified": "2022-11-10 15:40:16.434308",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Coal Raising Master",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

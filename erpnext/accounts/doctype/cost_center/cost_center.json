@@ -16,6 +16,7 @@
   "company",
   "cb0",
   "is_group",
+  "is_company",
   "disabled",
   "lft",
   "rgt",
@@ -144,13 +145,19 @@
    "label": "Budget Cost Center",
    "mandatory_depends_on": "eval:doc.use_budget_from_parent",
    "options": "Cost Center"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_company",
+   "fieldtype": "Check",
+   "label": "Is Company"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-09-28 12:36:21.032071",
+ "modified": "2022-11-16 14:03:11.464668",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",

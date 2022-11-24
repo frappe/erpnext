@@ -25,6 +25,7 @@
   "is_stock_item",
   "has_variants",
   "is_production_item",
+  "is_pol_item",
   "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
@@ -936,6 +937,12 @@
    "label": "Asset Sub Category",
    "mandatory_depends_on": "is_fixed_asset",
    "options": "Asset Sub Category"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_pol_item",
+   "fieldtype": "Check",
+   "label": "Is POL Item"
   }
  ],
  "icon": "fa fa-tag",
@@ -943,7 +950,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-21 09:32:03.003240",
+ "modified": "2022-10-21 13:57:36.369138",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
