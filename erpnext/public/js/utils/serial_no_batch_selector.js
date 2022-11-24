@@ -771,7 +771,7 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 			}
 
 			frappe.call({
-				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_no_ledgers',
+				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers',
 				args: {
 					ledgers: ledgers,
 					child_row: this.item
@@ -786,7 +786,7 @@ erpnext.SerialNoBatchBundleUpdate = class SerialNoBatchBundleUpdate {
 	render_data() {
 		if (!this.frm.is_new() && this.item.serial_and_batch_bundle) {
 			frappe.call({
-				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_no_ledgers',
+				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers',
 				args: {
 					item_code: this.item.item_code,
 					name: this.item.serial_and_batch_bundle,

@@ -16,6 +16,7 @@ from frappe.utils import (
 	flt,
 	get_link_to_form,
 	getdate,
+	now,
 	nowdate,
 	safe_json_loads,
 )
@@ -189,7 +190,6 @@ class SerialNo(StockController):
 	def get_last_sle(self, serial_no=None):
 		entries = {}
 		sle_dict = self.get_stock_ledger_entries(serial_no)
-		print("sle_dict", sle_dict)
 		if sle_dict:
 			if sle_dict.get("incoming", []):
 				entries["purchase_sle"] = sle_dict["incoming"][0]
@@ -538,11 +538,149 @@ def update_serial_nos(sle, item_det):
 		and item_det.has_serial_no == 1
 		and item_det.serial_no_series
 	):
-		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
-		sle.db_set("serial_no", serial_nos)
-		validate_serial_no(sle, item_det)
-	if sle.serial_and_batch_bundle:
+		bundle = make_serial_bundle(sle, item_det)
+		if bundle:
+			sle.db_set("serial_and_batch_bundle", bundle.name)
+			child_doctype = sle.voucher_type + " Item"
+			if sle.voucher_type == "Stock Entry":
+				child_doctype = "Stock Entry Detail"
+			elif sle.voucher_type == "Stock Reconciliation":
+				child_doctype = "Stock Reconciliation Item"
+
+			frappe.db.set_value(
+				child_doctype, sle.voucher_detail_no, "serial_and_batch_bundle", bundle.name
+			)
+
+	elif sle.serial_and_batch_bundle:
 		auto_make_serial_nos(sle)
+
+
+def make_serial_bundle(sle, item_details):
+	sr_nos = auto_create_serial_nos(sle, item_details)
+
+	if sr_nos:
+		sn_doc = frappe.new_doc("Serial and Batch Bundle")
+		sn_doc.item_code = item_details.name
+		sn_doc.item_name = item_details.item_name
+		sn_doc.item_group = item_details.item_group
+		sn_doc.has_serial_no = item_details.has_serial_no
+		sn_doc.has_batch_no = item_details.has_batch_no
+		sn_doc.voucher_type = sle.voucher_type
+		sn_doc.voucher_no = sle.voucher_no
+		sn_doc.flags.ignore_mandatory = True
+		sn_doc.qty = sle.actual_qty
+		sn_doc.insert()
+
+		batch_no = ""
+		if item_details.has_batch_no:
+			batch_no = create_batch_for_serial_no(sle)
+
+		ledgers = []
+		fields = [
+			"name",
+			"serial_no",
+			"batch_no",
+			"warehouse",
+			"qty",
+			"parent",
+			"parenttype",
+			"parentfield",
+		]
+
+		for serial_no in sr_nos:
+			ledgers.append(
+				(
+					frappe.generate_hash("", 10),
+					serial_no,
+					batch_no,
+					sle.warehouse,
+					1,
+					sn_doc.name,
+					sn_doc.doctype,
+					"ledgers",
+				)
+			)
+
+		frappe.db.bulk_insert(
+			"Serial and Batch Ledger",
+			fields=fields,
+			values=set(ledgers),
+			ignore_duplicates=True,
+		)
+
+		sn_doc.load_from_db()
+		return sn_doc.submit()
+
+
+def create_batch_for_serial_no(sle):
+	from erpnext.stock.doctype.batch.batch import make_batch
+
+	return make_batch(
+		frappe._dict(
+			{
+				"item": sle.item_code,
+				"reference_doctype": sle.voucher_type,
+				"reference_name": sle.voucher_no,
+			}
+		)
+	)
+
+
+def auto_create_serial_nos(sle, item_details) -> List[str]:
+	sr_nos = []
+	serial_nos_details = []
+	for i in range(cint(sle.actual_qty)):
+		serial_no = make_autoname(item_details.serial_no_series, "Serial No")
+		sr_nos.append(serial_no)
+		serial_nos_details.append(
+			(
+				serial_no,
+				serial_no,
+				now(),
+				now(),
+				frappe.session.user,
+				frappe.session.user,
+				sle.voucher_type,
+				sle.voucher_no,
+				sle.warehouse,
+				sle.company,
+				sle.posting_date,
+				sle.posting_time,
+				sle.incoming_rate,
+				sle.item_code,
+				item_details.item_name,
+				item_details.description,
+			)
+		)
+
+	if serial_nos_details:
+		fields = [
+			"name",
+			"serial_no",
+			"creation",
+			"modified",
+			"owner",
+			"modified_by",
+			"purchase_document_type",
+			"purchase_document_no",
+			"warehouse",
+			"company",
+			"purchase_date",
+			"purchase_time",
+			"purchase_rate",
+			"item_code",
+			"item_name",
+			"description",
+		]
+
+		frappe.db.bulk_insert(
+			"Serial No",
+			fields=fields,
+			values=set(serial_nos_details),
+			ignore_duplicates=True,
+		)
+
+	return sr_nos
 
 
 def get_auto_serial_nos(serial_no_series, qty):
@@ -609,7 +747,8 @@ def get_items_html(serial_nos, item_code):
 def get_item_details(item_code):
 	return frappe.db.sql(
 		"""select name, has_batch_no, docstatus,
-		is_stock_item, has_serial_no, serial_no_series
+		is_stock_item, has_serial_no, serial_no_series, description, item_name,
+		item_group, stock_uom
 		from tabItem where name=%s""",
 		item_code,
 		as_dict=True,

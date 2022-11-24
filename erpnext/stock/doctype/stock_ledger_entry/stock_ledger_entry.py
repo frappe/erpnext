@@ -40,7 +40,6 @@ class StockLedgerEntry(Document):
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
 		self.validate_mandatory()
-		self.validate_serial_batch_no_bundle()
 		self.validate_batch()
 		validate_disabled_warehouse(self.warehouse)
 		validate_warehouse_company(self.warehouse, self.company)
@@ -57,6 +56,8 @@ class StockLedgerEntry(Document):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 
 			process_serial_no(self)
+
+		self.validate_serial_batch_no_bundle()
 
 	def calculate_batch_qty(self):
 		if self.batch_no:

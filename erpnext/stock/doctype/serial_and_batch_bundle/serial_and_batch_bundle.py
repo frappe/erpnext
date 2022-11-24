@@ -48,7 +48,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_no_ledgers(item_code, voucher_no, name=None):
+def get_serial_batch_ledgers(item_code, voucher_no, name=None):
 	return frappe.get_all(
 		"Serial and Batch Bundle",
 		fields=[
@@ -68,7 +68,7 @@ def get_serial_batch_no_ledgers(item_code, voucher_no, name=None):
 
 
 @frappe.whitelist()
-def add_serial_batch_no_ledgers(ledgers, child_row) -> object:
+def add_serial_batch_ledgers(ledgers, child_row) -> object:
 	if isinstance(child_row, str):
 		child_row = frappe._dict(frappe.parse_json(child_row))
 
