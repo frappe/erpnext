@@ -170,7 +170,6 @@ def get_data(filters):
 				if d.price_list == filters.standard_price_list:
 					items_map[d.item_code].standard_rate = d.price_list_rate
 
-				# show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 				show_amounts = has_valuation_read_permission()
 				if show_amounts:
 					price.item_price = d.name

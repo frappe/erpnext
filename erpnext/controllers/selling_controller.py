@@ -551,19 +551,17 @@ class SellingController(StockController):
 
 	@frappe.whitelist()
 	def set_rate_as_cost(self):
-		if has_valuation_read_permission():
-			for item in self.items:
-				if item.item_code:
-					cost_rate = self.get_rate_as_cost(item)
-					item.rate = cost_rate
-					item.discount_percentage = 0
-					item.margin_rate_or_amount = 0
-
-			self.calculate_taxes_and_totals()
-		else:
+		if not has_valuation_read_permission():
 			frappe.throw('User not allowed to read valuation rate')
 
+		for item in self.items:
+			if item.item_code:
+				cost_rate = self.get_rate_as_cost(item)
+				item.rate = cost_rate
+				item.discount_percentage = 0
+				item.margin_rate_or_amount = 0
 
+		self.calculate_taxes_and_totals()
 
 	def get_rate_as_cost(self, item):
 		qty = -1 * flt(item.qty)
@@ -574,9 +572,9 @@ class SellingController(StockController):
 				WHERE voucher_type = 'Delivery Note' AND voucher_no = %s AND voucher_detail_no = %s
 			""", (item.delivery_note, item.delivery_note_item))
 
-			sum_of_stock_value_difference = sum_of_stock_value_difference[0][0] or 0
+			sum_of_stock_value_difference = flt(sum_of_stock_value_difference[0][0])
 			if qty:
-				cost_rate = flt(sum_of_stock_value_difference) / qty
+				cost_rate = sum_of_stock_value_difference / qty
 			else:
 				cost_rate = sum_of_stock_value_difference
 
