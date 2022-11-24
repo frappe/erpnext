@@ -29,11 +29,12 @@ from erpnext.assets.doctype.asset.depreciation import (
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	cancel_asset_depreciation_schedules,
-	convert_draft_asset_depreciation_schedules_into_active,
-	get_asset_depreciation_schedule,
-	make_draft_asset_depreciation_schedules,
-	update_draft_asset_depreciation_schedules,
+	cancel_asset_depr_schedules,
+	convert_draft_asset_depr_schedules_into_active,
+	get_asset_depr_schedule,
+	get_depr_schedule_from_asset_depr_schedule_of_asset,
+	make_draft_asset_depr_schedules,
+	update_draft_asset_depr_schedules,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -47,7 +48,7 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		if not self.split_from:
 			self.prepare_depreciation_data()
-			update_draft_asset_depreciation_schedules(self)
+			update_draft_asset_depr_schedules(self)
 		self.validate_gross_and_purchase_amount()
 		self.validate_expected_value_after_useful_life()
 
@@ -59,13 +60,13 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
-		convert_draft_asset_depreciation_schedules_into_active(self)
+		convert_draft_asset_depr_schedules_into_active(self)
 
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
 		self.delete_depreciation_entries()
-		cancel_asset_depreciation_schedules(self)
+		cancel_asset_depr_schedules(self)
 		self.set_status()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
@@ -73,7 +74,7 @@ class Asset(AccountsController):
 
 	def after_insert(self):
 		if not self.split_from:
-			make_draft_asset_depreciation_schedules(self)
+			make_draft_asset_depr_schedules(self)
 
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
@@ -246,7 +247,7 @@ class Asset(AccountsController):
 		return value_after_depreciation
 
 	def get_from_date(self, finance_book):
-		asset_depr_schedule = get_asset_depreciation_schedule(self.name, finance_book)
+		asset_depr_schedule = get_asset_depr_schedule(self.name, finance_book)
 
 		if not asset_depr_schedule:
 			return self.available_for_use_date
@@ -357,18 +358,16 @@ class Asset(AccountsController):
 		return depreciation_amount_for_last_row
 
 	def get_depreciation_amount_for_first_row(self, finance_book):
-		asset_depr_schedule = get_asset_depreciation_schedule(self.name, finance_book)
-
-		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule)
-
-		return asset_depr_schedule_doc.get("depreciation_schedule")[0].depreciation_amount
+		return get_depr_schedule_from_asset_depr_schedule_of_asset(self.name, finance_book)[
+			0
+		].depreciation_amount
 
 	def get_value_after_depreciation(self, idx):
 		return flt(self.get("finance_books")[cint(idx) - 1].value_after_depreciation)
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule = get_asset_depreciation_schedule(self.name, row.finance_book)
+			asset_depr_schedule = get_asset_depr_schedule(self.name, row.finance_book)
 
 			if not asset_depr_schedule:
 				return
@@ -426,7 +425,7 @@ class Asset(AccountsController):
 
 	def delete_depreciation_entries(self):
 		for row in self.get("finance_books"):
-			asset_depr_schedule = get_asset_depreciation_schedule(self.name, row.finance_book)
+			asset_depr_schedule = get_asset_depr_schedule(self.name, row.finance_book)
 
 			if not asset_depr_schedule:
 				return

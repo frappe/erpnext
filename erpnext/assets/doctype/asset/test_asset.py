@@ -882,7 +882,7 @@ class TestDepreciationBasics(AssetSetup):
 		"""Tests if get_depreciation_amount() returns the right value."""
 
 		from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-			get_depreciation_amount
+			get_depreciation_amount,
 		)
 
 		asset = create_asset(item_code="Macbook Pro", available_for_use_date="2019-12-31")
@@ -902,8 +902,8 @@ class TestDepreciationBasics(AssetSetup):
 		depreciation_amount = get_depreciation_amount(asset, 100000, asset.finance_books[0])
 		self.assertEqual(depreciation_amount, 30000)
 
-	def test_make_depreciation_schedule(self):
-		"""Tests if make_depreciation_schedule() returns the right values."""
+	def test_make_depr_schedule(self):
+		"""Tests if make_depr_schedule() returns the right values."""
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1194,8 +1194,8 @@ class TestDepreciationBasics(AssetSetup):
 		depr_expense_account.parent_account = "Expenses - _TC"
 		depr_expense_account.save()
 
-	def test_clear_depreciation_schedule(self):
-		"""Tests if clear_depreciation_schedule() works as expected."""
+	def test_clear_depr_schedule(self):
+		"""Tests if clear_depr_schedule() works as expected."""
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1211,11 +1211,11 @@ class TestDepreciationBasics(AssetSetup):
 		post_depreciation_entries(date="2021-06-01")
 		asset.load_from_db()
 
-		asset.clear_depreciation_schedule()
+		asset.clear_depr_schedule()
 
 		self.assertEqual(len(asset.schedules), 1)
 
-	def test_clear_depreciation_schedule_for_multiple_finance_books(self):
+	def test_clear_depr_schedule_for_multiple_finance_books(self):
 		asset = create_asset(item_code="Macbook Pro", available_for_use_date="2019-12-31", do_not_save=1)
 
 		asset.calculate_depreciation = 1
@@ -1254,7 +1254,7 @@ class TestDepreciationBasics(AssetSetup):
 		post_depreciation_entries(date="2020-04-01")
 		asset.load_from_db()
 
-		asset.clear_depreciation_schedule()
+		asset.clear_depr_schedule()
 
 		self.assertEqual(len(asset.schedules), 6)
 

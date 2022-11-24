@@ -5,15 +5,16 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, date_diff, flt, formatdate, getdate
+from frappe.utils import date_diff, flt, formatdate, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_asset_depreciation_schedule,
+	get_asset_depr_schedule,
 	get_depreciation_amount,
+	set_accumulated_depreciation,
 )
 
 
@@ -115,8 +116,17 @@ class AssetValueAdjustment(Document):
 		for d in asset.finance_books:
 			d.value_after_depreciation = asset_value
 
-			asset_depr_schedule = get_asset_depreciation_schedule(asset.name, d.finance_book)
-			depr_schedule = asset_depr_schedule.get("depreciation_schedule")
+			current_asset_depr_schedule = get_asset_depr_schedule(asset.name, d.finance_book)
+
+			current_asset_depr_schedule_doc = frappe.get_doc(
+				"Asset Depreciation Schedule", current_asset_depr_schedule
+			)
+
+			new_asset_depr_schedule_doc = frappe.copy_doc(
+				current_asset_depr_schedule_doc, ignore_no_copy=False
+			)
+
+			depr_schedule = new_asset_depr_schedule_doc.get("depreciation_schedule")
 
 			if d.depreciation_method in ("Straight Line", "Manual"):
 				end_date = max(s.schedule_date for s in depr_schedule)
@@ -128,7 +138,7 @@ class AssetValueAdjustment(Document):
 
 			value_after_depreciation = d.value_after_depreciation
 			for data in depr_schedule:
-				if cint(data.finance_book_id) == d.idx and not data.journal_entry:
+				if not data.journal_entry:
 					if d.depreciation_method in ("Straight Line", "Manual"):
 						days = date_diff(data.schedule_date, from_date)
 						depreciation_amount = days * rate_per_day
@@ -142,10 +152,16 @@ class AssetValueAdjustment(Document):
 
 			d.db_update()
 
-		asset.set_accumulated_depreciation(ignore_booked_entry=True)
-		for asset_data in asset.schedules:
-			if not asset_data.journal_entry:
-				asset_data.db_update()
+			set_accumulated_depreciation(new_asset_depr_schedule_doc, asset, d, ignore_booked_entry=True)
+			for asset_data in depr_schedule:
+				if not asset_data.journal_entry:
+					asset_data.db_update()
+
+			current_asset_depr_schedule_doc.cancel()
+
+			new_asset_depr_schedule_doc.notes = "Asset value adjustment"
+
+			new_asset_depr_schedule_doc.submit()
 
 
 @frappe.whitelist()
