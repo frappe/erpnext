@@ -311,45 +311,45 @@ class BankBookReconciliations(Document):
 	
 	def modified_total_reconcilitiation_account(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
-		doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
+		
 		if len(details) > 0:
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
-
+			doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 			if len(transaction) > 0:
 				doc.reconciliation_date = self.date
 				doc.total_reconciliation = self.actual_total_conciliation
 
-		for detail in details:
-			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
-			if transac[0].transaction_data == "Bank Check" or transac[0].transaction_data== "Debit Note":
-				doc.deferred_debits -= transac[0].amount_data
-			else:
-				doc.deferred_credits -= transac[0].amount_data
-		
-		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+			for detail in details:
+				transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
+				if transac[0].transaction_data == "Bank Check" or transac[0].transaction_data== "Debit Note":
+					doc.deferred_debits -= transac[0].amount_data
+				else:
+					doc.deferred_credits -= transac[0].amount_data
+			
+			doc.current_balance = doc.deferred_credits - doc.deferred_debits
 
-		doc.save()
+			doc.save()
 	
 	def modified_total_reconcilitiation_account_cancel(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
-		doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
+		
 		if len(details) > 0:
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
-
+			doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 			if len(transaction) > 0:
 				doc.reconciliation_date = self.date_last_reconciliations
 				doc.total_reconciliation = self.total_last_reconciliations
 
-		for detail in details:
-			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
-			if transac[0].transaction_data == "Bank Check" or transac[0].transaction_data== "Debit Note":
-				doc.deferred_debits += transac[0].amount_data
-			else:
-				doc.deferred_credits += transac[0].amount_data
-		
-		doc.current_balance = doc.deferred_credits - doc.deferred_debits
+			for detail in details:
+				transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
+				if transac[0].transaction_data == "Bank Check" or transac[0].transaction_data== "Debit Note":
+					doc.deferred_debits += transac[0].amount_data
+				else:
+					doc.deferred_credits += transac[0].amount_data
+			
+			doc.current_balance = doc.deferred_credits - doc.deferred_debits
 
-		doc.save()
+			doc.save()
 	
 	def verificate_bank_account(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
