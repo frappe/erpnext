@@ -231,8 +231,8 @@ class Bankreconciliations(Document):
 
 		for detail in details:
 			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
-			doc.docstatus = 3
-			doc.status = "Transit"
+			doc.docstatus = 4
+			doc.status = "Pre-reconciled"
 			doc.save()
 	
 	def mark_reconciled_payment_entry(self):
@@ -272,7 +272,6 @@ class Bankreconciliations(Document):
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
 
 			if len(transaction) > 0:
-				
 				doc.reconciliation_date = self.date
 				doc.total_reconciliation = self.actual_total_conciliation
 

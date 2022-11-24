@@ -275,8 +275,8 @@ class BankBookReconciliations(Document):
 
 		for detail in details:
 			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
-			doc.docstatus = 4
-			doc.status = "Pre-reconciled"
+			doc.docstatus = 3
+			doc.status = "Transit"
 			doc.save()
 	
 	def mark_reconciled_payment_entry(self):
@@ -311,14 +311,13 @@ class BankBookReconciliations(Document):
 	
 	def modified_total_reconcilitiation_account(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
-
+		doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 		if len(details) > 0:
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
 
 			if len(transaction) > 0:
-				doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 				doc.reconciliation_date = self.date
-				doc.total_reconciliation = self.total_last_reconciliations
+				doc.total_reconciliation = self.actual_total_conciliation
 
 		for detail in details:
 			transac = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data", "amount_data"], filters = {"name": detail.bank_trasaction})
@@ -333,12 +332,11 @@ class BankBookReconciliations(Document):
 	
 	def modified_total_reconcilitiation_account_cancel(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction", "amount"], filters = {"parent": self.name})
-
+		doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 		if len(details) > 0:
 			transaction = frappe.get_all("Bank Transactions", ["bank_account", "transaction_data"], filters = {"name": details[0].bank_trasaction})
 
 			if len(transaction) > 0:
-				doc = frappe.get_doc("Bank Account", transaction[0].bank_account)
 				doc.reconciliation_date = self.date_last_reconciliations
 				doc.total_reconciliation = self.total_last_reconciliations
 
