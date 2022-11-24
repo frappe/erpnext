@@ -686,7 +686,6 @@ erpnext.patches.v12_0.add_vehicles_domain
 erpnext.patches.v12_0.set_bill_to_in_sales_invoice
 erpnext.patches.v12_0.update_vehicle_color_link
 erpnext.patches.v12_0.convert_vehicle_service_person_to_sales_person
-erpnext.patches.v12_0.resetup_vehicle_domain #4-10-2020 #8-11-2020/2 #19-11-2020 #18-12-2020 #19-04-2021/2 #29-05-2021 #4-10-2021 #27-10-2021 #4-12-2021
 erpnext.patches.v12_0.set_item_tax_details #19-11-2020
 erpnext.patches.v12_0.create_item_source_from_db_and_df
 erpnext.patches.v12_0.set_customer_primary_address_and_contact
@@ -718,7 +717,6 @@ erpnext.patches.v12_0.set_vehicle_registration_agent_outstanding
 erpnext.patches.v12_0.set_vehicle_invoice_customer
 erpnext.patches.v12_0.set_sales_team_commission_rate_numerical
 erpnext.patches.v12_0.remove_vehicle_registration_to_pay_agent_status
-erpnext.patches.v12_0.resetup_vehicle_domain #4-12-2021 #20-01-2022 #24-01-2022/2 #01-02-2022 #17-03-2022 #30-03-2022 #1-04-2022 #3-04-2022 #5-04-2022/2
 erpnext.patches.v12_0.remove_vehicle_owner_field
 erpnext.patches.v12_0.set_is_stock_item_in_line_item
 erpnext.patches.v12_0.rename_transaction_line_item_reference_fieldname
@@ -734,7 +732,6 @@ execute:frappe.delete_doc_if_exists("Custom Field", "Project-deliver_vehicle_btn
 erpnext.patches.v12_0.change_vehicle_checklist_parentfield
 execute:frappe.delete_doc_if_exists("Custom Field", "Project-vehicle_owner")
 execute:frappe.delete_doc_if_exists("Custom Field", "Project-col_break_customer_details_2")
-erpnext.patches.v12_0.resetup_vehicle_domain #5-04-2022 #11-04-2022 #12-04-2022 #15-04-2022 #20-04-2022 #24-04-2022 #25-04-2022 #26-04-2022
 erpnext.patches.v12_0.rename_customer_billable_amount_field
 execute:frappe.delete_doc_if_exists("Report", "Vehicle Sales Stock")
 execute:frappe.delete_doc_if_exists("Report", "Vehicles In Workshop")
@@ -749,7 +746,6 @@ erpnext.patches.v12_0.reset_returned_qty_sales_invoice
 erpnext.patches.v12_0.create_item_default_rules
 erpnext.patches.v12_0.set_project_date
 erpnext.patches.v12_0.rename_vehicle_workshop
-erpnext.patches.v12_0.resetup_vehicle_domain #30-04-2022 #24-07-2022 #27-07-2022 #30-07-2022 #04-08-2022 #29-08-2022 #20-10-2022
 erpnext.patches.v12_0.update_reference_vehicle_log
 erpnext.patches.v12_0.set_vehicle_images
 erpnext.patches.v12_0.set_vehicle_transfer_letter_territory
@@ -775,9 +771,9 @@ execute:frappe.delete_doc_if_exists("Report", "Sales Payment Summary")
 execute:frappe.delete_doc_if_exists("Report", "Sales Order Items To Be Delivered")
 execute:frappe.delete_doc_if_exists("Report", "Purchase Order Items To Be Received")
 erpnext.patches.v12_0.set_booking_customer_name_in_jv
-erpnext.patches.v12_0.resetup_vehicle_domain #08-11-2022 #16-11-2022
 erpnext.patches.v12_0.move_customer_reference_to_lead
 erpnext.patches.v12_0.rename_stock_valuation_restriction_field
 erpnext.patches.v14_0.delete_datev_doctypes
 
 [post_model_sync]
+erpnext.patches.v12_0.resetup_vehicle_domain #24-11-2022
