@@ -11,7 +11,7 @@ from frappe.utils.html_utils import clean_html
 
 class StockSettings(Document):
 	def validate(self):
-		for key in ["item_naming_by", "item_group", "stock_uom",
+		for key in ["item_naming_by", "item_group", "stock_uom", "restrict_amounts_in_report_to_role",
 			"allow_negative_stock", "default_warehouse", "set_qty_in_transactions_based_on_serial_no_input"]:
 				frappe.db.set_default(key, self.get(key, ""))
 
