@@ -49,10 +49,10 @@ def validate_filters(filters):
         filters.to_date = filters.year_end_date
 
     if filters.get('asset_category'):
-        filters.asset_category = frappe.parse_json(filters.get('asset_category'))
+        filters.asset_category = filters.get('asset_category')
 
     if filters.get('asset_code'):
-        filters.asset_code = frappe.parse_json(filters.get('asset_code'))
+        filters.asset_code = filters.get('asset_code')
 
 def get_depreciation_details(filters):
     query= """

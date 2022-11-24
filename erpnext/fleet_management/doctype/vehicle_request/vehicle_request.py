@@ -6,9 +6,11 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 from frappe.utils import flt, get_datetime, nowdate, cint, datetime, date_diff, time_diff
+from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 
 class VehicleRequest(Document):
 	def validate(self):
+		validate_workflow_states(self)
 		self.check_duplicate_entry()
 		self.calculate_time()
 		self.check_date()
@@ -16,6 +18,11 @@ class VehicleRequest(Document):
 		if self.kilometer_reading:
 			if flt(self.previous_km) > flt(self.kilometer_reading):
 				frappe.throw("Kilometer reading must be greater than previous kilometer reading.")
+		if self.workflow_state != "Approved":
+			notify_workflow_states(self)
+
+	def on_submit(self):
+		notify_workflow_states(self)
 
 	def check_duplicate_entry(self):
 		data = frappe.db.sql("""

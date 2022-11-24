@@ -276,8 +276,8 @@
    "fieldname": "bank",
    "fieldtype": "Link",
    "label": "Bank",
-   "options": "Financial Institution",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.hired_equipment == 1",
+   "options": "Financial Institution"
   },
   {
    "fieldname": "bank_name",
@@ -353,7 +353,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-17 16:34:19.582359",
+ "modified": "2022-11-24 15:14:48.290845",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",

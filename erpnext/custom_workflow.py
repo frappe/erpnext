@@ -35,7 +35,7 @@ class CustomWorkflow:
 		self.field_list		= ["user_id","employee_name","designation","name"]
 		if self.doc.doctype != "Material Request" and self.doc.doctype != "Performance Evaluation" and self.doc.doctype not in ("Project Capitalization","Asset Issue Details", "Compile Budget"):
 			self.employee		= frappe.db.get_value("Employee", self.doc.employee, self.field_list)
-			self.reports_to		= frappe.db.get_value("Employee", frappe.db.get_value("Employee", self.doc.employee, "reports_to"), self.field_list)
+			self.reports_to		= frappe.db.get_value("Employee", {"user_id":frappe.db.get_value("Employee", self.doc.employee, "expense_approver")}, self.field_list)
 			self.supervisors_supervisor = frappe.db.get_value("Employee", frappe.db.get_value("Employee", frappe.db.get_value("Employee", self.doc.employee, "reports_to"), "reports_to"), self.field_list)
 			self.hr_approver	= frappe.db.get_value("Employee", frappe.db.get_single_value("HR Settings", "hr_approver"), self.field_list)
 			if self.doc.doctype in ('Travel Authorization','Travel Claim'):
@@ -168,15 +168,16 @@ class CustomWorkflow:
 			})
 
 	def set_approver(self, approver_type):
-		if not self.reports_to:
-			frappe.throw("Reports To not set for Employee {}".format(self.doc.employee if self.doc.employee else frappe.db.get_value("Employee",{"user_id",self.doc.owner},"name")))
 		if approver_type == "Supervisor":
+			if not self.reports_to:
+				frappe.throw("Expense Approver not set for Employee {}".format(self.doc.employee if self.doc.employee else frappe.db.get_value("Employee",{"user_id",self.doc.owner},"name")))
 			officiating = get_officiating_employee(self.reports_to[3])
 			if officiating:
 				officiating = frappe.db.get_value("Employee", officiating[0].officiate, self.field_list)
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.reports_to[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.reports_to[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.reports_to[2]
+		
 		elif approver_type == "Supervisors Supervisor":
 			officiating = get_officiating_employee(self.supervisors_supervisor[3])
 			if officiating:
@@ -184,6 +185,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.supervisors_supervisor[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.supervisors_supervisor[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.supervisors_supervisor[2]
+		
 		elif approver_type == "Project Manager":
 			if self.project_manager == None:
 				frappe.throw("""No Project Manager set in Project Definition <a href="#Form/Project%20Definition/{0}">{0}</a>""".format(frappe.db.get_value("Project",self.doc.reference_name,"project_definition")))
@@ -193,6 +195,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.project_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.project_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.project_manager[2]
+		
 		elif approver_type == "HR":
 			officiating = get_officiating_employee(self.hr_approver[3])
 			if officiating:
@@ -200,6 +203,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.hr_approver[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.hr_approver[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.hr_approver[2]
+		
 		elif approver_type == "TravelAdmin":
 			officiating = get_officiating_employee(self.ta_approver[3])
 			if officiating:
@@ -215,6 +219,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.inventory_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.inventory_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.inventory_manager[2]
+		
 		elif approver_type == "Manager Power":
 			officiating = get_officiating_employee(self.power_section_manager[3])
 			if officiating:
@@ -222,6 +227,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.power_section_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.power_section_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.power_section_manager[2]
+		
 		elif approver_type == "TSWF Manager":
 			officiating = get_officiating_employee(self.tswf_manager[3])
 			if officiating:
@@ -229,6 +235,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.tswf_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.tswf_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.tswf_manager[2]
+		
 		elif approver_type == "CCS Manager":
 			officiating = get_officiating_employee(self.ccs_manager[3])
 			if officiating:
@@ -236,6 +243,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.ccs_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.ccs_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.ccs_manager[2]
+		
 		elif approver_type == "Billing Manager":
 			officiating = get_officiating_employee(self.billing_section_manager[3])
 			if officiating:
@@ -243,6 +251,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.billing_section_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.billing_section_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.billing_section_manager[2]
+		
 		elif approver_type == "ADM":
 			officiating = get_officiating_employee(self.adm_section_manager[3])
 			if officiating:
@@ -250,6 +259,15 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.adm_section_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.adm_section_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.adm_section_manager[2]
+		
+		elif approver_type == "ADM User":
+			officiating = get_officiating_employee(self.adm_section_manager[3])
+			if officiating:
+				officiating = frappe.db.get_value("Employee", officiating[0].officiate, self.field_list)
+			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.adm_section_manager[0]
+			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.adm_section_manager[1]
+			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.adm_section_manager[2]
+
 		elif approver_type == "Internal Audit":
 			officiating = get_officiating_employee(self.internal_audit[3])
 			if officiating:
@@ -257,6 +275,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.internal_audit[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.internal_audit[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.internal_audit[2]
+		
 		elif approver_type == "General Manager":
 			officiating = get_officiating_employee(self.general_manager[3])
 			if officiating:
@@ -264,6 +283,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.general_manager[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.general_manager[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.general_manager[2]
+		
 		elif approver_type == "GMITD":
 			officiating = get_officiating_employee(self.gm_itd[3])
 			if officiating:
@@ -271,6 +291,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gm_itd[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gm_itd[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gm_itd[2]
+		
 		elif approver_type == "GMM":
 			officiating = get_officiating_employee(self.gm_marketing[3])
 			if officiating:
@@ -278,6 +299,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gm_marketing[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gm_marketing[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gm_marketing[2]
+		
 		elif approver_type == "GMCPSD":
 			officiating = get_officiating_employee(self.gm_cpsd[3])
 			if officiating:
@@ -285,6 +307,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gm_cpsd[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gm_cpsd[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gm_cpsd[2]
+		
 		elif approver_type == "GMFID":
 			officiating = get_officiating_employee(self.gm_fid[3])
 			if officiating:
@@ -292,6 +315,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gm_fid[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gm_fid[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gm_fid[2]
+		
 		elif approver_type == "GMO":
 			officiating = get_officiating_employee(self.gmo[3])
 			if officiating:
@@ -299,6 +323,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gmo[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gmo[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gmo[2]
+		
 		elif approver_type == "DirectorT":
 			officiating = get_officiating_employee(self.director_t[3])
 			if officiating:
@@ -306,6 +331,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.director_t[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.director_t[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.director_t[2]
+		
 		elif approver_type == "DirectorB":
 			officiating = get_officiating_employee(self.director_b[3])
 			if officiating:
@@ -313,6 +339,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.director_b[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.director_b[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.director_b[2]
+		
 		elif approver_type == "Regional Director":
 			officiating = get_officiating_employee(self.regional_director[3])
 			if officiating:
@@ -320,6 +347,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.regional_director[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.regional_director[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.regional_director[2]
+		
 		elif approver_type == "Department Head":
 			officiating = get_officiating_employee(self.dept_approver[3])
 			if officiating:
@@ -327,6 +355,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.dept_approver[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.dept_approver[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.dept_approver[2]
+		
 		elif approver_type == "GM":
 			# frappe.msgprint(str(self.gm_approver))
 			officiating = get_officiating_employee(self.gm_approver[3])
@@ -335,6 +364,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gm_approver[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gm_approver[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gm_approver[2]
+		
 		elif approver_type == "GMCSD":
 			officiating = get_officiating_employee(self.gmcsd[3])
 			if officiating:
@@ -342,6 +372,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.gmcsd[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.gmcsd[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.gmcsd[2]
+		
 		elif approver_type == "CEO":
 			officiating = get_officiating_employee(self.ceo[3])
 			if officiating:
@@ -349,6 +380,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.ceo[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.ceo[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.ceo[2]
+		
 		elif approver_type == "Final Approver":
 			officiating = get_officiating_employee(self.final_approver[3])
 			if officiating:
@@ -356,6 +388,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.final_approver[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.final_approver[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.final_approver[2]
+		
 		elif approver_type == "GM":
 			officiating = get_officiating_employee(self.reports_to[3])
 			if officiating:
@@ -363,6 +396,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.reports_to[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.reports_to[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.reports_to[2]
+		
 		elif approver_type == "Project Approver":
 			officiating = get_officiating_employee(self.project_approver[3])
 			if officiating:
@@ -370,6 +404,7 @@ class CustomWorkflow:
 			vars(self.doc)[self.doc_approver[0]] = officiating[0] if officiating else self.project_approver[0]
 			vars(self.doc)[self.doc_approver[1]] = officiating[1] if officiating else self.project_approver[1]
 			vars(self.doc)[self.doc_approver[2]] = officiating[2] if officiating else self.project_approver[2]
+		
 		else:
 			frappe.throw(_("Invalid approver type for Workflow"))
 
@@ -386,6 +421,8 @@ class CustomWorkflow:
 			self.salary_advance()
 		elif self.doc.doctype == "Travel Request":
 			self.travel_request()
+		elif self.doc.doctype == "Vehicle Request":
+			self.vehicle_request()
 		elif self.doc.doctype == "Overtime Application":
 			self.overtime_application()
 		elif self.doc.doctype == "Material Request":
@@ -902,6 +939,7 @@ class CustomWorkflow:
 		# if self.new_state.lower() in ("Waiting HR Approval".lower()):
 		# 	self.set_approver()
 		if self.new_state.lower() in ("Waiting Approval".lower()):
+			self.doc.check_advance()
 			self.set_approver("Supervisor")
 			self.doc.document_status = "Draft"
 		elif self.new_state == "Verified By Supervisor":
@@ -921,6 +959,29 @@ class CustomWorkflow:
 			if "HR User" not in frappe.get_roles(frappe.session.user):
 				frappe.throw(_("Only {} can Cancel this Travel Authorization").format(self.doc.supervisor_name))
 			self.doc.document_status = "Cancelled"
+
+	def vehicle_request(self):
+		if self.new_state.lower() in ("Waiting MTO Approval".lower()):
+			self.set_approver("ADM User")
+		
+		
+		# elif self.new_state == "Verified By Supervisor":
+		# 	if self.doc.supervisor != frappe.session.user:
+		# 		frappe.throw("Only {} can Approve this request".format(self.doc.supervisor_name))
+		# 	self.set_approver("Supervisors Supervisor")	
+		# 	self.doc.document_status = "Verified by Supervisor"
+		# elif self.new_state.lower() == "Approved".lower():
+		# 	if self.doc.supervisor != frappe.session.user:
+		# 		frappe.throw("Only {} can Approve this request".format(self.doc.supervisor_name))
+		# 	self.doc.document_status = "Approved"
+		# elif self.new_state.lower() == 'Rejected'.lower():
+		# 	if self.doc.supervisor != frappe.session.user:
+		# 		frappe.throw("Only {} can Reject this request".format(self.doc.supervisor_name))
+		# 	self.doc.document_status = "Rejected"
+		# elif self.new_state.lower() == "Cancelled".lower():
+		# 	if "HR User" not in frappe.get_roles(frappe.session.user):
+		# 		frappe.throw(_("Only {} can Cancel this Travel Authorization").format(self.doc.supervisor_name))
+		# 	self.doc.document_status = "Cancelled"
 
 	def overtime_application(self):
 		if self.new_state.lower() in ("Draft".lower(), "Waiting Supervisor Approval".lower()):
@@ -1636,6 +1697,7 @@ def get_field_map():
 		"Leave Encashment": ["approver","approver_name","approver_designation"],
 		"Leave Application": ["leave_approver", "leave_approver_name", "leave_approver_designation"],
 		"Travel Request": ["supervisor", "supervisor_name", "supervisor_designation"],
+		"Vehicle Request": ["supervisor", "supervisor_name", "supervisor_designation"],
 		"Overtime Application": ["approver", "approver_name", "approver_designation"],
 		"Material Request": ["approver","approver_name","approver_designation"],
 		"Festival Advance": ["advance_approver","advance_approver_name", "advance_approver_designation"],

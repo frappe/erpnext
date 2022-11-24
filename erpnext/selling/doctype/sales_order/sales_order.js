@@ -47,6 +47,15 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
+	item_group:function(frm){
+		frm.set_query("item_code","items",function(doc){
+			return {
+				filters :{
+					item_group:frm.doc.item_group
+				}
+			}
+		})
+	},
 	refresh: function (frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {

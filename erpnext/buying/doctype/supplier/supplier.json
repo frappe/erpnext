@@ -616,7 +616,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-15 12:15:42.946605",
+ "modified": "2022-11-24 15:20:57.232642",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -674,6 +674,15 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet User",
+   "share": 1
   }
  ],
  "search_fields": "supplier_name, supplier_group",

@@ -214,6 +214,7 @@
    "default": "0",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Internal Customer"
   },
   {
@@ -501,6 +502,7 @@
   {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
   },
@@ -555,7 +557,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-17 09:49:57.345267",
+ "modified": "2022-11-24 15:27:26.557454",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

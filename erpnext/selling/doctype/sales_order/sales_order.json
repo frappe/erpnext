@@ -2,7 +2,7 @@
  "actions": [],
  "allow_auto_repeat": 1,
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:SO-{YY}-{MM}-{####}",
  "creation": "2013-06-18 12:39:59",
  "doctype": "DocType",
  "document_type": "Document",
@@ -14,6 +14,7 @@
   "business_activity",
   "branch",
   "naming_series",
+  "item_group",
   "customer",
   "customer_name",
   "order_type",
@@ -176,15 +177,15 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "SAL-ORD-.YYYY.-",
+   "options": "SAL-.YY.-.MM.-.####",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -771,6 +772,7 @@
   {
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Taxes and Charges (Company Currency)",
@@ -790,6 +792,7 @@
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Taxes and Charges",
@@ -1046,6 +1049,7 @@
   {
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Payment Terms"
@@ -1125,6 +1129,7 @@
    "description": "Track this Sales Order against any Project",
    "fieldname": "project",
    "fieldtype": "Link",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Project",
@@ -1534,14 +1539,14 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Accounting Dimensions"
   },
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "reqd": 1
   },
   {
    "fieldname": "dimension_col_break",
@@ -1586,17 +1591,23 @@
    "fieldname": "sales_order_footer_text",
    "fieldtype": "Text Editor",
    "label": "Sales Order Footer Text"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 09:43:35.203581",
+ "modified": "2022-11-24 15:21:51.459915",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
