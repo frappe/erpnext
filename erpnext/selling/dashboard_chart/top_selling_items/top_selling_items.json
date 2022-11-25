@@ -1,0 +1,37 @@
+{
+ "aggregate_function_based_on": "base_net_amount",
+ "based_on": "",
+ "chart_name": "Top Selling Items",
+ "chart_type": "Group By",
+ "creation": "2022-11-25 02:31:10.048669",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Sales Invoice Item",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[]",
+ "group_by_based_on": "item_code",
+ "group_by_type": "Sum",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2022-11-25 02:31:10.048669",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Top Selling Items",
+ "number_of_groups": 10,
+ "owner": "Administrator",
+ "parent_document_type": "Sales Invoice",
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ],
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}

@@ -1,6 +1,19 @@
 {
- "charts": [],
- "content": "[\n {\n  \"data\": {\n   \"card_name\": \"Sales Transactions\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Order\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Delivery Note\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Invoice\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Quotation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customers\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customer\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customer Group\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Lead Source\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Contact\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Address\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Items\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Item\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Item Group\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Brand\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Item Attribute\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Product Bundle\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List Editor\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Bulk Price Update\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"All Item Prices\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Special Prices\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Promotional Scheme\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Pricing Rule\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shipping Rule\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Coupon Code\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Campaign\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Persons & Territories\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Person\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Territory\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Person Target Variance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Territory Target Variance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Person Commission Summary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"External Sales Partners\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Partner\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Partner Target Variance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Partners Commission\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Key Reports\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Analytics\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Details\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customer Credit Balance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Funnel\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Items To Be Delivered\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Items To Be Billed\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Other Reports\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Lead Details\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customer Addresses And Contacts\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customers Without Any Sales Transactions\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customer Acquisition and Loyalty\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Inactive Customers\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Selling Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Terms and Conditions Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Taxes and Charges Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Transaction Type\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Sales Commission Category\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n }\n]",
+ "charts": [
+  {
+   "chart_name": "Top Selling Items",
+   "label": "Top Selling Items"
+  },
+  {
+   "chart_name": "Sales Amount Trend",
+   "label": "Sales Amount Trend"
+  },
+  {
+   "chart_name": "Top Customers",
+   "label": "Top Customers"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Selling Module</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery Note\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Details Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quotation\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Analytics Report\",\"col\":3}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Sales Amount Trend\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Selling Items\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Customers\",\"col\":6}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Selling Documents</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Transactions\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Customers\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Items\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Special Prices\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Team\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"External Sales Partners\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.456761",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -322,70 +335,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Sales Persons & Territories",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Sales Person",
-   "link_count": 0,
-   "link_to": "Sales Person",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Territory",
-   "link_count": 0,
-   "link_to": "Territory",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Person",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Person Target Variance",
-   "link_count": 0,
-   "link_to": "Sales Person Target Variance Based On Item Group",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Territory",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Territory Target Variance",
-   "link_count": 0,
-   "link_to": "Territory Target Variance Based On Item Group",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Person",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Person Commission Summary",
-   "link_count": 0,
-   "link_to": "Sales Person Commission Summary",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "External Sales Partners",
    "link_count": 0,
    "link_type": "DocType",
@@ -627,9 +576,67 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Team",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Person",
+   "link_count": 0,
+   "link_to": "Sales Person",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Territory",
+   "link_count": 0,
+   "link_to": "Territory",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": " Sales Person Target Variance",
+   "link_count": 0,
+   "link_to": "Sales Person Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": " Territory Target Variance",
+   "link_count": 0,
+   "link_to": "Territory Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": " Sales Person Commission Summary",
+   "link_count": 0,
+   "link_to": "Sales Person Commission Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:24:37.116352",
+ "modified": "2022-11-25 03:11:42.022884",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -637,8 +644,86 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  }
+ ],
  "sequence_id": 2.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Sales Details Report",
+   "link_to": "Sales Details",
+   "stats_filter": "",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Sales Analytics Report",
+   "link_to": "Sales Analytics",
+   "stats_filter": "",
+   "type": "Report"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} Open",
+   "label": "Quotation",
+   "link_to": "Quotation",
+   "stats_filter": "{\"docstatus\":[\"=\",\"1\"],\"status\":[\"=\",\"Open\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} To Deliver",
+   "label": "Sales Order",
+   "link_to": "Sales Order",
+   "stats_filter": "{\"per_delivered\":[\"<\",100],\"docstatus\":[\"=\",\"1\"],\"status\":[\"!=\",\"Closed\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} To Bill",
+   "label": "Delivery Note",
+   "link_to": "Delivery Note",
+   "stats_filter": "{\"status\":[\"not in\",[\"Completed\",\"Return\",\"Closed\",\"\"]],\"docstatus\":[\"=\",\"1\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} Unpaid",
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "stats_filter": "{\"outstanding_amount\":[\">\",0],\"docstatus\":[\"=\",\"1\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Customer",
+   "link_to": "Customer",
+   "stats_filter": "{\"disabled\":[\"=\",0]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "{\"disabled\":[\"=\",0]}",
+   "type": "DocType"
+  }
+ ],
  "title": "Selling"
 }

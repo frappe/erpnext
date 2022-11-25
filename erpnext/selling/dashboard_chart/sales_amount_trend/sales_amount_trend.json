@@ -1,0 +1,37 @@
+{
+ "based_on": "posting_date",
+ "chart_name": "Sales Amount Trend",
+ "chart_type": "Sum",
+ "color": "#29CD42",
+ "creation": "2022-11-25 02:26:24.067007",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Sales Invoice",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Sales Invoice\",\"docstatus\",\"=\",\"1\",false],[\"Sales Invoice\",\"is_opening\",\"=\",\"No\",false]]",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-11-25 03:22:12.026070",
+ "modified": "2022-11-25 03:22:21.783769",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Amount Trend",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ],
+ "source": "",
+ "time_interval": "Monthly",
+ "timeseries": 1,
+ "timespan": "Last Year",
+ "type": "Line",
+ "use_report_chart": 0,
+ "value_based_on": "base_net_total",
+ "y_axis": []
+}

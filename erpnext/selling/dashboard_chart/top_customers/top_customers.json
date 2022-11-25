@@ -1,0 +1,38 @@
+{
+ "aggregate_function_based_on": "base_net_total",
+ "based_on": "",
+ "chart_name": "Top Customers",
+ "chart_type": "Group By",
+ "creation": "2022-11-25 03:02:36.508853",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Sales Invoice",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Sales Invoice\",\"docstatus\",\"=\",\"1\",false],[\"Sales Invoice\",\"is_opening\",\"=\",\"No\",false]]",
+ "group_by_based_on": "customer",
+ "group_by_type": "Sum",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-11-25 02:56:52.384648",
+ "modified": "2022-11-25 03:04:37.663990",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Top Customers",
+ "number_of_groups": 10,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "role": "Sales Manager"
+  }
+ ],
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}
