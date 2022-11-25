@@ -233,40 +233,32 @@ class LandedCostVoucher(AccountsController):
 		for f in item_total_fields:
 			totals[f] = flt(sum([flt(d.get(f)) for d in self.items]))
 
-		charges_map = []
-		manual_account_heads = set()
-		for tax in self.taxes:
-			based_on = scrub(tax.distribution_criteria)
-
-			if based_on == "manual":
-				manual_account_heads.add(cstr(tax.account_head))
-			else:
-				if not totals[based_on]:
-					frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
-
-				charges_map.append([])
-				for item in self.items:
-					charges_map[-1].append(flt(tax.base_amount) * flt(item.get(based_on)) / flt(totals.get(based_on)))
-
-		if manual_account_heads:
-			self.validate_manual_distribution_totals()
-
-		accumulated_taxes = 0.0
-		for item_idx, item in enumerate(self.items):
-			item_total_tax = 0.0
-			for row_charge in charges_map:
-				item_total_tax += row_charge[item_idx]
-
+		for item in self.items:
+			item.item_tax_detail = {}
 			item_manual_distribution = item.manual_distribution or {}
 			if isinstance(item.manual_distribution, string_types):
 				item_manual_distribution = json.loads(item_manual_distribution)
 
-			for account_head in item_manual_distribution.keys():
-				if account_head in manual_account_heads:
-					item_total_tax += flt(item_manual_distribution[account_head]) * flt(self.conversion_rate)
+			for tax in self.taxes:
+				item.item_tax_detail.setdefault(tax.name, 0)
+				distribution_based_on = scrub(tax.distribution_criteria)
+				if distribution_based_on == 'manual':
+					distribution_amount = flt(item_manual_distribution.get(tax.account_head))
+				else:
+					if not totals[distribution_based_on]:
+						frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
 
-			item.applicable_charges = item_total_tax
-			accumulated_taxes += item.applicable_charges
+					ratio = flt(item.get(distribution_based_on)) / flt(totals.get(distribution_based_on))
+					distribution_amount = flt(tax.base_amount) * ratio
+
+				item.item_tax_detail[tax.name] += distribution_amount
+
+		accumulated_taxes = 0
+		for item in self.get("items"):
+			item_tax_total = sum(item.item_tax_detail.values()) * flt(self.conversion_rate)
+			item.applicable_charges = item_tax_total
+			accumulated_taxes += item_tax_total
+			item.item_tax_detail = json.dumps(item.item_tax_detail, separators=(',', ':'))
 
 		if accumulated_taxes != self.base_total_taxes_and_charges:
 			diff = self.base_total_taxes_and_charges - accumulated_taxes
