@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
@@ -43,23 +44,6 @@
   "tax_id",
   "tax_cnic",
   "tax_strn",
-  "contact_info",
-  "customer_address",
-  "address_display",
-  "column_break_52",
-  "shipping_address_name",
-  "shipping_address",
-  "customer_group",
-  "territory",
-  "column_break_57",
-  "contact_person",
-  "contact_display",
-  "contact_phone",
-  "contact_mobile",
-  "contact_email",
-  "col_break46",
-  "company_address",
-  "company_address_display",
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
@@ -163,6 +147,26 @@
   "column_break3",
   "rounding_adjustment",
   "base_rounding_adjustment",
+  "contact_info",
+  "address_section",
+  "customer_address",
+  "address_display",
+  "column_break_52",
+  "shipping_address_name",
+  "shipping_address",
+  "customer_group",
+  "territory",
+  "col_break46",
+  "company_address",
+  "company_address_display",
+  "contact_section",
+  "contact_person",
+  "contact_display",
+  "column_break_57",
+  "contact_phone",
+  "contact_mobile",
+  "contact_email",
+  "terms_tab",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -171,34 +175,34 @@
   "terms",
   "printing_details",
   "letter_head",
+  "group_same_items",
   "column_break_156",
   "select_print_heading",
-  "column_break4",
   "language",
-  "group_same_items",
   "section_break_78",
   "status",
+  "delivery_section",
   "delivery_status",
-  "column_break_163",
-  "per_delivered",
-  "per_completed",
   "column_break_81",
+  "per_delivered",
+  "billing_section",
+  "billing_status",
+  "per_completed",
+  "column_break_181",
   "per_billed",
   "per_returned",
-  "billing_status",
+  "subscription_section",
+  "from_date",
+  "to_date",
+  "column_break_108",
+  "auto_repeat",
+  "update_auto_repeat_reference",
   "sales_team_section_break",
   "sales_partner",
   "column_break7",
   "commission_rate",
   "column_break_173",
-  "total_commission",
-  "subscription_section",
-  "from_date",
-  "column_break_178",
-  "to_date",
-  "column_break_108",
-  "auto_repeat",
-  "update_auto_repeat_reference"
+  "total_commission"
  ],
  "fields": [
   {
@@ -362,7 +366,7 @@
    "collapsible": 1,
    "depends_on": "customer",
    "fieldname": "contact_info",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Address and Contact",
    "options": "fa fa-bullhorn"
   },
@@ -370,7 +374,7 @@
    "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
-   "label": "Customer Address",
+   "label": "Customer Address Name",
    "options": "Address",
    "print_hide": 1
   },
@@ -378,7 +382,7 @@
    "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
-   "label": "Address",
+   "label": "Customer Address",
    "read_only": 1
   },
   {
@@ -394,7 +398,7 @@
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
-   "label": "Contact",
+   "label": "Contact Name",
    "read_only": 1
   },
   {
@@ -928,7 +932,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Terms"
@@ -949,7 +952,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
@@ -1024,7 +1026,7 @@
   {
    "collapsible": 1,
    "fieldname": "printing_details",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Print Settings"
   },
   {
@@ -1043,13 +1045,6 @@
    "oldfieldtype": "Select",
    "options": "Letter Head",
    "print_hide": 1
-  },
-  {
-   "fieldname": "column_break4",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1,
-   "width": "50%"
   },
   {
    "allow_on_submit": 1,
@@ -1074,8 +1069,8 @@
   {
    "collapsible": 1,
    "fieldname": "section_break_78",
-   "fieldtype": "Section Break",
-   "label": "Billing and Delivery Status",
+   "fieldtype": "Tab Break",
+   "label": "Status",
    "oldfieldtype": "Column Break",
    "print_hide": 1,
    "width": "50%"
@@ -1136,14 +1131,15 @@
    "width": "100px"
   },
   {
+   "default": "Not Billed",
    "fieldname": "billing_status",
    "fieldtype": "Select",
-   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Billing Status",
    "no_copy": 1,
    "options": "Not Billed\nFully Billed\nPartly Billed\nClosed",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1210,11 +1206,10 @@
   },
   {
    "allow_on_submit": 1,
-   "collapsible": 1,
    "collapsible_depends_on": "auto_repeat",
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Auto Repeat Section",
+   "label": "Auto Repeat",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -1592,10 +1587,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_163",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "per_completed",
    "fieldtype": "Percent",
@@ -1616,10 +1607,6 @@
   },
   {
    "fieldname": "column_break_173",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_178",
    "fieldtype": "Column Break"
   },
   {
@@ -1704,15 +1691,46 @@
    "no_copy": 1,
    "options": "Purchase Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "address_section",
+   "fieldtype": "Section Break",
+   "label": "Address"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact"
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "delivery_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery"
+  },
+  {
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "column_break_181",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2022-08-06 13:27:42.480518",
+ "links": [],
+ "modified": "2022-11-17 01:59:21.029957",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1828,6 +1846,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "transaction_date",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
  "title_field": "title",
  "track_changes": 1,
