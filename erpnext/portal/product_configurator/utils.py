@@ -1,7 +1,7 @@
 import frappe
-import numpy as np
 from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+
 
 def get_field_filter_data():
 	product_settings = get_product_settings()
@@ -187,6 +187,7 @@ def get_attributes_and_values(item_code):
 
 	return attributes
 
+
 def get_numeric_values():
 	attribute_values_list = []
 	numeric_attributes = frappe.db.get_all("Item Attribute",
@@ -196,7 +197,7 @@ def get_numeric_values():
 		from_range = attribute["from_range"]
 		to_range = attribute['to_range'] + attribute['increment']
 		increment = attribute['increment']
-		values = list(np.arange(from_range, to_range, increment))
+		values = list(range(from_range, to_range, increment))
 
 		for idx, val in enumerate(values):
 			attribute_values_list.append(frappe._dict({
@@ -424,6 +425,7 @@ def get_conditions(filter_list, and_or='and'):
 
 # utilities
 
+
 def get_item_attributes(item_code):
 	attributes = frappe.db.get_all('Item Variant Attribute',
 		fields=['attribute'],
@@ -442,13 +444,15 @@ def get_item_attributes(item_code):
 
 	return attributes
 
+
 def get_html_for_items(items):
 	html = []
 	for item in items:
 		html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
-			'item': item
+			'item': item or {}
 		}))
 	return html
+
 
 def get_product_settings():
 	doc = frappe.get_cached_doc('Products Settings')
