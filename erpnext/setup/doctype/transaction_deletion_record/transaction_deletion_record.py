@@ -58,7 +58,7 @@ class TransactionDeletionRecord(Document):
 
 	def delete_company_transactions(self):
 		table_doctypes = frappe.get_all("DocType", filters={"istable": 1}, pluck="name")
-		exclude_doctypes = {row.doctype_name for row in self.doctypes_to_be_ignored} + get_singles()
+		exclude_doctypes = {row.doctype_name for row in self.doctypes_to_be_ignored} | get_singles()
 
 		for doctype, fieldname in get_doctypes_with_company_field(exclude_doctypes):
 			if doctype == self.doctype:
