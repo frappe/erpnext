@@ -58,10 +58,9 @@ class TransactionDeletionRecord(Document):
 
 	def delete_company_transactions(self):
 		table_doctypes = frappe.get_all("DocType", filters={"istable": 1}, pluck="name")
+		exclude_doctypes = {row.doctype_name for row in self.doctypes_to_be_ignored} + get_singles()
 
-		for doctype, fieldname in get_doctypes_with_company_field(
-			exclude_doctypes=self.get_ignored_doctypes_and_singles()
-		):
+		for doctype, fieldname in get_doctypes_with_company_field(exclude_doctypes):
 			if doctype == self.doctype:
 				continue
 
@@ -89,10 +88,9 @@ class TransactionDeletionRecord(Document):
 				if "#" in naming_series:
 					update_naming_series(naming_series, doctype)
 
-	def get_ignored_doctypes_and_singles(self) -> list:
-		singles = set(frappe.get_all("DocType", filters={"issingle": 1}, pluck="name"))
-		ignored = {row.doctype_name for row in self.doctypes_to_be_ignored}
-		return list(singles + ignored)
+
+def get_singles() -> set[str]:
+	return set(frappe.get_all("DocType", filters={"issingle": 1}, pluck="name"))
 
 
 def update_naming_series(naming_series, doctype_name):
