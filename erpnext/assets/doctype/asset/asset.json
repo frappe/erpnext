@@ -52,8 +52,6 @@
   "column_break_24",
   "frequency_of_depreciation",
   "next_depreciation_date",
-  "section_break_14",
-  "schedules",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -308,19 +306,6 @@
    "no_copy": 1
   },
   {
-   "depends_on": "calculate_depreciation",
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break",
-   "label": "Depreciation Schedule"
-  },
-  {
-   "fieldname": "schedules",
-   "fieldtype": "Table",
-   "label": "Depreciation Schedule",
-   "no_copy": 1,
-   "options": "Depreciation Schedule"
-  },
-  {
    "collapsible": 1,
    "fieldname": "insurance_details",
    "fieldtype": "Section Break",
@@ -515,7 +500,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-11-01 15:25:27.669803",
+ "modified": "2022-11-25 12:47:19.689702",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

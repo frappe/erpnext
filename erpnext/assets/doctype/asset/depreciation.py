@@ -11,7 +11,9 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depr_schedule_name,
 	get_temp_asset_depr_schedule_doc,
+	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
 
 
@@ -25,7 +27,7 @@ def post_depreciation_entries(date=None, commit=True):
 	if not date:
 		date = today()
 	for asset in get_depreciable_assets(date):
-		make_depreciation_entry(asset, date)
+		make_depreciation_entry_for_all_asset_depr_schedules(asset, date)
 		if commit:
 			frappe.db.commit()
 
@@ -41,12 +43,22 @@ def get_depreciable_assets(date):
 	)
 
 
+def make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date=None):
+	for row in asset_doc.get("finance_books"):
+		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
+		make_depreciation_entry(asset_depr_schedule_name, date)
+
+
 @frappe.whitelist()
-def make_depreciation_entry(asset_name, date=None):
+def make_depreciation_entry(asset_depr_schedule_name, date=None):
 	frappe.has_permission("Journal Entry", throw=True)
 
 	if not date:
 		date = today()
+
+	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+
+	asset_name = asset_depr_schedule_doc.asset
 
 	asset = frappe.get_doc("Asset", asset_name)
 	(
@@ -63,14 +75,14 @@ def make_depreciation_entry(asset_name, date=None):
 
 	accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 
-	for d in asset.get("schedules"):
+	for d in asset_depr_schedule_doc.get("depreciation_schedule"):
 		if not d.journal_entry and getdate(d.schedule_date) <= getdate(date):
 			je = frappe.new_doc("Journal Entry")
 			je.voucher_type = "Depreciation Entry"
 			je.naming_series = depreciation_series
 			je.posting_date = d.schedule_date
 			je.company = asset.company
-			je.finance_book = d.finance_book
+			je.finance_book = asset_depr_schedule_doc.finance_book
 			je.remark = "Depreciation Entry against {0} worth {1}".format(asset_name, d.depreciation_amount)
 
 			credit_account, debit_account = get_credit_and_debit_accounts(
@@ -121,14 +133,14 @@ def make_depreciation_entry(asset_name, date=None):
 
 			d.db_set("journal_entry", je.name)
 
-			idx = cint(d.finance_book_id)
-			finance_books = asset.get("finance_books")[idx - 1]
-			finance_books.value_after_depreciation -= d.depreciation_amount
-			finance_books.db_update()
+			idx = cint(asset_depr_schedule_doc.finance_book_id)
+			row = asset.get("finance_books")[idx - 1]
+			row.value_after_depreciation -= d.depreciation_amount
+			row.db_update()
 
 	asset.set_status()
 
-	return asset
+	return asset_depr_schedule_doc
 
 
 def get_depreciation_accounts(asset):
@@ -202,8 +214,7 @@ def scrap_asset(asset_name):
 
 	date = today()
 
-	depreciate_asset(asset, date)
-	asset.reload()
+	depreciate_asset(asset, date, notes="Scrap asset")
 
 	depreciation_series = frappe.get_cached_value(
 		"Company", asset.company, "series_for_depreciation_entry"
@@ -247,22 +258,20 @@ def restore_asset(asset_name):
 	asset.set_status()
 
 
-def depreciate_asset(asset, date):
-	asset.flags.ignore_validate_update_after_submit = True
-	asset.prepare_depreciation_data(date_of_disposal=date)
-	asset.save()
+def depreciate_asset(asset, date, notes):
+	make_new_active_asset_depr_schedules_and_cancel_current_ones(
+		asset, date_of_disposal=date, notes=notes
+	)
 
-	make_depreciation_entry(asset.name, date)
+	make_depreciation_entry_for_all_asset_depr_schedules(asset, date)
 
 
-def reset_depreciation_schedule(asset, date):
-	asset.flags.ignore_validate_update_after_submit = True
-
-	# recreate original depreciation schedule of the asset
-	asset.prepare_depreciation_data(date_of_return=date)
+def reset_depreciation_schedule(asset, date, notes):
+	make_new_active_asset_depr_schedules_and_cancel_current_ones(
+		asset, date_of_return=date, notes=notes
+	)
 
 	modify_depreciation_schedule_for_asset_repairs(asset)
-	asset.save()
 
 
 def modify_depreciation_schedule_for_asset_repairs(asset):

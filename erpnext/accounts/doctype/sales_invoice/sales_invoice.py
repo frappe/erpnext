@@ -1189,8 +1189,7 @@ class SalesInvoice(SellingController):
 
 					else:
 						if asset.calculate_depreciation:
-							depreciate_asset(asset, self.posting_date)
-							asset.reload()
+							depreciate_asset(asset, self.posting_date, notes="Sell asset")
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")

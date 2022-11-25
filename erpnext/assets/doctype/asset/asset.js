@@ -76,7 +76,6 @@ frappe.ui.form.on('Asset', {
 	refresh: function(frm) {
 		frappe.ui.form.trigger("Asset", "is_existing_asset");
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
-		frm.events.make_schedules_editable(frm);
 
 		if (frm.doc.docstatus==1) {
 			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
@@ -511,30 +510,6 @@ frappe.ui.form.on('Asset Finance Book', {
 		}
 	}
 });
-
-frappe.ui.form.on('Depreciation Schedule', {
-	make_depreciation_entry: function(frm, cdt, cdn) {
-		var row = locals[cdt][cdn];
-		if (!row.journal_entry) {
-			frappe.call({
-				method: "erpnext.assets.doctype.asset.depreciation.make_depreciation_entry",
-				args: {
-					"asset_name": frm.doc.name,
-					"date": row.schedule_date
-				},
-				callback: function(r) {
-					frappe.model.sync(r.message);
-					frm.refresh();
-				}
-			})
-		}
-	},
-
-	depreciation_amount: function(frm, cdt, cdn) {
-		erpnext.asset.set_accumulated_depreciation(frm);
-	}
-
-})
 
 erpnext.asset.set_accumulated_depreciation = function(frm) {
 	if(frm.doc.depreciation_method != "Manual") return;

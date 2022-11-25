@@ -11,6 +11,7 @@
   "naming_series",
   "column_break_2",
   "finance_book",
+  "finance_book_id",
   "depreciation_details_section",
   "depreciation_method",
   "total_number_of_depreciations",
@@ -142,13 +143,21 @@
    "label": "Expected Value After Useful Life",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "finance_book_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Finance Book Id",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 14:33:53.360643",
+ "modified": "2022-11-25 14:31:52.668821",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",
