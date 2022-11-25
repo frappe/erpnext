@@ -72,9 +72,17 @@ class TransactionDeletionRecord(Document):
 			if doctype not in table_doctypes:
 				self.append("doctypes", {"doctype_name": doctype, "no_of_docs": no_of_docs})
 
-			delete_version_log(doctype, fieldname, self.company)
-			delete_communications(doctype, fieldname, self.company)
-			delete_child_table_rows(doctype, fieldname, self.company)
+			reference_docs = frappe.get_all(doctype, filters={fieldname: self.company}, pluck="name")
+
+			frappe.db.delete("Version", {"ref_doctype": doctype, "docname": ("in", reference_docs)})
+			frappe.db.delete(
+				"Communication", {"reference_doctype": doctype, "reference_name": ("in", reference_docs)}
+			)
+			for table in frappe.get_all(
+				"DocField", filters={"fieldtype": "Table", "parent": doctype}, pluck="options"
+			):
+				frappe.db.delete(table, {"parent": ("in", reference_docs)})
+
 			frappe.db.delete(doctype, {fieldname: self.company})
 
 			if naming_series := frappe.db.get_value("DocType", doctype, "autoname"):
@@ -105,27 +113,6 @@ def update_naming_series(naming_series, doctype_name):
 	frappe.qb.update(series).set(series.current, last).where(series.name == prefix).run()
 
 
-def delete_version_log(doctype, company_fieldname, company_name):
-	frappe.db.sql(
-		"""delete from `tabVersion` where ref_doctype=%s and docname in
-		(select name from `tab{0}` where `{1}`=%s)""".format(
-			doctype, company_fieldname
-		),
-		(doctype, company_name),
-	)
-
-
-def delete_communications(doctype, company_fieldname, company_name):
-	reference_docs = frappe.get_all(doctype, filters={company_fieldname: company_name}, pluck="name")
-	communications = frappe.get_all(
-		"Communication",
-		filters={"reference_doctype": doctype, "reference_name": ["in", reference_docs]},
-		pluck="name",
-	)
-
-	frappe.delete_doc("Communication", communications, ignore_permissions=True)
-
-
 @frappe.whitelist()
 def get_doctypes_to_be_ignored():
 	return list(IGNORED_DOCTYPES)
@@ -137,7 +124,7 @@ def get_doctypes_with_company_field(exclude_doctypes) -> tuple[tuple[str, str]]:
 		filters={
 			"fieldtype": "Link",
 			"options": "Company",
-			"parent": ["not in", exclude_doctypes],
+			"parent": ("not in", exclude_doctypes),
 		},
 		fields=["parent", "fieldname"],
 		as_list=True,
@@ -153,21 +140,7 @@ def reset_company_values(compay_name: str) -> None:
 
 def delete_bins(compay_name: str) -> None:
 	company_warehouses = frappe.get_all("Warehouse", filters={"company": compay_name}, pluck="name")
-	bins = frappe.get_all("Bin", filters={"warehouse": ["in", company_warehouses]}, pluck="name")
-	frappe.db.delete("Bin", {"name": ("in", bins)})
-
-
-def delete_child_table_rows(doctype, company_fieldname, company_name):
-	parent_docs_to_be_deleted = frappe.get_all(
-		doctype, {company_fieldname: company_name}, pluck="name"
-	)
-
-	child_tables = frappe.get_all(
-		"DocField", filters={"fieldtype": "Table", "parent": doctype}, pluck="options"
-	)
-
-	for table in child_tables:
-		frappe.db.delete(table, {"parent": ["in", parent_docs_to_be_deleted]})
+	frappe.db.delete("Bin", {"warehouse": ("in", company_warehouses)})
 
 
 def delete_lead_addresses(company_name: str) -> None:
