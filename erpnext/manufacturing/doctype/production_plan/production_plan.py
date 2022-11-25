@@ -312,6 +312,9 @@ class ProductionPlan(Document):
 	def add_items(self, items):
 		refs = {}
 		for data in items:
+			if not data.pending_qty:
+				continue
+
 			item_details = get_item_details(data.item_code)
 			if self.combine_items:
 				if item_details.bom_no in refs:
