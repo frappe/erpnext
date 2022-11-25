@@ -34,10 +34,13 @@ class LandedCostVoucher(AccountsController):
 		self.clear_advances_table_if_not_payable()
 		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
 		self.calculate_taxes_and_totals()
+		self.validate_manual_distribution_totals()
 		self.set_status()
 
+	def before_submit(self):
+		self.validate_manual_distribution_totals(throw=True)
+
 	def on_submit(self):
-		self.calculate_taxes_and_totals()
 		self.validate_applicable_charges_for_item()
 		self.update_against_document_in_jv()
 		self.update_landed_cost()
@@ -147,7 +150,7 @@ class LandedCostVoucher(AccountsController):
 		if abs(diff) > (2.0 / (10**precision)):
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
-	def validate_manual_distribution_totals(self):
+	def validate_manual_distribution_totals(self, throw=False):
 		tax_account_totals = {}
 		item_totals = {}
 
@@ -177,7 +180,7 @@ class LandedCostVoucher(AccountsController):
 				frappe.msgprint(_("Tax amount for {} ({}) does not match the total in the manual distribution table ({})")
 					.format(account_head,
 						fmt_money(tax_account_totals[account_head], digits, self.currency),
-						fmt_money(item_totals[account_head], digits, self.currency)))
+						fmt_money(item_totals[account_head], digits, self.currency)), raise_exception=throw)
 
 	def validate_credit_to_account(self):
 		if self.credit_to:
