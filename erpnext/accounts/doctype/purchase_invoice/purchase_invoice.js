@@ -81,7 +81,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		if(doc.docstatus == 1 && doc.outstanding_amount != 0
-			&& !(doc.is_return && doc.return_against)) {
+			&& !(doc.is_return && doc.return_against) && !doc.on_hold) {
 			this.frm.add_custom_button(__('Payment'), this.make_payment_entry, __('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
@@ -99,7 +99,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if (doc.outstanding_amount > 0 && !cint(doc.is_return)) {
+		if (doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
 			cur_frm.add_custom_button(__('Payment Request'), function() {
 				me.make_payment_request()
 			}, __('Create'));

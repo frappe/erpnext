@@ -54,6 +54,8 @@
   "column_break_26",
   "total",
   "net_total",
+  "tax_withholding_net_total",
+  "base_tax_withholding_net_total",
   "section_break_48",
   "pricing_rules",
   "raw_material_details",
@@ -1220,6 +1222,26 @@
    "fieldtype": "Section Break",
    "label": "Additional Info",
    "oldfieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_99",

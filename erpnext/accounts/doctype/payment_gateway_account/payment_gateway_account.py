@@ -11,7 +11,7 @@ class PaymentGatewayAccount(Document):
 		self.name = self.payment_gateway + " - " + self.currency
 
 	def validate(self):
-		self.currency = frappe.db.get_value("Account", self.payment_account, "account_currency")
+		self.currency = frappe.get_cached_value("Account", self.payment_account, "account_currency")
 
 		self.update_default_payment_gateway()
 		self.set_as_default_if_not_set()
