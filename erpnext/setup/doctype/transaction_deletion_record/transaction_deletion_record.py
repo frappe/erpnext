@@ -104,7 +104,7 @@ def update_naming_series(naming_series, doctype_name):
 		prefix = naming_series
 
 	table = frappe.qb.DocType(doctype_name)
-	last = frappe.qb.from_(table).select(Max(table.name)).where(table.name.like(f"{prefix}%"))
+	last = frappe.qb.from_(table).select(Max(table.name)).where(table.name.like(f"{prefix}%")).run()
 
 	last = cint(last[0][0].replace(prefix, "")) if last and last[0][0] else 0
 	series = frappe.qb.DocType("Series")
