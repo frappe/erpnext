@@ -16,17 +16,17 @@ class TestTransactionDeletionRecord(unittest.TestCase):
 	def test_doctypes_contain_company_field(self):
 		tdr = create_transaction_deletion_request("Dunder Mifflin Paper Co")
 		for doctype in tdr.doctypes:
-			contains_company = False
 			doctype_fields = frappe.get_meta(doctype.doctype_name).as_dict()["fields"]
-			for doctype_field in doctype_fields:
-				if doctype_field["fieldtype"] == "Link" and doctype_field["options"] == "Company":
-					contains_company = True
-					break
+			contains_company = any(
+				doctype_field["fieldtype"] == "Link" and doctype_field["options"] == "Company"
+				for doctype_field in doctype_fields
+			)
 			self.assertTrue(contains_company)
 
 	def test_no_of_docs_is_correct(self):
 		for i in range(5):
 			create_task("Dunder Mifflin Paper Co")
+
 		tdr = create_transaction_deletion_request("Dunder Mifflin Paper Co")
 		for doctype in tdr.doctypes:
 			if doctype.doctype_name == "Task":
