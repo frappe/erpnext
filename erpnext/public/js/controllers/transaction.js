@@ -375,12 +375,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "pricing_rules")) {
-			this.frm.set_indicator_formatter('pricing_rule', function(doc) {
-				return (doc.rule_applied) ? "green" : "red";
-			});
-		}
-
 		let batch_no_field = this.frm.get_docfield("items", "batch_no");
 		if (batch_no_field) {
 			batch_no_field.get_route_options_for_new_doc = function(row) {
@@ -560,6 +554,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					})
 					.appendTo($input_group);
 			}
+		}
+
+		if (frappe.meta.get_docfield(this.frm.doc.doctype, "pricing_rules")) {
+			this.frm.set_indicator_formatter('pricing_rule', function(doc) {
+				return (doc.rule_applied) ? "green" : "red";
+			});
 		}
 	}
 

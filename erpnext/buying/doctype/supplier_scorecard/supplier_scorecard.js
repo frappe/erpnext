@@ -4,7 +4,7 @@
 /* global frappe, refresh_field */
 
 frappe.ui.form.on("Supplier Scorecard", {
-	setup: function(frm) {
+	refresh: function(frm) {
 		if (frm.doc.indicator_color !== "")	{
 			frm.set_indicator_formatter("status", function(doc) {
 				return doc.indicator_color.toLowerCase();

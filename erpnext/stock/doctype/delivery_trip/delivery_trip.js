@@ -3,8 +3,6 @@
 
 frappe.ui.form.on('Delivery Trip', {
 	setup: function (frm) {
-		frm.set_indicator_formatter('customer', (stop) => (stop.visited) ? "green" : "orange");
-
 		frm.set_query("driver", function () {
 			return {
 				filters: {
@@ -41,6 +39,8 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	refresh: function (frm) {
+		frm.set_indicator_formatter('customer', (stop) => (stop.visited) ? "green" : "orange");
+
 		if (frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 			frm.add_custom_button(__("Notify Customers via Email"), function () {
 				frm.trigger('notify_customers');

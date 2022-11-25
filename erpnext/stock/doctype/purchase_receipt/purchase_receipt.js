@@ -30,21 +30,6 @@ frappe.ui.form.on("Purchase Receipt", {
 			'Auto Repeat': 'Subscription',
 		}
 
-		frm.set_indicator_formatter('item_code', function(doc) {
-			if (doc.docstatus === 1) {
-				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
-				if (!completed_qty) {
-					return "orange";
-				} else if (doc.returned_qty >= doc.qty) {
-					return "blue";
-				} else if (doc.billed_qty < doc.qty) {
-					return "yellow";
-				} else {
-					return "green";
-				}
-			}
-		});
-
 		frm.set_query("expense_account", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
@@ -73,6 +58,21 @@ frappe.ui.form.on("Purchase Receipt", {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+
+		frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 1) {
+				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
+				if (!completed_qty) {
+					return "orange";
+				} else if (doc.returned_qty >= doc.qty) {
+					return "blue";
+				} else if (doc.billed_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 	},
 
 	company: function(frm) {

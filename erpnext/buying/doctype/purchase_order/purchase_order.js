@@ -18,18 +18,6 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 
-		frm.set_indicator_formatter('item_code', function(doc) {
-			if (doc.docstatus === 1) {
-				if (!doc.received_qty) {
-					return "orange";
-				} else if (doc.received_qty < doc.qty) {
-					return "yellow";
-				} else {
-					return "green";
-				}
-			}
-		});
-
 		frm.set_query("expense_account", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
@@ -212,6 +200,18 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 		} else if(doc.docstatus===0) {
 			me.add_from_mappers();
 		}
+
+		this.frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 1) {
+				if (!doc.received_qty) {
+					return "orange";
+				} else if (doc.received_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 	}
 
 	get_items_from_open_material_requests() {

@@ -9,31 +9,8 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		super.setup(doc);
-
-		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
-			if (doc.docstatus === 0) {
-				if (parent.update_stock && !parent.is_return) {
-					if (!doc.is_stock_item) {
-						return "blue";
-					} else if (!doc.actual_qty) {
-						return "red";
-					} else if (doc.actual_qty < doc.stock_qty) {
-						return "orange";
-					} else {
-						return "green";
-					}
-				}
-			} else {
-				if (!parent.is_return) {
-					if (doc.returned_qty) {
-						return "yellow";
-					} else if (doc.base_returned_amount) {
-						return "grey";
-					}
-				}
-			}
-		});
 	}
+
 	onload() {
 		var me = this;
 		super.onload();
@@ -192,6 +169,30 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				}
 			});
 		}
+
+		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
+			if (doc.docstatus === 0) {
+				if (parent.update_stock && !parent.is_return) {
+					if (!doc.is_stock_item) {
+						return "blue";
+					} else if (!doc.actual_qty) {
+						return "red";
+					} else if (doc.actual_qty < doc.stock_qty) {
+						return "orange";
+					} else {
+						return "green";
+					}
+				}
+			} else {
+				if (!parent.is_return) {
+					if (doc.returned_qty) {
+						return "yellow";
+					} else if (doc.base_returned_amount) {
+						return "grey";
+					}
+				}
+			}
+		});
 	}
 
 	sync_fbr_pos_invoice() {

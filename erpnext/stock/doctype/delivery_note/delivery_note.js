@@ -17,31 +17,6 @@ frappe.ui.form.on("Delivery Note", {
 			'Delivery Trip': 'Delivery Trip',
 		};
 
-		frm.set_indicator_formatter('item_code', function(doc) {
-			if (doc.docstatus === 0) {
-				if (!doc.is_stock_item) {
-					return "blue";
-				} else if (!doc.actual_qty) {
-					return "red";
-				} else if (doc.actual_qty < doc.stock_qty) {
-					return "orange";
-				} else {
-					return "green";
-				}
-			} else {
-				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
-				if (!completed_qty) {
-					return "orange";
-				} else if (doc.returned_qty >= doc.qty) {
-					return "blue";
-				} else if (doc.billed_qty < doc.qty) {
-					return "yellow";
-				} else {
-					return "green";
-				}
-			}
-		});
-
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
@@ -255,6 +230,31 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __('Create'))
 		}
+
+		this.frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 0) {
+				if (!doc.is_stock_item) {
+					return "blue";
+				} else if (!doc.actual_qty) {
+					return "red";
+				} else if (doc.actual_qty < doc.stock_qty) {
+					return "orange";
+				} else {
+					return "green";
+				}
+			} else {
+				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
+				if (!completed_qty) {
+					return "orange";
+				} else if (doc.returned_qty >= doc.qty) {
+					return "blue";
+				} else if (doc.billed_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 	}
 
 	make_sales_invoice() {

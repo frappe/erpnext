@@ -11,6 +11,12 @@ frappe.ui.form.on('Asset Maintenance', {
 				}
 			};
 		});
+	},
+
+	refresh: (frm) => {
+		if(!frm.is_new()) {
+			frm.trigger('make_dashboard');
+		}
 
 		frm.set_indicator_formatter('maintenance_status',
 			function(doc) {
@@ -26,11 +32,6 @@ frappe.ui.form.on('Asset Maintenance', {
 		);
 	},
 
-	refresh: (frm) => {
-		if(!frm.is_new()) {
-			frm.trigger('make_dashboard');
-		}
-	},
 	make_dashboard: (frm) => {
 		if(!frm.is_new()) {
 			frappe.call({

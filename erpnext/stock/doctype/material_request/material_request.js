@@ -15,20 +15,6 @@ frappe.ui.form.on('Material Request', {
 			'Work Order': 'Work Order'
 		};
 
-		// formatter for material request item
-		frm.set_indicator_formatter('item_code', function (doc) {
-			if (frm.doc.docstatus != 0) {
-				var completed_qty = Math.max(doc.ordered_qty, doc.received_qty);
-				if (!completed_qty) {
-					return "orange";
-				} else if (completed_qty < doc.stock_qty) {
-					return "yellow";
-				} else {
-					return "green";
-				}
-			}
-		});
-
 		frm.set_query("from_warehouse", "items", function(doc) {
 			return {
 				filters: {'company': doc.company}
@@ -72,6 +58,20 @@ frappe.ui.form.on('Material Request', {
 		frm.cscript.add_rounding_button();
 		frm.cscript.del_zero_qty_rows_button();
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
+
+		// formatter for material request item
+		frm.set_indicator_formatter('item_code', function (doc) {
+			if (frm.doc.docstatus != 0) {
+				var completed_qty = Math.max(doc.ordered_qty, doc.received_qty);
+				if (!completed_qty) {
+					return "orange";
+				} else if (completed_qty < doc.stock_qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 	},
 
 	make_custom_buttons: function(frm) {

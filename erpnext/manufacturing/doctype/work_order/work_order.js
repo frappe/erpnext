@@ -101,10 +101,6 @@ frappe.ui.form.on("Work Order", {
 				}
 			};
 		});
-
-		// formatter for work order operation
-		frm.set_indicator_formatter('operation',
-			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange"; });
 	},
 
 	onload: function(frm) {
@@ -183,6 +179,10 @@ frappe.ui.form.on("Work Order", {
 				frm.trigger("make_bom");
 			});
 		}
+
+		// formatter for work order operation
+		frm.set_indicator_formatter('operation',
+			function(doc) { return (frm.doc.qty==doc.completed_qty) ? "green" : "orange"; });
 	},
 
 	make_job_card: function(frm) {

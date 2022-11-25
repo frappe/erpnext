@@ -721,34 +721,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			}
 		});
 
-		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
-			if (!doc.s_warehouse) {
-				return 'blue';
-			} else {
-				if (doc.docstatus === 0) {
-					if (!doc.actual_qty) {
-						return "red";
-					} else if (doc.actual_qty < doc.transfer_qty) {
-						return "orange";
-					} else {
-						return "green";
-					}
-				} else {
-					if (parent.purpose === "Send to Warehouse") {
-						if (!doc.transferred_qty) {
-							return "orange";
-						} else if (doc.transferred_qty < doc.qty) {
-							return "yellow";
-						} else {
-							return "green";
-						}
-					} else {
-						return "green";
-					}
-				}
-			}
-		})
-
 		this.frm.add_fetch("purchase_order", "supplier", "supplier");
 
 		this.frm.set_query("supplier_address", function() {
@@ -796,6 +768,34 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		if (me.frm.doc.docstatus === 0) {
 			this.create_select_batch_button();
 		}
+
+		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
+			if (!doc.s_warehouse) {
+				return 'blue';
+			} else {
+				if (doc.docstatus === 0) {
+					if (!doc.actual_qty) {
+						return "red";
+					} else if (doc.actual_qty < doc.transfer_qty) {
+						return "orange";
+					} else {
+						return "green";
+					}
+				} else {
+					if (parent.purpose === "Send to Warehouse") {
+						if (!doc.transferred_qty) {
+							return "orange";
+						} else if (doc.transferred_qty < doc.qty) {
+							return "yellow";
+						} else {
+							return "green";
+						}
+					} else {
+						return "green";
+					}
+				}
+			}
+		});
 	}
 
 	create_select_batch_button(doc, cdt, cdn) {

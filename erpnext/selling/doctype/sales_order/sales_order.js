@@ -20,29 +20,6 @@ frappe.ui.form.on("Sales Order", {
 			'Vehicle': __("Reserved Vehicles"),
 		}
 
-		// formatter for material request item
-		frm.set_indicator_formatter('item_code', function(doc) {
-			if (doc.docstatus === 0) {
-				if (!doc.is_stock_item) {
-					return "blue";
-				} else if (!doc.actual_qty) {
-					return "red";
-				} else if (doc.actual_qty < doc.stock_qty) {
-					return "orange";
-				} else {
-					return "green";
-				}
-			} else {
-				if (!doc.delivered_qty) {
-					return "orange";
-				} else if (doc.delivered_qty < doc.qty) {
-					return "yellow";
-				} else {
-					return "green";
-				}
-			}
-		});
-
 		frm.set_query('company_address', function(doc) {
 			if(!doc.company) {
 				frappe.throw(__('Please set Company'));
@@ -120,6 +97,29 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	refresh(doc, dt, dn) {
 		super.refresh();
 		this.setup_buttons();
+
+		// formatter for items table
+		this.frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 0) {
+				if (!doc.is_stock_item) {
+					return "blue";
+				} else if (!doc.actual_qty) {
+					return "red";
+				} else if (doc.actual_qty < doc.stock_qty) {
+					return "orange";
+				} else {
+					return "green";
+				}
+			} else {
+				if (!doc.delivered_qty) {
+					return "orange";
+				} else if (doc.delivered_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 
 		if (this.frm.doc.__islocal) {
 			this.set_skip_delivery_note();
