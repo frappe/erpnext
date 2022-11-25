@@ -204,14 +204,6 @@
   "column_break_155",
   "outstanding_amount",
   "sec_fbr_pos_transaction_details",
-  "accounting_dimensions_section",
-  "debit_to",
-  "party_account_currency",
-  "dimension_col_break",
-  "is_opening",
-  "c_form_applicable",
-  "c_form_no",
-  "is_discounted",
   "address_and_contact_tab",
   "sec_address",
   "customer_address",
@@ -238,12 +230,21 @@
   "sec_terms_and_conditions",
   "tc_name",
   "terms",
-  "print_settings_tab",
+  "settings_tab",
+  "print_settings_section",
   "letter_head",
   "group_same_items",
   "cb_4",
   "select_print_heading",
   "language",
+  "accounting_dimensions_section",
+  "debit_to",
+  "party_account_currency",
+  "dimension_col_break",
+  "is_opening",
+  "c_form_applicable",
+  "c_form_no",
+  "is_discounted",
   "status_tab",
   "status",
   "subscription_section",
@@ -1545,7 +1546,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
@@ -2165,11 +2165,6 @@
    "label": "Terms and Conditions"
   },
   {
-   "fieldname": "print_settings_tab",
-   "fieldtype": "Tab Break",
-   "label": "Print Settings"
-  },
-  {
    "fieldname": "cb_4",
    "fieldtype": "Column Break"
   },
@@ -2202,13 +2197,23 @@
    "fieldname": "cb_8",
    "fieldtype": "Column Break",
    "print_hide": 1
+  },
+  {
+   "fieldname": "settings_tab",
+   "fieldtype": "Tab Break",
+   "label": "Settings"
+  },
+  {
+   "fieldname": "print_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-23 16:35:34.707222",
+ "modified": "2022-11-26 01:40:58.536163",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

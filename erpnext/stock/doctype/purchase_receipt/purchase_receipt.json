@@ -629,7 +629,7 @@
    "description": "Add / Edit Taxes and Charges",
    "fieldname": "taxes_charges_section",
    "fieldtype": "Section Break",
-   "label": "Tax and Charges",
+   "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
@@ -1530,7 +1530,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-23 17:32:58.489647",
+ "modified": "2022-11-26 02:10:58.554606",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

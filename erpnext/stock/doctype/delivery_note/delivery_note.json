@@ -170,7 +170,7 @@
   "vehicle_no",
   "lr_no",
   "lr_date",
-  "cb_5",
+  "section_break_164",
   "instructions",
   "print_settings_tab",
   "letter_head",
@@ -1590,14 +1590,10 @@
   {
    "fieldname": "transporter_info_tab",
    "fieldtype": "Tab Break",
-   "label": "Transporter Info"
+   "label": "Transporter"
   },
   {
    "fieldname": "cb_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "cb_5",
    "fieldtype": "Column Break"
   },
   {
@@ -1653,13 +1649,17 @@
    "fieldname": "cb_10",
    "fieldtype": "Column Break",
    "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_164",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-23 17:24:39.510808",
+ "modified": "2022-11-26 01:55:53.139437",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
