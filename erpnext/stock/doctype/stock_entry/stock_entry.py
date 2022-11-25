@@ -525,6 +525,7 @@ class StockEntry(StockController):
 			if transferred_serial_no:
 				d.serial_no = transferred_serial_no
 
+	@frappe.whitelist()
 	def get_stock_and_rate(self):
 		self.set_work_order_details()
 		self.set_transfer_qty()
