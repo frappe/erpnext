@@ -370,9 +370,6 @@ frappe.ui.form.on("Material Request Item", {
 		if (flt(d.qty) < flt(d.min_order_qty)) {
 			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
-
-		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item, false);
 	},
 
 	from_warehouse: function(frm, doctype, name) {
