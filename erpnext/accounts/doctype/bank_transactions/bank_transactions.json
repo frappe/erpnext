@@ -55,7 +55,8 @@
   "amount_data",
   "amended_from",
   "created_by",
-  "cancel"
+  "cancel",
+  "conciliation"
  ],
  "fields": [
   {
@@ -358,10 +359,17 @@
    "in_list_view": 1,
    "label": "Transaction Number",
    "read_only": 1
+  },
+  {
+   "fieldname": "conciliation",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "conciliation",
+   "options": "Bank Book Reconciliations"
   }
  ],
  "is_submittable": 1,
- "modified": "2022-10-05 21:04:10.415641",
+ "modified": "2022-11-25 23:04:32.914309",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Transactions",

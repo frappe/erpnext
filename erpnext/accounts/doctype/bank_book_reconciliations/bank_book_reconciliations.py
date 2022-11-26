@@ -23,13 +23,14 @@ class BankBookReconciliations(Document):
 			self.create_reconciled_balance()
 			self.modified_total_reconcilitiation_account()
 			self.mark_reconciled_payment_entry()
+			self.conciliation_transactions_pre_reconciled()
 
 	def on_update(self):
-		if self.docstatus == 0:
-			
+		if self.docstatus == 0:			
 			self.transit_check_amount()
 			self.bank_book_value()
 			self.update_amount()
+			self.conciliation_transactions_pre_reconciled_cancel()
 	
 	def on_cancel(self):
 		self.conciliation_transactions_cancel()
@@ -261,6 +262,27 @@ class BankBookReconciliations(Document):
 	def verificate_defference_amount(self):
 		if self.defference_amount != 0:
 			frappe.throw(_("Difference amount must be 0"))
+
+	def conciliation_transactions_pre_reconciled(self):
+		conditions = self.filters_bank_transactions_prereconciled()
+		details = frappe.get_all("Bank Transactions", ["*"], filters = conditions)
+
+		for detail in details:
+			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
+			doc.docstatus = 5
+			doc.status = "Reconciled"
+			doc.conciliation = self.name
+			doc.save()
+	
+	def conciliation_transactions_pre_reconciled_cancel(self):
+		conditions = self.filters_bank_transactions_prereconciled_cancel()
+		details = frappe.get_all("Bank Transactions", ["*"], filters = conditions)
+
+		for detail in details:
+			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
+			doc.docstatus = 4
+			doc.status = "Pre-reconciled"
+			doc.save()
 	
 	def conciliation_transactions(self):
 		details = frappe.get_all("Bank reconciliations Table", ["bank_trasaction"], filters = {"parent": self.name})
@@ -384,6 +406,26 @@ class BankBookReconciliations(Document):
 		if transaction == "debit": conditions += ', "debit_note": 1'
 		if transaction == "credit": conditions += ', "credit_note": 1'
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
+		conditions += '}'
+
+		return conditions
+	
+	def filters_bank_transactions_prereconciled(self):
+		conditions = ''
+
+		conditions += "{"
+		conditions += '"date_data": ["<=", "{}"]'.format(self.to_date)
+		conditions += ', "status": "status": "Pre-reconciled"'
+		conditions += ', "bank_account": "{}"'.format(self.bank_account)
+		conditions += '}'
+
+		return conditions
+	
+	def filters_bank_transactions_prereconciled_cancel(self):
+		conditions = ''
+
+		conditions += "{"
+		conditions += '"conciliation": "{}"'.format(self.name)
 		conditions += '}'
 
 		return conditions
