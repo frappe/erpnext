@@ -77,6 +77,6 @@ def get_party_bank_account(party_type, party):
 
 @frappe.whitelist()
 def get_bank_account_details(bank_account):
-	return frappe.db.get_value(
+	return frappe.get_cached_value(
 		"Bank Account", bank_account, ["account", "bank", "bank_account_no"], as_dict=1
 	)

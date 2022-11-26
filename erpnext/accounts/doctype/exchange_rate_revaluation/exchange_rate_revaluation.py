@@ -222,7 +222,7 @@ class ExchangeRateRevaluation(Document):
 
 @frappe.whitelist()
 def get_account_details(account, company, posting_date, party_type=None, party=None):
-	account_currency, account_type = frappe.db.get_value(
+	account_currency, account_type = frappe.get_cached_value(
 		"Account", account, ["account_currency", "account_type"]
 	)
 	if account_type in ["Receivable", "Payable"] and not (party_type and party):
@@ -233,6 +233,10 @@ def get_account_details(account, company, posting_date, party_type=None, party=N
 	balance = get_balance_on(
 		account, date=posting_date, party_type=party_type, party=party, in_account_currency=False
 	)
+	account_details = {
+		"account_currency": account_currency,
+	}
+
 	if balance:
 		balance_in_account_currency = get_balance_on(
 			account, date=posting_date, party_type=party_type, party=party
@@ -242,13 +246,14 @@ def get_account_details(account, company, posting_date, party_type=None, party=N
 		)
 		new_exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 		new_balance_in_base_currency = balance_in_account_currency * new_exchange_rate
-		account_details = {
-			"account_currency": account_currency,
-			"balance_in_base_currency": balance,
-			"balance_in_account_currency": balance_in_account_currency,
-			"current_exchange_rate": current_exchange_rate,
-			"new_exchange_rate": new_exchange_rate,
-			"new_balance_in_base_currency": new_balance_in_base_currency,
-		}
+		account_details = account_details.update(
+			{
+				"balance_in_base_currency": balance,
+				"balance_in_account_currency": balance_in_account_currency,
+				"current_exchange_rate": current_exchange_rate,
+				"new_exchange_rate": new_exchange_rate,
+				"new_balance_in_base_currency": new_balance_in_base_currency,
+			}
+		)
 
 	return account_details
