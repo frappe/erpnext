@@ -268,7 +268,7 @@ class BankBookReconciliations(Document):
 		details = frappe.get_all("Bank Transactions", ["*"], filters = conditions)
 
 		for detail in details:
-			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
+			doc = frappe.get_doc("Bank Transactions", detail.name)
 			doc.docstatus = 5
 			doc.status = "Reconciled"
 			doc.conciliation = self.name
@@ -279,7 +279,7 @@ class BankBookReconciliations(Document):
 		details = frappe.get_all("Bank Transactions", ["*"], filters = conditions)
 
 		for detail in details:
-			doc = frappe.get_doc("Bank Transactions", detail.bank_trasaction)
+			doc = frappe.get_doc("Bank Transactions", detail.name)
 			doc.docstatus = 4
 			doc.status = "Pre-reconciled"
 			doc.save()
