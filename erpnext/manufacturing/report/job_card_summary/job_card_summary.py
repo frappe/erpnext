@@ -37,10 +37,14 @@ def get_data(filters):
 	]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	for field in ["work_order", "workstation", "operation", "company"]:
 =======
 	for field in ["work_order"]:
 >>>>>>> 481149814e (fix: company name with `,` in `Job Card Summary Report`)
+=======
+	for field in ["work_order", "production_item"]:
+>>>>>>> ef7fd670fc (fix: `production_item` filter in `Job Card Summary Report`)
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
 
