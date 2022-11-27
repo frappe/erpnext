@@ -152,22 +152,19 @@ def delete_lead_addresses(company_name: str) -> None:
 		filters={"link_name": ("in", leads), "link_doctype": "Lead", "parenttype": "Address"},
 		pluck="parent",
 	):
-		frappe.db.sql(
-			"""DELETE FROM `tabAddress`
-			WHERE name IN %(addresses)s AND
-			name NOT IN (
-				SELECT DISTINCT dl1.parent FROM `tabDynamic Link` dl1
-				INNER JOIN `tabDynamic Link` dl2 ON dl1.parent = dl2.parent
-				AND dl1.link_doctype <> dl2.link_doctype
+		dl1, dl2 = frappe.qb.DocType("Dynamic Link"), frappe.qb.DocType("Dynamic Link")
+		address = frappe.qb.DocType("Address")
+		frappe.qb.from_(address).delete().where(address.name.isin(addresses)).where(
+			address.name.notin(
+				frappe.qb.from_(dl1)
+				.inner_join(dl2)
+				.on((dl1.parent == dl2.parent) & (dl1.link_doctype != dl2.link_doctype))
+				.select(dl1.parent)
 			)
-			""",
-			{"addresses": addresses},
-		)
-
-		dl = frappe.db.get_table("Dynamic Link")
-		frappe.qb.delete(dl).where(dl.link_doctype == "Lead").where(dl.parenttype == "Address").where(
-			dl.link_name.isin(leads)
 		).run()
+		frappe.qb.from_(dl1).delete().where(dl1.link_doctype == "Lead").where(
+			dl1.parenttype == "Address"
+		).where(dl1.link_name.isin(leads)).run()
 
 	customer = frappe.qb.DocType("Customer")
 	frappe.qb.update(customer).set(customer.lead_name, None).where(
