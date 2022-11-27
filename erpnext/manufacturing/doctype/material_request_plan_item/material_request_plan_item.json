@@ -47,7 +47,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Warehouse",
+   "label": "For Warehouse",
    "options": "Warehouse",
    "reqd": 1
   },
@@ -173,7 +173,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-08-23 18:17:58.400462",
+ "modified": "2022-11-26 14:59:25.879631",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",
@@ -182,5 +182,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
