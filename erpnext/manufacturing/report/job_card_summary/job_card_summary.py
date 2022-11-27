@@ -36,7 +36,7 @@ def get_data(filters):
 		"total_time_in_mins",
 	]
 
-	for field in ["work_order"]:
+	for field in ["work_order", "production_item"]:
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
 
