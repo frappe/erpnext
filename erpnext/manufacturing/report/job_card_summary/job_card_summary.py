@@ -36,9 +36,17 @@ def get_data(filters):
 		"total_time_in_mins",
 	]
 
+<<<<<<< HEAD
 	for field in ["work_order", "workstation", "operation", "company"]:
+=======
+	for field in ["work_order"]:
+>>>>>>> 481149814e (fix: company name with `,` in `Job Card Summary Report`)
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
+
+	for field in ["workstation", "operation", "status", "company"]:
+		if filters.get(field):
+			query_filters[field] = filters.get(field)
 
 	data = frappe.get_all("Job Card", fields=fields, filters=query_filters)
 
