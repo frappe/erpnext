@@ -1547,11 +1547,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-11-22 12:44:29.935567",
-=======
- "modified": "2022-11-17 17:30:45.559785",
->>>>>>> 77105306f2 (feat: add incoterm to purchasing transactions)
+ "modified": "2022-11-27 16:28:45.559785",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

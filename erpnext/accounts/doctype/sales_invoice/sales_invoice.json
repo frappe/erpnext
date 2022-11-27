@@ -2098,24 +2098,12 @@
    "hide_seconds": 1,
    "label": "Write Off",
    "width": "50%"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "default": "0",
-   "fieldname": "repost_required",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Repost Required",
-   "no_copy": 1,
-   "read_only": 1
   },
   {
    "fieldname": "incoterm",
    "fieldtype": "Link",
    "label": "Incoterm",
    "options": "Incoterm"
->>>>>>> 029f22c549 (feat: add incoterm to sales transactions)
   }
  ],
  "icon": "fa fa-file-text",
