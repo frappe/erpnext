@@ -685,10 +685,10 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get(scrub(self.party_type)):
 			select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
+			doc_currency_fields = "debit as debit_in_account_currency, credit as credit_in_account_currency"
 		else:
 			select_fields = "debit, credit"
-
-		doc_currency_fields = "debit_in_account_currency, credit_in_account_currency"
+			doc_currency_fields = "debit_in_account_currency, credit_in_account_currency"
 
 		remarks = ", remarks" if self.filters.get("show_remarks") else ""
 
