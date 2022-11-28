@@ -15,6 +15,7 @@ from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance
 from erpnext.hr.doctype.attendance.attendance import mark_absent
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
+
 class ShiftType(Document):
 	def process_auto_attendance(self):
 		if not self.process_attendance_after:
@@ -25,24 +26,26 @@ class ShiftType(Document):
 			return
 
 		filters = {
-			'skip_auto_attendance':'0',
-			'attendance':('is', 'not set'),
-			'time':('>=', self.process_attendance_after),
+			'skip_auto_attendance': '0',
+			'attendance': ('is', 'not set'),
+			'time': ('>=', self.process_attendance_after),
 			'shift_actual_end': ('<', self.last_sync_of_checkin),
 			'shift': self.name
 		}
-		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
+
+		logs = frappe.get_all('Employee Checkin', fields="*", filters=filters, order_by="employee, time")
 		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_start'])):
 			single_shift_logs = list(group)
 			attendance_status, working_hours, late_entry, early_exit = self.get_attendance(single_shift_logs)
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, self.name)
+
 		for employee in self.get_assigned_employee(self.process_attendance_after, True):
 			self.mark_absent_for_dates_with_no_attendance(employee)
 
 	def get_attendance(self, logs):
 		"""Return attendance_status, working_hours for a set of logs belonging to a single shift.
-		Assumtion: 
-			1. These logs belongs to an single shift, single employee and is not in a holiday date.
+		Assumptions:
+			1. These logs belong to a single shift, single employee and is not in a holiday date.
 			2. Logs are in chronological order
 		"""
 		status = 'Present'
@@ -65,7 +68,7 @@ class ShiftType(Document):
 		return status, total_working_hours, late_entry, early_exit
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):
-		"""Marks Absents for the given employee on working days in this shift which have no andance marked.
+		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
 		The Absent is marked starting from 'process_attendance_after' or employee creation date.
 		"""
 		date_of_joining, relieving_date, employee_creation = frappe.db.get_value("Employee", employee, ["date_of_joining", "relieving_date", "creation"])
@@ -89,9 +92,10 @@ class ShiftType(Document):
 				mark_absent(employee, date, self.name)
 
 	def get_assigned_employee(self, from_date=None, consider_default_shift=False):
-		filters = {'date':('>=', from_date), 'shift_type': self.name, 'docstatus': '1'}
+		filters = {'date': ('>=', from_date), 'shift_type': self.name, 'docstatus': '1'}
 		if not from_date:
 			del filters['date']
+
 		assigned_employees = frappe.get_all('Shift Assignment', 'employee', filters, as_list=True)
 		assigned_employees = [x[0] for x in assigned_employees]
 
@@ -100,13 +104,16 @@ class ShiftType(Document):
 			default_shift_employees = frappe.get_all('Employee', 'name', filters, as_list=True)
 			default_shift_employees = [x[0] for x in default_shift_employees]
 			return list(set(assigned_employees+default_shift_employees))
+
 		return assigned_employees
+
 
 def process_auto_attendance_for_all_shifts():
 	shift_list = frappe.get_all('Shift Type', 'name', {'enable_auto_attendance': 1}, as_list=True)
 	for shift in shift_list:
 		doc = frappe.get_doc('Shift Type', shift[0])
 		doc.process_auto_attendance()
+
 
 def get_filtered_date_list(employee, start_date, end_date, filter_attendance=True, holiday_list=None):
 	"""Returns a list of dates after removing the dates with attendance and holidays
@@ -124,13 +131,18 @@ def get_filtered_date_list(employee, start_date, end_date, filter_attendance=Tru
 	if holiday_list:
 		condition_query += """ and a.selected_date not in (
 			select holiday_date from `tabHoliday` where parenttype = 'Holiday List' and
-    		parentfield = 'holidays' and parent = %(holiday_list)s
-    		and holiday_date between %(start_date)s and %(end_date)s)"""
-	
-	dates = frappe.db.sql("""select * from
+			parentfield = 'holidays' and parent = %(holiday_list)s
+			and holiday_date between %(start_date)s and %(end_date)s)"""
+
+	dates = frappe.db.sql("""
+		select * from
 		({base_dates_query}) as a
 		where a.selected_date <= %(end_date)s {condition_query}
-		""".format(base_dates_query=base_dates_query, condition_query=condition_query),
-		{"employee":employee, "start_date":start_date, "end_date":end_date, "holiday_list":holiday_list}, as_list=True)
+	""".format(base_dates_query=base_dates_query, condition_query=condition_query), {
+		"employee": employee,
+		"start_date": start_date,
+		"end_date": end_date,
+		"holiday_list": holiday_list
+	}, as_list=True)
 
 	return [getdate(date[0]) for date in dates]
