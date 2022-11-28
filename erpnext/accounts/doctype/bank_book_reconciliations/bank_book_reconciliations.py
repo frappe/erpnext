@@ -415,7 +415,7 @@ class BankBookReconciliations(Document):
 
 		conditions += "{"
 		conditions += '"date_data": ["<=", "{}"]'.format(self.to_date)
-		conditions += ', "status": "status": "Pre-reconciled"'
+		conditions += ', "status": "Pre-reconciled"'
 		conditions += ', "bank_account": "{}"'.format(self.bank_account)
 		conditions += '}'
 
