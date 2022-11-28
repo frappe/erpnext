@@ -224,15 +224,26 @@ class TestAsset(AssetSetup):
 			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
-		self.assertEquals(accumulated_depr_amount, 18000.00 + pro_rata_amount)
+		self.assertEquals(
+			accumulated_depr_amount,
+			flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+		)
 
 		self.assertEqual(asset.status, "Scrapped")
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
+			(
+				"_Test Accumulated Depreciations - _TC",
+				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 82000.0 - pro_rata_amount, 0.0),
+			(
+				"_Test Gain/Loss on Asset Disposal - _TC",
+				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 		)
 
 		gle = frappe.db.sql(
@@ -288,9 +299,17 @@ class TestAsset(AssetSetup):
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 18000.0 + pro_rata_amount, 0.0),
+			(
+				"_Test Accumulated Depreciations - _TC",
+				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 57000.0 - pro_rata_amount, 0.0),
+			(
+				"_Test Gain/Loss on Asset Disposal - _TC",
+				flt(57000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
+				0.0,
+			),
 			("Debtors - _TC", 25000.0, 0.0),
 		)
 

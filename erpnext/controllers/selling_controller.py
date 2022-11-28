@@ -581,6 +581,7 @@ class SellingController(StockController):
 			"customer_address": "address_display",
 			"shipping_address_name": "shipping_address",
 			"company_address": "company_address_display",
+			"dispatch_address_name": "dispatch_address",
 		}
 
 		for address_field, address_display_field in address_dict.items():

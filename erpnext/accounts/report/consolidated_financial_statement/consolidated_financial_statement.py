@@ -641,7 +641,7 @@ def set_gl_entries_by_account(
 				"rgt": root_rgt,
 				"company": d.name,
 				"finance_book": filters.get("finance_book"),
-				"company_fb": frappe.db.get_value("Company", d.name, "default_finance_book"),
+				"company_fb": frappe.get_cached_value("Company", d.name, "default_finance_book"),
 			},
 			as_dict=True,
 		)

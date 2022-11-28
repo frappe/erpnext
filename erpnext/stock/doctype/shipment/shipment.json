@@ -412,9 +412,9 @@
   },
   {
    "fieldname": "incoterm",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Incoterm",
-   "options": "EXW (Ex Works)\nFCA (Free Carrier)\nCPT (Carriage Paid To)\nCIP (Carriage and Insurance Paid to)\nDPU (Delivered At Place Unloaded)\nDAP (Delivered At Place)\nDDP (Delivered Duty Paid)"
+   "options": "Incoterm"
   },
   {
    "fieldname": "shipment_delivery_note",
@@ -433,10 +433,11 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-13 17:14:18.181818",
+ "modified": "2022-11-17 17:23:27.025802",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -470,5 +471,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

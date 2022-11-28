@@ -19,7 +19,7 @@ class Dunning(AccountsController):
 		self.validate_overdue_days()
 		self.validate_amount()
 		if not self.income_account:
-			self.income_account = frappe.db.get_value("Company", self.company, "default_income_account")
+			self.income_account = frappe.get_cached_value("Company", self.company, "default_income_account")
 
 	def validate_overdue_days(self):
 		self.overdue_days = (getdate(self.posting_date) - getdate(self.due_date)).days or 0

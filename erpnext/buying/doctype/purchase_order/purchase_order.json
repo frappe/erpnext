@@ -54,6 +54,8 @@
   "column_break_26",
   "total",
   "net_total",
+  "tax_withholding_net_total",
+  "base_tax_withholding_net_total",
   "section_break_48",
   "pricing_rules",
   "raw_material_details",
@@ -65,6 +67,7 @@
   "tax_category",
   "column_break_50",
   "shipping_rule",
+  "incoterm",
   "section_break_52",
   "taxes",
   "totals",
@@ -1108,7 +1111,8 @@
    "fetch_from": "supplier.is_internal_supplier",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
-   "label": "Is Internal Supplier"
+   "label": "Is Internal Supplier",
+   "read_only": 1
   },
   {
    "fetch_from": "supplier.represents_company",
@@ -1220,19 +1224,45 @@
    "oldfieldtype": "Section Break"
   },
   {
+   "default": "0",
+   "fieldname": "tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_tax_withholding_net_total",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Base Tax Withholding Net Total",
+   "no_copy": 1,
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_99",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_103",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:01:41.674352",
+ "modified": "2022-11-17 17:28:07.729943",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

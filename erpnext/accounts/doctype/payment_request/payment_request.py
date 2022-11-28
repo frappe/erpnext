@@ -53,7 +53,7 @@ class PaymentRequest(Document):
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if self.payment_account and ref_doc.currency != frappe.db.get_value(
+		if self.payment_account and ref_doc.currency != frappe.get_cached_value(
 			"Account", self.payment_account, "account_currency"
 		):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
