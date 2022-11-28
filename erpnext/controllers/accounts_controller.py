@@ -239,6 +239,10 @@ class AccountsController(TransactionBase):
 					else:
 						item.set(field_map.get(self.doctype), default_deferred_account)
 
+	def validate_auto_repeat_subscription_dates(self):
+		if getdate(self.from_date) > getdate(self.to_date):
+			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
+
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
