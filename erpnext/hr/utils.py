@@ -232,9 +232,7 @@ def get_employee_leave_policy(employee):
 			leave_policy = frappe.get_cached_value("Company", employee_company, "default_leave_policy")
 
 	if leave_policy:
-		return frappe.get_doc("Leave Policy", leave_policy)
-	else:
-		frappe.throw(_("Please set leave policy for employee {0} in Employee / Grade record").format(employee))
+		return frappe.get_cached_doc("Leave Policy", leave_policy)
 
 def validate_duplicate_exemption_for_payroll_period(doctype, docname, payroll_period, employee):
 	existing_record = frappe.db.exists(doctype, {

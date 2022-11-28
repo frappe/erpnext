@@ -5,6 +5,7 @@ import frappe
 from frappe import msgprint, _, scrub
 from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today, formatdate
 from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
+from erpnext.hr.utils import get_employee_leave_policy
 from calendar import monthrange
 import datetime
 
@@ -18,8 +19,6 @@ def execute(filters=None):
 	employee_map = get_employee_details(filters)
 	holiday_map = get_holiday_map(employee_map, filters.default_holiday_list,
 		from_date=filters.from_date, to_date=filters.to_date)
-
-	no_of_late_days_as_lwp = cint(frappe.get_cached_value("HR Settings", None, "no_of_late_days"))
 
 	leave_types = frappe.db.sql("select name, is_lwp, include_holiday from `tabLeave Type` order by idx, creation",
 		as_dict=1)
@@ -104,8 +103,10 @@ def execute(filters=None):
 						row['total_lwp'] += leave_count
 
 		row['total_late_deduction'] = 0
-		if no_of_late_days_as_lwp:
-			row['total_late_deduction'] = row['total_late_entry'] // no_of_late_days_as_lwp
+
+		leave_policy = get_employee_leave_policy(employee)
+		if leave_policy:
+			row['total_late_deduction'] = leave_policy.get_lwp_from_late_days(row['total_late_entry'])
 			row['total_deduction'] += row['total_late_deduction']
 
 		data.append(row)
@@ -144,8 +145,7 @@ def get_columns(filters, leave_types):
 		{"fieldname": "total_early_exit", "label": _("Early Exit"), "fieldtype": "Float", "width": 75, "precision": 1},
 	]
 
-	if cint(frappe.get_cached_value("HR Settings", None, "no_of_late_days")):
-		columns.append({"fieldname": "total_late_deduction", "label": _("Late Deduction"), "fieldtype": "Float", "width": 110, "precision": 1})
+	columns.append({"fieldname": "total_late_deduction", "label": _("Late Deduction"), "fieldtype": "Float", "width": 110, "precision": 1})
 
 	columns.append({"fieldname": "total_deduction", "label": _("Total Deduction"), "fieldtype": "Float", "width": 112, "precision": 1})
 
