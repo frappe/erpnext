@@ -129,6 +129,7 @@
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
+   "reqd": 1,
    "options": "Tax Category"
   },
   {
@@ -225,7 +226,7 @@
   }
  ],
  "links": [],
- "modified": "2021-06-04 23:14:27.186879",
+ "modified": "2022-11-28 23:14:27.186879",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Rule",
