@@ -25,6 +25,8 @@ class ShiftType(Document):
 			frappe.msgprint(_("Cannot Process Auto Attendance because <b>'Last Sync of Checkin'</b> is not set"))
 			return
 
+		self.update_shift_in_logs()
+
 		filters = {
 			'skip_auto_attendance': '0',
 			'attendance': ('is', 'not set'),
@@ -39,8 +41,32 @@ class ShiftType(Document):
 			attendance_status, working_hours, late_entry, early_exit = self.get_attendance(single_shift_logs)
 			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, self.name)
 
-		for employee in self.get_assigned_employee(self.process_attendance_after, True):
+		for employee in self.get_assigned_employees(self.process_attendance_after, True):
 			self.mark_absent_for_dates_with_no_attendance(employee)
+
+	def update_shift_in_logs(self):
+		filters = {
+			'skip_auto_attendance': '0',
+			'attendance': ('is', 'not set'),
+			'time': ('>=', self.process_attendance_after),
+			'shift_actual_end': ('<', self.last_sync_of_checkin),
+			'shift': ('is', 'set')
+		}
+
+		logs = frappe.get_all('Employee Checkin', fields="name", filters=filters)
+		for log in logs:
+			keys = ("shift", "shift_actual_start", "shift_actual_end", "shift_start", "shift_end")
+
+			log_doc = frappe.get_doc("Employee Checkin", log.name)
+			before_values = tuple(log_doc.get(k) for k in keys)
+
+			log_doc.fetch_shift()
+			after_values = tuple(log_doc.get(k) for k in keys)
+
+			if after_values != before_values:
+				log_doc.flags.ignore_permissions = True
+				log_doc.flags.ignore_validate = True
+				log_doc.save()
 
 	def get_attendance(self, logs):
 		"""Return attendance_status, working_hours for a set of logs belonging to a single shift.
@@ -96,7 +122,7 @@ class ShiftType(Document):
 			if shift_details and shift_details.shift_type.name == self.name:
 				mark_absent(employee, date, self.name)
 
-	def get_assigned_employee(self, from_date=None, consider_default_shift=False):
+	def get_assigned_employees(self, from_date=None, consider_default_shift=False):
 		filters = {'date': ('>=', from_date), 'shift_type': self.name, 'docstatus': '1'}
 		if not from_date:
 			del filters['date']
