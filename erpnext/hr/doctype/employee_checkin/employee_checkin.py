@@ -9,12 +9,11 @@ from frappe import _
 
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift
 
+
 class EmployeeCheckin(Document):
 	def validate(self):
 		self.validate_duplicate_log()
-
-		if not self.attendance:
-			self.fetch_shift()
+		self.fetch_shift()
 
 	def validate_duplicate_log(self):
 		doc = frappe.db.exists('Employee Checkin', {
@@ -24,21 +23,29 @@ class EmployeeCheckin(Document):
 		if doc:
 			doc_link = frappe.get_desk_link('Employee Checkin', doc)
 			frappe.throw(_('This employee already has a log with the same timestamp.{0}')
-				.format("<Br>" + doc_link))
+				.format("<br>" + doc_link))
 
 	def fetch_shift(self):
+		if self.attendance:
+			return
+
 		shift_actual_timings = get_actual_start_end_datetime_of_shift(self.employee, get_datetime(self.time), True)
 		if shift_actual_timings[0] and shift_actual_timings[1]:
 			if shift_actual_timings[2].shift_type.determine_check_in_and_check_out == 'Strictly based on Log Type in Employee Checkin' and not self.log_type and not self.skip_auto_attendance:
 				frappe.throw(_('Log Type is required for check-ins falling in the shift: {0}.').format(shift_actual_timings[2].shift_type.name))
-			if not self.attendance:
-				self.shift = shift_actual_timings[2].shift_type.name
-				self.shift_actual_start = shift_actual_timings[0]
-				self.shift_actual_end = shift_actual_timings[1]
-				self.shift_start = shift_actual_timings[2].start_datetime
-				self.shift_end = shift_actual_timings[2].end_datetime
+
+			self.shift = shift_actual_timings[2].shift_type.name
+			self.shift_actual_start = shift_actual_timings[0]
+			self.shift_actual_end = shift_actual_timings[1]
+			self.shift_start = shift_actual_timings[2].start_datetime
+			self.shift_end = shift_actual_timings[2].end_datetime
 		else:
 			self.shift = None
+			self.shift_actual_start = None
+			self.shift_actual_end = None
+			self.shift_start = None
+			self.shift_end = None
+
 
 @frappe.whitelist()
 def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=None, log_type=None, skip_auto_attendance=0, employee_fieldname='attendance_device_id'):
@@ -67,7 +74,10 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	doc.time = timestamp
 	doc.device_id = device_id
 	doc.log_type = log_type
-	if cint(skip_auto_attendance) == 1: doc.skip_auto_attendance = '1'
+
+	if cint(skip_auto_attendance) == 1:
+		doc.skip_auto_attendance = '1'
+
 	doc.insert()
 
 	return doc
@@ -168,8 +178,10 @@ def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 				total_hours += time_diff_in_hours(in_log.time, out_log.time)
 	return total_hours, in_time, out_time
 
+
 def time_diff_in_hours(start, end):
 	return round((end-start).total_seconds() / 3600, 1)
+
 
 def find_index_in_dict(dict_list, key, value):
 	return next((index for (index, d) in enumerate(dict_list) if d[key] == value), None)

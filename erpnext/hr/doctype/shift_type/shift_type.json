@@ -13,22 +13,24 @@
   "auto_attendance_settings_section",
   "determine_check_in_and_check_out",
   "working_hours_calculation_based_on",
+  "column_break_10",
   "begin_check_in_before_shift_start_time",
   "allow_check_out_after_shift_end_time",
-  "column_break_10",
+  "grace_period_settings_auto_attendance_section",
   "half_day_if_late_minutes",
+  "late_entry_grace_period",
+  "enable_entry_grace_period",
+  "column_break_18",
+  "half_day_if_exit_minutes",
+  "early_exit_grace_period",
+  "enable_exit_grace_period",
+  "cb_18",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
   "sync_settings_section",
   "process_attendance_after",
   "column_break_16",
-  "last_sync_of_checkin",
-  "grace_period_settings_auto_attendance_section",
-  "enable_entry_grace_period",
-  "late_entry_grace_period",
-  "column_break_18",
-  "enable_exit_grace_period",
-  "early_exit_grace_period"
+  "last_sync_of_checkin"
  ],
  "fields": [
   {
@@ -87,10 +89,10 @@
   },
   {
    "default": "60",
-   "description": "The time before the shift start time during which Employee Check-in is considered for attendance.",
+   "description": "The time before the shift start during which Check-ins are considered for attendance.",
    "fieldname": "begin_check_in_before_shift_start_time",
    "fieldtype": "Int",
-   "label": "Begin check-in before shift start time (in minutes)"
+   "label": "Begin Check-in before shift start time (in minutes)"
   },
   {
    "default": "0",
@@ -124,10 +126,10 @@
   },
   {
    "default": "60",
-   "description": "Time after the end of shift during which check-out is considered for attendance.",
+   "description": "Time after the end of shift during which Check-outs are considered for attendance.",
    "fieldname": "allow_check_out_after_shift_end_time",
    "fieldtype": "Int",
-   "label": "Allow check-out after shift end time (in minutes)"
+   "label": "Allow Check-out after shift end time (in minutes)"
   },
   {
    "fieldname": "auto_attendance_settings_section",
@@ -172,9 +174,19 @@
    "fieldname": "half_day_if_late_minutes",
    "fieldtype": "Int",
    "label": "Mark Half Day If Entry Later Than"
+  },
+  {
+   "fieldname": "cb_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Early exit in minutes before which Half Day is marked. (Zero to disable)",
+   "fieldname": "half_day_if_exit_minutes",
+   "fieldtype": "Int",
+   "label": "Mark Half Day If Exit Earlier Than"
   }
  ],
- "modified": "2021-08-27 15:52:28.339910",
+ "modified": "2022-11-28 15:46:12.569422",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",
