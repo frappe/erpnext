@@ -240,7 +240,11 @@ class AccountsController(TransactionBase):
 						item.set(field_map.get(self.doctype), default_deferred_account)
 
 	def validate_auto_repeat_subscription_dates(self):
-		if getdate(self.from_date) > getdate(self.to_date):
+		if (
+			self.get("from_date")
+			and self.get("to_date")
+			and getdate(self.from_date) > getdate(self.to_date)
+		):
 			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
 
 	def validate_deferred_start_and_end_date(self):
