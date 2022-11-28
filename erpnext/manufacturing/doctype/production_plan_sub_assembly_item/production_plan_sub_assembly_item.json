@@ -169,7 +169,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Manufacturing Type",
-   "options": "In House\nSubcontract"
+   "options": "In House\nSubcontract\nMaterial Request"
   },
   {
    "fieldname": "supplier",
@@ -188,7 +188,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-01-30 21:31:10.527559",
+ "modified": "2022-11-28 13:50:15.116082",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",
