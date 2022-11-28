@@ -174,7 +174,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			uom = next(filter(lambda x: x.uom == price.uom, uoms), {})
 
 			if (
-				price.uom is not item.stock_uom and
+				price.uom != item.stock_uom and
 				uom and
 				uom.conversion_factor
 			):
