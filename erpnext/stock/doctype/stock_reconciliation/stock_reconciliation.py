@@ -347,6 +347,9 @@ class StockReconciliation(StockController):
 		if row.qty:
 			args = self.get_sle_for_items(row)
 
+			if row.serial_no and row.batch_no:
+				args["qty_after_transaction"] = row.qty
+
 			args.update(
 				{
 					"actual_qty": row.qty,
