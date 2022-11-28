@@ -521,6 +521,9 @@ class ProductionPlan(Document):
 				subcontracted_po.setdefault(row.supplier, []).append(row)
 				continue
 
+			if row.type_of_manufacturing == "Material Request":
+				continue
+
 			work_order_data = {
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
@@ -1161,6 +1164,7 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
 
+	warehouse = ""
 	if not all_warehouse:
 		warehouse = for_warehouse or row.get("source_warehouse") or row.get("default_warehouse")
 
@@ -1226,6 +1230,21 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	doc["mr_items"] = []
 
 	po_items = doc.get("po_items") if doc.get("po_items") else doc.get("items")
+
+	if doc.get("sub_assembly_items"):
+		for sa_row in doc.sub_assembly_items:
+			sa_row = frappe._dict(sa_row)
+			if sa_row.type_of_manufacturing == "Material Request":
+				po_items.append(
+					frappe._dict(
+						{
+							"item_code": sa_row.production_item,
+							"required_qty": sa_row.qty,
+							"include_exploded_items": 0,
+						}
+					)
+				)
+
 	# Check for empty table or empty rows
 	if not po_items or not [row.get("item_code") for row in po_items if row.get("item_code")]:
 		frappe.throw(
