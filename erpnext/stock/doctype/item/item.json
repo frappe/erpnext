@@ -21,6 +21,7 @@
   "shelf_life",
   "product_brand",
   "brand",
+  "shipper_size",
   "column_break_11",
   "stock_uom",
   "supplier",
@@ -33,7 +34,6 @@
   "product_label",
   "barcode",
   "type_of_packing",
-  "shipper_size",
   "section_break_34",
   "physical_parameter",
   "column_break_25",
@@ -46,6 +46,7 @@
   "product_registration_doc",
   "product_marketing_doc_section",
   "product_marketing_doc",
+  "section_break_37",
   "is_stock_item",
   "item_group",
   "is_item_from_hub",
@@ -466,7 +467,7 @@
    "label": "Serial Nos and Batches"
   },
   {
-   "default": "0",
+   "default": "1",
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
@@ -1002,6 +1003,7 @@
   {
    "fieldname": "price_list_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Pack Price",
    "options": "Currency",
    "precision": "0"
@@ -1149,6 +1151,11 @@
    "fieldname": "shipper_size",
    "fieldtype": "Data",
    "label": "Shipper Size"
+  },
+  {
+   "fieldname": "section_break_37",
+   "fieldtype": "Section Break",
+   "hidden": 1
   }
  ],
  "hide_toolbar": 1,
@@ -1157,7 +1164,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-02 00:22:04.321661",
+ "modified": "2022-11-28 05:27:25.455371",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

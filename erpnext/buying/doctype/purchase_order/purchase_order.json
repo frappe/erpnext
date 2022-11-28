@@ -1225,8 +1225,6 @@
    "default": "Open",
    "fieldname": "po_status",
    "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "PO Status",
    "options": "Open\nProposed Ready Date\nPartially Ready\nReady\nShipped\nCancelled"
   },
@@ -1270,7 +1268,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 05:52:56.246252",
+ "modified": "2022-11-22 07:48:28.853795",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
