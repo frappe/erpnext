@@ -542,12 +542,12 @@ erpnext.PointOfSale.Controller = class {
 				if (!this.frm.doc.customer)
 					return this.raise_customer_selection_alert();
 
-				const { item_code, batch_no, serial_no, rate } = item;
+				const { item_code, batch_no, serial_no, rate, uom } = item;
 
 				if (!item_code)
 					return;
 
-				const new_item = { item_code, batch_no, rate, [field]: value };
+				const new_item = { item_code, batch_no, rate, uom, [field]: value };
 
 				if (serial_no) {
 					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
