@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import json, math
+import json
 from typing import Dict, Optional
 
 import frappe
@@ -149,7 +149,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 				uom and
 				uom.conversion_factor
 			):
-				item.actual_qty = math.floor(item.actual_qty / uom.conversion_factor)
+				item.actual_qty = item.actual_qty // uom.conversion_factor
 
 			result.append({
 				**item,
