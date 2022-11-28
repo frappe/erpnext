@@ -258,6 +258,16 @@ def repost_future_sle(
 			)
 
 
+<<<<<<< HEAD
+=======
+def validate_item_warehouse(args):
+	for field in ["item_code", "warehouse", "posting_date", "posting_time"]:
+		if not args.get(field):
+			validation_msg = f"The field {frappe.unscrub(field)} is required for the reposting"
+			frappe.throw(_(validation_msg))
+
+
+>>>>>>> ba77da0874 (fix: validation msg in stock entry)
 def update_args_in_repost_item_valuation(
 	doc, index, args, distinct_item_warehouses, affected_transactions
 ):
