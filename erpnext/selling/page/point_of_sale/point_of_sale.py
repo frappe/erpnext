@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import json
+import json, math
 from typing import Dict, Optional
 
 import frappe
@@ -124,6 +124,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 	if not items_data: return result
 
 	for item in items_data:
+		uoms = frappe.get_doc("Item", item.item_code).get("uoms", [])
+
 		item.actual_qty, _ = get_stock_availability(item.item_code, warehouse)
 		item.uom = item.stock_uom
 
@@ -133,12 +135,22 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			filters={
 				"price_list": price_list,
 				"item_code": item.item_code,
+				"selling": True,
 			},
 		)
 
 		if not item_price: result.append(item)
 
 		for price in item_price:
+			uom = next(filter(lambda x: x.uom == price.uom, uoms))
+
+			if (
+				price.uom is not item.stock_uom and
+				uom and
+				uom.conversion_factor
+			):
+				item.actual_qty = math.floor(item.actual_qty / uom.conversion_factor)
+
 			result.append({
 				**item,
 				"price_list_rate": price.get("price_list_rate"),
