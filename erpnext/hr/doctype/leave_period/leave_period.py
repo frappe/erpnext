@@ -69,6 +69,9 @@ def grant_leave_alloc_for_employees(employee_records, leave_period, carry_forwar
 					leave_allocation = create_leave_allocation(employee, leave_policy_detail.leave_type,
 						leave_policy_detail.annual_allocation, leave_type_details, leave_period, carry_forward, employee_records.get(employee))
 					leave_allocations.append(leave_allocation)
+		else:
+			frappe.msgprint(_("Please set leave policy for {0}").format(frappe.get_desk_link("Employee", employee)))
+
 		frappe.db.commit()
 		frappe.publish_progress(count*100/len(set(employee_records.keys()) - set(existing_allocations_for)), title = _("Allocating leaves..."))
 

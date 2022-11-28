@@ -1,0 +1,35 @@
+{
+ "creation": "2022-11-28 17:42:56.042996",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "late_days",
+  "lwp"
+ ],
+ "fields": [
+  {
+   "fieldname": "late_days",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "No of Late Days"
+  },
+  {
+   "fieldname": "lwp",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "No of Leave Without Pay"
+  }
+ ],
+ "istable": 1,
+ "modified": "2022-11-28 17:46:07.132491",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Late Days Threshold",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

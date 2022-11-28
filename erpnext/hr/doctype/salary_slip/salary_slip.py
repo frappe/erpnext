@@ -19,6 +19,7 @@ from erpnext.hr.doctype.income_tax_slab.income_tax_slab import get_applicable_in
 from erpnext.hr.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
+from erpnext.hr.utils import get_employee_leave_policy
 
 
 class SalarySlip(TransactionBase):
@@ -249,15 +250,15 @@ class SalarySlip(TransactionBase):
 		self.total_working_days = working_days
 
 		# LWP and Late calculation
-		no_of_late_days_as_lwp = cint(frappe.get_cached_value("HR Settings", None, "no_of_late_days"))
+		leave_policy = get_employee_leave_policy(self.employee)
 
 		actual_lwp = self.calculate_lwp(holidays, working_days, joining_date, relieving_date)
 		self.actual_late_days = self.calculate_late_days(holidays)
-		actual_late_lwp = self.actual_late_days // no_of_late_days_as_lwp if no_of_late_days_as_lwp else 0
+		actual_late_lwp = leave_policy.get_lwp_from_late_days(self.actual_late_days) if leave_policy else 0
 		actual_lwp_with_late = actual_lwp + actual_late_lwp
 		self.actual_leave_without_pay = flt(actual_lwp_with_late)
 
-		late_lwp = cint(late_days) // no_of_late_days_as_lwp if no_of_late_days_as_lwp else 0
+		late_lwp = leave_policy.get_lwp_from_late_days(late_days) if leave_policy else 0
 
 		if cint(self.set_lwp_manually):
 			self.late_days = cint(late_days)

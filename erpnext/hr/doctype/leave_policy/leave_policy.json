@@ -7,7 +7,11 @@
  "field_order": [
   "leave_allocations_section",
   "leave_policy_details",
-  "amended_from"
+  "amended_from",
+  "late_deductions_section",
+  "late_deduction_policy",
+  "lwp_per_late_days",
+  "late_days_threshold"
  ],
  "fields": [
   {
@@ -31,30 +35,39 @@
    "options": "Leave Policy",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "late_deductions_section",
+   "fieldtype": "Section Break",
+   "label": "Late Deductions"
+  },
+  {
+   "fieldname": "late_deduction_policy",
+   "fieldtype": "Select",
+   "label": "Late Deduction Policy",
+   "options": "\nn Late Days = 1 Leave Without Pay\nLate Days Threshold Rules"
+  },
+  {
+   "depends_on": "eval:doc.late_deduction_policy == \"Late Days Threshold Rules\"",
+   "fieldname": "late_days_threshold",
+   "fieldtype": "Table",
+   "label": "Late Days Threshold",
+   "options": "Late Days Threshold"
+  },
+  {
+   "depends_on": "eval:doc.late_deduction_policy == \"n Late Days = 1 Leave Without Pay\"",
+   "fieldname": "lwp_per_late_days",
+   "fieldtype": "Int",
+   "label": "No of Late Days as One Leave Without Pay"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:13.557071",
+ "modified": "2022-11-28 17:51:28.811277",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy",
  "owner": "Administrator",
  "permissions": [
-  {
-   "amend": 1,
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
   {
    "amend": 1,
    "cancel": 1,
@@ -71,19 +84,13 @@
    "write": 1
   },
   {
-   "amend": 1,
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "HR User",
-   "share": 1,
-   "submit": 1,
-   "write": 1
+   "share": 1
   }
  ],
  "sort_field": "modified",
