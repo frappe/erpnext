@@ -52,14 +52,19 @@ class ShiftType(Document):
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
 
+		# Late Entry / Early Exit
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
 		if cint(self.enable_exit_grace_period) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
 			early_exit = True
 
+		# Half Day if late entry or early exit
 		if cint(self.half_day_if_late_minutes) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.half_day_if_late_minutes)):
 			status = 'Half Day'
+		if cint(self.half_day_if_exit_minutes) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.half_day_if_exit_minutes)):
+			status = 'Half Day'
 
+		# Half Day / Absent if working hours less than
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
 			status = 'Half Day'
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
