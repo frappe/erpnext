@@ -261,47 +261,33 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		$.each(item_total_fields || [], function(i, f) {
 			totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
 		});
-
-		var charges_map = [];
-		var manual_account_heads = new Set;
-		var idx = 0;
-		$.each(me.frm.doc.taxes || [], function(i, tax) {
-			if (tax.base_amount) {
-				var based_on = frappe.scrub(tax.distribution_criteria);
-
-				if(based_on == "manual") {
-					manual_account_heads.add(cstr(tax.account_head));
-				} else {
-					if(!totals[based_on]) {
-						frappe.throw(__("Cannot distribute by {0} because total {0} is 0", [tax.distribution_criteria]));
-					}
-
-					charges_map[idx] = [];
-					$.each(me.frm.doc.items || [], function(item_idx, item) {
-						charges_map[idx][item_idx] = flt(tax.base_amount) * flt(item[based_on]) / flt(totals[based_on]);
-					});
-					++idx;
+		$.each(me.frm.doc.items || [], function(i, item) {
+			item.item_tax_detail = {}
+			let item_manual_distribution = JSON.parse(item.manual_distribution || '{}');
+			$.each(me.frm.doc.taxes || [], function(i, tax) {
+				item.item_tax_detail[tax.name] = 0;
+				let distribution_amount;
+				let distribution_based_on = frappe.model.scrub(tax.distribution_criteria);
+				if (distribution_based_on == 'manual') {
+					distribution_amount = flt(item_manual_distribution[tax.account_head]);
 				}
-			}
+				else {
+					if (!totals[distribution_based_on]){
+						frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
+					}
+					let ratio = flt(item[distribution_based_on]) / flt(totals[distribution_based_on])
+					distribution_amount = flt(tax.base_amount) * ratio
+				}
+				item.item_tax_detail[tax.name] += distribution_amount
+			});
 		});
 
-		var accumulated_taxes = 0.0;
-		$.each(me.frm.doc.items || [], function(item_idx, item) {
-			if (item.item_code) {
-				var item_total_tax = 0.0;
-				for(var i = 0; i < charges_map.length; ++i) {
-					item_total_tax += charges_map[i][item_idx];
-				}
-
-				Object.keys(item.manual_distribution_data || {}).forEach(function(account_head) {
-					if(manual_account_heads.has(account_head)) {
-						item_total_tax += flt(item.manual_distribution_data[account_head]) * flt(me.frm.doc.conversion_rate);
-					}
-				});
-
-				item.applicable_charges = item_total_tax;
-				accumulated_taxes += item.applicable_charges;
-			}
+		let accumulated_taxes = 0
+		$.each(me.frm.doc.items || [], function(i, item) {
+			let item_tax_total = flt(frappe.utils.sum(Object.values(item.item_tax_detail))) * me.frm.doc.conversion_rate;
+			item.item_tax_detail = JSON.stringify(item.item_tax_detail);
+			item.applicable_charges = item_tax_total
+			accumulated_taxes += item_tax_total
 		});
 
 		if (accumulated_taxes != me.frm.doc.base_total_taxes_and_charges) {
