@@ -11,6 +11,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_balance_on
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.party import get_party_account
 from six import string_types
 import json
 
@@ -362,6 +363,7 @@ class LandedCostVoucher(AccountsController):
 								Remove Item <b>{1}</b> from table to continue.').format(
 									item.receipt_document, item.item_code, item.receipt_document_type))
 
+
 def update_rate_in_serial_no_for_non_asset_items(receipt_document):
 	for item in receipt_document.get("items"):
 		if item.serial_no:
@@ -393,3 +395,12 @@ def get_landed_cost_voucher(dt, dn):
 
 	lcv.get_items_from_purchase_receipts()
 	return lcv
+
+
+@frappe.whitelist()
+def get_party_details(party_type, party, company):
+	out = frappe._dict()
+
+	out.currency = frappe.db.get_value(party_type, party, 'default_currency') or erpnext.get_company_currency(company)
+	out.credit_to = get_party_account(party_type, party, company)
+	return out

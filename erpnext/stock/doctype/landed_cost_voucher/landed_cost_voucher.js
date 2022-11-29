@@ -462,47 +462,22 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	party: function() {
 		var me = this;
-		frappe.run_serially([
-			() => {
-				if(me.frm.doc.party && me.frm.doc.company) {
-					return frappe.call({
-						method: "erpnext.accounts.party.get_party_account",
-						args: {
-							company: me.frm.doc.company,
-							party_type: me.frm.doc.party_type,
-							party: me.frm.doc.party,
-							include_currency: true
-						},
-						callback: function(r) {
-							if(!r.exc && r.message) {
-								me.frm.set_value("credit_to", r.message);
-							}
-						}
-					});
+		if (me.frm.doc.party_type && me.frm.doc.party) {
+			frappe.call({
+				method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_party_details",
+				args: {
+					party_type: me.frm.doc.party_type,
+					party: me.frm.doc.party,
+					company: me.frm.doc.company,
+				},
+				callback: function(r) {
+					if(!r.exc && r.message) {
+						me.frm.set_value("currency", r.message.currency);
+						me.frm.set_value("credit_to", r.message.credit_to);
+					}
 				}
-			},
-			() => {
-				if (me.frm.doc.party_type == "Supplier") {
-					me.frm.call({
-						method: "frappe.client.get_value",
-						args: {
-							doctype: "Supplier",
-							fieldname: "default_currency",
-							filters: {name: me.frm.doc.party},
-						},
-						callback: function(r, rt) {
-							if(r.message) {
-								me.frm.set_value("currency", r.message.default_currency);
-								me.set_dynamic_labels();
-							}
-						}
-					});
-				} else {
-					me.frm.set_value("currency", me.get_company_currency());
-					me.set_dynamic_labels();
-				}
-			}
-		]);
+			});
+		}
 	},
 
 	get_company_currency: function() {
