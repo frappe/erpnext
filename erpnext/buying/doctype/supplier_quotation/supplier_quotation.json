@@ -45,6 +45,7 @@
   "tax_category",
   "column_break_36",
   "shipping_rule",
+  "incoterm",
   "section_break_38",
   "taxes",
   "totals",
@@ -823,6 +824,12 @@
   {
    "fieldname": "column_break_85",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -830,7 +837,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-27 18:20:09.462037",
+ "modified": "2022-11-17 17:27:32.179686",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
