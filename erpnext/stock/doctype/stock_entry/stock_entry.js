@@ -1050,7 +1050,8 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 	if (frm.doc.purpose === 'Material Receipt') return;
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchSelector({
+		if (frm.batch_selector?.dialog?.display) return;
+		frm.batch_selector = new erpnext.SerialNoBatchSelector({
 			frm: frm,
 			item: item,
 			warehouse_details: get_warehouse_type_and_name(item),
