@@ -40,6 +40,7 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.validate_auto_repeat_subscription_dates()
 
 	def set_missing_values(self, for_validate=False):
 
