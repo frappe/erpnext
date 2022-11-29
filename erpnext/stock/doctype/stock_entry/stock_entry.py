@@ -659,6 +659,13 @@ class StockEntry(StockController):
 
 			if d.allow_zero_valuation_rate:
 				d.basic_rate = 0.0
+				frappe.msgprint(
+					_(
+						"Row {0}: Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {1}"
+					).format(d.idx, d.item_code),
+					alert=1,
+				)
+
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
