@@ -2,6 +2,29 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Follow Up', {
+	show_excluded_customers: function(frm){
+		if (frm.doc.show_excluded_customers == 1){
+			frm.set_query("customer",function(){
+				return{
+					"filters": {
+						"exclude_from_followups": 1
+					}
+				}
+				
+			})
+		}
+
+		else{
+			frm.set_query("customer",function(){
+				return{
+					"filters": {
+						"exclude_from_followups": 0
+					}
+				}
+				
+			})
+		}
+	},
 	refresh: function (frm) {
 
 		frm.fields_dict.get_follow_up_details.$input.addClass("btn-primary");

@@ -26,6 +26,7 @@
   "territory",
   "based_on_payment_terms",
   "show_future_payments",
+  "show_excluded_customers",
   "section_break_21",
   "get_follow_up_details",
   "items",
@@ -169,13 +170,19 @@
    "fieldtype": "Currency",
    "label": "Total Outstanding",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "show_excluded_customers",
+   "fieldtype": "Check",
+   "label": "Show Excluded Customers"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-06-06 12:26:42.366241",
+ "modified": "2022-11-29 16:02:10.154671",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Follow Up",

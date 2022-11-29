@@ -28,6 +28,7 @@
   "territory",
   "tax_id",
   "tax_category",
+  "exclude_from_followups",
   "so_required",
   "dn_required",
   "disabled",
@@ -504,6 +505,12 @@
    "no_copy": 1,
    "options": "Opportunity",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "exclude_from_followups",
+   "fieldtype": "Check",
+   "label": "Exclude From Followups"
   }
  ],
  "icon": "fa fa-user",
@@ -517,7 +524,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2021-09-06 17:38:54.196663",
+ "modified": "2022-11-29 16:00:31.742738",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
