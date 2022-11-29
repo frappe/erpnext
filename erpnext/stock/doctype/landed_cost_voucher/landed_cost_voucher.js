@@ -480,6 +480,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 	},
 
+	party_type: function() {
+		me.frm.set_value("party", '');
+	},
+
 	get_company_currency: function() {
 		return erpnext.get_currency(this.frm.doc.company);
 	},

@@ -401,6 +401,9 @@ def get_landed_cost_voucher(dt, dn):
 def get_party_details(party_type, party, company):
 	out = frappe._dict()
 
-	out.currency = frappe.db.get_value(party_type, party, 'default_currency') or erpnext.get_company_currency(company)
+	out.currency = erpnext.get_company_currency(company)
 	out.credit_to = get_party_account(party_type, party, company)
+	if party_type == 'Supplier':
+		out.currency = frappe.db.get_value(party_type, party, 'default_currency') or out.currency
+
 	return out
