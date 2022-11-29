@@ -473,6 +473,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				callback: function(r) {
 					if(!r.exc && r.message) {
 						me.frm.set_value(r.message);
+						me.set_dynamic_labels();
 					}
 				}
 			});
@@ -518,6 +519,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		} else {
 			this.conversion_rate();
 		}
+		me.set_dynamic_labels();
 	},
 
 	posting_date: function() {
