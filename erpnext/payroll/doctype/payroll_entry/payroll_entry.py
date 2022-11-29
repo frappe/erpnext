@@ -346,6 +346,8 @@ class PayrollEntry(Document):
 						"credit_in_account_currency": flt(payable_amt, precision),
 						"exchange_rate": flt(exchange_rate),
 						"cost_center": self.cost_center,
+						"reference_type": self.doctype,
+						"reference_name": self.name,
 					},
 					accounting_dimensions,
 				)
@@ -720,12 +722,21 @@ def get_month_details(year, month):
 
 def get_payroll_entry_bank_entries(payroll_entry_name):
 	journal_entries = frappe.db.sql(
-		"select name from `tabJournal Entry Account` "
-		'where reference_type="Payroll Entry" '
-		"and reference_name=%s and docstatus=1",
+		"""
+		select
+			je.name
+		from
+			`tabJournal Entry` je,
+			`tabJournal Entry Account` jea
+		where
+			je.name = jea.parent
+			and je.voucher_type = 'Bank Entry'
+			and jea.reference_type = 'Payroll Entry'
+			and jea.reference_name = %s
+	""",
 		payroll_entry_name,
-		as_dict=1,
-	)
+		as_dict=True,
+	)  # nosemgrep
 
 	return journal_entries
 
