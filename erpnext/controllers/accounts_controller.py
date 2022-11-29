@@ -239,6 +239,14 @@ class AccountsController(TransactionBase):
 					else:
 						item.set(field_map.get(self.doctype), default_deferred_account)
 
+	def validate_auto_repeat_subscription_dates(self):
+		if (
+			self.get("from_date")
+			and self.get("to_date")
+			and getdate(self.from_date) > getdate(self.to_date)
+		):
+			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
+
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
@@ -1352,12 +1360,12 @@ class AccountsController(TransactionBase):
 		party = self.customer if self.doctype == "Sales Order" else self.supplier
 		advance = (
 			frappe.qb.from_(ple)
-			.select(ple.account_currency, Abs(Sum(ple.amount)).as_("amount"))
+			.select(ple.account_currency, Abs(Sum(ple.amount_in_account_currency)).as_("amount"))
 			.where(
 				(ple.against_voucher_type == self.doctype)
 				& (ple.against_voucher_no == self.name)
 				& (ple.party == party)
-				& (ple.delinked == 0)
+				& (ple.docstatus == 1)
 				& (ple.company == self.company)
 			)
 			.run(as_dict=True)

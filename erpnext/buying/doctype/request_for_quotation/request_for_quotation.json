@@ -28,6 +28,7 @@
   "sec_break_email_2",
   "message_for_supplier",
   "terms_section_break",
+  "incoterm",
   "tc_name",
   "terms",
   "printing_settings",
@@ -271,13 +272,19 @@
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "label": "Required Date"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-04-06 17:47:49.909000",
+ "modified": "2022-11-17 17:26:33.770993",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
@@ -345,5 +352,6 @@
  "search_fields": "status, transaction_date",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }
