@@ -5,6 +5,8 @@
 frappe.provide("erpnext.accounts");
 
 erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnext.selling.SellingController {
+	settings = {};
+
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		super.setup(doc);
@@ -25,8 +27,13 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
 
+	onload_post_render(frm) {
+		this.pos_profile(frm);
+	}
+
 	refresh(doc) {
 		super.refresh();
+
 		if (doc.docstatus == 1 && !doc.is_return) {
 			this.frm.add_custom_button(__('Return'), this.make_sales_return, __('Create'));
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
@@ -36,6 +43,18 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			this.frm.return_print_format = "Sales Invoice Return";
 			this.frm.set_value('consolidated_invoice', '');
 		}
+
+		this.frm.set_query("customer", (function () {
+			const customer_groups = this.settings?.customer_groups;
+
+			if (!customer_groups?.length) return {};
+
+			return {
+				filters: {
+					customer_group: ["in", customer_groups],
+				}
+			}
+		}).bind(this));
 	}
 
 	is_pos() {
@@ -86,6 +105,25 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 			}, () => {
 				this.apply_pricing_rule();
 			});
+	}
+
+	pos_profile(frm) {
+		if (!frm.pos_profile || frm.pos_profile == '') {
+			this.update_customer_groups_settings([]);
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+			args: { "pos_profile": frm.pos_profile },
+			callback: ({ message: profile }) => {
+				this.update_customer_groups_settings(profile?.customer_groups);
+			},
+		});
+	}
+
+	update_customer_groups_settings(customer_groups) {
+		this.settings.customer_groups = customer_groups?.map((group) => group.name)
 	}
 
 	amount(){
