@@ -247,7 +247,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 
 		var grand_total = me.frm.doc.party_account_currency == me.frm.doc.currency ? me.frm.doc.grand_total : me.frm.doc.base_grand_total;
-		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, "outstanding_amount");
+		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, precision("outstanding_amount"));
 
 		me.distribute_applicable_charges_for_item();
 
