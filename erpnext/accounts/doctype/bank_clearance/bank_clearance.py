@@ -179,7 +179,6 @@ class BankClearance(Document):
 		)
 
 		self.set("payment_entries", [])
-		self.total_amount = 0.0
 		default_currency = erpnext.get_default_currency()
 
 		for d in entries:
@@ -198,7 +197,6 @@ class BankClearance(Document):
 			d.pop("debit")
 			d.pop("account_currency")
 			row.update(d)
-			self.total_amount += flt(amount)
 
 	@frappe.whitelist()
 	def update_clearance_date(self):
