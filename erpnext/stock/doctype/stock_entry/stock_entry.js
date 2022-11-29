@@ -173,28 +173,28 @@ frappe.ui.form.on('Stock Entry', {
 				});
 			});
 		}
-		frm.set_query('reference_gate_pass', function () {
-			if(!frm.doc.company){
-                frappe.msgprint("Please select Company First");
-				return {
-					filters: {
-						"docstatus": 3
-					}
-				}
-			}else{
-    			return {
-    			    query: 'nrp_manufacturing.nrp_manufacturing.doctype.gate_pass.gate_pass.get_reference_gate_pass_dn',
-        			filters: {
-        			'type': "OUT",
-        			'company': frm.doc.company,
-        			"docstatus":0,
-        			'gate_pass_type':'Stock Dispatch'
-        		}
+		// frm.set_query('reference_gate_pass', function () {
+		// 	if(!frm.doc.company){
+        //         frappe.msgprint("Please select Company First");
+		// 		return {
+		// 			filters: {
+		// 				"docstatus": 3
+		// 			}
+		// 		}
+		// 	}else{
+    	// 		return {
+    	// 		    query: 'nrp_manufacturing.nrp_manufacturing.doctype.gate_pass.gate_pass.get_reference_gate_pass_dn',
+        // 			filters: {
+        // 			'type': "OUT",
+        // 			'company': frm.doc.company,
+        // 			"docstatus":0,
+        // 			'gate_pass_type':'Stock Dispatch'
+        // 		}
 
-    			};
+    	// 		};
 			    
-			}
-		});
+		// 	}
+		// });
 		if(frm.doc.items) {
 			const has_alternative = frm.doc.items.find(i => i.allow_alternative_item === 1);
 
