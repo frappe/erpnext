@@ -267,13 +267,13 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			$.each(me.frm.doc.taxes || [], function(i, tax) {
 				item.item_tax_detail[tax.name] = 0;
 				let distribution_amount;
-				let distribution_based_on = frappe.model.scrub(tax.distribution_criteria);
+				let distribution_based_on = frappe.scrub(tax.distribution_criteria);
 				if (distribution_based_on == 'manual') {
 					distribution_amount = flt(item_manual_distribution[tax.account_head]);
 				}
 				else {
 					if (!totals[distribution_based_on]){
-						frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
+						frappe.throw(__("Cannot distribute by {0} because total {0} is 0", [tax.distribution_criteria]));
 					}
 					let ratio = flt(item[distribution_based_on]) / flt(totals[distribution_based_on])
 					distribution_amount = flt(tax.base_amount) * ratio
@@ -472,8 +472,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if(!r.exc && r.message) {
-						me.frm.set_value("currency", r.message.currency);
-						me.frm.set_value("credit_to", r.message.credit_to);
+						me.frm.set_value(r.message);
 					}
 				}
 			});
