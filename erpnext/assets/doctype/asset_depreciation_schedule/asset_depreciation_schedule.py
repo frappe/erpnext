@@ -96,11 +96,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 			"Asset Depreciation Schedule", current_asset_depr_schedule_name
 		)
 
-		new_asset_depr_schedule_doc = frappe.copy_doc(
-			current_asset_depr_schedule_doc, ignore_no_copy=False
-		)
-
-		current_asset_depr_schedule_doc.cancel()
+		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
 		make_depr_schedule(new_asset_depr_schedule_doc, asset_doc, row, date_of_disposal)
 		set_accumulated_depreciation(
@@ -108,6 +104,8 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 		)
 
 		new_asset_depr_schedule_doc.notes = notes
+
+		current_asset_depr_schedule_doc.cancel()
 
 		new_asset_depr_schedule_doc.submit()
 
@@ -170,30 +168,19 @@ def make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, date_of_disposal
 
 
 def clear_depr_schedule(asset_depr_schedule_doc):
-	start = []
+	start = 0
 	num_of_depreciations_completed = 0
 	depr_schedule = []
 
 	for schedule in asset_depr_schedule_doc.get("depreciation_schedule"):
-		if len(start) != 0:
-			break
-
 		if schedule.journal_entry:
 			num_of_depreciations_completed += 1
 			depr_schedule.append(schedule)
 		else:
-			start.append(num_of_depreciations_completed)
-			num_of_depreciations_completed = 0
+			start = num_of_depreciations_completed
+			break
 
-	# to update start when all the schedule rows corresponding to the FB are linked with JEs
-	if len(start) == 0:
-		start.append(num_of_depreciations_completed)
-
-	# when the Depreciation Schedule is being created for the first time
-	if start == []:
-		start = [0]
-	else:
-		asset_depr_schedule_doc.depreciation_schedule = depr_schedule
+	asset_depr_schedule_doc.depreciation_schedule = depr_schedule
 
 	return start
 
@@ -215,7 +202,7 @@ def _make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, start, date_of_
 	skip_row = False
 	should_get_last_day = is_last_day_of_the_month(row.depreciation_start_date)
 
-	for n in range(start[row.idx - 1], number_of_pending_depreciations):
+	for n in range(start, number_of_pending_depreciations):
 		# If depreciation is already completed (for double declining balance)
 		if skip_row:
 			continue
@@ -234,7 +221,10 @@ def _make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, start, date_of_
 
 		# if asset is being sold or scrapped
 		if date_of_disposal:
-			from_date = asset_doc.get_from_date(row.finance_book)
+			from_date = asset_doc.available_for_use_date
+			if asset_depr_schedule_doc.depreciation_schedule:
+				from_date = asset_depr_schedule_doc.depreciation_schedule[-1].schedule_date
+
 			depreciation_amount, days, months = asset_doc.get_pro_rata_amt(
 				row, depreciation_amount, from_date, date_of_disposal
 			)

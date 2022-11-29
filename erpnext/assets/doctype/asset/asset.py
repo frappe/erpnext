@@ -246,16 +246,6 @@ class Asset(AccountsController):
 
 		return value_after_depreciation
 
-	def get_from_date(self, finance_book):
-		asset_depr_schedule_name = get_asset_depr_schedule_name(self.name, finance_book)
-
-		if not asset_depr_schedule_name:
-			return self.available_for_use_date
-
-		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
-
-		return asset_depr_schedule_doc.get("depreciation_schedule")[-1].schedule_date
-
 	# if it returns True, depreciation_amount will not be equal for the first and last rows
 	def check_is_pro_rata(self, row):
 		has_pro_rata = False
