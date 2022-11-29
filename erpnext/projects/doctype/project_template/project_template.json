@@ -13,6 +13,7 @@
   "column_break_3",
   "applies_to_item",
   "applies_to_item_name",
+  "due_after",
   "items_section",
   "applicable_items",
   "applicable_item_groups",
@@ -97,9 +98,14 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "due_after",
+   "fieldtype": "Int",
+   "label": "Due after (months)"
   }
  ],
- "modified": "2022-04-13 20:18:03.581010",
+ "modified": "2022-11-25 14:41:35.851967",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",

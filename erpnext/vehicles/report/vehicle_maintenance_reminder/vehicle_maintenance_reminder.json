@@ -1,0 +1,43 @@
+{
+ "add_total_row": 0,
+ "creation": "2022-11-23 14:34:05.388993",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "Hyundai South",
+ "modified": "2022-11-23 14:34:05.388993",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Maintenance Reminder",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Delivery Note",
+ "report_name": "Vehicle Maintenance Reminder",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Delivery User"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Cashier"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Auditor"
+  }
+ ]
+}
