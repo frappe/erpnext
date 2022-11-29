@@ -262,7 +262,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
 		});
 		$.each(me.frm.doc.items || [], function(i, item) {
-			item.item_tax_detail = {}
+			item.item_tax_detail = {};
 			let item_manual_distribution = JSON.parse(item.manual_distribution || '{}');
 			$.each(me.frm.doc.taxes || [], function(i, tax) {
 				item.item_tax_detail[tax.name] = 0;
@@ -270,32 +270,29 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				let distribution_based_on = frappe.scrub(tax.distribution_criteria);
 				if (distribution_based_on == 'manual') {
 					distribution_amount = flt(item_manual_distribution[tax.account_head]);
-				}
-				else {
+				} else {
 					if (!totals[distribution_based_on]){
 						frappe.throw(__("Cannot distribute by {0} because total {0} is 0", [tax.distribution_criteria]));
 					}
-					let ratio = flt(item[distribution_based_on]) / flt(totals[distribution_based_on])
-					distribution_amount = flt(tax.base_amount) * ratio
+					let ratio = flt(item[distribution_based_on]) / flt(totals[distribution_based_on]);
+					distribution_amount = flt(tax.amount) * ratio;
 				}
-				item.item_tax_detail[tax.name] += distribution_amount
+				item.item_tax_detail[tax.name] += distribution_amount * me.frm.doc.conversion_rate;
 			});
 		});
 
 		let accumulated_taxes = 0
 		$.each(me.frm.doc.items || [], function(i, item) {
-			let item_tax_total = flt(frappe.utils.sum(Object.values(item.item_tax_detail))) * me.frm.doc.conversion_rate;
+			let item_tax_total = flt(frappe.utils.sum(Object.values(item.item_tax_detail)));
 			item.item_tax_detail = JSON.stringify(item.item_tax_detail);
-			item.applicable_charges = item_tax_total
-			accumulated_taxes += item_tax_total
+			item.applicable_charges = item_tax_total;
+			accumulated_taxes += item_tax_total;
 		});
 
 		if (accumulated_taxes != me.frm.doc.base_total_taxes_and_charges) {
 			var diff = me.frm.doc.base_total_taxes_and_charges - accumulated_taxes;
 			me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
 		}
-
-		refresh_field("items");
 	},
 
 	distribution_criteria: function() {

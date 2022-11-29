@@ -250,13 +250,13 @@ class LandedCostVoucher(AccountsController):
 						frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
 
 					ratio = flt(item.get(distribution_based_on)) / flt(totals.get(distribution_based_on))
-					distribution_amount = flt(tax.base_amount) * ratio
+					distribution_amount = flt(tax.amount) * ratio
 
-				item.item_tax_detail[tax.name] += distribution_amount
+				item.item_tax_detail[tax.name] += distribution_amount * flt(self.conversion_rate)
 
 		accumulated_taxes = 0
 		for item in self.get("items"):
-			item_tax_total = sum(item.item_tax_detail.values()) * flt(self.conversion_rate)
+			item_tax_total = sum(item.item_tax_detail.values())
 			item.applicable_charges = item_tax_total
 			accumulated_taxes += item_tax_total
 			item.item_tax_detail = json.dumps(item.item_tax_detail, separators=(',', ':'))
