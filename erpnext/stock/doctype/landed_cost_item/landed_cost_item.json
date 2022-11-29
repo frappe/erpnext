@@ -11,6 +11,7 @@
   "purchase_invoice",
   "purchase_order",
   "cost_center",
+  "item_tax_detail",
   "col_break2",
   "qty",
   "uom",
@@ -168,11 +169,20 @@
    "label": "UOM",
    "options": "UOM",
    "read_only": 1
+  },
+  {
+   "fieldname": "item_tax_detail",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Item Tax Detail",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-04-28 15:22:32.187199",
+ "modified": "2022-11-25 17:23:12.872584",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",

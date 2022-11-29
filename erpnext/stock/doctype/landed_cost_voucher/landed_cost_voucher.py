@@ -10,6 +10,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_balance_on
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.party import get_party_account
 from six import string_types
 import json
 
@@ -33,10 +34,13 @@ class LandedCostVoucher(AccountsController):
 		self.clear_advances_table_if_not_payable()
 		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
 		self.calculate_taxes_and_totals()
+		self.validate_manual_distribution_totals()
 		self.set_status()
 
+	def before_submit(self):
+		self.validate_manual_distribution_totals(throw=True)
+
 	def on_submit(self):
-		self.calculate_taxes_and_totals()
 		self.validate_applicable_charges_for_item()
 		self.update_against_document_in_jv()
 		self.update_landed_cost()
@@ -147,7 +151,7 @@ class LandedCostVoucher(AccountsController):
 		if abs(diff) > (2.0 / (10**precision)):
 			frappe.throw(_("Total Applicable Charges in Purchase Receipt Items table must be same as Total Taxes and Charges"))
 
-	def validate_manual_distribution_totals(self):
+	def validate_manual_distribution_totals(self, throw=False):
 		tax_account_totals = {}
 		item_totals = {}
 
@@ -177,7 +181,7 @@ class LandedCostVoucher(AccountsController):
 				frappe.msgprint(_("Tax amount for {} ({}) does not match the total in the manual distribution table ({})")
 					.format(account_head,
 						fmt_money(tax_account_totals[account_head], digits, self.currency),
-						fmt_money(item_totals[account_head], digits, self.currency)))
+						fmt_money(item_totals[account_head], digits, self.currency)), raise_exception=throw)
 
 	def validate_credit_to_account(self):
 		if self.credit_to:
@@ -230,40 +234,32 @@ class LandedCostVoucher(AccountsController):
 		for f in item_total_fields:
 			totals[f] = flt(sum([flt(d.get(f)) for d in self.items]))
 
-		charges_map = []
-		manual_account_heads = set()
-		for tax in self.taxes:
-			based_on = scrub(tax.distribution_criteria)
-
-			if based_on == "manual":
-				manual_account_heads.add(cstr(tax.account_head))
-			else:
-				if not totals[based_on]:
-					frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
-
-				charges_map.append([])
-				for item in self.items:
-					charges_map[-1].append(flt(tax.base_amount) * flt(item.get(based_on)) / flt(totals.get(based_on)))
-
-		if manual_account_heads:
-			self.validate_manual_distribution_totals()
-
-		accumulated_taxes = 0.0
-		for item_idx, item in enumerate(self.items):
-			item_total_tax = 0.0
-			for row_charge in charges_map:
-				item_total_tax += row_charge[item_idx]
-
+		for item in self.items:
+			item.item_tax_detail = {}
 			item_manual_distribution = item.manual_distribution or {}
 			if isinstance(item.manual_distribution, string_types):
 				item_manual_distribution = json.loads(item_manual_distribution)
 
-			for account_head in item_manual_distribution.keys():
-				if account_head in manual_account_heads:
-					item_total_tax += flt(item_manual_distribution[account_head]) * flt(self.conversion_rate)
+			for tax in self.taxes:
+				item.item_tax_detail.setdefault(tax.name, 0)
+				distribution_based_on = scrub(tax.distribution_criteria)
+				if distribution_based_on == 'manual':
+					distribution_amount = flt(item_manual_distribution.get(tax.account_head))
+				else:
+					if not totals[distribution_based_on]:
+						frappe.throw(_("Cannot distribute by {0} because total {0} is 0").format(tax.distribution_criteria))
 
-			item.applicable_charges = item_total_tax
-			accumulated_taxes += item.applicable_charges
+					ratio = flt(item.get(distribution_based_on)) / flt(totals.get(distribution_based_on))
+					distribution_amount = flt(tax.amount) * ratio
+
+				item.item_tax_detail[tax.name] += distribution_amount * flt(self.conversion_rate)
+
+		accumulated_taxes = 0
+		for item in self.get("items"):
+			item_tax_total = sum(item.item_tax_detail.values())
+			item.applicable_charges = item_tax_total
+			accumulated_taxes += item_tax_total
+			item.item_tax_detail = json.dumps(item.item_tax_detail, separators=(',', ':'))
 
 		if accumulated_taxes != self.base_total_taxes_and_charges:
 			diff = self.base_total_taxes_and_charges - accumulated_taxes
@@ -367,6 +363,7 @@ class LandedCostVoucher(AccountsController):
 								Remove Item <b>{1}</b> from table to continue.').format(
 									item.receipt_document, item.item_code, item.receipt_document_type))
 
+
 def update_rate_in_serial_no_for_non_asset_items(receipt_document):
 	for item in receipt_document.get("items"):
 		if item.serial_no:
@@ -398,3 +395,15 @@ def get_landed_cost_voucher(dt, dn):
 
 	lcv.get_items_from_purchase_receipts()
 	return lcv
+
+
+@frappe.whitelist()
+def get_party_details(party_type, party, company):
+	out = frappe._dict()
+
+	out.currency = erpnext.get_company_currency(company)
+	out.credit_to = get_party_account(party_type, party, company)
+	if party_type == 'Supplier':
+		out.currency = frappe.db.get_value(party_type, party, 'default_currency') or out.currency
+
+	return out
