@@ -247,7 +247,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 
 		var grand_total = me.frm.doc.party_account_currency == me.frm.doc.currency ? me.frm.doc.grand_total : me.frm.doc.base_grand_total;
-		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, "outstanding_amount");
+		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, precision("outstanding_amount"));
 
 		me.distribute_applicable_charges_for_item();
 
@@ -261,55 +261,38 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		$.each(item_total_fields || [], function(i, f) {
 			totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
 		});
-
-		var charges_map = [];
-		var manual_account_heads = new Set;
-		var idx = 0;
-		$.each(me.frm.doc.taxes || [], function(i, tax) {
-			if (tax.base_amount) {
-				var based_on = frappe.scrub(tax.distribution_criteria);
-
-				if(based_on == "manual") {
-					manual_account_heads.add(cstr(tax.account_head));
-				} else {
-					if(!totals[based_on]) {
+		$.each(me.frm.doc.items || [], function(i, item) {
+			item.item_tax_detail = {};
+			let item_manual_distribution = JSON.parse(item.manual_distribution || '{}');
+			$.each(me.frm.doc.taxes || [], function(i, tax) {
+				item.item_tax_detail[tax.name] = 0;
+				let distribution_amount = 0;
+				let distribution_based_on = frappe.scrub(tax.distribution_criteria);
+				if (distribution_based_on == 'manual') {
+					distribution_amount = flt(item_manual_distribution[tax.account_head]);
+				} else if (item.item_code) {
+					if (!totals[distribution_based_on]) {
 						frappe.throw(__("Cannot distribute by {0} because total {0} is 0", [tax.distribution_criteria]));
 					}
-
-					charges_map[idx] = [];
-					$.each(me.frm.doc.items || [], function(item_idx, item) {
-						charges_map[idx][item_idx] = flt(tax.base_amount) * flt(item[based_on]) / flt(totals[based_on]);
-					});
-					++idx;
+					let ratio = flt(item[distribution_based_on]) / flt(totals[distribution_based_on]);
+					distribution_amount = flt(tax.amount) * ratio;
 				}
-			}
+				item.item_tax_detail[tax.name] += distribution_amount * me.frm.doc.conversion_rate;
+			});
 		});
 
-		var accumulated_taxes = 0.0;
-		$.each(me.frm.doc.items || [], function(item_idx, item) {
-			if (item.item_code) {
-				var item_total_tax = 0.0;
-				for(var i = 0; i < charges_map.length; ++i) {
-					item_total_tax += charges_map[i][item_idx];
-				}
-
-				Object.keys(item.manual_distribution_data || {}).forEach(function(account_head) {
-					if(manual_account_heads.has(account_head)) {
-						item_total_tax += flt(item.manual_distribution_data[account_head]) * flt(me.frm.doc.conversion_rate);
-					}
-				});
-
-				item.applicable_charges = item_total_tax;
-				accumulated_taxes += item.applicable_charges;
-			}
+		let accumulated_taxes = 0
+		$.each(me.frm.doc.items || [], function(i, item) {
+			let item_tax_total = flt(frappe.utils.sum(Object.values(item.item_tax_detail)));
+			item.item_tax_detail = JSON.stringify(item.item_tax_detail);
+			item.applicable_charges = item_tax_total;
+			accumulated_taxes += item_tax_total;
 		});
 
 		if (accumulated_taxes != me.frm.doc.base_total_taxes_and_charges) {
 			var diff = me.frm.doc.base_total_taxes_and_charges - accumulated_taxes;
 			me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
 		}
-
-		refresh_field("items");
 	},
 
 	distribution_criteria: function() {
@@ -476,47 +459,26 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	party: function() {
 		var me = this;
-		frappe.run_serially([
-			() => {
-				if(me.frm.doc.party && me.frm.doc.company) {
-					return frappe.call({
-						method: "erpnext.accounts.party.get_party_account",
-						args: {
-							company: me.frm.doc.company,
-							party_type: me.frm.doc.party_type,
-							party: me.frm.doc.party,
-							include_currency: true
-						},
-						callback: function(r) {
-							if(!r.exc && r.message) {
-								me.frm.set_value("credit_to", r.message);
-							}
-						}
-					});
+		if (me.frm.doc.party_type && me.frm.doc.party) {
+			frappe.call({
+				method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_party_details",
+				args: {
+					party_type: me.frm.doc.party_type,
+					party: me.frm.doc.party,
+					company: me.frm.doc.company,
+				},
+				callback: function(r) {
+					if(!r.exc && r.message) {
+						me.frm.set_value(r.message);
+						me.set_dynamic_labels();
+					}
 				}
-			},
-			() => {
-				if (me.frm.doc.party_type == "Supplier") {
-					me.frm.call({
-						method: "frappe.client.get_value",
-						args: {
-							doctype: "Supplier",
-							fieldname: "default_currency",
-							filters: {name: me.frm.doc.party},
-						},
-						callback: function(r, rt) {
-							if(r.message) {
-								me.frm.set_value("currency", r.message.default_currency);
-								me.set_dynamic_labels();
-							}
-						}
-					});
-				} else {
-					me.frm.set_value("currency", me.get_company_currency());
-					me.set_dynamic_labels();
-				}
-			}
-		]);
+			});
+		}
+	},
+
+	party_type: function() {
+		me.frm.set_value("party", '');
 	},
 
 	get_company_currency: function() {
@@ -554,6 +516,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		} else {
 			this.conversion_rate();
 		}
+		me.set_dynamic_labels();
 	},
 
 	posting_date: function() {

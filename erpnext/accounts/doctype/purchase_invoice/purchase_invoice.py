@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_
 	unlink_inter_company_doc
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+import json
 
 
 form_grid_templates = {
@@ -717,14 +718,26 @@ class PurchaseInvoice(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if flt(item.landed_cost_voucher_amount):
-						gl_entries.append(self.get_gl_dict({
-							"account": expenses_included_in_valuation,
-							"against": item.expense_account,
-							"cost_center": item.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(item.landed_cost_voucher_amount),
-							"project": item.project
-						}, item=item))
+						landed_cost_items = frappe.get_all("Landed Cost Item", filters={
+							"docstatus": 1,
+							"purchase_invoice": self.name,
+							"purchase_invoice_item": item.name,
+							"applicable_charges": ["!=", 0]
+						}, fields="item_tax_detail")
+
+						for lc_item in landed_cost_items:
+							landed_cost_detail = json.loads(lc_item.item_tax_detail)
+							for lc_tax_id, amount in landed_cost_detail.items():
+								landed_cost_account = frappe.db.get_value("Landed Cost Taxes and Charges", lc_tax_id, 'account_head', cache=1)
+
+								gl_entries.append(self.get_gl_dict({
+									"account": landed_cost_account,
+									"against": warehouse_account[item.warehouse]["account"],
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(amount),
+									"project": item.project
+								}, item=item))
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
