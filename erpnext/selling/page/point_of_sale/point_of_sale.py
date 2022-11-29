@@ -42,7 +42,7 @@ def search_by_term(search_term, warehouse, price_list):
 	}
 
 	if barcode:
-		barcode_info = next(filter(lambda x: x.barcode == barcode, item_doc.get("barcodes")))
+		barcode_info = next(filter(lambda x: x.barcode == barcode, item_doc.get("barcodes", [])), None)
 		if barcode_info and barcode_info.uom:
 			uom = next(filter(lambda x: x.uom == barcode_info.uom, item_doc.uoms), {})
 			item.update(
