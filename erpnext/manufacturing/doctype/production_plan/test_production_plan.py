@@ -840,6 +840,34 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(row.uom, "Nos")
 			self.assertEqual(row.qty, 1)
 
+	def test_material_request_for_sub_assembly_items(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree = {
+			"Fininshed Goods1 For MR": {
+				"SubAssembly1 For MR": {"SubAssembly1-1 For MR": {"ChildPart1 For MR": {}}}
+			}
+		}
+
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		plan = create_production_plan(
+			item_code=parent_bom.item, planned_qty=10, ignore_existing_ordered_qty=1, do_not_submit=1
+		)
+
+		plan.get_sub_assembly_items()
+
+		mr_items = []
+		for row in plan.sub_assembly_items:
+			mr_items.append(row.production_item)
+			row.type_of_manufacturing = "Material Request"
+
+		plan.save()
+		items = get_items_for_material_requests(plan.as_dict())
+
+		validate_mr_items = [d.get("item_code") for d in items]
+		for item_code in mr_items:
+			self.assertTrue(item_code in validate_mr_items)
+
 
 def create_production_plan(**args):
 	"""

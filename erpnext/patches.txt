@@ -317,4 +317,5 @@ erpnext.patches.v14_0.fix_subcontracting_receipt_gl_entries
 erpnext.patches.v14_0.migrate_remarks_from_gl_to_payment_ledger
 erpnext.patches.v14_0.create_accounting_dimensions_for_asset_capitalization
 erpnext.patches.v13_0.update_schedule_type_in_loans
-erpnext.patches.v14_0.update_tds_fields
+erpnext.patches.v14_0.update_partial_tds_fields
+erpnext.patches.v14_0.create_incoterms_and_migrate_shipment

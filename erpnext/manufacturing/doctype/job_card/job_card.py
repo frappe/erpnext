@@ -57,6 +57,10 @@ class JobCard(Document):
 		)
 		self.set_onload("job_card_excess_transfer", excess_transfer)
 		self.set_onload("work_order_closed", self.is_work_order_closed())
+		self.set_onload("has_stock_entry", self.has_stock_entry())
+
+	def has_stock_entry(self):
+		return frappe.db.exists("Stock Entry", {"job_card": self.name, "docstatus": ["!=", 2]})
 
 	def before_validate(self):
 		self.set_wip_warehouse()
