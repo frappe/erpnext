@@ -19,14 +19,16 @@ def search_by_term(search_term, warehouse, price_list):
 
 	item_code = result.get("item_code", search_term)
 	serial_no = result.get("serial_no", "")
-	batch_no = result.get("batch_no", "") 
+	batch_no = result.get("batch_no", "")
 	barcode = result.get("barcode", "")
 
-	if not result: return
+	if not result:
+		return
 
-	item_doc = frappe.get_doc("Item", item_code);
-	
-	if not item_doc: return
+	item_doc = frappe.get_doc("Item", item_code)
+
+	if not item_doc:
+		return
 
 	item = {
 		"barcode": barcode,
@@ -54,7 +56,7 @@ def search_by_term(search_term, warehouse, price_list):
 
 	item_stock_qty, _ = get_stock_availability(item_code, warehouse)
 	item_stock_qty = item_stock_qty // item.get("conversion_factor")
-	item.update({ "actual_qty": item_stock_qty })
+	item.update({"actual_qty": item_stock_qty})
 
 	price = frappe.get_list(
 		doctype="Item Price",
@@ -64,13 +66,16 @@ def search_by_term(search_term, warehouse, price_list):
 		},
 		fields="*",
 	)
-	
+
 	def __sort(p):
 		p_uom = p.get("uom")
 
-		if p_uom == item.get("uom"): return 0
-		elif p_uom == item.get("stock_uom"): return 1
-		else: return 2
+		if p_uom == item.get("uom"):
+			return 0
+		elif p_uom == item.get("stock_uom"):
+			return 1
+		else:
+			return 2
 
 	# sort by fallback preference. always pick exact uom match if available
 	price = sorted(price, key=__sort)
@@ -97,7 +102,8 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 
 	if search_term:
 		result = search_by_term(search_term, warehouse, price_list) or []
-		if result: return result
+		if result:
+			return result
 
 	if not frappe.db.exists("Item Group", item_group):
 		item_group = get_root_of("Item Group")
@@ -148,9 +154,10 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 		{"warehouse": warehouse},
 		as_dict=1,
 	)
-	
+
 	# return (empty) list if there are no results
-	if not items_data: return result
+	if not items_data:
+		return result
 
 	for item in items_data:
 		uoms = frappe.get_doc("Item", item.item_code).get("uoms", [])
@@ -168,24 +175,23 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 			},
 		)
 
-		if not item_price: result.append(item)
+		if not item_price:
+			result.append(item)
 
 		for price in item_price:
 			uom = next(filter(lambda x: x.uom == price.uom, uoms), {})
 
-			if (
-				price.uom != item.stock_uom and
-				uom and
-				uom.conversion_factor
-			):
+			if price.uom != item.stock_uom and uom and uom.conversion_factor:
 				item.actual_qty = item.actual_qty // uom.conversion_factor
 
-			result.append({
-				**item,
-				"price_list_rate": price.get("price_list_rate"),
-				"currency": price.get("currency"),
-				"uom": price.uom or item.uom,
-			})
+			result.append(
+				{
+					**item,
+					"price_list_rate": price.get("price_list_rate"),
+					"currency": price.get("currency"),
+					"uom": price.uom or item.uom,
+				}
+			)
 
 	return {"items": result}
 
