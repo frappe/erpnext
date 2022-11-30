@@ -1395,7 +1395,8 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "search_index": 1
   },
   {
    "fieldname": "sales_commission_category",
@@ -1429,7 +1430,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-10-12 21:53:54.705324",
+ "modified": "2022-11-30 17:09:55.933641",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

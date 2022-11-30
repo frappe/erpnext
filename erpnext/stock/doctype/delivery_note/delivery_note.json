@@ -1042,7 +1042,8 @@
    "label": "Project",
    "oldfieldname": "project",
    "oldfieldtype": "Link",
-   "options": "Project"
+   "options": "Project",
+   "search_index": 1
   },
   {
    "fieldname": "campaign",
@@ -1720,7 +1721,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2022-08-06 13:28:03.311462",
+ "modified": "2022-11-30 17:13:58.717554",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
