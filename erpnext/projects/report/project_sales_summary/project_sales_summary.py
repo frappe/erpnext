@@ -47,6 +47,11 @@ class ProjectSalesSummaryReport(object):
 			extra_rows=extra_rows, conditions=conditions, panel_join=panel_join
 		), self.filters, as_dict=1)
 
+		for d in self.data:
+			# Model Name if not a variant
+			if not d.applies_to_variant_of_name:
+				d.applies_to_variant_of_name = d.applies_to_item_name
+
 	def get_conditions(self):
 		conditions = []
 
