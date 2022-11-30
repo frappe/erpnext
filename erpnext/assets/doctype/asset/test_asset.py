@@ -13,6 +13,7 @@ from frappe.utils import (
 	get_last_day,
 	getdate,
 	nowdate,
+	is_last_day_of_the_month,
 )
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -264,7 +265,7 @@ class TestAsset(AssetSetup):
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
 			asset.precision("gross_purchase_amount"),
 		)
-		this_month_depr_amount = 9000.0 if get_last_day(date) == date else 0
+		this_month_depr_amount = 9000.0 if is_last_day_of_the_month(date) else 0
 
 		self.assertEquals(accumulated_depr_amount, 18000.0 + this_month_depr_amount)
 
