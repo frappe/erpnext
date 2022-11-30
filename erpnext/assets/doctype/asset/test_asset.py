@@ -12,8 +12,8 @@ from frappe.utils import (
 	get_first_day,
 	get_last_day,
 	getdate,
-	nowdate,
 	is_last_day_of_the_month,
+	nowdate,
 )
 
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
