@@ -22,6 +22,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_items_for_material_requests
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
 	unlink_inter_company_doc
+from nrp_manufacturing.utils import get_config_by_name
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -202,7 +203,10 @@ class SalesOrder(SellingController):
 
 	def submit(self):
 		if self.request_from == 'RMS':
-			self.queue_action('submit',queue_name="dn_primary")
+			if(self.section in get_config_by_name('dn_queue_section',[])):
+				self.queue_action('submit',queue_name="dn_primary")
+			else:
+				self.queue_action('submit',queue_name="dn_secondary")	
 		else:
 			self._submit()
 
