@@ -37,13 +37,12 @@
  ],
  "fields": [
   {
-   "default": "Today",
    "fetch_from": "pos_opening_entry.period_start_date",
-   "fetch_if_empty": 1,
    "fieldname": "period_start_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Period Start Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -52,6 +51,7 @@
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Period End Date",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -229,7 +229,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2022-11-17 11:08:46.301715",
+ "modified": "2022-11-30 11:54:59.336325",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
