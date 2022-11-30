@@ -9,26 +9,28 @@ from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_lis
 from erpnext.hr.utils import get_employee_leave_policy
 from calendar import monthrange
 import datetime
+from collections import OrderedDict
 
 
 def execute(filters=None):
-	if not filters: filters = {}
+	filters = frappe._dict(filters)
 
-	conditions, filters = get_conditions(filters)
+	validate_filters(filters)
 
-	attendance_map = get_attendance_map(conditions, filters)
+	attendance_map = get_attendance_map(filters)
+	checkin_map = get_employee_checkin_map(filters)
+
+	employees = list(set([e for e in checkin_map] + [e for e in attendance_map]))
+	employees = sorted(employees)
 	employee_map = get_employee_details(filters)
+
 	holiday_map = get_holiday_map(employee_map, filters.default_holiday_list,
 		from_date=filters.from_date, to_date=filters.to_date)
 
-	leave_types = frappe.db.sql("select name, is_lwp, include_holiday from `tabLeave Type` order by idx, creation",
-		as_dict=1)
-	leave_type_map = {}
-	for d in leave_types:
-		leave_type_map[d.name] = d
+	leave_type_map, leave_types = get_leave_type_map()
 
 	data = []
-	for employee in sorted(attendance_map):
+	for employee in employees:
 		employee_details = employee_map.get(employee)
 		if not employee_details:
 			continue
@@ -46,22 +48,33 @@ def execute(filters=None):
 		row['total_absent'] = 0
 		row['total_leave'] = 0
 		row['total_half_day'] = 0
-		row['total_half_day'] = 0
 		row['total_late_entry'] = 0
 		row['total_early_exit'] = 0
 		row['total_lwp'] = 0
 		row['total_deduction'] = 0
 
-		for day in range(filters["total_days_in_month"]):
-			attendance_details = attendance_map.get(employee).get(day + 1, frappe._dict())
-			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day+1)
+		for day in range(1, filters["total_days_in_month"] + 1):
+			attendance_details = attendance_map.get(employee, {}).get(day, frappe._dict())
+			if not attendance_details:
+				checkin_shifts = checkin_map.get(employee, {}).get(day, {})
+				first_shift = list(checkin_shifts.keys())[0] if checkin_shifts else None
+				checkins = checkin_shifts[first_shift] if first_shift else []
+
+				if checkins:
+					attendance_status, working_hours, late_entry, early_exit = get_attendance_from_checkins(checkins,
+						first_shift)
+					attendance_details.status = attendance_status
+					attendance_details.late_entry = late_entry
+					attendance_details.early_exit = early_exit
+
+			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day)
 
 			attendance_status = attendance_details.get('status')
 			is_holiday = is_date_holiday(attendance_date, holiday_map, employee_details, filters.default_holiday_list)
 			if not attendance_status and is_holiday:
 				attendance_status = "Holiday"
 
-			day_fieldname = "day_{0}".format(day + 1)
+			day_fieldname = "day_{0}".format(day)
 			row["status_" + day_fieldname] = attendance_status
 			row["attendance_" + day_fieldname] = attendance_details.name
 
@@ -114,11 +127,12 @@ def execute(filters=None):
 
 	if data:
 		days_row = frappe._dict({})
-		for day in range(filters["total_days_in_month"]):
-			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day+1)
-			day_fieldname = "day_{0}".format(day + 1)
+		for day in range(1, filters["total_days_in_month"] + 1):
+			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day)
+			day_fieldname = "day_{0}".format(day)
 			day_of_the_week = formatdate(attendance_date, "EE")
 			days_row[day_fieldname] = day_of_the_week
+			days_row.is_day_row = 1
 
 		data.insert(0, days_row)
 
@@ -133,9 +147,9 @@ def get_columns(filters, leave_types):
 		{"fieldname": "designation", "label": _("Designation"), "fieldtype": "Link", "options": "Designation", "width": 100},
 	]
 
-	for day in range(filters["total_days_in_month"]):
-		columns.append({"fieldname": "day_{0}".format(day+1), "label": day+1, "fieldtype": "Data", "width": 40,
-			"day": cint(day+1)})
+	for day in range(1, filters["total_days_in_month"] + 1):
+		columns.append({"fieldname": "day_{0}".format(day), "label": cstr(day), "fieldtype": "Data", "width": 40,
+			"day": cint(day)})
 
 	columns += [
 		{"fieldname": "total_present", "label": _("Present"), "fieldtype": "Float", "width": 70, "precision": 1},
@@ -159,14 +173,16 @@ def get_columns(filters, leave_types):
 	return columns
 
 
-def get_attendance_map(conditions, filters):
+def get_attendance_map(filters):
+	conditions = get_conditions(filters)
+
 	attendance_list = frappe.db.sql("""
 		select name, employee, day(attendance_date) as day_of_month, attendance_date,
 			status, late_entry, early_exit, leave_type
 		from tabAttendance
-		where docstatus = 1 %s
+		where docstatus = 1 and attendance_date between %(from_date)s and %(to_date)s {0}
 		order by employee, attendance_date
-	""" % conditions, filters, as_dict=1)
+	""".format(conditions), filters, as_dict=1)
 
 	attendance_map = {}
 	for d in attendance_list:
@@ -176,9 +192,30 @@ def get_attendance_map(conditions, filters):
 	return attendance_map
 
 
-def get_conditions(filters):
-	filters = frappe._dict(filters)
+def get_employee_checkin_map(filters):
+	conditions = get_conditions(filters)
 
+	employee_checkins = frappe.db.sql("""
+		select *, day(shift_start) as day_of_month
+		from `tabEmployee Checkin`
+		where date(shift_start) between %(from_date)s and %(to_date)s
+			and ifnull(attendance, '') = ''
+			and ifnull(shift, '') != ''
+			{0}
+		order by time
+	""".format(conditions), filters, as_dict=1)
+
+	employee_checkin_map = {}
+	for d in employee_checkins:
+		employee_checkin_map.setdefault(d.employee, {})\
+			.setdefault(d.day_of_month, OrderedDict())\
+			.setdefault(cstr(d.shift), [])\
+			.append(d)
+
+	return employee_checkin_map
+
+
+def validate_filters(filters):
 	if not (filters.get("month") and filters.get("year")):
 		msgprint(_("Please select month and year"), raise_exception=1)
 
@@ -186,8 +223,8 @@ def get_conditions(filters):
 		frappe.throw(_("Please select Company"))
 
 	filters["year"] = cint(filters["year"])
-	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-		"Dec"].index(filters.month) + 1
+	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]\
+		.index(filters.month) + 1
 
 	filters["total_days_in_month"] = monthrange(filters.year, filters.month)[1]
 	filters["from_date"] = datetime.date(year=filters.year, month=filters.month, day=1)
@@ -195,12 +232,13 @@ def get_conditions(filters):
 
 	filters["default_holiday_list"] = get_default_holiday_list(filters.company)
 
-	conditions = " and month(attendance_date) = %(month)s and year(attendance_date) = %(year)s"
 
-	if filters.get("company"): conditions += " and company = %(company)s"
-	if filters.get("employee"): conditions += " and employee = %(employee)s"
+def get_conditions(filters):
+	conditions = ""
+	if filters.get("employee"):
+		conditions += " and employee = %(employee)s"
 
-	return conditions, filters
+	return conditions
 
 
 def get_employee_details(filters):
@@ -241,6 +279,20 @@ def get_holiday_map(employee_map, default_holiday_list, from_date=None, to_date=
 	holiday_lists = list(set(holiday_lists))
 	holiday_map = get_holiday_map_from_holiday_lists(holiday_lists, from_date=from_date, to_date=to_date)
 	return holiday_map
+
+
+def get_leave_type_map():
+	leave_types = frappe.db.sql("""
+		select name, is_lwp, include_holiday
+		from `tabLeave Type`
+		order by idx, creation
+	""", as_dict=1)
+
+	leave_type_map = {}
+	for d in leave_types:
+		leave_type_map[d.name] = d
+
+	return leave_type_map, leave_types
 
 
 def get_holiday_map_from_holiday_lists(holiday_lists, from_date=None, to_date=None):
@@ -310,3 +362,12 @@ def get_attendance_status_abbr(attendance_status, late_entry=0, early_exit=0, le
 		abbr = "{0}<".format(abbr)
 
 	return abbr
+
+
+def get_attendance_from_checkins(checkins, shift):
+	shift_doc = frappe.get_cached_doc("Shift Type", shift)
+
+	shift_not_ended = [chk for chk in checkins if shift_doc.last_sync_of_checkin < chk.shift_actual_end]
+	ignore_working_hour_threshold = not shift_doc.last_sync_of_checkin or shift_not_ended
+
+	return shift_doc.get_attendance(checkins, ignore_working_hour_threshold=ignore_working_hour_threshold)

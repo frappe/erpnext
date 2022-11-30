@@ -89,6 +89,8 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 
 			if (data[attendance_fieldname]) {
 				link = "desk#Form/Attendance/" + encodeURIComponent(data[attendance_fieldname]);
+			} else if (status != "Holiday" && !data.is_day_row) {
+				style['opacity'] = '0.6';
 			}
 
 			if (status == "Holiday") {
