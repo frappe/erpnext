@@ -139,6 +139,13 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Maintenance Schedule",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+				},
+				{
 					"type": "doctype",
 					"name": "Vehicle Log",
 					"dependencies": ["Vehicle"],

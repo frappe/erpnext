@@ -39,7 +39,6 @@
 				<th class="text-center">#</th>
 				<th class="text-center">{%= __("Due Date") %}</th>
 				<th>{%= __("Template") %}</th>
-				<th>{%= __("Model") %}</th>
 				<th class="text-center">{%= __("Variant Code") %}</th>
 				<th class="text-center">{%= __("Reg No") %}</th>
 				<th class="text-center">{%= __("Chassis No") %}</th>
@@ -54,15 +53,14 @@
 			{% for(var i=0, l=data.length; i<l; i++) { %}
 				<tr>
 					<td class="text-center">{%= i+1 %}</td>
-					<td class="text-center">{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
+					<td class="text-center text-nowrap">{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
 					<td>{%= data[i].project_template %}</td>
-					<td>{%= data[i].variant_of_name %}</td>
 					<td class="text-center">{%= data[i].item_code %}</td>
-					<td class="text-center">{%= data[i].license_plate %}</td>
-					<td class="text-center">{%= data[i].chassis_no %}</td>
+					<td class="text-center text-nowrap">{%= data[i].license_plate %}</td>
+					<td class="text-center"><small>{%= data[i].chassis_no %}</small></td>
 					<td>{%= data[i].customer_name %}</td>
-					<td class="text-center">{%= frappe.datetime.str_to_user(data[i].delivery_date) %}</td>
-					<td class="text-center">{%= data[i].age %}</td>
+					<td class="text-center text-nowrap">{%= frappe.datetime.str_to_user(data[i].delivery_date) %}</td>
+					<td class="text-center text-nowrap">{%= data[i].age %}</td>
 					<td class="text-center"></td>
 				</tr>
 			{% } %}
