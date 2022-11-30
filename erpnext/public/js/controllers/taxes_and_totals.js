@@ -621,10 +621,27 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	set_discount_amount() {
-		if(this.frm.doc.additional_discount_percentage) {
-			this.frm.doc.discount_amount = flt(flt(this.frm.doc[frappe.scrub(this.frm.doc.apply_discount_on)])
-				* this.frm.doc.additional_discount_percentage / 100, precision("discount_amount"));
-		}
+		const frm = this.frm;
+		const doc = frm.doc;
+
+		const n = parseFloat(doc.additional_discount_percentage);
+
+		// abort if invalid input
+		if (isNaN(n) || n < 0 || n > 100) return;
+
+		// actual percentage, from 0.0 to 1.0
+		const percentage = n / 100;
+
+		// field to which discount should be applied.
+		// scrub is used to slugify field name.
+		// eg: `Grand Total` -> `grand_total`
+		const apply_on = frappe.scrub(doc.apply_discount_on);
+
+		const amount_before_discount = flt(doc[apply_on]);
+		const amount_after_discount = amount_before_discount * percentage;
+		const rounded_amount = flt(amount_after_discount, precision("discount_amount"));
+
+		frm.set_value('discount_amount', rounded_amount);
 	}
 
 	apply_discount_amount() {
