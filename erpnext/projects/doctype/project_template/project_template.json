@@ -102,10 +102,10 @@
   {
    "fieldname": "due_after",
    "fieldtype": "Int",
-   "label": "Due after (months)"
+   "label": "Due After (Months)"
   }
  ],
- "modified": "2022-11-25 14:41:35.851967",
+ "modified": "2022-11-30 12:16:51.754309",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",

@@ -7,37 +7,24 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "letter_head": "Hyundai South",
- "modified": "2022-11-23 14:34:05.388993",
+ "modified": "2022-11-30 12:47:23.215109",
  "modified_by": "Administrator",
  "module": "Vehicles",
- "name": "Vehicle Maintenance Reminder",
+ "name": "Vehicle Maintenance Schedule",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Delivery Note",
- "report_name": "Vehicle Maintenance Reminder",
+ "ref_doctype": "Vehicle",
+ "report_name": "Vehicle Maintenance Schedule",
  "report_type": "Script Report",
  "roles": [
   {
-   "role": "Delivery User"
+   "role": "Projects User"
   },
   {
-   "role": "Stock User"
+   "role": "Vehicle Stock User"
   },
   {
    "role": "Accounts User"
-  },
-  {
-   "role": "Cashier"
-  },
-  {
-   "role": "Sales User (Read Only)"
-  },
-  {
-   "role": "Sales User"
-  },
-  {
-   "role": "Auditor"
   }
  ]
 }
