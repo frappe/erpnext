@@ -32,7 +32,6 @@ class VehicleMaintenanceSchedule:
 			SELECT name as project_template, project_template_name, applies_to_item, due_after
 			FROM `tabProject Template`
 			WHERE due_after > 0 and ifnull(applies_to_item, '') != ''
-			ORDER BY due_after ASC
 		""", as_dict=1)
 
 		vehicle_data = []
@@ -105,6 +104,8 @@ class VehicleMaintenanceSchedule:
 
 			if not d.license_plate and d.unregistered:
 				d.license_plate = 'Unreg'
+
+		self.data = sorted(self.data, key=lambda d: (getdate(d.due_date), getdate(d.delivery_date)))
 
 	def convert_delta_to_string(self, rd):
 		template = ['Y', 'M', 'D']
