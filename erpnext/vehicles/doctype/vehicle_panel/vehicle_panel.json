@@ -26,7 +26,7 @@
    "label": "Default Qty"
   }
  ],
- "modified": "2022-10-19 17:13:39.989901",
+ "modified": "2022-11-30 16:37:27.132105",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Panel",
@@ -45,13 +45,16 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Projects User",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,

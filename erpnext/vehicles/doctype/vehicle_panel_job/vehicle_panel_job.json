@@ -27,7 +27,7 @@
    "reqd": 1
   }
  ],
- "modified": "2022-10-21 14:27:21.955520",
+ "modified": "2022-11-30 16:37:36.319662",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Panel Job",
@@ -46,13 +46,16 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Projects User",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "email": 1,
