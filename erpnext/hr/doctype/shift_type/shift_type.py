@@ -68,7 +68,7 @@ class ShiftType(Document):
 				log_doc.flags.ignore_validate = True
 				log_doc.save()
 
-	def get_attendance(self, logs):
+	def get_attendance(self, logs, ignore_working_hour_threshold=False):
 		"""Return attendance_status, working_hours for a set of logs belonging to a single shift.
 		Assumptions:
 			1. These logs belong to a single shift, single employee and is not in a holiday date.
@@ -91,10 +91,11 @@ class ShiftType(Document):
 			status = 'Half Day'
 
 		# Half Day / Absent if working hours less than
-		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
-			status = 'Half Day'
-		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
-			status = 'Absent'
+		if not ignore_working_hour_threshold:
+			if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
+				status = 'Half Day'
+			if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
+				status = 'Absent'
 
 		return status, total_working_hours, late_entry, early_exit
 

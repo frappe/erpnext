@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, formatdate, get_time
 from erpnext.hr.utils import get_holiday_description
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
-	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list
+	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list, get_attendance_from_checkins
 from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
 
 
@@ -15,10 +15,10 @@ def execute(filters=None):
 	filters = frappe._dict(filters)
 	validate_filters(filters)
 
-	checkin_map, checkin_list = get_employee_checkin_map(filters)
-	attendance_map, attendance_list = get_attendance_map(filters)
+	checkin_map = get_employee_checkin_map(filters)
+	attendance_map = get_attendance_map(filters)
 
-	employees = list(set([d.employee for d in checkin_list] + [d.employee for d in attendance_list]))
+	employees = list(set([e for e in checkin_map] + [e for e in attendance_map]))
 	employees = sorted(employees)
 	employee_map = get_employee_details(filters)
 
@@ -51,8 +51,8 @@ def execute(filters=None):
 					employee_holiday_list = get_employee_holiday_list(employee_details, filters.default_holiday_list)
 					row_template['remarks'] = get_holiday_description(employee_holiday_list, current_date)
 
-				checkin_shifts = checkin_map.get(current_date, {}).get(employee, {})
-				attendance_shifts = attendance_map.get(current_date, {}).get(employee, {})
+				checkin_shifts = checkin_map.get(employee, {}).get(current_date, {})
+				attendance_shifts = attendance_map.get(employee, {}).get(current_date, {})
 
 				shifts = list(set(list(checkin_shifts.keys()) + list(attendance_shifts.keys())))
 				if shifts:
@@ -97,8 +97,8 @@ def execute(filters=None):
 							row['shift_end'] = get_time(checkins[-1].shift_end) if checkins[-1].shift_end else None
 
 						if not attendance_details and shift_type and checkins:
-							shift_doc = frappe.get_cached_doc("Shift Type", shift_type)
-							attendance_status, working_hours, late_entry, early_exit = shift_doc.get_attendance(checkins)
+							attendance_status, working_hours, late_entry, early_exit = get_attendance_from_checkins(checkins,
+								shift_type)
 
 							row['attendance_status'] = attendance_status
 							row['attendance_abbr'] = get_attendance_status_abbr(attendance_status, late_entry, early_exit)
@@ -147,9 +147,9 @@ def get_employee_checkin_map(filters):
 	employee_checkin_map = {}
 	for d in employee_checkins:
 		date = getdate(d.shift_start) if d.shift_start else getdate(d.time)
-		employee_checkin_map.setdefault(date, {}).setdefault(d.employee, {}).setdefault(cstr(d.shift), []).append(d)
+		employee_checkin_map.setdefault(d.employee, {}).setdefault(date, {}).setdefault(cstr(d.shift), []).append(d)
 
-	return employee_checkin_map, employee_checkins
+	return employee_checkin_map
 
 
 def get_attendance_map(filters):
@@ -171,10 +171,9 @@ def get_attendance_map(filters):
 	attendance_map = {}
 	for d in attendance:
 		date = getdate(d.attendance_date)
-		attendance_map.setdefault(date, {}).setdefault(d.employee, {}).setdefault(cstr(d.shift), d)
+		attendance_map.setdefault(d.employee, {}).setdefault(date, {}).setdefault(cstr(d.shift), d)
 
-	return attendance_map, attendance
-
+	return attendance_map
 
 
 def get_columns(filters, checkin_column_count):
