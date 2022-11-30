@@ -64,6 +64,7 @@
   "taxes_and_charges",
   "column_break_38",
   "shipping_rule",
+  "incoterm",
   "column_break_55",
   "tax_category",
   "section_break_40",
@@ -2114,6 +2115,12 @@
    "label": "Repost Required",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2126,7 +2133,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-11-15 09:33:47.870616",
+ "modified": "2022-11-17 17:17:10.883487",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

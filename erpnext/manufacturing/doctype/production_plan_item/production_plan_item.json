@@ -83,7 +83,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "For Warehouse",
+   "label": "FG Warehouse",
    "options": "Warehouse"
   },
   {
@@ -216,7 +216,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-03-24 04:54:09.940224",
+ "modified": "2022-11-25 14:15:40.061514",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Item",
