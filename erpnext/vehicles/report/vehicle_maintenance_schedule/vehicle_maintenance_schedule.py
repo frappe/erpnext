@@ -29,7 +29,7 @@ class VehicleMaintenanceSchedule:
 
 	def get_data(self):
 		self.project_template_data = frappe.db.sql("""
-			SELECT name as project_template, project_template_name, project_template_category, applies_to_item, due_after
+			SELECT name as project_template, project_template_name, applies_to_item, due_after
 			FROM `tabProject Template`
 			WHERE due_after > 0 and ifnull(applies_to_item, '') != ''
 			ORDER BY due_after ASC
@@ -85,6 +85,11 @@ class VehicleMaintenanceSchedule:
 
 	def process_data(self):
 		for d in self.data:
+			d.disable_item_formatter = 1
+
+			if not d.variant_of_name:
+				d.variant_of_name = d.item_name
+
 			rd = relativedelta(getdate(), d.delivery_date)
 			d.age = self.convert_delta_to_string(rd)
 
@@ -108,17 +113,23 @@ class VehicleMaintenanceSchedule:
 	def get_columns(self):
 		columns = [
 			{
-				"label": _("Customer"),
-				"fieldname": "customer",
-				"fieldtype": "Link",
-				"options": "Customer",
-				"width": 100
+				"label": _("Due Date"),
+				"fieldname": "due_date",
+				"fieldtype": "Date",
+				"width": 80
 			},
 			{
-				"label": _("Customer Name"),
-				"fieldname": "customer_name",
+				"label": _("Template"),
+				"fieldname": "project_template",
+				"fieldtype": "Link",
+				"options": "Project Template",
+				"width": 80
+			},
+			{
+				"label": _("Template Name"),
+				"fieldname": "project_template_name",
 				"fieldtype": "Data",
-				"width": 150
+				"width": 180
 			},
 			{
 				"label": _("Vehicle"),
@@ -128,9 +139,16 @@ class VehicleMaintenanceSchedule:
 				"width": 80
 			},
 			{
+				"label": _("Model"),
+				"fieldname": "variant_of_name",
+				"fieldtype": "Data",
+				"width": 120
+			},
+			{
 				"label": _("Variant Code"),
 				"fieldname": "item_code",
-				"fieldtype": "Data",
+				"fieldtype": "Link",
+				"options": "Item",
 				"width": 120
 			},
 			{
@@ -152,6 +170,19 @@ class VehicleMaintenanceSchedule:
 				"width": 115
 			},
 			{
+				"label": _("Customer"),
+				"fieldname": "customer",
+				"fieldtype": "Link",
+				"options": "Customer",
+				"width": 100
+			},
+			{
+				"label": _("Customer Name"),
+				"fieldname": "customer_name",
+				"fieldtype": "Data",
+				"width": 150
+			},
+			{
 				"label": _("Delivery Date"),
 				"fieldname": "delivery_date",
 				"fieldtype": "Date",
@@ -163,30 +194,5 @@ class VehicleMaintenanceSchedule:
 				"fieldtype": "Data",
 				"width": 80
 			},
-			{
-				"label": _("Project Template"),
-				"fieldname": "project_template",
-				"fieldtype": "Link",
-				"options": "Project Template",
-				"width": 150
-			},
-			{
-				"label": _("Due Date"),
-				"fieldname": "due_date",
-				"fieldtype": "Date",
-				"width": 80
-			},
-			{
-				"label": _("Project template Name"),
-				"fieldname": "project_template_name",
-				"fieldtype": "Data",
-				"width": 180
-			},
-			{
-				"label": _("Service Type"),
-				"fieldname": "project_template_category",
-				"fieldtype": "Data",
-				"width": 100
-			}
 		]
 		self.columns = columns
