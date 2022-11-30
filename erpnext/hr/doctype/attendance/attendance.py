@@ -142,14 +142,13 @@ def add_attendance(events, start, end, conditions=None):
 
 
 def mark_absent(employee, attendance_date, shift=None):
-	employee_doc = frappe.get_doc('Employee', employee)
 	if not frappe.db.exists('Attendance', {'employee': employee, 'attendance_date': attendance_date, 'docstatus': 1}):
 		doc_dict = {
 			'doctype': 'Attendance',
 			'employee': employee,
 			'attendance_date': attendance_date,
 			'status': 'Absent',
-			'company': employee_doc.company,
+			'company': frappe.db.get_value("Employee", employee, "company", cache=1),
 			'shift': shift
 		}
 		attendance = frappe.get_doc(doc_dict).insert()

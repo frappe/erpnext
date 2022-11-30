@@ -30,7 +30,8 @@
    "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "employee.employee_name",
@@ -69,7 +70,8 @@
    "in_list_view": 1,
    "label": "Time",
    "permlevel": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "device_id",
@@ -89,14 +91,16 @@
    "label": "Attendance Marked",
    "no_copy": 1,
    "options": "Attendance",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "shift_start",
    "fieldtype": "Datetime",
    "label": "Shift Start",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "shift_end",
@@ -153,7 +157,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-05-25 16:15:59.815768",
+ "modified": "2022-12-01 00:44:33.448238",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Checkin",
