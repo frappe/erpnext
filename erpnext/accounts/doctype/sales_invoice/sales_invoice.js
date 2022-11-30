@@ -526,6 +526,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["income_account"]);
+
+		if (!this.frm.doc.claim_billing) {
+			row.project = this.frm.doc.project;
+		}
 	},
 
 	set_dynamic_labels: function() {
@@ -538,11 +542,22 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.set_project_read_only();
 		if (this.frm.doc.claim_billing) {
 			this.frm.set_value("project", null);
+		} else {
+			this.copy_project_in_items();
 		}
 	},
 
 	set_project_read_only: function () {
 		this.frm.set_df_property('project', 'read_only', cint(this.frm.doc.claim_billing));
+	},
+
+	copy_project_in_items: function () {
+		var me = this;
+		if (!me.frm.doc.claim_billing) {
+			$.each(me.frm.doc.items || [], function (i, item) {
+				frappe.model.set_value(item.doctype, item.name, 'project', me.frm.doc.project);
+			});
+		}
 	},
 
 	items_on_form_rendered: function() {
@@ -927,7 +942,7 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
-	project: function(frm){
+	project: function(frm) {
 		frm.call({
 			method: "add_timesheet_data",
 			doc: frm.doc,

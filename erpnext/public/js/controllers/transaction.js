@@ -224,59 +224,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				frm.doc.project = null;
 				frm.refresh_field('project');
 			}
+
+			if (frm.doc.doctype == "Sales Invoice" && !frm.doc.claim_billing) {
+				frm.cscript.copy_project_in_items();
+			}
+
 			if (frm.doc.project) {
-				return frappe.call({
-					method: 'erpnext.projects.doctype.project.project.get_project_details',
-					args: {
-						project: frm.doc.project,
-						doctype: frm.doc.doctype
-					},
-					callback: function (r) {
-						if (!r.exc) {
-							var customer = null;
-							var bill_to = null;
-							var applies_to_vehicle = null;
-
-							// Set Customer and Bill To first
-							if (r.message.customer) {
-								customer = r.message.customer;
-								delete r.message['customer'];
-							}
-							if (r.message.bill_to) {
-								bill_to = r.message.bill_to;
-								delete r.message['bill_to'];
-							}
-
-							// Set Applies to Vehicle Later
-							if (r.message.applies_to_vehicle) {
-								applies_to_vehicle = r.message['applies_to_vehicle'];
-								delete r.message['applies_to_vehicle'];
-								delete r.message['applies_to_item'];
-							// Remove Applies to Vehicle if Applies to Item is given
-							} else if (r.message.applies_to_item && frm.fields_dict.applies_to_vehicle) {
-								frm.doc.applies_to_vehicle = null;
-								frm.refresh_field('applies_to_vehicle');
-							}
-
-							return frappe.run_serially([
-								() => {
-									if (bill_to && frm.fields_dict.bill_to) {
-										frm.doc.customer = customer;
-										return frm.set_value('bill_to', bill_to);
-									} else if (customer && frm.fields_dict.customer) {
-										return frm.set_value('customer', customer);
-									}
-								},
-								() => frm.set_value(r.message),
-								() => {
-									if (applies_to_vehicle && frm.fields_dict.applies_to_vehicle) {
-										return frm.set_value("applies_to_vehicle", applies_to_vehicle);
-									}
-								},
-							]);
-						}
-					}
-				});
+				return frm.cscript.get_project_details();
 			} else {
 				if (frm.fields_dict.project_reference_no) {
 					frm.set_value("project_reference_no", null);
@@ -917,6 +871,65 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				});
 			}
+		}
+	},
+
+	get_project_details: function () {
+		var me = this;
+
+		if (me.frm.doc.project) {
+			return frappe.call({
+				method: 'erpnext.projects.doctype.project.project.get_project_details',
+				args: {
+					project: me.frm.doc.project,
+					doctype: me.frm.doc.doctype
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						var customer = null;
+						var bill_to = null;
+						var applies_to_vehicle = null;
+
+						// Set Customer and Bill To first
+						if (r.message.customer) {
+							customer = r.message.customer;
+							delete r.message['customer'];
+						}
+						if (r.message.bill_to) {
+							bill_to = r.message.bill_to;
+							delete r.message['bill_to'];
+						}
+
+						// Set Applies to Vehicle Later
+						if (r.message.applies_to_vehicle) {
+							applies_to_vehicle = r.message['applies_to_vehicle'];
+							delete r.message['applies_to_vehicle'];
+							delete r.message['applies_to_item'];
+							// Remove Applies to Vehicle if Applies to Item is given
+						} else if (r.message.applies_to_item && me.frm.fields_dict.applies_to_vehicle) {
+							me.frm.doc.applies_to_vehicle = null;
+							me.frm.refresh_field('applies_to_vehicle');
+						}
+
+						return frappe.run_serially([
+							() => {
+								if (bill_to && me.frm.fields_dict.bill_to) {
+									me.frm.doc.customer = customer;
+									return me.frm.set_value('bill_to', bill_to);
+								} else if (customer && me.frm.fields_dict.customer) {
+									return me.frm.set_value('customer', customer);
+								}
+							},
+							() => me.frm.set_value(r.message),
+							() => {
+								if (applies_to_vehicle && me.frm.fields_dict.applies_to_vehicle) {
+									return me.frm.set_value("applies_to_vehicle", applies_to_vehicle);
+								}
+							},
+						]);
+					}
+				}
+			});
 		}
 	},
 
@@ -2232,6 +2245,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					expense_account: item.expense_account,
 					apply_discount_after_taxes: item.apply_discount_after_taxes,
 					allow_zero_valuation_rate: me.allow_zero_valuation_rate,
+					project: item.project || me.frm.doc.project,
 					warehouse: item.warehouse
 				});
 			}
