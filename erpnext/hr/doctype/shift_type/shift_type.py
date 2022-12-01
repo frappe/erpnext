@@ -78,25 +78,40 @@ class ShiftType(Document):
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
 
-		# Late Entry / Early Exit
-		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
+		missing_checkin_no_absent = not out_time and self.missing_checkin_no_absent
+		missing_checkin_no_half_day = not out_time and self.missing_checkin_no_half_day
+		missing_checkin_no_late_entry = not out_time and self.missing_checkin_no_late_entry
+
+		# Late Entry
+		if cint(self.enable_entry_grace_period) and in_time and not missing_checkin_no_late_entry\
+				and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
-		if cint(self.enable_exit_grace_period) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
+
+		# Early Exit
+		if cint(self.enable_exit_grace_period) and out_time\
+				and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
 			early_exit = True
 
-		# Half Day if late entry or early exit
-		if cint(self.half_day_if_late_minutes) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.half_day_if_late_minutes)):
-			status = 'Half Day'
-		if cint(self.half_day_if_exit_minutes) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.half_day_if_exit_minutes)):
+		# Half Day if Late Minutes
+		if cint(self.half_day_if_late_minutes) and in_time and not missing_checkin_no_half_day\
+				and in_time > logs[0].shift_start + timedelta(minutes=cint(self.half_day_if_late_minutes)):
 			status = 'Half Day'
 
-		ignore_for_missing_checkin = not out_time and self.ignore_working_hour_threshold_for_missing_checkin
+		# Half Day if Early Exit Minutes
+		if cint(self.half_day_if_exit_minutes) and out_time\
+				and out_time < logs[0].shift_end - timedelta(minutes=cint(self.half_day_if_exit_minutes)):
+			status = 'Half Day'
 
 		# Half Day / Absent if working hours less than
-		if not ignore_working_hour_threshold and not ignore_for_missing_checkin:
-			if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
+		if not ignore_working_hour_threshold:
+			if self.working_hours_threshold_for_half_day\
+					and total_working_hours < self.working_hours_threshold_for_half_day\
+					and not missing_checkin_no_half_day:
 				status = 'Half Day'
-			if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
+
+			if self.working_hours_threshold_for_absent\
+					and total_working_hours < self.working_hours_threshold_for_absent\
+					and not missing_checkin_no_absent:
 				status = 'Absent'
 
 		return status, total_working_hours, late_entry, early_exit
