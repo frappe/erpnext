@@ -7,8 +7,10 @@ from frappe import _
 from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, formatdate, get_time
 from erpnext.hr.utils import get_holiday_description
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
-	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list, get_attendance_from_checkins
+	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list,\
+	get_attendance_from_checkins, is_in_employment_date
 from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
+from erpnext.hr.doctype.shift_assignment.shift_assignment import get_employee_shift
 
 
 def execute(filters=None):
@@ -44,7 +46,8 @@ def execute(filters=None):
 					'designation': employee_details.designation,
 				})
 
-				if is_date_holiday(current_date, holiday_map, employee_details, filters.default_holiday_list):
+				is_holiday = is_date_holiday(current_date, holiday_map, employee_details, filters.default_holiday_list)
+				if is_holiday:
 					row_template['attendance_status'] = "Holiday"
 					row_template['attendance_abbr'] = get_attendance_status_abbr(row_template['attendance_status'])
 
@@ -55,6 +58,11 @@ def execute(filters=None):
 				attendance_shifts = attendance_map.get(employee, {}).get(current_date, {})
 
 				shifts = list(set(list(checkin_shifts.keys()) + list(attendance_shifts.keys())))
+				if not shifts and is_in_employment_date(current_date, employee_details):
+					assigned_shift = get_employee_shift(employee, current_date, True)
+					if assigned_shift:
+						shifts.append(assigned_shift.shift_type.name)
+
 				if shifts:
 					for shift_type in shifts:
 						row = row_template.copy()
@@ -95,17 +103,24 @@ def execute(filters=None):
 						if checkins:
 							row['shift_start'] = get_time(checkins[0].shift_start) if checkins[0].shift_start else None
 							row['shift_end'] = get_time(checkins[-1].shift_end) if checkins[-1].shift_end else None
+						else:
+							shift_type_doc = frappe.get_cached_doc("Shift Type", shift_type)
+							row['shift_start'] = get_time(shift_type_doc.start_time)
+							row['shift_end'] = get_time(shift_type_doc.end_time)
 
-						if not attendance_details and shift_type and checkins:
-							attendance_status, working_hours, late_entry, early_exit = get_attendance_from_checkins(checkins,
-								shift_type)
+						if not attendance_details and shift_type:
+							if checkins:
+								attendance_status, working_hours, late_entry, early_exit = get_attendance_from_checkins(checkins,
+									shift_type)
 
-							row['attendance_status'] = attendance_status
-							row['attendance_abbr'] = get_attendance_status_abbr(attendance_status, late_entry, early_exit)
-							row['late_entry'] = late_entry
-							row['early_exit'] = early_exit
-							if working_hours:
-								row['working_hours'] = working_hours
+								row['attendance_status'] = attendance_status
+								row['attendance_abbr'] = get_attendance_status_abbr(attendance_status, late_entry, early_exit)
+								row['late_entry'] = late_entry
+								row['early_exit'] = early_exit
+								if working_hours:
+									row['working_hours'] = working_hours
+							elif not is_holiday:
+								row['attendance_status'] = "Absent"
 
 						data.append(row)
 				else:

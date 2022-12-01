@@ -7,6 +7,7 @@ from frappe import msgprint, _, scrub
 from frappe.utils import cstr, cint, getdate, get_last_day, add_months, today, formatdate
 from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
 from erpnext.hr.utils import get_employee_leave_policy
+from erpnext.hr.doctype.shift_assignment.shift_assignment import get_employee_shift
 from calendar import monthrange
 import datetime
 from collections import OrderedDict
@@ -54,6 +55,9 @@ def execute(filters=None):
 		row['total_deduction'] = 0
 
 		for day in range(1, filters["total_days_in_month"] + 1):
+			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day)
+			is_holiday = is_date_holiday(attendance_date, holiday_map, employee_details, filters.default_holiday_list)
+
 			attendance_details = attendance_map.get(employee, {}).get(day, frappe._dict())
 			if not attendance_details:
 				checkin_shifts = checkin_map.get(employee, {}).get(day, {})
@@ -66,11 +70,11 @@ def execute(filters=None):
 					attendance_details.status = attendance_status
 					attendance_details.late_entry = late_entry
 					attendance_details.early_exit = early_exit
-
-			attendance_date = datetime.date(year=filters.year, month=filters.month, day=day)
+				elif not is_holiday and is_in_employment_date(attendance_date, employee_details):
+					if get_employee_shift(employee, attendance_date, True):
+						attendance_details.status = "Absent"
 
 			attendance_status = attendance_details.get('status')
-			is_holiday = is_date_holiday(attendance_date, holiday_map, employee_details, filters.default_holiday_list)
 			if not attendance_status and is_holiday:
 				attendance_status = "Holiday"
 
@@ -249,7 +253,9 @@ def get_employee_details(filters):
 		employee_condition = " and name = %(employee)s"
 
 	employees = frappe.db.sql("""
-		select name, employee_name, designation, department, branch, company, holiday_list
+		select name, employee_name,
+			designation, department, branch, company,
+			date_of_joining, relieving_date, creation, holiday_list
 		from tabEmployee
 		where company = %(company)s {0}
 	""".format(employee_condition), filters, as_dict=1)
@@ -279,6 +285,19 @@ def get_holiday_map(employee_map, default_holiday_list, from_date=None, to_date=
 	holiday_lists = list(set(holiday_lists))
 	holiday_map = get_holiday_map_from_holiday_lists(holiday_lists, from_date=from_date, to_date=to_date)
 	return holiday_map
+
+
+def is_in_employment_date(attendance_date, employee_details):
+	start_date = employee_details.date_of_joining or employee_details.creation
+	start_date = getdate(start_date) if start_date else None
+	end_date = getdate(employee_details.relieving_date) if employee_details.relieving_date else None
+
+	if not start_date or attendance_date < start_date:
+		return False
+	elif end_date and attendance_date > end_date:
+		return False
+	else:
+		return True
 
 
 def get_leave_type_map():
