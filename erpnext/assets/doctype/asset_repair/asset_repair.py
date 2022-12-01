@@ -10,6 +10,7 @@ from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule_from_asset_depr_schedule_of_asset,
+	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -54,10 +55,9 @@ class AssetRepair(AccountsController):
 				and self.increase_in_asset_life
 			):
 				self.modify_depreciation_schedule()
-
-		self.asset_doc.flags.ignore_validate_update_after_submit = True
-		self.asset_doc.prepare_depreciation_data()
-		self.asset_doc.save()
+				make_new_active_asset_depr_schedules_and_cancel_current_ones(
+					self.asset_doc, "Asset Repair submit TODO"
+				)
 
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
@@ -75,10 +75,9 @@ class AssetRepair(AccountsController):
 				and self.increase_in_asset_life
 			):
 				self.revert_depreciation_schedule_on_cancellation()
-
-		self.asset_doc.flags.ignore_validate_update_after_submit = True
-		self.asset_doc.prepare_depreciation_data()
-		self.asset_doc.save()
+				make_new_active_asset_depr_schedules_and_cancel_current_ones(
+					self.asset_doc, "Asset Repair cancel TODO"
+				)
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":

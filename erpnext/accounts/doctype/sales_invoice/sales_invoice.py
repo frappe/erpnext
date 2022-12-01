@@ -1185,11 +1185,11 @@ class SalesInvoice(SellingController):
 						if asset.calculate_depreciation:
 							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
-							reset_depreciation_schedule(asset, self.posting_date)
+							reset_depreciation_schedule(asset, self.posting_date, "Return asset")
 
 					else:
 						if asset.calculate_depreciation:
-							depreciate_asset(asset, self.posting_date, notes="Sell asset")
+							depreciate_asset(asset, self.posting_date, "Sell asset")
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")

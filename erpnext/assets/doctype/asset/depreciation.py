@@ -214,7 +214,7 @@ def scrap_asset(asset_name):
 
 	date = today()
 
-	depreciate_asset(asset, date, notes="Scrap asset")
+	depreciate_asset(asset, date, "Scrap asset")
 
 	depreciation_series = frappe.get_cached_value(
 		"Company", asset.company, "series_for_depreciation_entry"
@@ -246,7 +246,7 @@ def restore_asset(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 
 	reverse_depreciation_entry_made_after_disposal(asset, asset.disposal_date)
-	reset_depreciation_schedule(asset, asset.disposal_date)
+	reset_depreciation_schedule(asset, asset.disposal_date, "Restore asset")
 
 	je = asset.journal_entry_for_scrap
 
@@ -258,20 +258,20 @@ def restore_asset(asset_name):
 	asset.set_status()
 
 
-def depreciate_asset(asset, date, notes):
+def depreciate_asset(asset_doc, date, notes):
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(
-		asset, date_of_disposal=date, notes=notes
+		asset_doc, notes, date_of_disposal=date
 	)
 
-	make_depreciation_entry_for_all_asset_depr_schedules(asset, date)
+	make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date)
 
 
-def reset_depreciation_schedule(asset, date, notes):
+def reset_depreciation_schedule(asset_doc, date, notes):
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(
-		asset, date_of_return=date, notes=notes
+		asset_doc, notes, date_of_return=date
 	)
 
-	modify_depreciation_schedule_for_asset_repairs(asset)
+	modify_depreciation_schedule_for_asset_repairs(asset_doc)
 
 
 def modify_depreciation_schedule_for_asset_repairs(asset):
@@ -283,7 +283,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 		if repair.increase_in_asset_life:
 			asset_repair = frappe.get_doc("Asset Repair", repair.name)
 			asset_repair.modify_depreciation_schedule()
-			asset.prepare_depreciation_data()
+			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, "Asset Repair TODO")
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):

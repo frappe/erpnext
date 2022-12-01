@@ -84,7 +84,7 @@ def convert_draft_asset_depr_schedules_into_active(asset_doc):
 
 
 def make_new_active_asset_depr_schedules_and_cancel_current_ones(
-	asset_doc, date_of_disposal=None, date_of_return=None, notes=None
+	asset_doc, notes, date_of_disposal=None, date_of_return=None
 ):
 	for row in asset_doc.get("finance_books"):
 		current_asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
