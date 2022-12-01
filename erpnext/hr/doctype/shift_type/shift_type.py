@@ -103,9 +103,12 @@ class ShiftType(Document):
 		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
 		The Absent is marked starting from 'process_attendance_after' or employee creation date.
 		"""
-		date_of_joining, relieving_date, employee_creation = frappe.db.get_value("Employee", employee, ["date_of_joining", "relieving_date", "creation"])
+		date_of_joining, relieving_date, employee_creation = frappe.db.get_value("Employee", employee,
+			["date_of_joining", "relieving_date", "creation"])
+
 		if not date_of_joining:
 			date_of_joining = employee_creation.date()
+
 		start_date = max(getdate(self.process_attendance_after), date_of_joining)
 		actual_shift_datetime = get_actual_start_end_datetime_of_shift(employee, get_datetime(self.last_sync_of_checkin), True)
 		last_shift_time = actual_shift_datetime[0] if actual_shift_datetime[0] else get_datetime(self.last_sync_of_checkin)
@@ -114,9 +117,11 @@ class ShiftType(Document):
 			end_date = min(prev_shift.start_datetime.date(), relieving_date) if relieving_date else prev_shift.start_datetime.date()
 		else:
 			return
+
 		holiday_list_name = self.holiday_list
 		if not holiday_list_name:
 			holiday_list_name = get_holiday_list_for_employee(employee, False)
+
 		dates = get_filtered_date_list(employee, start_date, end_date, holiday_list=holiday_list_name)
 		for date in dates:
 			shift_details = get_employee_shift(employee, date, True)
