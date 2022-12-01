@@ -319,3 +319,4 @@ erpnext.patches.v14_0.create_accounting_dimensions_for_asset_capitalization
 erpnext.patches.v13_0.update_schedule_type_in_loans
 erpnext.patches.v14_0.update_partial_tds_fields
 erpnext.patches.v14_0.create_incoterms_and_migrate_shipment
+erpnext.patches.v14_0.setup_clear_repost_logs
