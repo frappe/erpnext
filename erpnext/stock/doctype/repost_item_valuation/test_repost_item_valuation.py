@@ -86,6 +86,31 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 				msg=f"Exepcted false from : {case}",
 			)
 
+	def test_clear_old_logs(self):
+		# create 10 logs
+		for i in range(1, 20):
+			frappe.get_doc(
+				doctype="Repost Item Valuation",
+				item_code="_Test Item",
+				warehouse="_Test Warehouse - _TC",
+				based_on="Item and Warehouse",
+				creation=add_to_date(today(), days=-i * 10),
+				modified=add_to_date(today(), days=-i * 10),
+				posting_date=nowdate(),
+				status="Skipped",
+				posting_time="00:01:00",
+			).insert(ignore_permissions=True)
+
+		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
+		self.assertTrue(len(logs) > 10)
+
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import RepostItemValuation
+
+		RepostItemValuation.clear_old_logs(days=1)
+
+		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
+		self.assertTrue(len(logs) == 0)
+
 	def test_create_item_wise_repost_item_valuation_entries(self):
 		pr = make_purchase_receipt(
 			company="_Test Company with perpetual inventory",
