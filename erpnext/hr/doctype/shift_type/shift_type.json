@@ -27,6 +27,7 @@
   "cb_18",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
+  "ignore_working_hour_threshold_for_missing_checkin",
   "sync_settings_section",
   "process_attendance_after",
   "column_break_16",
@@ -184,9 +185,15 @@
    "fieldname": "half_day_if_exit_minutes",
    "fieldtype": "Int",
    "label": "Mark Half Day If Exit Earlier Than"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_working_hour_threshold_for_missing_checkin",
+   "fieldtype": "Check",
+   "label": "Do Not Apply Working Hour Threshold If Less than 2 Checkins"
   }
  ],
- "modified": "2022-11-28 15:46:12.569422",
+ "modified": "2022-12-01 13:39:53.523070",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

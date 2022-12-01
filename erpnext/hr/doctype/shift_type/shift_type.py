@@ -90,8 +90,10 @@ class ShiftType(Document):
 		if cint(self.half_day_if_exit_minutes) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.half_day_if_exit_minutes)):
 			status = 'Half Day'
 
+		ignore_for_missing_checkin = not out_time and self.ignore_working_hour_threshold_for_missing_checkin
+
 		# Half Day / Absent if working hours less than
-		if not ignore_working_hour_threshold:
+		if not ignore_working_hour_threshold and not ignore_for_missing_checkin:
 			if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
 				status = 'Half Day'
 			if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
