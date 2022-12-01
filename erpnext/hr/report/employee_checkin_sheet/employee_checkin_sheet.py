@@ -103,7 +103,7 @@ def execute(filters=None):
 						if checkins:
 							row['shift_start'] = get_time(checkins[0].shift_start) if checkins[0].shift_start else None
 							row['shift_end'] = get_time(checkins[-1].shift_end) if checkins[-1].shift_end else None
-						else:
+						elif shift_type:
 							shift_type_doc = frappe.get_cached_doc("Shift Type", shift_type)
 							row['shift_start'] = get_time(shift_type_doc.start_time)
 							row['shift_end'] = get_time(shift_type_doc.end_time)
