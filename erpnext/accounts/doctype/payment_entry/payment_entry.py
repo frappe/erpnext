@@ -7,7 +7,7 @@ from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, scrub, throw
-from frappe.utils import cint, comma_or, flt, getdate, nowdate
+from frappe.utils import cint, comma_or, flt, getdate, nowdate, money_in_words
 from six import iteritems, string_types
 
 import erpnext
@@ -87,6 +87,10 @@ class PaymentEntry(AccountsController):
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		if self.paid_amount:
+			self.paid_amount_in_words = money_in_words(self.paid_amount,self.paid_from_account_currency)
+		if self.received_amount:
+			self.received_amount_in_words = money_in_words(self.received_amount,self.paid_to_account_currency)
 
 	def on_submit(self):
 		if self.difference_amount:

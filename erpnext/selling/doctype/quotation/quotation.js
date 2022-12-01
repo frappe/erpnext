@@ -134,6 +134,34 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 						}
 					})
 				}, __("Get Items From"), "btn-default");
+				this.frm.add_custom_button(__('Supplier Quotation'),
+				function() {
+					erpnext.utils.map_current_doc({
+						method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_quotation",
+						source_doctype: "Supplier Quotation",
+						target: me.frm,
+						setters: [
+							{
+								label: "Opportunity",
+								fieldname: "opportunity",
+								fieldtype: "Link",
+								options: "Opportunity",
+								default: undefined
+							},
+							{
+								label: "Supplier",
+								fieldname: "supplier",
+								fieldtype: "Link",
+								options: "Supplier",
+								default: undefined
+							}
+						],
+						get_query_filters: {
+							docstatus: 1,
+							status: ["not in", ["Stopped", "Expired"]],
+						}
+					})
+				}, __("Get Items From"));
 		}
 
 		this.toggle_reqd_lead_customer();

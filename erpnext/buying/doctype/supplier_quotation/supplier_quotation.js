@@ -49,6 +49,34 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 						}
 					})
 				}, __("Get Items From"));
+				this.frm.add_custom_button(__('Opportunity'),
+				function() {
+					erpnext.utils.map_current_doc({
+						method: "erpnext.crm.doctype.opportunity.opportunity.make_supplier_quotation",
+						source_doctype: "Opportunity",
+						target: me.frm,
+						setters: [
+							{
+								label: "Party",
+								fieldname: "party_name",
+								fieldtype: "Link",
+								options: me.frm.doc.quotation_to,
+								default: me.frm.doc.party_name || undefined
+							},
+							{
+								label: "Opportunity Type",
+								fieldname: "opportunity_type",
+								fieldtype: "Link",
+								options: "Opportunity Type",
+								default: me.frm.doc.order_type || undefined
+							}
+						],
+						get_query_filters: {
+							status: ["not in", ["Lost", "Closed"]],
+							company: me.frm.doc.company
+						}
+					})
+				}, __("Get Items From"));
 
 			// Link Material Requests
 			this.frm.add_custom_button(__('Link to Material Requests'),

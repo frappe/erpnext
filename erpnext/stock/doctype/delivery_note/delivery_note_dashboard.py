@@ -16,6 +16,7 @@ def get_data():
 			{"label": _("Related"), "items": ["Sales Invoice", "Packing Slip", "Delivery Trip"]},
 			{"label": _("Reference"), "items": ["Sales Order", "Shipment", "Quality Inspection"]},
 			{"label": _("Returns"), "items": ["Stock Entry"]},
+			{"label": _("Installation Note"), "items": ["Installation Note"]},
 			{"label": _("Subscription"), "items": ["Auto Repeat"]},
 		],
 	}

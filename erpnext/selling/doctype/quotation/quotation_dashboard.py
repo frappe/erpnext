@@ -8,7 +8,7 @@ def get_data():
 			"Auto Repeat": "reference_document",
 		},
 		"internal_links": {
-			"Supplier Quotation":  "supplier_quotation",
+			"Supplier Quotation": ["items", "supplier_quotation"],
 		},
 		"transactions": [
 			{"label": _("Sales Order"), "items": ["Sales Order"]},

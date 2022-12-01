@@ -174,26 +174,54 @@ def make_purchase_order(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
 	doclist = get_mapped_doc(
 		"Supplier Quotation",
 		source_name,
 		{
 			"Supplier Quotation": {
 				"doctype": "Quotation",
+				"validation": {
+					"docstatus": ["=", 1],
+				},
 				"field_map": {
-					"name": "supplier_quotation",
+					"opportunity": "opportunity",
 				},
 			},
 			"Supplier Quotation Item": {
 				"doctype": "Quotation Item",
-				"condition": lambda doc: frappe.db.get_value("Item", doc.item_code, "is_sales_item") == 1,
-				"add_if_empty": True,
+				"field_map": [
+					["name", "supplier_quotation_item"],
+					["parent", "supplier_quotation"],
+					["rate", "supplier_rate"],
+				],
 			},
 		},
 		target_doc,
+		set_missing_values,
 	)
-
 	return doclist
+	#doclist = get_mapped_doc(
+	#	"Supplier Quotation",
+	#	source_name,
+	#	{
+	#		"Supplier Quotation": {
+	#			"doctype": "Quotation",
+	#			"field_map": {
+	#				"name": "supplier_quotation",
+	#				"opportunity": "opportunity",
+	#			},
+	#		},
+	#		"Supplier Quotation Item": {
+	#			"doctype": "Quotation Item",
+	#			"condition": lambda doc: frappe.db.get_value("Item", doc.item_code, "is_sales_item") == 1,
+	#			"add_if_empty": True,
+	#		},
+	#	},
+	#	target_doc,
+	#)
+	#return doclist
 
 
 def set_expired_status():

@@ -12,13 +12,16 @@ def get_data():
 			"Auto Repeat": "reference_document",
 			"Maintenance Visit": "prevdoc_docname",
 		},
-		"internal_links": {"Quotation": ["items", "prevdoc_docname"]},
+		"internal_links": {
+			"Supplier Quotation": ["items", "supplier_quotation"],
+			"Quotation": ["items", "prevdoc_docname"],
+			},
 		"transactions": [
 			{
 				"label": _("Fulfillment"),
 				"items": ["Sales Invoice", "Pick List", "Delivery Note", "Maintenance Visit"],
 			},
-			{"label": _("Purchasing"), "items": ["Material Request", "Purchase Order"]},
+			{"label": _("Purchasing"), "items": ["Material Request", "Supplier Quotation", "Purchase Order"]},
 			{"label": _("Projects"), "items": ["Project"]},
 			{"label": _("Manufacturing"), "items": ["Work Order"]},
 			{"label": _("Reference"), "items": ["Quotation", "Auto Repeat"]},
