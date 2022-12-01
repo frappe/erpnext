@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import (
 	add_days,
 	add_months,
+	get_first_day,
 	get_last_day,
 	get_year_ending,
 	get_year_start,
@@ -13,12 +14,11 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.attendance.attendance import (
-	get_month_map,
 	get_unmarked_days,
 	mark_attendance,
 )
-from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.tests.test_utils import get_first_sunday
 
 test_records = frappe.get_test_records("Attendance")
@@ -55,9 +55,12 @@ class TestAttendance(FrappeTestCase):
 		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
 		mark_attendance(employee, attendance_date, "Present")
-		month_name = get_month_name(attendance_date)
 
-		unmarked_days = get_unmarked_days(employee, month_name)
+		unmarked_days = get_unmarked_days(
+			employee,
+			get_first_day(attendance_date),
+			get_last_day(attendance_date)
+		)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
 		# attendance already marked for the day
@@ -81,9 +84,13 @@ class TestAttendance(FrappeTestCase):
 		frappe.db.set_value("Employee", employee, "holiday_list", self.holiday_list)
 
 		mark_attendance(employee, attendance_date, "Present")
-		month_name = get_month_name(attendance_date)
 
-		unmarked_days = get_unmarked_days(employee, month_name, exclude_holidays=True)
+		unmarked_days = unmarked_days = get_unmarked_days(
+			employee,
+			get_first_day(attendance_date),
+			get_last_day(attendance_date),
+			exclude_holidays=True
+		)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
 		# attendance already marked for the day
@@ -110,9 +117,12 @@ class TestAttendance(FrappeTestCase):
 
 		attendance_date = add_days(date, 2)
 		mark_attendance(employee, attendance_date, "Present")
-		month_name = get_month_name(attendance_date)
 
-		unmarked_days = get_unmarked_days(employee, month_name)
+		unmarked_days = get_unmarked_days(
+			employee,
+			get_first_day(attendance_date),
+			get_last_day(attendance_date)
+		)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
 		# attendance already marked for the day
@@ -124,10 +134,3 @@ class TestAttendance(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.db.rollback()
-
-
-def get_month_name(date):
-	month_number = date.month
-	for month, number in get_month_map().items():
-		if number == month_number:
-			return month
