@@ -259,7 +259,7 @@ def update_product_bundle_rate(parent_items_price, pi_row):
 	if not rate:
 		parent_items_price[key] = 0.0
 
-	parent_items_price[key] += flt(pi_row.rate)
+	parent_items_price[key] += flt(pi_row.rate * pi_row.qty)
 
 
 def set_product_bundle_rate_amount(doc, parent_items_price):
