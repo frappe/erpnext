@@ -71,7 +71,8 @@ def execute(filters=None):
 					attendance_details.late_entry = late_entry
 					attendance_details.early_exit = early_exit
 				elif not is_holiday and is_in_employment_date(attendance_date, employee_details):
-					if get_employee_shift(employee, attendance_date, True):
+					absent_shift = get_employee_shift(employee, attendance_date, True)
+					if absent_shift and shift_ended(absent_shift.shift_type.name, attendance_date=attendance_date):
 						attendance_details.status = "Absent"
 
 			attendance_status = attendance_details.get('status')
@@ -386,7 +387,23 @@ def get_attendance_status_abbr(attendance_status, late_entry=0, early_exit=0, le
 def get_attendance_from_checkins(checkins, shift):
 	shift_doc = frappe.get_cached_doc("Shift Type", shift)
 
-	shift_not_ended = [chk for chk in checkins if shift_doc.last_sync_of_checkin < chk.shift_actual_end]
-	ignore_working_hour_threshold = not shift_doc.last_sync_of_checkin or shift_not_ended
-
+	ignore_working_hour_threshold = not shift_ended(shift, checkins)
 	return shift_doc.get_attendance(checkins, ignore_working_hour_threshold=ignore_working_hour_threshold)
+
+
+def shift_ended(shift, checkins=None, attendance_date=None):
+	if not shift:
+		return False
+
+	last_sync_of_checkin = frappe.db.get_value("Shift Type", shift, "last_sync_of_checkin", cache=1)
+	if not last_sync_of_checkin:
+		return False
+
+	if checkins is None:
+		if attendance_date:
+			return getdate(attendance_date) < getdate(last_sync_of_checkin)
+		else:
+			return False
+	else:
+		shift_not_ended = [chk for chk in checkins if last_sync_of_checkin < chk.shift_actual_end]
+		return not shift_not_ended

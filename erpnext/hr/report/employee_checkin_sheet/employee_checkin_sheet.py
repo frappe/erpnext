@@ -8,7 +8,7 @@ from frappe.utils import getdate, cstr, add_days, get_weekday, format_time, form
 from erpnext.hr.utils import get_holiday_description
 from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet import get_employee_details,\
 	get_attendance_status_abbr, get_holiday_map, is_date_holiday, get_employee_holiday_list,\
-	get_attendance_from_checkins, is_in_employment_date
+	get_attendance_from_checkins, is_in_employment_date, shift_ended
 from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_employee_shift
 
@@ -119,7 +119,7 @@ def execute(filters=None):
 								row['early_exit'] = early_exit
 								if working_hours:
 									row['working_hours'] = working_hours
-							elif not is_holiday:
+							elif not is_holiday and shift_ended(shift_type, attendance_date=current_date):
 								row['attendance_status'] = "Absent"
 
 						data.append(row)
