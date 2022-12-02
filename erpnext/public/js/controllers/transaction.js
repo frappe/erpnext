@@ -216,10 +216,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if(!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
 				}
+			},
+
+			project: function(frm, cdt, cdn) {
+				let row = frappe.get_doc(cdt, cdn);
+				return frm.cscript.update_item_defaults(false, row);
 			}
 		});
 
-		frappe.ui.form.on(this.frm.doctype,"project", function(frm) {
+		frappe.ui.form.on(this.frm.doctype, "project", function(frm) {
 			if (frm.doc.claim_billing && frm.doc.project) {
 				frm.doc.project = null;
 				frm.refresh_field('project');
@@ -230,15 +235,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			if (frm.doc.project) {
-				return frm.cscript.get_project_details();
+				return frappe.run_serially([
+					() => frm.cscript.get_project_details(),
+					() => frm.cscript.update_item_defaults(false),
+				]);
 			} else {
 				if (frm.fields_dict.project_reference_no) {
 					frm.set_value("project_reference_no", null);
 				}
-				return frm.cscript.get_applies_to_details();
+
+				frm.cscript.update_item_defaults(false);
+				frm.cscript.get_applies_to_details();
 			}
 		});
-
 
 		var me = this;
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
@@ -2265,7 +2274,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		};
 	},
 
-	update_item_defaults: function(set_warehouse) {
+	update_item_defaults: function(set_warehouse, row) {
 		var me = this;
 		var args = me.get_item_defaults_args();
 		args['set_warehouse'] = cint(set_warehouse);

@@ -415,8 +415,7 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Default Cost Center",
-   "options": "Cost Center",
-   "permlevel": 1
+   "options": "Cost Center"
   },
   {
    "collapsible": 1,
@@ -1246,7 +1245,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-08-29 13:07:24.835232",
+ "modified": "2022-12-02 18:36:01.240518",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

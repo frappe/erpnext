@@ -20,6 +20,7 @@ from erpnext.accounts.party import get_contact_details, get_address_display
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.projects.doctype.project_status.project_status import get_auto_project_status, set_manual_project_status,\
 	get_valid_manual_project_status_names, is_manual_project_status, validate_project_status_for_transaction
+from erpnext.projects.doctype.project_workshop.project_workshop import get_project_workshop_details
 from six import string_types
 from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_missing_checklist
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
@@ -634,6 +635,7 @@ class Project(StatusUpdater):
 			self.contact_mobile_2 = ''
 
 	def set_missing_values(self):
+		self.set_project_workshop_details()
 		self.set_appointment_details()
 		self.set_customer_details()
 		self.set_applies_to_details()
@@ -698,6 +700,13 @@ class Project(StatusUpdater):
 					self.applies_to_vehicle = appointment_doc.get('applies_to_vehicle')
 		else:
 			self.appointment_dt = None
+
+	def set_project_workshop_details(self):
+		if self.get('project_workshop'):
+			project_workshop_details = get_project_workshop_details(self.project_workshop, company=self.company)
+			for k, v in project_workshop_details.items():
+				if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
+					self.set(k, v)
 
 	def set_material_and_service_item_groups(self):
 		settings = frappe.get_cached_doc("Projects Settings", None)
@@ -1429,11 +1438,6 @@ def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 							 'start': start,
 							 'page_len': page_len
 						 })
-
-
-@frappe.whitelist()
-def get_cost_center_name(project):
-	return frappe.db.get_value("Project", project, "cost_center")
 
 
 def hourly_reminder():

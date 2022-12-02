@@ -555,7 +555,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var me = this;
 		if (!me.frm.doc.claim_billing) {
 			$.each(me.frm.doc.items || [], function (i, item) {
-				frappe.model.set_value(item.doctype, item.name, 'project', me.frm.doc.project);
+				item.project = me.frm.doc.project;
+				refresh_field("project", item.name, "items");
 			});
 		}
 	},

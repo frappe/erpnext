@@ -7,7 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "workshop_name",
-  "service_manager"
+  "service_manager",
+  "section_break_3",
+  "default_cost_centers"
  ],
  "fields": [
   {
@@ -22,9 +24,19 @@
    "in_list_view": 1,
    "label": "Service Manager",
    "options": "Sales Person"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "default_cost_centers",
+   "fieldtype": "Table",
+   "label": "Default Cost Centers",
+   "options": "Default Cost Center"
   }
  ],
- "modified": "2022-07-25 16:15:10.196559",
+ "modified": "2022-12-02 21:23:58.239826",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Workshop",
@@ -39,6 +51,18 @@
    "read": 1,
    "report": 1,
    "role": "Projects Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
    "share": 1,
    "write": 1
   },
@@ -67,15 +91,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)",
-   "share": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Accounts User",
    "share": 1
   },
   {
