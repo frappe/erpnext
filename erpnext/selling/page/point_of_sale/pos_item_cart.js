@@ -379,21 +379,28 @@ erpnext.PointOfSale.ItemCart = class {
 			df: {
 				label: __('Discount'),
 				fieldtype: 'Data',
-				placeholder: ( discount ? discount + '%' :  __('Enter discount percentage.') ),
+				placeholder: discount ? discount + '%' :  __('Enter discount percentage.'),
 				input_class: 'input-xs',
 				onchange: function() {
-					if (flt(this.value) != 0) {
-						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
-						me.hide_discount_control(this.value);
-					} else {
-						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
-						me.$add_discount_elem.css({
-							'border': '1px dashed var(--gray-500)',
-							'padding': 'var(--padding-sm) var(--padding-md)'
-						});
-						me.$add_discount_elem.html(`${me.get_discount_icon()} ${__('Add Discount')}`);
-						me.discount_field = undefined;
+					const frm = me.events.get_frm();
+					const value = flt(this.value);
+
+					frm.set_value('additional_discount_percentage', value);
+
+					if (value != 0) {
+						me.hide_discount_control(value);
+						return;
 					}
+
+					// reset discount amount and input fields
+					frm.set_value('discount_amount', value);
+					frm.save();
+					me.$add_discount_elem.css({
+						'border': '1px dashed var(--gray-500)',
+						'padding': 'var(--padding-sm) var(--padding-md)',
+					});
+					me.$add_discount_elem.html(`${me.get_discount_icon()} ${__('Add Discount')}`);
+					me.discount_field = undefined;
 				},
 			},
 			parent: this.$add_discount_elem.find('.add-discount-field'),
