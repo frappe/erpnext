@@ -103,7 +103,7 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 		shift_type_name = default_shift
 
 	if shift_type_name:
-		holiday_list_name = frappe.db.get_value('Shift Type', shift_type_name, 'holiday_list')
+		holiday_list_name = frappe.db.get_value('Shift Type', shift_type_name, 'holiday_list', cache=1)
 		if not holiday_list_name:
 			holiday_list_name = get_holiday_list_for_employee(employee, False)
 		if holiday_list_name and is_holiday(holiday_list_name, for_date):

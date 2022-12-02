@@ -289,13 +289,15 @@ def get_holiday_map(employee_map, default_holiday_list, from_date=None, to_date=
 
 
 def is_in_employment_date(attendance_date, employee_details):
-	start_date = employee_details.date_of_joining or employee_details.creation
-	start_date = getdate(start_date) if start_date else None
-	end_date = getdate(employee_details.relieving_date) if employee_details.relieving_date else None
+	attendance_date = getdate(attendance_date) if attendance_date else None
+	date_of_joining = getdate(employee_details.date_of_joining) if employee_details.date_of_joining else None
+	relieiving_date = getdate(employee_details.relieving_date) if employee_details.relieving_date else None
 
-	if not start_date or attendance_date < start_date:
+	if not attendance_date:
 		return False
-	elif end_date and attendance_date > end_date:
+	elif not date_of_joining or attendance_date < date_of_joining:
+		return False
+	elif relieiving_date and attendance_date > relieiving_date:
 		return False
 	else:
 		return True
