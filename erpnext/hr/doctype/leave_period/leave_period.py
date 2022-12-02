@@ -5,11 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, cstr, add_days, date_diff, getdate, ceil
+from frappe.utils import date_diff, getdate, ceil
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_overlap, get_employee_leave_policy
-from frappe.utils.background_jobs import enqueue
 from six import iteritems
+
 
 class LeavePeriod(Document):
 	def get_employees(self, args):
@@ -21,8 +21,12 @@ class LeavePeriod(Document):
 
 		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
 
-		employees = frappe._dict(frappe.db.sql("select name, date_of_joining from tabEmployee where status='Active' {condition}" #nosec
-			.format(condition=condition_str), tuple(values)))
+		employees = frappe._dict(frappe.db.sql("""
+			select name, date_of_joining
+			from tabEmployee
+			where status = 'Active' and ifnull(date_of_joining, '0000-00-00') != '0000-00-00'
+				{condition}
+		""".format(condition=condition_str), tuple(values)))
 
 		return employees
 
@@ -32,11 +36,9 @@ class LeavePeriod(Document):
 
 	def validate_dates(self):
 		if getdate(self.from_date) >= getdate(self.to_date):
-			frappe.throw(_("To date can not be equal or less than from date"))
+			frappe.throw(_("To Date can not be equal or less than From Date"))
 
-
-	def grant_leave_allocation(self, grade=None, department=None, designation=None,
-			employee=None, carry_forward=0):
+	def grant_leave_allocation(self, grade=None, department=None, designation=None, employee=None, carry_forward=0):
 		employee_records = self.get_employees({
 			"grade": grade,
 			"department": department,
@@ -51,7 +53,8 @@ class LeavePeriod(Document):
 			else:
 				grant_leave_alloc_for_employees(employee_records, self, carry_forward)
 		else:
-			frappe.msgprint(_("No Employee Found"))
+			frappe.msgprint(_("No Employee(s) Found"))
+
 
 def grant_leave_alloc_for_employees(employee_records, leave_period, carry_forward=0):
 	leave_allocations = []
@@ -61,7 +64,8 @@ def grant_leave_alloc_for_employees(employee_records, leave_period, carry_forwar
 	for employee in employee_records.keys():
 		if employee in existing_allocations_for:
 			continue
-		count +=1
+
+		count += 1
 		leave_policy = get_employee_leave_policy(employee)
 		if leave_policy:
 			for leave_policy_detail in leave_policy.leave_policy_details:
@@ -73,10 +77,12 @@ def grant_leave_alloc_for_employees(employee_records, leave_period, carry_forwar
 			frappe.msgprint(_("Please set leave policy for {0}").format(frappe.get_desk_link("Employee", employee)))
 
 		frappe.db.commit()
-		frappe.publish_progress(count*100/len(set(employee_records.keys()) - set(existing_allocations_for)), title = _("Allocating leaves..."))
+		frappe.publish_progress(count * 100 / len(set(employee_records.keys()) - set(existing_allocations_for)),
+			title=_("Allocating leaves..."))
 
 	if leave_allocations:
-		frappe.msgprint(_("Leaves has been granted sucessfully"))
+		frappe.msgprint(_("Leaves has been granted successfully"))
+
 
 def get_existing_allocations(employees, leave_period):
 	leave_allocations = frappe.db.sql_list("""
@@ -94,6 +100,7 @@ def get_existing_allocations(employees, leave_period):
 			.format("\n".join(leave_allocations)))
 	return leave_allocations
 
+
 def get_leave_type_details():
 	leave_type_details = frappe._dict()
 	leave_types = frappe.get_all("Leave Type",
@@ -102,7 +109,9 @@ def get_leave_type_details():
 		leave_type_details.setdefault(d.name, d)
 	return leave_type_details
 
-def create_leave_allocation(employee, leave_type, new_leaves_allocated, leave_type_details, leave_period, carry_forward, date_of_joining):
+
+def create_leave_allocation(employee, leave_type, new_leaves_allocated, leave_type_details, leave_period, carry_forward,
+		date_of_joining):
 	''' Creates leave allocation for the given employee in the provided leave period '''
 	if carry_forward and not leave_type_details.get(leave_type).is_carry_forward:
 		carry_forward = 0
@@ -126,6 +135,7 @@ def create_leave_allocation(employee, leave_type, new_leaves_allocated, leave_ty
 		leave_period=leave_period.name,
 		carry_forward=carry_forward
 		))
-	allocation.save(ignore_permissions = True)
+	allocation.save(ignore_permissions=True)
 	allocation.submit()
+
 	return allocation.name

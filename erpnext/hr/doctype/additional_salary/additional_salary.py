@@ -21,10 +21,12 @@ class AdditionalSalary(Document):
 			frappe.throw(_("Amount should not be less than zero."))
 
 	def validate_dates(self):
- 		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
-			["date_of_joining", "relieving_date"])
- 		if date_of_joining and getdate(self.payroll_date) < getdate(date_of_joining):
- 			frappe.throw(_("Payroll date can not be less than employee's joining date"))
+		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee, ["date_of_joining", "relieving_date"])
+		if not date_of_joining:
+			frappe.throw(_("Please set Date of Joining for {0}").format(frappe.get_desk_link("Employee", self.employee)))
+
+		if date_of_joining and getdate(self.payroll_date) < getdate(date_of_joining):
+			frappe.throw(_("Payroll date can not be less than employee's joining date"))
 
 	def get_amount(self, sal_start_date, sal_end_date):
 		start_date = getdate(sal_start_date)

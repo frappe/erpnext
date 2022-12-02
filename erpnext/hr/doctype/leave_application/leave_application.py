@@ -65,11 +65,10 @@ class LeaveApplication(Document):
 		if self.leave_type:
 			leave_type = frappe.get_doc("Leave Type", self.leave_type)
 			if leave_type.applicable_after > 0:
-				date_of_joining, employee_creation = frappe.db.get_value("Employee", self.employee,
-					["date_of_joining", "creation"])
-
-				if not date_of_joining and employee_creation:
-					date_of_joining = getdate(employee_creation)
+				date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
+				if not date_of_joining:
+					frappe.throw(_("Please set Date of Joining for {0}")
+						.format(frappe.get_desk_link("Employee", self.employee)))
 
 				leave_days = get_approved_leaves_for_period(self.employee, False, date_of_joining, self.from_date)
 				number_of_days = date_diff(getdate(self.from_date), date_of_joining)

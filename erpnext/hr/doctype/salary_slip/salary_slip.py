@@ -756,7 +756,7 @@ class SalarySlip(TransactionBase):
 			relieving_date = getdate(self.end_date)
 
 		if not joining_date:
-			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
+			frappe.throw(_("Please set the Date of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
 		taxable_earnings = 0
 		additional_income = 0
@@ -956,7 +956,7 @@ class SalarySlip(TransactionBase):
 			relieving_date = getdate(self.end_date)
 
 		if not joining_date:
-			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
+			frappe.throw(_("Please set the Date of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
 		for d in self.get(component_type):
 			d.amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
