@@ -67,6 +67,9 @@ class BulkPriceUpdate(Document):
 				d.item_name = "NOT FOUND: {0}".format(d.item_code)
 				d.item_code = None
 
+			if d.get('item_code'):
+				d.item_name = frappe.get_cached_value("Item", d.item_code, 'item_name')
+
 			d.current_rate = self.get_current_rate(d)
 
 		if missing_item_codes:
