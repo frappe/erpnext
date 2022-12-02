@@ -6,8 +6,7 @@ from unittest.mock import MagicMock, call
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import nowdate
-from frappe.utils.data import add_to_date, today
+from frappe.utils import add_days, add_to_date, now, nowdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.utils import repost_gle_for_stock_vouchers
@@ -89,17 +88,19 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 	def test_clear_old_logs(self):
 		# create 10 logs
 		for i in range(1, 20):
-			frappe.get_doc(
+			repost_doc = frappe.get_doc(
 				doctype="Repost Item Valuation",
 				item_code="_Test Item",
 				warehouse="_Test Warehouse - _TC",
 				based_on="Item and Warehouse",
-				creation=add_to_date(today(), days=-i * 10),
-				modified=add_to_date(today(), days=-i * 10),
 				posting_date=nowdate(),
 				status="Skipped",
 				posting_time="00:01:00",
 			).insert(ignore_permissions=True)
+
+			repost_doc.load_from_db()
+			repost_doc.modified = add_days(now(), days=-i * 10)
+			repost_doc.db_update_all()
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
 		self.assertTrue(len(logs) > 10)
