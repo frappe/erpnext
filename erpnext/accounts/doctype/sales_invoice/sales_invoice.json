@@ -332,7 +332,8 @@
    "oldfieldname": "project_name",
    "oldfieldtype": "Link",
    "options": "Project",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -2212,8 +2213,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2022-11-26 01:40:58.536163",
+ "modified": "2022-11-30 17:05:53.384218",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -62,6 +62,8 @@ frappe.query_reports["Employee Checkin Sheet"] = {
 		if (['attendance_status', 'attendance_abbr', 'working_hours'].includes(column.fieldname)) {
 			if (data['attendance']) {
 				link = "/app/attendance/" + encodeURIComponent(data['attendance']);
+			} else if (status != "Holiday") {
+				style['opacity'] = '0.6';
 			}
 		}
 

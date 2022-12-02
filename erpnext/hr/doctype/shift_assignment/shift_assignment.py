@@ -90,12 +90,19 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 	:param consider_default_shift: If set to true, default shift is taken when no shift assignment is found.
 	:param next_shift_direction: One of: None, 'forward', 'reverse'. Direction to look for next shift if shift not found on given date.
 	"""
-	default_shift = frappe.db.get_value('Employee', employee, 'default_shift')
-	shift_type_name = frappe.db.get_value('Shift Assignment', {'employee':employee, 'date': for_date, 'docstatus': '1'}, 'shift_type')
+	default_shift = frappe.db.get_value('Employee', employee, 'default_shift', cache=1)
+
+	shift_type_name = frappe.db.get_value('Shift Assignment', {
+		'employee': employee,
+		'date': for_date,
+		'docstatus': '1'
+	}, 'shift_type')
+
 	if not shift_type_name and consider_default_shift:
 		shift_type_name = default_shift
+
 	if shift_type_name:
-		holiday_list_name = frappe.db.get_value('Shift Type', shift_type_name, 'holiday_list')
+		holiday_list_name = frappe.db.get_value('Shift Type', shift_type_name, 'holiday_list', cache=1)
 		if not holiday_list_name:
 			holiday_list_name = get_holiday_list_for_employee(employee, False)
 		if holiday_list_name and is_holiday(holiday_list_name, for_date):
@@ -115,11 +122,10 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 		else:
 			direction = '<' if next_shift_direction == 'reverse' else '>'
 			sort_order = 'desc' if next_shift_direction == 'reverse' else 'asc'
-			dates = frappe.db.get_all('Shift Assignment',
-				'date',
-				{'employee':employee, 'date':(direction, for_date), 'docstatus': '1'},
-				as_list=True,
-				limit=MAX_DAYS, order_by="date "+sort_order)
+			dates = frappe.db.get_all('Shift Assignment', 'date',
+				{'employee': employee, 'date': (direction, for_date), 'docstatus': '1'},
+				as_list=True, limit=MAX_DAYS, order_by="date "+sort_order)
+
 			for date in dates:
 				shift_details = get_employee_shift(employee, date[0], consider_default_shift, None)
 				if shift_details:
@@ -164,7 +170,9 @@ def get_shift_details(shift_type_name, for_date=nowdate()):
 	"""
 	if not shift_type_name:
 		return None
-	shift_type = frappe.get_doc('Shift Type', shift_type_name)
+
+	shift_type = frappe.get_cached_doc('Shift Type', shift_type_name)
+
 	start_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.start_time
 	for_date = for_date + timedelta(days=1) if shift_type.start_time > shift_type.end_time else for_date
 	end_datetime = datetime.combine(for_date, datetime.min.time()) + shift_type.end_time

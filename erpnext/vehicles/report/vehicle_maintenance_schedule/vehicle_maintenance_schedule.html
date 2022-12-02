@@ -1,0 +1,69 @@
+<style>
+	@media screen {
+		.print-format {
+			padding: 8mm;
+		}
+	}
+	.print-format {
+		font-size: 7.5pt;
+	}
+	.table td, .table th {
+		padding-top: 5px !important;
+		padding-bottom: 5px !important;
+	}
+	.print-format td, .print-format th {
+		vertical-align: middle !important;
+	}
+</style>
+
+<h2 class="text-center">
+	{%= __("Vehicle Maintenance Schedule") %}
+</h2>
+
+<h4 class="text-center">
+	{% if (filters.from_date == filters.to_date) { %}
+		{%= moment(filters.from_date).format('dddd, D MMMM, YYYY') %}
+	{% } else { %}
+		{%= frappe.datetime.str_to_user(filters.from_date) %}
+		{%= __("to") %}
+		{%= frappe.datetime.str_to_user(filters.to_date) %}
+	{% } %}
+</h4>
+
+<div class="clearfix">
+	<div class="pull-right"><b>Print Date/Time:</b> {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</div>
+</div>
+
+<table class="table table-bordered" style="margin-bottom: 2px; margin-top: 5px;">
+	<thead>
+		<tr>
+			<th class="text-center">#</th>
+			<th class="text-center">{%= __("Due Date") %}</th>
+			<th>{%= __("Template") %}</th>
+			<th class="text-center">{%= __("Variant Code") %}</th>
+			<th class="text-center">{%= __("Reg No") %}</th>
+			<th class="text-center">{%= __("Chassis No") %}</th>
+			<th>{%= __("Customer Name") %}</th>
+			<th class="text-center">{%= __("Delivery Date") %}</th>
+			<th class="text-center">{%= __("Age") %}</th>
+			<th style="width:20%">{%= __("Remarks") %}</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+				<td class="text-center">{%= i+1 %}</td>
+				<td class="text-center text-nowrap">{%= frappe.datetime.str_to_user(data[i].due_date) %}</td>
+				<td>{%= data[i].project_template %}</td>
+				<td class="text-center">{%= data[i].item_code %}</td>
+				<td class="text-center text-nowrap">{%= data[i].license_plate %}</td>
+				<td class="text-center"><small>{%= data[i].chassis_no %}</small></td>
+				<td>{%= data[i].customer_name %}</td>
+				<td class="text-center text-nowrap">{%= frappe.datetime.str_to_user(data[i].delivery_date) %}</td>
+				<td class="text-center text-nowrap">{%= data[i].age %}</td>
+				<td class="text-center"></td>
+			</tr>
+		{% } %}
+	</tbody>
+</table>

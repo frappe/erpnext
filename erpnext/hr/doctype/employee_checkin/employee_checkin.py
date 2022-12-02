@@ -100,7 +100,6 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 			where name in %s""", ('1', log_names))
 		return None
 	elif attendance_status in ('Present', 'Absent', 'Half Day'):
-		employee_doc = frappe.get_doc('Employee', employee)
 		if not frappe.db.exists('Attendance', {'employee': employee, 'attendance_date': attendance_date, 'docstatus': 1}):
 			doc_dict = {
 				'doctype': 'Attendance',
@@ -108,7 +107,7 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				'attendance_date': attendance_date,
 				'status': attendance_status,
 				'working_hours': working_hours,
-				'company': employee_doc.company,
+				'company': frappe.db.get_value("Employee", employee, "company", cache=1),
 				'shift': shift,
 				'late_entry': late_entry,
 				'early_exit': early_exit

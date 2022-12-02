@@ -68,7 +68,7 @@ class ShiftType(Document):
 				log_doc.flags.ignore_validate = True
 				log_doc.save()
 
-	def get_attendance(self, logs):
+	def get_attendance(self, logs, ignore_working_hour_threshold=False):
 		"""Return attendance_status, working_hours for a set of logs belonging to a single shift.
 		Assumptions:
 			1. These logs belong to a single shift, single employee and is not in a holiday date.
@@ -78,23 +78,41 @@ class ShiftType(Document):
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
 
-		# Late Entry / Early Exit
-		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
+		missing_checkin_no_absent = not out_time and self.missing_checkin_no_absent
+		missing_checkin_no_half_day = not out_time and self.missing_checkin_no_half_day
+		missing_checkin_no_late_entry = not out_time and self.missing_checkin_no_late_entry
+
+		# Late Entry
+		if cint(self.enable_entry_grace_period) and in_time and not missing_checkin_no_late_entry\
+				and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
-		if cint(self.enable_exit_grace_period) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
+
+		# Early Exit
+		if cint(self.enable_exit_grace_period) and out_time\
+				and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
 			early_exit = True
 
-		# Half Day if late entry or early exit
-		if cint(self.half_day_if_late_minutes) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.half_day_if_late_minutes)):
+		# Half Day if Late Minutes
+		if cint(self.half_day_if_late_minutes) and in_time and not missing_checkin_no_half_day\
+				and in_time > logs[0].shift_start + timedelta(minutes=cint(self.half_day_if_late_minutes)):
 			status = 'Half Day'
-		if cint(self.half_day_if_exit_minutes) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.half_day_if_exit_minutes)):
+
+		# Half Day if Early Exit Minutes
+		if cint(self.half_day_if_exit_minutes) and out_time\
+				and out_time < logs[0].shift_end - timedelta(minutes=cint(self.half_day_if_exit_minutes)):
 			status = 'Half Day'
 
 		# Half Day / Absent if working hours less than
-		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
-			status = 'Half Day'
-		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
-			status = 'Absent'
+		if not ignore_working_hour_threshold:
+			if self.working_hours_threshold_for_half_day\
+					and total_working_hours < self.working_hours_threshold_for_half_day\
+					and not missing_checkin_no_half_day:
+				status = 'Half Day'
+
+			if self.working_hours_threshold_for_absent\
+					and total_working_hours < self.working_hours_threshold_for_absent\
+					and not missing_checkin_no_absent:
+				status = 'Absent'
 
 		return status, total_working_hours, late_entry, early_exit
 
@@ -102,9 +120,12 @@ class ShiftType(Document):
 		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
 		The Absent is marked starting from 'process_attendance_after' or employee creation date.
 		"""
-		date_of_joining, relieving_date, employee_creation = frappe.db.get_value("Employee", employee, ["date_of_joining", "relieving_date", "creation"])
+		date_of_joining, relieving_date = frappe.db.get_value("Employee", employee,
+			("date_of_joining", "relieving_date"), cache=1)
+
 		if not date_of_joining:
-			date_of_joining = employee_creation.date()
+			return
+
 		start_date = max(getdate(self.process_attendance_after), date_of_joining)
 		actual_shift_datetime = get_actual_start_end_datetime_of_shift(employee, get_datetime(self.last_sync_of_checkin), True)
 		last_shift_time = actual_shift_datetime[0] if actual_shift_datetime[0] else get_datetime(self.last_sync_of_checkin)
@@ -113,9 +134,11 @@ class ShiftType(Document):
 			end_date = min(prev_shift.start_datetime.date(), relieving_date) if relieving_date else prev_shift.start_datetime.date()
 		else:
 			return
+
 		holiday_list_name = self.holiday_list
 		if not holiday_list_name:
 			holiday_list_name = get_holiday_list_for_employee(employee, False)
+
 		dates = get_filtered_date_list(employee, start_date, end_date, holiday_list=holiday_list_name)
 		for date in dates:
 			shift_details = get_employee_shift(employee, date, True)

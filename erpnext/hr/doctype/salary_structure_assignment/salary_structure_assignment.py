@@ -19,6 +19,9 @@ class SalaryStructureAssignment(Document):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
 
+		if not joining_date:
+			frappe.throw(_("Please set Date of Joining for {0}").format(frappe.get_desk_link("Employee", self.employee)))
+
 		if self.from_date:
 			if frappe.db.exists("Salary Structure Assignment", {"employee": self.employee, "from_date": self.from_date, "docstatus": 1}):
 				frappe.throw(_("Salary Structure Assignment for Employee already exists"), DuplicateAssignment)

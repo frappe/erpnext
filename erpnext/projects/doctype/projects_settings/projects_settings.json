@@ -78,7 +78,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2022-04-25 03:08:08.302956",
+ "modified": "2022-11-30 16:35:42.608746",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects Settings",
@@ -91,6 +91,16 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Projects Manager",
    "share": 1,
    "write": 1
   }

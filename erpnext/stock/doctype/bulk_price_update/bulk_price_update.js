@@ -5,6 +5,7 @@ frappe.ui.form.on('Bulk Price Update', {
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.events.set_primary_action(frm);
+		frm.events.add_remove_missing_items_button(frm);
 	},
 
 	onload: function(frm) {
@@ -84,6 +85,20 @@ frappe.ui.form.on('Bulk Price Update', {
 				}
 			});
 		}
+		frm.refresh_field('items');
+	},
+
+	add_remove_missing_items_button: function (frm) {
+		frm.fields_dict.items.grid.add_custom_button(__("Remove Missing Items"),  function () {
+			var actions = [];
+			$.each(frm.doc.items || [], function(i, d) {
+				if (!d.item_code) {
+					actions.push(() => frm.fields_dict.items.grid.get_row(d.name).remove());
+				}
+			});
+
+			return frappe.run_serially(actions);
+		});
 	},
 });
 

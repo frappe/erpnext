@@ -27,6 +27,9 @@
   "cb_18",
   "working_hours_threshold_for_half_day",
   "working_hours_threshold_for_absent",
+  "missing_checkin_no_absent",
+  "missing_checkin_no_half_day",
+  "missing_checkin_no_late_entry",
   "sync_settings_section",
   "process_attendance_after",
   "column_break_16",
@@ -184,9 +187,27 @@
    "fieldname": "half_day_if_exit_minutes",
    "fieldtype": "Int",
    "label": "Mark Half Day If Exit Earlier Than"
+  },
+  {
+   "default": "0",
+   "fieldname": "missing_checkin_no_absent",
+   "fieldtype": "Check",
+   "label": "Do Not Mark Absent If Missing Checkout"
+  },
+  {
+   "default": "0",
+   "fieldname": "missing_checkin_no_half_day",
+   "fieldtype": "Check",
+   "label": "Do Not Mark Half Day If Missing Checkout"
+  },
+  {
+   "default": "0",
+   "fieldname": "missing_checkin_no_late_entry",
+   "fieldtype": "Check",
+   "label": "Do Not Mark Late If Missing Checkout"
   }
  ],
- "modified": "2022-11-28 15:46:12.569422",
+ "modified": "2022-12-01 14:32:02.645612",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",

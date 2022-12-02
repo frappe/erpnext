@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[\n {\n  \"data\": {\n   \"card_name\": \"Booking\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Booking Order\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Customer\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Booking Payment\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Allocation Register\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Pre Sales\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Quotation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Lead\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Opportunity\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Stock\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Stock\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Receipt\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Delivery\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Movement\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Service\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Project\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Tracking Sheet\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Service Summary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Service Receipt\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Gate Pass\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Pre Service\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Appointment\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Appointment Sheet\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Log\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Registration\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Registration Order\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Registration Receipt\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Transfer Letter\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Registration Register\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Documents\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Invoice\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Invoice Delivery\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Invoice Movement\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Reports\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Booking Details\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Booking Summary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Booking Analytics\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Booking Deposit Summary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Claim Items To Be Billed\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Sales Masters\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Item (Variants and Models)\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Withholding Tax Rule\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Allocation Creation Tool\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Allocation Period\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Allocation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Service Masters\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Project Workshop\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Project Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Panel\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Panel Side\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Panel Job\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicles Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Vehicle Pricing Component\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n }\n]",
+ "content": "[{\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pre Sales\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Pre Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Registration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Documents\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Sales Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.203759",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -227,48 +227,6 @@
    "label": "Vehicle Gate Pass",
    "link_count": 0,
    "link_to": "Vehicle Gate Pass",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Vehicle Pre Service",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Appointment",
-   "link_count": 0,
-   "link_to": "Appointment",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Appointment",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Appointment Sheet",
-   "link_count": 0,
-   "link_to": "Appointment Sheet",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Vehicle",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Vehicle Log",
-   "link_count": 0,
-   "link_to": "Vehicle Log",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -590,9 +548,60 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Vehicle Pre Service",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Appointment",
+   "link_count": 0,
+   "link_to": "Appointment",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Appointment",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Appointment Sheet",
+   "link_count": 0,
+   "link_to": "Appointment Sheet",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Vehicle Maintenance Schedule",
+   "link_count": 0,
+   "link_to": "Vehicle Maintenance Schedule",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Vehicle",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Vehicle Log",
+   "link_count": 0,
+   "link_to": "Vehicle Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:44:19.520835",
+ "modified": "2022-12-02 15:49:02.216241",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles",

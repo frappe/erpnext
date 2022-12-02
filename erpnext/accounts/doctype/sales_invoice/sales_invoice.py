@@ -542,6 +542,9 @@ class SalesInvoice(SellingController):
 
 		if self.claim_billing:
 			self.project = None
+		else:
+			for d in self.get('items'):
+				d.project = self.project
 
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company,

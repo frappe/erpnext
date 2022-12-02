@@ -32,22 +32,23 @@ class VehicleMaintenanceSchedule:
 			SELECT name as project_template, project_template_name, applies_to_item, due_after
 			FROM `tabProject Template`
 			WHERE due_after > 0 and ifnull(applies_to_item, '') != ''
-			ORDER BY due_after ASC
 		""", as_dict=1)
 
-		vehicle_or_conditions = self.process_project_template_data()
+		vehicle_data = []
 
-		vehicle_data = frappe.db.sql("""
-			SELECT
-				name as vehicle, item_code, item_name, customer, customer_name, delivery_date,
-				chassis_no, engine_no, license_plate, unregistered, variant_of, variant_of_name
-			FROM `tabVehicle`
-			WHERE {0} and ifnull(delivery_document_no, '') != ''
-		""".format(vehicle_or_conditions), self.filters, as_dict=1)
+		vehicle_or_conditions = self.get_vehicle_conditions()
+		if vehicle_or_conditions:
+			vehicle_data = frappe.db.sql("""
+				SELECT
+					name as vehicle, item_code, item_name, customer, customer_name, delivery_date,
+					chassis_no, engine_no, license_plate, unregistered, variant_of, variant_of_name
+				FROM `tabVehicle`
+				WHERE {0} and ifnull(delivery_document_no, '') != ''
+			""".format(vehicle_or_conditions), self.filters, as_dict=1)
 
 		self.data = vehicle_data
 
-	def process_project_template_data(self):
+	def get_vehicle_conditions(self):
 		self.applies_to_item_cache = frappe._dict()
 		vehicle_or_conditions = []
 
@@ -98,11 +99,13 @@ class VehicleMaintenanceSchedule:
 						and p.from_date <= d.delivery_date <= p.to_date:
 					d.update(p)
 					break
-			
-			d.due_date = d.delivery_date + relativedelta(months=p.due_after)
+
+			d.due_date = d.delivery_date + relativedelta(months=d.due_after)
 
 			if not d.license_plate and d.unregistered:
 				d.license_plate = 'Unreg'
+
+		self.data = sorted(self.data, key=lambda d: (getdate(d.due_date), getdate(d.delivery_date)))
 
 	def convert_delta_to_string(self, rd):
 		template = ['Y', 'M', 'D']
