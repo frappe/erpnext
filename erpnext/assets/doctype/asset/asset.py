@@ -34,6 +34,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_name,
 	get_depr_schedule_from_asset_depr_schedule_of_asset,
 	make_draft_asset_depr_schedules,
+	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 	update_draft_asset_depr_schedules,
 )
 from erpnext.controllers.accounts_controller import AccountsController
@@ -895,34 +896,35 @@ def update_existing_asset(asset, remaining_qty):
 		},
 	)
 
-	for finance_book in asset.get("finance_books"):
+	for row in asset.get("finance_books"):
 		value_after_depreciation = flt(
-			(finance_book.value_after_depreciation * remaining_qty) / asset.asset_quantity
+			(row.value_after_depreciation * remaining_qty) / asset.asset_quantity
 		)
 		expected_value_after_useful_life = flt(
-			(finance_book.expected_value_after_useful_life * remaining_qty) / asset.asset_quantity
+			(row.expected_value_after_useful_life * remaining_qty) / asset.asset_quantity
 		)
 		frappe.db.set_value(
-			"Asset Finance Book", finance_book.name, "value_after_depreciation", value_after_depreciation
+			"Asset Finance Book", row.name, "value_after_depreciation", value_after_depreciation
 		)
 		frappe.db.set_value(
 			"Asset Finance Book",
-			finance_book.name,
+			row.name,
 			"expected_value_after_useful_life",
 			expected_value_after_useful_life,
 		)
 
-	accumulated_depreciation = 0
+		accumulated_depreciation = 0
+		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(asset.name, row.finance_book)
 
-	for term in asset.get("schedules"):
-		depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
-		frappe.db.set_value(
-			"Depreciation Schedule", term.name, "depreciation_amount", depreciation_amount
-		)
-		accumulated_depreciation += depreciation_amount
-		frappe.db.set_value(
-			"Depreciation Schedule", term.name, "accumulated_depreciation_amount", accumulated_depreciation
-		)
+		for term in depr_schedule:
+			depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
+			frappe.db.set_value(
+				"Depreciation Schedule", term.name, "depreciation_amount", depreciation_amount
+			)
+			accumulated_depreciation += depreciation_amount
+			frappe.db.set_value(
+				"Depreciation Schedule", term.name, "accumulated_depreciation_amount", accumulated_depreciation
+			)
 
 
 def create_new_asset_after_split(asset, split_qty):
@@ -936,31 +938,41 @@ def create_new_asset_after_split(asset, split_qty):
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name
-	accumulated_depreciation = 0
 
-	for finance_book in new_asset.get("finance_books"):
-		finance_book.value_after_depreciation = flt(
-			(finance_book.value_after_depreciation * split_qty) / asset.asset_quantity
+	for row in new_asset.get("finance_books"):
+		row.value_after_depreciation = flt(
+			(row.value_after_depreciation * split_qty) / asset.asset_quantity
 		)
-		finance_book.expected_value_after_useful_life = flt(
-			(finance_book.expected_value_after_useful_life * split_qty) / asset.asset_quantity
+		row.expected_value_after_useful_life = flt(
+			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
-
-	for term in new_asset.get("schedules"):
-		depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)
-		term.depreciation_amount = depreciation_amount
-		accumulated_depreciation += depreciation_amount
-		term.accumulated_depreciation_amount = accumulated_depreciation
 
 	new_asset.submit()
-	new_asset.set_status()
 
-	for term in new_asset.get("schedules"):
-		# Update references in JV
-		if term.journal_entry:
-			add_reference_in_jv_on_split(
-				term.journal_entry, new_asset.name, asset.name, term.depreciation_amount
-			)
+	make_new_active_asset_depr_schedules_and_cancel_current_ones(
+		new_asset, "create_new_asset_after_split TODO", submit=False
+	)
+
+	for row in new_asset.get("finance_books"):
+		accumulated_depreciation = 0
+
+		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(
+			new_asset.name, row.finance_book
+		)
+
+		for term in depr_schedule:
+			depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)
+			term.depreciation_amount = depreciation_amount
+			accumulated_depreciation += depreciation_amount
+			term.accumulated_depreciation_amount = accumulated_depreciation
+
+			# Update references in JV
+			if term.journal_entry:
+				add_reference_in_jv_on_split(
+					term.journal_entry, new_asset.name, asset.name, term.depreciation_amount
+				)
+
+	new_asset.set_status()
 
 	return new_asset
 

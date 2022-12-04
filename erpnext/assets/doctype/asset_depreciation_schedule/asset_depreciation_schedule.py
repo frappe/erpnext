@@ -84,7 +84,7 @@ def convert_draft_asset_depr_schedules_into_active(asset_doc):
 
 
 def make_new_active_asset_depr_schedules_and_cancel_current_ones(
-	asset_doc, notes, date_of_disposal=None, date_of_return=None
+	asset_doc, notes, submit=True, date_of_disposal=None, date_of_return=None
 ):
 	for row in asset_doc.get("finance_books"):
 		current_asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
@@ -107,7 +107,10 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 
 		current_asset_depr_schedule_doc.cancel()
 
-		new_asset_depr_schedule_doc.submit()
+		new_asset_depr_schedule_doc.insert()
+
+		if submit:
+			new_asset_depr_schedule_doc.submit()
 
 
 def get_temp_asset_depr_schedule_doc(asset_doc, row, date_of_disposal=None, date_of_return=None):
@@ -149,6 +152,10 @@ def get_asset_depr_schedule_name(asset_name, finance_book):
 
 def get_depr_schedule_from_asset_depr_schedule_of_asset(asset_name, finance_book):
 	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, finance_book)
+
+	if not asset_depr_schedule_name:
+		return
+
 	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
