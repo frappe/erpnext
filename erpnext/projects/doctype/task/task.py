@@ -9,6 +9,7 @@ from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, cstr, date_diff, flt, get_link_to_form, getdate, today
+from frappe.utils.data import format_date
 from frappe.utils.nestedset import NestedSet
 
 
@@ -43,15 +44,18 @@ class Task(NestedSet):
 		self.validate_parent_project_dates()
 
 	def validate_parent_expected_end_date(self):
-		if not self.parent_task:
+		if not self.parent_task or not self.exp_end_date:
 			return
 
 		parent_exp_end_date = frappe.db.get_value("Task", self.parent_task, "exp_end_date")
-		if parent_exp_end_date and getdate(self.get("exp_end_date")) > getdate(parent_exp_end_date):
+		if not parent_exp_end_date:
+			return
+
+		if getdate(self.exp_end_date) > getdate(parent_exp_end_date):
 			frappe.throw(
 				_(
 					"Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-				).format(getdate(parent_exp_end_date)),
+				).format(format_date(parent_exp_end_date)),
 				frappe.exceptions.InvalidDates,
 			)
 
