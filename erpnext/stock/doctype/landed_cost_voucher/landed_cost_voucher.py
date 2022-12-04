@@ -5,15 +5,15 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe import _, scrub
-from frappe.utils import flt, cstr, fmt_money
+from frappe.utils import flt, fmt_money
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.accounts.utils import get_balance_on
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.party import get_party_account
 from six import string_types
 import json
+
 
 class LandedCostVoucher(AccountsController):
 	def __init__(self, *args, **kwargs):
@@ -32,6 +32,7 @@ class LandedCostVoucher(AccountsController):
 		self.check_mandatory()
 		self.validate_credit_to_account()
 		self.validate_purchase_receipts()
+		self.set_purchase_receipt_details()
 		self.clear_advances_table_if_not_payable()
 		self.clear_unallocated_advances("Landed Cost Voucher Advance", "advances")
 		self.calculate_taxes_and_totals()
@@ -52,6 +53,42 @@ class LandedCostVoucher(AccountsController):
 		unlink_ref_doc_from_payment_entries(self, validate_permission=True)
 		self.update_landed_cost()
 		self.make_gl_entries(cancel=True)
+
+	def get_purchase_receipts_from_letter_of_credit(self):
+		if self.party_type != "Letter of Credit" or not self.party:
+			frappe.throw(_("Please select Letter of Credit first"))
+
+		self.set("purchase_receipts", [])
+		precs = frappe.get_all("Purchase Receipt", {
+			"company": self.company, "docstatus": 1, "is_return": 0, "letter_of_credit": self.party
+		})
+
+		for d in precs:
+			self.append("purchase_receipts", {"receipt_document_type": "Purchase Receipt", "receipt_document": d.name})
+
+		pinvs = frappe.get_all("Purchase Invoice", {
+			"company": self.company, "docstatus": 1, "is_return": 0, "update_stock": 1, "letter_of_credit": self.party
+		})
+
+		for d in pinvs:
+			self.append("purchase_receipts", {"receipt_document_type": "Purchase Invoice", "receipt_document": d.name})
+
+		self.set_purchase_receipt_details()
+
+	def set_purchase_receipt_details(self):
+		for row in self.get('purchase_receipts'):
+			if row.receipt_document_type and row.receipt_document:
+				details = frappe.db.get_value(row.receipt_document_type, row.receipt_document,
+					['posting_date', 'supplier', 'base_grand_total'], as_dict=1)
+
+				if details:
+					row.posting_date = details.posting_date
+					row.supplier = details.supplier
+					row.grand_total = details.base_grand_total
+			else:
+				row.posting_date = None
+				row.supplier = None
+				row.grand_total = None
 
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
@@ -106,11 +143,31 @@ class LandedCostVoucher(AccountsController):
 		receipt_documents = []
 
 		for d in self.get("purchase_receipts"):
-			docstatus = frappe.db.get_value(d.receipt_document_type, d.receipt_document, "docstatus")
-			if docstatus is None:
-				frappe.throw(_("Row #{0}: {1} {2} does not exist").format(d.idx, d.receipt_document_type, d.receipt_document))
-			if docstatus != 1:
-				frappe.throw(_("Row #{0}: {1} {2} must be submitted").format(d.idx, d.receipt_document_type, d.receipt_document))
+			fields = ["company", "docstatus", "is_return"]
+			if d.receipt_document_type == "Purchase Invoice":
+				fields.append("update_stock")
+
+			details = frappe.db.get_value(d.receipt_document_type, d.receipt_document, fields, as_dict=1)
+
+			if details is None:
+				frappe.throw(_("Row #{0}: {1} {2} does not exist")
+					.format(d.idx, d.receipt_document_type, d.receipt_document))
+
+			if details.docstatus != 1:
+				frappe.throw(_("Row #{0}: {1} {2} must be submitted")
+					.format(d.idx, d.receipt_document_type, d.receipt_document))
+
+			if details.is_return:
+				frappe.throw(_("Row #{0}: {1} {2} must not be a return")
+					.format(d.idx, d.receipt_document_type, d.receipt_document))
+
+			if d.receipt_document_type == "Purchase Invoice" and not details.update_stock:
+				frappe.throw(_("Row #{0}: {1} {2} does not update stock")
+					.format(d.idx, d.receipt_document_type, d.receipt_document))
+
+			if details.company != self.company:
+				frappe.throw(_("Row #{0}: {1} {2} does not belong to Company {3}")
+					.format(d.idx, d.receipt_document_type, d.receipt_document, self.company))
 
 			receipt_documents.append(d.receipt_document)
 
@@ -131,7 +188,7 @@ class LandedCostVoucher(AccountsController):
 						.format(item.idx, "Purchase Invoice", item.purchase_invoice, "Purchase Receipts"))
 
 			if not item.cost_center:
-				frappe.throw(_("Item Row {0}: Cost center is not set for item {1}")
+				frappe.throw(_("Item Row {0}: Cost Center is not set for item {1}")
 					.format(item.idx, item.item_code))
 
 	def clear_advances_table_if_not_payable(self):
@@ -186,7 +243,7 @@ class LandedCostVoucher(AccountsController):
 	def validate_credit_to_account(self):
 		if self.credit_to:
 			account = frappe.db.get_value("Account", self.credit_to,
-				["account_type", "report_type"], as_dict=True)
+				["account_type", "report_type", "company"], as_dict=True)
 
 			self.party_account_currency = get_account_currency(self.credit_to)
 
@@ -195,6 +252,9 @@ class LandedCostVoucher(AccountsController):
 
 			if account.account_type != "Payable":
 				frappe.throw(_("Credit To account must be a Payable account"))
+
+			if account.company != self.company:
+				frappe.throw(_("Credit To Account does not belong to Company {0}").format(self.company))
 
 	def calculate_taxes_and_totals(self):
 		item_total_fields = ['qty', 'amount', 'weight']
@@ -311,8 +371,8 @@ class LandedCostVoucher(AccountsController):
 				self.get_gl_dict({
 					"account": self.credit_to,
 					"credit": grand_total_in_company_currency,
-					"credit_in_account_currency": grand_total_in_company_currency \
-						if self.party_account_currency==self.company_currency else self.grand_total,
+					"credit_in_account_currency": grand_total_in_company_currency
+						if self.party_account_currency == self.company_currency else self.grand_total,
 					"against": ", ".join(set([d.account_head for d in self.taxes])),
 					"party_type": self.party_type,
 					"party": self.party,
@@ -373,6 +433,43 @@ def update_rate_in_serial_no_for_non_asset_items(receipt_document):
 
 		if item.is_vehicle:
 			frappe.db.set_value("Vehicle", item.serial_no, "purchase_rate", item.valuation_rate)
+
+
+def get_purchase_landed_cost_gl_details(doc, item):
+	filters = {
+		"docstatus": 1,
+		"applicable_charges": ["!=", 0]
+	}
+	if doc.doctype == "Purchase Receipt":
+		filters["purchase_receipt"] = doc.name
+		filters["purchase_receipt_item"] = item.name
+	elif doc.doctype == "Purchase Invoice":
+		filters["purchase_invoice"] = doc.name
+		filters["purchase_invoice_item"] = item.name
+	else:
+		frappe.throw(_("Landed Cost Voucher not supported for DocType {0}").format(doc.doctype))
+
+	landed_cost_items = frappe.get_all("Landed Cost Item", filters=filters, fields="name, parent, item_tax_detail")
+
+	landed_cost_gl_details = []
+	for lc_item in landed_cost_items:
+		landed_cost_detail = json.loads(lc_item.item_tax_detail)
+		for lc_tax_id, amount in landed_cost_detail.items():
+			item_gl_details = frappe._dict()
+
+			item_gl_details.landed_cost_voucher = lc_item.parent
+			item_gl_details.landed_cost_voucher_item = lc_item.name
+			item_gl_details.landed_cost_tax = lc_tax_id
+			item_gl_details.amount = amount
+
+			lc_tax_details = frappe.db.get_value("Landed Cost Taxes and Charges", lc_tax_id,
+				('account_head', 'cost_center'), as_dict=1, cache=1)
+			item_gl_details.update(lc_tax_details)
+
+			landed_cost_gl_details.append(item_gl_details)
+
+	return landed_cost_gl_details
+
 
 @frappe.whitelist()
 def get_landed_cost_voucher(dt, dn):

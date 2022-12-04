@@ -4,64 +4,12 @@
 frappe.provide("erpnext.stock");
 
 erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
-	setup: function(frm) {
-		frm.custom_make_buttons = {
+	setup: function() {
+		this.frm.custom_make_buttons = {
 			'Payment Entry': 'Payment'
 		};
 
-		var me = this;
-		this.frm.fields_dict.purchase_receipts.grid.get_field('receipt_document').get_query =
-			function (doc, cdt, cdn) {
-				var d = locals[cdt][cdn];
-
-				var filters = [
-					[d.receipt_document_type, 'docstatus', '=', '1'],
-					[d.receipt_document_type, 'company', '=', me.frm.doc.company],
-				];
-
-				if (d.receipt_document_type == "Purchase Invoice") {
-					filters.push(["Purchase Invoice", "update_stock", "=", "1"])
-				}
-
-				if (!me.frm.doc.company) frappe.msgprint(__("Please enter company first"));
-				return {
-					filters: filters
-				}
-			};
-
-		this.frm.set_query("credit_to", function() {
-			return {
-				filters: {
-					'account_type': 'Payable',
-					'is_group': 0,
-					'company': me.frm.doc.company
-				}
-			};
-		});
-
-		this.frm.set_query("cost_center", "items", function() {
-			return {
-				filters: {
-					'company': me.frm.doc.company,
-					"is_group": 0
-				}
-			}
-		});
-
-		this.frm.set_query("account_head", "taxes", function(doc) {
-			var account_type = ["Tax", "Chargeable", "Expenses Included In Valuation"];
-			return {
-				query: "erpnext.controllers.queries.tax_account_query",
-				filters: {
-					"account_type": account_type,
-					"company": doc.company
-				}
-			}
-		});
-
-		this.frm.add_fetch("receipt_document", "supplier", "supplier");
-		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
-		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
+		this.setup_queries();
 	},
 
 	validate: function() {
@@ -73,33 +21,96 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_dynamic_labels();
-
-		this.show_general_ledger();
-
-		if (doc.docstatus < 2 && !doc.__islocal) {
-			cur_frm.add_custom_button(__('Costing Report'), () => {
-				frappe.set_route('query-report', 'LC Costing', {
-					landed_cost_voucher: doc.name,
-					from_date: doc.posting_date,
-					to_date: doc.posting_date,
-				});
-			}, __("View"));
-		}
-
-		if (doc.docstatus===1 && doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
-			cur_frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
-		}
-
+		this.setup_buttons();
 		this.load_manual_distribution_data();
 		this.update_manual_distribution();
+		this.set_help_html();
 
 		if (this.frm.doc.party && !this.frm.doc.credit_to) {
 			this.party();
 		}
+	},
 
+	setup_queries: function () {
+		let me = this;
+
+		me.frm.fields_dict.purchase_receipts.grid.get_field('receipt_document').get_query = function (doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+
+			let filters = {
+				'docstatus': 1,
+				'is_return': 0,
+				'company': me.frm.doc.company,
+			};
+
+			if (d.receipt_document_type == "Purchase Invoice") {
+				filters["update_stock"] = 1;
+			}
+
+			if (!me.frm.doc.company) {
+				frappe.msgprint(__("Please enter company first"));
+			}
+
+			return {
+				filters: filters
+			}
+		};
+
+		me.frm.set_query("credit_to", function() {
+			return {
+				filters: {
+					'account_type': 'Payable',
+					'is_group': 0,
+					'company': me.frm.doc.company
+				}
+			};
+		});
+
+		me.frm.set_query("cost_center", "items", function() {
+			return {
+				filters: {
+					'company': me.frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
+
+		me.frm.set_query("account_head", "taxes", function(doc) {
+			let account_type = ["Tax", "Chargeable", "Expenses Included In Valuation"];
+			return {
+				query: "erpnext.controllers.queries.tax_account_query",
+				filters: {
+					"account_type": account_type,
+					"company": doc.company
+				}
+			}
+		});
+	},
+
+	setup_buttons: function () {
+		let me = this;
+
+		me.show_general_ledger();
+
+		if (me.frm.doc.docstatus < 2 && !me.frm.doc.__islocal) {
+			me.frm.add_custom_button(__('Costing Report'), () => {
+				frappe.set_route('query-report', 'LC Costing', {
+					landed_cost_voucher: me.frm.doc.name,
+					from_date: me.frm.doc.posting_date,
+					to_date: me.frm.doc.posting_date,
+				});
+			}, __("View"));
+		}
+
+		if (me.frm.doc.docstatus===1 && me.frm.doc.outstanding_amount != 0 && frappe.model.can_create("Payment Entry")) {
+			me.frm.add_custom_button(__('Payment'), this.make_payment_entry, __("Make"));
+			me.frm.page.set_inner_btn_group_as_primary(__("Make"));
+		}
+	},
+
+	set_help_html: function () {
 		var help_content =
-			`<br><br>
+			`
 			<table class="table table-bordered" style="background-color: #f9f9f9;">
 				<tr><td>
 					<h4>
@@ -129,40 +140,17 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		set_field_options("landed_cost_help", help_content);
 	},
 
-	get_referenced_taxes: function() {
-		var me = this;
-		if(me.frm.doc.credit_to && me.frm.doc.party) {
-			return frappe.call({
-				method: "get_referenced_taxes",
-				doc: me.frm.doc,
-				callback: function(r) {
-					if(r.message) {
-						me.frm.doc.taxes = [];
-						$.each(r.message, function(i, d) {
-							var tax = me.frm.add_child("taxes");
-							tax.remarks = d.remarks;
-							tax.account_head = d.account_head;
-							tax.amount = d.amount;
-						});
-						me.calculate_taxes_and_totals();
-						me.update_manual_distribution();
-					}
-				}
-			});
-		}
-	},
-
 	allocate_advances_automatically: function() {
-		if(this.frm.doc.allocate_advances_automatically) {
+		if (this.frm.doc.allocate_advances_automatically) {
 			this.get_advances();
 		}
 	},
 
 	get_advances: function() {
-		var me = this;
-		return this.frm.call({
+		let me = this;
+		return me.frm.call({
 			method: "set_advances",
-			doc: this.frm.doc,
+			doc: me.frm.doc,
 			callback: function(r, rt) {
 				refresh_field("advances");
 				me.calculate_taxes_and_totals();
@@ -175,8 +163,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		return frappe.call({
 			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
-				"dt": cur_frm.doc.doctype,
-				"dn": cur_frm.doc.name
+				"dt": this.frm.doc.doctype,
+				"dn": this.frm.doc.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
@@ -185,10 +173,27 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		});
 	},
 
+	get_purchase_receipts_from_letter_of_credit: function() {
+		let me = this;
+
+		if (me.frm.doc.party_type == "Letter of Credit" && me.frm.doc.party) {
+			return me.frm.call({
+				doc: me.frm.doc,
+				method: "get_purchase_receipts_from_letter_of_credit",
+				callback: function() {
+					me.update_manual_distribution();
+					me.calculate_taxes_and_totals();
+					me.frm.dirty();
+				}
+			});
+		}
+	},
+
 	get_items_from_purchase_receipts: function() {
-		var me = this;
-		if(!me.frm.doc.purchase_receipts.length) {
-			frappe.msgprint(__("Please enter Purchase Receipt first"));
+		let me = this;
+
+		if (!(me.frm.doc.purchase_receipts || []).filter(d => d.receipt_document_type && d.receipt_document).length) {
+			frappe.msgprint(__("Please enter Purchase Receipt(s) first"));
 		} else {
 			return me.frm.call({
 				doc: me.frm.doc,
@@ -202,22 +207,22 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		}
 	},
 
-	amount: function(frm) {
+	amount: function() {
 		this.calculate_taxes_and_totals();
 	},
 
-	allocated_amount: function(frm) {
+	allocated_amount: function() {
 		this.calculate_taxes_and_totals();
 	},
 
-	weight: function(frm) {
+	weight: function() {
 		this.calculate_taxes_and_totals();
 	},
 
 	calculate_taxes_and_totals: function() {
-		var me = this;
+		let me = this;
 
-		var item_total_fields = ['qty', 'amount', 'weight'];
+		let item_total_fields = ['qty', 'amount', 'weight'];
 		$.each(item_total_fields || [], function(i, f) {
 			me.frm.doc['total_' + f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))),
 				precision('total_' + f));
@@ -232,7 +237,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		me.frm.doc.total_taxes_and_charges = flt(me.frm.doc.total_taxes_and_charges, precision("total_taxes_and_charges"));
 		me.frm.doc.base_total_taxes_and_charges = flt(me.frm.doc.total_taxes_and_charges * me.frm.doc.conversion_rate, precision("base_total_taxes_and_charges"));
 
-		var total_allocated_amount = frappe.utils.sum($.map(me.frm.doc["advances"] || [], function(adv) {
+		let total_allocated_amount = frappe.utils.sum($.map(me.frm.doc["advances"] || [], function(adv) {
 			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 
@@ -246,7 +251,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			me.frm.doc.total_advance = 0;
 		}
 
-		var grand_total = me.frm.doc.party_account_currency == me.frm.doc.currency ? me.frm.doc.grand_total : me.frm.doc.base_grand_total;
+		let grand_total = me.frm.doc.party_account_currency == me.frm.doc.currency ? me.frm.doc.grand_total : me.frm.doc.base_grand_total;
 		me.frm.doc.outstanding_amount = flt(grand_total - me.frm.doc.total_advance, precision("outstanding_amount"));
 
 		me.distribute_applicable_charges_for_item();
@@ -255,12 +260,14 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	distribute_applicable_charges_for_item: function() {
-		var me = this;
-		var totals = {};
-		var item_total_fields = ['qty', 'amount', 'weight'];
+		let me = this;
+
+		let totals = {};
+		let item_total_fields = ['qty', 'amount', 'weight'];
 		$.each(item_total_fields || [], function(i, f) {
 			totals[f] = flt(frappe.utils.sum((me.frm.doc.items || []).map(d => flt(d[f]))));
 		});
+
 		$.each(me.frm.doc.items || [], function(i, item) {
 			item.item_tax_detail = {};
 			let item_manual_distribution = JSON.parse(item.manual_distribution || '{}');
@@ -289,8 +296,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			accumulated_taxes += item_tax_total;
 		});
 
-		if (accumulated_taxes != me.frm.doc.base_total_taxes_and_charges) {
-			var diff = me.frm.doc.base_total_taxes_and_charges - accumulated_taxes;
+		if (accumulated_taxes != me.frm.doc.base_total_taxes_and_charges && me.frm.doc.items && me.frm.doc.items.length) {
+			let diff = me.frm.doc.base_total_taxes_and_charges - accumulated_taxes;
 			me.frm.doc.items.slice(-1)[0].applicable_charges += diff;
 		}
 	},
@@ -331,7 +338,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	update_manual_distribution_json: function() {
-		var me = this;
+		let me = this;
 		$.each(me.frm.doc.items || [], function(i, item) {
 			me.update_item_manual_distribution_json(i);
 		});
@@ -339,7 +346,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	update_item_manual_distribution_json: function(iItem) {
 		//Get manual tax account heads
-		var manual_taxes_cols = new Set;
+		let manual_taxes_cols = new Set;
 		$.each(this.frm.doc.taxes || [], function(i, tax) {
 			if(tax.distribution_criteria == "Manual" && tax.account_head) {
 				manual_taxes_cols.add(tax.account_head);
@@ -347,8 +354,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		});
 
 		//Remove tax amounts for taxes not in manual tax set
-		var item = this.frm.doc.items[iItem];
-		var data = Object.assign({}, item.manual_distribution_data || {});
+		let item = this.frm.doc.items[iItem];
+		let data = Object.assign({}, item.manual_distribution_data || {});
 		Object.keys(data).forEach(function(account_head) {
 			if(!manual_taxes_cols.has(account_head))
 				delete data[account_head];
@@ -359,10 +366,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	update_manual_distribution: function() {
-		var me = this;
+		let me = this;
 
 		//Get manual tax account heads
-		var manual_taxes_cols = new Set;
+		let manual_taxes_cols = new Set;
 		$.each(me.frm.doc.taxes || [], function(i, tax) {
 			if(tax.distribution_criteria == "Manual" && tax.account_head) {
 				manual_taxes_cols.add(tax.account_head);
@@ -385,18 +392,18 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		});
 
 		//Get distribution data from items
-		var account_heads = Array.from(manual_taxes_cols);
-		var rows = [];
-		var items = [];
-		var row_totals = [];
-		var col_totals = [];
+		let account_heads = Array.from(manual_taxes_cols);
+		let rows = [];
+		let items = [];
+		let row_totals = [];
+		let col_totals = [];
 		$.each(me.frm.doc.items || [], function(i, item) {
 			if(item.item_code)
 			{
 				items[i] = item.item_code;
 				row_totals[i] = 0.0;
 
-				var rowdata = [];
+				let rowdata = [];
 				$.each(account_heads || [], function(j, account_head) {
 					if(j >= col_totals.length)
 						col_totals[j] = 0.0;
@@ -412,7 +419,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			}
 		});
 
-		var editable = me.frm.doc.docstatus == 0;
+		let editable = me.frm.doc.docstatus == 0;
 
 		//Set table HTML
 		if(account_heads.length == 0 || rows.length == 0) {
@@ -458,7 +465,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	party: function() {
-		var me = this;
+		let me = this;
 		if (me.frm.doc.party_type && me.frm.doc.party) {
 			frappe.call({
 				method: "erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher.get_party_details",
@@ -478,7 +485,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	party_type: function() {
-		me.frm.set_value("party", '');
+		this.frm.set_value("party", null);
 	},
 
 	get_company_currency: function() {
@@ -486,7 +493,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	set_dynamic_labels: function() {
-		var company_currency = this.get_company_currency();
+		let company_currency = this.get_company_currency();
 
 		this.frm.set_currency_labels(["base_total_taxes_and_charges", "base_grand_total"], company_currency);
 		this.frm.set_currency_labels(["total_taxes_and_charges", "grand_total"], this.frm.doc.currency);
@@ -495,7 +502,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.set_currency_labels(["amount"], this.frm.doc.currency, "taxes");
 		this.frm.set_currency_labels(["advance_amount", "allocated_amount"], this.frm.doc.party_account_currency, "advances");
 
-		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
+		this.frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
 			+ " = [?] " + company_currency);
 
 		this.frm.toggle_display(["conversion_rate", "base_total_taxes_and_charges"], this.frm.doc.currency != company_currency);
@@ -505,16 +512,17 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	currency: function() {
-		var transaction_date = this.frm.doc.transaction_date || this.frm.doc.posting_date;
-		var me = this;
-		var company_currency = this.get_company_currency();
-		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency) {
-			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
+		let me = this;
+
+		let transaction_date = me.frm.doc.transaction_date || me.frm.doc.posting_date;
+		let company_currency = me.get_company_currency();
+		if (me.frm.doc.currency && me.frm.doc.currency !== company_currency) {
+			me.get_exchange_rate(transaction_date, me.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
 				});
 		} else {
-			this.conversion_rate();
+			me.conversion_rate();
 		}
 		me.set_dynamic_labels();
 	},
@@ -524,11 +532,11 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	conversion_rate: function() {
-		if(this.frm.doc.currency === this.get_company_currency()) {
+		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.doc.conversion_rate = 1.0;
 		}
 
-		if(flt(this.frm.doc.conversion_rate) > 0.0) {
+		if (flt(this.frm.doc.conversion_rate) > 0.0) {
 			this.calculate_taxes_and_totals();
 		}
 
@@ -537,7 +545,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	company: function() {
-		var company_currency = this.get_company_currency();
+		let company_currency = this.get_company_currency();
 		if (!this.frm.doc.currency) {
 			this.frm.set_value("currency", company_currency);
 		} else {
@@ -547,8 +555,9 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	},
 
 	credit_to: function() {
-		var me = this;
-		if(this.frm.doc.credit_to) {
+		let me = this;
+
+		if (me.frm.doc.credit_to) {
 			me.frm.call({
 				method: "frappe.client.get_value",
 				args: {
@@ -556,7 +565,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 					fieldname: "account_currency",
 					filters: { name: me.frm.doc.credit_to },
 				},
-				callback: function(r, rt) {
+				callback: function(r) {
 					if(r.message) {
 						me.frm.set_value("party_account_currency", r.message.account_currency);
 						me.set_dynamic_labels();

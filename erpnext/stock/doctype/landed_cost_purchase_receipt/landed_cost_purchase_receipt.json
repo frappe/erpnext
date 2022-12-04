@@ -7,8 +7,8 @@
  "field_order": [
   "receipt_document_type",
   "receipt_document",
-  "supplier",
   "col_break1",
+  "supplier",
   "posting_date",
   "grand_total"
  ],
@@ -58,12 +58,13 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Grand Total",
+   "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:41:57.130303",
+ "modified": "2022-12-03 14:32:24.032700",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Purchase Receipt",

@@ -21,6 +21,7 @@
   "col_break_currency",
   "conversion_rate",
   "sec_break3",
+  "get_purchase_receipts_from_letter_of_credit",
   "purchase_receipts",
   "purchase_receipt_items",
   "get_items_from_purchase_receipts",
@@ -87,6 +88,7 @@
    "label": "Purchase Receipt Items"
   },
   {
+   "depends_on": "eval:doc.docstatus == 0",
    "fieldname": "get_items_from_purchase_receipts",
    "fieldtype": "Button",
    "label": "Get Items From Purchase Receipts"
@@ -319,7 +321,7 @@
    "label": "Set Advances and Allocate (FIFO)"
   },
   {
-   "depends_on": "eval:doc.party && !doc.allocate_advances_automatically",
+   "depends_on": "eval:doc.party && !doc.allocate_advances_automatically && doc.docstatus == 0",
    "fieldname": "get_advances",
    "fieldtype": "Button",
    "label": "Get Advances Paid",
@@ -382,11 +384,17 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0 && doc.party_type == \"Letter of Credit\" && doc.party",
+   "fieldname": "get_purchase_receipts_from_letter_of_credit",
+   "fieldtype": "Button",
+   "label": "Get Purchase Receipts from Letter of Credit"
   }
  ],
  "icon": "icon-usd",
  "is_submittable": 1,
- "modified": "2022-11-29 18:11:50.255222",
+ "modified": "2022-12-04 15:11:41.228542",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",
