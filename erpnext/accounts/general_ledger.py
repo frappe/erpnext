@@ -80,9 +80,13 @@ def process_gl_map(gl_map, merge_entries=True):
 	return gl_map
 
 def merge_similar_entries(gl_map):
+	from erpnext.accounts.doctype.gl_entry.gl_entry import remove_dimensions_not_allowed_for_bs_account
+
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
 	for entry in gl_map:
+		remove_dimensions_not_allowed_for_bs_account(entry)
+
 		# if there is already an entry in this account then just add it
 		# to that entry
 		same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions)

@@ -82,12 +82,8 @@ class GLEntry(Document):
 			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
 				frappe.throw(_("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.")
 					.format(self.voucher_type, self.voucher_no, self.account))
-		else:
-			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
-			if not get_allow_cost_center_in_entry_of_bs_account() and self.cost_center:
-				self.cost_center = None
-			if not get_allow_project_in_entry_of_bs_account() and self.project:
-				self.project = None
+
+		remove_dimensions_not_allowed_for_bs_account(self)
 
 	def validate_dimensions_for_pl_and_bs(self):
 		account_type = frappe.db.get_value("Account", self.account, "report_type")
@@ -294,13 +290,27 @@ def update_against_account(voucher_type, voucher_no):
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
+
+def remove_dimensions_not_allowed_for_bs_account(gle):
+	from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account,\
+		get_allow_project_in_entry_of_bs_account
+
+	if gle.account and frappe.db.get_value("Account", gle.account, "report_type", cache=1) != "Profit and Loss":
+		if not get_allow_cost_center_in_entry_of_bs_account() and gle.cost_center:
+			gle.cost_center = None
+		if not get_allow_project_in_entry_of_bs_account() and gle.project:
+			gle.project = None
+
+
 def on_doctype_update():
 	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
 	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
 
+
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:
 		rename_temporarily_named_docs(doctype)
+
 
 def rename_temporarily_named_docs(doctype):
 	"""Rename temporarily named docs using autoname options"""
