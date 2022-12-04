@@ -150,6 +150,7 @@ def get_asset_depr_schedule_name(asset_name, finance_book):
 	)
 
 
+@frappe.whitelist()
 def get_depr_schedule_from_asset_depr_schedule_of_asset(asset_name, finance_book):
 	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, finance_book)
 

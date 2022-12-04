@@ -10,6 +10,7 @@
   "asset",
   "naming_series",
   "column_break_2",
+  "opening_accumulated_depreciation",
   "finance_book",
   "finance_book_id",
   "depreciation_details_section",
@@ -151,7 +152,15 @@
    "label": "Finance Book Id",
    "print_hide": 1,
    "read_only": 1
-  }
+  },
+  {
+    "depends_on": "opening_accumulated_depreciation",
+    "fieldname": "opening_accumulated_depreciation",
+    "fieldtype": "Currency",
+    "label": "Opening Accumulated Depreciation",
+    "read_only": 1,
+    "options": "Company:company:default_currency"
+   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,

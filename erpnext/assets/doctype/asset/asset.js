@@ -187,7 +187,11 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
-	setup_chart: function(frm) {
+	setup_chart: async function(frm) {
+		if(frm.doc.finance_books.length > 1) {
+			return
+		}
+
 		var x_intervals = [frm.doc.purchase_date];
 		var asset_values = [frm.doc.gross_purchase_amount];
 		var last_depreciation_date = frm.doc.purchase_date;
@@ -201,7 +205,19 @@ frappe.ui.form.on('Asset', {
 				flt(frm.doc.opening_accumulated_depreciation));
 		}
 
-		$.each(frm.doc.schedules || [], function(i, v) {
+		let depr_schedule = [];
+
+		if (frm.doc.finance_books.length == 1) {
+			depr_schedule = (await frappe.call(
+				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule_from_asset_depr_schedule_of_asset",
+				{
+					asset_name: frm.doc.name,
+					finance_book: frm.doc.finance_books[0].finance_book || null
+				}
+			)).message;
+		}
+
+		$.each(depr_schedule || [], function(i, v) {
 			x_intervals.push(v.schedule_date);
 			var asset_value = flt(frm.doc.gross_purchase_amount) - flt(v.accumulated_depreciation_amount);
 			if(v.journal_entry) {
@@ -263,10 +279,6 @@ frappe.ui.form.on('Asset', {
 	is_existing_asset: function(frm) {
 		frm.trigger("toggle_reference_doc");
 		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
-	},
-
-	opening_accumulated_depreciation: function(frm) {
-		erpnext.asset.set_accumulated_depreciation(frm);
 	},
 
 	make_schedules_editable: function(frm) {
@@ -510,17 +522,6 @@ frappe.ui.form.on('Asset Finance Book', {
 		}
 	}
 });
-
-erpnext.asset.set_accumulated_depreciation = function(frm) {
-	if(frm.doc.depreciation_method != "Manual") return;
-
-	var accumulated_depreciation = flt(frm.doc.opening_accumulated_depreciation);
-	$.each(frm.doc.schedules || [], function(i, row) {
-		accumulated_depreciation  += flt(row.depreciation_amount);
-		frappe.model.set_value(row.doctype, row.name,
-			"accumulated_depreciation_amount", accumulated_depreciation);
-	})
-};
 
 erpnext.asset.scrap_asset = function(frm) {
 	frappe.confirm(__("Do you really want to scrap this asset?"), function () {
