@@ -12,11 +12,12 @@
   "column_break_3",
   "posting_date",
   "pos_opening_entry",
+  "branch",
+  "pos_profile",
   "status",
   "section_break_5",
   "company",
   "column_break_7",
-  "pos_profile",
   "user",
   "section_break_12",
   "pos_transactions",
@@ -69,6 +70,7 @@
   {
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "User Details"
   },
   {
@@ -96,8 +98,7 @@
    "fieldname": "user",
    "fieldtype": "Link",
    "label": "Cashier",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
   },
   {
    "fieldname": "section_break_9",
@@ -186,9 +187,9 @@
   {
    "fieldname": "pos_opening_entry",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "POS Opening Entry",
-   "options": "POS Opening Entry",
-   "reqd": 1
+   "options": "POS Opening Entry"
   },
   {
    "allow_on_submit": 1,
@@ -220,6 +221,13 @@
    "fieldtype": "Small Text",
    "label": "Error",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
@@ -229,7 +237,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2022-11-17 11:08:46.301715",
+ "modified": "2022-12-05 00:34:49.258559",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
