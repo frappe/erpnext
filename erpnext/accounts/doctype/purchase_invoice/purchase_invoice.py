@@ -675,7 +675,8 @@ class PurchaseInvoice(BuyingController):
 		voucher_wise_stock_value = {}
 		if self.update_stock:
 			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
+					fields=["voucher_detail_no", "stock_value_difference"],
+					filters={'voucher_type': self.doctype, 'voucher_no': self.name}):
 				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
@@ -910,18 +911,20 @@ class PurchaseInvoice(BuyingController):
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		net_amt_precision = item.precision("base_net_amount")
-		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
-		warehouse_debit_amount = flt(flt(item.valuation_rate, val_rate_db_precision)
-			* flt(item.qty)	* flt(item.conversion_factor), net_amt_precision)
+		valuation_net_amount = self.get_item_valuation_net_amount(item)
+		valuation_item_tax_amount = self.get_item_valuation_tax_amount(item)
+
+		valuation_amount_as_per_doc = valuation_net_amount + valuation_item_tax_amount + \
+			flt(item.landed_cost_voucher_amount) + flt(item.rm_supp_cost)
+
+		stock_value_diff = flt(voucher_wise_stock_value.get(item.name))
+
+		stock_adjustment_amt = flt(valuation_amount_as_per_doc - stock_value_diff, net_amt_precision)
 
 		# Stock ledger value is not matching with the warehouse amount
-		if (self.update_stock and voucher_wise_stock_value.get(item.name) and
-			warehouse_debit_amount != flt(voucher_wise_stock_value.get(item.name), net_amt_precision)):
-
+		if self.update_stock and stock_adjustment_amt:
 			stock_adjustment_account = self.get_company_default("stock_adjustment_account")
-			stock_amount = flt(voucher_wise_stock_value.get(item.name), net_amt_precision)
-			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -929,14 +932,12 @@ class PurchaseInvoice(BuyingController):
 					"against": item.expense_account,
 					"debit": stock_adjustment_amt,
 					"remarks": self.get("remarks") or _("Stock Adjustment"),
-					"cost_center": item.cost_center or self.cost_center,
+					"cost_center": item.cost_center or self.get("cost_center"),
 					"project": item.project or self.project
 				}, account_currency, item=item)
 			)
 
-			warehouse_debit_amount = stock_amount
-
-		return warehouse_debit_amount
+		return stock_value_diff
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
