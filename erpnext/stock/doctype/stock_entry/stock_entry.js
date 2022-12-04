@@ -515,7 +515,11 @@ frappe.ui.form.on('Stock Entry', {
 
 	supplier_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'supplier_address', 'address_display', false);
-	}
+	},
+
+	project: function (frm) {
+		frm.cscript.set_item_cost_centers();
+	},
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -597,6 +601,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'bom_no': d.bom_no,
 				'expense_account': d.expense_account,
 				'cost_center': d.cost_center,
+				'project': d.project || frm.doc.project,
 				'company': frm.doc.company,
 				'qty': d.qty,
 				'voucher_type': frm.doc.doctype,
@@ -629,6 +634,13 @@ frappe.ui.form.on('Stock Entry Detail', {
 			frm.cscript.show_hide_select_batch_button();
 		}
 	},
+
+	project: function (frm, cdt, cdn) {
+		if (cdt && cdn) {
+			frm.cscript.set_item_cost_centers(cdn);
+		}
+	},
+
 	expense_account: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
 	},
@@ -1096,7 +1108,22 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	customer: function(doc) {
 		return erpnext.utils.get_party_details(this.frm, null, null, null);
-	}
+	},
+
+	set_item_cost_centers: function (row) {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "set_item_cost_centers",
+			args: {
+				row: row
+			},
+			callback: function(r) {
+				if (!r.exc) {
+					refresh_field("items");
+				}
+			}
+		});
+	},
 });
 
 erpnext.stock.select_batch_and_serial_no = (frm, item) => {

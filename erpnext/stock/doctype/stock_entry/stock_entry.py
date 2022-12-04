@@ -313,7 +313,7 @@ class StockEntry(StockController):
 	def set_missing_item_values(self, item):
 		item_details = self.get_item_details(frappe._dict(
 			{"item_code": item.item_code, "company": self.company, 'batch_no': item.batch_no,
-				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
+				"project": item.project or self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
 			for_update=True)
 
 		for f in item_details:
@@ -1002,6 +1002,18 @@ class StockEntry(StockController):
 				ret["subcontracted_item"] = subcontract_items[0].main_item_code
 
 		return ret
+
+	@frappe.whitelist()
+	def set_item_cost_centers(self, row=None):
+		for d in self.get("items"):
+			if d.get("item_code") and (not row or d.name == row):
+				d.cost_center = get_default_cost_center(d.item_code, {
+					"doctype": "Stock Entry",
+					"company": self.company,
+					"project": d.get('project') or self.get('project'),
+					"cost_center": d.get('cost_center'),
+					"customer": self.get("customer"),
+				})
 
 	def set_items_for_stock_in(self):
 		self.items = []
