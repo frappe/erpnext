@@ -338,7 +338,7 @@ class PurchaseReceipt(BuyingController):
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["account"],
 						"against": stock_rbnb,
-						"cost_center": d.cost_center,
+						"cost_center": d.cost_center or self.get("cost_center"),
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": stock_value_diff
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
@@ -348,7 +348,7 @@ class PurchaseReceipt(BuyingController):
 						gl_entries.append(self.get_gl_dict({
 							"account": stock_rbnb,
 							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
+							"cost_center": d.cost_center or self.get("cost_center"),
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(valuation_net_amount + valuation_item_tax_amount, d.precision('base_net_amount'))
 						}, stock_rbnb_currency, item=d))
@@ -374,7 +374,7 @@ class PurchaseReceipt(BuyingController):
 						gl_entries.append(self.get_gl_dict({
 							"account": warehouse_account[self.supplier_warehouse]["account"],
 							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
+							"cost_center": d.cost_center or self.get("cost_center"),
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=d))
@@ -441,7 +441,7 @@ class PurchaseReceipt(BuyingController):
 		gl_entries.append(self.get_gl_dict({
 			"account": cwip_account,
 			"against": arbnb_account,
-			"cost_center": item.cost_center,
+			"cost_center": item.cost_center or self.get("cost_center"),
 			"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 			"debit": base_asset_amount,
 			"debit_in_account_currency": (base_asset_amount
@@ -453,7 +453,7 @@ class PurchaseReceipt(BuyingController):
 		gl_entries.append(self.get_gl_dict({
 			"account": arbnb_account,
 			"against": cwip_account,
-			"cost_center": item.cost_center,
+			"cost_center": item.cost_center or self.get("cost_center"),
 			"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 			"credit": base_asset_amount,
 			"credit_in_account_currency": (base_asset_amount
@@ -472,7 +472,7 @@ class PurchaseReceipt(BuyingController):
 		gl_entries.append(self.get_gl_dict({
 			"account": expenses_included_in_asset_valuation,
 			"against": asset_account,
-			"cost_center": item.cost_center,
+			"cost_center": item.cost_center or self.get("cost_center"),
 			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 			"credit": flt(item.landed_cost_voucher_amount),
 			"project": item.project
@@ -481,7 +481,7 @@ class PurchaseReceipt(BuyingController):
 		gl_entries.append(self.get_gl_dict({
 			"account": asset_account,
 			"against": expenses_included_in_asset_valuation,
-			"cost_center": item.cost_center,
+			"cost_center": item.cost_center or self.get("cost_center"),
 			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 			"debit": flt(item.landed_cost_voucher_amount),
 			"project": item.project
@@ -622,31 +622,3 @@ def make_stock_entry(source_name,target_doc=None):
 def make_inter_company_delivery_note(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Receipt", source_name, target_doc)
-
-
-def get_item_account_wise_additional_cost(purchase_document):
-	landed_cost_vouchers = frappe.get_all("Landed Cost Purchase Receipt", fields=["parent"],
-		filters = {"receipt_document": purchase_document, "docstatus": 1})
-
-	if not landed_cost_vouchers:
-		return
-
-	item_account_wise_cost = {}
-
-	for lcv in landed_cost_vouchers:
-		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
-		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
-		total_item_cost = 0
-
-		for item in landed_cost_voucher_doc.items:
-			total_item_cost += item.get(based_on_field)
-
-		for item in landed_cost_voucher_doc.items:
-			if item.receipt_document == purchase_document:
-				for account in landed_cost_voucher_doc.taxes:
-					item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
-					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
-					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
-						account.amount * item.get(based_on_field) / total_item_cost
-
-	return item_account_wise_cost
