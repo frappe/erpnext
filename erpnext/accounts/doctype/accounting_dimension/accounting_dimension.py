@@ -162,14 +162,34 @@ def toggle_disabling(doc):
 		frappe.clear_cache(doctype=doctype)
 
 def get_doctypes_with_dimensions():
-	doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
-		"Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
-		"Expense Entry", "Expense Entry Detail", "Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges",
-		"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry", "Journal Entry Account", "Delivery Note Item",
-		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
-		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
-		"Subscription Plan"]
+	doclist = [
+		"GL Entry",
+
+		"Sales Invoice", "Sales Invoice Item", "POS Profile",
+		"Purchase Invoice", "Purchase Invoice Item",
+		"Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item",
+
+		"Delivery Note", "Delivery Note Item",
+		"Purchase Receipt", "Purchase Receipt Item",
+		"Sales Taxes and Charges", "Purchase Taxes and Charges",
+
+		"Journal Entry", "Journal Entry Account",
+		"Expense Entry", "Expense Entry Detail",
+		"Payment Entry", "Payment Entry Deduction",
+
+		"Stock Entry", "Stock Entry Detail",
+		"Stock Reconciliation", "Stock Reconciliation Item",
+		"Landed Cost Voucher", "Landed Cost Taxes and Charges",
+
+		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges",
+		"Loyalty Program", "Shipping Rule",
+		"Asset", "Asset Value Adjustment",
+		"Fees", "Fee Schedule", "Fee Structure",
+		"Budget",
+		"Payroll Entry",
+		"Travel Request",
+		"Subscription", "Subscription Plan"
+	]
 
 	return doclist
 

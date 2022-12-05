@@ -169,6 +169,8 @@
   "lr_date",
   "column_break_131",
   "instructions",
+  "accounting_dimensions_section",
+  "dimension_col_break",
   "printing_details",
   "letter_head",
   "column_break_153",
@@ -1716,12 +1718,22 @@
    "no_copy": 1,
    "options": "Purchase Receipt",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2022-11-30 17:13:58.717554",
+ "modified": "2022-12-05 13:08:33.586765",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

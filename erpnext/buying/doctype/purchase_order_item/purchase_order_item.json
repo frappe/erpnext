@@ -111,13 +111,15 @@
   "supplier_quotation",
   "supplier_quotation_item",
   "col_break5",
+  "project",
   "blanket_order",
   "blanket_order_rate",
   "column_break_108",
+  "item_tax_template",
   "bom",
+  "include_exploded_items",
   "item_group",
   "brand",
-  "include_exploded_items",
   "section_break_56",
   "last_purchase_rate",
   "column_break_60",
@@ -128,12 +130,6 @@
   "column_break_121",
   "billed_qty",
   "billed_amt",
-  "accounting_dimensions_section",
-  "expense_account",
-  "item_tax_template",
-  "dimension_col_break",
-  "cost_center",
-  "project",
   "section_break_72",
   "page_break",
   "item_tax_rate",
@@ -557,10 +553,12 @@
    "options": "Blanket Order"
   },
   {
+   "depends_on": "blanket_order",
    "fieldname": "blanket_order_rate",
    "fieldtype": "Currency",
    "label": "Blanket Order Rate",
    "no_copy": 1,
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -668,21 +666,6 @@
    "report_hide": 1
   },
   {
-   "fieldname": "expense_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Expense Account",
-   "options": "Account",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center",
-   "print_hide": 1
-  },
-  {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "page_break",
@@ -702,16 +685,6 @@
   {
    "fieldname": "section_break_72",
    "fieldtype": "Section Break"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
   },
   {
    "collapsible": 1,
@@ -1148,7 +1121,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-12-18 18:20:05.012452",
+ "modified": "2022-12-05 12:53:25.166050",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

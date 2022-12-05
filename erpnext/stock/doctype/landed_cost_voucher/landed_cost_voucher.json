@@ -9,13 +9,13 @@
   "naming_series",
   "party_type",
   "party",
-  "project",
   "col_break2",
   "remarks",
   "column_break_8",
   "company",
   "posting_date",
   "due_date",
+  "amended_from",
   "sec_currency",
   "currency",
   "col_break_currency",
@@ -46,12 +46,13 @@
   "allocate_advances_automatically",
   "get_advances",
   "advances",
-  "more_details",
+  "accounting_dimensions_section",
   "credit_to",
-  "status",
-  "col_break3",
-  "amended_from",
+  "dimension_col_break",
+  "cost_center",
+  "project",
   "sec_break2",
+  "status",
   "landed_cost_help",
   "party_account_currency"
  ],
@@ -337,13 +338,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_details",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
-   "depends_on": "party",
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -360,10 +354,6 @@
    "options": "Draft\nSubmitted\nPaid\nUnpaid\nOverdue\nBilled\nCancelled",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "col_break3",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "remarks",
@@ -390,11 +380,27 @@
    "fieldname": "get_purchase_receipts_from_letter_of_credit",
    "fieldtype": "Button",
    "label": "Get Purchase Receipts from Letter of Credit"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "icon": "icon-usd",
  "is_submittable": 1,
- "modified": "2022-12-04 15:11:41.228542",
+ "modified": "2022-12-05 13:22:47.871149",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",
