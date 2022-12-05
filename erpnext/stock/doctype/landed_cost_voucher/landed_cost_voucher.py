@@ -114,7 +114,7 @@ class LandedCostVoucher(AccountsController):
 					item.uom = d.uom
 					item.weight = d.total_weight
 					item.rate = d.base_rate
-					item.cost_center = d.cost_center or erpnext.get_default_cost_center(self.company)
+					item.cost_center = d.cost_center
 					item.amount = d.base_amount
 					item.purchase_order = d.purchase_order
 					item.purchase_order_item = d.purchase_order_item
@@ -186,10 +186,6 @@ class LandedCostVoucher(AccountsController):
 				if item.purchase_invoice not in receipt_documents:
 					frappe.throw(_("Item Row {0}: {1} {2} does not exist in above '{3}' table")
 						.format(item.idx, "Purchase Invoice", item.purchase_invoice, "Purchase Receipts"))
-
-			if not item.cost_center:
-				frappe.throw(_("Item Row {0}: Cost Center is not set for item {1}")
-					.format(item.idx, item.item_code))
 
 	def clear_advances_table_if_not_payable(self):
 		if not self.party:
@@ -398,7 +394,7 @@ class LandedCostVoucher(AccountsController):
 					"debit_in_account_currency": tax.base_amount \
 						if account_currency == self.company_currency else tax.amount,
 					"against": self.get('party_name') or self.party,
-					"cost_center": tax.cost_center,
+					"cost_center": tax.cost_center or self.get("cost_center"),
 					"project": self.project,
 					"remarks": remarks
 				}, account_currency)
@@ -465,6 +461,10 @@ def get_purchase_landed_cost_gl_details(doc, item):
 			lc_tax_details = frappe.db.get_value("Landed Cost Taxes and Charges", lc_tax_id,
 				('account_head', 'cost_center'), as_dict=1, cache=1)
 			item_gl_details.update(lc_tax_details)
+
+			if not item_gl_details.cost_center:
+				item_gl_details.cost_center = frappe.db.get_value("Landed Cost Voucher", item_gl_details.landed_cost_voucher,
+					"cost_center", cache=1)
 
 			landed_cost_gl_details.append(item_gl_details)
 
