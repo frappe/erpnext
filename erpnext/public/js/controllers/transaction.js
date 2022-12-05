@@ -1360,16 +1360,21 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			var item_list = [];
 
 			$.each(this.frm.doc["items"] || [], function(i, d) {
-				if (d.item_code && !d.is_free_item) {
-					item_list.push({
-						"doctype": d.doctype,
-						"name": d.name,
-						"item_code": d.item_code,
-						"pricing_rules": d.pricing_rules,
-						"parenttype": d.parenttype,
-						"parent": d.parent,
-						"price_list_rate": d.price_list_rate
-					})
+				if (d.item_code) {
+					if (d.is_free_item) {
+						// Simply remove free items
+						me.frm.get_field("items").grid.grid_rows[i].remove();
+					} else {
+						item_list.push({
+							"doctype": d.doctype,
+							"name": d.name,
+							"item_code": d.item_code,
+							"pricing_rules": d.pricing_rules,
+							"parenttype": d.parenttype,
+							"parent": d.parent,
+							"price_list_rate": d.price_list_rate
+						})
+					}
 				}
 			});
 			return this.frm.call({
