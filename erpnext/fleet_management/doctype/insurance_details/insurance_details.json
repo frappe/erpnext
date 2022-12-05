@@ -5,81 +5,82 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-    "insurance_company",
-    "policy_number",
-    "cb_1",
-    "insured_date",
-    "due_date",
-    "validity",
-    "cb_2",
-    "insurance_type",
-    "premium_amount"
-   ],
-   "fields": [
-    {
-     "fieldname": "insurance_company",
-     "fieldtype": "Link",
-     "in_list_view": 1,
-     "label": "Insurance Company",
-     "options": "Financial Institution",
-     "reqd": 1
-    },
-    {
-     "fieldname": "policy_number",
-     "fieldtype": "Data",
-     "in_list_view": 1,
-     "label": "Policy Number",
-     "reqd": 1
-    },
-    {
-     "fieldname": "cb_1",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "insured_date",
-     "fieldtype": "Date",
-     "in_list_view": 1,
-     "label": "Insured Date",
-     "reqd": 1
-    },
-    {
-     "fieldname": "due_date",
-     "fieldtype": "Date",
-     "in_list_view": 1,
-     "label": "Due Date",
-     "reqd": 1
-    },
-    {
-     "fieldname": "validity",
-     "fieldtype": "Date",
-     "in_list_view": 1,
-     "label": "Validity",
-     "reqd": 1
-    },
-    {
-     "fieldname": "cb_2",
-     "fieldtype": "Column Break"
-    },
-    {
-     "fieldname": "insurance_type",
-     "fieldtype": "Select",
-     "in_list_view": 1,
-     "label": "Insurance Type",
-     "options": "\nThird Party\nComprehensive",
-     "reqd": 1
-    },
-    {
-     "fieldname": "premium_amount",
-     "fieldtype": "Data",
-     "in_list_view": 1,
-     "label": "Premium Amount",
-     "reqd": 1
-    }
-   ],
+  "insurance_company",
+  "policy_number",
+  "cb_1",
+  "insured_date",
+  "due_date",
+  "validity",
+  "cb_2",
+  "insurance_type",
+  "premium_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Insurance Company",
+   "options": "Financial Institution",
+   "reqd": 1
+  },
+  {
+   "fieldname": "policy_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Policy Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insured_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Insured Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Due Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "validity",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Validity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Insurance Type",
+   "options": "\nThird Party\nComprehensive",
+   "reqd": 1
+  },
+  {
+   "fieldname": "premium_amount",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Premium Amount",
+   "reqd": 1
+  }
+ ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-07 11:13:03.347843",
+ "modified": "2022-11-30 16:25:55.430445",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Insurance Details",

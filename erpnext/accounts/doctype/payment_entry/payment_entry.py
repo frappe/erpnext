@@ -82,6 +82,7 @@ class PaymentEntry(AccountsController):
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		self.update_expense_claim()
 
 	def on_submit(self):
 		if self.difference_amount:
@@ -92,6 +93,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule()
 		self.set_status()
 		self.update_employee_advance()
+		self.update_expense_claim(submit=1)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
@@ -102,6 +104,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_status()
 		self.set_status()
+		self.update_expense_claim(cancel=1)
 
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
@@ -110,16 +113,33 @@ class PaymentEntry(AccountsController):
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
+
 	def update_employee_advance(self):
-		reference_d = frappe.db.sql("""
-			select reference_doctype from `tabPayment Entry Reference` where parent = '{}' 
-			""".format(self.name))[0][0]
-		reference_n = frappe.db.sql("""
-			select reference_name from `tabPayment Entry Reference` where parent = '{}' 
-			""".format(self.name))[0][0]
-		if reference_d == "Employee Advance":
-			frappe.db.sql("""update `tabEmployee Advance` set pending_amount = 0 where name = '{}'
-			""".format(reference_n))
+		if self.references:
+			reference_d = frappe.db.sql("""
+				select reference_doctype from `tabPayment Entry Reference` where parent = '{}' 
+				""".format(self.name))[0][0]
+			reference_n = frappe.db.sql("""
+				select reference_name from `tabPayment Entry Reference` where parent = '{}' 
+				""".format(self.name))[0][0]
+			if reference_d == "Employee Advance":
+				frappe.db.sql("""update `tabEmployee Advance` set pending_amount = 0 where name = '{}'
+				""".format(reference_n))
+
+	def update_expense_claim(self, cancel=0, submit = 0):
+		if self.references:
+			for a in self.references:
+				if a.reference_doctype == "Expense Claim":
+					if submit==1:
+						frappe.db.sql("""update `tabExpense Claim` set status = "Paid" where name = '{}'
+						""".format(a.reference_name))
+					if submit==0 and cancel==0:
+						frappe.db.sql("""update `tabExpense Claim` set status = "Unpaid" where name = '{}'
+						""".format(a.reference_name))
+					elif cancel == 1 :
+						frappe.db.sql("""update `tabExpense Claim` set status = "Unpaid" where name = '{}'
+						""".format(a.reference_name))
+
 
 	def validate_duplicate_entry(self):
 		reference_names = []
@@ -329,7 +349,7 @@ class PaymentEntry(AccountsController):
 				else:
 					ref_doc = frappe.get_doc(d.reference_doctype, d.reference_name)
 
-					if d.reference_doctype != "Journal Entry":
+					if d.reference_doctype not in ("Journal Entry","Repair And Service Invoice"):
 						if self.party != ref_doc.get(scrub(self.party_type)):
 							frappe.throw(
 								_("{0} {1} is not associated with {2} {3}").format(
@@ -373,7 +393,7 @@ class PaymentEntry(AccountsController):
 		elif self.party_type == "Shareholder":
 			return ("Journal Entry",)
 		elif self.party_type == "Employee":
-			return ("Journal Entry","Travel Request")
+			return ("Journal Entry","Travel Request","Repair And Service Invoice")
 
 	def validate_paid_invoices(self):
 		no_oustanding_refs = {}
@@ -1682,7 +1702,10 @@ def get_payment_entry(
 	paid_amount, received_amount, discount_amount = apply_early_payment_discount(
 		paid_amount, received_amount, doc
 	)
-
+	if dt in ["Repair And Service Invoice"]:
+		party = doc.party
+	else:
+		party = doc.get(scrub(party_type))
 	pe = frappe.new_doc("Payment Entry")
 	pe.branch = doc.branch
 	pe.payment_type = payment_type
@@ -1691,7 +1714,7 @@ def get_payment_entry(
 	pe.posting_date = nowdate()
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
-	pe.party = doc.get(scrub(party_type))
+	pe.party = party
 	pe.contact_person = doc.get("contact_person")
 	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
@@ -2025,7 +2048,7 @@ def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
 	user_roles = frappe.get_roles(user)
 
-	if user == "Administrator" or "System Manager" in user_roles: 
+	if user == "Administrator" or "System Manager" in user_roles or "Sales Manager" in user_roles: 
 		return
 
 	return """(

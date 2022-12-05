@@ -1,0 +1,22 @@
+{
+ "creation": "2022-12-01 14:32:50.420443",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "filters_json": "{\"company\":\"State Mining Corporation Ltd\",\"from_date\":\"2022-11-01\",\"to_date\":\"2022-12-01\",\"item_code\":\"100001\",\"warehouse\":\"Chunaikhola Consumable Warehouse - SMCL\"}",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 0,
+ "is_standard": 1,
+ "label": "Sum of In_qty",
+ "modified": "2022-12-01 14:32:50.592903",
+ "modified_by": "pralad.rai@smcl.bt",
+ "module": "Accounts",
+ "name": "Sum of In_qty",
+ "owner": "pralad.rai@smcl.bt",
+ "report_field": "in_qty",
+ "report_function": "Sum",
+ "report_name": "Stock Balance",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Report"
+}

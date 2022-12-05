@@ -1,0 +1,287 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "CSI.YYYY.MM.##",
+ "creation": "2022-12-02 10:38:48.477106",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "amended_from",
+  "customer_and_item_details",
+  "cost_center",
+  "col_break_9",
+  "customer",
+  "column_break_3",
+  "item_code",
+  "col_break_name",
+  "item_price",
+  "item_price_details",
+  "item_name",
+  "col_break_item",
+  "quantity",
+  "uom",
+  "col_break_price",
+  "rate",
+  "section_break_1",
+  "from_date",
+  "col_break_1",
+  "to_date",
+  "column_break_23",
+  "total_amount",
+  "column_break_6",
+  "loading_amount",
+  "column_break002",
+  "grand_total",
+  "column_break001",
+  "posting_date",
+  "invoices_section",
+  "items",
+  "section",
+  "sales_order_header_text"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer_and_item_details",
+   "fieldtype": "Section Break",
+   "label": "Customer and Item Details"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.cost_center",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.customer",
+   "fieldname": "column_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.customer",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_name",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.item_code",
+   "fieldname": "item_price",
+   "fieldtype": "Link",
+   "label": "Item Price",
+   "options": "Item Price",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_price_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_item",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "quantity",
+   "fieldtype": "Data",
+   "label": "Quantity",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "Stock UoM",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_price",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Average Rate",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.item_price",
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Consolidated Invoice Information"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Goods Amount",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loading_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loading Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break002",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break001",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "invoices_section",
+   "fieldtype": "Section Break",
+   "label": "Invoices"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Consolidated Invoice Item",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Consolidated Invoice",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section",
+   "fieldtype": "Section Break",
+   "label": "Header Text"
+  },
+  {
+   "fieldname": "sales_order_header_text",
+   "fieldtype": "Text Editor",
+   "label": "Sales Order Header Text"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-12-02 22:59:39.269967",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Consolidated Invoice",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

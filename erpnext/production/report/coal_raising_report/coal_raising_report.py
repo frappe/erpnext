@@ -12,36 +12,27 @@ def execute(filters=None):
 
 def get_data(filters):
 	cond = get_condidion(filters)
-	p = qb.DocType("Production")
-	query = (qb.from_(p))
-	if filters.from_date > filters.to_date:
-		frappe.throw('From Date cannot be after To Date')
-	if filters.coal_raising_type:
-		query = (query.where( p.coal_raising_type == filters.coal_raising_type))
-		cond += " AND coal_raising_type ='{}'".format(filters.coal_raising_type)
-	if filters.mineral_raising_group:
-		query = (query.where( p.mineral_raising_group == filters.mineral_raising_group))
-		cond += " AND `group` ='{}' ".format(filters.group)
-	if filters.tier:
-		cond += " AND tier = '{}' ".format(filters.tier)
-		query = (query.where( p.tier == filters.tier))
-	if filters.branch:
-		query = (query.where( p.branch == filters.branch))
 	if filters.show_aggregate:
-		return (query.select(p.mineral_raising_group, p.coal_raising_type, p.tier,
-							fn.Sum(p.no_of_labours).as_("no_of_labours"),
-							fn.Sum(p.product_qty).as_("product_qty"),
-							fn.Sum(p.machine_hours).as_("machine_hours"),
-							fn.Sum(p.amount).as_("amount"),
-							fn.Sum(p.machine_payable).as_("machine_payable"),
-							fn.Sum(p.grand_amount).as_("grand_amount"),
-							fn.Sum(p.penalty_amount).as_("penality_amount"))
-						.where((p.posting_date >= filters.from_date)
-								& (p.posting_date <= filters.to_date) 
-								& (p.docstatus == 1) 
-								& (p.coal_raising_type).isin('Manual', 'Machine Sharing', 'SMCL Machine'))
-						.groupby(p.mineral_raising_group)
-						.groupby(p.coal_raising_type)).run(as_dict=1)
+		return frappe.db.sql("""
+			SELECT mineral_raising_group, coal_raising_type, tier,
+				sum(no_of_labours) as no_of_labours,
+				sum(product_qty) as product_qty,
+				sum(machine_hours) as machine_hours,
+				sum(amount) as amount,
+				sum(machine_payable) as machine_payable,
+				sum(grand_amount) as grand_amount,
+				sum(penalty_amount) as penalty_amount
+			FROM `tabProduction` 
+			WHERE docstatus = 1
+			AND branch = '{}' 
+			AND posting_date between '{}'
+			AND '{}'
+			{} 
+			AND (tier = '' OR tier is not null) 
+			AND (coal_raising_type != '' or coal_raising_type is not null)
+			AND coal_raising_type IN ('Manual', 'Machine Sharing', 'SMCL Machine')
+			group by mineral_raising_group, coal_raising_type
+		""".format(filters.branch,filters.from_date,filters.to_date,cond),as_dict=1)
 	return frappe.db.sql("""
 		SELECT 
 			name as reference,posting_date,coal_raising_type, 
@@ -64,9 +55,9 @@ def get_condidion(filters=None):
 	if filters.coal_raising_type:
 		cond += " AND coal_raising_type ='{}'".format(filters.coal_raising_type)
 	if filters.group:
-		cond += " AND `group` ='{}' ".format(filters.group)
-	if filters.tire:
-		cond += " AND tire = '{}' ".format(filters.tire)
+		cond += " AND mineral_raising_group ='{}' ".format(filters.group)
+	if filters.tier:
+		cond += " AND tier = '{}' ".format(filters.tire)
 	return cond
 
 def get_columns(filters):
@@ -88,13 +79,13 @@ def get_columns(filters):
 			'fieldname':'mineral_raising_group','fieldtype':'Link',	'label':'Mineral Raising Group','options':'Mineral Raising Group','width':140
 		},
 		{
-			'fieldname':'tire','fieldtype':'Link','label':'Tire','options':'Tire','width':120
+			'fieldname':'tier','fieldtype':'Link','label':'Tier','options':'Tier','width':120
 		},
 		{
 			'fieldname':'no_of_labours','fieldtype':'Float','label':'No. Labours','width':90
 		},
 		{
-			'fieldname':'machine_hours','fieldtype':'Float','width':90
+			'fieldname':'machine_hours','fieldtype':'Float','width':90,'label':'Machine Hrs'
 		},
 		{
 			'fieldname':'machine_payable',	'fieldtype':'Currency',	'label':'Machine Payable','width':110

@@ -56,7 +56,7 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 		range4_val = flt(range4) * flt(details.valuatIon_rate)
 		above_range4_val = flt(above_range4) * flt(details.valuatIon_rate)
 
-		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
+		row = [details.name, details.item_name, details.item_group, frappe.db.get_value("Item", details.name, "item_sub_group")]
 
 		if filters.get("show_warehouse_wise_stock"):
 			row.append(details.warehouse)
@@ -137,7 +137,6 @@ def get_columns(filters: Filters) -> List[Dict]:
 			"width": 100,
 		},
 		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 100},
-		{"label": _("Description"), "fieldname": "description", "fieldtype": "Data", "width": 200},
 		{
 			"label": _("Item Group"),
 			"fieldname": "item_group",
@@ -146,12 +145,13 @@ def get_columns(filters: Filters) -> List[Dict]:
 			"width": 100,
 		},
 		{
-			"label": _("Brand"),
-			"fieldname": "brand",
+			"label": _("Item Sub Group"),
+			"fieldname": "item_sub_group",
 			"fieldtype": "Link",
-			"options": "Brand",
+			"options": "Item Group",
 			"width": 100,
 		},
+
 	]
 
 	if filters.get("show_warehouse_wise_stock"):

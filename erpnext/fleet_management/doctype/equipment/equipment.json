@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:registeration_number",
  "creation": "2022-10-19 12:38:16.340269",
@@ -12,6 +13,7 @@
   "creation_date",
   "asset_code",
   "rate",
+  "asset_issue_details",
   "column_break_2",
   "enabled",
   "hired_equipment",
@@ -20,12 +22,17 @@
   "equipment_name",
   "equipment_category",
   "equipment_type",
+  "wheeler",
   "fuelbook",
+  "reading_uom",
   "column_break_8",
   "equipment_model",
   "registeration_number",
   "initial_km_reading",
   "fuel_type",
+  "emission_standard",
+  "make",
+  "capacity",
   "is_container",
   "purchase_details_section",
   "purchase_receipt",
@@ -39,8 +46,8 @@
   "equipment_operator_section",
   "equipment_operator",
   "equipment_description",
-  "equipment_history_section",
   "model_items",
+  "company",
   "owner_details_tab",
   "supplier",
   "bank",
@@ -52,7 +59,9 @@
   "column_break_42",
   "dzongkhag",
   "gewog",
-  "village"
+  "village",
+  "equipment_history_tab",
+  "equipment_history"
  ],
  "fields": [
   {
@@ -96,6 +105,8 @@
    "reqd": 1
   },
   {
+   "fetch_from": "asset_issue_details.equipment_type",
+   "fetch_if_empty": 1,
    "fieldname": "equipment_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -109,6 +120,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "asset_issue_details.model",
+   "fetch_if_empty": 1,
    "fieldname": "equipment_model",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -117,6 +130,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "asset_issue_details.reg_number",
    "fieldname": "registeration_number",
    "fieldtype": "Data",
    "label": "Registration Number",
@@ -129,6 +143,7 @@
    "label": "Engine Details"
   },
   {
+   "fetch_from": "asset_issue_details.engine_no",
    "fieldname": "engine_number",
    "fieldtype": "Data",
    "label": "Engine Number",
@@ -139,6 +154,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "asset_issue_details.chesis_no",
    "fieldname": "chasis_number",
    "fieldtype": "Data",
    "label": "Chasis Number"
@@ -160,6 +176,7 @@
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Owner(Supplier)",
    "mandatory_depends_on": "hired_equipment",
    "options": "Supplier"
@@ -176,10 +193,6 @@
    "options": "Equipment Operator"
   },
   {
-   "fieldname": "equipment_history_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "equipment_details_tab",
    "fieldtype": "Tab Break",
    "label": "Equipment/Vehicle Details"
@@ -193,7 +206,7 @@
   {
    "fieldname": "initial_km_reading",
    "fieldtype": "Float",
-   "label": "Initial KM Reading"
+   "label": "Initial KM/Hr Reading"
   },
   {
    "fieldname": "model_items",
@@ -264,7 +277,7 @@
   },
   {
    "depends_on": "eval:doc.asset_code",
-   "fetch_from": "asset_code.asset_rate",
+   "fetch_from": "asset_code.gross_purchase_amount",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",
@@ -349,11 +362,64 @@
    "fieldtype": "Check",
    "label": "Is Container?",
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "equipment_history",
+   "fieldtype": "Table",
+   "label": "Equipment History",
+   "options": "Equipment History"
+  },
+  {
+   "fieldname": "equipment_history_tab",
+   "fieldtype": "Tab Break",
+   "label": "Equipment History"
+  },
+  {
+   "fetch_from": "asset_code.asset_issue_details",
+   "fieldname": "asset_issue_details",
+   "fieldtype": "Link",
+   "label": "Asset Issue Details",
+   "options": "Asset Issue Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "label": "Make(Brand)"
+  },
+  {
+   "fieldname": "emission_standard",
+   "fieldtype": "Data",
+   "label": "Emission Standard"
+  },
+  {
+   "fieldname": "wheeler",
+   "fieldtype": "Select",
+   "label": "Wheeler",
+   "options": "\n26\n10\n6\n4\n2"
+  },
+  {
+   "fieldname": "capacity",
+   "fieldtype": "Data",
+   "label": "Capacity"
+  },
+  {
+   "fetch_from": "equipment_type.reading_uom",
+   "fieldname": "reading_uom",
+   "fieldtype": "Data",
+   "label": "Reading UOM",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-24 15:14:48.290845",
+ "modified": "2022-12-03 11:58:28.344605",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",
@@ -393,6 +459,24 @@
    "role": "Fleet User",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1
   }
  ],
  "search_fields": "equipment_category,equipment_type, equipment_model",

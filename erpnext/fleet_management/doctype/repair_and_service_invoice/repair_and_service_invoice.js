@@ -28,6 +28,7 @@ frappe.ui.form.on('Repair And Service Invoice', {
 			args: {
 				dt: frm.doc.doctype,
 				dn: frm.doc.name,
+				party_type:frm.doc.party_type
 			},
 			callback: function (r) {
 				var doc = frappe.model.sync(r.message);
@@ -35,13 +36,17 @@ frappe.ui.form.on('Repair And Service Invoice', {
 			},
 		});
 	},
-	supplier:function(frm){
-		if (frm.doc.supplier){
+	party_type:function(frm){
+		frm.set_value("party","")
+		frm.refresh_field("party")
+	},
+	party:function(frm){
+		if (frm.doc.party){
 			frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
-					party_type:"Supplier",
-					party:frm.doc.supplier,
+					party_type:frm.doc.party_type,
+					party:frm.doc.party,
 					company: frm.doc.company,
 				},
 				callback: function(r) {

@@ -42,6 +42,7 @@
   "minimum_labor",
   "oms",
   "penalty_amount",
+  "eligible_for_penalty",
   "column_break_32",
   "tier",
   "labor_type",
@@ -107,10 +108,10 @@
    "default": "Own",
    "fieldname": "work_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Work Type",
-   "options": "\nOwn\nPrivate",
-   "reqd": 1
+   "options": "\nOwn\nPrivate"
   },
   {
    "depends_on": "eval:doc.work_type =='Private'",
@@ -190,6 +191,7 @@
    "label": "Get Product Item"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "options": "Production Product Item"
@@ -389,11 +391,17 @@
    "fieldtype": "Data",
    "label": "Labor Type",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "eligible_for_penalty",
+   "fieldtype": "Check",
+   "label": "Liable For Penalty"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 11:54:56.191624",
+ "modified": "2022-12-02 15:38:27.635469",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Production",

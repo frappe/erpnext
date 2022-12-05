@@ -135,7 +135,6 @@ class DeliveryNote(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_with_previous_doc()
-		self.calculate_qty_and_fetch_transporter_rate()
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
@@ -149,6 +148,7 @@ class DeliveryNote(SellingController):
 		if not self.installation_status:
 			self.installation_status = "Not Installed"
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.set_warehouse_data()
 
 	def calculate_qty_and_fetch_transporter_rate(self):
 		for item in self.items:
@@ -159,6 +159,8 @@ class DeliveryNote(SellingController):
 				if flt(item.gross_vehicle_weight) > 0 and flt(item.tare_weight) > 0 :
 					item.qty = flt(item.gross_vehicle_weight) - flt(item.tare_weight)
 					item.volumetric_weight = 0 
+			if cint(self.is_return) == 1:
+				item.qty = item.qty * -1
 			if item.from_warehouse:
 				if not item.location:
 					throw("Location Mandatory at row {}".format(bold(item.idx)),title="Location Missing")
@@ -184,7 +186,7 @@ class DeliveryNote(SellingController):
 					item.transporter_rate_expense_account 	= rate_data[0][3]
 				else:
 					if not rate_data:
-						throw("There Is No Rate and Distance Defined Between Warehouse {0} and Location {1}".format(bold(self.from_warehouse),bold(self.location)),title="Rate And Distance Missing")
+						throw("There Is No Rate and Distance Defined Between Warehouse {0} and Location {1}".format(bold(item.from_warehouse),bold(item.location)),title="Rate And Distance Missing")
 	def validate_with_previous_doc(self):
 		super(DeliveryNote, self).validate_with_previous_doc(
 			{
@@ -221,6 +223,10 @@ class DeliveryNote(SellingController):
 					["Sales Invoice", "against_sales_invoice", "si_detail"],
 				]
 			)
+	def set_warehouse_data(self):
+		for raw in  self.get('items'):
+			if raw.warehouse:
+				self.set_warehouse = raw.warehouse
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -418,7 +424,6 @@ class DeliveryNote(SellingController):
 					"Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 				)
 			)
-
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	from frappe.query_builder.functions import Sum
@@ -812,7 +817,8 @@ def make_shipment(source_name, target_doc=None):
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
-
+	if frappe.db.get_value("Delivery Note",source_name,"status") == "Completed":
+		frappe.throw(frappe.bold("Completed DN Cannot be Returned"))
 	return make_return_doc("Delivery Note", source_name, target_doc)
 
 
@@ -945,3 +951,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 def on_doctype_update():
 	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])
+
+# @frappe.whitelist()
+# def update_cost_center(branch):
+# 	cost_center = frappe.db.get_value("Branch", branch, "cost_center")
+# 	return cost_center

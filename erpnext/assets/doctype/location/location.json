@@ -169,7 +169,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2022-11-16 13:16:08.228800",
+ "modified": "2022-11-26 15:59:39.956306",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -247,6 +247,15 @@
    "role": "Agriculture User",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1
   }
  ],
  "quick_entry": 1,

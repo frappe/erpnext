@@ -44,7 +44,14 @@ frappe.ui.form.on("Delivery Note", {
 				}
 			}
 		});
-
+		
+		frm.set_query('equipment', 'items', function (doc, cdt, cdn) {
+			return {
+				filters: {
+					"hired_equipment": 1
+				}
+			}
+		});
 		frm.set_query('driver', function (doc) {
 			return {
 				filters: {
@@ -85,7 +92,16 @@ frappe.ui.form.on("Delivery Note", {
 		erpnext.stock.delivery_note.set_print_hide(frm.doc);
 	},
 
-	refresh: function (frm) {
+	refresh: function (frm, cdt, cdn) {
+		frm.doc.items.forEach((d)=>{
+			frm.fields_dict['items'].grid.get_field('item_type').get_query = function(){
+				return {
+					filters: {'item_code':d.item_code}
+				}
+			}
+		})
+
+		frm.set_df_property("naming_series","hidden",true)
 		if (frm.doc.docstatus === 1 && frm.doc.is_return === 1 && frm.doc.per_billed !== 100) {
 			frm.add_custom_button(__('Credit Note'), function () {
 				frappe.model.open_mapped_doc({
@@ -110,10 +126,34 @@ frappe.ui.form.on("Delivery Note", {
 				}, __('Create'));
 			}
 		}
-	}
+	},
 });
-
 frappe.ui.form.on("Delivery Note Item", {
+	form_render: function(frm, cdt, cdn){
+		var code = locals[cdt][cdn]
+		console.log(code.item_code)
+		frm.fields_dict['items'].grid.get_field('item_type').get_query = function(){
+			return {
+				filters: {'item_code':code.item_code}
+			}
+		}
+	},
+	item_code: function(frm, cdt, cdn){
+		var code = locals[cdt][cdn]
+		frm.fields_dict['items'].grid.get_field('item_type').get_query = function(){
+			return {
+				filters: {'item_code':code.item_code}
+			}
+		}
+	},
+	item_type: function(frm, cdt, cdn){
+		var code = locals[cdt][cdn]
+		frm.fields_dict['items'].grid.get_field('item_type').get_query = function(){
+			return {
+				filters: {'item_code':code.item_code}
+			}
+		}
+	},
 	expense_account: function (frm, dt, dn) {
 		var d = locals[dt][dn];
 		frm.update_in_all_rows('items', 'expense_account', d.expense_account);
@@ -133,7 +173,7 @@ frappe.ui.form.on("Delivery Note Item", {
 	},
 	volumetric_weight: function (frm, cdt, cdn) {
 		calculate_qty(frm, cdt, cdn)
-	}
+	},
 });
 
 var calculate_qty = function (frm, cdt, cdn) {

@@ -34,8 +34,8 @@
   {
    "fieldname": "security_deposit",
    "fieldtype": "Currency",
-   "label": "Security Deposit",
-   "reqd": 1
+   "hidden": 1,
+   "label": "Security Deposit"
   },
   {
    "fieldname": "column_break_3",
@@ -44,6 +44,7 @@
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Supplier",
    "options": "Supplier",
@@ -66,7 +67,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-09 11:42:09.656147",
+ "modified": "2022-12-01 09:39:47.966582",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fuelbook",
@@ -108,6 +109,7 @@
    "write": 1
   }
  ],
+ "search_fields": "branch",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

@@ -15,23 +15,18 @@ def execute(filters=None):
 def get_columns(filters):
 	cols = [
 		("Branch") + ":Link/Branch:200",
-		("Cost Center") + ":Link/Cost Center:200",
-		("Posting Date") + ":date:100",
-		("Equipment/Vehicle") + ":Link/Equipment:100",
-		("Equipment Type")+":Link/Equipment Type:120",
-		("Equipment Model")+":data:60",
-		("Current KM")+":data:70",
-		("KM Difference") + ":data:50",
-		("Supplier")+":data:50",
-		("Item")+":Link/Item:60",
-		("Item Name")+":data:80",
-		("Item Group")+":data:80",
-		("Rate")+":Currency:60",
-		("Qty") +":data:20",
-		("Charge Amount") +"Currency:60",
-		("Total Amount") +"data:60",
-		("Company") +"Link/Company:120",
-		("Last Service Date") +"date:50"
+		("Posting Date") + ":Date:120",
+		("Equipment/Vehicle") + ":Link/Equipment:120",
+		("Equipment Type")+":Link/Equipment Type:130",
+		("Current KM")+":Data:100",
+		("KM Difference") + ":Data:100",
+		("Item")+":Link/Item:100",
+		("Item Name")+":Data:100",
+		("Rate")+":Currency:100",
+		("Qty") +":Data:80",
+		("Amount") +":Currency:100",
+		("Last Service Date") +":Date:100",
+		("Repair & Services Type") + ":Data:130"
 	]
 	return cols
 
@@ -41,9 +36,9 @@ def get_data(filters):
 	query = (qb.from_(rs)
 				.inner_join(rsi)
 				.on(rs.name == rsi.parent)
-				.select(rs.branch,rs.cost_center,rs.posting_date,rs.equipment,rs.equipment_type,rs.equipment_model,rs.current_km,rs.km_difference,rs.supplier)
-				.select(rsi.item_code,rsi.item_name,rsi.item_group,rsi.rate,rsi.qty,rsi.charge_amount)
-				.select(rs.total_amount,rs.company,rs.last_service_date)
+				.select(rs.branch,rs.posting_date,rs.equipment,rs.equipment_type,rs.current_km,rs.km_difference)
+				.select(rsi.item_code,rsi.item_name,rsi.rate,rsi.qty,rsi.charge_amount)
+				.select(rsi.last_service_date,rs.repair_and_services_type)
 				.where(rs.docstatus == 1)
 				)
 
@@ -53,6 +48,12 @@ def get_data(filters):
 		query = (query.where(rs.equipment == filters.equipment))
 	if filters.get("equipment_type"):
 		query = (query.where(rs.equipment_type == filters.equipment_type))
-	if filters.get("equipment_model"):
-		query = (query.where(rs.equipment_model == filters.equipment_model))
+	# if filters.get("equipment_model"):
+	# 	query = (query.where(rs.equipment_model == filters.equipment_model))
+	if filters.from_date > filters.to_date:
+		frappe.throw("From Date cannot be greater than To Date")
+	if filters.from_date and filters.to_date:
+		query = (query.where((rs.posting_date >= filters.from_date) & ( rs.posting_date <= filters.to_date)))
+	if filters.repair_and_services_type:
+		query = (query.where(rs.repair_and_services_type == filters.repair_and_services_type))
 	return query.run()

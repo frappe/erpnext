@@ -13,15 +13,21 @@ from erpnext.accounts.report.financial_statements import (
 def execute(filters=None):
     if filters.periodicity == 'Daily':
         period_list = ""
-    else:    
+    else: 
+        if filters.periodicity == 'Yearly':
+            from_fiscal_year = filters.fiscal_year,
+            to_fiscal_year   = filters.to_fiscal_year
+        else:
+            from_fiscal_year = filters.fiscal_year,
+            to_fiscal_year   = filters.fiscal_year
         period_list = get_period_list(
-					from_fiscal_year = filters.fiscal_year,
-					to_fiscal_year = filters.fiscal_year,
-					period_start_date = getdate(str(filters.fiscal_year + '-01-01')),
-					period_end_date = getdate(str(filters.fiscal_year + '-12-31')),
-					filter_based_on = filters.filter_based_on,
-					periodicity = filters.periodicity,
-					company=filters.company)
+					from_fiscal_year    = from_fiscal_year,
+					to_fiscal_year      = to_fiscal_year,
+					period_start_date   = getdate(str(filters.fiscal_year + '-01-01')),
+					period_end_date     = getdate(str(filters.fiscal_year + '-12-31')),
+					filter_based_on     = filters.filter_based_on,
+					periodicity         = filters.periodicity,
+					company             =filters.company)
     
     columns = get_columns(filters, period_list)
     data = get_data(filters, period_list)

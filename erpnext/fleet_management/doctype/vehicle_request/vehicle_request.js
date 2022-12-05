@@ -3,20 +3,14 @@
 
 frappe.ui.form.on('Vehicle Request', {
 	refresh: function (frm) {
-        if(frm.doc.workflow_state == "Waiting MTO Approval"){
+        if(frm.doc.workflow_state == "Waiting MTO Approval" || frm.doc.workflow_state == "Approved"){
             frm.set_df_property('vehicle', 'reqd',  frappe.user.has_role(["ADM User","Branch Manager","Fleet Manager"]))
             frm.set_df_property('kilometer_reading', 'reqd',  frappe.user.has_role(["ADM User","Branch Manager","Fleet Manager"]))
-            cur_frm.toggle_display("section_break_003", frappe.user.has_role(["ADM User","Branch Manager","Fleet Manager"]));
-        }else if(frm.doc.workflow_state == "Approved"){
-            cur_frm.toggle_display("section_break_003", 1);
-            frm.add_custom_button("Make Logbook",()=>{
-                frappe.model.open_mapped_doc({
-                    method: "erpnext.fleet_management.doctype.vehicle_request.vehicle_request.create_logbook",	
-                    frm: cur_frm
-                });
-            })
-        }else{
-            cur_frm.toggle_display("section_break_003", 0);
+            frm.toggle_display("fleet_details_section", frappe.user.has_role(["Fleet Manager","System Manager"]));
+            frm.refresh_fields();
+        }
+        else{
+            cur_frm.toggle_display("fleet_details_section", false);
         }
         if (frm.doc.docstatus == 1 ){
             open_extension(frm)

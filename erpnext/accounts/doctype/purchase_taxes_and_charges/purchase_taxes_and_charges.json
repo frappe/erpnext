@@ -14,6 +14,7 @@
   "included_in_print_rate",
   "included_in_paid_amount",
   "col_break1",
+  "title",
   "account_head",
   "description",
   "section_break_10",
@@ -112,6 +113,7 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
+   "read_only_depends_on": "eval:doc.parenttype == \"Purchase Invoice\"",
    "reqd": 1,
    "width": "300px"
   },
@@ -223,18 +225,25 @@
    "label": "Account Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-05 20:04:36.618240",
+ "modified": "2022-11-29 19:42:59.095267",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

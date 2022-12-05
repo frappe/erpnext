@@ -34,6 +34,7 @@ from erpnext.stock.get_item_details import (
 )
 from erpnext.stock.stock_ledger import NegativeStockError, get_previous_sle, get_valuation_rate
 from erpnext.stock.utils import get_bin, get_incoming_rate
+from frappe.model.naming import make_autoname
 
 
 class FinishedGoodError(frappe.ValidationError):
@@ -62,6 +63,20 @@ form_grid_templates = {"items": "templates/form_grid/stock_entry_grid.html"}
 
 
 class StockEntry(StockController):
+	def autoname(self):
+		if self.stock_entry_type == 'Material Issue':
+			series = 'MI'
+			self.name = make_autoname(str(series) + ".YY.MM.####")
+		elif self.stock_entry_type == 'Material Receipt':
+			series = 'MR'
+			self.name = make_autoname(str(series) + ".YY.MM.####")
+		elif self.stock_entry_type == 'Material Transfer':
+			series = 'MT'
+			self.name = make_autoname(str(series) + ".YY.MM.DD.####")
+		else:
+			series = 'WO'
+			self.name = make_autoname(str(series) + ".YY.MM.####")
+
 	def __init__(self, *args, **kwargs):
 		super(StockEntry, self).__init__(*args, **kwargs)
 		if self.purchase_order:
@@ -2781,7 +2796,6 @@ def has_warehouse_permission(warehouse):
 
 	if user == "Administrator" or "System Manager" in user_roles:
 		return 1
-
 	res = frappe.db.sql("""
 			select 1
 			from `tabWarehouse` w, `tabWarehouse Branch` as wb
@@ -2801,4 +2815,5 @@ def has_warehouse_permission(warehouse):
 					   and bi.branch = wb.branch)
 			)
 			""".format(warehouse=warehouse, user=frappe.session.user))
+	
 	return res[0][0] if res else 0

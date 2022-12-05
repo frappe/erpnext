@@ -2,7 +2,7 @@
  "actions": [],
  "allow_auto_repeat": 1,
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:PE-{YY}-{MM}-{DD}-{###}",
  "creation": "2016-06-01 14:38:51.012597",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,7 +10,6 @@
   "type_of_payment",
   "business_activity",
   "branch",
-  "naming_series",
   "payment_type",
   "payment_order_status",
   "column_break_5",
@@ -108,16 +107,6 @@
   },
   {
    "bold": 1,
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "options": "ACC-PAY-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
-  },
-  {
-   "bold": 1,
    "fieldname": "payment_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -150,6 +139,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "branch.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -765,11 +755,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-07 14:20:59.740456",
+ "modified": "2022-11-29 18:56:37.030806",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

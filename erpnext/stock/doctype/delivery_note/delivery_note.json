@@ -2,7 +2,7 @@
  "actions": [],
  "allow_auto_repeat": 1,
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:DN-{YY}-{MM}-{DD}-{####}",
  "creation": "2013-05-24 19:29:09",
  "doctype": "DocType",
  "document_type": "Document",
@@ -12,16 +12,17 @@
   "business_activity",
   "branch",
   "title",
-  "naming_series",
+  "item_group",
   "customer",
   "customer_name",
   "column_break1",
-  "amended_from",
   "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "is_return",
+  "dispatch",
+  "rate_quoted",
   "location_required",
   "issue_credit_note",
   "return_against",
@@ -145,7 +146,8 @@
   "commission_rate",
   "total_commission",
   "section_break1",
-  "sales_team"
+  "sales_team",
+  "amended_from"
  ],
  "fields": [
   {
@@ -163,18 +165,6 @@
    "label": "Title",
    "no_copy": 1,
    "print_hide": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "MAT-DN-.YYYY.-\nMAT-DN-RET-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
   },
   {
    "fieldname": "customer",
@@ -491,7 +481,8 @@
    "fieldtype": "Link",
    "label": "Set Source Warehouse",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_break_warehouse",
@@ -643,7 +634,8 @@
   },
   {
    "fieldname": "section_break_41",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "description": "If you have created a standard template in Sales Taxes and Charges Template, select one and click on the button below.",
@@ -680,7 +672,8 @@
   },
   {
    "fieldname": "section_break_44",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "base_total_taxes_and_charges",
@@ -711,6 +704,7 @@
    "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_49",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Additional Discount"
   },
   {
@@ -1271,19 +1265,37 @@
    "default": "0",
    "fieldname": "location_required",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Location Required"
+  },
+  {
+   "fieldname": "dispatch",
+   "fieldtype": "Link",
+   "label": "Dispatch",
+   "options": "Dispatch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "rate_quoted",
+   "fieldtype": "Data",
+   "label": "Rate Quoted",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 12:34:06.380253",
+ "modified": "2022-11-28 09:43:37.825406",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1346,7 +1358,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
- "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

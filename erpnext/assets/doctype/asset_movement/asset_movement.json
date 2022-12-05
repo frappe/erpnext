@@ -8,10 +8,14 @@
  "field_order": [
   "company",
   "purpose",
+  "from_employee",
   "column_break_4",
-  "transaction_date",
   "transfer_type",
+  "transaction_date",
+  "to_single",
+  "to_employee",
   "section_break_10",
+  "get_asset",
   "assets",
   "reference",
   "reference_doctype",
@@ -94,18 +98,45 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Employee To Employee",
    "depends_on": "eval:doc.purpose == \"Transfer\"",
    "fieldname": "transfer_type",
    "fieldtype": "Select",
    "label": "Transfer Type",
    "mandatory_depends_on": "eval:doc.purpose == 'Transfer'",
-   "options": "\nCost Center To Cost Center\nEmployee To Employee"
+   "options": "\nEmployee To Employee"
+  },
+  {
+   "fieldname": "from_employee",
+   "fieldtype": "Link",
+   "label": "From Employee",
+   "options": "Employee"
+  },
+  {
+   "default": "0",
+   "fieldname": "to_single",
+   "fieldtype": "Check",
+   "label": "To Single Employee"
+  },
+  {
+   "depends_on": "to_single",
+   "fieldname": "to_employee",
+   "fieldtype": "Link",
+   "label": "To Employee",
+   "mandatory_depends_on": "to_single",
+   "options": "Employee"
+  },
+  {
+   "depends_on": "eval:doc.docstatus != 1",
+   "fieldname": "get_asset",
+   "fieldtype": "Button",
+   "label": "Get Asset"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-20 22:04:43.324324",
+ "modified": "2022-12-02 16:17:20.944816",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",

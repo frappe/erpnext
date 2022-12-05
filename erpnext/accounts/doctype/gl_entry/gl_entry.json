@@ -272,7 +272,7 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2022-09-23 17:17:56.278608",
+ "modified": "2022-12-02 12:06:20.780288",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
@@ -300,6 +300,15 @@
    "read": 1,
    "report": 1,
    "role": "Auditor"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "quick_entry": 1,

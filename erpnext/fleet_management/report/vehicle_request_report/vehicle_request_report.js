@@ -21,8 +21,8 @@ frappe.query_reports["Vehicle Request Report"] = {
 		{
 			"fieldname":"vehicle_type",
 			"fieldtype":"Link",
-			"label":__("Vehicle Type"),
-			"options":"Vehicle Type"
+			"label":__("Equipment Type"),
+			"options":"Equipment Type"
 		},
 		{
 			"fieldname":"from_date",

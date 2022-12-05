@@ -67,10 +67,55 @@ frappe.ui.form.on('Material Request', {
 				filters: { 'company': doc.company }
 			};
 		});
-
+		frm.set_query("item_group", function (doc) {
+			return {
+				filters:{'is_group':1}
+			};
+		});
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-	},
 
+		frm.fields_dict["items"].grid.get_field("item_code").get_query = function (doc) {
+			return {
+				filters: { 'item_group': frm.doc.item_group}
+			};
+		};
+
+	},
+	branch: function(frm){
+		if(frm.doc.branch != null || frm.doc.branch != "" || frm.doc.branch != undefined){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Branch",
+					fieldname: "cost_center",
+					filters: { name: frm.doc.branch },
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						frm.set_value("cost_center", r.message.cost_center);
+						frm.trigger("cost_center")
+					}
+				}
+			});
+		}
+		else{
+			frm.set_value("cost_center",null);
+		}
+		frm.refresh_fields();
+	},
+	item_group: function(frm){
+		frm.fields_dict["items"].grid.get_field("item_code").get_query = function (doc) {
+			return {
+				filters: { 'item_group': frm.doc.item_group}
+			};
+		};
+	},
+	cost_center: function(frm){
+		frm.doc.items.map(v=>{
+			v.cost_center = frm.doc.cost_center
+		})
+		frm.refresh_field("items")
+	},
 	company: function (frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
@@ -104,8 +149,10 @@ frappe.ui.form.on('Material Request', {
 			let precision = frappe.defaults.get_default("float_precision");
 			if (flt(frm.doc.per_ordered, precision) < 100) {
 				let add_create_pick_list_button = () => {
-					frm.add_custom_button(__('Pick List'),
-						() => frm.events.create_pick_list(frm), __('Create'));
+					// rinzin commented this as its not required 
+					// frm.add_custom_button(__('Pick List'),
+					// 	() => frm.events.create_pick_list(frm), __('Create'));
+					() => frm.events.create_pick_list(frm), __('Create');
 				}
 
 				if (frm.doc.material_request_type === "Material Transfer") {
@@ -215,7 +262,8 @@ frappe.ui.form.on('Material Request', {
 					plc_conversion_rate: 1,
 					rate: item.rate,
 					uom: item.uom,
-					conversion_factor: item.conversion_factor
+					conversion_factor: item.conversion_factor,
+					cost_center : frm.doc.cost_center
 				},
 				overwrite_warehouse: overwrite_warehouse
 			},
@@ -405,7 +453,9 @@ frappe.ui.form.on("Material Request Item", {
 		set_schedule_date(frm);
 		frm.events.get_item_data(frm, item, true);
 	},
-
+	form_render:function(frm, cdt, cdn){
+		frappe.model.set_value(cdt,cdn,"cost_center",frm.doc.cost_center)
+	},
 	schedule_date: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
@@ -416,6 +466,7 @@ frappe.ui.form.on("Material Request Item", {
 			}
 		}
 	},
+	
 
 	// issue_to: function (frm, cdt, cdn) {
 	// 	var row = locals[cdt][cdn];

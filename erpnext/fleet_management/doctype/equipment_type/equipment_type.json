@@ -9,9 +9,11 @@
  "field_order": [
   "equipment_category",
   "equipment_type",
+  "pol_expense_limit",
   "is_container",
   "doesnt_have_own_tank",
-  "disabled"
+  "disabled",
+  "reading_uom"
  ],
  "fields": [
   {
@@ -49,11 +51,23 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "pol_expense_limit",
+   "fieldtype": "Currency",
+   "label": "POL Expense Limit"
+  },
+  {
+   "fieldname": "reading_uom",
+   "fieldtype": "Select",
+   "label": "Reading UOM",
+   "options": "\nKM\nHour",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-08 16:44:21.076991",
+ "modified": "2022-12-03 11:49:30.787792",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Type",
@@ -73,13 +87,15 @@
    "write": 1
   },
   {
+   "create": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Fleet User",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
    "create": 1,

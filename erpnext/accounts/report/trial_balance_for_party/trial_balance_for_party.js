@@ -50,7 +50,7 @@ frappe.query_reports["Trial Balance for Party"] = {
 			"fieldtype": "Link",
 			"options": "Party Type",
 			"default": "Customer",
-			"reqd": 1
+			"reqd": 1,
 		},
 		{
 			"fieldname":"party",
@@ -78,6 +78,24 @@ frappe.query_reports["Trial Balance for Party"] = {
 						"company": company,
 					}
 				}
+			}
+		},
+		{
+			"fieldname":"cost_center",
+			"label":__("Cost Center"),
+			"fieldtype":"Link",
+			"options":"Cost Center"
+		},
+		{
+			"fieldname":"party_group",
+			"label": __("Party Group"),
+			"fieldtype": "Dynamic Link",
+			"get_options": function() {
+				var party_type = frappe.query_report.get_filter_value('party_type');
+				if( in_list(["Customer", "Supplier", "Employee"],party_type)) {
+					return party_type + " Group"
+				}
+				return "";
 			}
 		},
 		{

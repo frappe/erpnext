@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "PI.YY.MM.####",
  "creation": "2013-05-21 16:16:39",
  "doctype": "DocType",
  "document_type": "Document",
@@ -9,17 +9,19 @@
  "field_order": [
   "business_activity",
   "branch",
-  "naming_series",
   "supplier",
   "supplier_name",
+  "bill_no",
   "tax_id",
-  "due_date",
   "tax_withholding_category",
   "column_break1",
   "title",
   "company",
   "posting_date",
+  "due_date",
+  "bill_date",
   "posting_time",
+  "delay_by",
   "set_posting_time",
   "is_paid",
   "is_return",
@@ -30,9 +32,7 @@
   "dimension_col_break",
   "project",
   "supplier_invoice_details",
-  "bill_no",
   "column_break_15",
-  "bill_date",
   "returns",
   "return_against",
   "section_addresses",
@@ -128,6 +128,7 @@
   "column_break_61",
   "write_off_account",
   "write_off_cost_center",
+  "write_off_description",
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
@@ -184,18 +185,6 @@
    "no_copy": 1
   },
   {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "ACC-PINV-.YYYY.-\nACC-PINV-RET-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
-  },
-  {
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -230,7 +219,7 @@
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
-   "label": "Due Date",
+   "label": "Payment Due Date",
    "oldfieldname": "due_date",
    "oldfieldtype": "Date"
   },
@@ -282,7 +271,7 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date",
+   "label": "Invoice Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -353,6 +342,7 @@
    "collapsible_depends_on": "bill_no",
    "fieldname": "supplier_invoice_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Supplier Invoice Details"
   },
   {
@@ -671,6 +661,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category",
    "print_hide": 1
@@ -682,6 +673,7 @@
   {
    "fieldname": "shipping_rule",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shipping Rule",
    "options": "Shipping Rule",
    "print_hide": 1
@@ -1004,7 +996,6 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "write_off_amount",
-   "depends_on": "grand_total",
    "fieldname": "write_off",
    "fieldtype": "Section Break",
    "label": "Write Off"
@@ -1440,18 +1431,30 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "fieldname": "delay_by",
+   "fieldtype": "Int",
+   "label": "Delay By(Days)",
+   "read_only": 1
+  },
+  {
+   "depends_on": "write_off_amount",
+   "fieldname": "write_off_description",
+   "fieldtype": "Text",
+   "label": "Write Off Description"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-16 14:05:07.379391",
+ "modified": "2022-11-29 11:48:32.062913",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
  "name_case": "Title Case",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

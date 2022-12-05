@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.utils.nestedset import NestedSet, get_root_of
+from frappe.utils import cint
 
 from erpnext.utilities.transaction_base import delete_events
 
@@ -77,3 +78,26 @@ def add_node():
 		args.parent_department = None
 
 	frappe.get_doc(args).insert()
+
+@frappe.whitelist()
+def get_employee_count(department):
+	dep = frappe.get_doc("Department", department)
+	cond = ''
+	if cint(dep.is_department):	
+		cond = ' and department ="{}"'.format(dep.name)
+	if cint(dep.is_division):	
+		cond = ' and division ="{}"'.format(dep.department_name)
+	if cint(dep.is_unit): 
+		cond = ' and unit ="{}"'.format(dep.department_name)
+	if cint(dep.is_section): 
+		cond = ' and section ="{}"'.format(dep.department_name)
+	
+	# frappe.msgprint(str(cond))
+	data = {}
+	if department != 'Regions - BTL':
+		res = frappe.db.sql("""select count(*) employee_count from `tabEmployee`
+						where status = "Active" {} """.format(cond))
+		data['count'] = res[0][0]
+	data['approver_name'] = dep.approver_name
+	data['approver_level'] = dep.approver_level
+	return data

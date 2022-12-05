@@ -158,7 +158,7 @@ def get_columns(filters):
 			"fieldname": "uom",
 			"label": "UOM",
 			"fieldtype": "Link",
-			"options": "UoM",
+			"options": "UOM",
 			"width": 100
 		},
 		{

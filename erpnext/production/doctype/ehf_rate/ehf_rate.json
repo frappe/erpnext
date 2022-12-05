@@ -13,6 +13,7 @@
  ],
  "fields": [
   {
+   "allow_on_submit": 1,
    "fieldname": "hiring_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -29,6 +30,7 @@
    "label": "From Date"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "to_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -42,7 +44,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-04 15:41:17.739134",
+ "modified": "2022-11-28 11:27:32.181689",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "EHF Rate",

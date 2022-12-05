@@ -103,9 +103,10 @@
    "reqd": 1
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-03 10:04:05.583043",
+ "modified": "2022-12-02 15:19:33.287935",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Transfer",
@@ -125,6 +126,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

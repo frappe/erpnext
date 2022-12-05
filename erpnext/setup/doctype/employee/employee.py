@@ -26,7 +26,10 @@ class InactiveEmployeeStatusError(frappe.ValidationError):
 
 class Employee(NestedSet):
 	nsm_parent_field = "reports_to"
-
+	def autoname(self):
+		name = make_autoname('EMP.####')[3:]
+		if not self.employee_name:
+			self.set_employee_name()
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
@@ -35,10 +38,6 @@ class Employee(NestedSet):
 			self.employee =	self.name = self.old_id
 			return
 		year_month = str(self.date_of_joining)[2:4] + str(self.date_of_joining)[5:7]
-		name = make_autoname('EMP.####')[3:]
-		self.employee = self.name = year_month + name
-		if not self.employee_name:
-			self.set_employee_name()
 		self.validate_date()
 		self.validate_email()
 		self.validate_status()

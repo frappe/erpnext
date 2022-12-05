@@ -16,13 +16,13 @@ def get_data(filters):
 	to_exclude = []
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
-			SELECT t.item_code, i.item_name, i.asset_category, i.asset_sub_category, t.cost_center, t.warehouse,
+			SELECT t.item_code, i.item_name, i.asset_category, i.asset_sub_category, t.cost_center,
 			SUM(IFNULL(t.received_qty,0)) total_qty,
 			SUM(IFNULL(t.issued_qty,0)) issued_qty,
 			SUM(IFNULL(t.received_qty,0))-SUM(IFNULL(t.issued_qty,0)) balance_qty,
 			GROUP_CONCAT(IF(IFNULL(t.received_qty, 0)-IFNULL(t.issued_qty, 0) > 0, CONCAT('<a href="desk#Form/Purchase Receipt/',t.ref_doc,'">',t.ref_doc,'(',IFNULL(t.received_qty,0)-IFNULL(t.issued_qty, 0),')','</a>'),NULL)) purchase_receipt
 			FROM(
-			SELECT ar.item_code, ar.ref_doc, ar.cost_center, (select distinct pr.warehouse from `tabPurchase Receipt Item` pr where pr.parent = ar.ref_doc) as warehouse,
+			SELECT ar.item_code, ar.ref_doc, ar.cost_center, (select distinct pr.warehouse from `tabPurchase Receipt Item` pr where pr.name = ar.child_ref) as warehouse,
 				SUM(ar.qty) received_qty,
 				IFNULL((SELECT SUM(ai.qty)
 					FROM `tabAsset Issue Details` ai
@@ -38,7 +38,7 @@ def get_data(filters):
 			GROUP BY ar.item_code, ar.ref_doc
 			) AS t, `tabItem` i
 			WHERE i.name = t.item_code
-			GROUP BY  t.item_code, i.item_name
+			GROUP BY  t.item_code, i.item_name, t.cost_center, t.warehouse
 		""".format(from_date=filters.get("from_date"), to_date=filters.get("to_date"), cond = conditions), as_dict=True)
 	
 def get_conditions(filters):
@@ -84,13 +84,6 @@ def get_columns():
 		  "label": "Cost Center",
 		  "fieldtype": "Link",
 		  "options": "Cost Center",
-		  "width": 200
-		},
-		{
-		  "fieldname": "warehouse",
-		  "label": "Warehouse",
-		  "fieldtype": "Link",
-		  "options": "Warehouse",
 		  "width": 200
 		},
 		{

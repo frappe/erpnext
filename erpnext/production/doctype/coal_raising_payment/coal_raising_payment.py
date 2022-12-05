@@ -12,12 +12,12 @@ class CoalRaisingPayment(Document):
 		check_future_date(self.posting_date)
 		self.validate_data()
 		self.cal_total_amount()
-		if self.workflow_state != "Approved":
-			notify_workflow_states(self)
+		# if self.workflow_state != "Approved":
+		# 	notify_workflow_states(self)
 
 	def on_submit(self):
 		self.post_journal_entry()
-		notify_workflow_states(self)
+		# notify_workflow_states(self)
 
 	def validate_data(self):
 		if self.from_date > self.to_date:

@@ -33,7 +33,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-21 12:36:29.886626",
+ "modified": "2022-11-28 15:23:16.822412",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Cost Of Product List",
@@ -49,6 +49,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
    "share": 1,
    "write": 1
   }

@@ -3,7 +3,6 @@
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "prompt",
  "creation": "2022-02-21 11:54:09.632218",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -37,6 +36,7 @@
   "business_activity",
   "column_break_22",
   "employment_status",
+  "probation_end_date",
   "increment_cycle",
   "promotion_cycle",
   "promotion_due_date",
@@ -48,11 +48,11 @@
   "department",
   "employee_number",
   "column_break_25",
+  "branch",
+  "cost_center",
   "division",
   "section",
   "unit",
-  "branch",
-  "cost_center",
   "employment_details",
   "scheduled_confirmation_date",
   "column_break_32",
@@ -238,8 +238,7 @@
    "label": "Date of Joining",
    "oldfieldname": "date_of_joining",
    "oldfieldtype": "Date",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "bold": 1,
@@ -835,7 +834,7 @@
    "fieldname": "employment_status",
    "fieldtype": "Select",
    "label": "Employment Status",
-   "options": "\nIn Service\nEOL",
+   "options": "\nIn Service\nEOL\nProbation",
    "reqd": 1
   },
   {
@@ -927,13 +926,13 @@
   {
    "fieldname": "unit",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Unit",
-   "options": "Unit"
+   "options": "Department"
   },
   {
    "fieldname": "region",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Region"
   },
   {
@@ -941,18 +940,24 @@
    "fieldtype": "Link",
    "label": "Employment Type",
    "options": "Employment Type"
+  },
+  {
+   "depends_on": "eval:doc.employment_status == \"Probation\";",
+   "fieldname": "probation_end_date",
+   "fieldtype": "Date",
+   "label": "Probation End Date",
+   "mandatory_depends_on": "employement_status == \"Probation\";"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-11-10 15:04:27.988766",
+ "modified": "2022-11-26 13:55:03.220529",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
  "name_case": "Title Case",
- "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
@@ -988,6 +993,15 @@
    "set_user_permissions": 1,
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1
   }
  ],
  "search_fields": "employee_name, gender, designation, employment_type",

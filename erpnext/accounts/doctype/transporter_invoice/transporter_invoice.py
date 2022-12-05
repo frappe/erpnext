@@ -414,6 +414,7 @@ class TransporterInvoice(AccountsController):
 				WHERE a.docstatus = 1 AND a.posting_date BETWEEN "{0}" and "{1}" 
 				AND b.equipment = "{2}" AND b.cost_center = "{3}" 
 				AND b.others_equipment = 0
+				AND a.is_return = 0
 				AND NOT EXISTS(
 					select 1 
 					from `tabTransporter Invoice` p, `tabTransporter Invoice Item` i

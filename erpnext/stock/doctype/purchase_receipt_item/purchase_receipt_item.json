@@ -305,7 +305,8 @@
    "fieldtype": "Currency",
    "label": "Price List Rate",
    "options": "currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "depends_on": "price_list_rate",
@@ -328,6 +329,7 @@
   {
    "fieldname": "base_price_list_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Price List Rate (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -367,6 +369,7 @@
   {
    "fieldname": "base_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rate (Company Currency)",
    "oldfieldname": "purchase_rate",
    "oldfieldtype": "Currency",
@@ -374,12 +377,12 @@
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
-   "reqd": 1,
    "width": "100px"
   },
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Amount (Company Currency)",
    "oldfieldname": "amount",
    "oldfieldtype": "Currency",
@@ -434,6 +437,7 @@
   {
    "fieldname": "base_net_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Net Rate (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -442,6 +446,7 @@
   {
    "fieldname": "base_net_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Net Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -451,6 +456,7 @@
    "collapsible": 1,
    "fieldname": "item_weight_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Item Weight Details"
   },
   {
@@ -572,6 +578,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Serial No",
    "no_copy": 1,
@@ -582,6 +589,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "batch_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Batch No",
    "no_copy": 1,
@@ -594,6 +602,7 @@
    "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "rejected_serial_no",
    "fieldtype": "Small Text",
+   "hidden": 1,
    "label": "Rejected Serial No",
    "no_copy": 1,
    "print_hide": 1
@@ -601,6 +610,7 @@
   {
    "fieldname": "item_tax_template",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Item Tax Template",
    "options": "Item Tax Template",
    "print_hide": 1
@@ -680,6 +690,7 @@
    "allow_on_submit": 1,
    "fieldname": "landed_cost_voucher_amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Landed Cost Voucher Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -811,6 +822,7 @@
    "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Manufacture"
   },
   {
@@ -1027,7 +1039,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-10 17:04:18.529584",
+ "modified": "2022-11-29 10:11:51.734067",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

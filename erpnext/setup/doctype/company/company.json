@@ -51,6 +51,8 @@
   "default_warehouse_for_sales_return",
   "credit_limit",
   "transactions_annual_history",
+  "normal_loss_account",
+  "abnormal_loss_account",
   "default_settings",
   "default_bank_account",
   "default_cash_account",
@@ -1011,6 +1013,20 @@
    "fieldtype": "Link",
    "label": "Imprest Advance Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "normal_loss_account",
+   "fieldtype": "Link",
+   "label": "Normal Loss Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "abnormal_loss_account",
+   "fieldtype": "Link",
+   "label": "Abnormal Loss Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-building",
@@ -1018,7 +1034,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-11-18 10:12:58.918539",
+ "modified": "2022-11-28 16:45:31.504489",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

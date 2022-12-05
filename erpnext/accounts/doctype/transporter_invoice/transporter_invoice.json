@@ -533,7 +533,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 16:05:00.566194",
+ "modified": "2022-11-30 11:24:30.665758",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice",
@@ -554,6 +554,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "email": 1,
@@ -588,6 +589,19 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
    "share": 1,
    "submit": 1,
    "write": 1

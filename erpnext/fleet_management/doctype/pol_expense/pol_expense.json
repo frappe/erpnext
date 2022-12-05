@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "equipment",
+  "equipment_type",
   "fuel_book",
   "fuelbook_branch",
   "column_break_5",
@@ -16,9 +17,9 @@
   "is_opening",
   "payment_details_section",
   "party_type",
-  "payment_type",
   "party",
   "credit_account",
+  "expense_limit",
   "column_break_11",
   "currency",
   "amount",
@@ -34,10 +35,43 @@
   "sb_additional_info",
   "company",
   "branch",
+  "section_break_29",
+  "get_previous",
+  "items",
+  "previous_balance_amount",
+  "pol_received_details_section",
+  "from_date",
+  "column_break_35",
+  "to_date",
+  "section_break_37",
+  "pol_received_item",
+  "section_break_39",
+  "total_qty_received",
+  "column_break_41",
+  "total_bill_amount",
+  "summary_sheet_section",
+  "opening_pol_tank_balance",
+  "pol_issue_during_the_period",
+  "closing_pol_tank_balance",
+  "column_break_47",
+  "uom",
+  "previous_km_reading",
+  "present_km_reading",
+  "column_break_51",
+  "total_petrol_diesel_consumed",
+  "total_km_reading",
+  "average_km_reading",
+  "sb_approver",
+  "approver",
+  "column_break_34",
+  "approver_name",
+  "column_break_36",
+  "approver_designation",
   "section_break_31",
   "journal_entry",
   "user_remark",
-  "amended_from"
+  "amended_from",
+  "workflow_state"
  ],
  "fields": [
   {
@@ -65,6 +99,7 @@
    "fieldname": "party_type",
    "fieldtype": "Link",
    "hidden": 1,
+   "ignore_user_permissions": 1,
    "label": "Party Type",
    "options": "Party Type",
    "reqd": 1
@@ -72,6 +107,7 @@
   {
    "fieldname": "party",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Supplier",
    "options": "Supplier",
@@ -81,14 +117,6 @@
    "fieldname": "payment_details_section",
    "fieldtype": "Section Break",
    "label": "Payment Details"
-  },
-  {
-   "fetch_from": "party_type.account_type",
-   "fieldname": "payment_type",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Payment Type",
-   "read_only": 1
   },
   {
    "default": "BTN",
@@ -106,7 +134,7 @@
   },
   {
    "fieldname": "amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
    "reqd": 1
@@ -156,14 +184,14 @@
   {
    "allow_on_submit": 1,
    "fieldname": "adjusted_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Adjusted Amount",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "balance_amount",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Balance Amount",
    "read_only": 1
@@ -172,8 +200,7 @@
    "fieldname": "credit_account",
    "fieldtype": "Link",
    "label": "Credit Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
@@ -249,12 +276,206 @@
    "label": "Equipment",
    "options": "Equipment",
    "reqd": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "Workflow"
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment_type.pol_expense_limit",
+   "fieldname": "expense_limit",
+   "fieldtype": "Currency",
+   "label": "Expense Limit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_approver",
+   "fieldtype": "Section Break",
+   "label": "Approver Details"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_name",
+   "fieldtype": "Data",
+   "label": "Approver Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_designation",
+   "fieldtype": "Link",
+   "label": "Approver Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_37",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "get_previous",
+   "fieldtype": "Button",
+   "label": "Get Previous Expenses"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "POL Expense Item"
+  },
+  {
+   "fieldname": "previous_balance_amount",
+   "fieldtype": "Currency",
+   "label": "Previous Balance Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "summary_sheet_section",
+   "fieldtype": "Section Break",
+   "label": "Summary Sheet"
+  },
+  {
+   "fieldname": "previous_km_reading",
+   "fieldtype": "Float",
+   "label": "Previous KM/HR Reading (KMs/Hrs)(E)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "present_km_reading",
+   "fieldtype": "Float",
+   "label": "Present KM/HR Reading (KMs/Hrs)(F)"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_km_reading",
+   "fieldtype": "Float",
+   "label": "Total KM/ HR Reading (KMs/Hrs)(G=E-F)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "average_km_reading",
+   "fieldtype": "Float",
+   "label": "Average KM/Ltrs. or Ltrs./Hr of POL B/A (KMs/Lts.)(H=G/D or D/G)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "opening_pol_tank_balance",
+   "fieldtype": "Float",
+   "label": "Opening POL Tank Balance (Lts.(A))"
+  },
+  {
+   "fieldname": "pol_issue_during_the_period",
+   "fieldtype": "Float",
+   "label": "POL Issue During the Period (Lts. (B))"
+  },
+  {
+   "fieldname": "closing_pol_tank_balance",
+   "fieldtype": "Float",
+   "label": "Closing POL Tank Balance (Lts.(C))"
+  },
+  {
+   "fieldname": "total_petrol_diesel_consumed",
+   "fieldtype": "Float",
+   "label": "Total Petrol/ Diesel Consumed (Lts.(D=A+B-C))",
+   "read_only": 1
+  },
+  {
+   "default": "KM",
+   "fetch_from": "equipment.reading_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "UOM",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_opening == 0",
+   "fieldname": "pol_received_details_section",
+   "fieldtype": "Section Break",
+   "label": "POL Received Details"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory_depends_on": "eval:doc.is_opening == 0",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory_depends_on": "eval:doc.is_opening == 0",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pol_received_item",
+   "fieldtype": "Table",
+   "label": "POL Received Item",
+   "options": "POL Receive Ref Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_qty_received",
+   "fieldtype": "Float",
+   "label": "Total Qty Received",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_29",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_39",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_bill_amount",
+   "fieldtype": "Currency",
+   "label": "Total Bill Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_47",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_51",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-24 11:11:37.065419",
+ "modified": "2022-12-03 11:46:07.466754",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",

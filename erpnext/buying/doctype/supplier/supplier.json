@@ -19,17 +19,16 @@
   "tax_category",
   "tax_withholding_category",
   "supplier_tpn_no",
+  "company",
   "image",
   "column_break0",
-  "supplier_group",
   "supplier_type",
+  "supplier_group",
   "allow_purchase_invoice_creation_without_purchase_order",
   "allow_purchase_invoice_creation_without_purchase_receipt",
   "is_internal_supplier",
   "represents_company",
   "disabled",
-  "inter_company",
-  "company",
   "is_transporter",
   "warn_rfqs",
   "warn_pos",
@@ -37,6 +36,11 @@
   "prevent_pos",
   "is_pol_supplier",
   "section_break_27",
+  "inter_company",
+  "column_break_28",
+  "company_code",
+  "column_break_30",
+  "company_name",
   "bank_infromation_section",
   "bank",
   "bank_name",
@@ -89,7 +93,7 @@
   "column_break2",
   "website",
   "supplier_details",
-  "column_break_30",
+  "column_break_84",
   "language",
   "is_frozen"
  ],
@@ -131,23 +135,27 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax ID"
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
   {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category"
   },
@@ -155,12 +163,14 @@
    "default": "0",
    "fieldname": "is_transporter",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Transporter"
   },
   {
    "default": "0",
    "fieldname": "is_internal_supplier",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Internal Supplier"
   },
   {
@@ -196,11 +206,10 @@
    "reqd": 1
   },
   {
-   "default": "Company",
    "fieldname": "supplier_type",
    "fieldtype": "Select",
    "label": "Supplier Type",
-   "options": "Company\nIndividual",
+   "options": "Domestic Vendor\nInternational Vendor",
    "reqd": 1
   },
   {
@@ -220,6 +229,7 @@
    "default": "0",
    "fieldname": "warn_rfqs",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Warn RFQs",
    "read_only": 1
   },
@@ -227,6 +237,7 @@
    "default": "0",
    "fieldname": "warn_pos",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Warn POs",
    "read_only": 1
   },
@@ -234,6 +245,7 @@
    "default": "0",
    "fieldname": "prevent_rfqs",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Prevent RFQs",
    "read_only": 1
   },
@@ -241,6 +253,7 @@
    "default": "0",
    "fieldname": "prevent_pos",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Prevent POs",
    "read_only": 1
   },
@@ -286,6 +299,7 @@
    "collapsible": 1,
    "fieldname": "section_credit_limit",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Payment Terms"
   },
   {
@@ -478,7 +492,7 @@
    "default": "0",
    "fieldname": "inter_company",
    "fieldtype": "Check",
-   "label": "DHI Owned Company?"
+   "label": "DHI Company?"
   },
   {
    "fieldname": "company",
@@ -488,7 +502,8 @@
   },
   {
    "fieldname": "section_break_27",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Consolidation"
   },
   {
    "fieldname": "ifs_code",
@@ -505,12 +520,12 @@
   {
    "fieldname": "payment_due_terms_section",
    "fieldtype": "Section Break",
-   "label": "Payment due terms"
+   "label": "Payment Due Terms"
   },
   {
    "fieldname": "credit_days_based_on",
    "fieldtype": "Select",
-   "label": "Payment days Based On",
+   "label": "Payment Days Based On",
    "options": "\nFixed Days\nLast Day of the Next Month",
    "reqd": 1
   },
@@ -531,7 +546,7 @@
   {
    "fieldname": "bank_infromation_section",
    "fieldtype": "Section Break",
-   "label": "BANK INFROMATION"
+   "label": "Bank Information"
   },
   {
    "fieldname": "bank_branch",
@@ -547,6 +562,7 @@
   {
    "fieldname": "inr_bank_code",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Bank Code",
    "options": "\n01 - AXIS BANK\n02- SBI\n03 -Others\n04 - SCB"
   },
@@ -604,6 +620,30 @@
   {
    "fieldname": "section_break_43",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.inter_company",
+   "fieldname": "company_code",
+   "fieldtype": "Link",
+   "label": "DHI Company",
+   "mandatory_depends_on": "eval:doc.inter_company",
+   "options": "DHI Company"
+  },
+  {
+   "depends_on": "eval:doc.inter_company",
+   "fetch_from": "company_code.company",
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_84",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -616,7 +656,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-24 15:20:57.232642",
+ "modified": "2022-12-03 09:37:23.844196",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

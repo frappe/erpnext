@@ -13,7 +13,6 @@
   "title",
   "business_activity",
   "branch",
-  "naming_series",
   "item_group",
   "customer",
   "customer_name",
@@ -24,6 +23,8 @@
   "transaction_date",
   "delivery_date",
   "po_no",
+  "dispatch",
+  "rate_quoted",
   "location_required",
   "po_date",
   "tax_id",
@@ -171,22 +172,10 @@
    "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
+   "in_list_view": 1,
    "label": "Title",
-   "no_copy": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Series",
    "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "SAL-.YY.-.MM.-.####",
-   "print_hide": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "bold": 1,
@@ -195,6 +184,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Customer",
    "oldfieldname": "customer",
@@ -224,7 +214,7 @@
    "label": "Order Type",
    "oldfieldname": "order_type",
    "oldfieldtype": "Select",
-   "options": "\nSales\nMaintenance\nShopping Cart",
+   "options": "Sales\nMaintenance\nShopping Cart",
    "print_hide": 1,
    "reqd": 1
   },
@@ -289,9 +279,9 @@
    "fieldtype": "Date",
    "hide_days": 1,
    "hide_seconds": 1,
-   "in_list_view": 1,
    "label": "Delivery Date",
-   "no_copy": 1
+   "no_copy": 1,
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -547,7 +537,6 @@
   {
    "fieldname": "sec_warehouse",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1
   },
@@ -558,7 +547,8 @@
    "hide_seconds": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "items_section",
@@ -1500,10 +1490,11 @@
    "read_only": 1
   },
   {
-   "default": "0",
+   "default": "1",
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Disable Rounded Total"
   },
   {
@@ -1542,6 +1533,7 @@
    "label": "Accounting Dimensions"
   },
   {
+   "fetch_from": "branch.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -1596,14 +1588,26 @@
    "fieldname": "item_group",
    "fieldtype": "Link",
    "label": "Item Group",
-   "options": "Item Group"
+   "options": "Item Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dispatch",
+   "fieldtype": "Link",
+   "label": "Dispatch",
+   "options": "Dispatch"
+  },
+  {
+   "fieldname": "rate_quoted",
+   "fieldtype": "Data",
+   "label": "Rate Quoted"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-24 15:21:51.459915",
+ "modified": "2022-11-28 12:17:05.659584",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1679,7 +1683,7 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
- "title_field": "customer_name",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

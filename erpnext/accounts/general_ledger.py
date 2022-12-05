@@ -29,7 +29,6 @@ def make_gl_entries(
 	update_outstanding="Yes",
 	from_repost=False,
 ):
-	# frappe.throw(str(update_outstanding))
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)

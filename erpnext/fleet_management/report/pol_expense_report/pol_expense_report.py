@@ -23,29 +23,29 @@ def get_columns(data):
 		("Entry Date") + ":Date:100",
 		("Fuelbook") + ":Data:120",
 		("Supplier") + ":Data:120",
-		("Amount")+ ":Data:100",
-		("Adjusted Amount") + ":Date:120",
-		("Balance Amount") + ":Data:100",
-		("Credit Account") + ":Data:120"
+		("Advance Amount")+ ":Currency:150",
+		("Adjusted Amount") + ":Currency:150",
+		("Balance Amount") + ":Currency:150",
+		("Credit Account") + ":Link/Account:120"
 	]
 
 def get_data(filters):
 	conditions = get_conditions(filters)
-	query = frappe.db.sql("""select distinct 
-					p.name, 
-					p.equipment, 
-					p.fuelbook_branch, 
-					p.cost_center, 
-					p.entry_date,
-					p.fuel_book, 
-					p.party, 
-					p.amount, 
-					p.adjusted_amount, 
-					p.balance_amount, 
-					p.credit_account
-				from 
-					`tabPOL Expense` p 
-				where docstatus = 1 {} """.format(conditions))
+	query = frappe.db.sql("""select
+								p.name, 
+								p.equipment, 
+								p.fuelbook_branch, 
+								p.cost_center, 
+								p.entry_date,
+								p.fuel_book, 
+								p.party, 
+								p.amount, 
+								p.adjusted_amount, 
+								p.balance_amount, 
+								p.credit_account
+							from 
+								`tabPOL Expense` p 
+							where docstatus = 1 {} """.format(conditions))
 	return query
 
 def get_conditions(filters):

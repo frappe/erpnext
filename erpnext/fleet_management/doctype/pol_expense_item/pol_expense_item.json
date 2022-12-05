@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "creation": "2022-11-29 18:17:25.470506",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "reference",
+  "amount",
+  "adjusted_amount",
+  "balance_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "reference",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference",
+   "options": "POL Expense"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "adjusted_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Adjusted Amount"
+  },
+  {
+   "fieldname": "balance_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Balance Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-29 18:18:15.138207",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "POL Expense Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

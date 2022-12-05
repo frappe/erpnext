@@ -9,10 +9,15 @@
  "field_order": [
   "branch",
   "cost_center",
+  "repair_and_services_type",
   "out_source",
+  "set_warehouse",
   "column_break_2",
   "posting_date",
-  "posting_time",
+  "completion_status",
+  "start_date",
+  "end_date",
+  "total_hrs",
   "recent_maintenance_date",
   "column_break_4",
   "equipment",
@@ -24,9 +29,15 @@
   "current_km",
   "km_difference",
   "supplier_details_section",
-  "supplier",
+  "party_type",
+  "party",
   "parts_to_be_change_section",
   "items",
+  "section_break_26",
+  "total_out_source_amt",
+  "column_break_27",
+  "total_stock_amt",
+  "column_break_30",
   "total_amount",
   "nature_of_break_down",
   "defect",
@@ -40,7 +51,14 @@
   "cb123",
   "job_outsource_footer",
   "amended_from",
-  "paid"
+  "paid",
+  "sb_approver",
+  "approver",
+  "cb_approver_01",
+  "approver_name",
+  "cb_approver_02",
+  "approver_designation",
+  "status"
  ],
  "fields": [
   {
@@ -70,13 +88,6 @@
    "options": "Cost Center",
    "read_only": 1,
    "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.out_source == 1",
-   "fieldname": "supplier",
-   "fieldtype": "Link",
-   "label": "Supplier",
-   "options": "Supplier"
   },
   {
    "fieldname": "column_break_4",
@@ -161,13 +172,13 @@
    "depends_on": "eval:doc.equipment",
    "fieldname": "current_km",
    "fieldtype": "Float",
-   "label": "Current KM",
+   "label": "Current KM/HR",
    "reqd": 1
   },
   {
    "fieldname": "km_difference",
    "fieldtype": "Float",
-   "label": "KM Difference",
+   "label": "KM/HR Difference",
    "read_only": 1
   },
   {
@@ -182,7 +193,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Equipment/Vehicle",
-   "options": "Equipment"
+   "options": "Equipment",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.equipment",
@@ -211,17 +223,10 @@
    "reqd": 1
   },
   {
-   "default": "Now",
-   "fieldname": "posting_time",
-   "fieldtype": "Time",
-   "label": "Posting Time",
-   "reqd": 1
-  },
-  {
    "depends_on": "eval:doc.out_source",
    "fieldname": "supplier_details_section",
    "fieldtype": "Section Break",
-   "label": "Supplier Details"
+   "label": "Party Details"
   },
   {
    "fieldname": "amended_from",
@@ -266,12 +271,125 @@
    "hidden": 1,
    "label": "Paid",
    "read_only": 1
+  },
+  {
+   "default": "Supplier",
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "\nEmployee\nSupplier"
+  },
+  {
+   "depends_on": "eval:doc.out_source == 1",
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "mandatory_depends_on": "eval:doc.out_source == 1",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "repair_and_services_type",
+   "fieldtype": "Select",
+   "label": "Repair and Services Type",
+   "options": "\nPreventive Maintenance\nProactive Maintenance\nBreakdown Maintenance"
+  },
+  {
+   "fieldname": "sb_approver",
+   "fieldtype": "Section Break",
+   "label": "Approver Details"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_approver_01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approver_name",
+   "fieldtype": "Data",
+   "label": "Approver Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_approver_02",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "approver_designation",
+   "fieldtype": "Link",
+   "label": "Approver Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Datetime",
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Datetime",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "total_hrs",
+   "fieldtype": "Float",
+   "label": "Total Hrs",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_out_source_amt",
+   "fieldtype": "Currency",
+   "label": "Total Out Source Amt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_stock_amt",
+   "fieldtype": "Currency",
+   "label": "Total Stock Amt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "set_warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "completion_status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "In Process\nCompleted",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-24 15:41:40.151297",
+ "modified": "2022-11-30 15:25:27.607100",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Services",

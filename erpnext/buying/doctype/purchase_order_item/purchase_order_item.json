@@ -413,6 +413,7 @@
    "collapsible": 1,
    "fieldname": "item_weight_details",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Item Weight Details"
   },
   {
@@ -490,6 +491,7 @@
   {
    "fieldname": "sales_order",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Sales Order",
    "no_copy": 1,
    "options": "Sales Order",
@@ -690,6 +692,7 @@
   {
    "fieldname": "item_tax_template",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Item Tax Template",
    "options": "Item Tax Template"
   },
@@ -850,6 +853,7 @@
   {
    "fieldname": "sales_order_packed_item",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Sales Order Packed Item",
    "no_copy": 1,
    "print_hide": 1
@@ -875,7 +879,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-09-17 10:31:55.621295",
+ "modified": "2022-11-29 22:54:43.995670",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

@@ -28,7 +28,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-14 17:12:22.566360",
+ "modified": "2022-11-28 14:07:21.064403",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Production Group",
@@ -46,6 +46,27 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1
   }
  ],
  "sort_field": "modified",

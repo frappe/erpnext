@@ -40,7 +40,6 @@ frappe.ui.form.on('Asset Movement', {
 			}
 		})
 	},
-
 	onload: (frm) => {
 		frm.trigger('set_required_fields');
 	},
@@ -83,18 +82,39 @@ frappe.ui.form.on('Asset Movement', {
 			});
 		});
 		frm.refresh_field('assets');
+	},
+	get_asset: function(frm){
+		get_asset_list(frm);
+	},
+	to_employee:function(frm){
+		if(cint(frm.doc.to_single) == 1){
+			frm.doc.assets.map(v=>{
+				v.to_employee = frm.doc.to_employee
+			})
+			frm.refresh_field("assets")
+		}
 	}
 });
 
+function get_asset_list(frm){
+	frappe.call({
+		method:"get_asset_list",
+		doc: frm.doc,
+		callback: function (){
+			frm.refresh_field("assets")
+
+		}
+	});
+	
+}
+
 frappe.ui.form.on('Asset Movement Item', {
 	asset: function(frm, cdt, cdn) {
-		// on manual entry of an asset auto sets their source cost center / employee
 		const asset_name = locals[cdt][cdn].asset;
 		if (asset_name){
 			frappe.db.get_doc('Asset', asset_name).then((asset_doc) => {
 				if(asset_doc.cost_center ) frappe.model.set_value(cdt, cdn, 'source_cost_center', asset_doc.cost_center);
 				if(asset_doc.custodian) frappe.model.set_value(cdt, cdn, 'from_employee', asset_doc.custodian);
-				// frm.refresh_field('assets')
 			}).catch((err) => {
 			});
 		}

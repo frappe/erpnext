@@ -110,6 +110,21 @@
   "item_tax_rate",
   "actual_batch_qty",
   "actual_qty",
+  "loss_details_section",
+  "name_tolerance",
+  "loss_method",
+  "loss_tolerance",
+  "loss_qty_flat",
+  "remarks",
+  "justification",
+  "column_break_111",
+  "accepted_qty",
+  "normal_loss",
+  "normal_loss_amt",
+  "abnormal_loss",
+  "abnormal_loss_amt",
+  "excess_qty",
+  "excess_amt",
   "edit_references",
   "sales_order",
   "so_detail",
@@ -142,6 +157,7 @@
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -149,6 +165,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -156,6 +173,7 @@
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
    "print_hide": 1,
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -201,7 +219,8 @@
    "in_list_view": 1,
    "label": "Quantity",
    "oldfieldname": "qty",
-   "oldfieldtype": "Currency"
+   "oldfieldtype": "Currency",
+   "read_only_depends_on": "eval:doc.sales_order"
   },
   {
    "depends_on": "eval:doc.uom != doc.stock_uom",
@@ -216,10 +235,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -268,6 +289,7 @@
    "collapsible": 1,
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Discount and Margin"
   },
   {
@@ -337,7 +359,7 @@
    "oldfieldname": "export_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.sales_order",
    "reqd": 1
   },
   {
@@ -874,14 +896,17 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "transporter_info_section",
    "fieldtype": "Section Break",
    "hidden": 1,
    "label": "Transporter Info"
   },
   {
+   "collapsible": 1,
    "fieldname": "location_base_info_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Location Base Info"
   },
   {
@@ -991,13 +1016,101 @@
    "fieldname": "item_type",
    "fieldtype": "Link",
    "label": "Item Type",
-   "options": "Item Type"
+   "options": "Item Type",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "loss_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loss Details"
+  },
+  {
+   "fieldname": "name_tolerance",
+   "fieldtype": "Link",
+   "label": "Loss Tolerance",
+   "options": "Loss Tolerance"
+  },
+  {
+   "fieldname": "loss_method",
+   "fieldtype": "Select",
+   "label": "Loss Tolerance Based On",
+   "options": "Quantity in %\nQuantity in Flat"
+  },
+  {
+   "fetch_from": "name_tolerance.loss_tolerance",
+   "fieldname": "loss_tolerance",
+   "fieldtype": "Float",
+   "label": "Quantity in (%)",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "name_tolerance.loss_qty_flat",
+   "fieldname": "loss_qty_flat",
+   "fieldtype": "Float",
+   "label": "Quantity in Flat",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Normal loss description/justification"
+  },
+  {
+   "fieldname": "justification",
+   "fieldtype": "Small Text",
+   "label": "Abnormal loss description/justification"
+  },
+  {
+   "fieldname": "column_break_111",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accepted_qty",
+   "fieldtype": "Float",
+   "label": "Quantity Accepted by Customer"
+  },
+  {
+   "fieldname": "normal_loss",
+   "fieldtype": "Float",
+   "label": "Normal Loss Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "normal_loss_amt",
+   "fieldtype": "Currency",
+   "label": "Normal Loss Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "abnormal_loss",
+   "fieldtype": "Float",
+   "label": "Abnormal Loss Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "abnormal_loss_amt",
+   "fieldtype": "Currency",
+   "label": "Abnormal Loss Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "excess_qty",
+   "fieldtype": "Float",
+   "label": "Excess Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "excess_amt",
+   "fieldtype": "Currency",
+   "label": "Excess Amount",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-17 10:57:59.199767",
+ "modified": "2022-11-28 12:51:20.195676",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

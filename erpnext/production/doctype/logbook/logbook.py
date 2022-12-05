@@ -3,7 +3,7 @@
 import frappe
 from frappe.model.document import Document
 from erpnext.custom_utils import check_future_date
-from frappe.utils import flt, cint,getdate
+from frappe.utils import flt, cint,getdate,time_diff_in_hours
 from frappe import _, qb, throw
 from frappe.model.mapper import get_mapped_doc
 
@@ -77,7 +77,7 @@ class Logbook(Document):
 				else:
 					frappe.throw("Initial and Final Readings are mandatory")
 			else:
-				if flt(a.initial_time) > 0 and flt(a.final_time) > 0:
+				if a.initial_time and a.final_time:
 					start = "{0} {1}".format(str(self.posting_date), str(a.initial_time))
 					end = "{0} {1}".format(str(self.posting_date), str(a.final_time))
 					if getdate(start) > getdate(end):

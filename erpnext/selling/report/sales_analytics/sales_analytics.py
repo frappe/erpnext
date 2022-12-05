@@ -60,7 +60,7 @@ class Analytics(object):
 				"width": 140 if self.filters.tree_type != "Order Type" else 200,
 			}
 		]
-		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
+		if self.filters.tree_type in ["Supplier", "Item"]:
 			self.columns.append(
 				{
 					"label": _(self.filters.tree_type + " Name"),
@@ -69,7 +69,34 @@ class Analytics(object):
 					"width": 140,
 				}
 			)
-
+		if self.filters.tree_type == "Customer":
+			self.columns.append(
+				{
+					"label": _("Country"),
+					"fieldname": "country",
+					"fieldtype": "Link",
+					"options": "Country",
+					"width": 140,
+				}
+			)
+			self.columns.append(
+				{
+					"label": _("Territory"),
+					"fieldname": "territory",
+					"fieldtype": "Link",
+					"options": "Territory",
+					"width": 140,
+				}
+			)
+			self.columns.append(
+				{
+					"label": _("Customer Group"),
+					"fieldname": "customer_group",
+					"fieldtype": "Link",
+					"options": "Customer Group",
+					"width": 140,
+				}
+			)
 		if self.filters.tree_type == "Item":
 			self.columns.append(
 				{
@@ -83,13 +110,30 @@ class Analytics(object):
 
 		for end_date in self.periodic_daterange:
 			period = self.get_period(end_date)
-			self.columns.append(
-				{"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120}
-			)
+			if self.filters.tree_type == "Customer":
+				self.columns.append(
+					{"label": _(period)+" (Qty)", "fieldname": scrub(period)+"_qty", "fieldtype": "Float", "width": 120}
+				)
+				self.columns.append(
+					{"label": _(period+" (Value)"), "fieldname": scrub(period)+"_val", "fieldtype": "Float", "width": 120}
+				)
+			else:
+				self.columns.append(
+					{"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120}
+				)
 
-		self.columns.append(
-			{"label": _("Total"), "fieldname": "total", "fieldtype": "Float", "width": 120}
-		)
+
+		if self.filters.tree_type == "Customer":
+			self.columns.append(
+				{"label": _("Total Qty"), "fieldname": "total_qty", "fieldtype": "Float", "width": 120}
+			)
+			self.columns.append(
+				{"label": _("Total Val"), "fieldname": "total", "fieldtype": "Float", "width": 120}
+			)
+		else:
+			self.columns.append(
+				{"label": _("Total"), "fieldname": "total", "fieldtype": "Float", "width": 120}
+			)
 
 	def get_data(self):
 		if self.filters.tree_type in ["Customer", "Supplier"]:
@@ -139,31 +183,50 @@ class Analytics(object):
 		self.get_teams()
 
 	def get_sales_transactions_based_on_customers_or_suppliers(self):
-		if self.filters["value_quantity"] == "Value":
-			value_field = "base_net_total as value_field"
-		else:
-			value_field = "total_qty as value_field"
+		cond = ''
+		# if self.filters["value_quantity"] == "Value":
+		# 	value_field = "base_net_total as value_field"
+		# else:
+		# 	value_field = "total_qty as value_field"
+		value_field = "base_net_total-total_normal_loss-total_abnormal_loss+total_excess_amount as value"
+		qty_field = "total_qty as qty"
 
 		if self.filters.tree_type == "Customer":
 			entity = "customer as entity"
 			entity_name = "customer_name as entity_name"
+			country = "country"
+			territory = "territory"
+			customer_group = "customer_group"
 		else:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
-
-		self.entries = frappe.get_all(
-			self.filters.doc_type,
-			fields=[entity, entity_name, value_field, self.date_field],
-			filters={
-				"docstatus": 1,
-				"company": self.filters.company,
-				self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
-			},
-		)
-
+		if self.filters.territory:
+			cond += " and b.territory = '{}'".format(self.filters.territory)
+		if self.filters.country:
+			cond += " and b.country = '{}'".format(self.filters.country)
+		if self.filters.customer_group:
+			cond += " and b.customer_group = '{}'".format(self.filters.customer_group)
+		# self.entries = frappe.get_all(
+		# 	self.filters.doc_type,
+		# 	fields=[entity, entity_name, value_field, qty_field, self.date_field],
+		# 	filters={
+		# 		"docstatus": 1,
+		# 		"company": self.filters.company,
+		# 		self.date_field: ("between", [self.filters.from_date, self.filters.to_date]),
+		# 	},
+		# )
+		self.entries = frappe.db.sql("""
+			select a.{}, a.{}, b.{}, b.{}, b.{}, a.{}, a.{}, a.{} from `tab{}` a, `tabCustomer` b where
+			a.docstatus = 1
+			and a.customer = b.name
+			and a.company = '{}'
+			and a.{} between '{}' and '{}' {}
+		""".format(entity, entity_name, country, territory, customer_group, value_field, qty_field, self.date_field, self.filters.doc_type, self.filters.company, self.date_field, self.filters.from_date, self.filters.to_date, cond), as_dict=1)
 		self.entity_names = {}
 		for d in self.entries:
-			self.entity_names.setdefault(d.entity, d.entity_name)
+			self.entity_names.setdefault(d.entity, {"entity_name":d.entity_name, "country":d.country, 'territory': d.territory, 'customer_group': d.customer_group})
+			# self.entity_names.setdefault(d.entity, d.entity_name)
+		# frappe.msgprint(str(self.entity_names))
 
 	def get_sales_transactions_based_on_items(self):
 
@@ -259,22 +322,40 @@ class Analytics(object):
 		self.get_periodic_data()
 
 		for entity, period_data in self.entity_periodic_data.items():
-			row = {
-				"entity": entity,
-				"entity_name": self.entity_names.get(entity) if hasattr(self, "entity_names") else None,
-			}
-			total = 0
+			# frappe.msgprint(str(self.entity_names.get(entity)['country']))
+			if self.filters.tree_type != "Customer":
+				row = {
+					"entity": entity,
+					"entity_name": self.entity_names.get(entity) if hasattr(self, "entity_names") else None,
+				}
+			else:
+				row = {
+					"entity": entity,
+					"entity_name": self.entity_names.get(entity)['entity_name'] if self.entity_names.get(entity)['entity_name'] else None,
+					"country": self.entity_names.get(entity)['country'] if self.entity_names.get(entity)['country'] else None,
+					"territory": self.entity_names.get(entity)['territory'] if self.entity_names.get(entity)['territory'] else None,
+					"customer_group": self.entity_names.get(entity)['customer_group'] if self.entity_names.get(entity)['customer_group'] else None,	
+				}
+			total = total_qty = 0
 			for end_date in self.periodic_daterange:
 				period = self.get_period(end_date)
-				amount = flt(period_data.get(period, 0.0))
-				row[scrub(period)] = amount
+				if self.filters.tree_type != "Customer":
+					amount = flt(period_data.get(period, 0.0))
+					row[scrub(period)] = amount
+				else:
+					amount = flt(period_data.get(period+"_val", 0.0))
+					qty = flt(period_data.get(period+"_qty", 0.0))
+					row[scrub(period)+"_val"] = amount
+					row[scrub(period)+"_qty"] = qty
+					total_qty += qty
 				total += amount
 
-			row["total"] = total
 
+			row["total"] = total
 			if self.filters.tree_type == "Item":
 				row["stock_uom"] = period_data.get("stock_uom")
-
+			elif self.filters.tree_type == "Customer":
+				row["total_qty"] = total_qty
 			self.data.append(row)
 
 	def get_rows_by_group(self):
@@ -305,8 +386,14 @@ class Analytics(object):
 			if self.filters.tree_type == "Supplier Group":
 				d.entity = self.parent_child_map.get(d.entity)
 			period = self.get_period(d.get(self.date_field))
-			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
-			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
+			if self.filters.tree_type != "Customer":
+				self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
+				self.entity_periodic_data[d.entity][period] += flt(d.value_field)
+			else:
+				self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period+"_qty", 0.0)
+				self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period+"_val",0.0)
+				self.entity_periodic_data[d.entity][period+"_val"] += flt(d.value)
+				self.entity_periodic_data[d.entity][period+"_qty"] += flt(d.qty)
 
 			if self.filters.tree_type == "Item":
 				self.entity_periodic_data[d.entity]["stock_uom"] = d.stock_uom

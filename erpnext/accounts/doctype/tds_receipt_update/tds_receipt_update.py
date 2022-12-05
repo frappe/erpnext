@@ -68,18 +68,26 @@ class TDSReceiptUpdate(Document):
 					bill_no = str(employee_name + "(" + d.invoice_no + ")")
 				else:
 					bill_no = d.invoice_no
-
+				if d.tds_remittance == None:
+					d.tds_remittance = ''
 				entries.append((name, d.posting_date, self.branch, self.cost_center,
 					self.purpose, self.fiscal_year or "", self.month or "", "", self.region or "",
 					d.invoice_type, d.invoice_no, bill_no, 
 					self.tds_receipt_date, self.tds_receipt_number, self.cheque_no, self.cheque_date, 
 					self.name, d.tds_remittance, 0, 0, frappe.session.user, str(get_datetime()), str(get_datetime()), frappe.session.user))
+				# frappe.throw(str(entries))
 		return entries
 
 	def make_tds_receipt_entries(self):
 		entries = self.get_entries()
 		if len(entries):
 			entries = ', '.join(map(str, entries))
+			query = """INSERT INTO `tabTDS Receipt Entry`(name, posting_date, branch, cost_center, 
+				purpose, fiscal_year, month, pbva, region,  
+				invoice_type, invoice_no, bill_no,
+				receipt_date, receipt_number, cheque_no, cheque_date, 
+				tds_receipt_update, tds_remittance, idx, docstatus, owner, creation, modified, modified_by)
+				VALUES {}""".format(entries)
 			frappe.db.sql("""INSERT INTO `tabTDS Receipt Entry`(name, posting_date, branch, cost_center, 
 				purpose, fiscal_year, month, pbva, region,  
 				invoice_type, invoice_no, bill_no, 
@@ -113,46 +121,48 @@ class TDSReceiptUpdate(Document):
 
 		if self.purpose in ["Leave Encashment","Other Invoice","Overtime"]:
 			if self.purpose == 'Leave Encashment':
-				pass
-				'''
 				query = """
 					SELECT 
 						"Leave Encashment" as invoice_type, 
 						name as invoice_no, 
 						encashment_date as posting_date, 
-						encashment_amount as bill_amount, 
+						encashment_amount as bill_amount,
+						cost_center, 
 						encashment_tax as tds_amount, 
-						employee as party, 
-						'Employee' as party_type
+						employee as party,
+						'Employee' as party_type,
+						employee_name as party_name
 					FROM `tabLeave Encashment` AS t 
 						WHERE t.docstatus = 1 
 						AND t.encashment_date BETWEEN '{0}' AND '{1}' 
 						AND t.encashment_tax > 0 
 						# {2} 
 						AND NOT EXISTS (SELECT 1 
-					FROM `tabRRCO Receipt Entries` AS b 
-						WHERE b.purchase_invoice = t.name)
+					FROM `tabTDS Receipt Entry` AS b 
+						WHERE b.invoice_no = t.name)
 						""".format(self.from_date, self.to_date, cond)
 				query += """
 					UNION SELECT 
-						"Employee Benefits" as invoice_type, 
+						"Employee Benefit Claim" as invoice_type, 
 						t.name as invoice_no, 
 						t.posting_date, 
-						t1.amount as bill_amount, 
+						t1.amount as bill_amount,
+						t.cost_center as cost_center, 
 						t1.tax_amount as tds_amount, 
 						t.employee as party, 
-						'Employee' as party_type
-					FROM `tabEmployee Benefits` AS t, `tabSeparation Item` t1 
+						'Employee' as party_type,
+						t.employee_name as party_name
+					FROM `tabEmployee Benefit Claim` AS t, `tabSeparation Item` t1 
 						WHERE t.docstatus = 1 
 						AND t1.parent = t.name
 						AND t.posting_date BETWEEN '{0}' 
 						AND '{1}'
 						AND t1.tax_amount > 0 {2}
 						AND NOT EXISTS (SELECT 1 
-					FROM `tabRRCO Receipt Entries` AS b 
-						WHERE b.purchase_invoice = t.name)
+					FROM `tabTDS Receipt Entry` AS b 
+						WHERE b.invoice_no = t.name)
 						""".format(self.from_date, self.to_date, cond)
-				'''
+				entries = frappe.db.sql(query,as_dict=1)
 			elif self.purpose == 'Overtime':
 				pass
 				'''
@@ -197,6 +207,8 @@ class TDSReceiptUpdate(Document):
 
 			for d in entries:
 				row = self.append('items', {})
+				if self.purpose == "Leave Encashment":
+					d.tpn = frappe.db.get_value("Employee", d.party, "tpn_number")
 				d.bill_amount = flt(d.bill_amount, 2)
 				d.tds_amount = flt(d.tds_amount, 2)
 				row.update(d)

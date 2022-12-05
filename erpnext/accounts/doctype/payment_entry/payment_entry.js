@@ -26,7 +26,8 @@ frappe.ui.form.on('Payment Entry', {
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 			return {
 				filters: {
-					"account_type": ["in", account_types],
+					// "account_type": ["in", account_types],
+					"account_type": ["in", ["Bank", "Cash", "Payable", "Receivable"]],
 					"is_group": 0,
 					"company": frm.doc.company
 				}
@@ -77,10 +78,11 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.validate_company(frm);
 
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
+				["Bank", "Cash","Receivable"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 			return {
 				filters: {
-					"account_type": ["in", account_types],
+					// "account_type": ["in", account_types],
+					"account_type": ["in", ["Bank", "Cash", "Payable", "Receivable"]],
 					"is_group": 0,
 					"company": frm.doc.company
 				}

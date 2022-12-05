@@ -13,7 +13,8 @@ class AssetIssueDetails(Document):
 
     def on_submit(self):
         self.check_qty_balance()
-        self.make_asset()
+        for i in range(cint(self.qty)):
+            self.make_asset(i+1)
 
     def on_cancel(self):
         if self.reference_code:
@@ -41,7 +42,7 @@ class AssetIssueDetails(Document):
         if flt(self.qty) > flt(balance_qty):
             frappe.throw(_("Issuing Quantity cannot be greater than Balance Quantity i.e., {}").format(flt(balance_qty)), title="Insufficient Balance")
 
-    def make_asset(self):       
+    def make_asset(self, qty):       
         item_doc = frappe.get_doc("Item",self.item_code)
         if not cint(item_doc.is_fixed_asset):
             frappe.throw(_("Item selected is not a fixed asset"))
@@ -79,9 +80,9 @@ class AssetIssueDetails(Document):
 				"purchase_date": self.issued_date,
 				"calculate_depreciation": 1,
                 "asset_rate": self.asset_rate,
-				"purchase_receipt_amount": self.amount,
-				"gross_purchase_amount": self.amount,
-				"asset_quantity": self.qty,
+				"purchase_receipt_amount": self.asset_rate,
+				"gross_purchase_amount": flt(self.asset_rate) * flt(qty),
+				"asset_quantity": qty,
 				"purchase_receipt": self.purchase_receipt,
                 "location": self.location,
                 "branch": self.branch,
@@ -90,6 +91,8 @@ class AssetIssueDetails(Document):
                 "available_for_use_date": self.issued_date,
                 "asset_account": fixed_asset_account,
                 "credit_account": credit_account,
+                "asset_issue_details":self.name,
+                "serial_number":self.reg_number
 			}
 		)
 

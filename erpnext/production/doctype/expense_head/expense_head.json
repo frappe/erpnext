@@ -10,7 +10,8 @@
   "expense_head",
   "expense_account",
   "disabled",
-  "order_index"
+  "order_index",
+  "ob_qty_required"
  ],
  "fields": [
   {
@@ -40,11 +41,17 @@
    "in_list_view": 1,
    "label": "Order Index",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "ob_qty_required",
+   "fieldtype": "Check",
+   "label": "OB Qty Required"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-31 10:25:22.406835",
+ "modified": "2022-11-26 16:17:59.906860",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Expense Head",
@@ -60,6 +67,27 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "EME User",
    "share": 1,
    "write": 1
   }

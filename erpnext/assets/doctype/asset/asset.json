@@ -84,6 +84,7 @@
   "section_break_31",
   "maintenance_required",
   "other_details",
+  "asset_issue_details",
   "status",
   "booked_fixed_asset",
   "column_break_51",
@@ -95,6 +96,7 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
    "options": "ACC-ASS-.YYYY.-"
   },
@@ -604,7 +606,8 @@
   {
    "fieldname": "asset_rate",
    "fieldtype": "Currency",
-   "label": "Asset Rate"
+   "label": "Asset Rate",
+   "reqd": 1
   },
   {
    "fieldname": "vehicle_number",
@@ -638,6 +641,13 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "asset_issue_details",
+   "fieldtype": "Link",
+   "label": "Asset Issue Details",
+   "options": "Asset Issue Details",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -660,7 +670,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-11-20 18:35:15.579580",
+ "modified": "2022-12-02 12:24:57.800240",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -706,9 +716,18 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
- "search_fields": "asset_name,custodian,cost_center",
+ "search_fields": "asset_name,custodian,cost_center,vehicle_number",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

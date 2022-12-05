@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-12-01 07:54:07.327422",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "pol_receive_ref",
+  "km_hr_difference",
+  "current_km_hr_reading",
+  "qty",
+  "column_break_5",
+  "rate",
+  "mileage",
+  "bill_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "pol_receive_ref",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "POL Receive Ref",
+   "options": "POL Receive",
+   "read_only": 1
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mileage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Mileage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "bill_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Bill Amount"
+  },
+  {
+   "fieldname": "km_hr_difference",
+   "fieldtype": "Float",
+   "label": "KM/Hr Difference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_km_hr_reading",
+   "fieldtype": "Float",
+   "label": "Current KM/Hr Reading",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-12-01 08:35:16.428455",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "POL Receive Ref Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

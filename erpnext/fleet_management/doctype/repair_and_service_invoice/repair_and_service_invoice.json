@@ -10,12 +10,14 @@
   "section_break_1",
   "branch",
   "cost_center",
+  "repair_and_services_type",
   "out_source",
   "credit_account",
   "status",
   "column_break_7",
   "posting_date",
-  "supplier",
+  "party_type",
+  "party",
   "section_break_2",
   "items",
   "checked_by",
@@ -45,12 +47,12 @@
    "label": "Supplier Details"
   },
   {
+   "fetch_from": "branch.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_7",
@@ -63,7 +65,6 @@
    "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -72,14 +73,6 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Out Source"
-  },
-  {
-   "fieldname": "supplier",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Supplier",
-   "options": "Supplier",
-   "read_only": 1
   },
   {
    "fieldname": "section_break_5",
@@ -163,9 +156,11 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Equipment",
-   "options": "Equipment"
+   "options": "Equipment",
+   "reqd": 1
   },
   {
+   "fetch_from": "equipment.equipment_type",
    "fieldname": "equipment_type",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -175,6 +170,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "equipment.equipment_model",
    "fieldname": "equipment_model",
    "fieldtype": "Link",
    "label": "Equipment Model",
@@ -227,14 +223,34 @@
    "fieldname": "credit_account",
    "fieldtype": "Link",
    "label": "Credit Account",
-   "options": "Account",
-   "read_only": 1
+   "options": "Account"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Select",
+   "label": "Party Type",
+   "options": "\nEmployee\nSupplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Party",
+   "options": "party_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "repair_and_services_type",
+   "fieldtype": "Select",
+   "label": "Repair and Services Type",
+   "options": "\nPreventive Maintenance\nProactive Maintenance\nBreakdown Maintenance"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-07 14:18:00.466036",
+ "modified": "2022-11-28 17:45:36.653660",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Service Invoice",

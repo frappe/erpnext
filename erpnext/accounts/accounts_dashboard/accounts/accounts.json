@@ -11,6 +11,9 @@
   },
   {
    "card": "Total Outgoing Payment"
+  },
+  {
+   "card": "Sum of In_qty"
   }
  ],
  "charts": [
@@ -43,16 +46,16 @@
    "width": "Full"
   }
  ],
- "creation": "2020-07-17 11:25:34.796608",
+ "creation": "2022-08-24 17:57:48.912970",
  "dashboard_name": "Accounts",
  "docstatus": 0,
  "doctype": "Dashboard",
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2020-07-22 13:07:34.540574",
- "modified_by": "Administrator",
+ "modified": "2022-12-01 14:32:50.638167",
+ "modified_by": "pralad.rai@smcl.bt",
  "module": "Accounts",
  "name": "Accounts",
- "owner": "Administrator"
+ "owner": "birendra.bhuejel@thimphutechpark.bt"
 }

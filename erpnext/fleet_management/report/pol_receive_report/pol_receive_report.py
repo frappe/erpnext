@@ -24,9 +24,9 @@ def get_columns(data):
 		("Item Name")+ ":Data:130",
 		("Posting Date") + ":Date:120",
 		("Quantity") + ":Data:100",
-		("Mileage") + ":Data:100",
 		("Rate Per Unit") + ":Data:100",
-		("Amount") + ":Currency:120"
+		("Amount") + ":Currency:120",
+		("Mileage") + ":Data:100"
 	]
 
 def get_data(filters):
@@ -41,10 +41,10 @@ def get_data(filters):
 					p.pol_type, 
 					p.item_name, 
 					p.posting_date, 
-					p.qty, 
-					p.mileage, 
+					p.qty,  
 					p.rate, 
-					ifnull(p.total_amount,0) 
+					ifnull(p.total_amount,0),
+					p.mileage
 				from 
 					`tabPOL Receive` p 
 				where docstatus = 1 {} """.format(conditions))

@@ -37,7 +37,6 @@
   "min_order_qty",
   "projected_qty",
   "qty_info_col_break",
-  "actual_qty",
   "ordered_qty",
   "received_qty",
   "rate_and_amount_section_break",
@@ -54,6 +53,8 @@
   "dimension_col_break",
   "cost_center",
   "more_info",
+  "actual_qty",
+  "transferred_qty",
   "lead_time_date",
   "sales_order",
   "sales_order_item",
@@ -201,7 +202,8 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:parent.material_request_type != \"Purchase\";"
   },
   {
    "fieldname": "amount",
@@ -219,7 +221,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Information"
@@ -330,7 +331,7 @@
   {
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Actual Qty",
+   "label": "Balance Qty(Warehouse)",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1,
@@ -382,7 +383,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -514,13 +514,22 @@
    "fieldtype": "Data",
    "label": "Item Sub Group",
    "read_only": 1
+  },
+  {
+   "fieldname": "transferred_qty",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Transferred Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-17 10:22:36.480694",
+ "modified": "2022-12-01 10:18:22.902195",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

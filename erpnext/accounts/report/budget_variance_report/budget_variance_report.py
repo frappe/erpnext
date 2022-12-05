@@ -242,7 +242,7 @@ def get_actual_details(name, filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
 
-	if filters.get("budget_against") == "Cost Center":
+	if filters.get("budget_against") == "Cost Center" and frappe.db.exists("Cost Center",name):
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", name, ["lft", "rgt"])
 		cond = """
 				and lft >= "{lft}"
@@ -300,7 +300,6 @@ def get_actual_details(name, filters):
 def get_dimension_account_month_map(filters):
 	dimension_target_details = get_dimension_target_details(filters)
 	tdd = get_target_distribution_details(filters)
-
 	cam_map = {}
 
 	for ccd in dimension_target_details:

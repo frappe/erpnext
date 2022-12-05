@@ -69,55 +69,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Transaction",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Asset",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Asset Value Adjustment",
-   "link_count": 0,
-   "link_to": "Asset Value Adjustment",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Asset Transfer",
-   "link_count": 0,
-   "link_to": "Asset Transfer",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Asset Issue Detail",
-   "link_count": 0,
-   "link_to": "Asset Issue Details",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Asset Movement",
-   "link_count": 0,
-   "link_to": "Asset Movement",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Reports",
    "link_count": 5,
    "onboard": 0,
@@ -172,9 +123,48 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Transaction",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Asset",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Value Adjustment",
+   "link_count": 0,
+   "link_to": "Asset Value Adjustment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Issue Detail",
+   "link_count": 0,
+   "link_to": "Asset Issue Details",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Asset Movement",
+   "link_count": 0,
+   "link_to": "Asset Movement",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-24 10:29:38.591246",
+ "modified": "2022-12-02 15:20:21.763430",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",

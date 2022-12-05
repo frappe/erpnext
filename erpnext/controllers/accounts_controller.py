@@ -812,6 +812,7 @@ class AccountsController(TransactionBase):
 				"reference_name": d.reference_name,
 				"reference_row": d.reference_row,
 				"remarks": d.remarks,
+				"cost_center":d.cost_center,
 				"advance_amount": flt(d.amount),
 				"advance_account":d.advance_account,
 				"allocated_amount": allocated_amount,
@@ -830,6 +831,7 @@ class AccountsController(TransactionBase):
 			amount_field = "credit_in_account_currency"
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
+			cost_center = self.cost_center
 		else:
 			party_account = get_party_account('Supplier', self.supplier, self.company,is_advance)
 			party_type = "Supplier"
@@ -837,15 +839,14 @@ class AccountsController(TransactionBase):
 			amount_field = "debit_in_account_currency"
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
-
+			cost_center = self.cost_center
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(
 			party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated
 		)
-
 		payment_entries = get_advance_payment_entries(
-			party_type, party, party_account, order_doctype, order_list, include_unallocated
+			party_type, party, party_account, order_doctype, order_list, include_unallocated, cost_center
 		)
 
 		res = journal_entries + payment_entries
@@ -2099,6 +2100,7 @@ def get_advance_payment_entries(
 	order_doctype,
 	order_list=None,
 	include_unallocated=True,
+	cost_center = None,
 	against_all_orders=False,
 	limit=None,
 	condition=None,
@@ -2111,10 +2113,12 @@ def get_advance_payment_entries(
 	exchange_rate_field = (
 		"source_exchange_rate" if payment_type == "Receive" else "target_exchange_rate"
 	)
-
+	
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
-
+	cond = ''
+	if cost_center:
+		cond = " AND t1.cost_center = '{}' ".format(cost_center)
 	if order_list or against_all_orders:
 		if order_list:
 			reference_condition = " and t2.reference_name in ({0})".format(
@@ -2126,7 +2130,7 @@ def get_advance_payment_entries(
 		payment_entries_against_order = frappe.db.sql(
 			"""
 			select
-				'Payment Entry' as reference_type, t1.name as reference_name,
+				'Payment Entry' as reference_type, t1.name as reference_name, t1.cost_center,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
 				t2.reference_name as against_order, t1.posting_date,
 				t1.{0} as currency, t1.{1} as advance_account, t1.{4} as exchange_rate
@@ -2134,32 +2138,33 @@ def get_advance_payment_entries(
 			where
 				t1.name = t2.parent and t1.{1} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
-				and t2.reference_doctype = %s {2}
+				and t2.reference_doctype = %s {2} 
+				{5}
 			order by t1.posting_date {3}
 		""".format(
-				currency_field, party_account_field, reference_condition, limit_cond, exchange_rate_field
+				currency_field, party_account_field, reference_condition, limit_cond, exchange_rate_field, cond
 			),
 			[party_account, payment_type, party_type, party, order_doctype] + order_list,
 			as_dict=1,
 		)
-
+	cond = ""
+	if cost_center:
+		cond += " and cost_center = '{}' ".format(cost_center)
 	if include_unallocated:
 		unallocated_payment_entries = frappe.db.sql(
 			"""
-				select 'Payment Entry' as reference_type, name as reference_name, posting_date,
+				select 'Payment Entry' as reference_type, name as reference_name, posting_date, cost_center,
 				remarks, unallocated_amount as amount, {2} as exchange_rate, {3} as currency,{0} as advance_account
 				from `tabPayment Entry`
 				where
 					{0} = %s and party_type = %s and party = %s and payment_type = %s
-					and docstatus = 1 and unallocated_amount > 0 {condition}
+					and docstatus = 1 {4} and unallocated_amount > 0 {condition}
 				order by posting_date {1}
 			""".format(
-				party_account_field, limit_cond, exchange_rate_field, currency_field, condition=condition or ""
-			),
+				party_account_field, limit_cond, exchange_rate_field, currency_field, cond, condition=condition or ""),
 			(party_account, party_type, party, payment_type),
 			as_dict=1,
 		)
-
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
 
 

@@ -301,7 +301,7 @@ def get_permission_query_conditions(user):
 	return """(
 		exists(select 1
 			from `tabEmployee` as e
-			where e.branch = `tabTransporter Invoice`.branch
+			where e.branch = `tabEME Invoice`.branch
 			and e.user_id = '{user}')
 		or
 		exists(select 1
@@ -309,6 +309,6 @@ def get_permission_query_conditions(user):
 			where e.user_id = '{user}'
 			and ab.employee = e.name
 			and bi.parent = ab.name
-			and bi.branch = `tabTransporter Invoice`.branch)
+			and bi.branch = `tabEME Invoice`.branch)
 	)""".format(user=user)
 	

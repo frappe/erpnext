@@ -32,7 +32,7 @@
   "column_break04",
   "purpose",
   "total_days_and_hours",
-  "section_break_003",
+  "fleet_details_section",
   "vehicle",
   "vehicle_model",
   "vehicle_number",
@@ -130,11 +130,10 @@
    "reqd": 1
   },
   {
-   "fetch_from": "employee.reports_to",
    "fieldname": "approver",
    "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Approver"
+   "label": "Approver",
+   "read_only": 1
   },
   {
    "fieldname": "columb_break04",
@@ -149,9 +148,10 @@
   },
   {
    "fieldname": "approver_id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Approver ID"
+   "fieldtype": "Link",
+   "label": "Approver ID",
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "place",
@@ -170,12 +170,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_003",
-   "fieldtype": "Section Break",
-   "label": "Approval Detail",
-   "permlevel": 1
-  },
-  {
    "fieldname": "rejection_reason",
    "fieldtype": "Small Text",
    "label": "Remarks"
@@ -192,7 +186,6 @@
    "bold": 1,
    "fieldname": "items",
    "fieldtype": "Table",
-   "ignore_user_permissions": 1,
    "label": "Duty for (Name of the Official):",
    "options": "Vehicle Request Item"
   },
@@ -307,11 +300,16 @@
    "in_list_view": 1,
    "label": "Previous KM",
    "read_only": 1
+  },
+  {
+   "fieldname": "fleet_details_section",
+   "fieldtype": "Section Break",
+   "label": "Fleet Details"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 16:02:58.185784",
+ "modified": "2022-11-30 18:31:10.835868",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Vehicle Request",

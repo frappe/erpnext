@@ -9,15 +9,17 @@ frappe.query_reports["Stock Transaction Report"] = {
 			"label": __("Purpose"),
 			"fieldtype": "Select",
 			"width": "80",
-			"options": ["","Material Issue", "Material Transfer"],
+			"options": ["","Material Issue", "Material Transfer","Write Off"],
 			"reqd": 1,
 			on_change:function(query){
 				purpose=frappe.query_report.get_filter_value('purpose')
 				if (str(purpose) == 'Material Issue'){
-					frappe.query_report.get_filter('warehouse').toggle(false)
+					frappe.query_report.toggle_filter_display('warehouse', true);
+					// frappe.query_report.get_filter('warehouse').toggle(false)
 				} 
 				else {
-					frappe.query_report.get_filter('warehouse').toggle(true)
+					// frappe.query_report.get_filter('warehouse').toggle(true)
+					frappe.query_report.toggle_filter_display('warehouse', false);
 				}
 			}
 		},

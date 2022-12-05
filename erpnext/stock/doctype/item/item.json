@@ -19,6 +19,7 @@
   "item_group",
   "item_sub_group",
   "stock_uom",
+  "hsn_code",
   "column_break0",
   "disabled",
   "allow_alternative_item",
@@ -943,6 +944,11 @@
    "fieldname": "is_pol_item",
    "fieldtype": "Check",
    "label": "Is POL Item"
+  },
+  {
+   "fieldname": "hsn_code",
+   "fieldtype": "Data",
+   "label": "HSN Code"
   }
  ],
  "icon": "fa fa-tag",
@@ -950,7 +956,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-21 13:57:36.369138",
+ "modified": "2022-11-28 11:57:00.138881",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -2,6 +2,24 @@
 // For license information, please see license.txt
 
 frappe.query_reports["Production Summary"] = {
+	onload:function(query_report){
+		if  (query_report.get_filter_values("periodicity").periodicity != 'Daily'){
+			frappe.query_report.toggle_filter_display('fiscal_year', false);
+			frappe.query_report.toggle_filter_display('from_date', true);
+			frappe.query_report.toggle_filter_display('to_date', true);
+		}else{
+			frappe.query_report.toggle_filter_display('fiscal_year', true);
+			frappe.query_report.toggle_filter_display('from_date', false);
+			frappe.query_report.toggle_filter_display('to_date', false);
+		}
+		if  (query_report.get_filter_values("periodicity").periodicity == 'Yearly'){
+			frappe.query_report.toggle_filter_display('to_fiscal_year', false);
+		}else{
+			frappe.query_report.toggle_filter_display('to_fiscal_year', true);
+		}
+		query_report.refresh()
+
+	},
 	"filters": [
 		{
 			"fieldname": "cost_center",
@@ -14,18 +32,6 @@ frappe.query_reports["Production Summary"] = {
 			"label": __("Branch"),
 			"fieldtype": "Link",
 			"options": "Branch"
-		},
-		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.month_start()
-		},
-		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
-			"fieldtype": "Date",
-			"default":frappe.datetime.get_today()
 		},
 		{
 			"fieldname": "warehouse",
@@ -67,14 +73,19 @@ frappe.query_reports["Production Summary"] = {
 			"default": "Daily",
 			"reqd": 1,
 			"on_change":(query_report)=>{
-				var from_date = query_report.get_filter("from_date");
-				var to_date = query_report.get_filter("to_date");
 				if  (query_report.get_filter_values("periodicity").periodicity != 'Daily'){
-					from_date.toggle(false)
-					to_date.toggle(false)
+					frappe.query_report.toggle_filter_display('fiscal_year', false);
+					frappe.query_report.toggle_filter_display('from_date', true);
+					frappe.query_report.toggle_filter_display('to_date', true);
 				}else{
-					from_date.toggle(true)
-					to_date.toggle(true)
+					frappe.query_report.toggle_filter_display('fiscal_year', true);
+					frappe.query_report.toggle_filter_display('from_date', false);
+					frappe.query_report.toggle_filter_display('to_date', false);
+				}
+				if  (query_report.get_filter_values("periodicity").periodicity == 'Yearly'){
+					frappe.query_report.toggle_filter_display('to_fiscal_year', false);
+				}else{
+					frappe.query_report.toggle_filter_display('to_fiscal_year', true);
 				}
 				query_report.refresh()
 			}
@@ -86,6 +97,25 @@ frappe.query_reports["Production Summary"] = {
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
 			"reqd": 1
+		},
+		{
+			"fieldname": "to_fiscal_year",
+			"label": __("To Fiscal Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+		},
+		{
+			"fieldname":"from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.month_start()
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+			"default":frappe.datetime.get_today()
 		},
 		{
 			"fieldname": "company",

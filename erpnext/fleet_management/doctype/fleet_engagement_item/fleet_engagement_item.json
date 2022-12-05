@@ -1,0 +1,307 @@
+{
+ "actions": [],
+ "creation": "2022-11-26 12:32:31.887807",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "equipment",
+  "operator",
+  "column_break_3",
+  "equipment_type",
+  "operator_name",
+  "section_break_6",
+  "shift_type",
+  "shift_start_time",
+  "column_break_8",
+  "hrs_in_shift",
+  "shift_end_time",
+  "section_break_12",
+  "expense_head",
+  "distance",
+  "column_break_14",
+  "trip_or_hole",
+  "no_of_trip",
+  "holes",
+  "column_break_16",
+  "qtymt",
+  "meterage_drilled",
+  "km_reading_section",
+  "uom",
+  "schedule_working_hrs",
+  "total_km",
+  "column_break_12",
+  "initial_km",
+  "column_break_22",
+  "final_km",
+  "time_recordhours_section",
+  "start_time",
+  "column_break_18",
+  "end_time",
+  "ot_hr",
+  "column_break_20",
+  "total_hours",
+  "downtime_reason_section",
+  "downtime_reason",
+  "column_break_24",
+  "downtime_hrs",
+  "section_break_26",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "operator",
+   "fieldtype": "Link",
+   "label": "Operator",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "operator.employee_name",
+   "fieldname": "operator_name",
+   "fieldtype": "Data",
+   "label": "Operator Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "shift_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift Type",
+   "options": "Shift Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nature Of Work",
+   "options": "Expense Head",
+   "reqd": 1
+  },
+  {
+   "fieldname": "km_reading_section",
+   "fieldtype": "Section Break",
+   "label": "KM/Hr Reading"
+  },
+  {
+   "fieldname": "initial_km",
+   "fieldtype": "Float",
+   "label": "Initial KM/Hr",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_km",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total KM/Hr",
+   "read_only": 1
+  },
+  {
+   "fieldname": "time_recordhours_section",
+   "fieldtype": "Section Break",
+   "label": "Time Record(Hours)"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Datetime",
+   "label": "Start Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Datetime",
+   "label": "End Time",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_hours",
+   "fieldtype": "Float",
+   "label": "Total Hours",
+   "read_only": 1
+  },
+  {
+   "fieldname": "downtime_reason_section",
+   "fieldtype": "Section Break",
+   "label": "Downtime Reason"
+  },
+  {
+   "fieldname": "downtime_reason",
+   "fieldtype": "Link",
+   "label": "Downtime Reason",
+   "options": "Downtime Reason"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.downtime_reason",
+   "fieldname": "downtime_hrs",
+   "fieldtype": "Float",
+   "label": "Downtime Hrs",
+   "mandatory_depends_on": "eval:doc.downtime_reason"
+  },
+  {
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "final_km",
+   "fieldtype": "Float",
+   "label": "Final KM/Hr",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "shift_type.no_of_working_hrs",
+   "fieldname": "hrs_in_shift",
+   "fieldtype": "Float",
+   "label": "Hrs in shift",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.trip_or_hole == \"Trip\"",
+   "fieldname": "no_of_trip",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "No Of Trip",
+   "mandatory_depends_on": "eval:doc.trip_or_hole == \"Trip\""
+  },
+  {
+   "fieldname": "qtymt",
+   "fieldtype": "Float",
+   "label": "Qty(MT)"
+  },
+  {
+   "fetch_from": "shift_type.start_time",
+   "fieldname": "shift_start_time",
+   "fieldtype": "Time",
+   "label": "Shift Start Time",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shift_type.end_time",
+   "fieldname": "shift_end_time",
+   "fieldtype": "Time",
+   "label": "Shift End Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ot_hr",
+   "fieldtype": "Float",
+   "label": "OT Hr"
+  },
+  {
+   "fieldname": "distance",
+   "fieldtype": "Link",
+   "label": "Distance",
+   "options": "Distance"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Select",
+   "label": "Reading UOM",
+   "options": "\nKM\nHour",
+   "reqd": 1
+  },
+  {
+   "fieldname": "trip_or_hole",
+   "fieldtype": "Select",
+   "label": "Reading UOM(Trip/Hole)",
+   "options": "\nTrip\nHole"
+  },
+  {
+   "depends_on": "eval:doc.uom == \"Hour\"",
+   "fieldname": "schedule_working_hrs",
+   "fieldtype": "Float",
+   "label": "Schedule Working Hrs"
+  },
+  {
+   "depends_on": "eval:doc.trip_or_hole == \"Hole\"",
+   "fieldname": "holes",
+   "fieldtype": "Link",
+   "label": "Holes",
+   "mandatory_depends_on": "eval:doc.trip_or_hole == \"Hole\"",
+   "options": "No Of Holes"
+  },
+  {
+   "fieldname": "meterage_drilled",
+   "fieldtype": "Float",
+   "label": "Meterage Drilled"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-11-30 11:07:16.205661",
+ "modified_by": "Administrator",
+ "module": "Fleet Management",
+ "name": "Fleet Engagement Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

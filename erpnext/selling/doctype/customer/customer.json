@@ -33,6 +33,12 @@
   "customer_type",
   "country",
   "represents_company",
+  "consolidation_section",
+  "inter_company",
+  "column_break_26",
+  "company_code",
+  "column_break_28",
+  "company_name",
   "allowed_to_transact_section",
   "companies",
   "currency_and_price_list",
@@ -47,7 +53,8 @@
   "customer_primary_contact",
   "mobile_no",
   "email_id",
-  "column_break_26",
+  "fax_no",
+  "column_break_45",
   "customer_primary_address",
   "primary_address",
   "default_receivable_accounts",
@@ -59,7 +66,7 @@
   "credit_limits",
   "more_info",
   "customer_details",
-  "column_break_45",
+  "column_break_57",
   "market_segment",
   "industry",
   "website",
@@ -171,8 +178,6 @@
   {
    "fieldname": "customer_group",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Customer Group",
    "oldfieldname": "customer_group",
    "oldfieldtype": "Link",
@@ -529,6 +534,8 @@
   {
    "fieldname": "country",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Country",
    "options": "Country",
    "reqd": 1
@@ -544,6 +551,46 @@
    "fieldtype": "Table",
    "label": "Advance Accounts",
    "options": "Party Advance Account"
+  },
+  {
+   "fieldname": "fax_no",
+   "fieldtype": "Data",
+   "label": "Fax No"
+  },
+  {
+   "fieldname": "consolidation_section",
+   "fieldtype": "Section Break",
+   "label": "Consolidation"
+  },
+  {
+   "default": "0",
+   "fieldname": "inter_company",
+   "fieldtype": "Check",
+   "label": "Is DHI Company"
+  },
+  {
+   "depends_on": "eval:doc.inter_company == 1",
+   "fieldname": "company_code",
+   "fieldtype": "Link",
+   "label": "DHI Company",
+   "mandatory_depends_on": "eval:doc.inter_company == 1",
+   "options": "DHI Company"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.inter_company",
+   "fetch_from": "company_code.company",
+   "fieldname": "company_name",
+   "fieldtype": "Data",
+   "label": "Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_57",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -557,7 +604,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-24 15:27:26.557454",
+ "modified": "2022-12-03 09:37:36.025838",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -636,12 +683,10 @@
    "role": "Accounts Manager"
   }
  ],
- "quick_entry": 1,
  "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],
- "title_field": "customer_name",
  "track_changes": 1
 }

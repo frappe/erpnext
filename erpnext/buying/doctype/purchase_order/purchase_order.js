@@ -90,7 +90,13 @@ frappe.ui.form.on("Purchase Order", {
 			}, __('Create'));
 		}
 	},
-
+	item_group: function(frm){
+		frm.fields_dict["items"].grid.get_field("item_code").get_query = function (doc) {
+			return {
+				filters: { 'item_group': frm.doc.item_group}
+			};
+		};
+	},
 	onload: function(frm) {
 		set_schedule_date(frm);
 		if (!frm.doc.transaction_date){
@@ -99,6 +105,11 @@ frappe.ui.form.on("Purchase Order", {
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
+		});
+		frm.set_query("item_group", function (doc) {
+			return {
+				filters:{'is_group':1}
+			};
 		});
 	},
 

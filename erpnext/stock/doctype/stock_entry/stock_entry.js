@@ -43,6 +43,12 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query("item_group", function (doc) {
+			return {
+				filters:{'is_group':1}
+			};
+		});
+
 		frm.set_query('target_warehouse_address', function () {
 			return {
 				filters: {
@@ -114,6 +120,14 @@ frappe.ui.form.on('Stock Entry', {
 		attach_bom_items(frm.doc.bom_no);
 	},
 
+	item_group: function(frm){
+		frm.fields_dict["items"].grid.get_field("item_code").get_query = function (doc) {
+			return {
+				filters: { 'item_group': frm.doc.item_group}
+			};
+		};
+	},
+	
 	setup_quality_inspection: function (frm) {
 		if (!frm.doc.inspection_required) {
 			return;
@@ -346,6 +360,7 @@ frappe.ui.form.on('Stock Entry', {
 					warehouse: frm.doc.to_warehouse
 				},
 				callback: (r) => {
+					console.log(r.message)
 					if (!frm.doc.in_transit) {
 						frm.page.set_primary_action(__('Transfer'), () => {
 							frm.set_value("in_transit", 1);
@@ -402,7 +417,27 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 	},
-
+	branch: function(frm, cdt, cdn){
+		if(frm.doc.branch != null || frm.doc.branch != "" || frm.doc.branch != undefined){
+			frappe.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Branch",
+					fieldname: "cost_center",
+					filters: { name: frm.doc.branch },
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						let doctype = frm.doc.items[0].doctype;
+						$.each(frm.doc.items || [], function (i, item) {
+							frappe.model.set_value(doctype, item.name, "cost_center", r.message.cost_center);
+						});
+					}
+				}
+			});
+		}
+		frm.refresh_fields();
+	},
 	company: function (frm) {
 		if (frm.doc.company) {
 			var company_doc = frappe.get_doc(":Company", frm.doc.company);

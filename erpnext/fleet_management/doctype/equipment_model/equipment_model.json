@@ -21,10 +21,10 @@
   {
    "fieldname": "equipment_type",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Equipment Type",
-   "options": "Equipment Type",
-   "reqd": 1
+   "options": "Equipment Type"
   },
   {
    "fieldname": "model",
@@ -71,7 +71,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-20 14:38:53.087332",
+ "modified": "2022-11-28 17:45:02.871237",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Model",
@@ -108,6 +108,15 @@
    "read": 1,
    "report": 1,
    "role": "Fleet User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
    "share": 1
   }
  ],

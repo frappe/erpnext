@@ -28,14 +28,15 @@
   "section_break_4",
   "pol_type",
   "item_name",
-  "cur_km_reading",
+  "uom",
   "column_break_6",
   "qty",
   "stock_uom",
-  "km_difference",
+  "cur_km_reading",
   "column_break_8",
   "rate",
   "mileage",
+  "km_difference",
   "advance_details_section",
   "get_pol_expense",
   "items",
@@ -200,7 +201,8 @@
   {
    "fieldname": "memo_number",
    "fieldtype": "Data",
-   "label": "Cash Memo Number"
+   "label": "Cash Memo Number",
+   "reqd": 1
   },
   {
    "fieldname": "remarks",
@@ -214,13 +216,13 @@
   {
    "fieldname": "cur_km_reading",
    "fieldtype": "Float",
-   "label": "Current KM Reading",
+   "label": "Current KM/HR Reading",
    "reqd": 1
   },
   {
    "fieldname": "km_difference",
    "fieldtype": "Float",
-   "label": "KM Difference",
+   "label": "KM/Hr Difference",
    "read_only": 1
   },
   {
@@ -296,12 +298,20 @@
    "label": "Fuelbook Branch",
    "options": "Branch",
    "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.reading_uom",
+   "fieldname": "uom",
+   "fieldtype": "Data",
+   "label": "UOM",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-24 15:40:23.016380",
+ "modified": "2022-12-03 11:47:17.266884",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Receive",

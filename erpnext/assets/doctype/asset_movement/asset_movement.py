@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-
 class AssetMovement(Document):
 	def validate(self):
 		self.validate_cost_center()
@@ -137,10 +136,41 @@ class AssetMovement(Document):
 				),
 				args,
 			)
-			# if latest_movement_entry:
-			# 	current_cost_center = latest_movement_entry[0][0]
-			# 	current_employee 	= latest_movement_entry[0][1]
-			# 	current_employee_name= latest_movement_entry[0][2]
-			# frappe.db.set_value("Asset", d.asset, "cost_center", current_cost_center)
-			# frappe.db.set_value("Asset", d.asset, "custodian", current_employee)
-			# frappe.db.set_value("Asset", d.asset, "custodian_name", current_employee_name)
+			
+			if latest_movement_entry:
+				current_location = latest_movement_entry[0][0]
+				current_employee = latest_movement_entry[0][1]
+
+			frappe.db.set_value("Asset", d.asset, "location", current_location)
+			frappe.db.set_value("Asset", d.asset, "custodian", current_employee)
+			
+	@frappe.whitelist()
+	def get_asset_list(self):
+		if not self.from_employee:
+			frappe.throw("From Employee is Mandatory")
+		else:
+			if self.to_single:
+				if not self.to_employee:
+					frappe.throw("To Employee is Mandatory")
+				elif self.from_employee == self.to_employee:
+					frappe.throw("Select Different Employee")
+			asset_list = frappe.db.sql("""
+				select name
+				from `tabAsset` 
+				where custodian = {} 
+				and docstatus = 1 
+				""".format(self.from_employee),as_dict = 1)
+			if asset_list:
+				self.set("assets",[])
+				for x in asset_list:
+					row = self.append("assets",{})
+					data = {"asset":x.name, 
+							"from_employee":self.from_employee, 
+							"to_employee":self.to_employee, 
+							"source_cost_center": frappe.db.get_value("Employee",self.from_employee,"cost_center"),
+							"target_cost_center": frappe.db.get_value("Employee",self.to_employee,"cost_center")
+							}
+					row.update(data)
+
+
+			

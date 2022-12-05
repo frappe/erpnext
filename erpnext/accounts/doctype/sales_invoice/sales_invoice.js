@@ -504,7 +504,20 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		this.calculate_taxes_and_totals();
 	}
 };
-
+frappe.ui.form.on("Other Charge Entry", {
+	rate:function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		if (flt(row.rate) > 0){
+			row.amount = flt(row.rate) * flt(frm.doc.total_qty)
+			frm.refresh_field('other_charges')
+		}
+	},
+	other_charges_add:function(frm,cdt,cdn){
+		let row = locals[cdt][cdn]
+		row.cost_center = frm.doc.cost_center
+		frm.refresh_field('other_charges')
+	}
+})
 // for backward compatibility: combine new and previous states
 extend_cscript(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
 
@@ -525,7 +538,12 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 		]
 	}
 }
-
+cur_frm.fields_dict["other_charges"].grid.get_field("account").get_query = function (doc) {
+	return {
+		filters: { 'is_group': 0,
+					'account_type':["in",["Income Account","Expense Account"]]}
+	};
+};
 cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 	return{
 		filters:{
@@ -1060,3 +1078,149 @@ var select_loyalty_program = function(frm, loyalty_programs) {
 
 	dialog.show();
 }
+
+
+// Function for validating Loss Tolerance
+function validate_loss_tolerance(frm, cdt, cdn){
+	var item = frappe.get_doc(cdt, cdn)
+
+	if (item.qty > 0)
+	{
+		 if (item.accepted_qty >= 0 && item.accepted_qty <= item.qty)
+		 {
+			   var loss_qty = item.qty - item.accepted_qty, normal_loss = 0, abnormal_loss = 0;
+
+			   if (item.loss_method == "Quantity in %")
+			   {
+				   if ((loss_qty/item.qty)*100 <= item.loss_tolerance)
+				   {
+						normal_loss = loss_qty;
+				   }
+				   else
+				   {
+						normal_loss = (item.qty*item.loss_tolerance)/100;
+						abnormal_loss = loss_qty-normal_loss
+				   }
+			   }
+			   else if (item.loss_method == "Quantity in Flat")
+			   {
+				   if (loss_qty <= item.loss_qty_flat)
+				   {
+						normal_loss = loss_qty;
+				   }
+				   else
+				   {
+						normal_loss = item.loss_qty_flat;
+						abnormal_loss = loss_qty-normal_loss
+				   }
+			   }
+			   frappe.model.set_value(cdt, cdn, "normal_loss", normal_loss);
+			   frappe.model.set_value(cdt, cdn, "normal_loss_amt", normal_loss*item.rate);
+			   frappe.model.set_value(cdt, cdn, "abnormal_loss", abnormal_loss);
+			   frappe.model.set_value(cdt, cdn, "abnormal_loss_amt", abnormal_loss*item.rate);
+			   frappe.model.set_value(cdt, cdn, "excess_qty", 0);
+			   frappe.model.set_value(cdt, cdn, "excess_amt", 0);
+			   // Billed Quantity should not change irrespective of loss
+		 }
+		 else if(item.accepted_qty > item.qty)
+		 {
+			   var excess_qty=item.accepted_qty-item.qty;
+			   frappe.model.set_value(cdt, cdn, "normal_loss", 0);
+			   frappe.model.set_value(cdt, cdn, "abnormal_loss", 0);
+			   frappe.model.set_value(cdt, cdn, "normal_loss_amt", 0);
+			   frappe.model.set_value(cdt, cdn, "abnormal_loss_amt", 0);
+			   // Billed Quantity should not change irrespective of loss
+			   frappe.model.set_value(cdt, cdn, "excess_qty", excess_qty);
+			   frappe.model.set_value(cdt, cdn, "excess_amt", excess_qty*item.rate);
+		 }
+		 else
+		 {
+			  msgprint(__("Accepted Quantity should be between 1 and "+item.qty));
+			  // Allowing the user to input more accpted qty than delivered qty as per request
+			  frappe.model.set_value(cdt, cdn, "accepted_qty", item.qty);
+			  frappe.model.set_value(cdt, cdn, "normal_loss", 0);
+			  frappe.model.set_value(cdt, cdn, "abnormal_loss", 0);
+			  frappe.model.set_value(cdt, cdn, "normal_loss_amt", 0);
+			  frappe.model.set_value(cdt, cdn, "abnormal_loss_amt", 0);
+			  frappe.model.set_value(cdt, cdn, "excess_qty", 0);
+			  frappe.model.set_value(cdt, cdn, "excess_amt", 0);
+			  frappe.model.set_value(cdt, cdn, "qty", item.accepted_qty);
+		 }
+
+	}
+}
+
+frappe.ui.form.on('Sales Invoice Item', {
+	"accepted_qty":function(frm, cdt, cdn){
+		if (cur_frm.doc.docstatus == 0)
+		{
+			 validate_loss_tolerance(frm, cdt, cdn);
+		}
+   	},
+	"loss_method":function(frm, cdt, cdn){
+		if (cur_frm.doc.docstatus == 0)
+		{
+			 validate_loss_tolerance(frm, cdt, cdn);
+		}
+   	},
+   "name_tolerance":function(frm, cdt, cdn){
+	if (cur_frm.doc.docstatus == 0)
+		{
+			validate_loss_tolerance(frm, cdt, cdn);
+		}
+	}
+})
+
+
+// Validate on Tolerange method value change
+frappe.ui.form.on("Sales Invoice Item","loss_method",function(frm, cdt, cdn){
+	if (cur_frm.doc.docstatus == 0)
+	{
+		 validate_loss_tolerance(frm, cdt, cdn);
+	}
+});
+
+frappe.ui.form.on("Sales Invoice","items_on_form_rendered", function(frm, grid_row) {
+   cur_frm.call({
+	   method: "erpnext.accounts.accounts_custom_functions.get_loss_tolerance",
+	   callback: function(r) {
+			var grid_row = cur_frm.open_grid_row();
+			if (grid_row.grid_form.fields_dict.name_tolerance.value)
+			{
+				 console.log("Record Already Set")
+			}
+			else
+			{
+				 if (cur_frm.doc.docstatus == 0)
+				 {
+					  grid_row.grid_form.fields_dict.name_tolerance.set_value(r.message[0][0]);
+					  grid_row.grid_form.fields_dict.loss_tolerance.set_value(r.message[0][1]);
+					  grid_row.grid_form.fields_dict.loss_qty_flat.set_value(r.message[0][2]);
+					  grid_row.grid_form.fields_dict.loss_method.set_value("Quantity in %");
+				 }
+			}
+
+			// Setting default quantity for accepted quantity
+			if (cur_frm.doc.docstatus == 0)
+			{
+				 if (grid_row.grid_form.fields_dict.accepted_qty.value > 0)
+				 {
+					  console.log("Accepted Qty is already set")
+				 }
+				 else
+				 {
+					  if (grid_row.grid_form.fields_dict.accepted_qty.value == 0)
+					  {
+						   var actual_qty = grid_row.grid_form.fields_dict.qty.value;
+						   console.log("Quantity"+actual_qty)
+						   grid_row.grid_form.fields_dict.accepted_qty.set_value(actual_qty);
+						   grid_row.grid_form.fields_dict.normal_loss.set_value(0);
+						   grid_row.grid_form.fields_dict.abnormal_loss.set_value(0);
+						   grid_row.grid_form.fields_dict.normal_loss_amt.set_value(0);
+						   grid_row.grid_form.fields_dict.abnormal_loss_amt.set_value(0);
+					  }
+				 }
+			}
+	   }
+  })
+})

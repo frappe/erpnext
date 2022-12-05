@@ -1,0 +1,85 @@
+<div class="page-break">
+    <div style="margin-bottom: 7px;" class="text-center">
+        <!-- {%= frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")] %} -->
+    </div>
+    <h1 style="text-align: center;"><u>{%= __("EME Bill")%}</u></h1>
+    <table class="table1" style="margin-top: 1px; text-align:justify;font-size:small; width:100%;">
+        <tr>
+            <td>Branch</td>
+            <td>:</td>
+            <td>{{ data[0].branch}}</td>
+            <td>Posting Date</td>
+            <td>:</td>
+            <td>{{ frappe.format(data[0].posting_date,{fieldtype: "Date"})}}</td>
+        </tr>
+        <tr>
+            <td>Vendor/Supplier</td>
+            <td>:</td>
+            <td>{{ data[0].supplier}}</td>
+            <td>Reference</td>
+            <td>:</td>
+            <td>{{data[0].ref}}</td>
+        </tr>
+        <tr>
+            <td>From Date</td>
+            <td>:</td>
+            <td>{{ frappe.format(data[0].from_date,{fieldtype: "Date"})}}</td>
+            <td>To Date</td>
+            <td>:</td>
+            <td>{{ frappe.format(data[0].to_date,{fieldtype: "Date"})}}</td>
+        </tr>
+    </table>
+    <table class="table table-bordered" style="margin-top: 10px; text-align:justify;font-size:small; width:100% ">
+        <thead>
+            <th style="text-align: center;">Equipment Type</th>
+            <th style="text-align: center;">Nos</th>
+            <th style="text-align: center;">Total Hours</th>
+            <th style="text-align: center;">Rate</th>
+            <th style="text-align: center;">Amount(Nu)</th>
+        </thead>
+        <tbody>
+            {% for d in data %}
+                <tr>
+                    <td >{{d.equipment_type}}</td>
+                    <td style="text-align: right;">{{d.no}}</td>
+                    <td>{{ frappe.format(d.total_hours, {fieldtype: "Float"})}}</td>
+                    <td>{{ frappe.format(d.rate, {fieldtype: "Currency"})}}</td>
+                    <td>{{ frappe.format(d.total_hours * d.rate, {fieldtype: "Currency"})}}</td>
+                </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="4">Gross Amount(a)</td>
+                <td>{{ frappe.format(data[0].total_amount, {fieldtype: "Currency"})}}</td>
+            </tr>
+            <tr>
+                <td colspan="4">TDS(%)</td>
+                <td>{{ frappe.format(data[0].tds_percent, {fieldtype: "Float"})}}</td>
+            </tr>
+            <tr>
+                <td colspan="4">TDS Amount(b)</td>
+                <td>{{ frappe.format(data[0].tds_amount, {fieldtype: "Currency"})}}</td>
+            </tr>
+            <tr>
+                <td colspan="4">Total Deduction Amount(c)</td>
+                <td>{{ frappe.format(data[0].deduction_amount, {fieldtype: "Currency"})}}</td>
+            </tr>
+            <tr>
+                <td colspan="4">Payable Amount = a-b-c</td>
+                <td>{{ frappe.format(data[0].payable_amount, {fieldtype: "Currency"})}}</td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="row" style="margin-top: 15px;">
+        <b><lable>Narration<lable>:</b>
+            {{data[0].remarks}}
+    </div>
+    <div class="row section-break" style="margin-top: 60px;">
+        <div class="col-xs-6 column-break" style="text-align: left;">Prepared By</div>
+        <div class="col-xs-6 column-break" style="text-align: center;">Verified By</div>
+    </div>
+    <div class="row section-break" style="margin-top: 60px;">
+        <div class="col-xs-6 column-break" style="text-align: left;">Approved By</div>
+        <div class="col-xs-6 column-break" style="text-align: center;">Received By</div>
+    </div>
+    </div>
+    <div class="printedby">This print is system generated and should be considered VALID only with appropriate seal and/or signature. <br>  Printed on {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</div>

@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, flt, getdate, nowdate
+from frappe.utils import cint, flt, getdate, nowdate, date_diff
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
@@ -117,7 +117,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_cwip_accounts()
 		self.validate_provisional_expense_account()
-
+		self.calculate_delay_days()
 		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
@@ -127,7 +127,11 @@ class PurchaseReceipt(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
-
+	def calculate_delay_days(self):
+		if self.actual_receipt_date and self.schedule_date < self.actual_receipt_date:
+			self.delay_by = flt(date_diff(self.actual_receipt_date,self.schedule_date)) -1
+		else:
+			self.delay_by = 0
 	def validate_cwip_accounts(self):
 		for item in self.get("items"):
 			if item.is_fixed_asset and is_cwip_accounting_enabled(item.asset_category):

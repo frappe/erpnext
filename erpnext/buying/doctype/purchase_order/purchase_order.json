@@ -2,7 +2,7 @@
  "actions": [],
  "allow_auto_repeat": 1,
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:PO{YY}{MM}{####}",
  "creation": "2013-05-21 16:16:39",
  "doctype": "DocType",
  "document_type": "Document",
@@ -10,9 +10,9 @@
  "field_order": [
   "supplier_section",
   "business_activity",
-  "branch",
   "title",
-  "naming_series",
+  "branch",
+  "item_group",
   "supplier",
   "get_items_from_open_material_requests",
   "supplier_name",
@@ -24,6 +24,7 @@
   "company",
   "transaction_date",
   "schedule_date",
+  "deliver_to",
   "order_confirmation_no",
   "order_confirmation_date",
   "amended_from",
@@ -158,26 +159,13 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
    "fieldname": "title",
    "fieldtype": "Data",
-   "hidden": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Title",
-   "no_copy": 1,
    "print_hide": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "PUR-ORD-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -232,7 +220,6 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
@@ -603,6 +590,7 @@
   {
    "fieldname": "shipping_rule",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Shipping Rule",
    "options": "Shipping Rule",
    "print_hide": 1
@@ -716,6 +704,7 @@
    "collapsible_depends_on": "apply_discount_on",
    "fieldname": "discount_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Additional Discount"
   },
   {
@@ -859,6 +848,7 @@
    "collapsible": 1,
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Payment Terms"
   },
   {
@@ -1028,6 +1018,7 @@
    "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Subscription Section"
   },
   {
@@ -1069,6 +1060,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Tax Category",
    "options": "Tax Category"
   },
@@ -1148,6 +1140,7 @@
    "label": "Accounting Dimensions "
   },
   {
+   "fetch_from": "branch.cost_center",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -1191,6 +1184,7 @@
    "label": "Purchase Order Header and Footer"
   },
   {
+   "default": "With reference to your quotation no. ............. dated .............., kindly arrange to supply the following materials at your quoted rate and forward the bill for settlement.",
    "fieldname": "po_header",
    "fieldtype": "Text Editor",
    "label": "Purchase Order Header"
@@ -1200,20 +1194,33 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Thanking You<br>\nYours Sincerely<br><br><br>\n\n\n\n\nChhimi Rinzin<br>\nGeneral Manager-HRAD<br><br>\n\n\n\nCc:<br>\n<ol>\n  <li>GM, HRAD/PMD/RSLO for information;</li>\n  <li>Sr. Mines Manager, KGM for information;</li>\n  <li>Asst. Manager, AFD, RSLO, S/J for information;</li>\n <li>Procurement/Store Asst. for necessary action.</li>\n</ol>",
    "fieldname": "po_footer_text",
    "fieldtype": "Text Editor",
    "label": "Purchase Order Footer"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "deliver_to",
+   "fieldtype": "Link",
+   "label": "Deliver To",
+   "options": "Cost Center"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 14:38:59.615465",
+ "modified": "2022-12-01 12:21:26.747177",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1262,6 +1269,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",
- "title_field": "supplier_name",
+ "title_field": "title",
  "track_changes": 1
 }

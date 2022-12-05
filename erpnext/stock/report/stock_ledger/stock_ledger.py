@@ -62,7 +62,7 @@ def execute(filters=None):
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
-
+		
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
@@ -97,13 +97,34 @@ def get_columns(filters):
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
 		{
-			"label": _("Item"),
+			"label": _("Item Code"),
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 100,
 		},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
+		{
+			"label": _("Item Group"),
+			"fieldname": "item_group",
+			"fieldtype": "Link",
+			"options": "Item Group",
+			"width": 100,
+		},
+		{
+			"label": _("Item Sub Group"),
+			"fieldname": "item_sub_group",
+			"fieldtype": "Link",
+			"options": "Item Sub Group",
+			"width": 120,
+		},
+		{
+			"label": _("Warehouse"),
+			"fieldname": "warehouse",
+			"fieldtype": "Link",
+			"options": "Warehouse",
+			"width": 150,
+		},
 		{
 			"label": _("Stock UOM"),
 			"fieldname": "stock_uom",
@@ -134,11 +155,26 @@ def get_columns(filters):
 				"convertible": "qty",
 			},
 			{
+				"label": _("Incoming Rate"),
+				"fieldname": "incoming_rate",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
+				"convertible": "rate",
+			},
+			{
 				"label": _("Out Qty"),
 				"fieldname": "out_qty",
 				"fieldtype": "Float",
 				"width": 80,
 				"convertible": "qty",
+			},
+			{
+				"label": _("Value Change"),
+				"fieldname": "stock_value_difference",
+				"fieldtype": "Currency",
+				"width": 110,
+				"options": "Company:company:default_currency",
 			},
 			{
 				"label": _("Balance Qty"),
@@ -148,41 +184,11 @@ def get_columns(filters):
 				"convertible": "qty",
 			},
 			{
-				"label": _("Voucher #"),
-				"fieldname": "voucher_no",
-				"fieldtype": "Dynamic Link",
-				"options": "voucher_type",
-				"width": 150,
-			},
-			{
-				"label": _("Warehouse"),
-				"fieldname": "warehouse",
-				"fieldtype": "Link",
-				"options": "Warehouse",
-				"width": 150,
-			},
-			{
-				"label": _("Item Group"),
-				"fieldname": "item_group",
-				"fieldtype": "Link",
-				"options": "Item Group",
-				"width": 100,
-			},
-			{
-				"label": _("Brand"),
-				"fieldname": "brand",
-				"fieldtype": "Link",
-				"options": "Brand",
-				"width": 100,
-			},
-			{"label": _("Description"), "fieldname": "description", "width": 200},
-			{
-				"label": _("Incoming Rate"),
-				"fieldname": "incoming_rate",
+				"label": _("Balance Value"),
+				"fieldname": "stock_value",
 				"fieldtype": "Currency",
 				"width": 110,
 				"options": "Company:company:default_currency",
-				"convertible": "rate",
 			},
 			{
 				"label": _("Valuation Rate"),
@@ -192,20 +198,29 @@ def get_columns(filters):
 				"options": "Company:company:default_currency",
 				"convertible": "rate",
 			},
-			{
-				"label": _("Balance Value"),
-				"fieldname": "stock_value",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-			},
-			{
-				"label": _("Value Change"),
-				"fieldname": "stock_value_difference",
-				"fieldtype": "Currency",
-				"width": 110,
-				"options": "Company:company:default_currency",
-			},
+			# {
+			# 	"label": _("Voucher #"),
+			# 	"fieldname": "voucher_no",
+			# 	"fieldtype": "Dynamic Link",
+			# 	"options": "voucher_type",
+			# 	"width": 150,
+			# },
+			# {
+			# 	"label": _("Brand"),
+			# 	"fieldname": "brand",
+			# 	"fieldtype": "Link",
+			# 	"options": "Brand",
+			# 	"width": 100,
+			# },
+			# {"label": _("Description"), "fieldname": "description", "width": 200},
+			# {
+			# 	"label": _("Incoming Rate"),
+			# 	"fieldname": "incoming_rate",
+			# 	"fieldtype": "Currency",
+			# 	"width": 110,
+			# 	"options": "Company:company:default_currency",
+			# 	"convertible": "rate",
+			# },
 			{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 			{
 				"label": _("Voucher #"),
@@ -214,21 +229,28 @@ def get_columns(filters):
 				"options": "voucher_type",
 				"width": 100,
 			},
+			# {
+			# 	"label": _("Batch"),
+			# 	"fieldname": "batch_no",
+			# 	"fieldtype": "Link",
+			# 	"options": "Batch",
+			# 	"width": 100,
+			# },
+			# {
+			# 	"label": _("Serial No"),
+			# 	"fieldname": "serial_no",
+			# 	"fieldtype": "Link",
+			# 	"options": "Serial No",
+			# 	"width": 100,
+			# },
+			# {"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 			{
-				"label": _("Batch"),
-				"fieldname": "batch_no",
+				"label": _("Expense Account"),
+				"fieldname": "expense_account",
 				"fieldtype": "Link",
-				"options": "Batch",
-				"width": 100,
+				"options": "Account",
+				"width": 150,
 			},
-			{
-				"label": _("Serial No"),
-				"fieldname": "serial_no",
-				"fieldtype": "Link",
-				"options": "Serial No",
-				"width": 100,
-			},
-			{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 			{
 				"label": _("Project"),
 				"fieldname": "project",
@@ -251,8 +273,11 @@ def get_columns(filters):
 
 def get_stock_ledger_entries(filters, items):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
+	sed = frappe.qb.DocType("Stock Entry Detail")
 	query = (
 		frappe.qb.from_(sle)
+		.inner_join(sed)
+		.on(sed.parent == sle.voucher_no)
 		.select(
 			sle.item_code,
 			CombineDatetime(sle.posting_date, sle.posting_time).as_("date"),
@@ -271,6 +296,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.batch_no,
 			sle.serial_no,
 			sle.project,
+			sed.expense_account,
 		)
 		.where(
 			(sle.docstatus < 2)
@@ -309,7 +335,7 @@ def get_stock_ledger_entries(filters, items):
 			)
 		)
 		query = query.where(ExistsCriterion(chilren_subquery))
-
+	
 	return query.run(as_dict=True)
 
 
@@ -354,7 +380,7 @@ def get_item_details(items, sl_entries, include_uom):
 	res = frappe.db.sql(
 		"""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+			item.name, item.item_name, item.description, item.item_group, item.item_sub_group, item.brand, item.stock_uom {cf_field}
 		from
 			`tabItem` item
 			{cf_join}

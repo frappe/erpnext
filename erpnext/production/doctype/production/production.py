@@ -356,7 +356,7 @@ class Production(StockController):
 				total = flt(self.no_of_labours) * flt(rate1) * flt(self.oms)
 
 			# calculate penalty
-			if flt(self.no_of_labours) < flt(self.minimum_labor):
+			if flt(self.no_of_labours) < flt(self.minimum_labor) and flt(self.eligible_for_penalty) == 1:
 				p_oms = self.get_previous_day_oms()
 				penalty = flt((flt(self.minimum_labor) - flt(self.no_of_labours)) * flt(p_oms) * flt(rate1),2)
 				grand_total = flt(flt(total) - flt(penalty),2)
@@ -365,7 +365,7 @@ class Production(StockController):
 		
 		elif self.labor_type == 'Indian':
 			total = flt(rate_per_mt_tire2) * flt(self.product_qty)
-			if flt(self.no_of_labours) < flt(self.minimum_labor):
+			if flt(self.no_of_labours) < flt(self.minimum_labor) and flt(self.eligible_for_penalty) == 1:
 				p_oms 	= self.get_previous_day_oms()
 				penalty = flt((flt(self.minimum_labor) - flt(self.no_of_labours)) * flt(p_oms) * flt(rate_per_mt_tire2),2)
 			grand_total = flt(total) - flt(penalty)

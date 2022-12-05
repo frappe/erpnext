@@ -41,10 +41,13 @@ class POLReceive(Document):
 
 	def calculate_km_diff(self):
 		pol_rev = qb.DocType("POL Receive")
+		if not self.uom:
+			self.uom = frappe.db.get_value("Equipment", self.equipment,"reading_uom")
+		
 		previous_km_reading = (
 								qb.from_(pol_rev)
 								.select(pol_rev.cur_km_reading)
-								.where((pol_rev.equipment == self.equipment) & (pol_rev.docstatus==1))
+								.where((pol_rev.equipment == self.equipment) & (pol_rev.docstatus==1) & (pol_rev.uom == self.uom))
 								.orderby( pol_rev.posting_date,order=qb.desc)
 								.orderby( pol_rev.posting_time,order=qb.desc)
 								.limit(1)
@@ -56,9 +59,12 @@ class POLReceive(Document):
 		else:
 			pv_km = previous_km_reading[0][0]
 		if flt(pv_km) >= flt(self.cur_km_reading):
-			frappe.throw("Current KM Reading cannot be less than Previous KM Reading({}) for Equipment Number <b>{}</b>".format(pv_km,self.equipment))
+			frappe.throw("Current KM/Hr Reading cannot be less than Previous KM/Hr Reading({}) for Equipment Number <b>{}</b>".format(pv_km,self.equipment))
 		self.km_difference = flt(self.cur_km_reading) - flt(pv_km)
-		self.mileage = flt(self.km_difference) / self.qty
+		if self.uom == "Hour":
+			self.mileage = self.qty / flt(self.km_difference)
+		else :
+			self.mileage = flt(self.km_difference) / self.qty
 
 	def validate_data(self):
 		if not self.fuelbook_branch:
@@ -75,14 +81,20 @@ class POLReceive(Document):
 		self.calculate_km_diff()
 		pol_exp = qb.DocType("POL Expense")
 		je 		= qb.DocType("Journal Entry")
+		data = []
 		data = (
 				qb.from_(pol_exp)
 				.inner_join(je)
 				.on(pol_exp.journal_entry == je.name)
 				.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-				.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment) == self.equipment)
+				.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment))
 				.orderby( pol_exp.entry_date,order=qb.desc)
-				.limit(1)
+				).run(as_dict=True)
+		data += (
+				qb.from_(pol_exp)
+				.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
+				.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1))
+				.orderby( pol_exp.entry_date,order=qb.desc)
 				).run(as_dict=True)
 		if not data:
 			frappe.throw("NO POL Expense Found against Equipment {}.Make sure Journal  Entry are submitted".format(self.equipment))

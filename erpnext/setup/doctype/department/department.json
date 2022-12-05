@@ -15,6 +15,7 @@
   "is_department",
   "is_division",
   "is_section",
+  "is_unit",
   "disabled",
   "lft",
   "rgt",
@@ -128,13 +129,19 @@
    "label": "Approver Level",
    "options": "Designation",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_unit",
+   "fieldtype": "Check",
+   "label": "Is Unit"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-11-22 12:46:28.690812",
+ "modified": "2022-11-26 12:53:18.399996",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Department",

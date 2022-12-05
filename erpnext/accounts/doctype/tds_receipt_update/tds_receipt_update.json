@@ -199,8 +199,7 @@
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category",
-   "reqd": 1
+   "options": "Tax Withholding Category"
   },
   {
    "fieldname": "cheque_no",
@@ -219,7 +218,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-23 14:03:33.136585",
+ "modified": "2022-11-28 17:37:19.635053",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "TDS Receipt Update",
@@ -236,6 +235,31 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

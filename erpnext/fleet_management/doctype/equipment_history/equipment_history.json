@@ -7,7 +7,6 @@
  "field_order": [
   "branch",
   "supplier",
-  "owner_name",
   "column_break1",
   "from_date",
   "to_date",
@@ -32,13 +31,6 @@
    "in_list_view": 1,
    "label": "Owner",
    "options": "Supplier",
-   "read_only": 1
-  },
-  {
-   "fieldname": "owner_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Owner Name",
    "read_only": 1
   },
   {
@@ -91,7 +83,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-26 12:56:52.229702",
+ "modified": "2022-11-27 20:49:55.509952",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment History",

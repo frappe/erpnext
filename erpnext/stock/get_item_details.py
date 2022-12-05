@@ -56,8 +56,10 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	        "set_warehouse": ""
 	}
 	"""
-
+	
 	args = process_args(args)
+	if args.get("doctype") == "Material Request" and overwrite_warehouse:
+		overwrite_warehouse = False
 	for_validate = process_string_args(for_validate)
 	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
@@ -131,6 +133,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.amount = flt(args.qty) * flt(out.rate)
 
 	out = remove_standard_fields(out)
+	
 	return out
 
 
@@ -764,7 +767,6 @@ def get_default_cost_center(args, item=None, item_group=None, brand=None, compan
 
 	if not cost_center and company:
 		cost_center = frappe.get_cached_value("Company", company, "cost_center")
-
 	return cost_center
 
 

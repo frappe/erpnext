@@ -141,80 +141,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Stock Transactions",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Material Request",
-   "link_count": 0,
-   "link_to": "Material Request",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock Entry",
-   "link_count": 0,
-   "link_to": "Stock Entry",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Customer",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Delivery Note",
-   "link_count": 0,
-   "link_to": "Delivery Note",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item, Supplier",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Purchase Receipt",
-   "link_count": 0,
-   "link_to": "Purchase Receipt",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pick List",
-   "link_count": 0,
-   "link_to": "Pick List",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Delivery Trip",
-   "link_count": 0,
-   "link_to": "Delivery Trip",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Settings",
    "link_count": 0,
    "onboard": 0,
@@ -720,10 +646,73 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Transactions",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Material Request",
+   "link_count": 0,
+   "link_to": "Material Request",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Entry",
+   "link_count": 0,
+   "link_to": "Stock Entry",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item, Customer",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Note",
+   "link_count": 0,
+   "link_to": "Delivery Note",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item, Supplier",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Receipt",
+   "link_count": 0,
+   "link_to": "Purchase Receipt",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Delivery Trip",
+   "link_count": 0,
+   "link_to": "Delivery Trip",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-24 10:29:39.166891",
- "modified_by": "Administrator",
+ "modified": "2022-11-29 17:43:01.489913",
+ "modified_by": "ugyen.choden@thimphutechpark.bt",
  "module": "Stock",
  "name": "Stock",
  "owner": "Administrator",

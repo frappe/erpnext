@@ -18,6 +18,7 @@
   "process_deferred_accounting",
   "reversal_of",
   "column_break1",
+  "mode_of_payment",
   "from_template",
   "company",
   "posting_date",
@@ -61,7 +62,6 @@
   "letter_head",
   "select_print_heading",
   "addtional_info",
-  "mode_of_payment",
   "payment_order",
   "column_break3",
   "is_opening",
@@ -582,7 +582,7 @@
    "link_fieldname": "journal_entry"
   }
  ],
- "modified": "2022-11-18 12:05:10.610995",
+ "modified": "2022-12-03 11:13:11.610888",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -625,6 +625,15 @@
    "read": 1,
    "report": 1,
    "role": "Auditor"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet Manager",
+   "share": 1
   }
  ],
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",

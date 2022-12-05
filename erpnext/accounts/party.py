@@ -391,8 +391,10 @@ def get_party_account(party_type, party=None, company=None,is_advance=None):
 				"account",
 			)
 
-	if not account and party_type in ["Customer", "Supplier"]:
-		if is_advance:
+	if not account and party_type in ["Customer", "Supplier","Employee"]:
+		if party_type == "Employee":
+			default_account_name = "employee_payable_account"
+		elif is_advance:
 			default_account_name = (
 				"advance_received_from_customer" if party_type == "Customer" else "advance_paid_to_supplier"
 			)

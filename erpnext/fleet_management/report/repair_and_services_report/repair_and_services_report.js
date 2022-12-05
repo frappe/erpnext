@@ -12,6 +12,20 @@ frappe.query_reports["Repair And Services Report"] = {
 			"options": "Branch"
 		},
 		{
+			"fieldname":"from_date",
+			"label": ("From Date"),
+			"fieldtype": "Date",
+			"width": "80",
+			"default":frappe.datetime.month_start()
+		},
+		{
+			"fieldname":"to_date",
+			"label": ("To Date"),
+			"fieldtype": "Date",
+			"width": "80",
+			"default":frappe.datetime.month_end()
+		},
+		{
 			"fieldname": "equipment",
 			"label": __("Equipment/Vehicle"),
 			"fieldtype": "Link",
@@ -25,11 +39,18 @@ frappe.query_reports["Repair And Services Report"] = {
 			"width": "120",
 			"options": "Equipment Type"
 		},
+		// {
+		// 	"fieldname": "equipment_model",
+		// 	"label": __("Equipment Model"),
+		// 	"fieldtype": "Data",
+		// 	"width": "120",
+		// },
 		{
-			"fieldname": "equipment_model",
-			"label": __("Equipment Model"),
-			"fieldtype": "Data",
+			"fieldname": "repair_and_services_type",
+			"label": __("Repair and Services Type"),
+			"fieldtype": "Select",
 			"width": "120",
+			"options":["","Preventive Maintenance","Proactive Maintenance","Breakdown Maintenance"]
 		},
 	]
 };

@@ -5,6 +5,7 @@
 import frappe
 from frappe import _
 from frappe.utils import cint, flt
+import json
 
 from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
@@ -27,11 +28,20 @@ def get_data(filters, show_party_name):
 		party_name_field = "title"
 	else:
 		party_name_field = "name"
+	if filters.get("party_type") in ("Customer", "Supplier", "Employee"):
+		party_group_field = frappe.scrub(str(filters.get("party_type")) + " Group")
+	else:
+		party_group_field = ""
 
-	party_filters = {"name": filters.get("party")} if filters.get("party") else {}
+	party_filters = frappe._dict()
+	if filters.get("party"):
+		party_filters["name"] = filters.get("party") 
+	if filters.get("party_group"):
+		party_filters[frappe.scrub(str(filters.get("party_type")) + " Group")] = filters.get("party_group") 
+
 	parties = frappe.get_all(
 		filters.get("party_type"),
-		fields=["name", party_name_field],
+		fields=["name", party_name_field, party_group_field],
 		filters=party_filters,
 		order_by="name",
 	)
@@ -53,9 +63,10 @@ def get_data(filters, show_party_name):
 	)
 	for party in parties:
 		row = {"party": party.name}
+		if party_group_field:
+			row["party_group"] = party.get(party_group_field)
 		if show_party_name:
 			row["party_name"] = party.get(party_name_field)
-
 		# opening
 		opening_debit, opening_credit = opening_balances.get(party.name, [0, 0])
 		row.update({"opening_debit": opening_debit, "opening_credit": opening_credit})
@@ -82,7 +93,6 @@ def get_data(filters, show_party_name):
 
 		if cint(filters.show_zero_values) or has_value:
 			data.append(row)
-
 	# Add total row
 
 	total_row.update({"party": "'" + _("Totals") + "'", "currency": company_currency})
@@ -93,21 +103,24 @@ def get_data(filters, show_party_name):
 
 def get_opening_balances(filters):
 
-	account_filter = ""
+	account_filter = cost_center_filter = ""
 	if filters.get("account"):
 		account_filter = "and account = %s" % (frappe.db.escape(filters.get("account")))
 
+	if filters.cost_center:
+		cost_center_filter = " and cost_center = %s" %(frappe.db.escape(filters.get("cost_center")))
+	
 	gle = frappe.db.sql(
 		"""
-		select party, sum(debit) as opening_debit, sum(credit) as opening_credit
+		select party, sum(debit) as opening_debit, sum(credit) as opening_credit, cost_center
 		from `tabGL Entry`
 		where company=%(company)s
 			and is_cancelled=0
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
-			{account_filter}
-		group by party""".format(
-			account_filter=account_filter
+			{account_filter} {cost_center_filter}
+		group by party, cost_center""".format(
+			account_filter=account_filter, cost_center_filter = cost_center_filter
 		),
 		{"company": filters.company, "from_date": filters.from_date, "party_type": filters.party_type},
 		as_dict=True,
@@ -123,22 +136,25 @@ def get_opening_balances(filters):
 
 def get_balances_within_period(filters):
 
-	account_filter = ""
+	account_filter = cost_center_filter = ""
 	if filters.get("account"):
 		account_filter = "and account = %s" % (frappe.db.escape(filters.get("account")))
 
+	if filters.get("cost_center"):
+		cost_center_filter = " and cost_center = %s" %(frappe.db.escape(filters.get("cost_center")))
+
 	gle = frappe.db.sql(
 		"""
-		select party, sum(debit) as debit, sum(credit) as credit
+		select party, sum(debit) as debit, sum(credit) as credit, cost_center
 		from `tabGL Entry`
 		where company=%(company)s
 			and is_cancelled = 0
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
 			and posting_date >= %(from_date)s and posting_date <= %(to_date)s
 			and ifnull(is_opening, 'No') = 'No'
-			{account_filter}
-		group by party""".format(
-			account_filter=account_filter
+			{account_filter} {cost_center_filter}
+		group by party, cost_center""".format(
+			account_filter=account_filter, cost_center_filter = cost_center_filter
 		),
 		{
 			"company": filters.company,
@@ -174,6 +190,12 @@ def get_columns(filters, show_party_name):
 			"label": _(filters.party_type),
 			"fieldtype": "Link",
 			"options": filters.party_type,
+			"width": 200,
+		},
+		{
+			"fieldname": "party_group",
+			"label": _("Group"),
+			"fieldtype": "Data",
 			"width": 200,
 		},
 		{

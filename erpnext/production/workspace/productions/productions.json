@@ -23,64 +23,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Master Data",
-   "link_count": 5,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Cost Of Product List",
-   "link_count": 0,
-   "link_to": "Cost Of Product List",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "COP Rate",
-   "link_count": 0,
-   "link_to": "COP Rate",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Location",
-   "link_count": 0,
-   "link_to": "Location",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item",
-   "link_count": 0,
-   "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item Type",
-   "link_count": 0,
-   "link_to": "Item Type",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Coal Raising",
    "link_count": 3,
    "onboard": 0,
@@ -247,9 +189,77 @@
    "link_type": "Report",
    "onboard": 1,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Data",
+   "link_count": 6,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Cost Of Product List",
+   "link_count": 0,
+   "link_to": "Cost Of Product List",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "COP Rate",
+   "link_count": 0,
+   "link_to": "COP Rate",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Location",
+   "link_count": 0,
+   "link_to": "Location",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_count": 0,
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item Type",
+   "link_count": 0,
+   "link_to": "Item Type",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Distance",
+   "link_count": 0,
+   "link_to": "Distance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-24 10:29:39.606908",
+ "modified": "2022-11-25 09:23:17.308072",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Productions",

@@ -50,19 +50,27 @@ class calculate_taxes_and_totals(object):
 
 		if self.doc.meta.get_field("other_charges_calculation"):
 			self.set_item_wise_tax_breakup()
-
+		if self.doc.doctype == "Sales Invoice":
+			self.calculate_total_losses()
 	def _calculate(self):
 		self.validate_conversion_rate()
 		self.calculate_item_values()
 		self.validate_item_tax_template()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
+		self.calculate_charges()
 		self.calculate_net_total()
 		self.calculate_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
 		self.calculate_total_net_weight()
+	def calculate_charges(self):
+		total_charges = 0
+		if self.doc.doctype == "Sales Invoice":
+			for d in self.doc.other_charges:
+				total_charges += flt(d.amount)
+		self.doc.total_charges = total_charges
 
 	def validate_item_tax_template(self):
 		for item in self.doc.get("items"):
@@ -309,7 +317,10 @@ class calculate_taxes_and_totals(object):
 			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
-
+		if self.doc.doctype == "Sales Invoice":
+			self.doc.net_total += flt(self.doc.total_charges)
+			self.doc.base_net_total += flt(self.doc.total_charges)
+			self.doc.base_total += flt(self.doc.total_charges)
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 	def calculate_shipping_charges(self):
@@ -713,6 +724,22 @@ class calculate_taxes_and_totals(object):
 
 		return False
 
+	def calculate_total_losses(self):
+		if self.doc.docstatus < 2:
+			total_normal_amount = sum([flt(item.normal_loss_amt, item.precision("normal_loss_amt"))
+				for item in self.doc.get("items")])
+			total_abnormal_amount = sum([flt(item.abnormal_loss_amt, item.precision("abnormal_loss_amt"))
+				for item in self.doc.get("items")])
+			total_excess_amount = sum([flt(item.excess_amt, item.precision("excess_amt"))
+				for item in self.doc.get("items")])
+
+			self.doc.total_normal_loss = flt(total_normal_amount, self.doc.precision("total_normal_loss"))
+			self.doc.total_abnormal_loss = flt(total_abnormal_amount, self.doc.precision("total_abnormal_loss"))
+			self.doc.total_excess_amount = flt(total_excess_amount, self.doc.precision("total_excess_amount"))
+
+			#if self.doc.docstatus == 0:
+			self.calculate_outstanding_amount()
+
 	def calculate_outstanding_amount(self):
 		# NOTE:
 		# write_off_amount is only for POS Invoice
@@ -734,19 +761,30 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			grand_total = self.doc.rounded_total or self.doc.grand_total
 			base_grand_total = self.doc.base_rounded_total or self.doc.base_grand_total
-
-			if self.doc.party_account_currency == self.doc.currency:
-				total_amount_to_pay = flt(
-					grand_total - self.doc.total_advance - flt(self.doc.write_off_amount),
-					self.doc.precision("grand_total"),
-				)
+			if self.doc.doctype == "Sales Invoice":
+				self.doc.round_floats_in(self.doc, ["total_normal_loss", "total_abnormal_loss", "total_excess_amount"])
+				if self.doc.party_account_currency == self.doc.currency:
+					total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance 
+						- flt(self.doc.total_normal_loss) - flt(self.doc.total_abnormal_loss) + flt(self.doc.total_excess_amount)
+						- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
+				else:
+					total_amount_to_pay = flt(flt(self.doc.base_grand_total *
+						self.doc.conversion_rate, self.doc.precision("base_grand_total")) - self.doc.total_advance
+							- flt(self.doc.total_normal_loss * self.doc.conversion_rate) - flt(self.doc.total_abnormal_loss * self.doc.conversion_rate) + flt(self.doc.total_excess_amount * self.doc.conversion_rate)
+							- flt(self.doc.base_write_off_amount), self.doc.precision("base_grand_total"))
 			else:
-				total_amount_to_pay = flt(
-					flt(base_grand_total, self.doc.precision("base_grand_total"))
-					- self.doc.total_advance
-					- flt(self.doc.base_write_off_amount),
-					self.doc.precision("base_grand_total"),
-				)
+				if self.doc.party_account_currency == self.doc.currency:
+					total_amount_to_pay = flt(
+						grand_total - self.doc.total_advance - flt(self.doc.write_off_amount),
+						self.doc.precision("grand_total"),
+					)
+				else:
+					total_amount_to_pay = flt(
+						flt(base_grand_total, self.doc.precision("base_grand_total"))
+						- self.doc.total_advance
+						- flt(self.doc.base_write_off_amount),
+						self.doc.precision("base_grand_total"),
+					)
 
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			change_amount = 0
@@ -764,7 +802,6 @@ class calculate_taxes_and_totals(object):
 				if self.doc.party_account_currency == self.doc.currency
 				else self.doc.base_paid_amount
 			)
-
 			self.doc.outstanding_amount = flt(
 				total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"),

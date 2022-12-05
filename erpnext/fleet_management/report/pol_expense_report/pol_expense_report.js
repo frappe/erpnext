@@ -6,7 +6,7 @@ frappe.query_reports["POL Expense Report"] = {
 	"filters": [
 		{
 			"fieldname":"branch",
-			"label": ("fuelbook_branch"),
+			"label": ("Fuelbook Branch"),
 			"fieldtype": "Link",
 			"options": "Branch",
 			"width": "100",
@@ -23,16 +23,18 @@ frappe.query_reports["POL Expense Report"] = {
 			"label": ("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
+			"default":frappe.datetime.month_start()
 		},
 		{
 			"fieldname":"to_date",
 			"label": ("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
+			"default":frappe.datetime.month_end()
 		},
 		{
-			"fieldname":"Equipment",
-			"label": ("equipment"),
+			"fieldname":"equipment",
+			"label": ("Equipment"),
 			"fieldtype":"Link",
 			"options":"Equipment",
 			"width": "80",

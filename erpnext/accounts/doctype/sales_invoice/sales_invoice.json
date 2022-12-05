@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "naming_series:",
+ "autoname": "format:SIN-{YY}-{MM}-{DD}-{####}",
  "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -10,7 +10,6 @@
   "business_activity",
   "branch",
   "title",
-  "naming_series",
   "customer",
   "customer_name",
   "tax_id",
@@ -26,6 +25,8 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "dispatch",
+  "quoted_rate",
   "reference_date_for_payment",
   "due_date",
   "return_against",
@@ -69,6 +70,9 @@
   "update_stock",
   "scan_barcode",
   "items",
+  "total",
+  "other_charges_section",
+  "other_charges",
   "pricing_rule_details",
   "pricing_rules",
   "packing_list",
@@ -84,15 +88,12 @@
   "base_net_total",
   "column_break_32",
   "total_net_weight",
-  "total",
   "net_total",
   "taxes_section",
   "taxes_and_charges",
   "column_break_38",
   "shipping_rule",
   "tax_category",
-  "section_break_40",
-  "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
   "section_break_43",
@@ -117,6 +118,7 @@
   "discount_amount",
   "totals",
   "base_grand_total",
+  "total_charges",
   "base_rounding_adjustment",
   "base_rounded_total",
   "base_in_words",
@@ -126,6 +128,9 @@
   "rounded_total",
   "in_words",
   "total_advance",
+  "total_normal_loss",
+  "total_abnormal_loss",
+  "total_excess_amount",
   "outstanding_amount",
   "disable_rounded_total",
   "column_break4",
@@ -158,6 +163,8 @@
   "terms_section_break",
   "tc_name",
   "terms",
+  "section_break_40",
+  "taxes",
   "edit_printing_settings",
   "letter_head",
   "group_same_items",
@@ -219,21 +226,6 @@
   },
   {
    "bold": 1,
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "ACC-SINV-.YYYY.-\nACC-SINV-RET-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
-  },
-  {
-   "bold": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -285,6 +277,7 @@
    "default": "0",
    "fieldname": "is_pos",
    "fieldtype": "Check",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Include Payment (POS)",
@@ -306,6 +299,7 @@
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Is Return (Credit Note)",
@@ -590,6 +584,7 @@
    "oldfieldtype": "Select",
    "options": "Currency",
    "print_hide": 1,
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -622,6 +617,7 @@
    "oldfieldtype": "Select",
    "options": "Price List",
    "print_hide": 1,
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -686,6 +682,7 @@
    "default": "0",
    "fieldname": "update_stock",
    "fieldtype": "Check",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Update Stock",
@@ -799,6 +796,7 @@
   {
    "fieldname": "total_qty",
    "fieldtype": "Float",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Quantity",
@@ -855,6 +853,7 @@
   {
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Net Weight",
@@ -872,6 +871,7 @@
   {
    "fieldname": "taxes_and_charges",
    "fieldtype": "Link",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Sales Taxes and Charges Template",
@@ -889,6 +889,7 @@
   {
    "fieldname": "shipping_rule",
    "fieldtype": "Link",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Shipping Rule",
@@ -899,6 +900,7 @@
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Tax Category",
@@ -906,10 +908,12 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_40",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "label": "Taxes and charges"
   },
   {
    "fieldname": "taxes",
@@ -949,6 +953,7 @@
   {
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Taxes and Charges (Company Currency)",
@@ -967,6 +972,7 @@
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Taxes and Charges",
@@ -1257,7 +1263,6 @@
    "collapsible_depends_on": "advances",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Advance Payments",
@@ -1298,7 +1303,6 @@
    "collapsible_depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Payment Terms"
@@ -1808,6 +1812,7 @@
    "collapsible_depends_on": "sales_team",
    "fieldname": "section_break2",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Sales Team",
@@ -1971,6 +1976,7 @@
    "description": "Issue a debit note with 0 qty against an existing Sales Invoice",
    "fieldname": "is_debit_note",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Rate Adjustment Entry (Debit Note)"
   },
   {
@@ -2044,9 +2050,57 @@
    "options": "Business Activity"
   },
   {
+   "default": "Today",
    "fieldname": "reference_date_for_payment",
    "fieldtype": "Date",
-   "label": "Reference Date for Payment"
+   "label": "Reference Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dispatch",
+   "fieldtype": "Data",
+   "label": "Dispatch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quoted_rate",
+   "fieldtype": "Data",
+   "label": "Quoted Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "other_charges_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "other_charges",
+   "fieldtype": "Table",
+   "label": "Other Charges",
+   "options": "Other Charge Entry"
+  },
+  {
+   "fieldname": "total_charges",
+   "fieldtype": "Currency",
+   "label": "Total Charges",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_normal_loss",
+   "fieldtype": "Currency",
+   "label": "Total Normal Loss",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_abnormal_loss",
+   "fieldtype": "Currency",
+   "label": "Total Abnormal Loss",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_excess_amount",
+   "fieldtype": "Currency",
+   "label": "Total Excess Amount",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2059,12 +2113,12 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-11-17 10:01:54.093567",
+ "modified": "2022-11-28 13:58:33.419962",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
- "naming_rule": "By \"Naming Series\" field",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -2100,9 +2154,32 @@
    "write": 1
   },
   {
-   "permlevel": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
    "read": 1,
-   "role": "All"
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
   }
  ],
  "quick_entry": 1,
@@ -2112,7 +2189,6 @@
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
- "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

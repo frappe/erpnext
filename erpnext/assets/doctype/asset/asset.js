@@ -39,7 +39,12 @@ frappe.ui.form.on('Asset', {
 	company: function(frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
-
+	asset_rate: function(frm) {
+		set_gross_purchase_amount(frm)
+	},
+	asset_quantity: function(frm) {
+		set_gross_purchase_amount(frm)
+	},
 	setup: function(frm) {
 		frm.make_methods = {
 			'Asset Movement': () => {
@@ -104,13 +109,13 @@ frappe.ui.form.on('Asset', {
 				}, __("Manage"));
 			}
 
-			frm.add_custom_button(__("Repair Asset"), function() {
-				frm.trigger("create_asset_repair");
-			}, __("Manage"));
+			// frm.add_custom_button(__("Repair Asset"), function() {
+			// 	frm.trigger("create_asset_repair");
+			// }, __("Manage"));
 
-			frm.add_custom_button(__("Split Asset"), function() {
-				frm.trigger("split_asset");
-			}, __("Manage"));
+			// frm.add_custom_button(__("Split Asset"), function() {
+			// 	frm.trigger("split_asset");
+			// }, __("Manage"));
 
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Adjust Asset Value"), function() {
@@ -592,6 +597,23 @@ erpnext.asset.restore_asset = function(frm) {
 		})
 	})
 };
+
+function set_gross_purchase_amount(frm) {
+	frappe.call({
+		method: "erpnext.assets.doctype.asset.asset.set_gross_purchase_amount",
+		args: {
+			"asset_rate": frm.doc.asset_rate,
+			"asset_qty": frm.doc.asset_quantity
+		},
+		callback: function (r) {
+			if (r.message) {
+				frm.set_value("gross_purchase_amount", r.message)
+				frm.refresh_field('gross_purchase_amount')
+			}
+		}
+
+	})
+}
 
 erpnext.asset.transfer_asset = function() {
 	frappe.call({

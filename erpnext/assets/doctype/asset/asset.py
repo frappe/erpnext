@@ -1442,3 +1442,11 @@ def add_reference_in_jv_on_split(entry_name, new_asset_name, old_asset_name, dep
 	journal_entry.make_gl_entries(1)
 	journal_entry.docstatus = 1
 	journal_entry.make_gl_entries()
+
+@frappe.whitelist()
+def set_gross_purchase_amount(asset_rate, asset_qty):
+	if not asset_rate or not asset_qty:
+		frappe.throw("Asset Rate or Asset Quantity Not Defiend")
+	else:	
+		gross_amount = flt(asset_rate) * flt(asset_qty)
+		return gross_amount

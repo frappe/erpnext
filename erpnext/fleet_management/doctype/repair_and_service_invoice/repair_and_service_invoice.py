@@ -16,7 +16,7 @@ class RepairAndServiceInvoice(AccountsController):
 		self.calculate_total()
 		self.set_status()
 		if not self.credit_account:
-			self.credit_account = get_party_account("Supplier",self.supplier,self.company)
+			self.credit_account = get_party_account(self.party_type,self.party,self.company)
 	def on_submit(self):
 		self.make_gl_entry()
 		self.update_repair_and_service()
@@ -25,6 +25,8 @@ class RepairAndServiceInvoice(AccountsController):
 		self.update_repair_and_service()
 
 	def update_repair_and_service(self):
+		if not self.repair_and_services:
+			return
 		value = 1
 		if self.docstatus == 2:
 			value = 0
@@ -68,10 +70,8 @@ class RepairAndServiceInvoice(AccountsController):
 		gl_entries = []
 		ba = get_default_ba()
 
-		payable_account = frappe.db.get_value("Company", self.company, "default_payable_account")
 		expense_account = frappe.db.get_value("Company", self.company, "repair_and_service_expense_account")
-		if not payable_account:
-			frappe.throw("Setup Default Payable Account")
+		
 		if not expense_account:
 			frappe.throw(
 				"Setup Default Repair And Service Expense Account in Company")
@@ -89,9 +89,9 @@ class RepairAndServiceInvoice(AccountsController):
 		)
 		gl_entries.append(
 			self.get_gl_dict({
-				"account": payable_account,
-				"party_type": "Supplier",
-				"party": self.supplier,
+				"account": self.credit_account,
+				"party_type": self.party_type,
+				"party": self.party,
 				"credit": self.total_amount,
 				"credit_in_account_currency": self.total_amount,
 				"business_activity": ba,

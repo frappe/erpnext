@@ -135,6 +135,13 @@ def get_columns(filters: StockBalanceFilter):
 			"width": 100,
 		},
 		{
+			"label": _("Item Sub Group"),
+			"fieldname": "item_sub_group",
+			"fieldtype": "Link",
+			"options": "Item Sub Group",
+			"width": 120,
+		},
+		{
 			"label": _("Warehouse"),
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
@@ -162,20 +169,6 @@ def get_columns(filters: StockBalanceFilter):
 				"fieldtype": "Link",
 				"options": "UOM",
 				"width": 90,
-			},
-			{
-				"label": _("Balance Qty"),
-				"fieldname": "bal_qty",
-				"fieldtype": "Float",
-				"width": 100,
-				"convertible": "qty",
-			},
-			{
-				"label": _("Balance Value"),
-				"fieldname": "bal_val",
-				"fieldtype": "Currency",
-				"width": 100,
-				"options": "currency",
 			},
 			{
 				"label": _("Opening Qty"),
@@ -207,6 +200,20 @@ def get_columns(filters: StockBalanceFilter):
 				"convertible": "qty",
 			},
 			{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
+			{
+				"label": _("Balance Qty"),
+				"fieldname": "bal_qty",
+				"fieldtype": "Float",
+				"width": 100,
+				"convertible": "qty",
+			},
+			{
+				"label": _("Balance Value"),
+				"fieldname": "bal_val",
+				"fieldtype": "Currency",
+				"width": 100,
+				"options": "currency",
+			},
 			{
 				"label": _("Valuation Rate"),
 				"fieldname": "val_rate",
@@ -464,6 +471,7 @@ def get_item_details(items: List[str], sle: List[SLEntry], filters: StockBalance
 			item_table.item_name,
 			item_table.description,
 			item_table.item_group,
+			item_table.item_sub_group,
 			item_table.brand,
 			item_table.stock_uom,
 		)

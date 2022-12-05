@@ -16,18 +16,18 @@ def get_columns(filters):
     if filters.status == 'Free':
         return [
 			_("Branch")+":Link/Branch:150",
-			_("Vehicle Number")+":Data:140",
-			_("Vehicle Model")+":Data:140",
-			_("Vehicle Type")+":Link/Vehicle Type:120",
+			_("Equipment Number")+":Data:140",
+			_("Equipment Model")+":Data:140",
+			_("Equipment Type")+":Link/Equipment Type:120",
 		]
     return [
         _("Reference")+":Link/Vehicle Request:100",
 		_("EMP ID") + ":Link/Employee:80",
 		_("Booked By")+":Data:100",
 		_("Requested Date")+":Date:130",
-		_("Vehicle")+":Link/Vehicle:100",
-		_("Vehicle Number")+":Data:120",
-		_("Vehicle Type")+":Link/Vehicle Type:120",
+		_("Equipment")+":Link/Equipment:100",
+		_("Equipment Number")+":Data:120",
+		_("Equipment Type")+":Link/Equipment Type:120",
 		_("Operator ID")+":Link/Employee:80",
 		_("Operator Name")+":Data:130",
 		_("Operator Contact")+":Data:120",

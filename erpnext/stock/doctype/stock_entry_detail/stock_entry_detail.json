@@ -122,7 +122,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:parent.stock_entry_type != \"Material Issue\"",
+   "depends_on": "eval:parent.stock_entry_type != \"Material Issue\" && parent.stock_entry_type !=\"Write Off\"",
    "fieldname": "t_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -308,6 +308,7 @@
   {
    "fieldname": "serial_no_batch",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Serial No / Batch",
    "no_copy": 1
   },
@@ -326,6 +327,7 @@
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Batch No",
    "no_copy": 1,
    "oldfieldname": "batch_no",
@@ -360,10 +362,10 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Information"
@@ -374,8 +376,7 @@
    "fieldtype": "Check",
    "label": "Allow Zero Valuation Rate",
    "no_copy": 1,
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.s_warehouse"
+   "print_hide": 1
   },
   {
    "allow_on_submit": 1,
@@ -415,7 +416,6 @@
    "description": "Material Request used to make this Stock Entry",
    "fieldname": "material_request",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Material Request",
    "no_copy": 1,
    "options": "Material Request",
@@ -477,6 +477,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:parent.material_request_type == \"Material Transfer\";",
    "fieldname": "transferred_qty",
    "fieldtype": "Float",
    "label": "Transferred Qty",
@@ -485,7 +486,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -724,14 +724,14 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.stock_entry_type != \"Material Transfer\"",
+   "depends_on": "eval:parent.stock_entry_type == \"Material Issue\" ",
    "fieldname": "issue_to_employee",
    "fieldtype": "Link",
    "label": "Issue To Employee",
    "options": "Employee"
   },
   {
-   "depends_on": "eval:parent.stock_entry_type != \"Material Transfer\"",
+   "depends_on": "eval:parent.stock_entry_type == \"Material Issue\" ",
    "fieldname": "issue_to_equipment",
    "fieldtype": "Link",
    "label": "Issue To Equipment",
@@ -749,7 +749,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-18 11:28:57.337515",
+ "modified": "2022-12-02 12:38:13.335511",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

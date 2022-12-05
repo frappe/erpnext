@@ -17,12 +17,23 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
+from frappe.model.naming import make_autoname
 
 
 form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"}
 
 
 class MaterialRequest(BuyingController):
+	def autoname(self):
+		if self.material_request_type == 'Material Issue':
+			series = 'MRI'
+			self.name = make_autoname(str(series) + ".YY.MM.####")
+		elif self.material_request_type == 'Material Transfer':
+			series = 'MRT'
+			self.name = make_autoname(str(series) + ".YY.MM.####")
+		else:
+			series = 'MRP'
+			self.name = make_autoname(str(series) + ".YY.MM.####")
 	def get_feed(self):
 		return
 
@@ -103,6 +114,7 @@ class MaterialRequest(BuyingController):
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		self.set_actual_qty()
 		if self.workflow_state != "Approved":
 			notify_workflow_states(self)
 	def before_update_after_submit(self):
@@ -147,6 +159,46 @@ class MaterialRequest(BuyingController):
 						and reference_no='{reference_no}'
 					""".format(reference_type=self.doctype, reference_no=self.name))
 
+	def set_actual_qty(self):
+		from erpnext.stock.stock_ledger import is_negative_stock_allowed,get_previous_sle
+		for d in self.get("items"):
+			allow_negative_stock = is_negative_stock_allowed(item_code=d.item_code)
+			previous_sle = get_previous_sle(
+				{
+					"item_code": d.item_code,
+					"warehouse": d.from_warehouse or self.set_from_warehouse,
+					"posting_date": self.transaction_date,
+				}
+			)
+
+			# get actual stock at source warehouse
+			d.actual_qty = previous_sle.get("qty_after_transaction") or 0
+
+			# validate qty during submit
+			if (
+				d.docstatus == 1
+				and d.warehouse
+				and not allow_negative_stock
+				and flt(d.actual_qty, d.precision("actual_qty"))
+				< flt(d.transferred_qty, d.precision("actual_qty"))
+			):
+				frappe.throw(
+					_(
+						"Row {0}: Quantity not available for {4} in warehouse {1} at posting time of the entry ({2} {3})"
+					).format(
+						d.idx,
+						frappe.bold(d.s_warehouse),
+						formatdate(self.posting_date),
+						format_time(self.posting_time),
+						frappe.bold(d.item_code),
+					)
+					+ "<br><br>"
+					+ _("Available quantity is {0}, you need {1}").format(
+						frappe.bold(flt(d.actual_qty, d.precision("actual_qty"))), frappe.bold(d.transferred_qty)
+					),
+					NegativeStockError,
+					title=_("Insufficient Stock"),
+				)
 	def check_modified_date(self):
 		mod_db = frappe.db.sql(
 			"""select modified from `tabMaterial Request` where name = %s""", self.name
@@ -205,7 +257,7 @@ class MaterialRequest(BuyingController):
 				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
 					d.ordered_qty = flt(
 						frappe.db.sql(
-							"""select sum(transfer_qty)
+							"""select sum(transferred_qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 							(self.name, d.name),
@@ -285,7 +337,6 @@ class MaterialRequest(BuyingController):
 			doc.set_status()
 			doc.db_set("status", doc.status)
 
-
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
@@ -339,7 +390,6 @@ def get_list_context(context=None):
 	)
 
 	return list_context
-
 
 @frappe.whitelist()
 def update_status(name, status):
@@ -581,7 +631,7 @@ def make_stock_entry(source_name, target_doc=None):
 			else 0
 		)
 		target.qty = qty
-		target.transfer_qty = qty * obj.conversion_factor
+		target.transferred_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
 
 		if (
@@ -605,9 +655,13 @@ def make_stock_entry(source_name, target_doc=None):
 
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
-
+		if source.material_request_type == "Material Issue":
+			target.from_warehouse = source.set_warehouse
+			target.to_warehouse =""
+		# elif source.material_request_type == "Material Transfer":
+		# 	target
 		target.set_missing_values()
-		target.set_stock_entry_type()
+		# target.set_stock_entry_type()
 		target.set_job_card_data()
 
 	doclist = get_mapped_doc(
@@ -616,6 +670,11 @@ def make_stock_entry(source_name, target_doc=None):
 		{
 			"Material Request": {
 				"doctype": "Stock Entry",
+				"field_map": {
+					"set_from_warehouse": "from_warehouse",
+					"set_warehouse": "to_warehouse",
+					"material_request_type":"stock_entry_type"
+				},
 				"validation": {
 					"docstatus": ["=", 1],
 					"material_request_type": ["in", ["Material Transfer", "Material Issue", "Customer Provided"]],

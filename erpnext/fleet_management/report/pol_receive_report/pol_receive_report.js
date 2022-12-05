@@ -6,33 +6,35 @@ frappe.query_reports["POL Receive Report"] = {
 	"filters": [
 		{
 			"fieldname":"branch",
-			"label": ("Branch"),
+			"label": __("Branch"),
 			"fieldtype": "Link",
 			"options": "Branch",
 			"width": "100",
 		},
 		{
 			"fieldname":"from_date",
-			"label": ("From Date"),
+			"label": __("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
+			"default":frappe.datetime.month_start()
 		},
 		{
 			"fieldname":"to_date",
-			"label": ("To Date"),
+			"label": __("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
+			"default":frappe.datetime.month_end()
 		},
 		{
 			"fieldname":"item_name",
-			"label": ("Item Name"),
+			"label": __("Item Name"),
 			"fieldtype": "Select",
 			"options": ["Petrol","Diesel"],
 			"width": "80",
 		},
 		{
-			"fieldname":"Equipment",
-			"label": ("equipment"),
+			"fieldname":"equipment",
+			"label": __("Equipment"),
 			"fieldtype":"Link",
 			"options":"Equipment",
 			"width": "80",

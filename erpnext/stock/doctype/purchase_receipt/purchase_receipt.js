@@ -11,7 +11,6 @@ frappe.ui.form.on("Purchase Receipt", {
 			'Landed Cost Voucher': () => {
 				let lcv = frappe.model.get_new_doc('Landed Cost Voucher');
 				lcv.company = frm.doc.company;
-
 				let lcv_receipt = frappe.model.get_new_doc('Landed Cost Purchase Receipt');
 				lcv_receipt.receipt_document_type = 'Purchase Receipt';
 				lcv_receipt.receipt_document = frm.doc.name;
@@ -181,13 +180,13 @@ erpnext.stock.PurchaseReceiptController = class PurchaseReceiptController extend
 				if(flt(this.frm.doc.per_billed) < 100) {
 					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __('Create'));
 				}
-				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
+				// cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
 
-				if(!this.frm.doc.auto_repeat) {
-					cur_frm.add_custom_button(__('Subscription'), function() {
-						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
-					}, __('Create'))
-				}
+				// if(!this.frm.doc.auto_repeat) {
+				// 	cur_frm.add_custom_button(__('Subscription'), function() {
+				// 		erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
+				// 	}, __('Create'))
+				// }
 
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}

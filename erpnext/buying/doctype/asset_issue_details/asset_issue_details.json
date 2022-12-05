@@ -10,26 +10,34 @@
   "branch",
   "entry_date",
   "column_break_3",
+  "cost_center",
   "company",
   "item_detail_section",
   "item_code",
   "item_name",
-  "uom",
+  "engine_no",
   "column_break_8",
   "purchase_receipt",
   "warehouse",
+  "uom",
+  "chesis_no",
+  "column_break_14",
   "brand",
+  "equipment_type",
+  "reg_number",
+  "model",
+  "serial_number",
   "asset_issue_detail_section",
   "qty",
+  "issued_to",
   "location",
   "asset_rate",
-  "amount",
-  "issued_to",
   "column_break_17",
   "emp_branch",
   "issued_date",
   "reference_code",
   "employee_name",
+  "amount",
   "amended_from"
  ],
  "fields": [
@@ -114,6 +122,7 @@
   {
    "fieldname": "location",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Location",
    "options": "Location"
   },
@@ -133,6 +142,7 @@
   {
    "fieldname": "issued_to",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Issued To",
    "options": "Employee"
   },
@@ -180,15 +190,59 @@
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
+   "options": "Warehouse"
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Read Only",
+   "label": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Link",
+   "label": "Model",
+   "options": "Equipment Model"
+  },
+  {
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No."
+  },
+  {
+   "fieldname": "reg_number",
+   "fieldtype": "Data",
+   "label": "Registration No/Serial No"
+  },
+  {
+   "fieldname": "chesis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Serial Number"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 12:10:25.463056",
+ "modified": "2022-12-01 12:50:47.762172",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Asset Issue Details",

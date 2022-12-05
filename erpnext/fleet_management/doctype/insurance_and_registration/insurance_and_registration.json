@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "IR.YY.MM.####",
+ "autoname": "format:IR-{YY}-{MM}-{###}",
  "creation": "2022-11-07 10:58:47.931537",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,12 +9,12 @@
  "field_order": [
   "insurance_for",
   "cb_1",
-  "vehicle",
+  "equipment",
   "asset",
   "cb_2",
   "posting_date",
   "sb_1",
-  "vehicle_number",
+  "branch",
   "cb_3",
   "vehicle_type",
   "cb_4",
@@ -30,7 +30,10 @@
   "sb_4",
   "claim_item",
   "sb_5",
-  "registration_item"
+  "registration_item",
+  "bluebook_details_section",
+  "items",
+  "company"
  ],
  "fields": [
   {
@@ -132,14 +135,6 @@
    "options": "Registration Details"
   },
   {
-   "fetch_from": "vehicle.registeration_number",
-   "fieldname": "vehicle_number",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Vehicle Number",
-   "read_only": 1
-  },
-  {
    "fetch_from": "vehicle.equipment_type",
    "fieldname": "vehicle_type",
    "fieldtype": "Link",
@@ -155,28 +150,53 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.insurance_for == \"Asset\"",
+   "fieldname": "asset",
+   "fieldtype": "Link",
+   "label": "Asset",
+   "options": "Asset"
+  },
+  {
+   "fieldname": "bluebook_details_section",
+   "fieldtype": "Section Break",
+   "label": "Bluebook Fitness and Emission Details"
+  },
+  {
    "depends_on": "eval:doc.insurance_for == \"Vehicle\"",
-   "fieldname": "vehicle",
+   "fieldname": "equipment",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Vehicle",
    "options": "Equipment"
   },
   {
-   "depends_on": "eval:doc.insurance_for == \"Asset\"",
-   "fieldname": "asset",
+   "fetch_from": "equipment.branch",
+   "fieldname": "branch",
    "fieldtype": "Link",
-   "label": "Asset",
-   "options": "Asset"
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Bluebook Fitness and Emission Details"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-08 16:22:28.351660",
+ "modified": "2022-11-28 23:22:53.967914",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Insurance and Registration",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {

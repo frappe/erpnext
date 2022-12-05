@@ -1,0 +1,86 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-11-29 17:20:20.323260",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tb_notification",
+  "pol_expense_approval_notification_template",
+  "pol_expense_status_notification_template",
+  "sb_approver",
+  "fleet_mto",
+  "fleet_mto_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "tb_notification",
+   "fieldtype": "Tab Break",
+   "label": "Notification Templates"
+  },
+  {
+   "fieldname": "pol_expense_approval_notification_template",
+   "fieldtype": "Link",
+   "label": "POL Expense Approval Notification Template",
+   "options": "Email Template"
+  },
+  {
+   "fieldname": "sb_approver",
+   "fieldtype": "Tab Break",
+   "label": "Approver Settings"
+  },
+  {
+   "fieldname": "fleet_mto",
+   "fieldtype": "Link",
+   "label": "Fleet MTO",
+   "options": "User"
+  },
+  {
+   "fetch_from": "fleet_mto.full_name",
+   "fieldname": "fleet_mto_name",
+   "fieldtype": "Data",
+   "label": "Fleet MTO Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pol_expense_status_notification_template",
+   "fieldtype": "Link",
+   "label": "POL Expense Status Notification Template",
+   "options": "Email Template"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-11-30 11:02:36.108228",
+ "modified_by": "Administrator",
+ "module": "Maintenance",
+ "name": "Maintenance Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Maintenance Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

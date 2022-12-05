@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
  "doctype": "DocType",
  "document_type": "Document",
@@ -10,7 +9,7 @@
   "items_section",
   "title",
   "branch",
-  "naming_series",
+  "item_group",
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
@@ -61,6 +60,7 @@
   "total_additional_costs",
   "contact_section",
   "supplier",
+  "column_break_55",
   "supplier_name",
   "supplier_address",
   "address_display",
@@ -88,18 +88,6 @@
    "fieldname": "items_section",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "MAT-STE-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1,
-   "set_only_once": 1
   },
   {
    "fieldname": "stock_entry_type",
@@ -296,17 +284,14 @@
    "fieldtype": "Section Break"
   },
   {
-   "description": "Sets 'Source Warehouse' in each row of the items table.",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Source Warehouse",
-   "no_copy": 1,
    "oldfieldname": "from_warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse",
-   "print_hide": 1
+   "options": "Warehouse"
   },
   {
    "depends_on": "from_warehouse",
@@ -438,13 +423,12 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval:doc.stock_entry_type == \"Material Receipt\"",
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
   },
   {
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -456,7 +440,6 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -476,6 +459,7 @@
    "options": "Address"
   },
   {
+   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address"
@@ -670,6 +654,16 @@
    "fieldtype": "Data",
    "label": "Stock Entry Title",
    "reqd": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
@@ -677,11 +671,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-18 11:32:19.389595",
+ "modified": "2022-12-01 16:10:26.946652",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -749,6 +742,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "title_field": "stock_entry_type",
+ "title_field": "title",
  "track_changes": 1
 }

@@ -28,7 +28,8 @@
   "section_break_21",
   "claim_journal",
   "amended_from",
-  "company"
+  "company",
+  "workflow_state"
  ],
  "fields": [
   {
@@ -169,12 +170,17 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Data",
+   "label": "Workflow"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-14 11:27:45.842851",
+ "modified": "2022-11-29 22:38:01.419358",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Coal Raising Payment",
@@ -182,6 +188,7 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -191,6 +198,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -206,6 +214,7 @@
    "write": 1
   },
   {
+   "cancel": 1,
    "create": 1,
    "email": 1,
    "export": 1,

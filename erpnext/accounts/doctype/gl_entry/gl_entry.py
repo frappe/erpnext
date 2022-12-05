@@ -360,7 +360,7 @@ def update_outstanding_amt(
 			)
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
-
+		# frappe.throw(str(bal))
 		# Didn't use db_set for optimization purpose
 		ref_doc.outstanding_amount = bal
 		frappe.db.set_value(against_voucher_type, against_voucher, "outstanding_amount", bal)

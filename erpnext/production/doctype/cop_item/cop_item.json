@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-12-02 10:26:23.112903",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account",
+  "mining_expenses",
+  "crushing_plant_expenses1",
+  "crushing_plant_expenses2",
+  "washed_expenses",
+  "transportation",
+  "s_and_d"
+ ],
+ "fields": [
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mining_expenses",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Mining Expenses(%)"
+  },
+  {
+   "fieldname": "crushing_plant_expenses1",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Crushing Plant 1 Expenses(%)"
+  },
+  {
+   "fieldname": "crushing_plant_expenses2",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Crushing Plant 2 Expenses(%)"
+  },
+  {
+   "fieldname": "washed_expenses",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Washed Expenses(%)"
+  },
+  {
+   "fieldname": "transportation",
+   "fieldtype": "Percent",
+   "label": "Transportation Expenses to Stockyard(%)"
+  },
+  {
+   "fieldname": "s_and_d",
+   "fieldtype": "Percent",
+   "label": "Sales & Distribution(%)"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-12-02 10:33:13.128195",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "COP Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

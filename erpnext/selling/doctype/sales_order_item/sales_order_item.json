@@ -123,6 +123,7 @@
    "default": "0",
    "fieldname": "ensure_delivery_based_on_produced_serial_no",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Ensure Delivery Based on Produced Serial No"
   },
   {
@@ -826,6 +827,7 @@
   {
    "fieldname": "item_type",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Item Type",
    "options": "Item Type"
   }
@@ -833,7 +835,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-24 15:42:32.863394",
+ "modified": "2022-11-29 14:25:38.423050",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

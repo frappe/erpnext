@@ -25,13 +25,19 @@ frappe.ui.form.on('Repair And Services', {
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
 			if (cint(frm.doc.out_source) == 1 && frm.doc.total_amount > 0 && cint(frm.doc.paid) == 0) {
-				frm.add_custom_button("Create Invoice", function () {
+				frm.add_custom_button("Invoice", function () {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.fleet_management.doctype.repair_and_services.repair_and_services.make_repair_and_services_invoice",
 						frm: cur_frm
 					})
-				});
+				},__("Create"));
 			}
+			frm.add_custom_button("Request Material", function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.fleet_management.doctype.repair_and_services.repair_and_services.make_mr",
+					frm: cur_frm
+				});
+			},__("Create"));
 		}
 	}
 });

@@ -30,7 +30,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2022-09-15 16:52:57.500924",
+ "modified": "2022-11-29 12:19:08.569496",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Party Type",
@@ -62,6 +62,15 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Fleet User",
    "share": 1
   }
  ],

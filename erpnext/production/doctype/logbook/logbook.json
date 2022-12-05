@@ -21,7 +21,6 @@
   "equipment_model",
   "hired_equipment",
   "section_break_12",
-  "column_break_6",
   "scheduled_working_hour",
   "target_hours",
   "total_downtime_hours",
@@ -116,10 +115,6 @@
    "label": "Supplier",
    "options": "Supplier",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_6",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "scheduled_working_hour",
@@ -242,7 +237,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-21 12:05:40.916708",
+ "modified": "2022-11-24 22:41:54.286853",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Logbook",

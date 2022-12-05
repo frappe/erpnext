@@ -54,7 +54,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-08 13:52:06.464489",
+ "modified": "2022-11-24 17:39:21.737226",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Distance",
@@ -82,6 +82,18 @@
    "read": 1,
    "report": 1,
    "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Maintenance User",
    "share": 1,
    "write": 1
   }
