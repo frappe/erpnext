@@ -19,7 +19,6 @@ from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.batch.batch import get_batch_no
 from erpnext.stock.doctype.item.item import get_item_defaults, get_uom_conv_factor
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 from erpnext.stock.doctype.price_list.price_list import get_price_list_details
@@ -160,13 +159,6 @@ def update_stock(args, out):
 		and out.warehouse
 		and out.stock_qty > 0
 	):
-
-		if out.has_batch_no and not args.get("batch_no"):
-			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty)
-			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
-			if actual_batch_qty:
-				out.update(actual_batch_qty)
-
 		if out.has_serial_no and args.get("batch_no"):
 			reserved_so = get_so_reservation_for_item(args)
 			out.batch_no = args.get("batch_no")

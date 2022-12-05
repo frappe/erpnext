@@ -400,6 +400,7 @@ class SalesInvoice(SellingController):
 			"Repost Payment Ledger",
 			"Repost Payment Ledger Items",
 			"Payment Ledger Entry",
+			"Serial and Batch Bundle",
 		)
 
 	def update_status_updater_args(self):

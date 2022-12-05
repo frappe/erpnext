@@ -19,6 +19,7 @@
   "rate",
   "uom",
   "section_break_9",
+  "serial_and_batch_bundle",
   "serial_no",
   "column_break_11",
   "batch_no",
@@ -253,6 +254,12 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "options": "Serial and Batch Bundle"
   }
  ],
  "idx": 1,

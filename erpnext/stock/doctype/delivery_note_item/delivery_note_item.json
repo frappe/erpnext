@@ -77,8 +77,8 @@
   "dn_detail",
   "pick_list_item",
   "section_break_40",
-  "batch_no",
-  "serial_no",
+  "pick_serial_and_batch",
+  "serial_and_batch_bundle",
   "actual_batch_qty",
   "actual_qty",
   "installed_qty",
@@ -508,16 +508,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "batch_no",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Batch No",
-   "oldfieldname": "batch_no",
-   "oldfieldtype": "Link",
-   "options": "Batch",
-   "print_hide": 1
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "actual_qty",
    "fieldtype": "Float",
@@ -541,15 +531,6 @@
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
-  },
-  {
-   "fieldname": "serial_no",
-   "fieldtype": "Text",
-   "in_list_view": 1,
-   "label": "Serial No",
-   "no_copy": 1,
-   "oldfieldname": "serial_no",
-   "oldfieldtype": "Text"
   },
   {
    "fieldname": "item_group",
@@ -861,6 +842,17 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial and Batch Bundle",
+   "options": "Serial and Batch Bundle"
+  },
+  {
+   "fieldname": "pick_serial_and_batch",
+   "fieldtype": "Button",
+   "label": "Pick Serial / Batch No"
   }
  ],
  "idx": 1,

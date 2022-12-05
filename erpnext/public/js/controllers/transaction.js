@@ -6,6 +6,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	setup() {
 		super.setup();
 		let me = this;
+
+		this.frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
+
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
@@ -124,7 +127,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				let item_row = locals[cdt][cdn];
 				return {
 					filters: {
-						'item_code': item_row.item_code
+						'item_code': item_row.item_code,
+						'voucher_type': doc.doctype,
+						'voucher_no': ["in", [doc.name, ""]],
 					}
 				}
 			});
@@ -2277,12 +2282,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 };
 
-erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_dialog) {
+erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close, show_dialog) {
 	let warehouse, receiving_stock, existing_stock;
 	if (frm.doc.is_return) {
 		if (["Purchase Receipt", "Purchase Invoice"].includes(frm.doc.doctype)) {
 			existing_stock = true;
-			warehouse = d.warehouse;
+			warehouse = item_row.warehouse;
 		} else if (["Delivery Note", "Sales Invoice"].includes(frm.doc.doctype)) {
 			receiving_stock = true;
 		}
@@ -2292,11 +2297,11 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 				receiving_stock = true;
 			} else {
 				existing_stock = true;
-				warehouse = d.s_warehouse;
+				warehouse = item_row.s_warehouse;
 			}
 		} else {
 			existing_stock = true;
-			warehouse = d.warehouse;
+			warehouse = item_row.warehouse;
 		}
 	}
 
@@ -2309,16 +2314,13 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 	}
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchSelector({
-			frm: frm,
-			item: d,
-			warehouse_details: {
-				type: "Warehouse",
-				name: warehouse
-			},
-			callback: callback,
-			on_close: on_close
-		}, show_dialog);
+		new erpnext.SerialNoBatchBundleUpdate(frm, item_row, (r) => {
+			if (r) {
+				frm.refresh_fields();
+				frappe.model.set_value(item_row.doctype, item_row.name,
+					"serial_and_batch_bundle", r.name);
+			}
+		});
 	});
 }
 

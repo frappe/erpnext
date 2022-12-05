@@ -1448,6 +1448,7 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
+			"Serial and Batch Bundle",
 		)
 		self.update_advance_tax_references(cancel=1)
 

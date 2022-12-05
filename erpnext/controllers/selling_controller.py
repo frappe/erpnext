@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, throw
 from frappe.contacts.doctype.address.address import get_address_display
-from frappe.utils import cint, cstr, flt, get_link_to_form, nowtime
+from frappe.utils import cint, flt, get_link_to_form, nowtime
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
@@ -299,8 +299,7 @@ class SellingController(StockController):
 									"item_code": p.item_code,
 									"qty": flt(p.qty),
 									"uom": p.uom,
-									"batch_no": cstr(p.batch_no).strip(),
-									"serial_no": cstr(p.serial_no).strip(),
+									"serial_and_batch_bundle": p.serial_and_batch_bundle,
 									"name": d.name,
 									"target_warehouse": p.target_warehouse,
 									"company": self.company,
@@ -323,8 +322,7 @@ class SellingController(StockController):
 							"uom": d.uom,
 							"stock_uom": d.stock_uom,
 							"conversion_factor": d.conversion_factor,
-							"batch_no": cstr(d.get("batch_no")).strip(),
-							"serial_no": cstr(d.get("serial_no")).strip(),
+							"serial_and_batch_bundle": d.serial_and_batch_bundle,
 							"name": d.name,
 							"target_warehouse": d.target_warehouse,
 							"company": self.company,

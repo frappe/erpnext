@@ -9,17 +9,7 @@ import frappe
 from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import (
-	add_days,
-	cint,
-	cstr,
-	flt,
-	get_link_to_form,
-	getdate,
-	now,
-	nowdate,
-	safe_json_loads,
-)
+from frappe.utils import cint, flt, get_link_to_form, getdate, now, nowdate, safe_json_loads
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
@@ -80,19 +70,6 @@ class SerialNo(StockController):
 			)
 
 		self.set_maintenance_status()
-		self.validate_warehouse()
-		self.validate_item()
-		self.set_status()
-
-	def set_status(self):
-		if self.delivery_document_type:
-			self.status = "Delivered"
-		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
-			self.status = "Expired"
-		elif not self.warehouse:
-			self.status = "Inactive"
-		else:
-			self.status = "Active"
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
@@ -109,127 +86,6 @@ class SerialNo(StockController):
 
 		if self.warranty_expiry_date and getdate(self.warranty_expiry_date) >= getdate(nowdate()):
 			self.maintenance_status = "Under Warranty"
-
-	def validate_warehouse(self):
-		if not self.get("__islocal"):
-			item_code, warehouse = frappe.db.get_value("Serial No", self.name, ["item_code", "warehouse"])
-			if not self.via_stock_ledger and item_code != self.item_code:
-				frappe.throw(_("Item Code cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
-			if not self.via_stock_ledger and warehouse != self.warehouse:
-				frappe.throw(_("Warehouse cannot be changed for Serial No."), SerialNoCannotCannotChangeError)
-
-	def validate_item(self):
-		"""
-		Validate whether serial no is required for this item
-		"""
-		item = frappe.get_cached_doc("Item", self.item_code)
-		if item.has_serial_no != 1:
-			frappe.throw(
-				_("Item {0} is not setup for Serial Nos. Check Item master").format(self.item_code)
-			)
-
-		self.item_group = item.item_group
-		self.description = item.description
-		self.item_name = item.item_name
-		self.brand = item.brand
-		self.warranty_period = item.warranty_period
-
-	def set_purchase_details(self, purchase_sle):
-		if purchase_sle:
-			self.purchase_document_type = purchase_sle.voucher_type
-			self.purchase_document_no = purchase_sle.voucher_no
-			self.purchase_date = purchase_sle.posting_date
-			self.purchase_time = purchase_sle.posting_time
-			self.purchase_rate = purchase_sle.incoming_rate
-			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
-				self.supplier, self.supplier_name = frappe.db.get_value(
-					purchase_sle.voucher_type, purchase_sle.voucher_no, ["supplier", "supplier_name"]
-				)
-
-			# If sales return entry
-			if self.purchase_document_type == "Delivery Note":
-				self.sales_invoice = None
-		else:
-			for fieldname in (
-				"purchase_document_type",
-				"purchase_document_no",
-				"purchase_date",
-				"purchase_time",
-				"purchase_rate",
-				"supplier",
-				"supplier_name",
-			):
-				self.set(fieldname, None)
-
-	def set_sales_details(self, delivery_sle):
-		if delivery_sle:
-			self.delivery_document_type = delivery_sle.voucher_type
-			self.delivery_document_no = delivery_sle.voucher_no
-			self.delivery_date = delivery_sle.posting_date
-			self.delivery_time = delivery_sle.posting_time
-			if delivery_sle.voucher_type in ("Delivery Note", "Sales Invoice"):
-				self.customer, self.customer_name = frappe.db.get_value(
-					delivery_sle.voucher_type, delivery_sle.voucher_no, ["customer", "customer_name"]
-				)
-			if self.warranty_period:
-				self.warranty_expiry_date = add_days(
-					cstr(delivery_sle.posting_date), cint(self.warranty_period)
-				)
-		else:
-			for fieldname in (
-				"delivery_document_type",
-				"delivery_document_no",
-				"delivery_date",
-				"delivery_time",
-				"customer",
-				"customer_name",
-				"warranty_expiry_date",
-			):
-				self.set(fieldname, None)
-
-	def get_last_sle(self, serial_no=None):
-		entries = {}
-		sle_dict = self.get_stock_ledger_entries(serial_no)
-		if sle_dict:
-			if sle_dict.get("incoming", []):
-				entries["purchase_sle"] = sle_dict["incoming"][0]
-
-			if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
-				entries["last_sle"] = sle_dict["incoming"][0]
-			else:
-				entries["last_sle"] = sle_dict["outgoing"][0]
-				entries["delivery_sle"] = sle_dict["outgoing"][0]
-
-		return entries
-
-	def get_stock_ledger_entries(self, serial_no=None):
-		sle_dict = {}
-		if not serial_no:
-			serial_no = self.name
-
-		print("serial_no", serial_no)
-		for sle in frappe.db.sql(
-			"""
-			SELECT sle.voucher_type, sle.voucher_no, serial_and_batch_bundle,
-				sle.posting_date, sle.posting_time, sle.incoming_rate, sle.actual_qty, snb.serial_no
-			FROM
-				`tabStock Ledger Entry` sle, `tabSerial and Batch Ledger` snb
-			WHERE
-				sle.item_code=%s AND sle.company = %s
-				AND sle.is_cancelled = 0
-				AND snb.serial_no = %s and snb.parent = sle.serial_and_batch_bundle
-			ORDER BY
-				sle.posting_date desc, sle.posting_time desc, sle.creation desc""",
-			(self.item_code, self.company, serial_no),
-			as_dict=1,
-		):
-			if serial_no.upper() in get_serial_nos(sle.serial_and_batch_bundle):
-				if cint(sle.actual_qty) > 0:
-					sle_dict.setdefault("incoming", []).append(sle)
-				else:
-					sle_dict.setdefault("outgoing", []).append(sle)
-
-		return sle_dict
 
 	def on_trash(self):
 		sl_entries = frappe.db.sql(
@@ -251,19 +107,11 @@ class SerialNo(StockController):
 				_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name)
 			)
 
-	def update_serial_no_reference(self, serial_no=None):
-		last_sle = self.get_last_sle(serial_no)
-		print(last_sle)
-		self.set_purchase_details(last_sle.get("purchase_sle"))
-		self.set_sales_details(last_sle.get("delivery_sle"))
-		self.set_maintenance_status()
-		self.set_status()
-
 
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
 	validate_serial_no(sle, item_det)
-	update_serial_nos(sle, item_det)
+	create_serial_nos(sle, item_det)
 
 
 def validate_serial_no(sle, item_det):
@@ -277,6 +125,7 @@ def validate_serial_no(sle, item_det):
 				SerialNoNotRequiredError,
 			)
 	elif not sle.is_cancelled:
+		return
 		if serial_nos:
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
 				frappe.throw(
@@ -440,6 +289,7 @@ def validate_serial_no(sle, item_det):
 				_("Serial Nos Required for Serialized Item {0}").format(sle.item_code), SerialNoRequiredError
 			)
 	elif serial_nos:
+		return
 		# SLE is being cancelled and has serial nos
 		for serial_no in serial_nos:
 			check_serial_no_validity_on_cancel(serial_no, sle)
@@ -528,7 +378,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	return allow_serial_nos
 
 
-def update_serial_nos(sle, item_det):
+def create_serial_nos(sle, item_det):
 	if sle.skip_update_serial_no:
 		return
 	if (
@@ -538,7 +388,7 @@ def update_serial_nos(sle, item_det):
 		and item_det.has_serial_no == 1
 		and item_det.serial_no_series
 	):
-		bundle = make_serial_bundle(sle, item_det)
+		bundle = make_serial_no_bundle(sle, item_det)
 		if bundle:
 			sle.db_set("serial_and_batch_bundle", bundle.name)
 			child_doctype = sle.voucher_type + " Item"
@@ -552,64 +402,127 @@ def update_serial_nos(sle, item_det):
 			)
 
 	elif sle.serial_and_batch_bundle:
-		auto_make_serial_nos(sle)
-
-
-def make_serial_bundle(sle, item_details):
-	sr_nos = auto_create_serial_nos(sle, item_details)
-
-	if sr_nos:
-		sn_doc = frappe.new_doc("Serial and Batch Bundle")
-		sn_doc.item_code = item_details.name
-		sn_doc.item_name = item_details.item_name
-		sn_doc.item_group = item_details.item_group
-		sn_doc.has_serial_no = item_details.has_serial_no
-		sn_doc.has_batch_no = item_details.has_batch_no
-		sn_doc.voucher_type = sle.voucher_type
-		sn_doc.voucher_no = sle.voucher_no
-		sn_doc.flags.ignore_mandatory = True
-		sn_doc.qty = sle.actual_qty
-		sn_doc.insert()
-
-		batch_no = ""
-		if item_details.has_batch_no:
-			batch_no = create_batch_for_serial_no(sle)
-
-		ledgers = []
-		fields = [
-			"name",
-			"serial_no",
-			"batch_no",
-			"warehouse",
-			"qty",
-			"parent",
-			"parenttype",
-			"parentfield",
-		]
-
-		for serial_no in sr_nos:
-			ledgers.append(
-				(
-					frappe.generate_hash("", 10),
-					serial_no,
-					batch_no,
-					sle.warehouse,
-					1,
-					sn_doc.name,
-					sn_doc.doctype,
-					"ledgers",
-				)
+		if sle.is_cancelled:
+			frappe.db.set_value(
+				"Serial and Batch Bundle",
+				sle.serial_and_batch_bundle,
+				"is_cancelled",
+				1,
 			)
 
-		frappe.db.bulk_insert(
-			"Serial and Batch Ledger",
-			fields=fields,
-			values=set(ledgers),
-			ignore_duplicates=True,
+		if item_det.has_serial_no:
+			update_warehouse_in_serial_no(sle, item_det)
+
+
+def update_warehouse_in_serial_no(sle, item_det):
+	serial_nos = get_serial_nos(sle.serial_and_batch_bundle)
+	serial_no_data = get_serial_nos_warehouse(sle.item_code, serial_nos)
+
+	if not serial_no_data:
+		for serial_no in serial_nos:
+			frappe.db.set_value("Serial No", serial_no, "warehouse", None)
+
+	else:
+		for row in serial_no_data:
+			if not row.serial_no:
+				continue
+
+			warehouse = row.warehouse if row.actual_qty > 0 else None
+			frappe.db.set_value("Serial No", row.serial_no, "warehouse", warehouse)
+
+
+def get_serial_nos_warehouse(item_code, serial_nos):
+	ledger_table = frappe.qb.DocType("Serial and Batch Ledger")
+	sle_table = frappe.qb.DocType("Stock Ledger Entry")
+
+	return (
+		frappe.qb.from_(ledger_table)
+		.inner_join(sle_table)
+		.on(ledger_table.parent == sle_table.serial_and_batch_bundle)
+		.select(
+			ledger_table.serial_no,
+			sle_table.actual_qty,
+			ledger_table.warehouse,
+		)
+		.where(
+			(ledger_table.serial_no.isin(serial_nos))
+			& (sle_table.is_cancelled == 0)
+			& (sle_table.item_code == item_code)
+			& (sle_table.serial_and_batch_bundle.isnotnull())
+		)
+		.orderby(sle_table.posting_date, order=frappe.qb.desc)
+		.orderby(sle_table.posting_time, order=frappe.qb.desc)
+		.orderby(sle_table.creation, order=frappe.qb.desc)
+		.groupby(ledger_table.serial_no)
+	).run(as_dict=True)
+
+
+def make_serial_no_bundle(sle, item_details):
+	sr_nos = auto_create_serial_nos(sle, item_details)
+	if sr_nos:
+		return make_serial_batch_bundle(sle, item_details, sr_nos)
+
+
+def make_serial_batch_bundle(sle, item_details, sr_nos):
+	sn_doc = frappe.new_doc("Serial and Batch Bundle")
+	sn_doc.item_code = item_details.name
+	sn_doc.item_name = item_details.item_name
+	sn_doc.item_group = item_details.item_group
+	sn_doc.has_serial_no = item_details.has_serial_no
+	sn_doc.has_batch_no = item_details.has_batch_no
+	sn_doc.voucher_type = sle.voucher_type
+	sn_doc.voucher_no = sle.voucher_no
+	sn_doc.flags.ignore_mandatory = True
+	sn_doc.flags.ignore_validate = True
+	sn_doc.total_qty = sle.actual_qty
+	sn_doc.avg_rate = sle.incoming_rate
+	sn_doc.total_amount = flt(sle.actual_qty) * flt(sle.incoming_rate)
+	sn_doc.insert()
+
+	batch_no = ""
+	if item_details.has_batch_no:
+		batch_no = create_batch_for_serial_no(sle)
+
+	add_serial_no_to_bundle(sn_doc, sle, sr_nos, batch_no, item_details)
+
+	sn_doc.load_from_db()
+	sn_doc.flags.ignore_validate = True
+	return sn_doc.submit()
+
+
+def add_serial_no_to_bundle(sn_doc, sle, sr_nos, batch_no, item_details):
+	ledgers = []
+
+	fields = [
+		"name",
+		"serial_no",
+		"batch_no",
+		"warehouse",
+		"item_code",
+		"qty",
+		"incoming_rate",
+		"parent",
+		"parenttype",
+		"parentfield",
+	]
+
+	for serial_no in sr_nos:
+		ledgers.append(
+			(
+				frappe.generate_hash("Serial and Batch Ledger", 10),
+				serial_no,
+				batch_no,
+				sle.warehouse,
+				item_details.item_code,
+				1,
+				sle.incoming_rate,
+				sn_doc.name,
+				sn_doc.doctype,
+				"ledgers",
+			)
 		)
 
-		sn_doc.load_from_db()
-		return sn_doc.submit()
+	frappe.db.bulk_insert("Serial and Batch Ledger", fields=fields, values=set(ledgers))
 
 
 def create_batch_for_serial_no(sle):
@@ -629,6 +542,10 @@ def create_batch_for_serial_no(sle):
 def auto_create_serial_nos(sle, item_details) -> List[str]:
 	sr_nos = []
 	serial_nos_details = []
+	current_series = frappe.db.sql(
+		"select current from `tabSeries` where name = %s", item_details.serial_no_series
+	)
+
 	for i in range(cint(sle.actual_qty)):
 		serial_no = make_autoname(item_details.serial_no_series, "Serial No")
 		sr_nos.append(serial_no)
@@ -640,13 +557,8 @@ def auto_create_serial_nos(sle, item_details) -> List[str]:
 				now(),
 				frappe.session.user,
 				frappe.session.user,
-				sle.voucher_type,
-				sle.voucher_no,
 				sle.warehouse,
 				sle.company,
-				sle.posting_date,
-				sle.posting_time,
-				sle.incoming_rate,
 				sle.item_code,
 				item_details.item_name,
 				item_details.description,
@@ -661,24 +573,14 @@ def auto_create_serial_nos(sle, item_details) -> List[str]:
 			"modified",
 			"owner",
 			"modified_by",
-			"purchase_document_type",
-			"purchase_document_no",
 			"warehouse",
 			"company",
-			"purchase_date",
-			"purchase_time",
-			"purchase_rate",
 			"item_code",
 			"item_name",
 			"description",
 		]
 
-		frappe.db.bulk_insert(
-			"Serial No",
-			fields=fields,
-			values=set(serial_nos_details),
-			ignore_duplicates=True,
-		)
+		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	return sr_nos
 
@@ -696,41 +598,6 @@ def get_new_serial_number(series):
 	if frappe.db.exists("Serial No", sr_no):
 		sr_no = get_new_serial_number(series)
 	return sr_no
-
-
-def auto_make_serial_nos(args):
-	serial_nos = get_serial_nos(args.get("serial_and_batch_bundle"))
-	created_numbers = []
-	voucher_type = args.get("voucher_type")
-	item_code = args.get("item_code")
-	for serial_no in serial_nos:
-		is_new = False
-		if frappe.db.exists("Serial No", serial_no):
-			sr = frappe.get_cached_doc("Serial No", serial_no)
-		elif args.get("actual_qty", 0) > 0:
-			sr = frappe.new_doc("Serial No")
-			is_new = True
-
-		sr = update_args_for_serial_no(sr, serial_no, args, is_new=is_new)
-		if is_new:
-			created_numbers.append(sr.name)
-
-	form_links = list(map(lambda d: get_link_to_form("Serial No", d), created_numbers))
-
-	# Setting up tranlated title field for all cases
-	singular_title = _("Serial Number Created")
-	multiple_title = _("Serial Numbers Created")
-
-	if voucher_type:
-		multiple_title = singular_title = _("{0} Created").format(voucher_type)
-
-	if len(form_links) == 1:
-		frappe.msgprint(_("Serial No {0} Created").format(form_links[0]), singular_title)
-	elif len(form_links) > 0:
-		message = _("The following serial numbers were created: <br><br> {0}").format(
-			get_items_html(form_links, item_code)
-		)
-		frappe.msgprint(message, multiple_title)
 
 
 def get_items_html(serial_nos, item_code):
@@ -773,36 +640,8 @@ def clean_serial_no_string(serial_no: str) -> str:
 	return "\n".join(serial_no_list)
 
 
-def update_args_for_serial_no(serial_no_doc, serial_no, args, is_new=False):
-	for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
-		if args.get(field):
-			serial_no_doc.set(field, args.get(field))
-
-	serial_no_doc.via_stock_ledger = args.get("via_stock_ledger") or True
-	serial_no_doc.warehouse = args.get("warehouse") if args.get("actual_qty", 0) > 0 else None
-
-	if is_new:
-		serial_no_doc.serial_no = serial_no
-
-	if (
-		serial_no_doc.sales_order
-		and args.get("voucher_type") == "Stock Entry"
-		and not args.get("actual_qty", 0) > 0
-	):
-		serial_no_doc.sales_order = None
-
-	serial_no_doc.validate_item()
-	serial_no_doc.update_serial_no_reference(serial_no)
-
-	if is_new:
-		serial_no_doc.db_insert()
-	else:
-		serial_no_doc.db_update()
-
-	return serial_no_doc
-
-
 def update_serial_nos_after_submit(controller, parentfield):
+	return
 	stock_ledger_entries = frappe.db.sql(
 		"""select voucher_detail_no, serial_no, actual_qty, warehouse
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",

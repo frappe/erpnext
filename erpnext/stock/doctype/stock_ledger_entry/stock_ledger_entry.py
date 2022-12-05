@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, formatdate, get_datetime, getdate
+from frappe.utils import add_days, cint, formatdate, get_datetime, get_link_to_form, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
@@ -47,6 +47,7 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
+		self.process_serial_and_batch_bundle()
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
@@ -103,14 +104,19 @@ class StockLedgerEntry(Document):
 		if item_detail.has_serial_no or item_detail.has_batch_no:
 			if not self.serial_and_batch_bundle:
 				frappe.throw(_(f"Serial No and Batch No are mandatory for Item {self.item_code}"))
-			elif self.item_code != frappe.get_cached_value(
-				"Serial and Batch Bundle", self.serial_and_batch_bundle, "item_code"
-			):
-				frappe.throw(
-					_(
-						f"Serial No and Batch No Bundle {self.serial_and_batch_bundle} is not for Item {self.item_code}"
-					)
+			else:
+				bundle_data = frappe.get_cached_value(
+					"Serial and Batch Bundle", self.serial_and_batch_bundle, ["item_code", "docstatus"], as_dict=1
 				)
+
+				if self.item_code != bundle_data.item_code:
+					frappe.throw(
+						_(f"Serial and Batch Bundle {self.serial_and_batch_bundle} is not for Item {self.item_code}")
+					)
+
+				if bundle_data.docstatus != 1:
+					link = get_link_to_form("Serial and Batch Bundle", self.serial_and_batch_bundle)
+					frappe.throw(_(f"Serial and Batch Bundle {link} should be submitted first"))
 
 		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
 			frappe.throw(_(f"Serial No and Batch No are not allowed for Item {self.item_code}"))
@@ -210,6 +216,36 @@ class StockLedgerEntry(Document):
 					msg += "<br><br>" + _("Please contact any of the following users to {} this transaction.")
 					msg += "<br>" + "<br>".join(authorized_users)
 					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
+
+	def process_serial_and_batch_bundle(self):
+		if self.serial_and_batch_bundle:
+			self.update_warehouse_and_voucher_no()
+			self.set_outgoing_rate()
+
+	def update_warehouse_and_voucher_no(self):
+		voucher_no = self.name if not self.is_cancelled else None
+		frappe.db.set_value(
+			"Serial and Batch Bundle", self.serial_and_batch_bundle, "voucher_no", voucher_no
+		)
+
+		if not self.is_cancelled:
+			frappe.db.sql(
+				f"""
+				UPDATE `tabSerial and Batch Ledger`
+				SET warehouse = {frappe.db.escape(self.warehouse)}
+				WHERE parent = {frappe.db.escape(self.serial_and_batch_bundle)}
+				AND (
+					warehouse is NULL or warehouse = '' or
+					warehouse != {frappe.db.escape(self.warehouse)}
+				)"""
+			)
+
+	def set_outgoing_rate(self):
+		if self.is_cancelled:
+			return
+
+		doc = frappe.get_cached_doc("Serial and Batch Bundle", self.serial_and_batch_bundle)
+		doc.set_outgoing_rate()
 
 	def on_cancel(self):
 		msg = _("Individual Stock Ledger Entry cannot be cancelled.")

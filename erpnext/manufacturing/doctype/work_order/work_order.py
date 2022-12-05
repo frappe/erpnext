@@ -33,7 +33,6 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from erpnext.stock.doctype.batch.batch import make_batch
 from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
 from erpnext.stock.doctype.serial_no.serial_no import (
-	auto_make_serial_nos,
 	clean_serial_no_string,
 	get_auto_serial_nos,
 	get_serial_nos,
@@ -455,7 +454,7 @@ class WorkOrder(Document):
 
 		if self.serial_no:
 			args.update({"serial_no": self.serial_no, "actual_qty": self.qty})
-			auto_make_serial_nos(args)
+			# auto_make_serial_nos(args)
 
 		serial_nos_length = len(get_serial_nos(self.serial_no))
 		if serial_nos_length != self.qty:

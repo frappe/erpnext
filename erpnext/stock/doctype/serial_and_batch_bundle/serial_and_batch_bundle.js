@@ -10,6 +10,36 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 		frm.trigger('toggle_fields');
 	},
 
+	warehouse(frm) {
+		if (frm.doc.warehouse) {
+			frm.call({
+				method: "set_warehouse",
+				doc: frm.doc,
+				callback(r) {
+					refresh_field("ledgers");
+				}
+			})
+		}
+	},
+
+	has_serial_no(frm) {
+		frm.trigger('toggle_fields');
+	},
+
+	has_batch_no(frm) {
+		frm.trigger('toggle_fields');
+	},
+
+	toggle_fields(frm) {
+		frm.fields_dict.ledgers.grid.update_docfield_property(
+			'serial_no', 'read_only', !frm.doc.has_serial_no
+		);
+
+		frm.fields_dict.ledgers.grid.update_docfield_property(
+			'batch_no', 'read_only', !frm.doc.has_batch_no
+		);
+	},
+
 	set_queries(frm) {
 		frm.set_query('item_code', () => {
 			return {
@@ -31,6 +61,15 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			return {
 				filters: {
 					'docstatus': ["!=", 2],
+				}
+			};
+		});
+
+		frm.set_query('warehouse', () => {
+			return {
+				filters: {
+					'is_group': 0,
+					'company': frm.doc.company,
 				}
 			};
 		});
@@ -58,23 +97,14 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 				}
 			};
 		});
-	},
-
-	has_serial_no(frm) {
-		frm.trigger('toggle_fields');
-	},
-
-	has_batch_no(frm) {
-		frm.trigger('toggle_fields');
-	},
-
-	toggle_fields(frm) {
-		frm.fields_dict.ledgers.grid.update_docfield_property(
-			'serial_no', 'read_only', !frm.doc.has_serial_no
-		);
-
-		frm.fields_dict.ledgers.grid.update_docfield_property(
-			'batch_no', 'read_only', !frm.doc.has_batch_no
-		);
 	}
 });
+
+
+frappe.ui.form.on("Serial and Batch Ledger", {
+	ledgers_add(frm, cdt, cdn) {
+		if (frm.doc.warehouse) {
+			locals[cdt][cdn].warehouse = frm.doc.warehouse;
+		}
+	},
+})

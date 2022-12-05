@@ -12,7 +12,6 @@ from frappe.utils import cint, flt
 
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
-from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
@@ -142,11 +141,6 @@ class DeliveryNote(SellingController):
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
-
-		if self._action != "submit" and not self.is_return:
-			set_batch_nos(self, "warehouse", throw=True)
-			set_batch_nos(self, "warehouse", throw=True, child_table="packed_items")
-
 		self.update_current_stock()
 
 		if not self.installation_status:
@@ -274,7 +268,12 @@ class DeliveryNote(SellingController):
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""

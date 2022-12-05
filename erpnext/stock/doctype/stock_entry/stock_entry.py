@@ -29,6 +29,9 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
 from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_copy_of_serial_and_batch_bundle,
+)
 from erpnext.stock.doctype.serial_no.serial_no import (
 	get_serial_nos,
 	update_serial_nos_after_submit,
@@ -232,7 +235,12 @@ class StockEntry(StockController):
 		self.update_work_order()
 		self.update_stock_ledger()
 
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Serial and Batch Bundle",
+		)
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
@@ -1208,6 +1216,11 @@ class StockEntry(StockController):
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
 			if cstr(d.t_warehouse):
+				if d.s_warehouse and d.serial_and_batch_bundle:
+					d.serial_and_batch_bundle = get_copy_of_serial_and_batch_bundle(
+						d.serial_and_batch_bundle, d.t_warehouse
+					)
+
 				sle = self.get_sl_entries(
 					d,
 					{

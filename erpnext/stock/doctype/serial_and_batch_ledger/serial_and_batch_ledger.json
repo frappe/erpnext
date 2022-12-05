@@ -5,12 +5,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "item_code",
   "serial_no",
   "batch_no",
   "column_break_2",
   "qty",
   "warehouse",
-  "is_rejected"
+  "section_break_6",
+  "incoming_rate",
+  "column_break_8",
+  "outgoing_rate",
+  "stock_value_difference"
  ],
  "fields": [
   {
@@ -34,6 +39,7 @@
    "options": "Batch"
   },
   {
+   "default": "1",
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -47,21 +53,52 @@
    "options": "Warehouse"
   },
   {
-   "default": "0",
-   "depends_on": "eval:parent.voucher_type == 'Purchase Receipt'",
-   "fieldname": "is_rejected",
-   "fieldtype": "Check",
-   "label": "Is Rejected"
-  },
-  {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Rate Section"
+  },
+  {
+   "fieldname": "incoming_rate",
+   "fieldtype": "Float",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "outgoing_rate",
+   "fieldtype": "Float",
+   "label": "Outgoing Rate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_value_difference",
+   "fieldtype": "Float",
+   "label": "Change in Stock Value",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-24 13:00:23.598351",
+ "modified": "2023-01-10 12:55:57.368650",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Ledger",

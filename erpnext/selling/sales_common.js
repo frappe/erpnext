@@ -420,6 +420,40 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		});
 	}
 
+	pick_serial_and_batch(doc, cdt, cdn) {
+		let item = locals[cdt][cdn];
+		let me = this;
+		let path = "assets/erpnext/js/utils/serial_no_batch_selector.js";
+
+		frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+			.then((r) => {
+				if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+					item.has_serial_no = r.message.has_serial_no;
+					item.has_batch_no = r.message.has_batch_no;
+					item.outward = true;
+
+					item.title = item.has_serial_no ?
+						__("Select Serial No") : __("Select Batch No");
+
+					if (item.has_serial_no && item.has_batch_no) {
+						item.title = __("Select Serial and Batch");
+					}
+
+					frappe.require(path, function() {
+						new erpnext.SerialNoBatchBundleUpdate(
+							me.frm, item, (r) => {
+								if (r) {
+									me.frm.refresh_fields();
+									frappe.model.set_value(cdt, cdn,
+										"serial_and_batch_bundle", r.name);
+								}
+							}
+						);
+					});
+				}
+			});
+	}
+
 	update_auto_repeat_reference(doc) {
 		if (doc.auto_repeat) {
 			frappe.call({

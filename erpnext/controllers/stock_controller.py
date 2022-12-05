@@ -354,6 +354,7 @@ class StockController(AccountsController):
 										"batch_no": batch_no,
 										"qty": d.qty,
 										"warehouse": d.get(warehouse_field),
+										"incoming_rate": d.rate,
 									}
 								],
 							}
