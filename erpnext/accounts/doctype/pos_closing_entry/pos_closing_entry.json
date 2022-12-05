@@ -49,6 +49,7 @@
   },
   {
    "default": "Today",
+   "fetch_if_empty": 1,
    "fieldname": "period_end_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
@@ -237,7 +238,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2022-12-05 00:34:49.258559",
+ "modified": "2022-12-05 13:00:00.923534",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
