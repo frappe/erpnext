@@ -635,6 +635,10 @@ class TestWorkOrder(FrappeTestCase):
 			bom.submit()
 			bom_name = bom.name
 
+		ste1 = test_stock_entry.make_stock_entry(
+			item_code=rm1, target="_Test Warehouse - _TC", qty=32, basic_rate=5000.0
+		)
+
 		work_order = make_wo_order_test_record(
 			item=fg_item, skip_transfer=True, planned_start_date=now(), qty=1
 		)
@@ -659,11 +663,29 @@ class TestWorkOrder(FrappeTestCase):
 		work_order.insert()
 		work_order.submit()
 		self.assertEqual(work_order.has_batch_no, 1)
-		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 30))
+		batches = frappe.get_all("Batch", filters={"reference_name": work_order.name})
+		self.assertEqual(len(batches), 3)
+		batches = [batch.name for batch in batches]
+
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 10))
 		for row in ste1.get("items"):
 			if row.is_finished_item:
 				self.assertEqual(row.item_code, fg_item)
 				self.assertEqual(row.qty, 10)
+				self.assertTrue(row.batch_no in batches)
+				batches.remove(row.batch_no)
+
+		ste1.submit()
+
+		remaining_batches = []
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 20))
+		for row in ste1.get("items"):
+			if row.is_finished_item:
+				self.assertEqual(row.item_code, fg_item)
+				self.assertEqual(row.qty, 10)
+				remaining_batches.append(row.batch_no)
+
+		self.assertEqual(sorted(remaining_batches), sorted(batches))
 
 		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 0)
 
