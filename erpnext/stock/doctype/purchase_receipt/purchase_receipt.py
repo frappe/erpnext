@@ -383,16 +383,11 @@ class PurchaseReceipt(BuyingController):
 					valuation_amount_as_per_doc = valuation_net_amount + valuation_item_tax_amount + \
 						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
 
-					divisional_loss = flt(valuation_amount_as_per_doc - stock_value_diff,
-						d.precision("base_net_amount"))
+					divisional_loss = flt(valuation_amount_as_per_doc - stock_value_diff)
 
 					if divisional_loss:
 						loss_account = self.get_company_default("stock_adjustment_account")
 						loss_account_currency = get_account_currency(loss_account)
-						# if self.is_return or valuation_item_tax_amount:
-						# 	loss_account = expenses_included_in_valuation
-						# else:
-						# 	loss_account = self.get_company_default("stock_adjustment_account")
 
 						gl_entries.append(self.get_gl_dict({
 							"account": loss_account,

@@ -914,8 +914,6 @@ class PurchaseInvoice(BuyingController):
 		return gl_entries
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
-		net_amt_precision = item.precision("base_net_amount")
-
 		valuation_net_amount = self.get_item_valuation_net_amount(item)
 		valuation_item_tax_amount = self.get_item_valuation_tax_amount(item)
 
@@ -924,7 +922,7 @@ class PurchaseInvoice(BuyingController):
 
 		stock_value_diff = flt(voucher_wise_stock_value.get(item.name))
 
-		stock_adjustment_amt = flt(valuation_amount_as_per_doc - stock_value_diff, net_amt_precision)
+		stock_adjustment_amt = flt(valuation_amount_as_per_doc - stock_value_diff)
 
 		# Stock ledger value is not matching with the warehouse amount
 		if self.update_stock and stock_adjustment_amt:
