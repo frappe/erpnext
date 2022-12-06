@@ -239,6 +239,14 @@ class AccountsController(TransactionBase):
 					else:
 						item.set(field_map.get(self.doctype), default_deferred_account)
 
+	def validate_auto_repeat_subscription_dates(self):
+		if (
+			self.get("from_date")
+			and self.get("to_date")
+			and getdate(self.from_date) > getdate(self.to_date)
+		):
+			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
+
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
@@ -2303,7 +2311,7 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 		due_date = add_days(get_last_day(date), term.credit_days)
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
-		due_date = add_months(get_last_day(date), term.credit_months)
+		due_date = get_last_day(add_months(date, term.credit_months))
 	return due_date
 
 
@@ -2315,7 +2323,7 @@ def get_discount_date(term, posting_date=None, bill_date=None):
 	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
 		discount_validity = add_days(get_last_day(date), term.discount_validity)
 	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
-		discount_validity = add_months(get_last_day(date), term.discount_validity)
+		discount_validity = get_last_day(add_months(date, term.discount_validity))
 	return discount_validity
 
 

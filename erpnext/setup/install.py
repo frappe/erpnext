@@ -30,6 +30,7 @@ def after_install():
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
+	setup_log_settings()
 	frappe.db.commit()
 
 
@@ -197,3 +198,10 @@ def add_standard_navbar_items():
 
 def add_app_name():
 	frappe.db.set_value("System Settings", None, "app_name", "ERPNext")
+
+
+def setup_log_settings():
+	log_settings = frappe.get_single("Log Settings")
+	log_settings.append("logs_to_clear", {"ref_doctype": "Repost Item Valuation", "days": 60})
+
+	log_settings.save(ignore_permissions=True)
