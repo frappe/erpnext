@@ -54,7 +54,7 @@ def search_by_term(search_term, warehouse, price_list):
 				}
 			)
 
-	item_stock_qty, _ = get_stock_availability(item_code, warehouse)
+	item_stock_qty, is_stock_item = get_stock_availability(item_code, warehouse)
 	item_stock_qty = item_stock_qty // item.get("conversion_factor")
 	item.update({"actual_qty": item_stock_qty})
 
