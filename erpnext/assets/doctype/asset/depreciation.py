@@ -294,7 +294,7 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 		for schedule_idx, schedule in enumerate(depr_schedule):
 			if schedule.schedule_date == date:
 				if not disposal_was_made_on_original_schedule_date(
-					asset, schedule, schedule_idx, date
+					schedule_idx, row, date
 				) or disposal_happens_in_the_future(date):
 
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
@@ -318,15 +318,14 @@ def get_depreciation_amount_in_je(journal_entry):
 
 
 # if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
-def disposal_was_made_on_original_schedule_date(asset, schedule, row, posting_date_of_disposal):
-	for finance_book in asset.get("finance_books"):
-		if schedule.finance_book == finance_book.finance_book:
-			orginal_schedule_date = add_months(
-				finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
-			)
+def disposal_was_made_on_original_schedule_date(schedule_idx, row, posting_date_of_disposal):
+	orginal_schedule_date = add_months(
+		row.depreciation_start_date, schedule_idx * cint(row.frequency_of_depreciation)
+	)
 
-			if orginal_schedule_date == posting_date_of_disposal:
-				return True
+	if orginal_schedule_date == posting_date_of_disposal:
+		return True
+
 	return False
 
 

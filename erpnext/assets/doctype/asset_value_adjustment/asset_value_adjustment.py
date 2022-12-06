@@ -155,7 +155,7 @@ class AssetValueAdjustment(Document):
 
 			d.db_update()
 
-			set_accumulated_depreciation(new_asset_depr_schedule_doc, asset, d, ignore_booked_entry=True)
+			set_accumulated_depreciation(new_asset_depr_schedule_doc, d, ignore_booked_entry=True)
 			for asset_data in depr_schedule:
 				if not asset_data.journal_entry:
 					asset_data.db_update()
