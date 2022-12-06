@@ -75,6 +75,15 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			}
 		});
 
+		me.frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					'company': me.frm.doc.company,
+					"is_group": 0
+				}
+			}
+		});
+
 		me.frm.set_query("account_head", "taxes", function(doc) {
 			let account_type = ["Tax", "Chargeable", "Expenses Included In Valuation"];
 			return {

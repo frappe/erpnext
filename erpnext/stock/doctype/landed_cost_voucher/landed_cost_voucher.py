@@ -6,11 +6,11 @@ import frappe
 import erpnext
 from frappe import _, scrub
 from frappe.utils import flt, fmt_money
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, delete_voucher_gl_entries
 from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.accounts.party import get_party_account
+from erpnext.controllers.stock_controller import update_gl_entries_for_reposted_stock_vouchers
 from six import string_types
 import json
 
@@ -41,6 +41,7 @@ class LandedCostVoucher(AccountsController):
 
 	def before_submit(self):
 		self.validate_manual_distribution_totals(throw=True)
+		self.validate_asset_qty_and_status()
 
 	def on_submit(self):
 		self.validate_applicable_charges_for_item()
@@ -96,10 +97,11 @@ class LandedCostVoucher(AccountsController):
 			if pr.receipt_document_type and pr.receipt_document:
 				pr_items = frappe.db.sql("""
 					select
-						pr_item.item_code, pr_item.item_name,
+						pr_item.name, pr_item.item_code, pr_item.item_name,
 						pr_item.qty, pr_item.uom, pr_item.total_weight,
-						pr_item.base_rate, pr_item.base_amount, pr_item.amount, pr_item.name,
-						pr_item.purchase_order_item, pr_item.purchase_order, pr_item.cost_center
+						pr_item.base_rate, pr_item.base_amount, pr_item.amount,
+						pr_item.purchase_order_item, pr_item.purchase_order,
+						pr_item.cost_center, pr_item.is_fixed_asset
 					from `tab{doctype} Item` pr_item
 					inner join tabItem i on i.name = pr_item.item_code and i.is_stock_item = 1
 					where pr_item.parent = %s
@@ -116,6 +118,7 @@ class LandedCostVoucher(AccountsController):
 					item.rate = d.base_rate
 					item.cost_center = d.cost_center
 					item.amount = d.base_amount
+					item.is_fixed_asset = d.is_fixed_asset
 					item.purchase_order = d.purchase_order
 					item.purchase_order_item = d.purchase_order_item
 					if pr.receipt_document_type == "Purchase Receipt":
@@ -321,31 +324,31 @@ class LandedCostVoucher(AccountsController):
 			self.items[-1].applicable_charges += diff
 
 	def update_landed_cost(self):
+		docs = []
 		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
-			
-			# check if there are {qty} assets created and linked to this receipt document
-			self.validate_asset_qty_and_status(d.receipt_document_type, doc)
+			docs.append(doc)
 
-			# set landed cost voucher amount in pr item
 			doc.set_landed_cost_voucher_amount()
-
-			# set valuation amount in pr item
 			doc.update_valuation_rate("items")
-
-			# db_update will update and save landed_cost_voucher_amount and voucher_amount in PR
 			for item in doc.get("items"):
 				item.db_update()
 
+		excluded_vouchers = []
+		for doc in docs:
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			doc.make_gl_entries_on_cancel(repost_future_gle=False)
+			delete_voucher_gl_entries(doc.doctype, doc.name)
 
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			doc.make_gl_entries()
+			doc.make_gl_entries(repost_future_gle=False)
+
+			excluded_vouchers.append((doc.doctype, doc.name))
+
+		update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers)
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.grand_total) > 0:
@@ -401,33 +404,25 @@ class LandedCostVoucher(AccountsController):
 
 		return gl_entry
 
-	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
+	def validate_asset_qty_and_status(self):
 		for item in self.get('items'):
-			if item.get('is_fixed_asset'):
-				receipt_document_type = 'purchase_invoice' if item.receipt_document_type == 'Purchase Invoice' \
-						else 'purchase_receipt'
-				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: item.receipt_document,
-					'item_code': item.item_code }, fields=['name', 'docstatus'])
-				if not docs or len(docs) != item.qty:
+			receipt_document = item.get('purchase_receipt') or item.get('purchase_invoice')
+			if item.get('is_fixed_asset') and receipt_document:
+				receipt_document_type = 'purchase_invoice' if item.purchase_invoice else 'purchase_receipt'
+				assets = frappe.db.get_all('Asset', filters={
+					receipt_document_type: item.receipt_document,
+					'item_code': item.item_code
+				}, fields=['name', 'docstatus'])
+
+				if not assets or len(assets) != item.qty:
 					frappe.throw(_('There are not enough asset created or linked to {0}. \
-						Please create or link {1} Assets with respective document.').format(item.receipt_document, item.qty))
-				if docs:
-					for d in docs:
-						if d.docstatus == 1:
-							frappe.throw(_('{2} <b>{0}</b> has submitted Assets.\
-								Remove Item <b>{1}</b> from table to continue.').format(
-									item.receipt_document, item.item_code, item.receipt_document_type))
+						Please create or link {1} Assets with respective document.').format(receipt_document, item.qty))
 
-
-def update_rate_in_serial_no_for_non_asset_items(receipt_document):
-	for item in receipt_document.get("items"):
-		if item.serial_no:
-			serial_nos = get_serial_nos(item.serial_no)
-			if serial_nos:
-				frappe.db.set_value("Serial No", {"name": ['in', serial_nos]}, "purchase_rate", item.valuation_rate)
-
-		if item.is_vehicle:
-			frappe.db.set_value("Vehicle", item.serial_no, "purchase_rate", item.valuation_rate)
+				for d in assets:
+					if d.docstatus == 1:
+						frappe.throw(_('{2} <b>{0}</b> has submitted Assets.\
+							Remove Item <b>{1}</b> from table to continue.').format(
+								receipt_document, item.item_code, item.receipt_document_type))
 
 
 def get_purchase_landed_cost_gl_details(doc, item):

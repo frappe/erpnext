@@ -151,12 +151,13 @@ class BuyingController(StockController):
 			frappe.throw(_("Can only set Landed Cost Voucher Amount for Purchase Receipt or Purchase Invoice"))
 
 		for d in self.get("items"):
-			lc_voucher_data = frappe.db.sql("""select sum(applicable_charges), cost_center
+			lc_voucher_data = frappe.db.sql("""
+				select sum(applicable_charges)
 				from `tabLanded Cost Item`
-				where docstatus = 1 and {purchase_item_field} = %s""".format(purchase_item_field=purchase_item_field), d.name)
-			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
-			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
-				d.db_set('cost_center', lc_voucher_data[0][1])
+				where docstatus = 1 and {purchase_item_field} = %s
+			""".format(purchase_item_field=purchase_item_field), d.name)
+
+			d.landed_cost_voucher_amount = flt(lc_voucher_data[0][0]) if lc_voucher_data else 0.0
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
