@@ -241,7 +241,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			return flt(adv.allocated_amount, precision("allocated_amount", adv));
 		}));
 
-		if (me.frm.doc.party) {
+		if (me.frm.doc.is_payable) {
 			me.frm.doc.grand_total = flt(me.frm.doc.total_taxes_and_charges, precision("grand_total"));
 			me.frm.doc.base_grand_total = flt(me.frm.doc.grand_total * me.frm.doc.conversion_rate, precision("base_grand_total"));
 			me.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
@@ -486,6 +486,10 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	party_type: function() {
 		this.frm.set_value("party", null);
+	},
+
+	is_payable: function () {
+		this.calculate_taxes_and_totals();
 	},
 
 	get_company_currency: function() {

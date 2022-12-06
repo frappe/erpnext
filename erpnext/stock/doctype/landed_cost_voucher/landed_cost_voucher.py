@@ -126,18 +126,17 @@ class LandedCostVoucher(AccountsController):
 						item.purchase_invoice_item = d.name
 
 	def check_mandatory(self):
-		if self.party:
+		if self.party_type not in ["Supplier", "Letter of Credit"]:
+			frappe.throw(_("Party Type must be either Supplier or Letter of Credit"))
+
+		if self.is_payable:
+			if not self.party:
+				frappe.throw(_("Party is mandatory for Payable Landed Cost Voucher"))
 			if not self.credit_to:
-				frappe.throw(_("Credit To is mandatory when Payable To is selected"))
-			for d in self.taxes:
-				if not d.account_head:
-					frappe.throw(_("Row #{0}: Tax/Charge Account Head is mandatory when Payable To is selected").format(d.idx))
+				frappe.throw(_("Credit To is mandatory Payable Landed Cost Voucher"))
 
 		if not self.get("purchase_receipts"):
 			frappe.throw(_("Please enter Receipt Document"))
-
-		if self.party_type not in ["Supplier", "Letter of Credit"]:
-			frappe.throw(_("Party Type must be Supplier or Letter of Credit"))
 
 	def validate_purchase_receipts(self):
 		receipt_documents = []
@@ -188,7 +187,7 @@ class LandedCostVoucher(AccountsController):
 						.format(item.idx, "Purchase Invoice", item.purchase_invoice, "Purchase Receipts"))
 
 	def clear_advances_table_if_not_payable(self):
-		if not self.party:
+		if not self.is_payable:
 			self.advances = []
 			self.allocate_advances_automatically = 0
 
@@ -267,7 +266,7 @@ class LandedCostVoucher(AccountsController):
 
 		total_allocated = sum([flt(d.allocated_amount, d.precision("allocated_amount")) for d in self.get("advances")])
 
-		if self.party:
+		if self.is_payable:
 			self.grand_total = flt(self.total_taxes_and_charges, self.precision("grand_total"))
 			self.base_grand_total = flt(self.grand_total * self.conversion_rate, self.precision("base_grand_total"))
 			self.total_advance = flt(total_allocated, self.precision("total_advance"))
@@ -354,7 +353,7 @@ class LandedCostVoucher(AccountsController):
 			make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
-		if not self.party:
+		if not self.is_payable:
 			return []
 
 		gl_entry = []

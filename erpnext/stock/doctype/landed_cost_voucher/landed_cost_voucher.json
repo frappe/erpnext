@@ -9,6 +9,7 @@
   "naming_series",
   "party_type",
   "party",
+  "is_payable",
   "col_break2",
   "remarks",
   "column_break_8",
@@ -167,7 +168,7 @@
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
-   "label": "Payable To",
+   "label": "Party",
    "options": "party_type"
   },
   {
@@ -269,6 +270,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "is_payable",
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -278,7 +280,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -287,7 +289,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "total_advance",
    "fieldtype": "Currency",
    "label": "Total Advance",
@@ -297,7 +299,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -309,27 +311,25 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "advances",
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
    "label": "Advance Payments"
   },
   {
    "default": "0",
-   "depends_on": "party",
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
    "label": "Set Advances and Allocate (FIFO)"
   },
   {
-   "depends_on": "eval:doc.party && !doc.allocate_advances_automatically && doc.docstatus == 0",
+   "depends_on": "eval:!doc.allocate_advances_automatically && doc.docstatus == 0",
    "fieldname": "get_advances",
    "fieldtype": "Button",
    "label": "Get Advances Paid",
    "print_hide": 1
   },
   {
-   "depends_on": "party",
    "fieldname": "advances",
    "fieldtype": "Table",
    "label": "Advances",
@@ -376,7 +376,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.docstatus == 0 && doc.party_type == \"Letter of Credit\" && doc.party",
+   "depends_on": "eval:doc.docstatus == 0 && doc.party_type == \"Letter of Credit\"",
    "fieldname": "get_purchase_receipts_from_letter_of_credit",
    "fieldtype": "Button",
    "label": "Get Purchase Receipts from Letter of Credit"
@@ -397,11 +397,17 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_payable",
+   "fieldtype": "Check",
+   "label": "Is Payable"
   }
  ],
  "icon": "icon-usd",
  "is_submittable": 1,
- "modified": "2022-12-05 14:28:38.205971",
+ "modified": "2022-12-06 18:12:44.275773",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",
