@@ -14,7 +14,7 @@ from frappe import _
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc, map_doc
-from frappe.utils import flt, getdate, nowdate, get_datetime
+from frappe.utils import flt, getdate, nowdate, get_datetime, nowtime, get_time, format_time
 from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -90,7 +90,7 @@ class POSInvoiceMergeLog(Document):
         sales_invoice.is_consolidated = 1
         sales_invoice.set_posting_time = 1
         sales_invoice.posting_date = getdate(self.posting_date)
-        sales_invoice.posting_time = get_datetime(self.posting_date).strftime("%H:%M:%S")
+        sales_invoice.posting_time = self.posting_time
         sales_invoice.save()
         sales_invoice.submit()
 
@@ -107,7 +107,7 @@ class POSInvoiceMergeLog(Document):
         credit_note.is_consolidated = 1
         credit_note.set_posting_time = 1
         credit_note.posting_date = getdate(self.posting_date)
-        credit_note.posting_time = get_datetime(self.posting_date).strftime("%H:%M:%S")
+        credit_note.posting_time = self.posting_time
         # TODO: return could be against multiple sales invoice which could also have been consolidated?
         # credit_note.return_against = self.consolidated_invoice
         credit_note.save()
@@ -302,6 +302,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None,invoice_by_defualt
         for customer, invoices in six.iteritems(custom_invoice_by_customer):
             merge_log = frappe.new_doc('POS Invoice Merge Log')
             merge_log.posting_date = getdate(closing_entry.get('period_end_date')) if closing_entry else nowdate()
+            merge_log.posting_time = get_time(closing_entry.get('period_end_date')) if closing_entry else format_time(nowtime(), 'HH:mm:ss')
             merge_log.customer = customer
             merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
 
