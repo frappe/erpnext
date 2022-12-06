@@ -293,6 +293,10 @@ class JournalEntry(AccountsController):
 					depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(
 						asset.name, row.finance_book
 					)
+
+					if not depr_schedule:
+						return
+
 					for s in depr_schedule:
 						if s.journal_entry == self.name:
 							s.db_set("journal_entry", None)
