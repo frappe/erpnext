@@ -217,7 +217,7 @@ class SalesPipelineAnalytics(object):
 
 	def check_for_assigned_to(self, period, value, count_or_amount, assigned_to, info):
 		if self.filters.get("assigned_to"):
-			for data in json.loads(info.get("opportunity_owner")):
+			for data in json.loads(info.get("opportunity_owner") or "[]"):
 				if data == self.filters.get("assigned_to"):
 					self.set_formatted_data(period, data, count_or_amount, assigned_to)
 		else:
