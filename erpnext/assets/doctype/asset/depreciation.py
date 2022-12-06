@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_name,
+	get_depr_schedule_from_asset_depr_schedule_of_asset,
 	get_temp_asset_depr_schedule_doc,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
@@ -287,31 +288,26 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
-	row = -1
-	finance_book = asset.get("schedules")[0].get("finance_book")
-	for schedule in asset.get("schedules"):
-		if schedule.finance_book != finance_book:
-			row = 0
-			finance_book = schedule.finance_book
-		else:
-			row += 1
+	for row in asset.get("finance_books"):
+		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(asset, row.finance_book)
 
-		if schedule.schedule_date == date:
-			if not disposal_was_made_on_original_schedule_date(
-				asset, schedule, row, date
-			) or disposal_happens_in_the_future(date):
+		for schedule_idx, schedule in enumerate(depr_schedule):
+			if schedule.schedule_date == date:
+				if not disposal_was_made_on_original_schedule_date(
+					asset, schedule, schedule_idx, date
+				) or disposal_happens_in_the_future(date):
 
-				reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
-				reverse_journal_entry.posting_date = nowdate()
-				frappe.flags.is_reverse_depr_entry = True
-				reverse_journal_entry.submit()
+					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
+					reverse_journal_entry.posting_date = nowdate()
+					frappe.flags.is_reverse_depr_entry = True
+					reverse_journal_entry.submit()
 
-				frappe.flags.is_reverse_depr_entry = False
-				asset.flags.ignore_validate_update_after_submit = True
-				schedule.journal_entry = None
-				depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
-				asset.finance_books[0].value_after_depreciation += depreciation_amount
-				asset.save()
+					frappe.flags.is_reverse_depr_entry = False
+					asset.flags.ignore_validate_update_after_submit = True
+					schedule.journal_entry = None
+					depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
+					row.value_after_depreciation += depreciation_amount
+					asset.save()
 
 
 def get_depreciation_amount_in_je(journal_entry):
