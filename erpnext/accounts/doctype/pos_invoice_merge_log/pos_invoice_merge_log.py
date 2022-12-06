@@ -88,7 +88,7 @@ class POSInvoiceMergeLog(Document):
         sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
         sales_invoice.is_consolidated = 1
-        sales_invoice.set_posting_time = 1
+        sales_invoice.set_posting_time = 0
         sales_invoice.posting_date = getdate(self.posting_date)
         sales_invoice.posting_time = self.posting_time
         sales_invoice.save()
@@ -105,7 +105,7 @@ class POSInvoiceMergeLog(Document):
         credit_note = self.merge_pos_invoice_into(credit_note, data)
 
         credit_note.is_consolidated = 1
-        credit_note.set_posting_time = 1
+        credit_note.set_posting_time = 0
         credit_note.posting_date = getdate(self.posting_date)
         credit_note.posting_time = self.posting_time
         # TODO: return could be against multiple sales invoice which could also have been consolidated?
