@@ -11,6 +11,7 @@ from frappe import _, scrub
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
+from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
 
 
 class PayrollEntry(Document):
@@ -40,16 +41,42 @@ class PayrollEntry(Document):
 
 	def on_cancel(self):
 		ss = frappe.db.sql("""
-			select name, journal_entry from `tabSalary Slip`
+			select name, journal_entry, docstatus
+			from `tabSalary Slip`
+			where payroll_entry = %s
+		""", self.name, as_dict=1)
+
+		submitted_salary_slips = [d.name for d in ss if d.docstatus == 1]
+		draft_salary_slips = [d.name for d in ss if d.docstatus == 0]
+
+		journal_entries = list(set([d.journal_entry for d in ss if d.journal_entry]))
+
+		for name in submitted_salary_slips:
+			frappe.get_doc("Salary Slip", name).cancel()
+
+		if draft_salary_slips:
+			frappe.delete_doc("Salary Slip", draft_salary_slips)
+
+		for jv in journal_entries:
+			doc = frappe.get_doc("Journal Entry", jv)
+			if doc.docstatus == 1:
+				doc.cancel()
+
+	def on_trash(self):
+		ss = frappe.db.sql("""
+			select name, journal_entry, docstatus
+			from `tabSalary Slip`
 			where payroll_entry = %s
 		""", self.name, as_dict=1)
 
 		salary_slips = [d.name for d in ss]
 		journal_entries = list(set([d.journal_entry for d in ss if d.journal_entry]))
 
-		frappe.delete_doc("Salary Slip", salary_slips)
-		for jv in journal_entries:
-			frappe.get_doc("Journal Entry", jv).cancel()
+		if salary_slips:
+			frappe.delete_doc("Salary Slip", salary_slips)
+
+		if journal_entries:
+			frappe.delete_doc("Journal Entry", journal_entries)
 
 	def get_employees(self):
 		"""
@@ -298,12 +325,20 @@ class PayrollEntry(Document):
 			""".format(conditions), (self.start_date, self.end_date), as_dict=True) or []
 
 	def get_salary_component_account(self, salary_component):
-		account = frappe.db.get_value("Salary Component Account",
-			{"parent": salary_component, "company": self.company}, "default_account", cache=1)
+		if self.get('_salary_component_account_map') and self._salary_component_account_map.get(salary_component):
+			account = self._salary_component_account_map.get(salary_component)
+		else:
+			account = frappe.db.get_value("Salary Component Account",
+				{"parent": salary_component, "company": self.company}, "default_account", cache=1)
 
-		if not account:
-			frappe.throw(_("Please set default account in Salary Component {0}")
-				.format(salary_component))
+			if not account:
+				frappe.throw(_("Please set default account in Salary Component {0}")
+					.format(salary_component))
+
+			if not self.get('_salary_component_account_map'):
+				self._salary_component_account_map = {}
+
+			self._salary_component_account_map[salary_component] = account
 
 		return account
 
@@ -312,16 +347,17 @@ class PayrollEntry(Document):
 		salary_slip_names = [d.name for d in salary_slips]
 		if salary_slip_names:
 			salary_components = frappe.db.sql("""
-				select salary_component, amount, parentfield
-				from `tabSalary Detail`
-				where parentfield = %s and parent in %s and do_not_include_in_total = 0
+				select sc.salary_component, sc.amount, sc.parentfield, ss.cost_center
+				from `tabSalary Detail` sc
+				left join `tabSalary Slip` ss on ss.name = sc.parent
+				where sc.parentfield = %s and sc.parent in %s and sc.do_not_include_in_total = 0
 			""", (component_type, salary_slip_names), as_dict=True)
 			return salary_components
 
 	def get_salary_component_total(self, component_type=None):
 		salary_components = self.get_salary_components(component_type)
 		if salary_components:
-			component_amount_map = {}
+			component_map = {}
 			for item in salary_components:
 				add_component_to_accrual_jv_entry = True
 
@@ -333,19 +369,19 @@ class PayrollEntry(Document):
 						add_component_to_accrual_jv_entry = False
 
 				if add_component_to_accrual_jv_entry:
-					component_amount_map.setdefault(item['salary_component'], 0)
-					component_amount_map[item['salary_component']] += item['amount']
+					component = item['salary_component']
+					component_account = self.get_salary_component_account(component)
+					account_report_type = frappe.db.get_value("Account", component_account, "report_type", cache=1)
 
-			account_amount_map = self.get_account_amount_map(component_amount_map=component_amount_map)
-			return account_amount_map
+					if account_report_type == "Profit and Loss" or get_allow_cost_center_in_entry_of_bs_account():
+						cost_center = item['cost_center'] or self.get("cost_center") or ""
+					else:
+						cost_center = ""
 
-	def get_account_amount_map(self, component_amount_map=None):
-		account_dict = {}
-		for component, amount in component_amount_map.items():
-			account = self.get_salary_component_account(component)
-			account_dict[account] = account_dict.get(account, 0) + amount
+					component_map.setdefault(component, {}).setdefault(cost_center, 0)
+					component_map[component][cost_center] += item['amount']
 
-		return account_dict
+			return component_map
 
 	def get_default_payroll_payable_account(self):
 		payroll_payable_account = frappe.get_cached_value('Company',
@@ -373,33 +409,42 @@ class PayrollEntry(Document):
 		if earnings or deductions:
 			journal_entry = frappe.new_doc('Journal Entry')
 			journal_entry.voucher_type = 'Journal Entry'
-			journal_entry.user_remark = _('Accrual Journal Entry for salaries from {0} to {1}')\
-				.format(self.start_date, self.end_date)
 			journal_entry.company = self.company
 			journal_entry.posting_date = self.posting_date
+
+			journal_entry.user_remark = _('Accrual Journal Entry for salaries from {0} to {1}')\
+				.format(self.get_formatted("start_date"), self.get_formatted("end_date"))
 
 			accounts = []
 			payable_amount = 0
 
 			# Earnings
-			for account, amount in earnings.items():
-				payable_amount += flt(amount, precision)
-				accounts.append({
-					"account": account,
-					"debit_in_account_currency": flt(amount, precision),
-					"cost_center": self.cost_center,
-					"project": self.project
-				})
+			for component, component_cost_centers in earnings.items():
+				account = self.get_salary_component_account(component)
+
+				for cost_center, amount in component_cost_centers.items():
+					payable_amount += flt(amount, precision)
+					accounts.append({
+						"account": account,
+						"debit_in_account_currency": flt(amount, precision),
+						"cost_center": cost_center or self.cost_center,
+						"project": self.project,
+						"user_remark": _("{0} Salary Component").format(component),
+					})
 
 			# Deductions
-			for account, amount in deductions.items():
-				payable_amount -= flt(amount, precision)
-				accounts.append({
-					"account": account,
-					"credit_in_account_currency": flt(amount, precision),
-					"cost_center": self.cost_center,
-					"project": self.project
-				})
+			for component, component_cost_centers in deductions.items():
+				account = self.get_salary_component_account(component)
+
+				for cost_center, amount in component_cost_centers.items():
+					payable_amount -= flt(amount, precision)
+					accounts.append({
+						"account": account,
+						"credit_in_account_currency": flt(amount, precision),
+						"cost_center": cost_center or self.cost_center,
+						"project": self.project,
+						"user_remark": _("{0} Salary Component").format(component),
+					})
 
 			# Loan
 			for data in loan_details:

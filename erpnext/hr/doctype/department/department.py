@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils.nestedset import NestedSet, get_root_of
 from erpnext.utilities.transaction_base import delete_events
-from frappe.model.document import Document
+
 
 class Department(NestedSet):
 	nsm_parent_field = 'parent_department'
@@ -42,13 +42,16 @@ class Department(NestedSet):
 		super(Department, self).on_trash()
 		delete_events(self.doctype, self.name)
 
+
 def on_doctype_update():
 	frappe.db.add_index("Department", ["lft", "rgt"])
+
 
 def get_abbreviated_name(name, company):
 	abbr = frappe.get_cached_value('Company',  company,  'abbr')
 	new_name = '{0} - {1}'.format(name, abbr)
 	return new_name
+
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
@@ -74,6 +77,7 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 			{condition}
 		order by name""".format(doctype=doctype, condition=condition), var_dict, as_dict=1)
 
+
 @frappe.whitelist()
 def add_node():
 	from frappe.desk.treeview import make_tree_args
@@ -84,3 +88,13 @@ def add_node():
 		args.parent_department = None
 
 	frappe.get_doc(args).insert()
+
+
+def get_department_cost_center(department):
+	current_department = department
+	while current_department:
+		current_doc = frappe.get_cached_doc("Department", current_department)
+		if current_doc.cost_center:
+			return current_doc.cost_center
+
+		current_department = current_doc.parent_department

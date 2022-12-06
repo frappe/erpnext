@@ -14,10 +14,9 @@
   "tax_cnic",
   "tax_id",
   "column_break_10",
-  "posting_date",
   "company",
+  "posting_date",
   "payroll_entry",
-  "journal_entry",
   "amended_from",
   "section_break_10",
   "salary_slip_based_on_timesheet",
@@ -82,8 +81,10 @@
   "no_mode_amount",
   "more_information_section",
   "status",
+  "letter_head",
   "column_break_66",
-  "letter_head"
+  "journal_entry",
+  "cost_center"
  ],
  "fields": [
   {
@@ -212,12 +213,14 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date"
+   "label": "Start Date",
+   "search_index": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date"
+   "label": "End Date",
+   "search_index": 1
   },
   {
    "fieldname": "column_break_15",
@@ -639,12 +642,18 @@
    "label": "No Salary Mode Amount",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-12-08 18:24:48.787529",
+ "modified": "2022-12-06 01:04:22.156820",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
