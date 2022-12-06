@@ -264,7 +264,7 @@ class TestAsset(AssetSetup):
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
 			asset.precision("gross_purchase_amount"),
 		)
-		this_month_depr_amount = 9000.0 if get_last_day(date) == date else 0
+		this_month_depr_amount = 9000.0 if is_last_day_of_the_month(date) else 0
 
 		self.assertEquals(accumulated_depr_amount, 18000.0 + this_month_depr_amount)
 
@@ -1576,3 +1576,9 @@ def set_depreciation_settings_in_company(company=None):
 
 def enable_cwip_accounting(asset_category, enable=1):
 	frappe.db.set_value("Asset Category", asset_category, "enable_cwip_accounting", enable)
+
+
+def is_last_day_of_the_month(dt):
+	last_day_of_the_month = get_last_day(dt)
+
+	return getdate(dt) == getdate(last_day_of_the_month)
