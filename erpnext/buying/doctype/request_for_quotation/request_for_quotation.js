@@ -22,6 +22,13 @@ frappe.ui.form.on("Request for Quotation",{
 				}
 			};
 		}
+
+		frm.set_query('warehouse', 'items', () => ({
+			filters: {
+				company: frm.doc.company,
+				is_group: 0
+			}
+		}));
 	},
 
 	onload: function(frm) {
