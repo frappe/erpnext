@@ -4,30 +4,31 @@
 frappe.provide("erpnext.maintenance");
 
 frappe.ui.form.on('Maintenance Schedule', {
-	setup: function(frm) {
-		frm.custom_make_buttons = {
-			"Maintenance Visit": __("Make Maintenance Visit")
-		};
-		frm.set_query('contact_person', erpnext.queries.contact_query);
-		frm.set_query('customer_address', erpnext.queries.address_query);
-		frm.set_query('customer', erpnext.queries.customer);
+	// setup: function(frm) {
+	// 	frm.custom_make_buttons = {
+	// 		"Maintenance Visit": __("Make Maintenance Visit")
+	// 	};
+	// 	frm.set_query('contact_person', erpnext.queries.contact_query);
+	// 	frm.set_query('customer_address', erpnext.queries.address_query);
+	// 	frm.set_query('customer', erpnext.queries.customer);
 
-		frm.add_fetch('item_code', 'item_name', 'item_name');
-		frm.add_fetch('item_code', 'description', 'description');
-	},
-	onload: function(frm) {
-		if (!frm.doc.status) {
-			frm.set_value({status:'Draft'});
-		}
-		if (frm.doc.__islocal) {
-			frm.set_value({transaction_date: frappe.datetime.get_today()});
-		}
-	},
+	// 	frm.add_fetch('item_code', 'item_name', 'item_name');
+	// 	frm.add_fetch('item_code', 'description', 'description');
+	// },
+	// onload: function(frm) {
+	// 	if (!frm.doc.status) {
+	// 		frm.set_value({status:'Draft'});
+	// 	}
+	// 	if (frm.doc.__islocal) {
+	// 		frm.set_value({transaction_date: frappe.datetime.get_today()});
+	// 	}
+	// },
 	refresh: function(frm) {
-		setTimeout(() => {
-			frm.toggle_display('generate_schedule', !(frm.is_new()));
-			frm.toggle_display('schedule', !(frm.is_new()));
-		},10);
+		// setTimeout(() => {
+		// 	frm.toggle_display('generate_schedule', !(frm.is_new()));
+		// 	frm.toggle_display('schedule', !(frm.is_new()));
+		// },10);
+		erpnext.hide_company()
 	},
 	customer: function(frm) {
 		return erpnext.utils.get_party_details(frm)

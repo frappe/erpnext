@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, combine_datetime, get_datetime
 from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import schedule_next_project_template
 
 
 class VehicleGatePass(VehicleTransactionController):
@@ -27,10 +28,12 @@ class VehicleGatePass(VehicleTransactionController):
 	def on_submit(self):
 		self.update_project_vehicle_status()
 		self.make_vehicle_log()
+		self.add_vehicle_maintenance_schedule()
 
 	def on_cancel(self):
 		self.update_project_vehicle_status()
 		self.cancel_vehicle_log()
+		self.remove_vehicle_maintenance_schedule(self.project)
 
 	def set_title(self):
 		self.title = self.get('customer_name') or self.get('customer')
@@ -86,3 +89,15 @@ class VehicleGatePass(VehicleTransactionController):
 		else:
 			frappe.throw(_("Vehicle has not been received in Project Workshop {0} for {1} yet")
 				.format(self.project_workshop, frappe.get_desk_link("Project", self.project)))
+
+	def add_vehicle_maintenance_schedule(self):
+		if self.get("project"):
+			project = frappe.get_doc("Project", self.project)
+			if self.doctype == "Vehicle Gate Pass":
+				serial_no = self.vehicle
+				for template in project.project_templates:
+					schedule_next_project_template(template.project_template, serial_no, project.doctype, project.name, self.posting_date)
+
+	def remove_vehicle_maintenance_schedule(self, reference_doctype=None, reference_name=None):
+		if self.get("project"):
+			return super().remove_vehicle_maintenance_schedule("Project", self.project)

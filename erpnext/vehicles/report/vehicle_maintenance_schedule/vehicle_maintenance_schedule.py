@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, today
 from dateutil.relativedelta import relativedelta
+from frappe.contacts.doctype.contact.contact import get_default_contact
 
 
 def execute(filters=None):
@@ -28,61 +29,21 @@ class VehicleMaintenanceSchedule:
 		return self.columns, self.data
 
 	def get_data(self):
-		self.project_template_data = frappe.db.sql("""
-			SELECT name as project_template, project_template_name, applies_to_item, due_after
-			FROM `tabProject Template`
-			WHERE due_after > 0 and ifnull(applies_to_item, '') != ''
-		""", as_dict=1)
-
-		vehicle_data = []
-
-		vehicle_or_conditions = self.get_vehicle_conditions()
-		if vehicle_or_conditions:
-			vehicle_data = frappe.db.sql("""
-				SELECT
-					name as vehicle, item_code, item_name, customer, customer_name, delivery_date,
-					chassis_no, engine_no, license_plate, unregistered, variant_of, variant_of_name
-				FROM `tabVehicle`
-				WHERE {0} and ifnull(delivery_document_no, '') != ''
-			""".format(vehicle_or_conditions), self.filters, as_dict=1)
-
-		self.data = vehicle_data
-
-	def get_vehicle_conditions(self):
-		self.applies_to_item_cache = frappe._dict()
-		vehicle_or_conditions = []
-
-		for d in self.project_template_data:
-			template_condition = []
-			if d.applies_to_item:
-				item_codes = self.get_item_codes(d.applies_to_item)
-
-				template_condition.append("item_code in ({0})"
-					.format(", ".join([frappe.db.escape(item_code) for item_code in item_codes])))
-
-			delivery_from_date = self.filters.from_date - relativedelta(months=d.due_after)
-			delivery_to_date = self.filters.to_date - relativedelta(months=d.due_after)
-
-			template_condition.append("delivery_date between {0} and {1}".format(
-				frappe.db.escape(delivery_from_date),
-				frappe.db.escape(delivery_to_date)
-			))
-
-			vehicle_or_conditions.append(" and ".join(template_condition))
-			d.from_date, d.to_date = delivery_from_date, delivery_to_date
-
-		vehicle_or_conditions = " or ".join(vehicle_or_conditions)
-		return vehicle_or_conditions
-
-	def get_item_codes(self, applies_to_item):
-		if applies_to_item not in self.applies_to_item_cache:
-			item_codes = frappe.db.get_all("Item", filters={'variant_of': applies_to_item}, fields="item_code")
-			item_codes = [applies_to_item] + [i.item_code for i in item_codes]
-			self.applies_to_item_cache[applies_to_item] = item_codes
-		else:
-			item_codes = self.applies_to_item_cache[applies_to_item]
-		
-		return item_codes
+		self.data = frappe.db.sql("""
+			SELECT
+				msd.scheduled_date as due_date, msd.project_template,
+				ms.name as schedule, ms.customer, ms.customer_name, ms.contact_mobile,
+				v.name as vehicle, v.item_code, v.delivery_date, v.chassis_no,
+				v.engine_no, v.license_plate, v.unregistered, v.variant_of_name,
+				v.customer as vehicle_customer, v.customer_name as vehicle_customer_name
+				pt.project_template_name,
+			FROM `tabMaintenance Schedule Detail` msd
+			LEFT JOIN `tabProject Template` pt ON pt.name=msd.project_template
+			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name=msd.parent
+			LEFT JOIN `tabVehicle` v ON v.name=ms.serial_no
+			WHERE ifnull(msd.project_template, '') != ''
+				AND msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
+		""", self.filters, as_dict=1)
 
 	def process_data(self):
 		for d in self.data:
@@ -91,26 +52,28 @@ class VehicleMaintenanceSchedule:
 			if not d.variant_of_name:
 				d.variant_of_name = d.item_name
 
-			rd = relativedelta(getdate(), d.delivery_date)
-			d.age = self.convert_delta_to_string(rd)
+			if not d.customer:
+				d.customer = d.vehicle_customer
+				d.customer_name = d.vehicle_customer_name
 
-			for p in self.project_template_data:
-				if p.applies_to_item in [d.variant_of, d.item_code]\
-						and p.from_date <= d.delivery_date <= p.to_date:
-					d.update(p)
-					break
+			if not d.contact_mobile:
+				contact_id = get_default_contact('Customer', d.customer)
+				d.contact_mobile = frappe.db.get_value("Contact", contact_id, "mobile_no", cache=1)
 
-			d.due_date = d.delivery_date + relativedelta(months=d.due_after)
+			d.age = self.get_formatted_duration(getdate(), d.delivery_date)
 
 			if not d.license_plate and d.unregistered:
 				d.license_plate = 'Unreg'
 
 		self.data = sorted(self.data, key=lambda d: (getdate(d.due_date), getdate(d.delivery_date)))
 
-	def convert_delta_to_string(self, rd):
+	def get_formatted_duration(self, start_date, end_date):
+		delta = relativedelta(getdate(start_date), getdate(end_date))
 		template = ['Y', 'M', 'D']
-		data = [rd.years, rd.months, rd.days]
+		data = [delta.years, delta.months, delta.days]
 		duration = " ".join([str(x) + y for x, y in zip(data, template) if x or y=='D'])
+		if duration == '0D':
+			duration = '-'
 		return duration
 
 	def get_columns(self):
@@ -186,6 +149,12 @@ class VehicleMaintenanceSchedule:
 				"width": 150
 			},
 			{
+				"label": _("Customer Contact"),
+				"fieldname": "contact_mobile",
+				"fieldtype": "Data",
+				"width": 150
+			},
+			{
 				"label": _("Delivery Date"),
 				"fieldname": "delivery_date",
 				"fieldtype": "Date",
@@ -195,6 +164,13 @@ class VehicleMaintenanceSchedule:
 				"label": _("Age"),
 				"fieldname": "age",
 				"fieldtype": "Data",
+				"width": 80
+			},
+			{
+				"label": _("Schedule"),
+				"fieldname": "schedule",
+				"fieldtype": "Link",
+				"options": "Maintenance Schedule",
 				"width": 80
 			},
 		]

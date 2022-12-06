@@ -786,3 +786,5 @@ erpnext.patches.v12_0.rename_stock_valuation_restriction_field
 erpnext.patches.v12_0.set_item_tax_detail_lcv
 erpnext.patches.v12_0.set_item_project_from_sales_invoice
 erpnext.patches.v12_0.set_is_payable_in_lcv
+erpnext.patches.v12_0.trim_tables_maintenance_schedule
+erpnext.patches.v12_0.update_vehicle_maintenance_schedule

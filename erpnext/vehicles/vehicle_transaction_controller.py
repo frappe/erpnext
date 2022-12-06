@@ -12,6 +12,7 @@ from erpnext.accounts.party import validate_party_frozen_disabled, get_address_d
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_vehicle_log, get_vehicle_odometer
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import remove_schedule_for_reference_document
 import json
 from six import string_types
 
@@ -575,6 +576,18 @@ class VehicleTransactionController(StockController):
 			doc = frappe.get_doc("Vehicle Log", vehicle_log)
 			doc.flags.ignore_permissions = True
 			doc.cancel()
+
+	def remove_vehicle_maintenance_schedule(self, reference_doctype=None, reference_name=None):
+		serial_no = self.get_serial_no()
+		if serial_no:
+			if not reference_doctype or not reference_name:
+				reference_doctype = self.doctype
+				reference_name = self.name
+
+			remove_schedule_for_reference_document(serial_no, reference_doctype, reference_name)
+
+	def get_serial_no(self):
+		return self.get("serial_no") or self.get("vehicle")
 
 	def update_project_vehicle_checklist(self):
 		if self.get('project') and self.get('vehicle_checklist'):

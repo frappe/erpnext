@@ -26,6 +26,18 @@ frappe.ui.form.on('Project Template', {
 				}
 			}
 		});
+
+		frm.set_query("next_project_template", function (doc) {
+			let filters = {};
+			if (frm.doc.applies_to_item) {
+				filters["applies_to_item"] = frm.doc.applies_to_item;
+			}
+
+			return {
+				query: "erpnext.controllers.queries.project_template_query",
+				filters: filters
+			};
+		});
 	},
 
 	make_customer_request_checklist: function (frm) {

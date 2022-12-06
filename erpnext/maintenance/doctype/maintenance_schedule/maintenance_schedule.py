@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
+from dateutil.relativedelta import relativedelta
 from frappe.utils import add_days, getdate, cint, cstr
 
 from frappe import throw, _
@@ -34,51 +35,51 @@ class MaintenanceSchedule(TransactionBase):
 
 		self.save()
 
-	def on_submit(self):
-		if not self.get('schedules'):
-			throw(_("Please click on 'Generate Schedule' to get schedule"))
-		self.check_serial_no_added()
-		self.validate_schedule()
+	# def on_submit(self):
+	# 	if not self.get('schedules'):
+	# 		throw(_("Please click on 'Generate Schedule' to get schedule"))
+	# 	self.check_serial_no_added()
+	# 	self.validate_schedule()
 
-		email_map = {}
-		for d in self.get('items'):
-			if d.serial_no:
-				serial_nos = get_valid_serial_nos(d.serial_no)
-				self.validate_serial_no(serial_nos, d.start_date)
-				self.update_amc_date(serial_nos, d.end_date)
+	# 	email_map = {}
+	# 	for d in self.get('items'):
+	# 		if d.serial_no:
+	# 			serial_nos = get_valid_serial_nos(d.serial_no)
+	# 			self.validate_serial_no(serial_nos, d.start_date)
+	# 			self.update_amc_date(serial_nos, d.end_date)
 
-			no_email_sp = []
-			if d.sales_person not in email_map:
-				sp = frappe.get_doc("Sales Person", d.sales_person)
-				try:
-					email_map[d.sales_person] = sp.get_email_id()
-				except frappe.ValidationError:
-					no_email_sp.append(d.sales_person)
+	# 		no_email_sp = []
+	# 		if d.sales_person not in email_map:
+	# 			sp = frappe.get_doc("Sales Person", d.sales_person)
+	# 			try:
+	# 				email_map[d.sales_person] = sp.get_email_id()
+	# 			except frappe.ValidationError:
+	# 				no_email_sp.append(d.sales_person)
 
-			if no_email_sp:
-				frappe.msgprint(
-					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
-						self.owner, "<br>" + "<br>".join(no_email_sp)
-				))
+	# 		if no_email_sp:
+	# 			frappe.msgprint(
+	# 				frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
+	# 					self.owner, "<br>" + "<br>".join(no_email_sp)
+	# 			))
 
-			scheduled_date = frappe.db.sql("""select scheduled_date from
-				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
-				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
+	# 		scheduled_date = frappe.db.sql("""select scheduled_date from
+	# 			`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
+	# 			parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
-			for key in scheduled_date:
-				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)
-				event = frappe.get_doc({
-					"doctype": "Event",
-					"owner": email_map.get(d.sales_person, self.owner),
-					"subject": description,
-					"description": description,
-					"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
-					"event_type": "Private",
-				})
-				event.add_participant(self.doctype, self.name)
-				event.insert(ignore_permissions=1)
+	# 		for key in scheduled_date:
+	# 			description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)
+	# 			event = frappe.get_doc({
+	# 				"doctype": "Event",
+	# 				"owner": email_map.get(d.sales_person, self.owner),
+	# 				"subject": description,
+	# 				"description": description,
+	# 				"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
+	# 				"event_type": "Private",
+	# 			})
+	# 			event.add_participant(self.doctype, self.name)
+	# 			event.insert(ignore_permissions=1)
 
-		frappe.db.set(self, 'status', 'Submitted')
+	# 	frappe.db.set(self, 'status', 'Submitted')
 
 	def create_schedule_list(self, start_date, end_date, no_of_visit, sales_person):
 		schedule_list = []
@@ -166,13 +167,13 @@ class MaintenanceSchedule(TransactionBase):
 				if chk:
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
-	def validate(self):
-		self.validate_maintenance_detail()
-		self.validate_dates_with_periodicity()
-		self.validate_sales_order()
+	# def validate(self):
+	# 	self.validate_maintenance_detail()
+	# 	self.validate_dates_with_periodicity()
+	# 	self.validate_sales_order()
 
-	def on_update(self):
-		frappe.db.set(self, 'status', 'Draft')
+	# def on_update(self):
+	# 	frappe.db.set(self, 'status', 'Draft')
 
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
@@ -231,16 +232,16 @@ class MaintenanceSchedule(TransactionBase):
 				if m.item_code in serial_present and not m.serial_no:
 					throw(_("Please click on 'Generate Schedule' to fetch Serial No added for Item {0}").format(m.item_code))
 
-	def on_cancel(self):
-		for d in self.get('items'):
-			if d.serial_no:
-				serial_nos = get_valid_serial_nos(d.serial_no)
-				self.update_amc_date(serial_nos)
-		frappe.db.set(self, 'status', 'Cancelled')
-		delete_events(self.doctype, self.name)
+	# def on_cancel(self):
+	# 	for d in self.get('items'):
+	# 		if d.serial_no:
+	# 			serial_nos = get_valid_serial_nos(d.serial_no)
+	# 			self.update_amc_date(serial_nos)
+	# 	frappe.db.set(self, 'status', 'Cancelled')
+	# 	delete_events(self.doctype, self.name)
 
-	def on_trash(self):
-		delete_events(self.doctype, self.name)
+	# def on_trash(self):
+	# 	delete_events(self.doctype, self.name)
 
 @frappe.whitelist()
 def make_maintenance_visit(source_name, target_doc=None):
@@ -271,3 +272,116 @@ def make_maintenance_visit(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist
+
+
+def schedule_next_project_template(project_template, serial_no, reference_doctype, reference_name, reference_date):
+	if not project_template:
+		return
+
+	template_details = frappe.db.get_value("Project Template", project_template, ["next_due_after", "next_project_template"], as_dict=1)
+	if not template_details or not template_details.next_due_after or not template_details.next_project_template:
+		return
+
+	doc = get_maintenance_schedule_doc(serial_no)
+	reference_doc = frappe.get_doc(reference_doctype, reference_name)
+	update_customer_and_contact(reference_doc, doc)
+
+	existing_templates = [d.get('project_template') for d in doc.get('schedules', []) if d.get('project_template')]
+
+	schedule = frappe._dict({
+		'reference_doctype': reference_doctype,
+		'reference_name': reference_name,
+		'reference_date': getdate(reference_date)
+	})
+
+	if template_details.next_project_template not in existing_templates:
+		schedule.project_template = template_details.next_project_template
+		schedule.scheduled_date = schedule.reference_date + relativedelta(months=template_details.next_due_after)
+
+		doc.append('schedules', schedule)
+		doc.save(ignore_permissions=True)
+
+
+def schedule_project_templates_after_delivery(serial_no, reference_doctype, reference_name, reference_date):
+	item_code = frappe.db.get_value("Serial No", serial_no, "item_code")
+	if not item_code:
+		return
+
+	schedule_template = frappe._dict({
+		'reference_doctype': reference_doctype,
+		'reference_name': reference_name,
+		'reference_date': getdate(reference_date)
+	})
+
+	project_templates = get_project_templates_due_after_delivery(item_code)
+
+	doc = get_maintenance_schedule_doc(serial_no)
+	reference_doc = frappe.get_doc(reference_doctype, reference_name)
+	update_customer_and_contact(reference_doc, doc)
+
+	existing_templates = [d.get('project_template') for d in doc.get('schedules', []) if d.get('project_template')]
+
+	modified = False
+	for d in project_templates:
+		if d.name not in existing_templates:
+			schedule = schedule_template.copy()
+			schedule.project_template = d.name
+			schedule.scheduled_date = schedule.reference_date + relativedelta(months=d.due_after_delivery_date)
+			doc.append('schedules', schedule)
+
+			modified = True
+
+	if modified:
+		doc.save(ignore_permissions=True)
+
+
+def remove_schedule_for_reference_document(serial_no, reference_doctype, reference_name):
+	doc = get_maintenance_schedule_doc(serial_no)
+
+	to_remove = [d for d in doc.schedules if d.reference_doctype == reference_doctype and d.reference_name == reference_name]
+	if to_remove:
+		for d in to_remove:
+			doc.remove(d)
+
+		doc.save(ignore_permissions=True)
+
+
+def get_project_templates_due_after_delivery(item_code):
+	filters = {'due_after_delivery_date': ['>', 0]}
+
+	fields = ['name', 'due_after_delivery_date']
+	order_by = "due_after_delivery_date"
+
+	filters['applies_to_item'] = item_code
+	project_templates = frappe.get_all('Project Template', filters=filters, fields=fields, order_by=order_by)
+
+	if not project_templates:
+		variant_of = frappe.get_cached_value("Item", item_code, "variant_of")
+		if variant_of:
+			filters["applies_to_item"] = variant_of
+			project_templates = frappe.get_all('Project Template', filters=filters, fields=fields, order_by=order_by)
+
+	return project_templates
+
+
+def get_maintenance_schedule_doc(serial_no):
+	schedule_name = frappe.db.get_value('Maintenance Schedule', filters={'serial_no': serial_no})
+
+	if schedule_name:
+		doc = frappe.get_doc('Maintenance Schedule', schedule_name)
+	else:
+		doc = frappe.new_doc('Maintenance Schedule')
+		doc.serial_no = serial_no
+		doc.status = 'Active' # TODO this should be set from the doc iteselt...
+		doc.item_code, doc.item_name = frappe.db.get_value("Serial No", serial_no, ["item_code", "item_name"])
+
+	return doc
+
+def update_customer_and_contact(source_doc, target_doc):
+	target_doc.customer = source_doc.get('customer')
+	target_doc.customer_name = source_doc.get('customer_name')
+	target_doc.contact_person = source_doc.get('contact_person')
+	target_doc.contact_email = source_doc.get('contact_display')
+	target_doc.contact_mobile = source_doc.get('contact_mobile')
+	target_doc.contact_phone = source_doc.get('contact_phone')
+	target_doc.contact_email = source_doc.get('contact_email')

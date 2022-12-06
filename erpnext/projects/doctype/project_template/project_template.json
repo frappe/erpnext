@@ -10,10 +10,13 @@
   "project_template_name",
   "project_template_category",
   "disabled",
-  "column_break_3",
+  "column_break_4",
   "applies_to_item",
   "applies_to_item_name",
-  "due_after",
+  "column_break_3",
+  "due_after_delivery_date",
+  "next_project_template",
+  "next_due_after",
   "items_section",
   "applicable_items",
   "applicable_item_groups",
@@ -100,12 +103,28 @@
    "label": "Disabled"
   },
   {
-   "fieldname": "due_after",
+   "fieldname": "next_project_template",
+   "fieldtype": "Link",
+   "label": "Next Maintenance Template",
+   "options": "Project Template"
+  },
+  {
+   "fieldname": "due_after_delivery_date",
    "fieldtype": "Int",
-   "label": "Due After (Months)"
+   "label": "Due After Delivery Date (Months)"
+  },
+  {
+   "depends_on": "next_project_template",
+   "fieldname": "next_due_after",
+   "fieldtype": "Int",
+   "label": "Next Maintenance Due After (Months)"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2022-11-30 12:16:51.754309",
+ "modified": "2022-12-06 15:19:48.606564",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
