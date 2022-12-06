@@ -12,11 +12,12 @@
   "column_break_3",
   "posting_date",
   "pos_opening_entry",
+  "branch",
+  "pos_profile",
   "status",
   "section_break_5",
   "company",
   "column_break_7",
-  "pos_profile",
   "user",
   "section_break_12",
   "pos_transactions",
@@ -37,21 +38,22 @@
  ],
  "fields": [
   {
+   "default": "Today",
    "fetch_from": "pos_opening_entry.period_start_date",
+   "fetch_if_empty": 1,
    "fieldname": "period_start_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Period Start Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
    "default": "Today",
+   "fetch_if_empty": 1,
    "fieldname": "period_end_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
    "label": "Period End Date",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -69,6 +71,7 @@
   {
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "User Details"
   },
   {
@@ -96,8 +99,7 @@
    "fieldname": "user",
    "fieldtype": "Link",
    "label": "Cashier",
-   "options": "User",
-   "reqd": 1
+   "options": "User"
   },
   {
    "fieldname": "section_break_9",
@@ -186,9 +188,9 @@
   {
    "fieldname": "pos_opening_entry",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "POS Opening Entry",
-   "options": "POS Opening Entry",
-   "reqd": 1
+   "options": "POS Opening Entry"
   },
   {
    "allow_on_submit": 1,
@@ -220,6 +222,13 @@
    "fieldtype": "Small Text",
    "label": "Error",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
@@ -229,7 +238,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2022-11-30 11:54:59.336325",
+ "modified": "2022-12-05 14:46:31.488325",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
