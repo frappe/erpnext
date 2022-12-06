@@ -47,29 +47,36 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		await this.calculate_shipping_charges();
 
-		// Advance calculation applicable to Sales /Purchase Invoice
-		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)
-			&& this.frm.doc.docstatus < 2 && !this.frm.doc.is_return) {
+		// Advance calculation applicable to Sales/Purchase Invoice
+		if (
+			in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)
+			&& this.frm.doc.docstatus < 2
+			&& !this.frm.doc.is_return
+		) {
 			this.calculate_total_advance(update_paid_amount);
 		}
 
-		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
-			this.frm.doc.is_return) {
-			if (this.frm.doc.doctype == "Sales Invoice") {
-				this.set_total_amount_to_default_mop();
-			}
+		if (
+			in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
+			&& this.frm.doc.s_pos
+			&& this.frm.doc.is_return
+		) {
+			this.set_total_amount_to_default_mop();
 			this.calculate_paid_amount();
 		}
 
 		// Sales person's commission
-		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
+		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.calculate_commission();
 			this.calculate_contribution();
 		}
 
 		// Update paid amount on return/debit note creation
-		if(this.frm.doc.doctype === "Purchase Invoice" && this.frm.doc.is_return
-			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)) {
+		if (
+			this.frm.doc.doctype === "Purchase Invoice"
+			&& this.frm.doc.is_return
+			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)
+		) {
 			this.frm.doc.paid_amount = flt(this.frm.doc.grand_total, precision("grand_total"));
 		}
 
@@ -775,21 +782,30 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 
-		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
-			var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
-				- this.frm.doc.write_off_amount), precision("grand_total"));
+		if (this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			var total_amount_to_pay = flt(
+				grand_total - this.frm.doc.total_advance - this.frm.doc.write_off_amount,
+				precision("grand_total")
+			);
 		} else {
 			var total_amount_to_pay = flt(
-				(flt(base_grand_total, precision("base_grand_total"))
-					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+				(
+					flt(
+						base_grand_total,
+						precision("base_grand_total")
+					)
+					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount
+				),
 				precision("base_grand_total")
 			);
 		}
+
 		this.frm.doc.payments.find(pay => {
 			if (pay.default) {
 				pay.amount = total_amount_to_pay;
 			}
 		});
+
 		this.frm.refresh_fields();
 	}
 
