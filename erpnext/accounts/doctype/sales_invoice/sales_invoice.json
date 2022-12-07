@@ -920,6 +920,7 @@
    "fieldtype": "Table",
    "hide_days": 1,
    "hide_seconds": 1,
+   "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
    "options": "Sales Taxes and Charges"
@@ -2116,7 +2117,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-11-17 17:17:10.883487",
+ "modified": "2022-12-05 16:18:14.532114",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

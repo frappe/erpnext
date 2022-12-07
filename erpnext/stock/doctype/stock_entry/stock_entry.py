@@ -1545,6 +1545,7 @@ class StockEntry(StockController):
 			"reference_name": self.pro_doc.name,
 			"reference_doctype": self.pro_doc.doctype,
 			"qty_to_produce": (">", 0),
+			"batch_qty": ("=", 0),
 		}
 
 		fields = ["qty_to_produce as qty", "produced_qty", "name"]
@@ -2238,14 +2239,14 @@ class StockEntry(StockController):
 			d.qty -= process_loss_dict[d.item_code][1]
 
 	def set_serial_no_batch_for_finished_good(self):
-		args = {}
+		serial_nos = ""
 		if self.pro_doc.serial_no:
-			self.get_serial_nos_for_fg(args)
+			serial_nos = self.get_serial_nos_for_fg()
 
 		for row in self.items:
 			if row.is_finished_item and row.item_code == self.pro_doc.production_item:
-				if args.get("serial_no"):
-					row.serial_no = "\n".join(args["serial_no"][0 : cint(row.qty)])
+				if serial_nos:
+					row.serial_no = "\n".join(serial_nos[0 : cint(row.qty)])
 
 	def get_serial_nos_for_fg(self, args):
 		fields = [
@@ -2258,14 +2259,14 @@ class StockEntry(StockController):
 		filters = [
 			["Stock Entry", "work_order", "=", self.work_order],
 			["Stock Entry", "purpose", "=", "Manufacture"],
-			["Stock Entry", "docstatus", "=", 1],
+			["Stock Entry", "docstatus", "<", 2],
 			["Stock Entry Detail", "item_code", "=", self.pro_doc.production_item],
 		]
 
 		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
 
 		if self.pro_doc.serial_no:
-			args["serial_no"] = self.get_available_serial_nos(stock_entries)
+			return self.get_available_serial_nos(stock_entries)
 
 	def get_available_serial_nos(self, stock_entries):
 		used_serial_nos = []
