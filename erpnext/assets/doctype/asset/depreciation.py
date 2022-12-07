@@ -5,9 +5,8 @@
 import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, getdate, nowdate, today
-from frappe.utils.user import get_users_with_role
 from frappe.utils.data import get_link_to_form
-
+from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -226,9 +225,7 @@ def notify_depr_entry_posting_error_to_account_managers(failed_asset_names):
 	message = (
 		_("Hi,")
 		+ "<br>"
-		+_(
-			"The following assets have failed to post depreciation entries: {0}"
-		).format(asset_links)
+		+ _("The following assets have failed to post depreciation entries: {0}").format(asset_links)
 		+ "."
 	)
 
