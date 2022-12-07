@@ -68,6 +68,7 @@
   "column_break_51",
   "purchase_receipt_amount",
   "default_finance_book",
+  "depr_entry_posting_status",
   "amended_from"
  ],
  "fields": [
@@ -473,6 +474,32 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "split_from",
+   "fieldtype": "Link",
+   "label": "Split From",
+   "options": "Asset",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asset_quantity",
+   "fieldtype": "Int",
+   "label": "Asset Quantity",
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
+  },
+  {
+   "fieldname": "depr_entry_posting_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Depreciation Entry Posting Status",
+   "no_copy": 1,
+   "options": "\nSuccessful\nFailed",
+   "print_hide": 1,
+   "read_only": 1
+>>>>>>> b661f5758a (fix: handle_post_depr_entries_fail, show error alert and send email)
   }
  ],
  "idx": 72,
@@ -495,7 +522,11 @@
    "link_fieldname": "asset"
   }
  ],
+<<<<<<< HEAD
  "modified": "2022-07-20 16:22:44.437579",
+=======
+ "modified": "2022-12-05 16:21:30.024060",
+>>>>>>> b661f5758a (fix: handle_post_depr_entries_fail, show error alert and send email)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
