@@ -31,12 +31,12 @@ class VehicleMaintenanceSchedule:
 	def get_data(self):
 		self.data = frappe.db.sql("""
 			SELECT
-				msd.scheduled_date as due_date, msd.project_template,
-				ms.name as schedule, ms.customer, ms.customer_name, ms.contact_mobile,
+				msd.scheduled_date as due_date, msd.project_template, ms.name as schedule,
+				ms.customer, ms.customer_name, ms.contact_mobile, ms.contact_phone,
 				v.name as vehicle, v.item_code, v.delivery_date, v.chassis_no,
 				v.engine_no, v.license_plate, v.unregistered, v.variant_of_name,
-				v.customer as vehicle_customer, v.customer_name as vehicle_customer_name
-				pt.project_template_name,
+				v.customer as vehicle_customer, v.customer_name as vehicle_customer_name,
+				pt.project_template_name
 			FROM `tabMaintenance Schedule Detail` msd
 			LEFT JOIN `tabProject Template` pt ON pt.name=msd.project_template
 			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name=msd.parent
@@ -48,6 +48,7 @@ class VehicleMaintenanceSchedule:
 	def process_data(self):
 		for d in self.data:
 			d.disable_item_formatter = 1
+			d.contact_no = d.contact_mobile or d.contact_phone
 
 			if not d.variant_of_name:
 				d.variant_of_name = d.item_name
@@ -56,9 +57,9 @@ class VehicleMaintenanceSchedule:
 				d.customer = d.vehicle_customer
 				d.customer_name = d.vehicle_customer_name
 
-			if not d.contact_mobile:
+			if not d.contact_no:
 				contact_id = get_default_contact('Customer', d.customer)
-				d.contact_mobile = frappe.db.get_value("Contact", contact_id, "mobile_no", cache=1)
+				d.contact_no = frappe.db.get_value("Contact", contact_id, "mobile_no", cache=1)
 
 			d.age = self.get_formatted_duration(getdate(), d.delivery_date)
 
@@ -149,10 +150,10 @@ class VehicleMaintenanceSchedule:
 				"width": 150
 			},
 			{
-				"label": _("Customer Contact"),
-				"fieldname": "contact_mobile",
+				"label": _("Contact No"),
+				"fieldname": "contact_no",
 				"fieldtype": "Data",
-				"width": 150
+				"width": 100
 			},
 			{
 				"label": _("Delivery Date"),

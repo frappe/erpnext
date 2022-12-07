@@ -5,24 +5,27 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "customer",
   "customer_name",
+  "column_break_8",
   "company",
-  "column_break_3",
-  "serial_no",
-  "item_code",
-  "item_name",
   "status",
-  "naming_series",
+  "section_break_7",
+  "serial_no",
+  "column_break_9",
+  "item_code",
+  "column_break_11",
+  "item_name",
   "sec_contact",
   "contact_person",
-  "column_break_13",
   "contact_display",
+  "column_break_13",
   "contact_mobile",
-  "column_break_16",
   "contact_phone",
+  "column_break_16",
   "contact_email",
-  "schedule",
+  "sec_schedule",
   "schedules"
  ],
  "fields": [
@@ -35,12 +38,6 @@
    "options": "MSH-",
    "print_hide": 1,
    "set_only_once": 1
-  },
-  {
-   "fieldname": "schedule",
-   "fieldtype": "Section Break",
-   "label": "Schedule",
-   "oldfieldtype": "Section Break"
   },
   {
    "fieldname": "schedules",
@@ -64,34 +61,32 @@
    "fieldname": "serial_no",
    "fieldtype": "Link",
    "label": "Serial No",
-   "options": "Serial No",
-   "read_only": 1
+   "options": "Serial No"
   },
   {
+   "fetch_from": "serial_no.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "label": "Item Code",
    "options": "Item"
   },
   {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
+   "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nActive\nDisabled",
-   "read_only": 1
+   "no_copy": 1,
+   "options": "Active\nDisabled"
   },
   {
    "fieldname": "customer",
@@ -111,7 +106,7 @@
   },
   {
    "fieldname": "contact_person",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Customer Contact Person",
    "options": "Contact"
   },
@@ -140,7 +135,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "sec_contact",
    "fieldtype": "Section Break",
    "label": "Contact Info"
@@ -152,10 +146,32 @@
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_schedule",
+   "fieldtype": "Section Break",
+   "label": "Schedule",
+   "oldfieldtype": "Section Break"
   }
  ],
  "idx": 1,
- "modified": "2022-12-06 17:25:14.397252",
+ "modified": "2022-12-07 17:44:06.625929",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
@@ -174,5 +190,7 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
 }
