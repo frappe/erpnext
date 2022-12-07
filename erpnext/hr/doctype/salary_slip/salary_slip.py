@@ -1155,12 +1155,16 @@ class SalarySlip(TransactionBase):
 
 
 def unlink_ref_doc_from_salary_slip(ref_no):
-	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
-	where journal_entry=%s and docstatus < 2""", (ref_no))
-	if linked_ss:
-		for ss in linked_ss:
-			ss_doc = frappe.get_doc("Salary Slip", ss)
-			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
+	linked_salary_slips = frappe.db.sql_list("""
+		select name
+		from `tabSalary Slip`
+		where journal_entry = %s and docstatus < 2
+	""", ref_no)
+
+	if linked_salary_slips:
+		for salary_slip in linked_salary_slips:
+			frappe.db.set_value("Salary Slip", salary_slip, "journal_entry", None, notify=1)
+
 
 def generate_password_for_pdf(policy_template, employee):
 	employee = frappe.get_doc("Employee", employee)

@@ -342,8 +342,7 @@ class PayrollEntry(Document):
 
 		return account
 
-	def get_salary_components(self, component_type):
-		salary_slips = self.get_salary_slips(ss_status=1, as_dict=True)
+	def get_salary_components(self, salary_slips, component_type):
 		salary_slip_names = [d.name for d in salary_slips]
 		if salary_slip_names:
 			salary_components = frappe.db.sql("""
@@ -354,8 +353,9 @@ class PayrollEntry(Document):
 			""", (component_type, salary_slip_names), as_dict=True)
 			return salary_components
 
-	def get_salary_component_total(self, component_type=None):
-		salary_components = self.get_salary_components(component_type)
+	def get_salary_component_total(self, salary_slips, component_type=None):
+		salary_components = self.get_salary_components(salary_slips, component_type)
+
 		if salary_components:
 			component_map = {}
 			for item in salary_components:
@@ -396,8 +396,10 @@ class PayrollEntry(Document):
 	def make_accrual_jv_entry(self):
 		self.check_permission('write')
 
-		earnings = self.get_salary_component_total(component_type="earnings") or {}
-		deductions = self.get_salary_component_total(component_type="deductions") or {}
+		salary_slips = self.get_salary_slips(ss_status=1, as_dict=True)
+
+		earnings = self.get_salary_component_total(salary_slips, component_type="earnings") or {}
+		deductions = self.get_salary_component_total(salary_slips, component_type="deductions") or {}
 		loan_details = self.get_loan_details()
 		advance_details = self.get_advance_details()
 		payroll_payable_account = self.get_default_payroll_payable_account()
@@ -486,7 +488,6 @@ class PayrollEntry(Document):
 
 			payable_amount = flt(payable_amount, precision)
 
-			salary_slips = self.get_salary_slips(ss_status=1, as_dict=True)
 			payable_amount_rounded = sum([ss.rounded_total for ss in salary_slips])
 			payable_amount_rounded = flt(payable_amount_rounded, precision)
 
@@ -511,7 +512,7 @@ class PayrollEntry(Document):
 			journal_entry.save()
 
 			jv_name = journal_entry.name
-			self.update_salary_slip_status(jv_name=jv_name)
+			self.update_salary_slip_status(salary_slips, jv_name=jv_name)
 
 			journal_entry.submit()
 
@@ -651,9 +652,8 @@ class PayrollEntry(Document):
 
 		return journal_entry.name
 
-	def update_salary_slip_status(self, jv_name=None):
-		ss_list = self.get_salary_slips(ss_status=1, as_dict=True)
-		for ss in ss_list:
+	def update_salary_slip_status(self, salary_slips, jv_name=None):
+		for ss in salary_slips:
 			frappe.db.set_value("Salary Slip", ss.name, "journal_entry", jv_name)
 
 	def set_start_end_dates(self):
