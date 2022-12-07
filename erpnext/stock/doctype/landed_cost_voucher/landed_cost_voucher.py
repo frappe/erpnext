@@ -93,8 +93,27 @@ class LandedCostVoucher(AccountsController):
 
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
+
+		filter_conditions = []
+		filter_values = frappe._dict()
+		if self.get("item_group"):
+			item_groups = [self.item_group]
+			child_item_groups = frappe.get_all("Item Group", filters={"name": ["descendants of", self.item_group]})
+			item_groups += [d.name for d in child_item_groups]
+
+			filter_conditions.append("i.item_group in %(item_groups)s")
+			filter_values['item_groups'] = item_groups
+
+		if self.get("brand"):
+			filter_conditions.append("i.brand = %(brand)s")
+			filter_values['brand'] = self.brand
+
+		conditions = " and " + " and ".join(filter_conditions) if filter_conditions else ""
+
 		for pr in self.get("purchase_receipts"):
 			if pr.receipt_document_type and pr.receipt_document:
+				filter_values['receipt_document'] = pr.receipt_document
+
 				pr_items = frappe.db.sql("""
 					select
 						pr_item.name, pr_item.item_code, pr_item.item_name,
@@ -104,9 +123,8 @@ class LandedCostVoucher(AccountsController):
 						pr_item.cost_center, pr_item.is_fixed_asset
 					from `tab{doctype} Item` pr_item
 					inner join tabItem i on i.name = pr_item.item_code and i.is_stock_item = 1
-					where pr_item.parent = %s
-				""".format(doctype=pr.receipt_document_type),
-					pr.receipt_document, as_dict=True)
+					where pr_item.parent = %(receipt_document)s {conditions}
+				""".format(doctype=pr.receipt_document_type, conditions=conditions), filter_values, as_dict=True)
 
 				for d in pr_items:
 					item = self.append("items")
