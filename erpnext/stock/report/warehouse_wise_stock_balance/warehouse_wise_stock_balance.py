@@ -45,7 +45,7 @@ def get_warehouses(report_filters: StockBalanceFilter):
 	return frappe.get_all(
 		"Warehouse",
 		fields=["name", "parent_warehouse", "is_group"],
-		filters={"company": report_filters.company, "disabled": 0},
+		filters={"company": report_filters.company},
 		order_by="lft",
 	)
 
@@ -55,9 +55,10 @@ def get_data(filters: StockBalanceFilter):
 	warehouses = get_warehouses(filters)
 
 	for warehouse in warehouses:
-		warehouse["stock_balance"] = warehouse_balance.get(warehouse.name, 0)
+		warehouse.stock_balance = warehouse_balance.get(warehouse.name, 0) or 0.0
 
 	update_indent(warehouses)
+	set_balance_in_parent(warehouses)
 
 	return warehouses
 
@@ -69,11 +70,24 @@ def update_indent(warehouses):
 			warehouse.indent = indent
 			for child in warehouses:
 				if child.parent_warehouse == warehouse.name:
-					warehouse.stock_balance += child.stock_balance
 					add_indent(child, indent + 1)
 
 		if warehouse.is_group:
 			add_indent(warehouse, warehouse.indent or 0)
+
+
+def set_balance_in_parent(warehouses):
+	# sort warehouses by indent in descending order
+	warehouses = sorted(warehouses, key=lambda x: x.get("indent", 0), reverse=1)
+
+	for warehouse in warehouses:
+
+		def update_balance(warehouse, balance):
+			for parent in warehouses:
+				if warehouse.parent_warehouse == parent.name:
+					parent.stock_balance += balance
+
+		update_balance(warehouse, warehouse.stock_balance)
 
 
 def get_columns():
