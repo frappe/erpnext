@@ -217,7 +217,7 @@ class PayrollEntry(Document):
 		"""
 		self.check_permission('write')
 
-		salary_slips = self.get_salary_slips(0, as_dict=True)
+		salary_slips = self.get_salary_slips(docstatus=0)
 		if salary_slips:
 			if len(salary_slips) > 30:
 				self.queue_action('_update_salary_slips', timeout=600, salary_slips=salary_slips)
@@ -234,27 +234,9 @@ class PayrollEntry(Document):
 			if publish_progress:
 				frappe.publish_progress((count + 1) * 100 / len(salary_slips), title=_("Updating Salary Slips..."))
 
-	def get_salary_slips(self, ss_status, as_dict=False):
-		"""
-			Returns list of salary slips based on selected criteria
-		"""
-		cond = self.get_filter_condition()
-
-		salary_slips = frappe.db.sql("""
-			select ss.name, ss.salary_structure, ss.rounded_total
-			from `tabSalary Slip` ss
-			where ss.docstatus = %s
-				and ss.start_date >= %s and ss.end_date <= %s
-				and (ss.journal_entry is null or ss.journal_entry = '')
-				and ifnull(salary_slip_based_on_timesheet, 0) = %s
-				{0}
-		""".format(cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
-
-		return salary_slips
-
 	def submit_salary_slips(self):
 		self.check_permission('write')
-		salary_slips = self.get_salary_slips(0, as_dict=True)
+		salary_slips = self.get_salary_slips(docstatus=0)
 		if len(salary_slips) > 30:
 			self.queue_action('_submit_salary_slips', timeout=600, salary_slips=salary_slips)
 		else:
@@ -396,7 +378,7 @@ class PayrollEntry(Document):
 	def make_accrual_jv_entry(self):
 		self.check_permission('write')
 
-		salary_slips = self.get_salary_slips(ss_status=1, as_dict=True)
+		salary_slips = self.get_salary_slips(docstatus=1)
 
 		earnings = self.get_salary_component_total(salary_slips, component_type="earnings") or {}
 		deductions = self.get_salary_component_total(salary_slips, component_type="deductions") or {}
@@ -532,6 +514,24 @@ class PayrollEntry(Document):
 		ss_rounded_total_sum = sum([ss.rounded_total for ss in salary_slips])
 
 		return 0 if journal_entries_amount_sum < ss_rounded_total_sum else 1
+
+	def get_salary_slips(self, docstatus):
+		"""
+			Returns list of salary slips based on selected criteria
+		"""
+		cond = self.get_filter_condition()
+
+		salary_slips = frappe.db.sql("""
+			select ss.name, ss.salary_structure, ss.rounded_total
+			from `tabSalary Slip` ss
+			where ss.docstatus = %s
+				and ss.start_date >= %s and ss.end_date <= %s
+				and (ss.journal_entry is null or ss.journal_entry = '')
+				and ifnull(salary_slip_based_on_timesheet, 0) = %s
+				{0}
+		""".format(cond), (docstatus, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=True)
+
+		return salary_slips
 
 	def get_salary_slips_for_payment(self, include_draft=False):
 		filter_cond = self.get_filter_condition()
