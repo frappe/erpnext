@@ -22,7 +22,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def set_contact_details(self):
 		force = False
-		if not self.contact_person:
+		if not self.contact_person and self.customer:
 			contact = get_default_contact('Customer', self.customer)
 			self.contact_person = contact
 			force = True
