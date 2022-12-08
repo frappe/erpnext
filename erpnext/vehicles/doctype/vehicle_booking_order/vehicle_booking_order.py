@@ -855,7 +855,7 @@ def get_pdi_repair_order(source):
 	# Project Workshop
 	target.project_workshop = vehicles_settings.pdi_vehicle_workshop
 	if target.project_workshop:
-		target.update(get_project_workshop_details(target.project_workshop))
+		target.update(get_project_workshop_details(target.project_workshop, target.company))
 
 	# Project Template
 	if target.applies_to_item and vehicles_settings.pdi_project_template_category:

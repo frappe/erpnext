@@ -19,6 +19,7 @@ from erpnext.hr.doctype.payroll_period.payroll_period import get_period_factor, 
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
 from erpnext.hr.utils import get_employee_leave_policy
+from erpnext.hr.doctype.department.department import get_department_cost_center
 
 
 class SalarySlip(TransactionBase):
@@ -1068,19 +1069,32 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def set_employee_details(self):
-		emp = frappe.db.get_value("Employee", self.employee,
-			["salary_mode", "bank_name", "bank_ac_no", "date_of_joining", "relieving_date"], as_dict=1)
+		employee_details = frappe.db.get_value("Employee", self.employee, [
+			"department", "designation", "branch",
+			"salary_mode", "bank_name", "bank_ac_no",
+			"date_of_joining", "relieving_date",
+		], as_dict=1)
 
-		if emp:
-			self.salary_mode = emp.salary_mode
-			self.bank_name = emp.bank_name if self.salary_mode == "Bank" else None
-			self.bank_account_no = emp.bank_ac_no if self.salary_mode == "Bank" else None
-			self.joining_date = emp.date_of_joining
+		if employee_details:
+			self.department = employee_details.department
+			self.designation = employee_details.designation
+			self.branch = employee_details.branch
 
-			if emp.relieving_date and self.start_date and self.end_date and getdate(self.start_date) <= getdate(emp.relieving_date) <= getdate(self.end_date):
-				self.relieving_date = emp.relieving_date
+			self.salary_mode = employee_details.salary_mode
+			self.bank_name = employee_details.bank_name if self.salary_mode == "Bank" else None
+			self.bank_account_no = employee_details.bank_ac_no if self.salary_mode == "Bank" else None
+
+			self.joining_date = employee_details.date_of_joining
+
+			if employee_details.relieving_date and self.start_date and self.end_date\
+					and getdate(self.start_date) <= getdate(employee_details.relieving_date) <= getdate(self.end_date):
+				self.relieving_date = employee_details.relieving_date
 			else:
 				self.relieving_date = None
+
+			department_cost_center = get_department_cost_center(self.department)
+			if department_cost_center:
+				self.cost_center = department_cost_center
 
 	@frappe.whitelist()
 	def process_salary_based_on_leave(self, lwp=0, late_days=0):
@@ -1143,12 +1157,16 @@ class SalarySlip(TransactionBase):
 
 
 def unlink_ref_doc_from_salary_slip(ref_no):
-	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
-	where journal_entry=%s and docstatus < 2""", (ref_no))
-	if linked_ss:
-		for ss in linked_ss:
-			ss_doc = frappe.get_doc("Salary Slip", ss)
-			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
+	linked_salary_slips = frappe.db.sql_list("""
+		select name
+		from `tabSalary Slip`
+		where journal_entry = %s and docstatus < 2
+	""", ref_no)
+
+	if linked_salary_slips:
+		for salary_slip in linked_salary_slips:
+			frappe.db.set_value("Salary Slip", salary_slip, "journal_entry", None, notify=1)
+
 
 def generate_password_for_pdf(policy_template, employee):
 	employee = frappe.get_doc("Employee", employee)

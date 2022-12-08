@@ -75,6 +75,7 @@
    "set_only_once": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "subject",
    "fieldtype": "Data",
@@ -84,6 +85,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -122,6 +124,7 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -225,6 +228,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
@@ -237,8 +241,10 @@
    "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
   },
@@ -377,6 +383,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "contact_display",
    "fieldtype": "Data",
    "label": "Contact Name",
@@ -396,6 +403,7 @@
    "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -405,7 +413,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2022-07-27 12:34:51.199144",
+ "modified": "2022-12-07 12:10:43.955763",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

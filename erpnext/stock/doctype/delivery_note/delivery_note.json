@@ -191,6 +191,8 @@
   "cb_8",
   "per_installed",
   "excise_page",
+  "accounting_dimensions_section",
+  "dimension_col_break",
   "sec_subscription",
   "auto_repeat",
   "commission_tab",
@@ -1654,12 +1656,22 @@
   {
    "fieldname": "section_break_164",
    "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2022-11-30 17:13:58.717554",
+ "modified": "2022-12-05 13:08:33.586765",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

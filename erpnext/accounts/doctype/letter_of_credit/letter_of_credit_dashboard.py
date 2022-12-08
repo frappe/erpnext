@@ -6,6 +6,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Payment Entry': 'party',
 			'Journal Entry': 'party',
+			'Landed Cost Voucher': 'party',
 		},
 		'transactions': [
 			{
@@ -15,6 +16,10 @@ def get_data():
 			{
 				'label': _('Purchase'),
 				'items': ['Purchase Receipt', 'Purchase Invoice']
+			},
+			{
+				'label': _('Landed Cost'),
+				'items': ['Landed Cost Voucher']
 			}
 		]
 	}

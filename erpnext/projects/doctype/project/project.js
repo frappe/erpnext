@@ -672,7 +672,8 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 			return frappe.call({
 				method: "erpnext.projects.doctype.project_workshop.project_workshop.get_project_workshop_details",
 				args: {
-					project_workshop: me.frm.doc.project_workshop
+					project_workshop: me.frm.doc.project_workshop,
+					company: me.frm.doc.company,
 				},
 				callback: function (r) {
 					if (!r.exc) {

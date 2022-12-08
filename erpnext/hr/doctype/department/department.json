@@ -8,11 +8,14 @@
  "field_order": [
   "department_name",
   "parent_department",
-  "company",
   "is_group",
   "disabled",
+  "column_break_5",
+  "company",
   "section_break_4",
   "leave_block_list",
+  "column_break_8",
+  "cost_center",
   "leave_section",
   "leave_approvers",
   "expense_section",
@@ -120,13 +123,27 @@
    "ignore_user_permissions": 1,
    "label": "Old Parent",
    "print_hide": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Salary Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-12-21 14:46:47.331809",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2022-12-05 11:25:51.180504",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "Department",
  "nsm_parent_field": "parent_department",
@@ -172,5 +189,6 @@
  ],
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }

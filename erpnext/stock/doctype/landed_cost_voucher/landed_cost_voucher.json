@@ -9,20 +9,26 @@
   "naming_series",
   "party_type",
   "party",
-  "project",
+  "is_payable",
   "col_break2",
   "remarks",
   "column_break_8",
   "company",
   "posting_date",
   "due_date",
+  "amended_from",
   "sec_currency",
   "currency",
   "col_break_currency",
   "conversion_rate",
   "sec_break3",
+  "get_purchase_receipts_from_letter_of_credit",
   "purchase_receipts",
-  "purchase_receipt_items",
+  "item_filters_section",
+  "item_group",
+  "column_break_23",
+  "brand",
+  "items_section",
   "get_items_from_purchase_receipts",
   "items",
   "sec_totals",
@@ -45,12 +51,13 @@
   "allocate_advances_automatically",
   "get_advances",
   "advances",
-  "more_details",
+  "accounting_dimensions_section",
   "credit_to",
-  "status",
-  "col_break3",
-  "amended_from",
+  "dimension_col_break",
+  "cost_center",
+  "project",
   "sec_break2",
+  "status",
   "landed_cost_help",
   "party_account_currency"
  ],
@@ -82,11 +89,7 @@
    "reqd": 1
   },
   {
-   "fieldname": "purchase_receipt_items",
-   "fieldtype": "Section Break",
-   "label": "Purchase Receipt Items"
-  },
-  {
+   "depends_on": "eval:doc.docstatus == 0",
    "fieldname": "get_items_from_purchase_receipts",
    "fieldtype": "Button",
    "label": "Get Items From Purchase Receipts"
@@ -164,7 +167,7 @@
   {
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
-   "label": "Payable To",
+   "label": "Party",
    "options": "party_type"
   },
   {
@@ -266,6 +269,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "is_payable",
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -275,7 +279,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -284,7 +288,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "total_advance",
    "fieldtype": "Currency",
    "label": "Total Advance",
@@ -294,7 +298,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -306,27 +310,25 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "advances",
-   "depends_on": "party",
+   "depends_on": "is_payable",
    "fieldname": "advances_section",
    "fieldtype": "Section Break",
    "label": "Advance Payments"
   },
   {
    "default": "0",
-   "depends_on": "party",
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
    "label": "Set Advances and Allocate (FIFO)"
   },
   {
-   "depends_on": "eval:doc.party && !doc.allocate_advances_automatically",
+   "depends_on": "eval:!doc.allocate_advances_automatically && doc.docstatus == 0",
    "fieldname": "get_advances",
    "fieldtype": "Button",
    "label": "Get Advances Paid",
    "print_hide": 1
   },
   {
-   "depends_on": "party",
    "fieldname": "advances",
    "fieldtype": "Table",
    "label": "Advances",
@@ -335,13 +337,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_details",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
-   "depends_on": "party",
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -358,10 +353,6 @@
    "options": "Draft\nSubmitted\nPaid\nUnpaid\nOverdue\nBilled\nCancelled",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "col_break3",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "remarks",
@@ -382,11 +373,66 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0 && doc.party_type == \"Letter of Credit\"",
+   "fieldname": "get_purchase_receipts_from_letter_of_credit",
+   "fieldtype": "Button",
+   "label": "Get Purchase Receipts from Letter of Credit"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": ":Company",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_payable",
+   "fieldtype": "Check",
+   "label": "Is Payable"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Brand",
+   "options": "Brand"
+  },
+  {
+   "fieldname": "items_section",
+   "fieldtype": "Section Break",
+   "label": "Items"
+  },
+  {
+   "fieldname": "item_filters_section",
+   "fieldtype": "Section Break",
+   "label": "Item Filters"
   }
  ],
  "icon": "icon-usd",
  "is_submittable": 1,
- "modified": "2022-11-29 18:11:50.255222",
+ "modified": "2022-12-07 14:41:26.229227",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",

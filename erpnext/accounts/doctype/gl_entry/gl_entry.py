@@ -3,7 +3,7 @@
 
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, fmt_money, getdate, formatdate, cint
+from frappe.utils import flt, getdate, formatdate, cint
 from frappe.model.document import Document
 from frappe.model.naming import set_name_from_naming_options
 from frappe.model.meta import get_field_precision
@@ -14,6 +14,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_all_sales_invoice_receivable_accounts
 
 exclude_from_linked_with = True
+
+
 class GLEntry(Document):
 	def autoname(self):
 		"""
@@ -44,7 +46,7 @@ class GLEntry(Document):
 		validate_balance_type(self.account, adv_adj)
 
 	def check_mandatory(self):
-		mandatory = ['account','voucher_type','voucher_no','company']
+		mandatory = ['account', 'voucher_type', 'voucher_no', 'company']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
@@ -58,7 +60,7 @@ class GLEntry(Document):
 		if self.against_voucher_type and not self.against_voucher:
 			frappe.throw(_("Against Voucher is set but Against Voucher Type is not provided"))
 
-		account_type = frappe.db.get_value("Account", self.account, "account_type")
+		account_type = frappe.db.get_value("Account", self.account, "account_type", cache=1)
 		if not (self.party_type and self.party):
 			if account_type == "Receivable":
 				frappe.throw(_("{0} {1}: Party is required against Receivable account {2}")
@@ -77,19 +79,15 @@ class GLEntry(Document):
 				.format(self.voucher_type, self.voucher_no, self.account))
 
 	def pl_must_have_cost_center(self):
-		if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss":
+		if frappe.db.get_value("Account", self.account, "report_type", cache=1) == "Profit and Loss":
 			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
 				frappe.throw(_("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.")
 					.format(self.voucher_type, self.voucher_no, self.account))
-		else:
-			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account, get_allow_project_in_entry_of_bs_account
-			if not get_allow_cost_center_in_entry_of_bs_account() and self.cost_center:
-				self.cost_center = None
-			if not get_allow_project_in_entry_of_bs_account() and self.project:
-				self.project = None
+
+		remove_dimensions_not_allowed_for_bs_account(self)
 
 	def validate_dimensions_for_pl_and_bs(self):
-		account_type = frappe.db.get_value("Account", self.account, "report_type")
+		account_type = frappe.db.get_value("Account", self.account, "report_type", cache=1)
 
 		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
 		if accounting_dimensions:
@@ -114,11 +112,10 @@ class GLEntry(Document):
 						frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.")
 							.format(dimension.label, self.account))
 
-
 	def check_pl_account(self):
-		if self.is_opening=='Yes' and \
-				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss" and \
-				self.voucher_type not in ['Purchase Invoice', 'Sales Invoice', 'Journal Entry']:
+		if self.is_opening=='Yes'\
+				and frappe.db.get_value("Account", self.account, "report_type", cache=1) == "Profit and Loss"\
+				and self.voucher_type not in ['Purchase Invoice', 'Sales Invoice', 'Journal Entry']:
 			frappe.throw(_("{0} {1}: 'Profit and Loss' type account {2} not allowed in Opening Entry")
 				.format(self.voucher_type, self.voucher_no, self.account))
 
@@ -146,8 +143,7 @@ class GLEntry(Document):
 
 		def _get_cost_center_company():
 			if not self.cost_center_company.get(self.cost_center):
-				self.cost_center_company[self.cost_center] = frappe.db.get_value(
-					"Cost Center", self.cost_center, "company")
+				self.cost_center_company[self.cost_center] = frappe.db.get_value("Cost Center", self.cost_center, "company")
 
 			return self.cost_center_company[self.cost_center]
 
@@ -180,7 +176,6 @@ class GLEntry(Document):
 		if self.party_type and self.party:
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
 
-
 	def validate_and_set_fiscal_year(self):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
@@ -188,7 +183,7 @@ class GLEntry(Document):
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
-		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
+		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be", cache=1)
 		if balance_must_be:
 			balance = frappe.db.sql("""select sum(debit) - sum(credit)
 				from `tabGL Entry` where account = %s""", account)[0][0]
@@ -197,18 +192,20 @@ def validate_balance_type(account, adv_adj=False):
 				(balance_must_be=="Credit" and flt(balance) > 0):
 				frappe.throw(_("Balance for Account {0} must always be {1}").format(account, _(balance_must_be)))
 
+
 def check_freezing_date(posting_date, adv_adj=False):
 	"""
 		Nobody can do GL Entries where posting date is before freezing date
 		except authorized person
 	"""
 	if not adv_adj:
-		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
+		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto', cache=1)
 		if acc_frozen_upto:
-			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None, 'frozen_accounts_modifier', cache=1)
 			if getdate(posting_date) <= getdate(acc_frozen_upto) \
 					and not frozen_accounts_modifier in frappe.get_roles():
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
+
 
 def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=False):
 	# Update outstanding amt on against voucher
@@ -257,16 +254,17 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
 
+
 def validate_frozen_account(account, adv_adj=None):
-	frozen_account = frappe.db.get_value("Account", account, "freeze_account")
+	frozen_account = frappe.db.get_value("Account", account, "freeze_account", cache=1)
 	if frozen_account == 'Yes' and not adv_adj:
-		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,
-			'frozen_accounts_modifier')
+		frozen_accounts_modifier = frappe.db.get_value('Accounts Settings', None, 'frozen_accounts_modifier', cache=1)
 
 		if not frozen_accounts_modifier:
 			frappe.throw(_("Account {0} is frozen").format(account))
 		elif frozen_accounts_modifier not in frappe.get_roles():
 			frappe.throw(_("Not authorized to edit frozen Account {0}").format(account))
+
 
 def update_against_account(voucher_type, voucher_no):
 	entries = frappe.db.get_all("GL Entry",
@@ -293,13 +291,27 @@ def update_against_account(voucher_type, voucher_no):
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
+
+def remove_dimensions_not_allowed_for_bs_account(gle):
+	from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account,\
+		get_allow_project_in_entry_of_bs_account
+
+	if gle.account and frappe.db.get_value("Account", gle.account, "report_type", cache=1) != "Profit and Loss":
+		if not get_allow_cost_center_in_entry_of_bs_account() and gle.cost_center:
+			gle.cost_center = None
+		if not get_allow_project_in_entry_of_bs_account() and gle.project:
+			gle.project = None
+
+
 def on_doctype_update():
 	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
 	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
 
+
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:
 		rename_temporarily_named_docs(doctype)
+
 
 def rename_temporarily_named_docs(doctype):
 	"""Rename temporarily named docs using autoname options"""

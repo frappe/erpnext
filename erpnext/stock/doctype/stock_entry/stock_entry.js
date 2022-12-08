@@ -515,7 +515,11 @@ frappe.ui.form.on('Stock Entry', {
 
 	supplier_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'supplier_address', 'address_display', false);
-	}
+	},
+
+	project: function (frm) {
+		frm.cscript.set_item_cost_centers();
+	},
 });
 
 frappe.ui.form.on('Stock Entry Detail', {
@@ -588,20 +592,21 @@ frappe.ui.form.on('Stock Entry Detail', {
 		var d = locals[cdt][cdn];
 		if(d.item_code) {
 			var args = {
-				'item_code'			: d.item_code,
-				'uom'				: d.uom,
-				'hide_item_code'	: d.hide_item_code,
-				'warehouse'			: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-				'transfer_qty'		: d.transfer_qty,
-				'serial_no'		: d.serial_no,
-				'bom_no'		: d.bom_no,
-				'expense_account'	: d.expense_account,
-				'cost_center'		: d.cost_center,
-				'company'		: frm.doc.company,
-				'qty'			: d.qty,
-				'voucher_type'		: frm.doc.doctype,
-				'voucher_no'		: d.name,
-				'customer_provided'	: cint(frm.doc.customer_provided),
+				'item_code': d.item_code,
+				'uom': d.uom,
+				'hide_item_code': d.hide_item_code,
+				'warehouse': cstr(d.s_warehouse) || cstr(d.t_warehouse),
+				'transfer_qty': d.transfer_qty,
+				'serial_no': d.serial_no,
+				'bom_no': d.bom_no,
+				'expense_account': d.expense_account,
+				'cost_center': d.cost_center,
+				'project': d.project || frm.doc.project,
+				'company': frm.doc.company,
+				'qty': d.qty,
+				'voucher_type': frm.doc.doctype,
+				'voucher_no': d.name,
+				'customer_provided': cint(frm.doc.customer_provided),
 				'allow_zero_valuation': 1,
 				'stock_entry_type': frm.doc.stock_entry_type,
 				'posting_date': frm.doc.posting_date,
@@ -629,6 +634,13 @@ frappe.ui.form.on('Stock Entry Detail', {
 			frm.cscript.show_hide_select_batch_button();
 		}
 	},
+
+	project: function (frm, cdt, cdn) {
+		if (cdt && cdn) {
+			frm.cscript.set_item_cost_centers(cdn);
+		}
+	},
+
 	expense_account: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "expense_account");
 	},
@@ -1096,6 +1108,21 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 	customer(doc) {
 		return erpnext.utils.get_party_details(this.frm, null, null, null);
+	}
+
+	set_item_cost_centers(row) {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "set_item_cost_centers",
+			args: {
+				row: row
+			},
+			callback: function(r) {
+				if (!r.exc) {
+					refresh_field("items");
+				}
+			}
+		});
 	}
 };
 

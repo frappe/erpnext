@@ -1,11 +1,10 @@
 {
- "creation": "2014-08-29 16:02:39.740505",
+ "creation": "2022-12-02 16:10:57.822100",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "account",
   "cost_center"
  ],
  "fields": [
@@ -19,28 +18,23 @@
    "reqd": 1
   },
   {
-   "fieldname": "account",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "reqd": 1
   }
  ],
  "istable": 1,
- "modified": "2022-12-02 16:11:26.819681",
+ "modified": "2022-12-02 16:10:57.822100",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Party Account",
+ "name": "Default Cost Center",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

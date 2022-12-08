@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe, erpnext
-from frappe.utils import flt, cstr, cint, comma_and
+from frappe.utils import flt, cstr, cint
 from frappe import _
 from erpnext.accounts.utils import get_stock_and_account_balance
 from frappe.model.meta import get_field_precision
@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 class ClosedAccountingPeriod(frappe.ValidationError): pass
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
+
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
 	if gl_map:
@@ -25,6 +26,7 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 				frappe.throw(_("Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."))
 		else:
 			delete_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
+
 
 def validate_accounting_period(gl_map):
 	accounting_periods = frappe.db.sql(""" SELECT
@@ -46,6 +48,7 @@ def validate_accounting_period(gl_map):
 	if accounting_periods:
 		frappe.throw(_("You cannot create or cancel any accounting entries within in the closed Accounting Period {0}")
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
+
 
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
@@ -78,10 +81,15 @@ def process_gl_map(gl_map, merge_entries=True):
 
 	return gl_map
 
+
 def merge_similar_entries(gl_map):
+	from erpnext.accounts.doctype.gl_entry.gl_entry import remove_dimensions_not_allowed_for_bs_account
+
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
 	for entry in gl_map:
+		remove_dimensions_not_allowed_for_bs_account(entry)
+
 		# if there is already an entry in this account then just add it
 		# to that entry
 		same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions)
@@ -105,6 +113,7 @@ def merge_similar_entries(gl_map):
 
 	return merged_gl_map
 
+
 def check_if_in_list(gle, gl_map, dimensions=None):
 	account_head_fieldnames = ['party_type', 'party', 'against_voucher', 'against_voucher_type',
 		'cost_center', 'project', 'remarks', 'reference_no', 'reference_date']
@@ -123,6 +132,7 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 
 		if same_head:
 			return e
+
 
 def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	if not from_repost:
@@ -145,6 +155,7 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 	for voucher_type, voucher_no, account, party_type, party in reference_documents_for_update:
 		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party)
 
+
 def make_entry(args, adv_adj, from_repost=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
@@ -155,6 +166,7 @@ def make_entry(args, adv_adj, from_repost=False):
 	gle.run_method("on_update_with_args", adv_adj, from_repost)
 	gle.flags.ignore_validate = True
 	gle.submit()
+
 
 def validate_account_for_perpetual_inventory(gl_map):
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
@@ -207,6 +219,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 			# 			'args': journal_entry_args
 			# 		})
 
+
 def validate_cwip_accounts(gl_map):
 	if gl_map[0].voucher_type != "Journal Entry":
 		return
@@ -220,6 +233,7 @@ def validate_cwip_accounts(gl_map):
 				if entry.account in cwip_accounts:
 					frappe.throw(
 						_("Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry").format(entry.account))
+
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
@@ -244,6 +258,7 @@ def round_off_debit_credit(gl_map):
 
 	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
 		make_round_off_gle(gl_map, debit_credit_diff, precision)
+
 
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(gl_map[0].company)
@@ -282,6 +297,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 	if not round_off_account_exists:
 		gl_map.append(round_off_gle)
 
+
 def get_round_off_account_and_cost_center(company):
 	round_off_account, round_off_cost_center = frappe.get_cached_value('Company',  company,
 		["round_off_account", "round_off_cost_center"]) or [None, None]
@@ -293,8 +309,8 @@ def get_round_off_account_and_cost_center(company):
 
 	return round_off_account, round_off_cost_center
 
-def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
-		adv_adj=False, update_outstanding="Yes"):
+
+def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None, adv_adj=False, update_outstanding="Yes"):
 
 	from erpnext.accounts.doctype.gl_entry.gl_entry import validate_balance_type, \
 		check_freezing_date, update_outstanding_amt, validate_frozen_account
@@ -310,8 +326,7 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
-	frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""",
-		(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"]))
+	delete_voucher_gl_entries(voucher_type or gl_entries[0]["voucher_type"], voucher_no or gl_entries[0]["voucher_no"])
 
 	reference_documents_for_update = set()
 	for entry in gl_entries:
@@ -325,6 +340,14 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 
 	for voucher_type, voucher_no, account, party_type, party in reference_documents_for_update:
 		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party, on_cancel=True)
+
+
+def delete_voucher_gl_entries(voucher_type, voucher_no):
+	if voucher_type and voucher_no:
+		frappe.db.sql("""
+			delete from `tabGL Entry`
+			where voucher_type = %s and voucher_no = %s
+		""", (voucher_type, voucher_no))
 
 
 def add_to_reference_documents_for_update(reference_documents_for_update, entry):

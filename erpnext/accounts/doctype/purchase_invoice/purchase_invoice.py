@@ -13,16 +13,16 @@ from erpnext.controllers.accounts_controller import get_default_taxes_and_charge
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.stock import get_warehouse_account_map
-from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, merge_similar_entries, delete_gl_entries,\
+	get_round_off_account_and_cost_center, delete_voucher_gl_entries
+from erpnext.controllers.stock_controller import update_gl_entries_for_reposted_stock_vouchers
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
 	unlink_inter_company_doc
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
-import json
 
 
 form_grid_templates = {
@@ -311,31 +311,36 @@ class PurchaseInvoice(BuyingController):
 			if frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock'):
 				receipt_documents.add(('Purchase Invoice', self.return_against))
 
+		docs = []
 		for dt, dn in receipt_documents:
-			pr_doc = frappe.get_doc(dt, dn)
+			doc = frappe.get_doc(dt, dn)
+			docs.append(doc)
 
 			# set billed item tax amount and billed net amount in pr item
-			if dt == "Purchase Receipt":
-				pr_doc.set_billed_valuation_amounts()
-			elif dt == "Purchase Invoice":
-				pr_doc.set_debit_note_amount()
+			if doc.doctype == "Purchase Receipt":
+				doc.set_billed_valuation_amounts()
+			elif doc.doctype == "Purchase Invoice":
+				doc.set_debit_note_amount()
 
-			# set valuation rate in pr item
-			pr_doc.update_valuation_rate("items")
-
-			# db_update will update and save valuation_rate in PR
-			for item in pr_doc.get("items"):
+			doc.update_valuation_rate("items")
+			for item in doc.get("items"):
 				item.db_update()
 
+		excluded_vouchers = []
+		for doc in docs:
 			# update stock & gl entries for cancelled state of PR
-			pr_doc.docstatus = 2
-			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			pr_doc.make_gl_entries_on_cancel(repost_future_gle=False)
+			doc.docstatus = 2
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			delete_voucher_gl_entries(doc.doctype, doc.name)
 
 			# update stock & gl entries for submit state of PR
-			pr_doc.docstatus = 1
-			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			pr_doc.make_gl_entries()
+			doc.docstatus = 1
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+			doc.make_gl_entries(repost_future_gle=False)
+
+			excluded_vouchers.append((doc.doctype, doc.name))
+
+		update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers)
 
 	def set_debit_note_amount(self):
 		for d in self.items:
@@ -594,8 +599,7 @@ class PurchaseInvoice(BuyingController):
 			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2), merge_entries=False, from_repost=from_repost)
 
 			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) and self.auto_accounting_for_stock:
-				from erpnext.controllers.stock_controller import update_gl_entries_for_reposted_stock_vouchers
-				update_gl_entries_for_reposted_stock_vouchers(self.doctype, self.name, company=self.company)
+				update_gl_entries_for_reposted_stock_vouchers((self.doctype, self.name), company=self.company)
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
@@ -674,7 +678,8 @@ class PurchaseInvoice(BuyingController):
 		voucher_wise_stock_value = {}
 		if self.update_stock:
 			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
+					fields=["voucher_detail_no", "stock_value_difference"],
+					filters={'voucher_type': self.doctype, 'voucher_no': self.name}):
 				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
@@ -717,26 +722,17 @@ class PurchaseInvoice(BuyingController):
 
 					# Amount added through landed-cost-voucher
 					if flt(item.landed_cost_voucher_amount):
-						landed_cost_items = frappe.get_all("Landed Cost Item", filters={
-							"docstatus": 1,
-							"purchase_invoice": self.name,
-							"purchase_invoice_item": item.name,
-							"applicable_charges": ["!=", 0]
-						}, fields="item_tax_detail")
-
-						for lc_item in landed_cost_items:
-							landed_cost_detail = json.loads(lc_item.item_tax_detail)
-							for lc_tax_id, amount in landed_cost_detail.items():
-								landed_cost_account = frappe.db.get_value("Landed Cost Taxes and Charges", lc_tax_id, 'account_head', cache=1)
-
-								gl_entries.append(self.get_gl_dict({
-									"account": landed_cost_account,
-									"against": warehouse_account[item.warehouse]["account"],
-									"cost_center": item.cost_center,
-									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-									"credit": flt(amount),
-									"project": item.project
-								}, item=item))
+						from erpnext.stock.doctype.landed_cost_voucher.landed_cost_voucher import get_purchase_landed_cost_gl_details
+						landed_cost_gl_details = get_purchase_landed_cost_gl_details(self, item)
+						for lc_gl_details in landed_cost_gl_details:
+							gl_entries.append(self.get_gl_dict({
+								"account": lc_gl_details.account_head,
+								"against": warehouse_account[item.warehouse]["account"],
+								"cost_center": lc_gl_details.cost_center or item.cost_center or self.get("cost_center"),
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"credit": flt(lc_gl_details.amount),
+								"project": item.project
+							}, item=item))
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -917,19 +913,19 @@ class PurchaseInvoice(BuyingController):
 		return gl_entries
 
 	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
-		net_amt_precision = item.precision("base_net_amount")
-		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
+		valuation_net_amount = self.get_item_valuation_net_amount(item)
+		valuation_item_tax_amount = self.get_item_valuation_tax_amount(item)
 
-		warehouse_debit_amount = flt(flt(item.valuation_rate, val_rate_db_precision)
-			* flt(item.qty)	* flt(item.conversion_factor), net_amt_precision)
+		valuation_amount_as_per_doc = valuation_net_amount + valuation_item_tax_amount + \
+			flt(item.landed_cost_voucher_amount) + flt(item.rm_supp_cost)
+
+		stock_value_diff = flt(voucher_wise_stock_value.get(item.name))
+
+		stock_adjustment_amt = flt(valuation_amount_as_per_doc - stock_value_diff)
 
 		# Stock ledger value is not matching with the warehouse amount
-		if (self.update_stock and voucher_wise_stock_value.get(item.name) and
-			warehouse_debit_amount != flt(voucher_wise_stock_value.get(item.name), net_amt_precision)):
-
+		if self.update_stock and stock_adjustment_amt:
 			stock_adjustment_account = self.get_company_default("stock_adjustment_account")
-			stock_amount = flt(voucher_wise_stock_value.get(item.name), net_amt_precision)
-			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
 			gl_entries.append(
 				self.get_gl_dict({
@@ -937,14 +933,12 @@ class PurchaseInvoice(BuyingController):
 					"against": item.expense_account,
 					"debit": stock_adjustment_amt,
 					"remarks": self.get("remarks") or _("Stock Adjustment"),
-					"cost_center": item.cost_center or self.cost_center,
+					"cost_center": item.cost_center or self.get("cost_center"),
 					"project": item.project or self.project
 				}, account_currency, item=item)
 			)
 
-			warehouse_debit_amount = stock_amount
-
-		return warehouse_debit_amount
+		return stock_value_diff
 
 	def make_tax_gl_entries(self, gl_entries):
 		# tax table gl entries

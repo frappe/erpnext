@@ -11,6 +11,14 @@
   "column_break1",
   "company",
   "payroll_frequency",
+  "select_payroll_period",
+  "start_date",
+  "column_break_22",
+  "end_date",
+  "column_break_11",
+  "salary_slip_based_on_timesheet",
+  "deduct_tax_for_unclaimed_employee_benefits",
+  "deduct_tax_for_unsubmitted_tax_exemption_proof",
   "section_break_8",
   "branch",
   "column_break_8",
@@ -23,15 +31,6 @@
   "section_break_13",
   "validate_attendance",
   "attendance_detail_html",
-  "section_break_12",
-  "salary_slip_based_on_timesheet",
-  "select_payroll_period",
-  "start_date",
-  "column_break_22",
-  "end_date",
-  "column_break_11",
-  "deduct_tax_for_unclaimed_employee_benefits",
-  "deduct_tax_for_unsubmitted_tax_exemption_proof",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -137,10 +136,6 @@
    "fieldtype": "HTML"
   },
   {
-   "fieldname": "section_break_12",
-   "fieldtype": "Section Break"
-  },
-  {
    "default": "0",
    "fieldname": "salary_slip_based_on_timesheet",
    "fieldtype": "Check",
@@ -224,6 +219,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Salary Slips Created",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -232,6 +228,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Salary Slips Submitted",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -264,7 +261,7 @@
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2021-09-06 13:36:38.970980",
+ "modified": "2022-12-06 13:08:06.151947",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",

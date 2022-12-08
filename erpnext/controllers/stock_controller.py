@@ -6,7 +6,7 @@ from frappe.utils import cint, flt, cstr
 from frappe import _
 import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
+from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map, delete_voucher_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
@@ -14,9 +14,11 @@ from frappe.model.meta import get_field_precision
 import json
 from six import string_types
 
+
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
 class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
+
 
 class StockController(AccountsController):
 	def validate(self):
@@ -40,7 +42,7 @@ class StockController(AccountsController):
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
 			if (repost_future_gle or self.flags.repost_future_gle):
-				update_gl_entries_for_reposted_stock_vouchers(self.doctype, self.name,
+				update_gl_entries_for_reposted_stock_vouchers((self.doctype, self.name),
 					warehouse_account=warehouse_account, company=self.company)
 		elif self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.docstatus == 1:
 			gl_entries = []
@@ -424,8 +426,8 @@ class StockController(AccountsController):
 					d.serial_no = d.vehicle
 
 
-def update_gl_entries_for_reposted_stock_vouchers(exclude_voucher_type=None, exclude_voucher_no=None,
-		only_if_value_changed=True, warehouse_account=None, company=None):
+def update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers=None, warehouse_account=None, company=None,
+		only_if_value_changed=True):
 	if frappe.flags.stock_ledger_vouchers_reposted:
 		stock_ledger_vouchers_reposted_sorted = sorted(frappe.flags.stock_ledger_vouchers_reposted,
 			key=lambda d: (d.posting_date, d.posting_time))
@@ -434,7 +436,8 @@ def update_gl_entries_for_reposted_stock_vouchers(exclude_voucher_type=None, exc
 		if only_if_value_changed:
 			vouchers = [d for d in vouchers if d in frappe.flags.stock_ledger_vouchers_value_changed]
 
-		update_gl_entries_for_stock_voucher(vouchers, exclude_voucher_type, exclude_voucher_no, warehouse_account, company)
+		update_gl_entries_for_stock_voucher(vouchers,
+			excluded_vouchers=excluded_vouchers, warehouse_account=warehouse_account, company=company)
 
 
 def update_gl_entries_after(posting_date, posting_time,
@@ -445,19 +448,17 @@ def update_gl_entries_after(posting_date, posting_time,
 	update_gl_entries_for_stock_voucher(future_stock_vouchers, warehouse_account=warehouse_account, company=company)
 
 
-def update_gl_entries_for_stock_voucher(stock_vouchers, exclude_voucher_type=None, exclude_voucher_no=None,
-		warehouse_account=None, company=None):
-	def _delete_gl_entries(voucher_type, voucher_no):
-		frappe.db.sql("""delete from `tabGL Entry`
-			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
-
+def update_gl_entries_for_stock_voucher(stock_vouchers, excluded_vouchers=None, warehouse_account=None, company=None):
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
 	gle = get_voucherwise_gl_entries(stock_vouchers)
 
+	if excluded_vouchers and isinstance(excluded_vouchers, tuple):
+		excluded_vouchers = [excluded_vouchers]
+
 	for voucher_type, voucher_no in stock_vouchers:
-		if exclude_voucher_type and exclude_voucher_no and voucher_type == exclude_voucher_type and voucher_no == exclude_voucher_no:
+		if excluded_vouchers and (voucher_type, voucher_no) in excluded_vouchers:
 			continue
 
 		existing_gle = gle.get((voucher_type, voucher_no), [])
@@ -465,10 +466,10 @@ def update_gl_entries_for_stock_voucher(stock_vouchers, exclude_voucher_type=Non
 		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
-				_delete_gl_entries(voucher_type, voucher_no)
+				delete_voucher_gl_entries(voucher_type, voucher_no)
 				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
 		else:
-			_delete_gl_entries(voucher_type, voucher_no)
+			delete_voucher_gl_entries(voucher_type, voucher_no)
 
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
@@ -525,7 +526,7 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	}, as_dict=True)
 
 	for d in sle_vouchers:
-		future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+		future_stock_vouchers.append((d.voucher_type, d.voucher_no))
 
 	return future_stock_vouchers
 

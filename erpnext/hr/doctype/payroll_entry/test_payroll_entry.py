@@ -111,7 +111,7 @@ def make_payroll_entry(**args):
 	payroll_entry.save()
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
-	if payroll_entry.get_sal_slip_list(ss_status = 1):
+	if payroll_entry.get_salary_slips(docstatus= 1):
 		payroll_entry.make_payment_entry()
 
 	return payroll_entry

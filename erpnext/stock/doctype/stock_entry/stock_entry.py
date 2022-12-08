@@ -313,7 +313,7 @@ class StockEntry(StockController):
 	def set_missing_item_values(self, item):
 		item_details = self.get_item_details(frappe._dict(
 			{"item_code": item.item_code, "company": self.company, 'batch_no': item.batch_no,
-				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
+				"project": item.project or self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
 			for_update=True)
 
 		for f in item_details:
@@ -943,67 +943,79 @@ class StockEntry(StockController):
 
 		item = frappe.get_cached_doc("Item", args.get('item_code'))
 
-		ret = frappe._dict({
-			'uom'			      	: item.stock_uom,
-			'stock_uom'				: item.stock_uom,
-			'description'		  	: cstr(item.description).strip(),
-			'image'					: item.image,
-			'item_name' 		  	: item.item_name,
-			'hide_item_code'		: get_hide_item_code(item, args),
-			'cost_center'			: get_default_cost_center(item, args),
-			'qty'					: args.get("qty"),
-			'transfer_qty'			: args.get('qty'),
-			'conversion_factor'		: 1,
-			'batch_no'				: '',
-			'actual_qty'			: 0,
-			'basic_rate'			: 0,
-			'serial_no'				: '',
-			'has_serial_no'			: item.has_serial_no,
-			'is_vehicle'			: item.is_vehicle,
-			'has_batch_no'			: item.has_batch_no,
-			'sample_quantity'		: item.sample_quantity
+		out = frappe._dict({
+			'uom': item.stock_uom,
+			'stock_uom': item.stock_uom,
+			'description': cstr(item.description).strip(),
+			'image': item.image,
+			'item_name': item.item_name,
+			'hide_item_code': get_hide_item_code(item, args),
+			'cost_center': get_default_cost_center(item, args),
+			'qty': args.get("qty"),
+			'transfer_qty': args.get('qty'),
+			'conversion_factor': 1,
+			'batch_no': '',
+			'actual_qty': 0,
+			'basic_rate': 0,
+			'serial_no': '',
+			'has_serial_no': item.has_serial_no,
+			'is_vehicle': item.is_vehicle,
+			'has_batch_no': item.has_batch_no,
+			'sample_quantity': item.sample_quantity
 		})
 
 		if self.purpose == 'Send to Subcontractor':
-			ret["allow_alternative_item"] = item.allow_alternative_item
+			out["allow_alternative_item"] = item.allow_alternative_item
 
 		# update uom
 		if args.get("uom"):
 			uom_details = get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty'))
 			if not uom_details.get('not_convertible'):
-				ret['uom'] = args.get("uom")
-				ret.update(uom_details)
+				out['uom'] = args.get("uom")
+				out.update(uom_details)
 
 		company_copy_fields = {
 			'stock_adjustment_account': 'expense_account',
 			'cost_center': 'cost_center'
 		}
 		for company_field, field in company_copy_fields.items():
-			if not ret.get(field):
-				ret[field] = frappe.get_cached_value('Company',  self.company,  company_field)
+			if not out.get(field):
+				out[field] = frappe.get_cached_value('Company',  self.company,  company_field)
 
-		ret['expense_account'] = get_expense_account(self.company, stock_entry_type=self.stock_entry_type,
-			is_opening=self.is_opening, expense_account=ret.get('expense_account'))
+		out['expense_account'] = get_expense_account(self.company, stock_entry_type=self.stock_entry_type,
+			is_opening=self.is_opening, expense_account=out.get('expense_account'))
 
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
 
 		stock_and_rate = get_warehouse_details(args) if args.get('warehouse') else {}
-		ret.update(stock_and_rate)
+		out.update(stock_and_rate)
 
 		# Contents UOM
-		ret.alt_uom = item.alt_uom
-		ret.alt_uom_size = item.alt_uom_size if item.alt_uom else 1.0
-		ret.alt_uom_qty = flt(ret.transfer_qty) * flt(ret.alt_uom_size)
+		out.alt_uom = item.alt_uom
+		out.alt_uom_size = item.alt_uom_size if item.alt_uom else 1.0
+		out.alt_uom_qty = flt(out.transfer_qty) * flt(out.alt_uom_size)
 
 		if self.purpose == "Send to Subcontractor" and self.get("purchase_order") and args.get('item_code'):
 			subcontract_items = frappe.get_all("Purchase Order Item Supplied",
 				{"parent": self.purchase_order, "rm_item_code": args.get('item_code')}, "main_item_code")
 
 			if subcontract_items and len(subcontract_items) == 1:
-				ret["subcontracted_item"] = subcontract_items[0].main_item_code
+				out["subcontracted_item"] = subcontract_items[0].main_item_code
 
-		return ret
+		return out
+
+	@frappe.whitelist()
+	def set_item_cost_centers(self, row=None):
+		for d in self.get("items"):
+			if d.get("item_code") and (not row or d.name == row):
+				d.cost_center = get_default_cost_center(d.item_code, {
+					"doctype": "Stock Entry",
+					"company": self.company,
+					"project": d.get('project') or self.get('project'),
+					"cost_center": d.get('cost_center'),
+					"customer": self.get("customer"),
+				})
 
 	@frappe.whitelist()
 	def set_items_for_stock_in(self):
@@ -1508,6 +1520,7 @@ class StockEntry(StockController):
 						'reference_name': reference_name
 					})
 
+
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, string_types):
@@ -1543,6 +1556,7 @@ def move_sample_to_retention_warehouse(company, items):
 				})
 	if stock_entry.get('items'):
 		return stock_entry.as_dict()
+
 
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
@@ -1580,6 +1594,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 
 	return doclist
 
+
 @frappe.whitelist()
 def get_work_order_details(work_order, company):
 	work_order = frappe.get_doc("Work Order", work_order)
@@ -1593,6 +1608,7 @@ def get_work_order_details(work_order, company):
 		"fg_warehouse": work_order.fg_warehouse,
 		"fg_completed_qty": pending_qty_to_produce
 	}
+
 
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	operating_cost_per_unit = 0
@@ -1609,6 +1625,7 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 
 	return operating_cost_per_unit
 
+
 def get_additional_operating_costs(work_order=None, bom_no=None, use_multi_level_bom=0):
 	from erpnext.manufacturing.doctype.bom.bom import get_additional_operating_cost_per_unit
 
@@ -1620,6 +1637,7 @@ def get_additional_operating_costs(work_order=None, bom_no=None, use_multi_level
 		additional_costs = get_additional_operating_cost_per_unit(bom_no, use_multi_level_bom)
 
 	return additional_costs
+
 
 def get_used_alternative_items(purchase_order=None, work_order=None):
 	cond = ""
@@ -1645,6 +1663,7 @@ def get_used_alternative_items(purchase_order=None, work_order=None):
 
 	return used_alternative_items
 
+
 def get_valuation_rate_for_finished_good_entry(work_order):
 	work_order_qty = flt(frappe.get_cached_value("Work Order",
 		work_order, 'material_transferred_for_manufacturing'))
@@ -1662,6 +1681,7 @@ def get_valuation_rate_for_finished_good_entry(work_order):
 
 	if stock_data:
 		return stock_data[0].valuation_rate
+
 
 @frappe.whitelist()
 def get_uom_details(item_code, uom, qty):
@@ -1684,6 +1704,7 @@ def get_uom_details(item_code, uom, qty):
 		}
 	return ret
 
+
 @frappe.whitelist()
 def get_expired_batch_items():
 	return frappe.db.sql("""select b.item, sum(sle.actual_qty) as qty, sle.batch_no, sle.warehouse, sle.stock_uom\
@@ -1692,6 +1713,7 @@ def get_expired_batch_items():
 	and b.expiry_date is not NULL
 	and b.batch_id = sle.batch_no
 	group by sle.warehouse, sle.item_code, sle.batch_no""",(nowdate()), as_dict=1)
+
 
 @frappe.whitelist()
 def get_warehouse_details(args):
@@ -1711,6 +1733,7 @@ def get_warehouse_details(args):
 			"basic_rate" : get_incoming_rate(args) if not args.get('customer_provided') else 0
 		}
 	return ret
+
 
 @frappe.whitelist()
 def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
@@ -1732,6 +1755,7 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 		sample_quantity = qty_diff
 	return sample_quantity
 
+
 @frappe.whitelist()
 def get_expense_account(company, stock_entry_type=None, is_opening='No', expense_account=None):
 	if company and is_opening == 'Yes':
@@ -1746,6 +1770,7 @@ def get_expense_account(company, stock_entry_type=None, is_opening='No', expense
 		return frappe.get_cached_value('Company', company, 'stock_adjustment_account')
 
 	return expense_account
+
 
 @frappe.whitelist()
 def get_item_expense_accounts(args):

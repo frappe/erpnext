@@ -182,6 +182,8 @@
   "cb_6",
   "per_billed",
   "per_returned",
+  "accounting_dimensions_section",
+  "dimension_col_break",
   "sec_subscription",
   "auto_repeat"
  ],
@@ -1524,13 +1526,22 @@
    "fieldname": "sec_subscription",
    "fieldtype": "Section Break",
    "label": "Auto Repeat"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "links": [],
- "modified": "2022-11-26 02:10:58.554606",
+ "modified": "2022-12-05 13:08:15.989104",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
