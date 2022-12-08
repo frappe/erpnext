@@ -131,8 +131,8 @@ def get_assets(filters):
 							  else
 								   0
 							  end), 0) as depreciation_amount_during_the_period
-			from `tabAsset` a, `tabDepreciation Schedule` ds
-			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s and a.name = ds.parent and ifnull(ds.journal_entry, '') != ''
+			from `tabAsset` a, `tabAsset Depreciation Schedule` ads, `tabDepreciation Schedule` ds
+			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s and ads.asset = a.name and ads.docstatus=1 and ads.name = ds.parent and ifnull(ds.journal_entry, '') != ''
 			group by a.asset_category
 			union
 			SELECT a.asset_category,

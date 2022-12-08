@@ -176,7 +176,7 @@ def get_finance_book_value_map(filters):
 	return frappe._dict(
 		frappe.db.sql(
 			""" Select
-		ads.name, SUM(depreciation_amount)
+		ads.asset, SUM(depreciation_amount)
 		FROM `tabAsset Depreciation Schedule` ads, `tabDepreciation Schedule` ds
 		WHERE
 			ds.parent = ads.name
@@ -185,7 +185,7 @@ def get_finance_book_value_map(filters):
 			AND ds.parentfield='depreciation_schedule'
 			AND ds.schedule_date<=%s
 			AND ds.journal_entry IS NOT NULL
-		GROUP BY ads.name""",
+		GROUP BY ads.asset""",
 			(cstr(filters.finance_book or ""), date),
 		)
 	)
