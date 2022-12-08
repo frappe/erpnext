@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
 from erpnext.vehicles.vehicle_checklist import get_default_vehicle_checklist_items, set_updated_checklist
 from six import string_types
 import json
@@ -19,6 +20,7 @@ class ProjectTemplate(Document):
 	def validate(self):
 		self.validate_duplicate_items()
 		self.validate_duplicate_applicable_item_groups()
+		self.validate_due_after()
 
 	def validate_duplicate_items(self):
 		visited = set()
@@ -41,6 +43,19 @@ class ProjectTemplate(Document):
 	def set_updated_checklist(self):
 		if self.meta.has_field('customer_request_checklist'):
 			set_updated_checklist(self, 'customer_request_checklist')
+
+	def validate_due_after(self):
+		if self.next_project_template:
+			if not cint(self.next_due_after):
+				frappe.throw(_("Please set Next Maintenance Due After"))
+		else:
+			self.next_due_after = 0
+
+		if cint(self.due_after_delivery_date) < 0:
+			frappe.throw(_("Due After Delivery Date cannot be negative"))
+
+		if cint(self.next_due_after) < 0:
+			frappe.throw(_("Next Maintenance Due After cannot be negative"))
 
 
 @frappe.whitelist()

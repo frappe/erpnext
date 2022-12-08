@@ -521,28 +521,6 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Sales Invoice {0} must be cancelled before cancelling this Sales Order")
 				.format(", ".join(submit_rv)))
 
-		#check maintenance schedule
-		submit_ms = frappe.db.sql_list("""
-			select t1.name
-			from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-			where t2.parent=t1.name and t2.sales_order = %s and t1.docstatus = 1""", self.name)
-
-		if submit_ms:
-			submit_ms = [get_link_to_form("Maintenance Schedule", ms) for ms in submit_ms]
-			frappe.throw(_("Maintenance Schedule {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(submit_ms)))
-
-		# check maintenance visit
-		submit_mv = frappe.db.sql_list("""
-			select t1.name
-			from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-			where t2.parent=t1.name and t2.prevdoc_docname = %s and t1.docstatus = 1""",self.name)
-
-		if submit_mv:
-			submit_mv = [get_link_to_form("Maintenance Visit", mv) for mv in submit_mv]
-			frappe.throw(_("Maintenance Visit {0} must be cancelled before cancelling this Sales Order")
-				.format(", ".join(submit_mv)))
-
 		# check work order
 		pro_order = frappe.db.sql_list("""
 			select name
@@ -1123,60 +1101,6 @@ def get_unbilled_dn_qty_map(sales_order):
 		unbilled_dn_qty_map[sales_order_item] += qty
 
 	return unbilled_dn_qty_map
-
-
-@frappe.whitelist()
-def make_maintenance_schedule(source_name, target_doc=None):
-	maint_schedule = frappe.db.sql("""select t1.name
-		from `tabMaintenance Schedule` t1, `tabMaintenance Schedule Item` t2
-		where t2.parent=t1.name and t2.sales_order=%s and t1.docstatus=1""", source_name)
-
-	if not maint_schedule:
-		doclist = get_mapped_doc("Sales Order", source_name, {
-			"Sales Order": {
-				"doctype": "Maintenance Schedule",
-				"validation": {
-					"docstatus": ["=", 1]
-				}
-			},
-			"Sales Order Item": {
-				"doctype": "Maintenance Schedule Item",
-				"field_map": {
-					"parent": "sales_order"
-				},
-				"add_if_empty": True
-			}
-		}, target_doc)
-
-		return doclist
-
-
-@frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None):
-	visit = frappe.db.sql("""select t1.name
-		from `tabMaintenance Visit` t1, `tabMaintenance Visit Purpose` t2
-		where t2.parent=t1.name and t2.prevdoc_docname=%s
-		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
-
-	if not visit:
-		doclist = get_mapped_doc("Sales Order", source_name, {
-			"Sales Order": {
-				"doctype": "Maintenance Visit",
-				"validation": {
-					"docstatus": ["=", 1]
-				}
-			},
-			"Sales Order Item": {
-				"doctype": "Maintenance Visit Purpose",
-				"field_map": {
-					"parent": "prevdoc_docname",
-					"parenttype": "prevdoc_doctype"
-				},
-				"add_if_empty": True
-			}
-		}, target_doc)
-
-		return doclist
 
 
 @frappe.whitelist()

@@ -1,40 +1,17 @@
 {
- "autoname": "hash",
  "creation": "2013-02-22 01:28:05",
  "doctype": "DocType",
- "document_type": "Document",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "item_code",
-  "item_name",
   "scheduled_date",
-  "actual_date",
-  "sales_person",
-  "serial_no"
+  "project_template",
+  "reference_doctype",
+  "reference_name",
+  "reference_date",
+  "actual_date"
  ],
  "fields": [
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item Code",
-   "oldfieldname": "item_code",
-   "oldfieldtype": "Link",
-   "options": "Item",
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "label": "Item Name",
-   "oldfieldname": "item_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
   {
    "fieldname": "scheduled_date",
    "fieldtype": "Date",
@@ -42,8 +19,7 @@
    "label": "Scheduled Date",
    "oldfieldname": "scheduled_date",
    "oldfieldtype": "Date",
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "fieldname": "actual_date",
@@ -57,30 +33,39 @@
    "report_hide": 1
   },
   {
-   "fieldname": "sales_person",
+   "fieldname": "project_template",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Sales Person",
-   "oldfieldname": "incharge_name",
-   "oldfieldtype": "Link",
-   "options": "Sales Person",
-   "reqd": 1
+   "label": "Project Template",
+   "options": "Project Template"
   },
   {
-   "fieldname": "serial_no",
-   "fieldtype": "Small Text",
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Serial No",
-   "oldfieldname": "serial_no",
-   "oldfieldtype": "Small Text",
-   "print_width": "160px",
-   "read_only": 1,
-   "width": "160px"
+   "label": "Reference DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Reference Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Reference Name",
+   "options": "reference_doctype",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:44:51.329944",
+ "modified": "2022-12-08 12:29:00.405545",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",
