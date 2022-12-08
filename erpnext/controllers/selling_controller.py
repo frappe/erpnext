@@ -442,30 +442,31 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.is_internal_transfer():
-					if d.doctype == "Packed Item":
-						incoming_rate = flt(
-							flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-							d.precision("incoming_rate"),
-						)
-						if d.incoming_rate != incoming_rate:
-							d.incoming_rate = incoming_rate
-					else:
-						rate = flt(
-							flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
-							d.precision("rate"),
-						)
-						if d.rate != rate:
-							d.rate = rate
-							frappe.msgprint(
-								_(
-									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-								).format(d.idx),
-								alert=1,
+					if self.doctype == "Delivery Note" or self.get("update_stock"):
+						if d.doctype == "Packed Item":
+							incoming_rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("incoming_rate"),
 							)
+							if d.incoming_rate != incoming_rate:
+								d.incoming_rate = incoming_rate
+						else:
+							rate = flt(
+								flt(d.incoming_rate, d.precision("incoming_rate")) * d.conversion_factor,
+								d.precision("rate"),
+							)
+							if d.rate != rate:
+								d.rate = rate
+								frappe.msgprint(
+									_(
+										"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+									).format(d.idx),
+									alert=1,
+								)
 
-						d.discount_percentage = 0.0
-						d.discount_amount = 0.0
-						d.margin_rate_or_amount = 0.0
+							d.discount_percentage = 0.0
+							d.discount_amount = 0.0
+							d.margin_rate_or_amount = 0.0
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document

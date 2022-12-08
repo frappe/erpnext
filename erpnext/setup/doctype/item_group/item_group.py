@@ -152,7 +152,7 @@ def get_parent_item_groups(item_group_name, from_item=False):
 
 	if from_item and frappe.request.environ.get("HTTP_REFERER"):
 		# base page after 'Home' will vary on Item page
-		last_page = frappe.request.environ["HTTP_REFERER"].split("/")[-1]
+		last_page = frappe.request.environ["HTTP_REFERER"].split("/")[-1].split("?")[0]
 		if last_page and last_page in ("shop-by-category", "all-products"):
 			base_nav_page_title = " ".join(last_page.split("-")).title()
 			base_nav_page = {"name": _(base_nav_page_title), "route": "/" + last_page}

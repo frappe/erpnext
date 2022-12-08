@@ -453,6 +453,7 @@ def get_lead_with_phone_number(number):
 		"Lead",
 		or_filters={
 			"phone": ["like", "%{}".format(number)],
+			"whatsapp_no": ["like", "%{}".format(number)],
 			"mobile_no": ["like", "%{}".format(number)],
 		},
 		limit=1,
