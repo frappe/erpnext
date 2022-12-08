@@ -1,3 +1,4 @@
+import copy
 import unittest
 
 import frappe
@@ -12,6 +13,9 @@ from erpnext.accounts.utils import (
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.utils import update_reference_in_payment_entry
 
 
 class TestUtils(unittest.TestCase):
@@ -72,6 +76,40 @@ class TestUtils(unittest.TestCase):
 
 		sorted_vouchers = sort_stock_vouchers_by_posting_date(list(reversed(vouchers)))
 		self.assertEqual(sorted_vouchers, vouchers)
+
+	def test_update_reference_in_payment_entry(self):
+		item = make_item().name
+
+		purchase_invoice = make_purchase_invoice(**{
+			"item": item,
+			"supplier": "_Test Supplier USD",
+			"currency": "USD",
+			"conversion_rate": 82.32
+		})
+		purchase_invoice.submit()
+
+		payment_entry = get_payment_entry(purchase_invoice.doctype, purchase_invoice.name)
+		payment_entry.target_exchange_rate = 62.9
+		payment_entry.paid_amount = 15725
+		payment_entry.deductions = []
+		payment_entry.insert()
+
+		self.assertEqual(payment_entry.difference_amount, -4855.00)
+		payment_entry.references = []
+
+		update_reference_in_payment_entry(frappe._dict({
+			"against_voucher_type": purchase_invoice.doctype,
+			"against_voucher": purchase_invoice.name,
+			"grand_total": purchase_invoice.grand_total,
+			"outstanding": purchase_invoice.outstanding_amount,
+			"allocated_amount": purchase_invoice.outstanding_amount,
+			"exchange_rate": purchase_invoice.conversion_rate,
+			"difference_amount": -4855.00,
+			"difference_account": "Exchange Gain/Loss - _TC"
+		}), payment_entry, do_not_save=True)
+
+		self.assertEqual(len(payment_entry.references), 1)
+		self.assertEqual(payment_entry.difference_amount, 0)
 
 
 ADDRESS_RECORDS = [
