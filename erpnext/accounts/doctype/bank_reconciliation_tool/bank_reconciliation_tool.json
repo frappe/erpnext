@@ -83,6 +83,24 @@
    "fieldname": "no_bank_transactions",
    "fieldtype": "HTML"
   }
+  {
+    "depends_on": "eval:doc.filtered_by_reference_date",
+    "fieldname": "from_reference_date",
+    "fieldtype": "Date",
+    "label": "From Reference Date"
+   },
+   {
+    "depends_on": "eval:doc.filtered_by_reference_date",
+    "fieldname": "to_reference_date",
+    "fieldtype": "Date",
+    "label": "To Reference Date"
+   },
+   {
+    "default": "0",
+    "fieldname": "filtered_by_reference_date",
+    "fieldtype": "Check",
+    "label": "Filtered by Reference Date"
+   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
