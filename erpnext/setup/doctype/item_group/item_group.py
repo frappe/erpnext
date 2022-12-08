@@ -11,7 +11,6 @@ from frappe.utils.nestedset import NestedSet
 from frappe.website.utils import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import ECommerceSettings
 from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 
 
@@ -34,7 +33,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		self.make_route()
 		self.validate_item_group_defaults()
 		self.check_item_tax()
-		ECommerceSettings.validate_field_filters(self.filter_fields, enable_field_filters=True)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
