@@ -6,12 +6,9 @@ from urllib.parse import quote
 
 import frappe
 from frappe import _
-from frappe.utils import cint
 from frappe.utils.nestedset import NestedSet
 from frappe.website.utils import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
-
-from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
 
 
 class ItemGroup(NestedSet, WebsiteGenerator):
@@ -74,42 +71,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		NestedSet.on_trash(self, allow_root_deletion=True)
 		WebsiteGenerator.on_trash(self)
 		self.delete_child_item_groups_key()
-
-	def get_context(self, context):
-		context.show_search = True
-		context.body_class = "product-page"
-		context.page_length = (
-			cint(frappe.db.get_single_value("E Commerce Settings", "products_per_page")) or 6
-		)
-		context.search_link = "/product_search"
-
-		filter_engine = ProductFiltersBuilder(self.name)
-
-		context.field_filters = filter_engine.get_field_filters()
-		context.attribute_filters = filter_engine.get_attribute_filters()
-
-		context.update({"parents": get_parent_item_groups(self.parent_item_group), "title": self.name})
-
-		if self.slideshow:
-			values = {"show_indicators": 1, "show_controls": 0, "rounded": 1, "slider_name": self.slideshow}
-			slideshow = frappe.get_doc("Website Slideshow", self.slideshow)
-			slides = slideshow.get({"doctype": "Website Slideshow Item"})
-			for index, slide in enumerate(slides):
-				values[f"slide_{index + 1}_image"] = slide.image
-				values[f"slide_{index + 1}_title"] = slide.heading
-				values[f"slide_{index + 1}_subtitle"] = slide.description
-				values[f"slide_{index + 1}_theme"] = slide.get("theme") or "Light"
-				values[f"slide_{index + 1}_content_align"] = slide.get("content_align") or "Centre"
-				values[f"slide_{index + 1}_primary_action"] = slide.url
-
-			context.slideshow = values
-
-		context.no_breadcrumbs = False
-		context.title = self.website_title or self.name
-		context.name = self.name
-		context.item_group_name = self.item_group_name
-
-		return context
 
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
