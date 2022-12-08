@@ -15,7 +15,7 @@ frappe.views.calendar["Opportunity"] = {
 		if (doc.status == "Open") {
 			return "danger";
 		} else if (doc.status == "Closed") {
-			return "success";
+			return "secondary";
 		} else if (doc.status == "Lost") {
 			return "secondary";
 		} else if (doc.status == "Quotation") {
