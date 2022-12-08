@@ -25,8 +25,8 @@ class BankReconciliationTool(Document):
 @frappe.whitelist()
 def get_bank_transactions(bank_account, from_date=None, to_date=None):
 	# returns bank transactions for a bank account
-	from_date = frappe.db.get_single_value('Bank Reconciliation Tool','bank_statement_from_date')
-	to_date = frappe.db.get_single_value('Bank Reconciliation Tool','bank_statement_to_date')
+	from_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_from_date")
+	to_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_to_date")
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
@@ -53,9 +53,8 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 		],
 		filters=filters,
 	)
-	transactions= sorted(transactions, key=lambda x: x['date']) if transactions else []
+	transactions = sorted(transactions, key=lambda x: x["date"]) if transactions else []
 	return transactions
-
 
 
 @frappe.whitelist()
@@ -344,7 +343,9 @@ def get_linked_payments(bank_transaction_name, document_types=None):
 
 def check_matching(bank_account, company, transaction, document_types):
 	# combine all types of vouchers
-	filtered_by_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','filtered_by_reference_date')
+	filtered_by_reference_date = frappe.db.get_single_value(
+		"Bank Reconciliation Tool", "filtered_by_reference_date"
+	)
 	subquery = get_queries(bank_account, company, transaction, document_types)
 	filters = {
 		"amount": transaction.unallocated_amount,
@@ -366,9 +367,13 @@ def check_matching(bank_account, company, transaction, document_types):
 				filters,
 			)
 		)
-	matching_vouchers_with_ref_no = tuple(ele for ele in matching_vouchers if frappe.as_json(ele[5]) != "null")
+	matching_vouchers_with_ref_no = tuple(
+		ele for ele in matching_vouchers if frappe.as_json(ele[5]) != "null"
+	)
 	if filtered_by_reference_date:
-		matching_vouchers = sorted(matching_vouchers_with_ref_no , key=lambda x: x[5]) if matching_vouchers else []
+		matching_vouchers = (
+			sorted(matching_vouchers_with_ref_no, key=lambda x: x[5]) if matching_vouchers else []
+		)
 	else:
 		matching_vouchers = sorted(matching_vouchers, key=lambda x: x[8]) if matching_vouchers else []
 	return matching_vouchers
@@ -515,17 +520,21 @@ def get_lr_matching_query(bank_account, amount_condition, filters):
 
 def get_pe_matching_query(amount_condition, account_from_to, transaction):
 	# get matching payment entries query
-	from_date = frappe.db.get_single_value('Bank Reconciliation Tool','bank_statement_from_date')
-	to_date = frappe.db.get_single_value('Bank Reconciliation Tool','bank_statement_to_date')
-	from_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','from_reference_date')
-	to_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','to_reference_date')
-	filtered_by_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','filtered_by_reference_date')
+	from_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_from_date")
+	to_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_to_date")
+	from_reference_date = frappe.db.get_single_value(
+		"Bank Reconciliation Tool", "from_reference_date"
+	)
+	to_reference_date = frappe.db.get_single_value("Bank Reconciliation Tool", "to_reference_date")
+	filtered_by_reference_date = frappe.db.get_single_value(
+		"Bank Reconciliation Tool", "filtered_by_reference_date"
+	)
 	if transaction.deposit > 0:
 		currency_field = "paid_to_account_currency as currency"
 	else:
 		currency_field = "paid_from_account_currency as currency"
-	if (filtered_by_reference_date):
-		pe_data=  f"""
+	if filtered_by_reference_date:
+		pe_data = f"""
 			SELECT
 				(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
 				+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
@@ -548,11 +557,11 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 				AND ifnull(clearance_date, '') = ""
 				AND {account_from_to} = %(bank_account)s
 				AND reference_date >= '{from_reference_date}'
-				AND reference_date <= '{to_reference_date}'	 
-				
+				AND reference_date <= '{to_reference_date}'
+
 			"""
 	else:
-		pe_data=  f"""
+		pe_data = f"""
 			SELECT
 				(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
 				+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
@@ -575,12 +584,10 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 				AND ifnull(clearance_date, '') = ""
 				AND {account_from_to} = %(bank_account)s
 				AND posting_date >= '{from_date}'
-				AND posting_date <= '{to_date}'	 
-				
+				AND posting_date <= '{to_date}'
+
 			"""
 	return pe_data
-
-	
 
 
 def get_je_matching_query(amount_condition, transaction):
@@ -589,14 +596,18 @@ def get_je_matching_query(amount_condition, transaction):
 	# We have mapping at the bank level
 	# So one bank could have both types of bank accounts like asset and liability
 	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
-	from_date = frappe.db.get_single_value('Bank Reconciliation Tool','bank_statement_from_date')
-	to_date = frappe.db.get_single_value('Bank Reconciliation Tool','bank_statement_to_date')
-	from_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','from_reference_date')
-	to_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','to_reference_date')
-	filtered_by_reference_date = frappe.db.get_single_value('Bank Reconciliation Tool','filtered_by_reference_date')
+	from_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_from_date")
+	to_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_to_date")
+	from_reference_date = frappe.db.get_single_value(
+		"Bank Reconciliation Tool", "from_reference_date"
+	)
+	to_reference_date = frappe.db.get_single_value("Bank Reconciliation Tool", "to_reference_date")
+	filtered_by_reference_date = frappe.db.get_single_value(
+		"Bank Reconciliation Tool", "filtered_by_reference_date"
+	)
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
-	if (filtered_by_reference_date==1):
-		je_data =  f"""
+	if filtered_by_reference_date == 1:
+		je_data = f"""
 			SELECT
 				(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
 				+ 1) AS rank ,
@@ -624,7 +635,7 @@ def get_je_matching_query(amount_condition, transaction):
 				AND je.cheque_date <= '{to_reference_date}'
 			"""
 	else:
-		je_data =  f"""
+		je_data = f"""
 			SELECT
 				(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
 				+ 1) AS rank ,
@@ -652,6 +663,7 @@ def get_je_matching_query(amount_condition, transaction):
 				AND je.posting_date <= '{to_date}'
 			"""
 	return je_data
+
 
 def get_si_matching_query(amount_condition):
 	# get matchin sales invoice query
