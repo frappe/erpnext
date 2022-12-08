@@ -38,10 +38,6 @@ class MaintenanceSchedule(TransactionBase):
 			self.item_code, self.item_name = frappe.db.get_value("Serial No", self.serial_no, ["item_code", "item_name"])
 
 	def validate_schedule(self):
-		delivery_date = None
-		if self.serial_no:
-			delivery_date = frappe.db.get_value("Serial No", self.serial_no, "delivery_date")
-
 		date_template_pairs = set()
 		for d in self.schedules:
 			date_template_pair = (d.scheduled_date, cstr(d.project_template))
@@ -49,10 +45,6 @@ class MaintenanceSchedule(TransactionBase):
 				date_template_pairs.add(date_template_pair)
 			else:
 				frappe.throw(_("Row {0}: Duplicate schedule found".format(d.idx)))
-
-			if delivery_date and getdate(d.scheduled_date) < getdate(delivery_date):
-				frappe.throw(_("Row {0}: Scheduled date cannot be before Delivery date".format(d.idx)))
-
 
 	def adjust_scheduled_date_for_holiday(self, scheduled_date):
 		from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
