@@ -256,7 +256,7 @@ def apply_pricing_rule(args, doc=None):
 	for item in item_list:
 		args_copy = copy.deepcopy(args)
 		args_copy.update(item)
-		data = get_pricing_rule_for_item(args_copy, item.get("price_list_rate"), doc=doc)
+		data = get_pricing_rule_for_item(args_copy, doc=doc)
 		out.append(data)
 
 		if (
@@ -293,7 +293,7 @@ def update_pricing_rule_uom(pricing_rule, args):
 			pricing_rule.uom = row.uom
 
 
-def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
+def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
