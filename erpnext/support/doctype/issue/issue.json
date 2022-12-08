@@ -241,6 +241,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
   },
@@ -415,7 +416,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2022-12-08 18:35:43.041615",
+ "modified": "2022-12-08 21:25:33.388384",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
