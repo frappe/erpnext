@@ -35,6 +35,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				if (r.message) {
 					this.bank_transaction = r.message;
 					r.message.payment_entry = 1;
+					r.message.journal_entry = 1;
 					this.dialog.set_values(r.message);
 					this.dialog.show();
 				}
@@ -66,6 +67,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 							row[1],
 							row[2],
 							reference_date,
+							row[8],
 							format_currency(row[3], row[9]),
 							row[6],
 							row[4],
@@ -98,6 +100,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			},
 			{
 				name: __("Reference Date"),
+				editable: false,
+				width: 120,
+			},
+			{
+				name: "Posting Date",
 				editable: false,
 				width: 120,
 			},
