@@ -37,8 +37,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Project Template",
-   "options": "Project Template",
-   "reqd": 1
+   "options": "Project Template"
   },
   {
    "fieldname": "reference_doctype",
@@ -66,7 +65,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-12-06 14:23:19.492744",
+ "modified": "2022-12-08 12:29:00.405545",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",

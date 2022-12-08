@@ -61,4 +61,16 @@ class VehicleDelivery(VehicleTransactionController):
 	def add_vehicle_maintenance_schedule(self):
 		serial_no = self.get_serial_no()
 		if serial_no:
-			schedule_project_templates_after_delivery(serial_no, self.doctype, self.name, self.posting_date)
+			args = frappe._dict({
+				'reference_name': self.name,
+				'reference_doctype': self.doctype,
+				'reference_date': self.posting_date,
+				'customer': self.customer,
+				'customer_name': self.customer_name,
+				'contact_person': self.contact_person,
+				'contact_display': self.contact_display,
+				'contact_mobile': self.contact_mobile,
+				'contact_phone': self.contact_phone,
+				'contact_email': self.contact_email
+			})
+			schedule_project_templates_after_delivery(serial_no, args)

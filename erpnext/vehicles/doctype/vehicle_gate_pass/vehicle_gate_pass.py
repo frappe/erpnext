@@ -92,11 +92,24 @@ class VehicleGatePass(VehicleTransactionController):
 
 	def add_vehicle_maintenance_schedule(self):
 		if self.get("project"):
-			project = frappe.get_doc("Project", self.project)
-			if self.doctype == "Vehicle Gate Pass":
-				serial_no = self.vehicle
-				for template in project.project_templates:
-					schedule_next_project_template(template.project_template, serial_no, project.doctype, project.name, self.posting_date)
+			project = frappe.get_doc("Project", self.project).as_dict()
+			serial_no = self.vehicle
+
+			args = frappe._dict({
+				'reference_name': project.name,
+				'reference_doctype': project.doctype,
+				'reference_date': project.project_date,
+				'customer': project.customer,
+				'customer_name': project.customer_name,
+				'contact_person': project.contact_person,
+				'contact_display': project.contact_display,
+				'contact_mobile': project.contact_mobile,
+				'contact_phone': project.contact_phone,
+				'contact_email': project.contact_email
+			})
+
+			for template in project.project_templates:
+				schedule_next_project_template(template.project_template, serial_no, args)
 
 	def remove_vehicle_maintenance_schedule(self, reference_doctype=None, reference_name=None):
 		if self.get("project"):

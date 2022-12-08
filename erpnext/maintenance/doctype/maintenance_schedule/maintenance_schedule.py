@@ -69,24 +69,27 @@ class MaintenanceSchedule(TransactionBase):
 		return scheduled_date
 
 
-def schedule_next_project_template(project_template, serial_no, reference_doctype, reference_name, reference_date):
+def schedule_next_project_template(project_template, serial_no, args):
 	if not project_template:
 		return
+
+	args = frappe._dict(args)
+	if not args.reference_doctype or not args.reference_name:
+		frappe.throw(_("Invalid reference for Next Maintenance Schedule"))
 
 	template_details = frappe.db.get_value("Project Template", project_template, ["next_due_after", "next_project_template"], as_dict=1)
 	if not template_details or not template_details.next_due_after or not template_details.next_project_template:
 		return
 
 	doc = get_maintenance_schedule_doc(serial_no)
-	reference_doc = frappe.get_doc(reference_doctype, reference_name)
-	update_customer_and_contact(reference_doc, doc)
+	update_customer_and_contact(args, doc)
 
 	existing_templates = [d.get('project_template') for d in doc.get('schedules', []) if d.get('project_template')]
 
 	schedule = frappe._dict({
-		'reference_doctype': reference_doctype,
-		'reference_name': reference_name,
-		'reference_date': getdate(reference_date)
+		'reference_doctype': args.reference_doctype,
+		'reference_name': args.reference_name,
+		'reference_date': getdate(args.reference_date)
 	})
 
 	if template_details.next_project_template not in existing_templates:
@@ -98,26 +101,30 @@ def schedule_next_project_template(project_template, serial_no, reference_doctyp
 		doc.save(ignore_permissions=True)
 
 
-def schedule_project_templates_after_delivery(serial_no, reference_doctype, reference_name, reference_date):
+def schedule_project_templates_after_delivery(serial_no, args):
 	item_code = frappe.db.get_value("Serial No", serial_no, "item_code")
 	if not item_code:
 		return
 
+	args = frappe._dict(args)
+	if not args.reference_doctype or not args.reference_name:
+		frappe.throw(_("Invalid reference for Maintenance Schedule after Delivery"))
+
 	schedule_template = frappe._dict({
-		'reference_doctype': reference_doctype,
-		'reference_name': reference_name,
-		'reference_date': getdate(reference_date)
+		'reference_doctype': args.reference_doctype,
+		'reference_name': args.reference_name,
+		'reference_date': getdate(args.reference_date)
 	})
 
 	project_templates = get_project_templates_due_after_delivery(item_code)
 
 	doc = get_maintenance_schedule_doc(serial_no)
-	reference_doc = frappe.get_doc(reference_doctype, reference_name)
-	update_customer_and_contact(reference_doc, doc)
+	modified = False
+
+	update_customer_and_contact(args, doc)
 
 	existing_templates = [d.get('project_template') for d in doc.get('schedules', []) if d.get('project_template')]
 
-	modified = False
 	for d in project_templates:
 		if d.name not in existing_templates:
 			schedule = schedule_template.copy()
@@ -134,6 +141,9 @@ def schedule_project_templates_after_delivery(serial_no, reference_doctype, refe
 
 def remove_schedule_for_reference_document(serial_no, reference_doctype, reference_name):
 	doc = get_maintenance_schedule_doc(serial_no)
+
+	if not doc.get('schedules'):
+		return
 
 	to_remove = [d for d in doc.schedules if d.reference_doctype == reference_doctype and d.reference_name == reference_name]
 	if to_remove:
@@ -174,12 +184,18 @@ def get_maintenance_schedule_doc(serial_no):
 	return doc
 
 
-def update_customer_and_contact(source_doc, target_doc):
-	target_doc.customer = source_doc.get('customer')
-	target_doc.customer_name = source_doc.get('customer_name')
+def update_customer_and_contact(source, target_doc):
+	customer_fields = ['customer', 'customer_name']
+	contact_fields = ['contact_person', 'contact_display', 'contact_mobile', 'contact_phone', 'contact_email']
 
-	target_doc.contact_person = source_doc.get('contact_person')
-	target_doc.contact_email = source_doc.get('contact_display')
-	target_doc.contact_mobile = source_doc.get('contact_mobile')
-	target_doc.contact_phone = source_doc.get('contact_phone')
-	target_doc.contact_email = source_doc.get('contact_email')
+	if source.customer:
+		for f in customer_fields:
+			target_doc.set(f, source.get(f))
+
+		for f in contact_fields:
+			target_doc.set(f, None)
+
+	if source.contact_person:
+		for f in contact_fields:
+			target_doc.set(f, source.get(f))
+

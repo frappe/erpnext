@@ -41,8 +41,7 @@ class VehicleMaintenanceSchedule:
 			LEFT JOIN `tabProject Template` pt ON pt.name=msd.project_template
 			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name=msd.parent
 			LEFT JOIN `tabVehicle` v ON v.name=ms.serial_no
-			WHERE ifnull(msd.project_template, '') != ''
-				AND msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
+			WHERE msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
 		""", self.filters, as_dict=1)
 
 	def process_data(self):
