@@ -1387,6 +1387,11 @@ def create_asset(**args):
 			"location": args.location or "Test Location",
 			"asset_owner": args.asset_owner or "Company",
 			"is_existing_asset": args.is_existing_asset or 1,
+<<<<<<< HEAD
+=======
+			"asset_quantity": args.get("asset_quantity") or 1,
+			"depr_entry_posting_status": args.depr_entry_posting_status or "",
+>>>>>>> 4fbf65dd57 (chore: use frappe.db.set_value instead of asset.save)
 		}
 	)
 
