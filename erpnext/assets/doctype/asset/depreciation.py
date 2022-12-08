@@ -35,8 +35,8 @@ def post_depreciation_entries(date=None):
 			failed_asset_names.append(asset_name)
 
 	if failed_asset_names:
-		mark_asset_depr_entry_posting_status_as_failed(failed_asset_names)
-		notify_depr_entry_posting_error_to_account_managers(failed_asset_names)
+		set_depr_entry_posting_status_for_failed_assets(failed_asset_names)
+		notify_depr_entry_posting_error(failed_asset_names)
 
 	frappe.db.commit()
 
@@ -137,9 +137,7 @@ def make_depreciation_entry(asset_name, date=None):
 			finance_books.value_after_depreciation -= d.depreciation_amount
 			finance_books.db_update()
 
-	asset.flags.ignore_validate_update_after_submit = True
-	asset.depr_entry_posting_status = "Successful"
-	asset.save()
+	frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Successful")
 
 	asset.set_status()
 
@@ -204,15 +202,12 @@ def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation
 	return credit_account, debit_account
 
 
-def mark_asset_depr_entry_posting_status_as_failed(failed_asset_names):
+def set_depr_entry_posting_status_for_failed_assets(failed_asset_names):
 	for asset_name in failed_asset_names:
-		asset = frappe.get_doc("Asset", asset_name)
-		asset.flags.ignore_validate_update_after_submit = True
-		asset.depr_entry_posting_status = "Failed"
-		asset.save()
+		frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Failed")
 
 
-def notify_depr_entry_posting_error_to_account_managers(failed_asset_names):
+def notify_depr_entry_posting_error(failed_asset_names):
 	recipients = get_users_with_role("Accounts Manager")
 
 	if not recipients:
