@@ -27,8 +27,8 @@ def post_depreciation_entries(date=None, commit=True):
 
 	if not date:
 		date = today()
-	for asset in get_depreciable_assets(date):
-		make_depreciation_entry_for_all_asset_depr_schedules(asset, date)
+	for asset_name in get_depreciable_assets(date):
+		make_depreciation_entry_for_all_asset_depr_schedules(asset_name, date)
 		if commit:
 			frappe.db.commit()
 
@@ -46,7 +46,9 @@ def get_depreciable_assets(date):
 	)
 
 
-def make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date=None):
+def make_depreciation_entry_for_all_asset_depr_schedules(asset_name, date=None):
+	asset_doc = frappe.get_doc("Asset", asset_name)
+
 	for row in asset_doc.get("finance_books"):
 		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
 		make_depreciation_entry(asset_depr_schedule_name, date)
