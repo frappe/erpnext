@@ -294,9 +294,6 @@ class JournalEntry(AccountsController):
 						asset.name, row.finance_book
 					)
 
-					if not depr_schedule:
-						return
-
 					for s in depr_schedule:
 						if s.journal_entry == self.name:
 							s.db_set("journal_entry", None)

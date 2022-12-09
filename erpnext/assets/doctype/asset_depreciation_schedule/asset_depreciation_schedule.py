@@ -157,6 +157,7 @@ def get_depr_schedule_from_asset_depr_schedule_of_asset(asset_name, finance_book
 		return
 
 	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
 
