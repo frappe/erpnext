@@ -35,7 +35,7 @@
    "modified_by": "Administrator",
    "name": "Vehicle Log-vehicle_log_type",
    "no_copy": 0,
-   "options": "\nFuel\nOil Change\nParts",
+   "options": "\nFuel\nOil Change\nParts\nRoutine Checkup",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
