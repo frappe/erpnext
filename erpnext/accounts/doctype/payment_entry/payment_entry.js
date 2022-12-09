@@ -870,6 +870,7 @@ frappe.ui.form.on('Payment Entry', {
 		var unallocated_amount = 0;
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
 			function(d) { return flt(d.amount) }));
+		const included_taxes = get_included_taxes(frm);
 
 		if(frm.doc.party) {
 			if(frm.doc.payment_type == "Receive"
@@ -877,11 +878,11 @@ frappe.ui.form.on('Payment Entry', {
 				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
 					unallocated_amount = (frm.doc.base_received_amount + total_deductions + frm.doc.base_total_taxes_and_charges
 						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
-			} else if (frm.doc.payment_type == "Pay"
-				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
-				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges - (total_deductions
-						+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
+					unallocated_amount = frm.doc.received_amount - frm.doc.total_allocated_amount;
+			} else if (frm.doc.payment_type === "Pay") {
+				unallocated_amount = frm.doc.received_amount - frm.doc.total_allocated_amount;
+				frm.trigger("set_difference_amount");
+				unallocated_amount -= ((total_deductions - frm.doc.difference_amount) / frm.doc.target_exchange_rate) - included_taxes;
 			}
 		}
 		frm.set_value("unallocated_amount", unallocated_amount);
@@ -1419,3 +1420,18 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 })
+
+function get_included_taxes(frm) {
+	return frm.doc.taxes.reduce((acc, d) => {
+		if (!d.included_in_paid_amount) {
+			return acc;
+		}
+
+		if (d.add_deduct_tax) {
+			return acc + d.base_tax_amount
+		} else {
+			return acc - d.base_tax_amount
+		}
+
+	}, 0)
+}
