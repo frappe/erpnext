@@ -48,7 +48,10 @@ class PaymentRequest(Document):
 
 		if existing_payment_request_amount:
 			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-			if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") != "Shopping Cart":
+			if (
+				hasattr(ref_doc, "order_type")
+				and getattr(ref_doc, "order_type") != "Shopping Cart"
+			):
 				ref_amount = get_amount(ref_doc, self.payment_account)
 
 				if existing_payment_request_amount + flt(self.grand_total) > ref_amount:
@@ -144,7 +147,9 @@ class PaymentRequest(Document):
 		if not data_of_completed_requests:
 			return self.grand_total
 
-		request_amounts = sum(json.loads(d).get("request_amount") for d in data_of_completed_requests)
+		request_amounts = sum(
+			json.loads(d).get("request_amount") for d in data_of_completed_requests
+		)
 		return request_amounts
 
 	def on_cancel(self):
@@ -188,7 +193,10 @@ class PaymentRequest(Document):
 	def get_payment_url(self):
 		if self.reference_doctype != "Fees":
 			data = frappe.db.get_value(
-				self.reference_doctype, self.reference_name, ["company", "customer_name"], as_dict=1
+				self.reference_doctype,
+				self.reference_name,
+				["company", "customer_name"],
+				as_dict=1,
 			)
 		else:
 			data = frappe.db.get_value(
@@ -245,7 +253,8 @@ class PaymentRequest(Document):
 
 		bank_amount = self.grand_total
 		if (
-			party_account_currency == ref_doc.company_currency and party_account_currency != self.currency
+			party_account_currency == ref_doc.company_currency
+			and party_account_currency != self.currency
 		):
 			party_amount = ref_doc.base_grand_total
 		else:
@@ -369,9 +378,9 @@ class PaymentRequest(Document):
 
 				success_url = shopping_cart_settings.payment_success_url
 				if success_url:
-					redirect_to = ({"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}).get(
-						success_url, "/me"
-					)
+					redirect_to = (
+						{"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}
+					).get(success_url, "/me")
 				else:
 					redirect_to = get_url("/orders/{0}".format(self.reference_name))
 
@@ -393,11 +402,17 @@ def make_payment_request(**args):
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
 	if args.loyalty_points and args.dt == "Sales Order":
-		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
+		from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+			validate_loyalty_points,
+		)
 
 		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
 		frappe.db.set_value(
-			"Sales Order", args.dn, "loyalty_points", int(args.loyalty_points), update_modified=False
+			"Sales Order",
+			args.dn,
+			"loyalty_points",
+			int(args.loyalty_points),
+			update_modified=False,
 		)
 		frappe.db.set_value(
 			"Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False
@@ -419,7 +434,11 @@ def make_payment_request(**args):
 
 	if existing_payment_request:
 		frappe.db.set_value(
-			"Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False
+			"Payment Request",
+			existing_payment_request,
+			"grand_total",
+			grand_total,
+			update_modified=False,
 		)
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
 	else:
@@ -586,7 +605,10 @@ def update_payment_req_status(doc, method):
 
 			if status != "Paid" and not ref_details.outstanding_amount:
 				status = "Paid"
-			elif status != "Partially Paid" and ref_details.outstanding_amount != ref_details.total_amount:
+			elif (
+				status != "Partially Paid"
+				and ref_details.outstanding_amount != ref_details.total_amount
+			):
 				status = "Partially Paid"
 			elif ref_details.outstanding_amount == ref_details.total_amount:
 				if pay_req_doc.payment_request_type == "Outward":
