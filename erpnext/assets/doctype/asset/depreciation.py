@@ -219,8 +219,6 @@ def scrap_asset(asset_name):
 
 	date = today()
 
-	depreciate_asset(asset, date, "Scrap asset")
-
 	depreciation_series = frappe.get_cached_value(
 		"Company", asset.company, "series_for_depreciation_entry"
 	)
@@ -238,6 +236,11 @@ def scrap_asset(asset_name):
 
 	je.flags.ignore_permissions = True
 	je.submit()
+
+	notes = _(
+		"This schedule was created when the Asset {0} was scrapped through Journal Entry {1}."
+	).format(asset.name, je.name)
+	depreciate_asset(asset, date, notes)
 
 	frappe.db.set_value("Asset", asset_name, "disposal_date", date)
 	frappe.db.set_value("Asset", asset_name, "journal_entry_for_scrap", je.name)
@@ -288,7 +291,10 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 		if repair.increase_in_asset_life:
 			asset_repair = frappe.get_doc("Asset Repair", repair.name)
 			asset_repair.modify_depreciation_schedule()
-			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, "Asset Repair TODO")
+			notes = _(
+				"This schedule was created when the Asset {0} went through the Asset Repair {1}."
+			).format(asset.name, repair.name)
+			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, notes)
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):

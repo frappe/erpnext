@@ -55,9 +55,10 @@ class AssetRepair(AccountsController):
 				and self.increase_in_asset_life
 			):
 				self.modify_depreciation_schedule()
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(
-					self.asset_doc, "Asset Repair submit TODO"
+				notes = _("This schedule was created when the Asset Repair {0} was submitted.").format(
+					self.name
 				)
+				make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
@@ -75,9 +76,10 @@ class AssetRepair(AccountsController):
 				and self.increase_in_asset_life
 			):
 				self.revert_depreciation_schedule_on_cancellation()
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(
-					self.asset_doc, "Asset Repair cancel TODO"
+				notes = _("This schedule was created when the Asset Repair {0} was cancelled.").format(
+					self.name
 				)
+				make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":

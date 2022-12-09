@@ -121,9 +121,8 @@ class AssetValueAdjustment(Document):
 				"Asset Depreciation Schedule", current_asset_depr_schedule_name
 			)
 
-			new_asset_depr_schedule_doc = frappe.copy_doc(
-				current_asset_depr_schedule_doc, ignore_no_copy=False
-			)
+			new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+
 			new_asset_depr_schedule_doc.notes = "Asset value adjustment"
 
 			current_asset_depr_schedule_doc.cancel()

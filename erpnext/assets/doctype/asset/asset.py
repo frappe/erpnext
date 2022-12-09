@@ -352,12 +352,12 @@ class Asset(AccountsController):
 			0
 		].depreciation_amount
 
-	def get_value_after_depreciation(self, idx):
-		return flt(self.get("finance_books")[cint(idx) - 1].value_after_depreciation)
-
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
 			depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(self.name, row.finance_book)
+
+			if not depr_schedule:
+				continue
 
 			accumulated_depreciation_after_full_schedule = [
 				d.accumulated_depreciation_amount for d in depr_schedule

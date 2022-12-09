@@ -430,7 +430,11 @@ class AssetCapitalization(StockController):
 			asset = self.get_asset(item)
 
 			if asset.calculate_depreciation:
-				depreciate_asset(asset, self.posting_date, "Asset Capitalization TODO")
+				notes = _(
+					"This schedule was created when the Asset {0} was consumed through Asset Capitalization {1}."
+				).format(asset.name, self.get("name"))
+				depreciate_asset(asset, self.posting_date, notes)
+				asset.reload()
 
 			fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 				asset,
@@ -515,9 +519,10 @@ class AssetCapitalization(StockController):
 			asset_doc.purchase_date = self.posting_date
 			asset_doc.gross_purchase_amount = total_target_asset_value
 			asset_doc.purchase_receipt_amount = total_target_asset_value
-			make_new_active_asset_depr_schedules_and_cancel_current_ones(
-				asset_doc, "Asset Capitalization TODO"
+			notes = _("This schedule was created when the Asset Capitalization {0} was submitted.").format(
+				self.name
 			)
+			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset_doc, notes)
 		elif self.docstatus == 2:
 			for item in self.asset_items:
 				asset = self.get_asset(item)
@@ -526,7 +531,10 @@ class AssetCapitalization(StockController):
 
 				if asset.calculate_depreciation:
 					reverse_depreciation_entry_made_after_disposal(asset, self.posting_date)
-					reset_depreciation_schedule(asset, self.posting_date, "Asset Capitalization TODO")
+					notes = _(
+						"This schedule was created when the Asset Capitalization {0} was cancelled."
+					).format(self.name)
+					reset_depreciation_schedule(asset, self.posting_date, notes)
 
 	def get_asset(self, item):
 		asset = frappe.get_doc("Asset", item.asset)
