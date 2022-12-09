@@ -30,6 +30,19 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertTrue(sales_order.get("payment_schedule"))
 
+	def test_maintain_rate_in_sales_cycle_is_enforced(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
+		quotation.insert()
+		quotation.submit()
+
+		sales_order = make_sales_order(quotation.name)
+		sales_order.items[0].rate = 1
+		self.assertRaises(frappe.ValidationError, sales_order.save)
+
 	def test_make_sales_order_with_different_currency(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
