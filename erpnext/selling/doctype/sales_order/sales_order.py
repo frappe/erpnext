@@ -194,7 +194,7 @@ class SalesOrder(SellingController):
 		)
 
 		if cint(frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")):
-			self.validate_rate_with_reference_doc([["Quotation", "prev_docname", "quotation_item"]])
+			self.validate_rate_with_reference_doc([["Quotation", "prevdoc_docname", "quotation_item"]])
 
 	def update_enquiry_status(self, prevdoc, flag):
 		enq = frappe.db.sql(
