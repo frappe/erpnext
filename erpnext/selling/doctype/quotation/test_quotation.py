@@ -33,10 +33,8 @@ class TestQuotation(FrappeTestCase):
 	def test_maintain_rate_in_sales_cycle_is_enforced(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
-		maintain_rate = frappe.db.get_value(
-			"Selling Settings", "Selling Settings", "maintain_same_sales_rate"
-		)
-		frappe.db.set_value("Selling Settings", "Selling Settings", "maintain_same_sales_rate", 1)
+		maintain_rate = frappe.db.get_single_value("Selling Settings", "maintain_same_sales_rate")
+		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", 1)
 
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.transaction_date = nowdate()
@@ -48,9 +46,7 @@ class TestQuotation(FrappeTestCase):
 		sales_order.items[0].rate = 1
 		self.assertRaises(frappe.ValidationError, sales_order.save)
 
-		frappe.db.set_value(
-			"Selling Settings", "Selling Settings", "maintain_same_sales_rate", maintain_rate
-		)
+		frappe.db.set_single_value("Selling Settings", "maintain_same_sales_rate", maintain_rate)
 
 	def test_make_sales_order_with_different_currency(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
