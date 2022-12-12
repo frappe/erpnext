@@ -736,27 +736,29 @@ class TestPurchaseOrder(FrappeTestCase):
 	def test_advance_paid_upon_payment_entry_cancellation(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
-		po_doc = create_purchase_order()
+		po_doc = create_purchase_order(supplier="_Test Supplier USD", currency="USD", do_not_submit=1)
+		po_doc.conversion_rate = 80
+		po_doc.submit()
 
-		pe = get_payment_entry("Purchase Order", po_doc.name, bank_account="_Test Bank - _TC")
-		pe.reference_no = "1"
-		pe.reference_date = nowdate()
-		pe.paid_from_account_currency = po_doc.currency
-		pe.paid_to_account_currency = po_doc.currency
-		pe.source_exchange_rate = 1
+		pe = get_payment_entry("Purchase Order", po_doc.name)
+		pe.mode_of_payment = "Cash"
+		pe.paid_from = "Cash - _TC"
+		pe.source_exchange_rate = 80
 		pe.target_exchange_rate = 1
 		pe.paid_amount = po_doc.grand_total
 		pe.save(ignore_permissions=True)
 		pe.submit()
 
 		po_doc.reload()
-		self.assertEqual(po_doc.advance_paid, po_doc.base_grand_total)
+		self.assertEqual(po_doc.advance_paid, po_doc.grand_total)
+		self.assertEqual(po_doc.party_account_currency, "USD")
 
 		pe_doc = frappe.get_doc("Payment Entry", pe.name)
 		pe_doc.cancel()
 
 		po_doc.reload()
 		self.assertEqual(po_doc.advance_paid, 0)
+		self.assertEqual(po_doc.party_account_currency, "USD")
 
 	def test_schedule_date(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -833,6 +835,10 @@ class TestPurchaseOrder(FrappeTestCase):
 		prepare_data_for_internal_transfer()
 		supplier = "_Test Internal Supplier 2"
 
+		mr = make_material_request(
+			qty=2, company="_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+		)
+
 		po = create_purchase_order(
 			company="_Test Company with perpetual inventory",
 			supplier=supplier,
@@ -840,6 +846,8 @@ class TestPurchaseOrder(FrappeTestCase):
 			from_warehouse="_Test Internal Warehouse New 1 - TCP1",
 			qty=2,
 			rate=1,
+			material_request=mr.name,
+			material_request_item=mr.items[0].name,
 		)
 
 		so = make_inter_company_sales_order(po.name)
@@ -875,9 +883,11 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertTrue(pi.items[0].purchase_order)
 		self.assertTrue(pi.items[0].po_detail)
 		pi.submit()
+		mr.reload()
 
 		po.load_from_db()
 		self.assertEqual(po.status, "Completed")
+		self.assertEqual(mr.status, "Received")
 
 
 def prepare_data_for_internal_transfer():
@@ -979,6 +989,8 @@ def create_purchase_order(**args):
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),
 				"against_blanket_order": args.against_blanket_order,
+				"material_request": args.material_request,
+				"material_request_item": args.material_request_item,
 			},
 		)
 

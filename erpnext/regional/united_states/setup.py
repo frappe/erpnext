@@ -2,9 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-import os
-import json
-from frappe.permissions import add_permission, update_permission_property
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 

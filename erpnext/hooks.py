@@ -8,7 +8,6 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-required_apps = ["payments"]
 
 
 develop_version = "14.x.x-develop"
@@ -175,6 +174,7 @@ website_route_rules = [
 		},
 	},
 	{"from_route": "/project", "to_route": "Project"},
+	{"from_route": "/tasks", "to_route": "Task"},
 ]
 
 standard_portal_menu_items = [
@@ -312,11 +312,9 @@ doc_events = {
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 			"erpnext.regional.saudi_arabia.utils.create_qr_code",
-			"erpnext.erpnext_integrations.taxjar_integration.create_transaction",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction",
 			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
@@ -348,9 +346,6 @@ doc_events = {
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
-	},
-	("Quotation", "Sales Order", "Sales Invoice"): {
-		"validate": ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	},
 	"Company": {"on_trash": ["erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]},
 	"Integration Request": {
