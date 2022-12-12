@@ -27,7 +27,11 @@ frappe.ui.form.on("Vehicle Log", {
 	vehicle_log_type: function (frm){
 		if (frm.doc.vehicle_log_type == 'Routine Checkup'){
 			frm.set_df_property('service_detail','reqd',0);
+			var item_code = frappe.meta.get_docfield("Vehicle Service","item_code", frm.doc.name);
+			item_code.reqd = 0;
 		}else{
+			var item_code = frappe.meta.get_docfield("Vehicle Service","item_code", frm.doc.name);
+			item_code.reqd = 1;
 			frm.set_df_property('service_detail','reqd',1);
 		}
 		refresh_field('service_detail');
