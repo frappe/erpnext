@@ -47,6 +47,9 @@ def update_draft_asset_depr_schedules(asset_doc, date_of_disposal=None, date_of_
 	for row in asset_doc.get("finance_books"):
 		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_doc.name, row.finance_book)
 
+		if not asset_depr_schedule_doc:
+			continue
+
 		prepare_draft_asset_depr_schedule_data(
 			asset_depr_schedule_doc, asset_doc, row, date_of_disposal, date_of_return
 		)
@@ -141,6 +144,9 @@ def get_asset_depr_schedule_name(asset_name, finance_book):
 @frappe.whitelist()
 def get_depr_schedule(asset_name, finance_book):
 	asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_name, finance_book)
+
+	if not asset_depr_schedule_doc:
+		return
 
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
