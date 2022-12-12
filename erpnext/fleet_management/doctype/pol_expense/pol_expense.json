@@ -9,11 +9,12 @@
  "field_order": [
   "equipment",
   "equipment_type",
+  "equipment_category",
   "fuel_book",
-  "fuelbook_branch",
   "column_break_5",
   "entry_date",
   "cost_center",
+  "fuelbook_branch",
   "is_opening",
   "payment_details_section",
   "party_type",
@@ -470,12 +471,21 @@
   {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fetch_if_empty": 1,
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-03 11:46:07.466754",
+ "modified": "2022-12-08 17:16:43.726386",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",

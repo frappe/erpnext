@@ -13,7 +13,9 @@
   "cop_list",
   "work_type",
   "supplier",
+  "mines",
   "column_break_3",
+  "entry_date",
   "posting_date",
   "posting_time",
   "warehouse",
@@ -138,14 +140,14 @@
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date",
+   "label": "Production Date",
    "reqd": 1
   },
   {
    "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time",
+   "label": "Production Time",
    "reqd": 1
   },
   {
@@ -397,11 +399,24 @@
    "fieldname": "eligible_for_penalty",
    "fieldtype": "Check",
    "label": "Liable For Penalty"
+  },
+  {
+   "default": "Today",
+   "fieldname": "entry_date",
+   "fieldtype": "Date",
+   "label": "Entry Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mines",
+   "fieldtype": "Link",
+   "label": "Mines",
+   "options": "Mines"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-02 15:38:27.635469",
+ "modified": "2022-12-09 13:50:10.270297",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Production",

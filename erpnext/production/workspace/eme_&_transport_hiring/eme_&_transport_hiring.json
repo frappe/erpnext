@@ -8,56 +8,8 @@
  "hide_custom": 0,
  "icon": "healthcare",
  "idx": 0,
- "label": "EME & Transporter",
+ "label": "EME & Transport Hiring",
  "links": [
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Master Data",
-   "link_count": 4,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Offence",
-   "link_count": 0,
-   "link_to": "Offence",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Downtime Reason",
-   "link_count": 0,
-   "link_to": "Downtime Reason",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Expense Head",
-   "link_count": 0,
-   "link_to": "Expense Head",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Distance",
-   "link_count": 0,
-   "link_to": "Distance",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
   {
    "hidden": 0,
    "is_query_report": 0,
@@ -117,8 +69,46 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "EME Reports",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily EME Expenses Report",
+   "link_count": 0,
+   "link_to": "Daily EME Expenses",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily EME Working Hour",
+   "link_count": 0,
+   "link_to": "Daily EME Working Hour",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "EME Invoice Report",
+   "link_count": 0,
+   "link_to": "EME Invoice Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Transporter Transaction",
-   "link_count": 4,
+   "link_count": 5,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -165,46 +155,96 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "EME Reports",
-   "link_count": 3,
+   "label": "Hiring Rate Revision",
+   "link_count": 0,
+   "link_to": "Hiring Rate Revision",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Master Data",
+   "link_count": 7,
    "onboard": 0,
    "type": "Card Break"
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "Daily EME Expenses Report",
+   "is_query_report": 0,
+   "label": "Offence",
    "link_count": 0,
-   "link_to": "Daily EME Expenses",
-   "link_type": "Report",
+   "link_to": "Offence",
+   "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "Daily EME Working Hour",
+   "is_query_report": 0,
+   "label": "Downtime Reason",
    "link_count": 0,
-   "link_to": "Daily EME Working Hour",
-   "link_type": "Report",
+   "link_to": "Downtime Reason",
+   "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
   },
   {
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "EME Invoice Report",
+   "is_query_report": 0,
+   "label": "Expense Head",
    "link_count": 0,
-   "link_to": "EME Invoice Report",
-   "link_type": "Report",
+   "link_to": "Expense Head",
+   "link_type": "DocType",
    "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Distance",
+   "link_count": 0,
+   "link_to": "Distance",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Price",
+   "link_count": 0,
+   "link_to": "Fuel Price",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Hiring Rate Setting",
+   "link_count": 0,
+   "link_to": "Hiring Rate Setting",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Price List",
+   "link_count": 0,
+   "link_to": "Fuel Price List",
+   "link_type": "DocType",
+   "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2022-11-24 10:29:39.915407",
+ "modified": "2022-12-08 12:03:24.265527",
  "modified_by": "Administrator",
  "module": "Production",
- "name": "EME & Transporter",
+ "name": "EME & Transport Hiring",
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
@@ -267,5 +307,5 @@
    "type": "DocType"
   }
  ],
- "title": "EME & Transporter"
+ "title": "EME & Transport Hiring"
 }

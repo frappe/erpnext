@@ -14,6 +14,7 @@
   "tier_type",
   "contract_end_date",
   "column_break_5",
+  "group_leader",
   "default_oms",
   "minimum_labor_required",
   "minimum_labor"
@@ -78,11 +79,18 @@
    "label": "Mineral Raising Group",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "group_leader",
+   "fieldtype": "Link",
+   "label": "Group Leader",
+   "options": "Supplier",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-14 11:16:29.562429",
+ "modified": "2022-12-08 18:12:47.367554",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Mineral Raising Group",
@@ -123,6 +131,7 @@
    "share": 1
   }
  ],
+ "search_fields": "group_leader, tier, tier_type",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-12-06 16:39:27.737931",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "lower_range",
+  "column_break_2",
+  "upper_range"
+ ],
+ "fields": [
+  {
+   "fieldname": "lower_range",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Lower Range(%)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "upper_range",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Upper Range(%)",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-12-06 16:58:39.442526",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Hiring Rate Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Production Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

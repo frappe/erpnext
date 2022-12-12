@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr, rounded
-from erpnext.accounts.report.financial_statements_emines \
-	import filter_accounts, filter_out_zero_value_rows
+from erpnext.accounts.report.financial_statements import (filter_accounts,filter_out_zero_value_rows)
 from erpnext.accounts.accounts_custom_functions import get_child_cost_centers
 
 activity_list = ("total_exp", 'mining_expenses', 'crushing_plant_expenses1', 'crushing_plant_expenses2', 'washed_expenses', 'transportation', 's_and_d')

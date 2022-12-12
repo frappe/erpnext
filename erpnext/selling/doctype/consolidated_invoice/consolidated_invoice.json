@@ -174,7 +174,7 @@
    "fieldname": "loading_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Loading Amount",
+   "label": "Other Charges",
    "read_only": 1
   },
   {
@@ -234,7 +234,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-02 22:59:39.269967",
+ "modified": "2022-12-06 12:52:58.588745",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Consolidated Invoice",

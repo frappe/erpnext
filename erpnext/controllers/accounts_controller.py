@@ -793,7 +793,7 @@ class AccountsController(TransactionBase):
 		res = self.get_advance_entries()
 
 		self.set("advances", [])
-		advance_allocated = 0
+		advance_allocated = total_advance = 0
 		for d in res:
 			if d.against_order:
 				allocated_amount = flt(d.amount)
@@ -805,7 +805,7 @@ class AccountsController(TransactionBase):
 
 				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
-
+			total_advance += flt(allocated_amount)
 			advance_row = {
 				"doctype": self.doctype + " Advance",
 				"reference_type": d.reference_type,
@@ -820,7 +820,7 @@ class AccountsController(TransactionBase):
 			}
 
 			self.append("advances", advance_row)
-
+		self.total_advance = total_advance
 	def get_advance_entries(self, include_unallocated=True):
 		# is advance intorduced as advance account is different 
 		is_advance = True
@@ -872,7 +872,6 @@ class AccountsController(TransactionBase):
 			return
 
 		advance_entries = self.get_advance_entries(include_unallocated=False)
-
 		if advance_entries:
 			advance_entries_against_si = [d.reference_name for d in self.get("advances")]
 			for d in advance_entries:
@@ -882,7 +881,8 @@ class AccountsController(TransactionBase):
 							"Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice."
 						).format(d.reference_name, d.against_order)
 					)
-
+		elif self.doctype == "Sales Invoice" and not self.get("advances"):
+			frappe.msgprint(title=_("Advance Reminder"),msg=_("Pull advances if there is any received from customer {}".format(frappe.bold(self.customer))),indicator="red")
 	def set_advance_gain_or_loss(self):
 		if self.get("conversion_rate") == 1 or not self.get("advances"):
 			return
@@ -969,8 +969,9 @@ class AccountsController(TransactionBase):
 		        2. split into multiple rows if partially adjusted, assign against voucher
 		        3. submit advance voucher
 		"""
-
+		update_outstanding = "Yes"
 		if self.doctype == "Sales Invoice":
+			update_outstanding = "No"
 			party_type = "Customer"
 			party = self.customer
 			party_account = self.debit_to
@@ -1018,7 +1019,7 @@ class AccountsController(TransactionBase):
 
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
-			reconcile_against_document(lst)
+			reconcile_against_document(lst,update_outstanding)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries

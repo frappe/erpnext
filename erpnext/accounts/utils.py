@@ -422,7 +422,7 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args):  # nosemgrep
+def reconcile_against_document(args,update_outstanding="Yes"):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -442,7 +442,7 @@ def reconcile_against_document(args):  # nosemgrep
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
 		gl_map = doc.build_gl_map()
-		create_payment_ledger_entry(gl_map, cancel=1, adv_adj=1)
+		create_payment_ledger_entry(gl_map,update_outstanding=update_outstanding, cancel=1, adv_adj=1)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -458,7 +458,7 @@ def reconcile_against_document(args):  # nosemgrep
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
 		gl_map = doc.build_gl_map()
-		create_payment_ledger_entry(gl_map, cancel=0, adv_adj=1)
+		create_payment_ledger_entry(gl_map, update_outstanding = update_outstanding, cancel=0, adv_adj=1)
 
 		frappe.flags.ignore_party_validation = False
 
@@ -1369,6 +1369,7 @@ def check_and_delete_linked_reports(report):
 def create_payment_ledger_entry(
 	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0
 ):
+	# frappe.throw("here")
 	if gl_entries:
 		ple = None
 

@@ -54,13 +54,12 @@ class EMEInvoice(AccountsController):
 	# fetch rate base on equipment hiring form
 	def get_rate(self, ehf, posting_date):
 		ehfr = qb.DocType("EHF Rate")
-		rate = (qb.from_(ehfr)
-				.select((ehfr.hiring_rate).as_("rate"))
-				.where((ehfr.parent == ehf)
-						& ( posting_date >= ehfr.from_date)
-						& ( posting_date <= ehfr.to_date)
-						& ( ehfr.docstatus == 1))
-				.limit(1)).run()
+		rate = frappe.db.sql('''
+					select hiring_rate from `tabEHF Rate` where parent = '{ehf}' 
+						and from_date <= '{posting_date}' 
+						and ifnull(to_date, NOW()) >= '{posting_date}' 
+						and docstatus = 1 limit 1
+					'''.format(ehf = ehf, posting_date = posting_date))
 		if rate:
 			return rate[0][0]
 		else:

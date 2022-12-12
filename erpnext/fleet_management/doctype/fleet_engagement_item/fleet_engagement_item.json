@@ -22,9 +22,10 @@
   "column_break_14",
   "trip_or_hole",
   "no_of_trip",
-  "holes",
+  "hole_depth",
   "column_break_16",
   "qtymt",
+  "no_of_holes",
   "meterage_drilled",
   "km_reading_section",
   "uom",
@@ -218,6 +219,7 @@
    "mandatory_depends_on": "eval:doc.trip_or_hole == \"Trip\""
   },
   {
+   "depends_on": "eval:doc.trip_or_hole == \"Trip\"",
    "fieldname": "qtymt",
    "fieldtype": "Float",
    "label": "Qty(MT)"
@@ -280,22 +282,31 @@
   },
   {
    "depends_on": "eval:doc.trip_or_hole == \"Hole\"",
-   "fieldname": "holes",
-   "fieldtype": "Link",
-   "label": "Holes",
-   "mandatory_depends_on": "eval:doc.trip_or_hole == \"Hole\"",
-   "options": "No Of Holes"
-  },
-  {
    "fieldname": "meterage_drilled",
    "fieldtype": "Float",
-   "label": "Meterage Drilled"
+   "label": "Meterage Drilled",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.trip_or_hole == \"Hole\"",
+   "fieldname": "hole_depth",
+   "fieldtype": "Link",
+   "label": "Hole Depth",
+   "mandatory_depends_on": "eval:doc.trip_or_hole == \"Hole\"",
+   "options": "Hole Depth"
+  },
+  {
+   "depends_on": "eval:doc.trip_or_hole == \"Hole\"",
+   "fieldname": "no_of_holes",
+   "fieldtype": "Float",
+   "label": "No Of Holes",
+   "mandatory_depends_on": "eval:doc.trip_or_hole == \"Hole\""
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-30 11:07:16.205661",
+ "modified": "2022-12-07 16:35:18.016603",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fleet Engagement Item",

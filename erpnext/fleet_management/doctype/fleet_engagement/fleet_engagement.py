@@ -3,11 +3,36 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt, cint,getdate,time_diff_in_hours
 
 class FleetEngagement(Document):
-	pass
+	def validate(self):
+		self.calculate()
 
-
+# var calculate_total_km = function(frm, cdt, cdn){
+# 	let item = locals[cdt][cdn]
+# 	if (flt(item.initial_km) > 0 and flt(item.final_km) > 0 ){
+# 		if ( flt(item.initial_km) > flt(item.final_km)){
+# 			frappe.throw("Initial KM Cannot be greater than finial KM")
+# 		}
+# 		item.total_km = flt(item.final_km) - flt(item.initial_km)
+# 		frm.refresh_field("items")
+# 	}
+# }
+	def calculate(self):
+		for item in self.items:
+			if item.trip_or_hole == "Hole":
+				item.meterage_drilled = flt(item.hole_depth) * flt(item.no_of_holes)
+			else:
+				item.meterage_drilled = 0
+			if flt(item.initial_km) > 0 and flt(item.final_km) > 0:
+				if flt(item.initial_km) > flt(item.final_km):
+						frappe.throw("Initial KM Cannot be greater than finial KM")
+				item.total_km = flt(item.final_km) - flt(item.initial_km)
+			if item.end_time and item.start_time:
+				item.total_hours = time_diff_in_hours( item.end_time, item.start_time)
+					
+		
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
 	user_roles = frappe.get_roles(user)

@@ -1,0 +1,381 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:mines_name",
+ "creation": "2022-12-05 14:02:09.304416",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mines_name",
+  "branch",
+  "column_break_2",
+  "cost_center",
+  "location_section",
+  "dzongkhag",
+  "gewog",
+  "column_break_4",
+  "dungkhag",
+  "village",
+  "minning_lease_validity_section",
+  "lease_agreement_no",
+  "lease_signing_date",
+  "lease_start_date",
+  "column_break_11",
+  "leasehold_area",
+  "types_of_minerials",
+  "lease_end_date",
+  "column_break_15",
+  "reminder_year",
+  "lease_duration",
+  "enviromental_clearance_section",
+  "ec_no",
+  "ec_issue_date",
+  "column_break_22",
+  "ec_reminder",
+  "ec_expiry_date",
+  "ec_duration",
+  "other_clearancespermitsapprovals_section",
+  "clearances_no",
+  "clearances_issue_date",
+  "column_break_29",
+  "clearances_reminder",
+  "clearances_expiry_date",
+  "project_document_upload_section",
+  "final_mine_feasibility_study_report",
+  "eia_report",
+  "mine_plans",
+  "column_break_36",
+  "detail_plains",
+  "waste_record",
+  "data_39",
+  "column_break_40",
+  "water_consumption_record",
+  "other_reports",
+  "section_break_42",
+  "bi_annual_reports",
+  "column_break_44",
+  "annual_reports",
+  "column_break_46",
+  "other_related_reports",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "fieldname": "location_section",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "fieldname": "village",
+   "fieldtype": "Link",
+   "label": "Village",
+   "options": "Dzongkhag"
+  },
+  {
+   "fieldname": "dzongkhag",
+   "fieldtype": "Link",
+   "label": "Dzongkhag",
+   "options": "Dzongkhag"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gewog",
+   "fieldtype": "Link",
+   "label": "Gewog",
+   "options": "Dzongkhag"
+  },
+  {
+   "fieldname": "dungkhag",
+   "fieldtype": "Link",
+   "label": "Dungkhag",
+   "options": "Dzongkhag"
+  },
+  {
+   "fieldname": "minning_lease_validity_section",
+   "fieldtype": "Section Break",
+   "label": "Minning Lease Validity"
+  },
+  {
+   "fieldname": "lease_agreement_no",
+   "fieldtype": "Data",
+   "label": "Lease Agreement No"
+  },
+  {
+   "fieldname": "lease_signing_date",
+   "fieldtype": "Date",
+   "label": "Lease Signing Date"
+  },
+  {
+   "fieldname": "lease_start_date",
+   "fieldtype": "Date",
+   "label": "Lease Start Date"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "leasehold_area",
+   "fieldtype": "Data",
+   "label": "Leasehold Area"
+  },
+  {
+   "fieldname": "types_of_minerials",
+   "fieldtype": "Select",
+   "label": "Types of Minerials",
+   "options": "\nCoal\nDolomite\nGypsum"
+  },
+  {
+   "fieldname": "lease_end_date",
+   "fieldtype": "Date",
+   "label": "Lease End Date"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reminder_year",
+   "fieldtype": "Link",
+   "label": "Reminder Year",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "lease_duration",
+   "fieldtype": "Data",
+   "label": "Lease Duration"
+  },
+  {
+   "fieldname": "enviromental_clearance_section",
+   "fieldtype": "Section Break",
+   "label": "Enviromental Clearance"
+  },
+  {
+   "fieldname": "ec_no",
+   "fieldtype": "Data",
+   "label": "EC NO"
+  },
+  {
+   "fieldname": "ec_issue_date",
+   "fieldtype": "Date",
+   "label": "EC Issue Date"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "ec_reminder",
+   "fieldtype": "Data",
+   "label": "EC Reminder"
+  },
+  {
+   "fieldname": "ec_expiry_date",
+   "fieldtype": "Date",
+   "label": "EC Expiry Date"
+  },
+  {
+   "fieldname": "ec_duration",
+   "fieldtype": "Data",
+   "label": "EC Duration"
+  },
+  {
+   "fieldname": "other_clearancespermitsapprovals_section",
+   "fieldtype": "Section Break",
+   "label": "Other Clearances/Permits/Approvals"
+  },
+  {
+   "fieldname": "clearances_no",
+   "fieldtype": "Data",
+   "label": "Clearances No"
+  },
+  {
+   "fieldname": "clearances_issue_date",
+   "fieldtype": "Date",
+   "label": "Clearances Issue Date"
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "clearances_reminder",
+   "fieldtype": "Data",
+   "label": "Clearances Reminder"
+  },
+  {
+   "fieldname": "clearances_expiry_date",
+   "fieldtype": "Date",
+   "label": "Clearances Expiry Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "project_document_upload_section",
+   "fieldtype": "Section Break",
+   "label": "Project Document Upload"
+  },
+  {
+   "fieldname": "final_mine_feasibility_study_report",
+   "fieldtype": "Attach",
+   "label": "Final Mine Feasibility Study Report"
+  },
+  {
+   "fieldname": "eia_report",
+   "fieldtype": "Attach",
+   "label": "EIA Report"
+  },
+  {
+   "fieldname": "mine_plans",
+   "fieldtype": "Attach",
+   "label": "Mine Plans"
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Detailed Implementation Plans of respective mines",
+   "fieldname": "detail_plains",
+   "fieldtype": "Attach",
+   "label": "Detail Plains"
+  },
+  {
+   "description": "Monthly records of waste generation at the mine sites",
+   "fieldname": "waste_record",
+   "fieldtype": "Attach",
+   "label": "Waste Record"
+  },
+  {
+   "description": "Records on the ambient air quality at the mine sites",
+   "fieldname": "data_39",
+   "fieldtype": "Attach",
+   "label": "Air Quality Record"
+  },
+  {
+   "fieldname": "column_break_40",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Monthly records on the water consumption at the mine sites",
+   "fieldname": "water_consumption_record",
+   "fieldtype": "Attach",
+   "label": "Water Consumption Record"
+  },
+  {
+   "fieldname": "other_reports",
+   "fieldtype": "Attach",
+   "label": "Other Reports"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_42",
+   "fieldtype": "Section Break",
+   "label": "DGM Reporting "
+  },
+  {
+   "fieldname": "bi_annual_reports",
+   "fieldtype": "Attach",
+   "label": "Bi Annual Reports"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "annual_reports",
+   "fieldtype": "Attach",
+   "label": "Annual Reports"
+  },
+  {
+   "fieldname": "column_break_46",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "other_related_reports",
+   "fieldtype": "Attach",
+   "label": "Other Related Reports"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Mines",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "mines_name",
+   "fieldtype": "Data",
+   "label": "Mines Name",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-12-09 15:11:03.293836",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Mines",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1
+}

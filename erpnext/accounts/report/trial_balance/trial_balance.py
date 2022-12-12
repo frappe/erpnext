@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 import frappe
 from frappe import _
 from frappe.utils import cstr, flt, formatdate, getdate
@@ -127,7 +126,6 @@ def get_data(filters):
 	data = filter_out_zero_value_rows(
 		data, parent_children_map, show_zero_values=filters.get("show_zero_values")
 	)
-
 	return data
 
 
@@ -229,6 +227,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 	total_row = {
 		"account": "'" + _("Total") + "'",
+		"account_number": "'" + _("Total") + "'",
 		"account_name": "'" + _("Total") + "'",
 		"warn_if_negative": True,
 		"opening_debit": 0.0,
@@ -284,6 +283,7 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 		has_value = False
 		row = {
 			"account": d.name,
+			"account_number": d.account_number,
 			"parent_account": d.parent_account,
 			"indent": d.indent,
 			"from_date": filters.from_date,
@@ -324,6 +324,12 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Currency",
 			"hidden": 1,
+		},
+		{
+			"fieldname": "account_number",
+			"label": _("Account Number"),
+			"fieldtype": "Data",
+			"width": 150,
 		},
 		{
 			"fieldname": "opening_debit",

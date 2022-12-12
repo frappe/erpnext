@@ -90,10 +90,9 @@ class Analytics(object):
 			)
 			self.columns.append(
 				{
-					"label": _("Customer Group"),
-					"fieldname": "customer_group",
-					"fieldtype": "Link",
-					"options": "Customer Group",
+					"label": _("Customer Type"),
+					"fieldname": "customer_type",
+					"fieldtype": "Data",
 					"width": 140,
 				}
 			)
@@ -196,7 +195,7 @@ class Analytics(object):
 			entity_name = "customer_name as entity_name"
 			country = "country"
 			territory = "territory"
-			customer_group = "customer_group"
+			customer_type = "customer_type"
 		else:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
@@ -204,8 +203,8 @@ class Analytics(object):
 			cond += " and b.territory = '{}'".format(self.filters.territory)
 		if self.filters.country:
 			cond += " and b.country = '{}'".format(self.filters.country)
-		if self.filters.customer_group:
-			cond += " and b.customer_group = '{}'".format(self.filters.customer_group)
+		if self.filters.customer_type:
+			cond += " and b.customer_type = '{}'".format(self.filters.customer_type)
 		# self.entries = frappe.get_all(
 		# 	self.filters.doc_type,
 		# 	fields=[entity, entity_name, value_field, qty_field, self.date_field],
@@ -221,10 +220,10 @@ class Analytics(object):
 			and a.customer = b.name
 			and a.company = '{}'
 			and a.{} between '{}' and '{}' {}
-		""".format(entity, entity_name, country, territory, customer_group, value_field, qty_field, self.date_field, self.filters.doc_type, self.filters.company, self.date_field, self.filters.from_date, self.filters.to_date, cond), as_dict=1)
+		""".format(entity, entity_name, country, territory, customer_type, value_field, qty_field, self.date_field, self.filters.doc_type, self.filters.company, self.date_field, self.filters.from_date, self.filters.to_date, cond), as_dict=1)
 		self.entity_names = {}
 		for d in self.entries:
-			self.entity_names.setdefault(d.entity, {"entity_name":d.entity_name, "country":d.country, 'territory': d.territory, 'customer_group': d.customer_group})
+			self.entity_names.setdefault(d.entity, {"entity_name":d.entity_name, "country":d.country, 'territory': d.territory, 'customer_type': d.customer_type})
 			# self.entity_names.setdefault(d.entity, d.entity_name)
 		# frappe.msgprint(str(self.entity_names))
 
@@ -334,7 +333,7 @@ class Analytics(object):
 					"entity_name": self.entity_names.get(entity)['entity_name'] if self.entity_names.get(entity)['entity_name'] else None,
 					"country": self.entity_names.get(entity)['country'] if self.entity_names.get(entity)['country'] else None,
 					"territory": self.entity_names.get(entity)['territory'] if self.entity_names.get(entity)['territory'] else None,
-					"customer_group": self.entity_names.get(entity)['customer_group'] if self.entity_names.get(entity)['customer_group'] else None,	
+					"customer_type": self.entity_names.get(entity)['customer_type'] if self.entity_names.get(entity)['customer_type'] else None,	
 				}
 			total = total_qty = 0
 			for end_date in self.periodic_daterange:

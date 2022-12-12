@@ -273,11 +273,8 @@ def get_columns(filters):
 
 def get_stock_ledger_entries(filters, items):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
-	sed = frappe.qb.DocType("Stock Entry Detail")
 	query = (
 		frappe.qb.from_(sle)
-		.inner_join(sed)
-		.on(sed.parent == sle.voucher_no)
 		.select(
 			sle.item_code,
 			CombineDatetime(sle.posting_date, sle.posting_time).as_("date"),
@@ -295,8 +292,7 @@ def get_stock_ledger_entries(filters, items):
 			sle.stock_value,
 			sle.batch_no,
 			sle.serial_no,
-			sle.project,
-			sed.expense_account,
+			sle.project
 		)
 		.where(
 			(sle.docstatus < 2)

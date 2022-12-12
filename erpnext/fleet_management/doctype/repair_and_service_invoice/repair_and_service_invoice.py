@@ -69,12 +69,13 @@ class RepairAndServiceInvoice(AccountsController):
 		from erpnext.accounts.general_ledger import make_gl_entries
 		gl_entries = []
 		ba = get_default_ba()
-
-		expense_account = frappe.db.get_value("Company", self.company, "repair_and_service_expense_account")
+		expense_account = frappe.db.get_value("Equipment Category", self.equipment_category, "r_m_expense_account")
+		if not expense_account:
+			expense_account = frappe.db.get_value("Company", self.company, "repair_and_service_expense_account")
 		
 		if not expense_account:
 			frappe.throw(
-				"Setup Default Repair And Service Expense Account in Company")
+				"Setup Repair And Service Expense Account in Equipment Category {}".format(self.equipment_category))
 
 		gl_entries.append(
 			self.get_gl_dict({

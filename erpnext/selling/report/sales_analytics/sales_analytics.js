@@ -113,10 +113,10 @@ frappe.query_reports["Sales Analytics"] = {
 			options: "Country",
 		},
 		{
-			fieldname: "customer_group",
-			label: __("Customer Group"),
-			fieldtype: "Link",
-			options: "Customer Group",
+			fieldname: "customer_type",
+			label: __("Customer Type"),
+			fieldtype: "Select",
+			options: ["","International Customer","Company","Domestic Customer"],
 		},
 	],
 	get_datatable_options(options) {

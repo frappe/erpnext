@@ -9,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "branch",
+  "cost_center",
   "location_name",
   "parent_location",
   "cb_details",
@@ -165,11 +166,19 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   }
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2022-11-26 15:59:39.956306",
+ "modified": "2022-12-09 13:10:04.601571",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",

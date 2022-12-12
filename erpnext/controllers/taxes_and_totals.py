@@ -70,7 +70,8 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			for d in self.doc.other_charges:
 				total_charges += flt(d.amount)
-		self.doc.total_charges = total_charges
+			self.doc.total_charges = total_charges
+			self.calculate_outstanding_amount()
 
 	def validate_item_tax_template(self):
 		for item in self.doc.get("items"):

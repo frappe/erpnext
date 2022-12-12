@@ -1,21 +1,23 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:hole",
- "creation": "2022-11-30 10:31:51.528276",
+ "autoname": "field:fuel_price_list",
+ "creation": "2022-12-06 12:35:08.222039",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "hole",
-  "disabled"
+  "fuel_price_list",
+  "disabled",
+  "cop_branch"
  ],
  "fields": [
   {
-   "fieldname": "hole",
+   "fieldname": "fuel_price_list",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Hole",
+   "in_standard_filter": 1,
+   "label": "Fuel Price List",
    "reqd": 1,
    "unique": 1
   },
@@ -24,14 +26,20 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "cop_branch",
+   "fieldtype": "Table",
+   "label": "Fuel Price Branch",
+   "options": "Cop Branch"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-30 10:31:51.528276",
+ "modified": "2022-12-06 13:45:52.115343",
  "modified_by": "Administrator",
- "module": "Fleet Management",
- "name": "No Of Holes",
+ "module": "Production",
+ "name": "Fuel Price List",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -49,28 +57,30 @@
   },
   {
    "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Fleet Manager",
+   "role": "Production Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Fleet User",
-   "share": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_seen": 1
 }

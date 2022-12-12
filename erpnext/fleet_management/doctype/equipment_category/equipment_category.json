@@ -10,7 +10,9 @@
  "field_order": [
   "equipment_category",
   "budget_account",
-  "disabled"
+  "disabled",
+  "pol_expense_account",
+  "r_m_expense_account"
  ],
  "fields": [
   {
@@ -32,11 +34,25 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "pol_expense_account",
+   "fieldtype": "Link",
+   "label": "POL Expense Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "r_m_expense_account",
+   "fieldtype": "Link",
+   "label": "R & M Expense Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-05 11:09:03.874149",
+ "modified": "2022-12-08 17:11:52.928200",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Category",

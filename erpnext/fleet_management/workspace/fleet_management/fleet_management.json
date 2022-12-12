@@ -235,15 +235,15 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "No Of Holes",
+   "label": "Hole Depth",
    "link_count": 0,
-   "link_to": "No Of Holes",
+   "link_to": "Hole Depth",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2022-11-30 10:33:02.958784",
+ "modified": "2022-12-07 16:59:48.847994",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fleet Management",

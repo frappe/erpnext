@@ -10,10 +10,12 @@
   "equipment_category",
   "equipment_type",
   "pol_expense_limit",
+  "reading_uom",
+  "hiring_rate_revision",
+  "column_break_6",
   "is_container",
   "doesnt_have_own_tank",
-  "disabled",
-  "reading_uom"
+  "disabled"
  ],
  "fields": [
   {
@@ -63,11 +65,20 @@
    "label": "Reading UOM",
    "options": "\nKM\nHour",
    "reqd": 1
+  },
+  {
+   "fieldname": "hiring_rate_revision",
+   "fieldtype": "Percent",
+   "label": "Hiring Rate Revision(%)"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-03 11:49:30.787792",
+ "modified": "2022-12-07 11:31:29.506502",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Type",

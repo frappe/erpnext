@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "creation": "2022-12-06 21:51:51.167399",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "equipment",
+  "supplier",
+  "equipment_type",
+  "column_break_4",
+  "equipment_hiring_form",
+  "start_date",
+  "end_date",
+  "hiring_rate_details_section",
+  "base_rate",
+  "ref_row",
+  "column_break_11",
+  "revised_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment",
+   "options": "Equipment"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Owner",
+   "options": "Supplier"
+  },
+  {
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "equipment_hiring_form",
+   "fieldtype": "Link",
+   "label": "Equipment Hiring Form",
+   "options": "Equipment Hiring Form"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "End Date"
+  },
+  {
+   "fieldname": "hiring_rate_details_section",
+   "fieldtype": "Section Break",
+   "label": "Hiring Rate Details"
+  },
+  {
+   "fieldname": "base_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Base Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ref_row",
+   "fieldtype": "Data",
+   "label": "Ref Row"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "revised_rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Revised Rate",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-12-07 09:36:26.360856",
+ "modified_by": "Administrator",
+ "module": "Production",
+ "name": "Hiring Rate Revision Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

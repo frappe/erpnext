@@ -20,7 +20,7 @@ def get_data(query, filters=None):
     datas = frappe.db.sql(
         query, (filters.from_date, filters.to_date), as_dict=True)
     for d in datas:
-        row = [d.entry_date, d.item_code, d.item_name,  d.brand, d.qty, d.issued_to, d.custodian, d.issued_date, d.amount, d.location]
+        row = [d.entry_date, d.item_code, d.item_name,  d.brand, d.qty, d.issued_to, d.custodian, d.issued_date, d.amount, d.location, d.asset_category]
         data.append(row)
     return data
 
@@ -28,8 +28,10 @@ def get_data(query, filters=None):
 def construct_query(filters=None):
     query = """select id.entry_date, id.item_code, id.item_name, id.qty, id.brand,
 			id.issued_to, id.employee_name as custodian, 
-			id.issued_date, id.amount, id.location from `tabAsset Issue Details` as id
-			where id.docstatus = 1 and id.entry_date between %s and %s
+			id.issued_date, id.amount, id.location, i.asset_category 
+            from `tabAsset Issue Details` as id 
+			INNER JOIN `tabItem` i ON id.item_code = i.name
+            where id.docstatus = 1 and id.entry_date between %s and %s 
 			order by id.creation asc
 			"""
     return query
@@ -134,6 +136,12 @@ def get_columns():
         {
             "fieldname": "location",
             "label": "Location",
+            "fieldtype": "data",
+            "width": 120
+        },
+        {
+            "fieldname": "asset_category",
+            "label": "Asset Category",
             "fieldtype": "data",
             "width": 120
         }

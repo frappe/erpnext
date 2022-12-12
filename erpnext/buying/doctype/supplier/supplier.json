@@ -656,7 +656,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-12-03 09:37:23.844196",
+ "modified": "2022-12-08 11:18:56.678810",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -722,6 +722,15 @@
    "read": 1,
    "report": 1,
    "role": "Fleet User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "share": 1
   }
  ],

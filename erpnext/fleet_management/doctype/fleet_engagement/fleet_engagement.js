@@ -37,6 +37,12 @@ frappe.ui.form.on('Fleet Engagement Item', {
 	end_time:function(frm,cdt,cdn){
 		calculate_total_time(frm,cdt,cdn)
 	},
+	hole_depth:function(frm, cdt, cdn){
+		calculate_meterage_drilled(frm, cdt, cdn)
+	},
+	no_of_holes:function(frm, cdt, cdn){
+		calculate_meterage_drilled(frm, cdt, cdn)
+	},
 })
 
 var calculate_total_km = function(frm, cdt, cdn){
@@ -49,7 +55,15 @@ var calculate_total_km = function(frm, cdt, cdn){
 		frm.refresh_field("items")
 	}
 }
-
+var calculate_meterage_drilled = function(frm, cdt, cdn){
+	let item = locals[cdt][cdn]
+	if(item.trip_or_hole == "Hole"){
+		item.meterage_drilled = flt(item.hole_depth) * flt(item.no_of_holes)
+	}else{
+		item.meterage_drilled = 0
+	}
+	frm.refresh_field("items")
+}
 var calculate_total_time = function(frm, cdt, cdn){
 	let item = locals[cdt][cdn]
 	if ( item.end_time &&  item.start_time){

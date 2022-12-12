@@ -34,5 +34,11 @@ frappe.query_reports["Fleet Engagement Report"] = {
 			fieldtype:"Link",
 			options:"Branch",
 		},
+		{
+			fieldname:"aggregate",
+			label:"Aggregate Data",
+			fieldtype:"Check",
+			default:1
+		},
 	]
 };

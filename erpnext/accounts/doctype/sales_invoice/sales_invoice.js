@@ -762,6 +762,11 @@ frappe.ui.form.on('Sales Invoice', {
 			}
 		};
 	},
+	before_save:function(frm){
+		// if (frm.doc.__islocal){
+			// frm.trigger("get_advances")
+		// }
+	},
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function(frm){
 		if (frm.doc.company) {
@@ -1179,7 +1184,11 @@ frappe.ui.form.on("Sales Invoice Item","loss_method",function(frm, cdt, cdn){
 		 validate_loss_tolerance(frm, cdt, cdn);
 	}
 });
-
+// frappe.ui.form.on("Sales Invoice Advance",{
+// 	cost_center:function(frm, cdt, cdn){
+// 		console.log('here')
+// 	}
+// })
 frappe.ui.form.on("Sales Invoice","items_on_form_rendered", function(frm, grid_row) {
    cur_frm.call({
 	   method: "erpnext.accounts.accounts_custom_functions.get_loss_tolerance",

@@ -71,12 +71,14 @@ class POLExpense(Document):
 		default_ba = get_default_ba()
 
 		credit_account = self.credit_account
-		advance_account = frappe.db.get_value("Company", self.company,'pol_advance_account')
+		advance_account = frappe.db.get_value("Equipment Category", self.equipment_category,'pol_expense_account')
+		if not advance_account:
+			advance_account = frappe.db.get_value("Company", self.company,'pol_advance_account')
 			
 		if not credit_account:
 			frappe.throw("Expense Account is mandatory")
 		if not advance_account:
-			frappe.throw("Setup POL Advance Account in company")
+			frappe.throw("Setup POL Expense Account in Equipment Category {}".format(self.equipment_category))
 
 		r = []
 		if self.cheque_no:

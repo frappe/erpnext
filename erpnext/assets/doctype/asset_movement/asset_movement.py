@@ -5,13 +5,16 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 
 class AssetMovement(Document):
 	def validate(self):
+		validate_workflow_states(self)
 		self.validate_cost_center()
 		self.validate_employee()
 		self.validate_asset()
-		
+		if self.workflow_state != "Approved":
+			notify_workflow_states(self)
 	def validate_asset(self):
 		for d in self.assets:
 			status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])
@@ -107,9 +110,11 @@ class AssetMovement(Document):
 
 	def on_submit(self):
 		self.set_latest_cost_center_in_asset()
+		notify_workflow_states(self)
 
 	def on_cancel(self):
 		self.set_latest_cost_center_in_asset()
+		notify_workflow_states(self)
 
 	def set_latest_cost_center_in_asset(self):
 		current_cost_center, current_employee = "", ""

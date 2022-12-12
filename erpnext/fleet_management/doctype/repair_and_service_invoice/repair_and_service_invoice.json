@@ -29,6 +29,7 @@
   "section_break_5",
   "repair_and_services_date",
   "equipment",
+  "equipment_category",
   "equipment_type",
   "column_break_38",
   "equipment_model",
@@ -245,12 +246,21 @@
    "fieldtype": "Select",
    "label": "Repair and Services Type",
    "options": "\nPreventive Maintenance\nProactive Maintenance\nBreakdown Maintenance"
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fetch_if_empty": 1,
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-28 17:45:36.653660",
+ "modified": "2022-12-08 17:23:17.840255",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Service Invoice",

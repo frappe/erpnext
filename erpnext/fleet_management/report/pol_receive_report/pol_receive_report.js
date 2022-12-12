@@ -38,6 +38,12 @@ frappe.query_reports["POL Receive Report"] = {
 			"fieldtype":"Link",
 			"options":"Equipment",
 			"width": "80",
+		},
+		{
+			"fieldname":"aggregate",
+			"label": __("Aggregate Data"),
+			"fieldtype":"Check",
+			"default":1
 		}
 	]
 };

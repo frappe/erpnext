@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe import _, qb, throw, bold
-from frappe.utils import flt, cint, nowdate
+from frappe.utils import flt, cint, nowdate, getdate
 
 class EquipmentHiringForm(Document):
 	def validate(self):
@@ -31,24 +31,24 @@ class EquipmentHiringForm(Document):
 			'''.format(self.name,self.start_date,self.end_date,self.equipment)):
 			frappe.throw("Equipment Hiring Form Already exists for Equipment {}".format(self.equipment))
 	def validate_date(self):
-		if self.start_date > self.end_date:
+		if getdate(self.start_date) > getdate(self.end_date):
 			frappe.throw("Start Date cannot be greater than End Date")
 		for d in self.ehf_rate:
-			if d.from_date < self.start_date:
+			if getdate(d.from_date) < getdate(self.start_date):
 				throw("From Date cannot be greater than Equipment Start Date at row {}".format(bold(d.idx)))
-			if d.to_date > self.end_date:
+			if getdate(d.to_date) > getdate(self.end_date):
 				throw("To Date cannot be greater than Equipment End Date at row {}".format(bold(d.idx)))
-			if d.from_date > d.to_date:
+			if getdate(d.from_date) > getdate(d.to_date):
 				throw("From Date cannot be greater than To Date at row {}".format(bold(d.idx)))
 
 			# validate date verlapping
 			n = flt(d.idx)-1
 			i = 0
 			while i < n:
-				if d.from_date >= self.ehf_rate[i].from_date and d.from_date <= self.ehf_rate[i].to_date:
+				if getdate(d.from_date) >= getdate(self.ehf_rate[i].from_date) and getdate(d.from_date) <= getdate(self.ehf_rate[i].to_date):
 					throw("From Date at row {} is overlapping with row no {}".format(bold(d.idx),bold(self.ehf_rate[i].idx)))
 
-				if d.to_date >= self.ehf_rate[i].from_date and d.to_date <= self.ehf_rate[i].to_date:
+				if getdate(d.to_date) >= getdate(self.ehf_rate[i].from_date) and getdate(d.to_date) <= getdate(self.ehf_rate[i].to_date):
 					throw("To Date at row {} is overlapping with row no {}".format(bold(d.idx),bold(self.ehf_rate[i].idx)))
 				i  = i + 1
 
@@ -65,7 +65,7 @@ class EquipmentHiringForm(Document):
 		for b in self.get('ehf_rate'):
 			rate_count += 1
 			if not b.name:
-				if b.from_date > b.to_date:
+				if getdate(b.from_date) > getdate(b.to_date):
 					frappe.throw("From Date cannot be after to Date")
 				check = frappe.db.sql("""select count(*) 
 									from `tabEHF Rate` where ('{}' between from_date and to_date 

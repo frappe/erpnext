@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Coal Raising Payment\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coal Raising\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coal Raising Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coal Raising Report\",\"col\":4}}]",
+ "content": "[{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Production Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Coal Raising Invoice\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Master Data\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coal Raising\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coal Raising Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Coal Raising Report\",\"col\":4}}]",
  "creation": "2022-10-19 16:08:28.153552",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -54,24 +54,6 @@
    "label": "Coal Raising Master",
    "link_count": 0,
    "link_to": "Coal Raising Master",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Coal Raising Transaction",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Coal Raising Payment",
-   "link_count": 0,
-   "link_to": "Coal Raising Payment",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -193,8 +175,26 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Coal Raising Transaction",
+   "link_count": 1,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Coal Raising Invoice",
+   "link_count": 0,
+   "link_to": "Coal Raising Invoice",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Master Data",
-   "link_count": 6,
+   "link_count": 7,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -257,9 +257,19 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mines",
+   "link_count": 0,
+   "link_to": "Mines",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-25 09:23:17.308072",
+ "modified": "2022-12-09 13:51:10.719297",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Productions",
@@ -270,6 +280,15 @@
  "roles": [],
  "sequence_id": 9.0,
  "shortcuts": [
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "format": "{} Draft",
+   "label": "Coal Raising Invoice",
+   "link_to": "Coal Raising Invoice",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
   {
    "color": "Grey",
    "doc_view": "List",
@@ -283,15 +302,6 @@
    "format": "{} Draft",
    "label": "Production",
    "link_to": "Production",
-   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
-   "type": "DocType"
-  },
-  {
-   "color": "Red",
-   "doc_view": "List",
-   "format": "{} Draft",
-   "label": "Coal Raising Payment",
-   "link_to": "Coal Raising Payment",
    "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
    "type": "DocType"
   }

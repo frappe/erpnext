@@ -23,14 +23,14 @@ frappe.query_reports["POL Expense Report"] = {
 			"label": ("From Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default":frappe.datetime.month_start()
+			"default":frappe.datetime.year_start()
 		},
 		{
 			"fieldname":"to_date",
 			"label": ("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default":frappe.datetime.month_end()
+			"default":frappe.datetime.year_end()
 		},
 		{
 			"fieldname":"equipment",
@@ -39,6 +39,11 @@ frappe.query_reports["POL Expense Report"] = {
 			"options":"Equipment",
 			"width": "80",
 		},
-
+		{
+			"fieldname":"aggregate",
+			"label": __("Aggregate Data"),
+			"fieldtype":"Check",
+			"default":1
+		}
 	]
 };

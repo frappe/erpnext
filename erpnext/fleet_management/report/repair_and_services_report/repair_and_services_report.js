@@ -39,12 +39,12 @@ frappe.query_reports["Repair And Services Report"] = {
 			"width": "120",
 			"options": "Equipment Type"
 		},
-		// {
-		// 	"fieldname": "equipment_model",
-		// 	"label": __("Equipment Model"),
-		// 	"fieldtype": "Data",
-		// 	"width": "120",
-		// },
+		{
+			"fieldname":"aggregate",
+			"label": __("Aggregate Data"),
+			"fieldtype":"Check",
+			"default":1
+		},
 		{
 			"fieldname": "repair_and_services_type",
 			"label": __("Repair and Services Type"),

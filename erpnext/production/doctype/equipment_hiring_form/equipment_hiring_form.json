@@ -16,6 +16,7 @@
   "section_break_3",
   "equipment",
   "equipment_model",
+  "fuel_type",
   "hired_equipment",
   "column_break_11",
   "equipment_category",
@@ -48,6 +49,7 @@
   {
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch",
@@ -237,11 +239,19 @@
    "label": "Equipment Category",
    "options": "Equipment Category",
    "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.fuel_type",
+   "fieldname": "fuel_type",
+   "fieldtype": "Link",
+   "label": "Fuel Type",
+   "options": "Fuel Type",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-07 09:44:42.107801",
+ "modified": "2022-12-06 22:47:03.415252",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Equipment Hiring Form",
