@@ -88,7 +88,7 @@ def get_data(filters):
 		ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency)
-	accumulate_values_into_parents(accounts, accounts_by_name)
+	# accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
 	data = filter_out_zero_value_rows(data, parent_children_map, show_zero_values=filters.get("show_zero_values"))
