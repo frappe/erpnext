@@ -471,7 +471,6 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "hidden": 1,
-   "in_list_view": 1,
    "label": "Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
