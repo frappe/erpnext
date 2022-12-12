@@ -33,12 +33,7 @@ def make_draft_asset_depr_schedules(asset_doc, date_of_disposal=None, date_of_re
 
 def update_draft_asset_depr_schedules(asset_doc, date_of_disposal=None, date_of_return=None):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
-
-		if not asset_depr_schedule_name:
-			return
-
-		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(asset_doc.name, row.finance_book)
 
 		prepare_draft_asset_depr_schedule_data(
 			asset_depr_schedule_doc, asset_doc, row, date_of_disposal, date_of_return
@@ -72,12 +67,7 @@ def set_draft_asset_depr_schedule_details(asset_depr_schedule_doc, asset_doc, ro
 
 def convert_draft_asset_depr_schedules_into_active(asset_doc):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
-
-		if not asset_depr_schedule_name:
-			return
-
-		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(asset_doc.name, row.finance_book)
 
 		asset_depr_schedule_doc.status = "Active"
 
@@ -85,16 +75,11 @@ def convert_draft_asset_depr_schedules_into_active(asset_doc):
 
 
 def make_new_active_asset_depr_schedules_and_cancel_current_ones(
-	asset_doc, notes, submit=True, date_of_disposal=None, date_of_return=None
+	asset_doc, notes, date_of_disposal=None, date_of_return=None
 ):
 	for row in asset_doc.get("finance_books"):
-		current_asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
-
-		if not current_asset_depr_schedule_name:
-			return
-
-		current_asset_depr_schedule_doc = frappe.get_doc(
-			"Asset Depreciation Schedule", current_asset_depr_schedule_name
+		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(
+			asset_doc.name, row.finance_book
 		)
 
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
@@ -106,10 +91,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 
 		current_asset_depr_schedule_doc.cancel()
 
-		new_asset_depr_schedule_doc.insert()
-
-		if submit:
-			new_asset_depr_schedule_doc.submit()
+		new_asset_depr_schedule_doc.submit()
 
 
 def get_temp_asset_depr_schedule_doc(asset_doc, row, date_of_disposal=None, date_of_return=None):
@@ -124,12 +106,9 @@ def get_temp_asset_depr_schedule_doc(asset_doc, row, date_of_disposal=None, date
 
 def cancel_asset_depr_schedules(asset_doc):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(asset_doc.name, row.finance_book)
 
-		if not asset_depr_schedule_name:
-			return
-
-		asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+		asset_depr_schedule_doc.status = "Cancelled"
 
 		asset_depr_schedule_doc.cancel()
 
@@ -151,6 +130,12 @@ def get_asset_depr_schedule_name(asset_name, finance_book):
 
 @frappe.whitelist()
 def get_depr_schedule_from_asset_depr_schedule_of_asset(asset_name, finance_book):
+	asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(asset_name, finance_book)
+
+	return asset_depr_schedule_doc.get("depreciation_schedule")
+
+
+def get_asset_depr_schedule_doc_of_asset(asset_name, finance_book):
 	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, finance_book)
 
 	if not asset_depr_schedule_name:
@@ -158,7 +143,7 @@ def get_depr_schedule_from_asset_depr_schedule_of_asset(asset_name, finance_book
 
 	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 
-	return asset_depr_schedule_doc.get("depreciation_schedule")
+	return asset_depr_schedule_doc
 
 
 def make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, date_of_disposal):

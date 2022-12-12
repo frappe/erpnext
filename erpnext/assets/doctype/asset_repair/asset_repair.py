@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
+from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -55,10 +55,11 @@ class AssetRepair(AccountsController):
 				and self.increase_in_asset_life
 			):
 				self.modify_depreciation_schedule()
-				notes = _("This schedule was created when the Asset Repair {0} was submitted.").format(
-					self.name
-				)
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
+
+		notes = _("This schedule was created when Asset Repair {0} was submitted.").format(
+			get_link_to_form(self.doctype, self.name)
+		)
+		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
@@ -76,10 +77,11 @@ class AssetRepair(AccountsController):
 				and self.increase_in_asset_life
 			):
 				self.revert_depreciation_schedule_on_cancellation()
-				notes = _("This schedule was created when the Asset Repair {0} was cancelled.").format(
-					self.name
-				)
-				make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
+
+		notes = _("This schedule was created when Asset Repair {0} was cancelled.").format(
+			get_link_to_form(self.doctype, self.name)
+		)
+		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":

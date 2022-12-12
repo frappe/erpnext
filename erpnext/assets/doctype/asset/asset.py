@@ -14,6 +14,7 @@ from frappe.utils import (
 	flt,
 	get_datetime,
 	get_last_day,
+	get_link_to_form,
 	getdate,
 	is_last_day_of_the_month,
 	month_diff,
@@ -31,9 +32,10 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	cancel_asset_depr_schedules,
 	convert_draft_asset_depr_schedules_into_active,
+	get_asset_depr_schedule_doc_of_asset,
 	get_depr_schedule_from_asset_depr_schedule_of_asset,
 	make_draft_asset_depr_schedules,
-	make_new_active_asset_depr_schedules_and_cancel_current_ones,
+	set_draft_asset_depr_schedule_details,
 	update_draft_asset_depr_schedules,
 )
 from erpnext.controllers.accounts_controller import AccountsController
@@ -48,7 +50,6 @@ class Asset(AccountsController):
 		self.set_missing_values()
 		if not self.split_from:
 			self.prepare_depreciation_data()
-			update_draft_asset_depr_schedules(self)
 		self.validate_gross_and_purchase_amount()
 		self.validate_expected_value_after_useful_life()
 
@@ -97,6 +98,7 @@ class Asset(AccountsController):
 		if self.calculate_depreciation:
 			self.value_after_depreciation = 0
 			self.set_depreciation_rate()
+			update_draft_asset_depr_schedules(self)
 		else:
 			self.finance_books = []
 			self.value_after_depreciation = flt(self.gross_purchase_amount) - flt(
@@ -858,12 +860,12 @@ def split_asset(asset_name, split_qty):
 	remaining_qty = asset.asset_quantity - split_qty
 
 	new_asset = create_new_asset_after_split(asset, split_qty)
-	update_existing_asset(asset, remaining_qty)
+	update_existing_asset(asset, remaining_qty, new_asset.name)
 
 	return new_asset
 
 
-def update_existing_asset(asset, remaining_qty):
+def update_existing_asset(asset, remaining_qty, new_asset_name):
 	remaining_gross_purchase_amount = flt(
 		(asset.gross_purchase_amount * remaining_qty) / asset.asset_quantity
 	)
@@ -898,18 +900,31 @@ def update_existing_asset(asset, remaining_qty):
 			expected_value_after_useful_life,
 		)
 
-		accumulated_depreciation = 0
-		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(asset.name, row.finance_book)
+		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(
+			asset.name, row.finance_book
+		)
+		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
-		for term in depr_schedule:
+		set_draft_asset_depr_schedule_details(new_asset_depr_schedule_doc, asset, row)
+
+		accumulated_depreciation = 0
+
+		for term in new_asset_depr_schedule_doc.get("depreciation_schedule"):
 			depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
-			frappe.db.set_value(
-				"Depreciation Schedule", term.name, "depreciation_amount", depreciation_amount
-			)
+			term.depreciation_amount = depreciation_amount
 			accumulated_depreciation += depreciation_amount
-			frappe.db.set_value(
-				"Depreciation Schedule", term.name, "accumulated_depreciation_amount", accumulated_depreciation
-			)
+			term.accumulated_depreciation_amount = accumulated_depreciation
+
+		notes = _(
+			"This schedule was created when Asset {0} was updated after being split into new Asset {1}."
+		).format(
+			get_link_to_form(asset.doctype, asset.name), get_link_to_form(asset.doctype, new_asset_name)
+		)
+		new_asset_depr_schedule_doc.notes = notes
+
+		current_asset_depr_schedule_doc.cancel()
+
+		new_asset_depr_schedule_doc.submit()
 
 
 def create_new_asset_after_split(asset, split_qty):
@@ -932,32 +947,41 @@ def create_new_asset_after_split(asset, split_qty):
 			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
 
-	new_asset.submit()
+		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc_of_asset(
+			asset.name, row.finance_book
+		)
+		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
-	make_new_active_asset_depr_schedules_and_cancel_current_ones(
-		new_asset, "create_new_asset_after_split TODO", submit=False
-	)
+		set_draft_asset_depr_schedule_details(new_asset_depr_schedule_doc, new_asset, row)
 
-	for row in new_asset.get("finance_books"):
 		accumulated_depreciation = 0
 
-		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(
-			new_asset.name, row.finance_book
-		)
-
-		for term in depr_schedule:
+		for term in new_asset_depr_schedule_doc.get("depreciation_schedule"):
 			depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)
 			term.depreciation_amount = depreciation_amount
 			accumulated_depreciation += depreciation_amount
 			term.accumulated_depreciation_amount = accumulated_depreciation
 
+		notes = _("This schedule was created when new Asset {0} was split from Asset {1}.").format(
+			get_link_to_form(new_asset.doctype, new_asset.name), get_link_to_form(asset.doctype, asset.name)
+		)
+		new_asset_depr_schedule_doc.notes = notes
+
+		new_asset_depr_schedule_doc.insert()
+
+	new_asset.submit()
+	new_asset.set_status()
+
+	for row in new_asset.get("finance_books"):
+		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(
+			new_asset.name, row.finance_book
+		)
+		for term in depr_schedule:
 			# Update references in JV
 			if term.journal_entry:
 				add_reference_in_jv_on_split(
 					term.journal_entry, new_asset.name, asset.name, term.depreciation_amount
 				)
-
-	new_asset.set_status()
 
 	return new_asset
 

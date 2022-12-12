@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, getdate, nowdate, today
+from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, nowdate, today
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -238,8 +238,8 @@ def scrap_asset(asset_name):
 	je.submit()
 
 	notes = _(
-		"This schedule was created when the Asset {0} was scrapped through Journal Entry {1}."
-	).format(asset.name, je.name)
+		"This schedule was created when Asset {0} was scrapped through Journal Entry {1}."
+	).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(je.doctype, je.name))
 	depreciate_asset(asset, date, notes)
 
 	frappe.db.set_value("Asset", asset_name, "disposal_date", date)
@@ -291,9 +291,10 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 		if repair.increase_in_asset_life:
 			asset_repair = frappe.get_doc("Asset Repair", repair.name)
 			asset_repair.modify_depreciation_schedule()
-			notes = _(
-				"This schedule was created when the Asset {0} went through the Asset Repair {1}."
-			).format(asset.name, repair.name)
+			notes = _("This schedule was created when Asset {0} went through Asset Repair {1}.").format(
+				get_link_to_form(asset.doctype, asset.name),
+				get_link_to_form(asset_repair.doctype, asset_repair.name),
+			)
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, notes)
 
 
