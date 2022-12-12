@@ -25,7 +25,8 @@
    "in_list_view": 1,
    "label": "Type",
    "options": "DocType",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "columns": 2,
@@ -35,7 +36,8 @@
    "in_list_view": 1,
    "label": "Name",
    "options": "reference_doctype",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "due_date",
@@ -104,7 +106,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-26 17:06:55.597389",
+ "modified": "2022-12-12 12:31:44.919895",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",
@@ -113,5 +115,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
