@@ -9,13 +9,16 @@ from erpnext.accounts.report.financial_statements \
 	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
+
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
+
 
 def execute(filters=None):
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
 	return columns, data
+
 
 def validate_filters(filters):
 	if not filters.fiscal_year:
@@ -51,31 +54,38 @@ def validate_filters(filters):
 			.format(formatdate(filters.year_end_date)))
 		filters.to_date = filters.year_end_date
 
+
 def get_data(filters):
-
-	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
-
-		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
-	company_currency = erpnext.get_company_currency(filters.company)
+	accounts = frappe.db.sql("""
+		select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+		from `tabAccount`
+		where company=%s order by lft
+	""", filters.company, as_dict=True)
 
 	if not accounts:
 		return None
 
+	company_currency = erpnext.get_company_currency(filters.company)
+
 	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
 
-	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
-		where company=%s""", (filters.company,))[0]
+	min_lft, max_rgt = frappe.db.sql("""
+		select min(lft), max(rgt)
+		from `tabAccount`
+		where company=%s
+	""", (filters.company,))[0]
 
 	gl_entries_by_account = {}
 
 	opening_balances = get_opening_balances(filters)
 
-	#add filter inside list so that the query in financial_statements.py doesn't break
+	# add filter inside list so that the query in financial_statements.py doesn't break
 	if filters.project:
 		filters.project = [filters.project]
 
-	set_gl_entries_by_account(filters.company, filters.from_date,
-		filters.to_date, min_lft, max_rgt, filters, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
+	set_gl_entries_by_account(filters.company, filters.from_date, filters.to_date,
+		min_lft, max_rgt, filters, gl_entries_by_account,
+		ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency)
 	accumulate_values_into_parents(accounts, accounts_by_name)
@@ -86,6 +96,7 @@ def get_data(filters):
 	set_zero_for_group_accounts(data, parent_children_map)
 
 	return data
+
 
 def get_opening_balances(filters):
 	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet")
@@ -184,6 +195,7 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	return opening
 
+
 def calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency):
 	init = {
 		"opening_debit": 0.0,
@@ -232,17 +244,20 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 
 	return total_row
 
+
 def accumulate_values_into_parents(accounts, accounts_by_name):
 	for d in reversed(accounts):
 		if d.parent_account:
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
 
+
 def set_zero_for_group_accounts(data, parent_children_map):
 	for d in data:
 		if d.get('account') and parent_children_map.get(d['account']):
 			for key in value_fields:
 				del d[key]
+
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
@@ -274,9 +289,10 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 		row["has_value"] = has_value
 		data.append(row)
 
-	data.extend([{},total_row])
+	data.extend([{}, total_row])
 
 	return data
+
 
 def get_columns():
 	return [
@@ -337,6 +353,7 @@ def get_columns():
 			"width": 120
 		}
 	]
+
 
 def prepare_opening_closing(row):
 	dr_or_cr = "debit" if row["root_type"] in ["Asset", "Equity", "Expense"] else "credit"
