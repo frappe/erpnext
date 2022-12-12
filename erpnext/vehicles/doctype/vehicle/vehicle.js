@@ -15,6 +15,7 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 		this.setup_buttons();
 		this.set_cant_change_read_only();
 		this.make_customer_vehicle_selector();
+		this.render_maintenance_schedules();
 	},
 
 	setup_queries: function () {
@@ -120,6 +121,17 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 			);
 		}
 	},
+
+	render_maintenance_schedules: function() {
+		if (this.frm.fields_dict.maintenance_schedule_html && !this.frm.doc.__islocal) {
+			var wrapper = this.frm.fields_dict.maintenance_schedule_html.wrapper;
+			$(wrapper).empty();
+			$(wrapper).append(frappe.render_template(
+				"maintenance_schedule",
+				{ data: this.frm.doc}
+			));
+		}
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleController({frm: cur_frm}));

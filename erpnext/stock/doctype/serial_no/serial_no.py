@@ -30,6 +30,10 @@ class SerialNo(StockController):
 		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
 
+	def onload(self):
+		super().onload()
+		self.set_onload('maintenance_schedule_data', get_maintenance_schedule_data(serial_no=self.name))
+
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
 			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"),
@@ -791,3 +795,11 @@ def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None, sales_ord
 			serial_numbers = available_preferred_serial_nos + unpreferred_serial_nos
 
 	return serial_numbers[:qty]
+
+
+def get_maintenance_schedule_data(serial_no):
+	schedule_name = frappe.db.get_value('Maintenance Schedule', filters={'serial_no': serial_no})
+
+	if schedule_name:
+		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule_name)
+		return schedule_doc.schedules

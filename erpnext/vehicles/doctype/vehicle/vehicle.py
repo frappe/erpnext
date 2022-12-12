@@ -49,6 +49,7 @@ class Vehicle(Document):
 
 		if not self.is_new():
 			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(vehicle=self.name))
+			self.set_onload('maintenance_schedule_data', get_vehicle_maintenance_schedule_data(vehicle=self.name))
 
 	def validate(self):
 		self.validate_item()
@@ -523,3 +524,11 @@ def get_vehicle_image(vehicle=None, item_code=None):
 		image = frappe.get_cached_value("Item", item_code, 'image')
 
 	return image
+
+
+def get_vehicle_maintenance_schedule_data(vehicle):
+	schedule_name = frappe.db.get_value('Maintenance Schedule', filters={'serial_no': vehicle})
+
+	if schedule_name:
+		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule_name)
+		return schedule_doc.schedules

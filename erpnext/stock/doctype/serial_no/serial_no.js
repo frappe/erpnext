@@ -34,4 +34,13 @@ frappe.ui.form.on("Serial No", "refresh", function(frm) {
 	}
 
 	frm.toggle_enable("item_code", frm.doc.__islocal);
+
+	if (frm.fields_dict.maintenance_schedule_html && !frm.doc.__islocal) {
+		var wrapper = frm.fields_dict.maintenance_schedule_html.wrapper;
+		$(wrapper).empty();
+		$(wrapper).append(frappe.render_template(
+			"maintenance_schedule",
+			{ data: frm.doc}
+		));
+	}
 });

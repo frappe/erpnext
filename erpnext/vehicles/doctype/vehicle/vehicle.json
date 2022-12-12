@@ -94,7 +94,9 @@
   "column_break_60",
   "employee",
   "amc_expiry_date",
-  "company"
+  "company",
+  "sec_maintenance_schedule",
+  "maintenance_schedule_html"
  ],
  "fields": [
   {
@@ -728,10 +730,20 @@
    "fieldname": "customer_vehicle_selector_html",
    "fieldtype": "HTML",
    "label": "Customer Vehicle Selector HTML"
+  },
+  {
+   "fieldname": "sec_maintenance_schedule",
+   "fieldtype": "Section Break",
+   "label": "Maintenance Schedule"
+  },
+  {
+   "default": "<label class=\"control-label\">abcdef</label>",
+   "fieldname": "maintenance_schedule_html",
+   "fieldtype": "HTML"
   }
  ],
  "image_field": "image",
- "modified": "2022-07-30 17:28:10.940157",
+ "modified": "2022-12-12 16:21:19.770827",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
