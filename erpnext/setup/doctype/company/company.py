@@ -435,13 +435,13 @@ class Company(NestedSet):
 
 			self.db_set("exchange_gain_loss_account", exchange_gain_loss_acct)
 
-		if not self.disposal_account:
-			disposal_acct = frappe.db.get_value(
-				"Account",
-				{"account_name": _("Gain/Loss on Asset Disposal"), "company": self.name, "is_group": 0},
-			)
+		# if not self.disposal_account:
+		# 	disposal_acct = frappe.db.get_value(
+		# 		"Account",
+		# 		{"account_name": _("Gain/Loss on Asset Disposal"), "company": self.name, "is_group": 0},
+		# 	)
 
-			self.db_set("disposal_account", disposal_acct)
+		# 	self.db_set("disposal_account", disposal_acct)
 
 	def _set_default_account(self, fieldname, account_type):
 		if self.get(fieldname):
