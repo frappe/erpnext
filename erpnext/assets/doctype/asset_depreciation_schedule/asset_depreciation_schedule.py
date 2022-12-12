@@ -22,14 +22,28 @@ class AssetDepreciationSchedule(Document):
 		self.validate_another_asset_depr_schedule_does_not_exist()
 
 	def validate_another_asset_depr_schedule_does_not_exist(self):
-		asset_depr_schedule_name = get_asset_depr_schedule_name(self.asset, self.finance_book)
+		finance_book_filter = ["finance_book", "is", "not set"]
+		if self.finance_book:
+			finance_book_filter = ["finance_book", "=", self.finance_book]
 
-		if asset_depr_schedule_name:
-			frappe.throw(
-				_("Asset Depreciation Schedule for Asset {0} and Finance Book {1} already exists.").format(
-					self.asset, self.finance_book
+		num_asset_depr_schedules = frappe.db.count(
+			"Asset Depreciation Schedule",
+			[
+				["asset", "=", self.asset],
+				finance_book_filter,
+				["docstatus", "<", 2],
+			],
+		)
+
+		if num_asset_depr_schedules == 1:
+			asset_depr_schedule_name = get_asset_depr_schedule_name(self.asset, self.finance_book)
+
+			if self.name != asset_depr_schedule_name:
+				frappe.throw(
+					_("Asset Depreciation Schedule for Asset {0} and Finance Book {1} already exists.").format(
+						self.asset, self.finance_book
+					)
 				)
-			)
 
 
 def make_draft_asset_depr_schedules(asset_doc, date_of_disposal=None, date_of_return=None):

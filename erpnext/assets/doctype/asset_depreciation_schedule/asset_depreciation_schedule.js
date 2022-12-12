@@ -2,6 +2,20 @@
 // For license information, please see license.txt
 frappe.provide("erpnext.asset");
 
+frappe.ui.form.on('Asset Depreciation Schedule', {
+	onload: function(frm) {
+		frm.events.make_schedules_editable(frm);
+	},
+
+	make_schedules_editable: function(frm) {
+		var is_editable = frm.doc.depreciation_method == "Manual" ? true : false;
+
+		frm.toggle_enable("depreciation_schedule", is_editable);
+		frm.fields_dict["depreciation_schedule"].grid.toggle_enable("schedule_date", is_editable);
+		frm.fields_dict["depreciation_schedule"].grid.toggle_enable("depreciation_amount", is_editable);
+	}
+});
+
 frappe.ui.form.on('Depreciation Schedule', {
 	make_depreciation_entry: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
