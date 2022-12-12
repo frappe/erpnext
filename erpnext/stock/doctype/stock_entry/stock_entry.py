@@ -83,9 +83,6 @@ class StockEntry(StockController):
 				}
 			)
 
-	def get_feed(self):
-		return self.stock_entry_type
-
 	def onload(self):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
