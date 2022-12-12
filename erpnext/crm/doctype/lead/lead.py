@@ -14,9 +14,6 @@ from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_
 
 
 class Lead(SellingController, CRMNote):
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), self.lead_name)
-
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer
