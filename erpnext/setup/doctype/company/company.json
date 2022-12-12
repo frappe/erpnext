@@ -910,8 +910,7 @@
    "fieldname": "pol_advance_account",
    "fieldtype": "Link",
    "label": "POL Advance Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "other_settings_tab",
@@ -939,22 +938,19 @@
    "fieldname": "security_deposit_account",
    "fieldtype": "Link",
    "label": "Security Deposit Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "weighbridge_account",
    "fieldtype": "Link",
    "label": "Weighbridge Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "clearing_account",
    "fieldtype": "Link",
    "label": "Clearing Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "column_break_124",
@@ -964,8 +960,7 @@
    "fieldname": "default_unloading_account",
    "fieldtype": "Link",
    "label": "Default Unloading Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "tds_account_item",
@@ -987,22 +982,19 @@
    "fieldname": "coal_raising_credit_account",
    "fieldtype": "Link",
    "label": "Coal Raising Credit Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "coal_raising_expense_account",
    "fieldtype": "Link",
    "label": "Coal Raising Expense Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "coal_raising_penalty_account",
    "fieldtype": "Link",
    "label": "Coal Raising Penalty Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "column_break_131",
@@ -1018,15 +1010,13 @@
    "fieldname": "normal_loss_account",
    "fieldtype": "Link",
    "label": "Normal Loss Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "abnormal_loss_account",
    "fieldtype": "Link",
    "label": "Abnormal Loss Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -1034,7 +1024,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-11-28 16:45:31.504489",
+ "modified": "2022-12-12 13:52:18.976432",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
