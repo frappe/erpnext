@@ -12,7 +12,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_name,
-	get_depr_schedule_from_asset_depr_schedule_of_asset,
+	get_depr_schedule,
 	get_temp_asset_depr_schedule_doc,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
@@ -300,7 +300,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
 	for row in asset.get("finance_books"):
-		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(asset, row.finance_book)
+		depr_schedule = get_depr_schedule(asset, row.finance_book)
 
 		for schedule_idx, schedule in enumerate(depr_schedule):
 			if schedule.schedule_date == date:

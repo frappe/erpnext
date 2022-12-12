@@ -9,7 +9,7 @@ import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_depr_schedule_from_asset_depr_schedule_of_asset,
+	get_depr_schedule,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
 from erpnext.controllers.accounts_controller import AccountsController
@@ -285,7 +285,7 @@ class AssetRepair(AccountsController):
 			asset.number_of_depreciations_booked
 		)
 
-		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(asset.name, row.finance_book)
+		depr_schedule = get_depr_schedule(asset.name, row.finance_book)
 
 		# the Schedule Date in the final row of the old Depreciation Schedule
 		last_schedule_date = depr_schedule[len(depr_schedule) - 1].schedule_date
@@ -318,7 +318,7 @@ class AssetRepair(AccountsController):
 			asset.number_of_depreciations_booked
 		)
 
-		depr_schedule = get_depr_schedule_from_asset_depr_schedule_of_asset(asset.name, row.finance_book)
+		depr_schedule = get_depr_schedule(asset.name, row.finance_book)
 
 		# the Schedule Date in the final row of the modified Depreciation Schedule
 		last_schedule_date = depr_schedule[len(depr_schedule) - 1].schedule_date
