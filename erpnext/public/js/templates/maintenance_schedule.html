@@ -23,10 +23,10 @@
 			<td>{{ schedule.project_template }}</td>
 			<td>{{ schedule.reference_doctype }}</td>
 			<td>
-				{% var doctype = encodeURIComponent(schedule.reference_doctype) %}
+				{% var doctype = encodeURIComponent(frappe.router.slug(schedule.reference_doctype)) %}
 				{% var docname = encodeURIComponent(schedule.reference_name) %}
 
-				<a href="#Form/{%= doctype %}/{%= docname %}">
+				<a href="/app/{%= doctype %}/{%= docname %}">
 					{{ schedule.reference_name }}
 				</a>
 			</td>
