@@ -738,6 +738,8 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 @frappe.whitelist()
 def get_serial_no_item_customer(serial_no):
 	details = frappe.db.get_value("Serial No", serial_no, ['item_code', 'customer'], as_dict=1)
+	if not details:
+		frappe.throw(_("Serial No {0} does not exist").format(serial_no))
 	return {
 		"item_code": details.item_code,
 		"item_name": frappe.db.get_value("Item", details.item_code, "item_name"),

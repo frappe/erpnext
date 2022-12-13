@@ -198,14 +198,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 
 					// make purchase order
-						me.frm.add_custom_button(__('Purchase Order'), () => me.make_purchase_order(), __('Create'));
-
-					// maintenance
-					if(flt(me.frm.doc.per_delivered, 2) < 100 &&
-							["Sales", "Shopping Cart"].indexOf(me.frm.doc.order_type)===-1) {
-						me.frm.add_custom_button(__('Maintenance Visit'), () => me.make_maintenance_visit(), __('Create'));
-						me.frm.add_custom_button(__('Maintenance Schedule'), () => me.make_maintenance_schedule(), __('Create'));
-					}
+					me.frm.add_custom_button(__('Purchase Order'), () => me.make_purchase_order(), __('Create'));
 
 					// project
 					if(flt(me.frm.doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(me.frm.doc.order_type)!==-1 && allow_delivery) {
@@ -708,13 +701,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		})
 	}
 
-	make_maintenance_schedule() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
-			frm: this.frm
-		})
-	}
-
 	make_project() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_project",
@@ -727,13 +713,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_inter_company_purchase_order",
 			frm: this.frm
 		});
-	}
-
-	make_maintenance_visit() {
-		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
-			frm: this.frm
-		})
 	}
 
 	make_purchase_invoice() {

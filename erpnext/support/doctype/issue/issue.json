@@ -27,10 +27,12 @@
   "column_break_13",
   "contact_person",
   "contact_display",
+  "column_break_20",
   "contact_mobile",
   "contact_email",
-  "column_break_20",
+  "section_break_24",
   "raised_by",
+  "column_break_26",
   "lead",
   "sb_details",
   "description",
@@ -75,7 +77,6 @@
    "set_only_once": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "subject",
    "fieldtype": "Data",
@@ -85,7 +86,6 @@
    "reqd": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -119,12 +119,11 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nReplied\nHold\nClosed",
+   "options": "Open\nReplied\nIn Progress\nOn Hold\nTo Update\nClosed",
    "reqd": 1,
    "search_index": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -228,7 +227,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_in_quick_entry": 1,
    "bold": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
@@ -241,7 +239,6 @@
    "read_only": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -383,7 +380,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "contact_display",
    "fieldtype": "Data",
    "label": "Contact Name",
@@ -403,17 +399,24 @@
    "read_only": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Contact Person",
    "options": "Contact"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2022-12-07 12:10:43.955763",
+ "modified": "2022-12-08 21:25:33.388384",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

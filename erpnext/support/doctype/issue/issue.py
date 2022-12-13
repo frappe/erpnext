@@ -6,13 +6,14 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime
-from datetime import datetime, timedelta
+from frappe.utils import time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, get_time, get_datetime
+from datetime import datetime
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.contact.contact import get_contact_details
+
 
 sender_field = "raised_by"
 
@@ -21,20 +22,41 @@ class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
 
+	def onload(self):
+		self.set_onload("allow_resetting_service_level_agreement",
+			frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"))
+
 	def validate(self):
 		if self.is_new() and self.via_customer_portal:
 			self.flags.create_communication = True
 
+		self.previous_status = frappe.db.get_value(self.doctype, self.name, 'status') if not self.is_new() else None
+
+		self.set_missing_values()
 		self.change_service_level_agreement_and_priority()
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
-		self.set_contact_details()
 
 	def on_update(self):
 		# Add a communication in the issue timeline
 		if self.flags.create_communication and self.via_customer_portal:
 			self.create_communication()
 			self.flags.communication_created = None
+
+	def set_missing_values(self):
+		self.set_opening_date_time()
+		self.set_contact_details()
+
+	def set_opening_date_time(self):
+		self.opening_date = getdate(self.creation)
+		self.opening_time = get_time(self.creation)
+
+	def set_contact_details(self):
+		if self.contact_person:
+			contact_details = get_contact_details(self.contact_person)
+			for k, v in contact_details.items():
+				if self.meta.has_field(k):
+					self.set(k, v)
 
 	def set_lead_contact(self, email_id):
 		import email.utils
@@ -55,26 +77,20 @@ class Issue(Document):
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
 					frappe.db.get_default("Company")
 
-	def set_contact_details(self):
-		if self.contact_person:
-			contact_details = get_contact_details(self.contact_person)
-			for k, v in contact_details.items():
-				if self.meta.has_field(k):
-					self.set(k, v)
-
 	def update_status(self):
-		status = frappe.db.get_value("Issue", self.name, "status")
-		if self.status!="Open" and status =="Open" and not self.first_responded_on:
+		# Just Replied
+		if self.status == "Replied" and self.previous_status == "Open" and not self.first_responded_on:
 			self.first_responded_on = frappe.flags.current_time or now_datetime()
 
-		if self.status=="Closed" and status !="Closed":
+		# Just Closed
+		if self.status == "Closed" and self.previous_status != "Closed":
 			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
 				self.update_agreement_status()
 
-		if self.status=="Open" and status !="Open":
-			# if no date, it should be set as None and not a blank string "", as per mysql strict config
+		# Not Closed
+		if self.status != "Closed":
 			self.resolution_date = None
 
 	def update_agreement_status(self):
@@ -375,25 +391,26 @@ def set_status(name, status):
 
 
 def auto_close_tickets():
-	"""Auto-close replied support tickets after 7 days"""
-	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
+	"""Auto-close replied support tickets after days"""
+	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days")
 
-	issues = frappe.db.sql(""" select name from tabIssue where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
+	if auto_close_after_days:
+		issues = frappe.db.sql(""" select name from tabIssue where status='Replied' and
+			modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
 
-	for issue in issues:
-		doc = frappe.get_doc("Issue", issue.get("name"))
-		doc.status = "Closed"
-		doc.flags.ignore_permissions = True
-		doc.flags.ignore_mandatory = True
-		doc.save()
+		for issue in issues:
+			doc = frappe.get_doc("Issue", issue.get("name"))
+			doc.status = "Closed"
+			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
+			doc.save()
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
 	from erpnext.controllers.website_list_for_contact import has_website_permission
 	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
 
-	return permission_based_on_customer or doc.raised_by==user
+	return permission_based_on_customer or doc.raised_by == user
 
 
 def update_issue(contact, method):

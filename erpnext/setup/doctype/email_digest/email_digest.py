@@ -200,7 +200,7 @@ class EmailDigest(Document):
 			return None
 
 		issue_list = frappe.db.sql("""select *
-			from `tabIssue` where status in ("Replied","Open")
+			from `tabIssue` where status not in ('Closed', 'On Hold')
 			order by modified asc limit 10""", as_dict=True)
 
 		for t in issue_list:

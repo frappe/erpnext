@@ -483,3 +483,29 @@ def submit_communication(name, contact_date, remarks):
 	})
 
 	comm.insert(ignore_permissions=True)
+
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Opportunity", filters)
+
+	data = frappe.db.sql("""
+		select
+			`tabOpportunity`.name, `tabOpportunity`.customer_name, `tabOpportunity`.status,
+			`tabLead Follow Up`.schedule_date
+		from
+			`tabOpportunity`
+		inner join
+			`tabLead Follow Up` on `tabOpportunity`.name = `tabLead Follow Up`.parent
+		where
+			ifnull(`tabLead Follow Up`.schedule_date, '0000-00-00') != '0000-00-00'
+			and `tabLead Follow Up`.schedule_date between %(start)s and %(end)s
+			and `tabLead Follow Up`.parenttype = 'Opportunity'
+			{conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 1})
+
+	return data
