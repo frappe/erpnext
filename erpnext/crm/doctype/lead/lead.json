@@ -9,19 +9,24 @@
  "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
+  "section_break_1",
   "organization_lead",
-  "lead_details",
   "naming_series",
-  "lead_name",
+  "lead_details",
+  "lead_number",
+  "description",
   "company_name",
   "email_id",
   "col_break123",
+  "lead_name",
   "lead_owner",
   "status",
+  "lead_status",
   "salutation",
   "designation",
   "gender",
   "source",
+  "date",
   "customer",
   "campaign_name",
   "image",
@@ -61,7 +66,15 @@
   "language",
   "unsubscribed",
   "blog_subscriber",
-  "title"
+  "title",
+  "section_break_59",
+  "lead_person_details",
+  "lead_transfer_to_section",
+  "sales_person",
+  "data_61",
+  "product_person",
+  "column_break_62",
+  "proposal_person"
  ],
  "fields": [
   {
@@ -90,7 +103,7 @@
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Person Name",
+   "label": "Lead Name",
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
    "search_index": 1
@@ -98,6 +111,7 @@
   {
    "fieldname": "company_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Organization Name",
    "oldfieldname": "company_name",
@@ -106,6 +120,7 @@
   {
    "fieldname": "email_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Email Address",
    "oldfieldname": "email_id",
    "oldfieldtype": "Data",
@@ -121,6 +136,7 @@
    "default": "__user",
    "fieldname": "lead_owner",
    "fieldtype": "Link",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Lead Owner",
    "oldfieldname": "lead_owner",
@@ -132,6 +148,7 @@
    "default": "Lead",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
@@ -146,12 +163,14 @@
    "depends_on": "eval: doc.__islocal",
    "fieldname": "salutation",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Salutation",
    "options": "Salutation"
   },
   {
    "fieldname": "gender",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Gender",
    "options": "Gender"
   },
@@ -167,6 +186,7 @@
    "depends_on": "eval:doc.source == 'Existing Customer'",
    "fieldname": "customer",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "From Customer",
    "no_copy": 1,
    "oldfieldname": "customer",
@@ -176,6 +196,7 @@
   {
    "fieldname": "campaign_name",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Campaign Name",
    "oldfieldname": "campaign_name",
    "oldfieldtype": "Link",
@@ -191,6 +212,7 @@
   {
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Follow Up"
   },
   {
@@ -227,6 +249,7 @@
    "collapsible": 1,
    "fieldname": "notes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Notes"
   },
   {
@@ -333,6 +356,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
@@ -422,6 +446,7 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Designation",
    "options": "Designation"
   },
@@ -430,6 +455,7 @@
    "collapsible_depends_on": "eval: doc.__islocal",
    "fieldname": "address_info",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Address & Contact",
    "oldfieldtype": "Column Break",
    "options": "fa fa-map-marker"
@@ -439,6 +465,7 @@
    "collapsible_depends_on": "eval: doc.__islocal",
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Contact"
   },
   {
@@ -454,13 +481,79 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "lead_number",
+   "fieldtype": "Int",
+   "label": "Lead Number",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "lead_status",
+   "fieldtype": "Select",
+   "label": "Lead Status",
+   "options": "\nOpen\nConacted\nClose"
+  },
+  {
+   "fieldname": "lead_transfer_to_section",
+   "fieldtype": "Section Break",
+   "label": "Lead Transfer to"
+  },
+  {
+   "fieldname": "sales_person",
+   "fieldtype": "Data",
+   "label": "Sales Person"
+  },
+  {
+   "fieldname": "product_person",
+   "fieldtype": "Data",
+   "label": "Product Person"
+  },
+  {
+   "fieldname": "data_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "proposal_person",
+   "fieldtype": "Data",
+   "label": "Proposal Person"
+  },
+  {
+   "fieldname": "section_break_59",
+   "fieldtype": "Section Break",
+   "label": "Person Details"
+  },
+  {
+   "fieldname": "lead_person_details",
+   "fieldtype": "Table",
+   "options": "Lead Person Details"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2021-01-06 19:39:58.748978",
+ "modified": "2022-12-13 16:54:14.283850",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
