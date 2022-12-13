@@ -99,12 +99,8 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"tree": true,
 		"name_field": "account",
 		"parent_field": "parent_account",
-		"initial_depth": 3
 	}
 
 	erpnext.utils.add_dimensions('Trial Balance', 6);
 	erpnext.utils.add_additional_gl_filters('Trial Balance');
 });
-
-
-
