@@ -26,6 +26,7 @@
   "designation",
   "gender",
   "source",
+  "date",
   "customer",
   "campaign_name",
   "image",
@@ -540,13 +541,19 @@
    "fieldname": "lead_person_details",
    "fieldtype": "Table",
    "options": "Lead Person Details"
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-13 16:42:09.421767",
+ "modified": "2022-12-13 16:54:14.283850",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
