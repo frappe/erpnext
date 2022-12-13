@@ -198,3 +198,10 @@ def update_customer_and_contact(source, target_doc):
 		for f in contact_fields:
 			target_doc.set(f, source.get(f))
 
+
+def get_maintenance_schedule_from_serial_no(serial_no):
+	schedule_name = frappe.db.get_value('Maintenance Schedule', filters={'serial_no': serial_no})
+
+	if schedule_name:
+		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule_name)
+		return schedule_doc.schedules

@@ -125,11 +125,7 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	render_maintenance_schedules: function() {
 		if (this.frm.fields_dict.maintenance_schedule_html && !this.frm.doc.__islocal) {
 			var wrapper = this.frm.fields_dict.maintenance_schedule_html.wrapper;
-			$(wrapper).empty();
-			$(wrapper).append(frappe.render_template(
-				"maintenance_schedule",
-				{ data: this.frm.doc}
-			));
+			$(wrapper).html(frappe.render_template("maintenance_schedule", { data: this.frm.doc}));
 		}
 	}
 });

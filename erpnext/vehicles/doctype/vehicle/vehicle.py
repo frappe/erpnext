@@ -10,6 +10,7 @@ from frappe.utils import getdate, nowdate, cstr, cint
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
 from erpnext.vehicles.utils import format_vehicle_id
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import get_maintenance_schedule_from_serial_no
 from six import string_types
 
 
@@ -49,7 +50,7 @@ class Vehicle(Document):
 
 		if not self.is_new():
 			self.set_onload('customer_vehicle_selector_data', get_customer_vehicle_selector_data(vehicle=self.name))
-			self.set_onload('maintenance_schedule_data', get_vehicle_maintenance_schedule_data(vehicle=self.name))
+			self.set_onload('maintenance_schedule_data', get_maintenance_schedule_from_serial_no(serial_no=self.name))
 
 	def validate(self):
 		self.validate_item()
@@ -524,11 +525,3 @@ def get_vehicle_image(vehicle=None, item_code=None):
 		image = frappe.get_cached_value("Item", item_code, 'image')
 
 	return image
-
-
-def get_vehicle_maintenance_schedule_data(vehicle):
-	schedule_name = frappe.db.get_value('Maintenance Schedule', filters={'serial_no': vehicle})
-
-	if schedule_name:
-		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule_name)
-		return schedule_doc.schedules

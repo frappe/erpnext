@@ -25,7 +25,7 @@
 			<td>
 				<a href="#Form/{%= schedule.reference_doctype %}/{%= schedule.reference_name %}"> {{ schedule.reference_name }} </a>
 			</td>
-			<td>{{ schedule.reference_date }}</td>
+			<td>{{ frappe.datetime.str_to_user(schedule.reference_date) }}</td>
 		</tr>
 		{% endfor %}
 	</tbody>

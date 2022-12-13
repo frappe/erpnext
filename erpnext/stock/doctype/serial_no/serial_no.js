@@ -37,10 +37,6 @@ frappe.ui.form.on("Serial No", "refresh", function(frm) {
 
 	if (frm.fields_dict.maintenance_schedule_html && !frm.doc.__islocal) {
 		var wrapper = frm.fields_dict.maintenance_schedule_html.wrapper;
-		$(wrapper).empty();
-		$(wrapper).append(frappe.render_template(
-			"maintenance_schedule",
-			{ data: frm.doc}
-		));
+		$(wrapper).html(frappe.render_template("maintenance_schedule", { data: this.frm.doc}));
 	}
 });
