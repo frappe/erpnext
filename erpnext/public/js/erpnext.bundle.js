@@ -56,3 +56,6 @@ import "./agriculture/ternary_plot.js"
 // Education Domain
 import "./education/student_button.html"
 import "./education/assessment_result_tool.html"
+
+// Maintenance Schedule
+import "./templates/maintenance_schedule.html"
