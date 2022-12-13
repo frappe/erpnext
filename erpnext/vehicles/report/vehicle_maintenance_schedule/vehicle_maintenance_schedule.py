@@ -42,6 +42,7 @@ class VehicleMaintenanceSchedule:
 			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name=msd.parent
 			LEFT JOIN `tabVehicle` v ON v.name=ms.serial_no
 			WHERE msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
+			AND ifnull(ms.serial_no, '') != ''
 		""", self.filters, as_dict=1)
 
 	def process_data(self):

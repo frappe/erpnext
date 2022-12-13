@@ -8,6 +8,7 @@ from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
 from frappe import _, ValidationError
 from erpnext.controllers.stock_controller import StockController
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import get_maintenance_schedule_from_serial_no
 from six.moves import map
 from six import string_types
 
@@ -28,6 +29,10 @@ class SerialNo(StockController):
 	def __init__(self, *args, **kwargs):
 		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
+
+	def onload(self):
+		super().onload()
+		self.set_onload('maintenance_schedule_data', get_maintenance_schedule_from_serial_no(serial_no=self.name))
 
 	def validate(self):
 		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
