@@ -23,7 +23,12 @@
 			<td>{{ schedule.project_template }}</td>
 			<td>{{ schedule.reference_doctype }}</td>
 			<td>
-				<a href="#Form/{%= schedule.reference_doctype %}/{%= schedule.reference_name %}"> {{ schedule.reference_name }} </a>
+				{% var doctype = encodeURIComponent(schedule.reference_doctype) %}
+				{% var docname = encodeURIComponent(schedule.reference_name) %}
+
+				<a href="#Form/{%= doctype %}/{%= docname %}">
+					{{ schedule.reference_name }}
+				</a>
 			</td>
 			<td>{{ frappe.datetime.str_to_user(schedule.reference_date) }}</td>
 		</tr>
