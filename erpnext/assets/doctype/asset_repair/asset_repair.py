@@ -59,7 +59,9 @@ class AssetRepair(AccountsController):
 		notes = _("This schedule was created when Asset Repair {0} was submitted.").format(
 			get_link_to_form(self.doctype, self.name)
 		)
+		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
+		self.asset_doc.save()
 
 	def before_cancel(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
@@ -81,7 +83,9 @@ class AssetRepair(AccountsController):
 		notes = _("This schedule was created when Asset Repair {0} was cancelled.").format(
 			get_link_to_form(self.doctype, self.name)
 		)
+		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
+		self.asset_doc.save()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":

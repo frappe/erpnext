@@ -1192,6 +1192,7 @@ class SalesInvoice(SellingController):
 								get_link_to_form(self.doctype, self.get("name")),
 							)
 							reset_depreciation_schedule(asset, self.posting_date, notes)
+							asset.reload()
 
 					else:
 						if asset.calculate_depreciation:
@@ -1202,6 +1203,7 @@ class SalesInvoice(SellingController):
 								get_link_to_form(self.doctype, self.get("name")),
 							)
 							depreciate_asset(asset, self.posting_date, notes)
+							asset.reload()
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book, self.get("doctype"), self.get("name")

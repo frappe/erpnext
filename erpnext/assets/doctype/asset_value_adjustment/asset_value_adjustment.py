@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import date_diff, flt, formatdate, getdate
+from frappe.utils import date_diff, flt, formatdate, get_link_to_form, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -123,9 +123,16 @@ class AssetValueAdjustment(Document):
 
 			new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
-			new_asset_depr_schedule_doc.notes = "Asset value adjustment"
-
 			current_asset_depr_schedule_doc.cancel()
+
+			notes = _(
+				"This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
+			).format(
+				get_link_to_form(asset.doctype, asset.name),
+				get_link_to_form(self.get("doctype"), self.get("name")),
+			)
+			new_asset_depr_schedule_doc.notes = notes
+
 			new_asset_depr_schedule_doc.insert()
 
 			depr_schedule = new_asset_depr_schedule_doc.get("depreciation_schedule")

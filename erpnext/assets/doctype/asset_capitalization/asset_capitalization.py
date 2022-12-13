@@ -527,6 +527,8 @@ class AssetCapitalization(StockController):
 				get_link_to_form(asset_doc.doctype, asset_doc.name), get_link_to_form(self.doctype, self.name)
 			)
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset_doc, notes)
+			asset_doc.flags.ignore_validate_update_after_submit = True
+			asset_doc.save()
 		elif self.docstatus == 2:
 			for item in self.asset_items:
 				asset = self.get_asset(item)

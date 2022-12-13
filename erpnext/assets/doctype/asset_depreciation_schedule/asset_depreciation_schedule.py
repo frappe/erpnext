@@ -80,10 +80,17 @@ def update_draft_asset_depr_schedules(asset_doc):
 
 
 def prepare_draft_asset_depr_schedule_data(
-	asset_depr_schedule_doc, asset_doc, row, date_of_disposal=None, date_of_return=None
+	asset_depr_schedule_doc,
+	asset_doc,
+	row,
+	date_of_disposal=None,
+	date_of_return=None,
+	update_asset_finance_book_row=True,
 ):
 	set_draft_asset_depr_schedule_details(asset_depr_schedule_doc, asset_doc, row)
-	make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, date_of_disposal)
+	make_depr_schedule(
+		asset_depr_schedule_doc, asset_doc, row, date_of_disposal, update_asset_finance_book_row
+	)
 	set_accumulated_depreciation(asset_depr_schedule_doc, row, date_of_disposal, date_of_return)
 
 
@@ -129,11 +136,18 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 		new_asset_depr_schedule_doc.submit()
 
 
-def get_temp_asset_depr_schedule_doc(asset_doc, row, date_of_disposal=None, date_of_return=None):
+def get_temp_asset_depr_schedule_doc(
+	asset_doc, row, date_of_disposal=None, date_of_return=None, update_asset_finance_book_row=False
+):
 	asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
 
 	prepare_draft_asset_depr_schedule_data(
-		asset_depr_schedule_doc, asset_doc, row, date_of_disposal, date_of_return
+		asset_depr_schedule_doc,
+		asset_doc,
+		row,
+		date_of_disposal,
+		date_of_return,
+		update_asset_finance_book_row,
 	)
 
 	return asset_depr_schedule_doc
@@ -184,7 +198,9 @@ def get_asset_depr_schedule_doc(asset_name, finance_book=None):
 	return asset_depr_schedule_doc
 
 
-def make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, date_of_disposal):
+def make_depr_schedule(
+	asset_depr_schedule_doc, asset_doc, row, date_of_disposal, update_asset_finance_book_row=True
+):
 	if row.depreciation_method != "Manual" and not asset_depr_schedule_doc.get(
 		"depreciation_schedule"
 	):
@@ -195,7 +211,9 @@ def make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, date_of_disposal
 
 	start = clear_depr_schedule(asset_depr_schedule_doc)
 
-	_make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, start, date_of_disposal)
+	_make_depr_schedule(
+		asset_depr_schedule_doc, asset_doc, row, start, date_of_disposal, update_asset_finance_book_row
+	)
 
 
 def clear_depr_schedule(asset_depr_schedule_doc):
@@ -216,11 +234,16 @@ def clear_depr_schedule(asset_depr_schedule_doc):
 	return start
 
 
-def _make_depr_schedule(asset_depr_schedule_doc, asset_doc, row, start, date_of_disposal):
+def _make_depr_schedule(
+	asset_depr_schedule_doc, asset_doc, row, start, date_of_disposal, update_asset_finance_book_row
+):
 	asset_doc.validate_asset_finance_books(row)
 
 	value_after_depreciation = asset_doc._get_value_after_depreciation(row)
 	row.value_after_depreciation = value_after_depreciation
+
+	if update_asset_finance_book_row:
+		row.db_update()
 
 	number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
 		asset_doc.number_of_depreciations_booked

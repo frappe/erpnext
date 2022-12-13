@@ -12,6 +12,9 @@ from erpnext.assets.doctype.asset.test_asset import (
 	create_asset_data,
 	set_depreciation_settings_in_company,
 )
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_depr_schedule,
+)
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -283,7 +286,9 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(consumed_asset.status, "Decapitalized")
 
 		consumed_depreciation_schedule = [
-			d for d in consumed_asset.schedules if getdate(d.schedule_date) == getdate(capitalization_date)
+			d
+			for d in get_depr_schedule(consumed_asset.name)
+			if getdate(d.schedule_date) == getdate(capitalization_date)
 		]
 		self.assertTrue(
 			consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry
