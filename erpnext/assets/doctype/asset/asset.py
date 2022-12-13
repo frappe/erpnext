@@ -35,6 +35,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 	make_draft_asset_depr_schedules,
+	make_draft_asset_depr_schedules_if_not_present,
 	set_draft_asset_depr_schedule_details,
 	update_draft_asset_depr_schedules,
 )
@@ -62,7 +63,9 @@ class Asset(AccountsController):
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
-		convert_draft_asset_depr_schedules_into_active(self)
+		if not self.split_from:
+			make_draft_asset_depr_schedules_if_not_present(self)
+			convert_draft_asset_depr_schedules_into_active(self)
 
 	def on_cancel(self):
 		self.validate_cancellation()
@@ -332,26 +335,6 @@ class Asset(AccountsController):
 				).format(row.idx)
 			)
 
-	# to ensure that final accumulated depreciation amount is accurate
-	def get_adjusted_depreciation_amount(
-		self, depreciation_amount_without_pro_rata, depreciation_amount_for_last_row, finance_book
-	):
-		if not self.opening_accumulated_depreciation:
-			depreciation_amount_for_first_row = self.get_depreciation_amount_for_first_row(finance_book)
-
-			if (
-				depreciation_amount_for_first_row + depreciation_amount_for_last_row
-				!= depreciation_amount_without_pro_rata
-			):
-				depreciation_amount_for_last_row = (
-					depreciation_amount_without_pro_rata - depreciation_amount_for_first_row
-				)
-
-		return depreciation_amount_for_last_row
-
-	def get_depreciation_amount_for_first_row(self, finance_book):
-		return get_depr_schedule(self.name, finance_book)[0].depreciation_amount
-
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
 			depr_schedule = get_depr_schedule(self.name, row.finance_book)
@@ -412,7 +395,7 @@ class Asset(AccountsController):
 		for row in self.get("finance_books"):
 			depr_schedule = get_depr_schedule(self.name, row.finance_book)
 
-			for d in depr_schedule.get("depreciation_schedule"):
+			for d in depr_schedule:
 				if d.journal_entry:
 					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
 					d.db_set("journal_entry", None)
@@ -943,6 +926,10 @@ def create_new_asset_after_split(asset, split_qty):
 			(row.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
 
+	new_asset.submit()
+	new_asset.set_status()
+
+	for row in new_asset.get("finance_books"):
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, row.finance_book)
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
@@ -961,10 +948,7 @@ def create_new_asset_after_split(asset, split_qty):
 		)
 		new_asset_depr_schedule_doc.notes = notes
 
-		new_asset_depr_schedule_doc.insert()
-
-	new_asset.submit()
-	new_asset.set_status()
+		new_asset_depr_schedule_doc.submit()
 
 	for row in new_asset.get("finance_books"):
 		depr_schedule = get_depr_schedule(new_asset.name, row.finance_book)

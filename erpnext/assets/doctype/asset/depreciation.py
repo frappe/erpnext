@@ -28,7 +28,10 @@ def post_depreciation_entries(date=None, commit=True):
 	if not date:
 		date = today()
 	for asset_name in get_depreciable_assets(date):
-		make_depreciation_entry_for_all_asset_depr_schedules(asset_name, date)
+		asset_doc = frappe.get_doc("Asset", asset_name)
+
+		make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date)
+
 		if commit:
 			frappe.db.commit()
 
@@ -46,9 +49,7 @@ def get_depreciable_assets(date):
 	)
 
 
-def make_depreciation_entry_for_all_asset_depr_schedules(asset_name, date=None):
-	asset_doc = frappe.get_doc("Asset", asset_name)
-
+def make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date=None):
 	for row in asset_doc.get("finance_books"):
 		asset_depr_schedule_name = get_asset_depr_schedule_name(asset_doc.name, row.finance_book)
 		make_depreciation_entry(asset_depr_schedule_name, date)
@@ -240,6 +241,7 @@ def scrap_asset(asset_name):
 	notes = _(
 		"This schedule was created when Asset {0} was scrapped through Journal Entry {1}."
 	).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(je.doctype, je.name))
+
 	depreciate_asset(asset, date, notes)
 
 	frappe.db.set_value("Asset", asset_name, "disposal_date", date)
@@ -254,9 +256,14 @@ def restore_asset(asset_name):
 	asset = frappe.get_doc("Asset", asset_name)
 
 	reverse_depreciation_entry_made_after_disposal(asset, asset.disposal_date)
-	reset_depreciation_schedule(asset, asset.disposal_date, "Restore asset")
 
 	je = asset.journal_entry_for_scrap
+
+	notes = _(
+		"This schedule was created when Asset {0} was restored after being scrapped by Journal Entry {1}."
+	).format(get_link_to_form(asset.doctype, asset.name), get_link_to_form(je.doctype, je.name))
+
+	reset_depreciation_schedule(asset, asset.disposal_date, notes)
 
 	asset.db_set("disposal_date", None)
 	asset.db_set("journal_entry_for_scrap", None)
@@ -300,7 +307,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
 	for row in asset.get("finance_books"):
-		depr_schedule = get_depr_schedule(asset, row.finance_book)
+		depr_schedule = get_depr_schedule(asset.name, row.finance_book)
 
 		for schedule_idx, schedule in enumerate(depr_schedule):
 			if schedule.schedule_date == date:

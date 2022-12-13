@@ -1185,7 +1185,13 @@ class SalesInvoice(SellingController):
 						if asset.calculate_depreciation:
 							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
-							reset_depreciation_schedule(asset, self.posting_date, "Return asset")
+							notes = _(
+								"This schedule was created when Asset {0} was returned after being sold through Sales Invoice {1}."
+							).format(
+								get_link_to_form(asset.doctype, asset.name),
+								get_link_to_form(self.doctype, self.get("name")),
+							)
+							reset_depreciation_schedule(asset, self.posting_date, notes)
 
 					else:
 						if asset.calculate_depreciation:
