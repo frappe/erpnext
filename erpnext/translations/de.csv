@@ -1849,6 +1849,8 @@ Outstanding Amt,Offener Betrag,
 Outstanding Cheques and Deposits to clear,Ausstehende Schecks und Anzahlungen zum verbuchen,
 Outstanding for {0} cannot be less than zero ({1}),Ausstände für {0} können nicht kleiner als Null sein ({1}),
 Outward taxable supplies(zero rated),Steuerpflichtige Lieferungen aus dem Ausland (null bewertet),
+Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role.,"Überhöhte Annahme bzw. Lieferung von Artikel {2} mit {0} {1} wurde ignoriert, weil Sie die Rolle {3} haben."
+Overbilling of {0} {1} ignored for item {2} because you have {3} role.,"Überhöhte Abrechnung von Artikel {2} mit {0} {1} wurde ignoriert, weil Sie die Rolle {3} haben."
 Overdue,Überfällig,
 Overlap in scoring between {0} and {1},Überlappung beim Scoring zwischen {0} und {1},
 Overlapping conditions found between:,Überlagernde Bedingungen gefunden zwischen:,
@@ -9916,4 +9918,3 @@ Cost and Freight,Kosten und Fracht,
 Delivered at Place,Geliefert benannter Ort,
 Delivered at Place Unloaded,Geliefert benannter Ort entladen,
 Delivered Duty Paid,Geliefert verzollt,
-{0} of {1} {2} ignored for item {3} because you have {4} role,"{0} von Artikel {3} mit {1} {2} wurde ignoriert, weil Sie die Rolle {4} haben."
