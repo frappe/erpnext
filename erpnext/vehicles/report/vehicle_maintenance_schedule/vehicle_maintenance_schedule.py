@@ -29,6 +29,7 @@ class VehicleMaintenanceSchedule:
 		return self.columns, self.data
 
 	def get_data(self):
+		conditions = self.get_conditions()
 		self.data = frappe.db.sql("""
 			SELECT
 				msd.scheduled_date as due_date, msd.project_template, ms.name as schedule,
@@ -38,12 +39,48 @@ class VehicleMaintenanceSchedule:
 				v.customer as vehicle_customer, v.customer_name as vehicle_customer_name,
 				pt.project_template_name
 			FROM `tabMaintenance Schedule Detail` msd
-			LEFT JOIN `tabProject Template` pt ON pt.name=msd.project_template
-			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name=msd.parent
-			LEFT JOIN `tabVehicle` v ON v.name=ms.serial_no
+			LEFT JOIN `tabProject Template` pt ON pt.name = msd.project_template
+			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name = msd.parent
+			LEFT JOIN `tabVehicle` v ON v.name = ms.serial_no
+			LEFT JOIN `tabCustomer` c ON c.name = ms.customer
+			LEFT JOIN `tabItem` im ON im.name = v.item_code
 			WHERE msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
 			AND ifnull(ms.serial_no, '') != ''
-		""", self.filters, as_dict=1)
+			AND {conditions}
+		""".format(conditions=conditions), self.filters, as_dict=1, debug=1)
+
+	def get_conditions(self):
+		conditions = []
+
+		if self.filters.get("company"):
+			conditions.append("ms.company = %(company)s")
+
+		if self.filters.get("project_template"):
+			conditions.append("msd.project_template = %(project_template)s")
+
+		if self.filters.get("project_template_category"):
+			conditions.append("pt.project_template_category = %(project_template_category)s")
+
+		if self.filters.get("customer"):
+			conditions.append("c.name = %(customer)s")
+
+		if self.filters.get("customer_group"):
+			lft, rgt = frappe.db.get_value("Customer Group", self.filters.customer_group, ["lft", "rgt"])
+			conditions.append("""c.customer_group in (select name from `tabCustomer Group`
+				where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		if self.filters.get("variant_of"):
+			conditions.append("im.variant_of = %(variant_of)s")
+
+		if self.filters.get("item_code"):
+			conditions.append("im.name = %(item_code)s")
+
+		if self.filters.get("item_group"):
+			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
+			conditions.append("""im.item_group in (select name from `tabItem Group`
+				where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
+		return " AND ".join(conditions) if conditions else ""
 
 	def process_data(self):
 		for d in self.data:
