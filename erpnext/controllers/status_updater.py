@@ -333,16 +333,6 @@ class StatusUpdater(Document):
 		)
 
 	def warn_about_bypassing_with_role(self, item, qty_or_amount, role):
-<<<<<<< HEAD
-		action = _("Over Receipt/Delivery") if qty_or_amount == "qty" else _("Overbilling")
-
-		msg = _("{} of {} {} ignored for item {} because you have {} role.").format(
-			action,
-			_(item["target_ref_field"].title()),
-			frappe.bold(item["reduce_by"]),
-			frappe.bold(item.get("item_code")),
-			role,
-=======
 		if qty_or_amount == "qty":
 			msg = _("Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role.")
 		else:
@@ -357,7 +347,6 @@ class StatusUpdater(Document):
 			),
 			indicator="orange",
 			alert=True,
->>>>>>> 36997d9788 (fix: translation for warning on Overbilling/-receipt/-delivery)
 		)
 
 	def update_qty(self, update_modified=True):
