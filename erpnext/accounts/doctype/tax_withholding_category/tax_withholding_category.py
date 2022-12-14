@@ -133,7 +133,7 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 def get_cost_center(inv):
 	cost_center = frappe.get_cached_value("Company", inv.company, "cost_center")
 
-	if len(inv.get("taxes")) > 0:
+	if len(inv.get("taxes", [])) > 0:
 		cost_center = inv.get("taxes")[0].cost_center
 
 	return cost_center
