@@ -66,7 +66,9 @@
   "more_info",
   "serial_no_details",
   "company",
-  "status"
+  "status",
+  "sec_maintenance_schedule",
+  "maintenance_schedule_html"
  ],
  "fields": [
   {
@@ -509,11 +511,20 @@
    "label": "Reserved For Customer Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sec_maintenance_schedule",
+   "fieldtype": "Section Break",
+   "label": "Maintenance Schedule"
+  },
+  {
+   "fieldname": "maintenance_schedule_html",
+   "fieldtype": "HTML"
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2022-04-05 06:57:49.818458",
+ "modified": "2022-12-12 16:21:30.617225",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

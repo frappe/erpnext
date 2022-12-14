@@ -1,0 +1,40 @@
+{% if data.__onload && data.__onload.maintenance_schedule_data  %}
+	{% var schedules = data.__onload.maintenance_schedule_data %}
+{% endif %}
+
+{% if schedules && schedules.length  %}
+<table class="table table-bordered table-striped" style="margin:0">
+	<thead>
+		<tr>
+			<th style="width: 5%;" class="text-center">#</th>
+			<th style="width: 15%;">Scheduled Date</th>
+			<th style="width: 20%;">Project Template</th>
+			<th style="width: 20%;">Reference Type</th>
+			<th style="width: 20%;">Reference Name</th>
+			<th style="width: 20%;">Reference Date</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% var count = 1 %}
+		{% for schedule in schedules %}
+		<tr>
+			<th class="text-center">{{ count++ }}</th>
+			<td>{{ frappe.datetime.str_to_user(schedule.scheduled_date) }}</td>
+			<td>{{ schedule.project_template }}</td>
+			<td>{{ schedule.reference_doctype }}</td>
+			<td>
+				{% var doctype = encodeURIComponent(schedule.reference_doctype) %}
+				{% var docname = encodeURIComponent(schedule.reference_name) %}
+
+				<a href="#Form/{%= doctype %}/{%= docname %}">
+					{{ schedule.reference_name }}
+				</a>
+			</td>
+			<td>{{ frappe.datetime.str_to_user(schedule.reference_date) }}</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% else %}
+<b>No Maintenance Schedule found for this Vehicle</b>
+{% endif %}
