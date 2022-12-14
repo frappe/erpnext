@@ -802,7 +802,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 	set_loyalty_points: function(frm) {
 		if (frm.redemption_conversion_factor) {
-			let loyalty_amount = flt(frm.redemption_conversion_factor*flt(frm.doc.loyalty_points), precision("loyalty_amount"));
+			let loyalty_amount = flt(1*flt(frm.doc.loyalty_points), precision("loyalty_amount"));
 			var remaining_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance) - flt(frm.doc.write_off_amount);
 			if (frm.doc.grand_total && (remaining_amount < loyalty_amount)) {
 				let redeemable_points = parseInt(remaining_amount/frm.redemption_conversion_factor);
