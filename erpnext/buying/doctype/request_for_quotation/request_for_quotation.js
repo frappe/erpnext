@@ -95,6 +95,7 @@ frappe.ui.form.on("Request for Quotation",{
 								label: "Print Format",
 								fieldname: "print_format",
 								options: "Print Format",
+								placeholder: "Standard",
 								get_query: () => {
 									return {
 										filters: {
@@ -108,12 +109,14 @@ frappe.ui.form.on("Request for Quotation",{
 								label: "Language",
 								fieldname: "language",
 								options: "Language",
+								default: frappe.boot.lang,
 							},
 							{
 								fieldtype: "Link",
 								label: "Letter Head",
 								fieldname: "letter_head",
 								options: "Letter Head",
+								default: frm.doc.letter_head,
 							},
 						],
 						(data) => {
@@ -126,7 +129,7 @@ frappe.ui.form.on("Request for Quotation",{
 										supplier: data.supplier,
 										print_format: data.print_format || "Standard",
 										language: data.language || frappe.boot.lang,
-										letter_head: data.letter_head || "",
+										letter_head: data.letter_head || frm.doc.letter_head || "",
 									}).toString()
 								)
 							);
