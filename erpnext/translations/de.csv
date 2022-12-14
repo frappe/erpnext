@@ -9899,17 +9899,3 @@ Total Asset,Aktiva,
 Total Liability,Verbindlichkeiten,
 Total Equity,Eigenkapital,
 Warehouse wise Stock Value,Warenwert nach Lager,
-<<<<<<< HEAD
-=======
-Ex Works,Ab Werk,
-Free Carrier,Frei Frachtführer,
-Free Alongside Ship,Frei Längsseite Schiff,
-Free on Board,Frei an Bord,
-Carriage Paid To,Frachtfrei,
-Carriage and Insurance Paid to,Frachtfrei versichert,
-Cost and Freight,Kosten und Fracht,
-"Cost, Insurance and Freight","Kosten, Versicherung und Fracht",
-Delivered at Place,Geliefert benannter Ort,
-Delivered at Place Unloaded,Geliefert benannter Ort entladen,
-Delivered Duty Paid,Geliefert verzollt,
->>>>>>> 36997d9788 (fix: translation for warning on Overbilling/-receipt/-delivery)
