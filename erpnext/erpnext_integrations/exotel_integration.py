@@ -93,10 +93,10 @@ def get_call_status(call_id):
 
 
 @frappe.whitelist()
-def make_a_call(from_number, to_number, caller_id):
+def make_a_call(from_number, to_number, caller_id, **kwargs):
 	endpoint = get_exotel_endpoint("Calls/connect.json?details=true")
 	response = requests.post(
-		endpoint, data={"From": from_number, "To": to_number, "CallerId": caller_id}
+		endpoint, data={"From": from_number, "To": to_number, "CallerId": caller_id, **kwargs}
 	)
 
 	return response.json()
