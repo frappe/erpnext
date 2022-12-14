@@ -125,7 +125,6 @@ class Item(Document):
 		invalidate_cache_for_item(self)
 		self.update_variants()
 		self.update_item_price()
-		self.update_website_item()
 
 	def validate_description(self):
 		"""Clean HTML description if set"""
@@ -247,29 +246,6 @@ class Item(Document):
 
 		if self.stock_uom not in uoms_list:
 			self.append("uoms", {"uom": self.stock_uom, "conversion_factor": 1})
-
-	def update_website_item(self):
-		"""Update Website Item if change in Item impacts it."""
-		web_item = frappe.db.exists("Website Item", {"item_code": self.item_code})
-
-		if web_item:
-			changed = {}
-			editable_fields = ["item_name", "item_group", "stock_uom", "brand", "description", "disabled"]
-			doc_before_save = self.get_doc_before_save()
-
-			for field in editable_fields:
-				if doc_before_save.get(field) != self.get(field):
-					if field == "disabled":
-						changed["published"] = not self.get(field)
-					else:
-						changed[field] = self.get(field)
-
-			if not changed:
-				return
-
-			web_item_doc = frappe.get_doc("Website Item", web_item)
-			web_item_doc.update(changed)
-			web_item_doc.save()
 
 	def validate_item_tax_net_rate_range(self):
 		for tax in self.get("taxes"):
@@ -1157,24 +1133,6 @@ def invalidate_cache_for_item(doc):
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
-
-	invalidate_item_variants_cache_for_website(doc)
-
-
-def invalidate_item_variants_cache_for_website(doc):
-	"""Rebuild ItemVariantsCacheManager via Item or Website Item."""
-	from erpnext.e_commerce.variant_selector.item_variants_cache import ItemVariantsCacheManager
-
-	item_code = None
-	is_web_item = doc.get("published_in_website") or doc.get("published")
-	if doc.has_variants and is_web_item:
-		item_code = doc.item_code
-	elif doc.variant_of and frappe.db.get_value("Item", doc.variant_of, "published_in_website"):
-		item_code = doc.variant_of
-
-	if item_code:
-		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.rebuild_cache()
 
 
 def check_stock_uom_with_bin(item, stock_uom):
