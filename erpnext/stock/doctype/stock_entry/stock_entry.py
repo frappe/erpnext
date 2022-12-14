@@ -2236,16 +2236,16 @@ class StockEntry(StockController):
 			d.qty -= process_loss_dict[d.item_code][1]
 
 	def set_serial_no_batch_for_finished_good(self):
-		serial_nos = ""
+		serial_nos = []
 		if self.pro_doc.serial_no:
-			serial_nos = self.get_serial_nos_for_fg()
+			serial_nos = self.get_serial_nos_for_fg() or []
 
 		for row in self.items:
 			if row.is_finished_item and row.item_code == self.pro_doc.production_item:
 				if serial_nos:
 					row.serial_no = "\n".join(serial_nos[0 : cint(row.qty)])
 
-	def get_serial_nos_for_fg(self, args):
+	def get_serial_nos_for_fg(self):
 		fields = [
 			"`tabStock Entry`.`name`",
 			"`tabStock Entry Detail`.`qty`",
@@ -2261,9 +2261,7 @@ class StockEntry(StockController):
 		]
 
 		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
-
-		if self.pro_doc.serial_no:
-			return self.get_available_serial_nos(stock_entries)
+		return self.get_available_serial_nos(stock_entries)
 
 	def get_available_serial_nos(self, stock_entries):
 		used_serial_nos = []
