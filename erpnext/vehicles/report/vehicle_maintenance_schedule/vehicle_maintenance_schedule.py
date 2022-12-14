@@ -47,7 +47,7 @@ class VehicleMaintenanceSchedule:
 			WHERE msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
 			AND ifnull(ms.serial_no, '') != ''
 			AND {conditions}
-		""".format(conditions=conditions), self.filters, as_dict=1, debug=1)
+		""".format(conditions=conditions), self.filters, as_dict=1)
 
 	def get_conditions(self):
 		conditions = []
