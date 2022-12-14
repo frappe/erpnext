@@ -15,6 +15,7 @@ erpnext.vehicles.VehicleController = class VehicleController extends frappe.ui.f
 		this.setup_buttons();
 		this.set_cant_change_read_only();
 		this.make_customer_vehicle_selector();
+		this.render_maintenance_schedules();
 	}
 
 	setup_queries() {
@@ -118,6 +119,13 @@ erpnext.vehicles.VehicleController = class VehicleController extends frappe.ui.f
 				this.frm.fields_dict.customer_vehicle_selector_html.wrapper,
 				'name',
 			);
+		}
+	}
+
+	render_maintenance_schedules() {
+		if (this.frm.fields_dict.maintenance_schedule_html && !this.frm.doc.__islocal) {
+			var wrapper = this.frm.fields_dict.maintenance_schedule_html.wrapper;
+			$(wrapper).html(frappe.render_template("maintenance_schedule", { data: this.frm.doc}));
 		}
 	}
 };

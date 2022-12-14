@@ -37,13 +37,20 @@ class MaintenanceSchedule(TransactionBase):
 			self.item_code, self.item_name = frappe.db.get_value("Serial No", self.serial_no, ["item_code", "item_name"])
 
 	def validate_schedule(self):
+		self.sort_schedules()
 		date_template_pairs = set()
+
 		for d in self.schedules:
 			date_template_pair = (d.scheduled_date, cstr(d.project_template))
 			if date_template_pair not in date_template_pairs:
 				date_template_pairs.add(date_template_pair)
 			else:
 				frappe.throw(_("Row {0}: Duplicate schedule found".format(d.idx)))
+
+	def sort_schedules(self):
+		self.schedules.sort(key=lambda x: x.get('scheduled_date'))
+		for index, d in enumerate(self.schedules):
+			d.idx = index + 1
 
 	def adjust_scheduled_date_for_holiday(self, scheduled_date):
 		from erpnext.hr.doctype.holiday_list.holiday_list import get_default_holiday_list
@@ -190,3 +197,10 @@ def update_customer_and_contact(source, target_doc):
 		for f in contact_fields:
 			target_doc.set(f, source.get(f))
 
+
+def get_maintenance_schedule_from_serial_no(serial_no):
+	schedule_name = frappe.db.get_value('Maintenance Schedule', filters={'serial_no': serial_no})
+
+	if schedule_name:
+		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule_name)
+		return schedule_doc.schedules
