@@ -19,8 +19,8 @@
   "root_type",
   "report_type",
   "is_an_advance_account",
+  "is_tax_expense",
   "account_currency",
-  "inter_company_account",
   "column_break1",
   "parent_account",
   "account_type",
@@ -32,6 +32,8 @@
   "old_parent",
   "include_in_gross",
   "default_party_type",
+  "dhi_company",
+  "dhi_company_name",
   "warehouse",
   "bank_account_details_section",
   "bank_name",
@@ -115,12 +117,6 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
-  },
-  {
-   "default": "0",
-   "fieldname": "inter_company_account",
-   "fieldtype": "Check",
-   "label": "Inter Company Account"
   },
   {
    "fieldname": "column_break1",
@@ -295,13 +291,32 @@
    "fieldname": "bank_account_no",
    "fieldtype": "Data",
    "label": "Bank Account No"
+  },
+  {
+   "fetch_from": "dhi_company.company",
+   "fieldname": "dhi_company_name",
+   "fieldtype": "Data",
+   "label": "DHI Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dhi_company",
+   "fieldtype": "Link",
+   "label": "DHI Company",
+   "options": "DHI Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_tax_expense",
+   "fieldtype": "Check",
+   "label": "Is Tax Expense"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-12 14:11:17.638664",
+ "modified": "2022-12-14 10:12:52.248906",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
