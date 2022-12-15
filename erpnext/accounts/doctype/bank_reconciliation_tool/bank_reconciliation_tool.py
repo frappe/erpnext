@@ -533,66 +533,58 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 		currency_field = "paid_to_account_currency as currency"
 	else:
 		currency_field = "paid_from_account_currency as currency"
-	if filtered_by_reference_date:
-		pe_data = f"""
-			SELECT
-				(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
-				+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
-				+ 1 ) AS rank,
-				'Payment Entry' as doctype,
-				name,
-				paid_amount,
-				reference_no,
-				reference_date,
-				party,
-				party_type,
-				posting_date,
-				{currency_field}
-			FROM
-				`tabPayment Entry`
-			WHERE
-				paid_amount {amount_condition} %(amount)s
-				AND docstatus = 1
-				AND payment_type IN (%(payment_type)s, 'Internal Transfer')
-				AND ifnull(clearance_date, '') = ""
-				AND {account_from_to} = %(bank_account)s
-				AND reference_date >= '{from_reference_date}'
-				AND reference_date <= '{to_reference_date}'
-
-			"""
-	else:
-		pe_data = f"""
-			SELECT
-				(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
-				+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
-				+ 1 ) AS rank,
-				'Payment Entry' as doctype,
-				name,
-				paid_amount,
-				reference_no,
-				reference_date,
-				party,
-				party_type,
-				posting_date,
-				{currency_field}
-			FROM
-				`tabPayment Entry`
-			WHERE
-				paid_amount {amount_condition} %(amount)s
-				AND docstatus = 1
-				AND payment_type IN (%(payment_type)s, 'Internal Transfer')
-				AND ifnull(clearance_date, '') = ""
-				AND {account_from_to} = %(bank_account)s
-				AND posting_date >= '{from_date}'
-				AND posting_date <= '{to_date}'
-
-			"""
+	cond_filtered_from_ref_date = ""
+	cond_filtered_to_ref_date = ""
+	cond_filtered_from_posting_date = ""
+	cond_filtered_to_posting_date = ""
+	from_ref_date  =""
+	to_ref_date =""
+	from_post_date = ""
+	to_post_date = ""
+	if(filtered_by_reference_date):
+		cond_filtered_from_ref_date = " AND reference_date >="
+		cond_filtered_to_ref_date = " AND reference_date <="
+		from_ref_date = from_reference_date
+		to_ref_date = to_reference_date
+	elif(not filtered_by_reference_date):
+		cond_filtered_from_posting_date = " AND posting_date >="
+		cond_filtered_to_posting_date = " AND posting_date <="
+		from_post_date = from_date
+		to_post_date = to_date
+		
+	pe_data=  f"""
+		SELECT
+			(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
+			+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
+			+ 1 ) AS rank,
+			'Payment Entry' as doctype,
+			name,
+			paid_amount,
+			reference_no,
+			reference_date,
+			party,
+			party_type,
+			posting_date,
+			{currency_field}
+		FROM
+			`tabPayment Entry`
+		WHERE
+			paid_amount {amount_condition} %(amount)s
+			AND docstatus = 1
+			AND payment_type IN (%(payment_type)s, 'Internal Transfer')
+			AND ifnull(clearance_date, '') = ""
+			AND {account_from_to} = %(bank_account)s
+			AND reference_no = '{transaction.reference_number}'
+			{cond_filtered_from_ref_date} "{from_ref_date}"
+			{cond_filtered_to_ref_date} "{to_ref_date}"
+			{cond_filtered_from_posting_date} "{from_post_date}"
+			{cond_filtered_to_posting_date} "{to_post_date}"
+		"""	
 	return pe_data
 
 
 def get_je_matching_query(amount_condition, transaction):
 	# get matching journal entry query
-
 	# We have mapping at the bank level
 	# So one bank could have both types of bank accounts like asset and liability
 	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
@@ -606,64 +598,55 @@ def get_je_matching_query(amount_condition, transaction):
 		"Bank Reconciliation Tool", "filtered_by_reference_date"
 	)
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
-	if filtered_by_reference_date == 1:
-		je_data = f"""
-			SELECT
-				(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
-				+ 1) AS rank ,
-				'Journal Entry' as doctype,
-				je.name,
-				jea.{cr_or_dr}_in_account_currency as paid_amount,
-				je.cheque_no as reference_no,
-				je.cheque_date as reference_date,
-				je.pay_to_recd_from as party,
-				jea.party_type,
-				je.posting_date,
-				jea.account_currency as currency
-			FROM
-				`tabJournal Entry Account` as jea
-			JOIN
-				`tabJournal Entry` as je
-			ON
-				jea.parent = je.name
-			WHERE
-				(je.clearance_date is null or je.clearance_date='0000-00-00')
-				AND jea.account = %(bank_account)s
-				AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
-				AND je.docstatus = 1
-				AND je.cheque_date >= '{from_reference_date}'
-				AND je.cheque_date <= '{to_reference_date}'
-			"""
-	else:
-		je_data = f"""
-			SELECT
-				(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
-				+ 1) AS rank ,
-				'Journal Entry' as doctype,
-				je.name,
-				jea.{cr_or_dr}_in_account_currency as paid_amount,
-				je.cheque_no as reference_no,
-				je.cheque_date as reference_date,
-				je.pay_to_recd_from as party,
-				jea.party_type,
-				je.posting_date,
-				jea.account_currency as currency
-			FROM
-				`tabJournal Entry Account` as jea
-			JOIN
-				`tabJournal Entry` as je
-			ON
-				jea.parent = je.name
-			WHERE
-				(je.clearance_date is null or je.clearance_date='0000-00-00')
-				AND jea.account = %(bank_account)s
-				AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
-				AND je.docstatus = 1
-				AND je.posting_date >= '{from_date}'
-				AND je.posting_date <= '{to_date}'
-			"""
+	cond_filtered_from_ref_date = ""
+	cond_filtered_to_ref_date = ""
+	cond_filtered_from_posting_date = ""
+	cond_filtered_to_posting_date = ""
+	from_ref_date  =""
+	to_ref_date =""
+	from_post_date = ""
+	to_post_date = ""
+	if(filtered_by_reference_date):
+		cond_filtered_from_ref_date = " AND je.cheque_date >="
+		cond_filtered_to_ref_date = " AND je.cheque_date <="
+		from_ref_date = from_reference_date
+		to_ref_date = to_reference_date
+	elif(not filtered_by_reference_date):
+		cond_filtered_from_posting_date = " AND je.posting_date>="
+		cond_filtered_to_posting_date = " AND je.posting_date <="
+		from_post_date = from_date
+		to_post_date = to_date
+	je_data =  f"""
+		SELECT
+			(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
+			+ 1) AS rank ,
+			'Journal Entry' as doctype,
+			je.name,
+			jea.{cr_or_dr}_in_account_currency as paid_amount,
+			je.cheque_no as reference_no,
+			je.cheque_date as reference_date,
+			je.pay_to_recd_from as party,
+			jea.party_type,
+			je.posting_date,
+			jea.account_currency as currency
+		FROM
+			`tabJournal Entry Account` as jea
+		JOIN
+			`tabJournal Entry` as je
+		ON
+			jea.parent = je.name
+		WHERE
+			(je.clearance_date is null or je.clearance_date='0000-00-00')
+			AND jea.account = %(bank_account)s
+			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
+			AND je.docstatus = 1
+			AND je.cheque_no = '{transaction.reference_number}'
+			{cond_filtered_from_ref_date} "{from_ref_date}"
+			{cond_filtered_to_ref_date} "{to_ref_date}"
+			{cond_filtered_from_posting_date} "{from_post_date}"
+			{cond_filtered_to_posting_date} "{to_post_date}"
+		"""
 	return je_data
-
 
 def get_si_matching_query(amount_condition):
 	# get matchin sales invoice query
