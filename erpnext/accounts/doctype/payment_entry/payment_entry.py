@@ -1639,7 +1639,7 @@ def get_payment_entry(
 ):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
-	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
+	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= 99.99:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	if not party_type:
