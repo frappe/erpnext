@@ -102,7 +102,7 @@
   }
  ],
  "links": [],
- "modified": "2021-06-30 13:09:14.228756",
+ "modified": "2022-12-15 11:11:02.131986",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -120,16 +120,6 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   },
   {
    "create": 1,
@@ -170,5 +160,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
