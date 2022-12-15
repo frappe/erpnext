@@ -167,7 +167,9 @@ def cancel_asset_depr_schedules(asset_doc):
 		if not asset_depr_schedule_doc:
 			continue
 
-		asset_depr_schedule_doc.status = "Cancelled"
+		frappe.db.set_value(
+			"Asset Depreciation Schedule", asset_depr_schedule_doc.name, "status", "Cancelled"
+		)
 
 		asset_depr_schedule_doc.cancel()
 
