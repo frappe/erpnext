@@ -71,6 +71,7 @@ def get_columns():
 def get_item_info(filters):
 	from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 
+<<<<<<< HEAD
 	conditions = [get_item_group_condition(filters.get("item_group"))]
 	if filters.get("brand"):
 		conditions.append("item.brand=%(brand)s")
@@ -83,6 +84,21 @@ def get_item_info(filters):
 		),
 		filters,
 		as_dict=1,
+=======
+	item = frappe.qb.DocType("Item")
+	query = (
+		frappe.qb.from_(item)
+		.select(
+			item.name,
+			item.item_name,
+			item.description,
+			item.brand,
+			item.item_group,
+			item.safety_stock,
+			item.lead_time_days,
+		)
+		.where((item.is_stock_item == 1) & (item.disabled == 0))
+>>>>>>> ae31ff1c48 (fix: disabled items showing in the report 'Itemwise Recommended Reorder Level)
 	)
 
 
