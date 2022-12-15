@@ -27,6 +27,21 @@ frappe.query_reports["FBR Advance Tax Report"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "account",
+			label: __("Advance Tax Account"),
+			fieldtype: "Link",
+			options: "Account",
+			get_query: function () {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					query: "erpnext.accounts.report.fbr_advance_tax_report.fbr_advance_tax_report.advance_tax_account_query",
+					filters: {
+						company: company
+					}
+				}
+			},
+		},
+		{
 			fieldname: "for_export",
 			label: __("For Export"),
 			fieldtype: "Check",
