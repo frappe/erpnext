@@ -23,6 +23,7 @@ class PaymentReconciliation(Document):
 	def __init__(self, *args, **kwargs):
 		super(PaymentReconciliation, self).__init__(*args, **kwargs)
 		self.common_filter_conditions = []
+		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
 
 	@frappe.whitelist()
@@ -193,6 +194,7 @@ class PaymentReconciliation(Document):
 			posting_date=self.ple_posting_date_filter,
 			min_outstanding=self.minimum_invoice_amount if self.minimum_invoice_amount else None,
 			max_outstanding=self.maximum_invoice_amount if self.maximum_invoice_amount else None,
+			accounting_dimensions=self.accounting_dimension_filter_conditions,
 		)
 
 		if self.invoice_limit:
@@ -381,7 +383,7 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions.append(ple.company == self.company)
 
 		if self.get("cost_center") and (get_invoices or get_return_invoices):
-			self.common_filter_conditions.append(ple.cost_center == self.cost_center)
+			self.accounting_dimension_filter_conditions.append(ple.cost_center == self.cost_center)
 
 		if get_invoices:
 			if self.from_invoice_date:
