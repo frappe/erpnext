@@ -297,8 +297,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		});
 	},
 
+<<<<<<< HEAD
 	make_payment_request: function() {
 		var me = this;
+=======
+	make_payment_request() {
+		let me = this;
+>>>>>>> dc178984ae (fix: Payment Request flow fixes from Order to Payment Entry)
 		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
@@ -314,7 +319,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			},
 			callback: function(r) {
 				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
+					frappe.model.sync(r.message);
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
