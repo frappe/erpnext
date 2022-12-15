@@ -65,7 +65,13 @@ frappe.ui.form.on("BOM", {
 		});
 	},
 
-	onload_post_render(frm) {
+	validate: function(frm) {
+		if (frm.doc.fg_based_operating_cost && frm.doc.with_operations) {
+			frappe.throw({message: __("Please check either with operations or FG Based Operating Cost."), title: __("Mandatory")});
+		}
+	},
+
+	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
@@ -536,14 +542,20 @@ erpnext.bom.calculate_op_cost = function(doc) {
 	doc.operating_cost = 0.0;
 	doc.base_operating_cost = 0.0;
 
-	for(var i=0;i<op.length;i++) {
-		var operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
-		var base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
-		frappe.model.set_value('BOM Operation',op[i].name, "operating_cost", operating_cost);
-		frappe.model.set_value('BOM Operation',op[i].name, "base_operating_cost", base_operating_cost);
+	if(doc.with_operations) {
+		for(var i=0;i<op.length;i++) {
+			var operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+			var base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
+			frappe.model.set_value('BOM Operation',op[i].name, "operating_cost", operating_cost);
+			frappe.model.set_value('BOM Operation',op[i].name, "base_operating_cost", base_operating_cost);
 
-		doc.operating_cost += operating_cost;
-		doc.base_operating_cost += base_operating_cost;
+			doc.operating_cost += operating_cost;
+			doc.base_operating_cost += base_operating_cost;
+		}
+	} else if(doc.fg_based_operating_cost) {
+		let total_operating_cost = doc.quantity * flt(doc.operating_cost_per_bom_quantity);
+		doc.operating_cost = total_operating_cost;
+		doc.base_operating_cost = flt(total_operating_cost * doc.conversion_rate, 2);
 	}
 	refresh_field(['operating_cost', 'base_operating_cost']);
 };
