@@ -10,10 +10,11 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import set_party_name_in_list
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
-from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
-from six import iteritems, string_types
+from frappe.desk.query_report import group_report_data
+from six import string_types
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from collections import OrderedDict
+
 
 def execute(filters=None):
 	if not filters:
@@ -49,10 +50,6 @@ def validate_filters(filters, account_details):
 
 	if filters.get("account") and not account_details.get(filters.account):
 		frappe.throw(_("Account {0} does not exists").format(filters.account))
-
-	if (filters.get("account") and filters.get("group_by") == _('Group by Account')
-		and account_details[filters.account].is_group == 0):
-		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
@@ -159,10 +156,22 @@ def get_result(filters, account_details, accounting_dimensions):
 		if gle.get('party') and gle.get('party_name') and gle.get('party') != gle.get('party_name'):
 			filters['show_party_name'] = True
 
-	group_by_field = get_group_by_field(filters.get('group_by'))
-	group_by = [None]
-	if group_by_field:
-		group_by.append(group_by_field)
+	group_by = []
+
+	if not (filters.get('group_by') == _("Group by Sales Person") and filters.get("sales_person"))\
+			and not (filters.get('group_by') == _("Group by Party") and filters.get("party"))\
+			and not (filters.get('group_by') == _("Group by Account") and filters.get("account")):
+		group_by.append(None)
+
+	if filters.get('group_by') == _('Group by Party'):
+		group_by.append(('party_type', 'party'))
+	elif filters.get('group_by') == _('Group by Account'):
+		group_by.append('account')
+	elif filters.get('group_by') == _('Group by Voucher'):
+		group_by.append(('voucher_type', 'voucher_no'))
+	elif filters.get('group_by') == _('Group by Sales Person'):
+		group_by.append('sales_person')
+		group_by.append(('party_type', 'party'))
 
 	result = group_report_data(gl_entries, group_by,
 		calculate_totals=lambda rows, group_field, group_value, grouped_by:
@@ -172,23 +181,38 @@ def get_result(filters, account_details, accounting_dimensions):
 
 	return result
 
+
 def get_gl_entries(filters, accounting_dimensions):
 	currency_map = get_currency(filters)
 	filters.ledger_currency = currency_map.get("presentation_currency") or currency_map.get("company_currency")
 	dimensions_fields = ", " + ", ".join([d.fieldname for d in accounting_dimensions]) if accounting_dimensions else ""
 
+	sales_person_join = ""
+	sales_person_field = ""
+	if filters.get("sales_person") or filters.get("group_by") == _("Group by Sales Person"):
+		sales_person_join = "inner join `tabSales Team` steam on steam.parenttype = party_type and steam.parent = party"
+		sales_person_field = ", steam.sales_person"
+
 	gl_entries = frappe.db.sql("""
 		select
-			posting_date, account, party_type, party,
-			voucher_type, voucher_no, cost_center, project, account_currency,
-			debit, credit, debit_in_account_currency, credit_in_account_currency,
-			remarks, against, is_opening, against_voucher_type, against_voucher, reference_no, reference_date,
-			%(ledger_currency)s as currency {dimensions_fields}
-		from `tabGL Entry`
+			gle.posting_date, gle.account, gle.party_type, gle.party,
+			gle.voucher_type, gle.voucher_no, gle.cost_center, gle.project,
+			gle.debit, gle.credit, gle.debit_in_account_currency, gle.credit_in_account_currency,
+			gle.remarks, gle.against, gle.is_opening,
+			gle.against_voucher_type, gle.against_voucher,
+			gle.reference_no, gle.reference_date,
+			gle.account_currency, %(ledger_currency)s as currency
+			{sales_person_field} {dimensions_fields}
+		from `tabGL Entry` gle
+		{sales_person_join}
 		where {conditions}
-		order by posting_date, account, creation
-		""".format(conditions=get_conditions(filters, accounting_dimensions), dimensions_fields=dimensions_fields),
-			filters, as_dict=1)
+		order by gle.posting_date, gle.account, gle.creation
+	""".format(
+		conditions=get_conditions(filters, accounting_dimensions),
+		dimensions_fields=dimensions_fields,
+		sales_person_field=sales_person_field,
+		sales_person_join=sales_person_join,
+	), filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map)
@@ -247,69 +271,72 @@ def get_conditions(filters, accounting_dimensions):
 	conditions = []
 
 	if filters.get("company"):
-		conditions.append("company=%(company)s")
+		conditions.append("gle.company=%(company)s")
 
 	if filters.get("account"):
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
-		conditions.append("""account in (select name from tabAccount
+		conditions.append("""gle.account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
 	if filters.get("cost_center"):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
-		conditions.append("cost_center in %(cost_center)s")
+		conditions.append("gle.cost_center in %(cost_center)s")
 
 	if filters.get("voucher_no"):
 		voucher_filter_method = filters.get("voucher_filter_method")
 		if voucher_filter_method == "Posted Against Voucher":
-			conditions.append("against_voucher=%(voucher_no)s")
+			conditions.append("gle.against_voucher = %(voucher_no)s")
 		elif voucher_filter_method == "Posted By and Against Voucher":
-			conditions.append("voucher_no=%(voucher_no)s or against_voucher=%(voucher_no)s")
+			conditions.append("gle.voucher_no = %(voucher_no)s or gle.against_voucher = %(voucher_no)s")
 		else:
-			conditions.append("voucher_no=%(voucher_no)s")
+			conditions.append("gle.voucher_no = %(voucher_no)s")
 
 	if filters.get("against_voucher"):
-		conditions.append("against_voucher=%(against_voucher)s")
+		conditions.append("gle.against_voucher = %(against_voucher)s")
 
 	if filters.get("reference_no"):
 		filters['_reference_no'] = '%%{0}%%'.format(filters.get("reference_no"))
-		conditions.append("reference_no like %(_reference_no)s")
+		conditions.append("gle.reference_no like %(_reference_no)s")
 
 	if filters.get("group_by") == _("Group by Party") and not filters.get("party_type"):
-		conditions.append("party_type in ('Customer', 'Supplier')")
+		conditions.append("gle.party_type in ('Customer', 'Supplier')")
 
 	if filters.get("party_type") and not filters.get("party_list"):
-		conditions.append("party_type=%(party_type)s")
+		conditions.append("gle.party_type = %(party_type)s")
 
 	if filters.get("party_list"):
-		conditions.append("(party_type, party) in %(party_list)s")
+		conditions.append("(gle.party_type, gle.party) in %(party_list)s")
 
 	if filters.get("account") or filters.get("party") \
-			or filters.get("group_by") in [_("Group by Account"), _("Group by Party")]:
-		conditions.append("(posting_date <= %(to_date)s or is_opening = 'Yes')")
+			or filters.get("group_by") in [_("Group by Account"), _("Group by Party"), _("Group by Sales Person")]:
+		conditions.append("(gle.posting_date <= %(to_date)s or gle.is_opening = 'Yes')")
 	else:
-		conditions.append("posting_date between %(from_date)s and %(to_date)s")
+		conditions.append("gle.posting_date between %(from_date)s and %(to_date)s")
 		if not filters.get('show_opening_entries'):
-			conditions.append("is_opening != 'Yes'")
+			conditions.append("gle.is_opening != 'Yes'")
 
 	if filters.get("project"):
-		conditions.append("project in %(project)s")
+		conditions.append("gle.project in %(project)s")
+
+	if filters.get("group_by") == _("Group by Sales Person"):
+		conditions.append("steam.sales_person != '' and steam.sales_person is not null")
 
 	if filters.get("sales_person"):
 		lft, rgt = frappe.db.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
-		conditions.append("""exists(select name from `tabSales Team` steam where
-			steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})
-			and steam.parent = party and steam.parenttype = party_type)""".format(lft, rgt))
+		conditions.append("steam.sales_person in (select name from `tabSales Person` where lft >= {0} and rgt <= {1})"
+			.format(lft, rgt))
 
 	if filters.get("finance_book"):
 		if filters.get("include_default_book_entries"):
-			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+			conditions.append("gle.finance_book in (%(finance_book)s, %(company_fb)s)")
 		else:
-			conditions.append("finance_book in (%(finance_book)s)")
+			conditions.append("gle.finance_book in (%(finance_book)s)")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 
 	if match_conditions:
+		match_conditions = match_conditions.replace("`tabGL Entry`", "gle")
 		conditions.append(match_conditions)
 
 	if accounting_dimensions:
@@ -319,7 +346,7 @@ def get_conditions(filters, accounting_dimensions):
 
 	hooks = frappe.get_hooks('set_gl_conditions')
 	for method in hooks:
-		frappe.get_attr(method)(filters, conditions, alias="`tabGL Entry`")
+		frappe.get_attr(method)(filters, conditions, alias="gle")
 
 	return "{}".format(" and ".join(conditions)) if conditions else ""
 
@@ -339,20 +366,25 @@ def calculate_opening_closing(filters, gl_entries, group_field, group_value, gro
 		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not filters.get("show_opening_entries")):
 			update_totals_for('opening', gle)
 			update_totals_for('closing', gle)
+
+			# Mark to remove if outside date range for postprocess
 			gle.to_remove = True
+
 		elif gle.posting_date <= to_date:
 			update_totals_for('total', gle)
 			update_totals_for('closing', gle)
 
 	return totals
 
+
 def postprocess_group(filters, group_object, grouped_by):
 	no_total_row_general_ledger = frappe.get_cached_value("Accounts Settings", None, "no_total_row_general_ledger")
 	no_opening_total_general_ledger = frappe.get_cached_value("Accounts Settings", None, "no_opening_total_general_ledger")
 
 	if group_object.rows:
+		# Set Party Details in Total Row if grouped by Party
 		if 'party' in grouped_by:
-			if group_object.rows[0].party_type == "Customer":
+			if group_object.rows[0].party_type == "Customer" and not group_object.sales_person:
 				customer = frappe.get_cached_doc("Customer", grouped_by['party'])
 				group_object.sales_person = ", ".join(set([d.sales_person for d in customer.sales_team]))
 
@@ -363,43 +395,67 @@ def postprocess_group(filters, group_object, grouped_by):
 
 			group_object.party_name = group_object.rows[0].get('party_name')
 
-		group_object.rows = list(filter(lambda d: not d.get("to_remove"), group_object.rows))
+		# Set Sales Person Total Row Details if grouped by Sales Person
+		if 'sales_person' in grouped_by:
+			for k in ['opening', 'closing']:
+				group_object.totals[k].sales_person = group_object.sales_person
 
+		# Filter out rows outside date range
+		group_object.rows = list(filter(lambda d: not d.get("to_remove"), group_object.rows))
+		no_transactions_within_date = True if len(group_object.rows) == 0 else False
+
+		# Add Opening Row
 		if 'voucher_no' not in grouped_by:
 			group_object.rows.insert(0, group_object.totals.opening)
 
+		# Add Total Row
 		if not no_total_row_general_ledger:
 			group_object.rows.append(group_object.totals.total)
 
+		# Add Closing Row
 		if 'voucher_no' not in grouped_by:
 			group_object.rows.append(group_object.totals.closing)
 
 		balance, balance_in_account_currency = 0, 0
+
+		# Set Running Balances
+		precision = frappe.get_precision("GL Entry", "debit") + 1
 
 		for d in group_object.rows:
 			if not d.posting_date:
 				balance = 0
 
 			balance = get_balance(d, balance, 'debit', 'credit')
-			d['balance'] = balance
+			d['balance'] = flt(balance, precision)
 
 			d['account_currency'] = filters.account_currency
 			d['currency'] = filters.presentation_currency or filters.company_currency
 
+		# Adjust opening row
 		if no_opening_total_general_ledger:
 			group_object.totals.opening.debit = 0
 			group_object.totals.opening.credit = 0
 
+		# Adjust totals row
 		if no_total_row_general_ledger:
 			group_object.totals.closing.debit = group_object.totals.total.debit
 			group_object.totals.closing.credit = group_object.totals.total.credit
 
+		# Remove party group with 0 opening and 0 closing balance without transactions
+		if 'party' in grouped_by\
+				and not group_object.totals.opening.balance\
+				and not group_object.totals.closing.balance\
+				and no_transactions_within_date:
+			group_object.rows = None
+
 	# Do not show totals as they have already been added as rows
 	del group_object['totals']
+
 
 def get_balance(row, balance, debit_field, credit_field):
 	balance += (row.get(debit_field, 0) - row.get(credit_field, 0))
 	return balance
+
 
 def get_totals_dict():
 	def _get_debit_credit_dict(label):
@@ -419,15 +475,6 @@ def get_totals_dict():
 		_isGroupTotal=True
 	)
 
-def get_group_by_field(group_by):
-	if group_by == _('Group by Party'):
-		return 'party_type', 'party'
-	elif group_by == _('Group by Account'):
-		return 'account'
-	elif group_by == _('Group by Voucher'):
-		return 'voucher_type', 'voucher_no'
-	else:
-		return None
 
 def get_supplier_invoice_details():
 	inv_details = {}
@@ -437,6 +484,7 @@ def get_supplier_invoice_details():
 			inv_details[(voucher_type, d.name)] = d.bill_no
 
 	return inv_details
+
 
 def get_columns(filters, accounting_dimensions):
 	columns = [
@@ -472,6 +520,15 @@ def get_columns(filters, accounting_dimensions):
 			"hide_if_filtered": 1
 		},
 	]
+
+	if filters.get('group_by') == _("Group by Sales Person"):
+		columns.append({
+			"label": _("Sales Person"),
+			"fieldname": "sales_person",
+			"width": 120,
+			"fieldtype": "Link",
+			"options": "Sales Person",
+		})
 
 	if filters.get('show_party'):
 		columns += [
