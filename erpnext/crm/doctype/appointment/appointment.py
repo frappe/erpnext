@@ -6,8 +6,14 @@ from collections import Counter
 
 import frappe
 from frappe import _
+from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
+<<<<<<< HEAD
 from frappe.utils import get_url, getdate
+=======
+from frappe.share import add_docshare
+from frappe.utils import get_url, getdate, now
+>>>>>>> 4bfe2ea572 (fix: agent assignment and permissions for appointment)
 from frappe.utils.verified_command import get_signed_params
 
 
@@ -118,13 +124,13 @@ class Appointment(Document):
 		self.party = lead.name
 
 	def auto_assign(self):
-		from frappe.desk.form.assign_to import add as add_assignemnt
-
 		existing_assignee = self.get_assignee_from_latest_opportunity()
 		if existing_assignee:
 			# If the latest opportunity is assigned to someone
 			# Assign the appointment to the same
-			add_assignemnt({"doctype": self.doctype, "name": self.name, "assign_to": [existing_assignee]})
+			add_agent_assignment(
+				{"doctype": self.doctype, "name": self.name, "assign_to": [existing_assignee]}
+			)
 			return
 		if self._assign:
 			return
@@ -132,7 +138,7 @@ class Appointment(Document):
 		for agent in available_agents:
 			if _check_agent_availability(agent, self.scheduled_time):
 				agent = agent[0]
-				add_assignemnt({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+				add_agent_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
 			break
 
 	def get_assignee_from_latest_opportunity(self):
@@ -189,7 +195,7 @@ class Appointment(Document):
 
 
 def _get_agents_sorted_by_asc_workload(date):
-	appointments = frappe.db.get_list("Appointment", fields="*")
+	appointments = frappe.get_all("Appointment", fields="*")
 	agent_list = _get_agent_list_as_strings()
 	if not appointments:
 		return agent_list
@@ -214,7 +220,7 @@ def _get_agent_list_as_strings():
 
 
 def _check_agent_availability(agent_email, scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_list(
+	appointemnts_at_scheduled_time = frappe.get_all(
 		"Appointment", filters={"scheduled_time": scheduled_time}
 	)
 	for appointment in appointemnts_at_scheduled_time:
@@ -229,3 +235,12 @@ def _get_employee_from_user(user):
 		# frappe.db.exists returns a tuple of a tuple
 		return frappe.get_doc("Employee", employee_docname[0][0])
 	return None
+
+
+def add_agent_assignment(args):
+	doc = frappe.get_cached_doc(args.get("doctype"), args.get("name"))
+	for assign_to in args.get("assign_to"):
+		if not frappe.has_permission(doc=doc, user=assign_to):
+			add_docshare(doc.doctype, doc.name, assign_to, flags={"ignore_share_permission": True})
+
+	add_assignment(args)
