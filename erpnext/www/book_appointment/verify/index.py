@@ -14,6 +14,7 @@ def get_context(context):
 		appointment = frappe.get_doc("Appointment", appointment_name)
 		appointment.set_verified(email)
 		context.success = True
+		return context
 	else:
 		context.success = False
-	return context
+		return context

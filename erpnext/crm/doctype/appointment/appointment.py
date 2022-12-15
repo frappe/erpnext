@@ -238,9 +238,11 @@ def _get_employee_from_user(user):
 
 
 def add_agent_assignment(args):
-	doc = frappe.get_cached_doc(args.get("doctype"), args.get("name"))
+	doctype = args.get("doctype")
+	docname = args.get("name")
+
 	for assign_to in args.get("assign_to"):
-		if not frappe.has_permission(doc=doc, user=assign_to):
-			add_docshare(doc.doctype, doc.name, assign_to, flags={"ignore_share_permission": True})
+		if not frappe.has_permission(doctype=doctype, doc=docname, user=assign_to):
+			add_docshare(doctype, docname, assign_to, flags={"ignore_share_permission": True})
 
 	add_assignment(args)

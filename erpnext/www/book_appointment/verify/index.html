@@ -6,6 +6,7 @@
 
 {% block page_content %}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
     {% if success==True %}
         <div class="alert alert-success">
@@ -20,10 +21,22 @@
     {%- set alert_class = 'alert-success' if success else 'alert-danger' -%}
     <div class="alert {{ alert_class }}">
         {% if success==True %}
+=======
+
+    {% if success==True %}
+        <div class="alert alert-success">
+>>>>>>> 56f3ac15d8 (fix: removed unncessary changes)
             {{ _("Your email has been verified and your appointment has been scheduled") }}
-        {% else %}
+        </div>
+    {% else %}
+        <div class="alert alert-danger">
             {{ _("Verification failed please check the link") }}
+<<<<<<< HEAD
         {% endif %}
     </div>
 >>>>>>> 9a00b3bdbd (fix: format html of verify email for book appointment)
+=======
+        </div>
+    {% endif %}
+>>>>>>> 56f3ac15d8 (fix: removed unncessary changes)
 {% endblock%}
