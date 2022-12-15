@@ -9897,8 +9897,6 @@ Total Asset,Aktiva,
 Total Liability,Verbindlichkeiten,
 Total Equity,Eigenkapital,
 Warehouse wise Stock Value,Warenwert nach Lager,
-<<<<<<< HEAD
-=======
 Ex Works,Ab Werk,
 Free Carrier,Frei Frachtführer,
 Free Alongside Ship,Frei Längsseite Schiff,
@@ -9911,4 +9909,4 @@ Delivered at Place,Geliefert benannter Ort,
 Delivered at Place Unloaded,Geliefert benannter Ort entladen,
 Delivered Duty Paid,Geliefert verzollt,
 {0} of {1} {2} ignored for item {3} because you have {4} role,"{0} von Artikel {3} mit {1} {2} wurde ignoriert, weil Sie die Rolle {4} haben."
->>>>>>> 748c74ba52 (fix: add translation variable order)
+
