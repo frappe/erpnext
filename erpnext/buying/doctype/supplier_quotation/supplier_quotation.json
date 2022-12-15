@@ -40,12 +40,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_34",
-  "tax_category",
-  "column_break_36",
   "shipping_rule",
+  "column_break_36",
   "incoterm",
+  "named_place",
   "section_break_38",
   "taxes",
   "totals",
@@ -830,6 +831,12 @@
    "fieldtype": "Link",
    "label": "Incoterm",
    "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -837,7 +844,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 17:27:32.179686",
+ "modified": "2022-12-12 18:35:39.740974",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
