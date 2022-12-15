@@ -102,7 +102,11 @@
   }
  ],
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-06-29 18:27:02.832979",
+=======
+ "modified": "2022-12-15 11:11:02.131986",
+>>>>>>> ae8dd2b2bc (fix: remove guest role from doctype)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
@@ -120,16 +124,6 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "create": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   },
   {
    "create": 1,
@@ -170,5 +164,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
