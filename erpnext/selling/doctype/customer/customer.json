@@ -52,6 +52,7 @@
   "primary_address_and_contact_detail",
   "customer_primary_contact",
   "mobile_no",
+  "alternative_contact_no",
   "email_id",
   "fax_no",
   "column_break_45",
@@ -591,6 +592,11 @@
   {
    "fieldname": "column_break_57",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alternative_contact_no",
+   "fieldtype": "Data",
+   "label": "Alternative Contact No"
   }
  ],
  "icon": "fa fa-user",
@@ -604,7 +610,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-12-03 09:37:36.025838",
+ "modified": "2022-12-16 12:03:02.856910",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

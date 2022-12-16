@@ -75,6 +75,7 @@
   "primary_address_and_contact_detail_section",
   "supplier_primary_contact",
   "mobile_no",
+  "alternative_contact_no",
   "email_id",
   "column_break_62",
   "supplier_primary_address",
@@ -644,6 +645,11 @@
   {
    "fieldname": "column_break_84",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "alternative_contact_no",
+   "fieldtype": "Data",
+   "label": "Alternative Contact No"
   }
  ],
  "icon": "fa fa-user",
@@ -656,7 +662,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-12-08 11:18:56.678810",
+ "modified": "2022-12-16 12:05:00.063277",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
