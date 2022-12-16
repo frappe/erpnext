@@ -21,7 +21,6 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		this.setup_buttons();
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
-		this.setup_route_options();
 
 		this.frm.trigger('set_disallow_on_submit_fields_read_only');
 		this.setup_dashboard();
@@ -147,24 +146,6 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		me.frm.set_query('secondary_contact_person', () => {
 			return erpnext.queries.contact_query(me.frm.doc);
 		});
-	},
-
-	setup_route_options: function () {
-		var me = this;
-		var vehicle_field = me.frm.get_docfield("applies_to_vehicle");
-		if (vehicle_field) {
-			vehicle_field.get_route_options_for_new_doc = function () {
-				return {
-					"item_code": me.frm.doc.applies_to_item,
-					"item_name": me.frm.doc.applies_to_item_name,
-					"unregistered": me.frm.doc.vehicle_unregistered,
-					"license_plate": me.frm.doc.vehicle_license_plate,
-					"chassis_no": me.frm.doc.vehicle_chassis_no,
-					"engine_no": me.frm.doc.vehicle_engine_no,
-					"color": me.frm.doc.vehicle_color,
-				}
-			}
-		}
 	},
 
 	setup_dashboard: function() {

@@ -248,7 +248,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 
 				frm.cscript.update_item_defaults(false);
-				frm.trigger('get_applies_to_details');
+				frm.events.get_applies_to_details(frm);
 			}
 		});
 
