@@ -367,7 +367,8 @@ class LandedCostVoucher(AccountsController):
 
 			excluded_vouchers.append((doc.doctype, doc.name))
 
-		update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers)
+		if docs:
+			update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers)
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.grand_total) > 0:
