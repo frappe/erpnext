@@ -81,7 +81,7 @@ class TestUtils(unittest.TestCase):
 		item = make_item().name
 
 		purchase_invoice = make_purchase_invoice(
-			**{"item": item, "supplier": "_Test Supplier USD", "currency": "USD", "conversion_rate": 82.32}
+			item=item, supplier="_Test Supplier USD", currency="USD", conversion_rate=82.32
 		)
 		purchase_invoice.submit()
 
