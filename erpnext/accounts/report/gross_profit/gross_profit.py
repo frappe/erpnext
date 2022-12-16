@@ -503,7 +503,7 @@ class GrossProfitGenerator(object):
 						invoice_portion = 100
 					elif row.invoice_portion:
 						invoice_portion = row.invoice_portion
-					else:
+					elif row.payment_amount:
 						invoice_portion = row.payment_amount * 100 / row.base_net_amount
 
 					if i == 0:
