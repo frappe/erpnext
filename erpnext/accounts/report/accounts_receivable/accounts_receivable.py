@@ -99,6 +99,9 @@ class ReceivablePayableReport(object):
 		# Get return entries
 		self.get_return_entries()
 
+		# Get Exchange Rate Revaluations
+		self.get_exchange_rate_revaluations()
+
 		self.data = []
 
 		for ple in self.ple_entries:
@@ -251,7 +254,8 @@ class ReceivablePayableReport(object):
 			row.invoice_grand_total = row.invoiced
 
 			if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
-				abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision
+				(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+				or (row.voucher_no in self.err_journals)
 			):
 
 				# non-zero oustanding, we must consider this row
@@ -1028,3 +1032,17 @@ class ReceivablePayableReport(object):
 			"data": {"labels": self.ageing_column_labels, "datasets": rows},
 			"type": "percentage",
 		}
+
+	def get_exchange_rate_revaluations(self):
+		je = qb.DocType("Journal Entry")
+		results = (
+			qb.from_(je)
+			.select(je.name)
+			.where(
+				(je.company == self.filters.company)
+				& (je.posting_date.lte(self.filters.report_date))
+				& (je.voucher_type == "Exchange Rate Revaluation")
+			)
+			.run()
+		)
+		self.err_journals = [x[0] for x in results] if results else []
