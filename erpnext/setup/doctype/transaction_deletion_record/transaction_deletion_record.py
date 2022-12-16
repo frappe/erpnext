@@ -204,7 +204,7 @@ class TransactionDeletionRecord(Document):
 
 @frappe.whitelist()
 def get_doctypes_to_be_ignored():
-	doctypes_to_be_ignored_list = [
+	doctypes_to_be_ignored = [
 		"Account",
 		"Cost Center",
 		"Warehouse",
@@ -223,4 +223,7 @@ def get_doctypes_to_be_ignored():
 		"Customer",
 		"Supplier",
 	]
-	return doctypes_to_be_ignored_list
+
+	doctypes_to_be_ignored.extend(frappe.get_hooks("company_data_to_be_ignored") or [])
+
+	return doctypes_to_be_ignored
