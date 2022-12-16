@@ -70,9 +70,6 @@ class Company(NestedSet):
 
 		self.abbr = self.abbr.strip()
 
-		# if self.get('__islocal') and len(self.abbr) > 5:
-		# 	frappe.throw(_("Abbreviation cannot have more than 5 characters"))
-
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
