@@ -29,7 +29,7 @@ def get_appointment_settings():
 	settings = frappe.get_cached_value(
 		"Appointment Booking Settings",
 		None,
-		["holiday_list", "advance_booking_days", "appointment_duration", "success_redirect_url"],
+		["advance_booking_days", "appointment_duration", "success_redirect_url"],
 		as_dict=True,
 	)
 	return settings
@@ -94,26 +94,22 @@ def get_available_slots_between(query_start_time, query_end_time, settings):
 
 @frappe.whitelist(allow_guest=True)
 def create_appointment(date, time, tz, contact):
-	contact = json.loads(contact)
-	datetime_obj = datetime.datetime.strptime(date + " " + time, "%Y-%m-%d %H:%M:%S")
+	format_string = "%Y-%m-%d %H:%M:%S"
+	scheduled_time = datetime.datetime.strptime(date + " " + time, format_string)
 	# Strip tzinfo from datetime objects since it's handled by the doctype
-	scheduled_time_obj = datetime_obj.replace(tzinfo=None)
-	scheduled_time = convert_to_system_timezone(tz, scheduled_time_obj)
 	scheduled_time = scheduled_time.replace(tzinfo=None)
-
+	scheduled_time = convert_to_system_timezone(tz, scheduled_time)
+	scheduled_time = scheduled_time.replace(tzinfo=None)
 	# Create a appointment document from form
 	appointment = frappe.new_doc("Appointment")
-	appointment.update(
-		{
-			"scheduled_time": scheduled_time,
-			"customer_name": contact.get("name", None),
-			"customer_phone_number": contact.get("number", None),
-			"customer_skype": contact.get("skype", None),
-			"customer_details": contact.get("notes", None),
-			"customer_email": contact.get("email", None),
-			"status": "Open",
-		}
-	)
+	appointment.scheduled_time = scheduled_time
+	contact = json.loads(contact)
+	appointment.customer_name = contact.get("name", None)
+	appointment.customer_phone_number = contact.get("number", None)
+	appointment.customer_skype = contact.get("skype", None)
+	appointment.customer_details = contact.get("notes", None)
+	appointment.customer_email = contact.get("email", None)
+	appointment.status = "Open"
 	appointment.insert(ignore_permissions=True)
 	return appointment
 
