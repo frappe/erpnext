@@ -2,7 +2,24 @@
 
 frappe.ui.form.on(cur_frm.doctype, {
 	refresh: function(frm) {
-		frm.trigger("set_applies_to_read_only");
+		frm.events.set_applies_to_read_only(frm);
+
+		var vehicle_field = frm.get_docfield("applies_to_vehicle");
+		if (vehicle_field) {
+			vehicle_field.get_route_options_for_new_doc = function () {
+				return {
+					"item_code": frm.doc.applies_to_item,
+					"item_name": frm.doc.applies_to_item_name,
+					"unregistered": frm.doc.vehicle_unregistered,
+					"license_plate": frm.doc.vehicle_license_plate,
+					"chassis_no": frm.doc.vehicle_chassis_no,
+					"engine_no": frm.doc.vehicle_engine_no,
+					"color": frm.doc.vehicle_color,
+					"warranty_no": me.frm.doc.vehicle_warranty_no,
+					"delivery_date": me.frm.doc.vehicle_delivery_date,
+				}
+			}
+		}
 	},
 
 	onload: function(frm) {
@@ -12,12 +29,12 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 
 	applies_to_vehicle: function (frm) {
-		frm.trigger("set_applies_to_read_only");
-		frm.trigger("get_applies_to_details");
+		frm.events.set_applies_to_read_only(frm);
+		frm.events.get_applies_to_details(frm);
 	},
 
 	applies_to_item: function(frm) {
-		frm.trigger("get_applies_to_details");
+		frm.events.get_applies_to_details(frm);
 	},
 
 	set_applies_to_read_only: function(frm) {
@@ -25,9 +42,14 @@ frappe.ui.form.on(cur_frm.doctype, {
 			'applies_to_item', 'applies_to_item_name',
 			'vehicle_license_plate', 'vehicle_unregistered',
 			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_color', 'vehicle_last_odometer',
+			'vehicle_color',
 			'vehicle_warranty_no', 'vehicle_delivery_date',
 		];
+
+		if (frm.doc.doctype != "Project") {
+			read_only_fields.push("vehicle_last_odometer");
+		}
+
 		$.each(read_only_fields, function (i, f) {
 			if (frm.fields_dict[f]) {
 				frm.set_df_property(f, "read_only", frm.doc.applies_to_vehicle ? 1 : 0);
@@ -42,6 +64,11 @@ frappe.ui.form.on(cur_frm.doctype, {
 			doctype: frm.doc.doctype,
 			name: frm.doc.name,
 		};
+
+		if (frm.doc.doctype != "Project") {
+			args.project = frm.doc.project;
+		}
+
 		return frappe.call({
 			method: "erpnext.stock.get_item_details.get_applies_to_details",
 			args: {
@@ -73,5 +100,4 @@ frappe.ui.form.on(cur_frm.doctype, {
 			}
 		});
 	},
-
-})
+});
