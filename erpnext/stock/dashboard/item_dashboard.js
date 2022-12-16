@@ -97,7 +97,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		};
 
 		var me = this;
-		frappe.call({
+		return frappe.call({
 			method: this.method,
 			args: args,
 			callback: function (r) {
