@@ -5,7 +5,8 @@ frappe.provide("erpnext.crm");
 
 {% include 'erpnext/crm/doctype/appointment/appointment_slots.js' %};
 {% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
-{% include "erpnext/public/js/controllers/quick_contacts.js" %};
+{% include 'erpnext/public/js/controllers/quick_contacts.js' %};
+{% include 'erpnext/selling/applies_to_common.js' %};
 
 erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 	setup: function () {
@@ -21,7 +22,6 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		this.set_dynamic_field_label();
 		this.set_dynamic_link();
 		this.setup_route_options();
-		this.set_applies_to_read_only();
 
 		this.frm.trigger('set_disallow_on_submit_fields_read_only');
 		this.setup_dashboard();
@@ -369,12 +369,7 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 		}
 	},
 
-	applies_to_item: function () {
-		this.get_applies_to_details();
-	},
 	applies_to_vehicle: function () {
-		this.set_applies_to_read_only();
-		this.get_applies_to_details();
 		this.reload_customer_vehicle_selector();
 	},
 
@@ -386,46 +381,6 @@ erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 	},
 	vehicle_license_plate: function () {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
-	},
-
-	get_applies_to_details: function () {
-		var me = this;
-		var args = this.get_applies_to_args();
-		return frappe.call({
-			method: "erpnext.stock.get_item_details.get_applies_to_details",
-			args: {
-				args: args
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					return me.frm.set_value(r.message);
-				}
-			}
-		});
-	},
-
-	get_applies_to_args: function () {
-		return {
-			applies_to_item: this.frm.doc.applies_to_item,
-			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
-			doctype: this.frm.doc.doctype,
-			name: this.frm.doc.name,
-		}
-	},
-
-	set_applies_to_read_only: function() {
-		var me = this;
-		var read_only_fields = [
-			'applies_to_item', 'applies_to_item_name',
-			'vehicle_license_plate', 'vehicle_unregistered',
-			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_color', 'vehicle_last_odometer',
-		];
-		$.each(read_only_fields, function (i, f) {
-			if (me.frm.fields_dict[f]) {
-				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
-			}
-		});
 	},
 
 	make_project: function () {
