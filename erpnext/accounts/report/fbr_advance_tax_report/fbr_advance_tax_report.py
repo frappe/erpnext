@@ -5,6 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate, flt, cint
 
+
 class FBRInvoiceWiseTaxes(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
@@ -14,12 +15,16 @@ class FBRInvoiceWiseTaxes(object):
 		if not self.filters.get("company"):
 			self.filters["company"] = frappe.db.get_single_value('Global Defaults', 'default_company')
 
-		self.filters.advance_tax_account = frappe.get_cached_value('Company', self.filters.company, "advance_tax_account")
-
 	def run(self, args):
 		if self.filters.from_date > self.filters.to_date:
 			frappe.throw(_("From Date must be before To Date"))
-		if not self.filters.advance_tax_account:
+
+		self.filters.advance_tax_accounts = frappe.get_all("Advance Tax Account", filters={
+			"parenttype": "Company", "parent": self.filters.company
+		}, fields=["account_head"])
+		self.filters.advance_tax_accounts = [d.account_head for d in self.filters.advance_tax_accounts]
+
+		if not self.filters.advance_tax_accounts:
 			frappe.throw(_("Please set 'Advance Tax Account' for Company '{0}' first").format(self.filters.company))
 
 		self.filters.party_type = args.get("party_type")
@@ -116,6 +121,10 @@ class FBRInvoiceWiseTaxes(object):
 		return columns
 
 	def get_data(self):
+		account_condition = ""
+		if self.filters.account:
+			account_condition = " and t2.account_head = %(account)s"
+
 		taxes = frappe.db.sql("""
 			select
 				i.name as invoice, i.customer as party, t.account_head, t.charge_type, t.row_id, t.idx, t.rate,
@@ -125,8 +134,10 @@ class FBRInvoiceWiseTaxes(object):
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
 				and exists(select t2.name from `tabSales Taxes and Charges` t2
 					where t2.parent = i.name and t2.parenttype = 'Sales Invoice'
-					and t2.account_head = %(advance_tax_account)s and abs(t2.base_tax_amount_after_discount_amount) > 0)
-		""", self.filters, as_dict=1)
+						and t2.account_head in %(advance_tax_accounts)s
+						and abs(t2.base_tax_amount_after_discount_amount) > 0
+						{0})
+		""".format(account_condition), self.filters, as_dict=1)
 
 		advance_tax_in_invoice = set()
 		customer_rows = {}
@@ -140,7 +151,7 @@ class FBRInvoiceWiseTaxes(object):
 				frappe.msgprint(_("There is a problem in Sales Invoice '{0}'. Duplicate row idx found!").format(tax.invoice))
 			invoice_taxes[tax.idx] = tax
 
-			if tax.account_head == self.filters.advance_tax_account:
+			if tax.account_head in self.filters.advance_tax_accounts:
 				if tax.invoice in advance_tax_in_invoice:
 					frappe.msgprint(_("Sales Invoice '{0}' has multiple Advance Tax rows!").format(tax.invoice))
 				else:
@@ -156,7 +167,7 @@ class FBRInvoiceWiseTaxes(object):
 			tax.row_id = cint(tax.row_id)
 			reference_tax = invoice_taxes_idx_map.get(tax.invoice, {}).get(tax.row_id)
 			if tax.charge_type in ("On Previous Row Total", "On Previous Row Amount") and not reference_tax:
-				frappe.throw(_("There is a problem with Sales Invoice '{0}'. Reference tax for calculating Taxable Amount could be found!")
+				frappe.throw(_("There is a problem with Sales Invoice '{0}'. Reference tax for calculating Taxable Amount could not be found!")
 					.format(tax.invoice))
 
 			if tax.charge_type == "On Previous Row Total":
@@ -211,9 +222,39 @@ class FBRInvoiceWiseTaxes(object):
 
 		return customer_details
 
+
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 	return FBRInvoiceWiseTaxes(filters).run(args)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def advance_tax_account_query(doctype, txt, searchfield, start, page_len, filters):
+	accounts = frappe.db.sql("""
+		SELECT name, parent_account
+		FROM `tabAccount`
+		WHERE is_group = 0
+			AND company = %(company)s
+			AND exists(select `tabAdvance Tax Account`.name from `tabAdvance Tax Account` where
+				`tabAdvance Tax Account`.account_head = `tabAccount`.name
+				and `tabAdvance Tax Account`.parenttype = 'Company'
+				and `tabAdvance Tax Account`.parent = %(company)s)
+			AND `{searchfield}` LIKE %(txt)s
+		ORDER BY
+			if(locate(%(txt)s, name), locate(%(txt)s, name), 99999),
+			idx DESC,
+			name
+		LIMIT %(offset)s, %(limit)s
+	""".format(searchfield=searchfield), {
+		"account_types": filters.get("account_type"),
+		"company": filters.get("company"),
+		"txt": "%{}%".format(txt),
+		"offset": start,
+		"limit": page_len,
+	})
+
+	return accounts

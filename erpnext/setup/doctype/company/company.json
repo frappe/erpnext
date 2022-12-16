@@ -78,10 +78,11 @@
   "column_break_61",
   "further_tax_account",
   "extra_tax_account",
-  "advance_tax_account",
   "column_break_64",
   "selling_apply_discount_after_taxes",
   "buying_apply_discount_after_taxes",
+  "advance_tax_section",
+  "advance_tax_accounts",
   "default_accounts_section",
   "default_bank_account",
   "default_cash_account",
@@ -763,13 +764,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "advance_tax_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Advance Tax Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "sales_tax_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -934,14 +928,24 @@
    "fieldtype": "Tab Break",
    "label": "Company Details",
    "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "advance_tax_section",
+   "fieldtype": "Section Break",
+   "label": "Advance Tax"
+  },
+  {
+   "fieldname": "advance_tax_accounts",
+   "fieldtype": "Table",
+   "label": "Advance Tax Accounts",
+   "options": "Advance Tax Account"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "links": [],
- "modified": "2022-11-16 00:49:54.721817",
+ "modified": "2022-12-15 18:03:01.680143",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

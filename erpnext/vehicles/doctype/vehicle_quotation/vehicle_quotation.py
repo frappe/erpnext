@@ -157,5 +157,5 @@ def set_expired_status():
 		UPDATE
 			`tabVehicle Quotation` SET `status` = 'Expired'
 		WHERE
-			`status` not in ('Ordered', 'Expired', 'Lost', 'Cancelled') AND `valid_till` < %s
+			`status` not in ('Ordered', 'Expired', 'Lost', 'Cancelled') AND `valid_till` < %s AND `docstatus` = 1
 		""", (nowdate()))

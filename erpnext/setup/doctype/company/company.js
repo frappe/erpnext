@@ -228,7 +228,6 @@ erpnext.company.setup_queries = function(frm) {
 		["service_tax_account", {"account_type": "Tax"}],
 		["further_tax_account", {"account_type": "Tax"}],
 		["extra_tax_account", {"account_type": "Tax"}],
-		["advance_tax_account", {"account_type": "Tax"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
 		["unrealized_exchange_gain_loss_account", {"root_type": "Expense"}],
 		["accumulated_depreciation_account",
@@ -258,6 +257,18 @@ erpnext.company.setup_queries = function(frm) {
 				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
+		});
+	}
+
+	if (frm.fields_dict.advance_tax_accounts) {
+		frm.set_query("account_head", "advance_tax_accounts", function() {
+			return {
+				filters: {
+					"company": frm.doc.name,
+					"is_group": 0,
+					"account_type": "Tax"
+				}
+			}
 		});
 	}
 }
