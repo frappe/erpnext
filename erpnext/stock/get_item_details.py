@@ -828,9 +828,9 @@ def insert_item_price(args):
 	):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (
-				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				(flt(args.rate) + flt(args.discount_amount)) / args.get("conversion_factor")
 				if args.get("conversion_factor")
-				else (args.rate + args.discount_amount)
+				else (flt(args.rate) + flt(args.discount_amount))
 			)
 
 			item_price = frappe.db.get_value(
