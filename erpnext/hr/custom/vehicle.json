@@ -141,7 +141,7 @@
    "modified_by": "Administrator",
    "name": "Vehicle-vehicle_deputed_section",
    "no_copy": 0,
-   "options": "Bakery\nIce Cream\n19LTR\nCakes",
+   "options": "Bakery\nIce Cream\n19LTR\nCakes\nCash Van\nAmbulance\nI.T\nAdmin\nBeverages\nMotor Transport",
    "owner": "Administrator",
    "parent": null,
    "parentfield": null,
