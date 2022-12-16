@@ -136,15 +136,14 @@ class Appointment(Document):
 		if existing_assignee:
 			# If the latest opportunity is assigned to someone
 			# Assign the appointment to the same
-			assign_agents(self.doctype, self.name, [existing_assignee])
+			self.assign_agent(existing_assignee)
 			return
 		if self._assign:
 			return
 		available_agents = _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time))
 		for agent in available_agents:
 			if _check_agent_availability(agent, self.scheduled_time):
-				agent = agent[0]
-				assign_agents(self.doctype, self.name, [agent])
+				self.assign_agent(agent[0])
 			break
 
 	def get_assignee_from_latest_opportunity(self):
@@ -199,6 +198,12 @@ class Appointment(Document):
 		params = {"email": self.customer_email, "appointment": self.name}
 		return get_url(verify_route + "?" + get_signed_params(params))
 
+	def assign_agent(self, agent):
+		if not frappe.has_permission(doc=self, user=agent):
+			add_docshare(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
+
+		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+
 
 def _get_agents_sorted_by_asc_workload(date):
 	appointments = frappe.get_all("Appointment", fields="*")
@@ -240,11 +245,3 @@ def _get_employee_from_user(user):
 	if employee_docname:
 		return frappe.get_doc("Employee", employee_docname)
 	return None
-
-
-def assign_agents(doctype: str, name: str, agents: list[str]) -> None:
-	for agent in agents:
-		if not frappe.has_permission(doctype=doctype, doc=name, user=agent):
-			add_docshare(doctype, name, agent, flags={"ignore_share_permission": True})
-
-	add_assignment({"doctype": doctype, "name": name, "assign_to": agents})
