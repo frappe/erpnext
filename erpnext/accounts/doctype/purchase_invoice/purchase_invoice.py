@@ -327,7 +327,7 @@ class PurchaseInvoice(BuyingController):
 			for item in doc.get("items"):
 				item.db_update()
 
-		excluded_vouchers = []
+		excluded_vouchers = [(self.doctype, self.name)]
 		for doc in docs:
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
@@ -341,7 +341,8 @@ class PurchaseInvoice(BuyingController):
 
 			excluded_vouchers.append((doc.doctype, doc.name))
 
-		update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers)
+		if docs:
+			update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers)
 
 	def set_debit_note_amount(self):
 		for d in self.items:
