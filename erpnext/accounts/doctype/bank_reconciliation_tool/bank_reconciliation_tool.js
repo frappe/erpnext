@@ -160,6 +160,9 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					).$wrapper,
 					bank_statement_from_date: frm.doc.bank_statement_from_date,
 					bank_statement_to_date: frm.doc.bank_statement_to_date,
+					filtered_by_reference_date:frm.doc.filtered_by_reference_date,
+					from_reference_date:frm.doc.from_reference_date,
+					to_reference_date:frm.doc.to_reference_date,
 					bank_statement_closing_balance:
 						frm.doc.bank_statement_closing_balance,
 					cards_manager: frm.cards_manager,

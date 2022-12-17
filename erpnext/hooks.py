@@ -469,8 +469,8 @@ period_closing_doctypes = [
 bank_reconciliation_doctypes = [
 	"Payment Entry",
 	"Journal Entry",
-	# "Purchase Invoice",
-	# "Sales Invoice",
+	"Purchase Invoice",
+	"Sales Invoice",
 	"Loan Repayment",
 	"Loan Disbursement",
 ]

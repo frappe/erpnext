@@ -25,8 +25,6 @@ class BankReconciliationTool(Document):
 @frappe.whitelist()
 def get_bank_transactions(bank_account, from_date=None, to_date=None):
 	# returns bank transactions for a bank account
-	from_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_from_date")
-	to_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_to_date")
 	filters = []
 	filters.append(["bank_account", "=", bank_account])
 	filters.append(["docstatus", "=", 1])
@@ -52,8 +50,8 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 			"party",
 		],
 		filters=filters,
+		order_by="date",
 	)
-	transactions = sorted(transactions, key=lambda x: x["date"]) if transactions else []
 	return transactions
 
 
@@ -330,23 +328,58 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 
 
 @frappe.whitelist()
-def get_linked_payments(bank_transaction_name, document_types=None):
+def get_linked_payments(
+	bank_transaction_name,
+	document_types=None,
+	from_date=None,
+	to_date=None,
+	filtered_by_reference_date=None,
+	from_reference_date=None,
+	to_reference_date=None,
+):
 	# get all matching payments for a bank transaction
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_account = frappe.db.get_values(
 		"Bank Account", transaction.bank_account, ["account", "company"], as_dict=True
 	)[0]
 	(account, company) = (bank_account.account, bank_account.company)
-	matching = check_matching(account, company, transaction, document_types)
+	matching = check_matching(
+		account,
+		company,
+		transaction,
+		document_types,
+		from_date,
+		to_date,
+		filtered_by_reference_date,
+		from_reference_date,
+		to_reference_date,
+	)
 	return matching
 
 
-def check_matching(bank_account, company, transaction, document_types):
+def check_matching(
+	bank_account,
+	company,
+	transaction,
+	document_types,
+	from_date,
+	to_date,
+	filtered_by_reference_date,
+	from_reference_date,
+	to_reference_date,
+):
 	# combine all types of vouchers
-	filtered_by_reference_date = frappe.db.get_single_value(
-		"Bank Reconciliation Tool", "filtered_by_reference_date"
+	subquery = get_queries(
+		bank_account,
+		company,
+		transaction,
+		document_types,
+		from_date,
+		to_date,
+		filtered_by_reference_date,
+		from_reference_date,
+		to_reference_date,
 	)
-	subquery = get_queries(bank_account, company, transaction, document_types)
 	filters = {
 		"amount": transaction.unallocated_amount,
 		"payment_type": "Receive" if transaction.deposit > 0 else "Pay",
@@ -367,19 +400,20 @@ def check_matching(bank_account, company, transaction, document_types):
 				filters,
 			)
 		)
-	matching_vouchers_with_ref_no = tuple(
-		ele for ele in matching_vouchers if frappe.as_json(ele[5]) != "null"
-	)
-	if filtered_by_reference_date:
-		matching_vouchers = (
-			sorted(matching_vouchers_with_ref_no, key=lambda x: x[5]) if matching_vouchers else []
-		)
-	else:
-		matching_vouchers = sorted(matching_vouchers, key=lambda x: x[8]) if matching_vouchers else []
-	return matching_vouchers
+	return sorted(matching_vouchers, key=lambda x: x[0], reverse=True) if matching_vouchers else []
 
 
-def get_queries(bank_account, company, transaction, document_types):
+def get_queries(
+	bank_account,
+	company,
+	transaction,
+	document_types,
+	from_date,
+	to_date,
+	filtered_by_reference_date,
+	from_reference_date,
+	to_reference_date,
+):
 	# get queries to get matching vouchers
 	amount_condition = "=" if "exact_match" in document_types else "<="
 	account_from_to = "paid_to" if transaction.deposit > 0 else "paid_from"
@@ -395,6 +429,11 @@ def get_queries(bank_account, company, transaction, document_types):
 				document_types,
 				amount_condition,
 				account_from_to,
+				from_date,
+				to_date,
+				filtered_by_reference_date,
+				from_reference_date,
+				to_reference_date,
 			)
 			or []
 		)
@@ -403,15 +442,42 @@ def get_queries(bank_account, company, transaction, document_types):
 
 
 def get_matching_queries(
-	bank_account, company, transaction, document_types, amount_condition, account_from_to
+	bank_account,
+	company,
+	transaction,
+	document_types,
+	amount_condition,
+	account_from_to,
+	from_date,
+	to_date,
+	filtered_by_reference_date,
+	from_reference_date,
+	to_reference_date,
 ):
 	queries = []
 	if "payment_entry" in document_types:
-		pe_amount_matching = get_pe_matching_query(amount_condition, account_from_to, transaction)
+		pe_amount_matching = get_pe_matching_query(
+			amount_condition,
+			account_from_to,
+			transaction,
+			from_date,
+			to_date,
+			filtered_by_reference_date,
+			from_reference_date,
+			to_reference_date,
+		)
 		queries.extend([pe_amount_matching])
 
 	if "journal_entry" in document_types:
-		je_amount_matching = get_je_matching_query(amount_condition, transaction)
+		je_amount_matching = get_je_matching_query(
+			amount_condition,
+			transaction,
+			from_date,
+			to_date,
+			filtered_by_reference_date,
+			from_reference_date,
+			to_reference_date,
+		)
 		queries.extend([je_amount_matching])
 
 	if transaction.deposit > 0 and "sales_invoice" in document_types:
@@ -518,41 +584,27 @@ def get_lr_matching_query(bank_account, amount_condition, filters):
 	return vouchers
 
 
-def get_pe_matching_query(amount_condition, account_from_to, transaction):
+def get_pe_matching_query(
+	amount_condition,
+	account_from_to,
+	transaction,
+	from_date,
+	to_date,
+	filtered_by_reference_date,
+	from_reference_date,
+	to_reference_date,
+):
 	# get matching payment entries query
-	from_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_from_date")
-	to_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_to_date")
-	from_reference_date = frappe.db.get_single_value(
-		"Bank Reconciliation Tool", "from_reference_date"
-	)
-	to_reference_date = frappe.db.get_single_value("Bank Reconciliation Tool", "to_reference_date")
-	filtered_by_reference_date = frappe.db.get_single_value(
-		"Bank Reconciliation Tool", "filtered_by_reference_date"
-	)
 	if transaction.deposit > 0:
 		currency_field = "paid_to_account_currency as currency"
 	else:
 		currency_field = "paid_from_account_currency as currency"
-	cond_filtered_from_ref_date = ""
-	cond_filtered_to_ref_date = ""
-	cond_filtered_from_posting_date = ""
-	cond_filtered_to_posting_date = ""
-	from_ref_date  =""
-	to_ref_date =""
-	from_post_date = ""
-	to_post_date = ""
-	if(filtered_by_reference_date):
-		cond_filtered_from_ref_date = " AND reference_date >="
-		cond_filtered_to_ref_date = " AND reference_date <="
-		from_ref_date = from_reference_date
-		to_ref_date = to_reference_date
-	elif(not filtered_by_reference_date):
-		cond_filtered_from_posting_date = " AND posting_date >="
-		cond_filtered_to_posting_date = " AND posting_date <="
-		from_post_date = from_date
-		to_post_date = to_date
-		
-	pe_data=  f"""
+	filter_by_date = f"AND posting_date between '{from_date}' and '{to_date}'"
+	order_by = " posting_date"
+	if filtered_by_reference_date == "1":
+		filter_by_date = f"AND reference_date between '{from_reference_date}' and '{to_reference_date}'"
+		order_by = " reference_date"
+	return f"""
 		SELECT
 			(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
 			+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
@@ -574,49 +626,33 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 			AND payment_type IN (%(payment_type)s, 'Internal Transfer')
 			AND ifnull(clearance_date, '') = ""
 			AND {account_from_to} = %(bank_account)s
-			AND reference_no = '{transaction.reference_number}'
-			{cond_filtered_from_ref_date} "{from_ref_date}"
-			{cond_filtered_to_ref_date} "{to_ref_date}"
-			{cond_filtered_from_posting_date} "{from_post_date}"
-			{cond_filtered_to_posting_date} "{to_post_date}"
-		"""	
-	return pe_data
+			{filter_by_date}
+		order by{order_by}
+
+	"""
 
 
-def get_je_matching_query(amount_condition, transaction):
+def get_je_matching_query(
+	amount_condition,
+	transaction,
+	from_date,
+	to_date,
+	filtered_by_reference_date,
+	from_reference_date,
+	to_reference_date,
+):
 	# get matching journal entry query
 	# We have mapping at the bank level
 	# So one bank could have both types of bank accounts like asset and liability
 	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
-	from_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_from_date")
-	to_date = frappe.db.get_single_value("Bank Reconciliation Tool", "bank_statement_to_date")
-	from_reference_date = frappe.db.get_single_value(
-		"Bank Reconciliation Tool", "from_reference_date"
-	)
-	to_reference_date = frappe.db.get_single_value("Bank Reconciliation Tool", "to_reference_date")
-	filtered_by_reference_date = frappe.db.get_single_value(
-		"Bank Reconciliation Tool", "filtered_by_reference_date"
-	)
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
-	cond_filtered_from_ref_date = ""
-	cond_filtered_to_ref_date = ""
-	cond_filtered_from_posting_date = ""
-	cond_filtered_to_posting_date = ""
-	from_ref_date  =""
-	to_ref_date =""
-	from_post_date = ""
-	to_post_date = ""
-	if(filtered_by_reference_date):
-		cond_filtered_from_ref_date = " AND je.cheque_date >="
-		cond_filtered_to_ref_date = " AND je.cheque_date <="
-		from_ref_date = from_reference_date
-		to_ref_date = to_reference_date
-	elif(not filtered_by_reference_date):
-		cond_filtered_from_posting_date = " AND je.posting_date>="
-		cond_filtered_to_posting_date = " AND je.posting_date <="
-		from_post_date = from_date
-		to_post_date = to_date
-	je_data =  f"""
+	# filter_by_date = f"AND je.posting_date between '{from_date}' and '{to_date}'"
+	order_by = " je.posting_date"
+	if filtered_by_reference_date == "1":
+		filter_by_date = f"AND je.cheque_date between '{from_reference_date}' and '{to_reference_date}'"
+		order_by = " je.cheque_date"
+
+	return f"""
 		SELECT
 			(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
 			+ 1) AS rank ,
@@ -640,13 +676,10 @@ def get_je_matching_query(amount_condition, transaction):
 			AND jea.account = %(bank_account)s
 			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
 			AND je.docstatus = 1
-			AND je.cheque_no = '{transaction.reference_number}'
-			{cond_filtered_from_ref_date} "{from_ref_date}"
-			{cond_filtered_to_ref_date} "{to_ref_date}"
-			{cond_filtered_from_posting_date} "{from_post_date}"
-			{cond_filtered_to_posting_date} "{to_post_date}"
-		"""
-	return je_data
+			{filter_by_date}
+			order by {order_by}
+	"""
+
 
 def get_si_matching_query(amount_condition):
 	# get matchin sales invoice query
