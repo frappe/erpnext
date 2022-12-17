@@ -5,6 +5,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		this.bank_account = bank_account;
 		this.company = company;
 		this.make_dialog();
+		this.bank_statement_from_date = bank_statement_from_date;
+		this.bank_statement_to_date = bank_statement_to_date;
+		this.filtered_by_reference_date = filtered_by_reference_date;
+		this.from_reference_date = from_reference_date;
+		this.to_reference_date = to_reference_date;
 	}
 
 	show_dialog(bank_transaction_name, update_dt_cards) {
@@ -50,7 +55,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			this.company = company;
 			this.make_dialog();
 		}
-	
+
 		show_dialog(bank_transaction_name, update_dt_cards) {
 			this.bank_transaction_name = bank_transaction_name;
 			this.update_dt_cards = update_dt_cards;
@@ -86,7 +91,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			});
 		}
-	
+
 		get_linked_vouchers(document_types) {
 			frappe.call({
 				method:
@@ -94,12 +99,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				args: {
 					bank_transaction_name: this.bank_transaction_name,
 					document_types: document_types,
+					from_date: this.bank_statement_from_date,
+					to_date: this.bank_statement_to_date,
+					filtered_by_reference_date: this.filtered_by_reference_date,
+					from_reference_date:this.from_reference_date,
+					to_reference_date:this.to_reference_date
 				},
-	
+
 				callback: (result) => {
 					const data = result.message;
-	
-	
+
+
 					if (data && data.length > 0) {
 						const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 						proposals_wrapper.show();
@@ -123,13 +133,13 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 						const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 						proposals_wrapper.hide();
 						this.dialog.fields_dict.no_matching_vouchers.$wrapper.show();
-	
+
 					}
 					this.dialog.show();
 				},
 			});
 		}
-	
+
 		get_dt_columns() {
 			this.columns = [
 				{
@@ -162,7 +172,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					editable: false,
 					width: 120,
 				},
-	
+
 				{
 					name: __("Reference Number"),
 					editable: false,
@@ -170,7 +180,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			];
 		}
-	
+
 		get_datatable(proposals_wrapper) {
 			if (!this.datatable) {
 				const datatable_options = {
@@ -189,11 +199,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				this.datatable.rowmanager.checkMap = [];
 			}
 		}
-	
+
 		make_dialog() {
 			const me = this;
 			me.selected_payment = null;
-	
+
 			const fields = [
 				{
 					label: __("Action"),
@@ -221,7 +231,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					depends_on: "eval:doc.action=='Match Against Voucher'",
 				},
 			];
-	
+
 			frappe.call({
 				method: "erpnext.accounts.doctype.bank_transaction.bank_transaction.get_doctypes_for_bank_reconciliation",
 				callback: (r) => {
@@ -238,9 +248,9 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 							onchange: () => this.update_options(),
 						});
 					});
-	
+
 					fields.push(...this.get_voucher_fields());
-	
+
 					me.dialog = new frappe.ui.Dialog({
 						title: __("Reconcile the Bank Transaction"),
 						fields: fields,
@@ -251,7 +261,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				}
 			});
 		}
-	
+
 		get_voucher_fields() {
 			return [
 				{
@@ -431,7 +441,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					label: "Allocated Amount",
 					read_only: 1,
 				},
-	
+
 				{
 					fieldname: "unallocated_amount",
 					fieldtype: "Currency",
@@ -440,7 +450,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			];
 		}
-	
+
 		get_selected_attributes() {
 			let selected_attributes = [];
 			this.dialog.$wrapper.find(".checkbox input").each((i, col) => {
@@ -448,15 +458,15 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					selected_attributes.push($(col).attr("data-fieldname"));
 				}
 			});
-	
+
 			return selected_attributes;
 		}
-	
+
 		update_options() {
 			let selected_attributes = this.get_selected_attributes();
 			this.get_linked_vouchers(selected_attributes);
 		}
-	
+
 		reconciliation_dialog_primary_action(values) {
 			if (values.action == "Match Against Voucher") this.match(values);
 			if (
@@ -472,7 +482,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			else if (values.action == "Update Bank Transaction")
 				this.update_transaction(values);
 		}
-	
+
 		match() {
 			var selected_map = this.datatable.rowmanager.checkMap;
 			let rows = [];
@@ -502,7 +512,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			});
 		}
-	
+
 		add_payment_entry(values) {
 			frappe.call({
 				method:
@@ -526,7 +536,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			});
 		}
-	
+
 		add_journal_entry(values) {
 			frappe.call({
 				method:
@@ -550,7 +560,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			});
 		}
-	
+
 		update_transaction(values) {
 			frappe.call({
 				method:
@@ -569,7 +579,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 			});
 		}
-	
+
 		edit_in_full_page() {
 			const values = this.dialog.get_values(true);
 			if (values.document_type == "Payment Entry") {
@@ -616,9 +626,9 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				});
 			}
 		}
-	
+
 	};
-	
+
 	get_linked_vouchers(document_types) {
 		frappe.call({
 			method:
