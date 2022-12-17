@@ -52,6 +52,7 @@ class JournalEntry(AccountsController):
 		self.update_loan()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -73,6 +74,7 @@ class JournalEntry(AccountsController):
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
+	
 		for d in self.get("accounts"):
 			if d.is_advance:
 				if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
@@ -163,7 +165,13 @@ class JournalEntry(AccountsController):
 			set journal_entry = null where journal_entry = %s""", self.name)
 
 	def validate_party(self):
+		outstanding_amount =0
 		for d in self.get("accounts"):
+			if d.debit!= 0 : 
+				outstanding_amount = d.debit 
+			else: 
+				outstanding_amount = d.credit
+			d.outstanding_amount= outstanding_amount
 			account_type = frappe.db.get_value("Account", d.account, "account_type")
 			if account_type in ["Receivable", "Payable"]:
 				if not (d.party_type and d.party):

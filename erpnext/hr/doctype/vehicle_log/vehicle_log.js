@@ -22,6 +22,21 @@ frappe.ui.form.on("Vehicle Log", {
 				frappe.set_route('Form', 'Expense Claim', r.message.name);
 			}
 		});
-	}
+	},
+
+	vehicle_log_type: function (frm){
+		if (frm.doc.vehicle_log_type == 'Routine Checkup'){
+			frm.set_df_property('service_detail','reqd',0);
+			var field = frappe.meta.get_docfield("Vehicle Service", "item_code", frm.doc.name);
+			field.reqd = 0;
+		}else{
+			var field = frappe.meta.get_docfield("Vehicle Service", "item_code", frm.doc.name);
+			field.reqd = 1;
+			frm.set_df_property('service_detail','reqd',1);
+		}
+		refresh_field('service_detail');
+	},
+	
 });
+
 
