@@ -541,7 +541,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 15:11:57.409060",
+ "modified": "2022-12-18 16:39:32.300783",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -559,6 +559,15 @@
  ],
  "sequence_id": 3.0,
  "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "{\"disabled\":[\"=\",0],\"is_purchase_item\":[\"=\",1]}",
+   "type": "DocType"
+  },
   {
    "color": "Orange",
    "doc_view": "List",
@@ -610,15 +619,6 @@
    "label": "Purchase Invoice",
    "link_to": "Purchase Invoice",
    "stats_filter": "{\"docstatus\":[\"=\",\"1\"],\"outstanding_amount\":[\">\",0]}",
-   "type": "DocType"
-  },
-  {
-   "color": "Blue",
-   "doc_view": "List",
-   "format": "{} Enabled",
-   "label": "Item",
-   "link_to": "Item",
-   "stats_filter": "{\"disabled\":[\"=\",0]}",
    "type": "DocType"
   },
   {

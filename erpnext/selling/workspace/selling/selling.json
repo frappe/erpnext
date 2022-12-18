@@ -640,7 +640,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 14:26:50.245327",
+ "modified": "2022-12-18 16:39:15.137606",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -671,6 +671,15 @@
    "link_to": "Sales Details",
    "stats_filter": "",
    "type": "Report"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "{\"disabled\":[\"=\",0],\"is_sales_item\":[\"=\",1]}",
+   "type": "DocType"
   },
   {
    "color": "Grey",
@@ -722,15 +731,6 @@
    "format": "{} Enabled",
    "label": "Customer",
    "link_to": "Customer",
-   "stats_filter": "{\"disabled\":[\"=\",0]}",
-   "type": "DocType"
-  },
-  {
-   "color": "Blue",
-   "doc_view": "List",
-   "format": "{} Enabled",
-   "label": "Item",
-   "link_to": "Item",
    "stats_filter": "{\"disabled\":[\"=\",0]}",
    "type": "DocType"
   }

@@ -697,7 +697,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 15:51:52.965511",
+ "modified": "2022-12-18 16:39:42.487880",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -724,6 +724,15 @@
  ],
  "sequence_id": 4.0,
  "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "{\"is_stock_item\":[\"=\",1],\"disabled\":[\"=\",0]}",
+   "type": "DocType"
+  },
   {
    "color": "Orange",
    "doc_view": "List",
@@ -783,15 +792,6 @@
    "link_to": "Stock Projected Qty",
    "stats_filter": "",
    "type": "Report"
-  },
-  {
-   "color": "Blue",
-   "doc_view": "List",
-   "format": "{} Enabled",
-   "label": "Item",
-   "link_to": "Item",
-   "stats_filter": "{\"is_stock_item\":[\"=\",1],\"disabled\":[\"=\",0]}",
-   "type": "DocType"
   }
  ],
  "title": "Stock"
