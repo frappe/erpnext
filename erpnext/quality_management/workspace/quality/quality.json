@@ -135,7 +135,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:24:37.716426",
+ "modified": "2022-12-18 15:27:51.062589",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -143,7 +143,11 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Quality Manager"
+  }
+ ],
  "sequence_id": 9.0,
  "shortcuts": [],
  "title": "Quality"

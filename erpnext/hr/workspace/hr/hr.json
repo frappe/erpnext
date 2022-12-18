@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[\n {\n  \"data\": {\n   \"card_name\": \"Employee\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Department\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Designation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Branch\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employment Type\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Grade\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Group\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Payroll\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Payroll Entry\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Salary Slip\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Additional Salary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Retention Bonus\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Incentive\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Salary Register\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Attendance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Monthly Attendance Sheet\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Checkin Sheet\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Attendance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Attendance Request\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Checkin\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Upload Attendance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Attendance Tool\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leaves\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Application\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Allocation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Compensatory Leave Request\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Encashment\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Leave Balance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Leave Balance Summary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Ledger Entry\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Advances and Loans\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Advance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Loan\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Expense Claim\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Loan Application\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Loan Type\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employees Receivable\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Ledger Summary\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shift Management\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shift Type\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shift Request\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shift Assignment\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Configuration\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Policy\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Period\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Type\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Holiday List\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Leave Block List\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Payroll Configuration\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Salary Structure\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Salary Structure Assignment\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Payroll Period\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Income Tax Slab\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Salary Component\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Tax\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Opening Income Tax\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Tax Exemption Declaration\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Tax Exemption Proof Submission\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Tax Exemption Category\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Tax Exemption Sub Category\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Benefits\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Other Income\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Benefit Application\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Benefit Claim\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Health Insurance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Lifecycle\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Onboarding\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Promotion\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Transfer\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Separation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Lifecycle Configuration\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Skill Map\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Onboarding Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Separation Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Recruitment\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Job Opening\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Job Applicant\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Job Offer\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Staffing Plan\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Training\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Training Program\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Training Event\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Training Result\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Training Feedback\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Performance\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Appraisal\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Appraisal Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Energy Point Rule\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Energy Point Log\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Energy Point Leaderboard\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"HR Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Daily Work Summary Group\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Team Updates\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Reports\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employee Birthday\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Employees working on a holiday\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Department Analytics\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n }\n]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Human Resource Module</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payroll\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Attendance\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Leaves\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Advances and Loans\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift Management\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Leave Configuration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Payroll Configuration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee Tax\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee Benefits\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee Lifecycle\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee Lifecycle Configuration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Recruitment\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Training\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Performance\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:55.818294",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -920,69 +920,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Performance",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Appraisal",
-   "link_count": 0,
-   "link_to": "Appraisal",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Appraisal Template",
-   "link_count": 0,
-   "link_to": "Appraisal Template",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Energy Point Rule",
-   "link_count": 0,
-   "link_to": "Energy Point Rule",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Energy Point Log",
-   "link_count": 0,
-   "link_to": "Energy Point Log",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Energy Point Leaderboard",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Settings",
    "link_count": 0,
    "link_type": "DocType",
@@ -1063,9 +1000,61 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Performance",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Appraisal",
+   "link_count": 0,
+   "link_to": "Appraisal",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Appraisal Template",
+   "link_count": 0,
+   "link_to": "Appraisal Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Energy Point Rule",
+   "link_count": 0,
+   "link_to": "Energy Point Rule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Energy Point Log",
+   "link_count": 0,
+   "link_to": "Energy Point Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:24:37.612033",
+ "modified": "2022-12-18 15:27:31.583125",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -1073,7 +1062,14 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
  "sequence_id": 8.0,
  "shortcuts": [],
  "title": "HR"

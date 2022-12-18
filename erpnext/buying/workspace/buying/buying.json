@@ -541,7 +541,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 15:04:03.490564",
+ "modified": "2022-12-18 15:11:57.409060",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -571,6 +571,15 @@
   {
    "color": "Orange",
    "doc_view": "List",
+   "format": "{} Draft",
+   "label": "Supplier Quotation",
+   "link_to": "Supplier Quotation",
+   "stats_filter": "{\"docstatus\":[\"=\",\"0\"]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
    "format": "{} To Bill",
    "label": "Purchase Receipt",
    "link_to": "Purchase Receipt",
@@ -593,14 +602,6 @@
    "link_to": "Purchase Details",
    "stats_filter": "",
    "type": "Report"
-  },
-  {
-   "color": "Grey",
-   "doc_view": "List",
-   "label": "Supplier Quotation",
-   "link_to": "Supplier Quotation",
-   "stats_filter": "",
-   "type": "DocType"
   },
   {
    "color": "Orange",

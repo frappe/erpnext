@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"card\",\"data\":{\"card_name\":\"Projects\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Issues\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Time Tracking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Warranty\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Service Level Agreement\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Support Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Project Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Service Module</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Projects\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Issues\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Time Tracking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Warranty\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Service Level Agreement\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Maintenance\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Support Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Project Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
  "creation": "2022-11-16 04:02:55.857758",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -368,7 +368,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:50:17.204807",
+ "modified": "2022-12-18 15:27:06.101361",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Service",
@@ -376,7 +376,17 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Support Team"
+  }
+ ],
  "sequence_id": 7.0,
  "shortcuts": [],
  "title": "Service"

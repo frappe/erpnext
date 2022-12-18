@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pre Sales\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Pre Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Registration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Documents\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Sales Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Automotive / Vehicles Module</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pre Sales\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Pre Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Registration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Documents\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Sales Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.203759",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -601,7 +601,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-02 15:49:02.216241",
+ "modified": "2022-12-18 15:30:44.264751",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles",
@@ -610,7 +610,29 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "Vehicles",
- "roles": [],
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Vehicle Manager"
+  }
+ ],
  "sequence_id": 12.0,
  "shortcuts": [],
  "title": "Vehicles"
