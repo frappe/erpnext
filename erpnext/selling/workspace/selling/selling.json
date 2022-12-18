@@ -640,7 +640,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 01:44:24.186640",
+ "modified": "2022-12-18 14:26:50.245327",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -657,6 +657,9 @@
   },
   {
    "role": "Accounts User"
+  },
+  {
+   "role": "Stock User"
   }
  ],
  "sequence_id": 2.0,

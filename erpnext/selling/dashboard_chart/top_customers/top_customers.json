@@ -3,6 +3,7 @@
  "based_on": "",
  "chart_name": "Top Customers",
  "chart_type": "Group By",
+ "color": "#4463F0",
  "creation": "2022-11-25 03:02:36.508853",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
@@ -14,8 +15,8 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "last_synced_on": "2022-11-25 02:56:52.384648",
- "modified": "2022-11-25 03:04:37.663990",
+ "last_synced_on": "2022-12-18 14:36:04.681061",
+ "modified": "2022-12-18 14:45:15.719220",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Top Customers",
@@ -24,7 +25,13 @@
  "parent_document_type": "",
  "roles": [
   {
-   "role": "Sales Manager"
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Accounts User"
   }
  ],
  "source": "",

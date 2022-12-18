@@ -3,6 +3,7 @@
  "based_on": "",
  "chart_name": "Top Selling Items",
  "chart_type": "Group By",
+ "color": "#EC864B",
  "creation": "2022-11-25 02:31:10.048669",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
@@ -14,8 +15,8 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "last_synced_on": "2022-12-17 13:32:15.799242",
- "modified": "2022-12-17 14:22:25.559101",
+ "last_synced_on": "2022-12-18 14:36:00.481320",
+ "modified": "2022-12-18 14:45:56.919955",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Top Selling Items",
@@ -24,7 +25,13 @@
  "parent_document_type": "Sales Invoice",
  "roles": [
   {
-   "role": "Sales Manager"
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Accounts User"
   }
  ],
  "source": "",

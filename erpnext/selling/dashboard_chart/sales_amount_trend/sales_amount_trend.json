@@ -13,8 +13,8 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "last_synced_on": "2022-11-25 03:22:12.026070",
- "modified": "2022-11-25 03:22:21.783769",
+ "last_synced_on": "2022-12-18 14:26:13.754727",
+ "modified": "2022-12-18 14:28:08.136348",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Amount Trend",
@@ -23,7 +23,13 @@
  "parent_document_type": "",
  "roles": [
   {
-   "role": "Sales Manager"
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Accounts User"
   }
  ],
  "source": "",

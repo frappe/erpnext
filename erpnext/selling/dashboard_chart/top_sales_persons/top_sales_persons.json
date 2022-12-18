@@ -3,6 +3,7 @@
  "based_on": "",
  "chart_name": "Top Sales Persons",
  "chart_type": "Group By",
+ "color": "#761ACB",
  "creation": "2022-12-17 13:36:32.235974",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
@@ -14,8 +15,8 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "last_synced_on": "2022-12-17 13:32:15.799242",
- "modified": "2022-12-17 14:21:45.245735",
+ "last_synced_on": "2022-12-18 14:36:07.625202",
+ "modified": "2022-12-18 14:45:21.475366",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Top Sales Persons",
@@ -24,7 +25,13 @@
  "parent_document_type": "Sales Invoice",
  "roles": [
   {
-   "role": "Sales Manager"
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Accounts User"
   }
  ],
  "source": "",
