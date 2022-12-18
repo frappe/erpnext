@@ -7,7 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, get_url, nowdate
+from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -363,33 +363,6 @@ class PaymentRequest(Document):
 
 	def get_payment_success_url(self):
 		return self.payment_success_url
-
-	def on_payment_authorized(self, status=None):
-		if not status:
-			return
-
-		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
-
-		if status in ["Authorized", "Completed"]:
-			redirect_to = None
-			self.set_as_paid()
-
-			# if shopping cart enabled and in session
-			if (
-				shopping_cart_settings.enabled
-				and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest"
-			) and self.payment_channel != "Phone":
-
-				success_url = shopping_cart_settings.payment_success_url
-				if success_url:
-					redirect_to = ({"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}).get(
-						success_url, "/me"
-					)
-				else:
-					redirect_to = get_url("/orders/{0}".format(self.reference_name))
-
-			return redirect_to
 
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
