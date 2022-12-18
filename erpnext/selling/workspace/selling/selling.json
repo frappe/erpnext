@@ -1,6 +1,10 @@
 {
  "charts": [
   {
+   "chart_name": "Top Sales Persons",
+   "label": "Top Sales Persons"
+  },
+  {
    "chart_name": "Top Selling Items",
    "label": "Top Selling Items"
   },
@@ -13,7 +17,7 @@
    "label": "Top Customers"
   }
  ],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Selling Module</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery Note\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Details Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quotation\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Analytics Report\",\"col\":3}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Sales Amount Trend\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Selling Items\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Customers\",\"col\":6}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Selling Documents</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Transactions\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Customers\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Items\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Special Prices\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Team\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"External Sales Partners\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Selling Module</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Delivery Note\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Details Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Quotation\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Analytics Report\",\"col\":3}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Sales Amount Trend\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Selling Items\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Customers\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Sales Persons\",\"col\":6}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Selling Documents</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Transactions\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Customers\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Items\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Special Prices\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Sales Team\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"External Sales Partners\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.456761",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -636,7 +640,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-11-25 03:11:42.022884",
+ "modified": "2022-12-18 01:44:24.186640",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -650,6 +654,9 @@
   },
   {
    "role": "Sales User (Read Only)"
+  },
+  {
+   "role": "Accounts User"
   }
  ],
  "sequence_id": 2.0,
