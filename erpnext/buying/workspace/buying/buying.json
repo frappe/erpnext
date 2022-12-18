@@ -1,6 +1,15 @@
 {
- "charts": [],
- "content": "[\n {\n  \"data\": {\n   \"card_name\": \"Purchasing Transactions\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Order\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Receipt\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Invoice\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Material Request\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Request for Quotation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Quotation\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Suppliers\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Group\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Contact\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Address\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Addresses And Contacts\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Items\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Item\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Item Group\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Brand\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Product Bundle\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Price List Editor\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Bulk Price Update\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"All Item Prices\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Special Prices\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Promotional Scheme\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Pricing Rule\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Shipping Rule\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Buying Settings\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Taxes and Charges Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Terms and Conditions Template\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Transaction Type\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Key Reports\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Analytics\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Details\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Procurement Tracker\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Requested Items To Be Ordered\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Items To Be Received\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Purchase Items To Be Billed\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Scorecard\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Scorecard\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Scorecard Variable\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Scorecard Criteria\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier Scorecard Standing\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Other Reports\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Items To Be Requested\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Item-wise Purchase History\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Supplier-Wise Sales Analytics\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n },\n {\n  \"data\": {\n   \"card_name\": \"Material Requests for which Supplier Quotations are not created\",\n   \"col\": 3\n  },\n  \"type\": \"card\"\n }\n]",
+ "charts": [
+  {
+   "chart_name": "Top Suppliers",
+   "label": "Top Suppliers"
+  },
+  {
+   "chart_name": "Top Buying Items",
+   "label": "Top Buying Items"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Buying Module</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Order\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Receipt\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Details Report\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Supplier Quotation\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Item\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Analytics Report\",\"col\":3}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Suppliers\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Buying Items\",\"col\":6}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Buying Documents</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Purchasing Transactions\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Suppliers\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Items\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Price List\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Special Prices\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Key Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Supplier Scorecard\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Supplier Scorecard\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Reports\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.825385",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -532,7 +541,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-11-16 12:24:37.224095",
+ "modified": "2022-12-18 15:04:03.490564",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -540,8 +549,85 @@
  "parent_page": "",
  "public": 1,
  "quick_lists": [],
- "roles": [],
+ "roles": [
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
  "sequence_id": 3.0,
- "shortcuts": [],
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} To Receive",
+   "label": "Purchase Order",
+   "link_to": "Purchase Order",
+   "stats_filter": "{\"status\":[\"!=\",\"Closed\"],\"docstatus\":[\"=\",\"1\"],\"per_received\":[\"<\",100]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} To Bill",
+   "label": "Purchase Receipt",
+   "link_to": "Purchase Receipt",
+   "stats_filter": "{\"docstatus\":[\"=\",\"1\"],\"status\":[\"not in\",[\"Completed\",\"Return\",\"Closed\",\"\"]]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Supplier",
+   "link_to": "Supplier",
+   "stats_filter": "{\"disabled\":[\"=\",0]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Purchase Details Report",
+   "link_to": "Purchase Details",
+   "stats_filter": "",
+   "type": "Report"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Supplier Quotation",
+   "link_to": "Supplier Quotation",
+   "stats_filter": "",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "format": "{} Unpaid",
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "stats_filter": "{\"docstatus\":[\"=\",\"1\"],\"outstanding_amount\":[\">\",0]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "format": "{} Enabled",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "{\"disabled\":[\"=\",0]}",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Purchase Analytics Report",
+   "link_to": "Purchase Analytics",
+   "stats_filter": "",
+   "type": "Report"
+  }
+ ],
  "title": "Buying"
 }

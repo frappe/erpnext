@@ -1,0 +1,42 @@
+{
+ "aggregate_function_based_on": "base_net_total",
+ "based_on": "",
+ "chart_name": "Top Suppliers",
+ "chart_type": "Group By",
+ "color": "#4463F0",
+ "creation": "2022-12-18 15:00:13.424020",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Purchase Invoice",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Purchase Invoice\",\"docstatus\",\"=\",\"1\",false],[\"Purchase Invoice\",\"is_opening\",\"=\",\"No\",false]]",
+ "group_by_based_on": "supplier",
+ "group_by_type": "Sum",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-12-18 14:57:29.603974",
+ "modified": "2022-12-18 15:00:13.424020",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Top Suppliers",
+ "number_of_groups": 10,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}
