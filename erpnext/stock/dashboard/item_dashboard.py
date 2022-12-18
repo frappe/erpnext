@@ -1,6 +1,8 @@
 
 import frappe
+from frappe.utils import flt
 from frappe.model.db_query import DatabaseQuery
+
 
 @frappe.whitelist()
 def get_data(item_code=None, warehouse=None, item_group=None,
@@ -46,6 +48,12 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 			'item_name': frappe.get_cached_value("Item", item.item_code, 'item_name'),
 			'disable_quick_entry': frappe.get_cached_value("Item", item.item_code, 'has_batch_no')
 				or frappe.get_cached_value("Item", item.item_code, 'has_serial_no'),
+			'actual_qty': flt(item.actual_qty, 6),
+			'projected_qty': flt(item.projected_qty, 6),
+			'reserved_qty': flt(item.reserved_qty, 6),
+			'reserved_qty_for_production': flt(item.reserved_qty_for_production, 6),
+			'reserved_qty_for_sub_contract': flt(item.reserved_qty_for_sub_contract, 6),
+			'valuation_rate': flt(item.valuation_rate, 6),
 		})
 
 	return items

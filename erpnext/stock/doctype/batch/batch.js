@@ -49,7 +49,7 @@ frappe.ui.form.on('Batch', {
 						return;
 					}
 
-					var section = frm.dashboard.add_section(`<h5 style="margin-top: 0px;">
+					var section = frm.dashboard.add_section(`<h5 style="margin-top: var(--margin-md);">
 						${ __("Stock Levels") }</a></h5>`);
 
 					// sort by qty
@@ -60,7 +60,7 @@ frappe.ui.form.on('Batch', {
 					// show
 					(r.message || []).forEach(function(d) {
 						if(d.qty > 0) {
-							$(`<div class='row' style='margin-bottom: 10px;'>
+							$(`<div class='row' style='margin-bottom: 5px;'>
 								<div class='col-sm-3 small' style='padding-top: 3px;'>${d.warehouse}</div>
 								<div class='col-sm-3 small text-right' style='padding-top: 3px;'>${d.qty}</div>
 								<div class='col-sm-6'>
