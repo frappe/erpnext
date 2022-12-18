@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_to_date, formatdate, get_link_to_form, getdate, nowdate, cint
 from frappe.utils.dashboard import cache_source
-from frappe.utils.dateutils import get_from_date_from_timespan, get_period_ending
+from frappe.utils.dateutils import get_from_date_from_timespan, get_period_ending, get_period_beginning
 from frappe.utils.nestedset import get_descendants_of
 from erpnext import get_company_currency, get_default_currency
 
@@ -103,7 +103,7 @@ class AccountBalanceTimeline(object):
 		return accounts
 
 	def get_gl_entries(self):
-		from_date = self.dates[0]
+		from_date = get_period_beginning(self.dates[0], self.timegrain)
 		to_date = self.dates[-1]
 
 		conditions = []
