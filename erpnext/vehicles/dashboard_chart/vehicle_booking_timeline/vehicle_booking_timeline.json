@@ -1,0 +1,38 @@
+{
+ "based_on": "transaction_date",
+ "chart_name": "Vehicle Booking Timeline",
+ "chart_type": "Count",
+ "color": "#4463F0",
+ "creation": "2021-05-06 11:50:14.468578",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Vehicle Booking Order",
+ "filters_json": "[[\"Vehicle Booking Order\",\"docstatus\",\"=\",\"1\",false]]",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-12-18 16:15:29.444101",
+ "modified": "2022-12-18 16:19:02.915582",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Booking Timeline",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "roles": [
+  {
+   "role": "Sales Admin"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "source": "",
+ "time_interval": "Weekly",
+ "timeseries": 1,
+ "timespan": "Last Quarter",
+ "type": "Line",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}

@@ -1,0 +1,40 @@
+{
+ "based_on": "posting_date",
+ "chart_name": "Vehicle Delivery Timeline",
+ "chart_type": "Count",
+ "color": "#29CD42",
+ "creation": "2021-05-06 11:51:30.939689",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Vehicle Delivery",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Vehicle Delivery\",\"docstatus\",\"=\",\"1\",false],[\"Vehicle Delivery\",\"is_return\",\"=\",0,false]]",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-12-18 16:15:29.473664",
+ "modified": "2022-12-18 16:18:59.032757",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Delivery Timeline",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "role": "Sales Admin"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "source": "",
+ "time_interval": "Weekly",
+ "timeseries": 1,
+ "timespan": "Last Quarter",
+ "type": "Line",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}

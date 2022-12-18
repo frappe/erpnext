@@ -1,0 +1,40 @@
+{
+ "based_on": "",
+ "chart_name": "Booking Status Summary",
+ "chart_type": "Group By",
+ "color": "#EC864B",
+ "creation": "2021-04-18 14:14:15.429669",
+ "custom_options": "",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Vehicle Booking Order",
+ "filters_json": "[[\"Vehicle Booking Order\",\"docstatus\",\"=\",\"1\",false],[\"Vehicle Booking Order\",\"status\",\"!=\",\"Completed\",false]]",
+ "group_by_based_on": "status",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-12-18 16:15:29.395004",
+ "modified": "2022-12-18 16:19:06.932247",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Booking Status Summary",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "roles": [
+  {
+   "role": "Sales Admin"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "source": "",
+ "time_interval": "Quarterly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}

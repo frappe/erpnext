@@ -1,0 +1,42 @@
+{
+ "aggregate_function_based_on": "fni_amount",
+ "based_on": "",
+ "chart_name": "Top Vehicle Models",
+ "chart_type": "Group By",
+ "color": "#761ACB",
+ "creation": "2022-12-18 16:18:18.915995",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "Vehicle Booking Order",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Vehicle Booking Order\",\"docstatus\",\"=\",\"1\",false],[\"Vehicle Booking Order\",\"status\",\"!=\",\"Cancelled Booking\",false]]",
+ "group_by_based_on": "variant_of",
+ "group_by_type": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "last_synced_on": "2022-12-18 14:36:00.481320",
+ "modified": "2022-12-18 16:20:37.350296",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Top Vehicle Models",
+ "number_of_groups": 10,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "role": "Sales Admin"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "source": "",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "value_based_on": "",
+ "y_axis": []
+}

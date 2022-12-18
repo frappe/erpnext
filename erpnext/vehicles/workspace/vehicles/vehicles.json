@@ -1,6 +1,23 @@
 {
- "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Automotive / Vehicles Module</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pre Sales\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Pre Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Registration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Documents\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Sales Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
+ "charts": [
+  {
+   "chart_name": "Vehicle Booking Timeline",
+   "label": "Vehicle Booking Timeline"
+  },
+  {
+   "chart_name": "Vehicle Delivery Timeline",
+   "label": "Vehicle Delivery Timeline"
+  },
+  {
+   "chart_name": "Top Vehicle Models",
+   "label": "Top Vehicle Models"
+  },
+  {
+   "chart_name": "Booking Status Summary",
+   "label": "Booking Status Summary"
+  }
+ ],
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Automotive / Vehicles Module</b></span>\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Booking Status Summary\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Top Vehicle Models\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Vehicle Booking Timeline\",\"col\":6}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Vehicle Delivery Timeline\",\"col\":6}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Booking\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Pre Sales\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Stock\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Pre Service\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Registration\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Documents\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Sales Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Vehicle Service Masters\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Settings\",\"col\":3}}]",
  "creation": "2022-11-16 04:31:56.203759",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -601,7 +618,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 15:30:44.264751",
+ "modified": "2022-12-18 16:20:10.160519",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles",
