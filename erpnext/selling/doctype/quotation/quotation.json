@@ -52,6 +52,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "column_break_43",
   "applies_to_item_name",
@@ -1419,13 +1420,19 @@
    "hidden": 1,
    "label": "Applies to Template Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2022-11-01 19:16:38.654038",
+ "modified": "2022-12-19 15:13:12.829024",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

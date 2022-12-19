@@ -9,6 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
@@ -27,6 +28,10 @@ force_party_fields = [
 
 force_item_fields = ("item_group", "brand")
 
+force_applies_to_fields = [
+	"vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
+	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name"
+]
 
 class Opportunity(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -68,6 +73,7 @@ class Opportunity(TransactionBase):
 	def set_missing_values(self):
 		self.set_customer_details()
 		self.set_item_details()
+		self.set_applies_to_details()
 
 	def set_customer_details(self):
 		customer_details = get_customer_details(self.as_dict())
@@ -84,6 +90,17 @@ class Opportunity(TransactionBase):
 			for k, v in item_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_party_fields):
 					d.set(k, v)
+
+	def set_applies_to_details(self):
+		if self.get("applies_to_vehicle"):
+			self.applies_to_serial_no = self.applies_to_vehicle
+
+		args = self.as_dict()
+		applies_to_details = get_applies_to_details(args, for_validate=True)
+
+		for k, v in applies_to_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
+				self.set(k, v)
 
 	def validate_financer(self):
 		if self.get('financer'):

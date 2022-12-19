@@ -652,6 +652,9 @@ class Project(StatusUpdater):
 				self.set(k, v)
 
 	def set_applies_to_details(self):
+		if self.get("applies_to_vehicle"):
+			self.applies_to_serial_no = self.applies_to_vehicle
+
 		args = self.as_dict()
 		applies_to_details = get_applies_to_details(args, for_validate=True)
 

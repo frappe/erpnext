@@ -3,7 +3,7 @@
 
 {% include 'erpnext/selling/sales_common.js' %}
 {% include 'erpnext/selling/quotation_common.js' %}
-{% include 'erpnext/selling/applies_to_common.js' %}
+{% include 'erpnext/stock/applies_to_common.js' %}
 
 frappe.provide("erpnext.crm");
 

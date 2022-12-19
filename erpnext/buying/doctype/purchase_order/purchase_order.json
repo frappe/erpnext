@@ -61,6 +61,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "column_break_55",
   "applies_to_item_name",
@@ -1570,12 +1571,18 @@
    "no_copy": 1,
    "options": "Sales Order",
    "read_only": 1
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2022-08-06 13:27:52.595767",
+ "modified": "2022-12-19 15:07:57.678416",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

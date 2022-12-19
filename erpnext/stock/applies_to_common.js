@@ -28,7 +28,17 @@ frappe.ui.form.on(cur_frm.doctype, {
 		});
 	},
 
+	applies_to_serial_no: function (frm) {
+		frm.events.set_applies_to_read_only(frm);
+		frm.events.get_applies_to_details(frm);
+	},
+
 	applies_to_vehicle: function (frm) {
+		if (frm.fields_dict.applies_to_serial_no) {
+			frm.doc.applies_to_serial_no = frm.doc.applies_to_vehicle;
+			frm.refresh_field("applies_to_serial_no");
+		}
+
 		frm.events.set_applies_to_read_only(frm);
 		frm.events.get_applies_to_details(frm);
 	},
@@ -50,17 +60,24 @@ frappe.ui.form.on(cur_frm.doctype, {
 			read_only_fields.push("vehicle_last_odometer");
 		}
 
+		var read_only = frm.doc.applies_to_vehicle || frm.doc.applies_to_serial_no ? 1 : 0;
+
 		$.each(read_only_fields, function (i, f) {
 			if (frm.fields_dict[f]) {
-				frm.set_df_property(f, "read_only", frm.doc.applies_to_vehicle ? 1 : 0);
+				frm.set_df_property(f, "read_only", read_only);
 			}
 		});
 	},
 
 	get_applies_to_details: function(frm) {
+		if (frm.updating_applies_to_details) {
+			return;
+		}
+
 		var args =  {
 			applies_to_item: frm.doc.applies_to_item,
 			applies_to_vehicle: frm.doc.applies_to_vehicle,
+			applies_to_serial_no: frm.doc.applies_to_serial_no,
 			doctype: frm.doc.doctype,
 			name: frm.doc.name,
 		};
@@ -69,16 +86,22 @@ frappe.ui.form.on(cur_frm.doctype, {
 			args.project = frm.doc.project;
 		}
 
+		frm.updating_applies_to_details = true;
 		return frappe.call({
 			method: "erpnext.stock.get_item_details.get_applies_to_details",
 			args: {
 				args: args
 			},
 			callback: function(r) {
-				if(!r.exc) {
-					return frm.set_value(r.message);
+				if (!r.exc) {
+					return frappe.run_serially([
+						() => frm.set_value(r.message),
+						() => frm.updating_applies_to_details = false,
+					]);
 				}
-			}
+
+				frm.updating_applies_to_details = false;
+			},
 		});
 	},
 
