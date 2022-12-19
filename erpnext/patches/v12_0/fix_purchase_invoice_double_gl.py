@@ -21,7 +21,9 @@ def execute():
 
 		grand_total = doc.base_rounded_total or doc.base_grand_total
 		grand_total -= doc.base_write_off_amount
-		grand_total -= doc.base_paid_amount
+		if doc.get('is_paid'):
+			grand_total -= doc.base_paid_amount
+
 		grand_total = flt(grand_total, doc.precision('grand_total'))
 
 		if supplier_bal != grand_total:

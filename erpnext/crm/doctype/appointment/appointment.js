@@ -6,7 +6,7 @@ frappe.provide("erpnext.crm");
 {% include 'erpnext/crm/doctype/appointment/appointment_slots.js' %};
 {% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
 {% include 'erpnext/public/js/controllers/quick_contacts.js' %};
-{% include 'erpnext/selling/applies_to_common.js' %};
+{% include 'erpnext/stock/applies_to_common.js' %};
 
 erpnext.crm.AppointmentController = erpnext.contacts.QuickContacts.extend({
 	setup: function () {

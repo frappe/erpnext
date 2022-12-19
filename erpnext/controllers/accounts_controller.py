@@ -280,12 +280,13 @@ class AccountsController(TransactionBase):
 
 				if cint(self.is_return) and self.grand_total > self.paid_amount:
 					self.paid_amount = flt(flt(self.grand_total), self.precision("paid_amount"))
-
 				elif not flt(self.paid_amount) and flt(self.outstanding_amount) > 0:
 					self.paid_amount = flt(flt(self.outstanding_amount), self.precision("paid_amount"))
 
-				self.base_paid_amount = flt(self.paid_amount * self.conversion_rate,
-										self.precision("base_paid_amount"))
+				self.base_paid_amount = flt(self.paid_amount * self.conversion_rate, self.precision("base_paid_amount"))
+			else:
+				self.paid_amount = 0
+				self.base_paid_amount = 0
 
 	def set_missing_values(self, for_validate=False):
 		if frappe.flags.in_test:
