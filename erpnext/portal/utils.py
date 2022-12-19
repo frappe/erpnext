@@ -102,7 +102,7 @@ def create_party_contact(doctype, fullname, user, party_name):
 	contact = frappe.new_doc("Contact")
 	contact.update({"first_name": fullname, "email_id": user})
 	contact.append("links", dict(link_doctype=doctype, link_name=party_name))
-	contact.append("email_ids", dict(email_id=user))
+	contact.append("email_ids", dict(email_id=user, is_primary=True))
 	contact.flags.ignore_mandatory = True
 	contact.insert(ignore_permissions=True)
 
