@@ -766,13 +766,13 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 
 @frappe.whitelist()
 def auto_fetch_serial_number(
-	qty: float,
+	qty: int,
 	item_code: str,
 	warehouse: str,
 	posting_date: Optional[str] = None,
 	batch_nos: Optional[Union[str, List[str]]] = None,
 	for_doctype: Optional[str] = None,
-	exclude_sr_nos: Optional[List[str]] = None,
+	exclude_sr_nos=None,
 ) -> List[str]:
 
 	filters = frappe._dict({"item_code": item_code, "warehouse": warehouse})
