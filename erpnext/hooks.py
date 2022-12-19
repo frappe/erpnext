@@ -490,6 +490,7 @@ scheduler_events = {
 	],
 	"daily": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
+		"erpnext.stock.doctype.stock_entry.stock_entry.audit_incorrect_valuation_entries",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",

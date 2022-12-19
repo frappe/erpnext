@@ -4,13 +4,29 @@
 
 import json
 from collections import defaultdict
+from typing import Dict
 
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
+<<<<<<< HEAD
 from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
 from six import iteritems, itervalues, string_types
+=======
+from frappe.utils import (
+	add_days,
+	cint,
+	comma_or,
+	cstr,
+	flt,
+	format_time,
+	formatdate,
+	getdate,
+	nowdate,
+	today,
+)
+>>>>>>> b1721b79ce (fix: daily scheduler to identify and fix stock transfer entries having incorrect valuation)
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -2554,3 +2570,158 @@ def get_supplied_items(purchase_order):
 		)
 
 	return supplied_item_details
+<<<<<<< HEAD
+=======
+
+
+@frappe.whitelist()
+def get_items_from_subcontract_order(source_name, target_doc=None):
+	from erpnext.controllers.subcontracting_controller import make_rm_stock_entry
+
+	if isinstance(target_doc, str):
+		target_doc = frappe.get_doc(json.loads(target_doc))
+
+	order_doctype = "Purchase Order" if target_doc.purchase_order else "Subcontracting Order"
+	target_doc = make_rm_stock_entry(
+		subcontract_order=source_name, order_doctype=order_doctype, target_doc=target_doc
+	)
+
+	return target_doc
+
+
+def get_available_materials(work_order) -> dict:
+	data = get_stock_entry_data(work_order)
+
+	available_materials = {}
+	for row in data:
+		key = (row.item_code, row.warehouse)
+		if row.purpose != "Material Transfer for Manufacture":
+			key = (row.item_code, row.s_warehouse)
+
+		if key not in available_materials:
+			available_materials.setdefault(
+				key,
+				frappe._dict(
+					{"item_details": row, "batch_details": defaultdict(float), "qty": 0, "serial_nos": []}
+				),
+			)
+
+		item_data = available_materials[key]
+
+		if row.purpose == "Material Transfer for Manufacture":
+			item_data.qty += row.qty
+			if row.batch_no:
+				item_data.batch_details[row.batch_no] += row.qty
+
+			if row.serial_no:
+				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
+				item_data.serial_nos.sort()
+		else:
+			# Consume raw material qty in case of 'Manufacture' or 'Material Consumption for Manufacture'
+
+			item_data.qty -= row.qty
+			if row.batch_no:
+				item_data.batch_details[row.batch_no] -= row.qty
+
+			if row.serial_no:
+				for serial_no in get_serial_nos(row.serial_no):
+					item_data.serial_nos.remove(serial_no)
+
+	return available_materials
+
+
+def get_stock_entry_data(work_order):
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	stock_entry_detail = frappe.qb.DocType("Stock Entry Detail")
+
+	return (
+		frappe.qb.from_(stock_entry)
+		.from_(stock_entry_detail)
+		.select(
+			stock_entry_detail.item_name,
+			stock_entry_detail.original_item,
+			stock_entry_detail.item_code,
+			stock_entry_detail.qty,
+			(stock_entry_detail.t_warehouse).as_("warehouse"),
+			(stock_entry_detail.s_warehouse).as_("s_warehouse"),
+			stock_entry_detail.description,
+			stock_entry_detail.stock_uom,
+			stock_entry_detail.expense_account,
+			stock_entry_detail.cost_center,
+			stock_entry_detail.batch_no,
+			stock_entry_detail.serial_no,
+			stock_entry.purpose,
+		)
+		.where(
+			(stock_entry.name == stock_entry_detail.parent)
+			& (stock_entry.work_order == work_order)
+			& (stock_entry.docstatus == 1)
+			& (stock_entry_detail.s_warehouse.isnotnull())
+			& (
+				stock_entry.purpose.isin(
+					["Manufacture", "Material Consumption for Manufacture", "Material Transfer for Manufacture"]
+				)
+			)
+		)
+		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
+	).run(as_dict=1)
+
+
+def audit_incorrect_valuation_entries():
+	# Audit of stock transfer entries having incorrect valuation
+	from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+	stock_entries = get_incorrect_stock_entries()
+
+	for stock_entry, values in stock_entries.items():
+		reposting_data = frappe._dict(
+			{
+				"posting_date": values.posting_date,
+				"posting_time": values.posting_time,
+				"voucher_type": "Stock Entry",
+				"voucher_no": stock_entry,
+				"company": values.company,
+			}
+		)
+
+		create_repost_item_valuation_entry(reposting_data)
+
+
+def get_incorrect_stock_entries() -> Dict:
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	transfer_purposes = [
+		"Material Transfer",
+		"Material Transfer for Manufacture",
+		"Send to Subcontractor",
+	]
+
+	query = (
+		frappe.qb.from_(stock_entry)
+		.inner_join(stock_ledger_entry)
+		.on(stock_entry.name == stock_ledger_entry.voucher_no)
+		.select(
+			stock_entry.name,
+			stock_entry.company,
+			stock_entry.posting_date,
+			stock_entry.posting_time,
+			Sum(stock_ledger_entry.stock_value_difference).as_("stock_value"),
+		)
+		.where(
+			(stock_entry.docstatus == 1)
+			& (stock_entry.purpose.isin(transfer_purposes))
+			& (stock_ledger_entry.modified > add_days(today(), -2))
+		)
+		.groupby(stock_ledger_entry.voucher_detail_no)
+		.having(Sum(stock_ledger_entry.stock_value_difference) != 0)
+	)
+
+	data = query.run(as_dict=True)
+	stock_entries = {}
+
+	for row in data:
+		if abs(row.stock_value) > 0.1 and row.name not in stock_entries:
+			stock_entries.setdefault(row.name, row)
+
+	return stock_entries
+>>>>>>> b1721b79ce (fix: daily scheduler to identify and fix stock transfer entries having incorrect valuation)
