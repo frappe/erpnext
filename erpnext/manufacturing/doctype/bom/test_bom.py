@@ -202,6 +202,33 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(bom.items[0].rate, 20)
 
+	def test_bom_cost_with_fg_based_operating_cost(self):
+		bom = frappe.copy_doc(test_records[4])
+		bom.insert()
+
+		raw_material_cost = 0.0
+		op_cost = 0.0
+
+		op_cost = bom.quantity * bom.operating_cost_per_bom_quantity
+
+		for row in bom.items:
+			raw_material_cost += row.amount
+
+		base_raw_material_cost = raw_material_cost * flt(
+			bom.conversion_rate, bom.precision("conversion_rate")
+		)
+		base_op_cost = op_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
+
+		# test amounts in selected currency, almostEqual checks for 7 digits by default
+		self.assertAlmostEqual(bom.operating_cost, op_cost)
+		self.assertAlmostEqual(bom.raw_material_cost, raw_material_cost)
+		self.assertAlmostEqual(bom.total_cost, raw_material_cost + op_cost)
+
+		# test amounts in selected currency
+		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
+		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
+		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+
 	def test_subcontractor_sourced_item(self):
 		item_code = "_Test Subcontracted FG Item 1"
 		set_backflush_based_on("Material Transferred for Subcontract")
