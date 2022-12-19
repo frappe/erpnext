@@ -247,35 +247,37 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 
 		if(this.frm.doc.docstatus !=1 && !this.frm.doc.__islocal) {
-			this.frm.add_custom_button(__('Delete'), function() {
-					if (cur_frm.doc.name){
-						// for remove rows
-						frappe.call({
-							method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.purchase_order_pr_item_remove",
-							args: {
-								pr_name: cur_frm.doc.name,
-								purchase_order: cur_frm.doc.purchase_order,
-							},
-							async: false,
-							callback: function (r) {
-							}
-						})
-						frappe.call({
-							method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.set_proposed_qty_in_po",
-							args: {
-								purchase_order: cur_frm.doc.purchase_order},
-							async: false,
-							callback: function (r) {
-							}
-						})
-						frappe.model.delete_doc(cur_frm.doc.doctype, cur_frm.doc.name, function() {
-							window.history.back();
-						});
-						// frappe.model.delete_doc("Batch", cur_frm.doc.name, function() {
-						// 	this.recent_order_list.refresh_list();
-						// });
-				}
-			})
+			if( this.frm.has_perm('delete')) {
+				this.frm.add_custom_button(__('Delete'), function() {
+						if (cur_frm.doc.name){
+							// for remove rows
+							frappe.call({
+								method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.purchase_order_pr_item_remove",
+								args: {
+									pr_name: cur_frm.doc.name,
+									purchase_order: cur_frm.doc.purchase_order,
+								},
+								async: false,
+								callback: function (r) {
+								}
+							})
+							frappe.call({
+								method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.set_proposed_qty_in_po",
+								args: {
+									purchase_order: cur_frm.doc.purchase_order},
+								async: false,
+								callback: function (r) {
+								}
+							})
+							frappe.model.delete_doc(cur_frm.doc.doctype, cur_frm.doc.name, function() {
+								window.history.back();
+							});
+							// frappe.model.delete_doc("Batch", cur_frm.doc.name, function() {
+							// 	this.recent_order_list.refresh_list();
+							// });
+					}
+				})
+			}
 		}
 	},
 
