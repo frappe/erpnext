@@ -490,7 +490,6 @@ scheduler_events = {
 	],
 	"daily": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
-		"erpnext.stock.doctype.stock_entry.stock_entry.audit_incorrect_valuation_entries",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
@@ -526,7 +525,12 @@ scheduler_events = {
 		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
+<<<<<<< HEAD
 		"erpnext.crm.doctype.lead.lead.daily_open_lead",
+=======
+		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
+		"erpnext.stock.doctype.stock_entry.stock_entry.audit_incorrect_valuation_entries",
+>>>>>>> f31612376a (test: added test case to validate audit for incorrect entries)
 	],
 	"weekly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"],
 	"monthly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"],
