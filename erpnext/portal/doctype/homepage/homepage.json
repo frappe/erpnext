@@ -17,8 +17,7 @@
   "slideshow",
   "hero_section",
   "products_section",
-  "products_url",
-  "products"
+  "products_url"
  ],
  "fields": [
   {
@@ -97,19 +96,11 @@
    "fieldname": "products_url",
    "fieldtype": "Data",
    "label": "URL for \"All Products\""
-  },
-  {
-   "description": "Products to be shown on website homepage",
-   "fieldname": "products",
-   "fieldtype": "Table",
-   "label": "Products",
-   "options": "Homepage Featured Product",
-   "width": "40px"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-02-18 13:29:29.531639",
+ "modified": "2022-12-19 20:32:18.678135",
  "modified_by": "Administrator",
  "module": "Portal",
  "name": "Homepage",
@@ -138,6 +129,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "company",
  "track_changes": 1
 }
