@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/applies_to_common.js' %};
+{% include 'erpnext/stock/applies_to_common.js' %};
 
 
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
