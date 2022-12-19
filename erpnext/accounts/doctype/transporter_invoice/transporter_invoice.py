@@ -212,7 +212,7 @@ class TransporterInvoice(AccountsController):
 				d.unloading_amount 		= 0
 				d.transporter_rate 		= d.transporter_rate_reference
 			else:
-				tr = get_transporter_rate(d.from_warehouse, d.receiving_warehouse, d.posting_date, self.equipment_type, d.item_code)
+				tr = get_transporter_rate(d.from_warehouse, d.receiving_warehouse, d.posting_date, self.equipment_category, d.item_code)
 				d.transporter_rate_ref = tr.name
 
 				if cint(self.total_trip) > flt(tr.threshold_trip):

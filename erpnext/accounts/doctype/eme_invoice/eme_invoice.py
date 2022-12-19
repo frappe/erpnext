@@ -100,7 +100,7 @@ class EMEInvoice(AccountsController):
 			if not a.expense_account:
 				a.expense_account = frappe.db.get_value("Expense Head",a.expense_head,"expense_account")
 				if not a.expense_account:
-					throw("Expense Account no defined in Expense Head {}".format(bold(a.expense_head)),title="Expense Account Not Found")
+					throw("Expense Account not defined in Expense Head {}".format(bold(a.expense_head)),title="Expense Account Not Found")
 		self.grand_total = total
 
 		# tds

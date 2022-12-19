@@ -583,6 +583,7 @@ permission_query_conditions = {
 	"Repair And Services Invoice": "erpnext.fleet_management.doctype.repair_and_services_invoice.repair_and_services_invoice.get_permission_query_conditions",
 	"Trip Log": "erpnext.production.doctype.trip_log.trip_log.get_permission_query_conditions",
 	"Vehicle Request": "erpnext.fleet_management.doctype.vehicle_request.vehicle_request.get_permission_query_conditions",
+	# "Asset Movement": "erpnext.asset.doctype.asset_movement.asset_movement.get_permission_query_conditions",
 	# "Transporter Invoice": "erpnext.accounts.doctype.transporter_invoice.transporter_invoice.get_permission_query_conditions",
 	# "EME Invoice": "erpnext.accounts.doctype.eme_invoice.eme_invoice.get_permission_query_conditions",
 	# "EME Invoice": "erpnext.fleet_management.doctype.fleet_engagement.fleet_engagement.get_permission_query_conditions",

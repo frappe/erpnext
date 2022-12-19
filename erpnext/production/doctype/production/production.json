@@ -13,7 +13,7 @@
   "cop_list",
   "work_type",
   "supplier",
-  "mines",
+  "mine",
   "column_break_3",
   "entry_date",
   "posting_date",
@@ -408,15 +408,15 @@
    "read_only": 1
   },
   {
-   "fieldname": "mines",
+   "fieldname": "mine",
    "fieldtype": "Link",
-   "label": "Mines",
-   "options": "Mines"
+   "label": "Mine",
+   "options": "Mine"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-09 13:50:10.270297",
+ "modified": "2022-12-15 12:20:25.088585",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Production",

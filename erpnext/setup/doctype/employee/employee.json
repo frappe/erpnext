@@ -109,6 +109,7 @@
   "passport_details_section",
   "passport_number",
   "valid_upto",
+  "license_no",
   "column_break_73",
   "date_of_issue",
   "place_of_issue",
@@ -947,13 +948,19 @@
    "fieldtype": "Date",
    "label": "Probation End Date",
    "mandatory_depends_on": "employement_status == \"Probation\";"
+  },
+  {
+   "description": "<b>Applicable for drivers/operators</b>",
+   "fieldname": "license_no",
+   "fieldtype": "Data",
+   "label": "License No."
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-11-26 13:55:03.220529",
+ "modified": "2022-12-16 11:49:07.196038",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

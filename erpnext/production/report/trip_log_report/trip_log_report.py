@@ -19,7 +19,7 @@ def get_data(filters):
 	return frappe.db.sql("""
 		SELECT
 			ttl.name,ttl.branch,ttl.cost_center,ttl.posting_date,ttl.warehouse,
-			tlt.item_name,tlt.equipment,tlt.equipment_model,tlt.equipment_type,
+			tlt.item_name,tlt.equipment,tlt.equipment_type,tlt.equipment_category,
 			tlt.distance,tlt.qty,tlt.rate,tlt.amount
 		FROM
 			`tabTrip Log` as ttl
@@ -65,10 +65,10 @@ def get_columns():
 			"fieldname":"vehicle_no","label": ("Vehicle No"),"fieldtype": "Data","width": 100
 		},
 		{
-			"fieldname":"equipment_model",	"label": ("Equipment Model"),"fieldtype": "Data","width": 150
+			"fieldname":"equipment_type",	"label": ("Equipment type"),"fieldtype": "Data","width": 150
 		},
 		{
-			"fieldname":"equipment_type","label": ("Equipment Type"),"fieldtype": "Data","width": 150
+			"fieldname":"equipment_type","label": ("Equipment Category"),"fieldtype": "Data","width": 150
 		},
 		{
 			"fieldname":"distance",	"label": ("Distance"),	"fieldtype": "Float",	"width": 100

@@ -9,6 +9,7 @@
   "contact_number",
   "column_break_4",
   "operator_name",
+  "license_no",
   "section_break_4",
   "start_date",
   "column_break_6",
@@ -61,12 +62,19 @@
    "fieldname": "contact_number",
    "fieldtype": "Data",
    "label": "Contact Number"
+  },
+  {
+   "fetch_from": "operator.license_no",
+   "fieldname": "license_no",
+   "fieldtype": "Data",
+   "label": "License No",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-02 09:58:40.087901",
+ "modified": "2022-12-16 11:51:23.217324",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Operator",

@@ -26,14 +26,14 @@ class TransporterRate(Document):
 				throw("Threshold Trip should be greater than 0 for row {0}".format(frappe.bold(a.idx)))
 
 			# validation for duplicate entry for equipment type
-			if a.equipment_type in dup:
-				if a.item_code in dup.get(a.equipment_type):
+			if a.equipment_category in dup:
+				if a.item_code in dup.get(a.equipment_category):
 					throw(_("Row#{}: Duplicate entry for item {} under Equipment Type {}")\
-						.format(a.idx, frappe.bold(a.item_code), frappe.bold(a.equipment_type)))
+						.format(a.idx, frappe.bold(a.item_code), frappe.bold(a.equipment_category)))
 				else:
-					dup.setdefault(a.equipment_type, []).append(a.item_code)
+					dup.setdefault(a.equipment_category, []).append(a.item_code)
 			else:
-				dup.setdefault(a.equipment_type, []).append(a.item_code)
+				dup.setdefault(a.equipment_category, []).append(a.item_code)
 
 			# check for duplicate rate
 			for d in ( qb.from_(tr)
@@ -44,7 +44,7 @@ class TransporterRate(Document):
 							& (tr.receiving_warehouse == self.receiving_warehouse) 
 							& ((tr.from_date[self.from_date:self.to_date]) |(tr.to_date[self.from_date:self.to_date]) | ((self.from_date <= tr.to_date) & (self.to_date >= tr.from_date))) 
 							& (tr.name != self.name) 
-							& ( tri.equipment_type == a.equipment_type)	
+							& ( tri.equipment_category == a.equipment_category)	
 							& ( tri.item_code == a.item_code))
 						).run(as_dict =True):
 				throw(_("Rate already defined via {}").format(frappe.get_desk_link('Transporter Rate', d.name), title="Duplicate Entry"))
@@ -72,7 +72,7 @@ class TransporterRate(Document):
 					throw(_("Rate already defined via {}").format(frappe.get_desk_link('Transporter Rate', dup[0][0]), title="Duplicate Entry"))
 
 @frappe.whitelist()
-def get_transporter_rate(from_warehouse, receiving_warehouse, date, equipment_type, item_code):
+def get_transporter_rate(from_warehouse, receiving_warehouse, date, equipment_category, item_code):
 	tr = qb.DocType("Transporter Rate")
 	tri = qb.DocType("Transporter Rate Item")
 	rate = (qb.from_(tr)
@@ -84,13 +84,13 @@ def get_transporter_rate(from_warehouse, receiving_warehouse, date, equipment_ty
 						&(tr.from_date <= date) 
 						&(tr.to_date >= date)
 						&(tri.item_code == item_code)
-						&(tri.equipment_type == equipment_type))
+						&(tri.equipment_category == equipment_category))
 				).run(as_dict=True)
 		
 	if not rate:
 		frappe.throw(_("""No Transporter Rate defined between source warehouse {} and receiving warehouse {}
 					for Equipment Type {} and  Material {} for the date {}""")\
 				.format(frappe.bold(from_warehouse), frappe.bold(receiving_warehouse), 
-					frappe.bold(equipment_type), frappe.bold(item_code), frappe.bold(date)),title="No Data Found")
+					frappe.bold(equipment_category), frappe.bold(item_code), frappe.bold(date)),title="No Data Found")
 
 	return rate[0]

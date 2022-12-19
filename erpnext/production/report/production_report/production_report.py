@@ -82,7 +82,7 @@ def get_conditions(filters):
 	all_ccs = get_child_cost_centers(filters.cost_center)
 	if not all_ccs:
 		return " and pe.docstatus = 1"
-
+ 
 	all_branch = [str("DUMMY")]
 	for a in all_ccs:
 		all_branch.append(str(a))

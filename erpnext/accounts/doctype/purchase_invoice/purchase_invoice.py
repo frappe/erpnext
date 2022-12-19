@@ -291,7 +291,6 @@ class PurchaseInvoice(BuyingController):
 					or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")
 				)
 			):
-
 				if self.update_stock and item.warehouse and (not item.from_warehouse):
 					if (
 						for_validate
@@ -347,18 +346,21 @@ class PurchaseInvoice(BuyingController):
 							frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 						item.expense_account = stock_not_billed_account
+				'''below code commented as it was picking expense account from asset category but it should use asset received not billed account 
+				elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
+					frappe.throw(str(asset_received_but_not_billed))
 
-			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
-				asset_category_account = get_asset_category_account(
-					"fixed_asset_account", item=item.item_code, company=self.company
-				)
-				if not asset_category_account:
-					form_link = get_link_to_form("Asset Category", asset_category)
-					throw(
-						_("Please set Fixed Asset Account in {} against {}.").format(form_link, self.company),
-						title=_("Missing Account"),
+					asset_category_account = get_asset_category_account(
+						"fixed_asset_account", item=item.item_code, company=self.company
 					)
-				item.expense_account = asset_category_account
+					if not asset_category_account:
+						form_link = get_link_to_form("Asset Category", asset_category)
+						throw(
+							_("Please set Fixed Asset Account in {} against {}.").format(form_link, self.company),
+							title=_("Missing Account"),
+						)
+					item.expense_account = asset_category_account
+				'''
 			elif item.is_fixed_asset and item.pr_detail:
 				item.expense_account = asset_received_but_not_billed
 			elif not item.expense_account and for_validate:
@@ -669,9 +671,8 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_item_gl_entries(gl_entries)
-
-		if self.check_asset_cwip_enabled():
-			self.get_asset_gl_entry(gl_entries)
+		# if self.check_asset_cwip_enabled():
+		self.get_asset_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_exchange_gain_loss_gl_entries(gl_entries)
@@ -909,9 +910,10 @@ class PurchaseInvoice(BuyingController):
 							)
 						)
 
-				elif not item.is_fixed_asset or (
-					item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)
-				):
+				# elif not item.is_fixed_asset or (
+				# 	item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)
+				# ):
+				elif not item.is_fixed_asset:
 					expense_account = (
 						item.expense_account
 						if (not item.enable_deferred_expense or self.is_return)
@@ -1093,12 +1095,12 @@ class PurchaseInvoice(BuyingController):
 				asset_amount = flt(item.net_amount) + flt(item.item_tax_amount / self.conversion_rate)
 				base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
 
-				item_exp_acc_type = frappe.db.get_value("Account", item.expense_account, "account_type")
+				'''item_exp_acc_type = frappe.db.get_value("Account", item.expense_account, "account_type")
 				if not item.expense_account or item_exp_acc_type not in [
 					"Asset Received But Not Billed",
 					"Fixed Asset",
-				]:
-					item.expense_account = arbnb_account
+				]:'''
+				item.expense_account = arbnb_account
 
 				if not self.update_stock:
 					arbnb_currency = get_account_currency(item.expense_account)
@@ -1224,7 +1226,7 @@ class PurchaseInvoice(BuyingController):
 							frappe.db.set_value(
 								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
 							)
-
+		# frappe.throw(str(gl_entries))
 		return gl_entries
 
 	def make_stock_adjustment_entry(

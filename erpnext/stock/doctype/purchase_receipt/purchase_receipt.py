@@ -704,8 +704,8 @@ class PurchaseReceipt(BuyingController):
 	def get_asset_gl_entry(self, gl_entries):
 		for item in self.get("items"):
 			if item.is_fixed_asset:
-				if is_cwip_accounting_enabled(item.asset_category):
-					self.add_asset_gl_entries(item, gl_entries)
+				# if is_cwip_accounting_enabled(item.asset_category):
+				self.add_asset_gl_entries(item, gl_entries)
 				if flt(item.landed_cost_voucher_amount):
 					self.add_lcv_gl_entries(item, gl_entries)
 					# update assets gross amount by its valuation rate
@@ -717,7 +717,7 @@ class PurchaseReceipt(BuyingController):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
 		# This returns category's cwip account if not then fallback to company's default cwip account
 		cwip_account = get_asset_account(
-			"capital_work_in_progress_account", asset_category=item.asset_category, company=self.company
+			"credit_account", asset_category=item.asset_category, company=self.company
 		)
 
 		asset_amount = flt(item.net_amount) + flt(item.item_tax_amount / self.conversion_rate)

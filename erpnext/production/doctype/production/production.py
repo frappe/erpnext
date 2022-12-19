@@ -415,7 +415,7 @@ class Production(StockController):
 			doc.production_type = self.production_type
 			doc.adhoc_production = self.adhoc_production
 			doc.equipment_model = a.equipment_model
-			doc.transporter_type = frappe.db.get_value("Equipment", a.equipment, "equipment_type")
+			doc.transporter_type = frappe.db.get_value("Equipment", a.equipment, "equipment_category")
 			doc.unloading_by = a.unloading_by
 			doc.transfer_to_warehouse = self.to_warehouse if self.transfer else ''
 			doc.mineral_raising_group = self.mineral_raising_group
