@@ -280,7 +280,8 @@ class Subscription(Document):
 		self.validate_plans_billing_cycle(self.get_billing_cycle_and_interval())
 		self.validate_end_date()
 		self.validate_to_follow_calendar_months()
-		self.cost_center = erpnext.get_default_cost_center(self.get("company"))
+		if not self.cost_center:
+			self.cost_center = erpnext.get_default_cost_center(self.get("company"))
 
 	def validate_trial_period(self):
 		"""
