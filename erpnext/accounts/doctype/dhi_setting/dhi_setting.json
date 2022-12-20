@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2022-12-15 09:55:34.883984",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "entity",
+  "segment",
+  "column_break_3",
+  "flow",
+  "interco",
+  "manual_data_pull",
+  "manual_pull",
+  "column_break_8",
+  "from_date",
+  "column_break_10",
+  "to_date"
+ ],
+ "fields": [
+  {
+   "fieldname": "entity",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Entity",
+   "reqd": 1
+  },
+  {
+   "fieldname": "segment",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Segment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "flow",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Flow",
+   "reqd": 1
+  },
+  {
+   "fieldname": "interco",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Interco",
+   "reqd": 1
+  },
+  {
+   "fieldname": "manual_data_pull",
+   "fieldtype": "Section Break",
+   "label": "Manual data pull"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_pull",
+   "fieldtype": "Check",
+   "label": "Manual Pull"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "manual_pull",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "manual_pull",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2022-12-15 10:00:55.600284",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "DHI Setting",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1
+}

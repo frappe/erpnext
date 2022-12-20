@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:account_name",
+ "creation": "2022-12-15 10:15:57.538650",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account_code",
+  "account_type",
+  "column_break_3",
+  "account_name",
+  "root_type",
+  "column_break_6",
+  "is_inter_company",
+  "company_account_details",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account Code",
+   "options": "DHI GCOA",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "account_code.account_type",
+   "fieldname": "account_type",
+   "fieldtype": "Data",
+   "label": "Account Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "account_code.account_name",
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "label": "Account Name",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "account_code.root_type",
+   "fieldname": "root_type",
+   "fieldtype": "Data",
+   "label": "Root Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "default": "0",
+   "fetch_from": "account_code.is_inter_company",
+   "fieldname": "is_inter_company",
+   "fieldtype": "Check",
+   "label": "Is Inter Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company_account_details",
+   "fieldtype": "Section Break",
+   "label": "COMPANY ACCOUNT DETAILS"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Company Account",
+   "options": "DHI Mapper Item",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-12-19 15:27:32.871477",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "DHI GCOA Mapper",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

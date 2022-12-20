@@ -1,0 +1,179 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-12-15 10:12:05.222234",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+    "account_details",
+    "account",
+    "root_type",
+    "column_break_5",
+    "account_code",
+    "column_break_10",
+    "interco",
+    "amount_details",
+    "opening_debit",
+    "debit",
+    "column_break_9",
+    "opening_credit",
+    "credit",
+    "section_break_12",
+    "amount",
+    "other_details",
+    "entity",
+    "time",
+    "column_break_14",
+    "flow",
+    "segment",
+    "section_break_22",
+    "adjustment_entry_ref"
+   ],
+   "fields": [
+    {
+     "fieldname": "account_details",
+     "fieldtype": "Section Break",
+     "label": "Account Details"
+    },
+    {
+     "fieldname": "account",
+     "fieldtype": "Link",
+     "in_list_view": 1,
+     "label": "Account Name",
+     "options": "DHI GCOA Mapper",
+     "reqd": 1
+    },
+    {
+     "fetch_from": "account.root_type",
+     "fieldname": "root_type",
+     "fieldtype": "Data",
+     "label": "Root Type",
+     "read_only": 1
+    },
+    {
+     "fieldname": "column_break_5",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fetch_from": "account.account_code",
+     "fieldname": "account_code",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "label": "Account Code",
+     "read_only": 1
+    },
+    {
+     "fieldname": "column_break_10",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "interco",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "label": "Interco",
+     "options": "DHI Company",
+     "reqd": 1,
+     "width": "1"
+    },
+    {
+     "fieldname": "amount_details",
+     "fieldtype": "Section Break",
+     "label": "Amount Details"
+    },
+    {
+     "fieldname": "opening_debit",
+     "fieldtype": "Currency",
+     "label": "Opening(Dr)"
+    },
+    {
+     "fieldname": "debit",
+     "fieldtype": "Currency",
+     "label": "Debit"
+    },
+    {
+     "fieldname": "column_break_9",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "opening_credit",
+     "fieldtype": "Currency",
+     "label": "Opening(Cr)"
+    },
+    {
+     "fieldname": "credit",
+     "fieldtype": "Currency",
+     "label": "Credit"
+    },
+    {
+     "fieldname": "section_break_12",
+     "fieldtype": "Section Break"
+    },
+    {
+     "fieldname": "amount",
+     "fieldtype": "Currency",
+     "in_list_view": 1,
+     "label": "Amount",
+     "read_only": 1
+    },
+    {
+     "fieldname": "other_details",
+     "fieldtype": "Section Break",
+     "label": "Other Details"
+    },
+    {
+     "fieldname": "entity",
+     "fieldtype": "Data",
+     "label": "Entity",
+     "read_only": 1,
+     "width": "1"
+    },
+    {
+     "fieldname": "time",
+     "fieldtype": "Data",
+     "in_list_view": 1,
+     "label": "Timeline",
+     "read_only": 1
+    },
+    {
+     "fieldname": "column_break_14",
+     "fieldtype": "Column Break"
+    },
+    {
+     "fieldname": "flow",
+     "fieldtype": "Data",
+     "label": "Flow",
+     "read_only": 1
+    },
+    {
+     "fieldname": "segment",
+     "fieldtype": "Data",
+     "label": "Segment",
+     "read_only": 1
+    },
+    {
+     "fieldname": "section_break_22",
+     "fieldtype": "Section Break"
+    },
+    {
+     "fieldname": "adjustment_entry_ref",
+     "fieldtype": "Link",
+     "label": "Adjustment Entry Ref",
+     "options": "Consolidation Adjustment Entry",
+     "read_only": 1
+    }
+   ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-12-15 10:12:05.222234",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Consolidation Transaction Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
