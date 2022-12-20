@@ -5,12 +5,8 @@
 import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-<<<<<<< HEAD
-from frappe.utils import add_days, flt, nowdate, nowtime, today
-from six import iteritems
-=======
 from frappe.utils import add_days, flt, now, nowdate, nowtime, today
->>>>>>> f31612376a (test: added test case to validate audit for incorrect entries)
+from six import iteritems
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
