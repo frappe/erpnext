@@ -1,13 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/stock/applies_to_common.js' %};
-
-
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
 		frappe.flags.hide_serial_batch_dialog = true
 		super.setup();
+
+		erpnext.setup_applies_to_fields(this.frm);
+
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			var margin_df = frappe.meta.get_docfield(cdt, 'margin_type');

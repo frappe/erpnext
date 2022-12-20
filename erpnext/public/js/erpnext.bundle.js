@@ -12,6 +12,7 @@ import "./controllers/stock_controller.js"
 import "./payment/payments.js"
 import "./controllers/taxes_and_totals.js"
 import "./controllers/transaction.js"
+import "./controllers/applies_to_common.js"
 
 // Item Selector
 import "./templates/item_selector.html"
