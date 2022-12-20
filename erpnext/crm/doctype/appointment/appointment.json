@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2019-08-27 10:48:27.926283",
  "doctype": "DocType",
@@ -514,11 +515,14 @@
    "label": "Remarks"
   }
  ],
+ "is_calendar_and_gantt": 1,
  "is_submittable": 1,
- "modified": "2022-11-08 17:22:47.609656",
+ "links": [],
+ "modified": "2022-12-20 12:55:53.840842",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -592,6 +596,7 @@
  "search_fields": "party_name, customer_name, scheduled_dt",
  "sort_field": "scheduled_dt",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "party_name",
  "title_field": "customer_name",
  "track_changes": 1,

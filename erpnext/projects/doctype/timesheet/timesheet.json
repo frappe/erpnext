@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-02-28 17:57:33",
@@ -261,11 +262,14 @@
  ],
  "icon": "fa fa-clock-o",
  "idx": 1,
+ "is_calendar_and_gantt": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:02.106472",
+ "links": [],
+ "modified": "2022-12-20 15:41:08.639367",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -339,5 +343,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "title"
 }

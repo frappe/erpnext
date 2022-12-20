@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:13",
@@ -234,11 +235,14 @@
  ],
  "icon": "fa fa-ok",
  "idx": 1,
+ "is_calendar_and_gantt": 1,
  "is_submittable": 1,
- "modified": "2022-12-01 00:25:13.311325",
+ "links": [],
+ "modified": "2022-12-20 15:02:41.865307",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "ashwini@webnotestech.com",
  "permissions": [
   {
@@ -289,5 +293,6 @@
  "search_fields": "employee,employee_name,attendance_date,status",
  "sort_field": "attendance_date",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "employee_name"
 }

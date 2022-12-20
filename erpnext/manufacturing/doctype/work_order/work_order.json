@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:16",
@@ -573,11 +574,14 @@
  "icon": "fa fa-cogs",
  "idx": 1,
  "image_field": "image",
+ "is_calendar_and_gantt": 1,
  "is_submittable": 1,
- "modified": "2022-08-05 15:32:25.951008",
+ "links": [],
+ "modified": "2022-12-20 15:41:59.276353",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -605,6 +609,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "timeline_field": "production_item",
  "title_field": "production_item",
  "track_changes": 1,

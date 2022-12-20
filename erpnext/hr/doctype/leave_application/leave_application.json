@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-02-20 11:18:11",
@@ -272,12 +273,15 @@
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
+ "is_calendar_and_gantt": 1,
  "is_submittable": 1,
+ "links": [],
  "max_attachments": 3,
- "modified": "2021-09-03 19:12:55.667553",
+ "modified": "2022-12-20 15:41:56.125851",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -357,6 +361,7 @@
  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "employee",
  "title_field": "employee_name",
  "track_changes": 1,

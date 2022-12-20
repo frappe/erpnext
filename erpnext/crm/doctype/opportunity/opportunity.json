@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 18:50:30",
@@ -436,10 +437,13 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2022-11-16 17:29:46.511118",
+ "is_calendar_and_gantt": 1,
+ "links": [],
+ "modified": "2022-12-20 12:55:58.144926",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -470,6 +474,7 @@
  "search_fields": "status,transaction_date,party_name,customer_name,opportunity_type",
  "sort_field": "transaction_date",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "party_name",
  "title_field": "title",
  "track_changes": 1,
