@@ -75,6 +75,7 @@ def get_item_info(filters):
 	if filters.get("brand"):
 		conditions.append("item.brand=%(brand)s")
 	conditions.append("is_stock_item = 1")
+	conditions.append("disabled = 0")
 
 	return frappe.db.sql(
 		"""select name, item_name, description, brand, item_group,
