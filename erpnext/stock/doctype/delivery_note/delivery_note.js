@@ -192,14 +192,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 					me.make_delivery_trip() }, __('Create'));
 			}
 
-			if(doc.docstatus==0 && !doc.__islocal) {
-				this.frm.add_custom_button(__('Packing Slip'), function() {
-					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
-						frm: me.frm
-					}) }, __('Create'));
-			}
-
 			if (!doc.__islocal && doc.docstatus==1) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}

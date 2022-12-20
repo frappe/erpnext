@@ -85,7 +85,6 @@ class DeliveryNote(SellingController):
 
 		self.update_billing_status()
 		self.update_previous_doc_status()
-		self.cancel_packing_slips()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -440,19 +439,6 @@ class DeliveryNote(SellingController):
 		if submit_in:
 			frappe.throw(_("Installation Note {0} has already been submitted").format(submit_in[0][0]))
 
-	def cancel_packing_slips(self):
-		"""
-			Cancel submitted packing slips related to this delivery note
-		"""
-		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s
-			AND docstatus = 1""", self.name)
-
-		if res:
-			for r in res:
-				ps = frappe.get_doc('Packing Slip', r[0])
-				ps.cancel()
-			frappe.msgprint(_("Packing Slip(s) cancelled"))
-
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -744,24 +730,6 @@ def make_installation_note(source_name, target_doc=None):
 			},
 			"postprocess": update_item,
 			"condition": lambda doc, source, target: doc.installed_qty < doc.qty
-		}
-	}, target_doc)
-
-	return doclist
-
-
-@frappe.whitelist()
-def make_packing_slip(source_name, target_doc=None):
-	doclist = get_mapped_doc("Delivery Note", source_name, 	{
-		"Delivery Note": {
-			"doctype": "Packing Slip",
-			"field_map": {
-				"name": "delivery_note",
-				"letter_head": "letter_head"
-			},
-			"validation": {
-				"docstatus": ["=", 0]
-			}
 		}
 	}, target_doc)
 

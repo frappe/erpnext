@@ -783,3 +783,4 @@ erpnext.patches.v14_0.delete_datev_doctypes
 
 [post_model_sync]
 erpnext.patches.v12_0.resetup_vehicle_domain #20-12-2022
+erpnext.patches.v14_0.trim_packing_slip_table

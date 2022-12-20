@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:package_type_name",
+ "creation": "2022-12-18 19:40:16.641716",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "package_type_name",
+  "package_uom",
+  "default_packing_material_section",
+  "packing_items",
+  "package_details_section",
+  "total_tare_weight",
+  "tare_weight_uom",
+  "column_break_8",
+  "volume_based_on",
+  "volume_uom",
+  "column_break_12",
+  "length",
+  "width",
+  "height",
+  "volume"
+ ],
+ "fields": [
+  {
+   "fieldname": "package_type_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Package Type Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "package_uom",
+   "fieldtype": "Link",
+   "label": "Package UOM",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_packing_material_section",
+   "fieldtype": "Section Break",
+   "label": "Default Packing Material"
+  },
+  {
+   "fieldname": "packing_items",
+   "fieldtype": "Table",
+   "label": "Packing Material",
+   "options": "Package Type Packing Material"
+  },
+  {
+   "fieldname": "package_details_section",
+   "fieldtype": "Section Break",
+   "label": "Package Details"
+  },
+  {
+   "fieldname": "total_tare_weight",
+   "fieldtype": "Float",
+   "label": "Total Tare Weight"
+  },
+  {
+   "fieldname": "tare_weight_uom",
+   "fieldtype": "Link",
+   "label": "Tare Weight UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "volume_based_on",
+   "fieldtype": "Select",
+   "label": "Volume Based On",
+   "options": "Dimensions\nManual Volume"
+  },
+  {
+   "fieldname": "volume_uom",
+   "fieldtype": "Link",
+   "label": "Volume UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.volume_based_on == \"Dimensions\"",
+   "fieldname": "length",
+   "fieldtype": "Float",
+   "label": "Length (L)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.volume_based_on == \"Dimensions\"",
+   "fieldname": "width",
+   "fieldtype": "Float",
+   "label": "Width (W)"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.volume_based_on == \"Dimensions\"",
+   "fieldname": "height",
+   "fieldtype": "Float",
+   "label": "Height (H)"
+  },
+  {
+   "default": "0",
+   "fieldname": "volume",
+   "fieldtype": "Float",
+   "label": "Volume",
+   "read_only_depends_on": "eval:doc.volume_based_on == \"Dimensions\""
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-12-20 17:40:53.779715",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Package Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

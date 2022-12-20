@@ -1,21 +1,18 @@
 {
  "actions": [],
  "autoname": "hash",
- "creation": "2013-04-08 13:10:16",
+ "creation": "2022-12-19 16:09:05.570757",
+ "default_view": "List",
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "column_break_2",
   "item_name",
-  "batch_and_serial_no_section",
+  "column_break_2",
   "batch_no",
   "has_batch_no",
-  "column_break_7",
-  "serial_no",
-  "has_serial_no",
   "desc_section",
   "description",
   "quantity_section",
@@ -26,8 +23,8 @@
   "stock_qty",
   "stock_uom",
   "column_break_10",
-  "net_weight",
-  "net_weight_uom"
+  "tare_weight",
+  "tare_weight_uom"
  ],
  "fields": [
   {
@@ -45,15 +42,15 @@
    "width": "100px"
   },
   {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
    "print_width": "200px",
    "width": "200px"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
   },
   {
    "columns": 2,
@@ -63,6 +60,15 @@
    "in_standard_filter": 1,
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Batch No",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -90,61 +96,6 @@
    "print_width": "100px",
    "reqd": 1,
    "width": "100px"
-  },
-  {
-   "columns": 1,
-   "fieldname": "net_weight",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Net Weight",
-   "print_width": "100px",
-   "width": "100px"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "stock_uom",
-   "fieldtype": "Link",
-   "label": "Stock UOM",
-   "options": "UOM",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "batch_and_serial_no_section",
-   "fieldtype": "Section Break",
-   "label": "Batch and Serial No"
-  },
-  {
-   "default": "0",
-   "fetch_from": "item_code.has_batch_no",
-   "fieldname": "has_batch_no",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Has Batch No",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "has_serial_no",
-   "fieldname": "serial_no",
-   "fieldtype": "Text",
-   "label": "Serial No",
-   "no_copy": 1
-  },
-  {
-   "default": "0",
-   "fetch_from": "item_code.has_serial_no",
-   "fieldname": "has_serial_no",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Has Serial No",
-   "read_only": 1
   },
   {
    "columns": 1,
@@ -181,8 +132,29 @@
    "width": "100px"
   },
   {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
    "columns": 1,
-   "fieldname": "net_weight_uom",
+   "fieldname": "tare_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tare Weight",
+   "print_width": "100px",
+   "width": "100px"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tare_weight_uom",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Weight UOM",
@@ -191,13 +163,12 @@
    "width": "100px"
   }
  ],
- "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-20 17:40:59.664972",
+ "modified": "2022-12-20 17:41:00.175970",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Packing Slip Item",
+ "name": "Packing Slip Packing Material",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
