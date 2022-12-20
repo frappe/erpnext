@@ -29,6 +29,7 @@
 		"public/js/payment/payments.js",
 		"public/js/controllers/taxes_and_totals.js",
 		"public/js/controllers/transaction.js",
+		"public/js/controllers/applies_to_common.js",
 		"public/js/controllers/vehicle_pricing.js",
 		"public/js/controllers/vehicle_booking.js",
 		"public/js/controllers/vehicle_transaction.js",

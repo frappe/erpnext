@@ -3,7 +3,6 @@
 
 {% include 'erpnext/selling/sales_common.js' %}
 {% include 'erpnext/selling/quotation_common.js' %}
-{% include 'erpnext/stock/applies_to_common.js' %}
 
 frappe.provide("erpnext.crm");
 
@@ -16,6 +15,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			'Vehicle Booking Order': 'Vehicle Booking Order',
 			'Supplier Quotation': 'Supplier Quotation',
 		};
+
+		erpnext.setup_applies_to_fields(this.frm);
 
 		this.frm.email_field = 'contact_email';
 	},
