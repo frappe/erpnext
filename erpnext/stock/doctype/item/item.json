@@ -1,15 +1,18 @@
 {
+ "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_code",
  "creation": "2013-05-03 10:45:46",
+ "default_view": "List",
  "description": "A Product or a Service that is bought, sold or kept in stock.",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "image",
   "name_and_description_section",
   "item_naming_by",
   "naming_series",
@@ -31,39 +34,23 @@
   "is_stock_item",
   "is_vehicle",
   "has_serial_no",
-  "serial_no_series",
-  "warranty_period",
   "has_batch_no",
-  "create_new_batch",
-  "batch_number_series",
-  "has_expiry_date",
-  "shelf_life_in_days",
   "is_fixed_asset",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
   "section_break_31",
-  "purchase_uom",
-  "sales_uom",
-  "manufacture_uom",
-  "column_break_34",
-  "weight_uom",
-  "weight_per_unit",
-  "col_break_37",
-  "max_discount",
-  "over_delivery_receipt_allowance",
-  "over_billing_allowance",
-  "column_break_41",
   "is_sales_item",
   "is_purchase_item",
+  "cb_37",
   "include_in_vehicle_booking",
   "include_item_in_manufacturing",
+  "column_break_40",
   "allow_alternative_item",
   "hide_in_price_list",
-  "section_break_11",
-  "show_item_code",
-  "image",
-  "description",
+  "column_break_104",
+  "is_customer_provided_item",
+  "customer",
   "vehicle_details_section",
   "vehicle_engine_capacity",
   "quotation_validity_days",
@@ -76,11 +63,6 @@
   "exempt_from_vehicle_withholding_tax",
   "sb_barcodes",
   "barcodes",
-  "sec_applicable_to",
-  "applicable_to",
-  "applicable_to_all",
-  "applicable_items_section",
-  "applicable_items",
   "variants_section",
   "has_variants",
   "variant_item_code_format",
@@ -88,34 +70,67 @@
   "column_break_78",
   "variant_based_on",
   "attributes",
+  "units_of_measure_section",
+  "weight_uom",
+  "weight_per_unit",
+  "col_break_37",
+  "purchase_uom",
+  "sales_uom",
+  "column_break_41",
+  "manufacture_uom",
   "unit_of_measure_conversion",
   "uom_conversion_graph",
   "uoms",
-  "inventory_section",
-  "valuation_method",
-  "end_of_life",
-  "column_break1",
+  "description_tab",
+  "show_item_code",
+  "description",
+  "inventory_tab",
   "default_material_request_type",
+  "over_delivery_receipt_allowance",
+  "column_break1",
+  "valuation_method",
+  "safety_stock",
+  "end_of_life",
   "reorder_section",
   "reorder_levels",
   "serial_nos_and_batches",
+  "create_new_batch",
+  "batch_number_series",
+  "column_break_82",
+  "has_expiry_date",
+  "shelf_life_in_days",
+  "cb_85",
   "retain_sample",
   "sample_quantity",
-  "purchase_details",
+  "serial_no_configuration_section",
+  "warranty_period",
+  "column_break_88",
+  "serial_no_series",
+  "inspection_criteria",
+  "inspection_required_before_purchase",
+  "inspection_required_before_delivery",
+  "column_break_107",
+  "quality_inspection_template",
+  "selling_tab",
+  "max_discount",
+  "column_break_93",
+  "customer_item_specifications_section",
+  "customer_code",
+  "customer_items",
+  "purchasing_tab",
   "min_order_qty",
-  "safety_stock",
-  "purchase_details_cb",
   "lead_time_days",
+  "purchase_details_cb",
   "last_purchase_rate",
-  "is_customer_provided_item",
-  "customer",
-  "supplier_details",
   "delivered_by_supplier",
+  "supplier_details",
   "supplier_items",
   "foreign_trade_details",
   "country_of_origin",
   "column_break_59",
   "customs_tariff_number",
+  "accounting_tab",
+  "over_billing_allowance",
   "deferred_revenue",
   "deferred_revenue_account",
   "no_of_months",
@@ -124,23 +139,22 @@
   "deferred_expense_account",
   "no_of_months_exp",
   "enable_deferred_expense",
-  "customer_details",
-  "customer_items",
-  "customer_code",
-  "inspection_criteria",
-  "inspection_required_before_purchase",
-  "inspection_required_before_delivery",
-  "column_break_107",
-  "quality_inspection_template",
   "manufacturing",
+  "is_sub_contracted_item",
+  "manufacturing_defaults_section",
   "manufacturer",
   "manufacturer_part_no",
   "default_bom",
-  "column_break_74",
-  "is_sub_contracted_item",
+  "column_break_129",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "website_section",
+  "applicability_tab",
+  "applicable_to_section",
+  "applicable_to",
+  "applicable_to_all",
+  "applicable_items_section",
+  "applicable_items",
+  "website_tab",
   "show_in_website",
   "show_variant_in_website",
   "route",
@@ -332,12 +346,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_11",
-   "fieldtype": "Section Break",
-   "label": "Description"
-  },
-  {
    "allow_in_quick_entry": 1,
    "fieldname": "brand",
    "fieldtype": "Link",
@@ -368,15 +376,6 @@
    "options": "Item Barcode"
   },
   {
-   "collapsible": 1,
-   "depends_on": "is_stock_item",
-   "fieldname": "inventory_section",
-   "fieldtype": "Section Break",
-   "label": "Inventory",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-truck"
-  },
-  {
    "depends_on": "has_expiry_date",
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
@@ -392,6 +391,7 @@
   },
   {
    "default": "Purchase",
+   "depends_on": "is_stock_item",
    "fieldname": "default_material_request_type",
    "fieldtype": "Select",
    "label": "Default Material Request Type",
@@ -406,7 +406,6 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "is_stock_item",
    "fieldname": "column_break1",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -435,7 +434,6 @@
    "options": "UOM"
   },
   {
-   "collapsible": 1,
    "depends_on": "is_stock_item",
    "fieldname": "reorder_section",
    "fieldtype": "Section Break",
@@ -450,11 +448,10 @@
    "options": "Item Reorder"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "uom_conversion_graph",
    "fieldname": "unit_of_measure_conversion",
    "fieldtype": "Section Break",
-   "label": "Units of Measure"
+   "label": "Units of Measure Conversion"
   },
   {
    "description": "Will also apply for variants",
@@ -467,11 +464,10 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
-   "label": "Sample Retention"
+   "label": "Batch Configuration"
   },
   {
    "default": "0",
@@ -571,20 +567,13 @@
    "options": "Item Variant Attribute"
   },
   {
-   "collapsible": 1,
-   "fieldname": "purchase_details",
-   "fieldtype": "Section Break",
-   "label": "Purchase, Replenishment Details",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-shopping-cart"
-  },
-  {
    "default": "1",
    "fieldname": "is_purchase_item",
    "fieldtype": "Check",
    "label": "Is Purchase Item"
   },
   {
+   "depends_on": "is_purchase_item",
    "fieldname": "purchase_uom",
    "fieldtype": "Link",
    "label": "Default Purchase Unit of Measure",
@@ -592,7 +581,7 @@
   },
   {
    "default": "0.00",
-   "depends_on": "is_stock_item",
+   "depends_on": "is_purchase_item",
    "description": "Minimum quantity should be as per Stock UOM",
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
@@ -601,6 +590,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "depends_on": "is_stock_item",
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock"
@@ -610,14 +600,16 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "is_purchase_item",
    "description": "Average time taken by the supplier to deliver",
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
-   "label": "Lead Time in days",
+   "label": "Lead Time in Days",
    "oldfieldname": "lead_time_days",
    "oldfieldtype": "Int"
   },
   {
+   "depends_on": "is_purchase_item",
    "fieldname": "last_purchase_rate",
    "fieldtype": "Currency",
    "label": "Last Purchase Rate",
@@ -634,20 +626,21 @@
    "label": "Is Customer Provided Item"
   },
   {
-   "depends_on": "eval:doc.is_customer_provided_item==1",
+   "depends_on": "is_customer_provided_item",
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer"
   },
   {
-   "collapsible": 1,
+   "depends_on": "is_purchase_item",
    "fieldname": "supplier_details",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
   },
   {
    "default": "0",
+   "depends_on": "is_purchase_item",
    "fieldname": "delivered_by_supplier",
    "fieldtype": "Check",
    "label": "Delivered by Supplier (Drop Ship)",
@@ -660,7 +653,7 @@
    "options": "Item Supplier"
   },
   {
-   "collapsible": 1,
+   "depends_on": "is_purchase_item",
    "fieldname": "foreign_trade_details",
    "fieldtype": "Section Break",
    "label": "Foreign Trade Details"
@@ -682,6 +675,7 @@
    "options": "Customs Tariff Number"
   },
   {
+   "depends_on": "is_sales_item",
    "fieldname": "sales_uom",
    "fieldtype": "Link",
    "label": "Default Sales Unit of Measure",
@@ -694,6 +688,7 @@
    "label": "Is Sales Item"
   },
   {
+   "depends_on": "is_sales_item",
    "fieldname": "max_discount",
    "fieldtype": "Percent",
    "label": "Max Discount (%)",
@@ -701,7 +696,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "eval:doc.enable_deferred_revenue || doc.enable_deferred_expense",
    "fieldname": "deferred_revenue",
    "fieldtype": "Section Break",
@@ -752,19 +746,13 @@
    "label": "No of Months"
   },
   {
-   "collapsible": 1,
-   "fieldname": "customer_details",
-   "fieldtype": "Section Break",
-   "label": "Customer Details"
-  },
-  {
    "fieldname": "customer_items",
    "fieldtype": "Table",
    "label": "Customer Items",
    "options": "Item Customer Detail"
   },
   {
-   "collapsible": 1,
+   "depends_on": "is_stock_item",
    "fieldname": "inspection_criteria",
    "fieldtype": "Section Break",
    "label": "Inspection Criteria",
@@ -794,10 +782,9 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
    "depends_on": "is_stock_item",
    "fieldname": "manufacturing",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Manufacturing",
    "oldfieldtype": "Section Break",
    "options": "fa fa-cogs"
@@ -823,23 +810,12 @@
    "oldfieldtype": "Select"
   },
   {
-   "fieldname": "column_break_74",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "customer_code",
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Customer Code",
    "no_copy": 1,
    "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "website_section",
-   "fieldtype": "Section Break",
-   "label": "Website",
-   "options": "fa fa-globe"
   },
   {
    "default": "0",
@@ -920,7 +896,6 @@
    "label": "Set Meta Tags"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "website_specifications",
    "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
    "fieldname": "sb72",
@@ -997,6 +972,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "is_stock_item",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Percent",
    "label": "Over Delivery/Receipt Allowance (%)",
@@ -1074,10 +1050,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_34",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "col_break_37",
    "fieldtype": "Column Break"
   },
@@ -1102,7 +1074,7 @@
   {
    "fieldname": "show_item_code",
    "fieldtype": "Select",
-   "label": "Show Item Code",
+   "label": "Show Item Code in Print",
    "options": "\nNo\nYes"
   },
   {
@@ -1128,17 +1100,11 @@
    "label": "Is Vehicle"
   },
   {
+   "depends_on": "is_stock_item",
    "fieldname": "manufacture_uom",
    "fieldtype": "Link",
    "label": "Default Raw Material UOM",
    "options": "UOM"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "eval:(doc.applicable_to && doc.applicable_to.length)",
-   "fieldname": "sec_applicable_to",
-   "fieldtype": "Section Break",
-   "label": "Applicability"
   },
   {
    "fieldname": "applicable_to",
@@ -1234,7 +1200,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
    "collapsible_depends_on": "applicable_items",
    "fieldname": "applicable_items_section",
    "fieldtype": "Section Break",
@@ -1246,17 +1211,120 @@
    "label": "Applicable Items",
    "no_copy": 1,
    "options": "Item Applicable Item"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:(doc.applicable_to && doc.applicable_to.length)",
+   "fieldname": "applicability_tab",
+   "fieldtype": "Tab Break",
+   "label": "Applicability"
+  },
+  {
+   "fieldname": "inventory_tab",
+   "fieldtype": "Tab Break",
+   "label": "Inventory",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-truck"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "purchasing_tab",
+   "fieldtype": "Tab Break",
+   "label": "Purchasing",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-shopping-cart"
+  },
+  {
+   "fieldname": "accounting_tab",
+   "fieldtype": "Tab Break",
+   "label": "Accounting"
+  },
+  {
+   "fieldname": "applicable_to_section",
+   "fieldtype": "Section Break",
+   "label": "Applicable To"
+  },
+  {
+   "fieldname": "column_break_104",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "selling_tab",
+   "fieldtype": "Tab Break",
+   "label": "Selling"
+  },
+  {
+   "fieldname": "website_tab",
+   "fieldtype": "Tab Break",
+   "label": "Website",
+   "options": "fa fa-globe"
+  },
+  {
+   "fieldname": "column_break_93",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_sales_item",
+   "fieldname": "customer_item_specifications_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Item Specifications"
+  },
+  {
+   "fieldname": "manufacturing_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing Defaults"
+  },
+  {
+   "fieldname": "column_break_129",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "units_of_measure_section",
+   "fieldtype": "Section Break",
+   "label": "Units of Measure"
+  },
+  {
+   "fieldname": "cb_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_40",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_no_configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Serial No Configuration"
+  },
+  {
+   "fieldname": "column_break_88",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_82",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_85",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description_tab",
+   "fieldtype": "Tab Break",
+   "label": "Description"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
- "max_attachments": 1,
- "modified": "2022-10-08 14:27:16.504781",
+ "links": [],
+ "modified": "2022-12-21 00:10:30.007159",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -1337,11 +1405,12 @@
    "write": 1
   }
  ],
- "search_fields": "item_name,item_group,brand,customer_code",
+ "search_fields": "item_name,item_group,brand,item_source,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "idx desc,modified desc",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "item_name",
  "track_changes": 1
 }
