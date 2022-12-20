@@ -121,10 +121,22 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	else:
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
+	cost_center = get_cost_center(inv)
+	tax_row.update({"cost_center": cost_center})
+
 	if inv.doctype == "Purchase Invoice":
 		return tax_row, tax_deducted_on_advances, voucher_wise_amount
 	else:
 		return tax_row
+
+
+def get_cost_center(inv):
+	cost_center = frappe.get_cached_value("Company", inv.company, "cost_center")
+
+	if len(inv.get("taxes", [])) > 0:
+		cost_center = inv.get("taxes")[0].cost_center
+
+	return cost_center
 
 
 def get_tax_withholding_details(tax_withholding_category, posting_date, company):

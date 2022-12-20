@@ -684,34 +684,33 @@ class PaymentEntry(AccountsController):
 		)
 
 	def validate_payment_against_negative_invoice(self):
-		if (self.payment_type == "Pay" and self.party_type == "Customer") or (
-			self.payment_type == "Receive" and self.party_type == "Supplier"
+		if (self.payment_type != "Pay" or self.party_type != "Customer") and (
+			self.payment_type != "Receive" or self.party_type != "Supplier"
 		):
+			return
 
-			total_negative_outstanding = sum(
-				abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+		total_negative_outstanding = sum(
+			abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+		)
+
+		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
+		additional_charges = sum(flt(d.amount) for d in self.deductions)
+
+		if not total_negative_outstanding:
+			if self.party_type == "Customer":
+				msg = _("Cannot pay to Customer without any negative outstanding invoice")
+			else:
+				msg = _("Cannot receive from Supplier without any negative outstanding invoice")
+
+			frappe.throw(msg, InvalidPaymentEntry)
+
+		elif paid_amount - additional_charges > total_negative_outstanding:
+			frappe.throw(
+				_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
+					total_negative_outstanding
+				),
+				InvalidPaymentEntry,
 			)
-
-			paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
-			additional_charges = sum([flt(d.amount) for d in self.deductions])
-
-			if not total_negative_outstanding:
-				frappe.throw(
-					_("Cannot {0} {1} {2} without any negative outstanding invoice").format(
-						_(self.payment_type),
-						(_("to") if self.party_type == "Customer" else _("from")),
-						self.party_type,
-					),
-					InvalidPaymentEntry,
-				)
-
-			elif paid_amount - additional_charges > total_negative_outstanding:
-				frappe.throw(
-					_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
-						total_negative_outstanding
-					),
-					InvalidPaymentEntry,
-				)
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
@@ -1188,6 +1187,7 @@ def get_outstanding_reference_documents(args):
 
 	ple = qb.DocType("Payment Ledger Entry")
 	common_filter = []
+	accounting_dimensions_filter = []
 	posting_and_due_date = []
 
 	# confirm that Supplier is not blocked
@@ -1217,7 +1217,7 @@ def get_outstanding_reference_documents(args):
 	# Add cost center condition
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
-		common_filter.append(ple.cost_center == args.get("cost_center"))
+		accounting_dimensions_filter.append(ple.cost_center == args.get("cost_center"))
 
 	date_fields_dict = {
 		"posting_date": ["from_posting_date", "to_posting_date"],
@@ -1243,6 +1243,7 @@ def get_outstanding_reference_documents(args):
 		posting_date=posting_and_due_date,
 		min_outstanding=args.get("outstanding_amt_greater_than"),
 		max_outstanding=args.get("outstanding_amt_less_than"),
+		accounting_dimensions=accounting_dimensions_filter,
 	)
 
 	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
@@ -1639,7 +1640,7 @@ def get_payment_entry(
 ):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
-	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
+	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= 99.99:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	if not party_type:

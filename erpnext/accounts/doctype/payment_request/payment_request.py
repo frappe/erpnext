@@ -254,6 +254,7 @@ class PaymentRequest(Document):
 
 		payment_entry.update(
 			{
+				"mode_of_payment": self.mode_of_payment,
 				"reference_no": self.name,
 				"reference_date": nowdate(),
 				"remarks": "Payment Entry against {0} {1} via Payment Request {2}".format(
@@ -403,25 +404,22 @@ def make_payment_request(**args):
 		else ""
 	)
 
-	existing_payment_request = None
-	if args.order_type == "Shopping Cart":
-		existing_payment_request = frappe.db.get_value(
-			"Payment Request",
-			{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ("!=", 2)},
-		)
+	draft_payment_request = frappe.db.get_value(
+		"Payment Request",
+		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": 0},
+	)
 
-	if existing_payment_request:
+	existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
+
+	if existing_payment_request_amount:
+		grand_total -= existing_payment_request_amount
+
+	if draft_payment_request:
 		frappe.db.set_value(
-			"Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False
+			"Payment Request", draft_payment_request, "grand_total", grand_total, update_modified=False
 		)
-		pr = frappe.get_doc("Payment Request", existing_payment_request)
+		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
-		if args.order_type != "Shopping Cart":
-			existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
-
-			if existing_payment_request_amount:
-				grand_total -= existing_payment_request_amount
-
 		pr = frappe.new_doc("Payment Request")
 		pr.update(
 			{

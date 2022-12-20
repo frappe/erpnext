@@ -4,12 +4,24 @@
 
 import json
 from collections import defaultdict
+from typing import Dict
 
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	cint,
+	comma_or,
+	cstr,
+	flt,
+	format_time,
+	formatdate,
+	getdate,
+	nowdate,
+	today,
+)
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -2239,16 +2251,16 @@ class StockEntry(StockController):
 			d.qty -= process_loss_dict[d.item_code][1]
 
 	def set_serial_no_batch_for_finished_good(self):
-		serial_nos = ""
+		serial_nos = []
 		if self.pro_doc.serial_no:
-			serial_nos = self.get_serial_nos_for_fg()
+			serial_nos = self.get_serial_nos_for_fg() or []
 
 		for row in self.items:
 			if row.is_finished_item and row.item_code == self.pro_doc.production_item:
 				if serial_nos:
 					row.serial_no = "\n".join(serial_nos[0 : cint(row.qty)])
 
-	def get_serial_nos_for_fg(self, args):
+	def get_serial_nos_for_fg(self):
 		fields = [
 			"`tabStock Entry`.`name`",
 			"`tabStock Entry Detail`.`qty`",
@@ -2264,9 +2276,7 @@ class StockEntry(StockController):
 		]
 
 		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
-
-		if self.pro_doc.serial_no:
-			return self.get_available_serial_nos(stock_entries)
+		return self.get_available_serial_nos(stock_entries)
 
 	def get_available_serial_nos(self, stock_entries):
 		used_serial_nos = []
@@ -2705,3 +2715,62 @@ def get_stock_entry_data(work_order):
 		)
 		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
 	).run(as_dict=1)
+
+
+def audit_incorrect_valuation_entries():
+	# Audit of stock transfer entries having incorrect valuation
+	from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+	stock_entries = get_incorrect_stock_entries()
+
+	for stock_entry, values in stock_entries.items():
+		reposting_data = frappe._dict(
+			{
+				"posting_date": values.posting_date,
+				"posting_time": values.posting_time,
+				"voucher_type": "Stock Entry",
+				"voucher_no": stock_entry,
+				"company": values.company,
+			}
+		)
+
+		create_repost_item_valuation_entry(reposting_data)
+
+
+def get_incorrect_stock_entries() -> Dict:
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	transfer_purposes = [
+		"Material Transfer",
+		"Material Transfer for Manufacture",
+		"Send to Subcontractor",
+	]
+
+	query = (
+		frappe.qb.from_(stock_entry)
+		.inner_join(stock_ledger_entry)
+		.on(stock_entry.name == stock_ledger_entry.voucher_no)
+		.select(
+			stock_entry.name,
+			stock_entry.company,
+			stock_entry.posting_date,
+			stock_entry.posting_time,
+			Sum(stock_ledger_entry.stock_value_difference).as_("stock_value"),
+		)
+		.where(
+			(stock_entry.docstatus == 1)
+			& (stock_entry.purpose.isin(transfer_purposes))
+			& (stock_ledger_entry.modified > add_days(today(), -2))
+		)
+		.groupby(stock_ledger_entry.voucher_detail_no)
+		.having(Sum(stock_ledger_entry.stock_value_difference) != 0)
+	)
+
+	data = query.run(as_dict=True)
+	stock_entries = {}
+
+	for row in data:
+		if abs(row.stock_value) > 0.1 and row.name not in stock_entries:
+			stock_entries.setdefault(row.name, row)
+
+	return stock_entries
