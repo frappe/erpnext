@@ -102,11 +102,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-06-29 18:27:02.832979",
-=======
  "modified": "2022-12-15 11:11:02.131986",
->>>>>>> ae8dd2b2bc (fix: remove guest role from doctype)
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

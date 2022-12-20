@@ -8,12 +8,8 @@ import frappe
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
-<<<<<<< HEAD
-from frappe.utils import get_url, getdate
-=======
 from frappe.share import add_docshare
-from frappe.utils import get_url, getdate, now
->>>>>>> 4bfe2ea572 (fix: agent assignment and permissions for appointment)
+from frappe.utils import get_url, getdate
 from frappe.utils.verified_command import get_signed_params
 
 
