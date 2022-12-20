@@ -268,10 +268,12 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	data = {}
 	total = 0
+	filters.account_type = account_type
+	filters.start_date = fiscal_year.year_start_date
+	filters.end_date = fiscal_year.year_end_date
+
 	for company in companies:
-		amount = get_account_type_based_gl_data(
-			company, fiscal_year.year_start_date, fiscal_year.year_end_date, account_type, filters
-		)
+		amount = get_account_type_based_gl_data(company, filters)
 
 		if amount and account_type == "Depreciation":
 			amount *= -1
