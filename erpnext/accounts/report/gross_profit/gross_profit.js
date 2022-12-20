@@ -50,6 +50,12 @@ frappe.query_reports["Gross Profit"] = {
 			"fieldtype": "Link",
 			"options": "Sales Person"
 		},
+		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse"
+		},
 	],
 	"tree": true,
 	"name_field": "parent",

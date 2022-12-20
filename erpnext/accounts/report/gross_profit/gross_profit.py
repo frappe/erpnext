@@ -735,6 +735,9 @@ class GrossProfitGenerator(object):
 		if self.filters.get("item_code"):
 			conditions += " and `tabSales Invoice Item`.item_code = %(item_code)s"
 
+		if self.filters.get("warehouse"):
+			conditions += " and `tabSales Invoice Item`.warehouse = %(warehouse)s"
+
 		self.si_list = frappe.db.sql(
 			"""
 			select
