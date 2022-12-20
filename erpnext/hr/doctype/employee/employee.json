@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -877,11 +878,13 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2022-08-05 15:52:43.766989",
+ "links": [],
+ "modified": "2022-12-18 19:16:11.625225",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -923,8 +926,12 @@
    "role": "Accounts User"
   },
   {
-   "read": 1,
-   "role": "Projects User"
+   "role": "Projects User",
+   "select": 1
+  },
+  {
+   "role": "Stock User",
+   "select": 1
   }
  ],
  "quick_entry": 1,
@@ -932,6 +939,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "employee_name",
  "track_changes": 1
 }
