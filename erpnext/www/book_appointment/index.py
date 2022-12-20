@@ -26,8 +26,12 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def get_appointment_settings():
-	settings = frappe.get_doc("Appointment Booking Settings")
-	settings.holiday_list = frappe.get_doc("Holiday List", settings.holiday_list)
+	settings = frappe.get_cached_value(
+		"Appointment Booking Settings",
+		None,
+		["advance_booking_days", "appointment_duration", "success_redirect_url"],
+		as_dict=True,
+	)
 	return settings
 
 
@@ -106,7 +110,7 @@ def create_appointment(date, time, tz, contact):
 	appointment.customer_details = contact.get("notes", None)
 	appointment.customer_email = contact.get("email", None)
 	appointment.status = "Open"
-	appointment.insert()
+	appointment.insert(ignore_permissions=True)
 	return appointment
 
 
