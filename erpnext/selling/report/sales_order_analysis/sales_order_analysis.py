@@ -53,9 +53,6 @@ def get_conditions(filters):
 	if filters.get("status"):
 		conditions += " and so.status in %(status)s"
 
-	if filters.get("warehouse"):
-		conditions += " and soi.warehouse = %(warehouse)s"
-
 	return conditions
 
 
