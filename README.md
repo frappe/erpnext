@@ -49,15 +49,47 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 
 > Login for the PWD site: (username: Administrator, password: admin)
 
-### Containerized Installation
+### Containerized Installation using install script
 
-Use docker to deploy ERPNext in production or for development of [Frappe](https://github.com/frappe/frappe) apps. See https://github.com/frappe/frappe_docker for more details.
+The Easy Install script should get you going with a Frappe/ERPNext setup with minimal manual intervention and effort.
 
-### Manual Install
+This script uses Docker with the [Frappe/ERPNext Docker Repository](https://github.com/frappe/frappe_docker) and can be used for both Development setup and Production setup.
 
-The Easy Way: our install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench for more details.
+#### Setup
 
-New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
+Download the Easy Install script and execute it:
+
+```sh
+$ wget https://raw.githubusercontent.com/frappe/bench/develop/easy-install.py
+$ python3 easy-install.py --prod
+```
+
+This script will install docker on your system and will fetch the required containers, setup bench and a default ERPNext instance.
+
+The script will generate MySQL root password and an Administrator password for the Frappe/ERPNext instance, which will then be saved under `$HOME/passwords.txt` of the user used to setup the instance.
+It will also generate a new compose file under `$HOME/<project-name>-compose.yml`.
+
+When the setup is complete, you will be able to access the system at `http://<your-server-ip>`, wherein you can use the Administrator password to login.
+
+#### Usage
+
+Here are the arguments for the easy-install script
+
+```txt
+usage: easy-install.py [-h] [-p] [-d] [-s SITENAME] [-n PROJECT] [--email EMAIL]
+
+Install Frappe with Docker
+
+options:
+  -h, --help            show this help message and exit
+  -p, --prod            Setup Production System
+  -d, --dev             Setup Development System
+  -s SITENAME, --sitename SITENAME
+                        The Site Name for your production site
+  -n PROJECT, --project PROJECT
+                        Project Name
+  --email EMAIL         Add email for the SSL.
+```
 
 
 ## Learning and community
