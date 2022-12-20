@@ -211,8 +211,6 @@ def get_account_type_based_gl_data(company, filters=None):
 		filters,
 	)
 
-	print(gl_sum)
-
 	return gl_sum[0] if gl_sum and gl_sum[0] else 0
 
 
