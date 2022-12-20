@@ -782,4 +782,4 @@ erpnext.patches.v12_0.fix_purchase_invoice_double_gl
 erpnext.patches.v14_0.delete_datev_doctypes
 
 [post_model_sync]
-erpnext.patches.v12_0.resetup_vehicle_domain #24-11-2022
+erpnext.patches.v12_0.resetup_vehicle_domain #20-12-2022

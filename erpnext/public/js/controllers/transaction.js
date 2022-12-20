@@ -1,6 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+{% include 'erpnext/stock/applies_to_common.js' %};
+
+
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
 		frappe.flags.hide_serial_batch_dialog = true
@@ -245,7 +248,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				}
 
 				frm.cscript.update_item_defaults(false);
-				frm.cscript.get_applies_to_details();
+				frm.events.get_applies_to_details(frm);
 			}
 		});
 
@@ -492,7 +495,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
-		this.set_applies_to_read_only();
 
 		let scan_barcode_field = this.frm.get_field('scan_barcode');
 		if (scan_barcode_field) {
@@ -1468,13 +1470,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-	applies_to_item() {
-		this.get_applies_to_details();
-	}
-	applies_to_vehicle() {
-		this.set_applies_to_read_only();
-		this.get_applies_to_details();
-	}
 	vehicle_owner() {
 		if (!this.frm.doc.vehicle_owner) {
 			this.frm.doc.vehicle_owner_name = null;
@@ -1489,67 +1484,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 	vehicle_license_plate() {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
-	}
-
-	get_applies_to_details() {
-		var me = this;
-		var args = this.get_applies_to_args();
-		return frappe.call({
-			method: "erpnext.stock.get_item_details.get_applies_to_details",
-			args: {
-				args: args
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					return me.frm.set_value(r.message);
-				}
-			}
-		});
-	}
-
-	get_applies_to_vehicle_odometer() {
-		if (!this.frm.doc.applies_to_vehicle || !this.frm.fields_dict.vehicle_last_odometer) {
-			return;
-		}
-
-		var me = this;
-		return frappe.call({
-			method: "erpnext.stock.get_item_details.get_applies_to_vehicle_odometer",
-			args: {
-				vehicle: this.frm.doc.applies_to_vehicle,
-				project: this.frm.doc.project,
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					me.frm.set_value('vehicle_last_odometer', r.message);
-				}
-			}
-		});
-	}
-
-	get_applies_to_args() {
-		return {
-			applies_to_item: this.frm.doc.applies_to_item,
-			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
-			doctype: this.frm.doc.doctype,
-			name: this.frm.doc.name,
-			project: this.frm.doc.project,
-		}
-	}
-
-	set_applies_to_read_only() {
-		var me = this;
-		var read_only_fields = [
-			'applies_to_item', 'applies_to_item_name',
-			'vehicle_license_plate', 'vehicle_unregistered',
-			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_color', 'vehicle_last_odometer',
-		];
-		$.each(read_only_fields, function (i, f) {
-			if (me.frm.fields_dict[f]) {
-				me.frm.set_df_property(f, "read_only", me.frm.doc.applies_to_vehicle ? 1 : 0);
-			}
-		});
 	}
 
 	calculate_net_weight() {
