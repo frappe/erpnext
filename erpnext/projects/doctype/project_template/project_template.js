@@ -49,7 +49,14 @@ frappe.ui.form.on('Project Template', {
 				false,
 				__("Customer Request Checklist"));
 		}
-	}
+	},
+
+	applies_to_item: function (frm, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		if (!row.applies_to_item) {
+			frappe.model.set_value(cdt, cdn, 'applies_to_item_name', null);
+		}
+	},
 });
 
 frappe.ui.form.on('Project Template Item', {
@@ -57,13 +64,6 @@ frappe.ui.form.on('Project Template Item', {
 		var row = frappe.get_doc(cdt, cdn);
 		if (!row.applicable_item_code) {
 			frappe.model.set_value(cdt, cdn, 'applicable_item_name', null);
-		}
-	},
-
-	applies_to_item: function (frm, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		if (!row.applies_to_item) {
-			frappe.model.set_value(cdt, cdn, 'applies_to_item_name', null);
 		}
 	},
 });

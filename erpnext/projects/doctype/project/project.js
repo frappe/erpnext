@@ -5,7 +5,8 @@ frappe.provide('erpnext.projects');
 
 {% include 'erpnext/vehicles/vehicle_checklist.js' %};
 {% include 'erpnext/vehicles/customer_vehicle_selector.js' %};
-{% include "erpnext/public/js/controllers/quick_contacts.js" %};
+{% include 'erpnext/public/js/controllers/quick_contacts.js' %};
+{% include 'erpnext/stock/applies_to_common.js' %};
 
 erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 	setup: function() {
@@ -27,7 +28,6 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		this.set_status_read_only();
 		this.set_percent_complete_read_only();
 		this.set_cant_change_read_only();
-		this.set_applies_to_read_only();
 		this.toggle_vehicle_odometer_fields();
 		this.make_vehicle_checklist();
 		this.make_customer_request_checklist();
@@ -106,23 +106,6 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 					"project": me.frm.doc.name
 				};
 			};
-		}
-
-		var vehicle_field = me.frm.get_docfield("applies_to_vehicle");
-		if (vehicle_field) {
-			vehicle_field.get_route_options_for_new_doc = function () {
-				return {
-					"item_code": me.frm.doc.applies_to_item,
-					"item_name": me.frm.doc.applies_to_item_name,
-					"unregistered": me.frm.doc.vehicle_unregistered,
-					"license_plate": me.frm.doc.vehicle_license_plate,
-					"chassis_no": me.frm.doc.vehicle_chassis_no,
-					"engine_no": me.frm.doc.vehicle_engine_no,
-					"color": me.frm.doc.vehicle_color,
-					"warranty_no": me.frm.doc.vehicle_warranty_no,
-					"delivery_date": me.frm.doc.vehicle_delivery_date,
-				}
-			}
 		}
 	},
 
@@ -406,25 +389,6 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		});
 	},
 
-	set_applies_to_read_only: function() {
-		var me = this;
-		var read_only_fields = [
-			'applies_to_item', 'applies_to_item_name',
-			'vehicle_license_plate', 'vehicle_unregistered',
-			'vehicle_chassis_no', 'vehicle_engine_no',
-			'vehicle_color',
-			'vehicle_warranty_no', 'vehicle_delivery_date',
-		];
-
-		var read_only = me.frm.doc.applies_to_vehicle ? 1 : 0;
-
-		$.each(read_only_fields, function (i, f) {
-			if (me.frm.fields_dict[f]) {
-				me.frm.set_df_property(f, "read_only", read_only);
-			}
-		});
-	},
-
 	create_duplicate: function() {
 		var me = this;
 		return new Promise(resolve => {
@@ -505,12 +469,7 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 		erpnext.utils.get_address_display(this.frm, "customer_address");
 	},
 
-	applies_to_item: function () {
-		this.get_applies_to_details();
-	},
 	applies_to_vehicle: function () {
-		this.set_applies_to_read_only();
-		this.get_applies_to_details();
 		this.reload_customer_vehicle_selector();
 	},
 	vehicle_owner: function () {
@@ -527,31 +486,6 @@ erpnext.projects.ProjectController = erpnext.contacts.QuickContacts.extend({
 	},
 	vehicle_license_plate: function () {
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
-	},
-
-	get_applies_to_details: function () {
-		var me = this;
-		var args = this.get_applies_to_args();
-		return frappe.call({
-			method: "erpnext.stock.get_item_details.get_applies_to_details",
-			args: {
-				args: args
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					return me.frm.set_value(r.message);
-				}
-			}
-		});
-	},
-
-	get_applies_to_args: function () {
-		return {
-			applies_to_item: this.frm.doc.applies_to_item,
-			applies_to_vehicle: this.frm.doc.applies_to_vehicle,
-			doctype: this.frm.doc.doctype,
-			name: this.frm.doc.name,
-		}
 	},
 
 	serial_no: function () {
