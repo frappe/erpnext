@@ -1,0 +1,107 @@
+{
+ "actions": [],
+ "autoname": "autoincrement",
+ "creation": "2022-12-15 10:52:47.837060",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "consolidation_transaction",
+  "column_break_2",
+  "from_date",
+  "column_break_4",
+  "to_date",
+  "section_break_6",
+  "items",
+  "section_break_9",
+  "total_debit",
+  "column_break_11",
+  "total_credit",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "consolidation_transaction",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Consolidation Transaction",
+   "options": "Consolidation Transaction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Consolidation Adjustment Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_debit",
+   "fieldtype": "Float",
+   "label": "Total Debit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_credit",
+   "fieldtype": "Float",
+   "label": "Total Credit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Consolidation Adjustment Entry",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2022-12-15 10:56:14.929089",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Consolidation Adjustment Item",
+ "naming_rule": "Autoincrement",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
