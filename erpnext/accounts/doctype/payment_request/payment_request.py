@@ -420,28 +420,27 @@ def make_payment_request(**args):
 		)
 		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
-		if args.order_type != "Shopping Cart":
-			pr = frappe.new_doc("Payment Request")
-			pr.update(
-				{
-					"payment_gateway_account": gateway_account.get("name"),
-					"payment_gateway": gateway_account.get("payment_gateway"),
-					"payment_account": gateway_account.get("payment_account"),
-					"payment_channel": gateway_account.get("payment_channel"),
-					"payment_request_type": args.get("payment_request_type"),
-					"currency": ref_doc.currency,
-					"grand_total": grand_total,
-					"mode_of_payment": args.mode_of_payment,
-					"email_to": args.recipient_id or ref_doc.owner,
-					"subject": _("Payment Request for {0}").format(args.dn),
-					"message": gateway_account.get("message") or get_dummy_message(ref_doc),
-					"reference_doctype": args.dt,
-					"reference_name": args.dn,
-					"party_type": args.get("party_type") or "Customer",
-					"party": args.get("party") or ref_doc.get("customer"),
-					"bank_account": bank_account,
-				}
-			)
+		pr = frappe.new_doc("Payment Request")
+		pr.update(
+			{
+				"payment_gateway_account": gateway_account.get("name"),
+				"payment_gateway": gateway_account.get("payment_gateway"),
+				"payment_account": gateway_account.get("payment_account"),
+				"payment_channel": gateway_account.get("payment_channel"),
+				"payment_request_type": args.get("payment_request_type"),
+				"currency": ref_doc.currency,
+				"grand_total": grand_total,
+				"mode_of_payment": args.mode_of_payment,
+				"email_to": args.recipient_id or ref_doc.owner,
+				"subject": _("Payment Request for {0}").format(args.dn),
+				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
+				"reference_doctype": args.dt,
+				"reference_name": args.dn,
+				"party_type": args.get("party_type") or "Customer",
+				"party": args.get("party") or ref_doc.get("customer"),
+				"bank_account": bank_account,
+			}
+		)
 
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
