@@ -594,5 +594,3 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	}
 
 };
-
-	
