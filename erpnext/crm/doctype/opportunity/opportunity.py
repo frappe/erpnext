@@ -170,6 +170,14 @@ class Opportunity(TransactionBase):
 		if vehicle_booking_order:
 			return True
 
+		appointment = frappe.db.get_value("Appointment", {
+			"opportunity": self.name,
+			"docstatus": 1,
+		})
+
+		if appointment:
+			return True
+
 		return False
 
 	def has_ordered_quotation(self):
@@ -285,6 +293,9 @@ def make_quotation(source_name, target_doc=None):
 				"opportunity_from": "quotation_to",
 				"opportunity_type": "order_type",
 				"name": "opportunity",
+				"applies_to_serial_no": "applies_to_serial_no",
+				"applies_to_vehicle": "applies_to_vehicle",
+				"sales_person": "service_advisor"
 			}
 		},
 		"Opportunity Item": {
@@ -323,7 +334,6 @@ def make_request_for_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		set_vehicle_item_from_opportunity(source, target)
 		add_sales_person_from_source(source, target)
 
 		target.run_method("set_missing_values")
@@ -333,10 +343,12 @@ def make_vehicle_quotation(source_name, target_doc=None):
 		"Opportunity": {
 			"doctype": "Vehicle Quotation",
 			"field_map": {
+				"opportunity_from": "quotation_to",
 				"name": "opportunity",
-				'delivery_period': 'delivery_period',
-				'opportunity_from': 'quotation_to',
-				'party_name': 'party_name',
+				"applies_to_item": "item_code",
+				"applies_to_vehicle": "vehicle",
+				"vehicle_color": "color",
+				"delivery_period": "delivery_period",
 			}
 		}
 	}, target_doc, set_missing_values)
@@ -352,7 +364,6 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
 
-		set_vehicle_item_from_opportunity(source, target)
 		add_sales_person_from_source(source, target)
 
 		target.run_method("set_missing_values")
@@ -365,10 +376,9 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 			"doctype": "Vehicle Booking Order",
 			"field_map": {
 				"name": "opportunity",
-				"remarks": "remarks",
+				"applies_to_item": "item_code",
+				"applies_to_vehicle": "vehicle",
 				"delivery_period": "delivery_period",
-				"delivery_date": "delivery_date",
-				"vehicle": "vehicle",
 			}
 		},
 	}, target_doc, set_missing_values)
@@ -376,17 +386,26 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 	return target_doc
 
 
-def set_vehicle_item_from_opportunity(source, target):
-	for d in source.items:
-		item = frappe.get_cached_doc("Item", d.item_code) if d.item_code else frappe._dict()
-		if item.is_vehicle:
-			target.item_code = item.name
-			target.opportunity_item = d.name
-			if target.meta.has_field('color'):
-				target.color = d.vehicle_color
-			elif target.meta.has_field('color_1'):
-				target.color_1 = d.vehicle_color
-			return
+@frappe.whitelist()
+def make_appointment(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		add_sales_person_from_source(source, target)
+		target.appointment_type = frappe.get_cached_value("Opportunity Type", source.opportunity_type, "default_appointment_type")
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	target_doc = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Appointment",
+			"field_map": {
+				"name": "opportunity",
+				"applies_to_vehicle": "applies_to_vehicle",
+			}
+		}
+	}, target_doc, set_missing_values)
+
+	return target_doc
 
 
 @frappe.whitelist()
@@ -420,10 +439,14 @@ def set_multiple_status(names, status):
 
 def auto_close_opportunity():
 	""" auto close the `Replied` Opportunities after 7 days """
-	auto_close_after_days = frappe.db.get_single_value("Selling Settings", "close_opportunity_after_days") or 15
+	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days")
+	if auto_close_after_days < 1:
+		return
 
-	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
+	opportunities = frappe.db.sql("""
+		select name from tabOpportunity
+		where status='Replied' and modified<DATE_SUB(CURDATE(), INTERVAL %s DAY)
+	""", (auto_close_after_days), as_dict=True)
 
 	for opportunity in opportunities:
 		doc = frappe.get_doc("Opportunity", opportunity.get("name"))

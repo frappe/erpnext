@@ -19,7 +19,8 @@
    "label": "Scheduled Date",
    "oldfieldname": "scheduled_date",
    "oldfieldtype": "Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "actual_date",
@@ -65,7 +66,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-12-08 12:29:00.405545",
+ "modified": "2022-12-21 19:04:15.655916",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",

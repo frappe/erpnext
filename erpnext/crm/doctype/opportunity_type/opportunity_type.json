@@ -7,7 +7,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "description"
+  "description",
+  "conversion_document",
+  "default_appointment_type"
  ],
  "fields": [
   {
@@ -15,9 +17,21 @@
    "fieldtype": "Small Text",
    "in_list_view": 1,
    "label": "Description"
+  },
+  {
+   "fieldname": "conversion_document",
+   "fieldtype": "Select",
+   "label": "Conversion Document",
+   "options": "\nOrder\nAppointment"
+  },
+  {
+   "fieldname": "default_appointment_type",
+   "fieldtype": "Link",
+   "label": "Default Appointment Type",
+   "options": "Appointment Type"
   }
  ],
- "modified": "2020-03-03 15:42:30.085637",
+ "modified": "2022-12-20 18:30:05.576126",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Type",

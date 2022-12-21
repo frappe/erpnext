@@ -11,6 +11,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		this.frm.custom_make_buttons = {
 			'Customer': 'Customer',
 			'Quotation': 'Quotation',
+			'Appointment': 'Appointment',
 			'Vehicle Quotation': 'Vehicle Quotation',
 			'Vehicle Booking Order': 'Vehicle Booking Order',
 			'Supplier Quotation': 'Supplier Quotation',
@@ -29,6 +30,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		this.set_dynamic_link();
 		this.set_sales_person_from_user();
 		this.setup_buttons();
+		this.setup_fields();
 	},
 
 	onload: function() {
@@ -40,8 +42,9 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	},
 
 	setup_buttons: function() {
-		var me = this;
+		this.frm.clear_custom_buttons();
 
+		var me = this;
 		if (!me.frm.doc.__islocal) {
 			if(me.frm.perm[0].write) {
 
@@ -71,20 +74,26 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			}
 
 			if(me.frm.doc.status !== "Lost") {
-				if(!me.frm.doc.__onload.customer) {
+				if (!me.frm.doc.__onload.customer) {
 					me.frm.add_custom_button(__('Customer'), () => me.create_customer(),
 						__('Create'));
 				}
 
-				if (frappe.boot.active_domains.includes("Vehicles")) {
-					me.frm.add_custom_button(__("Vehicle Quotation"), () => me.make_vehicle_quotation(),
-						__('Create'));
+				if (frappe.boot.active_domains.includes("Vehicles") && (!me.frm.doc.conversion_document || me.frm.doc.conversion_document == "Order")) {
 					me.frm.add_custom_button(__("Vehicle Booking Order"), () => me.make_vehicle_booking_order(),
+						__('Create'));
+
+					me.frm.add_custom_button(__("Vehicle Quotation"), () => me.make_vehicle_quotation(),
 						__('Create'));
 				}
 
 				me.frm.add_custom_button(__('Quotation'), () => me.create_quotation(),
 					__('Create'));
+
+				if (!me.frm.doc.conversion_document || me.frm.doc.conversion_document == "Appointment") {
+					me.frm.add_custom_button(__('Appointment'), () => me.create_appointment(),
+						__('Create'));
+				}
 
 				if (me.frm.doc.items && me.frm.doc.items.length) {
 					me.frm.add_custom_button(__('Supplier Quotation'), () => me.make_supplier_quotation(),
@@ -116,7 +125,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		});
 
 		me.frm.set_query('customer_address', erpnext.queries.address_query);
-		me.frm.set_query('contact_person', erpnext.queries.contact_query)
+		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 
 		me.frm.set_query("item_code", "items", function() {
 			return {
@@ -124,13 +133,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				filters: {'is_sales_item': 1}
 			};
 		});
-
-		if(me.frm.fields_dict["items"].grid.get_field('vehicle_color')) {
-			me.frm.set_query("vehicle_color", "items", function(doc, cdt, cdn) {
-				var row = frappe.get_doc(cdt, cdn);
-				return erpnext.queries.vehicle_color({item_code: row.item_code});
-			});
-		}
 
 		if (me.frm.fields_dict.delivery_period) {
 			me.frm.set_query("delivery_period", function () {
@@ -172,10 +174,29 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		});
 	},
 
+	setup_fields: function() {
+		var vehicle_sales_fields = [
+			"vehicle_sb_1",
+			"vehicle_sb_2",
+			"feedback_section",
+			"ratings_section",
+			"previously_owned_section"
+		]
+
+		for (var field of vehicle_sales_fields) {
+			this.frm.toggle_display(field, this.frm.doc.conversion_document == "Order");
+		}
+	},
+
 	opportunity_from: function() {
 		this.set_dynamic_link();
 		this.set_dynamic_field_label();
 		this.frm.set_value("party_name", "");
+	},
+
+	opportunity_type: function() {
+		this.setup_buttons()
+		this.setup_fields()
 	},
 
 	contact_person: function() {
@@ -373,6 +394,13 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	make_vehicle_booking_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_vehicle_booking_order",
+			frm: this.frm
+		})
+	},
+
+	create_appointment: function () {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_appointment",
 			frm: this.frm
 		})
 	},
