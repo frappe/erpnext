@@ -8,6 +8,8 @@
  "field_order": [
   "project_type",
   "description",
+  "column_break_3",
+  "claim_billing_type",
   "sec_defaults",
   "is_warranty_claim",
   "is_internal",
@@ -100,9 +102,19 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "claim_billing_type",
+   "fieldtype": "Link",
+   "label": "Claim Billing Type",
+   "options": "Claim Billing Type"
   }
  ],
- "modified": "2022-04-24 00:58:27.868009",
+ "modified": "2022-12-22 17:25:40.720598",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Type",
