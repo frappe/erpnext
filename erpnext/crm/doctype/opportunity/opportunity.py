@@ -295,7 +295,6 @@ def make_quotation(source_name, target_doc=None):
 				"name": "opportunity",
 				"applies_to_serial_no": "applies_to_serial_no",
 				"applies_to_vehicle": "applies_to_vehicle",
-				"sales_person": "service_advisor"
 			}
 		},
 		"Opportunity Item": {
@@ -303,7 +302,7 @@ def make_quotation(source_name, target_doc=None):
 			"field_map": {
 				"parent": "prevdoc_docname",
 				"parenttype": "prevdoc_doctype",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
 			},
 			"add_if_empty": True
 		}
@@ -389,11 +388,11 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 @frappe.whitelist()
 def make_appointment(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		add_sales_person_from_source(source, target)
-		target.appointment_type = frappe.get_cached_value("Opportunity Type", source.opportunity_type, "default_appointment_type")
+		default_appointment_type = frappe.get_cached_value("Opportunity Type", source.opportunity_type, "default_appointment_type")
+		if default_appointment_type:
+			target.appointment_type = default_appointment_type
 
 		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
 
 	target_doc = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
@@ -401,6 +400,7 @@ def make_appointment(source_name, target_doc=None):
 			"field_map": {
 				"name": "opportunity",
 				"applies_to_vehicle": "applies_to_vehicle",
+				"applies_to_serial_no": "applies_to_serial_no"
 			}
 		}
 	}, target_doc, set_missing_values)

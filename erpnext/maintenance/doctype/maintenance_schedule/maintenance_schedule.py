@@ -222,6 +222,10 @@ def create_opportunity_from_schedule(for_date=None):
 		from `tabMaintenance Schedule Detail` msd
 		inner join `tabMaintenance Schedule` ms on ms.name = msd.parent
 		where ms.status = 'Active' and msd.scheduled_date = %s
+			and not exists(select opp.name from `tabOpportunity` opp
+				where opp.maintenance_schedule = ms.name
+					and opp.maintenance_schedule_row = msd.name
+			)
 	""", target_date, as_dict=1)
 
 	for schedule in schedule_data:
@@ -246,4 +250,5 @@ def create_opportunity_from_schedule(for_date=None):
 				"qty": d.applicable_qty,
 			})
 
+		opportunity_doc.flags.ignore_mandatory = True
 		opportunity_doc.save(ignore_permissions=True)

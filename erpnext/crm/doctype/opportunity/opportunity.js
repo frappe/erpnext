@@ -26,11 +26,10 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		erpnext.toggle_naming_series();
 
-		this.set_dynamic_field_label();
 		this.set_dynamic_link();
+		this.update_dynamic_fields();
 		this.set_sales_person_from_user();
 		this.setup_buttons();
-		this.setup_fields();
 	},
 
 	onload: function() {
@@ -145,7 +144,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	set_dynamic_field_label: function(){
+	update_dynamic_fields: function(){
 		if (this.frm.doc.opportunity_from) {
 			this.frm.set_df_property("party_name", "label", __(this.frm.doc.opportunity_from));
 			this.frm.set_df_property("customer_address", "label", __(this.frm.doc.opportunity_from + " Address"));
@@ -154,6 +153,18 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			this.frm.set_df_property("party_name", "label", __("Party"));
 			this.frm.set_df_property("customer_address", "label", __("Address"));
 			this.frm.set_df_property("contact_person", "label", __("Contact Person"));
+		}
+
+		var vehicle_sales_fields = [
+			"vehicle_sb_1",
+			"vehicle_sb_2",
+			"feedback_section",
+			"ratings_section",
+			"previously_owned_section"
+		]
+
+		for (var field of vehicle_sales_fields) {
+			this.frm.toggle_display(field, this.frm.doc.conversion_document == "Order");
 		}
 	},
 
@@ -174,29 +185,15 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	setup_fields: function() {
-		var vehicle_sales_fields = [
-			"vehicle_sb_1",
-			"vehicle_sb_2",
-			"feedback_section",
-			"ratings_section",
-			"previously_owned_section"
-		]
-
-		for (var field of vehicle_sales_fields) {
-			this.frm.toggle_display(field, this.frm.doc.conversion_document == "Order");
-		}
-	},
-
 	opportunity_from: function() {
 		this.set_dynamic_link();
-		this.set_dynamic_field_label();
+		this.update_dynamic_fields();
 		this.frm.set_value("party_name", "");
 	},
 
 	opportunity_type: function() {
 		this.setup_buttons()
-		this.setup_fields()
+		this.update_dynamic_fields()
 	},
 
 	contact_person: function() {
