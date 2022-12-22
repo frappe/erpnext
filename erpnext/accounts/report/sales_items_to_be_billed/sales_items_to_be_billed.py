@@ -214,6 +214,9 @@ class ItemsToBeBilled:
 		if self.filters.claim_billing_type:
 			conditions.append("ptype.claim_billing_type = %(claim_billing_type)s")
 
+		if self.filters.exclude_warranty_claim_denied:
+			conditions.append("proj.warranty_claim_denied = 0")
+
 		if self.filters.warehouse:
 			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
 			conditions.append("""i.warehouse in (select name from `tabWarehouse`

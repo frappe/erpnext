@@ -25,7 +25,7 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			label: __("Date Type"),
 			fieldtype: "Select",
 			options: ["Transaction Date", "Project Date"],
-			default: "Transaction Date",
+			default: "Project Date",
 			reqd: 1
 		},
 		{
@@ -43,6 +43,11 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			label: __("Claim Billing Type"),
 			fieldtype: "Link",
 			options: "Claim Billing Type"
+		},
+		{
+			fieldname: "exclude_warranty_claim_denied",
+			label: __("Exclude Denied Warranty Claims"),
+			fieldtype: "Check",
 		},
 		{
 			fieldname: "transaction_type",
