@@ -405,7 +405,7 @@
    "label": "Bank Name",
    "oldfieldname": "bank_name",
    "oldfieldtype": "Link",
-   "options": "Bank"
+   "options": "Financial Institution"
   },
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
@@ -866,7 +866,7 @@
    "fieldname": "bank_branch",
    "fieldtype": "Link",
    "label": "Bank Branch",
-   "options": "Bank Branch"
+   "options": "Financial Institution Branch"
   },
   {
    "fieldname": "bank_account_type",
@@ -960,7 +960,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-16 11:49:07.196038",
+ "modified": "2022-12-22 17:14:12.009114",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
