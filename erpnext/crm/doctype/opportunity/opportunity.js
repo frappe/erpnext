@@ -145,14 +145,16 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	},
 
 	update_dynamic_fields: function(){
-		if (this.frm.doc.opportunity_from) {
-			this.frm.set_df_property("party_name", "label", __(this.frm.doc.opportunity_from));
-			this.frm.set_df_property("customer_address", "label", __(this.frm.doc.opportunity_from + " Address"));
-			this.frm.set_df_property("contact_person", "label", __(this.frm.doc.opportunity_from + " Contact Person"));
+		var me = this;
+
+		if (me.frm.doc.opportunity_from) {
+			me.frm.set_df_property("party_name", "label", __(me.frm.doc.opportunity_from));
+			me.frm.set_df_property("customer_address", "label", __(me.frm.doc.opportunity_from + " Address"));
+			me.frm.set_df_property("contact_person", "label", __(me.frm.doc.opportunity_from + " Contact Person"));
 		} else {
-			this.frm.set_df_property("party_name", "label", __("Party"));
-			this.frm.set_df_property("customer_address", "label", __("Address"));
-			this.frm.set_df_property("contact_person", "label", __("Contact Person"));
+			me.frm.set_df_property("party_name", "label", __("Party"));
+			me.frm.set_df_property("customer_address", "label", __("Address"));
+			me.frm.set_df_property("contact_person", "label", __("Contact Person"));
 		}
 
 		var vehicle_sales_fields = [
@@ -164,8 +166,26 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		]
 
 		for (var field of vehicle_sales_fields) {
-			this.frm.toggle_display(field, this.frm.doc.conversion_document == "Order");
+			me.frm.toggle_display(field, me.frm.doc.conversion_document == "Order");
 		}
+
+		var vehicle_info_fields = [
+			"applies_to_vehicle",
+			"vehicle_license_plate",
+			"vehicle_unregistered",
+			"vehicle_chassis_no",
+			"vehicle_engine_no",
+			"vehicle_color",
+			"vehicle_last_odometer",
+			"col_break_vehicle_1",
+			"col_break_vehicle_2",
+		]
+
+		$.each(vehicle_info_fields, function (i, f) {
+			if (me.frm.fields_dict[f]) {
+				me.frm.set_df_property(f, "read_only", me.frm.doc.conversion_document == "Order" ? 1 : 0);
+			}
+		});
 	},
 
 	set_dynamic_link: function() {
