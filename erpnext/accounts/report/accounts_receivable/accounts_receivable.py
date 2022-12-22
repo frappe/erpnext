@@ -794,19 +794,19 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get("payment_terms_template"):
 			self.qb_selection_filter.append(
-				self.ple.party_isin(
-					qb.from_(self.customer).where(
-						self.customer.payment_terms == self.filters.get("payment_terms_template")
-					)
+				self.ple.party.isin(
+					qb.from_(self.customer)
+					.select(self.customer.name)
+					.where(self.customer.payment_terms == self.filters.get("payment_terms_template"))
 				)
 			)
 
 		if self.filters.get("sales_partner"):
 			self.qb_selection_filter.append(
-				self.ple.party_isin(
-					qb.from_(self.customer).where(
-						self.customer.default_sales_partner == self.filters.get("payment_terms_template")
-					)
+				self.ple.party.isin(
+					qb.from_(self.customer)
+					.select(self.customer.name)
+					.where(self.customer.default_sales_partner == self.filters.get("payment_terms_template"))
 				)
 			)
 
