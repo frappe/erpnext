@@ -92,7 +92,10 @@
   "non_standard_depreciation",
   "sec_warranty",
   "warranty_claim_no",
+  "warranty_claim_denied",
   "cb_warranty_1",
+  "warranty_claim_denied_section",
+  "warranty_claim_denied_reason",
   "project_template_section",
   "project_templates",
   "items_section",
@@ -727,7 +730,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.is_warranty_claim || doc.warranty_claim_no",
+   "collapsible_depends_on": "eval:doc.is_warranty_claim || doc.warranty_claim_no || doc.warranty_claim_denied",
    "fieldname": "sec_warranty",
    "fieldtype": "Section Break",
    "hidden": 1,
@@ -1240,12 +1243,31 @@
   {
    "fieldname": "column_break_secondary_contact_display",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "warranty_claim_denied",
+   "fieldtype": "Check",
+   "label": "Warranty Claim Denied",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "warranty_claim_denied",
+   "fieldname": "warranty_claim_denied_section",
+   "fieldtype": "Section Break",
+   "label": "Warranty Claim Denied"
+  },
+  {
+   "fieldname": "warranty_claim_denied_reason",
+   "fieldtype": "Small Text",
+   "label": "Warranty Claim Denied Reason",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-12-02 18:36:01.240518",
+ "modified": "2022-12-22 16:47:05.392159",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
