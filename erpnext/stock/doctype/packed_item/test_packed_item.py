@@ -126,8 +126,8 @@ class TestPackedItem(FrappeTestCase):
 		so.packed_items[1].rate = 200
 		so.save()
 
-		self.assertEqual(so.items[0].rate, 350)
-		self.assertEqual(so.items[0].amount, 700)
+		self.assertEqual(so.items[0].rate, 700)
+		self.assertEqual(so.items[0].amount, 1400)
 
 	def test_newly_mapped_doc_packed_items(self):
 		"Test impact on packed items in newly mapped DN from SO."

@@ -5,7 +5,7 @@ import copy
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings, timeout
-from frappe.utils import add_days, add_months, cint, flt, now, today
+from frappe.utils import add_days, add_months, add_to_date, cint, flt, now, today
 
 from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -635,6 +635,10 @@ class TestWorkOrder(FrappeTestCase):
 			bom.submit()
 			bom_name = bom.name
 
+		ste1 = test_stock_entry.make_stock_entry(
+			item_code=rm1, target="_Test Warehouse - _TC", qty=32, basic_rate=5000.0
+		)
+
 		work_order = make_wo_order_test_record(
 			item=fg_item, skip_transfer=True, planned_start_date=now(), qty=1
 		)
@@ -659,11 +663,29 @@ class TestWorkOrder(FrappeTestCase):
 		work_order.insert()
 		work_order.submit()
 		self.assertEqual(work_order.has_batch_no, 1)
-		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 30))
+		batches = frappe.get_all("Batch", filters={"reference_name": work_order.name})
+		self.assertEqual(len(batches), 3)
+		batches = [batch.name for batch in batches]
+
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 10))
 		for row in ste1.get("items"):
 			if row.is_finished_item:
 				self.assertEqual(row.item_code, fg_item)
 				self.assertEqual(row.qty, 10)
+				self.assertTrue(row.batch_no in batches)
+				batches.remove(row.batch_no)
+
+		ste1.submit()
+
+		remaining_batches = []
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 20))
+		for row in ste1.get("items"):
+			if row.is_finished_item:
+				self.assertEqual(row.item_code, fg_item)
+				self.assertEqual(row.qty, 10)
+				remaining_batches.append(row.batch_no)
+
+		self.assertEqual(sorted(remaining_batches), sorted(batches))
 
 		frappe.db.set_value("Manufacturing Settings", None, "make_serial_no_batch_from_work_order", 0)
 
@@ -1132,6 +1154,36 @@ class TestWorkOrder(FrappeTestCase):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_auto_serial_no_creation(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		fg_item = frappe.generate_hash(length=20)
+		child_item = frappe.generate_hash(length=20)
+
+		bom_tree = {fg_item: {child_item: {}}}
+
+		create_nested_bom(bom_tree, prefix="")
+
+		item = frappe.get_doc("Item", fg_item)
+		item.has_serial_no = 1
+		item.serial_no_series = f"{item.name}.#####"
+		item.save()
+
+		try:
+			wo_order = make_wo_order_test_record(item=fg_item, qty=2, skip_transfer=True)
+			serial_nos = wo_order.serial_no
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+			stock_entry.set_work_order_details()
+			stock_entry.set_serial_no_batch_for_finished_good()
+			for row in stock_entry.items:
+				if row.item_code == fg_item:
+					self.assertTrue(row.serial_no)
+					self.assertEqual(sorted(get_serial_nos(row.serial_no)), sorted(get_serial_nos(serial_nos)))
+
+		except frappe.MandatoryError:
+			self.fail("Batch generation causing failing in Work Order")
+
 	@change_settings(
 		"Manufacturing Settings",
 		{"backflush_raw_materials_based_on": "Material Transferred for Manufacture"},
@@ -1479,6 +1531,166 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertTrue(return_ste_doc.is_return)
 		for row in return_ste_doc.items:
 			self.assertEqual(row.qty, 2)
+
+	def test_workstation_type_for_work_order(self):
+		prepare_data_for_workstation_type_check()
+
+		workstation_types = ["Workstation Type 1", "Workstation Type 2", "Workstation Type 3"]
+		planned_start_date = "2022-11-14 10:00:00"
+
+		wo_order = make_wo_order_test_record(
+			item="Test FG Item For Workstation Type", planned_start_date=planned_start_date, qty=2
+		)
+
+		job_cards = frappe.get_all(
+			"Job Card",
+			fields=[
+				"`tabJob Card`.`name`",
+				"`tabJob Card`.`workstation_type`",
+				"`tabJob Card`.`workstation`",
+				"`tabJob Card Time Log`.`from_time`",
+				"`tabJob Card Time Log`.`to_time`",
+				"`tabJob Card Time Log`.`time_in_mins`",
+			],
+			filters=[
+				["Job Card", "work_order", "=", wo_order.name],
+				["Job Card Time Log", "docstatus", "=", 1],
+			],
+			order_by="`tabJob Card`.`creation` desc",
+		)
+
+		workstations_to_check = ["Workstation 1", "Workstation 3", "Workstation 5"]
+		for index, row in enumerate(job_cards):
+			if index != 0:
+				planned_start_date = add_to_date(planned_start_date, minutes=40)
+
+			self.assertEqual(row.workstation_type, workstation_types[index])
+			self.assertEqual(row.from_time, planned_start_date)
+			self.assertEqual(row.to_time, add_to_date(planned_start_date, minutes=30))
+			self.assertEqual(row.workstation, workstations_to_check[index])
+
+		planned_start_date = "2022-11-14 10:00:00"
+
+		wo_order = make_wo_order_test_record(
+			item="Test FG Item For Workstation Type", planned_start_date=planned_start_date, qty=2
+		)
+
+		job_cards = frappe.get_all(
+			"Job Card",
+			fields=[
+				"`tabJob Card`.`name`",
+				"`tabJob Card`.`workstation_type`",
+				"`tabJob Card`.`workstation`",
+				"`tabJob Card Time Log`.`from_time`",
+				"`tabJob Card Time Log`.`to_time`",
+				"`tabJob Card Time Log`.`time_in_mins`",
+			],
+			filters=[
+				["Job Card", "work_order", "=", wo_order.name],
+				["Job Card Time Log", "docstatus", "=", 1],
+			],
+			order_by="`tabJob Card`.`creation` desc",
+		)
+
+		workstations_to_check = ["Workstation 2", "Workstation 4", "Workstation 6"]
+		for index, row in enumerate(job_cards):
+			if index != 0:
+				planned_start_date = add_to_date(planned_start_date, minutes=40)
+
+			self.assertEqual(row.workstation_type, workstation_types[index])
+			self.assertEqual(row.from_time, planned_start_date)
+			self.assertEqual(row.to_time, add_to_date(planned_start_date, minutes=30))
+			self.assertEqual(row.workstation, workstations_to_check[index])
+
+
+def prepare_data_for_workstation_type_check():
+	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
+	from erpnext.manufacturing.doctype.workstation_type.test_workstation_type import (
+		create_workstation_type,
+	)
+
+	workstation_types = ["Workstation Type 1", "Workstation Type 2", "Workstation Type 3"]
+	for workstation_type in workstation_types:
+		create_workstation_type(workstation_type=workstation_type)
+
+	operations = ["Cutting", "Sewing", "Packing"]
+	for operation in operations:
+		make_operation(
+			{
+				"operation": operation,
+			}
+		)
+
+	workstations = [
+		{
+			"workstation": "Workstation 1",
+			"workstation_type": "Workstation Type 1",
+		},
+		{
+			"workstation": "Workstation 2",
+			"workstation_type": "Workstation Type 1",
+		},
+		{
+			"workstation": "Workstation 3",
+			"workstation_type": "Workstation Type 2",
+		},
+		{
+			"workstation": "Workstation 4",
+			"workstation_type": "Workstation Type 2",
+		},
+		{
+			"workstation": "Workstation 5",
+			"workstation_type": "Workstation Type 3",
+		},
+		{
+			"workstation": "Workstation 6",
+			"workstation_type": "Workstation Type 3",
+		},
+	]
+
+	for row in workstations:
+		make_workstation(row)
+
+	fg_item = make_item(
+		"Test FG Item For Workstation Type",
+		{
+			"is_stock_item": 1,
+		},
+	)
+
+	rm_item = make_item(
+		"Test RM Item For Workstation Type",
+		{
+			"is_stock_item": 1,
+		},
+	)
+
+	if not frappe.db.exists("BOM", {"item": fg_item.name}):
+		bom_doc = make_bom(
+			item=fg_item.name,
+			source_warehouse="Stores - _TC",
+			raw_materials=[rm_item.name],
+			do_not_submit=True,
+		)
+
+		submit_bom = False
+		for index, operation in enumerate(operations):
+			if not frappe.db.exists("BOM Operation", {"parent": bom_doc.name, "operation": operation}):
+				bom_doc.append(
+					"operations",
+					{
+						"operation": operation,
+						"time_in_mins": 30,
+						"hour_rate": 100,
+						"workstation_type": workstation_types[index],
+					},
+				)
+
+				submit_bom = True
+
+		if submit_bom:
+			bom_doc.submit()
 
 
 def prepare_data_for_backflush_based_on_materials_transferred():

@@ -1,26 +1,30 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:workstation_name",
  "creation": "2013-01-10 16:34:17",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "workstation_name",
   "production_capacity",
   "column_break_3",
+  "workstation_type",
   "over_heads",
   "hour_rate_electricity",
   "hour_rate_consumable",
   "column_break_11",
   "hour_rate_rent",
   "hour_rate_labour",
+  "section_break_11",
   "hour_rate",
+  "workstaion_description",
+  "description",
   "working_hours_section",
   "holiday_list",
-  "working_hours",
-  "workstaion_description",
-  "description"
+  "working_hours"
  ],
  "fields": [
   {
@@ -44,7 +48,7 @@
   },
   {
    "fieldname": "over_heads",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Operating Costs",
    "oldfieldtype": "Section Break"
   },
@@ -99,7 +103,7 @@
   },
   {
    "fieldname": "working_hours_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Working Hours"
   },
   {
@@ -128,16 +132,29 @@
   {
    "collapsible": 1,
    "fieldname": "workstaion_description",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Description"
+  },
+  {
+   "bold": 1,
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "icon-wrench",
  "idx": 1,
- "modified": "2019-11-26 12:39:19.742052",
+ "links": [],
+ "modified": "2022-11-04 17:39:01.549346",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -154,6 +171,8 @@
  ],
  "quick_entry": 1,
  "show_name_in_global_search": 1,
+ "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

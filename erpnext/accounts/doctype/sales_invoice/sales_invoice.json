@@ -61,11 +61,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_38",
   "shipping_rule",
   "column_break_55",
-  "tax_category",
+  "incoterm",
+  "named_place",
   "section_break_40",
   "taxes",
   "section_break_43",
@@ -920,6 +922,7 @@
    "fieldtype": "Table",
    "hide_days": 1,
    "hide_seconds": 1,
+   "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
    "options": "Sales Taxes and Charges"
@@ -2098,7 +2101,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "write_off_amount",
-   "depends_on": "grand_total",
+   "depends_on": "is_pos",
    "fieldname": "write_off_section",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -2114,6 +2117,18 @@
    "label": "Repost Required",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2126,7 +2141,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-11-07 16:02:07.972258",
+ "modified": "2022-12-12 18:34:33.409895",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

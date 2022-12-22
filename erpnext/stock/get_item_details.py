@@ -113,7 +113,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		if args.get(key) is None:
 			args[key] = value
 
-	data = get_pricing_rule_for_item(args, out.price_list_rate, doc, for_validate=for_validate)
+	data = get_pricing_rule_for_item(args, doc=doc, for_validate=for_validate)
 
 	out.update(data)
 
@@ -329,6 +329,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
 		else:
 			args.uom = item.stock_uom
+
+	# Set stock UOM in args, so that it can be used while fetching item price
+	args.stock_uom = item.stock_uom
 
 	if args.get("batch_no") and item.name != frappe.get_cached_value(
 		"Batch", args.get("batch_no"), "item"
@@ -825,9 +828,9 @@ def insert_item_price(args):
 	):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (
-				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				(flt(args.rate) + flt(args.discount_amount)) / args.get("conversion_factor")
 				if args.get("conversion_factor")
-				else (args.rate + args.discount_amount)
+				else (flt(args.rate) + flt(args.discount_amount))
 			)
 
 			item_price = frappe.db.get_value(
@@ -1302,7 +1305,7 @@ def apply_price_list_on_item(args):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
 
-	item_details.update(get_pricing_rule_for_item(args, item_details.price_list_rate))
+	item_details.update(get_pricing_rule_for_item(args))
 
 	return item_details
 

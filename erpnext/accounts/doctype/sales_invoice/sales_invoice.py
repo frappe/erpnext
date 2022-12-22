@@ -571,13 +571,14 @@ class SalesInvoice(SellingController):
 
 			# validate if deferred revenue is enabled for any item
 			# Don't allow to update the invoice if deferred revenue is enabled
-			for item in self.get("items"):
-				if item.enable_deferred_revenue:
-					frappe.throw(
-						_(
-							"Deferred Revenue is enabled for item {0}. You cannot update the invoice after submission."
-						).format(item.item_code)
-					)
+			if needs_repost:
+				for item in self.get("items"):
+					if item.enable_deferred_revenue:
+						frappe.throw(
+							_(
+								"Deferred Revenue is enabled for item {0}. You cannot update the invoice after submission."
+							).format(item.item_code)
+						)
 
 			self.db_set("repost_required", needs_repost)
 
@@ -1393,7 +1394,11 @@ class SalesInvoice(SellingController):
 
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
-		if self.write_off_account and flt(self.write_off_amount, self.precision("write_off_amount")):
+		if (
+			self.is_pos
+			and self.write_off_account
+			and flt(self.write_off_amount, self.precision("write_off_amount"))
+		):
 			write_off_account_currency = get_account_currency(self.write_off_account)
 			default_cost_center = frappe.get_cached_value("Company", self.company, "cost_center")
 
@@ -2160,6 +2165,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		if source.doctype == "Purchase Order Item" and target.doctype == "Sales Order Item":
 			target.purchase_order = source.parent
 			target.purchase_order_item = source.name
+			target.material_request = source.material_request
+			target.material_request_item = source.material_request_item
 
 		if (
 			source.get("purchase_order")

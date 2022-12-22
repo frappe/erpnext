@@ -25,5 +25,21 @@ def execute():
 			).where(
 				purchase_invoice.docstatus == 1
 			).run()
+
+			purchase_order = frappe.qb.DocType("Purchase Order")
+
+			frappe.qb.update(purchase_order).set(
+				purchase_order.tax_withholding_net_total, purchase_order.net_total
+			).set(
+				purchase_order.base_tax_withholding_net_total, purchase_order.base_net_total
+			).where(
+				purchase_order.company == company.name
+			).where(
+				purchase_order.apply_tds == 1
+			).where(
+				purchase_order.transaction_date >= fiscal_year_details.year_start_date
+			).where(
+				purchase_order.docstatus == 1
+			).run()
 		except FiscalYearError:
 			pass
