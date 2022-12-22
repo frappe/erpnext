@@ -8,6 +8,7 @@
   "naming_series",
   "appointment_type",
   "column_break_3",
+  "opportunity",
   "previous_appointment",
   "previous_appointment_dt",
   "column_break_6",
@@ -28,6 +29,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "col_break_applies_to",
   "applies_to_item_name",
@@ -511,11 +513,26 @@
    "allow_on_submit": 1,
    "fieldname": "remarks",
    "fieldtype": "Small Text",
-   "label": "Remarks"
+   "label": "Remarks",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
+  },
+  {
+   "fieldname": "opportunity",
+   "fieldtype": "Link",
+   "label": "Opportunity",
+   "no_copy": 1,
+   "options": "Opportunity",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2022-11-08 17:22:47.609656",
+ "modified": "2022-12-21 15:32:27.959398",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

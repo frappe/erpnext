@@ -126,6 +126,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "CRM Settings",
+					"description": _("CRM Settings"),
+				},
+				{
+					"type": "doctype",
 					"label": _("Customer Group"),
 					"name": "Customer Group",
 					"icon": "fa fa-sitemap",

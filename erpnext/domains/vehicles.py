@@ -242,7 +242,7 @@ customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
 # Opportunity Fields
 opportunity_fields = [
 	{"label": "Financing", "fieldname": "vehicle_sb_1", "fieldtype": "Section Break",
-		"insert_after": "sales_stage"},
+		"insert_after": "status"},
 	{"label": "Financer", "fieldname": "financer", "fieldtype": "Link", "options": "Customer",
 		"insert_after": "vehicle_sb_1"},
 	{"label": "", "fieldname": "vehcle_cb_1", "fieldtype": "Column Break",
@@ -257,34 +257,32 @@ opportunity_fields = [
 	{"label": "", "fieldname": "vehicle_sb_2", "fieldtype": "Section Break",
 		"insert_after": "items"},
 	{"label": "Delivery Period", "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period",
-		"insert_after": "vehicle_sb_2"},
+		"insert_after": "vehicle_sb_2", "no_copy": 1},
 	{"label": "", "fieldname": "vehcle_cb_3", "fieldtype": "Column Break",
 		"insert_after": "delivery_period"},
 	{"label": "First/Additional", "fieldname": "first_additional", "fieldtype": "Select", "options": "\nFirst\nAdditional\nReplacement",
-		"insert_after": "vehcle_cb_3"},
+		"insert_after": "vehcle_cb_3", "no_copy": 1},
 
 	{"label": "Key Features You Like", "fieldname": "liked_features", "fieldtype": "Small Text",
-		"insert_after": "feedback_cb_1"},
+		"insert_after": "feedback_cb_1", "no_copy": 1},
 	{"label": "Interior", "fieldname": "rating_interior", "fieldtype": "Rating",
-		"insert_after": "ratings_section"},
+		"insert_after": "ratings_section", "no_copy": 1},
 	{"label": "", "fieldname": "rating_cb_1", "fieldtype": "Column Break",
 		"insert_after": "rating_interior"},
 	{"label": "Exterior", "fieldname": "rating_exterior", "fieldtype": "Rating",
-		"insert_after": "rating_cb_1"},
+		"insert_after": "rating_cb_1", "no_copy": 1},
 	{"label": "", "fieldname": "rating_cb_2", "fieldtype": "Column Break",
 		"insert_after": "rating_exterior"},
 	{"label": "Specifications", "fieldname": "rating_specifications", "fieldtype": "Rating",
-		"insert_after": "rating_cb_2"},
+		"insert_after": "rating_cb_2", "no_copy": 1},
 	{"label": "", "fieldname": "rating_cb_3", "fieldtype": "Column Break",
 		"insert_after": "rating_specifications"},
 	{"label": "Price", "fieldname": "rating_price", "fieldtype": "Rating",
-		"insert_after": "rating_cb_3"},
+		"insert_after": "rating_cb_3", "no_copy": 1},
 ]
 
-opportunity_item_fields = [
-	{"label": "Vehicle Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "in_list_view": 1,
-		"insert_after": "item_name"},
-]
+applies_to_opportunity_fields = deepcopy(applies_to_transaction_fields)
+[d.update({"no_copy": 1}) for d in applies_to_opportunity_fields if d["fieldtype"] != "Column Break"]
 
 # Accounting Dimensions
 accounting_dimension_fields = [
@@ -332,7 +330,7 @@ field_lists = [
 	item_fields, project_fields, project_type_fields, project_change_vehicle_details_fields,
 	project_template_fields, project_template_category_fields, project_template_detail_fields,
 	customer_vehicle_selector_fields, project_customer_vehicle_selector, appointment_customer_vehicle_selector,
-	customer_customer_vehicle_selector, opportunity_fields, opportunity_item_fields
+	customer_customer_vehicle_selector, opportunity_fields, applies_to_opportunity_fields,
 ]
 
 for field_list in field_lists:
@@ -341,22 +339,26 @@ for field_list in field_lists:
 
 common_properties = [
 	# Unhide Vehicle Details Section
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment', 'Opportunity'),
 		{"fieldname": "sec_applies_to", "property": "hidden", "value": 0}],
 
 	# Vehicle Details Section Label
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment', 'Opportunity'),
 		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
 
 	# Vehicle Details Collapsible
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment', 'Opportunity'),
 		{"fieldname": "sec_applies_to", "property": "collapsible_depends_on",
-			"value": "eval:doc.applies_to_item || doc.applies_to_vehicle || doc.vehicle_license_plate || doc.vehicle_chassis_no || doc.vehicle_engine_no"}],
+			"value": "eval:doc.applies_to_item || doc.applies_to_serial_no || doc.applies_to_vehicle || doc.vehicle_license_plate || doc.vehicle_chassis_no || doc.vehicle_engine_no"}],
+
+	# Vehicle Details Applies To Serial No hidden
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment', 'Opportunity'),
+		{"fieldname": "applies_to_serial_no", "property": "hidden", "value": 1}],
 
 	# Applies to Model label
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment', 'Opportunity'),
 		{"fieldname": "applies_to_variant_of", "property": "label", "value": "Applies to Model"}],
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice', 'Project', 'Material Request', 'Appointment', 'Opportunity'),
 		{"fieldname": "applies_to_variant_of_name", "property": "label", "value": "Applies to Model Name"}],
 
 	# Customer (User) Label
@@ -423,8 +425,7 @@ data = {
 		"Project Template Category": project_template_category_fields,
 		"Project Template Detail": project_template_detail_fields,
 		"Customer": customer_customer_vehicle_selector,
-		"Opportunity": opportunity_fields,
-		"Opportunity Item": opportunity_item_fields,
+		"Opportunity": opportunity_fields + applies_to_opportunity_fields,
 	},
 	'default_portal_role': 'Customer'
 }

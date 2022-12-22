@@ -780,7 +780,7 @@ execute:frappe.delete_doc_if_exists("Report", "Sales Payment Summary")
 execute:frappe.delete_doc_if_exists("Report", "Sales Order Items To Be Delivered")
 execute:frappe.delete_doc_if_exists("Report", "Purchase Order Items To Be Received")
 erpnext.patches.v12_0.set_booking_customer_name_in_jv
-erpnext.patches.v12_0.resetup_vehicle_domain #08-11-2022
+erpnext.patches.v12_0.resetup_vehicle_domain #08-11-2022 #19-12-2022 21-12-2022
 erpnext.patches.v12_0.move_customer_reference_to_lead
 erpnext.patches.v12_0.rename_stock_valuation_restriction_field
 erpnext.patches.v12_0.set_item_tax_detail_lcv
@@ -789,3 +789,6 @@ erpnext.patches.v12_0.set_is_payable_in_lcv
 erpnext.patches.v12_0.trim_tables_maintenance_schedule
 erpnext.patches.v12_0.set_advance_tax_account_in_table
 erpnext.patches.v12_0.fix_purchase_invoice_double_gl
+erpnext.patches.v12_0.set_serial_no_in_transaction_documents
+execute:frappe.delete_doc_if_exists("Custom Field", "Opportunity Item-vehicle_color")
+erpnext.patches.v12_0.move_crm_config_to_crm_settings

@@ -16,26 +16,28 @@
   "column_break0",
   "sales_person",
   "opportunity_type",
+  "conversion_document",
   "lead_classification",
   "column_break_13",
   "company",
   "transaction_date",
+  "due_date",
   "status",
-  "sales_stage",
   "mins_to_first_response",
   "lost_reason_section",
   "order_lost_reason",
   "column_break_9",
   "lost_reasons",
   "more_info",
-  "column_break_20",
-  "information_source",
-  "column_break_11",
   "source",
-  "column_break_15",
+  "information_source",
+  "column_break_20",
   "territory",
-  "column_break_22",
   "campaign",
+  "column_break_22",
+  "sales_stage",
+  "maintenance_schedule",
+  "maintenance_schedule_row",
   "contact_info",
   "contact_person",
   "contact_display",
@@ -46,11 +48,18 @@
   "column_break_29",
   "customer_address",
   "address_display",
+  "sec_applies_to",
+  "applies_to_variant_of",
+  "applies_to_variant_of_name",
+  "applies_to_serial_no",
+  "applies_to_item",
+  "column_break_11",
+  "applies_to_item_name",
   "items_section",
   "items",
   "section_break_14",
   "opportunity_amount",
-  "column_break_37",
+  "column_break_15",
   "currency",
   "previously_owned_section",
   "existing_items",
@@ -157,6 +166,7 @@
    "fieldname": "mins_to_first_response",
    "fieldtype": "Float",
    "label": "Mins to first response",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -187,6 +197,7 @@
    "fieldname": "sales_stage",
    "fieldtype": "Link",
    "label": "Sales Stage",
+   "no_copy": 1,
    "options": "Sales Stage"
   },
   {
@@ -344,10 +355,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_37",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_29",
    "fieldtype": "Column Break"
   },
@@ -360,6 +367,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Lead Classification",
+   "no_copy": 1,
    "options": "\nHot\nWarm\nCold"
   },
   {
@@ -386,6 +394,7 @@
    "fieldname": "contact_schedule",
    "fieldtype": "Table",
    "label": "Contact Schedule",
+   "no_copy": 1,
    "options": "Lead Follow Up"
   },
   {
@@ -399,7 +408,8 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "in_standard_filter": 1,
-   "label": "Remarks"
+   "label": "Remarks",
+   "no_copy": 1
   },
   {
    "fieldname": "feedback_cb_1",
@@ -432,11 +442,89 @@
   {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "opportunity_type.conversion_document",
+   "fieldname": "conversion_document",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Conversion Document",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "applies_to_item",
+   "fieldname": "sec_applies_to",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Applies To"
+  },
+  {
+   "fetch_from": "applies_to_item.variant_of",
+   "fieldname": "applies_to_variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Applies to Template",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "applies_to_variant_of.item_name",
+   "fieldname": "applies_to_variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Applies to Template Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Applies to Item",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:!doc.applies_to_item || doc.applies_to_item_name != doc.applies_to_item",
+   "fetch_from": "applies_to_item.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "label": "Applies to Item Name"
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "no_copy": 1,
+   "options": "Serial No"
+  },
+  {
+   "fieldname": "maintenance_schedule",
+   "fieldtype": "Link",
+   "label": "Maintenance Schedule",
+   "no_copy": 1,
+   "options": "Maintenance Schedule",
+   "read_only": 1
+  },
+  {
+   "fieldname": "maintenance_schedule_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Maintenance Schedule Row",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2022-11-16 17:29:46.511118",
+ "modified": "2022-12-21 17:55:59.405667",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

@@ -62,7 +62,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Serial No",
-   "options": "Serial No"
+   "options": "Serial No",
+   "search_index": 1
   },
   {
    "fetch_from": "serial_no.item_code",
@@ -174,7 +175,7 @@
   }
  ],
  "idx": 1,
- "modified": "2022-12-08 14:40:37.713767",
+ "modified": "2022-12-21 19:03:52.761522",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",

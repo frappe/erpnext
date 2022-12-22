@@ -61,6 +61,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "column_break_54",
   "applies_to_item_name",
@@ -1728,12 +1729,18 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2022-12-05 13:08:33.586765",
+ "modified": "2022-12-19 15:12:40.429943",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

@@ -80,6 +80,7 @@ class Appointment(StatusUpdater):
 
 	def on_submit(self):
 		self.update_previous_appointment()
+		self.update_opportunity_status()
 		self.auto_assign()
 		self.create_calendar_event(update=True)
 		self.send_appointment_confirmation_notification()
@@ -88,6 +89,7 @@ class Appointment(StatusUpdater):
 		self.db_set('status', 'Cancelled')
 		self.validate_on_cancel()
 		self.update_previous_appointment()
+		self.update_opportunity_status()
 		self.auto_unassign()
 		self.send_appointment_cancellation_notification()
 
@@ -153,6 +155,9 @@ class Appointment(StatusUpdater):
 				self.set(k, v)
 
 	def set_applies_to_details(self):
+		if self.get("applies_to_vehicle"):
+			self.applies_to_serial_no = self.applies_to_vehicle
+
 		args = self.as_dict()
 		applies_to_details = get_applies_to_details(args, for_validate=True)
 
@@ -554,6 +559,12 @@ class Appointment(StatusUpdater):
 				return False
 
 		return True
+
+	def update_opportunity_status(self):
+		if self.opportunity:
+			doc = frappe.get_doc("Opportunity", self.opportunity)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def send_appointment_confirmation_notification(self):
 		if self.docstatus == 1:
