@@ -791,3 +791,4 @@ erpnext.patches.v12_0.set_advance_tax_account_in_table
 erpnext.patches.v12_0.fix_purchase_invoice_double_gl
 erpnext.patches.v12_0.set_serial_no_in_transaction_documents
 execute:frappe.delete_doc_if_exists("Custom Field", "Opportunity Item-vehicle_color")
+erpnext.patches.v12_0.move_crm_config_to_crm_settings
