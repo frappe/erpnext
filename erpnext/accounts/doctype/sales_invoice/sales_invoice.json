@@ -67,6 +67,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "column_break_68",
   "applies_to_item_name",
@@ -2221,12 +2222,18 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Claim Billing"
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2022-11-30 17:05:53.384218",
+ "modified": "2022-12-22 17:05:53.384218",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

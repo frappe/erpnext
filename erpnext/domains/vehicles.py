@@ -241,7 +241,7 @@ customer_customer_vehicle_selector = deepcopy(customer_vehicle_selector_fields)
 
 # Opportunity Fields
 opportunity_fields = [
-	{"label": "Financing", "fieldname": "vehicle_sb_1", "fieldtype": "Section Break",
+	{"label": "Financer", "fieldname": "vehicle_sb_1", "fieldtype": "Section Break",
 		"insert_after": "status"},
 	{"label": "Financer", "fieldname": "financer", "fieldtype": "Link", "options": "Customer",
 		"insert_after": "vehicle_sb_1"},

@@ -144,7 +144,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	update_dynamic_fields: function(){
+	update_dynamic_fields: function() {
 		var me = this;
 
 		if (me.frm.doc.opportunity_from) {
@@ -163,9 +163,9 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			"feedback_section",
 			"ratings_section",
 			"previously_owned_section"
-		]
+		];
 
-		for (var field of vehicle_sales_fields) {
+		for (let field of vehicle_sales_fields) {
 			me.frm.toggle_display(field, me.frm.doc.conversion_document == "Order");
 		}
 
@@ -175,15 +175,12 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			"vehicle_unregistered",
 			"vehicle_chassis_no",
 			"vehicle_engine_no",
-			"vehicle_color",
 			"vehicle_last_odometer",
-			"col_break_vehicle_1",
-			"col_break_vehicle_2",
 		]
 
 		$.each(vehicle_info_fields, function (i, f) {
 			if (me.frm.fields_dict[f]) {
-				me.frm.set_df_property(f, "read_only", me.frm.doc.conversion_document == "Order" ? 1 : 0);
+				me.frm.set_df_property(f, "hidden", me.frm.doc.conversion_document == "Order" ? 1 : 0);
 			}
 		});
 	},
