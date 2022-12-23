@@ -159,8 +159,7 @@
    "label": "Salutation",
    "oldfieldname": "salutation",
    "oldfieldtype": "Select",
-   "options": "\nMr\nMs",
-   "reqd": 1
+   "options": "\nMr\nMs"
   },
   {
    "fieldname": "first_name",
@@ -192,8 +191,7 @@
    "label": "Company",
    "options": "Company",
    "print_hide": 1,
-   "remember_last_selected_value": 1,
-   "reqd": 1
+   "remember_last_selected_value": 1
   },
   {
    "default": "Active",
@@ -203,7 +201,6 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Active\nInactive\nSuspended\nLeft",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -222,24 +219,21 @@
    "label": "Gender",
    "oldfieldname": "gender",
    "oldfieldtype": "Select",
-   "options": "Gender",
-   "reqd": 1
+   "options": "Gender"
   },
   {
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth",
    "oldfieldname": "date_of_birth",
-   "oldfieldtype": "Date",
-   "reqd": 1
+   "oldfieldtype": "Date"
   },
   {
    "fieldname": "date_of_joining",
    "fieldtype": "Date",
    "label": "Date of Joining",
    "oldfieldname": "date_of_joining",
-   "oldfieldtype": "Date",
-   "reqd": 1
+   "oldfieldtype": "Date"
   },
   {
    "bold": 1,
@@ -339,8 +333,7 @@
    "label": "Department",
    "oldfieldname": "department",
    "oldfieldtype": "Link",
-   "options": "Department",
-   "reqd": 1
+   "options": "Department"
   },
   {
    "fieldname": "designation",
@@ -351,7 +344,6 @@
    "oldfieldname": "designation",
    "oldfieldtype": "Link",
    "options": "Designation",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -369,8 +361,7 @@
    "label": "Branch",
    "oldfieldname": "branch",
    "oldfieldtype": "Link",
-   "options": "Branch",
-   "reqd": 1
+   "options": "Branch"
   },
   {
    "description": "Applicable Holiday List",
@@ -824,8 +815,7 @@
    "fieldname": "employee_group",
    "fieldtype": "Link",
    "label": "Employee Group",
-   "options": "Employee Group",
-   "reqd": 1
+   "options": "Employee Group"
   },
   {
    "fieldname": "column_break_22",
@@ -835,8 +825,7 @@
    "fieldname": "employment_status",
    "fieldtype": "Select",
    "label": "Employment Status",
-   "options": "\nIn Service\nEOL\nProbation",
-   "reqd": 1
+   "options": "\nIn Service\nEOL\nProbation"
   },
   {
    "fieldname": "increment_cycle",
@@ -886,8 +875,7 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "cb_50",
@@ -960,7 +948,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-22 17:14:12.009114",
+ "modified": "2022-12-23 15:03:57.014682",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
