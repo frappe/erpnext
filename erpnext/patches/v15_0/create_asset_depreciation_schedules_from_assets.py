@@ -2,7 +2,7 @@ import frappe
 
 
 def execute():
-	assets = get_details_of_depreciable_assets()
+	assets = get_details_of_draft_or_submitted_depreciable_assets()
 
 	for asset in assets:
 		finance_book_rows = get_details_of_asset_finance_books_rows(asset.name)
@@ -32,19 +32,16 @@ def execute():
 			if asset.docstatus == 1:
 				asset_depr_schedule_doc.status = "Active"
 				asset_depr_schedule_doc.submit()
-			elif asset.docstatus == 2:
-				asset_depr_schedule_doc.status = "Cancelled"
-				asset_depr_schedule_doc.submit()
-				asset_depr_schedule_doc.cancel()
 
 
-def get_details_of_depreciable_assets():
+def get_details_of_draft_or_submitted_depreciable_assets():
 	asset = frappe.qb.DocType("Asset")
 
 	records = (
 		frappe.qb.from_(asset)
 		.select(asset.name, asset.opening_accumulated_depreciation, asset.docstatus)
 		.where(asset.calculate_depreciation == 1)
+		.where(asset.docstatus < 2)
 	).run(as_dict=True)
 
 	return records
@@ -76,7 +73,7 @@ def update_depreciation_schedules(asset_name, asset_depr_schedule_name, fb_row_i
 	depr_schedules = (
 		frappe.qb.from_(ds)
 		.select(ds.name)
-		.where((ds.parent == asset_name) & (int(ds.finance_book_id) == fb_row_idx))
+		.where((ds.parent == asset_name) & (ds.finance_book_id == str(fb_row_idx)))
 	).run(as_dict=True)
 
 	for idx, depr_schedule in enumerate(depr_schedules, start=1):
