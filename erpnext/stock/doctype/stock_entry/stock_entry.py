@@ -4,12 +4,24 @@
 
 import json
 from collections import defaultdict
+from typing import Dict
 
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	cint,
+	comma_or,
+	cstr,
+	flt,
+	format_time,
+	formatdate,
+	getdate,
+	nowdate,
+	today,
+)
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -2700,3 +2712,62 @@ def get_stock_entry_data(work_order):
 		)
 		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
 	).run(as_dict=1)
+
+
+def audit_incorrect_valuation_entries():
+	# Audit of stock transfer entries having incorrect valuation
+	from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+
+	stock_entries = get_incorrect_stock_entries()
+
+	for stock_entry, values in stock_entries.items():
+		reposting_data = frappe._dict(
+			{
+				"posting_date": values.posting_date,
+				"posting_time": values.posting_time,
+				"voucher_type": "Stock Entry",
+				"voucher_no": stock_entry,
+				"company": values.company,
+			}
+		)
+
+		create_repost_item_valuation_entry(reposting_data)
+
+
+def get_incorrect_stock_entries() -> Dict:
+	stock_entry = frappe.qb.DocType("Stock Entry")
+	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
+	transfer_purposes = [
+		"Material Transfer",
+		"Material Transfer for Manufacture",
+		"Send to Subcontractor",
+	]
+
+	query = (
+		frappe.qb.from_(stock_entry)
+		.inner_join(stock_ledger_entry)
+		.on(stock_entry.name == stock_ledger_entry.voucher_no)
+		.select(
+			stock_entry.name,
+			stock_entry.company,
+			stock_entry.posting_date,
+			stock_entry.posting_time,
+			Sum(stock_ledger_entry.stock_value_difference).as_("stock_value"),
+		)
+		.where(
+			(stock_entry.docstatus == 1)
+			& (stock_entry.purpose.isin(transfer_purposes))
+			& (stock_ledger_entry.modified > add_days(today(), -2))
+		)
+		.groupby(stock_ledger_entry.voucher_detail_no)
+		.having(Sum(stock_ledger_entry.stock_value_difference) != 0)
+	)
+
+	data = query.run(as_dict=True)
+	stock_entries = {}
+
+	for row in data:
+		if abs(row.stock_value) > 0.1 and row.name not in stock_entries:
+			stock_entries.setdefault(row.name, row)
+
+	return stock_entries

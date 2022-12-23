@@ -1187,6 +1187,7 @@ def get_outstanding_reference_documents(args):
 
 	ple = qb.DocType("Payment Ledger Entry")
 	common_filter = []
+	accounting_dimensions_filter = []
 	posting_and_due_date = []
 
 	# confirm that Supplier is not blocked
@@ -1216,7 +1217,7 @@ def get_outstanding_reference_documents(args):
 	# Add cost center condition
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
-		common_filter.append(ple.cost_center == args.get("cost_center"))
+		accounting_dimensions_filter.append(ple.cost_center == args.get("cost_center"))
 
 	date_fields_dict = {
 		"posting_date": ["from_posting_date", "to_posting_date"],
@@ -1242,6 +1243,7 @@ def get_outstanding_reference_documents(args):
 		posting_date=posting_and_due_date,
 		min_outstanding=args.get("outstanding_amt_greater_than"),
 		max_outstanding=args.get("outstanding_amt_less_than"),
+		accounting_dimensions=accounting_dimensions_filter,
 	)
 
 	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
@@ -1638,7 +1640,7 @@ def get_payment_entry(
 ):
 	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
-	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
+	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) >= 99.99:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	if not party_type:
