@@ -157,11 +157,11 @@ class StockLedgerEntry(Document):
 				self.voucher_type in ["Delivery Note", "Sales Invoice"] and self.actual_qty > 0
 			):
 				return
-
-			expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
-			if expiry_date:
-				if getdate(self.posting_date) > getdate(expiry_date):
-					frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
+			if self.voucher_type not in ["Purchase Receipt","Stock Reconciliation","Stock Entry"]:
+				expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
+				if expiry_date:
+					if getdate(self.posting_date) > getdate(expiry_date):
+						frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
 
 	def validate_and_set_fiscal_year(self):
 		if not self.fiscal_year:
