@@ -24,7 +24,7 @@ from erpnext.accounts.utils import (
 	get_stock_and_account_balance,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_depr_schedule,
+	get_cancelled_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -287,7 +287,7 @@ class JournalEntry(AccountsController):
 			if d.reference_type == "Asset" and d.reference_name:
 				asset = frappe.get_doc("Asset", d.reference_name)
 				for row in asset.get("finance_books"):
-					depr_schedule = get_depr_schedule(asset.name, row.finance_book)
+					depr_schedule = get_cancelled_depr_schedule(asset.name, row.finance_book)
 
 					for s in depr_schedule:
 						if s.journal_entry == self.name:

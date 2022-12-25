@@ -13,7 +13,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 	set_depreciation_settings_in_company,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_depr_schedule,
+	get_draft_or_active_depr_schedule,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -287,7 +287,7 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		consumed_depreciation_schedule = [
 			d
-			for d in get_depr_schedule(consumed_asset.name)
+			for d in get_draft_or_active_depr_schedule(consumed_asset.name)
 			if getdate(d.schedule_date) == getdate(capitalization_date)
 		]
 		self.assertTrue(

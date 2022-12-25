@@ -209,7 +209,7 @@ frappe.ui.form.on('Asset', {
 
 		if (frm.doc.finance_books.length == 1) {
 			depr_schedule = (await frappe.call(
-				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_depr_schedule",
+				"erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule.get_draft_or_active_depr_schedule",
 				{
 					asset_name: frm.doc.name,
 					finance_book: frm.doc.finance_books[0].finance_book || null

@@ -13,7 +13,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 	set_depreciation_settings_in_company,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_depr_schedule,
+	get_draft_or_active_depr_schedule,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -241,7 +241,7 @@ class TestAssetRepair(unittest.TestCase):
 
 		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(asset))
 		self.assertEqual(
-			get_depr_schedule(asset.name)[-1].accumulated_depreciation_amount,
+			get_draft_or_active_depr_schedule(asset.name)[-1].accumulated_depreciation_amount,
 			asset.finance_books[0].value_after_depreciation,
 		)
 
