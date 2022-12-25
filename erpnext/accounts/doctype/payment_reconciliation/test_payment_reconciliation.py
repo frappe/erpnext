@@ -6,7 +6,7 @@ import unittest
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, nowdate
+from frappe.utils import add_days, flt, nowdate
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -25,8 +25,8 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.create_cost_center()
 		self.clear_old_entries()
 
-	def tearDown(self):
-		frappe.db.rollback()
+	# def tearDown(self):
+	# 	frappe.db.rollback()
 
 	def create_company(self):
 		company = None
@@ -644,9 +644,21 @@ class TestPaymentReconciliation(FrappeTestCase):
 		invoices = [x.as_dict() for x in pr.invoices]
 		payments = [pr.payments[1].as_dict()]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocation[0].difference_account = "Exchange Gain/Loss - _PR"
 
 		self.assertEqual(pr.allocation[0].allocated_amount, 100)
 		self.assertEqual(pr.allocation[0].difference_amount, -500)
+
+		# Check if difference journal entry gets generated for difference amount after reconciliation
+		pr.reconcile()
+		total_debit_amount = frappe.db.get_all(
+			"Journal Entry Account",
+			{"account": pr.receivable_payable_account, "docstatus": 1, "reference_name": si.name},
+			"sum(debit - credit) as amount",
+			group_by="reference_name",
+		)
+
+		# self.assertEqual(flt(total_debit_amount, 2), 500)
 
 	def test_difference_amount_via_payment_entry(self):
 		# Make Sale Invoice

@@ -21,6 +21,7 @@
   "difference_amount",
   "column_break_7",
   "difference_account",
+  "exchange_rate",
   "currency"
  ],
  "fields": [
@@ -137,11 +138,17 @@
    "hidden": 1,
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-11-08 12:39:59.824323",
+ "modified": "2022-12-24 21:01:14.882747",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",

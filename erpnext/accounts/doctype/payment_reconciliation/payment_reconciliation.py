@@ -247,6 +247,7 @@ class PaymentReconciliation(Document):
 
 				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
+				res.exchange_rate = inv.get("exchange_rate")
 
 				if pay.get("amount") == 0:
 					entries.append(res)
@@ -299,7 +300,11 @@ class PaymentReconciliation(Document):
 				else:
 					reconciled_entry = entry_list
 
-				reconciled_entry.append(self.get_payment_details(row, dr_or_cr))
+				payment_details = self.get_payment_details(row, dr_or_cr)
+				reconciled_entry.append(payment_details)
+
+				if payment_details.difference_amount:
+					self.make_difference_entry(payment_details)
 
 		if entry_list:
 			reconcile_against_document(entry_list)
@@ -310,6 +315,65 @@ class PaymentReconciliation(Document):
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
 
+	def make_difference_entry(self, row):
+		journal_entry = frappe.new_doc("Journal Entry")
+		journal_entry.company = self.company
+		journal_entry.posting_date = nowdate()
+		journal_entry.multi_currency = 1
+
+		party_account_currency = frappe.get_cached_value(
+			"Account", self.receivable_payable_account, "account_currency"
+		)
+		difference_account_currency = frappe.get_cached_value(
+			"Account", row.difference_account, "account_currency"
+		)
+
+		journal_entry_accounts = []
+
+		dr_or_cr = (
+			"credit_in_account_currency" if self.party_type == "Customer" else "debit_in_account_currency"
+		)
+
+		reverse_dr_or_cr = (
+			"debit_in_account_currency"
+			if dr_or_cr == "credit_in_account_currency"
+			else "credit_in_account_currency"
+		)
+
+		journal_entry_accounts.append(
+			{
+				"account": self.receivable_payable_account,
+				"party_type": self.party_type,
+				"party": self.party,
+				"account_currency": party_account_currency,
+				dr_or_cr: flt(
+					row.difference_amount / row.exchange_rate,
+				),
+				"exchange_rate": row.exchange_rate,
+				"reference_type": row.against_voucher_type,
+				"reference_name": row.against_voucher,
+				"cost_center": erpnext.get_default_cost_center(self.company),
+			}
+		)
+
+		journal_entry_accounts.append(
+			{
+				"account": row.difference_account,
+				"account_currency": difference_account_currency,
+				reverse_dr_or_cr: flt(row.difference_amount),
+				"exchange_rate": 1,
+				"cost_center": erpnext.get_default_cost_center(self.company),
+			}
+		)
+
+		journal_entry.set("accounts", journal_entry_accounts)
+		journal_entry.set_amounts_in_company_currency()
+		journal_entry.set_total_debit_credit()
+		journal_entry.get_balance(difference_account=row.difference_account)
+
+		journal_entry.save()
+		journal_entry.submit()
+
 	def get_payment_details(self, row, dr_or_cr):
 		return frappe._dict(
 			{
@@ -319,6 +383,7 @@ class PaymentReconciliation(Document):
 				"against_voucher_type": row.get("invoice_type"),
 				"against_voucher": row.get("invoice_number"),
 				"account": self.receivable_payable_account,
+				"exchange_rate": row.get("exchange_rate"),
 				"party_type": self.party_type,
 				"party": self.party,
 				"is_advance": row.get("is_advance"),

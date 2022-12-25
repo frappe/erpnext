@@ -179,8 +179,12 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				title: __("Select Difference Account"),
 				fields: [
 					{
-						fieldname: "allocation", fieldtype: "Table", label: __("Allocation"),
-						data: this.data, in_place_edit: true,
+						fieldname: "allocation",
+						fieldtype: "Table",
+						label: __("Allocation"),
+						data: this.data,
+						in_place_edit: true,
+						cannot_add_rows: true,
 						get_data: () => {
 							return this.data;
 						},
@@ -218,6 +222,10 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							read_only: 1
 						}]
 					},
+					{
+						fieldtype: 'HTML',
+						options: "<b> New Journal Entry will be posted for the difference amount </b>"
+					}
 				],
 				primary_action: () => {
 					const args = dialog.get_values()["allocation"];
