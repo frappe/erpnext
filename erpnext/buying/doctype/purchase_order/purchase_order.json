@@ -113,43 +113,6 @@
   "disable_rounded_total",
   "in_words",
   "advance_paid",
-<<<<<<< HEAD
-=======
-  "discount_section",
-  "apply_discount_on",
-  "base_discount_amount",
-  "column_break_45",
-  "additional_discount_percentage",
-  "discount_amount",
-  "sec_tax_breakup",
-  "other_charges_calculation",
-  "address_and_contact_tab",
-  "section_addresses",
-  "supplier_address",
-  "address_display",
-  "col_break_address",
-  "contact_person",
-  "contact_display",
-  "contact_mobile",
-  "contact_email",
-  "shipping_address_section",
-  "shipping_address",
-  "column_break_99",
-  "shipping_address_display",
-  "company_billing_address_section",
-  "billing_address",
-  "column_break_103",
-  "billing_address_display",
-  "drop_ship",
-  "customer",
-  "customer_name",
-  "column_break_19",
-  "customer_contact_person",
-  "customer_contact_display",
-  "customer_contact_mobile",
-  "customer_contact_email",
-  "terms_tab",
->>>>>>> 7e1b6b3c2a (fix: `shipping_address` in PO)
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -1201,125 +1164,13 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
-<<<<<<< HEAD
-=======
-  },
-  {
-   "default": "0",
-   "fieldname": "is_old_subcontracting_flow",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Old Subcontracting Flow",
-   "read_only": 1
-  },
-  {
-   "depends_on": "is_internal_supplier",
-   "fieldname": "set_from_warehouse",
-   "fieldtype": "Link",
-   "label": "Set From Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "fieldname": "terms_tab",
-   "fieldtype": "Tab Break",
-   "label": "Terms"
-  },
-  {
-   "fieldname": "more_info_tab",
-   "fieldtype": "Tab Break",
-   "label": "More Info"
-  },
-  {
-   "fieldname": "dashboard",
-   "fieldtype": "Tab Break",
-   "label": "Dashboard",
-   "show_dashboard": 1
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_40",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_53",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "address_and_contact_tab",
-   "fieldtype": "Tab Break",
-   "label": "Address & Contact"
-  },
-  {
-   "fieldname": "company_billing_address_section",
-   "fieldtype": "Section Break",
-   "label": "Company Billing Address"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "additional_info_section",
-   "fieldtype": "Section Break",
-   "label": "Additional Info",
-   "oldfieldtype": "Section Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "base_tax_withholding_net_total",
-   "fieldtype": "Currency",
-   "hidden": 1,
-   "label": "Base Tax Withholding Net Total",
-   "no_copy": 1,
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_99",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_103",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "incoterm",
-   "fieldtype": "Link",
-   "label": "Incoterm",
-   "options": "Incoterm"
-  },
-  {
-   "depends_on": "incoterm",
-   "fieldname": "named_place",
-   "fieldtype": "Data",
-   "label": "Named Place"
-  },
-  {
-   "fieldname": "shipping_address_section",
-   "fieldtype": "Section Break",
-   "label": "Shipping Address"
->>>>>>> 7e1b6b3c2a (fix: `shipping_address` in PO)
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-11-17 12:34:36.033363",
-=======
  "modified": "2022-12-25 18:08:59.074182",
->>>>>>> 7e1b6b3c2a (fix: `shipping_address` in PO)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
