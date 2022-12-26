@@ -1097,8 +1097,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
-		target.customer = ""
-		target.customer_name = ""
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -1125,8 +1123,10 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"contact_email",
 					"contact_person",
 					"taxes_and_charges",
-					"shipping_address",
 					"terms",
+				],
+				"field_map": [
+					["shipping_address_name", "shipping_address"],
 				],
 				"validation": {"docstatus": ["=", 1]},
 			},

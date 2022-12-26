@@ -10,7 +10,6 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from six import iteritems, itervalues, string_types
 from frappe.utils import (
 	add_days,
 	cint,
@@ -23,6 +22,7 @@ from frappe.utils import (
 	nowdate,
 	today,
 )
+from six import iteritems, itervalues, string_types
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -2625,4 +2625,3 @@ def get_incorrect_stock_entries() -> Dict:
 			stock_entries.setdefault(row.name, row)
 
 	return stock_entries
-
