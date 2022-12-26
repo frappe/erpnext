@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import today, getdate
+from frappe.utils import today, getdate, cint
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
@@ -531,20 +531,21 @@ def get_customer_from_opportunity(source):
 
 
 @frappe.whitelist()
-def submit_communication(name, contact_date, remarks):
+def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 	if not remarks:
-		frappe.throw(_('Remarks are mandatory for follow up'))
+		frappe.throw(_('Remarks are mandatory for Communication'))
+
+	if not frappe.db.exists('Opportunity', name):
+		frappe.throw(_("Opportunity does not exist"))
 
 	opp = frappe.get_cached_doc('Opportunity', name)
-	follow_up = [f for f in opp.contact_schedule if not f.contact_date]
-	if follow_up:
-		follow_up[0].contact_date = getdate(contact_date)
-	else:
-		opp.append("contact_schedule", {
-			"contact_date": contact_date,
-		})
 
-	opp.save()
+	if cint(submit_follow_up):
+		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
+		if follow_up:
+			follow_up[0].contact_date = getdate(contact_date)
+
+		opp.save()
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
@@ -557,10 +558,9 @@ def submit_communication(name, contact_date, remarks):
 	comm.content = remarks
 	comm.communication_type = "Feedback"
 
-	if opp.get('party_doctype') and opp.get('party'):
-		comm.append("timeline_links", {
-			"link_doctype": opp.party_doctype,
-			"link_name": opp.party
+	comm.append("timeline_links", {
+		"link_doctype": opp.opportunity_from,
+		"link_name": opp.party_name,
 	})
 
 	comm.insert(ignore_permissions=True)
