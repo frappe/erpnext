@@ -894,6 +894,20 @@ erpnext.utils.has_valuation_read_permission = function() {
 	return !allowed_role || frappe.user.has_role(allowed_role);
 }
 
+erpnext.utils.query_report_local_refresh = function() {
+	frappe.query_report.datatable.datamanager.rowCount = 0;
+	frappe.query_report.datatable.datamanager.columns = [];
+	frappe.query_report.datatable.datamanager.rows = [];
+
+	frappe.query_report.datatable.datamanager.prepareColumns();
+	frappe.query_report.datatable.datamanager.prepareRows();
+	frappe.query_report.datatable.datamanager.prepareTreeRows();
+	frappe.query_report.datatable.datamanager.prepareRowView();
+	frappe.query_report.datatable.datamanager.prepareNumericColumns();
+
+	frappe.query_report.datatable.bodyRenderer.render();
+}
+
 frappe.form.link_formatters['Item'] = function(value, doc) {
 	if(doc && doc.item_name && doc.item_name !== value && !doc.disable_item_formatter) {
 		return value ? value + ': ' + doc.item_name : doc.item_name;

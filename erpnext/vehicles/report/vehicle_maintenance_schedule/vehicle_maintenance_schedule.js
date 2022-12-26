@@ -90,5 +90,41 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			fieldtype: "Link",
 			options: "Item Group"
 		},
-	]
+	],
+
+	onChange: function(new_value, column, data, rowIndex) {
+		if (column.fieldname == "remarks") {
+			if (cstr(data['remarks']) === cstr(new_value)) {
+				return
+			}
+
+			if (!data.opportunity) {
+				frappe.msgprint(__("Opportunity does not exist"));
+				frappe.run_serially([
+					() => {
+						frappe.query_report.datatable.datamanager.data[rowIndex].remarks = null;
+					},
+					() => erpnext.utils.query_report_local_refresh()
+				]);
+				return
+			}
+
+			return frappe.call({
+				method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
+				args: {
+					remarks: new_value,
+					name: data.opportunity,
+					contact_date: frappe.datetime.get_today()
+				},
+				callback: function() {
+					frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = get_today();
+					frappe.query_report.datatable.datamanager.data[rowIndex].remarks = new_value;
+					erpnext.utils.query_report_local_refresh()
+				},
+				error: function() {
+					erpnext.utils.query_report_local_refresh()
+				},
+			});
+		}
+	},
 };

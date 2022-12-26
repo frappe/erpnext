@@ -37,13 +37,15 @@ class VehicleMaintenanceSchedule:
 				v.name as vehicle, v.item_code, v.delivery_date, v.chassis_no,
 				v.engine_no, v.license_plate, v.unregistered, v.variant_of_name,
 				v.customer as vehicle_customer, v.customer_name as vehicle_customer_name,
-				pt.project_template_name
+				pt.project_template_name, opp.name as opportunity
 			FROM `tabMaintenance Schedule Detail` msd
 			LEFT JOIN `tabProject Template` pt ON pt.name = msd.project_template
 			LEFT JOIN `tabMaintenance Schedule` ms ON ms.name = msd.parent
 			LEFT JOIN `tabVehicle` v ON v.name = ms.serial_no
 			LEFT JOIN `tabCustomer` c ON c.name = ms.customer
 			LEFT JOIN `tabItem` im ON im.name = v.item_code
+			LEFT JOIN `tabOpportunity` opp ON opp.maintenance_schedule = msd.parent
+				AND opp.maintenance_schedule_row = msd.name
 			WHERE msd.scheduled_date BETWEEN %(from_date)s AND %(to_date)s
 			AND ifnull(ms.serial_no, '') != ''
 			AND {conditions}
@@ -102,6 +104,20 @@ class VehicleMaintenanceSchedule:
 
 			if not d.license_plate and d.unregistered:
 				d.license_plate = 'Unreg'
+
+			if d.opportunity:
+				communication = frappe.db.sql("""
+					SELECT content, CAST(communication_date AS date) AS contact_date
+					FROM tabCommunication
+					WHERE reference_doctype = "Opportunity" AND reference_name = %s
+					ORDER BY communication_date desc
+					LIMIT 1
+				""", d.opportunity, as_dict=1)
+
+				if communication:
+					d.remarks = communication[0].content
+					d.contact_date = communication[0].contact_date
+
 
 		self.data = sorted(self.data, key=lambda d: (getdate(d.due_date), getdate(d.delivery_date)))
 
@@ -210,6 +226,27 @@ class VehicleMaintenanceSchedule:
 				"fieldtype": "Link",
 				"options": "Maintenance Schedule",
 				"width": 80
+			},
+			{
+				"label": _("Opportunity"),
+				"fieldname": "opportunity",
+				"fieldtype": "Link",
+				"options": "Opportunity",
+				"width": 80
+			},
+			{
+				"label": _("Contact Date"),
+				"fieldname": "contact_date",
+				"fieldtype": "Date",
+				"width": 100
+			},
+			{
+				"label": _("Remarks"),
+				"fieldname": "remarks",
+				"fieldtype": "Data",
+				"options": "Opportunity",
+				"width": 200,
+				"editable": 1
 			},
 		]
 		self.columns = columns
