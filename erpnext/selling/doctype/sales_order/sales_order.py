@@ -204,9 +204,9 @@ class SalesOrder(SellingController):
 	def submit(self):
 		if self.request_from == 'RMS':
 			if(self.section in get_config_by_name('dn_queue_section',[])):
-				self.queue_action('submit',queue_name="dn_primary")
+				self.queue_action('submit',queue_name="dn_tertiary")
 			else:
-				self.queue_action('submit',queue_name="dn_secondary")	
+				self.queue_action('submit',queue_name="return")	
 		else:
 			self._submit()
 
