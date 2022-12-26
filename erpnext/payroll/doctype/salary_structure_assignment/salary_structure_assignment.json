@@ -23,9 +23,9 @@
   "column_break_9",
   "variable",
   "earnings_and_taxation_section",
-  "tax_deducted_till_date",
-  "column_break_18",
   "taxable_earnings_till_date",
+  "column_break_18",
+  "tax_deducted_till_date",
   "amended_from"
  ],
  "fields": [
@@ -147,11 +147,11 @@
    "options": "Account"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "earnings_and_taxation_section",
    "fieldtype": "Section Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "tax_deducted_till_date",
    "fieldtype": "Currency",
    "label": "Tax Deducted Till Date"
@@ -169,7 +169,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-21 17:06:38.602361",
+ "modified": "2022-12-26 12:47:42.521891",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
