@@ -63,7 +63,7 @@ class ItemsToBeBilled:
 			if self.filters.claim_billing_type:
 				project_type_join = "left join `tabProject Type` ptype on ptype.name = proj.project_type"
 
-		if 'Vehicles' in frappe.get_active_domains():
+		if 'Vehicles' in frappe.get_active_domains() and self.filters.claim_billing:
 			project_fields += ", proj.applies_to_vehicle, proj.vehicle_chassis_no, proj.vehicle_license_plate"
 
 		common_fields = """
