@@ -42,6 +42,12 @@ class AssetDepreciationSchedule(Document):
 				)
 			)
 
+	def on_submit(self):
+		self.db_set("status", "Active")
+
+	def on_cancel(self):
+		self.db_set("status", "Cancelled")
+
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
 	for row in asset_doc.get("finance_books"):
@@ -121,6 +127,18 @@ def convert_draft_asset_depr_schedules_into_active(asset_doc):
 			asset_depr_schedule_doc.submit()
 
 
+def cancel_asset_depr_schedules(asset_doc):
+	for row in asset_doc.get("finance_books"):
+		asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
+			asset_doc.name, row.finance_book
+		)
+
+		if not asset_depr_schedule_doc:
+			continue
+
+		asset_depr_schedule_doc.cancel()
+
+
 def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 	asset_doc, notes, date_of_disposal=None, date_of_return=None
 ):
@@ -165,18 +183,6 @@ def get_temp_asset_depr_schedule_doc(
 	return asset_depr_schedule_doc
 
 
-def cancel_asset_depr_schedules(asset_doc):
-	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset_doc.name, row.finance_book
-		)
-
-		if not asset_depr_schedule_doc:
-			continue
-
-		asset_depr_schedule_doc.cancel()
-
-
 def get_draft_or_active_asset_depr_schedule_name(asset_name, finance_book=None):
 	finance_book_filter = ["finance_book", "is", "not set"]
 	if finance_book:
@@ -197,14 +203,22 @@ def get_cancelled_asset_depr_schedule_name(asset_name, finance_book=None):
 	if finance_book:
 		finance_book_filter = ["finance_book", "=", finance_book]
 
-	return frappe.db.get_value(
+	cancelled_asset_depr_schedule_names = frappe.db.get_all(
 		doctype="Asset Depreciation Schedule",
 		filters=[
 			["asset", "=", asset_name],
 			finance_book_filter,
-			["docstatus", "=", "2"],
+			["status", "=", "Cancelled"],
 		],
+		order_by="creation desc",
+		limit=1,
+		pluck="name",
 	)
+
+	if cancelled_asset_depr_schedule_names:
+		return cancelled_asset_depr_schedule_names[0]
+
+	return
 
 
 @frappe.whitelist()

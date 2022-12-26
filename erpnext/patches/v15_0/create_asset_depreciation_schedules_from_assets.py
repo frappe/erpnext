@@ -30,7 +30,6 @@ def execute():
 			update_depreciation_schedules(asset.name, asset_depr_schedule_doc.name, fb_row.idx)
 
 			if asset.docstatus == 1:
-				asset_depr_schedule_doc.status = "Active"
 				asset_depr_schedule_doc.submit()
 
 

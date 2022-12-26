@@ -167,7 +167,6 @@ class AssetValueAdjustment(Document):
 				if not asset_data.journal_entry:
 					asset_data.db_update()
 
-			new_asset_depr_schedule_doc.status = "Active"
 			new_asset_depr_schedule_doc.submit()
 
 
