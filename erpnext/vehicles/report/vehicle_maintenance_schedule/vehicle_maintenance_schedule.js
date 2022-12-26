@@ -99,14 +99,11 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			}
 
 			if (!data.opportunity) {
-				frappe.msgprint(__("Opportunity does not exist"));
-				frappe.run_serially([
-					() => {
-						frappe.query_report.datatable.datamanager.data[rowIndex].remarks = null;
-					},
-					() => erpnext.utils.query_report_local_refresh()
-				]);
-				return
+				setTimeout(() => {
+					erpnext.utils.query_report_local_refresh();
+					frappe.throw(__("Opportunity does not exist"));
+					return;
+				});
 			}
 
 			return frappe.call({
@@ -117,7 +114,7 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 					contact_date: frappe.datetime.get_today()
 				},
 				callback: function() {
-					frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = get_today();
+					frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = frappe.datetime.get_today();
 					frappe.query_report.datatable.datamanager.data[rowIndex].remarks = new_value;
 					erpnext.utils.query_report_local_refresh()
 				},

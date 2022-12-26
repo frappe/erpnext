@@ -110,7 +110,7 @@ class VehicleMaintenanceSchedule:
 					SELECT content, CAST(communication_date AS date) AS contact_date
 					FROM tabCommunication
 					WHERE reference_doctype = "Opportunity" AND reference_name = %s
-					ORDER BY communication_date desc
+					ORDER BY communication_date DESC, creation DESC
 					LIMIT 1
 				""", d.opportunity, as_dict=1)
 
