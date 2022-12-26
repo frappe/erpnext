@@ -22,6 +22,10 @@
   "base",
   "column_break_9",
   "variable",
+  "earnings_and_taxation_section",
+  "taxable_earnings_till_date",
+  "column_break_18",
+  "tax_deducted_till_date",
   "amended_from"
  ],
  "fields": [
@@ -141,11 +145,31 @@
    "fieldtype": "Link",
    "label": "Payroll Payable Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "earnings_and_taxation_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tax_deducted_till_date",
+   "fieldtype": "Currency",
+   "label": "Tax Deducted Till Date"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "taxable_earnings_till_date",
+   "fieldtype": "Currency",
+   "label": "Taxable Earnings Till Date"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:44:46.267974",
+ "modified": "2022-12-26 12:47:42.521891",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

@@ -13,8 +13,10 @@ from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assign
 
 
 def execute():
+	frappe.reload_doc("Payroll", "doctype", "Payroll Settings")
 	frappe.reload_doc("Payroll", "doctype", "Salary Structure")
 	frappe.reload_doc("Payroll", "doctype", "Salary Structure Assignment")
+
 	frappe.db.sql(
 		"""
 		delete from `tabSalary Structure Assignment`
