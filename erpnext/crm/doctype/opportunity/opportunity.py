@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import today, getdate
+from frappe.utils import today, getdate, cint
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
@@ -499,7 +499,7 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 
 	opp = frappe.get_cached_doc('Opportunity', name)
 
-	if submit_follow_up:
+	if cint(submit_follow_up):
 		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
 		if follow_up:
 			follow_up[0].contact_date = getdate(contact_date)

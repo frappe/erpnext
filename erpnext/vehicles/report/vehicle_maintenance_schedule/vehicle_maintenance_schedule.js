@@ -101,9 +101,9 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			if (!data.opportunity) {
 				setTimeout(() => {
 					erpnext.utils.query_report_local_refresh();
-					frappe.throw(__("Opportunity does not exist"));
-					return;
+					frappe.msgprint(__("Opportunity does not exist"));
 				});
+				return;
 			}
 
 			return frappe.call({
