@@ -300,6 +300,7 @@ class DeliveryNote(SellingController):
 		elif self.is_return and self.return_type == 'Shop Return' and len(self.items) > 0:
 			savedoc =	make_sales_invoice(self.name)
 			savedoc.submit()
+			frappe.db.sql("UPDATE `tabDelivery Note Item` SET against_sales_invoice ='{sale_invoice}' WHERE `parent`='{docname}';".format(docname=self.name,sale_invoice=savedoc.name))
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		from nrp_manufacturing.modules.gourmet.delivery_note.delivery_note import update_stock_ledger
