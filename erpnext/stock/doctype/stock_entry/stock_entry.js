@@ -24,26 +24,6 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
-		frappe.db.get_value('Stock Settings', {name: 'Stock Settings'}, 'sample_retention_warehouse', (r) => {
-			if (r.sample_retention_warehouse) {
-				var filters = [
-							["Warehouse", 'company', '=', frm.doc.company],
-							["Warehouse", "is_group", "=",0],
-							['Warehouse', 'name', '!=', r.sample_retention_warehouse]
-						]
-				frm.set_query("from_warehouse", function() {
-					return {
-						filters: filters
-					};
-				});
-				frm.set_query("s_warehouse", "items", function() {
-					return {
-						filters: filters
-					};
-				});
-			}
-		});
-
 		frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
 			var item = locals[cdt][cdn];
 			if(!item.item_code) {

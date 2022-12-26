@@ -58,7 +58,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2022-12-21 18:44:50.785674",
+ "modified": "2022-12-26 12:22:10.877720",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -66,11 +66,19 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }

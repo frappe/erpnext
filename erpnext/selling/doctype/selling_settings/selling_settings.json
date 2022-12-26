@@ -121,7 +121,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2022-12-21 16:53:21.979468",
+ "modified": "2022-12-26 12:22:05.256037",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -133,6 +133,15 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }
