@@ -2,7 +2,7 @@ import frappe
 
 
 def execute():
-	frappe.reload_doc("asset", "doctype", "Asset Depreciation Schedule")
+	frappe.reload_doc("assets", "doctype", "Asset Depreciation Schedule")
 
 	assets = get_details_of_draft_or_submitted_depreciable_assets()
 
