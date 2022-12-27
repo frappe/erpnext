@@ -282,6 +282,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		var me = this;
 		var company_currency = erpnext.get_currency(me.frm.doc.company);
 
+		me.frm.dashboard.stats_area_row.empty();
 		me.frm.dashboard.stats_area.show();
 
 		// Payment Status

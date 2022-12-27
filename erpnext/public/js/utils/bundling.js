@@ -107,9 +107,11 @@ $.extend(erpnext.bundling, {
 
 	setup_bundle_buttons: function(frm) {
 		frm.fields_dict.items.grid.add_custom_button(__("Unbundle"), () => erpnext.bundling.unbundle_selected(frm));
+		frm.fields_dict.items.grid.custom_buttons[__("Unbundle")].removeClass('btn-secondary');
 		frm.fields_dict.items.grid.custom_buttons[__("Unbundle")].addClass('hidden btn-warning');
 
 		frm.fields_dict.items.grid.add_custom_button(__("Bundle"), () => erpnext.bundling.bundle_selected(frm));
+		frm.fields_dict.items.grid.custom_buttons[__("Bundle")].removeClass('btn-secondary');
 		frm.fields_dict.items.grid.custom_buttons[__("Bundle")].addClass('hidden btn-success');
 	},
 
@@ -155,17 +157,17 @@ $.extend(erpnext.bundling, {
 				if($(wrapper.find('.bundle-icon').length)) {
 					$(wrapper.find('.bundle-icon')[0]).remove();
 				}
-				$(wrapper.find('.grid-row-check')[0]).after(erpnext.bundling.start_icon);
+				$(wrapper.find('.row-index')[0]).prepend(erpnext.bundling.start_icon);
 			} else if (item.bundling_state === "Continue") {
 				if($(wrapper.find('.bundle-icon').length)) {
 					$(wrapper.find('.bundle-icon')[0]).remove();
 				}
-				$(wrapper.find('.grid-row-check')[0]).after(erpnext.bundling.continue_icon);
+				$(wrapper.find('.row-index')[0]).prepend(erpnext.bundling.continue_icon);
 			} else if (item.bundling_state === "Terminate") {
 				if($(wrapper.find('.bundle-icon').length)){
 					$(wrapper.find('.bundle-icon')[0]).remove();
 				}
-				$(wrapper.find('.grid-row-check')[0]).after(erpnext.bundling.terminate_icon);
+				$(wrapper.find('.row-index')[0]).prepend(erpnext.bundling.terminate_icon);
 			} else {
 				$(wrapper.find('.bundle-icon')[0]).remove();
 			}
