@@ -30,11 +30,7 @@ class SalaryStructureAssignment(Document):
 			if not self.taxable_earnings_till_date and not self.tax_deducted_till_date:
 				frappe.msgprint(
 					_(
-						"""
-						Not found any salary slip record(s) for the employee {0}. <br><br>
-						Please specify {1} and {2} (if any),
-						for the correct tax calculation in future salary slips.
-						"""
+						"""Not found any salary slip record(s) for the employee {0}.<br><br>Please specify {1} and {2} (if any), for the correct tax calculation in future salary slips."""
 					).format(
 						self.employee,
 						"<b>" + _("Taxable Earnings Till Date") + "</b>",
