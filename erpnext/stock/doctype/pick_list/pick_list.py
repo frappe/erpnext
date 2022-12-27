@@ -441,7 +441,7 @@ def get_available_item_locations_for_batched_item(
 			sle.`batch_no`,
 			sle.`item_code`
 		HAVING `qty` > 0
-		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
+		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`, sle.`batch_no`, sle.`warehouse`
 	""".format(
 			warehouse_condition=warehouse_condition
 		),
