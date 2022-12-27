@@ -8,9 +8,7 @@
  "field_order": [
   "child_handling_unit",
   "net_weight",
-  "net_weight_uom",
-  "gross_weight",
-  "gross_weight_uom"
+  "gross_weight"
  ],
  "fields": [
   {
@@ -31,32 +29,16 @@
   },
   {
    "columns": 2,
-   "fieldname": "net_weight_uom",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Net Weight UOM",
-   "options": "UOM"
-  },
-  {
-   "columns": 2,
    "fieldname": "gross_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Gross Weight"
-  },
-  {
-   "columns": 2,
-   "fieldname": "gross_weight_uom",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Gross Weight UOM",
-   "options": "UOM"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-20 22:39:32.361262",
+ "modified": "2022-12-27 11:32:55.415629",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Handling Unit",

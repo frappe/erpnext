@@ -26,8 +26,7 @@
   "stock_qty",
   "stock_uom",
   "column_break_10",
-  "net_weight",
-  "net_weight_uom"
+  "net_weight"
  ],
  "fields": [
   {
@@ -179,22 +178,12 @@
    "print_width": "100px",
    "read_only": 1,
    "width": "100px"
-  },
-  {
-   "columns": 1,
-   "fieldname": "net_weight_uom",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Weight UOM",
-   "options": "UOM",
-   "print_width": "100px",
-   "width": "100px"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-20 17:40:59.664972",
+ "modified": "2022-12-27 11:32:44.778974",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",

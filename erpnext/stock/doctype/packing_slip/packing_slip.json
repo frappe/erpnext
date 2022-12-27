@@ -22,7 +22,9 @@
   "set_posting_time",
   "amended_from",
   "packing_details_section",
-  "set_warehouse",
+  "from_warehouse",
+  "column_break_15",
+  "to_warehouse",
   "column_break_9",
   "packed_by",
   "packed_by_name",
@@ -34,13 +36,12 @@
   "packing_items",
   "package_weight_details",
   "total_net_weight",
-  "total_net_weight_uom",
   "column_break4",
   "total_tare_weight",
-  "tare_weight_uom",
   "column_break_24",
   "total_gross_weight",
-  "gross_weight_uom"
+  "column_break_32",
+  "weight_uom"
  ],
  "fields": [
   {
@@ -69,8 +70,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Packed Items",
-   "options": "Packing Slip Item",
-   "reqd": 1
+   "options": "Packing Slip Item"
   },
   {
    "fieldname": "package_weight_details",
@@ -80,13 +80,6 @@
   {
    "fieldname": "column_break4",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "gross_weight_uom",
-   "fieldtype": "Link",
-   "label": "Gross Weight UOM",
-   "no_copy": 1,
-   "options": "UOM"
   },
   {
    "fieldname": "amended_from",
@@ -175,12 +168,6 @@
    "label": "Packing Details"
   },
   {
-   "fieldname": "set_warehouse",
-   "fieldtype": "Link",
-   "label": "Set Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
   },
@@ -229,21 +216,9 @@
    "label": "Total Net Weight"
   },
   {
-   "fieldname": "total_net_weight_uom",
-   "fieldtype": "Link",
-   "label": "Net Weight UOM",
-   "options": "UOM"
-  },
-  {
    "fieldname": "total_tare_weight",
    "fieldtype": "Float",
    "label": "Total Tare Weight"
-  },
-  {
-   "fieldname": "tare_weight_uom",
-   "fieldtype": "Link",
-   "label": "Tare Weight UOM",
-   "options": "UOM"
   },
   {
    "fieldname": "column_break_24",
@@ -254,13 +229,39 @@
    "fieldtype": "Float",
    "label": "Total Gross Weight",
    "no_copy": 1
+  },
+  {
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_warehouse",
+   "fieldtype": "Link",
+   "label": "Target Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "weight_uom",
+   "fieldtype": "Link",
+   "label": "Weight UOM",
+   "options": "UOM"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-20 17:43:06.811509",
+ "modified": "2022-12-27 11:40:03.893709",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

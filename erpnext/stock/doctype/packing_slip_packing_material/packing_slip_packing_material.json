@@ -23,8 +23,7 @@
   "stock_qty",
   "stock_uom",
   "column_break_10",
-  "tare_weight",
-  "tare_weight_uom"
+  "tare_weight"
  ],
  "fields": [
   {
@@ -151,21 +150,11 @@
    "label": "Tare Weight",
    "print_width": "100px",
    "width": "100px"
-  },
-  {
-   "columns": 1,
-   "fieldname": "tare_weight_uom",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Weight UOM",
-   "options": "UOM",
-   "print_width": "100px",
-   "width": "100px"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-12-20 17:41:00.175970",
+ "modified": "2022-12-27 11:32:05.610652",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Packing Material",
