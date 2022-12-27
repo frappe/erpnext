@@ -112,6 +112,10 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 		attach_bom_items(frm.doc.bom_no);
+
+		if(!check_should_not_attach_bom_items(frm.doc.bom_no)) {
+			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		}
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -326,7 +330,11 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
-		attach_bom_items(frm.doc.bom_no)
+		attach_bom_items(frm.doc.bom_no);
+
+		if(!check_should_not_attach_bom_items(frm.doc.bom_no)) {
+			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		}
 	},
 
 	before_save: function(frm) {
@@ -939,7 +947,10 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				method: "get_items",
 				callback: function(r) {
 					if(!r.exc) refresh_field("items");
-					if(me.frm.doc.bom_no) attach_bom_items(me.frm.doc.bom_no)
+					if(me.frm.doc.bom_no) {
+						attach_bom_items(me.frm.doc.bom_no);
+						erpnext.accounts.dimensions.update_dimension(me.frm, me.frm.doctype);
+					}
 				}
 			});
 		}
