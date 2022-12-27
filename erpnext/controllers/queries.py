@@ -632,7 +632,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		having_clause = ""
 
 	batch_nos = frappe.db.sql("""
-		select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom,
+		select sle.batch_no, sum(sle.actual_qty), sle.stock_uom,
 			min(timestamp(sle.posting_date, sle.posting_time)), batch.manufacturing_date, batch.expiry_date
 		from `tabStock Ledger Entry` sle
 			INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
@@ -654,7 +654,8 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		), args, as_list=1)
 
 	for d in batch_nos:
-		d[1] = cstr(flt(d[1])) # Actual Qty
+		d[1] = "{0} {1}".format(frappe.format(flt(d[1])), cstr(d[2]))  # Actual Qty
+		d[2] = None  # UOM already formatted in Actual Qty
 		d[3] = "Received: {0}".format(frappe.format(getdate(d[3]))) if d[3] else None  # Received Date
 		d[4] = "Manufactured: {0}".format(frappe.format(getdate(d[4]))) if d[4] else None  # Manufactured Date
 		d[5] = "Expiry: {0}".format(frappe.format(getdate(d[5]))) if d[5] else None  # Expiry Date
@@ -819,19 +820,19 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 def item_uom_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters and filters.get('item_code'):
 		return frappe.db.sql("""
-			select distinct uom
-			from `tabUOM Conversion Detail`
-				where parenttype = 'Item' and parent = %(item_code)s
-					and (uom like %(txt)s)
-					{mcond}
-				order by
-					if(locate(%(_txt)s, uom), locate(%(_txt)s, uom), 99999),
-					idx desc,
-					uom
-				limit %(start)s, %(page_len)s
+			select distinct `tabUOM Conversion Detail`.uom
+			from `tabItem`
+			inner join `tabUOM Conversion Detail` on `tabUOM Conversion Detail`.parenttype = 'Item'
+				and `tabUOM Conversion Detail`.parent = `tabItem`.name
+			where `tabItem`.name = %(item_code)s and `tabUOM Conversion Detail`.uom like %(txt)s
+			order by
+				if(locate(%(_txt)s, `tabUOM Conversion Detail`.uom), locate(%(_txt)s, `tabUOM Conversion Detail`.uom), 99999),
+				if(`tabUOM Conversion Detail`.uom = `tabItem`.stock_uom, 0, 1),
+				`tabUOM Conversion Detail`.idx,
+				`tabUOM Conversion Detail`.uom
+			limit %(start)s, %(page_len)s
 		""".format(**{
 			'key': searchfield,
-			'mcond': get_match_cond(doctype)
 		}), {
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),
