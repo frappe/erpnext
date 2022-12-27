@@ -1071,7 +1071,7 @@ def get_weight_per_unit(item_code, weight_uom=None):
 
 	if flt(item.weight_per_unit):
 		if weight_uom and weight_uom != item.weight_uom:
-			return flt(item.weight_per_unit) * flt(get_uom_conv_factor(weight_uom, item.weight_uom))
+			return flt(item.weight_per_unit) * flt(get_uom_conv_factor(item.weight_uom, weight_uom))
 		else:
 			return flt(item.weight_per_unit)
 
