@@ -84,5 +84,5 @@ def update_depreciation_schedules(asset_name, asset_depr_schedule_name, fb_row_i
 			.set(ds.parent, asset_depr_schedule_name)
 			.set(ds.parentfield, "depreciation_schedule")
 			.set(ds.parenttype, "Asset Depreciation Schedule")
-			.where(ds.parent == depr_schedule.name)
+			.where(ds.name == depr_schedule.name)
 		).run()
