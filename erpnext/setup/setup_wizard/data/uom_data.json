@@ -289,7 +289,7 @@
   },
   {
     "category": "Mass",
-    "disabled": 0,
+    "disabled": 1,
     "must_be_whole_number": 0,
     "uom_name": "Grain"
   },
@@ -343,7 +343,7 @@
   },
   {
     "category": "Mass",
-    "disabled": 0,
+    "disabled": 1,
     "must_be_whole_number": 0,
     "uom_name": "Pood"
   },
