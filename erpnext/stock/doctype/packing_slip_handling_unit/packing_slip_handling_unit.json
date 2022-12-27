@@ -8,6 +8,7 @@
  "field_order": [
   "child_handling_unit",
   "net_weight",
+  "tare_weight",
   "gross_weight"
  ],
  "fields": [
@@ -25,20 +26,30 @@
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Net Weight"
+   "label": "Net Weight",
+   "read_only": 1
   },
   {
    "columns": 2,
    "fieldname": "gross_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Gross Weight"
+   "label": "Gross Weight",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "tare_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tare Weight",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-27 11:32:55.415629",
+ "modified": "2022-12-27 23:36:17.428456",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Handling Unit",
