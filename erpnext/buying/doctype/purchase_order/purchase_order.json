@@ -370,7 +370,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "label": "Company Shipping Address",
+   "label": "Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -1170,7 +1170,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 12:34:36.033363",
+ "modified": "2022-12-25 18:08:59.074182",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

@@ -1063,7 +1063,25 @@ class SalarySlip(TransactionBase):
 			)
 			exempted_amount = flt(exempted_amount[0][0]) if exempted_amount else 0
 
-		return taxable_earnings - exempted_amount
+		opening_taxable_earning = self.get_opening_balance_for(
+			"taxable_earnings_till_date", start_date, end_date
+		)
+
+		return (taxable_earnings + opening_taxable_earning) - exempted_amount
+
+	def get_opening_balance_for(self, field_to_select, start_date, end_date):
+		opening_balance = frappe.db.get_all(
+			"Salary Structure Assignment",
+			{
+				"employee": self.employee,
+				"salary_structure": self.salary_structure,
+				"from_date": ["between", (start_date, end_date)],
+				"docstatus": 1,
+			},
+			field_to_select,
+		)
+
+		return opening_balance[0].get(field_to_select) if opening_balance else 0.0
 
 	def get_tax_paid_in_period(self, start_date, end_date, tax_component):
 		# find total_tax_paid, tax paid for benefit, additional_salary
@@ -1092,7 +1110,11 @@ class SalarySlip(TransactionBase):
 			)[0][0]
 		)
 
-		return total_tax_paid
+		tax_deducted_till_date = self.get_opening_balance_for(
+			"tax_deducted_till_date", start_date, end_date
+		)
+
+		return total_tax_paid + tax_deducted_till_date
 
 	def get_taxable_earnings(
 		self, allow_tax_exemption=False, based_on_payment_days=0, payroll_period=None
