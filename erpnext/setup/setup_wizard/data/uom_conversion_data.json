@@ -1559,14 +1559,14 @@
 		"value": "0.0001"
 	},
 	{
-		"category": "Agriculture",
+		"category": "Numbers",
 		"from_uom": "Percent",
 		"to_uom": "Percent",
 		"abbr": "%",
 		"value": "1"
 	},
 	{
-		"category": "Agriculture",
+		"category": "Numbers",
 		"from_uom": "Percent",
 		"to_uom": "Parts Per Million",
 		"abbr": "ppm",

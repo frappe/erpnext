@@ -48,7 +48,6 @@ class calculate_taxes_and_totals(object):
 		self.calculate_tax_inclusive_rate()
 		self.calculate_totals()
 		self._cleanup()
-		self.calculate_total_net_weight()
 
 	def validate_conversion_rate(self):
 		# validate conversion rate
@@ -68,7 +67,7 @@ class calculate_taxes_and_totals(object):
 				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
 				exclude_round_fieldnames = ['rate', 'price_list_rate', 'discount_percentage', 'discount_amount',
-					'margin_rate_or_amount', 'rate_with_margin']
+					'margin_rate_or_amount', 'rate_with_margin', 'weight_per_unit']
 				self.doc.round_floats_in(item, excluding=exclude_round_fieldnames)
 
 				if item.discount_percentage == 100:
@@ -156,12 +155,19 @@ class calculate_taxes_and_totals(object):
 					item.tax_exclusive_rate_with_margin = item.rate_with_margin
 					item.base_tax_exclusive_rate_with_margin = item.base_rate_with_margin
 
+				item.item_tax_amount = 0.0
+
+				if item.meta.has_field("stock_qty") and item.meta.has_field("conversion_factor"):
+					item.stock_qty = item.qty * flt(item.conversion_factor)
+
+				if item.meta.has_field("total_weight") and item.meta.has_field("weight_per_unit"):
+					stock_qty = item.stock_qty if item.meta.has_field("stock_qty") else item.qty
+					item.total_weight = flt(flt(item.weight_per_unit) * flt(stock_qty), item.precision("total_weight"))
+
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "amount",
 					"taxable_rate", "taxable_amount", "net_rate", "net_amount",
 					"tax_exclusive_price_list_rate", "tax_exclusive_rate", "tax_exclusive_amount",
 					"amount_before_discount", "total_discount", "tax_exclusive_amount_before_discount", "tax_exclusive_total_discount"])
-
-				item.item_tax_amount = 0.0
 
 	def _set_in_company_currency(self, doc, fields, do_not_round_before_conversion=False):
 		"""set values in base currency"""
@@ -309,6 +315,9 @@ class calculate_taxes_and_totals(object):
 		self.doc.base_tax_exclusive_total_before_discount = self.doc.tax_exclusive_total_before_discount = 0.0
 		self.doc.base_tax_exclusive_total_discount = self.doc.tax_exclusive_total_discount = 0.0
 
+		if self.doc.meta.has_field('total_net_weight'):
+			self.doc.total_net_weight = 0.0
+
 		has_depreciation_field = self.doc.meta.has_field('total_depreciation')
 		if has_depreciation_field:
 			self.doc.base_total_depreciation = self.doc.total_depreciation = 0.0
@@ -322,6 +331,9 @@ class calculate_taxes_and_totals(object):
 		for item in self.doc.get("items"):
 			self.doc.total_qty += item.qty
 			self.doc.total_alt_uom_qty += item.alt_uom_qty
+
+			if self.doc.meta.has_field('total_net_weight') and item.meta.has_field('total_weight'):
+				self.doc.total_net_weight += item.total_weight
 
 			self.doc.total += item.amount
 			self.doc.base_total += item.base_amount
@@ -362,13 +374,16 @@ class calculate_taxes_and_totals(object):
 		self.doc.total_discount_after_taxes = self.doc.taxable_total - self.doc.net_total
 		self.doc.base_total_discount_after_taxes = self.doc.base_taxable_total - self.doc.base_net_total
 
-		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total",
+		self.doc.round_floats_in(self.doc, [
+			"total", "base_total", "net_total", "base_net_total",
 			"taxable_total", "base_taxable_total",
 			"total_discount_after_taxes", "base_total_discount_after_taxes",
 			"tax_exclusive_total", "base_tax_exclusive_total",
 			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount",
 			"tax_exclusive_total_before_discount", "tax_exclusive_total_discount",
-			"base_tax_exclusive_total_before_discount", "base_tax_exclusive_total_discount"])
+			"base_tax_exclusive_total_before_discount", "base_tax_exclusive_total_discount",
+			"total_net_weight",
+		])
 
 		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:
 			self.doc.pos_total_qty = self.doc.total_qty
@@ -612,13 +627,6 @@ class calculate_taxes_and_totals(object):
 		self.doc.round_floats_in(self.doc, ["base_grand_total", "base_total_after_taxes"])
 
 		self.set_rounded_total()
-
-	def calculate_total_net_weight(self):
-		if self.doc.meta.get_field('total_net_weight'):
-			self.doc.total_net_weight = 0.0
-			for d in self.doc.items:
-				if d.total_weight:
-					self.doc.total_net_weight += d.total_weight
 
 	def set_rounded_total(self):
 		if self.doc.meta.get_field("rounded_total"):

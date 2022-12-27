@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-06-24 16:37:54",
  "description": "Settings",
  "doctype": "DocType",
@@ -9,7 +10,9 @@
   "valuation_method",
   "defaults_section",
   "item_group",
+  "column_break_6",
   "stock_uom",
+  "weight_uom",
   "column_break_9",
   "default_warehouse",
   "sample_retention_warehouse",
@@ -265,12 +268,23 @@
    "fieldtype": "Link",
    "label": "Restrict Stock Valuation Amounts to Role",
    "options": "Role"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "weight_uom",
+   "fieldtype": "Link",
+   "label": "Default Weight UOM",
+   "options": "UOM"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2022-11-24 15:18:30.767726",
+ "links": [],
+ "modified": "2022-12-21 14:56:27.506815",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -297,5 +311,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

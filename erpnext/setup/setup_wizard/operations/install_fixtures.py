@@ -318,22 +318,29 @@ def add_uom_data():
 	# add UOMs
 	uoms = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
 	for d in uoms:
-		if not frappe.db.exists('UOM', _(d.get("uom_name"))):
-			uom_doc = frappe.get_doc({
-				"doctype": "UOM",
-				"uom_name": _(d.get("uom_name")),
-				"name": _(d.get("uom_name")),
-				"must_be_whole_number": d.get("must_be_whole_number")
-			}).insert(ignore_permissions=True)
+		if d.get("category"):
+			create_missing_uom_category(d.get("category"))
+
+		if frappe.db.exists('UOM', _(d.get("uom_name"))):
+			uom_doc = frappe.get_doc("UOM", _(d.get("uom_name")))
+		else:
+			uom_doc = frappe.new_doc("UOM")
+
+		uom_doc.update({
+			"uom_name": _(d.get("uom_name")),
+			"name": _(d.get("uom_name")),
+			"category": _(d.get("category")),
+			"disabled": d.get("disabled"),
+			"must_be_whole_number": d.get("must_be_whole_number")
+		})
+
+		uom_doc.save(ignore_permissions=True)
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")).read())
 	for d in uom_conversions:
-		if not frappe.db.exists("UOM Category", _(d.get("category"))):
-			frappe.get_doc({
-				"doctype": "UOM Category",
-				"category_name": _(d.get("category"))
-			}).insert(ignore_permissions=True)
+		if d.get("category"):
+			create_missing_uom_category(d.get("category"))
 
 		if not frappe.db.exists("UOM Conversion Factor", {"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))}):
 			uom_conversion = frappe.get_doc({
@@ -343,6 +350,13 @@ def add_uom_data():
 				"to_uom": _(d.get("to_uom")),
 				"value": d.get("value")
 			}).insert(ignore_permissions=True)
+
+def create_missing_uom_category(category):
+	if not frappe.db.exists("UOM Category", _(category)):
+		frappe.get_doc({
+			"doctype": "UOM Category",
+			"category_name": _(category),
+		}).insert(ignore_permissions=True)
 
 def add_market_segments():
 	records = [
@@ -462,6 +476,7 @@ def install_defaults(args=None):
 	stock_settings.valuation_method = "FIFO"
 	stock_settings.default_warehouse = frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')})
 	stock_settings.stock_uom = _("Nos")
+	stock_settings.weight_uom = _("Kg")
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.automatically_set_serial_nos_based_on_fifo = 1

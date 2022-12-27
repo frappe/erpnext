@@ -118,7 +118,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 
 				var exclude_round_fieldnames = ['rate', 'price_list_rate', 'discount_percentage', 'discount_amount',
-					'margin_rate_or_amount', 'rate_with_margin'];
+					'margin_rate_or_amount', 'rate_with_margin', 'weight_per_unit'];
 				frappe.model.round_floats_in(item, null, exclude_round_fieldnames);
 
 				var rate_before_discount;
@@ -196,7 +196,15 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				}
 
 				item.item_tax_amount = 0.0;
-				item.total_weight = flt(item.weight_per_unit * item.stock_qty);
+
+				if (frappe.meta.has_field(item.doctype, "stock_qty") && frappe.meta.has_field(item.doctype, "conversion_factor")) {
+					item.stock_qty = item.qty * flt(item.conversion_factor);
+				}
+
+				if (frappe.meta.has_field(item.doctype, "total_weight") && frappe.meta.has_field(item.doctype, "weight_per_unit")) {
+					let stock_qty = frappe.meta.has_field(item.doctype, "stock_qty") ? item.stock_qty : item.qty
+					item.total_weight = flt(flt(item.weight_per_unit) * flt(stock_qty), precision("total_weight", item));
+				}
 
 				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount",
 					"taxable_rate", "taxable_amount", "net_rate", "net_amount",
@@ -386,9 +394,17 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.frm.doc.base_tax_exclusive_total_depreciation = this.frm.doc.tax_exclusive_total_depreciation = 0.0;
 		}
 
+		if (frappe.meta.has_field(this.frm.doc.doctype, "total_net_weight")) {
+			this.frm.doc.total_net_weight = 0.0
+		}
+
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total_qty += item.qty;
 			me.frm.doc.total_alt_uom_qty += item.alt_uom_qty;
+
+			if (frappe.meta.has_field(me.frm.doc.doctype, 'total_net_weight') && frappe.meta.has_field(item.doctype, 'total_weight')) {
+				me.frm.doc.total_net_weight += item.total_weight;
+			}
 
 			me.frm.doc.total += item.amount;
 			me.frm.doc.base_total += item.base_amount;
@@ -431,13 +447,16 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.frm.doc.total_discount_after_taxes = this.frm.doc.taxable_total - this.frm.doc.net_total;
 		this.frm.doc.base_total_discount_after_taxes = this.frm.doc.base_taxable_total - this.frm.doc.base_net_total;
 
-		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total",
+		frappe.model.round_floats_in(this.frm.doc, [
+			"total", "base_total", "net_total", "base_net_total",
 			"taxable_total", "base_taxable_total",
 			"total_discount_after_taxes", "base_total_discount_after_taxes",
 			"tax_exclusive_total", "base_tax_exclusive_total",
 			"total_before_discount", "total_discount", "base_total_before_discount", "base_total_discount",
 			"tax_exclusive_total_before_discount", "tax_exclusive_total_discount",
-			"base_tax_exclusive_total_before_discount", "base_tax_exclusive_total_discount"]);
+			"base_tax_exclusive_total_before_discount", "base_tax_exclusive_total_discount",
+			"total_net_weight",
+		]);
 	}
 
 	calculate_taxes() {

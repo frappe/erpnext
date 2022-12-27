@@ -144,10 +144,10 @@
   "manufacturing_defaults_section",
   "manufacturer",
   "manufacturer_part_no",
-  "default_bom",
-  "column_break_129",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
+  "column_break_129",
+  "default_bom",
   "applicability_tab",
   "applicable_to_section",
   "applicable_to",
@@ -423,7 +423,7 @@
    "depends_on": "is_stock_item",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
-   "label": "Weight Per Unit"
+   "label": "Net Weight Per Unit"
   },
   {
    "depends_on": "eval:doc.is_stock_item",
@@ -1320,7 +1320,7 @@
  "idx": 2,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-21 00:10:30.007159",
+ "modified": "2022-12-22 14:39:31.695687",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
