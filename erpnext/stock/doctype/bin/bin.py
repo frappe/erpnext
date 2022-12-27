@@ -162,6 +162,7 @@ def update_qty(bin_name, args):
 			.where((sle.item_code == args.get("item_code")) & (sle.warehouse == args.get("warehouse")))
 			.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
+			.limit(1)
 			.run()
 		)
 
