@@ -240,6 +240,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		var me = this;
 		var company_currency = erpnext.get_currency(me.frm.doc.company);
 
+		me.frm.dashboard.stats_area_row.empty();
 		me.frm.dashboard.stats_area.show();
 
 		// Work Status
