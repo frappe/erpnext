@@ -13,7 +13,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 	set_depreciation_settings_in_company,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_draft_or_active_depr_schedule,
+	get_draft_or_active_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -256,6 +256,9 @@ class TestAssetCapitalization(unittest.TestCase):
 			submit=1,
 		)
 
+		first_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(consumed_asset.name)
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
 			entry_type="Decapitalization",
@@ -285,9 +288,17 @@ class TestAssetCapitalization(unittest.TestCase):
 		consumed_asset.reload()
 		self.assertEqual(consumed_asset.status, "Decapitalized")
 
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(consumed_asset.name)
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+
+		depr_schedule_of_consumed_asset = second_asset_depr_schedule.get("depreciation_schedule")
+
 		consumed_depreciation_schedule = [
 			d
-			for d in get_draft_or_active_depr_schedule(consumed_asset.name)
+			for d in depr_schedule_of_consumed_asset
 			if getdate(d.schedule_date) == getdate(capitalization_date)
 		]
 		self.assertTrue(

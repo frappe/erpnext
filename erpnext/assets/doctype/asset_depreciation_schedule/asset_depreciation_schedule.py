@@ -122,8 +122,10 @@ def convert_draft_asset_depr_schedules_into_active(asset_doc):
 			asset_doc.name, row.finance_book
 		)
 
+		if not asset_depr_schedule_doc:
+			continue
+
 		if asset_depr_schedule_doc.status == "Draft":
-			asset_depr_schedule_doc.status = "Active"
 			asset_depr_schedule_doc.submit()
 
 

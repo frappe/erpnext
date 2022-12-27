@@ -210,6 +210,9 @@ class TestAsset(AssetSetup):
 			submit=1,
 		)
 
+		first_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
 		post_depreciation_entries(date=add_months(purchase_date, 2))
 		asset.load_from_db()
 
@@ -221,6 +224,11 @@ class TestAsset(AssetSetup):
 
 		scrap_asset(asset.name)
 		asset.load_from_db()
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 
 		accumulated_depr_amount = flt(
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
@@ -261,6 +269,11 @@ class TestAsset(AssetSetup):
 		self.assertSequenceEqual(gle, expected_gle)
 
 		restore_asset(asset.name)
+		second_asset_depr_schedule.load_from_db()
+
+		third_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		self.assertEquals(third_asset_depr_schedule.status, "Active")
+		self.assertEquals(second_asset_depr_schedule.status, "Cancelled")
 
 		asset.load_from_db()
 		self.assertFalse(asset.journal_entry_for_scrap)
@@ -288,6 +301,9 @@ class TestAsset(AssetSetup):
 			submit=1,
 		)
 
+		first_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
 		post_depreciation_entries(date=add_months(purchase_date, 2))
 
 		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
@@ -298,6 +314,12 @@ class TestAsset(AssetSetup):
 		si.submit()
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
+
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
 			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
@@ -375,6 +397,9 @@ class TestAsset(AssetSetup):
 			submit=1,
 		)
 
+		first_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
 		post_depreciation_entries(date="2021-01-01")
 
 		self.assertEqual(asset.asset_quantity, 10)
@@ -383,9 +408,18 @@ class TestAsset(AssetSetup):
 
 		new_asset = split_asset(asset.name, 2)
 		asset.load_from_db()
+		first_asset_depr_schedule.load_from_db()
 
-		depr_schedule_of_asset = get_draft_or_active_depr_schedule(asset.name)
-		depr_schedule_of_new_asset = get_draft_or_active_depr_schedule(new_asset.name)
+		second_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset.name)
+		first_asset_depr_schedule_of_new_asset = get_draft_or_active_asset_depr_schedule_doc(
+			new_asset.name
+		)
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule_of_new_asset.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+
+		depr_schedule_of_asset = second_asset_depr_schedule.get("depreciation_schedule")
+		depr_schedule_of_new_asset = first_asset_depr_schedule_of_new_asset.get("depreciation_schedule")
 
 		self.assertEqual(new_asset.asset_quantity, 2)
 		self.assertEqual(new_asset.gross_purchase_amount, 24000)
@@ -1351,9 +1385,9 @@ class TestDepreciationBasics(AssetSetup):
 		# cancel depreciation entry
 		depr_entry = get_draft_or_active_depr_schedule(asset.name)[0].journal_entry
 		self.assertTrue(depr_entry)
+
 		frappe.get_doc("Journal Entry", depr_entry).cancel()
 
-		asset.load_from_db()
 		depr_entry = get_draft_or_active_depr_schedule(asset.name)[0].journal_entry
 		self.assertFalse(depr_entry)
 
