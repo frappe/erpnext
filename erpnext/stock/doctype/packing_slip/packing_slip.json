@@ -211,24 +211,30 @@
    "options": "Packing Slip Packing Material"
   },
   {
+   "default": "0",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
-   "label": "Total Net Weight"
+   "label": "Total Net Weight",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "total_tare_weight",
    "fieldtype": "Float",
-   "label": "Total Tare Weight"
+   "label": "Total Tare Weight",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_24",
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "total_gross_weight",
    "fieldtype": "Float",
    "label": "Total Gross Weight",
-   "no_copy": 1
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "from_warehouse",
@@ -261,7 +267,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-27 16:36:01.984427",
+ "modified": "2022-12-27 23:54:10.916083",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
