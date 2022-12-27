@@ -607,6 +607,7 @@ class GrossProfitGenerator(object):
 					return abs(previous_stock_value - flt(sle.stock_value)) * flt(row.qty) / abs(flt(sle.qty))
 				else:
 					return flt(row.qty) * self.get_average_buying_rate(row, item_code)
+		return 0.0
 
 	def get_buying_amount(self, row, item_code):
 		# IMP NOTE

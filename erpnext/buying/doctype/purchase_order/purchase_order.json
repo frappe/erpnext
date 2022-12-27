@@ -108,7 +108,7 @@
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "company_shipping_address_section",
+  "shipping_address_section",
   "shipping_address",
   "column_break_99",
   "shipping_address_display",
@@ -385,7 +385,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "label": "Company Shipping Address",
+   "label": "Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -1208,11 +1208,6 @@
    "label": "Address & Contact"
   },
   {
-   "fieldname": "company_shipping_address_section",
-   "fieldtype": "Section Break",
-   "label": "Company Shipping Address"
-  },
-  {
    "fieldname": "company_billing_address_section",
    "fieldtype": "Section Break",
    "label": "Company Billing Address"
@@ -1263,13 +1258,18 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "fieldname": "shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Address"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:36:37.455134",
+ "modified": "2022-12-25 18:08:59.074182",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
