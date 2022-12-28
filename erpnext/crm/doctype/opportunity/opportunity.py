@@ -35,17 +35,6 @@ force_applies_to_fields = [
 
 
 class Opportunity(TransactionBase):
-	def __init__(self, *args, **kwargs):
-		super(Opportunity, self).__init__(*args, **kwargs)
-		self.status_map = [
-			["Open", None],
-			["Lost", "eval:self.status=='Lost'"],
-			["Lost", "has_lost_quotation"],
-			["Quotation", "has_active_quotation"],
-			["Converted", "is_converted"],
-			["Closed", "eval:self.status=='Closed'"]
-		]
-
 	def get_feed(self):
 		return _("From {0}").format(self.get("customer_name") or self.get('party_name'))
 
@@ -59,8 +48,9 @@ class Opportunity(TransactionBase):
 		self.set_missing_values()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_financer()
-		self.set_title()
 		self.validate_follow_up()
+		self.set_status()
+		self.set_title()
 
 	def after_insert(self):
 		self.update_lead_status()
@@ -70,6 +60,35 @@ class Opportunity(TransactionBase):
 
 	def set_title(self):
 		self.title = self.customer_name
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		previous_status = self.status
+
+		if status:
+			self.status = status
+
+		has_active_quotation = self.has_active_quotation()
+		next_follow_up = self.get_next_follow_up()
+
+		if self.is_converted():
+			self.status = "Converted"
+		elif self.status == "Closed":
+			self.status = "Closed"
+		elif self.status == "Lost" or (not has_active_quotation and self.has_lost_quotation()):
+			self.status = "Lost"
+		elif next_follow_up and getdate(next_follow_up.schedule_date) >= getdate():
+			self.status = "To Follow Up"
+		elif has_active_quotation:
+			self.status = "Quotation"
+		elif self.has_communication():
+			self.status = "Replied"
+		else:
+			self.status = "Open"
+
+		self.add_status_comment(previous_status)
+
+		if update:
+			self.db_set('status', self.status, update_modified=update_modified)
 
 	def set_missing_values(self):
 		self.set_customer_details()
@@ -123,20 +142,35 @@ class Opportunity(TransactionBase):
 			if d.is_new() and not d.get('contact_date') and getdate(d.get('schedule_date')) < getdate(today()):
 				frappe.throw(_("Row #{0}: Can't schedule a follow up for past dates".format(d.idx)))
 
-	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
-		if not self.has_active_quotation():
-			frappe.db.set(self, 'status', 'Lost')
+	def get_next_follow_up(self):
+		follow_up = [f for f in self.contact_schedule
+			if f.schedule_date and not f.contact_date and getdate(f.schedule_date) >= getdate()]
+		if follow_up:
+			return follow_up[0]
+
+	@frappe.whitelist()
+	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):
+		is_lost = cint(is_lost)
+
+		if is_lost and (self.has_active_quotation() or self.is_converted()):
+			frappe.throw(_("Cannot declare as lost; Active documents against Opportunity"))
+
+		if is_lost:
+			self.set_status(update=True, status="Lost")
 
 			if detailed_reason:
-				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+				self.db_set("order_lost_reason", detailed_reason)
 
 			for reason in lost_reasons_list:
-				self.append('lost_reasons', reason)
-
-			self.save()
-
+				row = self.append('lost_reasons', reason)
+				row.db_insert()
 		else:
-			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
+			self.set_status(update=True, status="Open")
+			self.db_set('order_lost_reason', None)
+			self.lost_reasons = []
+			self.update_child_table("lost_reasons")
+
+		self.notify_update()
 
 	def update_lead_status(self):
 		if self.opportunity_from == "Lead" and self.party_name:
@@ -199,6 +233,9 @@ class Opportunity(TransactionBase):
 			if self.has_active_quotation():
 				return False
 			return True
+
+	def has_communication(self):
+		return frappe.get_value("Communication", filters={'reference_doctype': self.doctype, 'reference_name': self.name})
 
 
 @frappe.whitelist()
@@ -299,8 +336,6 @@ def make_quotation(source_name, target_doc=None):
 		"Opportunity Item": {
 			"doctype": "Quotation Item",
 			"field_map": {
-				"parent": "prevdoc_docname",
-				"parenttype": "prevdoc_doctype",
 				"uom": "stock_uom",
 			},
 			"add_if_empty": True
@@ -540,20 +575,13 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 
 	opp = frappe.get_cached_doc('Opportunity', name)
 
-	if cint(submit_follow_up):
-		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
-		if follow_up:
-			follow_up[0].contact_date = getdate(contact_date)
-
-		opp.save()
-
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
 	comm.reference_name = opp.name
 	comm.reference_owner = opp.owner
 
 	comm.sender = frappe.session.user
-	comm.sent_or_received = 'Sent'
+	comm.sent_or_received = 'Received'
 	comm.subject = "Opportunity Communication"
 	comm.content = remarks
 	comm.communication_type = "Feedback"
@@ -564,6 +592,13 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 	})
 
 	comm.insert(ignore_permissions=True)
+
+	if cint(submit_follow_up):
+		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
+		if follow_up:
+			follow_up[0].contact_date = getdate(contact_date)
+
+	opp.save()
 
 
 @frappe.whitelist()

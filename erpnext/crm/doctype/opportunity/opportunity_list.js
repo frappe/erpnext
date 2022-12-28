@@ -12,17 +12,19 @@ frappe.listview_settings['Opportunity'] = {
 			indicator[1] = "darkgrey";
 		} else if (doc.status == "Replied") {
 			indicator[1] = "purple";
+		} else if (doc.status == "To Follow Up") {
+			indicator[1] = "lightblue";
 		}
 		return indicator;
 	},
 	onload: function(listview) {
 		var method = "erpnext.crm.doctype.opportunity.opportunity.set_multiple_status";
 
-		listview.page.add_menu_item(__("Set as Open"), function() {
+		listview.page.add_action_item(__("Set as Open"), function() {
 			listview.call_for_selected_items(method, {"status": "Open"});
 		});
 
-		listview.page.add_menu_item(__("Set as Closed"), function() {
+		listview.page.add_action_item(__("Set as Closed"), function() {
 			listview.call_for_selected_items(method, {"status": "Closed"});
 		});
 
