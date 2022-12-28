@@ -15,9 +15,6 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), frappe.safe_decode(self.project_name))
-
 	def onload(self):
 		self.set_onload(
 			"activity_summary",

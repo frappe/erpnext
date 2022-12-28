@@ -27,9 +27,6 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
-	def get_feed(self):
-		return self.customer_name
-
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
@@ -740,7 +737,7 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		qb.from_(con)
 		.join(dlink)
 		.on(con.name == dlink.parent)
-		.select(con.name, con.full_name, con.email_id)
+		.select(con.name, con.email_id)
 		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
 		.run()
 	)

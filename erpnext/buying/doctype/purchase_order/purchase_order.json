@@ -62,12 +62,13 @@
   "set_reserve_warehouse",
   "supplied_items",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_53",
-  "tax_category",
-  "column_break_50",
   "shipping_rule",
+  "column_break_50",
   "incoterm",
+  "named_place",
   "section_break_52",
   "taxes",
   "totals",
@@ -107,7 +108,7 @@
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "company_shipping_address_section",
+  "shipping_address_section",
   "shipping_address",
   "column_break_99",
   "shipping_address_display",
@@ -384,7 +385,7 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "label": "Company Shipping Address",
+   "label": "Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -1207,11 +1208,6 @@
    "label": "Address & Contact"
   },
   {
-   "fieldname": "company_shipping_address_section",
-   "fieldtype": "Section Break",
-   "label": "Company Shipping Address"
-  },
-  {
    "fieldname": "company_billing_address_section",
    "fieldtype": "Section Break",
    "label": "Company Billing Address"
@@ -1256,13 +1252,24 @@
    "fieldtype": "Link",
    "label": "Incoterm",
    "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
+  },
+  {
+   "fieldname": "shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Address"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 17:28:07.729943",
+ "modified": "2022-12-25 18:08:59.074182",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

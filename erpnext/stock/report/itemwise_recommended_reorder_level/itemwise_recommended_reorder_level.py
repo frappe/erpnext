@@ -82,7 +82,7 @@ def get_item_info(filters):
 			item.safety_stock,
 			item.lead_time_days,
 		)
-		.where(item.is_stock_item == 1)
+		.where((item.is_stock_item == 1) & (item.disabled == 0))
 	)
 
 	if brand := filters.get("brand"):

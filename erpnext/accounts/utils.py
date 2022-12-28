@@ -836,6 +836,7 @@ def get_outstanding_invoices(
 	posting_date=None,
 	min_outstanding=None,
 	max_outstanding=None,
+	accounting_dimensions=None,
 ):
 
 	ple = qb.DocType("Payment Ledger Entry")
@@ -866,6 +867,7 @@ def get_outstanding_invoices(
 		min_outstanding=min_outstanding,
 		max_outstanding=max_outstanding,
 		get_invoices=True,
+		accounting_dimensions=accounting_dimensions or [],
 	)
 
 	for d in invoice_list:
@@ -1615,6 +1617,7 @@ class QueryPaymentLedger(object):
 			.where(ple.delinked == 0)
 			.where(Criterion.all(filter_on_voucher_no))
 			.where(Criterion.all(self.common_filter))
+			.where(Criterion.all(self.dimensions_filter))
 			.where(Criterion.all(self.voucher_posting_date))
 			.groupby(ple.voucher_type, ple.voucher_no, ple.party_type, ple.party)
 		)
@@ -1702,6 +1705,7 @@ class QueryPaymentLedger(object):
 		max_outstanding=None,
 		get_payments=False,
 		get_invoices=False,
+		accounting_dimensions=None,
 	):
 		"""
 		Fetch voucher amount and outstanding amount from Payment Ledger using Database CTE
@@ -1717,6 +1721,7 @@ class QueryPaymentLedger(object):
 		self.reset()
 		self.vouchers = vouchers
 		self.common_filter = common_filter or []
+		self.dimensions_filter = accounting_dimensions or []
 		self.voucher_posting_date = posting_date or []
 		self.min_outstanding = min_outstanding
 		self.max_outstanding = max_outstanding
