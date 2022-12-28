@@ -491,6 +491,10 @@ class AccountsController(TransactionBase):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
+		print("Accounts Controller Missing Item Details")
+		for d in self.get("items"):
+			print(d.conversion_factor, "conversion_factor")
+
 		if hasattr(self, "items"):
 			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
@@ -584,7 +588,12 @@ class AccountsController(TransactionBase):
 					if bool(uom) != bool(stock_uom):  # xor
 						item.stock_uom = item.uom = uom or stock_uom
 
-					item.conversion_factor = get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+					# UOM cannot be zero so substitute as 1
+					item.conversion_factor = (
+						get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+						or item.get("conversion_factor")
+						or 1
+					)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)

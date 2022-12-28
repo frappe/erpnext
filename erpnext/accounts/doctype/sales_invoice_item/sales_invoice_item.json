@@ -206,7 +206,6 @@
    "reqd": 1
   },
   {
-   "default": "1",
    "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
@@ -891,7 +890,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-02 12:53:12.693217",
+ "modified": "2022-12-28 16:17:33.484531",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
