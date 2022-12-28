@@ -608,10 +608,11 @@ class JournalEntry(AccountsController):
 
 	def validate_total_debit_and_credit(self):
 		self.set_total_debit_credit()
-		if self.difference:
-			frappe.throw(
-				_("Total Debit must be equal to Total Credit. The difference is {0}").format(self.difference)
-			)
+		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
+			if self.difference:
+				frappe.throw(
+					_("Total Debit must be equal to Total Credit. The difference is {0}").format(self.difference)
+				)
 
 	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
@@ -788,7 +789,7 @@ class JournalEntry(AccountsController):
 	def build_gl_map(self):
 		gl_map = []
 		for d in self.get("accounts"):
-			if d.debit or d.credit:
+			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]
 				r = [x for x in r if x]
 				remarks = "\n".join(r)
