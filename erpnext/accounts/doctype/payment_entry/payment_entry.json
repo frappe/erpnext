@@ -436,7 +436,6 @@
   {
    "bold": 1,
    "default": "0",
-   "depends_on": "cheque_lot",
    "fieldname": "reference_no",
    "fieldtype": "Data",
    "label": "Reference No",
@@ -444,7 +443,6 @@
   },
   {
    "bold": 1,
-   "depends_on": "cheque_lot",
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Reference Date",
@@ -755,7 +753,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-29 18:56:37.030806",
+ "modified": "2022-12-21 12:23:46.434246",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

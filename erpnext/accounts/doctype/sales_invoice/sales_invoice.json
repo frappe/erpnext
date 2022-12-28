@@ -2113,7 +2113,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-11-28 13:58:33.419962",
+ "modified": "2022-12-21 12:07:04.173728",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2156,7 +2156,6 @@
   {
    "cancel": 1,
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -2170,7 +2169,6 @@
   {
    "cancel": 1,
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,

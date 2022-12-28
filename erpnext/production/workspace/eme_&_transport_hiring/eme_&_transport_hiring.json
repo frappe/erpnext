@@ -69,44 +69,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "EME Reports",
-   "link_count": 3,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Daily EME Expenses Report",
-   "link_count": 0,
-   "link_to": "Daily EME Expenses",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Daily EME Working Hour",
-   "link_count": 0,
-   "link_to": "Daily EME Working Hour",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "EME Invoice Report",
-   "link_count": 0,
-   "link_to": "EME Invoice Report",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Transporter Transaction",
    "link_count": 5,
    "onboard": 0,
@@ -239,9 +201,57 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "EME Reports",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily EME Expenses Report",
+   "link_count": 0,
+   "link_to": "Daily EME Expenses",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily EME Working Hour",
+   "link_count": 0,
+   "link_to": "Daily EME Working Hour",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "EME Invoice Report",
+   "link_count": 0,
+   "link_to": "EME Invoice Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Expense and Performance Summary",
+   "link_count": 0,
+   "link_to": "Expense and Performance Summary",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-08 12:03:24.265527",
+ "modified": "2022-12-13 11:13:11.462103",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "EME & Transport Hiring",
@@ -250,7 +260,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 11.0,
+ "sequence_id": 15.0,
  "shortcuts": [
   {
    "color": "Red",

@@ -422,91 +422,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Reports",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "GL Entry",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Trial Balance for Party",
-   "link_count": 0,
-   "link_to": "Trial Balance for Party",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Journal Entry",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Payment Period Based On Invoice Date",
-   "link_count": 0,
-   "link_to": "Payment Period Based On Invoice Date",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Invoice",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Partners Commission",
-   "link_count": 0,
-   "link_to": "Sales Partners Commission",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customer Credit Balance",
-   "link_count": 0,
-   "link_to": "Customer Credit Balance",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Invoice",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Payment Summary",
-   "link_count": 0,
-   "link_to": "Sales Payment Summary",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Address",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Address And Contacts",
-   "link_count": 0,
-   "link_to": "Address And Contacts",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "GL Entry",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Tax Detail",
-   "link_count": 0,
-   "link_to": "Tax Detail",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Financial Statements",
    "link_count": 0,
    "onboard": 0,
@@ -1096,9 +1011,114 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 9,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Trial Balance for Party",
+   "link_count": 0,
+   "link_to": "Trial Balance for Party",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Journal Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Payment Period Based On Invoice Date",
+   "link_count": 0,
+   "link_to": "Payment Period Based On Invoice Date",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Invoice",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Partners Commission",
+   "link_count": 0,
+   "link_to": "Sales Partners Commission",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Customer",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Credit Balance",
+   "link_count": 0,
+   "link_to": "Customer Credit Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Invoice",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Payment Summary",
+   "link_count": 0,
+   "link_to": "Sales Payment Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Address",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Address And Contacts",
+   "link_count": 0,
+   "link_to": "Address And Contacts",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tax Detail",
+   "link_count": 0,
+   "link_to": "Tax Detail",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Compensation Report",
+   "link_count": 0,
+   "link_to": "Sales Compensation Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Summary Report",
+   "link_count": 0,
+   "link_to": "Customer Summary Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-07 16:59:47.274706",
+ "modified": "2022-12-26 12:02:31.985360",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

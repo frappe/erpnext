@@ -70,6 +70,7 @@
   {
    "fieldname": "operator",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Operator",
    "options": "Employee",
    "reqd": 1
@@ -306,7 +307,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-07 16:35:18.016603",
+ "modified": "2022-12-22 09:35:28.955301",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fleet Engagement Item",

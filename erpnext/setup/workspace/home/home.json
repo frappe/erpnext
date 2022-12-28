@@ -1,23 +1,11 @@
 {
  "charts": [
   {
-   "chart_name": "Accounts Receivable Ageing",
-   "label": "Accounts Receivable Ageing"
-  },
-  {
-   "chart_name": "Employees by Age",
-   "label": "Employee By Age"
-  },
-  {
-   "chart_name": "Profit and Loss",
-   "label": "Profit and Loss"
-  },
-  {
-   "chart_name": "Accounts Payable Ageing",
-   "label": "Accounts Payable Ageing"
+   "chart_name": "Employee Leave Balance",
+   "label": "Employee Leave Balance"
   }
  ],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<br>\",\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Accounts</b></span>\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Accounts Receivable Ageing\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Accounts Payable Ageing\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Profit and Loss\",\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Human Resource</b></span>\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Employee By Age\",\"col\":12}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<br>\",\"col\":12}},{\"type\":\"chart\",\"data\":{\"chart_name\":\"Employee Leave Balance\",\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Human Resource</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Employee Self Services\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Other Transaction\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2020-01-23 13:46:38.833076",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -213,9 +201,123 @@
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 1,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee TDS Certificate",
+   "link_count": 0,
+   "link_to": "Employee TDS Certificate",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Self Services",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Leave Application",
+   "link_count": 0,
+   "link_to": "Leave Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Advance",
+   "link_count": 0,
+   "link_to": "Employee Advance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Material Request",
+   "link_count": 0,
+   "link_to": "Material Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Other Transaction",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Leave Encashment",
+   "link_count": 0,
+   "link_to": "Leave Encashment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Overtime Application",
+   "link_count": 0,
+   "link_to": "Overtime Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Separation",
+   "link_count": 0,
+   "link_to": "Employee Separation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee Transfer",
+   "link_count": 0,
+   "link_to": "Employee Transfer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-09 15:47:54.353357",
+ "modified": "2022-12-15 17:11:01.903199",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",

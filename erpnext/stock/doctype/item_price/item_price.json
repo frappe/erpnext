@@ -218,7 +218,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-09-02 16:33:55.612992",
+ "modified": "2022-12-21 10:34:03.335538",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -227,7 +227,6 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "import": 1,
@@ -240,7 +239,6 @@
   },
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "export": 1,
    "import": 1,
@@ -248,6 +246,17 @@
    "read": 1,
    "report": 1,
    "role": "Purchase Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }

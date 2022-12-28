@@ -274,90 +274,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Other Reports",
-   "link_count": 7,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Payment Terms Status for Sales Order",
-   "link_count": 0,
-   "link_to": "Payment Terms Status for Sales Order",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Address",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customer Addresses And Contacts",
-   "link_count": 0,
-   "link_to": "Address And Contacts",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Delivery Note",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Delivery Note Trends",
-   "link_count": 0,
-   "link_to": "Delivery Note Trends",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Invoice",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Sales Invoice Trends",
-   "link_count": 0,
-   "link_to": "Sales Invoice Trends",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customer Credit Balance",
-   "link_count": 0,
-   "link_to": "Customer Credit Balance",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Customer",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Customers Without Any Sales Transactions",
-   "link_count": 0,
-   "link_to": "Customers Without Any Sales Transactions",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Sales Order",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Territory Target Variance Based On Item Group",
-   "link_count": 0,
-   "link_to": "Territory Target Variance Based On Item Group",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Selling",
    "link_count": 9,
    "onboard": 0,
@@ -478,7 +394,7 @@
    "type": "Link"
   },
   {
-   "dependencies": "Item, Price List",
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Price",
@@ -530,10 +446,104 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Other Reports",
+   "link_count": 8,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Payment Terms Status for Sales Order",
+   "link_count": 0,
+   "link_to": "Payment Terms Status for Sales Order",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Address",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Addresses And Contacts",
+   "link_count": 0,
+   "link_to": "Address And Contacts",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Delivery Note",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Delivery Note Trends",
+   "link_count": 0,
+   "link_to": "Delivery Note Trends",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Invoice",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Sales Invoice Trends",
+   "link_count": 0,
+   "link_to": "Sales Invoice Trends",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Customer",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Credit Balance",
+   "link_count": 0,
+   "link_to": "Customer Credit Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Customer",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customers Without Any Sales Transactions",
+   "link_count": 0,
+   "link_to": "Customers Without Any Sales Transactions",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Sales Order",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Territory Target Variance Based On Item Group",
+   "link_count": 0,
+   "link_to": "Territory Target Variance Based On Item Group",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Customer Summary Report",
+   "link_count": 0,
+   "link_to": "Customer Summary Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-13 11:13:10.378858",
- "modified_by": "Administrator",
+ "modified": "2022-12-26 12:11:34.645960",
+ "modified_by": "ugyen.choden@thimphutechpark.bt",
  "module": "Selling",
  "name": "Selling",
  "owner": "Administrator",

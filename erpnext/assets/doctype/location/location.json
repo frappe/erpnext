@@ -178,7 +178,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-09 13:10:04.601571",
+ "modified": "2022-12-21 11:34:08.432858",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -236,34 +236,32 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Agriculture Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Agriculture User",
-   "share": 1,
-   "write": 1
-  },
-  {
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Production User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "share": 1
   }
  ],

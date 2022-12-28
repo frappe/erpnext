@@ -40,7 +40,8 @@
   "status",
   "amended_from",
   "column_break_32",
-  "currency"
+  "currency",
+  "eme_invoice_entry"
  ],
  "fields": [
   {
@@ -255,11 +256,18 @@
    "label": "Status",
    "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "eme_invoice_entry",
+   "fieldtype": "Link",
+   "label": "EME Invoice Entry",
+   "options": "EME Invoice Entry",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-30 00:28:54.966233",
+ "modified": "2022-12-20 15:32:22.148841",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice",

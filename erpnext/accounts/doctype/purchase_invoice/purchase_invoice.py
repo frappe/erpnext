@@ -1912,10 +1912,12 @@ def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
 	user_roles = frappe.get_roles(user)
 
-	if user == "Administrator" or "System Manager" in user_roles: 
+	if user == "Administrator" or "System Manager" in user_roles or "Purchase Master" in user_roles or "Account Manager" in user_roles: 
 		return
 
 	return """(
+		`tabPurchase Invoice`.owner = '{user}'
+		or
 		exists(select 1
 			from `tabEmployee` as e
 			where e.branch = `tabPurchase Invoice`.branch

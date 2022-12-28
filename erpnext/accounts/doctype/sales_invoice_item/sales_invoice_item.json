@@ -41,7 +41,7 @@
   "transporter_info_section",
   "others_equipment",
   "equipment",
-  "vehicle_no",
+  "vehicle_number",
   "transporter_name",
   "vehicle_type",
   "column_break_37",
@@ -922,11 +922,6 @@
    "options": "Equipment"
   },
   {
-   "fieldname": "vehicle_no",
-   "fieldtype": "Data",
-   "label": "Vehicle No"
-  },
-  {
    "fieldname": "transporter_name",
    "fieldtype": "Link",
    "label": "Transporter Name",
@@ -1105,12 +1100,17 @@
    "fieldtype": "Currency",
    "label": "Excess Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_number",
+   "fieldtype": "Data",
+   "label": "Vehicle No"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-28 12:51:20.195676",
+ "modified": "2022-12-21 16:04:37.836575",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

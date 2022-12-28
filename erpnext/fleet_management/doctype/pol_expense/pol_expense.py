@@ -181,6 +181,8 @@ def get_permission_query_conditions(user):
 		return
 
 	return """(
+		`tabPOL Expense`.owner = '{user}'
+		or
 		exists(select 1
 			from `tabEmployee` as e
 			where e.branch = `tabPOL Expense`.branch

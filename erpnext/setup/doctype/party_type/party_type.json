@@ -30,7 +30,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2022-11-29 12:19:08.569496",
+ "modified": "2022-12-21 16:24:09.636400",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Party Type",
@@ -71,6 +71,15 @@
    "read": 1,
    "report": 1,
    "role": "Fleet User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
    "share": 1
   }
  ],

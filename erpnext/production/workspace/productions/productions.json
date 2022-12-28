@@ -61,24 +61,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Coal Raising Report",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Coal Raising Report",
-   "link_count": 0,
-   "link_to": "Coal Raising Report",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Transaction",
    "link_count": 5,
    "onboard": 0,
@@ -194,7 +176,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Master Data",
-   "link_count": 7,
+   "link_count": 8,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -261,15 +243,63 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Mines",
+   "label": "Mine",
    "link_count": 0,
-   "link_to": "Mines",
+   "link_to": "Mine",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "COP",
+   "link_count": 0,
+   "link_to": "COP",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Coal Raising Report",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Coal Raising Report",
+   "link_count": 0,
+   "link_to": "Coal Raising Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Detail COP",
+   "link_count": 0,
+   "link_to": "COP Computation Report",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Final COP",
+   "link_count": 0,
+   "link_to": "COP",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
   }
  ],
- "modified": "2022-12-09 13:51:10.719297",
+ "modified": "2022-12-16 09:48:03.689621",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Productions",
@@ -278,7 +308,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 9.0,
+ "sequence_id": 13.0,
  "shortcuts": [
   {
    "color": "Red",

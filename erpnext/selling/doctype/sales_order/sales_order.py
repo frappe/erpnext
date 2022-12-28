@@ -1299,3 +1299,27 @@ def update_produced_qty_in_so_item(sales_order, sales_order_item):
 		return
 
 	frappe.db.set_value("Sales Order Item", sales_order_item, "produced_qty", total_produced_qty)
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	user_roles = frappe.get_roles(user)
+
+	if user == "Administrator" or "System Manager" in user_roles or "Sales Master" in user_roles: 
+		return
+
+	return """(
+		`tabSales Order`.owner = '{user}'
+		or
+		exists(select 1
+			from `tabEmployee` as e
+			where e.branch = `tabSales Order`.branch
+			and e.user_id = '{user}')
+		or
+		exists(select 1
+			from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
+			where e.user_id = '{user}'
+			and ab.employee = e.name
+			and bi.parent = ab.name
+			and bi.branch = `tabSales Order`.branch)
+	)""".format(user=user)
+

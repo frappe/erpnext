@@ -244,7 +244,7 @@ class EMEInvoice(AccountsController):
 					).run(as_dict=True)
 		self.set('items', [])
 		if len(entries) == 0:
-			frappe.msgprint("No valid logbooks found!.You must have pulled in other EME Invoices(including draft invoices)")
+			frappe.msgprint("No valid logbooks found for owner {} between {} and {}.You must have pulled in other EME Invoices(including draft invoices)".format(frappe.bold(self.supplier), frappe.bold(self.from_date),frappe.bold(self.to_date)))
 
 		total = 0
 		exist_list = {}
@@ -298,6 +298,8 @@ def get_permission_query_conditions(user):
 		return
 
 	return """(
+		`tabEME Invoice`.owner = '{user}'
+		or 
 		exists(select 1
 			from `tabEmployee` as e
 			where e.branch = `tabEME Invoice`.branch

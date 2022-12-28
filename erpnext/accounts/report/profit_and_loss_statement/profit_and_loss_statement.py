@@ -11,6 +11,7 @@ from erpnext.accounts.report.financial_statements import (
 	get_data,
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
+	get_data_tax
 )
 
 
@@ -24,7 +25,6 @@ def execute(filters=None):
 		filters.periodicity,
 		company=filters.company,
 	)
-
 	income = get_data(
 		filters.company,
 		"Income",
@@ -46,37 +46,72 @@ def execute(filters=None):
 		ignore_closing_entries=True,
 		ignore_accumulated_values_for_fy=True,
 	)
+	tax_expense = get_data_tax(
+		filters.company,
+		"Expense",
+		"Debit",
+		period_list,
+		filters=filters,
+		accumulated_values=filters.accumulated_values,
+		ignore_closing_entries=True,
+		ignore_accumulated_values_for_fy=True
+	)
+	gross_profit_loss = get_gross_profit_loss(
+		income, expense, period_list, filters.company, filters.presentation_currency
+	)
 
 	net_profit_loss = get_net_profit_loss(
-		income, expense, period_list, filters.company, filters.presentation_currency
+		income, expense, tax_expense, period_list, filters.company, filters.presentation_currency
+	)
+
+	profit_per_employee = get_profit_per_employee(
+		income, expense, tax_expense, period_list, filters.company, filters.presentation_currency
+	)
+	operating_efficency_ratio = get_operating_efficency_ratio(
+		income, expense, tax_expense, period_list, filters.company, filters.presentation_currency
 	)
 
 	data = []
 	data.extend(income or [])
 	data.extend(expense or [])
+	if gross_profit_loss:
+		data.append(gross_profit_loss)
+		data.append([])
+
+	if tax_expense:
+		data.extend(tax_expense or [])
+		data.append([])
+	
+	if profit_per_employee:
+		data.append(profit_per_employee)
+		data.append([])
+
+	if operating_efficency_ratio:
+		data.append(operating_efficency_ratio)
+		data.append([])
+
 	if net_profit_loss:
 		data.append(net_profit_loss)
-
+	
 	columns = get_columns(
 		filters.periodicity, period_list, filters.accumulated_values, filters.company
 	)
 
-	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
+	chart = get_chart_data(filters, columns, income, expense, tax_expense, net_profit_loss)
 
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
 	report_summary = get_report_summary(
-		period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters
+		period_list, filters.periodicity, income, expense, tax_expense, net_profit_loss, currency, filters
 	)
-
 	return columns, data, None, chart, report_summary
 
 
 def get_report_summary(
-	period_list, periodicity, income, expense, net_profit_loss, currency, filters, consolidated=False
+	period_list, periodicity, income, expense, tax_expense, net_profit_loss, currency, filters, consolidated=False
 ):
-	net_income, net_expense, net_profit = 0.0, 0.0, 0.0
+	net_income, net_expense, net_tax_expense, net_profit = 0.0, 0.0, 0.0, 0.0
 
 	# from consolidated financial statement
 	if filters.get("accumulated_in_group_company"):
@@ -88,22 +123,28 @@ def get_report_summary(
 			net_income += income[-2].get(key)
 		if expense:
 			net_expense += expense[-2].get(key)
+		if tax_expense:
+			net_tax_expense += tax_expense[-2].get(key)
 		if net_profit_loss:
 			net_profit += net_profit_loss.get(key)
 
 	if len(period_list) == 1 and periodicity == "Yearly":
 		profit_label = _("Profit This Year")
-		income_label = _("Total Income This Year")
-		expense_label = _("Total Expense This Year")
+		income_label = _("Total Income This Year<b>(+)</b>")
+		expense_label = _("Total Expense This Year<b>(−)</b>")
+		tax_expense_label = _("Total Tax Expense This Year<b>(−)</b>")
 	else:
-		profit_label = _("Net Profit")
-		income_label = _("Total Income")
-		expense_label = _("Total Expense")
+		profit_label = _("Net Profit<b>")
+		income_label = _("Total Income<b>(+)</b>")
+		expense_label = _("Total Expense<b>(−)</b>")
+		tax_expense_label = _("Total Tax Expense<b>(−)</b>")
 
 	return [
 		{"value": net_income, "label": income_label, "datatype": "Currency", "currency": currency},
-		{"type": "separator", "value": "-"},
+		# {"type": "separator", "value": "-"},
 		{"value": net_expense, "label": expense_label, "datatype": "Currency", "currency": currency},
+		# {"type": "separator", "value": "-"},
+		{"value": net_tax_expense, "label": tax_expense_label, "datatype": "Currency", "currency": currency},
 		{"type": "separator", "value": "=", "color": "blue"},
 		{
 			"value": net_profit,
@@ -114,8 +155,31 @@ def get_report_summary(
 		},
 	]
 
+def get_gross_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
+    total = 0
+    gross_profit_loss = {
+        "account_name": "'" + _("Profit Before Tax") + "'",
+        "account": "'" + _("Proft Before Tax") + "'",
+        "warn_if_negative": True,
+        "currency": currency or frappe.get_cached_value('Company',  company,  "default_currency")
+    }
 
-def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
+    has_value = False
+
+    for period in period_list:
+        key = period if consolidated else period.key
+        total_income = flt(income[-2][key], 3) if income else 0
+        total_expense = flt(expense[-2][key], 3) if expense else 0
+        gross_profit_loss[key] = total_income - total_expense
+        if gross_profit_loss[key]:
+            has_value = True
+        total += flt(gross_profit_loss[key])
+    gross_profit_loss["total"] = total
+
+    if has_value:
+        return gross_profit_loss
+
+def get_net_profit_loss(income, expense, tax_expense, period_list, company, currency=None, consolidated=False):
 	total = 0
 	net_profit_loss = {
 		"account_name": "'" + _("Profit for the year") + "'",
@@ -130,8 +194,8 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 		key = period if consolidated else period.key
 		total_income = flt(income[-2][key], 3) if income else 0
 		total_expense = flt(expense[-2][key], 3) if expense else 0
-
-		net_profit_loss[key] = total_income - total_expense
+		total_tax_expense = flt(tax_expense[-2][key], 3) if tax_expense else 0
+		net_profit_loss[key] = total_income - total_expense - total_tax_expense
 
 		if net_profit_loss[key]:
 			has_value = True
@@ -142,17 +206,69 @@ def get_net_profit_loss(income, expense, period_list, company, currency=None, co
 	if has_value:
 		return net_profit_loss
 
+def get_profit_per_employee(income, expense, tax_expense, period_list, company, currency=None, consolidated=False):
+	total = active_emloyee_count = total_percent = 0
+	profit_per_employee = {
+		"account_name": "'" + _("Profit Per Employee") + "'",
+		"account": "'" + _("Profit Per Employee") + "'",
+		"warn_if_negative": True,
+		"currency": currency or frappe.get_cached_value("Company", company, "default_currency"),
+	}
+	has_value = False
 
-def get_chart_data(filters, columns, income, expense, net_profit_loss):
+	for period in period_list:
+		key = period if consolidated else period.key
+		total_income = flt(income[-2][key], 3) if income else 0
+		total_expense = flt(expense[-2][key], 3) if expense else 0
+		total_tax_expense = flt(tax_expense[-2][key], 3) if tax_expense else 0
+		profit_per_employee[key] = flt(total_income - total_expense - total_tax_expense,2)
+		active_emloyee_count = frappe.db.sql('select count(*) from `tabEmployee` where status = "Active" and ifnull(relieving_date,{0}) >= {0}'.format(period.to_date))
+		if profit_per_employee[key]:
+			has_value = True
+		profit_per_employee[key] = flt(flt(profit_per_employee[key]) / flt(active_emloyee_count[0][0]) if active_emloyee_count else 1, 2)
+		total += flt(profit_per_employee[key])
+		profit_per_employee['total'] = total
+
+	if has_value:
+		return profit_per_employee
+
+def get_operating_efficency_ratio(income, expense, tax_expense, period_list, company, currency=None, consolidated=False):
+	total = active_emloyee_count = 0
+	operating_efficency_ratio = {
+		"account_name": "'" + _("Operating Efficiency Ratio") + "'",
+		"account": "'" + _("Operating Efficiency Ratio") + "'",
+		"warn_if_negative": True,
+		"currency": currency or frappe.get_cached_value("Company", company, "default_currency"),
+	}
+
+	has_value = False
+	total, total_percent = 0, 0
+	for period in period_list:
+		key = period if consolidated else period.key
+		total_income = flt(income[-2][key], 3) if income else 0
+		total_expense = flt(expense[-2][key], 3) if expense else 0
+		total_tax_expense = flt(tax_expense[-2][key], 3) if tax_expense else 0
+		operating_efficency_ratio[key] = flt(flt(total_income) / flt(total_expense + total_tax_expense),2)
+		total += flt(operating_efficency_ratio[key])
+		if operating_efficency_ratio[key]:
+			has_value = True
+		operating_efficency_ratio['total'] = total
+		
+	if has_value:
+		return operating_efficency_ratio
+
+def get_chart_data(filters, columns, income, expense, tax_expense, net_profit_loss):
 	labels = [d.get("label") for d in columns[2:]]
 
-	income_data, expense_data, net_profit = [], [], []
+	income_data, expense_data, tax_expense_data, net_profit = [], [], [], []
 
 	for p in columns[2:]:
 		if income:
 			income_data.append(income[-2].get(p.get("fieldname")))
 		if expense:
 			expense_data.append(expense[-2].get(p.get("fieldname")))
+		if tax_expense:
+			tax_expense_data.append(tax_expense[-2].get(p.get("fieldname")))
 		if net_profit_loss:
 			net_profit.append(net_profit_loss.get(p.get("fieldname")))
 
@@ -161,6 +277,8 @@ def get_chart_data(filters, columns, income, expense, net_profit_loss):
 		datasets.append({"name": _("Income"), "values": income_data})
 	if expense_data:
 		datasets.append({"name": _("Expense"), "values": expense_data})
+	if tax_expense_data:
+		datasets.append({"name": _("Tax Expense"), "values": tax_expense_data})
 	if net_profit:
 		datasets.append({"name": _("Net Profit/Loss"), "values": net_profit})
 

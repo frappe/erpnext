@@ -5,11 +5,12 @@ from frappe import _, msgprint, scrub
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 from erpnext.budget.doctype.budget.budget import validate_expense_against_budget
+from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 
 class BudgetReappropiation(Document):
 	def validate(self):
 		self.validate_budget()
-
+		validate_workflow_states(self)
 	def on_submit(self):
 		self.budget_check()
 		self.budget_appropriate(cancel=False)

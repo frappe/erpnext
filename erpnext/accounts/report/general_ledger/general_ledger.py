@@ -544,12 +544,12 @@ def get_columns(filters):
 			"fieldtype": "Float",
 			"width": 100,
 		},
-		{
-			"label": _("Balance ({0})").format(currency),
-			"fieldname": "balance",
-			"fieldtype": "Float",
-			"width": 130,
-		},
+		# {
+		# 	"label": _("Balance ({0})").format(currency),
+		# 	"fieldname": "balance",
+		# 	"fieldtype": "Float",
+		# 	"width": 130,
+		# },
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
 		{
 			"label": _("Voucher No"),
