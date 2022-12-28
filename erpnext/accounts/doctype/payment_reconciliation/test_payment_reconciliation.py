@@ -8,6 +8,8 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, nowdate
 
+from erpnext import get_default_cost_center
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
@@ -20,6 +22,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.create_item()
 		self.create_customer()
 		self.create_account()
+		self.create_cost_center()
 		self.clear_old_entries()
 
 	def tearDown(self):
@@ -215,6 +218,22 @@ class TestPaymentReconciliation(FrappeTestCase):
 			],
 		)
 		return je
+
+	def create_cost_center(self):
+		# Setup cost center
+		cc_name = "Sub"
+
+		self.main_cc = frappe.get_doc("Cost Center", get_default_cost_center(self.company))
+
+		cc_exists = frappe.db.get_list("Cost Center", filters={"cost_center_name": cc_name})
+		if cc_exists:
+			self.sub_cc = frappe.get_doc("Cost Center", cc_exists[0].name)
+		else:
+			sub_cc = frappe.new_doc("Cost Center")
+			sub_cc.cost_center_name = "Sub"
+			sub_cc.parent_cost_center = self.main_cc.parent_cost_center
+			sub_cc.company = self.main_cc.company
+			self.sub_cc = sub_cc.save()
 
 	def test_filter_min_max(self):
 		# check filter condition minimum and maximum amount
@@ -578,3 +597,24 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.payments), 1)
 		self.assertEqual(pr.payments[0].amount, amount)
 		self.assertEqual(pr.payments[0].currency, "EUR")
+
+	def test_differing_cost_center_on_invoice_and_payment(self):
+		"""
+		Cost Center filter should not affect outstanding amount calculation
+		"""
+
+		si = self.create_sales_invoice(qty=1, rate=100, do_not_submit=True)
+		si.cost_center = self.main_cc.name
+		si.submit()
+		pr = get_payment_entry(si.doctype, si.name)
+		pr.cost_center = self.sub_cc.name
+		pr = pr.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.cost_center = self.main_cc.name
+
+		pr.get_unreconciled_entries()
+
+		# check PR tool output
+		self.assertEqual(len(pr.get("invoices")), 0)
+		self.assertEqual(len(pr.get("payments")), 0)

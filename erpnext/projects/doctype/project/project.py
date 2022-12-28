@@ -15,9 +15,6 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), frappe.safe_decode(self.project_name))
-
 	def onload(self):
 		self.set_onload(
 			"activity_summary",
@@ -42,6 +39,8 @@ class Project(Document):
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
+		self.validate_from_to_dates("expected_start_date", "expected_end_date")
+		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
 	def copy_from_template(self):
 		"""

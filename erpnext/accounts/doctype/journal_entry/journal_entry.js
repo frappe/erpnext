@@ -253,9 +253,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				var party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 
-				if (in_list(['Debit Note', 'Credit Note'], doc.voucher_type)) {
-					out.filters.push([jvd.reference_type, "is_return", "=", 1]);
-				}
 			}
 
 			if(in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {

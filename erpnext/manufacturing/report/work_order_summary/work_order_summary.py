@@ -39,9 +39,13 @@ def get_data(filters):
 		"lead_time",
 	]
 
-	for field in ["sales_order", "production_item", "status", "company"]:
+	for field in ["sales_order", "production_item"]:
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
+
+	for field in ["status", "company"]:
+		if filters.get(field):
+			query_filters[field] = filters.get(field)
 
 	query_filters["planned_start_date"] = (">=", filters.get("from_date"))
 	query_filters["planned_end_date"] = ("<=", filters.get("to_date"))

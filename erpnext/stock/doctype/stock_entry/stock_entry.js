@@ -112,6 +112,10 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 		attach_bom_items(frm.doc.bom_no);
+
+		if(!check_should_not_attach_bom_items(frm.doc.bom_no)) {
+			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		}
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -326,7 +330,11 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
-		attach_bom_items(frm.doc.bom_no)
+		attach_bom_items(frm.doc.bom_no);
+
+		if(!check_should_not_attach_bom_items(frm.doc.bom_no)) {
+			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		}
 	},
 
 	before_save: function(frm) {
@@ -939,7 +947,10 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 				method: "get_items",
 				callback: function(r) {
 					if(!r.exc) refresh_field("items");
-					if(me.frm.doc.bom_no) attach_bom_items(me.frm.doc.bom_no)
+					if(me.frm.doc.bom_no) {
+						attach_bom_items(me.frm.doc.bom_no);
+						erpnext.accounts.dimensions.update_dimension(me.frm, me.frm.doctype);
+					}
 				}
 			});
 		}
@@ -1079,7 +1090,8 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 	if (frm.doc.purpose === 'Material Receipt') return;
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		new erpnext.SerialNoBatchSelector({
+		if (frm.batch_selector?.dialog?.display) return;
+		frm.batch_selector = new erpnext.SerialNoBatchSelector({
 			frm: frm,
 			item: item,
 			warehouse_details: get_warehouse_type_and_name(item),

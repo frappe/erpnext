@@ -10,7 +10,7 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
@@ -22,9 +22,6 @@ form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"
 
 
 class MaterialRequest(BuyingController):
-	def get_feed(self):
-		return
-
 	def check_if_already_pulled(self):
 		pass
 
@@ -120,7 +117,6 @@ class MaterialRequest(BuyingController):
 			self.title = _("{0} Request for {1}").format(self.material_request_type, items)[:100]
 
 	def on_submit(self):
-		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
 		if self.material_request_type == "Purchase":
@@ -501,13 +497,13 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'
-			and mr.company = '{1}'
-			{2}
+			and mr.company = %s
+			{1}
 		order by mr_item.item_code ASC
-		limit {3} offset {4} """.format(
-			", ".join(["%s"] * len(supplier_items)), filters.get("company"), conditions, page_len, start
+		limit {2} offset {3} """.format(
+			", ".join(["%s"] * len(supplier_items)), conditions, cint(page_len), cint(start)
 		),
-		tuple(supplier_items),
+		tuple(supplier_items) + (filters.get("company"),),
 		as_dict=1,
 	)
 
@@ -597,7 +593,9 @@ def make_stock_entry(source_name, target_doc=None):
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
 
-		target.set_missing_values()
+		target.set_transfer_qty()
+		target.set_actual_qty()
+		target.calculate_rate_and_amount(raise_error_if_no_rate=False)
 		target.set_stock_entry_type()
 		target.set_job_card_data()
 

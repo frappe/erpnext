@@ -298,7 +298,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	make_payment_request() {
-		var me = this;
+		let me = this;
 		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
@@ -314,7 +314,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			},
 			callback: function(r) {
 				if(!r.exc){
-					var doc = frappe.model.sync(r.message);
+					frappe.model.sync(r.message);
 					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
@@ -1130,10 +1130,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	qty(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		item.pricing_rules = ''
-		this.conversion_factor(doc, cdt, cdn, true);
-		this.calculate_stock_uom_rate(doc, cdt, cdn);
-		this.apply_pricing_rule(item, true);
+		// item.pricing_rules = ''
+		frappe.run_serially([
+			() => this.remove_pricing_rule(item),
+			() => this.conversion_factor(doc, cdt, cdn, true),
+			() => this.calculate_stock_uom_rate(doc, cdt, cdn),
+			() => this.apply_pricing_rule(item, true)
+		]);
 	}
 
 	calculate_stock_uom_rate(doc, cdt, cdn) {
@@ -1357,16 +1360,21 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			var item_list = [];
 
 			$.each(this.frm.doc["items"] || [], function(i, d) {
-				if (d.item_code && !d.is_free_item) {
-					item_list.push({
-						"doctype": d.doctype,
-						"name": d.name,
-						"item_code": d.item_code,
-						"pricing_rules": d.pricing_rules,
-						"parenttype": d.parenttype,
-						"parent": d.parent,
-						"price_list_rate": d.price_list_rate
-					})
+				if (d.item_code) {
+					if (d.is_free_item) {
+						// Simply remove free items
+						me.frm.get_field("items").grid.grid_rows[i].remove();
+					} else {
+						item_list.push({
+							"doctype": d.doctype,
+							"name": d.name,
+							"item_code": d.item_code,
+							"pricing_rules": d.pricing_rules,
+							"parenttype": d.parenttype,
+							"parent": d.parent,
+							"price_list_rate": d.price_list_rate
+						})
+					}
 				}
 			});
 			return this.frm.call({

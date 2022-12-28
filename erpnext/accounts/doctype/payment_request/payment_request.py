@@ -9,8 +9,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_url, nowdate
 from frappe.utils.background_jobs import enqueue
-from payments.utils import get_payment_gateway_controller
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_company_defaults,
 	get_payment_entry,
@@ -19,6 +21,14 @@ from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_pla
 from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
+from erpnext.utilities import payment_app_import_guard
+
+
+def _get_payment_gateway_controller(*args, **kwargs):
+	with payment_app_import_guard():
+		from payments.utils import get_payment_gateway_controller
+
+	return get_payment_gateway_controller(*args, **kwargs)
 
 
 class PaymentRequest(Document):
@@ -53,7 +63,7 @@ class PaymentRequest(Document):
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if self.payment_account and ref_doc.currency != frappe.db.get_value(
+		if self.payment_account and ref_doc.currency != frappe.get_cached_value(
 			"Account", self.payment_account, "account_currency"
 		):
 			frappe.throw(_("Transaction currency must be same as Payment Gateway currency"))
@@ -107,7 +117,7 @@ class PaymentRequest(Document):
 			self.request_phone_payment()
 
 	def request_phone_payment(self):
-		controller = get_payment_gateway_controller(self.payment_gateway)
+		controller = _get_payment_gateway_controller(self.payment_gateway)
 		request_amount = self.get_request_amount()
 
 		payment_record = dict(
@@ -156,7 +166,7 @@ class PaymentRequest(Document):
 
 	def payment_gateway_validation(self):
 		try:
-			controller = get_payment_gateway_controller(self.payment_gateway)
+			controller = _get_payment_gateway_controller(self.payment_gateway)
 			if hasattr(controller, "on_payment_request_submission"):
 				return controller.on_payment_request_submission(self)
 			else:
@@ -189,7 +199,7 @@ class PaymentRequest(Document):
 			)
 			data.update({"company": frappe.defaults.get_defaults().company})
 
-		controller = get_payment_gateway_controller(self.payment_gateway)
+		controller = _get_payment_gateway_controller(self.payment_gateway)
 		controller.validate_transaction_currency(self.currency)
 
 		if hasattr(controller, "validate_minimum_transaction_amount"):
@@ -254,6 +264,7 @@ class PaymentRequest(Document):
 
 		payment_entry.update(
 			{
+				"mode_of_payment": self.mode_of_payment,
 				"reference_no": self.name,
 				"reference_date": nowdate(),
 				"remarks": "Payment Entry against {0} {1} via Payment Request {2}".format(
@@ -261,6 +272,17 @@ class PaymentRequest(Document):
 				),
 			}
 		)
+
+		# Update dimensions
+		payment_entry.update(
+			{
+				"cost_center": self.get("cost_center"),
+				"project": self.get("project"),
+			}
+		)
+
+		for dimension in get_accounting_dimensions():
+			payment_entry.update({dimension: self.get(dimension)})
 
 		if payment_entry.difference_amount:
 			company_details = get_company_defaults(ref_doc.company)
@@ -403,25 +425,22 @@ def make_payment_request(**args):
 		else ""
 	)
 
-	existing_payment_request = None
-	if args.order_type == "Shopping Cart":
-		existing_payment_request = frappe.db.get_value(
-			"Payment Request",
-			{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ("!=", 2)},
-		)
+	draft_payment_request = frappe.db.get_value(
+		"Payment Request",
+		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": 0},
+	)
 
-	if existing_payment_request:
+	existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
+
+	if existing_payment_request_amount:
+		grand_total -= existing_payment_request_amount
+
+	if draft_payment_request:
 		frappe.db.set_value(
-			"Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False
+			"Payment Request", draft_payment_request, "grand_total", grand_total, update_modified=False
 		)
-		pr = frappe.get_doc("Payment Request", existing_payment_request)
+		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
-		if args.order_type != "Shopping Cart":
-			existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
-
-			if existing_payment_request_amount:
-				grand_total -= existing_payment_request_amount
-
 		pr = frappe.new_doc("Payment Request")
 		pr.update(
 			{
@@ -443,6 +462,17 @@ def make_payment_request(**args):
 				"bank_account": bank_account,
 			}
 		)
+
+		# Update dimensions
+		pr.update(
+			{
+				"cost_center": ref_doc.get("cost_center"),
+				"project": ref_doc.get("project"),
+			}
+		)
+
+		for dimension in get_accounting_dimensions():
+			pr.update({dimension: ref_doc.get(dimension)})
 
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True

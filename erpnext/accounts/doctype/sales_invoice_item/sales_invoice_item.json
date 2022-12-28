@@ -439,6 +439,7 @@
    "label": "Accounting Details"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "income_account",
    "fieldtype": "Link",
    "label": "Income Account",
@@ -451,6 +452,7 @@
    "width": "120px"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "label": "Expense Account",
@@ -470,6 +472,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "default": ":Company",
    "fieldname": "cost_center",
    "fieldtype": "Link",
@@ -801,6 +804,7 @@
    "options": "Finance Book"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -823,7 +827,6 @@
    "label": "Incoming Rate (Costing)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
-   "precision": "6",
    "print_hide": 1
   },
   {
@@ -836,6 +839,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "discount_account",
    "fieldtype": "Link",
    "label": "Discount Account",
