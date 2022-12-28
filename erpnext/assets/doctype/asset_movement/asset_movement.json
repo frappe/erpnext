@@ -127,6 +127,7 @@
    "depends_on": "to_single",
    "fieldname": "to_employee",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "To Employee",
    "mandatory_depends_on": "to_single",
    "options": "Employee"
@@ -147,7 +148,8 @@
    "fieldname": "approver",
    "fieldtype": "Link",
    "label": "Approver",
-   "options": "User"
+   "options": "User",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_19",
@@ -156,18 +158,20 @@
   {
    "fieldname": "approver_name",
    "fieldtype": "Data",
-   "label": "Approver Name"
+   "label": "Approver Name",
+   "read_only": 1
   },
   {
    "fieldname": "approver_designation",
    "fieldtype": "Data",
-   "label": "Approver Designation"
+   "label": "Approver Designation",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 11:31:47.490388",
+ "modified": "2022-12-22 14:48:48.509761",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
@@ -217,6 +221,42 @@
    "role": "Stock Manager",
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Asset User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Asset Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "GM",
+   "share": 1,
    "write": 1
   }
  ],

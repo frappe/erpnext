@@ -23,6 +23,7 @@
   "column_break_3",
   "asset_status",
   "naming_series",
+  "asset_barcode",
   "asset_name",
   "asset_category",
   "asset_sub_category",
@@ -648,6 +649,12 @@
    "label": "Asset Issue Details",
    "options": "Asset Issue Details",
    "read_only": 1
+  },
+  {
+   "fieldname": "asset_barcode",
+   "fieldtype": "Barcode",
+   "label": "Asset Barcode",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -670,7 +677,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-12-02 12:24:57.800240",
+ "modified": "2022-12-13 12:01:05.252376",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

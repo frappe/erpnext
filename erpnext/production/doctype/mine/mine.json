@@ -1,20 +1,21 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:MINE-{YY}-{MM}-{DD}-{####}",
+ "autoname": "field:mine_name",
  "creation": "2022-12-05 14:02:09.304416",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "mine_name",
   "branch",
   "column_break_2",
   "cost_center",
   "location_section",
-  "village",
   "dzongkhag",
-  "column_break_4",
   "gewog",
+  "column_break_4",
+  "village",
   "dungkhag",
   "minning_lease_validity_section",
   "lease_agreement_no",
@@ -62,8 +63,9 @@
  "fields": [
   {
    "fieldname": "types_of_minerials",
-   "fieldtype": "Data",
-   "label": "Types of Minerials"
+   "fieldtype": "Select",
+   "label": "Types of Minerials",
+   "options": "\nCoal\nGypsum\nDolomite"
   },
   {
    "fieldname": "amended_from",
@@ -135,7 +137,8 @@
   {
    "fieldname": "lease_duration",
    "fieldtype": "Data",
-   "label": "Lease Duration"
+   "label": "Lease Duration",
+   "read_only": 1
   },
   {
    "fieldname": "leasehold_area",
@@ -178,7 +181,8 @@
   {
    "fieldname": "ec_duration",
    "fieldtype": "Data",
-   "label": "EC Duration"
+   "label": "EC Duration",
+   "read_only": 1
   },
   {
    "fieldname": "ec_reminder",
@@ -324,16 +328,22 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "read_only": 1
+  },
+  {
+   "fieldname": "mine_name",
+   "fieldtype": "Data",
+   "label": "Mine Name",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2022-12-07 10:08:59.756001",
+ "modified": "2022-12-16 15:19:39.278831",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Mine",
- "naming_rule": "Expression",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

@@ -13,8 +13,8 @@ class AssetMovement(Document):
 		self.validate_cost_center()
 		self.validate_employee()
 		self.validate_asset()
-		if self.workflow_state != "Approved":
-			notify_workflow_states(self)
+		# if self.workflow_state != "Approved":
+		# 	notify_workflow_states(self)
 	def validate_asset(self):
 		for d in self.assets:
 			status, company = frappe.db.get_value("Asset", d.asset, ["status", "company"])
@@ -56,17 +56,10 @@ class AssetMovement(Document):
 					frappe.throw(_("Employee is required while issuing Asset {0}").format(d.asset))
 
 			if self.purpose == "Transfer":
-				# if d.to_employee:
-				# 	frappe.throw(
-				# 		_(
-				# 			"Transferring cannot be done to an Employee. Please enter cost center where Asset {0} has to be transferred"
-				# 		).format(d.asset),
-				# 		title=_("Incorrect Movement Purpose"),
-				# 	)
 				if not d.target_cost_center and self.transfer_type == 'Cost Center To Cost Center':
 					frappe.throw(_("Target Cost Center is required while transferring Asset {0}").format(d.asset))
-				if d.source_cost_center == d.target_cost_center:
-					frappe.throw(_("Source and Target Cost Center cannot be same"))
+				# if d.source_cost_center == d.target_cost_center:
+				# 	frappe.throw(_("Source and Target Cost Center cannot be same"))
 
 			if self.purpose == "Receipt":
 				# only when asset is bought and first entry is made
@@ -97,7 +90,8 @@ class AssetMovement(Document):
 		for d in self.assets:
 			if d.from_employee:
 				current_custodian = frappe.db.get_value("Asset", d.asset, "custodian")
-
+				# frappe.throw(str(current_custodian))
+				# frappe.throw(str(d.asset))
 				if current_custodian != d.from_employee:
 					frappe.throw(
 						_("Asset {0} does not belongs to the custodian {1}").format(d.asset, d.from_employee)
@@ -110,11 +104,11 @@ class AssetMovement(Document):
 
 	def on_submit(self):
 		self.set_latest_cost_center_in_asset()
-		notify_workflow_states(self)
+		# notify_workflow_states(self)
 
 	def on_cancel(self):
 		self.set_latest_cost_center_in_asset()
-		notify_workflow_states(self)
+		# notify_workflow_states(self)
 
 	def set_latest_cost_center_in_asset(self):
 		current_cost_center, current_employee = "", ""
@@ -127,7 +121,7 @@ class AssetMovement(Document):
 			# In case of cancellation it corresponds to previous latest document's Cost Center, employee
 			latest_movement_entry = frappe.db.sql(
 				"""
-				SELECT asm_item.target_cost_center, asm_item.to_employee,to_employee_name
+				SELECT asm_item.target_cost_center, asm_item.to_employee, asm_item.to_employee_name
 				FROM `tabAsset Movement Item` asm_item, `tabAsset Movement` asm
 				WHERE
 					asm_item.parent=asm.name and
@@ -141,13 +135,13 @@ class AssetMovement(Document):
 				),
 				args,
 			)
-			
 			if latest_movement_entry:
 				current_location = latest_movement_entry[0][0]
 				current_employee = latest_movement_entry[0][1]
-
+				current_employee_name = latest_movement_entry[0][2]
 			frappe.db.set_value("Asset", d.asset, "location", current_location)
 			frappe.db.set_value("Asset", d.asset, "custodian", current_employee)
+			frappe.db.set_value("Asset", d.asset, "custodian_name", current_employee_name)
 			
 	@frappe.whitelist()
 	def get_asset_list(self):
@@ -177,5 +171,24 @@ class AssetMovement(Document):
 							}
 					row.update(data)
 
+# def get_permission_query_conditions(user):
+# 	if not user: user = frappe.session.user
+# 	user_roles = frappe.get_roles(user)
 
+# 	if user == "Administrator" or "System Manager" in user_roles: 
+# 		return
+
+# 	return """(
+# 		exists(select 1
+# 			from `tabEmployee` as e
+# 			where e.branch = `tabAsset Movement`.branch
+# 			and e.user_id = '{user}')
+# 		or
+# 		exists(select 1
+# 			from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
+# 			where e.user_id = '{user}'
+# 			and ab.employee = e.name
+# 			and bi.parent = ab.name
+# 			and bi.branch = `tabPurchase Invoice`.branch)
+# 	)""".format(user=user)
 			
