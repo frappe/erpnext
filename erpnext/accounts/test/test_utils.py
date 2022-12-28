@@ -3,11 +3,14 @@ import unittest
 import frappe
 from frappe.test_runner import make_test_objects
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.party import get_party_shipping_address
 from erpnext.accounts.utils import (
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
 	sort_stock_vouchers_by_posting_date,
+	update_reference_in_payment_entry,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -89,24 +92,28 @@ class TestUtils(unittest.TestCase):
 
 		self.assertEqual(payment_entry.difference_amount, -4855.00)
 		payment_entry.references = []
+		payment_entry.submit()
 
-		update_reference_in_payment_entry(
-			frappe._dict(
-				{
-					"against_voucher_type": purchase_invoice.doctype,
-					"against_voucher": purchase_invoice.name,
-					"grand_total": purchase_invoice.grand_total,
-					"outstanding": purchase_invoice.outstanding_amount,
-					"allocated_amount": purchase_invoice.outstanding_amount,
-					"exchange_rate": purchase_invoice.conversion_rate,
-					"difference_amount": -4855.00,
-					"difference_account": "Exchange Gain/Loss - _TC",
-				}
-			),
-			payment_entry,
-			do_not_save=True,
+		payment_reconciliation = frappe.new_doc("Payment Reconciliation")
+		payment_reconciliation.company = payment_entry.company
+		payment_reconciliation.party_type = "Supplier"
+		payment_reconciliation.party = purchase_invoice.supplier
+		payment_reconciliation.receivable_payable_account = payment_entry.paid_to
+		payment_reconciliation.get_unreconciled_entries()
+		payment_reconciliation.allocate_entries(
+			{
+				"payments": [d.__dict__ for d in payment_reconciliation.payments],
+				"invoices": [d.__dict__ for d in payment_reconciliation.invoices],
+			}
 		)
+		for d in payment_reconciliation.invoices:
+			# Reset invoice outstanding_amount because allocate_entries will zero this value out.
+			d.outstanding_amount = d.amount
+		for d in payment_reconciliation.allocation:
+			d.difference_account = "Exchange Gain/Loss - _TC"
+		payment_reconciliation.reconcile()
 
+		payment_entry.load_from_db()
 		self.assertEqual(len(payment_entry.references), 1)
 		self.assertEqual(payment_entry.difference_amount, 0)
 
