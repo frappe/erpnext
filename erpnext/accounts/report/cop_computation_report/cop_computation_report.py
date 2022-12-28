@@ -96,7 +96,7 @@ def get_data(filters):
 		out = prepare_data(filters, accounts)
 		out = filter_out_zero_value_rows(out, parent_children_map)
 	return out
-
+	
 def calculate_values(filters, accounts_by_name, gl_entries_by_account):	
 	mining_qty = production_qty(filters, 'Mining Expense')[0].qty
 	crush_qty1 = production_qty(filters, 'Crushing Plant 1')[0].qty
@@ -107,7 +107,6 @@ def calculate_values(filters, accounts_by_name, gl_entries_by_account):
 	
 	if filters.detail_cop:
 		mining_qty = crush_qty1 = crush_qty2 = washed_qty = trans_qty = sales_qty = 1
-	
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			d = accounts_by_name.get(entry.account)
@@ -135,7 +134,7 @@ def cop_per_dic(filters, account, posting_date):
 def production_qty(filters, activity_name):
 	query = """ select ifnull(sum(c.qty), 1) as qty from `tabProduction Product Item` c, `tabProduction` p 
 			where c.parent = p.name and p.posting_date between '{0}' and '{1}' and p.cost_center = "{2}" and 
-			p.docstatus = 1 and c.item_code in (select ai.item from `tabActivity Item` ai 
+			p.docstatus = 1 and c.item_code    in (select ai.item from `tabActivity Item` ai 
 			where ai.parent = "{3}") 
 		""".format(filters.from_date, filters.to_date, filters.cost_center, activity_name)
 	return frappe.db.sql(query, as_dict = 1)
@@ -197,7 +196,6 @@ def prepare_data(filters, accounts):
 		row["has_value"] = has_value
 		row["total"] = flt(total) - flt(d.get('total_exp', 0.0), 3)
 		data.append(row)
-
 	return data
 
 def set_gl_entries_by_account(filters, cost_center, company, from_date, to_date, root_lft, root_rgt, gl_entries_by_account, ignore_closing_entries=True, open_date=None):

@@ -849,7 +849,6 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Transporter Name",
-   "mandatory_depends_on": "eval:doc.others_equipment",
    "options": "Supplier"
   },
   {
@@ -971,7 +970,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-13 09:59:21.954028",
+ "modified": "2022-12-21 11:45:30.438466",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

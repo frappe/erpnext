@@ -185,7 +185,7 @@ def get_data(
 	gl_entries_by_account = {}
 	for root in frappe.db.sql(
 		"""select lft, rgt from tabAccount
-			where root_type=%s and ifnull(parent_account, '') = ''""",
+			where root_type=%s and ifnull(parent_account, '') = '' and is_tax_expense = 0""",
 		root_type,
 		as_dict=1,
 	):
@@ -218,6 +218,75 @@ def get_data(
 	return out
 
 
+def get_data_tax(
+		company, root_type, balance_must_be, period_list, filters=None,
+		accumulated_values=1, only_current_fiscal_year=True, ignore_closing_entries=False,
+		ignore_accumulated_values_for_fy=False, total = True):
+
+	accounts = get_accounts(company, root_type)
+	if not accounts:
+		return None
+
+	accounts, accounts_by_name, parent_children_map = filter_accounts(accounts)
+
+	company_currency = get_appropriate_currency(company, filters)
+
+	gl_entries_by_account = {}
+	for root in frappe.db.sql("""select lft, rgt from tabAccount
+			where root_type=%s and ifnull(parent_account, '') = '' and is_tax_expense = 1 """, root_type, as_dict=1):
+		set_gl_entries_by_account(
+			company,
+			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
+			period_list[-1]["to_date"],
+			root.lft, root.rgt, filters,
+			gl_entries_by_account, ignore_closing_entries=ignore_closing_entries
+		)
+	calculate_values(
+		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
+	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
+	out = prepare_data_tax(accounts, balance_must_be, period_list, company_currency)
+	out = filter_out_zero_value_rows(out, parent_children_map)
+	return out
+def prepare_data_tax(accounts, balance_must_be, period_list, company_currency):
+	data = []
+	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
+	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
+	for d in accounts:
+		# add to output
+		has_value = False
+		total = 0
+		if d.is_tax_expense == 1 :
+			row = frappe._dict({
+				"account": _(d.name),
+				"parent_account": _(d.parent_account) if d.parent_account else '',
+				"indent": flt(d.indent),
+				"year_start_date": year_start_date,
+				"year_end_date": year_end_date,
+				"currency": company_currency,
+				"include_in_gross": d.include_in_gross,
+				"account_type": d.account_type,
+				"is_group": d.is_group,
+				"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be=="Debit" else -1),
+				"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
+					if d.account_number else _(d.account_name))
+			})
+			for period in period_list:
+				if d.get(period.key) and balance_must_be == "Credit":
+					# change sign based on Debit or Credit, since calculation is done using (debit - credit)
+					d[period.key] *= -1
+
+				row[period.key] = flt(d.get(period.key, 0.0), 3)
+
+				if abs(row[period.key]) >= 0.005:
+					# ignore zero values
+					has_value = True
+					total += flt(row[period.key])
+
+			row["has_value"] = has_value
+			row["total"] = total
+			data.append(row)
+
+	return data
 def get_appropriate_currency(company, filters=None):
 	if filters and filters.get("presentation_currency"):
 		return filters["presentation_currency"]
@@ -328,7 +397,6 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 					if row.get("account") in children and row.get("has_value"):
 						data_with_value.append(d)
 						break
-
 	return data_with_value
 
 
@@ -362,7 +430,7 @@ def add_total_row(out, root_type, balance_must_be, period_list, company_currency
 def get_accounts(company, root_type):
 	return frappe.db.sql(
 		"""
-		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name, include_in_gross, account_type, is_group, lft, rgt
+		select name, account_number, parent_account, lft, rgt, root_type, report_type, account_name, include_in_gross, account_type, is_group, lft, rgt, is_tax_expense 
 		from `tabAccount`
 		where company=%s and root_type=%s order by lft""",
 		(company, root_type),
@@ -437,7 +505,6 @@ def set_gl_entries_by_account(
 		where lft >= %s and rgt <= %s and company = %s""",
 		(root_lft, root_rgt, company),
 	)
-
 	if accounts:
 		additional_conditions += " and account in ({})".format(
 			", ".join(frappe.db.escape(d) for d in accounts)
@@ -476,7 +543,6 @@ def set_gl_entries_by_account(
 
 		for entry in gl_entries:
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)
-
 		return gl_entries_by_account
 
 
@@ -546,7 +612,7 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			"label": _("Account"),
 			"fieldtype": "Link",
 			"options": "Account",
-			"width": 300,
+			"width": 320,
 		}
 	]
 	if company:
@@ -566,7 +632,7 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 				"label": period.label,
 				"fieldtype": "Currency",
 				"options": "currency",
-				"width": 150,
+				"width": 200,
 			}
 		)
 	if periodicity != "Yearly":
