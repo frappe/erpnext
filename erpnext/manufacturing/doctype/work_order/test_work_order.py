@@ -885,6 +885,17 @@ class TestWorkOrder(FrappeTestCase):
 		items = se.get("items")
 		self.assertEqual(len(items), 3, "There should be 3 items including process loss.")
 
+		fg_sle_entries = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"item_code": fg_item_non_whole.item_code,
+				"voucher_no": se.name,
+				"actual_qty": (">", 0),
+			},
+		)
+
+		self.assertEqual(len(fg_sle_entries), 1, "There should be 1 stock ledger entry for FG item.")
+
 		source_item, fg_item, pl_item = items
 
 		total_pl_qty = qty * scrap_qty
