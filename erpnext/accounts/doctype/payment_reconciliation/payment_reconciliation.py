@@ -149,14 +149,16 @@ class PaymentReconciliation(Document):
 
 		reconciled_dr_or_cr = (
 			gl["debit_in_account_currency"]
-			if dr_or_cr == gl["credit_in_account_currency"]
+			if dr_or_cr.name == "credit_in_account_currency"
 			else gl["credit_in_account_currency"]
 		)
 
+		having_clause = qb.Field("amount") > 0
+
 		if self.minimum_payment_amount:
-			conditions.append(dr_or_cr.gte(self.minimum_payment_amount))
+			having_clause = qb.Field("amount") >= self.minimum_payment_amount
 		if self.maximum_payment_amount:
-			conditions.append(dr_or_cr.lte(self.maximum_payment_amount))
+			having_clause = having_clause & qb.Field("amount") <= self.maximum_payment_amount
 
 		sub_query = (
 			qb.from_(doc)
@@ -188,7 +190,7 @@ class PaymentReconciliation(Document):
 			)
 			.where(Criterion.all(conditions))
 			.groupby(gl.against_voucher)
-			.having(qb.Field("amount") > 0)
+			.having(having_clause)
 		)
 		dr_cr_notes = query.run(as_dict=True)
 		return dr_cr_notes
