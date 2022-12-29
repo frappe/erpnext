@@ -491,10 +491,6 @@ class AccountsController(TransactionBase):
 		"""set missing item values"""
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		print("Accounts Controller Missing Item Details")
-		for d in self.get("items"):
-			print(d.conversion_factor, "conversion_factor")
-
 		if hasattr(self, "items"):
 			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
