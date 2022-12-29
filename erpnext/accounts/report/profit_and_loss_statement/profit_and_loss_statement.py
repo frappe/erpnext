@@ -248,11 +248,12 @@ def get_operating_efficency_ratio(income, expense, tax_expense, period_list, com
 		total_income = flt(income[-2][key], 3) if income else 0
 		total_expense = flt(expense[-2][key], 3) if expense else 0
 		total_tax_expense = flt(tax_expense[-2][key], 3) if tax_expense else 0
-		operating_efficency_ratio[key] = flt(flt(total_income) / flt(total_expense + total_tax_expense),2) if total_expense + total_tax_expense != 0 else 1
-		total += flt(operating_efficency_ratio[key])
-		if operating_efficency_ratio[key]:
-			has_value = True
-		operating_efficency_ratio['total'] = total
+		if total_expense + total_tax_expense != 0 :
+			operating_efficency_ratio[key] = flt(flt(total_income) / flt(total_expense + total_tax_expense),2) 
+			total += flt(operating_efficency_ratio[key])
+			if operating_efficency_ratio[key]:
+				has_value = True
+			operating_efficency_ratio['total'] = total
 		
 	if has_value:
 		return operating_efficency_ratio
