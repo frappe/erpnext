@@ -114,6 +114,8 @@ class Appointment(StatusUpdater):
 	def set_previous_appointment_details(self):
 		if self.previous_appointment:
 			self.previous_appointment_dt = frappe.db.get_value("Appointment", self.previous_appointment, "scheduled_dt")
+		else:
+			self.previous_appointment_dt = None
 
 	def set_missing_duration(self):
 		if self.get('appointment_type'):
