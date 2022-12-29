@@ -1,5 +1,7 @@
 import frappe
 from erpnext.setup.doctype.employee.employee import create_user
+import pandas as pd
+
 def create_users():
     print("here")
 
@@ -59,10 +61,11 @@ def update_user_pwd():
     for i in user_list:
         # print("NAME '{}':  '{}'".format(c,str(i.name)))
         if not frappe.db.exists("Employee", {"user_id":i.name}):
-            non_employee.append(i.name)
+            non_employee.append({"User ID":i.name, "User Name":frpape.db.get_value("User",i.name,"full_name")})
         # ds = frappe.get_doc("User", i.name)
         # ds.new_password = 'smcl@2022'
         # ds.save(ignore_permissions=1)
         # c += 1
-    if len(non_employee) > 0:
-        print("Non Employee Users: "+str(non_employee))
+	df = pd.DataFrame(data = non_employee) # convert dict to dataframe
+	df.to_excel("Inventory Opening.xlsx", index=False)
+	print("Dictionery Converted in to Excel")
