@@ -18,13 +18,8 @@ frappe.ui.form.on('Project Template', {
 		});
 
 		frm.set_query("applicable_uom", "applicable_items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				query : "erpnext.controllers.queries.item_uom_query",
-				filters: {
-					item_code: d.applicable_item_code
-				}
-			}
+			let item = frappe.get_doc(cdt, cdn);
+			return erpnext.queries.item_uom(item.applicable_item_code);
 		});
 
 		frm.set_query("next_project_template", function (doc) {

@@ -289,24 +289,25 @@ class StockEntry(StockController):
 			validate_end_of_life(d.item_code, end_of_life=item.end_of_life, disabled=item.disabled)
 
 			if cint(item.has_variants):
-				frappe.throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+				frappe.throw(_("Row #{0}: {1} is a template Item, please select one of its variants")
+					.format(d.idx, frappe.bold(d.item_code)))
 
 			if d.item_code not in stock_items:
-				frappe.throw(_("{0} is not a stock Item").format(d.item_code))
+				frappe.throw(_("Row #{0}: {1} is not a stock Item")
+					.format(d.idx, frappe.bold(d.item_code)))
 
 			if flt(d.qty) and flt(d.qty) < 0:
-				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
+				frappe.throw(_("Row #{0}: Item {1}, quantity must be positive number")
 					.format(d.idx, frappe.bold(d.item_code)))
 
 			self.set_missing_item_values(d)
 
 			if not d.transfer_qty and d.qty:
-				d.transfer_qty = flt(flt(d.qty) * flt(d.conversion_factor),
-				self.precision("transfer_qty", d))
+				d.transfer_qty = flt(flt(d.qty) * flt(d.conversion_factor), self.precision("transfer_qty", d))
 
 			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
-				and not d.serial_no
-				and d.item_code in serialized_items):
+					and not d.serial_no
+					and d.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(d.idx, d.item_code),
 					frappe.MandatoryError)
 

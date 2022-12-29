@@ -488,7 +488,8 @@ class SellingController(StockController):
 					validate_end_of_life(d.item_code, end_of_life=item.end_of_life, disabled=item.disabled)
 
 				if cint(item.has_variants):
-					throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+					throw(_("Row #{0}: {1} is a template Item, please select one of its variants")
+						.format(d.idx, frappe.bold(d.item_code)))
 
 	def validate_target_warehouse(self):
 		if frappe.get_meta(self.doctype + " Item").has_field("target_warehouse"):
