@@ -53,9 +53,6 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	item_details = get_item_details()
 
 	for d in item_list:
-		if not d.stock_qty:
-			continue
-
 		item_record = item_details.get(d.item_code)
 
 		purchase_receipt = None
@@ -94,7 +91,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				"expense_account": expense_account,
 				"stock_qty": d.stock_qty,
 				"stock_uom": d.stock_uom,
-				"rate": d.base_net_amount / d.stock_qty,
+				"rate": d.base_net_amount / d.stock_qty if d.stock_qty else d.base_net_amount,
 				"amount": d.base_net_amount,
 			}
 		)
