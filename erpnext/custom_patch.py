@@ -66,6 +66,6 @@ def update_user_pwd():
         # ds.new_password = 'smcl@2022'
         # ds.save(ignore_permissions=1)
         # c += 1
-	df = pd.DataFrame(data = non_employee) # convert dict to dataframe
-	df.to_excel("Inventory Opening.xlsx", index=False)
-	print("Dictionery Converted in to Excel")
+    df = pd.DataFrame(data = non_employee) # convert dict to dataframe
+    df.to_excel("Users Without Employee Data.xlsx", index=False)
+    print("Dictionery Converted in to Excel")
