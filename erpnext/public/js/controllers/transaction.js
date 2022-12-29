@@ -284,13 +284,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		this.frm.set_query("uom", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				query : "erpnext.controllers.queries.item_uom_query",
-				filters: {
-					item_code: d.item_code
-				}
-			}
+			let item = frappe.get_doc(cdt, cdn);
+			return erpnext.queries.item_uom(item.item_code);
 		});
 
 		if(this.frm.fields_dict["return_against"]) {

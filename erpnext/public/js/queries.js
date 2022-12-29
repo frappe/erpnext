@@ -26,6 +26,15 @@ $.extend(erpnext.queries, {
 		return args;
 	},
 
+	item_uom: function(item_code) {
+		return {
+			query : "erpnext.controllers.queries.item_uom_query",
+			filters: {
+				item_code: item_code
+			}
+		}
+	},
+
 	bom: function() {
 		return { query: "erpnext.controllers.queries.bom" };
 	},

@@ -724,13 +724,8 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		}
 
 		this.frm.set_query("uom", "items", function(doc, cdt, cdn) {
-			var d = locals[cdt][cdn];
-			return {
-				query : "erpnext.controllers.queries.item_uom_query",
-				filters: {
-					item_code: d.item_code
-				}
-			}
+			let item = frappe.get_doc(cdt, cdn);
+			return erpnext.queries.item_uom(item.item_code);
 		});
 
 		this.frm.add_fetch("purchase_order", "supplier", "supplier");
