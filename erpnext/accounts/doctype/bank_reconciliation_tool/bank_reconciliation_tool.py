@@ -267,6 +267,82 @@ def create_payment_entry_bts(
 
 
 @frappe.whitelist()
+def auto_reconcile_vouchers(
+	bank_account,
+	from_date=None,
+	to_date=None,
+	filtered_by_reference_date=None,
+	from_reference_date=None,
+	to_reference_date=None,
+):
+	frappe.flags.auto_reconcile_vouchers = True
+	document_types = ["payment_entry", "journal_entry"]
+	bank_transactions = get_bank_transactions(bank_account)
+	matched_transaction = []
+	for transaction in bank_transactions:
+		linked_payments = get_linked_payments(
+			transaction.name,
+			document_types,
+			from_date,
+			to_date,
+			filtered_by_reference_date,
+			from_reference_date,
+			to_reference_date,
+		)
+		vouchers = []
+		for r in linked_payments:
+			vouchers.append(
+				{
+					"payment_doctype": r[1],
+					"payment_name": r[2],
+					"amount": r[4],
+				}
+			)
+		# vouchers = frappe.as_json(voucherss)
+		# vouchers = json.loads(voucherss)
+		transaction = frappe.get_doc("Bank Transaction", transaction.name)
+		account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
+		matched_trans = 0
+		for voucher in vouchers:
+			gl_entry = frappe.db.get_value(
+				"GL Entry",
+				dict(
+					account=account, voucher_type=voucher["payment_doctype"], voucher_no=voucher["payment_name"]
+				),
+				["credit", "debit"],
+				as_dict=1,
+			)
+			gl_amount, transaction_amount = (
+				(gl_entry.credit, transaction.deposit)
+				if gl_entry.credit > 0
+				else (gl_entry.debit, transaction.withdrawal)
+			)
+			allocated_amount = gl_amount if gl_amount >= transaction_amount else transaction_amount
+			transaction.append(
+				"payment_entries",
+				{
+					"payment_document": voucher["payment_doctype"],
+					"payment_entry": voucher["payment_name"],
+					"allocated_amount": allocated_amount,
+				},
+			)
+			matched_transaction.append(str(transaction.name))
+		transaction.save()
+		transaction.update_allocations()
+	matched_transaction_len = len(set(matched_transaction))
+	if matched_transaction_len == 0:
+		frappe.msgprint(_("There is no any matched reference number for reconciliation"))
+	elif matched_transaction_len == 1:
+		frappe.msgprint(_(f"{matched_transaction_len} transaction is reconcilied"))
+	else:
+		frappe.msgprint(_(f"{matched_transaction_len} transactions are reconcilied"))
+
+	frappe.flags.auto_reconcile_vouchers = False
+
+	return frappe.get_doc("Bank Transaction", transaction.name)
+
+
+@frappe.whitelist()
 def reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
@@ -601,9 +677,12 @@ def get_pe_matching_query(
 		currency_field = "paid_from_account_currency as currency"
 	filter_by_date = f"AND posting_date between '{from_date}' and '{to_date}'"
 	order_by = " posting_date"
+	filter_by_reference_no = ""
 	if cint(filtered_by_reference_date):
 		filter_by_date = f"AND reference_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " reference_date"
+	if frappe.flags.auto_reconcile_vouchers == True:
+		filter_by_reference_no = f"AND reference_no = '{transaction.reference_number}'"
 	return f"""
 		SELECT
 			(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
@@ -627,6 +706,7 @@ def get_pe_matching_query(
 			AND ifnull(clearance_date, '') = ""
 			AND {account_from_to} = %(bank_account)s
 			{filter_by_date}
+			{filter_by_reference_no}
 		order by{order_by}
 
 	"""
@@ -646,12 +726,14 @@ def get_je_matching_query(
 	# So one bank could have both types of bank accounts like asset and liability
 	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
-	# filter_by_date = f"AND je.posting_date between '{from_date}' and '{to_date}'"
+	filter_by_date = f"AND je.posting_date between '{from_date}' and '{to_date}'"
 	order_by = " je.posting_date"
+	filter_by_reference_no = ""
 	if cint(filtered_by_reference_date):
 		filter_by_date = f"AND je.cheque_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " je.cheque_date"
-
+	if frappe.flags.auto_reconcile_vouchers == True:
+		filter_by_reference_no = f"AND je.cheque_no = '{transaction.reference_number}'"
 	return f"""
 		SELECT
 			(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
@@ -677,6 +759,7 @@ def get_je_matching_query(
 			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
 			AND je.docstatus = 1
 			{filter_by_date}
+			{filter_by_reference_no}
 			order by {order_by}
 	"""
 
