@@ -21,6 +21,7 @@
   "default_fg_warehouse",
   "column_break_11",
   "default_scrap_warehouse",
+  "other_settings_section",
   "over_production_for_sales_and_work_order_section",
   "overproduction_percentage_for_sales_order",
   "column_break_16",
@@ -29,15 +30,16 @@
   "add_corrective_operation_cost_in_finished_good_valuation",
   "column_break_24",
   "job_card_excess_transfer",
-  "other_settings_section",
+  "section_break_5arj",
   "update_bom_costs_automatically",
   "column_break_23",
-  "make_serial_no_batch_from_work_order"
+  "make_serial_no_batch_from_work_order",
+  "add_process_loss_cost_in_fg_item"
  ],
  "fields": [
   {
    "fieldname": "capacity_planning",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Capacity Planning"
   },
   {
@@ -77,7 +79,7 @@
   },
   {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Default Warehouses for Production"
   },
   {
@@ -146,7 +148,7 @@
   },
   {
    "fieldname": "raw_materials_consumption_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Raw Materials Consumption"
   },
   {
@@ -155,7 +157,7 @@
   },
   {
    "fieldname": "other_settings_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Other Settings"
   },
   {
@@ -194,13 +196,24 @@
    "fieldname": "job_card_excess_transfer",
    "fieldtype": "Check",
    "label": "Allow Excess Material Transfer"
+  },
+  {
+   "fieldname": "section_break_5arj",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "description": "System will add process loss cost in the FG item's basic rate in the Manufacture stock entry.",
+   "fieldname": "add_process_loss_cost_in_fg_item",
+   "fieldtype": "Check",
+   "label": "Add Process Loss Cost in FG Item"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 22:09:09.401559",
+ "modified": "2022-12-29 14:54:34.638147",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
@@ -216,5 +229,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

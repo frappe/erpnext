@@ -889,7 +889,7 @@ class BOM(WebsiteGenerator):
 				).format(frappe.bold(item.item_code))
 
 			must_be_whole_number = frappe.get_value("UOM", item.stock_uom, "must_be_whole_number")
-			if item.is_process_loss and must_be_whole_number:
+			if item.is_process_loss and must_be_whole_number and item.qty != cint(item.qty):
 				msg = _(
 					"Item: {0} with Stock UOM: {1} cannot be a Scrap/Loss Item as {1} is a whole UOM."
 				).format(frappe.bold(item.item_code), frappe.bold(item.stock_uom))

@@ -661,6 +661,10 @@ class StockEntry(StockController):
 			d.transfer_qty for d in self.items if d.is_finished_item or d.is_process_loss
 		)
 
+		add_process_loss_cost = frappe.db.get_single_value(
+			"Manufacturing Settings", "add_process_loss_cost_in_fg_item"
+		)
+
 		# Set basic rate for incoming items
 		for d in self.get("items"):
 			if d.s_warehouse or d.set_basic_rate_manually:
@@ -678,12 +682,16 @@ class StockEntry(StockController):
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
 					d.basic_rate = self.get_basic_rate_for_manufactured_item(
-						finished_item_qty, outgoing_items_cost
+						finished_item_qty, outgoing_items_cost, add_process_loss_cost
 					)
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
-			if not d.basic_rate and not d.allow_zero_valuation_rate:
+			if (
+				not d.basic_rate
+				and not d.allow_zero_valuation_rate
+				and (not d.is_process_loss or d.is_scrap_item)
+			):
 				d.basic_rate = get_valuation_rate(
 					d.item_code,
 					d.t_warehouse,
@@ -745,7 +753,9 @@ class StockEntry(StockController):
 				total_fg_qty = sum([flt(d.transfer_qty) for d in self.items if d.is_finished_item])
 				return flt(outgoing_items_cost / total_fg_qty)
 
-	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
+	def get_basic_rate_for_manufactured_item(
+		self, finished_item_qty, outgoing_items_cost=0, add_process_loss_cost=False
+	) -> float:
 		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
 
 		# Get raw materials cost from BOM if multiple material consumption entries
@@ -754,6 +764,12 @@ class StockEntry(StockController):
 		):
 			bom_items = self.get_bom_raw_materials(finished_item_qty)
 			outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
+
+		if add_process_loss_cost:
+			process_loss_qty = sum(
+				flt(d.qty) for d in self.get("items") if d.is_process_loss and not d.is_scrap_item
+			)
+			finished_item_qty -= process_loss_qty
 
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
@@ -1136,7 +1152,7 @@ class StockEntry(StockController):
 
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
-			if cstr(d.t_warehouse):
+			if cstr(d.t_warehouse) and (not d.is_process_loss or d.is_scrap_item):
 				sle = self.get_sl_entries(
 					d,
 					{
