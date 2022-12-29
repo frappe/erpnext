@@ -25,6 +25,24 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frappe.require("bank-reconciliation-tool.bundle.js", () =>
 			frm.trigger("make_reconciliation_tool")
 		);
+		cur_frm.add_custom_button(__('Auto Reconcile'), function(){
+			frappe.call({
+				method:"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.auto_reconcile_vouchers",
+				args: {
+					bank_account:frm.doc.bank_account,
+					from_date: frm.doc.bank_statement_from_date,
+					to_date: frm.doc.bank_statement_to_date,
+					filtered_by_reference_date:frm.doc.filtered_by_reference_date,
+					from_reference_date:frm.doc.from_reference_date,
+					to_reference_date:frm.doc.to_reference_date,
+				},
+				callback: function (r) {
+				}
+			})
+
+
+			}
+		),
 		frm.upload_statement_button = frm.page.set_secondary_action(
 			__("Upload Bank Statement"),
 			() =>
