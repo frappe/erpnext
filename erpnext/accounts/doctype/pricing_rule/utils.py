@@ -246,10 +246,15 @@ def get_other_conditions(conditions, values, args):
 
 	if args.get("doctype") in [
 		"Quotation",
+		"Quotation Item",
 		"Sales Order",
+		"Sales Order Item",
 		"Delivery Note",
+		"Delivery Note Item",
 		"Sales Invoice",
+		"Sales Invoice Item",
 		"POS Invoice",
+		"POS Invoice Item",
 	]:
 		conditions += """ and ifnull(`tabPricing Rule`.selling, 0) = 1"""
 	else:
