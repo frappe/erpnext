@@ -61,7 +61,7 @@ def update_user_pwd():
     for i in user_list:
         # print("NAME '{}':  '{}'".format(c,str(i.name)))
         if not frappe.db.exists("Employee", {"user_id":i.name}):
-            non_employee.append({"User ID":i.name, "User Name":frpape.db.get_value("User",i.name,"full_name")})
+            non_employee.append({"User ID":i.name, "User Name":frappe.db.get_value("User",i.name,"full_name")})
         # ds = frappe.get_doc("User", i.name)
         # ds.new_password = 'smcl@2022'
         # ds.save(ignore_permissions=1)
