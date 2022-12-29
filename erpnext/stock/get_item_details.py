@@ -102,9 +102,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	elif out.get("warehouse"):
 		if doc and doc.get("doctype") == "Purchase Order":
 			# calculate company_total_stock only for po
-			bin_details = get_bin_details(args.item_code, out.warehouse, args.company)
+			bin_details = get_bin_details(
+				args.item_code, out.warehouse, args.company, include_child_warehouses=True
+			)
 		else:
-			bin_details = get_bin_details(args.item_code, out.warehouse)
+			bin_details = get_bin_details(args.item_code, out.warehouse, include_child_warehouses=True)
 
 		out.update(bin_details)
 
@@ -1045,7 +1047,9 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(args.item_code, res.warehouse).get("actual_qty")
+			res.actual_qty = get_bin_details(
+				args.item_code, res.warehouse, include_child_warehouses=True
+			).get("actual_qty")
 
 	return res
 
@@ -1156,14 +1160,26 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None):
-	bin_details = frappe.db.get_value(
-		"Bin",
-		{"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty", "reserved_qty"],
-		as_dict=True,
-		cache=True,
-	) or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
+	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+
+	if warehouse:
+		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
+		bin_details = frappe.db.get_value(
+			"Bin",
+			filters={"item_code": item_code, "warehouse": ["in", warehouses]},
+			fieldname=[
+				"sum(projected_qty) as projected_qty",
+				"sum(actual_qty) as actual_qty",
+				"sum(reserved_qty) as reserved_qty",
+			],
+			as_dict=True,
+			cache=True,
+		)
+		bin_details = {k: 0 if not v else v for k, v in bin_details.items()}
+
 	if company:
 		bin_details["company_total_stock"] = get_company_total_stock(item_code, company)
 	return bin_details
