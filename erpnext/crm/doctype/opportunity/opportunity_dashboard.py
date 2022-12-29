@@ -12,6 +12,9 @@ def get_data():
 
 	return {
 		'fieldname': 'opportunity',
+		'internal_links': {
+			'Maintenance Schedule': 'maintenance_schedule'
+		},
 		'transactions': [
 			{
 				'label': _("Pre Sales"),
@@ -20,7 +23,7 @@ def get_data():
 		] + vehicle_domain_links + [
 			{
 				'label': _("Reference"),
-				'items': ['Appointment']
+				'items': ['Appointment', 'Maintenance Schedule']
 			},
 		]
 	}

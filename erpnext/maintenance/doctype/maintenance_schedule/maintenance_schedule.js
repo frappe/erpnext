@@ -9,7 +9,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 	},
 
 	refresh: function() {
-		erpnext.hide_company()
+		erpnext.hide_company();
 		this.set_dynamic_link();
 	},
 
@@ -19,7 +19,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 
 	setup_queries: function() {
 		this.frm.set_query('customer', erpnext.queries.customer);
-		this.frm.set_query('contact_person', erpnext.queries.contact_query)
+		this.frm.set_query('contact_person', erpnext.queries.contact_query);
 
 		this.frm.set_query("item_code", function() {
 			return {
@@ -53,6 +53,23 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 
 	contact_person: function() {
 		return erpnext.utils.get_contact_details(this.frm);
+	},
+
+	create_opportunity: function(doc, cdt, cdn) {
+		var me = this;
+		frappe.call({
+			method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.create_maintenance_opportunity",
+			args: {
+				maintenance_schedule: doc.name,
+				row: cdn
+			},
+			callback: function(r) {
+				if (!r.exc) {
+					frappe.msgprint(__("Opportunity created successfully."));
+					me.frm.reload_doc();
+				}
+			}
+		});
 	},
 });
 

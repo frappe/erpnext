@@ -49,6 +49,7 @@ class Opportunity(TransactionBase):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_financer()
 		self.validate_follow_up()
+		self.validate_maintenance_schedule()
 		self.set_status()
 		self.set_title()
 
@@ -147,6 +148,14 @@ class Opportunity(TransactionBase):
 			if f.schedule_date and not f.contact_date and getdate(f.schedule_date) >= getdate()]
 		if follow_up:
 			return follow_up[0]
+
+	def validate_maintenance_schedule(self):
+		dup = frappe.get_value("Opportunity", filters={
+			'maintenance_schedule': self.maintenance_schedule,
+			'maintenance_schedule_row': self.maintenance_schedule_row
+		})
+		if dup:
+			frappe.throw(_("Opportunity already exist for this maintenance schedule"))
 
 	@frappe.whitelist()
 	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):

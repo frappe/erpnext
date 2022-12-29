@@ -212,7 +212,6 @@ def create_opportunity_from_schedule(for_date=None):
 		return
 
 	days_in_advance = frappe.get_cached_value("CRM Settings", None, "auto_create_opportunity_before_days")
-	default_opportunity_type = frappe.get_cached_value("CRM Settings", None, "default_opportunity_type_for_schedule")
 
 	for_date = getdate(for_date)
 	target_date = getdate(add_days(for_date, days_in_advance))
@@ -229,20 +228,29 @@ def create_opportunity_from_schedule(for_date=None):
 	""", target_date, as_dict=1)
 
 	for schedule in schedule_data:
-		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule.parent)
-		opportunity_doc = frappe.new_doc('Opportunity')
+		create_maintenance_opportunity(schedule.parent, schedule.name)
 
-		opportunity_doc.opportunity_from = 'Customer'
-		opportunity_doc.party_name = schedule_doc.customer
-		opportunity_doc.transaction_date = getdate(today())
-		opportunity_doc.due_date = target_date
-		opportunity_doc.status = 'Open'
-		opportunity_doc.opportunity_type = default_opportunity_type
-		opportunity_doc.applies_to_serial_no = schedule_doc.serial_no
 
-		opportunity_doc.maintenance_schedule = schedule_doc.name
-		opportunity_doc.maintenance_schedule_row = schedule.name
+@frappe.whitelist()
+def create_maintenance_opportunity(maintenance_schedule, row):
+	schedule_doc = frappe.get_doc('Maintenance Schedule', maintenance_schedule)
+	default_opportunity_type = frappe.get_cached_value("CRM Settings", None, "default_opportunity_type_for_schedule")
+	schedule = schedule_doc.getone('schedules', {'name': row})
 
+	opportunity_doc = frappe.new_doc('Opportunity')
+
+	opportunity_doc.opportunity_from = 'Customer'
+	opportunity_doc.party_name = schedule_doc.customer
+	opportunity_doc.transaction_date = getdate(today())
+	opportunity_doc.due_date = schedule.scheduled_date
+	opportunity_doc.status = 'Open'
+	opportunity_doc.opportunity_type = default_opportunity_type
+	opportunity_doc.applies_to_serial_no = schedule_doc.serial_no
+
+	opportunity_doc.maintenance_schedule = schedule_doc.name
+	opportunity_doc.maintenance_schedule_row = schedule.name
+
+	if schedule.project_template:
 		project_template = frappe.get_cached_doc('Project Template', schedule.project_template)
 		for d in project_template.applicable_items:
 			opportunity_doc.append("items", {
@@ -250,5 +258,5 @@ def create_opportunity_from_schedule(for_date=None):
 				"qty": d.applicable_qty,
 			})
 
-		opportunity_doc.flags.ignore_mandatory = True
-		opportunity_doc.save(ignore_permissions=True)
+	opportunity_doc.flags.ignore_mandatory = True
+	opportunity_doc.save(ignore_permissions=True)
