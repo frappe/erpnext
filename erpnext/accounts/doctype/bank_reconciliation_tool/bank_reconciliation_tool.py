@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt
+from frappe.utils import flt , cint
 
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_paid_amount
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
@@ -601,7 +601,7 @@ def get_pe_matching_query(
 		currency_field = "paid_from_account_currency as currency"
 	filter_by_date = f"AND posting_date between '{from_date}' and '{to_date}'"
 	order_by = " posting_date"
-	if filtered_by_reference_date == "1":
+	if cint(filtered_by_reference_date):
 		filter_by_date = f"AND reference_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " reference_date"
 	return f"""
@@ -648,7 +648,7 @@ def get_je_matching_query(
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
 	# filter_by_date = f"AND je.posting_date between '{from_date}' and '{to_date}'"
 	order_by = " je.posting_date"
-	if filtered_by_reference_date == "1":
+	if cint(filtered_by_reference_date):
 		filter_by_date = f"AND je.cheque_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " je.cheque_date"
 
