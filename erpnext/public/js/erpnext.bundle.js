@@ -9,6 +9,7 @@ import "./templates/lcv_manual_distribution.html"
 // Controllers
 import "./utils/party.js"
 import "./controllers/stock_controller.js"
+import "./controllers/packing_controller.js"
 import "./payment/payments.js"
 import "./controllers/taxes_and_totals.js"
 import "./controllers/transaction.js"

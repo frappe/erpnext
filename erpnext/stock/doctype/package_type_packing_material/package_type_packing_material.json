@@ -16,13 +16,13 @@
   "quantity_section",
   "qty",
   "uom",
-  "cb_10",
+  "column_break_9",
   "conversion_factor",
   "stock_qty",
   "stock_uom",
   "column_break_10",
-  "tare_weight",
-  "tare_weight_uom"
+  "weight_per_unit",
+  "total_weight"
  ],
  "fields": [
   {
@@ -88,10 +88,6 @@
    "width": "100px"
   },
   {
-   "fieldname": "cb_10",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "1",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
@@ -125,7 +121,7 @@
   },
   {
    "columns": 1,
-   "fieldname": "tare_weight",
+   "fieldname": "total_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Tare Weight",
@@ -133,19 +129,20 @@
    "width": "100px"
   },
   {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
    "columns": 1,
-   "fieldname": "tare_weight_uom",
-   "fieldtype": "Link",
+   "fieldname": "weight_per_unit",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Weight UOM",
-   "options": "UOM",
-   "print_width": "100px",
-   "width": "100px"
+   "label": "Unit Weight"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-12-20 17:41:00.775516",
+ "modified": "2022-12-28 21:59:35.648208",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Package Type Packing Material",

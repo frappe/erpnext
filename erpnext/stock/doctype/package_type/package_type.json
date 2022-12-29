@@ -12,23 +12,24 @@
   "package_uom",
   "default_packing_material_section",
   "packing_items",
-  "package_details_section",
+  "tare_weight_section",
   "total_tare_weight",
-  "tare_weight_uom",
+  "manual_tare_weight",
+  "column_break_7",
+  "weight_uom",
   "column_break_8",
   "volume_based_on",
   "volume_uom",
+  "volume",
   "column_break_12",
   "length",
   "width",
-  "height",
-  "volume"
+  "height"
  ],
  "fields": [
   {
    "fieldname": "package_type_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Package Type Name",
    "reqd": 1,
    "unique": 1
@@ -36,6 +37,8 @@
   {
    "fieldname": "package_uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Package UOM",
    "options": "UOM",
    "reqd": 1
@@ -52,24 +55,16 @@
    "options": "Package Type Packing Material"
   },
   {
-   "fieldname": "package_details_section",
-   "fieldtype": "Section Break",
-   "label": "Package Details"
-  },
-  {
    "fieldname": "total_tare_weight",
    "fieldtype": "Float",
-   "label": "Total Tare Weight"
-  },
-  {
-   "fieldname": "tare_weight_uom",
-   "fieldtype": "Link",
-   "label": "Tare Weight UOM",
-   "options": "UOM"
+   "in_list_view": 1,
+   "label": "Total Tare Weight",
+   "read_only_depends_on": "eval:!doc.manual_tare_weight"
   },
   {
    "fieldname": "column_break_8",
-   "fieldtype": "Column Break"
+   "fieldtype": "Section Break",
+   "label": "Size and Volume"
   },
   {
    "fieldname": "volume_based_on",
@@ -92,33 +87,66 @@
    "depends_on": "eval:doc.volume_based_on == \"Dimensions\"",
    "fieldname": "length",
    "fieldtype": "Float",
-   "label": "Length (L)"
+   "label": "Length (L)",
+   "non_negative": 1
   },
   {
    "default": "0",
    "depends_on": "eval:doc.volume_based_on == \"Dimensions\"",
    "fieldname": "width",
    "fieldtype": "Float",
-   "label": "Width (W)"
+   "label": "Width (W)",
+   "non_negative": 1
   },
   {
    "default": "0",
    "depends_on": "eval:doc.volume_based_on == \"Dimensions\"",
    "fieldname": "height",
    "fieldtype": "Float",
-   "label": "Height (H)"
+   "label": "Height (H)",
+   "non_negative": 1
   },
   {
    "default": "0",
    "fieldname": "volume",
    "fieldtype": "Float",
    "label": "Volume",
+   "non_negative": 1,
    "read_only_depends_on": "eval:doc.volume_based_on == \"Dimensions\""
+  },
+  {
+   "fieldname": "tare_weight_section",
+   "fieldtype": "Section Break",
+   "label": "Tare Weight"
+  },
+  {
+   "fieldname": "weight_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Weight UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_tare_weight",
+   "fieldtype": "Check",
+   "label": "Set Tare Weight Manually"
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2022-12-20 17:40:53.779715",
+ "links": [
+  {
+   "group": "Packing",
+   "link_doctype": "Packing Slip",
+   "link_fieldname": "package_type"
+  }
+ ],
+ "modified": "2022-12-29 11:48:01.797247",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Package Type",
@@ -174,7 +202,7 @@
    "share": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "idx",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

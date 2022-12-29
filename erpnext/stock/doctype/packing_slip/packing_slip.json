@@ -38,6 +38,7 @@
   "total_net_weight",
   "column_break4",
   "total_tare_weight",
+  "manual_tare_weight",
   "column_break_24",
   "total_gross_weight",
   "column_break_32",
@@ -222,7 +223,7 @@
    "fieldname": "total_tare_weight",
    "fieldtype": "Float",
    "label": "Total Tare Weight",
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.manual_tare_weight"
   },
   {
    "fieldname": "column_break_24",
@@ -234,7 +235,7 @@
    "fieldtype": "Float",
    "label": "Total Gross Weight",
    "no_copy": 1,
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.manual_tare_weight"
   },
   {
    "fieldname": "from_warehouse",
@@ -261,13 +262,19 @@
    "fieldtype": "Link",
    "label": "Weight UOM",
    "options": "UOM"
+  },
+  {
+   "default": "0",
+   "fieldname": "manual_tare_weight",
+   "fieldtype": "Check",
+   "label": "Set Tare Weight Manually"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-27 23:54:10.916083",
+ "modified": "2022-12-28 23:44:48.357878",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
