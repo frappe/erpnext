@@ -112,7 +112,6 @@
   {
    "fieldname": "handling_unit",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Handling Unit",
    "no_copy": 1,
@@ -215,6 +214,7 @@
    "default": "0",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Total Net Weight",
    "read_only": 1
   },
@@ -233,6 +233,7 @@
    "default": "0",
    "fieldname": "total_gross_weight",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Total Gross Weight",
    "no_copy": 1,
    "read_only_depends_on": "eval:!doc.manual_tare_weight"
@@ -241,7 +242,8 @@
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "label": "Source Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_15",
@@ -251,7 +253,8 @@
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_32",
@@ -274,7 +277,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-28 23:44:48.357878",
+ "modified": "2022-12-29 16:23:28.852430",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

@@ -79,7 +79,7 @@
    "link_fieldname": "handling_unit"
   }
  ],
- "modified": "2022-12-20 17:44:54.783663",
+ "modified": "2022-12-29 16:44:55.662847",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Handling Unit",
@@ -126,7 +126,7 @@
    "share": 1
   }
  ],
- "search_fields": "status, warehouse, package_type",
+ "search_fields": "status, package_type, warehouse",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
