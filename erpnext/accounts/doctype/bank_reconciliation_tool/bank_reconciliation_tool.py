@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt , cint
+from frappe.utils import cint, flt
 
 from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_paid_amount
 from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
