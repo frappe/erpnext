@@ -1164,21 +1164,22 @@ def get_bin_details(item_code, warehouse, company=None, include_child_warehouses
 	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
+		from frappe.query_builder.functions import Coalesce, Sum
+
 		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
-		bin_details = frappe.db.get_value(
-			"Bin",
-			filters={"item_code": item_code, "warehouse": ["in", warehouses]},
-			fieldname=[
-				"sum(projected_qty) as projected_qty",
-				"sum(actual_qty) as actual_qty",
-				"sum(reserved_qty) as reserved_qty",
-			],
-			as_dict=True,
-			cache=True,
-		)
-		bin_details = {k: 0 if not v else v for k, v in bin_details.items()}
+
+		bin = frappe.qb.DocType("Bin")
+		bin_details = (
+			frappe.qb.from_(bin)
+			.select(
+				Coalesce(Sum(bin.projected_qty), 0).as_("projected_qty"),
+				Coalesce(Sum(bin.actual_qty), 0).as_("actual_qty"),
+				Coalesce(Sum(bin.reserved_qty), 0).as_("reserved_qty"),
+			)
+			.where((bin.item_code == item_code) & (bin.warehouse.isin(warehouses)))
+		).run(as_dict=True)[0]
 
 	if company:
 		bin_details["company_total_stock"] = get_company_total_stock(item_code, company)
