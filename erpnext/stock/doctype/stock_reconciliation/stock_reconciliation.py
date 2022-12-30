@@ -16,8 +16,10 @@ from frappe.model.meta import get_field_precision
 import json
 from six import string_types
 
+
 class OpeningEntryAccountError(frappe.ValidationError): pass
 class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
+
 
 class StockReconciliation(StockController):
 	def __init__(self, *args, **kwargs):
@@ -294,9 +296,17 @@ class StockReconciliation(StockController):
 		if sle["actual_qty"]:
 			sl_entries.append(self.get_sl_entries(d, sle))
 
-	def get_gl_entries(self, warehouse_account=None):
-		return super(StockReconciliation, self).get_gl_entries(warehouse_account,
-			self.expense_account, self.cost_center)
+	def get_stock_voucher_items(self, sle_map):
+		is_opening = "Yes" if self.purpose == "Opening Stock" else "No"
+		details = []
+		for item_code, voucher_detail_no in sle_map:
+			details.append(frappe._dict({
+				"name": voucher_detail_no,
+				"expense_account": self.expense_account,
+				"cost_center": self.cost_center,
+				"is_opening": is_opening
+			}))
+		return details
 
 	def validate_expense_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):

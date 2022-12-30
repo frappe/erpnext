@@ -600,19 +600,21 @@ class PurchaseInvoice(BuyingController):
 			make_gl_entries(gl_entries,  cancel=(self.docstatus == 2), merge_entries=False, from_repost=from_repost)
 
 			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) and self.auto_accounting_for_stock:
-				update_gl_entries_for_reposted_stock_vouchers((self.doctype, self.name), company=self.company)
+				update_gl_entries_for_reposted_stock_vouchers((self.doctype, self.name))
 
 		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
 		else:
 			self.stock_received_but_not_billed = None
+
 		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		self.negative_expense_to_be_booked = 0.0
+
 		gl_entries = []
 
 		self.make_supplier_gl_entry(gl_entries)
