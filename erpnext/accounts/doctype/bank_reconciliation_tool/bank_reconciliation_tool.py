@@ -333,9 +333,9 @@ def auto_reconcile_vouchers(
 	if matched_transaction_len == 0:
 		frappe.msgprint(_("There is no any matched reference number for reconciliation"))
 	elif matched_transaction_len == 1:
-		frappe.msgprint(_(f"{matched_transaction_len} transaction is reconcilied"))
+		frappe.msgprint(_("{0} transaction is reconcilied").format(matched_transaction_len))
 	else:
-		frappe.msgprint(_(f"{matched_transaction_len} transactions are reconcilied"))
+		frappe.msgprint(_("{0} transactions are reconcilied").format(matched_transaction_len))
 
 	frappe.flags.auto_reconcile_vouchers = False
 
