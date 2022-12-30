@@ -738,7 +738,7 @@ class SalesInvoice(SellingController):
 			},
 			"Delivery Note Item": {
 				"ref_dn_field": "delivery_note_item",
-				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="], ["vehicle", "="]],
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="], ["batch_no", "="], ["vehicle", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},
@@ -1689,6 +1689,7 @@ def make_delivery_note(source_name, target_doc=None):
 			"field_map": {
 				"name": "sales_invoice_item",
 				"parent": "sales_invoice",
+				"batch_no": "batch_no",
 				"serial_no": "serial_no",
 				"vehicle": "vehicle",
 				"sales_order": "sales_order",
