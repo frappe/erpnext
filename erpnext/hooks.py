@@ -525,8 +525,12 @@ scheduler_events = {
 		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
+<<<<<<< HEAD
 		"erpnext.crm.doctype.lead.lead.daily_open_lead",
 		"erpnext.stock.doctype.stock_entry.stock_entry.audit_incorrect_valuation_entries",
+=======
+		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
+>>>>>>> 728dc1acf4 (Revert "fix: daily scheduler to identify and fix stock transfer entries having incorrect valuation")
 	],
 	"weekly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_weekly"],
 	"monthly": ["erpnext.hr.doctype.employee.employee_reminders.send_reminders_in_advance_monthly"],
