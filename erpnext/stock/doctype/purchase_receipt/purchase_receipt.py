@@ -14,7 +14,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-import json
+from erpnext.stock import get_warehouse_account_map
 
 
 form_grid_templates = {
@@ -297,9 +297,10 @@ class PurchaseReceipt(BuyingController):
 				check_list.append(d.purchase_order)
 				check_on_hold_or_closed_status('Purchase Order', d.purchase_order, is_return=self.get('is_return'))
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self):
 		from erpnext.accounts.general_ledger import process_gl_map
 
+		warehouse_account = get_warehouse_account_map(self.company)
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		stock_rbnb_currency = get_account_currency(stock_rbnb)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")

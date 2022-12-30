@@ -992,13 +992,13 @@ class SalesInvoice(SellingController):
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=False, from_repost=from_repost)
 
 			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) and cint(auto_accounting_for_stock):
-				update_gl_entries_for_reposted_stock_vouchers((self.doctype, self.name), company=self.company)
+				update_gl_entries_for_reposted_stock_vouchers((self.doctype, self.name))
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
 				from erpnext.accounts.general_ledger import delete_gl_entries
 				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
