@@ -299,7 +299,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 			dict(
 				account=account, voucher_type=voucher["payment_doctype"], voucher_no=voucher["payment_name"]
 			),
-			["credit", "debit"],
+			["credit_in_account_currency as credit", "debit_in_account_currency as debit"],
 			as_dict=1,
 		)
 		gl_amount, transaction_amount = (
