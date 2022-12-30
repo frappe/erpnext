@@ -637,6 +637,7 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postp
 				"sales_order_item": "sales_order_item",
 				"quotation": "quotation",
 				"quotation_item": "quotation_item",
+				"batch_no": "batch_no",
 				"serial_no": "serial_no",
 				"vehicle": "vehicle",
 				"cost_center": "cost_center"
