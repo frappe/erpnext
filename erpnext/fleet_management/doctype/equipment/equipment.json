@@ -170,7 +170,6 @@
    "fieldname": "asset_code",
    "fieldtype": "Link",
    "label": "Asset Code",
-   "mandatory_depends_on": "eval:!doc.hired_equipment",
    "options": "Asset"
   },
   {
@@ -419,7 +418,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-03 11:58:28.344605",
+ "modified": "2022-12-30 14:21:29.406857",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",
