@@ -21,6 +21,9 @@ erpnext.stock.PackingController = class PackingController extends erpnext.stock.
 						weight_uom: me.frm.doc.weight_uom,
 						company: me.frm.doc.company,
 						posting_date: me.frm.doc.posting_date,
+						doctype: me.frm.doc.doctype,
+						name: me.frm.doc.name,
+						child_doctype: item.doctype,
 					}
 				},
 				callback: function(r) {

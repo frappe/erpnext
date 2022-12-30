@@ -42,7 +42,10 @@
   "column_break_24",
   "total_gross_weight",
   "column_break_32",
-  "weight_uom"
+  "weight_uom",
+  "accounting_dimensions_section",
+  "project",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -271,13 +274,29 @@
    "fieldname": "manual_tare_weight",
    "fieldtype": "Check",
    "label": "Set Tare Weight Manually"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-29 16:23:28.852430",
+ "modified": "2022-12-29 23:33:47.262006",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

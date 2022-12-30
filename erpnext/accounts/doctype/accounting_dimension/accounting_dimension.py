@@ -177,6 +177,7 @@ def get_doctypes_with_dimensions():
 		"Payment Entry", "Payment Entry Deduction",
 
 		"Stock Entry", "Stock Entry Detail",
+		"Packing Slip", "Packing Slip Packing Material",
 		"Stock Reconciliation", "Stock Reconciliation Item",
 		"Landed Cost Voucher", "Landed Cost Taxes and Charges",
 

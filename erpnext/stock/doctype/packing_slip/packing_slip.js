@@ -10,6 +10,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 
 	refresh() {
 		erpnext.hide_company();
+		this.setup_buttons();
 	}
 
 	setup_queries() {
@@ -51,6 +52,11 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			let item = frappe.get_doc(cdt, cdn);
 			return erpnext.queries.item_uom(item.item_code);
 		});
+	}
+
+	setup_buttons() {
+		this.show_stock_ledger();
+		this.show_general_ledger();
 	}
 
 	calculate_totals() {

@@ -27,7 +27,11 @@
   "stock_uom",
   "column_break_10",
   "weight_per_unit",
-  "total_weight"
+  "total_weight",
+  "accounting_dimensions_section",
+  "expense_account",
+  "dimension_col_break",
+  "cost_center"
  ],
  "fields": [
   {
@@ -185,12 +189,37 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Net Weight"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-27 22:51:19.804787",
+ "modified": "2022-12-29 23:31:15.489804",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",

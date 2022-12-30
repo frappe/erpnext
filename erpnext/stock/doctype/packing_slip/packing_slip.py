@@ -5,7 +5,8 @@ import frappe
 from frappe import _
 from frappe.utils import flt, cint
 from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit
+from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
+	get_default_expense_account, get_default_cost_center
 import json
 
 
@@ -21,6 +22,7 @@ class PackingSlip(StockController):
 	def validate(self):
 		self.validate_posting_time()
 		super(PackingSlip, self).validate()
+		self.validate_target_handling_unit()
 		self.validate_contents_mandatory()
 		self.validate_items()
 		self.validate_handling_units()
@@ -30,18 +32,49 @@ class PackingSlip(StockController):
 		self.calculate_totals()
 		self.validate_weights()
 
+	def before_submit(self):
+		self.create_handling_unit()
+
+	def on_submit(self):
+		self.update_stock_ledger()
+		self.make_gl_entries()
+
+	def on_cancel(self):
+		self.update_stock_ledger()
+		self.make_gl_entries_on_cancel()
+
 	def set_missing_values(self, for_validate=False):
+		self.set_missing_item_details(for_validate)
+
+	def set_missing_item_details(self, for_validate=False):
 		parent_args = self.as_dict()
 		for field in self.item_table_fields:
 			for item in self.get(field):
 				if item.item_code:
 					args = parent_args.copy()
 					args.update(item.as_dict())
+					args.doctype = self.doctype
+					args.name = self.name
+					args.child_doctype = item.doctype
 
 					item_details = get_item_details(args)
 					for f in item_details:
 						if f in force_item_fields or not item.get(f):
 							item.set(f, item_details.get(f))
+
+	def validate_target_handling_unit(self):
+		if self.handling_unit:
+			hu = frappe.db.get_value("Handling Unit", self.handling_unit, ['name', 'status', 'package_type'], as_dict=1)
+			if not hu:
+				frappe.throw(_("Target Handling Unit {0} does not exist").format(self.handling_unit))
+
+			if hu.status not in ["Inactive", "In Stock"]:
+				frappe.throw(_("Cannot pack into Target {0} because its status is {1}")
+					.format(frappe.get_desk_link("Handling Unit", hu.name), frappe.bold(hu.status)))
+
+			if hu.package_type and self.package_type != hu.package_type:
+				frappe.throw(_("Package Type does not match with Target {0}")
+					.format(frappe.get_desk_link("Handling Unit", hu.name)))
 
 	def validate_contents_mandatory(self):
 		if not self.get("items") and not self.get("handling_units"):
@@ -131,6 +164,65 @@ class PackingSlip(StockController):
 		self.round_floats_in(self, ['total_net_weight', 'total_tare_weight'])
 		self.total_gross_weight = flt(self.total_net_weight + self.total_tare_weight, self.precision("total_gross_weight"))
 
+	def create_handling_unit(self):
+		if self.handling_unit:
+			return
+
+		hu_doc = frappe.new_doc("Handling Unit")
+		hu_doc.package_type = self.package_type
+		hu_doc.package_uom = self.package_uom
+		hu_doc.insert(ignore_permissions=True)
+
+		self.handling_unit = hu_doc.name
+
+	def update_stock_ledger(self, allow_negative_stock=False):
+		sl_entries = []
+
+		# SLE for items contents source warehouse
+		for d in self.get('items'):
+			sl_entries.append(self.get_sl_entries(d, {
+				"warehouse": self.from_warehouse,
+				"actual_qty": -flt(d.stock_qty),
+				"incoming_rate": 0
+			}))
+
+		# SLE for item contents target warehouse
+		for d in self.get('items'):
+			sle = self.get_sl_entries(d, {
+				"warehouse": self.to_warehouse,
+				"actual_qty": flt(d.stock_qty),
+				"handling_unit": self.handling_unit,
+				# "incoming_rate": flt(d.valuation_rate)
+			})
+
+			# SLE Dependency
+			if self.docstatus == 1:
+				sle.dependencies = [{
+					"dependent_voucher_type": self.doctype,
+					"dependent_voucher_no": self.name,
+					"dependent_voucher_detail_no": d.name,
+					"dependency_type": "Amount",
+				}]
+
+			sl_entries.append(sle)
+
+		# SLE for packing material
+		for d in self.get('packing_items'):
+			sl_entries.append(self.get_sl_entries(d, {
+				"warehouse": self.from_warehouse,
+				"actual_qty": -flt(d.stock_qty),
+				"incoming_rate": 0
+			}))
+
+		# Reverse for cancellation
+		if self.docstatus == 2:
+			sl_entries.reverse()
+
+		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No', allow_negative_stock=allow_negative_stock)
+
+	def get_stock_voucher_items(self, sle_map):
+		return self.get("items") + self.get("packing_items")
+
 
 @frappe.whitelist()
 def get_package_type_details(package_type):
@@ -195,6 +287,17 @@ def get_item_details(args):
 
 	# Net Weight
 	out.weight_per_unit = get_weight_per_unit(item.name, weight_uom=args.weight_uom or item.weight_uom)
+
+	# Accounting
+	if args.company:
+		stock_adjustment_account = frappe.get_cached_value('Company', args.company, 'stock_adjustment_account')
+		default_expense_account = get_default_expense_account(args.item_code, args)
+		if args.child_doctype == "Packing Slip Item":
+			out.expense_account = stock_adjustment_account or default_expense_account
+		elif args.child_doctype == "Packing Slip Packing Material":
+			out.expense_account = default_expense_account
+
+		out.cost_center = get_default_cost_center(args.item_code, args)
 
 	return out
 

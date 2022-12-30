@@ -24,7 +24,11 @@
   "stock_uom",
   "column_break_10",
   "weight_per_unit",
-  "total_weight"
+  "total_weight",
+  "accounting_dimensions_section",
+  "expense_account",
+  "dimension_col_break",
+  "cost_center"
  ],
  "fields": [
   {
@@ -157,11 +161,36 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Unit Weight"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Expense Account",
+   "options": "Account",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "print_hide": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-12-29 16:10:32.921025",
+ "modified": "2022-12-29 23:27:18.520390",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Packing Material",
