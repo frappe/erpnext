@@ -829,6 +829,9 @@ def make_rm_stock_entry(
 					order_doctype: {
 						"doctype": "Stock Entry",
 						"field_map": {
+							"supplier": "supplier",
+							"supplier_name": "supplier_name",
+							"supplier_address": "supplier_address",
 							"to_warehouse": "supplier_warehouse",
 						},
 						"field_no_map": [field_no_map],
