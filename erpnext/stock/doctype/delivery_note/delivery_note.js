@@ -28,14 +28,16 @@ frappe.ui.form.on("Delivery Note", {
 				} else {
 					return "green";
 				}
-			} else {
+			} else if (doc.docstatus === 1) {
 				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
 				if (!completed_qty) {
 					return "orange";
 				} else if (doc.returned_qty >= doc.qty) {
-					return "blue";
-				} else if (doc.billed_qty < doc.qty) {
+					return "grey";
+				} else if (completed_qty < doc.qty) {
 					return "yellow";
+				} else if (doc.billed_qty < doc.qty) {
+					return "blue";
 				} else {
 					return "green";
 				}
