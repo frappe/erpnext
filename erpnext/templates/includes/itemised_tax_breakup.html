@@ -31,7 +31,7 @@
 						{% endif %}
 					{% endfor %}
 					{% if 'Valuation Rate' in headers %}
-					<td class='text-right'>{{ frappe.utils.fmt_money(item_totals[item] / itemised_qty[item] / conversion_rate, None, currency) }}</td>
+					<td class='text-right'>{{ frappe.utils.fmt_money(item_totals[item] / (itemised_qty[item] or 1) / conversion_rate, None, currency) }}</td>
 					{% endif %}
 					<td class='text-right'>{{ frappe.utils.fmt_money(item_totals[item] / conversion_rate, None, currency) }}</td>
 				</tr>
