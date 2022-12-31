@@ -1160,10 +1160,10 @@ def get_bin_details(item_code, warehouse, company=None):
 	bin_details = frappe.db.get_value(
 		"Bin",
 		{"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty", "reserved_qty"],
+		["projected_qty", "actual_qty", "reserved_qty", "ordered_qty"],
 		as_dict=True,
 		cache=True,
-	) or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+	) or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0, "ordered_qty": 0}
 	if company:
 		bin_details["company_total_stock"] = get_company_total_stock(item_code, company)
 	return bin_details
