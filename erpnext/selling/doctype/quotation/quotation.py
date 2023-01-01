@@ -133,8 +133,8 @@ class Quotation(SellingController):
 	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):
 		is_lost = cint(is_lost)
 
-		if not is_lost and self.has_sales_order_or_invoice():
-			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
+		if is_lost and self.has_sales_order_or_invoice():
+			frappe.throw(_("Cannot declare as Lost because Quotation is converted to order"))
 
 		if is_lost:
 			self.set_status(update=True, status="Lost")

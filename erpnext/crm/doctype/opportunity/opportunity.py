@@ -150,10 +150,17 @@ class Opportunity(TransactionBase):
 			return follow_up[0]
 
 	def validate_maintenance_schedule(self):
-		dup = frappe.get_value("Opportunity", filters={
+		if not self.maintenance_schedule:
+			return
+
+		filters = {
 			'maintenance_schedule': self.maintenance_schedule,
 			'maintenance_schedule_row': self.maintenance_schedule_row
-		})
+		}
+		if not self.is_new():
+			filters['name'] = ['!=', self.name]
+
+		dup = frappe.get_value("Opportunity", filters=filters)
 		if dup:
 			frappe.throw(_("Opportunity already exist for this maintenance schedule"))
 
@@ -162,7 +169,7 @@ class Opportunity(TransactionBase):
 		is_lost = cint(is_lost)
 
 		if is_lost and (self.has_active_quotation() or self.is_converted()):
-			frappe.throw(_("Cannot declare as lost; Active documents against Opportunity"))
+			frappe.throw(_("Cannot declare as Lost because there are active documents against Opportunity"))
 
 		if is_lost:
 			self.set_status(update=True, status="Lost")
@@ -582,7 +589,7 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 	if not frappe.db.exists('Opportunity', name):
 		frappe.throw(_("Opportunity does not exist"))
 
-	opp = frappe.get_cached_doc('Opportunity', name)
+	opp = frappe.get_doc('Opportunity', name)
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
@@ -607,7 +614,7 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 		if follow_up:
 			follow_up[0].contact_date = getdate(contact_date)
 
-	opp.save()
+		opp.save()
 
 
 @frappe.whitelist()

@@ -228,7 +228,9 @@ def create_opportunity_from_schedule(for_date=None):
 	""", target_date, as_dict=1)
 
 	for schedule in schedule_data:
-		create_maintenance_opportunity(schedule.parent, schedule.name)
+		opportunity_doc = create_maintenance_opportunity(schedule.parent, schedule.name)
+		opportunity_doc.flags.ignore_mandatory = True
+		opportunity_doc.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
@@ -237,26 +239,30 @@ def create_maintenance_opportunity(maintenance_schedule, row):
 	default_opportunity_type = frappe.get_cached_value("CRM Settings", None, "default_opportunity_type_for_schedule")
 	schedule = schedule_doc.getone('schedules', {'name': row})
 
-	opportunity_doc = frappe.new_doc('Opportunity')
+	if not schedule:
+		frappe.throw(_("Row does not exist in Maintenace Schedule"))
 
-	opportunity_doc.opportunity_from = 'Customer'
-	opportunity_doc.party_name = schedule_doc.customer
-	opportunity_doc.transaction_date = getdate(today())
-	opportunity_doc.due_date = schedule.scheduled_date
-	opportunity_doc.status = 'Open'
-	opportunity_doc.opportunity_type = default_opportunity_type
-	opportunity_doc.applies_to_serial_no = schedule_doc.serial_no
+	target_doc = frappe.new_doc('Opportunity')
 
-	opportunity_doc.maintenance_schedule = schedule_doc.name
-	opportunity_doc.maintenance_schedule_row = schedule.name
+	target_doc.opportunity_from = 'Customer'
+	target_doc.party_name = schedule_doc.customer
+	target_doc.transaction_date = getdate()
+	target_doc.due_date = schedule.scheduled_date
+	target_doc.status = 'Open'
+	target_doc.opportunity_type = default_opportunity_type
+	target_doc.applies_to_serial_no = schedule_doc.serial_no
+
+	target_doc.maintenance_schedule = schedule_doc.name
+	target_doc.maintenance_schedule_row = schedule.name
 
 	if schedule.project_template:
 		project_template = frappe.get_cached_doc('Project Template', schedule.project_template)
 		for d in project_template.applicable_items:
-			opportunity_doc.append("items", {
+			target_doc.append("items", {
 				"item_code": d.applicable_item_code,
 				"qty": d.applicable_qty,
 			})
 
-	opportunity_doc.flags.ignore_mandatory = True
-	opportunity_doc.save(ignore_permissions=True)
+	target_doc.run_method("set_misssing_values")
+	target_doc.run_method("validate_maintenance_schedule")
+	return target_doc

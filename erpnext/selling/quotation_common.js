@@ -54,7 +54,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				var reasons = values["lost_reason"];
 				var detailed_reason = values["detailed_reason"];
 
-				frm.events.update_lost_status(frm, "Lost", reasons, detailed_reason)
+				frm.events.update_lost_status(frm, true, reasons, detailed_reason)
 				dialog.hide();
 			},
 			primary_action_label: __('Declare Lost')
@@ -63,17 +63,19 @@ frappe.ui.form.on(cur_frm.doctype, {
 		dialog.show();
 	},
 
-	update_lost_status: function(frm, status, lost_reasons_list=null, detailed_reason=null) {
+	update_lost_status: function(frm, is_lost, lost_reasons_list=null, detailed_reason=null) {
 		frappe.call({
 			doc: frm.doc,
 			method: "set_is_lost",
 			args: {
-				'is_lost': status == "Lost",
+				'is_lost': is_lost,
 				'lost_reasons_list': lost_reasons_list,
 				'detailed_reason': detailed_reason
 			},
 			callback: () => {
-				frm.reload_doc();
+				if (!r.exc) {
+					frm.reload_doc();
+				}
 			}
 		});
 	}

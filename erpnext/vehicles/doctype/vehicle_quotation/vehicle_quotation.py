@@ -82,8 +82,8 @@ class VehicleQuotation(VehicleBookingController):
 	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):
 		is_lost = cint(is_lost)
 
-		if not is_lost and self.has_vehicle_booking_order():
-			frappe.throw(_("Cannot set as Lost as Vehicle Booking Order is made."))
+		if is_lost and self.has_vehicle_booking_order():
+			frappe.throw(_("Cannot declare as Lost because Vehicle Quotation is converted to order"))
 
 		if is_lost:
 			self.set_status(update=True, status="Lost")

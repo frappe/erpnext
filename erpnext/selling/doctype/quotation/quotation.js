@@ -116,7 +116,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 		if (me.frm.doc.status == "Lost") {
 			me.frm.add_custom_button(__("Reopen"), () => {
-				me.frm.events.update_lost_status(me.frm, 'Open');
+				me.frm.events.update_lost_status(me.frm, false);
 			}, __("Status"));
 		}
 

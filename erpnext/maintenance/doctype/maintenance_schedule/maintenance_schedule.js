@@ -63,10 +63,12 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 				maintenance_schedule: doc.name,
 				row: cdn
 			},
+			freeze: 1,
+			freeze_message: __("Creating Opportunity"),
 			callback: function(r) {
 				if (!r.exc) {
-					frappe.msgprint(__("Opportunity created successfully."));
-					me.frm.reload_doc();
+					frappe.model.sync(r.message);
+					frappe.set_route("Form", r.message.doctype, r.message.name);
 				}
 			}
 		});
