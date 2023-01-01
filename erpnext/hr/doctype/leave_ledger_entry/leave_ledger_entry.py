@@ -184,3 +184,63 @@ def expire_carried_forward_allocation(allocation):
 			to_date=allocation.to_date
 		)
 		create_leave_ledger_entry(allocation, args)
+
+
+def get_leave_allocation(employee, leave_type, date, fields=None):
+	allocation = frappe.db.get_value('Leave Allocation',
+		filters={
+			'employee': employee,
+			'leave_type': leave_type,
+			'from_date': ['<=', date],
+			'to_date': ['>=', date],
+			'docstatus': 1
+		},
+		fieldname=fields or "name",
+		as_dict=True if isinstance(fields, list) else False
+	)
+	if not allocation:
+		frappe.throw(_("Leave Allocation not found."))
+
+	return allocation
+
+
+def delete_expired_leave_ledger_entry(leave_allocation):
+	if not leave_allocation:
+		return
+
+	to_date = frappe.db.get_value("Leave Allocation", leave_allocation, "to_date")
+	if not to_date or getdate() <= to_date:
+		return
+
+	name = frappe.get_value(
+		'Leave Ledger Entry',
+		filters={
+			"transaction_type": "Leave Allocation",
+			"transaction_name": leave_allocation,
+			"is_expired": 1
+		}
+	)
+	if name:
+		frappe.db.sql("""DELETE FROM `tabLeave Ledger Entry` WHERE `name`=%s""", (name))
+
+
+def get_allocation_leave_balance_summary(allocation_name):
+	allocation = frappe.get_doc("Leave Allocation", allocation_name)
+
+	leaves_summary = frappe.db.sql("""
+		SELECT
+			SUM(leaves) as used_leaves
+		FROM `tabLeave Ledger Entry`
+		WHERE
+			employee = %(employee)s
+			AND leave_type = %(leave_type)s
+			AND docstatus = 1
+			AND leaves < 0
+			AND from_date between %(from_date)s AND %(to_date)s
+			AND to_date between %(from_date)s AND %(to_date)s
+	""", allocation.as_dict(), as_dict=1)[0]
+
+	leaves_summary.leave_allocation = allocation.name
+	leaves_summary.allocated_leaves = allocation.total_leaves_allocated
+	leaves_summary.leave_balance = flt(leaves_summary.used_leaves) + flt(leaves_summary.allocated_leaves)
+	return leaves_summary

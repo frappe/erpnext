@@ -27,6 +27,9 @@ class LeaveAllocation(Document):
 		set_employee_name(self)
 		self.validate_leave_allocation_days()
 
+	def before_insert(self):
+		self.expired = 0
+
 	def validate_leave_allocation_days(self):
 		company = frappe.db.get_value("Employee", self.employee, "company")
 		leave_period = get_leave_period(self.from_date, self.to_date, company)
