@@ -175,6 +175,7 @@ class DeliveryNote(SellingController):
 			doc.update_billing_status()
 			doc.validate_returned_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
 			doc.validate_billed_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
+			doc.notify_update()
 
 		self.update_project_billing_and_sales()
 
@@ -652,6 +653,7 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postp
 				"sales_order_item": "sales_order_item",
 				"quotation": "quotation",
 				"quotation_item": "quotation_item",
+				"batch_no": "batch_no",
 				"serial_no": "serial_no",
 				"vehicle": "vehicle",
 				"cost_center": "cost_center"

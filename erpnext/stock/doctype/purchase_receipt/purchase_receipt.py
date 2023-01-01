@@ -151,6 +151,7 @@ class PurchaseReceipt(BuyingController):
 			doc.set_billing_status(update=True)
 			doc.validate_returned_qty(from_doctype=self.doctype, row_names=purchase_receipt_row_names)
 			doc.validate_billed_qty(from_doctype=self.doctype, row_names=purchase_receipt_row_names)
+			doc.notify_update()
 
 	def set_billing_status(self, update=False, update_modified=True):
 		data = self.get_billing_status_data()
@@ -564,7 +565,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"purchase_order": "purchase_order",
 				"is_fixed_asset": "is_fixed_asset",
 				"asset_location": "asset_location",
-				"asset_category": 'asset_category',
+				"asset_category": "asset_category",
+				"batch_no": "batch_no",
+				"serial_no": "serial_no",
 				"vehicle": "vehicle",
 			},
 			"postprocess": update_item,
