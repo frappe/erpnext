@@ -1,5 +1,7 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
+# Copyright (c) 2022, pseudocode-skyai and contributors
+# For license information, please see license.txt
+
+# import frappe
 
 
 import frappe
@@ -85,28 +87,78 @@ def update_available_serial_nos(available_serial_nos, sle):
 
 def get_columns():
 	columns = [
-		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 150},
+		{"label": _("Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 110},
 		{
-			"label": _("Item"),
-			"fieldname": "item_code",
+			"label": _("Supplier"),
+			"fieldname": "supplier",
+			"fieldtype": "Data",
+			"width": 200,
+		},
+		{
+			"label": _("Purchase Order #"),
+			"fieldname": "purchase_order",
 			"fieldtype": "Link",
-			"options": "Item",
+			"options": "Purchase Order",
+			"width": 150,
+		},
+		{
+			"label": _("Customer Order #"),
+			"fieldname": "customer_order",
+			"fieldtype": "Link",
+			"options": "Customer Order",
+			"width": 150,
+		},
+		{
+			"label": _("Customer's Purchase Order #"),
+			"fieldname": "customer_purchase_order",
+			"fieldtype": "Data",
+			"width": 210,
+		},
+		{
+			"label": _("Product Code"),
+			"fieldname": "item_code",
+			"fieldtype": "Data",
+			"width": 120,
+		},
+		{"label": _("Product Name"), "fieldname": "item_name", "width": 350},
+		{
+			"label": _("Pack Size"),
+			"fieldname": "pack_size",
+			"fieldtype": "Data",
 			"width": 100,
 		},
-		{"label": _("Item Name"), "fieldname": "item_name", "width": 100},
 		{
-			"label": _("Stock UOM"),
-			"fieldname": "stock_uom",
-			"fieldtype": "Link",
-			"options": "UOM",
-			"width": 90,
+			"label": _("Label"),
+			"fieldname": "product_label",
+			"fieldtype": "Data",
+			"width": 100,
 		},
+		{
+			"label": _("H2K Additional Description"),
+			"fieldname": "additioanl_description",
+			"fieldtype": "Text Editor",
+			"width": 250,
+		},
+		{
+			"label": _("Shipper Size"),
+			"fieldname": "shipper_size",
+			"fieldtype": "Text Editor",
+			"width": 110,
+		},
+		# {
+		# 	"label": _("Stock UOM"),
+		# 	"fieldname": "stock_uom",
+		# 	"fieldtype": "Link",
+		# 	"options": "UOM",
+		# 	"width": 90,
+		# },
 		{
 			"label": _("In Qty"),
 			"fieldname": "in_qty",
 			"fieldtype": "Float",
 			"width": 80,
 			"convertible": "qty",
+			"precision": "0",
 		},
 		{
 			"label": _("Out Qty"),
@@ -114,76 +166,81 @@ def get_columns():
 			"fieldtype": "Float",
 			"width": 80,
 			"convertible": "qty",
+			"precision": "0",
 		},
 		{
-			"label": _("Balance Qty"),
+			"label": _("Batch Qty"),
+			"fieldname": "batch_warehouse_qty",
+			"fieldtype": "Float",
+			"width": 100,
+			"convertible": "qty",
+			"precision": "0",
+		},
+		{
+			"label": _("Product Qty"),
 			"fieldname": "qty_after_transaction",
 			"fieldtype": "Float",
 			"width": 100,
 			"convertible": "qty",
-		},
-		{
-			"label": _("Voucher #"),
-			"fieldname": "voucher_no",
-			"fieldtype": "Dynamic Link",
-			"options": "voucher_type",
-			"width": 150,
+			"precision": "0",
 		},
 		{
 			"label": _("Warehouse"),
 			"fieldname": "warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
+			"fieldtype": "Data",
 			"width": 150,
 		},
+	
+		
+		# {
+		# 	"label": _("Item Group"),
+		# 	"fieldname": "item_group",
+		# 	"fieldtype": "Link",
+		# 	"options": "Item Group",
+		# 	"width": 100,
+		# },
+		# {
+		# 	"label": _("Brand"),
+		# 	"fieldname": "brand",
+		# 	"fieldtype": "Link",
+		# 	"options": "Brand",
+		# 	"width": 100,
+		# },
+		
+		# {"label": _("Description"), "fieldname": "description", "width": 200},
 		{
-			"label": _("Item Group"),
-			"fieldname": "item_group",
-			"fieldtype": "Link",
-			"options": "Item Group",
-			"width": 100,
-		},
-		{
-			"label": _("Brand"),
-			"fieldname": "brand",
-			"fieldtype": "Link",
-			"options": "Brand",
-			"width": 100,
-		},
-		{"label": _("Description"), "fieldname": "description", "width": 200},
-		{
-			"label": _("Incoming Rate"),
+			"label": _("Price (USD)"),
 			"fieldname": "incoming_rate",
 			"fieldtype": "Currency",
 			"width": 110,
 			"options": "Company:company:default_currency",
 			"convertible": "rate",
 		},
+		# {
+		# 	"label": _("Valuation Rate"),
+		# 	"fieldname": "valuation_rate",
+		# 	"fieldtype": "Currency",
+		# 	"width": 110,
+		# 	"options": "Company:company:default_currency",
+		# 	"convertible": "rate",
+		# },
+		# {
+		# 	"label": _("Balance Value"),
+		# 	"fieldname": "stock_value",
+		# 	"fieldtype": "Currency",
+		# 	"width": 110,
+		# 	"options": "Company:company:default_currency",
+		# },
+		# {
+		# 	"label": _("Value Change"),
+		# 	"fieldname": "stock_value_difference",
+		# 	"fieldtype": "Currency",
+		# 	"width": 110,
+		# 	"options": "Company:company:default_currency",
+		# },
+		# {"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{
-			"label": _("Valuation Rate"),
-			"fieldname": "valuation_rate",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-			"convertible": "rate",
-		},
-		{
-			"label": _("Balance Value"),
-			"fieldname": "stock_value",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-		},
-		{
-			"label": _("Value Change"),
-			"fieldname": "stock_value_difference",
-			"fieldtype": "Currency",
-			"width": 110,
-			"options": "Company:company:default_currency",
-		},
-		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
-		{
-			"label": _("Voucher #"),
+			"label": _("Document Type / Document No"),
 			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
 			"options": "voucher_type",
@@ -192,32 +249,88 @@ def get_columns():
 		{
 			"label": _("Batch"),
 			"fieldname": "batch_no",
-			"fieldtype": "Link",
-			"options": "Batch",
+			"fieldtype": "Data",
+			"width": 100,
+		},
+		{"label": _("Mfg Date"), "fieldname": "manufacturing_date", "fieldtype": "Date", "width": 110},
+		{"label": _("Exp Date"), "fieldname": "expiry_date", "fieldtype": "Date", "width": 110},
+		{
+			"label": _("Type Of Packing"),
+			"fieldname": "type_of_packing",
+			"fieldtype": "Data",
+			"width": 150,
+		},
+		{
+			"label": _("Physical Parameter"),
+			"fieldname": "physical_parameter",
+			"fieldtype": "Data",
+			"width": 200,
+		},
+		{
+			"label": _("Shelf Life"),
+			"fieldname": "shelf_life",
+			"fieldtype": "Data",
 			"width": 100,
 		},
 		{
-			"label": _("Serial No"),
-			"fieldname": "serial_no",
-			"fieldtype": "Link",
-			"options": "Serial No",
-			"width": 100,
+			"label": _("Barcode"),
+			"fieldname": "barcode",
+			"fieldtype": "Data",
+			"width": 150
 		},
-		{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 		{
-			"label": _("Project"),
-			"fieldname": "project",
-			"fieldtype": "Link",
-			"options": "Project",
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Data",
+			"options": "Brand",
 			"width": 100,
 		},
 		{
-			"label": _("Company"),
-			"fieldname": "company",
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": 110,
+			"label": _("Color Band"),
+			"fieldname": "color_band",
+			"fieldtype": "Data",
+			"width": 100,
 		},
+		{
+			"label": _("Dossiers"),
+			"fieldname": "dossiers",
+			"fieldtype": "Data",
+			"width": 100,
+		},
+		{
+			"label": _("OTC"),
+			"fieldname": "otc_product",
+			"fieldtype": "Select",
+			"width": 80,
+		},
+		{
+			"label": _("Pharmacopeia "),
+			"fieldname": "pharmacopeia_data",
+			"fieldtype": "Data",
+			"width": 120,
+		},
+		# {
+		# 	"label": _("Serial No"),
+		# 	"fieldname": "serial_no",
+		# 	"fieldtype": "Link",
+		# 	"options": "Serial No",
+		# 	"width": 100,
+		# },
+		# {"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
+		# {
+		# 	"label": _("Project"),
+		# 	"fieldname": "project",
+		# 	"fieldtype": "Link",
+		# 	"options": "Project",
+		# 	"width": 100,
+		# },
+		# {
+		# 	"label": _("Company"),
+		# 	"fieldname": "company",
+		# 	"fieldtype": "Link",
+		# 	"options": "Company",
+		# 	"width": 110,
+		# },
 	]
 
 	return columns
@@ -234,10 +347,12 @@ def get_stock_ledger_entries(filters, items):
 		"""
 		SELECT
 			concat_ws(" ", posting_date, posting_time) AS date,
+			posting_date,
 			item_code,
 			warehouse,
 			actual_qty,
 			qty_after_transaction,
+			batch_warehouse_qty,
 			incoming_rate,
 			valuation_rate,
 			stock_value,
@@ -247,7 +362,12 @@ def get_stock_ledger_entries(filters, items):
 			serial_no,
 			company,
 			project,
-			stock_value_difference
+			stock_value_difference,
+			manufacturing_date,
+			expiry_date,
+			purchase_order,
+			customer_order,
+			customer_purchase_order
 		FROM
 			`tabStock Ledger Entry` sle
 		WHERE
@@ -274,6 +394,10 @@ def get_items(filters):
 	else:
 		if filters.get("brand"):
 			conditions.append("item.brand=%(brand)s")
+		if filters.get("pack_size"):
+			conditions.append("item.pack_size=%(pack_size)s")
+		if filters.get("barcode"):
+			conditions.append("item.barcode=%(barcode)s")
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
 
@@ -282,6 +406,7 @@ def get_items(filters):
 		items = frappe.db.sql_list(
 			"""select name from `tabItem` item where {}""".format(" and ".join(conditions)), filters
 		)
+
 	return items
 
 
@@ -304,7 +429,10 @@ def get_item_details(items, sl_entries, include_uom):
 	res = frappe.db.sql(
 		"""
 		select
-			item.name, item.item_name, item.description, item.item_group, item.brand, item.stock_uom {cf_field}
+			item.name, item.item_name, item.barcode, item.description, item.item_group, item.supplier, item.brand, 
+			item.product_label, item.pack_size, item.type_of_packing, item.physical_parameter, item.shelf_life,
+			item.additioanl_description, item.color_band, item.dossiers, item.otc_product, item.pharmacopeia_data,
+			item.stock_uom, item.shipper_size {cf_field}
 		from
 			`tabItem` item
 			{cf_join}
@@ -335,7 +463,13 @@ def get_sle_conditions(filters):
 		conditions.append("batch_no=%(batch_no)s")
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
-
+	if filters.get("purchase_order"):
+		conditions.append("purchase_order=%(purchase_order)s")
+	if filters.get("customer_order"):
+		conditions.append("customer_order=%(customer_order)s")
+	if filters.get("customer_purchase_order"):
+		conditions.append("customer_purchase_order=%(customer_purchase_order)s")
+		
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 

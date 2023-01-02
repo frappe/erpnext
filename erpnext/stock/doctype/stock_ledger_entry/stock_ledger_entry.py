@@ -56,8 +56,13 @@ class StockLedgerEntry(Document):
 		frappe.db.set_value(self.doctype, self.name, "manufacturing_date", manufacturing_date)
 		purchase_order = frappe.db.get_value("Batch", self.batch_no, "purchase_order")
 		frappe.db.set_value(self.doctype, self.name, "purchase_order", purchase_order)
+		if (self.voucher_type == "Shipping Notice Instruction"):
+			customer_order, cos_po_no = frappe.db.get_value(self.voucher_type, self.voucher_no, ["customer_order", "po_no"])
+			frappe.db.set_value(self.doctype, self.name, "customer_order", customer_order)
+			frappe.db.set_value(self.doctype, self.name, "customer_purchase_order", cos_po_no)
 		self.check_stock_frozen_date()
 		self.calculate_batch_qty()
+		self.calculate_batch_warehouse_qty()
 
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
@@ -75,6 +80,17 @@ class StockLedgerEntry(Document):
 				or 0
 			)
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
+	def calculate_batch_warehouse_qty(self):
+		if self.batch_no:
+			batch_warehouse_qty = (
+				frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": 0, "warehouse": self.warehouse},
+					"sum(actual_qty)",
+				)
+				or 0
+			)
+			frappe.db.set_value(self.doctype, self.name, "batch_warehouse_qty", batch_warehouse_qty)
 
 	def validate_mandatory(self):
 		mandatory = ["warehouse", "posting_date", "voucher_type", "voucher_no", "company"]

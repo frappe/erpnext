@@ -39,7 +39,10 @@
   "expiry_date",
   "serial_no",
   "to_rename",
-  "purchase_order"
+  "batch_warehouse_qty",
+  "purchase_order",
+  "customer_order",
+  "customer_purchase_order"
  ],
  "fields": [
   {
@@ -328,11 +331,31 @@
    "read_only": 1
   },
   {
+    "fieldname": "batch_warehouse_qty",
+    "fieldtype": "Float",
+    "label": "Batch and Warehouse Qty",
+    "read_only": 1
+   },
+  {
    "fieldname": "purchase_order",
    "fieldtype": "Data",
    "label": "Purchase Order",
    "read_only": 1
-  }
+  },
+  {
+    "fieldname": "customer_order",
+    "fieldtype": "Data",
+    "label": "Customer Order",
+    "read_only": 0,
+    "allow_on_submit": 1
+   },
+   {
+    "fieldname": "customer_purchase_order",
+    "fieldtype": "Data",
+    "label": "Customer's Purchase Order",
+    "read_only": 0,
+    "allow_on_submit": 1
+   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-list",
@@ -340,7 +363,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-14 01:47:13.958230",
+ "modified": "2023-01-02 01:47:13.958230",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

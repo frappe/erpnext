@@ -9,7 +9,9 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company"),
-			"reqd": 1
+			"reqd": 1,
+			"read_only": 1,
+			"hide": 1
 		},
 		{
 			"fieldname":"from_date",
@@ -25,7 +27,7 @@ frappe.query_reports["Stock Ledger"] = {
 			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		},
-		{
+		/* {
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
@@ -36,10 +38,10 @@ frappe.query_reports["Stock Ledger"] = {
 					filters: { 'company': company }
 				}
 			}
-		},
-		{
+		}, */
+		/* {
 			"fieldname":"item_code",
-			"label": __("Item"),
+			"label": __("Product"),
 			"fieldtype": "Link",
 			"options": "Item",
 			"get_query": function() {
@@ -47,42 +49,54 @@ frappe.query_reports["Stock Ledger"] = {
 					query: "erpnext.controllers.queries.item_query"
 				}
 			}
-		},
-		{
+		}, */
+		/* {
 			"fieldname":"item_group",
 			"label": __("Item Group"),
 			"fieldtype": "Link",
 			"options": "Item Group"
-		},
-		{
+		}, */
+		/* {
 			"fieldname":"batch_no",
 			"label": __("Batch No"),
 			"fieldtype": "Link",
 			"options": "Batch"
-		},
-		{
+		}, */
+		/* {
 			"fieldname":"brand",
 			"label": __("Brand"),
 			"fieldtype": "Link",
 			"options": "Brand"
+		}, */
+		{
+			"fieldname":"purchase_order",
+			"label": __("Purchase Order #"),
+			"fieldtype": "Link",
+			"options": "Purchase Order"
 		},
 		{
-			"fieldname":"voucher_no",
-			"label": __("Voucher #"),
-			"fieldtype": "Data"
+			"fieldname":"customer_order",
+			"label": __("Customer Order #"),
+			"fieldtype": "Link",
+			"options": "Customer Order"
 		},
 		{
+			"fieldname":"customer_purchase_order #",
+			"label": __("Customer's Purchase Order"),
+			"fieldtype": "Data",
+		},
+		/* {
 			"fieldname":"project",
 			"label": __("Project"),
 			"fieldtype": "Link",
 			"options": "Project"
-		},
-		{
+		}, */
+		/* {
 			"fieldname":"include_uom",
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
-		}
+		} */
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
