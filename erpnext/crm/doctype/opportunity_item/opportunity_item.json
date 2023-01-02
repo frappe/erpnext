@@ -8,8 +8,8 @@
   "col_break1",
   "item_name",
   "section_break_6",
-  "qty",
   "uom",
+  "qty",
   "column_break_8",
   "basic_rate",
   "description_section",
@@ -22,7 +22,7 @@
  ],
  "fields": [
   {
-   "columns": 7,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -73,17 +73,21 @@
    "fieldtype": "Section Break"
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
    "options": "UOM"
   },
   {
+   "columns": 6,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_list_view": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data"
@@ -137,7 +141,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-11-07 15:53:34.347817",
+ "modified": "2022-12-20 12:49:10.508334",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Item",

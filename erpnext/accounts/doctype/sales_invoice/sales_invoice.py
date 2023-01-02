@@ -316,9 +316,9 @@ class SalesInvoice(SellingController):
 		if self.is_return and self.return_against:
 			doc = frappe.get_doc("Sales Invoice", self.return_against)
 			doc.set_returned_status(update=True)
-
 			if self.update_stock:
 				doc.validate_returned_qty(from_doctype=self.doctype)
+			doc.notify_update()
 
 		self.update_project_billing_and_sales()
 

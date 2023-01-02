@@ -31,14 +31,17 @@ erpnext.maintenance.MaintenanceSchedule = class MaintenanceSchedule extends frap
 
 	serial_no() {
 		var me = this;
-		frappe.call({
-			method: "erpnext.stock.doctype.serial_no.serial_no.get_serial_no_item_customer",
-			args: {
-				serial_no: me.frm.doc.serial_no
-			},
-			callback: function (r) {
-				if (r.message) {
-					me.frm.set_value(r.message);
+
+		if (me.frm.doc.serial_no) {
+			frappe.call({
+				method: "erpnext.stock.doctype.serial_no.serial_no.get_serial_no_item_customer",
+				args: {
+					serial_no: me.frm.doc.serial_no
+				},
+				callback: function (r) {
+					if (r.message) {
+						me.frm.set_value(r.message);
+					}
 				}
 			}
 		});

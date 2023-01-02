@@ -18,8 +18,8 @@ erpnext.setup_applies_to_fields = function (frm) {
 						"chassis_no": frm.doc.vehicle_chassis_no,
 						"engine_no": frm.doc.vehicle_engine_no,
 						"color": frm.doc.vehicle_color,
-						"warranty_no": me.frm.doc.vehicle_warranty_no,
-						"delivery_date": me.frm.doc.vehicle_delivery_date,
+						"warranty_no": frm.doc.vehicle_warranty_no,
+						"delivery_date": frm.doc.vehicle_delivery_date,
 					}
 				}
 			}

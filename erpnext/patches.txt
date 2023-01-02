@@ -778,7 +778,11 @@ erpnext.patches.v12_0.set_is_payable_in_lcv
 erpnext.patches.v12_0.trim_tables_maintenance_schedule
 erpnext.patches.v12_0.set_advance_tax_account_in_table
 erpnext.patches.v12_0.fix_purchase_invoice_double_gl
+erpnext.patches.v12_0.set_serial_no_in_transaction_documents
+execute:frappe.delete_doc_if_exists("Custom Field", "Opportunity Item-vehicle_color")
+erpnext.patches.v12_0.move_crm_config_to_crm_settings
 erpnext.patches.v12_0.update_mapped_item_batch_no
+erpnext.patches.v12_0.update_salary_slip_leave_with_pay
 erpnext.patches.v14_0.delete_datev_doctypes
 
 [post_model_sync]

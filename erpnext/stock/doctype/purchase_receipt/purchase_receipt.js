@@ -60,14 +60,20 @@ frappe.ui.form.on("Purchase Receipt", {
 		}
 
 		frm.set_indicator_formatter('item_code', function(doc) {
-			if (doc.docstatus === 1) {
+			if (doc.docstatus === 0) {
+				if (!doc.is_stock_item) {
+					return "blue";
+				}
+			} else if (doc.docstatus === 1) {
 				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
 				if (!completed_qty) {
 					return "orange";
 				} else if (doc.returned_qty >= doc.qty) {
-					return "blue";
-				} else if (doc.billed_qty < doc.qty) {
+					return "darkgrey";
+				} else if (completed_qty < doc.qty) {
 					return "yellow";
+				} else if (doc.billed_qty < doc.qty) {
+					return "blue";
 				} else {
 					return "green";
 				}

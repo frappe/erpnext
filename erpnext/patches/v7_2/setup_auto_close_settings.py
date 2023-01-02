@@ -5,8 +5,8 @@ import frappe
 
 def execute():
 	# update the selling settings and set the close_opportunity_after_days
-	frappe.reload_doc("selling", "doctype", "selling_settings")
-	frappe.db.set_value("Selling Settings", "Selling Settings", "close_opportunity_after_days", 15)
+	frappe.reload_doc("crm", "doctype", "crm_settings")
+	frappe.db.set_value("CRM Settings", "CRM Settings", "close_opportunity_after_days", 15)
 
 	# Auto close Replied opportunity
 	frappe.db.sql("""update `tabOpportunity` set status='Closed' where status='Replied'

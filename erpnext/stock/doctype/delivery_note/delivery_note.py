@@ -174,6 +174,7 @@ class DeliveryNote(SellingController):
 			doc.update_billing_status()
 			doc.validate_returned_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
 			doc.validate_billed_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
+			doc.notify_update()
 
 		self.update_project_billing_and_sales()
 

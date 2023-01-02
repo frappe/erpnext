@@ -52,11 +52,18 @@ class ItemsToBeBilled:
 		elif self.filters.party_type == "Supplier":
 			party_join = "inner join `tabSupplier` sup on sup.name = o.supplier"
 
-		project_type_join = ""
+		project_join = ""
 		project_fields = ""
+		project_type_join = ""
 		if self.filters.claim_billing:
-			project_type_join = "left join `tabProject` proj on proj.name = o.project"
-			project_fields = ", proj.project_type, proj.project_date"
+			project_join = "left join `tabProject` proj on proj.name = o.project"
+			project_fields = ", proj.project_type, proj.project_date, proj.warranty_claim_denied, proj.warranty_claim_denied_reason"
+
+			if self.filters.claim_billing_type:
+				project_type_join = "left join `tabProject Type` ptype on ptype.name = proj.project_type"
+
+		if 'Vehicles' in frappe.get_active_domains() and self.filters.claim_billing:
+			project_fields += ", proj.applies_to_vehicle, proj.vehicle_chassis_no, proj.vehicle_license_plate"
 
 		common_fields = """
 			o.name, o.company, o.creation, o.currency, o.project,
@@ -87,6 +94,7 @@ class ItemsToBeBilled:
 				INNER JOIN `tabItem` im on im.name = i.item_code
 				{sales_person_join}
 				{party_join}
+				{project_join}
 				{project_type_join}
 				WHERE
 					o.docstatus = 1 AND o.status != 'Closed'
@@ -99,6 +107,7 @@ class ItemsToBeBilled:
 				common_fields=common_fields,
 				sales_person_join=sales_person_join.format(frappe.db.escape(order_doctype)),
 				party_join=party_join,
+				project_join=project_join,
 				project_type_join=project_type_join,
 				conditions=conditions,
 			), self.filters, as_dict=1)
@@ -114,6 +123,7 @@ class ItemsToBeBilled:
 				INNER JOIN `tabItem` im on im.name = i.item_code
 				{sales_person_join}
 				{party_join}
+				{project_join}
 				{project_type_join}
 				WHERE
 					o.docstatus = 1 AND o.status != 'Closed'
@@ -126,6 +136,7 @@ class ItemsToBeBilled:
 				common_fields=common_fields,
 				order_reference_field=scrub(order_doctype),
 				party_join=party_join,
+				project_join=project_join,
 				project_type_join=project_type_join,
 				sales_person_join=sales_person_join.format(frappe.db.escape(delivery_doctype)),
 				conditions=conditions,
@@ -198,6 +209,12 @@ class ItemsToBeBilled:
 
 		if self.filters.claim_billing:
 			conditions.append("ifnull(i.claim_customer, '') != ''")
+
+		if self.filters.claim_billing_type:
+			conditions.append("ptype.claim_billing_type = %(claim_billing_type)s")
+
+		if self.filters.exclude_warranty_claim_denied:
+			conditions.append("proj.warranty_claim_denied = 0")
 
 		if self.filters.warehouse:
 			lft, rgt = frappe.db.get_value("Warehouse", self.filters.warehouse, ["lft", "rgt"])
@@ -312,7 +329,7 @@ class ItemsToBeBilled:
 				"fieldname": "name",
 				"fieldtype": "Dynamic Link",
 				"options": "doctype",
-				"width": 140
+				"width": 120
 			},
 			{
 				"label": _("Project"),
@@ -320,6 +337,18 @@ class ItemsToBeBilled:
 				"fieldtype": "Link",
 				"options": "Project",
 				"width": 100
+			},
+			{
+				"label": _("Denied"),
+				"fieldname": "warranty_claim_denied",
+				"fieldtype": "Check",
+				"width": 60
+			},
+			{
+				"label": _("Chassis #"),
+				"fieldname": "vehicle_chassis_no",
+				"fieldtype": "Data",
+				"width": 150
 			},
 			{
 				"label": _(self.filters.party_type),
@@ -355,6 +384,19 @@ class ItemsToBeBilled:
 				"width": 50
 			},
 			{
+				"label": _("Remaining"),
+				"fieldname": "remaining_qty",
+				"fieldtype": "Float",
+				"width": 80
+			},
+			{
+				"label": _("Remaining Amount"),
+				"fieldname": "remaining_amt",
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			},
+			{
 				"label": _("Qty"),
 				"fieldname": "qty",
 				"fieldtype": "Float",
@@ -373,12 +415,6 @@ class ItemsToBeBilled:
 				"width": 80
 			},
 			{
-				"label": _("Remaining"),
-				"fieldname": "remaining_qty",
-				"fieldtype": "Float",
-				"width": 80
-			},
-			{
 				"label": _("Amount"),
 				"fieldname": "amount",
 				"fieldtype": "Currency",
@@ -388,13 +424,6 @@ class ItemsToBeBilled:
 			{
 				"label": _("Billed Amount"),
 				"fieldname": "billed_amt",
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
-			},
-			{
-				"label": _("Remaining Amount"),
-				"fieldname": "remaining_amt",
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120

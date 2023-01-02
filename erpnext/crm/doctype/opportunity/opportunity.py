@@ -3,11 +3,12 @@
 
 import frappe
 from frappe import _
-from frappe.utils import today, getdate
+from frappe.utils import today, getdate, cint
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
@@ -25,6 +26,11 @@ force_party_fields = [
 ]
 
 force_item_fields = ("item_group", "brand")
+
+force_applies_to_fields = [
+	"vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
+	"vehicle_color", "applies_to_item", "applies_to_item_name", "applies_to_variant_of", "applies_to_variant_of_name"
+]
 
 
 class Opportunity(TransactionBase):
@@ -67,6 +73,7 @@ class Opportunity(TransactionBase):
 	def set_missing_values(self):
 		self.set_customer_details()
 		self.set_item_details()
+		self.set_applies_to_details()
 
 	def set_customer_details(self):
 		customer_details = get_customer_details(self.as_dict())
@@ -83,6 +90,17 @@ class Opportunity(TransactionBase):
 			for k, v in item_details.items():
 				if d.meta.has_field(k) and (not d.get(k) or k in force_party_fields):
 					d.set(k, v)
+
+	def set_applies_to_details(self):
+		if self.get("applies_to_vehicle"):
+			self.applies_to_serial_no = self.applies_to_vehicle
+
+		args = self.as_dict()
+		applies_to_details = get_applies_to_details(args, for_validate=True)
+
+		for k, v in applies_to_details.items():
+			if self.meta.has_field(k) and not self.get(k) or k in force_applies_to_fields:
+				self.set(k, v)
 
 	def validate_financer(self):
 		if self.get('financer'):
@@ -127,11 +145,7 @@ class Opportunity(TransactionBase):
 			doc.notify_update()
 
 	def has_active_quotation(self):
-		vehicle_quotation = frappe.db.get_value("Vehicle Quotation", {
-			"opportunity": self.name,
-			"docstatus": 1,
-			"status": ("not in", ['Lost', 'Closed'])
-		})
+		vehicle_quotation = get_active_vehicle_quotation(self.name, include_draft=False)
 
 		quotation = frappe.get_all('Quotation', {
 			'opportunity': self.name,
@@ -145,12 +159,16 @@ class Opportunity(TransactionBase):
 		if self.has_ordered_quotation():
 			return True
 
-		vehicle_booking_order = frappe.db.get_value("Vehicle Booking Order", {
+		vehicle_booking_order = get_vehicle_booking_order(self.name, include_draft=False)
+		if vehicle_booking_order:
+			return True
+
+		appointment = frappe.db.get_value("Appointment", {
 			"opportunity": self.name,
 			"docstatus": 1,
 		})
 
-		if vehicle_booking_order:
+		if appointment:
 			return True
 
 		return False
@@ -220,6 +238,12 @@ def get_customer_details(args):
 	out.contact_person = args.contact_person or get_default_contact(party.doctype, party.name)
 	out.update(get_contact_details(out.contact_person, lead=lead))
 
+	out.territory = party.territory
+	if party.doctype == "Lead":
+		out.sales_person = party.sales_person
+		out.source = party.source
+		out.campaign = party.campaign
+
 	return out
 
 
@@ -268,6 +292,8 @@ def make_quotation(source_name, target_doc=None):
 				"opportunity_from": "quotation_to",
 				"opportunity_type": "order_type",
 				"name": "opportunity",
+				"applies_to_serial_no": "applies_to_serial_no",
+				"applies_to_vehicle": "applies_to_vehicle",
 			}
 		},
 		"Opportunity Item": {
@@ -275,7 +301,7 @@ def make_quotation(source_name, target_doc=None):
 			"field_map": {
 				"parent": "prevdoc_docname",
 				"parenttype": "prevdoc_doctype",
-				"uom": "stock_uom"
+				"uom": "stock_uom",
 			},
 			"add_if_empty": True
 		}
@@ -305,8 +331,12 @@ def make_request_for_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_vehicle_quotation(source_name, target_doc=None):
+	existing_quotation = get_active_vehicle_quotation(source_name, include_draft=True)
+	if existing_quotation:
+		frappe.throw(_("{0} already exists against Opportunity")
+			.format(frappe.get_desk_link("Vehicle Quotation", existing_quotation)))
+
 	def set_missing_values(source, target):
-		set_vehicle_item_from_opportunity(source, target)
 		add_sales_person_from_source(source, target)
 
 		target.run_method("set_missing_values")
@@ -316,10 +346,12 @@ def make_vehicle_quotation(source_name, target_doc=None):
 		"Opportunity": {
 			"doctype": "Vehicle Quotation",
 			"field_map": {
+				"opportunity_from": "quotation_to",
 				"name": "opportunity",
-				'delivery_period': 'delivery_period',
-				'opportunity_from': 'quotation_to',
-				'party_name': 'party_name',
+				"applies_to_item": "item_code",
+				"applies_to_vehicle": "vehicle",
+				"vehicle_color": "color",
+				"delivery_period": "delivery_period",
 			}
 		}
 	}, target_doc, set_missing_values)
@@ -329,14 +361,22 @@ def make_vehicle_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_vehicle_booking_order(source_name, target_doc=None):
+	existing_vbo = get_vehicle_booking_order(source_name, include_draft=True)
+	if existing_vbo:
+		frappe.throw(_("{0} already exists against Opportunity")
+			.format(frappe.get_desk_link("Vehicle Booking Order", existing_vbo)))
+
 	def set_missing_values(source, target):
 		customer = get_customer_from_opportunity(source)
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
 
-		set_vehicle_item_from_opportunity(source, target)
 		add_sales_person_from_source(source, target)
+
+		existing_quotation = get_active_vehicle_quotation(source_name, include_draft=False)
+		if existing_quotation:
+			target.vehicle_quotation = existing_quotation
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -348,10 +388,10 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 			"doctype": "Vehicle Booking Order",
 			"field_map": {
 				"name": "opportunity",
-				"remarks": "remarks",
+				"applies_to_item": "item_code",
+				"applies_to_vehicle": "vehicle",
+				"vehicle_color": "color_1",
 				"delivery_period": "delivery_period",
-				"delivery_date": "delivery_date",
-				"vehicle": "vehicle",
 			}
 		},
 	}, target_doc, set_missing_values)
@@ -359,17 +399,27 @@ def make_vehicle_booking_order(source_name, target_doc=None):
 	return target_doc
 
 
-def set_vehicle_item_from_opportunity(source, target):
-	for d in source.items:
-		item = frappe.get_cached_doc("Item", d.item_code) if d.item_code else frappe._dict()
-		if item.is_vehicle:
-			target.item_code = item.name
-			target.opportunity_item = d.name
-			if target.meta.has_field('color'):
-				target.color = d.vehicle_color
-			elif target.meta.has_field('color_1'):
-				target.color_1 = d.vehicle_color
-			return
+@frappe.whitelist()
+def make_appointment(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		default_appointment_type = frappe.get_cached_value("Opportunity Type", source.opportunity_type, "default_appointment_type")
+		if default_appointment_type:
+			target.appointment_type = default_appointment_type
+
+		target.run_method("set_missing_values")
+
+	target_doc = get_mapped_doc("Opportunity", source_name, {
+		"Opportunity": {
+			"doctype": "Appointment",
+			"field_map": {
+				"name": "opportunity",
+				"applies_to_vehicle": "applies_to_vehicle",
+				"applies_to_serial_no": "applies_to_serial_no"
+			}
+		}
+	}, target_doc, set_missing_values)
+
+	return target_doc
 
 
 @frappe.whitelist()
@@ -392,6 +442,33 @@ def make_supplier_quotation(source_name, target_doc=None):
 	return doclist
 
 
+def get_active_vehicle_quotation(opportunity, include_draft=False):
+	filters = {
+		"opportunity": opportunity,
+		"status": ("not in", ['Lost', 'Closed'])
+	}
+
+	if include_draft:
+		filters["docstatus"] = ["<", 2]
+	else:
+		filters["docstatus"] = 1
+
+	return frappe.db.get_value("Vehicle Quotation", filters)
+
+
+def get_vehicle_booking_order(opportunity, include_draft=False):
+	filters = {
+		"opportunity": opportunity,
+	}
+
+	if include_draft:
+		filters["docstatus"] = ["<", 2]
+	else:
+		filters["docstatus"] = 1
+
+	return frappe.db.get_value("Vehicle Booking Order", filters)
+
+
 @frappe.whitelist()
 def set_multiple_status(names, status):
 	names = json.loads(names)
@@ -403,10 +480,14 @@ def set_multiple_status(names, status):
 
 def auto_close_opportunity():
 	""" auto close the `Replied` Opportunities after 7 days """
-	auto_close_after_days = frappe.db.get_single_value("Selling Settings", "close_opportunity_after_days") or 15
+	auto_close_after_days = frappe.db.get_single_value("CRM Settings", "close_opportunity_after_days")
+	if auto_close_after_days < 1:
+		return
 
-	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
+	opportunities = frappe.db.sql("""
+		select name from tabOpportunity
+		where status='Replied' and modified<DATE_SUB(CURDATE(), INTERVAL %s DAY)
+	""", (auto_close_after_days), as_dict=True)
 
 	for opportunity in opportunities:
 		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
@@ -450,20 +531,21 @@ def get_customer_from_opportunity(source):
 
 
 @frappe.whitelist()
-def submit_communication(name, contact_date, remarks):
+def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 	if not remarks:
-		frappe.throw(_('Remarks are mandatory for follow up'))
+		frappe.throw(_('Remarks are mandatory for Communication'))
+
+	if not frappe.db.exists('Opportunity', name):
+		frappe.throw(_("Opportunity does not exist"))
 
 	opp = frappe.get_cached_doc('Opportunity', name)
-	follow_up = [f for f in opp.contact_schedule if not f.contact_date]
-	if follow_up:
-		follow_up[0].contact_date = getdate(contact_date)
-	else:
-		opp.append("contact_schedule", {
-			"contact_date": contact_date,
-		})
 
-	opp.save()
+	if cint(submit_follow_up):
+		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
+		if follow_up:
+			follow_up[0].contact_date = getdate(contact_date)
+
+		opp.save()
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
@@ -476,10 +558,9 @@ def submit_communication(name, contact_date, remarks):
 	comm.content = remarks
 	comm.communication_type = "Feedback"
 
-	if opp.get('party_doctype') and opp.get('party'):
-		comm.append("timeline_links", {
-			"link_doctype": opp.party_doctype,
-			"link_name": opp.party
+	comm.append("timeline_links", {
+		"link_doctype": opp.opportunity_from,
+		"link_name": opp.party_name,
 	})
 
 	comm.insert(ignore_permissions=True)
