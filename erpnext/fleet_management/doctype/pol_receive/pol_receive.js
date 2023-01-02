@@ -3,16 +3,40 @@
 
 frappe.ui.form.on('POL Receive', {
 	refresh: function(frm) {
+		// if (frm.doc.docstatus === 1) {
+		// 	frm.add_custom_button(__('Stock Ledger'), function () {
+		// 		frappe.route_options = {
+		// 				voucher_no: frm.doc.name,
+		// 				from_date: frm.doc.posting_date,
+		// 				to_date: frm.doc.posting_date,
+		// 				company: frm.doc.company,
+		// 				group_by_voucher: false
+		// 		};
+		// 		frappe.set_route("query-report", "Stock Ledger");
+		// 	}, __("View"));
+		// }
 	},
 	qty: function(frm) {
 		calculate_total(frm)
 	},
-
+	direct_consumption:function(frm){
+		set_equipment_filter(frm)
+	},
 	rate: function(frm) {
 		calculate_total(frm)
 	},
 	get_pol_expense:function(frm){
 		populate_child_table(frm)
+	},
+	branch:function(frm){
+		frm.set_query("equipment",function(){
+			return {
+				filters:{
+					"branch":frm.doc.branch,
+					"enabled":1
+				}
+			}
+		})
 	}
 });
 cur_frm.set_query("pol_type", function() {
@@ -45,3 +69,15 @@ function calculate_total(frm) {
 	}
 }	
 
+var set_equipment_filter=function(frm){
+	if ( cint(frm.doc.direct_consumption) == 0){
+		frm.set_query("equipment", function() {
+			return {
+				query: "erpnext.fleet_management.fleet_utils.get_container_filtered",
+				filters:{
+					"branch":frm.doc.branch
+				}
+			};
+		});
+	}
+}

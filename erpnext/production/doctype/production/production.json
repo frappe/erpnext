@@ -13,7 +13,6 @@
   "cop_list",
   "work_type",
   "supplier",
-  "mine",
   "column_break_3",
   "entry_date",
   "posting_date",
@@ -60,7 +59,8 @@
   "column_break_5",
   "company",
   "currency",
-  "amended_from"
+  "amended_from",
+  "reference"
  ],
  "fields": [
   {
@@ -134,6 +134,7 @@
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
    "label": "Transfer To Warehouse",
+   "mandatory_depends_on": "eval:doc.transfer",
    "options": "Warehouse"
   },
   {
@@ -408,15 +409,16 @@
    "read_only": 1
   },
   {
-   "fieldname": "mine",
+   "fieldname": "reference",
    "fieldtype": "Link",
-   "label": "Mine",
-   "options": "Mine"
+   "label": "Reference",
+   "options": "Production",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-15 12:20:25.088585",
+ "modified": "2022-12-31 10:41:19.944367",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Production",

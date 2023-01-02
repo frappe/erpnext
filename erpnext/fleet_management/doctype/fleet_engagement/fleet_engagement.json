@@ -8,8 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "branch",
-  "cost_center",
+  "mine",
   "column_break_3",
+  "cost_center",
   "posting_date",
   "section_break_5",
   "items",
@@ -62,12 +63,19 @@
    "label": "Item",
    "options": "Fleet Engagement Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "mine",
+   "fieldtype": "Link",
+   "label": "Mine",
+   "options": "Mine",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-29 10:48:24.940334",
+ "modified": "2022-12-28 14:38:59.919797",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fleet Engagement",

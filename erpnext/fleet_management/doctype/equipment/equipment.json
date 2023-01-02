@@ -284,7 +284,6 @@
   },
   {
    "fetch_from": "supplier.bank",
-   "fetch_if_empty": 1,
    "fieldname": "bank",
    "fieldtype": "Link",
    "label": "Bank",
@@ -359,8 +358,7 @@
    "fetch_from": "equipment_type.is_container",
    "fieldname": "is_container",
    "fieldtype": "Check",
-   "label": "Is Container?",
-   "read_only": 1
+   "label": "Is Container?"
   },
   {
    "fieldname": "company",
@@ -418,7 +416,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-30 14:21:29.406857",
+ "modified": "2023-01-01 14:06:00.490418",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",

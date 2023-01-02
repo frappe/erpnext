@@ -14,7 +14,6 @@
   "column_break_3",
   "posting_date",
   "posting_time",
-  "warehouse",
   "direct_consumption",
   "section_break_6",
   "equipment",
@@ -29,6 +28,7 @@
   "pol_type",
   "item_name",
   "uom",
+  "previous_km",
   "column_break_6",
   "qty",
   "stock_uom",
@@ -75,14 +75,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.branch",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -109,7 +101,6 @@
    "description": "If the POL is consumed directly by the vehicle, check this. This will consume the POL too",
    "fieldname": "direct_consumption",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Direct Consumption"
   },
   {
@@ -217,7 +208,7 @@
    "fieldname": "cur_km_reading",
    "fieldtype": "Float",
    "label": "Current KM/HR Reading",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.direct_consumption"
   },
   {
    "fieldname": "km_difference",
@@ -304,14 +295,19 @@
    "fieldname": "uom",
    "fieldtype": "Data",
    "label": "UOM",
-   "read_only": 1,
-   "reqd": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_km",
+   "fieldtype": "Float",
+   "label": "Previous KM",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-03 11:47:17.266884",
+ "modified": "2023-01-01 15:29:29.087150",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Receive",
@@ -332,6 +328,7 @@
    "write": 1
   },
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,

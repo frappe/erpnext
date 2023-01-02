@@ -7,16 +7,25 @@
  "field_order": [
   "equipment",
   "equipment_category",
-  "qty",
+  "uom",
   "column_break_3",
   "fuelbook",
   "fuel_book_branch",
   "fuel_cost_center",
+  "section_break_7",
+  "qty",
+  "cur_km_reading",
+  "previous_km",
+  "column_break_11",
+  "rate",
+  "km_difference",
+  "amount",
   "section_break_9",
   "warehouse",
   "cost_center",
   "item_code",
-  "project"
+  "project",
+  "stock_uom"
  ],
  "fields": [
   {
@@ -53,7 +62,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Fuelbook",
-   "options": "Fuelbook"
+   "options": "Fuelbook",
+   "reqd": 1
   },
   {
    "fetch_from": "fuelbook.branch",
@@ -77,6 +87,7 @@
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Warehouse",
    "options": "Warehouse",
    "read_only": 1
@@ -101,12 +112,66 @@
    "hidden": 1,
    "label": "Ptoject",
    "options": "Project"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "previous_km",
+   "fieldtype": "Float",
+   "label": "Previous KM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "km_difference",
+   "fieldtype": "Float",
+   "label": "KM Difference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cur_km_reading",
+   "fieldtype": "Float",
+   "label": "Current KM",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.reading_uom",
+   "fieldname": "uom",
+   "fieldtype": "Select",
+   "label": "Reading UOM",
+   "options": "\nHour\nKM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate Per Unit",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-25 10:45:42.987567",
+ "modified": "2023-01-01 15:57:15.702401",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Issue Items",

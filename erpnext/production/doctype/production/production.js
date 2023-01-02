@@ -2,8 +2,10 @@
 // For license information, please see license.txt
 frappe.ui.form.on('Production', {
 	setup:function(frm){
-		frm.set_value("posting_time",frappe.datetime.now_time())
-		frm.refresh_field("posting_time")
+		if (frm.doc.__islocal){
+			frm.set_value("posting_time",frappe.datetime.now_time())
+			frm.refresh_field("posting_time")
+		}
 	},
     refresh:function(frm){
 		if(frm.doc.docstatus == 1) {

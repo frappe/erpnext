@@ -253,7 +253,7 @@ class EMEInvoice(AccountsController):
 			d.amount = flt(d.total_hours * d.rate, 2)
 			row = self.append('items', {})
 			row.update(d)
-		self.calculate_totals()
+		# self.calculate_totals()
 
 def set_missing_values(source, target):
 	target.run_method("set_missing_values")
