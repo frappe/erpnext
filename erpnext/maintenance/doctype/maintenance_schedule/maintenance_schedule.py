@@ -240,7 +240,7 @@ def create_maintenance_opportunity(maintenance_schedule, row):
 	schedule = schedule_doc.getone('schedules', {'name': row})
 
 	if not schedule:
-		frappe.throw(_("Row does not exist in Maintenace Schedule"))
+		frappe.throw(_("Invalid Maintenance Schedule Row Provided"))
 
 	target_doc = frappe.new_doc('Opportunity')
 

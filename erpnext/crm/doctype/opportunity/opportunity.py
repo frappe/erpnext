@@ -162,7 +162,7 @@ class Opportunity(TransactionBase):
 
 		dup = frappe.get_value("Opportunity", filters=filters)
 		if dup:
-			frappe.throw(_("Opportunity already exist for this maintenance schedule"))
+			frappe.throw(_("{0} already exists for this scheduled maintenance".format(frappe.get_desk_link("Opportunity", dup))))
 
 	@frappe.whitelist()
 	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):

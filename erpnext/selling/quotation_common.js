@@ -68,11 +68,11 @@ frappe.ui.form.on(cur_frm.doctype, {
 			doc: frm.doc,
 			method: "set_is_lost",
 			args: {
-				'is_lost': is_lost,
+				'is_lost': cint(is_lost),
 				'lost_reasons_list': lost_reasons_list,
 				'detailed_reason': detailed_reason
 			},
-			callback: () => {
+			callback: (r) => {
 				if (!r.exc) {
 					frm.reload_doc();
 				}
