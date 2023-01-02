@@ -337,8 +337,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Maintenance",
-   "link_count": 0,
-   "link_type": "DocType",
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -367,17 +366,6 @@
   {
    "dependencies": "",
    "hidden": 0,
-   "is_query_report": 1,
-   "label": "Maintenance Schedules",
-   "link_count": 0,
-   "link_to": "Maintenance Schedules",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
    "is_query_report": 0,
    "label": "Warranty Claim",
    "link_count": 0,
@@ -387,7 +375,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-01-02 13:51:36.474600",
+ "modified": "2023-01-02 16:51:10.558323",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
