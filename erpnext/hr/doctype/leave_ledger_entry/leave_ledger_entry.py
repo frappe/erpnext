@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import add_days, today, flt, DATE_FORMAT, getdate
 
+
 class LeaveLedgerEntry(Document):
 	def validate(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -18,6 +19,7 @@ class LeaveLedgerEntry(Document):
 			frappe.db.set_value("Leave Allocation", self.transaction_name, "expired", 0)
 		else:
 			frappe.throw(_("Only expired allocation can be cancelled"))
+
 
 def validate_leave_allocation_against_leave_application(ledger):
 	''' Checks that leave allocation has no leave application against it '''
@@ -35,6 +37,7 @@ def validate_leave_allocation_against_leave_application(ledger):
 	if leave_application_records:
 		frappe.throw(_("Leave allocation %s is linked with leave application %s"
 			% (ledger.transaction_name, ', '.join(leave_application_records))))
+
 
 def create_leave_ledger_entry(ref_doc, args, submit=True):
 	ledger = frappe._dict(
@@ -55,6 +58,7 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 	else:
 		delete_ledger_entry(ledger)
 
+
 def delete_ledger_entry(ledger):
 	''' Delete ledger entry on cancel of leave application/allocation/encashment '''
 	if ledger.transaction_type == "Leave Allocation":
@@ -66,6 +70,7 @@ def delete_ledger_entry(ledger):
 		WHERE
 			`transaction_name`=%s
 			OR `name`=%s""", (ledger.transaction_name, expired_entry))
+
 
 def get_previous_expiry_ledger_entry(ledger):
 	''' Returns the expiry ledger entry having same creation date as the ledger entry to be cancelled '''
@@ -85,6 +90,7 @@ def get_previous_expiry_ledger_entry(ledger):
 		'docstatus': 1,
 		'is_carry_forward': 0
 	}, fieldname=['name'])
+
 
 def process_expired_allocation():
 	''' Check if a carry forwarded allocation has expired and create a expiry ledger entry
@@ -125,6 +131,7 @@ def process_expired_allocation():
 	if expire_allocation:
 		create_expiry_ledger_entry(expire_allocation)
 
+
 def create_expiry_ledger_entry(allocations):
 	''' Create ledger entry for expired allocation '''
 	for allocation in allocations:
@@ -132,6 +139,7 @@ def create_expiry_ledger_entry(allocations):
 			expire_carried_forward_allocation(allocation)
 		else:
 			expire_allocation(allocation)
+
 
 def get_remaining_leaves(allocation):
 	''' Returns remaining leaves from the given allocation '''
@@ -142,6 +150,7 @@ def get_remaining_leaves(allocation):
 			'to_date': ('<=', allocation.to_date),
 			'docstatus': 1
 		}, fieldname=['SUM(leaves)'])
+
 
 @frappe.whitelist()
 def expire_allocation(allocation, expiry_date=None):
@@ -163,6 +172,7 @@ def expire_allocation(allocation, expiry_date=None):
 		create_leave_ledger_entry(allocation, args)
 
 	frappe.db.set_value("Leave Allocation", allocation.name, "expired", 1)
+
 
 def expire_carried_forward_allocation(allocation):
 	''' Expires remaining leaves in the on carried forward allocation '''

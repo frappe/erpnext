@@ -320,6 +320,9 @@ class DeliveryNote(SellingController):
 
 	def validate_order_required(self):
 		"""check in manage account if sales order required or not"""
+		if self.is_return:
+			return
+
 		so_required = frappe.get_cached_value("Selling Settings", None, 'so_required') == 'Yes'
 		if self.get('transaction_type'):
 			tt_so_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'so_required')

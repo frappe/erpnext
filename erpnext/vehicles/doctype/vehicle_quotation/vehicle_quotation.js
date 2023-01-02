@@ -54,8 +54,8 @@ erpnext.vehicles.VehicleQuotation = class VehicleQuotation extends erpnext.vehic
 		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
 			if(this.frm.doc.status !== "Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
-					this.frm.trigger('set_as_lost_dialog');
-				});
+					this.frm.events.set_as_lost_dialog(this.frm);
+				}, __("Status"));
 			}
 
 			if (!customer) {
@@ -70,6 +70,13 @@ erpnext.vehicles.VehicleQuotation = class VehicleQuotation extends erpnext.vehic
 
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+
+		if (this.frm.doc.status == "Lost") {
+			this.frm.add_custom_button(__("Reopen"), () => {
+				this.frm.events.update_lost_status(this.frm, false);
+			}, __("Status"));
+		}
+
 	}
 
 	quotation_to() {
@@ -99,6 +106,6 @@ erpnext.vehicles.VehicleQuotation = class VehicleQuotation extends erpnext.vehic
 			frm: this.frm
 		});
 	}
-};
+}
 
 extend_cscript(cur_frm.cscript, new erpnext.vehicles.VehicleQuotation({frm: cur_frm}));

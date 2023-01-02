@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, nowdate, getdate
+from frappe.utils import flt, nowdate, getdate, cint
 from frappe import _
 from erpnext.crm.doctype.lead.lead import get_customer_from_lead
 
@@ -118,43 +118,42 @@ class Quotation(SellingController):
 			doc.set_status(update=True)
 			doc.notify_update()
 
-	def update_opportunity(self):
-		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
-			if opportunity:
-				self.update_opportunity_status(opportunity)
-
-		if self.opportunity:
-			self.update_opportunity_status()
-
-	def update_opportunity_status(self, opportunity=None):
-		if not opportunity:
-			opportunity = self.opportunity
-
-		opp = frappe.get_doc("Opportunity", opportunity)
-		opp.set_status(update=True)
-		opp.notify_update()
+	def update_opportunity(self, reopen=False):
+		if self.get('opportunity'):
+			opp = frappe.get_doc("Opportunity", self.opportunity)
+			opp.set_status(update=True, status="Open" if reopen else None)
+			opp.notify_update()
 
 	def has_sales_order_or_invoice(self):
 		return frappe.db.get_value("Sales Order Item", {"quotation": self.name, "docstatus": 1})\
 			or frappe.db.get_value("Sales Invoice Item", {"quotation": self.name, "docstatus": 1})
 
 	@frappe.whitelist()
-	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
-		if not self.has_sales_order_or_invoice():
-			frappe.db.set(self, 'status', 'Lost')
+	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):
+		is_lost = cint(is_lost)
+
+		if is_lost and self.has_sales_order_or_invoice():
+			frappe.throw(_("Cannot declare as Lost because Quotation is converted to order"))
+
+		if is_lost:
+			self.set_status(update=True, status="Lost")
 
 			if detailed_reason:
-				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+				self.db_set('order_lost_reason', detailed_reason)
 
-			for reason in lost_reasons_list:
-				self.append('lost_reasons', reason)
-
-			self.update_opportunity()
-			self.update_lead()
-			self.save()
-
+			for reason in lost_reasons_list or []:
+				row = self.append('lost_reasons', reason)
+				row.db_insert()
 		else:
-			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
+			self.set_status(update=True, status="Open")
+			self.db_set('order_lost_reason', None)
+			self.lost_reasons = []
+			self.update_child_table("lost_reasons")
+
+		self.update_opportunity(reopen=not is_lost)
+		self.update_lead()
+
+		self.notify_update()
 
 	def set_customer_name(self):
 		if self.party_name and self.quotation_to == 'Customer':

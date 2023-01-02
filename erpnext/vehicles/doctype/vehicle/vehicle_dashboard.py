@@ -11,7 +11,7 @@ def get_data():
 			},
 			{
 				'label': ['Service'],
-				'items': ['Project', 'Vehicle Service Receipt', 'Vehicle Gate Pass']
+				'items': ['Project', 'Vehicle Service Receipt', 'Vehicle Gate Pass', 'Maintenance Schedule']
 			},
 			{
 				'label': ['Invoice'],
@@ -53,6 +53,7 @@ def get_data():
 			'Purchase Order': 'applies_to_vehicle',
 			'Purchase Receipt': 'applies_to_vehicle',
 			'Purchase Invoice': 'applies_to_vehicle',
+			'Maintenance Schedule': 'serial_no'
 		},
 		'transactions': vehicle_domain_sections
 	}
