@@ -10,6 +10,9 @@ from frappe.model.document import Document
 from frappe.utils import flt, get_url, nowdate
 from frappe.utils.background_jobs import enqueue
 
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+	get_accounting_dimensions,
+)
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_company_defaults,
 	get_payment_entry,
@@ -270,6 +273,17 @@ class PaymentRequest(Document):
 			}
 		)
 
+		# Update dimensions
+		payment_entry.update(
+			{
+				"cost_center": self.get("cost_center"),
+				"project": self.get("project"),
+			}
+		)
+
+		for dimension in get_accounting_dimensions():
+			payment_entry.update({dimension: self.get(dimension)})
+
 		if payment_entry.difference_amount:
 			company_details = get_company_defaults(ref_doc.company)
 
@@ -448,6 +462,17 @@ def make_payment_request(**args):
 				"bank_account": bank_account,
 			}
 		)
+
+		# Update dimensions
+		pr.update(
+			{
+				"cost_center": ref_doc.get("cost_center"),
+				"project": ref_doc.get("project"),
+			}
+		)
+
+		for dimension in get_accounting_dimensions():
+			pr.update({dimension: ref_doc.get(dimension)})
 
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True

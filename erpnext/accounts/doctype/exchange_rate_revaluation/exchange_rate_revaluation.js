@@ -26,7 +26,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 				doc: frm.doc,
 				callback: function(r) {
 					if (r.message) {
-						frm.add_custom_button(__('Journal Entry'), function() {
+						frm.add_custom_button(__('Journal Entries'), function() {
 							return frm.events.make_jv(frm);
 						}, __('Create'));
 					}
@@ -35,10 +35,11 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 		}
 	},
 
-	get_entries: function(frm) {
+	get_entries: function(frm, account) {
 		frappe.call({
 			method: "get_accounts_data",
 			doc: cur_frm.doc,
+			account: account,
 			callback: function(r){
 				frappe.model.clear_table(frm.doc, "accounts");
 				if(r.message) {
@@ -57,7 +58,6 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 
 		let total_gain_loss = 0;
 		frm.doc.accounts.forEach((d) => {
-			d.gain_loss = flt(d.new_balance_in_base_currency, precision("new_balance_in_base_currency", d)) - flt(d.balance_in_base_currency, precision("balance_in_base_currency", d));
 			total_gain_loss += flt(d.gain_loss, precision("gain_loss", d));
 		});
 
@@ -66,13 +66,19 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 	},
 
 	make_jv : function(frm) {
+		let revaluation_journal = null;
+		let zero_balance_journal = null;
 		frappe.call({
-			method: "make_jv_entry",
+			method: "make_jv_entries",
 			doc: frm.doc,
+			freeze: true,
+			freeze_message: "Making Journal Entries...",
 			callback: function(r){
 				if (r.message) {
-					var doc = frappe.model.sync(r.message)[0];
-					frappe.set_route("Form", doc.doctype, doc.name);
+					let response = r.message;
+					if(response['revaluation_jv'] || response['zero_balance_jv']) {
+						frappe.msgprint(__("Journals have been created"));
+					}
 				}
 			}
 		});
