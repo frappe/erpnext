@@ -35,6 +35,7 @@
   "payment_days",
   "column_break_26",
   "salary_structure",
+  "leave_with_pay",
   "actual_leave_without_pay",
   "actual_late_days",
   "set_lwp_manually",
@@ -648,12 +649,20 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "depends_on": "leave_with_pay",
+   "fieldname": "leave_with_pay",
+   "fieldtype": "Float",
+   "label": "Leaves Adjusted",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2022-12-06 01:04:22.156820",
+ "modified": "2023-01-02 00:23:10.691109",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
