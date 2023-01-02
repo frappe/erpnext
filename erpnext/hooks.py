@@ -447,8 +447,8 @@ email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
 default_mail_footer = """
 	<span>
 		Sent via
-		<a class="text-muted" href="https://erpnext.com?source=via_email_footer" target="_blank">
-			ERPNext
+		<a class="text-muted" href="https://emines.smcl.bt" target="_blank">
+			Emines
 		</a>
 	</span>
 """
@@ -569,6 +569,9 @@ permission_query_conditions = {
 	"Purchase Order": "erpnext.buying.doctype.purchase_order.purchase_order.get_permission_query_conditions",
 	"Purchase Invoice": "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_permission_query_conditions",
 	"Purchase Receipt": "erpnext.stock.doctype.purchase_receipt.purchase_receipt.get_permission_query_conditions",
+	"Sales Order": "erpnext.selling.doctype.sales_order.sales_order.get_permission_query_conditions",
+	"Delivery Note": "erpnext.stock.doctype.delivery_note.delivery_note.get_permission_query_conditions",
+	"Sales Invoice": "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_permission_query_conditions",
 	"Material Request": "erpnext.stock.doctype.material_request.material_request.get_permission_query_conditions",
 	"Stock Entry": "erpnext.stock.doctype.stock_entry.stock_entry.get_permission_query_conditions",
 	"Employee": "erpnext.setup.doctype.employee.employee.get_permission_query_conditions",
@@ -584,9 +587,9 @@ permission_query_conditions = {
 	"Trip Log": "erpnext.production.doctype.trip_log.trip_log.get_permission_query_conditions",
 	"Vehicle Request": "erpnext.fleet_management.doctype.vehicle_request.vehicle_request.get_permission_query_conditions",
 	# "Asset Movement": "erpnext.asset.doctype.asset_movement.asset_movement.get_permission_query_conditions",
-	# "Transporter Invoice": "erpnext.accounts.doctype.transporter_invoice.transporter_invoice.get_permission_query_conditions",
-	# "EME Invoice": "erpnext.accounts.doctype.eme_invoice.eme_invoice.get_permission_query_conditions",
-	# "EME Invoice": "erpnext.fleet_management.doctype.fleet_engagement.fleet_engagement.get_permission_query_conditions",
+	"Transporter Invoice": "erpnext.accounts.doctype.transporter_invoice.transporter_invoice.get_permission_query_conditions",
+	"EME Invoice": "erpnext.accounts.doctype.eme_invoice.eme_invoice.get_permission_query_conditions",
+	"Fleet Engagement": "erpnext.fleet_management.doctype.fleet_engagement.fleet_engagement.get_permission_query_conditions",
 }
 
 user_privacy_documents = [

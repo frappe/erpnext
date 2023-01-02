@@ -13,6 +13,7 @@
   "credit_account",
   "column_break_4",
   "mineral_raising_group",
+  "warehouse",
   "tier",
   "posting_date",
   "section_break_6",
@@ -239,12 +240,19 @@
    "label": "Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-09 12:27:24.138060",
+ "modified": "2022-12-28 15:03:47.500788",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Coal Raising Invoice",

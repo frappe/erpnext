@@ -10,6 +10,7 @@
   "section_break_1",
   "branch",
   "cost_center",
+  "mine",
   "repair_and_services_type",
   "out_source",
   "credit_account",
@@ -255,12 +256,19 @@
    "label": "Equipment Category",
    "options": "Equipment Category",
    "read_only": 1
+  },
+  {
+   "fieldname": "mine",
+   "fieldtype": "Link",
+   "label": "Mine",
+   "options": "Mine",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-08 17:23:17.840255",
+ "modified": "2022-12-28 14:42:06.934976",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Service Invoice",

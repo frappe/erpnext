@@ -21,6 +21,14 @@ frappe.ui.form.on('Coal Raising Invoice', {
 			}			
 		}
 	},
+	branch:function(frm){
+        cur_frm.set_query("warehouse", function() {
+            return {
+                query: "erpnext.controllers.queries.filter_branch_wh",
+                filters: {'branch': frm.doc.branch}
+            }
+        });
+	},
 	get_coal_raising_details:function(frm){
 		if(frm.doc.branch){
 			frappe.call({

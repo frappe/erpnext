@@ -70,7 +70,8 @@ class CoalRaisingInvoice(AccountsController):
 					AND crp.from_date BETWEEN '{1}' AND '{2}'
 					AND crp.to_date BETWEEN '{1}' AND '{2}'
 					AND cri.group_name = '{3}' AND cri.tier = '{4}')
-			""".format(self.branch,self.from_date,self.to_date,self.mineral_raising_group,self.tier),as_dict=True)
+				AND warehouse = '{5}'
+			""".format(self.branch,self.from_date,self.to_date,self.mineral_raising_group,self.tier, self.warehouse),as_dict=True)
 		if data1:
 			data.append(self.calculation(data1,self.mineral_raising_group,self.tier))
 

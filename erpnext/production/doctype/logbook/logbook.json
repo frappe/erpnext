@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "branch",
+  "mine",
   "equipment_hiring_form",
   "column_break_2",
   "cost_center",
@@ -233,11 +234,18 @@
    "fieldtype": "Check",
    "label": "Hired Equipment",
    "read_only": 1
+  },
+  {
+   "fieldname": "mine",
+   "fieldtype": "Link",
+   "label": "Mine",
+   "options": "Mine",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-24 22:41:54.286853",
+ "modified": "2022-12-28 14:45:19.898511",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Logbook",
