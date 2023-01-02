@@ -485,23 +485,6 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		erpnext.utils.format_vehicle_id(this.frm, 'vehicle_license_plate');
 	}
 
-	serial_no() {
-		var me = this;
-		if (me.frm.doc.serial_no) {
-			frappe.call({
-				method: "erpnext.stock.doctype.serial_no.serial_no.get_serial_no_item_customer",
-				args: {
-					serial_no: me.frm.doc.serial_no
-				},
-				callback: function (r) {
-					if (r.message) {
-						me.frm.set_value(r.message);
-					}
-				}
-			});
-		}
-	}
-
 	project_template(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.get_project_template_details(row);

@@ -39,7 +39,7 @@ def work(domain="Manufacturing"):
 		for i in range(random.randint(1,3)):
 			opportunity = get_random('Opportunity', doc=True)
 			if opportunity and opportunity.status in ('Open', 'Replied'):
-				opportunity.declare_enquiry_lost([{'lost_reason': 'Did not ask'}])
+				opportunity.set_is_lost(is_lost=1, lost_reasons_list=['Did not ask'])
 
 	for i in range(random.randint(1,3)):
 		if random.random() < 0.6:

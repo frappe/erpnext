@@ -25,7 +25,7 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			label: __("Date Type"),
 			fieldtype: "Select",
 			options: ["Transaction Date", "Project Date"],
-			default: "Transaction Date",
+			default: "Project Date",
 			reqd: 1
 		},
 		{
@@ -37,6 +37,17 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date"
+		},
+		{
+			fieldname: "claim_billing_type",
+			label: __("Claim Billing Type"),
+			fieldtype: "Link",
+			options: "Claim Billing Type"
+		},
+		{
+			fieldname: "exclude_warranty_claim_denied",
+			label: __("Exclude Denied Warranty Claims"),
+			fieldtype: "Check",
 		},
 		{
 			fieldname: "transaction_type",
@@ -241,5 +252,67 @@ frappe.query_reports["Claim Items To Be Billed"] = {
 			}
 			dialog.show();
 		});
-	}
+
+		report.page.add_inner_button(__("Set Claim Denied"), function() {
+			let rows = frappe.query_report.get_checked_items() || [];
+			rows = rows.filter(d => d.project);
+
+			let projects = rows.map(d => d.project);
+			projects = [...new Set(projects)];
+
+			if (!projects.length) {
+				frappe.msgprint(__("Please select rows first."));
+				return
+			}
+
+			let dialog = new frappe.ui.Dialog({
+				title: __('Set Warranty Claim Denied ({0} Projects)', [projects.length]),
+				fields: [
+					{
+						label: 'Is Denied',
+						fieldname: 'warranty_claim_denied',
+						fieldtype: 'Check',
+						default: 1,
+						onchange: () => {
+
+						},
+					},
+					{
+						label: 'Denied Reason',
+						fieldname: 'warranty_claim_denied_reason',
+						fieldtype: 'Small Text',
+						depends_on: "warranty_claim_denied",
+					},
+				],
+				primary_action_label: 'Update',
+				primary_action: function(values) {
+					frappe.call({
+						type: "POST",
+						method: "erpnext.projects.doctype.project.project.set_warranty_claim_denied",
+						args: {
+							projects: projects,
+							denied: cint(values.warranty_claim_denied),
+							reason: cstr(values.warranty_claim_denied_reason),
+						},
+						freeze: 1,
+						freeze_message: __("Updating"),
+						callback: function (r) {
+							if (!r.exc) {
+								frappe.query_report.refresh();
+								dialog.hide();
+							}
+						}
+					});
+				}
+			});
+
+			dialog.show();
+		});
+	},
+
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			checkboxColumn: true,
+		});
+	},
 };

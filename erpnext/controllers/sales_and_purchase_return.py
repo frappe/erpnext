@@ -103,11 +103,28 @@ def validate_returned_items(doc):
 
 	items_returned = False
 	for d in doc.get("items"):
-		if d.item_code and (flt(d.qty) < 0 or flt(d.get('received_qty')) < 0):
+		if flt(d.qty) > 0 or flt(d.get('received_qty')) > 0:
+			frappe.throw(_("Row #{0}: Item Qty must be negative for return").format(d.idx))
+
+		if d.item_code:
 			if d.item_code not in valid_items:
-				frappe.throw(_("Row # {0}: Returned Item {1} does not exist in {2} {3}")
+				frappe.throw(_("Row #{0}: Returned Item {1} does not exist in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
 			else:
+				return_against_row_name_field = None
+				if doc.doctype == "Purchase Receipt":
+					return_against_row_name_field = "purchase_receipt_item"
+				elif doc.doctype == "Purchase Invoice":
+					return_against_row_name_field = "purchase_invoice_item"
+				elif doc.doctype == "Delivery Note":
+					return_against_row_name_field = "delivery_note_item"
+				elif doc.doctype == "Sales Invoice":
+					return_against_row_name_field = "sales_invoice_item"
+
+				if return_against_row_name_field and not d.get(return_against_row_name_field):
+					frappe.throw(_("Row # {0}: Returned Item {1} does not have reference to returned against {2} Item")
+						.format(d.idx, d.item_code, doc.doctype))
+
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
@@ -119,7 +136,7 @@ def validate_returned_items(doc):
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
 
-				elif ref.serial_no:
+				if ref.serial_no:
 					if not d.serial_no:
 						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
 					else:
@@ -346,7 +363,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		target_doc.qty = -1 * source_doc.qty
 
 		if doctype == "Purchase Receipt":
-			target_doc.qty = -1 * (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
+			target_doc.qty = -1 * flt(source_doc.qty - source_doc.billed_qty - source_doc.returned_qty,
+				target_doc.precision('qty'))
 			target_doc.received_qty = target_doc.qty if target_doc.qty else -1 * source_doc.rejected_qty
 			target_doc.rejected_qty = -1 * source_doc.rejected_qty
 			target_doc.stock_qty = target_doc.qty * target_doc.conversion_factor
@@ -368,7 +386,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_invoice_item = source_doc.name
 
 		elif doctype == "Delivery Note":
-			target_doc.qty = -1 * (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
+			target_doc.qty = -1 * flt(source_doc.qty - source_doc.billed_qty - source_doc.returned_qty,
+				target_doc.precision("qty"))
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.sales_invoice = source_doc.sales_invoice
 			target_doc.target_warehouse = source_doc.target_warehouse

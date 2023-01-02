@@ -524,3 +524,10 @@ def get_vehicle_image(vehicle=None, item_code=None):
 		image = frappe.get_cached_value("Item", item_code, 'image')
 
 	return image
+
+
+def get_vehicle_from_serial_no(serial_no):
+	if not serial_no:
+		return None
+
+	return frappe.db.get_value("Serial No", serial_no, "vehicle", cache=1)

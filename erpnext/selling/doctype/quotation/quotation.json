@@ -39,6 +39,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "column_break_43",
   "applies_to_item_name",
@@ -883,11 +884,9 @@
    "read_only": 1
   },
   {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.status===\"Lost\"",
    "fieldname": "order_lost_reason",
    "fieldtype": "Small Text",
-   "label": "Detailed Reason",
+   "label": "Detailed Lost Reason",
    "no_copy": 1,
    "print_hide": 1
   },
@@ -1400,6 +1399,12 @@
    "fieldname": "cb_4",
    "fieldtype": "Column Break",
    "print_hide": 1
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -1407,7 +1412,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2022-11-23 17:19:46.477923",
+ "modified": "2022-12-28 13:24:22.369454",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

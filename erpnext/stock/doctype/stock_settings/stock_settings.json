@@ -283,8 +283,7 @@
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "links": [],
- "modified": "2022-12-21 14:56:27.506815",
+ "modified": "2022-12-26 12:15:26.279334",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -295,17 +294,18 @@
    "email": 1,
    "print": 1,
    "read": 1,
-   "role": "Stock Manager",
+   "role": "System Manager",
    "share": 1,
    "write": 1
   },
   {
+   "create": 1,
+   "email": 1,
+   "print": 1,
    "read": 1,
-   "role": "Stock User"
-  },
-  {
-   "read": 1,
-   "role": "Manufacturing User"
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "quick_entry": 1,

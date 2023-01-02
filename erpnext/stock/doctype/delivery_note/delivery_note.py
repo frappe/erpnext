@@ -173,6 +173,7 @@ class DeliveryNote(SellingController):
 			doc.update_billing_status()
 			doc.validate_returned_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
 			doc.validate_billed_qty(from_doctype=self.doctype, row_names=delivery_note_row_names)
+			doc.notify_update()
 
 		self.update_project_billing_and_sales()
 
@@ -318,6 +319,9 @@ class DeliveryNote(SellingController):
 
 	def validate_order_required(self):
 		"""check in manage account if sales order required or not"""
+		if self.is_return:
+			return
+
 		so_required = frappe.get_cached_value("Selling Settings", None, 'so_required') == 'Yes'
 		if self.get('transaction_type'):
 			tt_so_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'so_required')

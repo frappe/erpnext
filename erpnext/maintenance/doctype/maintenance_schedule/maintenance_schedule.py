@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from erpnext.utilities.transaction_base import TransactionBase
 from dateutil.relativedelta import relativedelta
-from frappe.utils import add_days, getdate, cstr
+from frappe.utils import add_days, getdate, cstr, today
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from erpnext.accounts.party import get_contact_details
 
@@ -204,3 +204,64 @@ def get_maintenance_schedule_from_serial_no(serial_no):
 	if schedule_name:
 		schedule_doc = frappe.get_doc('Maintenance Schedule', schedule_name)
 		return schedule_doc.schedules
+
+
+def create_opportunity_from_schedule(for_date=None):
+	if not frappe.db.get_single_value("CRM Settings", "auto_create_opportunity_from_schedule"):
+		return
+
+	days_in_advance = frappe.get_cached_value("CRM Settings", None, "auto_create_opportunity_before_days")
+
+	for_date = getdate(for_date)
+	target_date = getdate(add_days(for_date, days_in_advance))
+
+	schedule_data = frappe.db.sql("""
+		select msd.name, msd.parent, msd.project_template
+		from `tabMaintenance Schedule Detail` msd
+		inner join `tabMaintenance Schedule` ms on ms.name = msd.parent
+		where ms.status = 'Active' and msd.scheduled_date = %s
+			and not exists(select opp.name from `tabOpportunity` opp
+				where opp.maintenance_schedule = ms.name
+					and opp.maintenance_schedule_row = msd.name
+			)
+	""", target_date, as_dict=1)
+
+	for schedule in schedule_data:
+		opportunity_doc = create_maintenance_opportunity(schedule.parent, schedule.name)
+		opportunity_doc.flags.ignore_mandatory = True
+		opportunity_doc.save(ignore_permissions=True)
+
+
+@frappe.whitelist()
+def create_maintenance_opportunity(maintenance_schedule, row):
+	schedule_doc = frappe.get_doc('Maintenance Schedule', maintenance_schedule)
+	default_opportunity_type = frappe.get_cached_value("CRM Settings", None, "default_opportunity_type_for_schedule")
+	schedule = schedule_doc.getone('schedules', {'name': row})
+
+	if not schedule:
+		frappe.throw(_("Invalid Maintenance Schedule Row Provided"))
+
+	target_doc = frappe.new_doc('Opportunity')
+
+	target_doc.opportunity_from = 'Customer'
+	target_doc.party_name = schedule_doc.customer
+	target_doc.transaction_date = getdate()
+	target_doc.due_date = schedule.scheduled_date
+	target_doc.status = 'Open'
+	target_doc.opportunity_type = default_opportunity_type
+	target_doc.applies_to_serial_no = schedule_doc.serial_no
+
+	target_doc.maintenance_schedule = schedule_doc.name
+	target_doc.maintenance_schedule_row = schedule.name
+
+	if schedule.project_template:
+		project_template = frappe.get_cached_doc('Project Template', schedule.project_template)
+		for d in project_template.applicable_items:
+			target_doc.append("items", {
+				"item_code": d.applicable_item_code,
+				"qty": d.applicable_qty,
+			})
+
+	target_doc.run_method("set_misssing_values")
+	target_doc.run_method("validate_maintenance_schedule")
+	return target_doc

@@ -314,7 +314,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.vehicles.doctype.vehicle_quotation.vehicle_quotation.set_expired_status",
-		"erpnext.crm.doctype.appointment.appointment.auto_mark_missed"
+		"erpnext.crm.doctype.appointment.appointment.auto_mark_missed",
+		"erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.create_opportunity_from_schedule",
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",

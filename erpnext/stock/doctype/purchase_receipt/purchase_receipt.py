@@ -150,6 +150,7 @@ class PurchaseReceipt(BuyingController):
 			doc.set_billing_status(update=True)
 			doc.validate_returned_qty(from_doctype=self.doctype, row_names=purchase_receipt_row_names)
 			doc.validate_billed_qty(from_doctype=self.doctype, row_names=purchase_receipt_row_names)
+			doc.notify_update()
 
 	def set_billing_status(self, update=False, update_modified=True):
 		data = self.get_billing_status_data()
@@ -277,6 +278,9 @@ class PurchaseReceipt(BuyingController):
 				break
 
 	def validate_order_required(self):
+		if self.is_return:
+			return
+
 		po_required = frappe.get_cached_value("Buying Settings", None, 'po_required') == 'Yes'
 		if self.get('transaction_type'):
 			tt_po_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'po_required')
