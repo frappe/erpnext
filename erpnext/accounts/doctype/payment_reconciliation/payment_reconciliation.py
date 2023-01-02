@@ -317,6 +317,7 @@ class PaymentReconciliation(Document):
 
 	def make_difference_entry(self, row):
 		journal_entry = frappe.new_doc("Journal Entry")
+		journal_entry.voucher_type = "Exchange Gain Or Loss"
 		journal_entry.company = self.company
 		journal_entry.posting_date = nowdate()
 		journal_entry.multi_currency = 1
@@ -328,48 +329,38 @@ class PaymentReconciliation(Document):
 			"Account", row.difference_account, "account_currency"
 		)
 
-		journal_entry_accounts = []
+		# Account Currency has balance
+		dr_or_cr = "debit" if self.party_type == "Customer" else "debit"
+		reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
-		dr_or_cr = (
-			"credit_in_account_currency" if self.party_type == "Customer" else "debit_in_account_currency"
-		)
-
-		reverse_dr_or_cr = (
-			"debit_in_account_currency"
-			if dr_or_cr == "credit_in_account_currency"
-			else "credit_in_account_currency"
-		)
-
-		journal_entry_accounts.append(
+		journal_account = frappe._dict(
 			{
 				"account": self.receivable_payable_account,
 				"party_type": self.party_type,
 				"party": self.party,
 				"account_currency": party_account_currency,
-				dr_or_cr: flt(
-					row.difference_amount / row.exchange_rate,
-				),
-				"exchange_rate": row.exchange_rate,
+				"exchange_rate": 0,
+				"cost_center": erpnext.get_default_cost_center(self.company),
 				"reference_type": row.against_voucher_type,
 				"reference_name": row.against_voucher,
-				"cost_center": erpnext.get_default_cost_center(self.company),
+				dr_or_cr: flt(row.difference_amount),
+				dr_or_cr + "_in_account_currency": 0,
 			}
 		)
 
-		journal_entry_accounts.append(
+		journal_entry.append("accounts", journal_account)
+
+		journal_account = frappe._dict(
 			{
 				"account": row.difference_account,
 				"account_currency": difference_account_currency,
-				reverse_dr_or_cr: flt(row.difference_amount),
 				"exchange_rate": 1,
 				"cost_center": erpnext.get_default_cost_center(self.company),
+				reverse_dr_or_cr + "_in_account_currency": flt(row.difference_amount),
 			}
 		)
 
-		journal_entry.set("accounts", journal_entry_accounts)
-		journal_entry.set_amounts_in_company_currency()
-		journal_entry.set_total_debit_credit()
-		journal_entry.get_balance(difference_account=row.difference_account)
+		journal_entry.append("accounts", journal_account)
 
 		journal_entry.save()
 		journal_entry.submit()
