@@ -160,10 +160,9 @@ class StockController(AccountsController):
 
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
-            default_cost_center=None):
+			default_cost_center=None):
 
 		if not warehouse_account:
-			from erpnext.stock import get_warehouse_account_map
 			warehouse_account = get_warehouse_account_map(self.company)
 
 		sle_map = self.get_stock_ledger_details()
@@ -214,7 +213,7 @@ class StockController(AccountsController):
 						}, item=item_row))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
-						
+
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
