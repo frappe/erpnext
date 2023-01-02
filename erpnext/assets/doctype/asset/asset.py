@@ -395,7 +395,7 @@ class Asset(AccountsController):
 		for row in self.get("finance_books"):
 			depr_schedule = get_draft_or_active_depr_schedule(self.name, row.finance_book)
 
-			for d in depr_schedule:
+			for d in depr_schedule or []:
 				if d.journal_entry:
 					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
 					d.db_set("journal_entry", None)
@@ -903,6 +903,7 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 		)
 		new_asset_depr_schedule_doc.notes = notes
 
+		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
 		current_asset_depr_schedule_doc.cancel()
 
 		new_asset_depr_schedule_doc.submit()

@@ -65,8 +65,7 @@
    "fieldname": "finance_book",
    "fieldtype": "Link",
    "label": "Finance Book",
-   "options": "Finance Book",
-   "read_only": 1
+   "options": "Finance Book"
   },
   {
    "fieldname": "depreciation_method",
@@ -115,7 +114,8 @@
   {
    "fieldname": "notes",
    "fieldtype": "Small Text",
-   "label": "Notes"
+   "label": "Notes",
+   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -133,7 +133,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
    "fieldname": "expected_value_after_useful_life",
    "fieldtype": "Currency",
    "label": "Expected Value After Useful Life",
@@ -157,11 +156,10 @@
    "read_only": 1
   }
  ],
- "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-26 20:32:43.342271",
+ "modified": "2023-01-02 15:38:30.766779",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",

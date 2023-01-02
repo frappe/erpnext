@@ -124,6 +124,7 @@ class AssetValueAdjustment(Document):
 			new_asset_depr_schedule_doc.status = "Draft"
 			new_asset_depr_schedule_doc.docstatus = 0
 
+			current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
 			current_asset_depr_schedule_doc.cancel()
 
 			notes = _(

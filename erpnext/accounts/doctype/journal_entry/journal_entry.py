@@ -289,7 +289,7 @@ class JournalEntry(AccountsController):
 				for row in asset.get("finance_books"):
 					depr_schedule = get_draft_or_active_depr_schedule(asset.name, row.finance_book)
 
-					for s in depr_schedule:
+					for s in depr_schedule or []:
 						if s.journal_entry == self.name:
 							s.db_set("journal_entry", None)
 

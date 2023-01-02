@@ -18,6 +18,12 @@ import erpnext
 
 
 class AssetDepreciationSchedule(Document):
+	def before_save(self):
+		if not self.finance_book_id:
+			self.prepare_draft_asset_depr_schedule_data_from_asset_name_and_fb_name(
+				self.asset, self.finance_book
+			)
+
 	def validate(self):
 		self.validate_another_asset_depr_schedule_does_not_exist()
 
@@ -45,8 +51,32 @@ class AssetDepreciationSchedule(Document):
 	def on_submit(self):
 		self.db_set("status", "Active")
 
+	def before_cancel(self):
+		if not self.flags.should_not_cancel_depreciation_entries:
+			self.cancel_depreciation_entries()
+
+	def cancel_depreciation_entries(self):
+		for d in self.get("depreciation_schedule"):
+			if d.journal_entry:
+				frappe.get_doc("Journal Entry", d.journal_entry).cancel()
+
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
+
+	def prepare_draft_asset_depr_schedule_data_from_asset_name_and_fb_name(self, asset_name, fb_name):
+		asset_doc = frappe.get_doc("Asset", asset_name)
+
+		finance_book_filter = ["finance_book", "is", "not set"]
+		if fb_name:
+			finance_book_filter = ["finance_book", "=", fb_name]
+
+		asset_finance_book_name = frappe.db.get_value(
+			doctype="Asset Finance Book",
+			filters=[["parent", "=", asset_name], finance_book_filter],
+		)
+		asset_finance_book_doc = frappe.get_doc("Asset Finance Book", asset_finance_book_name)
+
+		prepare_draft_asset_depr_schedule_data(self, asset_doc, asset_finance_book_doc)
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
@@ -138,7 +168,8 @@ def cancel_asset_depr_schedules(asset_doc):
 		if not asset_depr_schedule_doc:
 			continue
 
-		asset_depr_schedule_doc.cancel()
+		if asset_depr_schedule_doc.status == "Active":
+			asset_depr_schedule_doc.cancel()
 
 
 def make_new_active_asset_depr_schedules_and_cancel_current_ones(
@@ -163,6 +194,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 
 		new_asset_depr_schedule_doc.notes = notes
 
+		current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
 		current_asset_depr_schedule_doc.cancel()
 
 		new_asset_depr_schedule_doc.submit()
