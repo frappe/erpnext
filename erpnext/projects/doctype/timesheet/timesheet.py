@@ -31,7 +31,7 @@ class Timesheet(Document):
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
-		
+
 	def calculate_hours(self):
 		for row in self.time_logs:
 			if row.to_time and row.from_time:
