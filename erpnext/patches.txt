@@ -783,11 +783,11 @@ execute:frappe.delete_doc_if_exists("Custom Field", "Opportunity Item-vehicle_co
 erpnext.patches.v12_0.move_crm_config_to_crm_settings
 erpnext.patches.v12_0.update_mapped_item_batch_no
 erpnext.patches.v12_0.update_salary_slip_leave_with_pay
-execute:frappe.delete_doc_if_exists("Report", "Maintenance Schedules")
 erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.update_uom_category_and_disabled
 erpnext.patches.v14_0.set_default_weight_uom
 
 [post_model_sync]
 erpnext.patches.v12_0.resetup_vehicle_domain #01-01-2023
+execute:frappe.delete_doc_if_exists("Report", "Maintenance Schedules")
 erpnext.patches.v14_0.trim_packing_slip_table
