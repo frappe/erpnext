@@ -793,3 +793,4 @@ erpnext.patches.v12_0.set_serial_no_in_transaction_documents
 execute:frappe.delete_doc_if_exists("Custom Field", "Opportunity Item-vehicle_color")
 erpnext.patches.v12_0.move_crm_config_to_crm_settings
 erpnext.patches.v12_0.update_mapped_item_batch_no
+execute:frappe.delete_doc_if_exists("Report", "Maintenance Schedules")
