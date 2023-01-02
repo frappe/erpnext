@@ -5,10 +5,10 @@
 from collections import Counter
 
 import frappe
+import frappe.share
 from frappe import _
 from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
-from frappe.share import add
 from frappe.utils import get_url, getdate
 from frappe.utils.verified_command import get_signed_params
 
@@ -188,7 +188,7 @@ class Appointment(Document):
 
 	def assign_agent(self, agent):
 		if not frappe.has_permission(doc=self, user=agent):
-			add(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
+			frappe.share.add(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
 
 		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
 
