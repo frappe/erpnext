@@ -89,20 +89,93 @@ class StockController(AccountsController):
 
 				row.serial_no = "\n".join(serial_no_list)
 
+	# def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
+	# 		default_cost_center=None):
+
+	# 	if not warehouse_account:
+	# 		warehouse_account = get_warehouse_account_map(self.company)
+
+	# 	sle_map = self.get_stock_ledger_details()
+	# 	voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
+
+	# 	gl_list = []
+	# 	warehouse_with_no_account = []
+	# 	precision = self.get_debit_field_precision()
+	# 	for item_row in voucher_details:
+
+	# 		sle_list = sle_map.get(item_row.name)
+	# 		if sle_list:
+	# 			for sle in sle_list:
+	# 				if warehouse_account.get(sle.warehouse):
+	# 					# from warehouse account
+
+	# 					self.check_expense_account(item_row)
+
+	# 					# If the item does not have the allow zero valuation rate flag set
+	# 					# and ( valuation rate not mentioned in an incoming entry
+	# 					# or incoming entry not found while delivering the item),
+	# 					# try to pick valuation rate from previous sle or Item master and update in SLE
+	# 					# Otherwise, throw an exception
+
+	# 					if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
+	# 						and not item_row.get("allow_zero_valuation_rate"):
+
+	# 						sle = self.update_stock_ledger_entries(sle)
+
+	# 					# expense account/ target_warehouse / source_warehouse
+	# 					if item_row.get('target_warehouse'):
+	# 						warehouse = item_row.get('target_warehouse')
+	# 						expense_account = warehouse_account[warehouse]["account"]
+	# 					else:
+	# 						expense_account = item_row.expense_account
+
+	# 					gl_list.append(self.get_gl_dict({
+	# 						"account": warehouse_account[sle.warehouse]["account"],
+	# 						"against": expense_account,
+	# 						"cost_center": item_row.cost_center,
+	# 						"project": item_row.project or self.get('project'),
+	# 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+	# 						"debit": flt(sle.stock_value_difference, precision),
+	# 						"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
+	# 					}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
+
+	# 					gl_list.append(self.get_gl_dict({
+	# 						"account": expense_account,
+	# 						"against": warehouse_account[sle.warehouse]["account"],
+	# 						"cost_center": item_row.cost_center,
+	# 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
+	# 						"credit": flt(sle.stock_value_difference, precision),
+	# 						"project": item_row.get("project") or self.get("project"),
+	# 						"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
+	# 					}, item=item_row))
+	# 				elif sle.warehouse not in warehouse_with_no_account:
+	# 					warehouse_with_no_account.append(sle.warehouse)
+
+	# 	if warehouse_with_no_account:
+	# 		for wh in warehouse_with_no_account:
+	# 			if frappe.db.get_value("Warehouse", wh, "company"):
+	# 				frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
+
+	# 	return process_gl_map(gl_list, precision=precision)
+
+
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
-			default_cost_center=None):
+                   default_cost_center=None):
 
 		if not warehouse_account:
+			print(self.company)
+			from erpnext.stock import get_warehouse_account_map
 			warehouse_account = get_warehouse_account_map(self.company)
 
 		sle_map = self.get_stock_ledger_details()
-		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
+		voucher_details = self.get_voucher_details(
+			default_expense_account, default_cost_center, sle_map)
 
 		gl_list = []
 		warehouse_with_no_account = []
-		precision = self.get_debit_field_precision()
-		for item_row in voucher_details:
 
+		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
+		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
@@ -117,30 +190,24 @@ class StockController(AccountsController):
 						# try to pick valuation rate from previous sle or Item master and update in SLE
 						# Otherwise, throw an exception
 
+
 						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
-							and not item_row.get("allow_zero_valuation_rate"):
+								and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
-
-						# expense account/ target_warehouse / source_warehouse
-						if item_row.get('target_warehouse'):
-							warehouse = item_row.get('target_warehouse')
-							expense_account = warehouse_account[warehouse]["account"]
-						else:
-							expense_account = item_row.expense_account
-
+						# from frappe.utils import flt
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
-							"against": expense_account,
+							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
-							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
+						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
-							"account": expense_account,
+							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -148,15 +215,62 @@ class StockController(AccountsController):
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}, item=item_row))
+
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
-
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
-					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
+					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in  the warehouse record or set default inventory account in company {1}.").format(
+						wh, self.company))
 
-		return process_gl_map(gl_list, precision=precision)
+		from erpnext.accounts.general_ledger import process_gl_map
+
+		processed_gl_map = process_gl_map(gl_list)
+		if self.get("purpose") == "Material Transfer" and (self.get("add_to_transit") or self.get("outgoing_stock_entry")):
+
+			# intermediate_warehouse = frappe.get_doc(
+			#     "NCITY Settings").intermediate_warehouse
+			intermediate_warehouse = frappe.get_doc(
+				"Warehouse", self.source_warehouse).default_in_transit_warehouse
+			def get_current_account(warehouse):
+				branch = frappe.get_doc('Warehouse', warehouse).branch
+				return frappe.get_doc('Branch', branch).currant_account
+
+			intermediate_account = frappe.get_doc(
+				"Warehouse", intermediate_warehouse).account
+			target_current_account = get_current_account(self.target_warehouse)
+			source_current_account = get_current_account(self.source_warehouse)
+
+			if not (source_current_account == target_current_account):
+				flag = 0
+				for entry in processed_gl_map:
+					if(entry.account == intermediate_account):
+						flag = 1
+						current_account = None
+
+						if(self.get("purpose") == "Material Transfer" and not self.outgoing_stock_entry):
+							current_account = target_current_account
+
+						elif(self.get("purpose") == "Material Transfer" and self.outgoing_stock_entry):
+							current_account = source_current_account
+
+						intermediate = entry.copy()
+						intermediate.account = current_account
+
+						processed_gl_map.append(intermediate)
+
+						if(entry.credit > 0):
+							entry.debit = entry.credit
+						else:
+							entry.credit = entry.debit
+						break
+
+				if not flag:
+					frappe.throw("No Intermediate Warehouse Account")
+
+		return processed_gl_map
+
 
 	def get_debit_field_precision(self):
 		if not frappe.flags.debit_field_precision:
