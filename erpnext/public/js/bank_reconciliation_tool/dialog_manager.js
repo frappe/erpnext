@@ -371,12 +371,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "deposit",
 				fieldtype: "Currency",
 				label: "Deposit",
+				options: "currency",
 				read_only: 1,
 			},
 			{
 				fieldname: "withdrawal",
 				fieldtype: "Currency",
 				label: "Withdrawal",
+				options: "currency",
 				read_only: 1,
 			},
 			{
@@ -394,6 +396,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "allocated_amount",
 				fieldtype: "Currency",
 				label: "Allocated Amount",
+				options: "Currency",
 				read_only: 1,
 			},
 
@@ -401,8 +404,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "unallocated_amount",
 				fieldtype: "Currency",
 				label: "Unallocated Amount",
+				options: "Currency",
 				read_only: 1,
 			},
+			{
+				fieldname: "currency",
+				fieldtype: "Link",
+				label: "Currency",
+				options: "Currency",
+				read_only: 1,
+				hidden: 1,
+			}
 		];
 
 		me.dialog = new frappe.ui.Dialog({
