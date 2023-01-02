@@ -100,6 +100,7 @@ class PickList(Document):
 			item_table,
 			item.sales_order_item,
 			["picked_qty", stock_qty_field],
+			for_update=True,
 		)
 
 		if self.docstatus == 1:
@@ -118,7 +119,7 @@ class PickList(Document):
 	def update_sales_order_picking_status(sales_orders: Set[str]) -> None:
 		for sales_order in sales_orders:
 			if sales_order:
-				frappe.get_doc("Sales Order", sales_order).update_picking_status()
+				frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
@@ -262,7 +263,7 @@ class PickList(Document):
 		for so_row, item_code in product_bundles.items():
 			picked_qty = self._compute_picked_qty_for_bundle(so_row, product_bundle_qty_map[item_code])
 			item_table = "Sales Order Item"
-			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty")
+			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
 			frappe.db.set_value(
 				item_table,
 				so_row,
