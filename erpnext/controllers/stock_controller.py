@@ -160,16 +160,14 @@ class StockController(AccountsController):
 
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
-                   default_cost_center=None):
+            default_cost_center=None):
 
 		if not warehouse_account:
-			print(self.company)
 			from erpnext.stock import get_warehouse_account_map
 			warehouse_account = get_warehouse_account_map(self.company)
 
 		sle_map = self.get_stock_ledger_details()
-		voucher_details = self.get_voucher_details(
-			default_expense_account, default_cost_center, sle_map)
+		voucher_details = self.get_voucher_details(default_expense_account, default_cost_center, sle_map)
 
 		gl_list = []
 		warehouse_with_no_account = []
@@ -190,9 +188,8 @@ class StockController(AccountsController):
 						# try to pick valuation rate from previous sle or Item master and update in SLE
 						# Otherwise, throw an exception
 
-
 						if not sle.stock_value_difference and self.doctype != "Stock Reconciliation" \
-								and not item_row.get("allow_zero_valuation_rate"):
+							and not item_row.get("allow_zero_valuation_rate"):
 
 							sle = self.update_stock_ledger_entries(sle)
 						# from frappe.utils import flt
@@ -215,9 +212,9 @@ class StockController(AccountsController):
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}, item=item_row))
-
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
+						
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
