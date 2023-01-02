@@ -611,11 +611,6 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 		new_row.docstatus = 1
 		new_row.update(reference_details)
 
-	payment_entry.flags.ignore_validate_update_after_submit = True
-	payment_entry.setup_party_account_field()
-	payment_entry.set_missing_values()
-	payment_entry.set_amounts()
-
 	if d.difference_amount and d.difference_account:
 		account_details = {
 			"account": d.difference_account,
@@ -626,6 +621,11 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 			account_details["amount"] = d.difference_amount
 
 		payment_entry.set_gain_or_loss(account_details=account_details)
+
+	payment_entry.flags.ignore_validate_update_after_submit = True
+	payment_entry.setup_party_account_field()
+	payment_entry.set_missing_values()
+	payment_entry.set_amounts()
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
