@@ -64,9 +64,14 @@
   "column_break_25",
   "frozen_accounts_modifier",
   "report_settings_sb",
+<<<<<<< HEAD
   "banking_tab",
   "enable_party_matching",
   "enable_fuzzy_matching"
+=======
+  "tab_break_dpet",
+  "show_balance_in_coa"
+>>>>>>> 1b78fae6fc (refactor: show balance checkbox in Accounts Settings)
  ],
  "fields": [
   {
@@ -355,6 +360,7 @@
    "label": "Allow multi-currency invoices against single party account "
   },
   {
+<<<<<<< HEAD
    "default": "0",
    "description": "Split Early Payment Discount Loss into Income and Tax Loss",
    "fieldname": "book_tax_discount_loss",
@@ -416,6 +422,17 @@
    "fieldname": "ignore_account_closing_balance",
    "fieldtype": "Check",
    "label": "Ignore Account Closing Balance"
+=======
+   "fieldname": "tab_break_dpet",
+   "fieldtype": "Tab Break",
+   "label": "Chart Of Accounts"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_balance_in_coa",
+   "fieldtype": "Check",
+   "label": "Show Balances in Chart Of Accounts"
+>>>>>>> 1b78fae6fc (refactor: show balance checkbox in Accounts Settings)
   }
  ],
  "icon": "icon-cog",
@@ -423,7 +440,11 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-07-27 15:05:34.000264",
+=======
+ "modified": "2023-01-02 12:07:42.434214",
+>>>>>>> 1b78fae6fc (refactor: show balance checkbox in Accounts Settings)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
