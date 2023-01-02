@@ -735,6 +735,11 @@ frappe.ui.form.on('Stock Entry Detail', {
 		frm.events.set_serial_no(frm, cdt, cdn, () => {
 			frm.events.set_basic_rate(frm, cdt, cdn);
 		});
+		let row = locals[cdt][cdn]
+		if (frm.doc.__islocal){
+			row.received_qty = row.qty
+			frm.refresh_field("items")
+		}
 	},
 
 	conversion_factor: function (frm, cdt, cdn) {
