@@ -263,6 +263,6 @@ def create_maintenance_opportunity(maintenance_schedule, row):
 				"qty": d.applicable_qty,
 			})
 
-	target_doc.run_method("set_misssing_values")
+	target_doc.run_method("set_missing_values")
 	target_doc.run_method("validate_maintenance_schedule")
 	return target_doc
