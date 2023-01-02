@@ -133,7 +133,7 @@ frappe.ui.form.on('Stock Entry', {
 
 		let quality_inspection_field = frm.get_docfield("items", "quality_inspection");
 		quality_inspection_field.get_route_options_for_new_doc = function(row) {
-			if (frm.is_new()) return;
+			if (frm.is_new()) return {};
 			return {
 				"inspection_type": "Incoming",
 				"reference_type": frm.doc.doctype,

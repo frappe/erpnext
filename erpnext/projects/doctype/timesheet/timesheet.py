@@ -25,11 +25,17 @@ class Timesheet(Document):
 	def validate(self):
 		self.set_status()
 		self.validate_dates()
+		self.calculate_hours()
 		self.validate_time_logs()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
 		self.set_dates()
+
+	def calculate_hours(self):
+		for row in self.time_logs:
+			if row.to_time and row.from_time:
+				row.hours = time_diff_in_hours(row.to_time, row.from_time)
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
