@@ -368,16 +368,6 @@ class PaymentRequest(Document):
 		if payment_provider == "stripe":
 			return create_stripe_subscription(gateway_controller, data)
 
-	@staticmethod
-	def get_gateway_details(args):  # nosemgrep
-		"""return gateway and payment account of default payment gateway"""
-		if args.get("payment_gateway_account"):
-			return get_payment_gateway_account(args.get("payment_gateway_account"))
-
-		gateway_account = get_payment_gateway_account({"is_default": 1})
-
-		return gateway_account
-
 
 @frappe.whitelist(allow_guest=True)
 def make_payment_request(**args):
@@ -386,7 +376,7 @@ def make_payment_request(**args):
 	args = frappe._dict(args)
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
-	gateway_account = PaymentRequest.get_gateway_details(args) or frappe._dict()
+	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
 	if args.loyalty_points and args.dt == "Sales Order":
@@ -524,6 +514,20 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 		(ref_dt, ref_dn),
 	)
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
+
+
+def get_gateway_details(args):  # nosemgrep
+	"""return gateway and payment account of default payment gateway"""
+	if args.get("payment_gateway_account"):
+		return get_payment_gateway_account(args.get("payment_gateway_account"))
+
+	if args.order_type == "Shopping Cart":
+		payment_gateway_account = frappe.get_doc("E Commerce Settings").payment_gateway_account
+		return get_payment_gateway_account(payment_gateway_account)
+
+	gateway_account = get_payment_gateway_account({"is_default": 1})
+
+	return gateway_account
 
 
 def get_payment_gateway_account(args):
