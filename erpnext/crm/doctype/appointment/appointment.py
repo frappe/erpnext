@@ -120,7 +120,6 @@ class Appointment(Document):
 		self.party = lead.name
 
 	def auto_assign(self):
-
 		existing_assignee = self.get_assignee_from_latest_opportunity()
 		if existing_assignee:
 			# If the latest opportunity is assigned to someone
