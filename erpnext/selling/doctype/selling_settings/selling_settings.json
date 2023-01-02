@@ -6,11 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "cust_master_name",
-  "campaign_naming_by",
   "customer_group",
   "territory",
   "selling_price_list",
-  "close_opportunity_after_days",
   "default_valid_till",
   "column_break_5",
   "so_required",
@@ -33,13 +31,6 @@
    "options": "Customer Name\nNaming Series"
   },
   {
-   "fieldname": "campaign_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series"
-  },
-  {
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -59,13 +50,6 @@
    "in_list_view": 1,
    "label": "Default Price List",
    "options": "Price List"
-  },
-  {
-   "default": "15",
-   "description": "Auto close Opportunity after 15 days",
-   "fieldname": "close_opportunity_after_days",
-   "fieldtype": "Int",
-   "label": "Close Opportunity After Days"
   },
   {
    "fieldname": "default_valid_till",
@@ -137,7 +121,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2021-09-28 12:48:02.586844",
+ "modified": "2022-12-26 12:22:05.256037",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -149,6 +133,15 @@
    "print": 1,
    "read": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
    "share": 1,
    "write": 1
   }

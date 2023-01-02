@@ -252,8 +252,11 @@ class SalarySlip(TransactionBase):
 
 		# LWP and Late calculation
 		leave_policy = get_employee_leave_policy(self.employee)
+		leave_count = self.get_leave_count(holidays, working_days, joining_date, relieving_date)
 
-		actual_lwp = self.calculate_lwp(holidays, working_days, joining_date, relieving_date)
+		self.leave_with_pay = flt(leave_count.leave_with_pay)
+
+		actual_lwp = flt(leave_count.leave_without_pay)
 		self.actual_late_days = self.calculate_late_days(holidays)
 		actual_late_lwp = leave_policy.get_lwp_from_late_days(self.actual_late_days) if leave_policy else 0
 		actual_lwp_with_late = actual_lwp + actual_late_lwp
@@ -316,8 +319,7 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
-	def calculate_lwp(self, holidays, working_days, joining_date, relieving_date):
-		lwp = 0
+	def get_leave_count(self, holidays, working_days, joining_date, relieving_date):
 		holidays = "','".join(holidays)
 
 		start_date = self.start_date
@@ -328,25 +330,39 @@ class SalarySlip(TransactionBase):
 		if relieving_date and getdate(self.start_date) <= getdate(relieving_date) <= getdate(self.end_date):
 			end_date = relieving_date
 
+		out = frappe._dict({
+			'leave_without_pay': 0,
+			'leave_with_pay': 0,
+			'total_leave': 0,
+		})
+
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
 			leave = frappe.db.sql("""
-				SELECT app.name,
-					CASE WHEN app.half_day_date = %(dt)s or app.to_date = app.from_date
-					THEN app.half_day else 0 END
+				SELECT app.name, type.is_lwp,
+					CASE
+						WHEN app.half_day_date = %(dt)s or app.to_date = app.from_date
+						THEN app.half_day else 0
+					END as half_day
 				FROM `tabLeave Application` app, `tabLeave Type` type
 				WHERE type.name = app.leave_type
-				AND type.is_lwp = 1
 				AND app.docstatus = 1
 				AND app.employee = %(employee)s
 				AND CASE
 					WHEN type.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(app.salary_slip, '') = ''
 					WHEN type.include_holiday THEN %(dt)s between from_date and to_date and ifnull(app.salary_slip, '') = ''
 				END
-			""".format(holidays), {"employee": self.employee, "dt": dt})
+			""".format(holidays), {"employee": self.employee, "dt": dt}, as_dict=1)
 
 			if leave:
-				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+				leave = leave[0]
+				leave_count = 0.5 if cint(leave.half_day) else 1
+
+				out.total_leave += leave_count
+				if leave.is_lwp:
+					out.leave_without_pay += leave_count
+				else:
+					out.leave_with_pay += leave_count
 
 		if not cint(frappe.get_cached_value("HR Settings", None, "do_not_consider_absent_as_lwp")):
 			absent = frappe.db.sql("""
@@ -362,9 +378,9 @@ class SalarySlip(TransactionBase):
 			""", {"employee": self.employee, "st_dt": start_date, "end_dt": end_date})
 
 			absent_days = flt(absent[0][0]) if absent else 0
-			lwp += absent_days
+			out.leave_without_pay += absent_days
 
-		return lwp
+		return out
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
 		row_exists = False

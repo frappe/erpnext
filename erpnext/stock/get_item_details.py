@@ -14,6 +14,7 @@ from erpnext.setup.doctype.item_default_rule.item_default_rule import get_item_d
 from erpnext.stock.doctype.price_list.price_list import get_price_list_details
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 from erpnext.selling.doctype.sales_commission_category.sales_commission_category import get_commission_rate
+from erpnext.vehicles.doctype.vehicle.vehicle import get_vehicle_from_serial_no
 
 from six import string_types, iteritems
 
@@ -1381,11 +1382,22 @@ def get_applies_to_details(args, for_validate=False):
 	args = frappe._dict(args)
 	out = frappe._dict()
 
-	# Get Vehicle and Vehicle's Item Code
+	if args.applies_to_serial_no and not args.applies_to_vehicle:
+		args.applies_to_vehicle = get_vehicle_from_serial_no(args.applies_to_serial_no)
+		out.applies_to_vehicle = args.applies_to_vehicle
+
+	if args.applies_to_vehicle:
+		args.applies_to_serial_no = args.applies_to_vehicle
+		out.applies_to_serial_no = args.applies_to_serial_no
+
+	# Get Item Code from Serial No
+	if args.applies_to_serial_no:
+		out.applies_to_item = frappe.db.get_value("Serial No", args.applies_to_serial_no, "item_code")
+
+	# Get Vehicle
 	vehicle = frappe._dict()
 	if args.applies_to_vehicle:
 		vehicle = frappe.get_doc("Vehicle", args.applies_to_vehicle)
-		out.applies_to_item = vehicle.item_code
 
 	# Get Project
 	project = None

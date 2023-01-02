@@ -79,22 +79,22 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		}
 
 		var customer;
-		if (this.frm.doc.quotation_to == "Customer") {
-			customer = this.frm.doc.party_name;
-		} else if (this.frm.doc.quotation_to == "Lead") {
-			customer = this.frm.doc.__onload && this.frm.doc.__onload.customer;
+		if (me.frm.doc.quotation_to == "Customer") {
+			customer = me.frm.doc.party_name;
+		} else if (me.frm.doc.quotation_to == "Lead") {
+			customer = me.frm.doc.__onload && me.frm.doc.__onload.customer;
 		}
 
-		if(me.frm.doc.docstatus == 1 && me.frm.doc.status!=='Lost') {
+		if(me.frm.doc.docstatus == 1 && me.frm.doc.status !== 'Lost') {
 			if (me.frm.doc.status !== "Ordered") {
 				me.frm.add_custom_button(__('Set as Lost'), () => {
-					me.frm.trigger('set_as_lost_dialog');
-				});
+					me.frm.events.set_as_lost_dialog(me.frm);
+				}, __("Status"));
 			}
 
 			if (!customer) {
-				this.frm.add_custom_button(__('Customer'), () => {
-					erpnext.utils.make_customer_from_lead(this.frm, this.frm.doc.party_name);
+				me.frm.add_custom_button(__('Customer'), () => {
+					erpnext.utils.make_customer_from_lead(me.frm, me.frm.doc.party_name);
 				}, __('Create'));
 			}
 
@@ -112,6 +112,12 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			}
 
 			me.frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+
+		if (me.frm.doc.status == "Lost") {
+			me.frm.add_custom_button(__("Reopen"), () => {
+				me.frm.events.update_lost_status(me.frm, false);
+			}, __("Status"));
 		}
 
 		if (me.frm.doc.docstatus === 0) {

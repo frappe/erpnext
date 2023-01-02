@@ -225,6 +225,16 @@
    "type": "Card Break"
   },
   {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "CRM Settings",
+   "link_count": 0,
+   "link_to": "CRM Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
@@ -377,7 +387,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 15:26:26.092250",
+ "modified": "2023-01-02 13:51:36.474600",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

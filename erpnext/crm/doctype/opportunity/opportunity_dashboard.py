@@ -16,5 +16,10 @@ def get_data():
 				'label': _("Pre Sales"),
 				'items': ['Quotation', 'Supplier Quotation']
 			},
-		] + vehicle_domain_links
+		] + vehicle_domain_links + [
+			{
+				'label': _("Reference"),
+				'items': ['Appointment']
+			},
+		]
 	}

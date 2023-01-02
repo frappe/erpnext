@@ -5,7 +5,8 @@ import frappe
 import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
-from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days, ceil, getdate
+from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days, ceil, getdate,\
+	clean_whitespace
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -97,6 +98,7 @@ class Project(StatusUpdater):
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
+		self.validate_warranty()
 		self.validate_vehicle_panels()
 
 		self.set_percent_complete()
@@ -651,6 +653,9 @@ class Project(StatusUpdater):
 				self.set(k, v)
 
 	def set_applies_to_details(self):
+		if self.get("applies_to_vehicle"):
+			self.applies_to_serial_no = self.applies_to_vehicle
+
 		args = self.as_dict()
 		applies_to_details = get_applies_to_details(args, for_validate=True)
 
@@ -828,6 +833,14 @@ class Project(StatusUpdater):
 					.format(d.idx, frappe.bold(d.depreciation_item_code)))
 
 			item_codes_visited.add(d.depreciation_item_code)
+
+	def validate_warranty(self):
+		if self.warranty_claim_denied:
+			self.warranty_claim_denied_reason = clean_whitespace(self.warranty_claim_denied_reason)
+			if not self.warranty_claim_denied_reason:
+				frappe.throw(_("Warranty Claim Denied Reason is mandatory for setting as Denied"))
+		else:
+			self.warranty_claim_denied_reason = None
 
 	def validate_vehicle_panels(self):
 		if not self.meta.has_field('vehicle_panels'):
@@ -2111,3 +2124,17 @@ def set_depreciation_in_invoice_items(items_list, project):
 					d.depreciation_percentage = flt(project.default_depreciation_percentage)
 		else:
 			d.depreciation_percentage = 0
+
+
+@frappe.whitelist()
+def set_warranty_claim_denied(projects, denied, reason=None):
+	if isinstance(projects, string_types):
+		projects = json.loads(projects)
+
+	denied = cint(denied)
+
+	for name in projects:
+		doc = frappe.get_doc("Project", name)
+		doc.warranty_claim_denied = denied
+		doc.warranty_claim_denied_reason = reason
+		doc.save()

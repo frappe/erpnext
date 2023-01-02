@@ -47,6 +47,7 @@
   "sec_applies_to",
   "applies_to_variant_of",
   "applies_to_variant_of_name",
+  "applies_to_serial_no",
   "applies_to_item",
   "col_break_applies_to",
   "applies_to_item_name",
@@ -1720,14 +1721,19 @@
   {
    "fieldname": "column_break_181",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applies_to_serial_no",
+   "fieldtype": "Link",
+   "label": "Applies to Serial No",
+   "options": "Serial No"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_calendar_and_gantt": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2022-12-20 12:56:00.113977",
+ "modified": "2022-12-19 15:12:16.792349",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

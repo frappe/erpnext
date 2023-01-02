@@ -452,8 +452,11 @@ class AccountsController(TransactionBase):
 		self.set_missing_applies_to_details()
 
 	def set_missing_applies_to_details(self):
-		if not self.meta.has_field('applies_to_item') and not self.meta.has_field('applies_to_vehicle'):
+		if not self.meta.has_field('applies_to_item'):
 			return
+
+		if self.get("applies_to_vehicle"):
+			self.applies_to_serial_no = self.applies_to_vehicle
 
 		args = self.get_item_details_parent_args()
 		applies_to_details = get_applies_to_details(args, for_validate=True)

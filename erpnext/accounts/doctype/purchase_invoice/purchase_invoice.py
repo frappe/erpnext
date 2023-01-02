@@ -192,9 +192,9 @@ class PurchaseInvoice(BuyingController):
 		if self.is_return and self.return_against:
 			doc = frappe.get_doc("Purchase Invoice", self.return_against)
 			doc.set_returned_status(update=True)
-
 			if self.update_stock:
 				doc.validate_returned_qty(from_doctype=self.doctype)
+			doc.notify_update()
 
 	def set_returned_status(self, update=False, update_modified=True):
 		data = self.get_returned_status_data()
