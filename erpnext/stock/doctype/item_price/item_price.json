@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "autoname": "format:IP-{item_code}-{####}",
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
  "doctype": "DocType",
@@ -218,11 +219,12 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-21 10:34:03.335538",
+ "modified": "2023-01-02 16:12:24.866902",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
  "name_case": "Title Case",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
@@ -262,6 +264,7 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "item_code,price_list_rate",
  "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],
