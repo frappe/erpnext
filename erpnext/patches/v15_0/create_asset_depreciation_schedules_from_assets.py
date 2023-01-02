@@ -62,7 +62,7 @@ def get_details_of_asset_finance_books_rows(asset_name):
 			afb.rate_of_depreciation,
 			afb.expected_value_after_useful_life,
 		)
-		.where((afb.parenttype == "Asset") & (afb.parent == asset_name))
+		.where(afb.parent == asset_name)
 	).run(as_dict=True)
 
 	return records
@@ -75,6 +75,7 @@ def update_depreciation_schedules(asset_name, asset_depr_schedule_name, fb_row_i
 		frappe.qb.from_(ds)
 		.select(ds.name)
 		.where((ds.parent == asset_name) & (ds.finance_book_id == str(fb_row_idx)))
+		.orderby(ds.idx)
 	).run(as_dict=True)
 
 	for idx, depr_schedule in enumerate(depr_schedules, start=1):
