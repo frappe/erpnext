@@ -253,6 +253,20 @@ class TestItem(FrappeTestCase):
 
 	def test_item_defaults(self):
 		frappe.delete_doc_if_exists("Item", "Test Item With Defaults", force=1)
+		with self.assertRaises(frappe.ValidationError) as context:
+			make_item(
+				"Test Item With Defaults",
+				{
+					"item_group": "_Test Item Group",
+					"item_defaults": [
+						{
+							"company": "_Test Company",
+							"expense_account": "_Test Account Stock Expenses - _TC",  # fail on group account
+						}
+					],
+				},
+			)
+
 		make_item(
 			"Test Item With Defaults",
 			{
@@ -262,7 +276,7 @@ class TestItem(FrappeTestCase):
 					{
 						"company": "_Test Company",
 						"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
-						"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
+						"expense_account": "_Test Account Stock Adjustment - _TC",  # override brand default
 						"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
 					}
 				],
@@ -273,7 +287,7 @@ class TestItem(FrappeTestCase):
 			"item_code": "Test Item With Defaults",
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
-			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"expense_account": "_Test Account Stock Adjustment - _TC",  # from item
 			"cost_center": "_Test Cost Center 2 - _TC",  # from item group
 		}
 		sales_item_details = get_item_details(
@@ -295,7 +309,7 @@ class TestItem(FrappeTestCase):
 		purchase_item_check = {
 			"item_code": "Test Item With Defaults",
 			"warehouse": "_Test Warehouse 2 - _TC",  # from item
-			"expense_account": "_Test Account Stock Expenses - _TC",  # from item
+			"expense_account": "_Test Account Stock Adjustment - _TC",  # from item
 			"income_account": "_Test Account Sales - _TC",  # from brand
 			"cost_center": "_Test Write Off Cost Center - _TC",  # from item
 		}

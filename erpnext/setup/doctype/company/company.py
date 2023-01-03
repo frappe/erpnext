@@ -55,7 +55,6 @@ class Company(NestedSet):
 
 		self.validate_abbr()
 		self.validate_default_accounts()
-		self.validate_default_inventory_account()
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
@@ -96,28 +95,25 @@ class Company(NestedSet):
 			["Expense Included In Valuation Account", "expenses_included_in_valuation"],
 		]
 
-		for account in accounts:
-			if self.get(account[1]):
-				for_company = frappe.db.get_value("Account", self.get(account[1]), "company")
-				if for_company != self.name:
+		for (label, field) in accounts:
+			account = self.get(field)
+			if account:
+				if frappe.db.get_value("Account", account, "is_group"):
 					frappe.throw(
-						_("Account {0} does not belong to company: {1}").format(self.get(account[1]), self.name)
+						_("Account {} is a Group Account and group accounts cannot be used in transactions.").format(
+							frappe.bold(account),
+						),
+						title=_("Invalid {}".format(label)),
 					)
+				for_company = frappe.db.get_value("Account", account, "company")
+				if for_company != self.name:
+					frappe.throw(_("Account {0} does not belong to company: {1}").format(account, self.name))
 
-				if get_account_currency(self.get(account[1])) != self.default_currency:
+				if get_account_currency(account) != self.default_currency:
 					error_message = _(
 						"{0} currency must be same as company's default currency. Please select another account."
-					).format(frappe.bold(account[0]))
+					).format(frappe.bold(label))
 					frappe.throw(error_message)
-
-	def validate_default_inventory_account(self):
-		if self.default_inventory_account and frappe.db.get_value("Account", self.default_inventory_account, "is_group"):
-			frappe.throw(
-				_("Account {} is a Group Account and group accounts cannot be used in transactions.").format(
-					frappe.bold(self.get("default_inventory_account")),
-				),
-				title=_("Invalid Default Inventory Account"),
-			)
 
 	def validate_currency(self):
 		if self.is_new():

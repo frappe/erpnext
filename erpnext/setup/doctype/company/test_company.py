@@ -162,6 +162,16 @@ class TestCompany(unittest.TestCase):
 		child_company.save()
 		self.test_basic_tree()
 
+	def test_default_accounts(self):
+		company = frappe.get_doc("Company", "_Test Company")
+		company.default_bank_account = "_Test Account Stock Expenses - _TC"
+		self.assertRaises(frappe.ValidationError, company.save)
+
+		company = frappe.get_doc("Company", "_Test Company")
+		company.default_bank_account = "_Test Account Stock Adjustment - _TC"
+		company.save()
+		self.assertEqual(company.default_bank_account, "_Test Account Stock Adjustment - _TC")
+
 
 def create_company_communication(doctype, docname):
 	comm = frappe.get_doc(
