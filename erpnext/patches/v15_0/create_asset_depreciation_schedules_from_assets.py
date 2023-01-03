@@ -1,7 +1,13 @@
 import frappe
 
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	set_draft_asset_depr_schedule_details,
+)
+
 
 def execute():
+	frappe.reload_doc("assets", "doctype", "Asset Depreciation Schedule")
+
 	assets = get_details_of_draft_or_submitted_depreciable_assets()
 
 	for asset in assets:
@@ -10,20 +16,7 @@ def execute():
 		for fb_row in finance_book_rows:
 			asset_depr_schedule_doc = frappe.new_doc("Asset Depreciation Schedule")
 
-			asset_depr_schedule_doc.asset = asset.name
-			asset_depr_schedule_doc.finance_book = fb_row.finance_book
-			asset_depr_schedule_doc.finance_book_id = fb_row.idx
-			asset_depr_schedule_doc.opening_accumulated_depreciation = (
-				asset.opening_accumulated_depreciation
-			)
-			asset_depr_schedule_doc.depreciation_method = fb_row.depreciation_method
-			asset_depr_schedule_doc.total_number_of_depreciations = fb_row.total_number_of_depreciations
-			asset_depr_schedule_doc.frequency_of_depreciation = fb_row.frequency_of_depreciation
-			asset_depr_schedule_doc.rate_of_depreciation = fb_row.rate_of_depreciation
-			asset_depr_schedule_doc.expected_value_after_useful_life = (
-				fb_row.expected_value_after_useful_life
-			)
-			asset_depr_schedule_doc.status = "Draft"
+			set_draft_asset_depr_schedule_details(asset_depr_schedule_doc, asset, fb_row)
 
 			asset_depr_schedule_doc.insert()
 
