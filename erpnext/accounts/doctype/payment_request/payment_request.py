@@ -360,33 +360,6 @@ class PaymentRequest(Document):
 	def get_payment_success_url(self):
 		return self.payment_success_url
 
-	def on_payment_authorized(self, status=None):
-		if not status:
-			return
-
-		shopping_cart_settings = frappe.get_doc("E Commerce Settings")
-
-		if status in ["Authorized", "Completed"]:
-			redirect_to = None
-			self.set_as_paid()
-
-			# if shopping cart enabled and in session
-			if (
-				shopping_cart_settings.enabled
-				and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest"
-			) and self.payment_channel != "Phone":
-
-				success_url = shopping_cart_settings.payment_success_url
-				if success_url:
-					redirect_to = ({"Orders": "/orders", "Invoices": "/invoices", "My Account": "/me"}).get(
-						success_url, "/me"
-					)
-				else:
-					redirect_to = get_url("/orders/{0}".format(self.reference_name))
-
-			return redirect_to
-
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
 			return create_stripe_subscription(gateway_controller, data)
@@ -540,13 +513,12 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 
 
 def get_gateway_details(args):  # nosemgrep
-	"""return gateway and payment account of default payment gateway"""
-	if args.get("payment_gateway_account"):
-		return get_payment_gateway_account(args.get("payment_gateway_account"))
-
-	if args.order_type == "Shopping Cart":
-		payment_gateway_account = frappe.get_doc("E Commerce Settings").payment_gateway_account
-		return get_payment_gateway_account(payment_gateway_account)
+	"""
+	Return gateway and payment account of default payment gateway
+	"""
+	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
+	if gateway_account:
+		return get_payment_gateway_account(gateway_account)
 
 	gateway_account = get_payment_gateway_account({"is_default": 1})
 
