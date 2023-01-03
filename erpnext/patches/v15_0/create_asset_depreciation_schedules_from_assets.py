@@ -20,10 +20,10 @@ def execute():
 
 			asset_depr_schedule_doc.insert()
 
-			update_depreciation_schedules(asset.name, asset_depr_schedule_doc.name, fb_row.idx)
-
 			if asset.docstatus == 1:
 				asset_depr_schedule_doc.submit()
+
+			update_depreciation_schedules(asset.name, asset_depr_schedule_doc.name, fb_row.idx)
 
 
 def get_details_of_draft_or_submitted_depreciable_assets():
