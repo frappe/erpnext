@@ -8,7 +8,6 @@
   "item_code",
   "column_break_2",
   "item_name",
-  "is_process_loss",
   "quantity_and_rate",
   "stock_qty",
   "rate",
@@ -89,17 +88,11 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_process_loss",
-   "fieldtype": "Check",
-   "label": "Is Process Loss"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-06-22 16:46:12.153311",
+ "modified": "2023-01-03 14:19:28.460965",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Scrap Item",
@@ -108,5 +101,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

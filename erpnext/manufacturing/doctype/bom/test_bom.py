@@ -409,7 +409,7 @@ class TestBOM(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, is_process_loss=0
+			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0
 		)
 		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
@@ -743,9 +743,7 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)
 
 
-def create_bom_with_process_loss_item(
-	fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2, is_process_loss=1
-):
+def create_bom_with_process_loss_item(fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2):
 	bom_doc = frappe.new_doc("BOM")
 	bom_doc.item = fg_item.item_code
 	bom_doc.quantity = fg_qty
@@ -768,7 +766,6 @@ def create_bom_with_process_loss_item(
 			"uom": fg_item.stock_uom,
 			"stock_uom": fg_item.stock_uom,
 			"rate": scrap_rate,
-			"is_process_loss": is_process_loss,
 		},
 	)
 	bom_doc.currency = "INR"
