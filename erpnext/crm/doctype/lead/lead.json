@@ -14,11 +14,11 @@
   "naming_series",
   "lead_details",
   "lead_number",
+  "lead_name",
   "description",
-  "company_name",
   "email_id",
   "col_break123",
-  "lead_name",
+  "company_name",
   "lead_owner",
   "status",
   "lead_status",
@@ -96,13 +96,12 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "CRM-LEAD-.YYYY.-",
+   "options": ".YY.-.DD.-",
    "set_only_once": 1
   },
   {
    "fieldname": "lead_name",
    "fieldtype": "Data",
-   "in_global_search": 1,
    "label": "Lead Name",
    "oldfieldname": "lead_name",
    "oldfieldtype": "Data",
@@ -110,12 +109,12 @@
   },
   {
    "fieldname": "company_name",
-   "fieldtype": "Data",
-   "hidden": 1,
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Organization Name",
+   "label": "Company Name",
    "oldfieldname": "company_name",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Company Details"
   },
   {
    "fieldname": "email_id",
@@ -137,12 +136,10 @@
    "fieldname": "lead_owner",
    "fieldtype": "Link",
    "hidden": 1,
-   "in_list_view": 1,
    "label": "Lead Owner",
    "oldfieldname": "lead_owner",
    "oldfieldtype": "Link",
-   "options": "User",
-   "search_index": 1
+   "options": "User"
   },
   {
    "default": "Lead",
@@ -212,7 +209,6 @@
   {
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Follow Up"
   },
   {
@@ -367,7 +363,7 @@
    "label": "Lead Type",
    "oldfieldname": "type",
    "oldfieldtype": "Select",
-   "options": "\nClient\nChannel Partner\nConsultant"
+   "options": "\nClient Type Table\nChannel Partner\nConsultant"
   },
   {
    "fieldname": "market_segment",
@@ -483,12 +479,6 @@
    "options": "Language"
   },
   {
-   "fieldname": "lead_number",
-   "fieldtype": "Int",
-   "label": "Lead Number",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_1",
    "fieldtype": "Section Break",
    "hidden": 1
@@ -502,7 +492,7 @@
    "fieldname": "lead_status",
    "fieldtype": "Select",
    "label": "Lead Status",
-   "options": "\nOpen\nConacted\nClose"
+   "options": "\nOpen\nContacted\nClose"
   },
   {
    "fieldname": "lead_transfer_to_section",
@@ -547,13 +537,21 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Date"
+  },
+  {
+   "fieldname": "lead_number",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Lead Number"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-13 16:54:14.283850",
+ "modified": "2022-12-27 16:34:56.624730",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

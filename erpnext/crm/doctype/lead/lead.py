@@ -25,7 +25,7 @@ class Lead(SellingController):
 	def before_insert(self):
 		if self.address_title and self.address_type:
 			self.address_doc = self.create_address()
-		self.contact_doc = self.create_contact()
+		# self.contact_doc = self.create_contact()
 
 	def after_insert(self):
 		self.update_links()
@@ -204,11 +204,11 @@ class Lead(SellingController):
 			self.address_doc.save()
 
 		# update contact links
-		if self.contact_doc:
-			self.contact_doc.append(
-				"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
-			)
-			self.contact_doc.save()
+		# if self.contact_doc:
+		# 	self.contact_doc.append(
+		# 		"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
+		# 	)
+		# 	self.contact_doc.save()
 
 
 @frappe.whitelist()

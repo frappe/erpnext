@@ -6,7 +6,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "company_name",
   "person_name",
   "designation",
   "email_address",
@@ -15,20 +14,15 @@
  "fields": [
   {
    "columns": 2,
-   "fieldname": "company_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Company Name"
-  },
-  {
-   "columns": 2,
    "fieldname": "person_name",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Person Name"
+   "label": "Person Name",
+   "options": "Contact"
   },
   {
    "columns": 2,
+   "fetch_from": "person_name.designation",
    "fieldname": "designation",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -36,6 +30,7 @@
   },
   {
    "columns": 2,
+   "fetch_from": "person_name.email_id",
    "fieldname": "email_address",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -43,6 +38,7 @@
   },
   {
    "columns": 2,
+   "fetch_from": "person_name.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -52,7 +48,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-13 16:23:37.153360",
+ "modified": "2022-12-21 11:18:27.023494",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Person Details",
