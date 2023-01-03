@@ -7,6 +7,7 @@
  "field_order": [
   "parent_account",
   "account",
+  "account_number",
   "budget_type",
   "column_break_4",
   "initial_budget",
@@ -95,11 +96,18 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "account.account_number",
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-09-09 23:07:02.956836",
+ "modified": "2023-01-03 15:24:01.711461",
  "modified_by": "Administrator",
  "module": "Budget",
  "name": "Budget Account",

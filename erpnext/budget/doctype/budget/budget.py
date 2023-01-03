@@ -137,7 +137,7 @@ class Budget(Document):
 	@frappe.whitelist()
 	def get_accounts(self):
 		condition = " and a.budget_type = '{}'".format(self.budget_type) if self.budget_type else ""
-		entries = frappe.db.sql("""select parent_account, a.name as account, a.budget_type
+		entries = frappe.db.sql("""select parent_account, a.name as account, a.budget_type, account_number
 							from tabAccount a
 							where a.is_group = 0
 							and (a.freeze_account is null or a.freeze_account != 'Yes')
