@@ -17,7 +17,7 @@ class PriceList(Document):
 			self.check_impact_on_shopping_cart()
 
 	def on_update(self):
-		self.set_default_if_missing()
+		# self.set_default_if_missing()
 		self.update_item_price()
 		self.delete_price_list_details_key()
 
