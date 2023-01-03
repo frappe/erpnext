@@ -2136,6 +2136,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			currency = frappe.db.get_value("Customer", details.get("party"), "default_currency")
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
+			target_doc.is_internal_customer = 1
+			target_doc.ignore_pricing_rule = 1
 			target_doc.selling_price_list = source_doc.buying_price_list
 
 			update_address(
