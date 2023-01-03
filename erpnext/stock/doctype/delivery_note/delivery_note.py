@@ -579,6 +579,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = to_make_invoice_qty_map[source_doc.name]
+		target_doc.accepted_qty = source_doc.qty
 
 		if source_doc.serial_no and source_parent.per_billed > 0 and not source_parent.is_return:
 			target_doc.serial_no = get_delivery_note_serial_no(
@@ -623,6 +624,7 @@ def make_sales_invoice(source_name, target_doc=None):
 					"against_sales_order": "sales_order",
 					"serial_no": "serial_no",
 					"cost_center": "cost_center",
+					"qty":"accepted_qty"
 				},
 				"postprocess": update_item,
 				"filter": lambda d: get_pending_qty(d) <= 0
@@ -689,7 +691,6 @@ def make_installation_note(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
-		target.accepted_qty = obj.qty
 
 	doclist = get_mapped_doc(
 		"Delivery Note",
