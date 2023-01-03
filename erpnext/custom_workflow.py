@@ -33,7 +33,7 @@ class CustomWorkflow:
 		self.field_map 		= get_field_map()
 		self.doc_approver	= self.field_map[self.doc.doctype]
 		self.field_list		= ["user_id","employee_name","designation","name"]
-		if self.doc.doctype != "Material Request" and self.doc.doctype != "Performance Evaluation" and self.doc.doctype not in ("Project Capitalization","Asset Issue Details", "Compile Budget","POL Expense","Vehicle Request", "Repair And Services", "Asset Movement"):
+		if self.doc.doctype != "Material Request" and self.doc.doctype != "Performance Evaluation" and self.doc.doctype not in ("Project Capitalization","Asset Issue Details", "Compile Budget","POL Expense","Vehicle Request", "Repair And Services", "Asset Movement", "Budget Reappropiation"):
 			self.employee		= frappe.db.get_value("Employee", self.doc.employee, self.field_list)
 			self.reports_to = frappe.db.get_value("Employee", {"user_id":frappe.db.get_value("Employee", self.doc.employee, "reports_to")}, self.field_list)
 			if self.doc.doctype in ("Travel Request","Employee Separation","Overtime Application"):
@@ -111,7 +111,7 @@ class CustomWorkflow:
 			self.reports_to		= frappe.db.get_value("Employee", frappe.db.get_value("Employee", self.doc.employee, "reports_to"), self.field_list)
 			self.supervisors_supervisor = frappe.db.get_value("Employee", frappe.db.get_value("Employee", frappe.db.get_value("Employee", {"user_id": self.doc.approver}, "name"), "reports_to"), self.field_list)
 		
-		if self.doc.doctype == "Asset Movement":
+		if self.doc.doctype == "Asset Movement" and self.doc.doctype == "Budget Reappropiation":
 			department = frappe.db.get_value("Employee",{"user_id":frappe.session.user}, "department")
 			if not department:
 				frappe.throw("Department not set for {}".format(frappe.session.user))
@@ -123,7 +123,7 @@ class CustomWorkflow:
 					)},self.field_list)
 			else:
 				self.asset_verifier = frappe.db.get_value("Employee", frappe.db.get_value("Employee", {"designation": "Chief Executive Officer", "status": "Active"},"name"), self.field_list)
-
+		
 		if self.doc.doctype == "POL Expense":
 			department = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"department")
 			if department != "PROJECTS & MINES DEPARTMENT - SMCL":
@@ -520,7 +520,7 @@ class CustomWorkflow:
 		elif self.doc.doctype == "Material Request":
 			self.material_request()		
 		elif self.doc.doctype == "Employee Advance":
-			self.employe_advance()
+			self.employee_advance()
 		elif self.doc.doctype == "Employee Transfer":
 			self.employee_transfer()
 		elif self.doc.doctype == "Employee Benefit Claim":
@@ -1031,6 +1031,9 @@ class CustomWorkflow:
 			if "HR User" not in frappe.get_roles(frappe.session.user):
 				frappe.throw(_("Only {} can Cancel this Travel Authorization").format(self.doc.supervisor_name))
 			self.doc.document_status = "Cancelled"
+	def employee_advance(self):
+		if self.new_state.lower() in ("Waiting Approval".lower()):
+			self.set_approver("HR")
 
 	def vehicle_request(self):
 		if self.new_state.lower() in ("Draft".lower()):
@@ -1815,12 +1818,14 @@ def get_field_map():
 		"Leave Encashment": ["approver","approver_name","approver_designation"],
 		"Leave Application": ["leave_approver", "leave_approver_name", "leave_approver_designation"],
 		"Travel Request": ["supervisor", "supervisor_name", "supervisor_designation"],
+		"Employee Advance": ["advance_approver_name", "advance_approver", "advance_approver_designation"],
 		"Vehicle Request": ["approver_id", "approver"],
 		"Repair And Services": ["approver", "approver_name", "aprover_designation"],
 		"Overtime Application": ["approver", "approver_name", "approver_designation"],
 		"POL Expense": ["approver", "approver_name", "approver_designation"],
 		"Material Request": ["approver","approver_name","approver_designation"],
 		"Asset Movement": ["approver", "approver_name", "approver_designation"],
+		"Budget Reappropiation": ["approver", "approver_name", "approver_designation"],
 		"Festival Advance": ["advance_approver","advance_approver_name", "advance_approver_designation"],
 		"Employee Transfer": ["supervisor", "supervisor_name", "supervisor_designation"],
 		"Employee Benefits": ["benefit_approver","benefit_approver_name","benefit_approver_designation"],
