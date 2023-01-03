@@ -193,6 +193,7 @@ class BOM(WebsiteGenerator):
 		self.update_exploded_items(save=False)
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate=False, save=False)
+		self.set_process_loss_qty()
 		self.validate_scrap_items()
 
 	def get_context(self, context):
@@ -876,6 +877,10 @@ class BOM(WebsiteGenerator):
 	def get_tree_representation(self) -> BOMTree:
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
+
+	def set_process_loss_qty(self):
+		if self.process_loss_percentage:
+			self.process_loss_qty = flt(self.quantity) * flt(self.process_loss_percentage) / 100
 
 	def validate_scrap_items(self):
 		must_be_whole_number = frappe.get_value("UOM", self.uom, "must_be_whole_number")
