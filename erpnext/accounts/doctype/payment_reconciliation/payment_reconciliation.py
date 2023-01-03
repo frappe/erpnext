@@ -231,6 +231,9 @@ class PaymentReconciliation(Document):
 		self.validate_entries()
 
 		invoice_exchange_map = self.get_invoice_exchange_map(args.get("invoices"))
+		default_exchange_gain_loss_account = frappe.get_cached_value(
+			"Company", self.company, "exchange_gain_loss_account"
+		)
 
 		entries = []
 		for pay in args.get("payments"):
@@ -247,6 +250,7 @@ class PaymentReconciliation(Document):
 
 				inv["exchange_rate"] = invoice_exchange_map.get(inv.get("invoice_number"))
 				res.difference_amount = self.get_difference_amount(pay, inv, res["allocated_amount"])
+				res.difference_account = default_exchange_gain_loss_account
 				res.exchange_rate = inv.get("exchange_rate")
 
 				if pay.get("amount") == 0:

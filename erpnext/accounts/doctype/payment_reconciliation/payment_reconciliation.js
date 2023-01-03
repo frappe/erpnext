@@ -170,7 +170,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 	}
 
 	reconcile() {
-		var show_dialog = this.frm.doc.allocation.filter(d => d.difference_amount && !d.difference_account);
+		var show_dialog = this.frm.doc.allocation.filter(d => d.difference_amount);
 
 		if (show_dialog && show_dialog.length) {
 
@@ -242,7 +242,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 
 			this.frm.doc.allocation.forEach(d => {
-				if (d.difference_amount && !d.difference_account) {
+				if (d.difference_amount) {
 					dialog.fields_dict.allocation.df.data.push({
 						'docname': d.name,
 						'reference_name': d.reference_name,
