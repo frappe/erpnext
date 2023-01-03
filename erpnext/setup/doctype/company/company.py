@@ -103,7 +103,7 @@ class Company(NestedSet):
 						_("Account {} is a Group Account and group accounts cannot be used in transactions.").format(
 							frappe.bold(account),
 						),
-						title=_("Invalid {}".format(label)),
+						title=_("Invalid {0}".format(label)),
 					)
 				for_company = frappe.db.get_value("Account", account, "company")
 				if for_company != self.name:
