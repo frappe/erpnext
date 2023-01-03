@@ -1,7 +1,7 @@
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import now_datetime
+from frappe.utils import add_months, getdate
 
 from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -14,9 +14,7 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 		frappe.db.delete("Attendance", {"employee": self.employee})
 
 	def test_monthly_attendance_sheet_report(self):
-		now = now_datetime()
-		previous_month = now.month - 1
-		previous_month_first = now.replace(day=1).replace(month=previous_month).date()
+		previous_month_first = add_months(getdate(), -1).replace(day=1)
 
 		company = frappe.db.get_value("Employee", self.employee, "company")
 
@@ -27,8 +25,8 @@ class TestMonthlyAttendanceSheet(FrappeTestCase):
 
 		filters = frappe._dict(
 			{
-				"month": previous_month,
-				"year": now.year,
+				"month": previous_month_first.month,
+				"year": previous_month_first.year,
 				"company": company,
 			}
 		)

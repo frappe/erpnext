@@ -5,7 +5,16 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, cstr, formatdate, get_datetime, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	formatdate,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
 
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 
@@ -106,8 +115,6 @@ class Attendance(Document):
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 	def unlink_attendance_from_checkins(self):
-		from frappe.utils import get_link_to_form
-
 		EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
 		linked_logs = (
 			frappe.qb.from_(EmployeeCheckin)
@@ -221,75 +228,39 @@ def mark_bulk_attendance(data):
 		attendance.submit()
 
 
-def get_month_map():
-	return frappe._dict(
-		{
-			"January": 1,
-			"February": 2,
-			"March": 3,
-			"April": 4,
-			"May": 5,
-			"June": 6,
-			"July": 7,
-			"August": 8,
-			"September": 9,
-			"October": 10,
-			"November": 11,
-			"December": 12,
-		}
-	)
-
-
 @frappe.whitelist()
-def get_unmarked_days(employee, month, exclude_holidays=0):
-	import calendar
-
-	month_map = get_month_map()
-	today = get_datetime()
-
+def get_unmarked_days(employee, from_date, to_date, exclude_holidays=0):
 	joining_date, relieving_date = frappe.get_cached_value(
 		"Employee", employee, ["date_of_joining", "relieving_date"]
 	)
-	start_day = 1
-	end_day = calendar.monthrange(today.year, month_map[month])[1] + 1
 
-	if joining_date and joining_date.year == today.year and joining_date.month == month_map[month]:
-		start_day = joining_date.day
-
-	if (
-		relieving_date and relieving_date.year == today.year and relieving_date.month == month_map[month]
-	):
-		end_day = relieving_date.day + 1
-
-	dates_of_month = [
-		"{}-{}-{}".format(today.year, month_map[month], r) for r in range(start_day, end_day)
-	]
-	month_start, month_end = dates_of_month[0], dates_of_month[-1]
+	from_date = max(getdate(from_date), joining_date or getdate(from_date))
+	to_date = min(getdate(to_date), relieving_date or getdate(to_date))
 
 	records = frappe.get_all(
 		"Attendance",
 		fields=["attendance_date", "employee"],
 		filters=[
-			["attendance_date", ">=", month_start],
-			["attendance_date", "<=", month_end],
+			["attendance_date", ">=", from_date],
+			["attendance_date", "<=", to_date],
 			["employee", "=", employee],
 			["docstatus", "!=", 2],
 		],
 	)
 
-	marked_days = [get_datetime(record.attendance_date) for record in records]
+	marked_days = [getdate(record.attendance_date) for record in records]
+
 	if cint(exclude_holidays):
-		holiday_dates = get_holiday_dates_for_employee(employee, month_start, month_end)
-		holidays = [get_datetime(record) for record in holiday_dates]
+		holiday_dates = get_holiday_dates_for_employee(employee, from_date, to_date)
+		holidays = [getdate(record) for record in holiday_dates]
 		marked_days.extend(holidays)
 
 	unmarked_days = []
 
-	for date in dates_of_month:
-		date_time = get_datetime(date)
-		if today.day <= date_time.day and today.month <= date_time.month:
-			break
-		if date_time not in marked_days:
-			unmarked_days.append(date)
+	while from_date <= to_date:
+		if from_date not in marked_days:
+			unmarked_days.append(from_date)
+
+		from_date = add_days(from_date, 1)
 
 	return unmarked_days
