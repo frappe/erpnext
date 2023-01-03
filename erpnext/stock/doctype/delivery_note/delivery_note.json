@@ -2,7 +2,8 @@
  "actions": [],
  "allow_auto_repeat": 1,
  "allow_import": 1,
- "autoname": "format:DN-{YY}-{MM}-{DD}-{####}",
+ "allow_rename": 1,
+ "autoname": "DN.YY.MM.DD.####",
  "creation": "2013-05-24 19:29:09",
  "doctype": "DocType",
  "document_type": "Document",
@@ -1291,11 +1292,11 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-28 09:43:37.825406",
+ "modified": "2023-01-03 15:32:25.075081",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

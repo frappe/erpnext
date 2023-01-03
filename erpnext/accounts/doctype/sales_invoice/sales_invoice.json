@@ -1,7 +1,8 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "format:SIN-{YY}-{MM}-{DD}-{####}",
+ "allow_rename": 1,
+ "autoname": "SI.YY.MM.DD.####",
  "creation": "2022-01-25 10:29:57.771398",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -2113,12 +2114,12 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2022-12-21 12:07:04.173728",
+ "modified": "2023-01-03 15:31:38.648801",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
