@@ -836,7 +836,7 @@ class Project(StatusUpdater):
 			item_codes_visited.add(d.depreciation_item_code)
 
 	def validate_warranty(self):
-		if self.warranty_claim_denied:
+		if self.get('warranty_claim_denied'):
 			self.warranty_claim_denied_reason = clean_whitespace(self.warranty_claim_denied_reason)
 			if not self.warranty_claim_denied_reason:
 				frappe.throw(_("Warranty Claim Denied Reason is mandatory for setting as Denied"))
@@ -2139,3 +2139,27 @@ def set_warranty_claim_denied(projects, denied, reason=None):
 		doc.warranty_claim_denied = denied
 		doc.warranty_claim_denied_reason = reason
 		doc.save()
+
+
+@frappe.whitelist()
+def submit_feedback(project, feedback_remark):
+	if not feedback_remark:
+		frappe.throw(_('Remarks are mandatory for Communication'))
+
+	if not frappe.db.exists('Project', project):
+		frappe.throw(_("Repair Order {0} does not exist".format(project)))
+
+	target_doc = frappe.get_doc('Project', project)
+
+	cur_date = getdate()
+	cur_time = get_time(get_datetime())
+
+	target_doc.feedback_date = cur_date
+	target_doc.feedback_time = cur_time
+	target_doc.feedback_remark = feedback_remark
+
+	target_doc.save()
+	return {
+			"feedback_date": cur_date,
+			"feedback_time": cur_time
+		}

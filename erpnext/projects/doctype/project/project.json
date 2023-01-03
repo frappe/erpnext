@@ -171,7 +171,11 @@
   "column_break_121",
   "project_status",
   "indicator_color",
-  "status"
+  "status",
+  "sec_service_feedback",
+  "feedback_date",
+  "feedback_time",
+  "feedback_remark"
  ],
  "fields": [
   {
@@ -1269,12 +1273,32 @@
    "fieldtype": "Link",
    "label": "Applies to Serial No",
    "options": "Serial No"
+  },
+  {
+   "fieldname": "sec_service_feedback",
+   "fieldtype": "Section Break",
+   "label": "Service Feedback"
+  },
+  {
+   "fieldname": "feedback_date",
+   "fieldtype": "Date",
+   "label": "Feedback Date"
+  },
+  {
+   "fieldname": "feedback_time",
+   "fieldtype": "Time",
+   "label": "Feedback Time"
+  },
+  {
+   "fieldname": "feedback_remark",
+   "fieldtype": "Small Text",
+   "label": "Feedback Remark"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2022-12-19 15:10:33.152786",
+ "modified": "2023-01-03 15:15:49.385398",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
