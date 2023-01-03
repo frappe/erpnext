@@ -1321,9 +1321,12 @@ def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> Non
 						title=_("Invalid Item Defaults"),
 					)
 
+
 def validate_item_default_expense_account(item_defaults: List[ItemDefault]) -> None:
 	for item_default in item_defaults:
-		if item_default.get("expense_account") and frappe.db.get_value("Account", item_default.get("expense_account"), "is_group"):
+		if item_default.get("expense_account") and frappe.db.get_value(
+			"Account", item_default.get("expense_account"), "is_group"
+		):
 			frappe.throw(
 				_("Row #{}: {} is a Group Account and group accounts cannot be used in transactions.").format(
 					item_default.idx,
@@ -1331,6 +1334,7 @@ def validate_item_default_expense_account(item_defaults: List[ItemDefault]) -> N
 				),
 				title=_("Invalid Item Defaults"),
 			)
+
 
 @frappe.whitelist()
 def get_asset_naming_series():
