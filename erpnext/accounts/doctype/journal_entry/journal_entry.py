@@ -34,6 +34,41 @@ class StockAccountInvalidTransaction(frappe.ValidationError):
 class JournalEntry(AccountsController):
 	def __init__(self, *args, **kwargs):
 		super(JournalEntry, self).__init__(*args, **kwargs)
+	
+	def autoname(self):
+		series_seq = ""
+		if self.voucher_type == 'Journal Entry':
+			series_seq = 'JEJV'
+		elif self.voucher_type == 'Bank Entry':
+			if self.naming_series == 'Bank Payment Voucher':
+				series_seq = 'JEBP'
+			elif self.naming_series == 'Bank Receipt Voucher':
+				series_seq = 'JEBR'
+			else:
+				series_seq = 'JEBE'
+		elif self.voucher_type == 'Cash Entry':
+			if self.naming_series == 'Cash Payment Voucher':
+				series_seq = 'JECP'
+			elif self.naming_series == 'Cash Receipt Voucher':
+				series_seq = 'JECR'
+			else:
+				series_seq = 'JECA'
+		elif self.voucher_type == 'Debit Note':
+			series_seq = 'JEDN'
+		elif self.voucher_type == 'Credit Note':
+			series_seq = 'JECN'
+		elif self.voucher_type == 'Contra Entry':
+			series_seq = 'JECE'
+		elif self.voucher_type == 'Excise Entry':
+			series_seq = 'JEEE'
+		elif self.voucher_type == 'Write Off Entry':
+			series_seq = 'JEWE'
+		elif self.voucher_type == 'Opening Entry':
+			series_seq = 'JEOP'
+		elif self.voucher_type == 'Depreciation Entry':
+			series_seq = 'JEDE'
+
+		self.name = make_autoname(str(series_seq) + '.YYYY.MM.#####')
 
 	def get_feed(self):
 		return self.voucher_type
