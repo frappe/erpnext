@@ -8,7 +8,7 @@ from frappe.utils import add_days, get_last_day, nowdate
 
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_draft_or_active_asset_depr_schedule_doc,
+	get_asset_depr_schedule_doc,
 )
 from erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment import (
 	get_current_asset_value,
@@ -76,7 +76,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 		asset_doc.submit()
 
-		first_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset_doc.name)
+		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
 		self.assertEquals(first_asset_depr_schedule.status, "Active")
 
 		current_value = get_current_asset_value(asset_doc.name)
@@ -87,7 +87,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 
 		first_asset_depr_schedule.load_from_db()
 
-		second_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(asset_doc.name)
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
 		self.assertEquals(second_asset_depr_schedule.status, "Active")
 		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 

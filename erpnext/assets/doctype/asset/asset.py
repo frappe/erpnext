@@ -32,8 +32,8 @@ from erpnext.assets.doctype.asset_category.asset_category import get_asset_categ
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	cancel_asset_depr_schedules,
 	convert_draft_asset_depr_schedules_into_active,
-	get_draft_or_active_asset_depr_schedule_doc,
-	get_draft_or_active_depr_schedule,
+	get_asset_depr_schedule_doc,
+	get_depr_schedule,
 	make_draft_asset_depr_schedules,
 	make_draft_asset_depr_schedules_if_not_present,
 	set_draft_asset_depr_schedule_details,
@@ -337,7 +337,7 @@ class Asset(AccountsController):
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
-			depr_schedule = get_draft_or_active_depr_schedule(self.name, row.finance_book)
+			depr_schedule = get_depr_schedule(self.name, "Draft", row.finance_book)
 
 			if not depr_schedule:
 				continue
@@ -393,7 +393,7 @@ class Asset(AccountsController):
 
 	def delete_depreciation_entries(self):
 		for row in self.get("finance_books"):
-			depr_schedule = get_draft_or_active_depr_schedule(self.name, row.finance_book)
+			depr_schedule = get_depr_schedule(self.name, "Active", row.finance_book)
 
 			for d in depr_schedule or []:
 				if d.journal_entry:
@@ -881,8 +881,8 @@ def update_existing_asset(asset, remaining_qty, new_asset_name):
 			expected_value_after_useful_life,
 		)
 
-		current_asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset.name, row.finance_book
+		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+			asset.name, "Active", row.finance_book
 		)
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
@@ -933,8 +933,8 @@ def create_new_asset_after_split(asset, split_qty):
 	new_asset.set_status()
 
 	for row in new_asset.get("finance_books"):
-		current_asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset.name, row.finance_book
+		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+			asset.name, "Active", row.finance_book
 		)
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
@@ -956,7 +956,7 @@ def create_new_asset_after_split(asset, split_qty):
 		new_asset_depr_schedule_doc.submit()
 
 	for row in new_asset.get("finance_books"):
-		depr_schedule = get_draft_or_active_depr_schedule(new_asset.name, row.finance_book)
+		depr_schedule = get_depr_schedule(new_asset.name, "Active", row.finance_book)
 		for term in depr_schedule:
 			# Update references in JV
 			if term.journal_entry:

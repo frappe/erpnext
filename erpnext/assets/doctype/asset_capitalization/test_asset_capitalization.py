@@ -13,7 +13,7 @@ from erpnext.assets.doctype.asset.test_asset import (
 	set_depreciation_settings_in_company,
 )
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_draft_or_active_asset_depr_schedule_doc,
+	get_asset_depr_schedule_doc,
 )
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -256,7 +256,7 @@ class TestAssetCapitalization(unittest.TestCase):
 			submit=1,
 		)
 
-		first_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(consumed_asset.name)
+		first_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
 		self.assertEquals(first_asset_depr_schedule.status, "Active")
 
 		# Create and submit Asset Captitalization
@@ -290,7 +290,7 @@ class TestAssetCapitalization(unittest.TestCase):
 
 		first_asset_depr_schedule.load_from_db()
 
-		second_asset_depr_schedule = get_draft_or_active_asset_depr_schedule_doc(consumed_asset.name)
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
 		self.assertEquals(second_asset_depr_schedule.status, "Active")
 		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 

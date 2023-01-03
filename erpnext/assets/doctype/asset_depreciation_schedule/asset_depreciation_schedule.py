@@ -32,7 +32,7 @@ class AssetDepreciationSchedule(Document):
 		if self.finance_book:
 			finance_book_filter = ["finance_book", "=", self.finance_book]
 
-		num_asset_depr_schedules = frappe.db.count(
+		asset_depr_schedule = frappe.db.exists(
 			"Asset Depreciation Schedule",
 			[
 				["asset", "=", self.asset],
@@ -41,12 +41,19 @@ class AssetDepreciationSchedule(Document):
 			],
 		)
 
-		if num_asset_depr_schedules > 1:
-			frappe.throw(
-				_("Asset Depreciation Schedule for Asset {0} and Finance Book {1} already exists.").format(
-					self.asset, self.finance_book
+		if asset_depr_schedule and asset_depr_schedule != self.name:
+			if self.finance_book:
+				frappe.throw(
+					_(
+						"Asset Depreciation Schedule {0} for Asset {1} and Finance Book {2} already exists."
+					).format(asset_depr_schedule, self.asset, self.finance_book)
 				)
-			)
+			else:
+				frappe.throw(
+					_("Asset Depreciation Schedule {0} for Asset {1} already exists.").format(
+						asset_depr_schedule, self.asset
+					)
+				)
 
 	def on_submit(self):
 		self.db_set("status", "Active")
@@ -81,11 +88,15 @@ class AssetDepreciationSchedule(Document):
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_name = get_draft_or_active_asset_depr_schedule_name(
-			asset_doc.name, row.finance_book
+		draft_asset_depr_schedule_name = get_asset_depr_schedule_name(
+			asset_doc.name, "Draft", row.finance_book
 		)
 
-		if not asset_depr_schedule_name:
+		active_asset_depr_schedule_name = get_asset_depr_schedule_name(
+			asset_doc.name, "Active", row.finance_book
+		)
+
+		if not draft_asset_depr_schedule_name and not active_asset_depr_schedule_name:
 			make_draft_asset_depr_schedule(asset_doc, row)
 
 
@@ -104,9 +115,7 @@ def make_draft_asset_depr_schedule(asset_doc, row):
 
 def update_draft_asset_depr_schedules(asset_doc):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset_doc.name, row.finance_book
-		)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_doc.name, "Draft", row.finance_book)
 
 		if not asset_depr_schedule_doc:
 			continue
@@ -148,36 +157,30 @@ def set_draft_asset_depr_schedule_details(asset_depr_schedule_doc, asset_doc, ro
 
 def convert_draft_asset_depr_schedules_into_active(asset_doc):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset_doc.name, row.finance_book
-		)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_doc.name, "Draft", row.finance_book)
 
 		if not asset_depr_schedule_doc:
 			continue
 
-		if asset_depr_schedule_doc.status == "Draft":
-			asset_depr_schedule_doc.submit()
+		asset_depr_schedule_doc.submit()
 
 
 def cancel_asset_depr_schedules(asset_doc):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset_doc.name, row.finance_book
-		)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_doc.name, "Active", row.finance_book)
 
 		if not asset_depr_schedule_doc:
 			continue
 
-		if asset_depr_schedule_doc.status == "Active":
-			asset_depr_schedule_doc.cancel()
+		asset_depr_schedule_doc.cancel()
 
 
 def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 	asset_doc, notes, date_of_disposal=None, date_of_return=None
 ):
 	for row in asset_doc.get("finance_books"):
-		current_asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset_doc.name, row.finance_book
+		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+			asset_doc.name, "Active", row.finance_book
 		)
 
 		if not current_asset_depr_schedule_doc:
@@ -217,7 +220,7 @@ def get_temp_asset_depr_schedule_doc(
 	return asset_depr_schedule_doc
 
 
-def get_draft_or_active_asset_depr_schedule_name(asset_name, finance_book=None):
+def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
 	finance_book_filter = ["finance_book", "is", "not set"]
 	if finance_book:
 		finance_book_filter = ["finance_book", "=", finance_book]
@@ -227,37 +230,14 @@ def get_draft_or_active_asset_depr_schedule_name(asset_name, finance_book=None):
 		filters=[
 			["asset", "=", asset_name],
 			finance_book_filter,
-			["status", "in", ["Draft", "Active"]],
+			["status", "=", status],
 		],
 	)
-
-
-def get_cancelled_asset_depr_schedule_name(asset_name, finance_book=None):
-	finance_book_filter = ["finance_book", "is", "not set"]
-	if finance_book:
-		finance_book_filter = ["finance_book", "=", finance_book]
-
-	cancelled_asset_depr_schedule_names = frappe.db.get_all(
-		doctype="Asset Depreciation Schedule",
-		filters=[
-			["asset", "=", asset_name],
-			finance_book_filter,
-			["status", "=", "Cancelled"],
-		],
-		order_by="creation desc",
-		limit=1,
-		pluck="name",
-	)
-
-	if cancelled_asset_depr_schedule_names:
-		return cancelled_asset_depr_schedule_names[0]
-
-	return
 
 
 @frappe.whitelist()
-def get_draft_or_active_depr_schedule(asset_name, finance_book=None):
-	asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(asset_name, finance_book)
+def get_depr_schedule(asset_name, status, finance_book=None):
+	asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_name, status, finance_book)
 
 	if not asset_depr_schedule_doc:
 		return
@@ -265,28 +245,8 @@ def get_draft_or_active_depr_schedule(asset_name, finance_book=None):
 	return asset_depr_schedule_doc.get("depreciation_schedule")
 
 
-def get_cancelled_depr_schedule(asset_name, finance_book=None):
-	asset_depr_schedule_doc = get_cancelled_asset_depr_schedule_doc(asset_name, finance_book)
-
-	if not asset_depr_schedule_doc:
-		return
-
-	return asset_depr_schedule_doc.get("depreciation_schedule")
-
-
-def get_draft_or_active_asset_depr_schedule_doc(asset_name, finance_book=None):
-	asset_depr_schedule_name = get_draft_or_active_asset_depr_schedule_name(asset_name, finance_book)
-
-	if not asset_depr_schedule_name:
-		return
-
-	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
-
-	return asset_depr_schedule_doc
-
-
-def get_cancelled_asset_depr_schedule_doc(asset_name, finance_book=None):
-	asset_depr_schedule_name = get_cancelled_asset_depr_schedule_name(asset_name, finance_book)
+def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
+	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, status, finance_book)
 
 	if not asset_depr_schedule_name:
 		return

@@ -11,8 +11,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_draft_or_active_asset_depr_schedule_doc,
-	get_draft_or_active_asset_depr_schedule_name,
+	get_asset_depr_schedule_doc,
+	get_asset_depr_schedule_name,
 	get_temp_asset_depr_schedule_doc,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
@@ -51,8 +51,8 @@ def get_depreciable_assets(date):
 
 def make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date=None):
 	for row in asset_doc.get("finance_books"):
-		asset_depr_schedule_name = get_draft_or_active_asset_depr_schedule_name(
-			asset_doc.name, row.finance_book
+		asset_depr_schedule_name = get_asset_depr_schedule_name(
+			asset_doc.name, "Active", row.finance_book
 		)
 		make_depreciation_entry(asset_depr_schedule_name, date)
 
@@ -318,9 +318,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
 	for row in asset.get("finance_books"):
-		asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-			asset.name, row.finance_book
-		)
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
 
 		for schedule_idx, schedule in enumerate(asset_depr_schedule_doc.get("depreciation_schedule")):
 			if schedule.schedule_date == date:

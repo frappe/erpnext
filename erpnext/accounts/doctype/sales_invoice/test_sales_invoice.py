@@ -22,7 +22,7 @@ from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
-	get_draft_or_active_depr_schedule,
+	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
@@ -2777,7 +2777,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["2021-09-30", 5041.1, 26407.22],
 		]
 
-		for i, schedule in enumerate(get_draft_or_active_depr_schedule(asset.name)):
+		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
@@ -2808,7 +2808,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
 
-		for i, schedule in enumerate(get_draft_or_active_depr_schedule(asset.name)):
+		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
@@ -2837,7 +2837,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["2025-06-06", 18633.88, 100000.0, False],
 		]
 
-		for i, schedule in enumerate(get_draft_or_active_depr_schedule(asset.name)):
+		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)

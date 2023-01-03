@@ -12,8 +12,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 )
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depr_schedule_doc,
 	get_depreciation_amount,
-	get_draft_or_active_asset_depr_schedule_doc,
 	set_accumulated_depreciation,
 )
 
@@ -116,8 +116,8 @@ class AssetValueAdjustment(Document):
 		for d in asset.finance_books:
 			d.value_after_depreciation = asset_value
 
-			current_asset_depr_schedule_doc = get_draft_or_active_asset_depr_schedule_doc(
-				asset.name, d.finance_book
+			current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
+				asset.name, "Active", d.finance_book
 			)
 
 			new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
