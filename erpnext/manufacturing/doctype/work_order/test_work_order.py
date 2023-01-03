@@ -859,7 +859,7 @@ class TestWorkOrder(FrappeTestCase):
 		bom_no = f"BOM-{fg_item_non_whole.item_code}-001"
 		if not frappe.db.exists("BOM", bom_no):
 			bom_doc = create_bom_with_process_loss_item(
-				fg_item_non_whole, bom_item, scrap_qty=scrap_qty, scrap_rate=0, fg_qty=1, is_process_loss=1
+				fg_item_non_whole, bom_item, scrap_qty=scrap_qty, scrap_rate=0, fg_qty=1
 			)
 			bom_doc.submit()
 
