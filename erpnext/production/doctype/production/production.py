@@ -58,7 +58,7 @@ class Production(StockController):
 				prod.production_type = self.production_type
 				prod.company = self.company
 				prod.currency = self.currency
-				prod.check_raw_material_product_qty = 0
+				prod.check_raw_material_product_qty = 1
 				prod.reference = self.name
 				prod.set("raw_materials",[])
 				prod.set("items",[])
