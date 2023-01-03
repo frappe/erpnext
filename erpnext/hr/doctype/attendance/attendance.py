@@ -5,8 +5,16 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.query_builder import Criterion
-from frappe.utils import cint, cstr, formatdate, get_datetime, get_link_to_form, getdate, nowdate, add_days
+from frappe.utils import (
+	add_days,
+	cint,
+	cstr,
+	formatdate,
+	get_datetime,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
 
 from erpnext.hr.utils import get_holiday_dates_for_employee, validate_active_employee
 
@@ -107,8 +115,6 @@ class Attendance(Document):
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 	def unlink_attendance_from_checkins(self):
-		from frappe.utils import get_link_to_form
-
 		EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
 		linked_logs = (
 			frappe.qb.from_(EmployeeCheckin)

@@ -14,11 +14,8 @@ from frappe.utils import (
 	nowdate,
 )
 
-from erpnext.setup.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.attendance.attendance import (
-	get_unmarked_days,
-	mark_attendance,
-)
+from erpnext.hr.doctype.attendance.attendance import get_unmarked_days, mark_attendance
+from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.tests.test_utils import get_first_sunday
 
 test_records = frappe.get_test_records("Attendance")
@@ -57,9 +54,7 @@ class TestAttendance(FrappeTestCase):
 		mark_attendance(employee, attendance_date, "Present")
 
 		unmarked_days = get_unmarked_days(
-			employee,
-			get_first_day(attendance_date),
-			get_last_day(attendance_date)
+			employee, get_first_day(attendance_date), get_last_day(attendance_date)
 		)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
@@ -86,10 +81,7 @@ class TestAttendance(FrappeTestCase):
 		mark_attendance(employee, attendance_date, "Present")
 
 		unmarked_days = unmarked_days = get_unmarked_days(
-			employee,
-			get_first_day(attendance_date),
-			get_last_day(attendance_date),
-			exclude_holidays=True
+			employee, get_first_day(attendance_date), get_last_day(attendance_date), exclude_holidays=True
 		)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
@@ -119,9 +111,7 @@ class TestAttendance(FrappeTestCase):
 		mark_attendance(employee, attendance_date, "Present")
 
 		unmarked_days = get_unmarked_days(
-			employee,
-			get_first_day(attendance_date),
-			get_last_day(attendance_date)
+			employee, get_first_day(attendance_date), get_last_day(attendance_date)
 		)
 		unmarked_days = [getdate(date) for date in unmarked_days]
 
