@@ -9,7 +9,18 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from frappe.utils import (
+	add_days,
+	cint,
+	comma_or,
+	cstr,
+	flt,
+	format_time,
+	formatdate,
+	getdate,
+	nowdate,
+	today,
+)
 from six import iteritems, itervalues, string_types
 
 import erpnext
