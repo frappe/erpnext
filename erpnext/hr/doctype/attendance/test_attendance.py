@@ -25,7 +25,7 @@ class TestAttendance(FrappeTestCase):
 	def setUp(self):
 		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
 
-		from_date = get_year_start(getdate())
+		from_date = get_year_start(add_months(getdate(), -1))
 		to_date = get_year_ending(getdate())
 		self.holiday_list = make_holiday_list(from_date=from_date, to_date=to_date)
 
