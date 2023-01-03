@@ -25,6 +25,7 @@ from erpnext.accounts.utils import (
 	get_stock_and_account_balance,
 )
 from erpnext.controllers.accounts_controller import AccountsController
+from frappe.model.naming import make_autoname
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError):
