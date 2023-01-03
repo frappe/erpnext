@@ -75,15 +75,15 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Purchase Order"
 		},
 		{
+			"fieldname":"customer_purchase_order #",
+			"label": __("Customer's Purchase Order"),
+			"fieldtype": "Data",
+		},
+		{
 			"fieldname":"customer_order",
 			"label": __("Customer Order #"),
 			"fieldtype": "Link",
 			"options": "Customer Order"
-		},
-		{
-			"fieldname":"customer_purchase_order #",
-			"label": __("Customer's Purchase Order"),
-			"fieldtype": "Data",
 		},
 		/* {
 			"fieldname":"project",

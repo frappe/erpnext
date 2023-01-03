@@ -102,17 +102,17 @@ def get_columns():
 			"width": 150,
 		},
 		{
+			"label": _("Customer's Purchase Order #"),
+			"fieldname": "customer_purchase_order",
+			"fieldtype": "Data",
+			"width": 210,
+		},
+		{
 			"label": _("Customer Order #"),
 			"fieldname": "customer_order",
 			"fieldtype": "Link",
 			"options": "Customer Order",
 			"width": 150,
-		},
-		{
-			"label": _("Customer's Purchase Order #"),
-			"fieldname": "customer_purchase_order",
-			"fieldtype": "Data",
-			"width": 210,
 		},
 		{
 			"label": _("Product Code"),
@@ -465,10 +465,10 @@ def get_sle_conditions(filters):
 		conditions.append("project=%(project)s")
 	if filters.get("purchase_order"):
 		conditions.append("purchase_order=%(purchase_order)s")
-	if filters.get("customer_order"):
-		conditions.append("customer_order=%(customer_order)s")
 	if filters.get("customer_purchase_order"):
 		conditions.append("customer_purchase_order=%(customer_purchase_order)s")
+	if filters.get("customer_order"):
+		conditions.append("customer_order=%(customer_order)s")
 		
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
