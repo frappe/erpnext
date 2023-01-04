@@ -78,7 +78,8 @@ class HiringRateRevision(Document):
 			if base_rate:
 				row.base_rate = base_rate[0][0]
 				row.ref_row = base_rate[0][1]
-				row.revised_rate = (flt((flt(self.current_price) - flt(self.previous_price))/ flt(self.previous_price),2) * (flt(self.hiring_rate_revision)/100 * flt( base_rate[0][0]))) + flt( base_rate[0][0])
+				row.revised_rate = (flt((flt(self.current_price) - flt(self.previous_price))/ flt(self.previous_price)) * (flt(self.hiring_rate_revision)/100 * flt( base_rate[0][0]))) + flt( base_rate[0][0])
+				row.revised_rate = flt(row.revised_rate,2)
 			row.update(d)
 @frappe.whitelist()
 def filter_fuel_price_list(doctype, txt, searchfield, start, page_len, filters):

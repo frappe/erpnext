@@ -10,7 +10,6 @@
   "section_break_1",
   "branch",
   "cost_center",
-  "mine",
   "col_break_3",
   "request_date",
   "contact_number",
@@ -248,18 +247,11 @@
    "label": "Fuel Type",
    "options": "Fuel Type",
    "read_only": 1
-  },
-  {
-   "fieldname": "mine",
-   "fieldtype": "Link",
-   "label": "Mine",
-   "options": "Mine",
-   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-28 14:43:32.774061",
+ "modified": "2023-01-04 15:58:28.345098",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Equipment Hiring Form",
