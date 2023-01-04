@@ -74,8 +74,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Account Number",
-   "unique": 1
+   "label": "Account Number"
   },
   {
    "default": "0",
@@ -316,7 +315,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-01-03 18:23:12.378566",
+ "modified": "2023-01-04 11:44:50.832145",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
