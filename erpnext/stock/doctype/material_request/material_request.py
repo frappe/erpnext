@@ -10,7 +10,7 @@ import json
 import frappe
 from frappe import _, msgprint
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
+from frappe.utils import cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate, today
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
@@ -18,6 +18,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
 from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 from frappe.model.naming import make_autoname
+from datetime import datetime
 
 
 form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"}
@@ -122,7 +123,7 @@ class MaterialRequest(BuyingController):
 		self.validate_schedule_date()
 
 	def validate_transaction_date(self):
-		if self.transaction_date > nowdate():
+		if self.transaction_date > today():
 			frappe.throw("Transaction Date cannot be future date")
 
 	def validate_material_request_type(self):
