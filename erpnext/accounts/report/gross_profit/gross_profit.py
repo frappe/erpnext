@@ -439,6 +439,18 @@ class GrossProfitGenerator(object):
 					row.delivery_note, frappe._dict()
 				)
 				row.item_row = row.dn_detail
+				# Update warehouse and base_amount from 'Packed Item' List
+				if product_bundles and not row.parent:
+					# For Packed Items, row.parent_invoice will be the Bundle name
+					product_bundle = product_bundles.get(row.parent_invoice)
+					if product_bundle:
+						for packed_item in product_bundle:
+							if (
+								packed_item.get("item_code") == row.item_code
+								and packed_item.get("parent_detail_docname") == row.item_row
+							):
+								row.warehouse = packed_item.warehouse
+								row.base_amount = packed_item.base_amount
 
 			# get buying amount
 			if row.item_code in product_bundles:
@@ -589,7 +601,9 @@ class GrossProfitGenerator(object):
 		buying_amount = 0.0
 		for packed_item in product_bundle:
 			if packed_item.get("parent_detail_docname") == row.item_row:
-				buying_amount += self.get_buying_amount(row, packed_item.item_code)
+				packed_item_row = row.copy()
+				packed_item_row.warehouse = packed_item.warehouse
+				buying_amount += self.get_buying_amount(packed_item_row, packed_item.item_code)
 
 		return flt(buying_amount, self.currency_precision)
 
@@ -922,12 +936,25 @@ class GrossProfitGenerator(object):
 	def load_product_bundle(self):
 		self.product_bundles = {}
 
-		for d in frappe.db.sql(
-			"""select parenttype, parent, parent_item,
-			item_code, warehouse, -1*qty as total_qty, parent_detail_docname
-			from `tabPacked Item` where docstatus=1""",
-			as_dict=True,
-		):
+		pki = qb.DocType("Packed Item")
+
+		pki_query = (
+			frappe.qb.from_(pki)
+			.select(
+				pki.parenttype,
+				pki.parent,
+				pki.parent_item,
+				pki.item_code,
+				pki.warehouse,
+				(-1 * pki.qty).as_("total_qty"),
+				pki.rate,
+				(pki.rate * pki.qty).as_("base_amount"),
+				pki.parent_detail_docname,
+			)
+			.where(pki.docstatus == 1)
+		)
+
+		for d in pki_query.run(as_dict=True):
 			self.product_bundles.setdefault(d.parenttype, frappe._dict()).setdefault(
 				d.parent, frappe._dict()
 			).setdefault(d.parent_item, []).append(d)
