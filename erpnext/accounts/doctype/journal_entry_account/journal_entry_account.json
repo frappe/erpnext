@@ -47,7 +47,11 @@
   "col_break3",
   "is_advance",
   "user_remark",
-  "against_account"
+  "against_account",
+  "epayment_beneficiary_details_section",
+  "beneficiary_type",
+  "column_break_44",
+  "beneficiary"
  ],
  "fields": [
   {
@@ -214,7 +218,7 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nPBVA\nBonus\nLeave Travel Concession\nFull and Final Statement\nPOL Expense\nCoal Raising Payment\nEmployee Benefit Claim\nInsurance and Registration"
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nPBVA\nBonus\nLeave Travel Concession\nFull and Final Statement\nPOL Expense\nCoal Raising Invoice\nEmployee Benefit Claim\nInsurance and Registration"
   },
   {
    "fieldname": "reference_name",
@@ -359,12 +363,40 @@
    "fieldname": "apply_tds",
    "fieldtype": "Check",
    "label": "Apply TDS"
+  },
+  {
+   "depends_on": "eval:doc.account_type != \"Bank\"",
+   "fieldname": "epayment_beneficiary_details_section",
+   "fieldtype": "Section Break",
+   "label": "ePayment Beneficiary Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "<b>Select the following to make payment to: </b><br>\n<i>Employee - Individual employee<br>\nSupplier - Vendor <br>\nBranch - Branch Imprest Bank Account <br>\nAccount - Bank Accounts maintain in COA</i>",
+   "fieldname": "beneficiary_type",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Beneficiary Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "column_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "<b>Bank Account Details will be picked from above master data</b>",
+   "fieldname": "beneficiary",
+   "fieldtype": "Dynamic Link",
+   "ignore_user_permissions": 1,
+   "label": "Beneficiary",
+   "options": "beneficiary_type"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-28 23:07:19.786824",
+ "modified": "2023-01-04 14:44:04.270891",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

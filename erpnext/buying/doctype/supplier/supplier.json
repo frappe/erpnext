@@ -42,15 +42,15 @@
   "column_break_30",
   "company_name",
   "bank_infromation_section",
-  "bank",
+  "supplier_bank_account",
+  "default_bank_accunt_section",
   "bank_name",
   "bank_branch",
   "inr_bank_code",
-  "column_break_33",
   "inr_purpose_code",
+  "column_break_33",
   "bank_account_type",
   "account_number",
-  "column_break_100",
   "ifs_code",
   "section_break_43",
   "dzongkhag",
@@ -510,13 +510,15 @@
   {
    "fieldname": "ifs_code",
    "fieldtype": "Data",
-   "label": "IFS Code"
+   "label": "IFS Code",
+   "read_only": 1
   },
   {
    "fetch_from": "bank.bank_name",
    "fieldname": "bank_name",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Bank Name",
+   "options": "Financial Institution",
    "read_only": 1
   },
   {
@@ -538,10 +540,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_100",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_34",
    "fieldtype": "Column Break"
   },
@@ -554,19 +552,21 @@
    "fieldname": "bank_branch",
    "fieldtype": "Link",
    "label": "Bank Branch",
-   "options": "Financial Institution Branch"
+   "options": "Financial Institution Branch",
+   "read_only": 1
   },
   {
    "fieldname": "account_number",
    "fieldtype": "Data",
-   "label": "Account Number"
+   "label": "Account Number",
+   "read_only": 1
   },
   {
    "fieldname": "inr_bank_code",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Bank Code",
-   "options": "\n01 - AXIS BANK\n02- SBI\n03 -Others\n04 - SCB"
+   "options": "\n01 - AXIS BANK\n02- SBI\n03 -Others\n04 - SCB",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_33",
@@ -577,19 +577,15 @@
    "fieldname": "inr_purpose_code",
    "fieldtype": "Select",
    "label": "Purpose Code",
-   "options": "\n01- INVT IN EQUITY SHARE\n02- INVT IN MUTUAL FUND\n03- INVT IN DEBENTURES\n04- BILL PAYMENT\n05- CREDIT TO NRE A/c\n06- PAYMENT TO HOTELS\n07- TRAVEL & TOURISM\n08- INVT IN REAL ESTATE\n09- PYMNT TO ESTATE DEVELOPER\n10- LIC PREMIUM\n11- EDUCATIONAL EXPENSES\n12- FAMILY MAINTENANCE\n13- POSTMASTER / UTI PREMIUM\n14- PROPERTY Pymnt-Co-op Hsg.Soc\n15- PROPERTY Pymnt-Govt. Hsg.Scheme\n16- MEDICAL EXPENSES\n17- UTILITY PAYMENTS\n18- TAX PAYMENTS\n19- EMI FOR LOAN REPAYMENT\n20- COMPENSATION OF EMPLOYEES\n21- SALARY"
+   "options": "\n01- INVT IN EQUITY SHARE\n02- INVT IN MUTUAL FUND\n03- INVT IN DEBENTURES\n04- BILL PAYMENT\n05- CREDIT TO NRE A/c\n06- PAYMENT TO HOTELS\n07- TRAVEL & TOURISM\n08- INVT IN REAL ESTATE\n09- PYMNT TO ESTATE DEVELOPER\n10- LIC PREMIUM\n11- EDUCATIONAL EXPENSES\n12- FAMILY MAINTENANCE\n13- POSTMASTER / UTI PREMIUM\n14- PROPERTY Pymnt-Co-op Hsg.Soc\n15- PROPERTY Pymnt-Govt. Hsg.Scheme\n16- MEDICAL EXPENSES\n17- UTILITY PAYMENTS\n18- TAX PAYMENTS\n19- EMI FOR LOAN REPAYMENT\n20- COMPENSATION OF EMPLOYEES\n21- SALARY",
+   "read_only": 1
   },
   {
    "fieldname": "bank_account_type",
    "fieldtype": "Link",
    "label": "Bank Account Type",
-   "options": "Bank Account Type"
-  },
-  {
-   "fieldname": "bank",
-   "fieldtype": "Link",
-   "label": "Bank",
-   "options": "Financial Institution"
+   "options": "Bank Account Type",
+   "read_only": 1
   },
   {
    "fieldname": "dzongkhag",
@@ -656,6 +652,16 @@
    "fieldname": "alternative_email_id",
    "fieldtype": "Data",
    "label": "Alternative Email ID"
+  },
+  {
+   "fieldname": "supplier_bank_account",
+   "fieldtype": "Table",
+   "options": "Supplier Bank Account"
+  },
+  {
+   "fieldname": "default_bank_accunt_section",
+   "fieldtype": "Section Break",
+   "label": "Default Bank Accunt"
   }
  ],
  "icon": "fa fa-user",
@@ -668,7 +674,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-12-16 12:22:19.810349",
+ "modified": "2023-01-04 14:35:56.506357",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
