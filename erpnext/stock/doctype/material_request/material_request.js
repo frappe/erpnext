@@ -81,6 +81,11 @@ frappe.ui.form.on('Material Request', {
 		};
 
 	},
+	"transaction_date": function(frm) {
+		if(frm.doc.transaction_date >= frappe.datetime.nowdate()){
+			frappe.throw("Transaction Date cannot be future date")
+		}
+	},
 	branch: function(frm){
 		if(frm.doc.branch != null || frm.doc.branch != "" || frm.doc.branch != undefined){
 			frappe.call({
