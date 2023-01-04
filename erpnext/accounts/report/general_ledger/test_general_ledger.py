@@ -109,8 +109,7 @@ class TestGeneralLedger(FrappeTestCase):
 		frappe.db.set_value(
 			"Company", company, "unrealized_exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC"
 		)
-		revaluation_jv = revaluation.make_jv_entry()
-		revaluation_jv = frappe.get_doc(revaluation_jv)
+		revaluation_jv = revaluation.make_jv_for_revaluation()
 		revaluation_jv.cost_center = "_Test Cost Center - _TC"
 		for acc in revaluation_jv.get("accounts"):
 			acc.cost_center = "_Test Cost Center - _TC"
