@@ -55,7 +55,7 @@
    "fieldname": "hours",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Hours",
+   "label": "No. of Hours",
    "precision": "1",
    "read_only": 1
   },
@@ -114,9 +114,8 @@
   {
    "depends_on": "eval:doc.uom==\"Trip\"",
    "fieldname": "target_trip",
-   "fieldtype": "Select",
+   "fieldtype": "Int",
    "label": "Target Trip",
-   "options": "\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10",
    "precision": "2"
   },
   {
@@ -159,7 +158,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-26 16:44:44.158555",
+ "modified": "2023-01-04 14:58:39.795812",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Logbook Item",

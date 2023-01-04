@@ -218,7 +218,8 @@
    "fieldname": "fuel_type",
    "fieldtype": "Link",
    "label": "Fuel Type",
-   "options": "Fuel Type"
+   "options": "Fuel Type",
+   "reqd": 1
   },
   {
    "fieldname": "equipment_description",
@@ -416,7 +417,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-01 14:06:00.490418",
+ "modified": "2023-01-04 14:43:43.788094",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",

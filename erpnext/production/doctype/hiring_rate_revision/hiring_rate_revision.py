@@ -42,6 +42,8 @@ class HiringRateRevision(Document):
 
 	def update_equipment_hiring_form(self):
 		if self.rate_applicable == "Applicable":
+			if len(self.items) <= 0:
+				frappe.throw("You need to pull equipments to apply rate change")
 			for d in self.items:
 				doc = frappe.get_doc("Equipment Hiring Form", d.equipment_hiring_form)
 				if self.docstatus == 1:
