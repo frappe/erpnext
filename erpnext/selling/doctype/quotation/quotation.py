@@ -242,8 +242,8 @@ def make_sales_order(source_name: str, target_doc=None):
 	return _make_sales_order(source_name, target_doc)
 
 
-def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
-	customer = _make_customer(source_name, ignore_permissions)
+def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_permissions=False):
+	customer = _make_customer(source_name, customer_group, ignore_permissions)
 	ordered_items = frappe._dict(
 		frappe.db.get_all(
 			"Sales Order Item",
@@ -407,7 +407,7 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 
-def _make_customer(source_name, ignore_permissions=False):
+def _make_customer(source_name, ignore_permissions=False, customer_group=None):
 	quotation = frappe.db.get_value(
 		"Quotation", source_name, ["order_type", "party_name", "customer_name"], as_dict=1
 	)
@@ -424,6 +424,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 				customer = frappe.get_doc(customer_doclist)
 				customer.flags.ignore_permissions = ignore_permissions
+				customer.customer_group = customer_group
 				if quotation.get("party_name") == "Shopping Cart":
 					customer.customer_group = frappe.db.get_value(
 						"E Commerce Settings", None, "default_customer_group"
