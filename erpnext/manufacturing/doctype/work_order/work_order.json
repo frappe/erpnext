@@ -14,13 +14,13 @@
   "item_name",
   "image",
   "bom_no",
+  "sales_order",
   "column_break1",
   "company",
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
   "process_loss_qty",
-  "sales_order",
   "project",
   "serial_no_and_batch_for_finished_good_section",
   "has_serial_no",
@@ -28,6 +28,7 @@
   "column_break_17",
   "serial_no",
   "batch_size",
+  "work_order_configuration",
   "settings_section",
   "allow_alternative_item",
   "use_multi_level_bom",
@@ -42,7 +43,11 @@
   "fg_warehouse",
   "scrap_warehouse",
   "required_items_section",
+  "materials_and_operations_tab",
   "required_items",
+  "operations_section",
+  "operations",
+  "transfer_material_against",
   "time",
   "planned_start_date",
   "planned_end_date",
@@ -51,9 +56,6 @@
   "actual_start_date",
   "actual_end_date",
   "lead_time",
-  "operations_section",
-  "transfer_material_against",
-  "operations",
   "section_break_22",
   "planned_operating_cost",
   "actual_operating_cost",
@@ -72,12 +74,14 @@
   "production_plan_item",
   "production_plan_sub_assembly_item",
   "product_bundle_item",
-  "amended_from"
+  "amended_from",
+  "connections_tab"
  ],
  "fields": [
   {
    "fieldname": "item",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
+   "label": "Production Item",
    "options": "fa fa-gift"
   },
   {
@@ -236,7 +240,7 @@
   {
    "fieldname": "warehouses",
    "fieldtype": "Section Break",
-   "label": "Warehouses",
+   "label": "Warehouse",
    "options": "fa fa-building"
   },
   {
@@ -390,8 +394,8 @@
   {
    "collapsible": 1,
    "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
+   "fieldtype": "Tab Break",
+   "label": "More Info",
    "options": "fa fa-file-text"
   },
   {
@@ -474,8 +478,7 @@
   },
   {
    "fieldname": "settings_section",
-   "fieldtype": "Section Break",
-   "label": "Settings"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_18",
@@ -568,6 +571,22 @@
    "no_copy": 1,
    "non_negative": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "work_order_configuration",
+   "fieldtype": "Tab Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "materials_and_operations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Materials & Operations"
   }
  ],
  "icon": "fa fa-cogs",
@@ -575,7 +594,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-24 21:18:12.160114",
+ "modified": "2023-01-03 14:16:35.427731",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
