@@ -52,31 +52,27 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 
 
 def adjust_qty_for_expired_items(item_code, stock_qty, warehouse):
-    batches = frappe.get_all(
-        "Batch", filters=[{"item": item_code}], fields=["expiry_date", "name"]
-    )
-    expired_batches = get_expired_batches(batches)
-    stock_qty = [list(item) for item in stock_qty]
+	batches = frappe.get_all("Batch", filters=[{"item": item_code}], fields=["expiry_date", "name"])
+	expired_batches = get_expired_batches(batches)
+	stock_qty = [list(item) for item in stock_qty]
 
-    for batch in expired_batches:
-        if warehouse:
-            stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
-        else:
-            stock_qty[0][0] = max(
-                0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch))
-            )
+	for batch in expired_batches:
+		if warehouse:
+			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
+		else:
+			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
 
-        if not stock_qty[0][0]:
-            break
+		if not stock_qty[0][0]:
+			break
 
 	return stock_qty[0][0] if stock_qty else 0
 
 
 def get_expired_batches(batches):
-    """
-    :param batches: A list of dict in the form [{'expiry_date': datetime.date(20XX, 1, 1), 'name': 'batch_id'}, ...]
-    """
-    return [b.name for b in batches if b.expiry_date and b.expiry_date <= getdate(nowdate())]
+	"""
+	:param batches: A list of dict in the form [{'expiry_date': datetime.date(20XX, 1, 1), 'name': 'batch_id'}, ...]
+	"""
+	return [b.name for b in batches if b.expiry_date and b.expiry_date <= getdate(nowdate())]
 
 
 def qty_from_all_warehouses(batch_info):
@@ -189,47 +185,47 @@ def get_price(item_code, price_list, customer_group, company, party=None, qty=1)
 
 
 def get_non_stock_item_status(item_code, item_warehouse_field):
-    # if item is a product bundle, check if its bundle items are in stock
-    if frappe.db.exists("Product Bundle", item_code):
-        items = frappe.get_doc("Product Bundle", item_code).get_all_children()
-        bundle_warehouse = frappe.db.get_value(
-            "Website Item", {"item_code": item_code}, item_warehouse_field
-        )
-        return all(
-            get_web_item_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock
-            for d in items
-        )
-    else:
-        return 1
+	# if item is a product bundle, check if its bundle items are in stock
+	if frappe.db.exists("Product Bundle", item_code):
+		items = frappe.get_doc("Product Bundle", item_code).get_all_children()
+		bundle_warehouse = frappe.db.get_value(
+			"Website Item", {"item_code": item_code}, item_warehouse_field
+		)
+		return all(
+			get_web_item_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock
+			for d in items
+		)
+	else:
+		return 1
 
 
 def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
-    items = []
+	items = []
 
-    for attribute, values in attribute_filters.items():
-        attribute_values = values
+	for attribute, values in attribute_filters.items():
+		attribute_values = values
 
-        if not isinstance(attribute_values, list):
-            attribute_values = [attribute_values]
+		if not isinstance(attribute_values, list):
+			attribute_values = [attribute_values]
 
-        if not attribute_values:
-            continue
+		if not attribute_values:
+			continue
 
-        wheres = []
-        query_values = []
-        for attribute_value in attribute_values:
-            wheres.append("( attribute = %s and attribute_value = %s )")
-            query_values += [attribute, attribute_value]
+		wheres = []
+		query_values = []
+		for attribute_value in attribute_values:
+			wheres.append("( attribute = %s and attribute_value = %s )")
+			query_values += [attribute, attribute_value]
 
-        attribute_query = " or ".join(wheres)
+		attribute_query = " or ".join(wheres)
 
-        if template_item_code:
-            variant_of_query = "AND t2.variant_of = %s"
-            query_values.append(template_item_code)
-        else:
-            variant_of_query = ""
+		if template_item_code:
+			variant_of_query = "AND t2.variant_of = %s"
+			query_values.append(template_item_code)
+		else:
+			variant_of_query = ""
 
-        query = """
+		query = """
 			SELECT
 				t1.parent
 			FROM
@@ -253,12 +249,12 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 			ORDER BY
 				NULL
 		""".format(
-            attribute_query=attribute_query, variant_of_query=variant_of_query
-        )
+			attribute_query=attribute_query, variant_of_query=variant_of_query
+		)
 
-        item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
-        items.append(item_codes)
+		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
+		items.append(item_codes)
 
-    res = list(set.intersection(*items))
+	res = list(set.intersection(*items))
 
-    return res
+	return res
