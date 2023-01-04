@@ -611,7 +611,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": " Sales Person Target Variance",
    "link_count": 0,
    "link_to": "Sales Person Target Variance Based On Item Group",
@@ -621,7 +621,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": " Territory Target Variance",
    "link_count": 0,
    "link_to": "Territory Target Variance Based On Item Group",
@@ -631,7 +631,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": " Sales Person Commission Summary",
    "link_count": 0,
    "link_to": "Sales Person Commission Summary",
@@ -640,7 +640,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 16:39:15.137606",
+ "modified": "2023-01-02 18:12:01.248077",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
