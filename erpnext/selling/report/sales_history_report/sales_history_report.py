@@ -92,7 +92,7 @@ def get_data(filters):
 	if filters.get("from_date") and filters.get("to_date"):
 		if filters.get("from_date") > filters.get("to_date"):
 			frappe.throw('Enter From Date less than To Date')
-		query = (query.where(filters.from_date <= dn.posting_date <=  filters.to_date))
+		query = (query.where((dn.posting_date >= filters.from_date) &(dn.posting_date <=  filters.to_date)))
 
 	query = query.run(as_dict=True)
 
