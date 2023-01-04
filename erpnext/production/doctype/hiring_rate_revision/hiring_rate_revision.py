@@ -64,11 +64,11 @@ class HiringRateRevision(Document):
 	def get_hired_equipment(self):
 		self.set("items",[])
 		for d in frappe.db.sql('''
-			select name as equipment_hiring_form, equipment, supplier, start_date, end_date, equipment_type
-			from `tabEquipment Hiring Form` where branch = '{branch}' and equipment_type = '{equipment_type}'
+			select name as equipment_hiring_form, equipment, supplier, start_date, end_date, equipment_category
+			from `tabEquipment Hiring Form` where branch = '{branch}' and equipment_category = '{equipment_category}'
 			and '{valid_from}' between start_date and end_date
 			and fuel_type = '{fuel_type}'
-			'''.format(branch = self.branch, equipment_type = self.equipment_type, valid_from = self.valid_from, fuel_type = self.fuel_type), as_dict=1):
+			'''.format(branch = self.branch, equipment_category = self.equipment_category, valid_from = self.valid_from, fuel_type = self.fuel_type), as_dict=1):
 			base_rate = frappe.db.sql('''
 					select hiring_rate, name from `tabEHF Rate` where parent = '{}' order by idx desc limit 1 
 					'''.format(d.equipment_hiring_form))

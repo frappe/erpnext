@@ -12,7 +12,8 @@
   "budget_account",
   "disabled",
   "pol_expense_account",
-  "r_m_expense_account"
+  "r_m_expense_account",
+  "hiring_rate_revision"
  ],
  "fields": [
   {
@@ -48,11 +49,17 @@
    "label": "R & M Expense Account",
    "options": "Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "hiring_rate_revision",
+   "fieldtype": "Percent",
+   "label": "Hiring Rate Revision(%)",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-08 17:11:52.928200",
+ "modified": "2023-01-04 10:21:11.978115",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Category",

@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "field:branch",
  "creation": "2013-01-10 16:34:13",
  "doctype": "DocType",
@@ -107,7 +108,7 @@
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2023-01-03 12:53:41.839607",
+ "modified": "2023-01-04 11:28:20.506255",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Branch",
@@ -116,7 +117,6 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
@@ -127,12 +127,23 @@
   },
   {
    "create": 1,
-   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
    "write": 1
   }
