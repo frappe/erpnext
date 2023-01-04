@@ -491,6 +491,7 @@
    "depends_on": "eval:(parent.material_request_type != \"Purchase\") && (parent.material_request_type != \"Material Transfer\") ",
    "fieldname": "issue_to_employee",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Issue To Employee",
    "options": "Employee"
   },
@@ -498,6 +499,7 @@
    "depends_on": "eval:(parent.material_request_type != \"Purchase\") && (parent.material_request_type != \"Material Transfer\") ",
    "fieldname": "issue_to_equipment",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Issue To Equipment",
    "options": "Equipment"
   },
@@ -529,7 +531,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-01 10:18:22.902195",
+ "modified": "2023-01-04 18:38:57.370684",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
