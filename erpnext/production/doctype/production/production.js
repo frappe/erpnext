@@ -147,9 +147,8 @@ cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(fr
 cur_frm.fields_dict['items'].grid.get_field('equipment').get_query = function(frm, cdt, cdn) {
 	return {
         filters: {
-            "enabled": 1,
-            "hired_equipment": 1,
-        }
+            "enabled": 1
+		    }
     };
 }
 var update_expense_account = function(frm, cdt, cdn){

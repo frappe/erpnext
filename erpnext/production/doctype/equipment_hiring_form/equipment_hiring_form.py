@@ -38,7 +38,7 @@ class EquipmentHiringForm(Document):
 				throw("From Date cannot be greater than Equipment Start Date at row {}".format(bold(d.idx)))
 			if getdate(d.to_date) > getdate(self.end_date):
 				throw("To Date cannot be greater than Equipment End Date at row {}".format(bold(d.idx)))
-			if getdate(d.from_date) > getdate(d.to_date):
+			if d.to_date and getdate(d.from_date) > getdate(d.to_date):
 				throw("From Date cannot be greater than To Date at row {}".format(bold(d.idx)))
 
 			# validate date verlapping
@@ -48,7 +48,7 @@ class EquipmentHiringForm(Document):
 				if getdate(d.from_date) >= getdate(self.ehf_rate[i].from_date) and getdate(d.from_date) <= getdate(self.ehf_rate[i].to_date):
 					throw("From Date at row {} is overlapping with row no {}".format(bold(d.idx),bold(self.ehf_rate[i].idx)))
 
-				if getdate(d.to_date) >= getdate(self.ehf_rate[i].from_date) and getdate(d.to_date) <= getdate(self.ehf_rate[i].to_date):
+				if d.to_date and getdate(d.to_date) >= getdate(self.ehf_rate[i].from_date) and getdate(d.to_date) <= getdate(self.ehf_rate[i].to_date):
 					throw("To Date at row {} is overlapping with row no {}".format(bold(d.idx),bold(self.ehf_rate[i].idx)))
 				i  = i + 1
 
