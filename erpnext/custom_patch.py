@@ -2,6 +2,26 @@ import frappe
 from erpnext.setup.doctype.employee.employee import create_user
 import pandas as pd
 
+def assign_ess_role():
+    users = frappe.db.sql("""
+        select name from `tabUser` where name not in ('Guest', 'Administrator')
+    """,as_dict=1)
+    for a in users:
+        user = frappe.get_doc("User", a.name)
+        user.flags.ignore_permissions = True
+        if "Employee Self Service" not in frappe.get_roles(a.name):
+            user.add_roles("Employee Self Service")
+            print("Employee Self Service role added for user {}".format(a.name))
+
+
+def delete_salary_detail_salary_slip():
+    ssd = frappe.db.sql("""
+        select name from `tabSalary Detail` where parenttype = 'Salary Slip'
+    """,as_dict=1)
+    for a in ssd:
+        frappe.db.sql("delete from `tabSalary Detail` where name = '{}'".format(a.name))
+        print(a.name)
+
 def create_users():
     print("here")
 
