@@ -79,7 +79,6 @@ frappe.ui.form.on('Material Request', {
 				filters: { 'item_group': frm.doc.item_group}
 			};
 		};
-
 	},
 	"transaction_date": function(frm) {
 		if(frm.doc.transaction_date >= frappe.datetime.nowdate()){
