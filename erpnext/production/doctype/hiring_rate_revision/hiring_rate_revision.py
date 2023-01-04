@@ -22,8 +22,8 @@ class HiringRateRevision(Document):
 				WHERE item_code = '{item_code}' AND fuel_price_list = '{fuel_price_list}'
 				AND name != '{name}' AND valid_from <= ifnull('{valid_from}',NOW())
 				AND ifnull(valid_upto,NOW()) >= '{valid_from}'
-				AND branch = '{branch}'
-			'''.format(item_code = self.item_code, fuel_price_list = self.fuel_price_list, name = self.name, valid_from = self.valid_from, branch =self.branch), as_dict=1)
+				AND branch = '{branch}' AND equipment_category = '{equipment_category}'
+			'''.format(item_code = self.item_code, fuel_price_list = self.fuel_price_list, name = self.name, valid_from = self.valid_from, branch =self.branch, equipment_category = self.equipment_category), as_dict=1)
 		if rate:
 			msg = ", ".join(frappe.get_desk_link(self.doctype,d.name) for d in rate)
 			frappe.throw(

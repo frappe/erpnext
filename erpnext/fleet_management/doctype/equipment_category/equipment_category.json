@@ -54,12 +54,13 @@
    "fieldname": "hiring_rate_revision",
    "fieldtype": "Percent",
    "label": "Hiring Rate Revision(%)",
+   "precision": "2",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-04 10:21:11.978115",
+ "modified": "2023-01-04 11:50:23.702606",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment Category",
