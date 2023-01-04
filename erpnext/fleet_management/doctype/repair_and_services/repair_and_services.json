@@ -9,7 +9,6 @@
  "field_order": [
   "branch",
   "cost_center",
-  "mine",
   "repair_and_services_type",
   "out_source",
   "set_warehouse",
@@ -387,19 +386,12 @@
    "fieldname": "status",
    "fieldtype": "Data",
    "label": "Status"
-  },
-  {
-   "fieldname": "mine",
-   "fieldtype": "Link",
-   "label": "Mine",
-   "options": "Mine",
-   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-28 14:40:11.270816",
+ "modified": "2023-01-04 15:57:55.349097",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Repair And Services",

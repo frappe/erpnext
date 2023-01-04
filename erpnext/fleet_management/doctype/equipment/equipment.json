@@ -284,7 +284,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "supplier.bank",
    "fieldname": "bank",
    "fieldtype": "Link",
    "label": "Bank",
@@ -417,7 +416,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-04 14:43:43.788094",
+ "modified": "2023-01-04 15:40:47.562178",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",

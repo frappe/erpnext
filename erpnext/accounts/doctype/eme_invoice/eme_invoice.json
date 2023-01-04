@@ -9,7 +9,6 @@
  "field_order": [
   "branch",
   "cost_center",
-  "mine",
   "column_break_2",
   "posting_date",
   "supplier",
@@ -264,18 +263,11 @@
    "label": "EME Invoice Entry",
    "options": "EME Invoice Entry",
    "read_only": 1
-  },
-  {
-   "fieldname": "mine",
-   "fieldtype": "Link",
-   "label": "Mine",
-   "options": "Mine",
-   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-28 14:46:19.822100",
+ "modified": "2023-01-04 15:59:16.544495",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice",
