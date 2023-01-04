@@ -6,14 +6,14 @@ from frappe.model.document import Document
 from frappe.utils import date_diff
 
 class Mine(Document):
-	def validate(self):
-		self.validate_date()
+	# def validate(self):
+	# 	self.validate_date()
 
 	def validate_date(self):
 		if not self.lease_start_date and not self.lease_end_date:
 			if self.lease_start_date > self.lease_end_date:
 				frappe.throw("Lease Start Date cannot be greater than Lease End Date")
-				
+
 @frappe.whitelist()
 def lease_duration(lease_start_date, lease_end_date):
 	if lease_start_date and lease_end_date:
