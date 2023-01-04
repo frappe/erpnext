@@ -598,7 +598,7 @@
   },
   {
    "hidden": 0,
-   "is_query_report": 0,
+   "is_query_report": 1,
    "label": "Vehicle Maintenance Schedule",
    "link_count": 0,
    "link_to": "Vehicle Maintenance Schedule",
@@ -618,7 +618,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-12-18 16:20:10.160519",
+ "modified": "2023-01-02 18:07:43.975070",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles",
