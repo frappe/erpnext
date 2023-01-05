@@ -50,13 +50,6 @@
   "company",
   "owner_details_tab",
   "supplier",
-  "bank",
-  "bank_name",
-  "account_type",
-  "account_number",
-  "bank_branch",
-  "ifs_code",
-  "column_break_42",
   "dzongkhag",
   "gewog",
   "village",
@@ -284,52 +277,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "bank",
-   "fieldtype": "Link",
-   "label": "Bank",
-   "mandatory_depends_on": "eval:doc.hired_equipment == 1",
-   "options": "Financial Institution"
-  },
-  {
-   "fieldname": "bank_name",
-   "fieldtype": "Data",
-   "label": "Bank Name",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "supplier.bank_account_type",
-   "fieldname": "account_type",
-   "fieldtype": "Link",
-   "label": "Account Type",
-   "options": "Bank Account Type"
-  },
-  {
-   "fetch_from": "supplier.account_number",
-   "fieldname": "account_number",
-   "fieldtype": "Data",
-   "label": "Account Number",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "supplier.bank_branch",
-   "fieldname": "bank_branch",
-   "fieldtype": "Link",
-   "label": "Bank Branch",
-   "options": "Financial Institution Branch",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "supplier.ifs_code",
-   "fieldname": "ifs_code",
-   "fieldtype": "Data",
-   "label": "IFS Code",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_42",
-   "fieldtype": "Column Break"
-  },
-  {
    "fetch_from": "supplier.dzongkhag",
    "fieldname": "dzongkhag",
    "fieldtype": "Link",
@@ -416,7 +363,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-01-04 15:40:47.562178",
+ "modified": "2023-01-05 13:07:26.077045",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Equipment",
