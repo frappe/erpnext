@@ -49,6 +49,12 @@
   "column_break_14",
   "minimum_lead_time_days",
   "maximum_payment_adjustment",
+  "section_break_47",
+  "opp_required_for_quotation",
+  "role_skip_opportunity_for_quotation",
+  "column_break_45",
+  "opp_required_for_booking",
+  "role_skip_opportunity_for_booking",
   "default_vehicle_invoice_documents_section",
   "invoice_documents",
   "vehicle_checklist_section",
@@ -323,11 +329,43 @@
   {
    "fieldname": "cb_15",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opp_required_for_quotation",
+   "fieldtype": "Select",
+   "label": "Opportunity Required For Vehicle Quotation",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "opp_required_for_booking",
+   "fieldtype": "Select",
+   "label": "Opportunity Required For Vehicle Booking",
+   "options": "No\nYes"
+  },
+  {
+   "fieldname": "role_skip_opportunity_for_booking",
+   "fieldtype": "Link",
+   "label": "Role Allowed To Skip Opportunity For Booking",
+   "options": "Role"
+  },
+  {
+   "fieldname": "role_skip_opportunity_for_quotation",
+   "fieldtype": "Link",
+   "label": "Role Allowed To Skip Opportunity For Quotation",
+   "options": "Role"
+  },
+  {
+   "fieldname": "section_break_47",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2022-08-14 14:09:07.787579",
+ "modified": "2023-01-05 13:53:00.157125",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

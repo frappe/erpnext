@@ -29,6 +29,7 @@ class VehicleQuotation(VehicleBookingController):
 	def validate(self):
 		super(VehicleQuotation, self).validate()
 
+		self.validate_opportunity_required()
 		self.validate_vehicle_qty()
 		self.validate_quotation_valid_till()
 		self.get_terms_and_conditions()
@@ -55,6 +56,16 @@ class VehicleQuotation(VehicleBookingController):
 	def before_print(self):
 		super(VehicleQuotation, self).before_print()
 		self.total_discount = -self.total_discount
+
+	def validate_opportunity_required(self):
+		if self.get('opportunity'):
+			return
+
+		role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_skip_opportunity_for_quotation")
+		if not role_allowed or role_allowed not in frappe.get_roles():
+			opp_required = frappe.get_cached_value("Vehicles Settings", None, "opp_required_for_quotation") or 'No'
+			if opp_required == 'Yes':
+				frappe.throw("Opportunity is mandatory for creating {0}".format(self.doctype))
 
 	def validate_vehicle_qty(self):
 		if self.get('vehicle') and cint(self.qty) > 1:
