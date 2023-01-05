@@ -180,8 +180,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "user_id.user_image",
-   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -810,7 +808,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2022-09-13 10:27:14.579197",
+ "modified": "2023-01-05 10:27:14.579197",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
