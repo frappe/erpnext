@@ -274,12 +274,14 @@ cur_frm.cscript.set_manual_distribution = function(doc, cdt, cdn) {
 		current_row.net_amount += me.frm.doc.calculate_tax_on_company_currency ? item_row.base_net_amount : item_row.net_amount;
 	});
 
+	let table_data = [];
+
 	var dialog = new frappe.ui.Dialog({
 		title: __("Manual Distribution for {0}", [tax_row.description]),
-		size: 'large',
+		size: "extra-large",
 		fields: [
-			{label: __("Items"), fieldname: "items", fieldtype: "Table", data: this.data,
-				get_data: () => this.data,
+			{label: __("Items"), fieldname: "items", fieldtype: "Table", data: table_data,
+				get_data: () => table_data,
 				cannot_add_rows: true, in_place_edit: true,
 				fields: [
 					{
@@ -322,7 +324,7 @@ cur_frm.cscript.set_manual_distribution = function(doc, cdt, cdn) {
 	});
 
 	dialog.fields_dict.items.df.data = itemised_rows;
-	this.data = dialog.fields_dict.items.df.data;
+	table_data = dialog.fields_dict.items.df.data;
 	dialog.fields_dict.items.grid.refresh();
 
 	dialog.show();
