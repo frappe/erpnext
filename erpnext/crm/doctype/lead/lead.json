@@ -21,7 +21,7 @@
   "company_name",
   "lead_owner",
   "status",
-  "lead_status",
+  "sub_status",
   "salutation",
   "designation",
   "gender",
@@ -70,11 +70,7 @@
   "section_break_59",
   "lead_person_details",
   "lead_transfer_to_section",
-  "sales_person",
-  "data_61",
-  "product_person",
-  "column_break_62",
-  "proposal_person"
+  "lead_transfer"
  ],
  "fields": [
   {
@@ -142,17 +138,16 @@
    "options": "User"
   },
   {
-   "default": "Lead",
+   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Lead\nOpen\nReplied\nOpportunity\nQuotation\nLost Quotation\nInterested\nConverted\nDo Not Contact",
+   "options": "\nOpen\nContacted\nClose",
    "reqd": 1,
    "search_index": 1
   },
@@ -209,6 +204,7 @@
   {
    "fieldname": "section_break_12",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Follow Up"
   },
   {
@@ -489,38 +485,9 @@
    "label": "Description"
   },
   {
-   "fieldname": "lead_status",
-   "fieldtype": "Select",
-   "label": "Lead Status",
-   "options": "\nOpen\nContacted\nClose"
-  },
-  {
    "fieldname": "lead_transfer_to_section",
    "fieldtype": "Section Break",
    "label": "Lead Transfer to"
-  },
-  {
-   "fieldname": "sales_person",
-   "fieldtype": "Data",
-   "label": "Sales Person"
-  },
-  {
-   "fieldname": "product_person",
-   "fieldtype": "Data",
-   "label": "Product Person"
-  },
-  {
-   "fieldname": "data_61",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_62",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "proposal_person",
-   "fieldtype": "Data",
-   "label": "Proposal Person"
   },
   {
    "fieldname": "section_break_59",
@@ -544,6 +511,18 @@
    "hidden": 1,
    "in_list_view": 1,
    "label": "Lead Number"
+  },
+  {
+   "depends_on": "eval:doc.status == \"Contacted\"",
+   "fieldname": "sub_status",
+   "fieldtype": "Select",
+   "label": "Sub Status",
+   "options": "To Be Contacted\nOn Call Discussion\nTechnical Visit\nQuotation\nFollow Up\nBudgetary  Discussion\nNegotiation\nExisting Customer"
+  },
+  {
+   "fieldname": "lead_transfer",
+   "fieldtype": "Link",
+   "options": "User"
   }
  ],
  "hide_toolbar": 1,
@@ -551,7 +530,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-27 16:34:56.624730",
+ "modified": "2023-01-05 15:36:56.419499",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

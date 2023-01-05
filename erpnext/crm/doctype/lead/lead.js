@@ -93,6 +93,13 @@ $.extend(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
 
 //Hide Connection section 
 frappe.ui.form.on('Lead', {
+	setup: (frm) => {
+		frm.fields_dict["lead_person_details"].grid.get_field("person_name").get_query = function(doc, cdt, cdn) {
+			return {
+				filters: {'company_name': doc.company_name}
+			}
+		};
+	},
 	refresh(frm) {
 		frm.dashboard.links_area.hide();
 		if(frm.doc.lead_number != null){
@@ -102,10 +109,10 @@ frappe.ui.form.on('Lead', {
 		//frm.set_value("lead_number",frm.doc.name);
 	},
 	after_save :function(frm){
-		var lead_number = 0;
-		lead_number=frm.doc.name;
-		frm.set_value("lead_number",lead_number);
-		//console.log(lead_number);
-		//frm.refresh_field('lead_number');
+		console.log(frm.doc.sub_status);
+		if (frm.doc.sub_status == "Existing Customer"){
+			frappe.msgprint(frm.doc.sub_status)
+			frappe.db.set_value("Company Details", frm.doc.company_name, "existing_customer", 1)
+		}
 	}
 });														

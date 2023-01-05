@@ -16,9 +16,8 @@
    "columns": 2,
    "fieldname": "person_name",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Person Name",
-   "options": "Contact"
+   "options": "Company Contact Person"
   },
   {
    "columns": 2,
@@ -30,7 +29,7 @@
   },
   {
    "columns": 2,
-   "fetch_from": "person_name.email_id",
+   "fetch_from": "person_name.primary_email_id",
    "fieldname": "email_address",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -38,7 +37,7 @@
   },
   {
    "columns": 2,
-   "fetch_from": "person_name.mobile_no",
+   "fetch_from": "person_name.primary_phone_number",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -48,7 +47,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-12-21 11:18:27.023494",
+ "modified": "2023-01-05 15:52:12.920194",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Person Details",
