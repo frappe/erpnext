@@ -246,21 +246,11 @@ class WorkOrder(Document):
 			status = "Draft"
 		elif self.docstatus == 1:
 			if status != "Stopped":
-				stock_entries = frappe._dict(
-					frappe.db.sql(
-						"""select purpose, sum(fg_completed_qty)
-					from `tabStock Entry` where work_order=%s and docstatus=1
-					group by purpose""",
-						self.name,
-					)
-				)
-
 				status = "Not Started"
-				if stock_entries:
+				if flt(self.material_transferred_for_manufacturing) > 0:
 					status = "In Process"
-					produced_qty = stock_entries.get("Manufacture")
-					if flt(produced_qty) >= flt(self.qty):
-						status = "Completed"
+				if flt(self.produced_qty) >= flt(self.qty):
+					status = "Completed"
 		else:
 			status = "Cancelled"
 
@@ -309,11 +299,14 @@ class WorkOrder(Document):
 
 	def get_transferred_or_manufactured_qty(self, purpose):
 		table = frappe.qb.DocType("Stock Entry")
-		query = (
-			frappe.qb.from_(table)
-			.select(Sum(table.fg_completed_qty))
-			.where((table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose))
+		query = frappe.qb.from_(table).where(
+			(table.work_order == self.name) & (table.docstatus == 1) & (table.purpose == purpose)
 		)
+
+		if purpose == "Manufacture":
+			query = query.select(Sum(table.fg_completed_qty) - Sum(table.process_loss_qty))
+		else:
+			query = query.select(Sum(table.fg_completed_qty))
 
 		return flt(query.run()[0][0])
 
@@ -346,6 +339,7 @@ class WorkOrder(Document):
 
 			produced_qty = total_qty[0][0] if total_qty else 0
 
+		self.update_status()
 		production_plan.run_method(
 			"update_produced_pending_qty", produced_qty, self.production_plan_item
 		)
