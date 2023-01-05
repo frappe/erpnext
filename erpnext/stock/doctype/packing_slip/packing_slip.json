@@ -9,18 +9,22 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "naming_series",
   "package_type",
   "package_uom",
   "handling_unit",
   "column_break0",
-  "remarks",
+  "customer",
+  "customer_name",
   "column_break1",
   "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "amended_from",
+  "packing_remarks_section",
+  "remarks",
   "packing_details_section",
   "from_warehouse",
   "column_break_15",
@@ -98,7 +102,6 @@
   {
    "fieldname": "package_type",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Package Type",
    "options": "Package Type",
@@ -108,6 +111,7 @@
    "fetch_from": "package_type.package_uom",
    "fieldname": "package_uom",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Package UOM",
    "options": "UOM",
    "read_only": 1
@@ -193,12 +197,12 @@
   {
    "fieldname": "packed_handling_units_section",
    "fieldtype": "Section Break",
-   "label": "Packed Packages"
+   "label": "Packed Handling Units"
   },
   {
    "fieldname": "handling_units",
    "fieldtype": "Table",
-   "label": "Packed Handling Units",
+   "label": "Packed Packages",
    "no_copy": 1,
    "options": "Packing Slip Handling Unit"
   },
@@ -290,13 +294,42 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "remarks",
+   "fieldname": "packing_remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Packing Remarks"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-29 23:33:47.262006",
+ "modified": "2023-01-05 23:24:30.468767",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
@@ -332,6 +365,7 @@
  "sort_field": "posting_date",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

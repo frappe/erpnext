@@ -67,6 +67,7 @@ class SalesOrder(SellingController):
 
 		self.validate_with_previous_doc()
 		self.set_delivery_status()
+		self.set_packing_status()
 		self.set_billing_status()
 		self.set_purchase_status()
 		self.set_status()
@@ -193,6 +194,32 @@ class SalesOrder(SellingController):
 			self.db_set({
 				'per_delivered': self.per_delivered,
 				'delivery_status': self.delivery_status,
+			}, update_modified=update_modified)
+
+	def set_packing_status(self, update=False, update_modified=True):
+		data = self.get_packing_status_data()
+
+		# update values in rows
+		for d in self.items:
+			d.packed_qty = flt(data.packed_qty_map.get(d.name))
+
+			if update:
+				d.db_set({
+					'packed_qty': d.packed_qty,
+				}, update_modified=update_modified)
+
+		# update percentage in parent
+		self.per_packed = self.calculate_status_percentage('packed_qty', 'qty', data.packable_rows)
+		if self.per_packed is None:
+			self.per_packed = flt(self.calculate_status_percentage('packed_qty', 'qty', self.items))
+
+		# update packing_status
+		self.packing_status = self.get_completion_status('per_packed', 'Packed')
+
+		if update:
+			self.db_set({
+				'per_packed': self.per_packed,
+				'packing_status': self.packing_status,
 			}, update_modified=update_modified)
 
 	def set_billing_status(self, update=False, update_modified=True):
@@ -329,6 +356,36 @@ class SalesOrder(SellingController):
 
 		return out
 
+	def get_packing_status_data(self):
+		out = frappe._dict()
+
+		out.packable_rows = []
+		out.packed_qty_map = {}
+
+		packable_row_names = []
+
+		for d in self.items:
+			if d.is_stock_item and not d.delivered_by_supplier:
+				out.packable_rows.append(d)
+				packable_row_names.append(d.name)
+
+		# Get Delivered Qty
+		if self.docstatus == 1:
+			if packable_row_names:
+				# Delivered By Delivery Note
+				packed_by_packing_slip = frappe.db.sql("""
+					select i.sales_order_item, i.qty
+					from `tabPacking Slip Item` i
+					inner join `tabPacking Slip` p on p.name = i.parent
+					where p.docstatus = 1 and i.sales_order_item in %s
+				""", [packable_row_names], as_dict=1)
+
+				for d in packed_by_packing_slip:
+					out.packed_qty_map.setdefault(d.sales_order_item, 0)
+					out.packed_qty_map[d.sales_order_item] += d.qty
+
+		return out
+
 	def get_billing_status_data(self):
 		out = frappe._dict()
 		out.billed_qty_map = {}
@@ -403,6 +460,10 @@ class SalesOrder(SellingController):
 
 	def validate_delivered_qty(self, from_doctype=None, row_names=None):
 		self.validate_completed_qty('delivered_qty', 'qty', self.items,
+			allowance_type='qty', from_doctype=from_doctype, row_names=row_names)
+
+	def validate_packed_qty(self, from_doctype=None, row_names=None):
+		self.validate_completed_qty('packed_qty', 'qty', self.items,
 			allowance_type='qty', from_doctype=from_doctype, row_names=row_names)
 
 	def validate_billed_qty(self, from_doctype=None, row_names=None):
@@ -979,6 +1040,69 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 			"postprocess": update_item,
 			"condition": item_condition,
 		}
+
+	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
+
+	return target_doc
+
+
+@frappe.whitelist()
+def make_packing_slip(source_name, target_doc=None, warehouse=None):
+	if not warehouse and frappe.flags.args:
+		warehouse = frappe.flags.args.warehouse
+
+	def item_condition(source, source_parent, target_parent):
+		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item]:
+			return False
+
+		if source.delivered_by_supplier:
+			return False
+
+		if not source.is_stock_item:
+			return False
+
+		undelivered_qty, unpacked_qty = get_remaining_qty(source)
+		return undelivered_qty > 0 and unpacked_qty > 0
+
+	def set_missing_values(source, target):
+		if warehouse:
+			target.to_warehouse = warehouse
+
+		target.run_method("set_missing_values")
+		target.run_method("calculate_totals")
+
+	def update_item(source, target, source_parent, target_parent):
+		undelivered_qty, unpacked_qty = get_remaining_qty(source)
+		target.qty = min(undelivered_qty, unpacked_qty)
+
+	def get_remaining_qty(source):
+		undelivered_qty = flt(source.qty) - flt(source.delivered_qty)
+		unpacked_qty = flt(source.qty) - flt(source.packed_qty)
+
+		return undelivered_qty, unpacked_qty
+
+	mapper = {
+		"Sales Order": {
+			"doctype": "Packing Slip",
+			"validation": {
+				"docstatus": ["=", 1]
+			},
+			"field_no_map": [
+				"total_net_weight",
+				"total_gross_weight",
+				"remarks",
+			]
+		},
+		"Sales Order Item": {
+			"doctype": "Packing Slip Item",
+			"field_map": {
+				"name": "sales_order_item",
+				"parent": "sales_order",
+			},
+			"postprocess": update_item,
+			"condition": item_condition,
+		}
+	}
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 

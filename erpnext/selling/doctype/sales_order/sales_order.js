@@ -18,6 +18,7 @@ frappe.ui.form.on("Sales Order", {
 			'Auto Repeat': __("Subscription"),
 			'Payment Request': __("Payment Request"),
 			'Vehicle': __("Reserved Vehicles"),
+			'Packing Slip': __("Packing Slip"),
 		}
 
 		frm.set_query('company_address', function(doc) {
@@ -176,6 +177,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					if(flt(me.frm.doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(me.frm.doc.order_type)!==-1 && allow_delivery) {
 						me.frm.add_custom_button(__('Delivery Note'), () => me.make_delivery_note_based_on(), __('Create'));
 						me.frm.add_custom_button(__('Work Order'), () => me.make_work_order(), __('Create'));
+
+						if (flt(me.frm.doc.per_packed, 6) < 100) {
+							me.frm.add_custom_button(__('Packing Slip'), () => me.make_packing_slip(), __('Create'));
+						}
 
 						var has_vehicles = me.frm.doc.items.some(d => d.is_vehicle);
 						if (has_vehicles) {
@@ -687,6 +692,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 	make_delivery_note(warehouse) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+			frm: this.frm,
+			args: {
+				warehouse: warehouse
+			}
+		})
+	}
+
+	make_packing_slip(warehouse) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_packing_slip",
 			frm: this.frm,
 			args: {
 				warehouse: warehouse

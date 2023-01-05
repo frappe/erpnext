@@ -7,6 +7,7 @@ from frappe.utils import flt, cint
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
 	get_default_expense_account, get_default_cost_center
+from erpnext.accounts.party import validate_party_frozen_disabled
 import json
 
 
@@ -26,24 +27,35 @@ class PackingSlip(StockController):
 		self.validate_contents_mandatory()
 		self.validate_items()
 		self.validate_source_handling_units()
+		self.validate_sales_orders()
+		self.validate_customer()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_with_previous_doc()
 		self.calculate_totals()
 		self.validate_weights()
+		self.set_title()
 
 	def before_submit(self):
 		self.create_handling_unit()
 
 	def on_submit(self):
+		self.update_previous_doc_status()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.update_handling_unit()
 
 	def on_cancel(self):
+		self.update_previous_doc_status()
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.update_handling_unit()
+
+	def set_title(self):
+		self.title = self.package_type
+		if self.get("customer"):
+			self.title += " for {0}".format(self.customer_name or self.customer)
 
 	def set_missing_values(self, for_validate=False):
 		self.set_missing_item_details(for_validate)
@@ -116,6 +128,20 @@ class PackingSlip(StockController):
 						frappe.throw(_("Row #{0}: Item {1}, quantity must be positive number")
 							.format(d.idx, frappe.bold(d.item_code)))
 
+	def validate_with_previous_doc(self):
+		super(PackingSlip, self).validate_with_previous_doc({
+			"Sales Order": {
+				"ref_dn_field": "sales_order",
+				"compare_fields": [["customer", "="], ["company", "="], ["project", "="]]
+			},
+			"Sales Order Item": {
+				"ref_dn_field": "sales_order_item",
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+		})
+
 	def validate_weights(self):
 		for field in self.item_table_fields:
 			for d in self.get(field):
@@ -140,6 +166,56 @@ class PackingSlip(StockController):
 		warehouses = list(set(warehouses))
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
+
+	def validate_sales_orders(self):
+		sales_orders = list(set([d.sales_order for d in self.get("items") if d.get("sales_order")]))
+		sales_order_map = {}
+		for sales_order in sales_orders:
+			details = frappe.db.get_value("Sales Order", sales_order,
+				["name", "docstatus", "status", "customer", "customer_name"], as_dict=1)
+			sales_order_map[sales_order] = details
+
+		customer_details = frappe._dict({})
+		for d in self.get("items"):
+			if not d.get("sales_order"):
+				continue
+
+			order_details = sales_order_map[d.sales_order]
+			if order_details.docstatus == 0:
+				frappe.throw(_("Row #{0}: {1} is Draft. Please submit it first.").format(
+					d.idx, frappe.get_desk_link("Sales Order", order_details.name)))
+			if order_details.docstatus == 2:
+				frappe.throw(_("Row #{0}: {1} is cancelled").format(
+					d.idx, frappe.get_desk_link("Sales Order", order_details.name)))
+			if order_details.status in ("Closed", "On Hold"):
+				frappe.throw(_("Row #{0}: {1} status is {2}").format(
+					d.idx, frappe.get_desk_link("Sales Order", order_details.name), frappe.bold(order_details.status)))
+
+			if customer_details and customer_details.customer != order_details.customer:
+				frappe.throw(_("Row #{0}: {1} Customer {2} does not match with Row #{3} {4} Customer {5}").format(
+					d.idx,
+					frappe.get_desk_link("Sales Order", order_details.name),
+					order_details.customer_name or order_details.customer,
+					customer_details.row.idx,
+					frappe.get_desk_link("Sales Order", customer_details.sales_order),
+					customer_details.customer_name or customer_details.customer,
+				))
+
+			customer_details.customer = order_details.customer
+			customer_details.customer_name = order_details.customer_name
+			customer_details.row = d
+			customer_details.sales_order = d.sales_order
+
+		if customer_details and customer_details.customer:
+			self.customer = customer_details.customer
+			self.customer_name = customer_details.customer_name
+
+	def validate_customer(self):
+		if self.get("customer"):
+			validate_party_frozen_disabled("Customer", self.customer)
+			self.customer_name = frappe.get_cached_value("Customer", self.customer, "customer_name")
+		else:
+			self.customer_name = None
 
 	def calculate_totals(self):
 		self.total_net_weight = 0
@@ -181,6 +257,22 @@ class PackingSlip(StockController):
 		hu_doc = frappe.get_doc("Handling Unit", self.handling_unit)
 		hu_doc.set_status(update=True)
 		hu_doc.notify_update()
+
+	def update_previous_doc_status(self):
+		sales_orders = set()
+		sales_order_row_names = set()
+
+		for d in self.items:
+			if d.sales_order:
+				sales_orders.add(d.sales_order)
+			if d.sales_order_item:
+				sales_order_row_names.add(d.sales_order_item)
+
+		for name in sales_orders:
+			doc = frappe.get_doc("Sales Order", name)
+			doc.set_packing_status(update=True)
+			doc.validate_packed_qty(from_doctype=self.doctype, row_names=sales_order_row_names)
+			doc.notify_update()
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		sl_entries = []

@@ -52,11 +52,45 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			let item = frappe.get_doc(cdt, cdn);
 			return erpnext.queries.item_uom(item.item_code);
 		});
+
+		me.frm.set_query("customer", erpnext.queries.customer);
 	}
 
 	setup_buttons() {
 		this.show_stock_ledger();
 		this.show_general_ledger();
+
+		if (this.frm.doc.docstatus == 0) {
+			this.frm.add_custom_button(__('Sales Order'), () => {
+				this.get_items_from_sales_order();
+			}, __("Get Items From"));
+		}
+	}
+
+	get_items_from_sales_order() {
+		if (!this.frm.doc.customer) {
+			frappe.throw({
+				title: __("Mandatory"),
+				message: __("Please Select a Customer")
+			});
+		}
+		erpnext.utils.map_current_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_packing_slip",
+			source_doctype: "Sales Order",
+			target: this.frm,
+			setters: {
+				customer: this.frm.doc.customer || undefined,
+				project: this.frm.doc.project || undefined,
+			},
+			columns: ['customer_name', 'project'],
+			get_query_filters: {
+				docstatus: 1,
+				status: ["not in", ["Closed", "On Hold"]],
+				per_delivered: ["<", 99.99],
+				per_packed: ["<", 99.99],
+				company: this.frm.doc.company,
+			}
+		});
 	}
 
 	calculate_totals() {
