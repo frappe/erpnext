@@ -442,9 +442,6 @@ class Item(Document):
 				title=_("Note"),
 			)
 
-		if self.published_in_website:
-			invalidate_cache_for_item(self)
-
 		frappe.db.set_value("Item", new_name, "item_code", new_name)
 
 		if merge:
