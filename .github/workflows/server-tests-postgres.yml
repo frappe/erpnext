@@ -15,7 +15,7 @@ concurrency:
 jobs:
   test:
     if: ${{ contains(github.event.pull_request.labels.*.name, 'postgres') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
 
     strategy:
