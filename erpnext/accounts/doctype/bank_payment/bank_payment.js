@@ -54,6 +54,16 @@ frappe.ui.form.on('Bank Payment', {
 				}
 			};
 		});
+		
+		cur_frm.set_query("transaction_no", function() {
+			return {
+				"filters": {
+					"docstatus": 1,
+					"branch": cur_frm.doc.branch
+				}
+			};
+		});
+	
 	},
 	refresh: function(frm) {
 		enable_disable(frm);

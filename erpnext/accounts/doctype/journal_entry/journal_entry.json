@@ -63,11 +63,13 @@
   "select_print_heading",
   "addtional_info",
   "payment_order",
+  "payment_status",
   "column_break3",
   "is_opening",
   "stock_entry",
   "subscription_section",
   "auto_repeat",
+  "bank_payment",
   "amended_from"
  ],
  "fields": [
@@ -571,6 +573,19 @@
    "fieldtype": "HTML",
    "label": "TDS Table",
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Data",
+   "label": "Payment Status",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bank_payment",
+   "fieldtype": "Link",
+   "label": "Bank Payment",
+   "options": "Bank Payment",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -582,7 +597,7 @@
    "link_fieldname": "journal_entry"
   }
  ],
- "modified": "2023-01-03 10:50:10.448035",
+ "modified": "2023-01-04 16:09:54.110418",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
@@ -633,6 +648,16 @@
    "read": 1,
    "report": 1,
    "role": "Fleet Manager",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Approver",
    "share": 1
   }
  ],

@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form, now_datetime, get_datetime
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -26,6 +26,7 @@ from erpnext.accounts.utils import (
 )
 from erpnext.controllers.accounts_controller import AccountsController
 from frappe.model.naming import make_autoname
+from frappe.model.mapper import get_mapped_doc
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError):
@@ -1543,3 +1544,25 @@ def get_permission_query_conditions(user):
 			and bi.parent = ab.name
 			and bi.branch = `tabJournal Entry`.branch)
 	)""".format(user=user)
+
+# ePayment Begins
+@frappe.whitelist()
+def make_bank_payment(source_name, target_doc=None):
+    def set_missing_values(obj, target, source_parent):
+        target.payment_type = "One-One Payment"
+        target.transaction_type = "Journal Entry"
+        target.posting_date = get_datetime()
+        target.from_date = None
+        target.to_date = None
+
+    doc = get_mapped_doc("Journal Entry", source_name, {
+            "Journal Entry": {
+                "doctype": "Bank Payment",
+                "field_map": {
+                    "name": "transaction_no",
+                },
+                "postprocess": set_missing_values,
+            },
+    }, target_doc, ignore_permissions=True)
+    return doc
+# ePayment Ends

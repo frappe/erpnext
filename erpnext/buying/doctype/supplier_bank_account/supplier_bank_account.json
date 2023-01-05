@@ -13,7 +13,7 @@
   "column_break_5",
   "bank_account_type",
   "account_number",
-  "default_bank_account"
+  "default"
  ],
  "fields": [
   {
@@ -30,12 +30,14 @@
    "options": "Financial Institution Branch"
   },
   {
+   "depends_on": "eval:doc.bank_name == \"INR\"",
    "fieldname": "inr_bank_code",
    "fieldtype": "Select",
    "label": "Bank Code",
    "options": "\n01 - AXIS BANK\n02- SBI\n03 -Others\n04 - SCB"
   },
   {
+   "depends_on": "eval:doc.bank_name == \"INR\"",
    "fieldname": "inr_purpose_code",
    "fieldtype": "Select",
    "label": "Purpose Code",
@@ -60,7 +62,8 @@
   },
   {
    "default": "0",
-   "fieldname": "default_bank_account",
+   "description": "Default bank account will be pull during bank payment(ePayment)",
+   "fieldname": "default",
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Default Bank Account"
@@ -69,7 +72,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-04 14:36:58.693608",
+ "modified": "2023-01-04 14:58:31.277853",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Bank Account",

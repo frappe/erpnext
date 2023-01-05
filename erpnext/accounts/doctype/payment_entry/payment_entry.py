@@ -7,7 +7,7 @@ from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, qb, scrub, throw
-from frappe.utils import cint, comma_or, flt, getdate, nowdate
+from frappe.utils import flt, comma_or, nowdate, getdate, get_datetime
 
 import erpnext
 from erpnext.accounts.doctype.bank_account.bank_account import (
@@ -30,6 +30,7 @@ from erpnext.controllers.accounts_controller import (
 	validate_taxes_and_charges,
 )
 from erpnext.setup.utils import get_exchange_rate
+from frappe.model.mapper import get_mapped_doc
 
 
 class InvalidPaymentEntry(ValidationError):
@@ -2043,6 +2044,29 @@ def make_payment_order(source_name, target_doc=None):
 	)
 
 	return doclist
+
+# ePayment Begins
+@frappe.whitelist()
+def make_bank_payment(source_name, target_doc=None):
+	def set_missing_values(obj, target, source_parent):
+		target.payment_type = None
+		target.transaction_type = "Payment Entry"
+		target.posting_date = get_datetime()
+		target.from_date = None
+		target.to_date = None
+
+	doc = get_mapped_doc("Payment Entry", source_name, {
+			"Payment Entry": {
+				"doctype": "Bank Payment",
+				"field_map": {
+					"name": "transaction_no",
+					"paid_from": "paid_from"
+				},
+				"postprocess": set_missing_values,
+			},
+	}, target_doc, ignore_permissions=True)
+	return doc
+# ePayment Ends
 
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user

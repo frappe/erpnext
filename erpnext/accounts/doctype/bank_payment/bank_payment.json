@@ -12,8 +12,8 @@
   "institution_name",
   "fiscal_year",
   "month",
-  "pf_remittance",
-  "pf_vendor",
+  "select_beneficiary",
+  "beneficiary",
   "column_break_0",
   "posting_date",
   "payment_type",
@@ -318,21 +318,21 @@
   {
    "default": "0",
    "depends_on": "eval:doc.transaction_type==\"Journal Entry\"",
-   "fieldname": "pf_remittance",
+   "fieldname": "select_beneficiary",
    "fieldtype": "Check",
-   "label": "PF Remittance"
+   "label": "Select Beneficiary"
   },
   {
-   "depends_on": "eval:doc.pf_remittance",
-   "fieldname": "pf_vendor",
+   "depends_on": "eval:doc.select_beneficiary",
+   "fieldname": "beneficiary",
    "fieldtype": "Link",
-   "label": "PF Vendor",
+   "label": "Beneficiary",
    "options": "Supplier"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-23 14:37:19.445902",
+ "modified": "2023-01-04 16:08:29.322078",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Payment",

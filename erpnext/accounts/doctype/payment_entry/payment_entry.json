@@ -97,7 +97,11 @@
   "subscription_section",
   "auto_repeat",
   "amended_from",
-  "title"
+  "title",
+  "bank_payment_detail_section",
+  "bank_payment",
+  "column_break_94",
+  "payment_status"
  ],
  "fields": [
   {
@@ -748,12 +752,36 @@
    "hidden": 1,
    "label": "Business Activity",
    "options": "Business Activity"
+  },
+  {
+   "depends_on": "eval:doc.payment_type == \"Pay\"",
+   "fieldname": "bank_payment_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Bank Payment Detail"
+  },
+  {
+   "fieldname": "bank_payment",
+   "fieldtype": "Link",
+   "label": "Bank Payment",
+   "options": "Bank Payment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_94",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "\nPayment Under Process\nPayment Successful\nPayment Failed\nPartial Payment\nPayment Cancelled",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-21 12:23:46.434246",
+ "modified": "2023-01-04 16:52:14.175209",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
