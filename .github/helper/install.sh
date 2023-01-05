@@ -41,8 +41,12 @@ fi
 
 
 install_whktml() {
-    wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
-    sudo apt install /tmp/wkhtmltox.deb
+    if [ "$(lsb_release -rs)" = "22.04" ]; then
+        wget -O /tmp/wkhtmltox.deb https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-2/wkhtmltox_0.12.6.1-2.jammy_amd64.deb
+        sudo apt install /tmp/wkhtmltox.deb
+    else
+        echo "Please update this script to support wkhtmltopdf for $(lsb_release -ds)"
+    fi
 }
 install_whktml &
 
