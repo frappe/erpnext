@@ -200,7 +200,7 @@ frappe.listview_settings['Vehicle Registration Order'] = {
 
 			var dialog = new frappe.ui.Dialog({
 				title: __('Agent Payment Order Selection'),
-				size: "large",
+				size: "extra-large",
 				fields: fields
 			});
 

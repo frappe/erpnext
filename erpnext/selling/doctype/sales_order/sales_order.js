@@ -534,7 +534,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var d = new frappe.ui.Dialog({
 			title: __("Items for Raw Material Request"),
 			fields: fields,
-			size: "large",
+			size: "extra-large",
 			primary_action: function() {
 				var data = d.get_values();
 				frappe.call({

@@ -37,6 +37,7 @@ frappe.ui.form.on("Work Order", {
 		frm.set_query("sales_order", function() {
 			return {
 				filters: {
+					"docstatus": 1,
 					"status": ["not in", ["Closed", "On Hold"]]
 				}
 			};
