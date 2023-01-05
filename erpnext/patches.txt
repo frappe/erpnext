@@ -786,6 +786,7 @@ erpnext.patches.v12_0.update_salary_slip_leave_with_pay
 erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.update_uom_category_and_disabled
 erpnext.patches.v14_0.set_default_weight_uom
+erpnext.patches.v14_0.set_hu_qty_after_transaction
 
 [post_model_sync]
 erpnext.patches.v12_0.resetup_vehicle_domain #01-01-2023

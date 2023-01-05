@@ -5,6 +5,8 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import create_missin
 
 
 def execute():
+	frappe.reload_doc("setup", "doctype", "uom")
+
 	uoms = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read())
 	for d in uoms:
 		uom_name = frappe.db.get_value("UOM", _(d.get("uom_name")))

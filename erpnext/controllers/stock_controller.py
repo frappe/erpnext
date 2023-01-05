@@ -221,6 +221,7 @@ class StockController(AccountsController):
 			"incoming_rate": 0,
 			"company": self.company,
 			"batch_no": cstr(d.get("batch_no")).strip(),
+			"handling_unit": d.get("handling_unit", None),
 			"serial_no": '\n'.join(get_serial_nos(d.get("serial_no"))),
 			"project": d.get("project") or self.get('project'),
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"

@@ -25,7 +25,7 @@ class PackingSlip(StockController):
 		self.validate_target_handling_unit()
 		self.validate_contents_mandatory()
 		self.validate_items()
-		self.validate_handling_units()
+		self.validate_source_handling_units()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -38,10 +38,12 @@ class PackingSlip(StockController):
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
+		self.update_handling_unit()
 
 	def on_cancel(self):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.update_handling_unit()
 
 	def set_missing_values(self, for_validate=False):
 		self.set_missing_item_details(for_validate)
@@ -75,6 +77,9 @@ class PackingSlip(StockController):
 			if hu.package_type and self.package_type != hu.package_type:
 				frappe.throw(_("Package Type does not match with Target {0}")
 					.format(frappe.get_desk_link("Handling Unit", hu.name)))
+
+	def validate_source_handling_units(self):
+		pass
 
 	def validate_contents_mandatory(self):
 		if not self.get("items") and not self.get("handling_units"):
@@ -110,9 +115,6 @@ class PackingSlip(StockController):
 					if flt(d.qty) < 0:
 						frappe.throw(_("Row #{0}: Item {1}, quantity must be positive number")
 							.format(d.idx, frappe.bold(d.item_code)))
-
-	def validate_handling_units(self):
-		pass
 
 	def validate_weights(self):
 		for field in self.item_table_fields:
@@ -174,6 +176,11 @@ class PackingSlip(StockController):
 		hu_doc.insert(ignore_permissions=True)
 
 		self.handling_unit = hu_doc.name
+
+	def update_handling_unit(self):
+		hu_doc = frappe.get_doc("Handling Unit", self.handling_unit)
+		hu_doc.set_status(update=True)
+		hu_doc.notify_update()
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		sl_entries = []
