@@ -10,7 +10,9 @@ from erpnext.hr.utils import set_employee_name, get_leave_period
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import daterange
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry,\
+	delete_expired_leave_ledger_entry, get_leave_allocation
+
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -395,6 +397,13 @@ class LeaveApplication(Document):
 				holiday_list=get_holiday_list_for_employee(self.employee)
 			)
 			create_leave_ledger_entry(self, args, submit)
+
+		allocation = get_leave_allocation(self.employee, self.leave_type, self.to_date)
+
+		if not allocation:
+			frappe.throw(_("Leave Allocation not found."))
+
+		delete_expired_leave_ledger_entry(allocation)
 
 	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
 		''' splits leave application into two ledger entries to consider expiry of allocation '''

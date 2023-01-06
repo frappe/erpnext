@@ -10,7 +10,8 @@ from frappe.utils import getdate, nowdate, flt, add_days, today
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure,\
 	get_salary_structure_assignment
-from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
+from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry,\
+	delete_expired_leave_ledger_entry, get_leave_allocation
 from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
 import datetime
 
@@ -99,13 +100,13 @@ class LeaveEncashment(Document):
 		self.leave_allocation = allocation.name
 
 	def get_leave_allocation(self):
-		leave_allocation = frappe.db.sql("""
-			select name, from_date, to_date, total_leaves_allocated, carry_forwarded_leaves_count
-			from `tabLeave Allocation`
-			where %s between from_date and to_date and docstatus = 1 and leave_type = %s and employee = %s
-		""", (self.encashment_date or getdate(nowdate()), self.leave_type, self.employee), as_dict=1)
+		leave_allocation = get_leave_allocation(self.employee, self.leave_type, getdate(self.encashment_date),
+			fields=["name", "from_date", "to_date", "total_leaves_allocated", "carry_forwarded_leaves_count"])
 
-		return leave_allocation[0] if leave_allocation else None
+		if not leave_allocation:
+			frappe.throw(_("Leave Allocation not found."))
+
+		return leave_allocation
 
 	def create_leave_ledger_entry(self, submit=True):
 		args = frappe._dict(
@@ -115,15 +116,7 @@ class LeaveEncashment(Document):
 			is_carry_forward=0
 		)
 		create_leave_ledger_entry(self, args, submit)
-
-		# create reverse entry for expired leaves
-		to_date = self.get_leave_allocation().get('to_date')
-		if to_date < getdate(nowdate()):
-			leave_allocation = self.get_leave_allocation()
-			if leave_allocation:
-				name = frappe.get_value('Leave Ledger Entry', {"transaction_type": "Leave Allocation", "transaction_name": leave_allocation.get("name"), "is_expired": 1}, "name")
-				if name:
-					frappe.db.sql("""DELETE FROM `tabLeave Ledger Entry` WHERE `name`=%s""", (name))
+		delete_expired_leave_ledger_entry(self.leave_allocation)
 
 	def get_encashment_amount_per_day(self):
 		if not self.salary_structure:

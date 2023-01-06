@@ -194,3 +194,60 @@ def expire_carried_forward_allocation(allocation):
 			to_date=allocation.to_date
 		)
 		create_leave_ledger_entry(allocation, args)
+
+
+def get_leave_allocation(employee, leave_type, date, fields=None):
+	allocation = frappe.db.get_value('Leave Allocation',
+		filters={
+			'employee': employee,
+			'leave_type': leave_type,
+			'from_date': ['<=', date],
+			'to_date': ['>=', date],
+			'docstatus': 1
+		},
+		fieldname=fields or "name",
+		as_dict=True if isinstance(fields, list) else False
+	)
+
+	return allocation
+
+
+def delete_expired_leave_ledger_entry(leave_allocation):
+	if not leave_allocation:
+		return
+
+	to_date = frappe.db.get_value("Leave Allocation", leave_allocation, "to_date")
+	if not to_date or getdate() <= to_date:
+		return
+
+	name = frappe.get_value(
+		'Leave Ledger Entry',
+		filters={
+			"transaction_type": "Leave Allocation",
+			"transaction_name": leave_allocation,
+			"is_expired": 1
+		}
+	)
+	if name:
+		frappe.db.sql("""DELETE FROM `tabLeave Ledger Entry` WHERE `name`=%s""", (name))
+
+
+def get_allocation_leave_balance_summary(allocation_name):
+	from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
+
+	allocation = frappe.get_doc("Leave Allocation", allocation_name)
+
+	total_leaves = get_leaves_for_period(
+		allocation.employee,
+		allocation.leave_type,
+		allocation.from_date,
+		allocation.to_date,
+		do_not_skip_expired_leaves=True
+	)
+
+	leaves_summary = frappe._dict()
+	leaves_summary.leave_allocation = allocation.name
+	leaves_summary.allocated_leaves = allocation.total_leaves_allocated
+	leaves_summary.used_leaves = total_leaves
+	leaves_summary.leave_balance = flt(total_leaves) + flt(leaves_summary.allocated_leaves)
+	return leaves_summary
