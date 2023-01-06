@@ -25,6 +25,7 @@ class VehicleBookingOrder(VehicleBookingController):
 	def validate(self):
 		super(VehicleBookingOrder, self).validate()
 
+		self.validate_opportunity_required()
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_allocation()
@@ -176,6 +177,16 @@ class VehicleBookingOrder(VehicleBookingController):
 		# remove previous color if Draft or if current color and previous color are the same
 		if self.docstatus == 0 or (self.docstatus == 1 and self.previous_color == self.color_1):
 			self.previous_color = None
+
+	def validate_opportunity_required(self):
+		if self.get('opportunity'):
+			return
+
+		role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_skip_opportunity_for_booking")
+		if not role_allowed or role_allowed not in frappe.get_roles():
+			opp_required = frappe.get_cached_value("Vehicles Settings", None, "opp_required_for_booking") or 'No'
+			if opp_required == 'Yes':
+				frappe.throw("Opportunity is mandatory for creating {0}".format(self.doctype))
 
 	def validate_vehicle_quotation(self):
 		if self.vehicle_quotation:

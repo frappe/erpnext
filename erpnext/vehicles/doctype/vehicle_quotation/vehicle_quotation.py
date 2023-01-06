@@ -29,6 +29,7 @@ class VehicleQuotation(VehicleBookingController):
 	def validate(self):
 		super(VehicleQuotation, self).validate()
 
+		self.validate_opportunity_required()
 		self.validate_vehicle_qty()
 		self.validate_quotation_valid_till()
 		self.get_terms_and_conditions()
@@ -56,6 +57,16 @@ class VehicleQuotation(VehicleBookingController):
 		super(VehicleQuotation, self).before_print()
 		self.total_discount = -self.total_discount
 
+	def validate_opportunity_required(self):
+		if self.get('opportunity'):
+			return
+
+		role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_skip_opportunity_for_quotation")
+		if not role_allowed or role_allowed not in frappe.get_roles():
+			opp_required = frappe.get_cached_value("Vehicles Settings", None, "opp_required_for_quotation") or 'No'
+			if opp_required == 'Yes':
+				frappe.throw("Opportunity is mandatory for creating {0}".format(self.doctype))
+
 	def validate_vehicle_qty(self):
 		if self.get('vehicle') and cint(self.qty) > 1:
 			frappe.throw(_("Qty must be 1 if Vehicle is selected"))
@@ -66,9 +77,11 @@ class VehicleQuotation(VehicleBookingController):
 	def has_vehicle_booking_order(self):
 		return frappe.db.get_value("Vehicle Booking Order", {"vehicle_quotation": self.name, "docstatus": 1})
 
-	def update_opportunity(self):
-		if self.opportunity:
-			self.update_opportunity_status()
+	def update_opportunity(self, reopen=False):
+		if self.get("opportunity"):
+			opp = frappe.get_doc("Opportunity", self.opportunity)
+			opp.set_status(update=True, status="Open" if reopen else None)
+			opp.notify_update()
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
@@ -76,28 +89,32 @@ class VehicleQuotation(VehicleBookingController):
 			doc.set_status(update=True)
 			doc.notify_update()
 
-	def update_opportunity_status(self):
-		opp = frappe.get_doc("Opportunity", self.opportunity)
-		opp.set_status(update=True)
-		opp.notify_update()
+	@frappe.whitelist()
+	def set_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):
+		is_lost = cint(is_lost)
 
-	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
-		if not self.has_vehicle_booking_order():
-			self.set_status(update=True, status='Lost')
+		if is_lost and self.has_vehicle_booking_order():
+			frappe.throw(_("Cannot declare as Lost because Vehicle Quotation is converted to order"))
+
+		if is_lost:
+			self.set_status(update=True, status="Lost")
 
 			if detailed_reason:
-				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+				self.db_set('order_lost_reason', detailed_reason)
 
-			self.lost_reasons = []
-			for reason in lost_reasons_list:
-				self.append('lost_reasons', reason)
-
-			self.update_opportunity()
-			self.update_lead()
-			self.save()
-
+			for reason in lost_reasons_list or []:
+				row = self.append('lost_reasons', reason)
+				row.db_insert()
 		else:
-			frappe.throw(_("Cannot set as Lost as Vehicle Booking Order is made."))
+			self.set_status(update=True, status="Open")
+			self.db_set('order_lost_reason', None)
+			self.lost_reasons = []
+			self.update_child_table("lost_reasons")
+
+		self.update_opportunity(reopen=not is_lost)
+		self.update_lead()
+
+		self.notify_update()
 
 
 @frappe.whitelist()

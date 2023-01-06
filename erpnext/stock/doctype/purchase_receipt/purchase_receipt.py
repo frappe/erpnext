@@ -279,6 +279,9 @@ class PurchaseReceipt(BuyingController):
 				break
 
 	def validate_order_required(self):
+		if self.is_return:
+			return
+
 		po_required = frappe.get_cached_value("Buying Settings", None, 'po_required') == 'Yes'
 		if self.get('transaction_type'):
 			tt_po_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'po_required')

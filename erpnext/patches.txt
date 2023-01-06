@@ -794,4 +794,6 @@ execute:frappe.delete_doc_if_exists("Custom Field", "Opportunity Item-vehicle_co
 erpnext.patches.v12_0.move_crm_config_to_crm_settings
 erpnext.patches.v12_0.update_mapped_item_batch_no
 erpnext.patches.v12_0.update_salary_slip_leave_with_pay
+execute:frappe.delete_doc_if_exists("Report", "Maintenance Schedules")
+erpnext.patches.v12_0.set_next_follow_up_in_opportunity
 erpnext.patches.v12_0.fix_negative_expired_leaves

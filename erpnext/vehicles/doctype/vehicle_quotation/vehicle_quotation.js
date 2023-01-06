@@ -54,8 +54,8 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 		if(this.frm.doc.docstatus == 1 && this.frm.doc.status !== 'Lost') {
 			if(this.frm.doc.status !== "Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
-					this.frm.trigger('set_as_lost_dialog');
-				});
+					this.frm.events.set_as_lost_dialog(this.frm);
+				}, __("Status"));
 			}
 
 			if (!customer) {
@@ -70,6 +70,13 @@ erpnext.vehicles.VehicleQuotation = erpnext.vehicles.VehicleBookingController.ex
 
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+
+		if (this.frm.doc.status == "Lost") {
+			me.frm.add_custom_button(__("Reopen"), () => {
+				me.frm.events.update_lost_status(me.frm, false);
+			}, __("Status"));
+		}
+
 	},
 
 	quotation_to: function () {

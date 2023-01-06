@@ -9,7 +9,9 @@
   "reference_doctype",
   "reference_name",
   "reference_date",
-  "actual_date"
+  "actual_date",
+  "section_break_2",
+  "create_opportunity"
  ],
  "fields": [
   {
@@ -62,11 +64,20 @@
    "label": "Reference Name",
    "options": "reference_doctype",
    "read_only": 1
+  },
+  {
+   "fieldname": "create_opportunity",
+   "fieldtype": "Button",
+   "label": "Create Opportunity"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-12-21 19:04:15.655916",
+ "modified": "2022-12-28 18:25:54.838000",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",
