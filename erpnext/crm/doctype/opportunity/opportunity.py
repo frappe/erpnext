@@ -149,8 +149,11 @@ class Opportunity(TransactionBase):
 
 		future_follow_ups = [d for d in pending_follow_ups if getdate(d.schedule_date) >= getdate()]
 
-		next_follow_up = future_follow_ups or pending_follow_ups
-		next_follow_up = next_follow_up[0] if next_follow_up else None
+		next_follow_up = None
+		if future_follow_ups:
+			next_follow_up = future_follow_ups[0]
+		elif pending_follow_ups:
+			next_follow_up = future_follow_ups[-1]
 
 		return getdate(next_follow_up.schedule_date) if next_follow_up else None
 
