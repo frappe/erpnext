@@ -78,7 +78,7 @@ class Opportunity(TransactionBase):
 			self.status = "Closed"
 		elif self.status == "Lost" or (not has_active_quotation and self.has_lost_quotation()):
 			self.status = "Lost"
-		elif self.get('next_follow_up') and getdate(self.next_follow_up) >= getdate():
+		elif self.get("next_follow_up") and getdate(self.next_follow_up) >= getdate():
 			self.status = "To Follow Up"
 		elif has_active_quotation:
 			self.status = "Quotation"
@@ -134,9 +134,6 @@ class Opportunity(TransactionBase):
 			self.finance_type = None
 
 	def validate_follow_up(self):
-		if not self.get('contact_schedule'):
-			return
-
 		self.next_follow_up = self.get_next_follow_up_date()
 
 		for d in self.get('contact_schedule'):
@@ -147,10 +144,15 @@ class Opportunity(TransactionBase):
 				frappe.throw(_("Row #{0}: Can't schedule a follow up for past dates".format(d.idx)))
 
 	def get_next_follow_up_date(self):
-		follow_up = [f for f in self.contact_schedule
-			if f.schedule_date and not f.contact_date and getdate(f.schedule_date) >= getdate()]
+		pending_follow_ups = [d for d in self.get("contact_schedule") if d.schedule_date and not d.contact_date]
+		pending_follow_ups = sorted(pending_follow_ups, key=lambda d: (getdate(d.schedule_date), d.idx))
 
-		return getdate(follow_up[0].schedule_date) if follow_up else None
+		future_follow_ups = [d for d in pending_follow_ups if getdate(d.schedule_date) >= getdate()]
+
+		next_follow_up = future_follow_ups or pending_follow_ups
+		next_follow_up = next_follow_up[0] if next_follow_up else None
+
+		return getdate(next_follow_up.schedule_date) if next_follow_up else None
 
 	def validate_maintenance_schedule(self):
 		if not self.maintenance_schedule:
