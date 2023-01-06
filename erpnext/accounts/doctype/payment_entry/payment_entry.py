@@ -786,7 +786,6 @@ class PaymentEntry(AccountsController):
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
 
-		print(gl_entries, "#############")
 		return gl_entries
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
