@@ -810,7 +810,7 @@ class ReceivablePayableReport(object):
 				self.ple.party.isin(
 					qb.from_(self.customer)
 					.select(self.customer.name)
-					.where(self.customer.default_sales_partner == self.filters.get("payment_terms_template"))
+					.where(self.customer.default_sales_partner == self.filters.get("sales_partner"))
 				)
 			)
 
@@ -869,10 +869,15 @@ class ReceivablePayableReport(object):
 	def get_party_details(self, party):
 		if not party in self.party_details:
 			if self.party_type == "Customer":
+				fields = ["customer_name", "territory", "customer_group", "customer_primary_contact"]
+
+				if self.filters.get("sales_partner"):
+					fields.append("default_sales_partner")
+
 				self.party_details[party] = frappe.db.get_value(
 					"Customer",
 					party,
-					["customer_name", "territory", "customer_group", "customer_primary_contact"],
+					fields,
 					as_dict=True,
 				)
 			else:
@@ -972,6 +977,9 @@ class ReceivablePayableReport(object):
 			)
 			if self.filters.show_sales_person:
 				self.add_column(label=_("Sales Person"), fieldname="sales_person", fieldtype="Data")
+
+			if self.filters.sales_partner:
+				self.add_column(label=_("Sales Partner"), fieldname="default_sales_partner", fieldtype="Data")
 
 		if self.filters.party_type == "Supplier":
 			self.add_column(
