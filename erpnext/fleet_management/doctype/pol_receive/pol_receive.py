@@ -94,18 +94,20 @@ class POLReceive(StockController):
 		pol_exp = qb.DocType("POL Expense")
 		je 		= qb.DocType("Journal Entry")
 		data = []
+		if not self.equipment or not self.supplier:
+			frappe.throw("Either equipment or Supplier is missing")
 		data = (
 				qb.from_(pol_exp)
 				.inner_join(je)
 				.on(pol_exp.journal_entry == je.name)
 				.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-				.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment))
+				.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.party == self.supplier))
 				.orderby( pol_exp.entry_date,order=qb.desc)
 				).run(as_dict=True)
 		data += (
 				qb.from_(pol_exp)
 				.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-				.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1))
+				.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1) & ( pol_exp.party == self.supplier))
 				.orderby( pol_exp.entry_date,order=qb.desc)
 				).run(as_dict=True)
 		if not data:

@@ -28,7 +28,7 @@ class Production(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.make_production_entry()
-		frappe.enqueue(make_auto_production(self), queue="long")
+		# frappe.enqueue(make_auto_production(self), queue="long")
 
 	def on_cancel(self):
 		self.assign_default_dummy()
