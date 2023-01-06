@@ -61,7 +61,7 @@ class Opportunity(TransactionBase):
 
 	def set_title(self):
 		self.title = self.customer_name
-		if self.contact_display != self.customer_name:
+		if self.contact_display and self.contact_display != self.customer_name:
 			self.title += " ({0})".format(self.contact_display)
 
 	def set_status(self, update=False, status=None, update_modified=True):
