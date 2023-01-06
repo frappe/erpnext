@@ -293,8 +293,8 @@ class LeaveApplication(Document):
 					and (status = 'Present' or ifnull(attendance_request, '') != '') and docstatus = 1""",
 			(self.employee, self.from_date, self.to_date))
 		if attendance:
-			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(self.employee),
-				AttendanceAlreadyMarkedError)
+			frappe.throw(_("Attendance for employee {0} is already marked for this day").format(
+				self.employee_name or self.employee), AttendanceAlreadyMarkedError)
 
 	def validate_optional_leave(self):
 		leave_period = get_leave_period(self.from_date, self.to_date, self.company)
@@ -399,10 +399,6 @@ class LeaveApplication(Document):
 			create_leave_ledger_entry(self, args, submit)
 
 		allocation = get_leave_allocation(self.employee, self.leave_type, self.to_date)
-
-		if not allocation:
-			frappe.throw(_("Leave Allocation not found."))
-
 		delete_expired_leave_ledger_entry(allocation)
 
 	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):

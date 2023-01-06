@@ -41,9 +41,6 @@ class LeaveEncashment(Document):
 			frappe.throw(_("You can only submit Leave Encashment for a valid encashment amount"))
 
 	def on_submit(self):
-		if not self.leave_allocation:
-			self.leave_allocation = self.get_leave_allocation().get('name')
-
 		additional_salary = frappe.new_doc("Additional Salary")
 		additional_salary.company = frappe.get_value("Employee", self.employee, "company")
 		additional_salary.employee = self.employee
@@ -82,7 +79,6 @@ class LeaveEncashment(Document):
 			frappe.throw(_("Leave Type {0} is not encashable").format(self.leave_type))
 
 		allocation = self.get_leave_allocation()
-
 		if not allocation:
 			frappe.throw(_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
 
@@ -102,9 +98,6 @@ class LeaveEncashment(Document):
 	def get_leave_allocation(self):
 		leave_allocation = get_leave_allocation(self.employee, self.leave_type, getdate(self.encashment_date),
 			fields=["name", "from_date", "to_date", "total_leaves_allocated", "carry_forwarded_leaves_count"])
-
-		if not leave_allocation:
-			frappe.throw(_("Leave Allocation not found."))
 
 		return leave_allocation
 
