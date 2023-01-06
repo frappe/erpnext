@@ -93,8 +93,8 @@ frappe.query_reports["Service Feedback Sheet"] = {
 	],
 
 	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "feedback_remark") {
-			if (cstr(data['feedback_remark']) === cstr(new_value)) {
+		if (column.fieldname == "customer_feedback") {
+			if (cstr(data['customer_feedback']) === cstr(new_value)) {
 				return
 			}
 
@@ -102,13 +102,13 @@ frappe.query_reports["Service Feedback Sheet"] = {
 				method: "erpnext.projects.doctype.project.project.submit_feedback",
 				args: {
 					project: data.project,
-					feedback_remark: new_value,
+					customer_feedback: new_value,
 				},
 				callback: function(r) {
 					if (!r.exc) {
 						frappe.query_report.datatable.datamanager.data[rowIndex].feedback_date = r.message.feedback_date;
 						frappe.query_report.datatable.datamanager.data[rowIndex].feedback_time = r.message.feedback_time;
-						frappe.query_report.datatable.datamanager.data[rowIndex].feedback_remark = new_value;
+						frappe.query_report.datatable.datamanager.data[rowIndex].customer_feedback = new_value;
 						erpnext.utils.query_report_local_refresh()
 					}
 				},

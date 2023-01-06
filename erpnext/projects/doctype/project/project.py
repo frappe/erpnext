@@ -99,6 +99,7 @@ class Project(StatusUpdater):
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
+		self.validate_feedback()
 		self.validate_warranty()
 		self.validate_vehicle_panels()
 
@@ -834,6 +835,16 @@ class Project(StatusUpdater):
 					.format(d.idx, frappe.bold(d.depreciation_item_code)))
 
 			item_codes_visited.add(d.depreciation_item_code)
+
+	def validate_feedback(self):
+		if not self.get("customer_feedback"):
+			self.feedback_date = self.feedback_time = None
+			return
+
+		if not self.get("feedback_date") or not self.get("feedback_time"):
+			cur_dt = get_datetime()
+			self.feedback_date = getdate(cur_dt)
+			self.feedback_time = get_time(cur_dt)
 
 	def validate_warranty(self):
 		if self.get('warranty_claim_denied'):
@@ -2142,8 +2153,8 @@ def set_warranty_claim_denied(projects, denied, reason=None):
 
 
 @frappe.whitelist()
-def submit_feedback(project, feedback_remark):
-	if not feedback_remark:
+def submit_feedback(project, customer_feedback):
+	if not customer_feedback:
 		frappe.throw(_('Remarks are mandatory for Communication'))
 
 	if not frappe.db.exists('Project', project):
@@ -2151,15 +2162,16 @@ def submit_feedback(project, feedback_remark):
 
 	target_doc = frappe.get_doc('Project', project)
 
-	cur_date = getdate()
-	cur_time = get_time(get_datetime())
+	cur_dt = get_datetime()
+	cur_date = getdate(cur_dt)
+	cur_time = get_time(cur_dt)
 
 	target_doc.feedback_date = cur_date
 	target_doc.feedback_time = cur_time
-	target_doc.feedback_remark = feedback_remark
+	target_doc.customer_feedback = customer_feedback
 
 	target_doc.save()
 	return {
-			"feedback_date": cur_date,
-			"feedback_time": cur_time
-		}
+		"feedback_date": cur_date,
+		"feedback_time": cur_time
+	}

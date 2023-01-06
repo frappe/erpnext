@@ -35,7 +35,7 @@ class ServiceFeedbackSheet:
 			SELECT
 				ro.name as project, ro.project_type, ro.project_workshop as workshop, ro.project_name, ro.applies_to_vehicle as vehicle,
 				ro.applies_to_item as variant_item_code, ro.applies_to_item_name as variant_item_name, ro.vehicle_license_plate,
-				ro.customer, ro.customer_name, ro.contact_mobile, ro.feedback_date, ro.feedback_time, ro.feedback_remark,
+				ro.customer, ro.customer_name, ro.contact_mobile, ro.feedback_date, ro.feedback_time, ro.customer_feedback,
 				vgp.posting_date as delivery_date, vgp.posting_time as delivery_time
 			FROM `tabProject` ro
 			LEFT JOIN `tabVehicle Gate Pass` vgp ON vgp.project = ro.name
@@ -186,7 +186,7 @@ class ServiceFeedbackSheet:
 			},
 			{
 				"label": _("Remarks"),
-				"fieldname": "feedback_remark",
+				"fieldname": "customer_feedback",
 				"fieldtype": "Data",
 				"width": 200,
 				"editable": 1

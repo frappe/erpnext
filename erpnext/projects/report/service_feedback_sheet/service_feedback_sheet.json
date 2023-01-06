@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-01-02 16:43:47.272880",
+ "modified": "2023-01-06 16:15:06.746796",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Service Feedback Sheet",
@@ -21,25 +21,13 @@
    "role": "Projects User"
   },
   {
-   "role": "Projects Manager"
-  },
-  {
    "role": "Sales User"
   },
   {
    "role": "Sales User (Read Only)"
   },
   {
-   "role": "Purchase User"
-  },
-  {
    "role": "Accounts User"
-  },
-  {
-   "role": "Cashier"
-  },
-  {
-   "role": "Stock User"
   }
  ]
 }
