@@ -8,7 +8,6 @@ from frappe.utils import flt, cint, cstr,getdate, nowtime
 from erpnext.custom_utils import check_future_date
 from erpnext.production.doctype.cop_rate.cop_rate import get_cop_rate
 from erpnext.controllers.stock_controller import StockController
-
 class Production(StockController):
 	def __init__(self, *args, **kwargs):
 		super(Production, self).__init__(*args, **kwargs)
@@ -29,7 +28,7 @@ class Production(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.make_production_entry()
-		self.make_auto_production()
+		make_auto_production(self)
 
 	def on_cancel(self):
 		self.assign_default_dummy()
@@ -37,59 +36,6 @@ class Production(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 	
-	def make_auto_production(self):
-		if self.docstatus == 1:
-			sort_prod_wise = frappe._dict()
-			for item in self.items:
-				data = frappe.db.sql('''
-							select parent from `tabAuto Production Setting Item` where item_code = '{}'
-						'''.format(item.item_code))
-				if data:
-					sort_prod_wise.setdefault(data[0][0], []).append(item)
-			if sort_prod_wise:
-				prod = frappe.new_doc("Production")
-				prod.branch = self.branch
-				prod.cost_center = self.cost_center
-				prod.posting_date = self.posting_date
-				prod.entry_date = self.entry_date
-				prod.posting_time = nowtime()
-				prod.cop_list = self.cop_list
-				prod.warehouse = self.warehouse if cint(self.transfer) == 0 else self.to_warehouse
-				prod.production_type = self.production_type
-				prod.company = self.company
-				prod.currency = self.currency
-				prod.check_raw_material_product_qty = 1
-				prod.reference = self.name
-				prod.set("raw_materials",[])
-				prod.set("items",[])
-				for key, item in sort_prod_wise.items():
-					total_qty = 0
-					for d in item:
-						total_qty += flt(d.qty)
-						prod.append("raw_materials",{
-							"item_code":d.item_code,
-							"qty":d.qty,
-							"uom":d.uom,
-							"item_name":d.item_name,
-							"item_type":d.item_type
-						})
-
-					item_name, item_group, uom = frappe.db.get_value("Item",key, ["item_name","item_group","stock_uom"])
-					prod.append("items",{
-						"item_code":key,
-						"item_name":item_name,
-						"item_group":item_group,
-						"uom":uom,
-						"cost_center":self.cost_center,
-						"cop":get_cop_rate(key, self.posting_date, self.cop_list, uom)[0].rate,
-						"qty":total_qty,
-						"expense_account":get_expense_account(self.company, key),
-						"warehouse":self.warehouse if cint(self.transfer) == 0 else self.to_warehouse
-					})
-			
-				prod.insert()
-				prod.submit()
-
 	def update_stock_ledger(self):
 		sl_entries = []
 		# make sl entries for source warehouse first, then do the target warehouse
@@ -129,7 +75,7 @@ class Production(StockController):
 					}))
 	
 		if self.docstatus == 2:
-				sl_entries.reverse()
+			sl_entries.reverse()
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 	def get_gl_entries(self, warehouse_account):
 			gl_entries = super(Production, self).get_gl_entries(
@@ -613,6 +559,61 @@ class Production(StockController):
 			return data
 		else:
 			frappe.msgprint("No records in production settings")
+
+
+@frappe.whitelist()
+def make_auto_production(self):
+	if self.docstatus == 1:
+		sort_prod_wise = frappe._dict()
+		for item in self.items:
+			data = frappe.db.sql('''
+						select parent from `tabAuto Production Setting Item` where item_code = '{}'
+					'''.format(item.item_code))
+			if data:
+				sort_prod_wise.setdefault(data[0][0], []).append(item)
+		if sort_prod_wise:
+			prod = frappe.new_doc("Production")
+			prod.branch = self.branch
+			prod.cost_center = self.cost_center
+			prod.posting_date = self.posting_date
+			prod.entry_date = self.entry_date
+			prod.posting_time = nowtime()
+			prod.cop_list = self.cop_list
+			prod.warehouse = self.warehouse if cint(self.transfer) == 0 else self.to_warehouse
+			prod.production_type = self.production_type
+			prod.company = self.company
+			prod.currency = self.currency
+			prod.check_raw_material_product_qty = 1
+			prod.reference = self.name
+			prod.set("raw_materials",[])
+			prod.set("items",[])
+			for key, item in sort_prod_wise.items():
+				total_qty = 0
+				for d in item:
+					total_qty += flt(d.qty)
+					prod.append("raw_materials",{
+						"item_code":d.item_code,
+						"qty":d.qty,
+						"uom":d.uom,
+						"item_name":d.item_name,
+						"item_type":d.item_type
+					})
+
+				item_name, item_group, uom = frappe.db.get_value("Item",key, ["item_name","item_group","stock_uom"])
+				prod.append("items",{
+					"item_code":key,
+					"item_name":item_name,
+					"item_group":item_group,
+					"uom":uom,
+					"cost_center":self.cost_center,
+					"cop":get_cop_rate(key, self.posting_date, self.cop_list, uom)[0].rate,
+					"qty":total_qty,
+					"expense_account":get_expense_account(self.company, key),
+					"warehouse":self.warehouse if cint(self.transfer) == 0 else self.to_warehouse
+				})
+		
+			prod.insert()
+			prod.submit()
 
 @frappe.whitelist()
 def get_expense_account(company, item):

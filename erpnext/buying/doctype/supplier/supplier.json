@@ -45,6 +45,7 @@
   "supplier_bank_account",
   "default_bank_accunt_section",
   "bank_name",
+  "bank",
   "bank_branch",
   "inr_bank_code",
   "inr_purpose_code",
@@ -550,9 +551,8 @@
   },
   {
    "fieldname": "bank_branch",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Bank Branch",
-   "options": "Financial Institution Branch",
    "read_only": 1
   },
   {
@@ -662,6 +662,13 @@
    "fieldname": "default_bank_accunt_section",
    "fieldtype": "Section Break",
    "label": "Default Bank Accunt"
+  },
+  {
+   "fetch_from": "bank_name.bank_name",
+   "fieldname": "bank",
+   "fieldtype": "Data",
+   "label": "Bank",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
@@ -674,7 +681,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-01-04 14:35:56.506357",
+ "modified": "2023-01-06 11:09:07.073309",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
