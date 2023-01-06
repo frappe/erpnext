@@ -103,6 +103,9 @@ class LeaveEncashment(Document):
 		leave_allocation = get_leave_allocation(self.employee, self.leave_type, getdate(self.encashment_date),
 			fields=["name", "from_date", "to_date", "total_leaves_allocated", "carry_forwarded_leaves_count"])
 
+		if not leave_allocation:
+			frappe.throw(_("Leave Allocation not found."))
+
 		return leave_allocation
 
 	def create_leave_ledger_entry(self, submit=True):

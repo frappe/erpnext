@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import add_days, today, flt, DATE_FORMAT, getdate
 
+
 class LeaveLedgerEntry(Document):
 	def validate(self):
 		if getdate(self.from_date) > getdate(self.to_date):
@@ -198,8 +199,6 @@ def get_leave_allocation(employee, leave_type, date, fields=None):
 		fieldname=fields or "name",
 		as_dict=True if isinstance(fields, list) else False
 	)
-	if not allocation:
-		frappe.throw(_("Leave Allocation not found."))
 
 	return allocation
 
@@ -225,22 +224,21 @@ def delete_expired_leave_ledger_entry(leave_allocation):
 
 
 def get_allocation_leave_balance_summary(allocation_name):
+	from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
+
 	allocation = frappe.get_doc("Leave Allocation", allocation_name)
 
-	leaves_summary = frappe.db.sql("""
-		SELECT
-			SUM(leaves) as used_leaves
-		FROM `tabLeave Ledger Entry`
-		WHERE
-			employee = %(employee)s
-			AND leave_type = %(leave_type)s
-			AND docstatus = 1
-			AND leaves < 0
-			AND from_date between %(from_date)s AND %(to_date)s
-			AND to_date between %(from_date)s AND %(to_date)s
-	""", allocation.as_dict(), as_dict=1)[0]
+	total_leaves = get_leaves_for_period(
+		allocation.employee,
+		allocation.leave_type,
+		allocation.from_date,
+		allocation.to_date,
+		do_not_skip_expired_leaves=True
+	)
 
+	leaves_summary = frappe._dict()
 	leaves_summary.leave_allocation = allocation.name
 	leaves_summary.allocated_leaves = allocation.total_leaves_allocated
-	leaves_summary.leave_balance = flt(leaves_summary.used_leaves) + flt(leaves_summary.allocated_leaves)
+	leaves_summary.used_leaves = total_leaves
+	leaves_summary.leave_balance = flt(total_leaves) + flt(leaves_summary.allocated_leaves)
 	return leaves_summary

@@ -9,7 +9,7 @@ def execute():
 
 	for allocation in expired_allocations:
 		leave_balance_summary = get_allocation_leave_balance_summary(allocation)
-		if flt(leave_balance_summary.leave_balance) != flt(0):
+		if not flt(leave_balance_summary.leave_balance):
 			delete_expired_leave_ledger_entry(allocation.get('name'))
 	
 	process_expired_allocation()

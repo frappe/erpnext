@@ -399,6 +399,10 @@ class LeaveApplication(Document):
 			create_leave_ledger_entry(self, args, submit)
 
 		allocation = get_leave_allocation(self.employee, self.leave_type, self.to_date)
+
+		if not allocation:
+			frappe.throw(_("Leave Allocation not found."))
+
 		delete_expired_leave_ledger_entry(allocation)
 
 	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
