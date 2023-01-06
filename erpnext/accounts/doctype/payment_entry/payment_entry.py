@@ -689,14 +689,17 @@ class PaymentEntry(AccountsController):
 		):
 			return
 
-		total_negative_outstanding = sum(
-			abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
-		)
+		if self.get("references"):
+			total_negative_outstanding = sum(
+				abs(flt(d.outstanding_amount)) for d in self.get("references") if flt(d.outstanding_amount) < 0
+			)
+		else:
+			total_negative_outstanding = self.party_balance
 
 		paid_amount = self.paid_amount if self.payment_type == "Receive" else self.received_amount
 		additional_charges = sum(flt(d.amount) for d in self.deductions)
 
-		if not total_negative_outstanding:
+		if total_negative_outstanding >= 0:
 			if self.party_type == "Customer":
 				msg = _("Cannot pay to Customer without any negative outstanding invoice")
 			else:
@@ -704,7 +707,7 @@ class PaymentEntry(AccountsController):
 
 			frappe.throw(msg, InvalidPaymentEntry)
 
-		elif paid_amount - additional_charges > total_negative_outstanding:
+		elif self.get("references") and paid_amount - additional_charges > total_negative_outstanding:
 			frappe.throw(
 				_("Paid Amount cannot be greater than total negative outstanding amount {0}").format(
 					total_negative_outstanding
@@ -782,6 +785,8 @@ class PaymentEntry(AccountsController):
 		self.add_bank_gl_entries(gl_entries)
 		self.add_deductions_gl_entries(gl_entries)
 		self.add_tax_gl_entries(gl_entries)
+
+		print(gl_entries, "#############")
 		return gl_entries
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
@@ -809,7 +814,10 @@ class PaymentEntry(AccountsController):
 			)
 
 			dr_or_cr = (
-				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
+				"credit"
+				if erpnext.get_party_account_type(self.party_type) == "Receivable"
+				and self.payment_type == "Receive"
+				else "debit"
 			)
 
 			for d in self.get("references"):

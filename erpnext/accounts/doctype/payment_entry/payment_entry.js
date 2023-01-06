@@ -778,9 +778,9 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount, paid_amount_change) {
-		var total_positive_outstanding_including_order = 0;
-		var total_negative_outstanding = 0;
-		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
+		let total_positive_outstanding_including_order = 0;
+		let total_negative_outstanding = 0;
+		let total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
 			function(d) { return flt(d.amount) }));
 
 		paid_amount -= total_deductions;
@@ -806,14 +806,14 @@ frappe.ui.form.on('Payment Entry', {
 
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
 		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
-			if(paid_amount > total_negative_outstanding) {
-				if(total_negative_outstanding == 0) {
+			if(frm.doc.references.length && paid_amount > total_negative_outstanding) {
+				if(total_negative_outstanding >= 0) {
 					frappe.msgprint(
 						__("Cannot {0} {1} {2} without any negative outstanding invoice", [frm.doc.payment_type,
 							(frm.doc.party_type=="Customer" ? "to" : "from"), frm.doc.party_type])
 					);
 					return false
-				} else {
+				} else if (frm.doc.references.length) {
 					frappe.msgprint(
 						__("Paid Amount cannot be greater than total negative outstanding amount {0}", [total_negative_outstanding])
 					);
