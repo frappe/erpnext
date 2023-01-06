@@ -1247,7 +1247,6 @@ class StockEntry(StockController):
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
-			pro_doc.run_method("update_status")
 
 			if self.fg_completed_qty:
 				pro_doc.run_method("update_work_order_qty")
@@ -1255,6 +1254,7 @@ class StockEntry(StockController):
 					pro_doc.run_method("update_planned_qty")
 					pro_doc.update_batch_produced_qty(self)
 
+			pro_doc.run_method("update_status")
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
 
@@ -1497,9 +1497,10 @@ class StockEntry(StockController):
 			return
 
 		self.process_loss_qty = 0.0
-		self.process_loss_percentage = frappe.get_cached_value(
-			"BOM", self.bom_no, "process_loss_percentage"
-		)
+		if not self.process_loss_percentage:
+			self.process_loss_percentage = frappe.get_cached_value(
+				"BOM", self.bom_no, "process_loss_percentage"
+			)
 
 		if self.process_loss_percentage:
 			self.process_loss_qty = flt(
