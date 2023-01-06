@@ -436,7 +436,7 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2022-11-10 18:36:13.129096",
+ "modified": "2023-01-06 15:57:08.420248",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -458,6 +458,15 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
   },
   {
    "create": 1,
