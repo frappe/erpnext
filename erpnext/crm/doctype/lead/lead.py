@@ -202,14 +202,14 @@ class Lead(SellingController):
 				"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
 			)
 			self.address_doc.save()
-
-		# update contact links
-		# if self.contact_doc:
-		# 	self.contact_doc.append(
-		# 		"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
-		# 	)
-		# 	self.contact_doc.save()
-
+""" 
+		update contact links
+		if self.contact_doc:
+			self.contact_doc.append(
+				"links", {"link_doctype": "Lead", "link_name": self.name, "link_title": self.lead_name}
+			)
+			self.contact_doc.save()
+ """
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):

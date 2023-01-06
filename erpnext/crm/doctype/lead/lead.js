@@ -68,10 +68,10 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		})
 	},
 
-	organization_lead: function () {
+	/* organization_lead: function () {
 		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
 		this.frm.toggle_reqd("company_name", this.frm.doc.organization_lead);
-	},
+	}, */
 
 	company_name: function () {
 		if (this.frm.doc.organization_lead && !this.frm.doc.lead_name) {
@@ -102,14 +102,14 @@ frappe.ui.form.on('Lead', {
 	},
 	refresh(frm) {
 		frm.dashboard.links_area.hide();
-		if(frm.doc.lead_number != null){
-			frm.set_value("lead_number",frm.doc.name);
+		if(frm.doc.name  && !frm.doc.__islocal && (frm.doc.lead_number == null || frm.doc.lead_number != undefined)){
+			cur_frm.set_value("lead_number",frm.doc.name);
+			console.log(frm.doc.lead_number);
 			frm.save();
 		}
-		//frm.set_value("lead_number",frm.doc.name);
+		
 	},
 	after_save :function(frm){
-		console.log(frm.doc.sub_status);
 		if (frm.doc.sub_status == "Existing Customer"){
 			frappe.msgprint(frm.doc.sub_status)
 			frappe.db.set_value("Company Details", frm.doc.company_name, "existing_customer", 1)
