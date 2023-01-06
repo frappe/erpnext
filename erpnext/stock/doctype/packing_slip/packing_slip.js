@@ -68,12 +68,6 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 	}
 
 	get_items_from_sales_order() {
-		if (!this.frm.doc.customer) {
-			frappe.throw({
-				title: __("Mandatory"),
-				message: __("Please Select a Customer")
-			});
-		}
 		erpnext.utils.map_current_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_packing_slip",
 			source_doctype: "Sales Order",
