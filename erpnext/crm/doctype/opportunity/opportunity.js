@@ -269,6 +269,18 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	schedule_date: function() {
+		this.set_next_follow_up()
+	},
+
+	contact_schedule_add: function() {
+		this.set_next_follow_up()
+	},
+
+	contact_schedule_remove: function() {
+		this.set_next_follow_up()
+	},
+
 	schedule_follow_up: function() {
 		var me = this;
 		me.frm.check_if_unsaved();
@@ -387,6 +399,15 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			primary_action_label: __('Submit')
 		});
 		d.show();
+	},
+
+	set_next_follow_up: function() {
+		var next_schedule = this.frm.doc.contact_schedule.find(x => x.schedule_date && !x.contact_date)
+		if (next_schedule) {
+			this.frm.set_value("set_next_follow_up", next_schedule.schedule_date);
+		} else {
+			this.frm.set_value("set_next_follow_up", null);
+		}
 	},
 
 	create_customer: function () {

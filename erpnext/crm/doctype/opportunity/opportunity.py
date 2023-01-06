@@ -61,6 +61,8 @@ class Opportunity(TransactionBase):
 
 	def set_title(self):
 		self.title = self.customer_name
+		if self.contact_display != self.customer_name:
+			self.title += " ({0})".format(self.contact_display)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		previous_status = self.status
@@ -69,7 +71,6 @@ class Opportunity(TransactionBase):
 			self.status = status
 
 		has_active_quotation = self.has_active_quotation()
-		next_follow_up = self.get_next_follow_up()
 
 		if self.is_converted():
 			self.status = "Converted"
@@ -77,7 +78,7 @@ class Opportunity(TransactionBase):
 			self.status = "Closed"
 		elif self.status == "Lost" or (not has_active_quotation and self.has_lost_quotation()):
 			self.status = "Lost"
-		elif next_follow_up and getdate(next_follow_up.schedule_date) >= getdate():
+		elif self.get('next_follow_up') and getdate(self.next_follow_up) >= getdate():
 			self.status = "To Follow Up"
 		elif has_active_quotation:
 			self.status = "Quotation"
@@ -136,6 +137,8 @@ class Opportunity(TransactionBase):
 		if not self.get('contact_schedule'):
 			return
 
+		self.next_follow_up = self.get_next_follow_up_date()
+
 		for d in self.get('contact_schedule'):
 			if not d.get('contact_date') and not d.get('schedule_date'):
 				frappe.throw(_("Row #{0}: Please set Contact or Schedule Date in follow up".format(d.idx)))
@@ -143,11 +146,11 @@ class Opportunity(TransactionBase):
 			if d.is_new() and not d.get('contact_date') and getdate(d.get('schedule_date')) < getdate(today()):
 				frappe.throw(_("Row #{0}: Can't schedule a follow up for past dates".format(d.idx)))
 
-	def get_next_follow_up(self):
+	def get_next_follow_up_date(self):
 		follow_up = [f for f in self.contact_schedule
 			if f.schedule_date and not f.contact_date and getdate(f.schedule_date) >= getdate()]
-		if follow_up:
-			return follow_up[0]
+
+		return getdate(follow_up[0].schedule_date) if follow_up else None
 
 	def validate_maintenance_schedule(self):
 		if not self.maintenance_schedule:
@@ -542,10 +545,7 @@ def auto_close_opportunity():
 
 	for opportunity in opportunities:
 		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
-		doc.status = "Closed"
-		doc.flags.ignore_permissions = True
-		doc.flags.ignore_mandatory = True
-		doc.save()
+		doc.set_status(status="Closed")
 
 
 @frappe.whitelist()
