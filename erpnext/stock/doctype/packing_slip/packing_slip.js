@@ -109,7 +109,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			}
 		}
 
-		for (let item of this.frm.doc.handling_units || []) {
+		for (let item of this.frm.doc.packing_slips || []) {
 			this.frm.doc.total_net_weight += item.net_weight;
 			if (!this.frm.doc.manual_tare_weight) {
 				this.frm.doc.total_tare_weight += item.tare_weight;

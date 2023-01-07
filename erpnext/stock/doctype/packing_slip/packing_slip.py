@@ -23,10 +23,9 @@ class PackingSlip(StockController):
 	def validate(self):
 		self.validate_posting_time()
 		super(PackingSlip, self).validate()
-		self.validate_target_handling_unit()
 		self.validate_contents_mandatory()
 		self.validate_items()
-		self.validate_source_handling_units()
+		self.validate_children_packing_slips()
 		self.validate_sales_orders()
 		self.validate_customer()
 		self.validate_warehouse()
@@ -36,21 +35,18 @@ class PackingSlip(StockController):
 		self.calculate_totals()
 		self.validate_weights()
 		self.set_title()
-
-	def before_submit(self):
-		self.create_handling_unit()
+		self.set_status()
 
 	def on_submit(self):
 		self.update_previous_doc_status()
 		self.update_stock_ledger()
 		self.make_gl_entries()
-		self.update_handling_unit()
 
 	def on_cancel(self):
+		self.db_set("status", "Cancelled")
 		self.update_previous_doc_status()
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
-		self.update_handling_unit()
 
 	def set_title(self):
 		self.title = self.package_type
@@ -76,28 +72,12 @@ class PackingSlip(StockController):
 						if f in force_item_fields or not item.get(f):
 							item.set(f, item_details.get(f))
 
-	def validate_target_handling_unit(self):
-		if self.handling_unit:
-			hu = frappe.db.get_value("Handling Unit", self.handling_unit,
-				['name', 'status', 'package_type'], as_dict=1)
-
-			if not hu:
-				frappe.throw(_("Target Handling Unit {0} does not exist").format(self.handling_unit))
-
-			if hu.status != "Inactive":
-				frappe.throw(_("Cannot pack into Target {0} because its status is {1}")
-					.format(frappe.get_desk_link("Handling Unit", hu.name), frappe.bold(hu.status)))
-
-			if hu.package_type and self.package_type != hu.package_type:
-				frappe.throw(_("Package Type does not match with Target {0}")
-					.format(frappe.get_desk_link("Handling Unit", hu.name)))
-
-	def validate_source_handling_units(self):
+	def validate_children_packing_slips(self):
 		pass
 
 	def validate_contents_mandatory(self):
-		if not self.get("items") and not self.get("handling_units"):
-			frappe.throw(_("Please enter Packed Items or Packed Handling Units"))
+		if not self.get("items") and not self.get("packing_slips"):
+			frappe.throw(_("Please enter Packed Items or Packed Packaged"))
 
 	def validate_items(self):
 		from erpnext.stock.doctype.item.item import validate_end_of_life
@@ -236,29 +216,13 @@ class PackingSlip(StockController):
 					if not self.manual_tare_weight:
 						self.total_tare_weight += item.total_weight
 
-		for item in self.get("handling_units"):
+		for item in self.get("packing_slips"):
 			self.total_net_weight += item.net_weight
 			if not self.manual_tare_weight:
 				self.total_tare_weight += item.tare_weight
 
 		self.round_floats_in(self, ['total_net_weight', 'total_tare_weight'])
 		self.total_gross_weight = flt(self.total_net_weight + self.total_tare_weight, self.precision("total_gross_weight"))
-
-	def create_handling_unit(self):
-		if self.handling_unit:
-			return
-
-		hu_doc = frappe.new_doc("Handling Unit")
-		hu_doc.package_type = self.package_type
-		hu_doc.package_uom = self.package_uom
-		hu_doc.insert(ignore_permissions=True)
-
-		self.handling_unit = hu_doc.name
-
-	def update_handling_unit(self):
-		hu_doc = frappe.get_doc("Handling Unit", self.handling_unit)
-		hu_doc.set_status(update=True)
-		hu_doc.notify_update()
 
 	def update_previous_doc_status(self):
 		sales_orders = set()
@@ -292,7 +256,7 @@ class PackingSlip(StockController):
 			sle = self.get_sl_entries(d, {
 				"warehouse": self.to_warehouse,
 				"actual_qty": flt(d.stock_qty),
-				"handling_unit": self.handling_unit,
+				"packing_slip": self.name,
 				# "incoming_rate": flt(d.valuation_rate)
 			})
 
@@ -323,6 +287,37 @@ class PackingSlip(StockController):
 
 	def get_stock_voucher_items(self, sle_map):
 		return self.get("items") + self.get("packing_items")
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		previous_status = self.status
+
+		if self.docstatus == 0:
+			self.status = "Draft"
+		elif self.docstatus == 1:
+			delivered_qty = self.get_delivered_qty()
+			if not delivered_qty:
+				self.status = "In Stock"
+			else:
+				self.status = "Delivered"
+		else:
+			self.status = "Cancelled"
+
+		self.add_status_comment(previous_status)
+
+		if update:
+			self.db_set("status", self.status, update_modified=update_modified)
+
+	def get_delivered_qty(self):
+		if self.is_new():
+			return 0
+
+		delivered_qty = frappe.db.sql("""
+			select sum(qty)
+			from `tabDelivery Note Item`
+			where packing_slip = %s
+		""", self.name)
+
+		return flt(delivered_qty[0][0]) if delivered_qty else 0
 
 
 @frappe.whitelist()

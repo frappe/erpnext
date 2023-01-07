@@ -13,18 +13,16 @@
   "naming_series",
   "package_type",
   "package_uom",
-  "handling_unit",
-  "column_break0",
   "customer",
   "customer_name",
+  "column_break0",
+  "remarks",
   "column_break1",
   "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "amended_from",
-  "packing_remarks_section",
-  "remarks",
   "packing_details_section",
   "from_warehouse",
   "column_break_15",
@@ -34,8 +32,8 @@
   "packed_by_name",
   "package_item_details",
   "items",
-  "packed_handling_units_section",
-  "handling_units",
+  "packed_packages_section",
+  "packing_slips",
   "packing_material_section",
   "packing_items",
   "package_weight_details",
@@ -49,7 +47,9 @@
   "weight_uom",
   "accounting_dimensions_section",
   "project",
-  "dimension_col_break"
+  "dimension_col_break",
+  "status_section",
+  "status"
  ],
  "fields": [
   {
@@ -115,15 +115,6 @@
    "label": "Package UOM",
    "options": "UOM",
    "read_only": 1
-  },
-  {
-   "fieldname": "handling_unit",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Handling Unit",
-   "no_copy": 1,
-   "options": "Handling Unit",
-   "search_index": 1
   },
   {
    "fieldname": "remarks",
@@ -193,18 +184,6 @@
    "fieldtype": "Data",
    "label": "Packed By Name",
    "read_only": 1
-  },
-  {
-   "fieldname": "packed_handling_units_section",
-   "fieldtype": "Section Break",
-   "label": "Packed Handling Units"
-  },
-  {
-   "fieldname": "handling_units",
-   "fieldtype": "Table",
-   "label": "Packed Packages",
-   "no_copy": 1,
-   "options": "Packing Slip Handling Unit"
   },
   {
    "fieldname": "packing_material_section",
@@ -318,18 +297,42 @@
    "label": "Title"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "remarks",
-   "fieldname": "packing_remarks_section",
+   "fieldname": "packed_packages_section",
    "fieldtype": "Section Break",
-   "label": "Packing Remarks"
+   "label": "Packed Packages"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nIn Stock\nRepacked\nDelivered\nCancelled",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "packing_slips",
+   "fieldtype": "Table",
+   "label": "Packed Packages",
+   "no_copy": 1,
+   "options": "Packing Slip Package"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-05 23:24:30.468767",
+ "modified": "2023-01-07 15:59:38.372078",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
@@ -360,7 +363,7 @@
    "share": 1
   }
  ],
- "search_fields": "package_type, handling_unit, posting_date, packed_by",
+ "search_fields": "package_type, posting_date, customer, packed_by_name",
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
