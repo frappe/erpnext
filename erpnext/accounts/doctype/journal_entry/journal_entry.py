@@ -592,15 +592,15 @@ class JournalEntry(AccountsController):
 				d.against_account = frappe.db.get_value(d.reference_type, d.reference_name, field)
 		else:
 			for d in self.get("accounts"):
-				if flt(d.debit > 0):
+				if flt(d.debit) > 0:
 					accounts_debited.append(d.party or d.account)
 				if flt(d.credit) > 0:
 					accounts_credited.append(d.party or d.account)
 
 			for d in self.get("accounts"):
-				if flt(d.debit > 0):
+				if flt(d.debit) > 0:
 					d.against_account = ", ".join(list(set(accounts_credited)))
-				if flt(d.credit > 0):
+				if flt(d.credit) > 0:
 					d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_credit_amount(self):
@@ -762,7 +762,7 @@ class JournalEntry(AccountsController):
 					pay_to_recd_from = d.party
 
 				if pay_to_recd_from and pay_to_recd_from == d.party:
-					party_amount += d.debit_in_account_currency or d.credit_in_account_currency
+					party_amount += flt(d.debit_in_account_currency) or flt(d.credit_in_account_currency)
 					party_account_currency = d.account_currency
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
@@ -840,7 +840,7 @@ class JournalEntry(AccountsController):
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
 	@frappe.whitelist()
-	def get_balance(self):
+	def get_balance(self, difference_account=None):
 		if not self.get("accounts"):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 		else:
@@ -855,7 +855,13 @@ class JournalEntry(AccountsController):
 						blank_row = d
 
 				if not blank_row:
-					blank_row = self.append("accounts", {})
+					blank_row = self.append(
+						"accounts",
+						{
+							"account": difference_account,
+							"cost_center": erpnext.get_default_cost_center(self.company),
+						},
+					)
 
 				blank_row.exchange_rate = 1
 				if diff > 0:
