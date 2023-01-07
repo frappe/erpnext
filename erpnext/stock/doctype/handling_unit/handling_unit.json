@@ -11,8 +11,13 @@
   "package_type",
   "package_uom",
   "column_break_3",
+  "company",
   "status",
-  "warehouse"
+  "warehouse",
+  "reservation_section",
+  "customer",
+  "column_break_9",
+  "customer_name"
  ],
  "fields": [
   {
@@ -69,6 +74,44 @@
    "no_copy": 1,
    "options": "Warehouse",
    "read_only": 1
+  },
+  {
+   "fieldname": "reservation_section",
+   "fieldtype": "Section Break",
+   "label": "Reservation"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "no_copy": 1,
+   "options": "Customer",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -79,7 +122,7 @@
    "link_fieldname": "handling_unit"
   }
  ],
- "modified": "2022-12-29 16:44:55.662847",
+ "modified": "2023-01-07 01:47:26.894026",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Handling Unit",

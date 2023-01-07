@@ -78,11 +78,13 @@ class PackingSlip(StockController):
 
 	def validate_target_handling_unit(self):
 		if self.handling_unit:
-			hu = frappe.db.get_value("Handling Unit", self.handling_unit, ['name', 'status', 'package_type'], as_dict=1)
+			hu = frappe.db.get_value("Handling Unit", self.handling_unit,
+				['name', 'status', 'package_type'], as_dict=1)
+
 			if not hu:
 				frappe.throw(_("Target Handling Unit {0} does not exist").format(self.handling_unit))
 
-			if hu.status not in ["Inactive", "In Stock"]:
+			if hu.status != "Inactive":
 				frappe.throw(_("Cannot pack into Target {0} because its status is {1}")
 					.format(frappe.get_desk_link("Handling Unit", hu.name), frappe.bold(hu.status)))
 
