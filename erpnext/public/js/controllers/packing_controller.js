@@ -75,7 +75,7 @@ erpnext.stock.PackingController = class PackingController extends erpnext.stock.
 	items_remove() {
 		this.calculate_totals();
 	}
-	packing_items_remove() {
+	packaging_items_remove() {
 		this.calculate_totals();
 	}
 	packing_slips_remove() {

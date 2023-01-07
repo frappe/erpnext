@@ -34,8 +34,8 @@
   "items",
   "packed_packages_section",
   "packing_slips",
-  "packing_material_section",
-  "packing_items",
+  "packaging_material_section",
+  "packaging_items",
   "package_weight_details",
   "total_net_weight",
   "column_break4",
@@ -186,17 +186,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "packing_material_section",
-   "fieldtype": "Section Break",
-   "label": "Packing Material"
-  },
-  {
-   "fieldname": "packing_items",
-   "fieldtype": "Table",
-   "label": "Packing Material",
-   "options": "Packing Slip Packing Material"
-  },
-  {
    "default": "0",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
@@ -326,13 +315,24 @@
    "label": "Packed Packages",
    "no_copy": 1,
    "options": "Packing Slip Package"
+  },
+  {
+   "fieldname": "packaging_material_section",
+   "fieldtype": "Section Break",
+   "label": "Packaging Material"
+  },
+  {
+   "fieldname": "packaging_items",
+   "fieldtype": "Table",
+   "label": "Packaging Material",
+   "options": "Packing Slip Packaging Material"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-07 15:59:38.372078",
+ "modified": "2023-01-07 16:20:52.948009",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

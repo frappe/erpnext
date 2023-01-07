@@ -15,7 +15,7 @@ force_item_fields = ['stock_uom', 'has_batch_no', 'has_serial_no']
 
 
 class PackingSlip(StockController):
-	item_table_fields = ['items', 'packing_items']
+	item_table_fields = ['items', 'packaging_items']
 
 	def get_feed(self):
 		return _("Packed {0}").format(self.get("package_type"))
@@ -212,7 +212,7 @@ class PackingSlip(StockController):
 
 				if item.doctype == "Packing Slip Item":
 					self.total_net_weight += item.total_weight
-				elif item.doctype == "Packing Slip Packing Material":
+				elif item.doctype == "Packing Slip Packaging Material":
 					if not self.manual_tare_weight:
 						self.total_tare_weight += item.total_weight
 
@@ -271,8 +271,8 @@ class PackingSlip(StockController):
 
 			sl_entries.append(sle)
 
-		# SLE for packing material
-		for d in self.get('packing_items'):
+		# SLE for packaging material
+		for d in self.get('packaging_items'):
 			sl_entries.append(self.get_sl_entries(d, {
 				"warehouse": self.from_warehouse,
 				"actual_qty": -flt(d.stock_qty),
@@ -286,7 +286,7 @@ class PackingSlip(StockController):
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No', allow_negative_stock=allow_negative_stock)
 
 	def get_stock_voucher_items(self, sle_map):
-		return self.get("items") + self.get("packing_items")
+		return self.get("items") + self.get("packaging_items")
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		previous_status = self.status
@@ -322,19 +322,19 @@ class PackingSlip(StockController):
 
 @frappe.whitelist()
 def get_package_type_details(package_type):
-	packing_items_copy_fields = [
+	packaging_items_copy_fields = [
 		"item_code", "item_name", "description",
 		"qty", "uom", "conversion_factor", "stock_qty",
 		"weight_per_unit"
 	]
 
 	package_type_doc = frappe.get_cached_doc("Package Type", package_type)
-	packing_items = []
-	for d in package_type_doc.get("packing_items"):
-		packing_items.append({k: d.get(k) for k in packing_items_copy_fields})
+	packaging_items = []
+	for d in package_type_doc.get("packaging_items"):
+		packaging_items.append({k: d.get(k) for k in packaging_items_copy_fields})
 
 	return {
-		"packing_items": packing_items,
+		"packaging_items": packaging_items,
 		"manual_tare_weight": cint(package_type_doc.manual_tare_weight),
 		"total_tare_weight": flt(package_type_doc.total_tare_weight),
 		"weight_uom": package_type_doc.weight_uom,
@@ -390,7 +390,7 @@ def get_item_details(args):
 		default_expense_account = get_default_expense_account(args.item_code, args)
 		if args.child_doctype == "Packing Slip Item":
 			out.expense_account = stock_adjustment_account or default_expense_account
-		elif args.child_doctype == "Packing Slip Packing Material":
+		elif args.child_doctype == "Packing Slip Packaging Material":
 			out.expense_account = default_expense_account
 
 		out.cost_center = get_default_cost_center(args.item_code, args)

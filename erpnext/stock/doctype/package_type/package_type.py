@@ -18,7 +18,7 @@ class PackageType(Document):
 		self.validate_weights()
 
 	def validate_items(self):
-		for d in self.get("packing_items"):
+		for d in self.get("packaging_items"):
 			if d.item_code:
 				if frappe.get_cached_value("Item", d.item_code, "has_variants"):
 					frappe.throw(_("Row #{0}: {1} is a template Item, please select one of its variants")
@@ -33,7 +33,7 @@ class PackageType(Document):
 						.format(d.idx, frappe.bold(d.item_code)))
 
 	def validate_weights(self):
-		for d in self.get("packing_items"):
+		for d in self.get("packaging_items"):
 			if flt(d.total_weight) < 0:
 				frappe.throw(_("Row #{0}: {1} cannot be negative").format(d.idx, d.meta.get_label('total_weight')))
 
@@ -44,7 +44,7 @@ class PackageType(Document):
 		if not self.manual_tare_weight:
 			self.total_tare_weight = 0
 
-		for item in self.get("packing_items"):
+		for item in self.get("packaging_items"):
 			self.round_floats_in(item, excluding=['weight_per_unit'])
 			item.stock_qty = item.qty * item.conversion_factor
 			item.total_weight = flt(item.weight_per_unit * item.stock_qty, item.precision("total_weight"))

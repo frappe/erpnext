@@ -10,8 +10,8 @@
  "field_order": [
   "package_type_name",
   "package_uom",
-  "default_packing_material_section",
-  "packing_items",
+  "default_packaging_material_section",
+  "packaging_items",
   "tare_weight_section",
   "total_tare_weight",
   "manual_tare_weight",
@@ -42,17 +42,6 @@
    "label": "Package UOM",
    "options": "UOM",
    "reqd": 1
-  },
-  {
-   "fieldname": "default_packing_material_section",
-   "fieldtype": "Section Break",
-   "label": "Default Packing Material"
-  },
-  {
-   "fieldname": "packing_items",
-   "fieldtype": "Table",
-   "label": "Packing Material",
-   "options": "Package Type Packing Material"
   },
   {
    "fieldname": "total_tare_weight",
@@ -136,6 +125,17 @@
    "fieldname": "manual_tare_weight",
    "fieldtype": "Check",
    "label": "Set Tare Weight Manually"
+  },
+  {
+   "fieldname": "default_packaging_material_section",
+   "fieldtype": "Section Break",
+   "label": "Default Packaging Material"
+  },
+  {
+   "fieldname": "packaging_items",
+   "fieldtype": "Table",
+   "label": "Packaging Material",
+   "options": "Package Type Packaging Material"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -146,7 +146,7 @@
    "link_fieldname": "package_type"
   }
  ],
- "modified": "2022-12-29 11:48:01.797247",
+ "modified": "2023-01-07 16:20:14.568504",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Package Type",

@@ -1,7 +1,7 @@
 frappe.provide("erpnext.stock");
 
 erpnext.stock.PackingSlipController = class PackingSlipController extends erpnext.stock.PackingController {
-	item_table_fields = ['items', 'packing_items']
+	item_table_fields = ['items', 'packaging_items']
 
 	setup() {
 		this.setup_posting_date_time_check();
@@ -20,7 +20,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			return erpnext.queries.item({is_stock_item: 1});
 		});
 
-		me.frm.set_query("item_code", "packing_items", function() {
+		me.frm.set_query("item_code", "packaging_items", function() {
 			return erpnext.queries.item({is_stock_item: 1});
 		});
 
@@ -42,13 +42,13 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			}
 		};
 		me.frm.set_query("batch_no", "items", batch_query);
-		me.frm.set_query("batch_no", "packing_items", batch_query);
+		me.frm.set_query("batch_no", "packaging_items", batch_query);
 
 		me.frm.set_query("uom", "items", (doc, cdt, cdn) => {
 			let item = frappe.get_doc(cdt, cdn);
 			return erpnext.queries.item_uom(item.item_code);
 		});
-		me.frm.set_query("uom", "packing_items", (doc, cdt, cdn) => {
+		me.frm.set_query("uom", "packaging_items", (doc, cdt, cdn) => {
 			let item = frappe.get_doc(cdt, cdn);
 			return erpnext.queries.item_uom(item.item_code);
 		});
@@ -101,7 +101,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 
 				if (item.doctype == "Packing Slip Item") {
 					this.frm.doc.total_net_weight += item.total_weight;
-				} else if (item.doctype == "Packing Slip Packing Material") {
+				} else if (item.doctype == "Packing Slip Packaging Material") {
 					if (!this.frm.doc.manual_tare_weight) {
 						this.frm.doc.total_tare_weight += item.total_weight;
 					}
@@ -137,10 +137,10 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
-						if (r.message.packing_items && r.message.packing_items.length) {
-							me.frm.clear_table("packing_items");
-							for (let d of r.message.packing_items) {
-								me.frm.add_child("packing_items", d);
+						if (r.message.packaging_items && r.message.packaging_items.length) {
+							me.frm.clear_table("packaging_items");
+							for (let d of r.message.packaging_items) {
+								me.frm.add_child("packaging_items", d);
 							}
 						}
 

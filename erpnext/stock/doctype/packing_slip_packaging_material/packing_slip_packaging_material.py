@@ -4,5 +4,5 @@
 # import frappe
 from frappe.model.document import Document
 
-class PackageTypePackingMaterial(Document):
+class PackingSlipPackagingMaterial(Document):
 	pass

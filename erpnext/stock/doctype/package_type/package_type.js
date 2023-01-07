@@ -4,18 +4,18 @@
 frappe.provide("erpnext.stock");
 
 erpnext.stock.PackageTypeController = class PackageTypeController extends erpnext.stock.PackingController {
-	item_table_fields = ['packing_items']
+	item_table_fields = ['packaging_items']
 
 	setup() {
 		this.setup_queries();
 	}
 
 	setup_queries() {
-		this.frm.set_query("item_code", "packing_items", function() {
+		this.frm.set_query("item_code", "packaging_items", function() {
 			return erpnext.queries.item({is_stock_item: 1});
 		});
 
-		this.frm.set_query("uom", "packing_items", (doc, cdt, cdn) => {
+		this.frm.set_query("uom", "packaging_items", (doc, cdt, cdn) => {
 			let item = frappe.get_doc(cdt, cdn);
 			return erpnext.queries.item_uom(item.item_code);
 		});
@@ -26,7 +26,7 @@ erpnext.stock.PackageTypeController = class PackageTypeController extends erpnex
 			this.frm.doc.total_tare_weight = 0;
 		}
 
-		for (let item of this.frm.doc.packing_items || []) {
+		for (let item of this.frm.doc.packaging_items || []) {
 			frappe.model.round_floats_in(item, null, ['weight_per_unit']);
 			item.stock_qty = item.qty * item.conversion_factor;
 			item.total_weight = flt(item.weight_per_unit * item.stock_qty, precision("total_weight", item));
