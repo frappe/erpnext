@@ -661,9 +661,13 @@ frappe.ui.form.on('Stock Entry Taxes and Charges', {
 
 erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockController {
 	setup() {
+		super.setup();
+
 		var me = this;
 
 		this.setup_posting_date_time_check();
+
+		erpnext.queries.setup_warehouse_qty_query(me.frm, "s_warehouse");
 
 		this.frm.fields_dict.bom_no.get_query = function() {
 			return {
@@ -1016,8 +1020,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	set_warehouse_in_children(child_table, warehouse_field, warehouse) {
-		let transaction_controller = new erpnext.TransactionController();
-		transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
+		this.autofill_warehouse(child_table, warehouse_field, warehouse);
 	}
 
 	items_on_form_rendered(doc, grid_row) {

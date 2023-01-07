@@ -24,9 +24,9 @@
   "set_posting_time",
   "amended_from",
   "packing_details_section",
-  "from_warehouse",
+  "warehouse",
   "column_break_15",
-  "to_warehouse",
+  "default_source_warehouse",
   "column_break_9",
   "packed_by",
   "packed_by_name",
@@ -214,22 +214,8 @@
    "read_only_depends_on": "eval:!doc.manual_tare_weight"
   },
   {
-   "fieldname": "from_warehouse",
-   "fieldtype": "Link",
-   "label": "Source Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "to_warehouse",
-   "fieldtype": "Link",
-   "label": "Target Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
   },
   {
    "fieldname": "column_break_32",
@@ -326,13 +312,26 @@
    "fieldtype": "Table",
    "label": "Packaging Material",
    "options": "Packing Slip Packaging Material"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Target Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "default_source_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Source Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-07 16:20:52.948009",
+ "modified": "2023-01-07 16:38:32.814485",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

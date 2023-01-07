@@ -1066,8 +1066,8 @@ def make_packing_slip(source_name, target_doc=None, warehouse=None):
 		return undelivered_qty > 0 and unpacked_qty > 0
 
 	def set_missing_values(source, target):
-		if warehouse:
-			target.to_warehouse = warehouse
+		if warehouse and not target.warehouse:
+			target.warehouse = warehouse
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_totals")
@@ -1087,6 +1087,9 @@ def make_packing_slip(source_name, target_doc=None, warehouse=None):
 			"doctype": "Packing Slip",
 			"validation": {
 				"docstatus": ["=", 1]
+			},
+			"field_map": {
+				"set_warehouse": "warehouse",
 			},
 			"field_no_map": [
 				"total_net_weight",

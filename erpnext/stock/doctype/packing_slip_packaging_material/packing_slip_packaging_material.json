@@ -9,8 +9,12 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "item_name",
   "column_break_2",
+  "item_name",
+  "warehouse_section",
+  "source_warehouse",
+  "force_default_warehouse",
+  "column_break_6",
   "batch_no",
   "has_batch_no",
   "desc_section",
@@ -186,11 +190,36 @@
    "label": "Cost Center",
    "options": "Cost Center",
    "print_hide": 1
+  },
+  {
+   "fieldname": "warehouse_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
+  },
+  {
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "force_default_warehouse",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Force Default Warehouse",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-12-29 23:27:18.520390",
+ "modified": "2023-01-07 17:52:43.751410",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Packaging Material",

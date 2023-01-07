@@ -24,6 +24,10 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			return erpnext.queries.item({is_stock_item: 1});
 		});
 
+		me.setup_warehouse_query();
+		erpnext.queries.setup_warehouse_qty_query(me.frm, "source_warehouse", "items");
+		erpnext.queries.setup_warehouse_qty_query(me.frm, "source_warehouse", "packaging_items");
+
 		const batch_query = (doc, cdt, cdn) => {
 			let item = frappe.get_doc(cdt, cdn);
 			if (!item.item_code) {
@@ -31,7 +35,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			} else {
 				let filters = {
 					item_code: item.item_code,
-					warehouse: me.frm.doc.from_warehouse,
+					warehouse: item.source_warehouse,
 					posting_date: me.frm.doc.posting_date || frappe.datetime.nowdate(),
 				}
 
@@ -134,26 +138,39 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 				method: "erpnext.stock.doctype.packing_slip.packing_slip.get_package_type_details",
 				args: {
 					package_type: me.frm.doc.package_type,
+					args: {
+						weight_uom: me.frm.doc.weight_uom,
+						company: me.frm.doc.company,
+						posting_date: me.frm.doc.posting_date,
+						doctype: me.frm.doc.doctype,
+						name: me.frm.doc.name,
+						default_source_warehouse: me.frm.doc.default_source_warehouse,
+					}
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
-						if (r.message.packaging_items && r.message.packaging_items.length) {
-							me.frm.clear_table("packaging_items");
-							for (let d of r.message.packaging_items) {
-								me.frm.add_child("packaging_items", d);
+						return frappe.run_serially([
+							() => {
+								if (r.message.weight_uom) {
+									return me.frm.set_value("weight_uom", r.message.weight_uom);
+								}
+							},
+							() => {
+								if (r.message.packaging_items && r.message.packaging_items.length) {
+									me.frm.clear_table("packaging_items");
+									for (let d of r.message.packaging_items) {
+										me.frm.add_child("packaging_items", d);
+									}
+								}
+
+								me.frm.doc.manual_tare_weight = cint(r.message.manual_tare_weight);
+								if (r.message.manual_tare_weight && flt(r.message.total_tare_weight)) {
+									me.frm.doc.total_tare_weight = flt(r.message.total_tare_weight);
+								}
+
+								me.calculate_totals();
 							}
-						}
-
-						me.frm.doc.manual_tare_weight = cint(r.message.manual_tare_weight);
-						if (r.message.manual_tare_weight && flt(r.message.total_tare_weight)) {
-							me.frm.doc.total_tare_weight = flt(r.message.total_tare_weight);
-						}
-
-						me.calculate_totals();
-
-						if (r.message.weight_uom) {
-							return me.frm.set_value("weight_uom", r.message.weight_uom);
-						}
+						]);
 					}
 				}
 			});

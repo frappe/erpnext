@@ -4,7 +4,7 @@
 frappe.provide("erpnext.stock");
 
 erpnext.stock.StockController = class StockController extends frappe.ui.form.Controller {
-	onload() {
+	setup() {
 		// warehouse query if company
 		if (this.frm.fields_dict.company) {
 			this.setup_warehouse_query();
@@ -78,6 +78,17 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
+		}
+	}
+
+	autofill_warehouse (child_table, warehouse_field, warehouse, force) {
+		if ((warehouse || force) && child_table && child_table.length) {
+			let doctype = child_table[0].doctype;
+			$.each(child_table || [], function(i, item) {
+				if (force || !item.force_default_warehouse) {
+					frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
+				}
+			});
 		}
 	}
 

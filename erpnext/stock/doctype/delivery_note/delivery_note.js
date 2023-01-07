@@ -20,7 +20,7 @@ frappe.ui.form.on("Delivery Note", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
-		erpnext.queries.setup_warehouse_query(frm);
+		erpnext.queries.setup_warehouse_qty_query(frm);
 
 		frm.set_query('transporter', function() {
 			return {

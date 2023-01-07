@@ -2,10 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
-	setup() {
-
-	}
-
 	apply_pricing_rule_on_item(item) {
 		let effective_item_rate = item.price_list_rate;
 		if (item.parenttype === "Sales Order" && item.blanket_order_rate) {

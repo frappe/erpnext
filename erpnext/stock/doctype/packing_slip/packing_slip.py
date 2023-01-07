@@ -6,7 +6,8 @@ from frappe import _
 from frappe.utils import flt, cint
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
-	get_default_expense_account, get_default_cost_center
+	get_default_expense_account, get_default_cost_center, get_item_default_values, get_force_default_warehouse,\
+	get_global_default_warehouse
 from erpnext.accounts.party import validate_party_frozen_disabled
 import json
 
@@ -140,10 +141,8 @@ class PackingSlip(StockController):
 		from erpnext.stock.utils import validate_warehouse_company
 
 		warehouses = []
-		if self.from_warehouse:
-			warehouses.append(self.from_warehouse)
-		if self.to_warehouse:
-			warehouses.append(self.to_warehouse)
+		for field in self.item_table_fields:
+			warehouses += [d.source_warehouse for d in self.get(field) if d.get("source_warehouse")]
 
 		warehouses = list(set(warehouses))
 		for w in warehouses:
@@ -246,7 +245,7 @@ class PackingSlip(StockController):
 		# SLE for items contents source warehouse
 		for d in self.get('items'):
 			sl_entries.append(self.get_sl_entries(d, {
-				"warehouse": self.from_warehouse,
+				"warehouse": d.source_warehouse,
 				"actual_qty": -flt(d.stock_qty),
 				"incoming_rate": 0
 			}))
@@ -254,7 +253,7 @@ class PackingSlip(StockController):
 		# SLE for item contents target warehouse
 		for d in self.get('items'):
 			sle = self.get_sl_entries(d, {
-				"warehouse": self.to_warehouse,
+				"warehouse": self.warehouse,
 				"actual_qty": flt(d.stock_qty),
 				"packing_slip": self.name,
 				# "incoming_rate": flt(d.valuation_rate)
@@ -274,7 +273,7 @@ class PackingSlip(StockController):
 		# SLE for packaging material
 		for d in self.get('packaging_items'):
 			sl_entries.append(self.get_sl_entries(d, {
-				"warehouse": self.from_warehouse,
+				"warehouse": d.source_warehouse,
 				"actual_qty": -flt(d.stock_qty),
 				"incoming_rate": 0
 			}))
@@ -321,7 +320,10 @@ class PackingSlip(StockController):
 
 
 @frappe.whitelist()
-def get_package_type_details(package_type):
+def get_package_type_details(package_type, args):
+	if isinstance(args, str):
+		args = json.loads(args)
+
 	packaging_items_copy_fields = [
 		"item_code", "item_name", "description",
 		"qty", "uom", "conversion_factor", "stock_qty",
@@ -329,9 +331,23 @@ def get_package_type_details(package_type):
 	]
 
 	package_type_doc = frappe.get_cached_doc("Package Type", package_type)
+	if package_type_doc.weight_uom:
+		args["weight_uom"] = package_type_doc.weight_uom
+
+	args["child_doctype"] = "Packing Slip Packaging Material"
+
 	packaging_items = []
 	for d in package_type_doc.get("packaging_items"):
-		packaging_items.append({k: d.get(k) for k in packaging_items_copy_fields})
+		if d.get("item_code"):
+			item_row = {k: d.get(k) for k in packaging_items_copy_fields}
+
+			item_args = args.copy()
+			item_args.update(item_row)
+
+			item_details = get_item_details(item_args)
+			item_row.update(item_details)
+
+			packaging_items.append(item_row)
 
 	return {
 		"packaging_items": packaging_items,
@@ -382,7 +398,12 @@ def get_item_details(args):
 	out.stock_qty = out.qty * out.conversion_factor
 
 	# Net Weight
-	out.weight_per_unit = get_weight_per_unit(item.name, weight_uom=args.weight_uom or item.weight_uom)
+	out.weight_per_unit = flt(args.weight_per_unit) or get_weight_per_unit(item.name,
+		weight_uom=args.weight_uom or item.weight_uom)
+
+	# Warehouse
+	out.source_warehouse = get_default_source_warehouse(item, args)
+	out.force_default_warehouse = get_force_default_warehouse(item, args)
 
 	# Accounting
 	if args.company:
@@ -396,6 +417,26 @@ def get_item_details(args):
 		out.cost_center = get_default_cost_center(args.item_code, args)
 
 	return out
+
+
+def get_default_source_warehouse(item, args):
+	warehouse = args.get("source_warehouse")
+	if not warehouse:
+		parent_warehouse = args.get("default_source_warehouse")
+
+		default_values = get_item_default_values(item, args)
+		default_warehouse = default_values.get("default_warehouse")
+
+		force_default_warehouse = get_force_default_warehouse(item, args)
+		if force_default_warehouse:
+			warehouse = default_warehouse
+		else:
+			warehouse = parent_warehouse or default_warehouse
+
+		if not warehouse:
+			warehouse = get_global_default_warehouse(args.get("company"))
+
+	return warehouse
 
 
 @frappe.whitelist()

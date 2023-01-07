@@ -2499,17 +2499,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.autofill_warehouse(this.frm.doc.items, "warehouse", this.frm.doc.set_warehouse);
 	}
 
-	autofill_warehouse (child_table, warehouse_field, warehouse, force) {
-		if ((warehouse || force) && child_table && child_table.length) {
-			let doctype = child_table[0].doctype;
-			$.each(child_table || [], function(i, item) {
-				if (force || !item.force_default_warehouse || warehouse_field != "warehouse") {
-					frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
-				}
-			});
-		}
-	}
-
 	coupon_code() {
 		var me = this;
 		frappe.run_serially([

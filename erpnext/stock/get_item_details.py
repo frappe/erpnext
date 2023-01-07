@@ -375,18 +375,25 @@ def get_default_warehouse(item, args, overwrite_warehouse=True):
 			warehouse = parent_warehouse or default_warehouse
 
 		if not warehouse:
-			defaults = frappe.defaults.get_defaults() or {}
-			warehouse_exists = frappe.db.exists("Warehouse", {
-				'name': defaults.default_warehouse,
-				'company': args.get('company')
-			})
-			if defaults.get("default_warehouse") and warehouse_exists:
-				warehouse = defaults.default_warehouse
+			warehouse = get_global_default_warehouse(args.get("company"))
 
 	else:
 		warehouse = args.get('warehouse')
 
 	return warehouse
+
+
+def get_global_default_warehouse(company):
+	global_defaults = frappe.defaults.get_defaults() or {}
+	if not global_defaults.get("default_warehouse"):
+		return None
+
+	warehouse_exists = frappe.db.exists("Warehouse", {
+		"name": global_defaults.default_warehouse,
+		"company": company
+	})
+	if warehouse_exists:
+		return global_defaults.default_warehouse
 
 
 def update_barcode_value(out):
