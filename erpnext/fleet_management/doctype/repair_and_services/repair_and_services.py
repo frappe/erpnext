@@ -49,7 +49,6 @@ class RepairAndServices(StockController):
 							& (rs.docstatus == 1)
 							& (rsi.item_code == item.item_code))
 						.orderby(rs.posting_date,order=qb.desc)
-						.orderby(rs.posting_time,order=qb.desc)
 						.limit(1)).run()
 			if data:
 				item.last_service_date 	= data[0][0]
@@ -85,7 +84,6 @@ class RepairAndServices(StockController):
 								.select(doc.current_km)
 								.where((doc.equipment == self.equipment) & (doc.docstatus==1))
 								.orderby( doc.posting_date,order=qb.desc)
-								.orderby( doc.posting_time,order=qb.desc)
 								.limit(1)
 								.run()
 								)
