@@ -430,7 +430,6 @@ class Item(Document):
 		if merge:
 			self.validate_properties_before_merge(new_name)
 			self.validate_duplicate_product_bundles_before_merge(old_name, new_name)
-			self.validate_duplicate_website_item_before_merge(old_name, new_name)
 			self.delete_old_bins(old_name)
 
 	def after_rename(self, old_name, new_name, merge):
@@ -526,27 +525,6 @@ class Item(Document):
 				bundle_link, old_name, new_name
 			)
 			frappe.throw(msg, title=_("Cannot Merge"), exc=DataValidationError)
-
-	def validate_duplicate_website_item_before_merge(self, old_name, new_name):
-		"""
-		Block merge if both old and new items have website items against them.
-		This is to avoid duplicate website items after merging.
-		"""
-		web_items = frappe.get_all(
-			"Website Item",
-			filters={"item_code": ["in", [old_name, new_name]]},
-			fields=["item_code", "name"],
-		)
-
-		if len(web_items) <= 1:
-			return
-
-		old_web_item = [d.get("name") for d in web_items if d.get("item_code") == old_name][0]
-		web_item_link = get_link_to_form("Website Item", old_web_item)
-		old_name, new_name = frappe.bold(old_name), frappe.bold(new_name)
-
-		msg = f"Please delete linked Website Item {frappe.bold(web_item_link)} before merging {old_name} into {new_name}"
-		frappe.throw(_(msg), title=_("Cannot Merge"), exc=DataValidationError)
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
