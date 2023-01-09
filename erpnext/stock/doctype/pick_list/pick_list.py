@@ -100,6 +100,7 @@ class PickList(Document):
 			item_table,
 			item.sales_order_item,
 			["picked_qty", stock_qty_field],
+			for_update=True,
 		)
 
 		if self.docstatus == 1:
@@ -118,7 +119,7 @@ class PickList(Document):
 	def update_sales_order_picking_status(sales_orders: Set[str]) -> None:
 		for sales_order in sales_orders:
 			if sales_order:
-				frappe.get_doc("Sales Order", sales_order).update_picking_status()
+				frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
@@ -135,6 +136,7 @@ class PickList(Document):
 
 		# reset
 		self.delete_key("locations")
+		updated_locations = frappe._dict()
 		for item_doc in items:
 			item_code = item_doc.item_code
 
@@ -155,7 +157,26 @@ class PickList(Document):
 			for row in locations:
 				location = item_doc.as_dict()
 				location.update(row)
-				self.append("locations", location)
+				key = (
+					location.item_code,
+					location.warehouse,
+					location.uom,
+					location.batch_no,
+					location.serial_no,
+					location.sales_order_item or location.material_request_item,
+				)
+
+				if key not in updated_locations:
+					updated_locations.setdefault(key, location)
+				else:
+					updated_locations[key].qty += location.qty
+					updated_locations[key].stock_qty += location.stock_qty
+
+		for location in updated_locations.values():
+			if location.picked_qty > location.stock_qty:
+				location.picked_qty = location.stock_qty
+
+			self.append("locations", location)
 
 		# If table is empty on update after submit, set stock_qty, picked_qty to 0 so that indicator is red
 		# and give feedback to the user. This is to avoid empty Pick Lists.
@@ -242,7 +263,7 @@ class PickList(Document):
 		for so_row, item_code in product_bundles.items():
 			picked_qty = self._compute_picked_qty_for_bundle(so_row, product_bundle_qty_map[item_code])
 			item_table = "Sales Order Item"
-			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty")
+			already_picked = frappe.db.get_value(item_table, so_row, "picked_qty", for_update=True)
 			frappe.db.set_value(
 				item_table,
 				so_row,
@@ -441,7 +462,7 @@ def get_available_item_locations_for_batched_item(
 			sle.`batch_no`,
 			sle.`item_code`
 		HAVING `qty` > 0
-		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
+		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`, sle.`batch_no`, sle.`warehouse`
 	""".format(
 			warehouse_condition=warehouse_condition
 		),

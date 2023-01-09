@@ -199,7 +199,14 @@ def merge_similar_entries(gl_map, precision=None):
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(
-		lambda x: flt(x.debit, precision) != 0 or flt(x.credit, precision) != 0, merged_gl_map
+		lambda x: flt(x.debit, precision) != 0
+		or flt(x.credit, precision) != 0
+		or (
+			x.voucher_type == "Journal Entry"
+			and frappe.get_cached_value("Journal Entry", x.voucher_no, "voucher_type")
+			== "Exchange Gain Or Loss"
+		),
+		merged_gl_map,
 	)
 	merged_gl_map = list(merged_gl_map)
 
@@ -350,15 +357,26 @@ def process_debit_credit_difference(gl_map):
 	allowance = get_debit_credit_allowance(voucher_type, precision)
 
 	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
+
 	if abs(debit_credit_diff) > allowance:
-		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
+		if not (
+			voucher_type == "Journal Entry"
+			and frappe.get_cached_value("Journal Entry", voucher_no, "voucher_type")
+			== "Exchange Gain Or Loss"
+		):
+			raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
 
 	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
 		make_round_off_gle(gl_map, debit_credit_diff, precision)
 
 	debit_credit_diff = get_debit_credit_difference(gl_map, precision)
 	if abs(debit_credit_diff) > allowance:
-		raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
+		if not (
+			voucher_type == "Journal Entry"
+			and frappe.get_cached_value("Journal Entry", voucher_no, "voucher_type")
+			== "Exchange Gain Or Loss"
+		):
+			raise_debit_credit_not_equal_error(debit_credit_diff, voucher_type, voucher_no)
 
 
 def get_debit_credit_difference(gl_map, precision):

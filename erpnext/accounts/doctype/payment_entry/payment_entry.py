@@ -1758,6 +1758,8 @@ def get_payment_entry(
 	pe.setup_party_account_field()
 	pe.set_missing_values()
 
+	update_accounting_dimensions(pe, doc)
+
 	if party_account and bank:
 		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
@@ -1773,6 +1775,18 @@ def get_payment_entry(
 			pe.set_difference_amount()
 
 	return pe
+
+
+def update_accounting_dimensions(pe, doc):
+	"""
+	Updates accounting dimensions in Payment Entry based on the accounting dimensions in the reference document
+	"""
+	from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+		get_accounting_dimensions,
+	)
+
+	for dimension in get_accounting_dimensions():
+		pe.set(dimension, doc.get(dimension))
 
 
 def get_bank_cash_account(doc, bank_account):
