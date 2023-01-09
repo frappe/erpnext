@@ -274,6 +274,11 @@ class BuyingController(SubcontractingController):
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
 			return
 
+		if (
+			self.doctype == "Purchase Invoice" and not self.update_stock and not self.is_internal_transfer()
+		):
+			return
+
 		ref_doctype_map = {
 			"Purchase Order": "Sales Order Item",
 			"Purchase Receipt": "Delivery Note Item",
