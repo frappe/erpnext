@@ -298,8 +298,6 @@ def auto_reconcile_vouchers(
 					"amount": r[4],
 				}
 			)
-		# vouchers = frappe.as_json(voucherss)
-		# vouchers = json.loads(voucherss)
 		transaction = frappe.get_doc("Bank Transaction", transaction.name)
 		account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
 		matched_trans = 0
@@ -331,7 +329,7 @@ def auto_reconcile_vouchers(
 		transaction.update_allocations()
 	matched_transaction_len = len(set(matched_transaction))
 	if matched_transaction_len == 0:
-		frappe.msgprint(_("There is no any matched reference number for reconciliation"))
+		frappe.msgprint(_("No matching references found for auto reconciliation"))
 	elif matched_transaction_len == 1:
 		frappe.msgprint(_("{0} transaction is reconcilied").format(matched_transaction_len))
 	else:

@@ -22,8 +22,8 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions",
 			args: {
 				bank_account: this.bank_account,
-				from_date:this.bank_statement_from_date,
-				to_date:this.bank_statement_to_date
+				from_date: this.bank_statement_from_date,
+				to_date: this.bank_statement_to_date
 			},
 			callback: function (response) {
 				me.format_data(response.message);
