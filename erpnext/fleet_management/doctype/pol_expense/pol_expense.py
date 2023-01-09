@@ -192,11 +192,6 @@ def get_permission_query_conditions(user):
 			and e.user_id = '{user}')
 		or
 		exists(select 1
-			from `tabEmployee` as e
-			where e.user_id = `tabPOL Expense`.owner
-			and e.user_id = '{user}')
-		or
-		exists(select 1
 			from `tabEmployee` e, `tabAssign Branch` ab, `tabBranch Item` bi
 			where e.user_id = '{user}'
 			and ab.employee = e.name
