@@ -3,11 +3,15 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, getdate, time_diff_in_hours
+from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
 
 import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.assets.doctype.asset.asset import get_asset_account
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_depr_schedule,
+	make_new_active_asset_depr_schedules_and_cancel_current_ones,
+)
 from erpnext.controllers.accounts_controller import AccountsController
 
 
@@ -52,8 +56,11 @@ class AssetRepair(AccountsController):
 			):
 				self.modify_depreciation_schedule()
 
+		notes = _("This schedule was created when Asset Repair {0} was submitted.").format(
+			get_link_to_form(self.doctype, self.name)
+		)
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
-		self.asset_doc.prepare_depreciation_data()
+		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 		self.asset_doc.save()
 
 	def before_cancel(self):
@@ -73,8 +80,11 @@ class AssetRepair(AccountsController):
 			):
 				self.revert_depreciation_schedule_on_cancellation()
 
+		notes = _("This schedule was created when Asset Repair {0} was cancelled.").format(
+			get_link_to_form(self.doctype, self.name)
+		)
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
-		self.asset_doc.prepare_depreciation_data()
+		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
 		self.asset_doc.save()
 
 	def check_repair_status(self):
@@ -279,8 +289,10 @@ class AssetRepair(AccountsController):
 			asset.number_of_depreciations_booked
 		)
 
+		depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
+
 		# the Schedule Date in the final row of the old Depreciation Schedule
-		last_schedule_date = asset.schedules[len(asset.schedules) - 1].schedule_date
+		last_schedule_date = depr_schedule[len(depr_schedule) - 1].schedule_date
 
 		# the Schedule Date in the final row of the new Depreciation Schedule
 		asset.to_date = add_months(last_schedule_date, extra_months)
@@ -310,8 +322,10 @@ class AssetRepair(AccountsController):
 			asset.number_of_depreciations_booked
 		)
 
+		depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
+
 		# the Schedule Date in the final row of the modified Depreciation Schedule
-		last_schedule_date = asset.schedules[len(asset.schedules) - 1].schedule_date
+		last_schedule_date = depr_schedule[len(depr_schedule) - 1].schedule_date
 
 		# the Schedule Date in the final row of the original Depreciation Schedule
 		asset.to_date = add_months(last_schedule_date, -extra_months)
