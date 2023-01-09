@@ -692,8 +692,11 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		having_clause = ""
 
 	batch_nos = frappe.db.sql("""
-		select sle.batch_no, sum(sle.actual_qty), sle.stock_uom,
-			min(timestamp(sle.posting_date, sle.posting_time)), batch.manufacturing_date, batch.expiry_date
+		select sle.batch_no,
+			sum(sle.actual_qty), sle.stock_uom,
+			min(timestamp(sle.posting_date, sle.posting_time)) as received_dt,
+			batch.manufacturing_date,
+			batch.expiry_date
 		from `tabStock Ledger Entry` sle
 			INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 		where
@@ -706,7 +709,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			{cond}
 			{match_conditions}
 		group by batch_no {having_clause}
-		order by batch.expiry_date, sle.batch_no desc
+		order by batch.expiry_date, received_dt, sle.batch_no desc
 		limit %(start)s, %(page_len)s""".format(
 			cond=cond,
 			match_conditions=get_match_cond(doctype),
