@@ -279,7 +279,7 @@ class Item(Document):
 				frappe.throw(_("Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"))
 
 	def update_template_tables(self):
-		template = frappe.get_doc("Item", self.variant_of)
+		template = frappe.get_cached_doc("Item", self.variant_of)
 
 		# add item taxes from template
 		for d in template.get("taxes"):
