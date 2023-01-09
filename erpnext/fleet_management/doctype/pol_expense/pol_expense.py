@@ -39,7 +39,10 @@ class POLExpense(Document):
 	def on_submit(self):
 		self.post_journal_entry()
 		notify_workflow_states(self)
-	
+	def before_cancel(self):
+		doc = frappe.get_doc("Journal Entry", self.journal_entry)
+		if doc.docstatus != 2:
+			frappe.throw("Journal Entry exists for this transaction {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry)))
 	def calculate_km_diff(self):
 		pol_exp = qb.DocType("POL Expense")
 		if not self.uom:
