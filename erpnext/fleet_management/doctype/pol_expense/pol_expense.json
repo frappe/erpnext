@@ -151,13 +151,12 @@
    "read_only": 1
   },
   {
-   "fetch_from": "equipment.fuelbook",
    "fieldname": "fuel_book",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Fuel Book",
    "options": "Fuelbook",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fetch_from": "fuel_book.branch",
@@ -485,7 +484,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-08 17:16:43.726386",
+ "modified": "2023-01-09 11:43:52.300653",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",

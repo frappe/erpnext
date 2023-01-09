@@ -155,6 +155,8 @@ class POLExpense(Document):
 			frappe.throw("Amount cannot be greater than expense limit")
 	@frappe.whitelist()
 	def pull_previous_expense(self):
+		if not self.equipment or not self.fuel_book:
+			frappe.throw("Equipment or Fuel book is missing")
 		pol_exp = qb.DocType(self.doctype)
 		self.set('items',[])
 
@@ -163,7 +165,8 @@ class POLExpense(Document):
 			
 		total_amount = 0
 		for d in (qb.from_(pol_exp).select(pol_exp.name.as_("reference"), pol_exp.amount,pol_exp.adjusted_amount, pol_exp.balance_amount)
-						.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) & (pol_exp.name != self.name))
+						.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) 
+							& (pol_exp.name != self.name) & (pol_exp.fuel_book == self.fuel_book))
 						).run(as_dict= True):
 			total_amount += flt(d.balance_amount)
 			self.append("items", d)
