@@ -13,12 +13,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+<<<<<<< HEAD
 
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 16
 
+=======
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+>>>>>>> 1ad1fc4c7d (ci: bump node in release workflow (#33574))
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save
