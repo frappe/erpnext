@@ -28,7 +28,8 @@ class Production(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.make_production_entry()
-		# frappe.enqueue(make_auto_production(self), queue="long")
+		# make_auto_production(self)
+		frappe.enqueue(make_auto_production(self), queue="long")
 
 	def on_cancel(self):
 		self.assign_default_dummy()
@@ -563,14 +564,16 @@ class Production(StockController):
 
 @frappe.whitelist()
 def make_auto_production(self):
-	if self.docstatus == 1:
+	if self.docstatus == 1 and not frappe.db.exists("Production",{"reference":self.name}) and not self.reference:
 		sort_prod_wise = frappe._dict()
 		for item in self.items:
-			data = frappe.db.sql('''
-						select parent from `tabAuto Production Setting Item` where item_code = '{}'
-					'''.format(item.item_code))
-			if data:
-				sort_prod_wise.setdefault(data[0][0], []).append(item)
+			if frappe.db.exists("Auto Production Setting Item", {"item_code":item.item_code}):
+				data = frappe.db.sql('''
+							select parent from `tabAuto Production Setting Item` where item_code = '{}'
+						'''.format(item.item_code))
+				if data:
+					sort_prod_wise.setdefault(data[0][0], []).append(item)
+
 		if sort_prod_wise:
 			prod = frappe.new_doc("Production")
 			prod.branch = self.branch
