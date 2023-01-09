@@ -44,6 +44,7 @@
    "reqd": 1
   },
   {
+   "default": "0",
    "fieldname": "total_tare_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -146,7 +147,7 @@
    "link_fieldname": "package_type"
   }
  ],
- "modified": "2023-01-07 16:20:14.568504",
+ "modified": "2023-01-09 23:40:22.584501",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Package Type",
