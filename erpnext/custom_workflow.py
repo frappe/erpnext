@@ -146,19 +146,25 @@ class CustomWorkflow:
 					self.hr_approver = frappe.db.get_value("Employee", frappe.db.get_single_value("HR Settings", "hrgm"), self.field_list)
 			else:
 				self.imprest_verifier = frappe.db.get_value("Employee",{'user_id':frappe.db.get_value("Employee",self.doc.employee,"expense_approver")},self.field_list)
-				department = frappe.db.get_value("Employee", {"user_id":self.doc.employee},"department")
+				department = frappe.db.get_value("Employee", self.doc.employee ,"department")
+				if not department:
+					frappe.throw("Set department for {}".format(self.doc.employee))
 				if department != "PROJECTS & MINES DEPARTMENT - SMCL":
 					self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 						"Department Approver",
 						{"parent": "CORPORATE SERVICES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
 						"approver",
 					)},self.field_list)
+					if not self.imprest_verifier:
+						frappe.throw("Set expense approver for CORPORATE SERVICES DEPARTMENT - SMCL department")
 				else:
 					self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 						"Department Approver",
 						{"parent": "PROJECTS & MINES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
 						"approver",
 					)},self.field_list)
+					if not self.imprest_approver:
+						frappe.throw("Set expense approver for PROJECTS & MINES DEPARTMENT - SMCL department")
 	
 		if self.doc.doctype == "Material Request":
 			self.expense_approver = frappe.db.get_value("Employee", {"user_id":frappe.db.get_value("Employee", {"user_id":self.doc.owner}, "expense_approver")}, self.field_list)
