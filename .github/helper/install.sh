@@ -46,9 +46,12 @@ install_whktml() {
         sudo apt install /tmp/wkhtmltox.deb
     else
         echo "Please update this script to support wkhtmltopdf for $(lsb_release -ds)"
+        exit 1
     fi
 }
 install_whktml &
+wkpid=$!
+
 
 cd ~/frappe-bench || exit
 
@@ -61,6 +64,8 @@ bench get-app payments
 bench get-app erpnext "${GITHUB_WORKSPACE}"
 
 if [ "$TYPE" == "server" ]; then bench setup requirements --dev; fi
+
+wait $wkpid
 
 bench start &> bench_run_logs.txt &
 CI=Yes bench build --app frappe &
