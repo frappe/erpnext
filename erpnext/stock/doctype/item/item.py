@@ -60,8 +60,11 @@ class Item(Document):
 			self.item_code = self.name = self.item_old_code
 			return
 		elif not self.item_group:
-			frappe.msgprint('Item Group is required to generate item code',raise_exception=1)
-		self.item_code = self.name = make_autoname('ABC{}.#####'.format(frappe.db.get_value('Item Group',self.item_group,'item_code_base')))[3:]
+			if frappe.db.exists("Item",{"item_group":self.item_group}):
+				prev_item = frappe.db.sql("select name from `tabItem` where item_group = '{}' order by name desc limit 1".format(self.item_group))
+				self.item_code = self.name = flt(prev_item[0][0]) + 1
+			else:
+				self.item_code = self.name = make_autoname('ABC{}.#####'.format(frappe.db.get_value('Item Group',self.item_group,'item_code_base')))[3:]
 
 	def after_insert(self):
 		"""set opening stock and item price"""
