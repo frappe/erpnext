@@ -839,12 +839,12 @@ class Project(StatusUpdater):
 	def validate_feedback(self):
 		if not self.get("customer_feedback"):
 			self.feedback_date = self.feedback_time = None
-			return
 
-		if not self.get("feedback_date") or not self.get("feedback_time"):
+		elif not self.get("feedback_date") or not self.get("feedback_time"):
 			cur_dt = get_datetime()
 			self.feedback_date = getdate(cur_dt)
 			self.feedback_time = get_time(cur_dt)
+			self.customer_feedback = clean_whitespace(self.customer_feedback)
 
 	def validate_warranty(self):
 		if self.get('warranty_claim_denied'):

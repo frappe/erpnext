@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Service Feedback Sheet"] = {
+frappe.query_reports["Vehicle Service Feedback"] = {
 	"filters": [
 		{
 			fieldname: "company",

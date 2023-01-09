@@ -7,10 +7,10 @@ from frappe import _
 from frappe.utils import getdate, today, add_days, cint
 
 def execute(filters=None):
-	return ServiceFeedbackSheet(filters).run()
+	return VehicleServiceFeedback(filters).run()
 
 
-class ServiceFeedbackSheet:
+class VehicleServiceFeedback:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.from_date = getdate(filters.from_date or today())
