@@ -2237,6 +2237,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		$.each(me.frm.doc.items || [], function(i, item) {
 			if(item.item_code && items_dict.hasOwnProperty(item.name)) {
+				if (items_dict[item.name].warehouse && item.packing_slip) {
+					delete items_dict[item.name]["warehouse"];
+				}
+
 				frappe.model.set_value(item.doctype, item.name, items_dict[item.name]);
 			}
 		});

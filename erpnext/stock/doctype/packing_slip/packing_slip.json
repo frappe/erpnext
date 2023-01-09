@@ -49,7 +49,9 @@
   "project",
   "dimension_col_break",
   "status_section",
-  "status"
+  "status",
+  "column_break_42",
+  "is_delivered"
  ],
  "fields": [
   {
@@ -325,13 +327,26 @@
    "fieldtype": "Link",
    "label": "Default Source Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_delivered",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Delivered",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-suitcase",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-07 16:38:32.814485",
+ "modified": "2023-01-08 17:51:07.254598",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

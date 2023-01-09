@@ -559,35 +559,72 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		d.show();
 	}
 
-	make_delivery_note_based_on() {
-		var me = this;
+	make_delivery_note_based_on(filters, packing_filter) {
+		let item_grid = this.frm.fields_dict["items"].grid;
+		let selected_rows = item_grid.get_selected();
+		if (selected_rows.length) {
+			selected_rows = (this.frm.doc.items || []).filter(d => selected_rows.includes(d.name));
+		} else {
+			selected_rows = this.frm.doc.items || [];
+		}
 
-		var warehouses = [];
-		var delivery_dates = [];
-		$.each(this.frm.doc.items || [], function(i, d) {
+		filters = filters || {};
+		let filtered_items = frappe.utils.filter_dict(selected_rows, filters);
+		let filtered_row_names = filtered_items.map(d => d.name);
+
+		let warehouses = [];
+		let delivery_dates = [];
+		let has_packed_qty = false;
+		$.each(filtered_items, function(i, d) {
 			if(d.warehouse && !warehouses.includes(d.warehouse)) {
 				warehouses.push(d.warehouse);
 			}
+
 			if(!delivery_dates.includes(d.delivery_date)) {
 				delivery_dates.push(d.delivery_date);
 			}
+
+			if (flt(d.packed_qty) > 0) {
+				has_packed_qty = true;
+			}
 		});
 
-		var item_grid = this.frm.fields_dict["items"].grid;
-		if(item_grid.get_selected().length) {
-			me.make_delivery_note();
-		} else if (warehouses.length > 1) {
-			me.make_delivery_note_based_on_warehouse(warehouses);
-		} else if (delivery_dates.length > 1) {
-			me.make_delivery_note_based_on_delivery_date(delivery_dates);
+		if (has_packed_qty && !packing_filter) {
+			return this.make_delivery_note_based_on_packing_type(filters);
+		} else if (warehouses.length > 1 && !filters.warehouse) {
+			return this.make_delivery_note_based_on_warehouse(warehouses, filters, packing_filter);
+		} else if (delivery_dates.length > 1 && !filters.delivery_date) {
+			return this.make_delivery_note_based_on_delivery_date(delivery_dates, filters, packing_filter);
+		}
+
+		if (filtered_items.length != this.frm.doc.items.length) {
+			$.each(item_grid.grid_rows || [], function(j, row) {
+				row.doc.__checked = filtered_row_names.includes(row.doc.name) ? 1 : 0;
+			});
+		}
+
+		let warehouse = filters.warehouse && warehouses.length == 1 ? warehouses[0] : null;
+		if (packing_filter && packing_filter != "Unpacked Items Only") {
+			return this.make_delivery_note_from_packing_slips(packing_filter, warehouse);
 		} else {
-			me.make_delivery_note();
+			return this.make_delivery_note(warehouse);
 		}
 	}
 
-	make_delivery_note_based_on_warehouse(warehouses) {
+	make_delivery_note_based_on_packing_type(filters) {
+		frappe.prompt({
+			label: __("Deliver Packed or Unpacked Items"),
+			fieldname: "type",
+			fieldtype: "Select",
+			options: ['', 'Packed Items Only', 'Unpacked Items Only', 'All Items'],
+			reqd: 1
+		}, (values) => {
+			this.make_delivery_note_based_on(filters, values.type);
+		}, __("Deliver Packed or Unpacked Items"), __("Select"));
+	}
+
+	make_delivery_note_based_on_warehouse(warehouses, filters, packing_filter) {
 		var me = this;
-		var item_grid = this.frm.fields_dict["items"].grid;
 
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Items based on Warehouse"),
@@ -623,23 +660,16 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 			if(!warehouses) return;
 
-			$.each(warehouses, function(i, d) {
-				$.each(item_grid.grid_rows || [], function(j, row) {
-					if(row.doc.warehouse === d) {
-						row.doc.__checked = 1;
-					}
-				});
-			})
-
-			me.make_delivery_note(warehouses.length === 1 ? warehouses[0] : null);
 			dialog.hide();
+
+			filters["warehouse"] = ["in", warehouses]
+			me.make_delivery_note_based_on(filters, packing_filter);
 		});
 		dialog.show();
 	}
 
-	make_delivery_note_based_on_delivery_date(delivery_dates) {
+	make_delivery_note_based_on_delivery_date(delivery_dates, filters, packing_filter) {
 		var me = this;
-		var item_grid = this.frm.fields_dict["items"].grid;
 
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Items based on Delivery Date"),
@@ -675,15 +705,10 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 			if(!dates) return;
 
-			$.each(dates, function(i, d) {
-				$.each(item_grid.grid_rows || [], function(j, row) {
-					if(row.doc.delivery_date == d) {
-						row.doc.__checked = 1;
-					}
-				});
-			})
-			me.make_delivery_note();
 			dialog.hide();
+
+			filters["delivery_date"] = ["in", dates];
+			me.make_delivery_note_based_on(filters, packing_filter);
 		});
 		dialog.show();
 	}
@@ -693,6 +718,17 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 			frm: this.frm,
 			args: {
+				warehouse: warehouse
+			}
+		})
+	}
+
+	make_delivery_note_from_packing_slips(packing_filter, warehouse) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note_from_packing_slips",
+			frm: this.frm,
+			args: {
+				packing_filter: packing_filter,
 				warehouse: warehouse
 			}
 		})

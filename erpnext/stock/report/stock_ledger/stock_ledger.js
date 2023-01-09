@@ -73,6 +73,18 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Item Group"
 		},
 		{
+			"fieldname":"brand",
+			"label": __("Brand"),
+			"fieldtype": "Link",
+			"options": "Brand"
+		},
+		{
+			fieldname: "item_source",
+			label: __("Item Source"),
+			fieldtype: "Link",
+			options: "Item Source"
+		},
+		{
 			"fieldname":"batch_no",
 			"label": __("Batch No"),
 			"fieldtype": "Link",
@@ -85,16 +97,10 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Serial No"
 		},
 		{
-			"fieldname":"brand",
-			"label": __("Brand"),
+			"fieldname": "packing_slip",
+			"label": __("Packing Slip"),
 			"fieldtype": "Link",
-			"options": "Brand"
-		},
-		{
-			fieldname: "item_source",
-			label: __("Item Source"),
-			fieldtype: "Link",
-			options: "Item Source"
+			"options": "Packing Slip"
 		},
 		{
 			"fieldname":"voucher_no",

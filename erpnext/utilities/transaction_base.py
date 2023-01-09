@@ -81,25 +81,28 @@ class TransactionBase(StatusUpdater):
 	def validate_with_previous_doc(self, ref):
 		self.exclude_fields = ["conversion_factor", "uom"] if self.get('is_return') else []
 
-		for key, val in ref.items():
-			is_child = val.get("is_child_table")
-			ref_doc = {}
-			item_ref_dn = []
-			for d in self.get_all_children(self.doctype + " Item"):
-				ref_dn = d.get(val["ref_dn_field"])
-				if ref_dn:
-					if is_child:
-						self.compare_values({key: [ref_dn]}, val["compare_fields"], d)
-						if ref_dn not in item_ref_dn:
-							item_ref_dn.append(ref_dn)
-						elif not val.get("allow_duplicate_prev_row_id"):
-							frappe.throw(_("Duplicate row {0} with same {1}").format(d.idx, key))
-					elif ref_dn:
-						ref_doc.setdefault(key, [])
-						if ref_dn not in ref_doc[key]:
-							ref_doc[key].append(ref_dn)
-			if ref_doc:
-				self.compare_values(ref_doc, val["compare_fields"])
+		for prev_doctype, validator in ref.items():
+			prev_is_child = validator.get("is_child_table")
+			prev_parent_docs = []
+			item_prev_docname_visited = []
+
+			for row in self.get_all_children(self.doctype + " Item"):
+				prev_docname = row.get(validator["ref_dn_field"])
+				if prev_docname:
+					if prev_is_child:
+						self.compare_values({prev_doctype: [prev_docname]}, validator["compare_fields"], row)
+
+						if prev_docname not in item_prev_docname_visited:
+							item_prev_docname_visited.append(prev_docname)
+						elif not validator.get("allow_duplicate_prev_row_id"):
+							frappe.throw(_("Duplicate row {0} with same {1}").format(row.idx, prev_doctype))
+
+					elif prev_docname:
+						if prev_docname not in prev_parent_docs:
+							prev_parent_docs.append(prev_docname)
+
+			if prev_parent_docs:
+				self.compare_values({prev_doctype: prev_parent_docs}, validator["compare_fields"])
 
 	def compare_values(self, ref_doc, fields, doc=None):
 		for reference_doctype, ref_dn_list in ref_doc.items():

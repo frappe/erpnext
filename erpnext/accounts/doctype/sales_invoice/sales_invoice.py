@@ -322,6 +322,9 @@ class SalesInvoice(SellingController):
 
 		self.update_project_billing_and_sales()
 
+		if self.update_stock:
+			self.update_packing_slips()
+
 	def set_delivery_status(self, update=False, update_modified=True):
 		delivered_qty_map = self.get_delivered_qty_map()
 
@@ -745,6 +748,26 @@ class SalesInvoice(SellingController):
 			"Quotation": {
 				"ref_dn_field": "quotation",
 				"compare_fields": [["company", "="]]
+			},
+			"Packing Slip": {
+				"ref_dn_field": "packing_slip",
+				"compare_fields": [["warehouse", "="], ["weight_uom", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+			"Packing Slip Item": {
+				"ref_dn_field": "packing_slip_item",
+				"compare_fields": [["item_code", "="], ["qty", "="], ["uom", "="], ["conversion_factor", "="],
+					["batch_no", "="], ["serial_no", "="], ["weight_per_unit", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+		})
+
+		super(SalesInvoice, self).validate_with_previous_doc({
+			"Packing Slip": {
+				"ref_dn_field": "packing_slip",
+				"compare_fields": [["company", "="], ["project", "="], ["customer", "="]],
 			},
 		})
 

@@ -528,6 +528,66 @@ def _get_sales_orders_to_be_billed(doctype="Sales Order", txt="", searchfield="n
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+def get_packing_slips_to_be_delivered(doctype, txt, searchfield, start, page_len, filters, as_dict):
+	return _get_packing_slips_to_be_delivered(doctype, txt, searchfield, start, page_len, filters, as_dict)
+
+
+def _get_packing_slips_to_be_delivered(doctype="Packing Slip", txt="", searchfield="name", start=0, page_len=0,
+		filters=None, as_dict=True):
+
+	fields = get_fields("Packing Slip",
+		["name", "package_type", "customer", "customer_name", "warehouse", "total_net_weight"])
+	select_fields = ", ".join(["`tabPacking Slip`.{0}".format(f) for f in fields])
+	limit = "limit {0}, {1}".format(start, page_len) if page_len else ""
+
+	exists_conditions = []
+
+	if filters.get("sales_order"):
+		exists_conditions.append("`tabPacking Slip Item`.sales_order = {0}".format(
+			frappe.db.escape(filters.pop("sales_order"))))
+
+	if "sales_order_item" in filters:
+		sales_order_items = filters.pop("sales_order_item")
+		if sales_order_items:
+			if not isinstance(sales_order_items, list):
+				sales_order_items = [sales_order_items]
+
+			exists_conditions.append("`tabPacking Slip Item`.sales_order_item in ({0})".format(
+				", ".join([frappe.db.escape(i) for i in sales_order_items]),
+			))
+
+	if filters.get("item_code"):
+		exists_conditions.append("`tabPacking Slip Item`.item_code = {0}".format(
+			frappe.db.escape(filters.pop("item_code"))))
+
+	if exists_conditions:
+		exists_conditions = """ and exists(select `tabPacking Slip Item`.name from `tabPacking Slip Item` where
+				`tabPacking Slip Item`.parent = `tabPacking Slip`.name and {0})""".format(
+			" and ".join(exists_conditions))
+	else:
+		exists_conditions = ""
+
+	return frappe.db.sql("""
+			select {fields}
+			from `tabPacking Slip`
+			where `tabPacking Slip`.`{key}` like {txt}
+				and `tabPacking Slip`.`status` = 'In Stock'
+				{exists_conditions} {fcond} {mcond}
+			order by `tabPacking Slip`.posting_date, `tabPacking Slip`.posting_time, `tabPacking Slip`.creation
+			{limit}
+		""".format(
+		fields=select_fields,
+		key=searchfield,
+		exists_conditions=exists_conditions,
+		fcond=get_filters_cond(doctype, filters, []),
+		mcond=get_match_cond(doctype),
+		limit=limit,
+		txt="%(txt)s",
+	), {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_projects_to_be_billed(doctype="Project", txt="", searchfield="name", start=0, page_len=0,
 		filters=None, as_dict=True, ignore_permissions=False):
 
@@ -1058,7 +1118,10 @@ def vehicle_color_query(doctype, txt, searchfield, start, page_len, filters):
 	})
 
 
-def get_fields(doctype, fields=[]):
+def get_fields(doctype, fields=None):
+	if not fields:
+		fields = []
+
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
 

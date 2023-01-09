@@ -4,6 +4,11 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 	item_table_fields = ['items', 'packaging_items']
 
 	setup() {
+		this.frm.custom_make_buttons = {
+			'Delivery Note': __('Delivery Note'),
+			'Sales Invoice': __('Sales Invoice'),
+		}
+
 		this.setup_posting_date_time_check();
 		this.setup_queries();
 	}
@@ -69,26 +74,15 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 				this.get_items_from_sales_order();
 			}, __("Get Items From"));
 		}
-	}
 
-	get_items_from_sales_order() {
-		erpnext.utils.map_current_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_packing_slip",
-			source_doctype: "Sales Order",
-			target: this.frm,
-			setters: {
-				customer: this.frm.doc.customer || undefined,
-				project: this.frm.doc.project || undefined,
-			},
-			columns: ['customer_name', 'project'],
-			get_query_filters: {
-				docstatus: 1,
-				status: ["not in", ["Closed", "On Hold"]],
-				per_delivered: ["<", 99.99],
-				per_packed: ["<", 99.99],
-				company: this.frm.doc.company,
+		if (this.frm.doc.docstatus == 1) {
+			if (this.frm.doc.status == "In Stock") {
+				this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note(), __('Create'));
+				this.frm.add_custom_button(__('Sales Invoice'), () => this.make_sales_invoice(), __('Create'));
+
+				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
-		});
+		}
 	}
 
 	calculate_totals() {
@@ -175,6 +169,40 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 				}
 			});
 		}
+	}
+
+	get_items_from_sales_order() {
+		erpnext.utils.map_current_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_packing_slip",
+			source_doctype: "Sales Order",
+			target: this.frm,
+			setters: {
+				customer: this.frm.doc.customer || undefined,
+				project: this.frm.doc.project || undefined,
+			},
+			columns: ['customer_name', 'project'],
+			get_query_filters: {
+				docstatus: 1,
+				status: ["not in", ["Closed", "On Hold"]],
+				per_delivered: ["<", 99.99],
+				per_packed: ["<", 99.99],
+				company: this.frm.doc.company,
+			}
+		});
+	}
+
+	make_delivery_note() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.packing_slip.packing_slip.make_delivery_note",
+			frm: this.frm,
+		})
+	}
+
+	make_sales_invoice() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.packing_slip.packing_slip.make_sales_invoice",
+			frm: this.frm,
+		})
 	}
 };
 

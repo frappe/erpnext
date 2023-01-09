@@ -19,6 +19,10 @@ def get_notification_config():
 				"status": ("not in", ("Completed", "Closed")),
 				"docstatus": ("<", 2)
 			},
+			"Packing Slip": {
+				"status": ("in", ("In Stock", "Draft")),
+				"docstatus": ("<", 2)
+			},
 			"Journal Entry": {"docstatus": 0},
 			"Sales Invoice": {
 				"outstanding_amount": (">", 0),

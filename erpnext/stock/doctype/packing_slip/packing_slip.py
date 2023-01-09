@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, cint
+from frappe.model.mapper import get_mapped_doc, map_child_doc
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
 	get_default_expense_account, get_default_cost_center, get_item_default_values, get_force_default_warehouse,\
@@ -36,6 +37,7 @@ class PackingSlip(StockController):
 		self.calculate_totals()
 		self.validate_weights()
 		self.set_title()
+		self.set_delivery_status(validate_delivery=False)
 		self.set_status()
 
 	def on_submit(self):
@@ -147,6 +149,18 @@ class PackingSlip(StockController):
 		warehouses = list(set(warehouses))
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
+
+	def determine_warehouse_from_sales_order(self):
+		sales_order_row_names = [d.sales_order_item for d in self.get("items") if d.get("sales_order_item")]
+		if sales_order_row_names:
+			warehouses = frappe.db.sql_list("""
+				select distinct warehouse
+				from `tabSales Order Item`
+				where name in %s
+			""", [sales_order_row_names])
+
+			if warehouses and len(warehouses) == 1 and warehouses[0]:
+				self.warehouse = warehouses[0]
 
 	def validate_sales_orders(self):
 		sales_orders = list(set([d.sales_order for d in self.get("items") if d.get("sales_order")]))
@@ -287,14 +301,61 @@ class PackingSlip(StockController):
 	def get_stock_voucher_items(self, sle_map):
 		return self.get("items") + self.get("packaging_items")
 
+	def set_delivery_status(self, update=False, update_modified=True, validate_delivery=True):
+		packed_qty_map = {}
+		for d in self.get("items"):
+			packed_qty_map[d.name] = flt(d.qty)
+
+		delivered_qty_map = self.get_delivered_qty_map()
+
+		if delivered_qty_map == packed_qty_map:
+			self.is_delivered = 1
+		else:
+			self.is_delivered = 0
+
+			if validate_delivery and delivered_qty_map:
+				frappe.throw(_(
+					"Some items from {0} are were not completely delivered. "
+					"Partial delivery of Packing Slip is not allowed. "
+					"Please select all items of Packing Slip."
+				).format(frappe.get_desk_link("Packing Slip", self.name)))
+
+		if update:
+			self.db_set('is_delivered', self.is_delivered, update_modified=update_modified)
+
+	def get_delivered_qty_map(self):
+		if self.is_new():
+			return {}
+
+		delivered_by_dn = frappe.db.sql("""
+			select packing_slip_item, sum(qty) as delivered_qty
+			from `tabDelivery Note Item`
+			where packing_slip = %s and docstatus = 1
+			group by packing_slip_item
+		""", self.name, as_dict=1)
+
+		delivered_by_sinv = frappe.db.sql("""
+			select i.packing_slip_item, sum(i.qty) as delivered_qty
+			from `tabSales Invoice Item` i
+			inner join `tabSales Invoice` s on s.name = i.parent
+			where i.packing_slip = %s and s.docstatus = 1 and s.update_stock = 1
+			group by i.packing_slip_item
+		""", self.name, as_dict=1)
+
+		delivered_qty_map = {}
+		for d in delivered_by_dn + delivered_by_sinv:
+			delivered_qty_map.setdefault(d.packing_slip_item, 0)
+			delivered_qty_map[d.packing_slip_item] += d.delivered_qty
+
+		return delivered_qty_map
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		previous_status = self.status
 
 		if self.docstatus == 0:
 			self.status = "Draft"
 		elif self.docstatus == 1:
-			delivered_qty = self.get_delivered_qty()
-			if not delivered_qty:
+			if not cint(self.is_delivered):
 				self.status = "In Stock"
 			else:
 				self.status = "Delivered"
@@ -305,18 +366,6 @@ class PackingSlip(StockController):
 
 		if update:
 			self.db_set("status", self.status, update_modified=update_modified)
-
-	def get_delivered_qty(self):
-		if self.is_new():
-			return 0
-
-		delivered_qty = frappe.db.sql("""
-			select sum(qty)
-			from `tabDelivery Note Item`
-			where packing_slip = %s
-		""", self.name)
-
-		return flt(delivered_qty[0][0]) if delivered_qty else 0
 
 
 @frappe.whitelist()
@@ -453,3 +502,136 @@ def get_item_weights_per_unit(item_codes, weight_uom=None):
 		out[item_code] = get_weight_per_unit(item_code, weight_uom=weight_uom or item_weight_uom)
 
 	return out
+
+
+@frappe.whitelist()
+def make_delivery_note(source_name, target_doc=None):
+	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as make_delivery_note_from_sales_order,\
+		get_item_mapper_for_delivery
+
+	packing_slip = frappe.get_doc("Packing Slip", source_name)
+	target_doc = map_target_document("Delivery Note", target_doc, packing_slip)
+
+	# Map Sales Orders
+	sales_orders = list(set([d.sales_order for d in packing_slip.get("items") if d.get("sales_order")]))
+	sales_order_docs = {}
+	for so in sales_orders:
+		sales_order_docs[so] = frappe.get_doc("Sales Order", so)
+		target_doc = make_delivery_note_from_sales_order(so, target_doc, skip_item_mapping=True)
+
+	so_item_mapper = get_item_mapper_for_delivery(allow_duplicate=True)
+	packing_slip_item_mapper = get_packing_slip_item_mapper("Delivery Note Item")
+
+	# Map Packing Slip Items
+	for ps_item in packing_slip.get("items"):
+		if not mapper_item_condition(ps_item, target_doc):
+			continue
+
+		if ps_item.get("sales_order_item"):
+			source_parent = sales_order_docs[ps_item.sales_order]
+			source_row = frappe.get_doc("Sales Order Item", ps_item.sales_order_item)
+			mapper = so_item_mapper
+		else:
+			source_parent = packing_slip
+			source_row = ps_item
+			mapper = packing_slip_item_mapper
+
+		dn_item = map_child_doc(source_row, target_doc, mapper, source_parent)
+		update_mapped_item(dn_item, packing_slip, ps_item)
+
+	postprocess_mapped_document(target_doc)
+	return target_doc
+
+
+@frappe.whitelist()
+def make_sales_invoice(source_name, target_doc=None):
+	from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice as make_sales_invoice_from_sales_order, \
+		get_item_mapper_for_invoice
+
+	packing_slip = frappe.get_doc("Packing Slip", source_name)
+	target_doc = map_target_document("Sales Invoice", target_doc, packing_slip)
+
+	# Map Sales Orders
+	sales_orders = list(set([d.sales_order for d in packing_slip.get("items") if d.get("sales_order")]))
+	sales_order_docs = {}
+	sales_order_mappers = {}
+	for sales_order in sales_orders:
+		sales_order_docs[sales_order] = frappe.get_doc("Sales Order", sales_order)
+		sales_order_mappers[sales_order] = get_item_mapper_for_invoice(sales_order, allow_duplicate=True)
+		target_doc = make_sales_invoice_from_sales_order(sales_order, target_doc, skip_item_mapping=True)
+
+	packing_slip_item_mapper = get_packing_slip_item_mapper("Sales Invoice Item")
+
+	# Map Packing Slip Items
+	for ps_item in packing_slip.get("items"):
+		if not mapper_item_condition(ps_item, target_doc):
+			continue
+
+		if ps_item.get("sales_order_item"):
+			source_parent = sales_order_docs[ps_item.sales_order]
+			source_row = frappe.get_doc("Sales Order Item", ps_item.sales_order_item)
+			mapper = sales_order_mappers[ps_item.sales_order]
+		else:
+			source_parent = packing_slip
+			source_row = ps_item
+			mapper = packing_slip_item_mapper
+
+		sinv_item = map_child_doc(source_row, target_doc, mapper, source_parent)
+		update_mapped_item(sinv_item, packing_slip, ps_item)
+
+	postprocess_mapped_document(target_doc)
+	target_doc.update_stock = 1
+
+	return target_doc
+
+
+def map_target_document(target_doctype, target_doc, packing_slip):
+	if isinstance(target_doc, str):
+		target_doc = frappe.get_doc(json.loads(target_doc))
+
+	if not target_doc:
+		target_doc = frappe.new_doc(target_doctype)
+
+	if not target_doc.get("customer"):
+		target_doc.customer = packing_slip.customer
+
+	return target_doc
+
+
+def get_packing_slip_item_mapper(target_doctype):
+	return {
+		"doctype": target_doctype,
+		"field_no_map": [
+			"expense_account",
+			"cost_center",
+		],
+	}
+
+
+def mapper_item_condition(ps_item, target_doc):
+	if ps_item.name in [d.packing_slip_item for d in target_doc.get("items") if d.get("packing_slip_item")]:
+		return False
+
+	return True
+
+
+def update_mapped_item(target, packing_slip, ps_item):
+	target.packing_slip = packing_slip.name
+	target.packing_slip_item = ps_item.name
+
+	target.qty = ps_item.qty
+	target.uom = ps_item.uom
+	target.conversion_factor = ps_item.conversion_factor
+
+	target.weight_per_unit = ps_item.weight_per_unit
+	target.weight_uom = packing_slip.weight_uom
+
+	target.warehouse = packing_slip.warehouse
+	target.batch_no = ps_item.batch_no
+	target.serial_no = ps_item.serial_no
+
+
+def postprocess_mapped_document(target):
+	target.run_method('set_missing_values')
+	target.run_method('set_po_nos')
+	target.run_method('calculate_taxes_and_totals')

@@ -12,6 +12,7 @@ from erpnext.setup.doctype.sales_person.sales_person import get_sales_person_com
 
 from erpnext.controllers.stock_controller import StockController
 
+
 class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
@@ -424,6 +425,14 @@ class SellingController(StockController):
 							"dependencies": return_dependency
 						}))
 		self.make_sl_entries(sl_entries)
+
+	def update_packing_slips(self):
+		packing_slips = list(set([d.packing_slip for d in self.get("items") if d.get("packing_slip")]))
+		for name in packing_slips:
+			doc = frappe.get_doc("Packing Slip", name)
+			doc.set_delivery_status(update=True)
+			doc.set_status(update=True)
+			doc.notify_update()
 
 	def set_po_nos(self):
 		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-04-22 13:15:44",
  "doctype": "DocType",
@@ -116,6 +117,8 @@
   "sales_order_item",
   "sales_invoice",
   "sales_invoice_item",
+  "packing_slip",
+  "packing_slip_item",
   "delivery_note_item",
   "claim_customer",
   "col_break4",
@@ -1255,16 +1258,43 @@
    "label": "Claim Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "fieldname": "packing_slip",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Packing Slip",
+   "no_copy": 1,
+   "oldfieldname": "batch_no",
+   "oldfieldtype": "Link",
+   "options": "Packing Slip",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "packing_slip_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Packing Slip Item",
+   "no_copy": 1,
+   "oldfieldname": "batch_no",
+   "oldfieldtype": "Link",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-10-12 21:55:58.786232",
+ "links": [],
+ "modified": "2023-01-08 16:41:27.411029",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

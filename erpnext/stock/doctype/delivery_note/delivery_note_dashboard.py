@@ -14,7 +14,7 @@ def get_data():
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order'],
 			'Quotation': ['items', 'quotation'],
-			'Vehicle': ['items', 'vehicle']
+			'Packing Slip': ['items', 'packing_slip'],
 		},
 		'transactions': [
 			{
@@ -23,7 +23,7 @@ def get_data():
 			},
 			{
 				'label': _('Previous Documents'),
-				'items': ['Sales Order', 'Quotation']
+				'items': ['Sales Order', 'Quotation', 'Packing Slip']
 			},
 			{
 				'label': _('Reference'),

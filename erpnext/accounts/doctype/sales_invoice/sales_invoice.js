@@ -145,6 +145,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				me.frm.add_custom_button(__('Quotation'), function() {
 					me.get_items_from_quotation();
 				}, __("Get Items From"));
+
+				me.frm.add_custom_button(__('Packing Slip'), function() {
+					me.get_items_from_packing_slip("Sales Invoice");
+				}, __("Get Items From"));
 			}
 
 			me.frm.add_custom_button(__('Projects'), function() {

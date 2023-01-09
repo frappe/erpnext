@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-06-04 11:02:19",
  "doctype": "DocType",
@@ -132,6 +133,8 @@
   "sales_order_item",
   "delivery_note",
   "delivery_note_item",
+  "packing_slip",
+  "packing_slip_item",
   "sales_invoice_item",
   "allow_zero_valuation_rate",
   "planning_section",
@@ -1426,16 +1429,39 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
+  },
+  {
+   "fieldname": "packing_slip",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Packing Slip",
+   "no_copy": 1,
+   "options": "Packing Slip",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "packing_slip_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Packing Slip Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-12-05 13:41:10.097233",
+ "links": [],
+ "modified": "2023-01-08 16:53:32.843271",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

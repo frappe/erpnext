@@ -114,31 +114,13 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 
 		if ((!doc.is_return) && (doc.status!="Closed" || this.frm.is_new())) {
 			if (this.frm.doc.docstatus===0) {
-				this.frm.add_custom_button(__('Sales Order'),
-					function() {
-						if (!me.frm.doc.customer) {
-							frappe.throw({
-								title: __("Mandatory"),
-								message: __("Please Select a Customer")
-							});
-						}
-						erpnext.utils.map_current_doc({
-							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-							source_doctype: "Sales Order",
-							target: me.frm,
-							setters: {
-								customer: me.frm.doc.customer || undefined,
-								project: me.frm.doc.project || undefined,
-							},
-							columns: ['customer_name', 'project'],
-							get_query_filters: {
-								docstatus: 1,
-								status: ["not in", ["Closed", "On Hold"]],
-								per_delivered: ["<", 99.99],
-								company: me.frm.doc.company,
-							}
-						})
-					}, __("Get Items From"));
+				this.frm.add_custom_button(__('Sales Order'), function() {
+					me.get_items_from_sales_order();
+				}, __("Get Items From"));
+
+				this.frm.add_custom_button(__('Packing Slip'), function() {
+					me.get_items_from_packing_slip("Delivery Note");
+				}, __("Get Items From"));
 
 				me.add_get_applicable_items_button("stock");
 				me.add_get_project_template_items_button("stock");
@@ -247,6 +229,31 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 				} else {
 					return "green";
 				}
+			}
+		});
+	}
+
+	get_items_from_sales_order() {
+		if (!this.frm.doc.customer) {
+			frappe.throw({
+				title: __("Mandatory"),
+				message: __("Please Select a Customer")
+			});
+		}
+		erpnext.utils.map_current_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+			source_doctype: "Sales Order",
+			target: this.frm,
+			setters: {
+				customer: this.frm.doc.customer || undefined,
+				project: this.frm.doc.project || undefined,
+			},
+			columns: ['customer_name', 'project'],
+			get_query_filters: {
+				docstatus: 1,
+				status: ["not in", ["Closed", "On Hold"]],
+				per_delivered: ["<", 99.99],
+				company: this.frm.doc.company,
 			}
 		});
 	}

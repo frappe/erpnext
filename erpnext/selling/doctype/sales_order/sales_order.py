@@ -7,11 +7,9 @@ import frappe.utils
 from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form
 from frappe import _
 from six import string_types
-from frappe.model.utils import get_fetch_values
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
-from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 from erpnext.vehicles.doctype.vehicle.vehicle import split_vehicle_items_by_qty, set_reserved_vehicles_from_so
@@ -900,21 +898,9 @@ def make_project(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_mapping=False):
+def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_mapping=False, allow_duplicate=False):
 	if not warehouse and frappe.flags.args:
 		warehouse = frappe.flags.args.warehouse
-
-	def item_condition(source, source_parent, target_parent):
-		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item]:
-			return False
-
-		if source.delivered_by_supplier:
-			return False
-
-		if not source.is_stock_item and not source.is_fixed_asset:
-			return False
-
-		return abs(source.delivered_qty) < abs(source.qty)
 
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
@@ -930,18 +916,6 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
-
-		if source.company_address:
-			target.update({'company_address': source.company_address})
-		else:
-			# set company address
-			target.update(get_company_address(target.company))
-
-		if target.company_address:
-			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
-
-	def update_item(source, target, source_parent, target_parent):
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
 	mapper = {
 		"Sales Order": {
@@ -964,22 +938,74 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 	}
 
 	if not skip_item_mapping:
-		mapper["Sales Order Item"] = {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "sales_order_item",
-				"parent": "sales_order",
-				"quotation": "quotation",
-				"quotation_item": "quotation_item",
-			},
-			"postprocess": update_item,
-			"condition": item_condition,
-		}
+		mapper["Sales Order Item"] = get_item_mapper_for_delivery(allow_duplicate=allow_duplicate)
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
 	return target_doc
+
+
+@frappe.whitelist()
+def make_delivery_note_from_packing_slips(source_name, target_doc=None, packing_filter=None, warehouse=None):
+	from erpnext.controllers.queries import _get_packing_slips_to_be_delivered
+
+	from erpnext.stock.doctype.packing_slip.packing_slip import make_delivery_note as map_dn_from_packing_slip
+	if not warehouse and frappe.flags.args:
+		warehouse = frappe.flags.args.warehouse
+	if not packing_filter and frappe.flags.args:
+		packing_filter = frappe.flags.args.packing_filter
+
+	packing_slip_filters = {"sales_order": source_name}
+	if frappe.flags.selected_children and frappe.flags.selected_children.get("items"):
+		packing_slip_filters["sales_order_item"] = frappe.flags.selected_children["items"]
+
+	packing_slips = _get_packing_slips_to_be_delivered(filters=packing_slip_filters)
+	for d in packing_slips:
+		target_doc = map_dn_from_packing_slip(d.name, target_doc)
+
+	if packing_filter != "Packed Items Only":
+		target_doc = make_delivery_note(source_name, target_doc, warehouse=warehouse, allow_duplicate=True)
+
+	return target_doc
+
+
+def get_item_mapper_for_delivery(allow_duplicate=False):
+	def update_item(source, target, source_parent, target_parent):
+		undelivered_qty, unpacked_qty = get_remaining_qty(source)
+		target.qty = min(undelivered_qty, unpacked_qty)
+
+	def item_condition(source, source_parent, target_parent):
+		if not allow_duplicate:
+			if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item]:
+				return False
+
+		if source.delivered_by_supplier:
+			return False
+
+		if not source.is_stock_item and not source.is_fixed_asset:
+			return False
+
+		undelivered_qty, unpacked_qty = get_remaining_qty(source)
+		return undelivered_qty > 0 and unpacked_qty > 0
+
+	def get_remaining_qty(source):
+		undelivered_qty = flt(source.qty) - flt(source.delivered_qty)
+		unpacked_qty = flt(source.qty) - flt(source.packed_qty)
+
+		return undelivered_qty, unpacked_qty
+
+	return {
+		"doctype": "Delivery Note Item",
+		"field_map": {
+			"rate": "rate",
+			"name": "sales_order_item",
+			"parent": "sales_order",
+			"quotation": "quotation",
+			"quotation_item": "quotation_item",
+		},
+		"postprocess": update_item,
+		"condition": item_condition,
+	}
 
 
 def update_items_based_on_purchase_against_sales_order(source, target):
@@ -1066,8 +1092,11 @@ def make_packing_slip(source_name, target_doc=None, warehouse=None):
 		return undelivered_qty > 0 and unpacked_qty > 0
 
 	def set_missing_values(source, target):
-		if warehouse and not target.warehouse:
-			target.warehouse = warehouse
+		if not target.warehouse:
+			if warehouse:
+				target.warehouse = warehouse
+			else:
+				target.determine_warehouse_from_sales_order()
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_totals")
@@ -1114,46 +1143,19 @@ def make_packing_slip(source_name, target_doc=None, warehouse=None):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, only_items=None, skip_postprocess=False):
-	unbilled_dn_qty_map = get_unbilled_dn_qty_map(source_name)
+def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False,
+		only_items=None, skip_item_mapping=False, skip_postprocess=False):
 
 	if frappe.flags.args and only_items is None:
 		only_items = cint(frappe.flags.args.only_items)
 
-	def get_pending_qty(source):
-		billable_qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
-		unbilled_dn_qty = flt(unbilled_dn_qty_map.get(source.name))
-		return max(billable_qty - unbilled_dn_qty, 0)
-
-	def item_condition(source, source_parent, target_parent):
-		if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item and not d.delivery_note_item]:
-			return False
-
-		if cint(target_parent.get('claim_billing')):
-			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
-			if bill_to:
-				if source.claim_customer != bill_to:
-					return False
-			else:
-				if not source.claim_customer:
-					return False
-
-		return get_pending_qty(source)
-
-	def update_item(source, target, source_parent, target_parent):
-		target.project = source_parent.get('project')
-		target.qty = get_pending_qty(source)
-		target.depreciation_percentage = None
-
-		if target_parent:
-			target_parent.set_rate_zero_for_claim_item(source, target)
-
 	def postprocess(source, target):
-		split_vehicle_items_by_qty(target)
-		set_reserved_vehicles_from_so(source, target)
+		if not skip_item_mapping:
+			split_vehicle_items_by_qty(target)
+			set_reserved_vehicles_from_so(source, target)
 
 		target.ignore_pricing_rule = 1
-		target.flags.ignore_permissions = True
+		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1180,17 +1182,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, o
 				"docstatus": ["=", 1]
 			}
 		},
-		"Sales Order Item": {
-			"doctype": "Sales Invoice Item",
-			"field_map": {
-				"name": "sales_order_item",
-				"parent": "sales_order",
-				"quotation": "quotation",
-				"quotation_item": "quotation_item",
-			},
-			"postprocess": update_item,
-			"condition": item_condition,
-		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
 			"add_if_empty": True
@@ -1201,6 +1192,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, o
 		}
 	}
 
+	if not skip_item_mapping:
+		mapping["Sales Order Item"] = get_item_mapper_for_invoice(source_name)
+
 	if only_items:
 		mapping = {dt: dt_mapping for dt, dt_mapping in mapping.items() if dt == "Sales Order Item"}
 
@@ -1210,6 +1204,51 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False, o
 		explicit_child_tables=only_items)
 
 	return doclist
+
+
+def get_item_mapper_for_invoice(sales_order, allow_duplicate=False):
+	unbilled_dn_qty_map = get_unbilled_dn_qty_map(sales_order)
+
+	def get_pending_qty(source):
+		billable_qty = flt(source.qty) - flt(source.billed_qty) - flt(source.returned_qty)
+		unbilled_dn_qty = flt(unbilled_dn_qty_map.get(source.name))
+		return max(billable_qty - unbilled_dn_qty, 0)
+
+	def item_condition(source, source_parent, target_parent):
+		if not allow_duplicate:
+			if source.name in [d.sales_order_item for d in target_parent.get('items') if d.sales_order_item and not d.delivery_note_item]:
+				return False
+
+		if cint(target_parent.get('claim_billing')):
+			bill_to = target_parent.get('bill_to') or target_parent.get('customer')
+			if bill_to:
+				if source.claim_customer != bill_to:
+					return False
+			else:
+				if not source.claim_customer:
+					return False
+
+		return get_pending_qty(source)
+
+	def update_item(source, target, source_parent, target_parent):
+		target.project = source_parent.get('project')
+		target.qty = get_pending_qty(source)
+		target.depreciation_percentage = None
+
+		if target_parent:
+			target_parent.set_rate_zero_for_claim_item(source, target)
+
+	return {
+		"doctype": "Sales Invoice Item",
+		"field_map": {
+			"name": "sales_order_item",
+			"parent": "sales_order",
+			"quotation": "quotation",
+			"quotation_item": "quotation_item",
+		},
+		"postprocess": update_item,
+		"condition": item_condition,
+	}
 
 
 def get_unbilled_dn_qty_map(sales_order):

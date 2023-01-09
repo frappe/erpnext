@@ -716,6 +716,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.total_billing_amount > 0",
+   "depends_on": "timesheets",
    "fieldname": "time_sheet_list",
    "fieldtype": "Section Break",
    "label": "Time Sheet List"
@@ -2221,7 +2222,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-02 15:18:28.168466",
+ "modified": "2023-01-08 16:59:00.546143",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

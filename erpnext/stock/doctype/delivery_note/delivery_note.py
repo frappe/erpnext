@@ -176,6 +176,7 @@ class DeliveryNote(SellingController):
 			doc.notify_update()
 
 		self.update_project_billing_and_sales()
+		self.update_packing_slips()
 
 	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
@@ -364,6 +365,26 @@ class DeliveryNote(SellingController):
 			"Quotation": {
 				"ref_dn_field": "quotation",
 				"compare_fields": [["company", "="]]
+			},
+			"Packing Slip": {
+				"ref_dn_field": "packing_slip",
+				"compare_fields": [["warehouse", "="], ["weight_uom", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+			"Packing Slip Item": {
+				"ref_dn_field": "packing_slip_item",
+				"compare_fields": [["item_code", "="], ["qty", "="], ["uom", "="], ["conversion_factor", "="],
+					["batch_no", "="], ["serial_no", "="], ["weight_per_unit", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+		})
+
+		super(DeliveryNote, self).validate_with_previous_doc({
+			"Packing Slip": {
+				"ref_dn_field": "packing_slip",
+				"compare_fields": [["company", "="], ["project", "="], ["customer", "="]],
 			},
 		})
 
@@ -641,6 +662,8 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postp
 				"sales_order_item": "sales_order_item",
 				"quotation": "quotation",
 				"quotation_item": "quotation_item",
+				"packing_slip": "packing_slip",
+				"packing_slip_item": "packing_slip_item",
 				"batch_no": "batch_no",
 				"serial_no": "serial_no",
 				"vehicle": "vehicle",
