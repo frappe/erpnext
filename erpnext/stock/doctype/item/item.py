@@ -8,6 +8,8 @@ from typing import Dict, List, Optional
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import (
 	cint,
 	cstr,
@@ -997,18 +999,19 @@ def make_item_price(item, price_list_name, item_price):
 	).insert()
 
 
-def get_timeline_data(doctype, name):
+def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
 
-	items = frappe.db.sql(
-		"""select unix_timestamp(posting_date), count(*)
-							from `tabStock Ledger Entry`
-							where item_code=%s and posting_date > date_sub(curdate(), interval 1 year)
-							group by posting_date""",
-		name,
-	)
+	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	return dict(items)
+	return dict(
+		frappe.qb.from_(sle)
+		.select(UnixTimestamp(sle.posting_date), Count("*"))
+		.where(sle.item_code == name)
+		.where(sle.posting_date > CurDate() - Interval(years=1))
+		.groupby(sle.posting_date)
+		.run()
+	)
 
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None):
