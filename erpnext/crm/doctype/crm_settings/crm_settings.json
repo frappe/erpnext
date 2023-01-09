@@ -11,9 +11,7 @@
   "default_opportunity_type_for_schedule",
   "column_break_5",
   "auto_create_opportunity_from_schedule",
-  "auto_create_opportunity_before_days",
-  "section_break_9",
-  "feedback_valid_after_service_days"
+  "auto_create_opportunity_before_days"
  ],
  "fields": [
   {
@@ -57,19 +55,10 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "feedback_valid_after_service_days",
-   "fieldtype": "Int",
-   "label": "Feedback For Service After Days"
   }
  ],
  "issingle": 1,
- "modified": "2023-01-03 13:26:56.560165",
+ "modified": "2023-01-09 12:15:31.780601",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",

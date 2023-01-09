@@ -2166,12 +2166,15 @@ def submit_feedback(project, customer_feedback):
 	cur_date = getdate(cur_dt)
 	cur_time = get_time(cur_dt)
 
-	target_doc.feedback_date = cur_date
-	target_doc.feedback_time = cur_time
-	target_doc.customer_feedback = customer_feedback
-
-	target_doc.save()
-	return {
+	feedback_info = {
 		"feedback_date": cur_date,
-		"feedback_time": cur_time
+		"feedback_time": cur_time,
+		"customer_feedback": customer_feedback
 	}
+
+	target_doc.update(feedback_info)
+	target_doc.run_method("validate_feedback")
+
+	target_doc.db_set(feedback_info)
+
+	return feedback_info
