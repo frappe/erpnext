@@ -160,6 +160,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			me.frm.set_df_property("contact_person", "label", __("Contact Person"));
 		}
 
+		me.frm.set_df_property("next_contact", "hidden", me.frm.is_new())
+
 		var vehicle_sales_fields = [
 			"vehicle_sb_1",
 			"vehicle_sb_2",
