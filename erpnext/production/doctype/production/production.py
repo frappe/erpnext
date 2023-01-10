@@ -176,6 +176,8 @@ class Production(StockController):
 	def validate_raw_material_product_qty(self):
 		raw_material_qty = 0.0
 		product_item_qty = 0.0
+		if self.reference and len(self.raw_materials) <= 0:
+			frappe.throw("Raw material is required for auto production")
 		for a in self.raw_materials:
 			raw_material_qty += flt(a.qty)
 

@@ -360,7 +360,6 @@ frappe.ui.form.on('Stock Entry', {
 					warehouse: frm.doc.to_warehouse
 				},
 				callback: (r) => {
-					console.log(r.message)
 					if (!frm.doc.in_transit) {
 						frm.page.set_primary_action(__('Transfer'), () => {
 							frm.set_value("in_transit", 1);
