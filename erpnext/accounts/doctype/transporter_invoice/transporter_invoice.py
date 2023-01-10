@@ -252,13 +252,14 @@ class TransporterInvoice(AccountsController):
 		for a in frappe.db.sql("""select posting_date, name as pol_receive, pol_type as item_code, 
 										item_name, qty, rate, total_amount as amount, 
 										total_amount as allocated_amount,
-										fuelbook_branch
+										fuelbook_branch, 'POL Receive' as reference_type, name as reference
 									from `tabPOL Receive`  p
 									where docstatus = 1 
 									and posting_date between '{}' and '{}' and equipment = '{}'
 									and NOT EXISTS(select 1 from `tabTransporter Invoice` ti inner join `tabTransporter Invoice Pol` tip 
 											on ti.name = tip.parent 
-											where ti.docstatus != 2 and ti.name != '{}')
+											where ti.docstatus != 2 and ti.name != '{}'
+											and reference_type = 'POL Receive' and reference = p.name)
 									""".format(self.from_date, self.to_date, self.equipment,self.name), as_dict=1):
 			row = self.append('pols', {})
 			row.update(a)
@@ -452,7 +453,7 @@ class TransporterInvoice(AccountsController):
 	def get_trip_log(self):
 		return frappe.db.sql("""select b.name as reference_row, a.posting_date, 
 					'Trip Log' as reference_type, a.name as reference_name, 
-					b.item as item_code, b.item_name, b.amount as transportation_amount,
+					b.item_code as item_code, b.item_name, b.amount as transportation_amount,
 					a.warehouse as from_warehouse, a.warehouse as receiving_warehouse, 
 					b.qty as qty, b.equipment, b.transporter_rate as transporter_rate_ref, 
 					b.rate as transportation_rate, b.expense_account
