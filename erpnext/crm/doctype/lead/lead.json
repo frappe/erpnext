@@ -92,7 +92,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": ".YY.-.DD.-",
+   "options": "Lead-.DD.-.YYYY.-",
    "set_only_once": 1
   },
   {
@@ -107,6 +107,7 @@
    "fieldname": "company_name",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company Name",
    "oldfieldname": "company_name",
    "oldfieldtype": "Data",
@@ -138,9 +139,9 @@
    "options": "User"
   },
   {
-   "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
@@ -148,7 +149,6 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "\nOpen\nContacted\nClose",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -503,6 +503,7 @@
    "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date"
   },
   {
@@ -513,11 +514,13 @@
    "label": "Lead Number"
   },
   {
-   "depends_on": "eval:doc.status == \"Contacted\"",
    "fieldname": "sub_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Sub Status",
-   "options": "To Be Contacted\nOn Call Discussion\nTechnical Visit\nQuotation\nFollow Up\nBudgetary  Discussion\nNegotiation\nExisting Customer"
+   "options": "\nOn Call Discussion\nTechnical Visit\nQuotation\nFollow Up\nBudgetary  Discussion\nNegotiation\nExisting Customer",
+   "read_only": 1
   },
   {
    "fieldname": "lead_transfer",
@@ -530,7 +533,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2023-01-05 15:36:56.419499",
+ "modified": "2023-01-10 18:42:07.962121",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

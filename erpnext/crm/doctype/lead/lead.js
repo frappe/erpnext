@@ -34,6 +34,38 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		erpnext.toggle_naming_series();
 		frappe.dynamic_link = { doc: doc, fieldname: 'name', doctype: 'Lead' }
 
+		if (doc.status==="Open") {
+			if (doc.status != "Contacted") {
+				this.frm.add_custom_button(__('Contacted'), () => this.contacted_lead(), __("Status"));
+			}		
+		}
+		if ( doc.status==="Open" || doc.status == "Contacted") {
+			this.frm.add_custom_button(__('Close'), () => this.close_lead(), __("Status"));
+		}
+		if (doc.status == "Contacted"){
+			if (doc.sub_status == "" ){
+				this.frm.add_custom_button(__("On Call Discussion"), () => this.on_call_discussion_lead(), __("Sub-Status"));
+			}
+			if ((!in_list(["Technical Visit"],doc.sub_status)&& doc.sub_status == "On Call Discussion")||doc.sub_status == "" ){
+				this.frm.add_custom_button(__("Technical Visit"), () => this.technical_visit_lead(), __("Sub-Status"));
+			}	
+			if ((!in_list(["Quotation"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion"],doc.sub_status))||doc.sub_status == "" ){
+				this.frm.add_custom_button(__("Quotation"), () => this.quotation_lead(), __("Sub-Status"));
+			}	
+			if ((!in_list(["Follow Up"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion","Quotation"],doc.sub_status))||doc.sub_status == "" ){
+				this.frm.add_custom_button(__("Follow Up"), () => this.follow_up_visit_lead(), __("Sub-Status"));
+			}	
+			if ((!in_list(["Budgetary  Discussion"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion","Quotation","Follow Up"],doc.sub_status))||doc.sub_status == "" ){
+				this.frm.add_custom_button(__("Budgetary  Discussion"), () => this.budgetary_discussion_lead(), __("Sub-Status"));
+			}	
+			if ((!in_list(["Negotiation"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion","Quotation","Follow Up","Budgetary  Discussion"],doc.sub_status))||doc.sub_status == "" ){
+				this.frm.add_custom_button(__("Negotiation"), () => this.negotiation_lead(), __("Sub-Status"));
+			}	
+			if ((!in_list(["Existing Customer"],doc.sub_status)&& in_list(["Technical Visit","On Call Discussion","Quotation","Follow Up","Budgetary  Discussion","Negotiation"],doc.sub_status))||doc.sub_status == "" ){
+				this.frm.add_custom_button(__("Existing Customer"), () => this.existing_customer_lead(), __("Sub-Status"));
+			}	
+		}
+
 		/* if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.make_customer, __("Create"));
 			this.frm.add_custom_button(__("Opportunity"), this.make_opportunity, __("Create"));
@@ -45,6 +77,43 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		} else {
 			frappe.contacts.clear_address_and_contact(this.frm);
 		}
+	},
+
+	contacted_lead: function(){
+		cur_frm.set_value("status","Contacted");
+		cur_frm.save();
+	},
+	on_call_discussion_lead: function(){
+		cur_frm.set_value("sub_status","On Call Discussion");
+		cur_frm.save();
+	},
+	technical_visit_lead: function(){
+		cur_frm.set_value("sub_status","Technical Visit");
+		cur_frm.save();
+	},
+	quotation_lead: function(){
+		cur_frm.set_value("sub_status","Quotation");
+		cur_frm.save();
+	},
+	follow_up_visit_lead: function(){
+		cur_frm.set_value("sub_status","Follow Up");
+		cur_frm.save();
+	},
+	budgetary_discussion_lead: function(){
+		cur_frm.set_value("sub_status","Budgetary  Discussion");
+		cur_frm.save();
+	},
+	negotiation_lead: function(){
+		cur_frm.set_value("sub_status","Negotiation");
+		cur_frm.save();
+	},
+	existing_customer_lead: function(){
+		cur_frm.set_value("sub_status","Existing Customer");
+		cur_frm.save();
+	},
+	close_lead: function(){
+		cur_frm.set_value("status","Close");
+		cur_frm.save();
 	},
 
 	make_customer: function () {
@@ -102,17 +171,18 @@ frappe.ui.form.on('Lead', {
 	},
 	refresh(frm) {
 		frm.dashboard.links_area.hide();
-		if(frm.doc.name  && !frm.doc.__islocal && (frm.doc.lead_number == null || frm.doc.lead_number != undefined)){
+		if(frm.doc.name  && !frm.doc.__islocal && (frm.doc.lead_number == null || frm.doc.lead_number == undefined)){
 			cur_frm.set_value("lead_number",frm.doc.name);
-			console.log(frm.doc.lead_number);
 			frm.save();
 		}
-		
-	},
-	after_save :function(frm){
 		if (frm.doc.sub_status == "Existing Customer"){
-			frappe.msgprint(frm.doc.sub_status)
 			frappe.db.set_value("Company Details", frm.doc.company_name, "existing_customer", 1)
 		}
-	}
-});														
+	},
+	before_save :function(frm){
+		if (frm.doc.__islocal)
+		{
+			cur_frm.set_value("status","Open");
+		}
+	},
+});				

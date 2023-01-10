@@ -14,6 +14,18 @@ from erpnext.controllers.selling_controller import SellingController
 
 
 class Lead(SellingController):
+	def before_save(self):
+		if self.lead_transfer != None:
+			if frappe.db.exists ({"doctype": "Event", "subject": self.lead_name}):
+				pass
+			else:
+					lead_event= frappe.new_doc("Event")
+					lead_event.subject = self.lead_name
+					lead_event.start_on = self.date
+					lead_event.sender = self.lead_transfer
+					lead_event.status = "Lead Transfer"
+					lead_event.insert(ignore_mandatory=True)
+					
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.lead_name)
 
