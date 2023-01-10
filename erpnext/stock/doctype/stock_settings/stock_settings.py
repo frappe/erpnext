@@ -21,7 +21,7 @@ class StockSettings(Document):
 			make_bundling_fields()
 
 	def update_global_defaults(self):
-		for key in ["item_naming_by", "item_group", "stock_uom", "restrict_stock_valuation_to_role",
+		for key in ["item_naming_by", "item_group", "stock_uom", "weight_uom", "restrict_stock_valuation_to_role",
 			"allow_negative_stock", "default_warehouse", "set_qty_in_transactions_based_on_serial_no_input"]:
 				frappe.db.set_default(key, self.get(key, ""))
 

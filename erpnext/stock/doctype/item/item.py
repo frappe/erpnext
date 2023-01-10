@@ -902,6 +902,9 @@ class Item(WebsiteGenerator):
 		if not self.alt_uom:
 			self.alt_uom_size = 1
 
+		if flt(self.weight_per_unit) and not self.weight_uom:
+			frappe.throw(_("Weight UOM is mandatory for 'Net Weight Per Unit'"))
+
 	def validate_uom_conversion_factor(self):
 		if self.uoms:
 			for d in self.uoms:
@@ -1051,6 +1054,7 @@ class Item(WebsiteGenerator):
 
 				visited.add(cstr(d.applicable_item_code))
 
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	out = {}
@@ -1095,6 +1099,7 @@ def validate_cancelled_item(item_code, docstatus=None, verbose=1):
 	if docstatus == 2:
 		msg = _("Item {0} is cancelled").format(item_code)
 		_msgprint(msg, verbose)
+
 
 def _msgprint(msg, verbose):
 	if verbose:
@@ -1230,10 +1235,12 @@ def check_stock_uom_with_bin(item, stock_uom):
 		frappe.throw(
 			_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 
+
 @frappe.whitelist()
 def get_uom_conv_factor(from_uom, to_uom):
 	from erpnext.setup.doctype.uom_conversion_factor.uom_conversion_factor import get_uom_conv_factor
 	return get_uom_conv_factor(from_uom, to_uom)
+
 
 @frappe.whitelist()
 def convert_item_uom_for(value, item_code, from_uom=None, to_uom=None, conversion_factor=None,
@@ -1273,6 +1280,7 @@ def convert_item_uom_for(value, item_code, from_uom=None, to_uom=None, conversio
 				value /= flt(to_uom_conversion.get('conversion_factor'))
 
 	return value
+
 
 @frappe.whitelist()
 def get_item_attribute(parent, attribute_value=''):
@@ -1455,6 +1463,7 @@ def change_uom(item_code, stock_uom=None, alt_uom=None, alt_uom_size=None):
 	}
 	item.save()
 
+
 def update_variants(variants, template, publish_progress=True):
 	count=0
 	for d in variants:
@@ -1464,6 +1473,7 @@ def update_variants(variants, template, publish_progress=True):
 		count+=1
 		if publish_progress:
 				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
+
 
 def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing

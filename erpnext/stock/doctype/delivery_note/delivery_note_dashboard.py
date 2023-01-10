@@ -14,16 +14,16 @@ def get_data():
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order'],
 			'Quotation': ['items', 'quotation'],
-			'Vehicle': ['items', 'vehicle']
+			'Packing Slip': ['items', 'packing_slip'],
 		},
 		'transactions': [
 			{
 				'label': _('Fulfilment'),
-				'items': ['Sales Invoice', 'Packing Slip', 'Delivery Trip']
+				'items': ['Sales Invoice', 'Delivery Trip', 'Installation Note']
 			},
 			{
-				'label': _('Reference'),
-				'items': ['Sales Order', 'Quotation', 'Installation Note']
+				'label': _('Previous Documents'),
+				'items': ['Sales Order', 'Quotation', 'Packing Slip']
 			},
 			{
 				'label': _('Reference'),

@@ -7,7 +7,6 @@ from frappe import _
 from frappe.utils import flt, cstr
 from frappe.model.document import Document
 from collections import defaultdict
-import json
 from six import string_types
 
 

@@ -2,10 +2,6 @@ import frappe
 from frappe import _
 
 def get_data():
-	reference_list = ['Quotation', 'Auto Repeat']
-	if 'Vehicles' in frappe.get_active_domains():
-		reference_list.append('Vehicle')
-
 	return {
 		'fieldname': 'sales_order',
 		'non_standard_fieldnames': {
@@ -20,11 +16,11 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Fulfillment'),
-				'items': ['Delivery Note', 'Sales Invoice', 'Pick List']
+				'items': ['Delivery Note', 'Sales Invoice', 'Packing Slip']
 			},
 			{
 				'label': _('Reference'),
-				'items': reference_list
+				'items': ['Quotation', 'Pick List', 'Auto Repeat']
 			},
 			{
 				'label': _('Procurement'),

@@ -56,11 +56,6 @@ def get_transaction_type_details(args, items):
 		if transaction_type_doc.calculate_tax_on_company_currency:
 			out.doc.calculate_tax_on_company_currency = cint(transaction_type_doc.calculate_tax_on_company_currency == "Yes")
 
-		if args.company:
-			transaction_type_defaults = get_item_default_values({}, args)
-			if transaction_type_defaults.get('default_warehouse'):
-				out.doc.set_warehouse = transaction_type_defaults.get('default_warehouse')
-
 	if account_field and party_type and party:
 		party_account_details = get_party_account_details(party_type, party, args.company,
 			transaction_type=args.transaction_type_name)

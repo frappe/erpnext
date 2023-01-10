@@ -5,6 +5,8 @@ frappe.provide("erpnext.stock");
 
 erpnext.stock.LandedCostVoucher = class LandedCostVoucher extends erpnext.stock.StockController {
 	setup() {
+		super.setup();
+
 		this.frm.custom_make_buttons = {
 			'Payment Entry': 'Payment'
 		};

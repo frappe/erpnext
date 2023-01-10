@@ -388,23 +388,29 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		elif doctype == "Delivery Note":
 			target_doc.qty = -1 * flt(source_doc.qty - source_doc.billed_qty - source_doc.returned_qty,
 				target_doc.precision("qty"))
-			target_doc.sales_order = source_doc.sales_order
-			target_doc.sales_invoice = source_doc.sales_invoice
-			target_doc.target_warehouse = source_doc.target_warehouse
 			target_doc.delivery_note_item = source_doc.name
+			target_doc.sales_order = source_doc.sales_order
 			target_doc.sales_order_item = source_doc.sales_order_item
+			target_doc.sales_invoice = source_doc.sales_invoice
 			target_doc.sales_invoice_item = source_doc.sales_invoice_item
+			# target_doc.packing_slip = source_doc.packing_slip
+			# target_doc.packing_slip_item = source_doc.packing_slip_item
+
+			target_doc.target_warehouse = source_doc.target_warehouse
 			target_doc.expense_account = source_doc.expense_account
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
 		elif doctype == "Sales Invoice":
-			target_doc.sales_order = source_doc.sales_order
-			target_doc.delivery_note = source_doc.delivery_note
-			target_doc.target_warehouse = source_doc.target_warehouse
-			target_doc.sales_order_item = source_doc.sales_order_item
-			target_doc.delivery_note_item = source_doc.delivery_note_item
 			target_doc.sales_invoice_item = source_doc.name
+			target_doc.sales_order = source_doc.sales_order
+			target_doc.sales_order_item = source_doc.sales_order_item
+			target_doc.delivery_note = source_doc.delivery_note
+			target_doc.delivery_note_item = source_doc.delivery_note_item
+			# target_doc.packing_slip = source_doc.packing_slip
+			# target_doc.packing_slip_item = source_doc.packing_slip_item
+
+			target_doc.target_warehouse = source_doc.target_warehouse
 			target_doc.expense_account = source_doc.expense_account
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return

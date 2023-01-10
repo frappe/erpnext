@@ -166,16 +166,14 @@ $.extend(erpnext.queries, {
 	},
 });
 
-erpnext.queries.setup_queries = function(frm, options, query_fn) {
-	var me = this;
-	var set_query = function(doctype, parentfield) {
-		var link_fields = frappe.meta.get_docfields(doctype, frm.doc.name,
-			{"fieldtype": "Link", "options": options});
+erpnext.queries.setup_queries = function(frm, options, query_fn, do_not_override) {
+	let set_query = function(doctype, parentfield) {
+		let link_fields = frappe.meta.get_docfields(doctype, frm.doc.name, {"fieldtype": "Link", "options": options});
 		$.each(link_fields, function(i, df) {
-			if(parentfield) {
-				frm.set_query(df.fieldname, parentfield, query_fn.bind(me, df.fieldname));
+			if (parentfield) {
+				frm.set_query(df.fieldname, parentfield, query_fn.bind(frm.cscript, df.fieldname));
 			} else {
-				frm.set_query(df.fieldname, query_fn.bind(me, df.fieldname));
+				frm.set_query(df.fieldname, query_fn.bind(frm.cscript, df.fieldname));
 			}
 		});
 	};
@@ -183,24 +181,29 @@ erpnext.queries.setup_queries = function(frm, options, query_fn) {
 	set_query(frm.doc.doctype);
 
 	// warehouse field in tables
-	$.each(frappe.meta.get_docfields(frm.doc.doctype, frm.doc.name, {"fieldtype": "Table"}),
-		function(i, df) {
-			set_query(df.options, df.fieldname);
-		});
+	$.each(frappe.meta.get_docfields(frm.doc.doctype, frm.doc.name, {"fieldtype": "Table"}), function(i, df) {
+		set_query(df.options, df.fieldname);
+	});
 }
 
 /* 	if item code is selected in child table
 	then list down warehouses with its quantity
 	else apply default filters.
 */
-erpnext.queries.setup_warehouse_query = function(frm){
-	frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
-		var row  = locals[cdt][cdn];
-		var filters = erpnext.queries.warehouse(frm.doc);
-		if(row.item_code){
-			$.extend(filters, {"query":"erpnext.controllers.queries.warehouse_query"});
-			filters["filters"].push(["Bin", "item_code", "=", row.item_code]);
+erpnext.queries.setup_warehouse_qty_query = function(frm, warehouse_field, items_field) {
+	warehouse_field = warehouse_field || "warehouse";
+	items_field = items_field || "items";
+
+	frm.set_query(warehouse_field, items_field, function(doc, cdt, cdn) {
+		let warehouse_query = erpnext.queries.warehouse(frm.doc,
+			frm.cscript.get_warehouse_filters && frm.cscript.get_warehouse_filters.bind(frm.cscript, warehouse_field));
+
+		let row = frappe.get_doc(cdt, cdn);
+		if (row && row.item_code) {
+			warehouse_query["query"] = "erpnext.controllers.queries.warehouse_query";
+			warehouse_query["filters"].push(["Bin", "item_code", "=", row.item_code]);
 		}
-		return filters
+
+		return warehouse_query;
 	});
 }

@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 import frappe, erpnext
 from frappe import _
-from frappe.utils import cint, flt, now
+from frappe.utils import cint, flt, now, cstr
 from erpnext.stock.utils import get_valuation_method
 from six import iteritems
 import json
@@ -132,6 +132,8 @@ class update_entries_after(object):
 
 		self.previous_sle = self.get_sle_before_datetime()
 		self.previous_sle = self.previous_sle[0] if self.previous_sle else frappe._dict()
+
+		self.previous_packing_slip_sle_dict = {}
 		self.previous_batch_sle_dict = {}
 
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
@@ -215,6 +217,7 @@ class update_entries_after(object):
 	def process_sle(self, sle):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, update_args_for_serial_no
 
+		self.get_previous_packing_slip_sle(sle)
 		if self.batch_wise_valuation:
 			self.get_previous_batch_sle(sle)
 
@@ -260,6 +263,7 @@ class update_entries_after(object):
 		sle.stock_queue = json.dumps(self.stock_queue)
 		sle.stock_value_difference = stock_value_difference
 
+		# Batch Values
 		if self.batch_wise_valuation:
 			sle.batch_qty_after_transaction = self.batch_data.batch_qty_after_transaction
 			sle.batch_valuation_rate = self.batch_data.batch_valuation_rate
@@ -269,11 +273,19 @@ class update_entries_after(object):
 			sle.batch_valuation_rate = self.valuation_rate
 			sle.batch_stock_value = self.stock_value
 
+		# Packing Slip Qty
+		self.packing_slip_data.packed_qty_after_transaction += sle.actual_qty
+		self.packing_slip_data.packed_qty_after_transaction = flt(self.packing_slip_data.packed_qty_after_transaction,
+			self.qty_db_precision)
+		sle.packed_qty_after_transaction = self.packing_slip_data.packed_qty_after_transaction
+
 		# validate negative stock
 		if not cint(self.allow_negative_stock):
 			if self.batch_wise_valuation and not self.validate_negative_stock(sle, validate_batch=True):
 				return
 			if not self.validate_negative_stock(sle):
+				return
+			if not self.validate_negative_stock(sle, validate_batch=self.batch_wise_valuation, validate_packing_slip=True):
 				return
 
 		# update SLE and Serial Nos
@@ -286,16 +298,23 @@ class update_entries_after(object):
 
 		self.add_sle_to_reposted_flags(sle, stock_value_difference_changed)
 
-	def validate_negative_stock(self, sle, validate_batch=False):
+	def validate_negative_stock(self, sle, validate_batch=False, validate_packing_slip=False):
 		"""
 			validate negative stock for entries current datetime onwards
 			will not consider cancelled entries
 		"""
-		diff = self.batch_data.batch_qty_after_transaction if validate_batch else self.qty_after_transaction
+		if validate_packing_slip:
+			diff = self.packing_slip_data.packed_qty_after_transaction
+		elif validate_batch:
+			diff = self.batch_data.batch_qty_after_transaction
+		else:
+			diff = self.qty_after_transaction
 
 		if diff < 0 and abs(diff) > 0.0001:
 			# negative stock!
-			exc = sle.copy().update({"diff": diff, "validate_batch": validate_batch})
+			exc = sle.copy().update({
+				"diff": diff, "validate_batch": validate_batch, "validate_packing_slip": validate_packing_slip
+			})
 			self.exceptions.append(exc)
 			return False
 		else:
@@ -694,14 +713,14 @@ class update_entries_after(object):
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
 		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
-				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
-			">=", "asc", for_update=True)
+				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse")
+			}), ">=", "asc", for_update=True)
 
 	def get_previous_batch_sle(self, sle):
 		self.batch_data = self.previous_batch_sle_dict.get(sle.batch_no)
 
 		if not self.batch_data:
-			previous_batch_sle = get_stock_ledger_entries(sle, "<", "desc", "limit 1",
+			previous_batch_sle = get_stock_ledger_entries(sle, "<=", "desc", "limit 1",
 				for_update=True, batch_sle=True)
 			previous_batch_sle = previous_batch_sle[0] if previous_batch_sle else frappe._dict()
 
@@ -709,6 +728,18 @@ class update_entries_after(object):
 			for key in ("batch_qty_after_transaction", "batch_valuation_rate", "batch_stock_value"):
 				self.batch_data[key] = flt(previous_batch_sle.get(key))
 			self.batch_data.prev_batch_stock_value = self.batch_data.batch_stock_value or 0.0
+
+	def get_previous_packing_slip_sle(self, sle):
+		self.packing_slip_data = self.previous_packing_slip_sle_dict.get(cstr(sle.packing_slip))
+
+		if not self.packing_slip_data:
+			previous_packing_slip_sle = get_stock_ledger_entries(sle, "<=", "desc", "limit 1",
+				for_update=True, packing_slip_sle=True, batch_sle=self.batch_wise_valuation)
+			previous_packing_slip_sle = previous_packing_slip_sle[0] if previous_packing_slip_sle else frappe._dict()
+
+			self.packing_slip_data = self.previous_packing_slip_sle_dict[cstr(sle.packing_slip)] = frappe._dict()
+			for key in ("packed_qty_after_transaction",):
+				self.packing_slip_data[key] = flt(previous_packing_slip_sle.get(key))
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
@@ -720,24 +751,35 @@ class update_entries_after(object):
 		else:
 			batch_msg = ""
 
+		if exc.get("validate_packing_slip"):
+			if exc.packing_slip:
+				packing_slip_msg = " ({0})".format(frappe.get_desk_link('Packing Slip', exc.packing_slip))
+			else:
+				packing_slip_msg = _(" (Unpacked)")
+		else:
+			packing_slip_msg = ""
+
 		if ((self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]) in
 			frappe.local.flags.currently_saving):
 
-			msg = _("{0} {1} of {2}{3} needed in {4} to complete this transaction.").format(
-				frappe.bold(frappe.format(abs(deficiency), df={"fieldtype": "Float", "precision": self.qty_db_precision})),
-				exc.stock_uom,
-				frappe.get_desk_link('Item', self.item_code),
-				batch_msg,
-				frappe.get_desk_link('Warehouse', self.warehouse))
+			msg = _("{diff} {uom} of {item}{batch}{package} needed in {warehouse} to complete this transaction.").format(
+				diff=frappe.bold(frappe.format(abs(deficiency), df={"fieldtype": "Float", "precision": self.qty_db_precision})),
+				uom=exc.stock_uom,
+				item=frappe.get_desk_link('Item', self.item_code),
+				batch=batch_msg,
+				package=packing_slip_msg,
+				warehouse=frappe.get_desk_link('Warehouse', self.warehouse))
 		else:
-			msg = _("{0} {1} of {2}{3} needed in {4} on {5} {6} for {7} to complete this transaction.").format(
-				frappe.bold(frappe.format(abs(deficiency), df={"fieldtype": "Float", "precision": self.qty_db_precision})),
-				exc.stock_uom,
-				frappe.get_desk_link('Item', self.item_code),
-				batch_msg,
-				frappe.get_desk_link('Warehouse', self.warehouse),
-				frappe.format(self.exceptions[0]["posting_date"]), frappe.format(self.exceptions[0]["posting_time"]),
-				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
+			msg = _("{diff} {uom} of {item}{batch}{package} needed in {warehouse} on {date} {time} for {voucher} to complete this transaction.").format(
+				diff=frappe.bold(frappe.format(abs(deficiency), df={"fieldtype": "Float", "precision": self.qty_db_precision})),
+				uom=exc.stock_uom,
+				item=frappe.get_desk_link('Item', self.item_code),
+				batch=batch_msg,
+				package=packing_slip_msg,
+				warehouse=frappe.get_desk_link('Warehouse', self.warehouse),
+				date=frappe.format(self.exceptions[0]["posting_date"]),
+				time=frappe.format(self.exceptions[0]["posting_time"]),
+				voucher=frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
 
 		if self.verbose:
 			frappe.throw(msg, NegativeStockError, title='Insufficient Stock')
@@ -786,7 +828,9 @@ def get_previous_sle(args, for_update=False):
 
 
 def get_stock_ledger_entries(previous_sle, operator=None,
-	order="desc", limit=None, for_update=False, batch_sle=False, debug=False, check_serial_no=False):
+		order="desc", limit=None, for_update=False,
+		batch_sle=False, packing_slip_sle=False, check_serial_no=False,
+		debug=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
@@ -813,6 +857,12 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 
 	if batch_sle:
 		conditions += " and batch_no = %(batch_no)s"
+
+	if packing_slip_sle:
+		if previous_sle.get("packing_slip"):
+			conditions += " and packing_slip = %(packing_slip)s"
+		else:
+			conditions += " and (packing_slip is null or packing_slip = '')"
 
 	if operator in (">", ">=", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"

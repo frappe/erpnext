@@ -4,7 +4,7 @@
 frappe.provide("erpnext.stock");
 
 erpnext.stock.StockController = class StockController extends frappe.ui.form.Controller {
-	onload() {
+	setup() {
 		// warehouse query if company
 		if (this.frm.fields_dict.company) {
 			this.setup_warehouse_query();
@@ -78,6 +78,17 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
+		}
+	}
+
+	autofill_warehouse (child_table, warehouse_field, warehouse, force) {
+		if ((warehouse || force) && child_table && child_table.length) {
+			let doctype = child_table[0].doctype;
+			$.each(child_table || [], function(i, item) {
+				if (force || !item.force_default_warehouse) {
+					frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
+				}
+			});
 		}
 	}
 
@@ -279,5 +290,75 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 		me.frm.add_custom_button(__("Project Template"), function() {
 			me.get_project_template_items(items_type);
 		}, __("Get Items From"));
+	}
+
+	get_items_from_packing_slip(target_doctype) {
+		let method;
+		if (target_doctype == "Delivery Note") {
+			method = "erpnext.stock.doctype.packing_slip.packing_slip.make_delivery_note";
+		} else if (target_doctype == "Sales Invoice") {
+			method = "erpnext.stock.doctype.packing_slip.packing_slip.make_sales_invoice";
+		} else {
+			frappe.throw(__("Invalid Target DocType"))
+		}
+
+		erpnext.utils.map_current_doc({
+			method: method,
+			source_doctype: "Packing Slip",
+			target: this.frm,
+			setters: [
+				{
+					fieldname: 'customer',
+					label: __('Customer'),
+					fieldtype: 'Link',
+					options: 'Customer',
+					default: this.frm.doc.customer || undefined,
+					get_query: () => erpnext.queries.customer(),
+				},
+				{
+					fieldname: 'warehouse',
+					label: __('Warehouse'),
+					fieldtype: 'Link',
+					options: 'Warehouse',
+					default: this.frm.doc.set_warehouse || undefined,
+					get_query: () => erpnext.queries.warehouse(this.frm.doc),
+				},
+				{
+					fieldname: 'sales_order',
+					label: __('Sales Order'),
+					fieldtype: 'Link',
+					options: 'Sales Order',
+					get_query: () => {
+						return {
+							filters: {
+								docstatus: 1
+							}
+						}
+					}
+				},
+				{
+					fieldname: 'item_code',
+					label: __('Has Item'),
+					fieldtype: 'Link',
+					options: 'Item',
+					get_query: () => erpnext.queries.item(),
+				},
+			],
+			columns: ['package_type', 'customer', 'warehouse', 'total_net_weight'],
+			get_query: () => {
+				var filters = {
+					company: this.frm.doc.company,
+				};
+
+				if (this.frm.doc.customer) {
+					filters["customer"] = this.frm.doc.customer;
+				}
+
+				return {
+					query: "erpnext.controllers.queries.get_packing_slips_to_be_delivered",
+					filters: filters
+				};
+			},
+		});
 	}
 };

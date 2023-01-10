@@ -283,8 +283,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"supplier": get_default_supplier(item, args),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
-		"weight_per_unit":item.weight_per_unit,
-		"weight_uom":item.weight_uom,
+		"weight_per_unit": get_weight_per_unit(item.name, weight_uom=args.weight_uom or item.weight_uom),
+		"weight_uom": args.weight_uom or item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
 		"claim_customer": get_claim_customer(item, args),
@@ -375,18 +375,25 @@ def get_default_warehouse(item, args, overwrite_warehouse=True):
 			warehouse = parent_warehouse or default_warehouse
 
 		if not warehouse:
-			defaults = frappe.defaults.get_defaults() or {}
-			warehouse_exists = frappe.db.exists("Warehouse", {
-				'name': defaults.default_warehouse,
-				'company': args.get('company')
-			})
-			if defaults.get("default_warehouse") and warehouse_exists:
-				warehouse = defaults.default_warehouse
+			warehouse = get_global_default_warehouse(args.get("company"))
 
 	else:
 		warehouse = args.get('warehouse')
 
 	return warehouse
+
+
+def get_global_default_warehouse(company):
+	global_defaults = frappe.defaults.get_defaults() or {}
+	if not global_defaults.get("default_warehouse"):
+		return None
+
+	warehouse_exists = frappe.db.exists("Warehouse", {
+		"name": global_defaults.default_warehouse,
+		"company": company
+	})
+	if warehouse_exists:
+		return global_defaults.default_warehouse
 
 
 def update_barcode_value(out):
@@ -1062,6 +1069,26 @@ def get_serial_no_batchwise(args, sales_order=None):
 				"qty": abs(cint(args.stock_qty)),
 				"sales_order": sales_order
 			}))
+
+
+@frappe.whitelist()
+def get_weight_per_unit(item_code, weight_uom=None):
+	item = frappe.get_cached_doc("Item", item_code)
+
+	weight_uom = weight_uom or item.weight_uom
+
+	if flt(item.weight_per_unit):
+		if weight_uom and weight_uom != item.weight_uom:
+			return flt(item.weight_per_unit) * flt(get_uom_conv_factor(item.weight_uom, weight_uom))
+		else:
+			return flt(item.weight_per_unit)
+
+	elif weight_uom:
+		weight_conversion_factor = get_conversion_factor(item.name, weight_uom)
+		if not weight_conversion_factor.get("not_convertible"):
+			return 1 / flt(weight_conversion_factor.get("conversion_factor"))
+
+	return 0
 
 
 @frappe.whitelist()

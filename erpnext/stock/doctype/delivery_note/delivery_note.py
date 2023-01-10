@@ -85,7 +85,6 @@ class DeliveryNote(SellingController):
 
 		self.update_billing_status()
 		self.update_previous_doc_status()
-		self.cancel_packing_slips()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -177,6 +176,7 @@ class DeliveryNote(SellingController):
 			doc.notify_update()
 
 		self.update_project_billing_and_sales()
+		self.update_packing_slips()
 
 	def update_billing_status(self, update_modified=True):
 		updated_delivery_notes = [self.name]
@@ -366,6 +366,26 @@ class DeliveryNote(SellingController):
 				"ref_dn_field": "quotation",
 				"compare_fields": [["company", "="]]
 			},
+			"Packing Slip": {
+				"ref_dn_field": "packing_slip",
+				"compare_fields": [["warehouse", "="], ["weight_uom", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+			"Packing Slip Item": {
+				"ref_dn_field": "packing_slip_item",
+				"compare_fields": [["item_code", "="], ["qty", "="], ["uom", "="], ["conversion_factor", "="],
+					["batch_no", "="], ["serial_no", "="], ["weight_per_unit", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+		})
+
+		super(DeliveryNote, self).validate_with_previous_doc({
+			"Packing Slip": {
+				"ref_dn_field": "packing_slip",
+				"compare_fields": [["company", "="], ["project", "="], ["customer", "="]],
+			},
 		})
 
 		if cint(frappe.get_cached_value('Selling Settings', None, 'maintain_same_sales_rate')) and not self.is_return:
@@ -443,19 +463,6 @@ class DeliveryNote(SellingController):
 			(self.name))
 		if submit_in:
 			frappe.throw(_("Installation Note {0} has already been submitted").format(submit_in[0][0]))
-
-	def cancel_packing_slips(self):
-		"""
-			Cancel submitted packing slips related to this delivery note
-		"""
-		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip` WHERE delivery_note = %s
-			AND docstatus = 1""", self.name)
-
-		if res:
-			for r in res:
-				ps = frappe.get_doc('Packing Slip', r[0])
-				ps.cancel()
-			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
 
 def get_list_context(context=None):
@@ -655,6 +662,8 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postp
 				"sales_order_item": "sales_order_item",
 				"quotation": "quotation",
 				"quotation_item": "quotation_item",
+				"packing_slip": "packing_slip",
+				"packing_slip_item": "packing_slip_item",
 				"batch_no": "batch_no",
 				"serial_no": "serial_no",
 				"vehicle": "vehicle",
@@ -749,24 +758,6 @@ def make_installation_note(source_name, target_doc=None):
 			},
 			"postprocess": update_item,
 			"condition": lambda doc, source, target: doc.installed_qty < doc.qty
-		}
-	}, target_doc)
-
-	return doclist
-
-
-@frappe.whitelist()
-def make_packing_slip(source_name, target_doc=None):
-	doclist = get_mapped_doc("Delivery Note", source_name, 	{
-		"Delivery Note": {
-			"doctype": "Packing Slip",
-			"field_map": {
-				"name": "delivery_note",
-				"letter_head": "letter_head"
-			},
-			"validation": {
-				"docstatus": ["=", 0]
-			}
 		}
 	}, target_doc)
 

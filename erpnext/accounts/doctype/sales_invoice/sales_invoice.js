@@ -23,6 +23,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(me.frm.doc);
 		});
+		erpnext.queries.setup_warehouse_qty_query(this.frm);
 
 		if(this.frm.doc.__islocal && this.frm.doc.is_pos) {
 			//Load pos profile data on the invoice if the default value of Is POS is 1
@@ -30,7 +31,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
 		}
-		erpnext.queries.setup_warehouse_query(this.frm);
 	}
 
 	refresh(doc, dt, dn) {
@@ -144,6 +144,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 
 				me.frm.add_custom_button(__('Quotation'), function() {
 					me.get_items_from_quotation();
+				}, __("Get Items From"));
+
+				me.frm.add_custom_button(__('Packing Slip'), function() {
+					me.get_items_from_packing_slip("Sales Invoice");
 				}, __("Get Items From"));
 			}
 

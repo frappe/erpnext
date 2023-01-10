@@ -34,12 +34,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 			}
 		});
 
-		frm.set_query("default_warehouse", function() {
-			return {
-				filters: ["Warehouse", "company", "in", ["", cstr(frm.doc.company)]]
-			}
-		});
-
 		if (!frm.doc.expense_account) {
 			frm.trigger("set_expense_account");
 		}
@@ -250,6 +244,8 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 
 erpnext.stock.StockReconciliation = class StockReconciliation extends erpnext.stock.StockController {
 	setup() {
+		super.setup();
+
 		var me = this;
 
 		this.frm.page.toggle_sidebar();
