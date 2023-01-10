@@ -181,19 +181,16 @@ class Opportunity(TransactionBase):
 
 		if is_lost:
 			self.set_status(update=True, status="Lost")
-
-			if detailed_reason:
-				self.db_set("order_lost_reason", detailed_reason)
-
+			self.db_set("order_lost_reason", detailed_reason)
+			self.lost_reasons = []
 			for reason in lost_reasons_list:
-				row = self.append('lost_reasons', reason)
-				row.db_insert()
+				self.append('lost_reasons', reason)
 		else:
 			self.set_status(update=True, status="Open")
 			self.db_set('order_lost_reason', None)
 			self.lost_reasons = []
-			self.update_child_table("lost_reasons")
 
+		self.update_child_table("lost_reasons")
 		self.notify_update()
 
 	def update_lead_status(self):
