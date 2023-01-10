@@ -760,6 +760,7 @@
    "label": "Bank Payment Detail"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "bank_payment",
    "fieldtype": "Link",
    "label": "Bank Payment",
@@ -771,6 +772,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "payment_status",
    "fieldtype": "Select",
    "label": "Payment Status",
@@ -781,7 +783,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-04 16:52:14.175209",
+ "modified": "2023-01-10 10:52:13.898945",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
