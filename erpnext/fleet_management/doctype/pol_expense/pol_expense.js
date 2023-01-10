@@ -28,6 +28,9 @@ frappe.ui.form.on('POL Expense', {
 	equipment:function(frm){
 		frm.events.get_previous(frm)
 	},
+	fuel_book:function(frm){
+		frm.events.get_previous(frm)
+	},
 	refresh: function(frm){
 		enable_disable(frm);
 	},
@@ -61,18 +64,20 @@ frappe.ui.form.on('POL Expense', {
 		}
 	},
 	get_previous:function(frm){
-		frappe.call({
-			method:"pull_previous_expense",
-			doc:frm.doc,
-			callback:function(r){
-				frm.refresh_field("items")
-				frm.refresh_field("previous_balance_amount")
-				frm.refresh_field("amount")
-				frm.refresh_field("previous_km_reading")
-				frm.refresh_field("present_km_reading")
-				frm.dirty()
-			}
-		})
+		if ( frm.doc.equipment && frm.doc.fuel_book){
+			frappe.call({
+				method:"pull_previous_expense",
+				doc:frm.doc,
+				callback:function(r){
+					frm.refresh_field("items")
+					frm.refresh_field("previous_balance_amount")
+					frm.refresh_field("amount")
+					frm.refresh_field("previous_km_reading")
+					frm.refresh_field("present_km_reading")
+					frm.dirty()
+				}
+			})
+		}
 	},
 	from_date:function(frm){
 		frm.events.get_pol_received(frm)

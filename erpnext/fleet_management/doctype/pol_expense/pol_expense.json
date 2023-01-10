@@ -263,9 +263,8 @@
   },
   {
    "fieldname": "journal_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Journal Entry",
-   "options": "Journal Entry",
    "read_only": 1
   },
   {
@@ -484,7 +483,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-09 11:43:52.300653",
+ "modified": "2023-01-10 13:39:12.113455",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",

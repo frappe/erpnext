@@ -10,6 +10,7 @@
   "branch",
   "fuelbook_number",
   "type",
+  "equipment",
   "column_break_3",
   "supplier",
   "security_deposit",
@@ -63,11 +64,18 @@
    "label": "Fuelbook Number",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-12-01 09:39:47.966582",
+ "modified": "2023-01-10 15:36:12.017394",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "Fuelbook",

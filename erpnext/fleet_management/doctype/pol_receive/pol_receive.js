@@ -37,6 +37,15 @@ frappe.ui.form.on('POL Receive', {
 				}
 			}
 		})
+	},
+	equipment:function(frm){
+		frm.set_query("fuelbook",function(){
+			return {
+				filters:{
+					"equipment":frm.doc.equipment
+				}
+			}
+		})
 	}
 });
 cur_frm.set_query("pol_type", function() {
