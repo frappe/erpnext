@@ -111,34 +111,30 @@ def get_data(filters: Filters) -> List:
 				employee.leave_approver
 			)
 
-			if (
-				(leave_approvers and len(leave_approvers) and user in leave_approvers)
-				or (user in ["Administrator", employee.user_id])
-				or ("HR Manager" in frappe.get_roles(user))
-			):
-				if len(active_employees) > 1:
-					row = frappe._dict()
-				row.employee = employee.name
-				row.employee_name = employee.employee_name
+			if len(active_employees) > 1:
+				row = frappe._dict()
 
-				leaves_taken = (
-					get_leaves_for_period(employee.name, leave_type, filters.from_date, filters.to_date) * -1
-				)
+			row.employee = employee.name
+			row.employee_name = employee.employee_name
 
-				new_allocation, expired_leaves, carry_forwarded_leaves = get_allocated_and_expired_leaves(
-					filters.from_date, filters.to_date, employee.name, leave_type
-				)
-				opening = get_opening_balance(employee.name, leave_type, filters, carry_forwarded_leaves)
+			leaves_taken = (
+				get_leaves_for_period(employee.name, leave_type, filters.from_date, filters.to_date) * -1
+			)
 
-				row.leaves_allocated = new_allocation
-				row.leaves_expired = expired_leaves
-				row.opening_balance = opening
-				row.leaves_taken = leaves_taken
+			new_allocation, expired_leaves, carry_forwarded_leaves = get_allocated_and_expired_leaves(
+				filters.from_date, filters.to_date, employee.name, leave_type
+			)
+			opening = get_opening_balance(employee.name, leave_type, filters, carry_forwarded_leaves)
 
-				# not be shown on the basis of days left it create in user mind for carry_forward leave
-				row.closing_balance = new_allocation + opening - (row.leaves_expired + leaves_taken)
-				row.indent = 1
-				data.append(row)
+			row.leaves_allocated = new_allocation
+			row.leaves_expired = expired_leaves
+			row.opening_balance = opening
+			row.leaves_taken = leaves_taken
+
+			# not be shown on the basis of days left it create in user mind for carry_forward leave
+			row.closing_balance = new_allocation + opening - (row.leaves_expired + leaves_taken)
+			row.indent = 1
+			data.append(row)
 
 	return data
 

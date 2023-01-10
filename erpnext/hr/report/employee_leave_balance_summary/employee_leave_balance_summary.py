@@ -65,21 +65,16 @@ def get_data(filters, leave_types):
 		if employee.leave_approver:
 			leave_approvers.append(employee.leave_approver)
 
-		if (
-			(len(leave_approvers) and user in leave_approvers)
-			or (user in ["Administrator", employee.user_id])
-			or ("HR Manager" in frappe.get_roles(user))
-		):
-			row = [employee.name, employee.employee_name, employee.department]
-			available_leave = get_leave_details(employee.name, filters.date)
-			for leave_type in leave_types:
-				remaining = 0
-				if leave_type in available_leave["leave_allocation"]:
-					# opening balance
-					remaining = available_leave["leave_allocation"][leave_type]["remaining_leaves"]
+		row = [employee.name, employee.employee_name, employee.department]
+		available_leave = get_leave_details(employee.name, filters.date)
+		for leave_type in leave_types:
+			remaining = 0
+			if leave_type in available_leave["leave_allocation"]:
+				# opening balance
+				remaining = available_leave["leave_allocation"][leave_type]["remaining_leaves"]
 
-				row += [remaining]
+			row += [remaining]
 
-			data.append(row)
+		data.append(row)
 
 	return data
