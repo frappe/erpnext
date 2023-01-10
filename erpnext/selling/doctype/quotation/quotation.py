@@ -119,11 +119,16 @@ class Quotation(SellingController):
 			doc.set_status(update=True)
 			doc.notify_update()
 
-	def update_opportunity(self, reopen=False):
+	def update_opportunity(self):
 		if self.get('opportunity'):
 			opp = frappe.get_doc("Opportunity", self.opportunity)
-			opp.set_status(update=True, status="Open" if reopen else None)
+			opp.set_status(update=True)
 			opp.notify_update()
+
+	def set_opportunity_is_lost(self, is_lost, lost_reasons_list=None, detailed_reason=None):
+		if self.get('opportunity'):
+			opp = frappe.get_doc("Opportunity", self.opportunity)
+			opp.set_is_lost(is_lost, lost_reasons_list, detailed_reason)
 
 	def has_sales_order_or_invoice(self):
 		return frappe.db.get_value("Sales Order Item", {"quotation": self.name, "docstatus": 1})\
@@ -151,7 +156,7 @@ class Quotation(SellingController):
 			self.lost_reasons = []
 			self.update_child_table("lost_reasons")
 
-		self.update_opportunity(reopen=not is_lost)
+		self.set_opportunity_is_lost(is_lost, lost_reasons_list, detailed_reason)
 		self.update_lead()
 
 		self.notify_update()
