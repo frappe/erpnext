@@ -1733,7 +1733,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		$.each(["company", "customer"], function(i, fieldname) {
+<<<<<<< HEAD
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) && !["Purchase Order","Purchase Invoice"].includes(me.frm.doc.doctype)) {
+=======
+			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) &&  !["Purchase Order","Purchase Invoice"].includes(me.frm.doc.doctype)) {
+>>>>>>> 0f0bc9a462 (fix: customer selection not mandatory in  purchase invoice to fetch item details (#33572))
 				if (!me.frm.doc[fieldname]) {
 					frappe.msgprint(__("Please specify") + ": " +
 						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +
