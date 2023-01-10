@@ -578,8 +578,8 @@
   {
    "fieldname": "scrap_items_section",
    "fieldtype": "Section Break",
-   "label": "Scrap Items",
-   "hide_border": 1
+   "hide_border": 1,
+   "label": "Scrap Items"
   },
   {
    "default": "0",
@@ -605,7 +605,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-03 18:42:27.732107",
+ "modified": "2023-01-10 07:47:08.652616",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
