@@ -162,7 +162,7 @@ class VehicleSalesOpportunities:
 					d.lost_reason = d.order_lost_reason
 				else:
 					lost_reason_list = self.lost_reason_map.get(d.opportunity) or []
-					d.lost_reason = ', '.join(map(lambda x:x.get('item_name'), lost_reason_list))
+					d.lost_reason = ', '.join(map(lambda x:x.get('lost_reason'), lost_reason_list))
 
 	def get_columns(self):
 		columns = [
