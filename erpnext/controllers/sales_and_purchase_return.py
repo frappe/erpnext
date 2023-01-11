@@ -234,7 +234,6 @@ def get_returned_qty_map_for_row(row_name, doctype):
 			[doctype, "is_return", "=", 1],
 			[child_doctype, reference_field, "=", row_name]
 	])
-
 	return data[0]
 
 def make_return_doc(doctype, source_name, target_doc=None):
@@ -349,7 +348,10 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
-			returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
+			if doctype == "POS Invoice":
+				returned_qty_map = get_returned_qty_map_for_row(source_doc.name, doctype)
+			else:
+				returned_qty_map={'qty': None, 'stock_qty': None}
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get('qty') or 0))
 			target_doc.stock_qty = -1 * flt(source_doc.stock_qty - (returned_qty_map.get('stock_qty') or 0))
 
