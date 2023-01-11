@@ -27,7 +27,7 @@ class VehicleServiceFeedback:
 	def get_data(self):
 		conditions = self.get_conditions()
 
-		feedback_valid_after_service_days = cint(frappe.get_value("CRM Settings", None, "feedback_valid_after_service_days"))
+		feedback_valid_after_service_days = cint(frappe.db.get_value("CRM Settings", None, "feedback_valid_after_service_days"))
 		self.filters.from_date = add_days(self.filters.from_date, -1 * feedback_valid_after_service_days)
 		self.filters.to_days = add_days(self.filters.to_days, -1 * feedback_valid_after_service_days)
 

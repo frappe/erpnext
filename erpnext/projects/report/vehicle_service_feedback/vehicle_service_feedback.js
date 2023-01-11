@@ -108,7 +108,7 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 					if (!r.exc) {
 						frappe.query_report.datatable.datamanager.data[rowIndex].feedback_date = r.message.feedback_date;
 						frappe.query_report.datatable.datamanager.data[rowIndex].feedback_time = r.message.feedback_time;
-						frappe.query_report.datatable.datamanager.data[rowIndex].customer_feedback = new_value;
+						frappe.query_report.datatable.datamanager.data[rowIndex].customer_feedback = r.message.customer_feedback;
 						erpnext.utils.query_report_local_refresh()
 					}
 				},

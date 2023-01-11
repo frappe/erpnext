@@ -2155,7 +2155,7 @@ def set_warranty_claim_denied(projects, denied, reason=None):
 @frappe.whitelist()
 def submit_feedback(project, customer_feedback):
 	if not customer_feedback:
-		frappe.throw(_('Remarks are mandatory for Communication'))
+		frappe.throw(_('Customer feedback cannot be empty'))
 
 	if not frappe.db.exists('Project', project):
 		frappe.throw(_("Repair Order {0} does not exist".format(project)))
@@ -2176,5 +2176,6 @@ def submit_feedback(project, customer_feedback):
 	target_doc.run_method("validate_feedback")
 
 	target_doc.db_set(feedback_info)
+	target_doc.notify_update()
 
 	return feedback_info
