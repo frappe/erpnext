@@ -27,37 +27,26 @@ frappe.query_reports["Vehicle Sales Opportunities"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"project_template",
-			"label": __("Project Template"),
+			"fieldname":"sales_person",
+			"label": __("Sales Person"),
 			"fieldtype": "Link",
-			"options": "Project Template"
+			"options": "Sales Person"
 		},
 		{
-			"fieldname":"project_template_category",
-			"label": __("Project Template Category"),
+			"fieldname":"lead_source",
+			"label": __("Source of Lead"),
 			"fieldtype": "Link",
-			"options": "Project Template Category"
+			"options": "Lead Source"
 		},
 		{
-			fieldname: "customer",
-			label: __("Customer"),
-			fieldtype: "Link",
-			options: "Customer",
-			get_query: function() {
-				return {
-					query: "erpnext.controllers.queries.customer_query"
-				};
-			}
-		},
-		{
-			fieldname: "customer_group",
-			label: __("Customer Group"),
-			fieldtype: "Link",
-			options: "Customer Group"
+			"fieldname":"information_source",
+			"label": __("Source of Information"),
+			"fieldtype": "Link",
+			"options": "Lead Information Source"
 		},
 		{
 			fieldname: "variant_of",
-			label: __("Model Item Code"),
+			label: __("Model Interested In"),
 			fieldtype: "Link",
 			options: "Item",
 			get_query: function() {
@@ -68,12 +57,12 @@ frappe.query_reports["Vehicle Sales Opportunities"] = {
 			}
 		},
 		{
-			fieldname: "item_code",
-			label: __("Variant Item Code"),
+			fieldname: "variant_item_code",
+			label: __("Variant Interested In"),
 			fieldtype: "Link",
 			options: "Item",
 			get_query: function() {
-				var variant_of = frappe.query_report.get_filter_value('applies_to_variant_of');
+				var variant_of = frappe.query_report.get_filter_value('variant_of');
 				var filters = {"is_vehicle": 1, "include_disabled": 1};
 				if (variant_of) {
 					filters['variant_of'] = variant_of;
@@ -85,43 +74,22 @@ frappe.query_reports["Vehicle Sales Opportunities"] = {
 			}
 		},
 		{
-			fieldname: "item_group",
-			label: __("Item Group"),
-			fieldtype: "Link",
-			options: "Item Group"
+			fieldname: "first_additional",
+			label: __("1st/Additional/Replacement"),
+			fieldtype: "Select",
+			options: "\nFirst\nAdditional\nReplacement"
+		},
+		{
+			fieldname: "lead_classification",
+			label: __("Hot/Warm/Cold"),
+			fieldtype: "Select",
+			options: "\nHot\nWarm\nCold"
+		},
+		{
+			fieldname: "sales_done",
+			label: __("Sales Done"),
+			fieldtype: "Select",
+			options: "\nYes\nNo"
 		},
 	],
-
-	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "remarks") {
-			if (cstr(data['remarks']) === cstr(new_value)) {
-				return
-			}
-
-			if (!data.opportunity) {
-				setTimeout(() => {
-					erpnext.utils.query_report_local_refresh();
-					frappe.msgprint(__("Opportunity does not exist"));
-				});
-				return;
-			}
-
-			return frappe.call({
-				method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
-				args: {
-					remarks: new_value,
-					name: data.opportunity,
-					contact_date: frappe.datetime.get_today()
-				},
-				callback: function() {
-					frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = frappe.datetime.get_today();
-					frappe.query_report.datatable.datamanager.data[rowIndex].remarks = new_value;
-					erpnext.utils.query_report_local_refresh()
-				},
-				error: function() {
-					erpnext.utils.query_report_local_refresh()
-				},
-			});
-		}
-	},
 };

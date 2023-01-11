@@ -15,13 +15,12 @@ def execute(filters=None):
 
 class VehicleSalesOpportunities:
 	def __init__(self, filters=None):
-		# self.filters = frappe._dict(filters or {})
-		# self.filters.from_date = getdate(filters.from_date or today())
-		# self.filters.to_date = getdate(filters.to_date or today())
+		self.filters = frappe._dict(filters or {})
+		self.filters.from_date = getdate(filters.from_date or today())
+		self.filters.to_date = getdate(filters.to_date or today())
 
-		# if self.filters.from_date > self.filters.to_date:
-		# 	frappe.throw(_("Date Range is incorrect"))
-		pass
+		if self.filters.from_date > self.filters.to_date:
+			frappe.throw(_("Date Range is incorrect"))
 
 	def run(self):
 		self.get_data()
@@ -36,15 +35,17 @@ class VehicleSalesOpportunities:
 		self.get_communication_map()
 
 	def get_opportunity_data(self):
+		conditions = self.get_conditions()
+
 		self.data = frappe.db.sql("""
 			SELECT
 				opp.name AS opportunity, opp.opportunity_from, opp.party_name, opp.customer_name,
 				opp.sales_person, opp.lead_classification, opp.transaction_date, opp.status,
-				opp.source, opp.information_source, order_lost_reason,
+				opp.source AS lead_source, opp.information_source, order_lost_reason,
 				opp.contact_mobile, opp.contact_phone,
-				opp.applies_to_variant_of_name AS variant_interested_in, first_additional,
-				rating_interior, rating_exterior, rating_specifications, rating_price,
-				liked_features, remarks,
+				opp.applies_to_item AS variant_interested_in, opp.first_additional,
+				opp.rating_interior, opp.rating_exterior, opp.rating_specifications, opp.rating_price,
+				opp.liked_features, opp.remarks,
 				address.city AS address_city, lead.city AS lead_city,
 				vbo.name AS vehicle_booking_order,
 				opp.delivery_period AS opp_delivery_month, vbo.delivery_period AS vbo_delivery_month
@@ -52,10 +53,50 @@ class VehicleSalesOpportunities:
 			LEFT JOIN `tabLead` lead ON lead.name = opp.party_name AND opp.opportunity_from = 'Lead'
 			LEFT JOIN `tabAddress` address ON address.name = opp.customer_address
 			LEFT JOIN `tabVehicle Booking Order` vbo ON vbo.opportunity = opp.name
-			WHERE opp.opportunity_type = "Sales"
-		""", as_dict=1)
+			WHERE
+				opp.opportunity_type = "Sales"
+				AND opp.transaction_date between %(from_date)s AND %(to_date)s
+				AND {conditions}
+		""".format(conditions=conditions), self.filters, as_dict=1)
 
 		self.opportunities = [d.opportunity for d in self.data]
+
+	def get_conditions(self):
+		conditions = []
+
+		if self.filters.get("company"):
+			conditions.append("opp.company = %(company)s")
+
+		if self.filters.get("sales_person"):
+			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
+			conditions.append("""opp.sales_person in (select name from `tabSales Person`
+				where lft >= {0} and rgt <= {1})""".format(lft, rgt))
+
+		if self.filters.get("lead_source"):
+			conditions.append("opp.source = %(lead_source)s")
+
+		if self.filters.get("information_source"):
+			conditions.append("opp.information_source = %(information_source)s")
+
+		if self.filters.get("variant_of"):
+			conditions.append("opp.applies_to_variant_of = %(variant_of)s")
+
+		if self.filters.get("variant_item_code"):
+			conditions.append("opp.applies_to_item = %(variant_item_code)s")
+
+		if self.filters.get("first_additional"):
+			conditions.append("opp.first_additional = %(first_additional)s")
+
+		if self.filters.get("lead_classification"):
+			conditions.append("opp.lead_classification = %(lead_classification)s")
+
+		if self.filters.get("sales_done"):
+			if self.filters.sales_done == "Yes":
+				conditions.append("ifnull(vbo.name, '') != ''")
+			elif self.filters.sales_done == "No":
+				conditions.append("ifnull(vbo.name, '') = ''")
+
+		return " AND ".join(conditions) if conditions else "1"
 
 	def get_existing_vehicles_map(self):
 		existing_vehicles_data = []
@@ -91,7 +132,7 @@ class VehicleSalesOpportunities:
 				FROM `tabCommunication`
 				WHERE reference_doctype = 'Opportunity' AND reference_name IN %s
 					AND sent_or_received = 'Received'
-			""", [self.opportunities], as_dict=1, debug=1)
+			""", [self.opportunities], as_dict=1)
 
 		self.communication_map = {}
 		for d in communication_data:
@@ -106,7 +147,6 @@ class VehicleSalesOpportunities:
 
 			d.sales_done = "Yes" if d.vehicle_booking_order else "No"
 			d.delivery_month = d.vbo_delivery_month or d.opp_delivery_month
-			
 
 			existing_vehicles = self.existing_vehicles_map.get(d.opportunity) or []
 			for i in range(len(existing_vehicles)):
@@ -147,7 +187,7 @@ class VehicleSalesOpportunities:
 			},
 			{
 				"label": _("Source of Lead"),
-				"fieldname": "source",
+				"fieldname": "lead_source",
 				"fieldtype": "Data",
 				"width": 110
 			},
