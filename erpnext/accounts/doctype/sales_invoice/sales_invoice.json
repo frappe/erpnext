@@ -2086,7 +2086,6 @@
    "label": "Default Depreciation (%)"
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:doc.has_stin && doc.is_fbr_pos_invoice",
    "fieldname": "sec_fbr_pos_transaction_details",
    "fieldtype": "Section Break",
@@ -2229,7 +2228,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-11 17:41:40.296448",
+ "modified": "2023-01-11 17:43:48.663734",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
