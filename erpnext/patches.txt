@@ -257,6 +257,7 @@ erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v15_0.delete_taxjar_doctypes
+erpnext.patches.v15_0.delete_ecommerce_doctypes
 erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 erpnext.patches.v15_0.saudi_depreciation_warning
