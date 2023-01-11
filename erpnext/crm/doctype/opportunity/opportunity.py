@@ -87,8 +87,7 @@ class Opportunity(TransactionBase):
 		else:
 			self.status = "Open"
 
-		if not self.is_new():
-			self.add_status_comment(previous_status)
+		self.add_status_comment(previous_status)
 
 		if update:
 			self.db_set('status', self.status, update_modified=update_modified)
