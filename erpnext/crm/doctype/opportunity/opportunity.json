@@ -23,7 +23,7 @@
   "company",
   "transaction_date",
   "due_date",
-  "status",
+  "next_follow_up",
   "mins_to_first_response",
   "lost_reason_section",
   "order_lost_reason",
@@ -69,7 +69,8 @@
   "feedback_cb_1",
   "ratings_section",
   "next_contact",
-  "contact_schedule"
+  "contact_schedule",
+  "status"
  ],
  "fields": [
   {
@@ -87,7 +88,6 @@
   {
    "fieldname": "opportunity_from",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Opportunity From",
    "oldfieldname": "enquiry_from",
@@ -127,6 +127,7 @@
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Title",
    "no_copy": 1
   },
@@ -144,6 +145,7 @@
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
@@ -173,6 +175,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "contact_schedule",
    "fieldname": "next_contact",
    "fieldtype": "Section Break",
    "label": "Follow Up"
@@ -522,13 +525,20 @@
    "fieldtype": "Date",
    "label": "Due Date",
    "no_copy": 1
+  },
+  {
+   "fieldname": "next_follow_up",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Next Follow Up Date",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2023-01-02 15:18:30.723954",
+ "modified": "2023-01-06 15:56:50.696270",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -545,6 +555,15 @@
    "role": "Sales User",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
   },
   {
    "create": 1,

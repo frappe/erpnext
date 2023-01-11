@@ -38,6 +38,7 @@
   "pdi_vehicle_workshop",
   "column_break_29",
   "pdi_project_template_category",
+  "feedback_valid_after_service_days",
   "section_break_14",
   "role_change_booking_after_payment",
   "role_change_payment_adjustment",
@@ -361,11 +362,16 @@
   {
    "fieldname": "section_break_47",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "feedback_valid_after_service_days",
+   "fieldtype": "Int",
+   "label": "Feedback For Service After Days"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2023-01-05 13:53:00.157125",
+ "modified": "2023-01-09 12:14:56.330578",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

@@ -20,6 +20,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		erpnext.setup_applies_to_fields(this.frm);
 
 		this.frm.email_field = 'contact_email';
+		this.setup_queries();
 	}
 
 	refresh() {
@@ -30,10 +31,6 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		this.update_dynamic_fields();
 		this.set_sales_person_from_user();
 		this.setup_buttons();
-	}
-
-	onload() {
-		this.setup_queries();
 	}
 
 	onload_post_render() {
