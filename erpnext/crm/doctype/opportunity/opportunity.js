@@ -64,6 +64,8 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 
 				if (["Lost", "Closed"].includes(me.frm.doc.status)) {
 					me.frm.add_custom_button(__("Reopen"), () => {
+						me.frm.set_value("lost_reasons", [])
+						me.frm.set_value("order_lost_reason", null)
 						me.frm.set_value("status", "Open");
 						me.frm.save();
 					}, __("Status"));

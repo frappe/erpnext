@@ -26,9 +26,9 @@
   "next_follow_up",
   "mins_to_first_response",
   "lost_reason_section",
-  "order_lost_reason",
-  "column_break_9",
   "lost_reasons",
+  "column_break_9",
+  "order_lost_reason",
   "more_info",
   "source",
   "information_source",
@@ -336,7 +336,7 @@
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
    "no_copy": 1,
-   "options": "Opportunity Lost Reason Detail",
+   "options": "Lost Reason Detail",
    "read_only": 1
   },
   {
@@ -346,7 +346,6 @@
    "width": "50%"
   },
   {
-   "depends_on": "eval:doc.status===\"Lost\"",
    "fieldname": "lost_reason_section",
    "fieldtype": "Section Break",
    "label": "Lost Reason"
@@ -538,7 +537,7 @@
  "idx": 195,
  "is_calendar_and_gantt": 1,
  "links": [],
- "modified": "2023-01-06 15:56:50.696270",
+ "modified": "2023-01-10 18:23:21.287358",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
