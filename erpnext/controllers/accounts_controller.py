@@ -394,7 +394,7 @@ class AccountsController(TransactionBase):
 				self.get("inter_company_reference")
 				or self.get("inter_company_invoice_reference")
 				or self.get("inter_company_order_reference")
-			):
+			) and not self.get("is_return"):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
