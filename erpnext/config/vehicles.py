@@ -153,6 +153,11 @@ def get_data():
 					"dependencies": ["Vehicle"],
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Service Feedback",
+				},
+				{
 					"type": "doctype",
 					"name": "Vehicle Log",
 					"dependencies": ["Vehicle"],

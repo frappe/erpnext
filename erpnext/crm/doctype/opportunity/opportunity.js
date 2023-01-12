@@ -20,6 +20,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		erpnext.setup_applies_to_fields(this.frm);
 
 		this.frm.email_field = 'contact_email';
+		this.setup_queries();
 	},
 
 	refresh: function() {
@@ -30,10 +31,6 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		this.update_dynamic_fields();
 		this.set_sales_person_from_user();
 		this.setup_buttons();
-	},
-
-	onload: function() {
-		this.setup_queries();
 	},
 
 	onload_post_render: function() {
@@ -172,7 +169,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			me.frm.toggle_display(field, me.frm.doc.conversion_document == "Order");
 		}
 
-		var vehicle_info_fields = [
+		var vehicle_maintenance_fields = [
+			"due_date",
 			"applies_to_vehicle",
 			"vehicle_license_plate",
 			"vehicle_unregistered",
@@ -181,7 +179,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			"vehicle_last_odometer",
 		]
 
-		$.each(vehicle_info_fields, function (i, f) {
+		$.each(vehicle_maintenance_fields, function (i, f) {
 			if (me.frm.fields_dict[f]) {
 				me.frm.set_df_property(f, "hidden", me.frm.doc.conversion_document == "Order" ? 1 : 0);
 			}
