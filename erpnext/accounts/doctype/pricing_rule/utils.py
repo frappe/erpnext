@@ -127,6 +127,12 @@ def _get_pricing_rules(apply_on, args, values):
 				values["variant_of"] = args.variant_of
 	elif apply_on_field == "item_group":
 		item_conditions = _get_tree_conditions(args, "Item Group", child_doc, False)
+		if args.get("uom", None):
+			item_conditions += (
+				" and ({child_doc}.uom='{item_uom}' or IFNULL({child_doc}.uom, '')='')".format(
+					child_doc=child_doc, item_uom=args.get("uom")
+				)
+			)
 
 	conditions += get_other_conditions(conditions, values, args)
 	warehouse_conditions = _get_tree_conditions(args, "Warehouse", "`tabPricing Rule`")
@@ -243,6 +249,22 @@ def get_other_conditions(conditions, values, args):
 		conditions += """ and %(transaction_date)s between ifnull(`tabPricing Rule`.valid_from, '2000-01-01')
 			and ifnull(`tabPricing Rule`.valid_upto, '2500-12-31')"""
 		values["transaction_date"] = args.get("transaction_date")
+
+	if args.get("doctype") in [
+		"Quotation",
+		"Quotation Item",
+		"Sales Order",
+		"Sales Order Item",
+		"Delivery Note",
+		"Delivery Note Item",
+		"Sales Invoice",
+		"Sales Invoice Item",
+		"POS Invoice",
+		"POS Invoice Item",
+	]:
+		conditions += """ and ifnull(`tabPricing Rule`.selling, 0) = 1"""
+	else:
+		conditions += """ and ifnull(`tabPricing Rule`.buying, 0) = 1"""
 
 	return conditions
 
@@ -627,9 +649,13 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 	qty = pricing_rule.free_qty or 1
 	if pricing_rule.is_recursive:
-		transaction_qty = args.get("qty") if args else doc.total_qty
+		transaction_qty = (
+			args.get("qty") if args else doc.total_qty
+		) - pricing_rule.apply_recursion_over
 		if transaction_qty:
-			qty = flt(transaction_qty) * qty
+			qty = flt(transaction_qty) * qty / pricing_rule.recurse_for
+			if pricing_rule.round_free_qty:
+				qty = round(qty)
 
 	free_item_data_args = {
 		"item_code": free_item,
@@ -659,7 +685,7 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	item_details.free_item_data.append(free_item_data_args)
 
 
-def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
+def apply_pricing_rule_for_free_items(doc, pricing_rule_args):
 	if pricing_rule_args:
 		items = tuple((d.item_code, d.pricing_rules) for d in doc.items if d.is_free_item)
 

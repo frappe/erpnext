@@ -1,5 +1,3 @@
-from frappe import _
-
 app_name = "erpnext"
 app_title = "ERPNext"
 app_publisher = "Frappe Technologies Pvt. Ltd."
@@ -10,7 +8,6 @@ app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
-required_apps = ["payments"]
 
 
 develop_version = "14.x.x-develop"
@@ -94,7 +91,7 @@ website_route_rules = [
 	{
 		"from_route": "/orders/<path:name>",
 		"to_route": "order",
-		"defaults": {"doctype": "Sales Order", "parents": [{"label": _("Orders"), "route": "orders"}]},
+		"defaults": {"doctype": "Sales Order", "parents": [{"label": "Orders", "route": "orders"}]},
 	},
 	{"from_route": "/invoices", "to_route": "Sales Invoice"},
 	{
@@ -102,7 +99,7 @@ website_route_rules = [
 		"to_route": "order",
 		"defaults": {
 			"doctype": "Sales Invoice",
-			"parents": [{"label": _("Invoices"), "route": "invoices"}],
+			"parents": [{"label": "Invoices", "route": "invoices"}],
 		},
 	},
 	{"from_route": "/supplier-quotations", "to_route": "Supplier Quotation"},
@@ -111,7 +108,7 @@ website_route_rules = [
 		"to_route": "order",
 		"defaults": {
 			"doctype": "Supplier Quotation",
-			"parents": [{"label": _("Supplier Quotation"), "route": "supplier-quotations"}],
+			"parents": [{"label": "Supplier Quotation", "route": "supplier-quotations"}],
 		},
 	},
 	{"from_route": "/purchase-orders", "to_route": "Purchase Order"},
@@ -120,7 +117,7 @@ website_route_rules = [
 		"to_route": "order",
 		"defaults": {
 			"doctype": "Purchase Order",
-			"parents": [{"label": _("Purchase Order"), "route": "purchase-orders"}],
+			"parents": [{"label": "Purchase Order", "route": "purchase-orders"}],
 		},
 	},
 	{"from_route": "/purchase-invoices", "to_route": "Purchase Invoice"},
@@ -129,7 +126,7 @@ website_route_rules = [
 		"to_route": "order",
 		"defaults": {
 			"doctype": "Purchase Invoice",
-			"parents": [{"label": _("Purchase Invoice"), "route": "purchase-invoices"}],
+			"parents": [{"label": "Purchase Invoice", "route": "purchase-invoices"}],
 		},
 	},
 	{"from_route": "/quotations", "to_route": "Quotation"},
@@ -138,7 +135,7 @@ website_route_rules = [
 		"to_route": "order",
 		"defaults": {
 			"doctype": "Quotation",
-			"parents": [{"label": _("Quotations"), "route": "quotations"}],
+			"parents": [{"label": "Quotations", "route": "quotations"}],
 		},
 	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
@@ -147,7 +144,7 @@ website_route_rules = [
 		"to_route": "order",
 		"defaults": {
 			"doctype": "Delivery Note",
-			"parents": [{"label": _("Shipments"), "route": "shipments"}],
+			"parents": [{"label": "Shipments", "route": "shipments"}],
 		},
 	},
 	{"from_route": "/rfq", "to_route": "Request for Quotation"},
@@ -156,14 +153,14 @@ website_route_rules = [
 		"to_route": "rfq",
 		"defaults": {
 			"doctype": "Request for Quotation",
-			"parents": [{"label": _("Request for Quotation"), "route": "rfq"}],
+			"parents": [{"label": "Request for Quotation", "route": "rfq"}],
 		},
 	},
 	{"from_route": "/addresses", "to_route": "Address"},
 	{
 		"from_route": "/addresses/<path:name>",
 		"to_route": "addresses",
-		"defaults": {"doctype": "Address", "parents": [{"label": _("Addresses"), "route": "addresses"}]},
+		"defaults": {"doctype": "Address", "parents": [{"label": "Addresses", "route": "addresses"}]},
 	},
 	{"from_route": "/boms", "to_route": "BOM"},
 	{"from_route": "/timesheets", "to_route": "Timesheet"},
@@ -173,78 +170,79 @@ website_route_rules = [
 		"to_route": "material_request_info",
 		"defaults": {
 			"doctype": "Material Request",
-			"parents": [{"label": _("Material Request"), "route": "material-requests"}],
+			"parents": [{"label": "Material Request", "route": "material-requests"}],
 		},
 	},
 	{"from_route": "/project", "to_route": "Project"},
+	{"from_route": "/tasks", "to_route": "Task"},
 ]
 
 standard_portal_menu_items = [
-	{"title": _("Projects"), "route": "/project", "reference_doctype": "Project"},
+	{"title": "Projects", "route": "/project", "reference_doctype": "Project"},
 	{
-		"title": _("Request for Quotations"),
+		"title": "Request for Quotations",
 		"route": "/rfq",
 		"reference_doctype": "Request for Quotation",
 		"role": "Supplier",
 	},
 	{
-		"title": _("Supplier Quotation"),
+		"title": "Supplier Quotation",
 		"route": "/supplier-quotations",
 		"reference_doctype": "Supplier Quotation",
 		"role": "Supplier",
 	},
 	{
-		"title": _("Purchase Orders"),
+		"title": "Purchase Orders",
 		"route": "/purchase-orders",
 		"reference_doctype": "Purchase Order",
 		"role": "Supplier",
 	},
 	{
-		"title": _("Purchase Invoices"),
+		"title": "Purchase Invoices",
 		"route": "/purchase-invoices",
 		"reference_doctype": "Purchase Invoice",
 		"role": "Supplier",
 	},
 	{
-		"title": _("Quotations"),
+		"title": "Quotations",
 		"route": "/quotations",
 		"reference_doctype": "Quotation",
 		"role": "Customer",
 	},
 	{
-		"title": _("Orders"),
+		"title": "Orders",
 		"route": "/orders",
 		"reference_doctype": "Sales Order",
 		"role": "Customer",
 	},
 	{
-		"title": _("Invoices"),
+		"title": "Invoices",
 		"route": "/invoices",
 		"reference_doctype": "Sales Invoice",
 		"role": "Customer",
 	},
 	{
-		"title": _("Shipments"),
+		"title": "Shipments",
 		"route": "/shipments",
 		"reference_doctype": "Delivery Note",
 		"role": "Customer",
 	},
-	{"title": _("Issues"), "route": "/issues", "reference_doctype": "Issue", "role": "Customer"},
-	{"title": _("Addresses"), "route": "/addresses", "reference_doctype": "Address"},
+	{"title": "Issues", "route": "/issues", "reference_doctype": "Issue", "role": "Customer"},
+	{"title": "Addresses", "route": "/addresses", "reference_doctype": "Address"},
 	{
-		"title": _("Timesheets"),
+		"title": "Timesheets",
 		"route": "/timesheets",
 		"reference_doctype": "Timesheet",
 		"role": "Customer",
 	},
-	{"title": _("Newsletter"), "route": "/newsletters", "reference_doctype": "Newsletter"},
+	{"title": "Newsletter", "route": "/newsletters", "reference_doctype": "Newsletter"},
 	{
-		"title": _("Material Request"),
+		"title": "Material Request",
 		"route": "/material-requests",
 		"reference_doctype": "Material Request",
 		"role": "Customer",
 	},
-	{"title": _("Appointment Booking"), "route": "/book_appointment"},
+	{"title": "Appointment Booking", "route": "/book_appointment"},
 ]
 
 default_roles = [
@@ -314,11 +312,9 @@ doc_events = {
 			"erpnext.regional.create_transaction_log",
 			"erpnext.regional.italy.utils.sales_invoice_on_submit",
 			"erpnext.regional.saudi_arabia.utils.create_qr_code",
-			"erpnext.erpnext_integrations.taxjar_integration.create_transaction",
 		],
 		"on_cancel": [
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
-			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction",
 			"erpnext.regional.saudi_arabia.utils.delete_qr_code_file",
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
@@ -350,9 +346,6 @@ doc_events = {
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
-	},
-	("Quotation", "Sales Order", "Sales Invoice"): {
-		"validate": ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	},
 	"Company": {"on_trash": ["erpnext.regional.saudi_arabia.utils.delete_vat_settings_for_company"]},
 	"Integration Request": {

@@ -644,6 +644,38 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 		self.assertEqual(len(active_sr_no), 0)
 
+	def test_serial_no_batch_no_item(self):
+		item = self.make_item(
+			"Test Serial No Batch No Item",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"serial_no_series": "SRS9.####",
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		sr = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=1,
+			rate=100,
+		)
+
+		sl_entry = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Stock Reconciliation", "voucher_no": sr.name},
+			["actual_qty", "qty_after_transaction"],
+			as_dict=1,
+		)
+
+		self.assertEqual(flt(sl_entry.actual_qty), 1.0)
+		self.assertEqual(flt(sl_entry.qty_after_transaction), 1.0)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)

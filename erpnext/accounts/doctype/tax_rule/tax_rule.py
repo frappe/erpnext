@@ -32,7 +32,7 @@ class TaxRule(Document):
 
 	def validate(self):
 		self.validate_tax_template()
-		self.validate_date()
+		self.validate_from_to_dates("from_date", "to_date")
 		self.validate_filters()
 		self.validate_use_for_shopping_cart()
 
@@ -50,10 +50,6 @@ class TaxRule(Document):
 
 		if not (self.sales_tax_template or self.purchase_tax_template):
 			frappe.throw(_("Tax Template is mandatory."))
-
-	def validate_date(self):
-		if self.from_date and self.to_date and self.from_date > self.to_date:
-			frappe.throw(_("From Date cannot be greater than To Date"))
 
 	def validate_filters(self):
 		filters = {

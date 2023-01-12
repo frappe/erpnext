@@ -57,7 +57,7 @@ class StockController(AccountsController):
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 		provisional_accounting_for_non_stock_items = cint(
-			frappe.db.get_value(
+			frappe.get_cached_value(
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
 			)
 		)
@@ -200,7 +200,7 @@ class StockController(AccountsController):
 				elif self.get("is_internal_supplier"):
 					warehouse_asset_account = warehouse_account[item_row.get("warehouse")]["account"]
 
-				expense_account = frappe.db.get_value("Company", self.company, "default_expense_account")
+				expense_account = frappe.get_cached_value("Company", self.company, "default_expense_account")
 
 				gl_list.append(
 					self.get_gl_dict(
@@ -235,7 +235,7 @@ class StockController(AccountsController):
 
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
-				if frappe.db.get_value("Warehouse", wh, "company"):
+				if frappe.get_cached_value("Warehouse", wh, "company"):
 					frappe.throw(
 						_(
 							"Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}."
@@ -449,14 +449,14 @@ class StockController(AccountsController):
 
 				# Get value based on doctype name
 				if not sl_dict.get(dimension.target_fieldname):
-					fieldname = frappe.get_cached_value(
-						"DocField", {"parent": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
+					fieldname = next(
+						(
+							field.fieldname
+							for field in frappe.get_meta(self.doctype).fields
+							if field.options == dimension.fetch_from_parent
+						),
+						None,
 					)
-
-					if not fieldname:
-						fieldname = frappe.get_cached_value(
-							"Custom Field", {"dt": self.doctype, "options": dimension.fetch_from_parent}, "fieldname"
-						)
 
 					if fieldname and self.get(fieldname):
 						sl_dict[dimension.target_fieldname] = self.get(fieldname)

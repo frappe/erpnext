@@ -119,10 +119,10 @@ class Quotation(SellingController):
 		if not (self.is_fully_ordered() or self.is_partially_ordered()):
 			get_lost_reasons = frappe.get_list("Quotation Lost Reason", fields=["name"])
 			lost_reasons_lst = [reason.get("name") for reason in get_lost_reasons]
-			frappe.db.set(self, "status", "Lost")
+			self.db_set("status", "Lost")
 
 			if detailed_reason:
-				frappe.db.set(self, "order_lost_reason", detailed_reason)
+				self.db_set("order_lost_reason", detailed_reason)
 
 			for reason in lost_reasons_list:
 				if reason.get("lost_reason") in lost_reasons_lst:
@@ -247,7 +247,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			"Quotation": {"doctype": "Sales Order", "validation": {"docstatus": ["=", 1]}},
 			"Quotation Item": {
 				"doctype": "Sales Order Item",
-				"field_map": {"parent": "prevdoc_docname"},
+				"field_map": {"parent": "prevdoc_docname", "name": "quotation_item"},
 				"postprocess": update_item,
 				"condition": lambda doc: doc.qty > 0,
 			},

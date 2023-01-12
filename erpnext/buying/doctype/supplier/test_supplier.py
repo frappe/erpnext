@@ -156,6 +156,8 @@ class TestSupplier(FrappeTestCase):
 	def test_serach_fields_for_supplier(self):
 		from erpnext.controllers.queries import supplier_query
 
+		frappe.db.set_value("Buying Settings", None, "supp_master_name", "Naming Series")
+
 		supplier_name = create_supplier(supplier_name="Test Supplier 1").name
 
 		make_property_setter(
@@ -186,6 +188,8 @@ class TestSupplier(FrappeTestCase):
 		self.assertEqual(data[0].supplier_group, "Services")
 		self.assertEqual(data[0].supplier_type, "Company")
 		self.assertTrue("supplier_type" in data[0])
+
+		frappe.db.set_value("Buying Settings", None, "supp_master_name", "Supplier Name")
 
 
 def create_supplier(**args):

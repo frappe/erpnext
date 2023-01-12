@@ -124,6 +124,11 @@ frappe.ui.form.on("Sales Order", {
 			return query;
 		});
 
+		// On cancel and amending a sales order with advance payment, reset advance paid amount
+		if (frm.is_new()) {
+			frm.set_value("advance_paid", 0)
+		}
+
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
 	},
 

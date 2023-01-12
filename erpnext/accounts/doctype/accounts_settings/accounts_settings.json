@@ -91,7 +91,7 @@
   },
   {
    "default": "0",
-   "description": "Enabling ensure each Sales Invoice has a unique value in Supplier Invoice No. field",
+   "description": "Enabling ensure each Purchase Invoice has a unique value in Supplier Invoice No. field",
    "fieldname": "check_supplier_invoice_uniqueness",
    "fieldtype": "Check",
    "label": "Check Supplier Invoice Number Uniqueness"
@@ -354,7 +354,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-07-11 13:37:50.605141",
+ "modified": "2022-11-27 21:49:52.538655",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

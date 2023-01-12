@@ -57,6 +57,18 @@ frappe.ui.form.on('Subcontracting Receipt', {
 				filters: { 'company': frm.doc.company }
 			};
 		});
+
+		frappe.db.get_single_value('Buying Settings', 'backflush_raw_materials_of_subcontract_based_on').then(val => {
+			if (val == 'Material Transferred for Subcontract') {
+				frm.fields_dict['supplied_items'].grid.grid_rows.forEach((grid_row) => {
+					grid_row.docfields.forEach((df) => {
+						if (df.fieldname == 'consumed_qty') {
+							df.read_only = 0;
+						}
+					});
+				});
+			}
+		});
 	},
 
 	refresh: (frm) => {

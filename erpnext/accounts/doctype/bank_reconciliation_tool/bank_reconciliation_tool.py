@@ -57,7 +57,7 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 @frappe.whitelist()
 def get_account_balance(bank_account, till_date):
 	# returns account balance till the specified date
-	account = frappe.db.get_value("Bank Account", bank_account, "account")
+	account = frappe.get_cached_value("Bank Account", bank_account, "account")
 	filters = frappe._dict(
 		{"account": account, "report_date": till_date, "include_pos_transactions": 1}
 	)
@@ -130,8 +130,10 @@ def create_journal_entry_bts(
 		fieldname=["name", "deposit", "withdrawal", "bank_account"],
 		as_dict=True,
 	)[0]
-	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
-	account_type = frappe.db.get_value("Account", second_account, "account_type")
+	company_account = frappe.get_cached_value(
+		"Bank Account", bank_transaction.bank_account, "account"
+	)
+	account_type = frappe.get_cached_value("Account", second_account, "account_type")
 	if account_type in ["Receivable", "Payable"]:
 		if not (party_type and party):
 			frappe.throw(
@@ -164,7 +166,7 @@ def create_journal_entry_bts(
 		}
 	)
 
-	company = frappe.get_value("Account", company_account, "company")
+	company = frappe.get_cached_value("Account", company_account, "company")
 
 	journal_entry_dict = {
 		"voucher_type": entry_type,
@@ -219,8 +221,10 @@ def create_payment_entry_bts(
 	paid_amount = bank_transaction.unallocated_amount
 	payment_type = "Receive" if bank_transaction.deposit > 0 else "Pay"
 
-	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
-	company = frappe.get_value("Account", company_account, "company")
+	company_account = frappe.get_cached_value(
+		"Bank Account", bank_transaction.bank_account, "account"
+	)
+	company = frappe.get_cached_value("Account", company_account, "company")
 	payment_entry_dict = {
 		"company": company,
 		"payment_type": payment_type,
@@ -266,7 +270,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
-	company_account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
+	company_account = frappe.get_cached_value("Bank Account", transaction.bank_account, "account")
 
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
@@ -290,7 +294,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 				"The sum total of amounts of all selected vouchers should be less than the unallocated amount of the bank transaction"
 			)
 		)
-	account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
+	account = frappe.get_cached_value("Bank Account", transaction.bank_account, "account")
 
 	for voucher in vouchers:
 		gl_entry = frappe.db.get_value(
@@ -298,7 +302,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 			dict(
 				account=account, voucher_type=voucher["payment_doctype"], voucher_no=voucher["payment_name"]
 			),
-			["credit", "debit"],
+			["credit_in_account_currency as credit", "debit_in_account_currency as debit"],
 			as_dict=1,
 		)
 		gl_amount, transaction_amount = (

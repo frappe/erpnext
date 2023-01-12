@@ -815,6 +815,7 @@ def add_second_row_in_scr(scr):
 		"item_name",
 		"qty",
 		"uom",
+		"bom",
 		"warehouse",
 		"stock_uom",
 		"subcontracting_order",

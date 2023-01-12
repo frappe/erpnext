@@ -57,11 +57,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_43",
-  "tax_category",
-  "column_break_39",
   "shipping_rule",
+  "column_break_39",
+  "incoterm",
+  "named_place",
   "section_break_41",
   "taxes",
   "section_break_44",
@@ -1381,13 +1383,25 @@
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:06:58.655635",
+ "modified": "2022-12-12 18:38:53.067799",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

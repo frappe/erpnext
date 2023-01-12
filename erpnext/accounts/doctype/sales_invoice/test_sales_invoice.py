@@ -21,6 +21,9 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_comp
 from erpnext.accounts.utils import PaymentEntryUnlinkError
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_depr_schedule,
+)
 from erpnext.controllers.accounts_controller import update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
@@ -965,7 +968,8 @@ class TestSalesInvoice(unittest.TestCase):
 		pos_return.insert()
 		pos_return.submit()
 
-		self.assertEqual(pos_return.get("payments")[0].amount, -1000)
+		self.assertEqual(pos_return.get("payments")[0].amount, -500)
+		self.assertEqual(pos_return.get("payments")[1].amount, -500)
 
 	def test_pos_change_amount(self):
 		make_pos_profile(
@@ -2728,6 +2732,31 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
 
+		# Update Invoice post submit and then check GL Entries again
+
+		si.load_from_db()
+		si.items[0].income_account = "Service - _TC"
+		si.additional_discount_account = "_Test Account Sales - _TC"
+		si.taxes[0].account_head = "TDS Payable - _TC"
+		si.save()
+
+		si.load_from_db()
+		self.assertTrue(si.repost_required)
+
+		si.repost_accounting_entries()
+
+		expected_gle = [
+			["_Test Account Sales - _TC", 22.0, 0.0, nowdate()],
+			["Debtors - _TC", 88, 0.0, nowdate()],
+			["Service - _TC", 0.0, 100.0, nowdate()],
+			["TDS Payable - _TC", 0.0, 10.0, nowdate()],
+		]
+
+		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
+
+		si.load_from_db()
+		self.assertFalse(si.repost_required)
+
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
 		Tests if an Asset set to depreciate yearly on June 30, that gets sold on Sept 30, creates an additional depreciation entry on its date of sale.
@@ -2748,7 +2777,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["2021-09-30", 5041.1, 26407.22],
 		]
 
-		for i, schedule in enumerate(asset.schedules):
+		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
@@ -2779,7 +2808,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = [["2020-12-31", 30000, 30000], ["2021-12-31", 30000, 60000]]
 
-		for i, schedule in enumerate(asset.schedules):
+		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
@@ -2808,7 +2837,7 @@ class TestSalesInvoice(unittest.TestCase):
 			["2025-06-06", 18633.88, 100000.0, False],
 		]
 
-		for i, schedule in enumerate(asset.schedules):
+		for i, schedule in enumerate(get_depr_schedule(asset.name, "Active")):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
 			self.assertEqual(expected_values[i][2], schedule.accumulated_depreciation_amount)
@@ -3285,6 +3314,7 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		"""select account, debit, credit, posting_date
 		from `tabGL Entry`
 		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		and is_cancelled = 0
 		order by posting_date asc, account asc""",
 		(voucher_no, posting_date),
 		as_dict=1,

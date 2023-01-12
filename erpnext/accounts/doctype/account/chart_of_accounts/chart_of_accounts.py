@@ -53,7 +53,7 @@ def create_charts(
 							"account_number": account_number,
 							"account_type": child.get("account_type"),
 							"account_currency": child.get("account_currency")
-							or frappe.db.get_value("Company", company, "default_currency"),
+							or frappe.get_cached_value("Company", company, "default_currency"),
 							"tax_rate": child.get("tax_rate"),
 						}
 					)
@@ -148,7 +148,7 @@ def get_charts_for_country(country, with_standard=False):
 			) or frappe.local.flags.allow_unverified_charts:
 				charts.append(content["name"])
 
-	country_code = frappe.db.get_value("Country", country, "code")
+	country_code = frappe.get_cached_value("Country", country, "code")
 	if country_code:
 		folders = ("verified",)
 		if frappe.local.flags.allow_unverified_charts:

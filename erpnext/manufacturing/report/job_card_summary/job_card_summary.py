@@ -36,9 +36,13 @@ def get_data(filters):
 		"total_time_in_mins",
 	]
 
-	for field in ["work_order", "workstation", "operation", "status", "company"]:
+	for field in ["work_order", "production_item"]:
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
+
+	for field in ["workstation", "operation", "status", "company"]:
+		if filters.get(field):
+			query_filters[field] = filters.get(field)
 
 	data = frappe.get_all("Job Card", fields=fields, filters=query_filters)
 

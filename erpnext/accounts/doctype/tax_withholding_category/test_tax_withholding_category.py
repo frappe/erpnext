@@ -186,6 +186,82 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in reversed(invoices):
 			d.cancel()
 
+	def test_tds_calculation_on_net_total_partial_tds(self):
+		frappe.db.set_value(
+			"Supplier", "Test TDS Supplier4", "tax_withholding_category", "Cumulative Threshold TDS"
+		)
+		invoices = []
+
+		pi = create_purchase_invoice(supplier="Test TDS Supplier4", rate=20000, do_not_save=True)
+		pi.extend(
+			"items",
+			[
+				{
+					"doctype": "Purchase Invoice Item",
+					"item_code": frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name"),
+					"qty": 1,
+					"rate": 20000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 0,
+				},
+				{
+					"doctype": "Purchase Invoice Item",
+					"item_code": frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name"),
+					"qty": 1,
+					"rate": 35000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 1,
+				},
+			],
+		)
+		pi.save()
+		pi.submit()
+		invoices.append(pi)
+
+		self.assertEqual(pi.taxes[0].tax_amount, 5500)
+
+		# cancel invoices to avoid clashing
+		for d in reversed(invoices):
+			d.cancel()
+
+		orders = []
+
+		po = create_purchase_order(supplier="Test TDS Supplier4", rate=20000, do_not_save=True)
+		po.extend(
+			"items",
+			[
+				{
+					"doctype": "Purchase Order Item",
+					"item_code": frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name"),
+					"qty": 1,
+					"rate": 20000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 0,
+				},
+				{
+					"doctype": "Purchase Order Item",
+					"item_code": frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name"),
+					"qty": 1,
+					"rate": 35000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+					"apply_tds": 1,
+				},
+			],
+		)
+		po.save()
+		po.submit()
+		orders.append(po)
+
+		self.assertEqual(po.taxes[0].tax_amount, 5500)
+
+		# cancel orders to avoid clashing
+		for d in reversed(orders):
+			d.cancel()
+
 	def test_multi_category_single_supplier(self):
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier5", "tax_withholding_category", "Test Service Category"
@@ -306,6 +382,39 @@ def create_purchase_invoice(**args):
 
 	pi.save()
 	return pi
+
+
+def create_purchase_order(**args):
+	# return purchase order doc object
+	item = frappe.db.get_value("Item", {"item_name": "TDS Item"}, "name")
+
+	args = frappe._dict(args)
+	po = frappe.get_doc(
+		{
+			"doctype": "Purchase Order",
+			"transaction_date": today(),
+			"schedule_date": today(),
+			"apply_tds": 0 if args.do_not_apply_tds else 1,
+			"supplier": args.supplier,
+			"company": "_Test Company",
+			"taxes_and_charges": "",
+			"currency": "INR",
+			"taxes": [],
+			"items": [
+				{
+					"doctype": "Purchase Order Item",
+					"item_code": item,
+					"qty": args.qty or 1,
+					"rate": args.rate or 10000,
+					"cost_center": "Main - _TC",
+					"expense_account": "Stock Received But Not Billed - _TC",
+				}
+			],
+		}
+	)
+
+	po.save()
+	return po
 
 
 def create_sales_invoice(**args):

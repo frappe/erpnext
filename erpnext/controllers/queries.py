@@ -85,7 +85,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters, as_dict=
 
 	fields = ["name"]
 	if cust_master_name != "Customer Name":
-		fields = ["customer_name"]
+		fields.append("customer_name")
 
 	fields = get_fields(doctype, fields)
 	searchfields = frappe.get_meta(doctype).get_search_fields()
@@ -123,7 +123,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters, as_dict=
 
 	fields = ["name"]
 	if supp_master_name != "Supplier Name":
-		fields = ["supplier_name"]
+		fields.append("supplier_name")
 
 	fields = get_fields(doctype, fields)
 

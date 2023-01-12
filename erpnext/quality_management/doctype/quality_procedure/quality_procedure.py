@@ -79,7 +79,7 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 		]
 	else:
 		return frappe.get_all(
-			doctype,
+			"Quality Procedure",
 			fields=["name as value", "is_group as expandable"],
 			filters=dict(parent_quality_procedure=parent),
 			order_by="name asc",

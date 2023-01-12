@@ -326,7 +326,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
-	default_warehouse_for_sales_return = frappe.db.get_value(
+	default_warehouse_for_sales_return = frappe.get_cached_value(
 		"Company", company, "default_warehouse_for_sales_return"
 	)
 
@@ -340,11 +340,11 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 
 			# look for Print Heading "Credit Note"
 			if not doc.select_print_heading:
-				doc.select_print_heading = frappe.db.get_value("Print Heading", _("Credit Note"))
+				doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Credit Note"))
 
 		elif doctype == "Purchase Invoice":
 			# look for Print Heading "Debit Note"
-			doc.select_print_heading = frappe.db.get_value("Print Heading", _("Debit Note"))
+			doc.select_print_heading = frappe.get_cached_value("Print Heading", _("Debit Note"))
 
 		for tax in doc.get("taxes") or []:
 			if tax.charge_type == "Actual":
@@ -404,12 +404,17 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
 			)
-			target_doc.received_qty = -1 * flt(
-				source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
-			)
-			target_doc.rejected_qty = -1 * flt(
-				source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
-			)
+
+			if doctype == "Subcontracting Receipt":
+				target_doc.received_qty = -1 * flt(source_doc.qty)
+			else:
+				target_doc.received_qty = -1 * flt(
+					source_doc.received_qty - (returned_qty_map.get("received_qty") or 0)
+				)
+				target_doc.rejected_qty = -1 * flt(
+					source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
+				)
+
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 
 			if hasattr(target_doc, "stock_qty"):
@@ -503,7 +508,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			doctype
 			+ " Item": {
 				"doctype": doctype + " Item",
-				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no"},
+				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
 				"postprocess": update_item,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},

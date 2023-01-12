@@ -312,6 +312,9 @@ class ProductionPlan(Document):
 	def add_items(self, items):
 		refs = {}
 		for data in items:
+			if not data.pending_qty:
+				continue
+
 			item_details = get_item_details(data.item_code)
 			if self.combine_items:
 				if item_details.bom_no in refs:
@@ -518,6 +521,9 @@ class ProductionPlan(Document):
 				subcontracted_po.setdefault(row.supplier, []).append(row)
 				continue
 
+			if row.type_of_manufacturing == "Material Request":
+				continue
+
 			work_order_data = {
 				"wip_warehouse": default_warehouses.get("wip_warehouse"),
 				"fg_warehouse": default_warehouses.get("fg_warehouse"),
@@ -649,23 +655,13 @@ class ProductionPlan(Document):
 			else:
 				material_request = material_request_map[key]
 
-			conversion_factor = 1.0
-			if (
-				material_request_type == "Purchase"
-				and item_doc.purchase_uom
-				and item_doc.purchase_uom != item_doc.stock_uom
-			):
-				conversion_factor = (
-					get_conversion_factor(item_doc.name, item_doc.purchase_uom).get("conversion_factor") or 1.0
-				)
-
 			# add item
 			material_request.append(
 				"items",
 				{
 					"item_code": item.item_code,
 					"from_warehouse": item.from_warehouse,
-					"qty": item.quantity / conversion_factor,
+					"qty": item.quantity,
 					"schedule_date": schedule_date,
 					"warehouse": item.warehouse,
 					"sales_order": item.sales_order,
@@ -1053,11 +1049,25 @@ def get_material_request_items(
 	if include_safety_stock:
 		required_qty += flt(row["safety_stock"])
 
+	item_details = frappe.get_cached_value(
+		"Item", row.item_code, ["purchase_uom", "stock_uom"], as_dict=1
+	)
+
+	conversion_factor = 1.0
+	if (
+		row.get("default_material_request_type") == "Purchase"
+		and item_details.purchase_uom
+		and item_details.purchase_uom != item_details.stock_uom
+	):
+		conversion_factor = (
+			get_conversion_factor(row.item_code, item_details.purchase_uom).get("conversion_factor") or 1.0
+		)
+
 	if required_qty > 0:
 		return {
 			"item_code": row.item_code,
 			"item_name": row.item_name,
-			"quantity": required_qty,
+			"quantity": required_qty / conversion_factor,
 			"required_bom_qty": total_qty,
 			"stock_uom": row.get("stock_uom"),
 			"warehouse": warehouse
@@ -1154,6 +1164,7 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 
 	subquery = frappe.qb.from_(wh).select(wh.name).where(wh.company == company)
 
+	warehouse = ""
 	if not all_warehouse:
 		warehouse = for_warehouse or row.get("source_warehouse") or row.get("default_warehouse")
 
@@ -1219,6 +1230,21 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	doc["mr_items"] = []
 
 	po_items = doc.get("po_items") if doc.get("po_items") else doc.get("items")
+
+	if doc.get("sub_assembly_items"):
+		for sa_row in doc.sub_assembly_items:
+			sa_row = frappe._dict(sa_row)
+			if sa_row.type_of_manufacturing == "Material Request":
+				po_items.append(
+					frappe._dict(
+						{
+							"item_code": sa_row.production_item,
+							"required_qty": sa_row.qty,
+							"include_exploded_items": 0,
+						}
+					)
+				)
+
 	# Check for empty table or empty rows
 	if not po_items or not [row.get("item_code") for row in po_items if row.get("item_code")]:
 		frappe.throw(

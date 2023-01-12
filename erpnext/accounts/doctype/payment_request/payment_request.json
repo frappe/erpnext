@@ -32,6 +32,10 @@
   "iban",
   "branch_code",
   "swift_number",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "recipient_and_message",
   "print_format",
   "email_to",
@@ -362,13 +366,35 @@
    "label": "Payment Channel",
    "options": "\nEmail\nPhone",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-09-30 16:19:43.680025",
+ "modified": "2022-12-21 16:56:40.115737",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

@@ -1050,9 +1050,22 @@ class TestDeliveryNote(FrappeTestCase):
 			do_not_submit=True,
 		)
 
+		dn.append(
+			"taxes",
+			{
+				"charge_type": "On Net Total",
+				"account_head": "_Test Account Service Tax - _TC",
+				"description": "Tax 1",
+				"rate": 14,
+				"cost_center": "_Test Cost Center - _TC",
+				"included_in_print_rate": 1,
+			},
+		)
+
 		self.assertEqual(dn.items[0].rate, 500)  # haven't saved yet
 		dn.save()
 		self.assertEqual(dn.ignore_pricing_rule, 1)
+		self.assertEqual(dn.taxes[0].included_in_print_rate, 0)
 
 		# rate should reset to incoming rate
 		self.assertEqual(dn.items[0].rate, rate)
@@ -1063,6 +1076,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.save()
 
 		self.assertEqual(dn.items[0].rate, rate)
+		self.assertEqual(dn.items[0].net_rate, rate)
 
 	def test_internal_transfer_precision_gle(self):
 		from erpnext.selling.doctype.customer.test_customer import create_internal_customer

@@ -87,33 +87,33 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	get_dt_columns() {
 		this.columns = [
 			{
-				name: "Document Type",
+				name: __("Document Type"),
 				editable: false,
 				width: 125,
 			},
 			{
-				name: "Document Name",
+				name: __("Document Name"),
 				editable: false,
 				width: 150,
 			},
 			{
-				name: "Reference Date",
+				name: __("Reference Date"),
 				editable: false,
 				width: 120,
 			},
 			{
-				name: "Amount",
+				name: __("Amount"),
 				editable: false,
 				width: 100,
 			},
 			{
-				name: "Party",
+				name: __("Party"),
 				editable: false,
 				width: 120,
 			},
 
 			{
-				name: "Reference Number",
+				name: __("Reference Number"),
 				editable: false,
 				width: 140,
 			},
@@ -222,7 +222,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			{
 				fieldtype: "HTML",
 				fieldname: "no_matching_vouchers",
-				options: "<div class=\"text-muted text-center\">No Matching Vouchers Found</div>"
+				options: __("<div class=\"text-muted text-center\">{0}</div>", [__("No Matching Vouchers Found")])
 			},
 			{
 				fieldtype: "Section Break",
@@ -355,12 +355,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "deposit",
 				fieldtype: "Currency",
 				label: "Deposit",
+				options: "currency",
 				read_only: 1,
 			},
 			{
 				fieldname: "withdrawal",
 				fieldtype: "Currency",
 				label: "Withdrawal",
+				options: "currency",
 				read_only: 1,
 			},
 			{
@@ -378,6 +380,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "allocated_amount",
 				fieldtype: "Currency",
 				label: "Allocated Amount",
+				options: "Currency",
 				read_only: 1,
 			},
 
@@ -385,8 +388,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldname: "unallocated_amount",
 				fieldtype: "Currency",
 				label: "Unallocated Amount",
+				options: "Currency",
 				read_only: 1,
 			},
+			{
+				fieldname: "currency",
+				fieldtype: "Link",
+				label: "Currency",
+				options: "Currency",
+				read_only: 1,
+				hidden: 1,
+			}
 		];
 	}
 
@@ -444,10 +456,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				vouchers: vouchers,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" Matched";
+				const alert_string = __("Bank Transaction {0} Matched", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
@@ -471,10 +480,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				cost_center: values.cost_center,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" added as Payment Entry";
+				const alert_string = __("Bank Transaction {0} added as Payment Entry", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
@@ -498,10 +504,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				second_account: values.second_account,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" added as Journal Entry";
+				const alert_string = __("Bank Transaction {0} added as Journal Entry", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
@@ -520,10 +523,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				party: values.party,
 			},
 			callback: (response) => {
-				const alert_string =
-					"Bank Transaction " +
-					this.bank_transaction.name +
-					" updated";
+				const alert_string = __("Bank Transaction {0} updated", [this.bank_transaction.name]);
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();

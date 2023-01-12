@@ -52,7 +52,10 @@
   "free_item_rate",
   "column_break_42",
   "free_item_uom",
+  "round_free_qty",
   "is_recursive",
+  "recurse_for",
+  "apply_recursion_over",
   "section_break_23",
   "valid_from",
   "valid_upto",
@@ -578,12 +581,34 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "PRLE-.####"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_free_qty",
+   "fieldtype": "Check",
+   "label": "Round Free Qty"
+  },
+  {
+   "depends_on": "is_recursive",
+   "description": "Give free item for every N quantity",
+   "fieldname": "recurse_for",
+   "fieldtype": "Float",
+   "label": "Recurse Every (As Per Transaction UOM)",
+   "mandatory_depends_on": "is_recursive"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_recursive",
+   "description": "Qty for which recursion isn't applicable.",
+   "fieldname": "apply_recursion_over",
+   "fieldtype": "Float",
+   "label": "Apply Recursion Over (As Per Transaction UOM)"
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2022-09-16 16:00:38.356266",
+ "modified": "2022-10-13 19:05:35.056304",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

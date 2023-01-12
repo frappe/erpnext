@@ -58,11 +58,13 @@
   "total",
   "net_total",
   "taxes_section",
+  "tax_category",
   "taxes_and_charges",
   "column_break_38",
-  "tax_category",
-  "column_break_49",
   "shipping_rule",
+  "column_break_49",
+  "incoterm",
+  "named_place",
   "section_break_40",
   "taxes",
   "section_break_43",
@@ -1623,13 +1625,25 @@
   {
    "fieldname": "column_break_152",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-10-11 13:06:10.469796",
+ "modified": "2022-12-12 18:34:00.681780",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

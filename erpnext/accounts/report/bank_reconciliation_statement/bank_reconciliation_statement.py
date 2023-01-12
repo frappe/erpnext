@@ -21,7 +21,7 @@ def execute(filters=None):
 	if not filters.get("account"):
 		return columns, []
 
-	account_currency = frappe.db.get_value("Account", filters.account, "account_currency")
+	account_currency = frappe.get_cached_value("Account", filters.account, "account_currency")
 
 	data = get_entries(filters)
 

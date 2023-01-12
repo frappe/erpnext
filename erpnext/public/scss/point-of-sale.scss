@@ -159,6 +159,12 @@
 					}
 				}
 
+				.item-img {
+					@extend .image;
+					border-radius: 8px 8px 0 0;
+					object-fit: cover;
+				}
+
 				> .item-detail {
 					display: flex;
 					flex-direction: column;

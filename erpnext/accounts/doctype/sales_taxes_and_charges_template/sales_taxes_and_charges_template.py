@@ -27,7 +27,7 @@ class SalesTaxesandChargesTemplate(Document):
 	def set_missing_values(self):
 		for data in self.taxes:
 			if data.charge_type == "On Net Total" and flt(data.rate) == 0.0:
-				data.rate = frappe.db.get_value("Account", data.account_head, "tax_rate")
+				data.rate = frappe.get_cached_value("Account", data.account_head, "tax_rate")
 
 
 def valdiate_taxes_and_charges_template(doc):

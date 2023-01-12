@@ -38,7 +38,7 @@ def validate_filters(filters):
 	if not filters.fiscal_year:
 		frappe.throw(_("Fiscal Year {0} is required").format(filters.fiscal_year))
 
-	fiscal_year = frappe.db.get_value(
+	fiscal_year = frappe.get_cached_value(
 		"Fiscal Year", filters.fiscal_year, ["year_start_date", "year_end_date"], as_dict=True
 	)
 	if not fiscal_year:
@@ -177,7 +177,7 @@ def get_rootwise_opening_balances(filters, report_type):
 		"year_start_date": filters.year_start_date,
 		"project": filters.project,
 		"finance_book": filters.finance_book,
-		"company_fb": frappe.db.get_value("Company", filters.company, "default_finance_book"),
+		"company_fb": frappe.get_cached_value("Company", filters.company, "default_finance_book"),
 	}
 
 	if accounting_dimensions:
