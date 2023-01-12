@@ -283,7 +283,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"supplier": get_default_supplier(item, args),
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
-		"weight_per_unit": get_weight_per_unit(item.name, weight_uom=args.weight_uom or item.weight_uom),
+		"net_weight_per_unit": get_weight_per_unit(item.name, weight_uom=args.weight_uom or item.weight_uom),
 		"weight_uom": args.weight_uom or item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
@@ -1072,18 +1072,23 @@ def get_serial_no_batchwise(args, sales_order=None):
 
 
 @frappe.whitelist()
-def get_weight_per_unit(item_code, weight_uom=None):
+def get_weight_per_unit(item_code, weight_uom=None, weight_field="net_weight_per_unit"):
+	allowed_weight_fields = ["net_weight_per_unit", "tare_weight_per_unit", "gross_weight_per_unit"]
+	if weight_field not in allowed_weight_fields:
+		frappe.throw(_("Invalid weight field '{0}'").format(weight_field))
+
 	item = frappe.get_cached_doc("Item", item_code)
 
+	item_weight = flt(item.get(weight_field))
 	weight_uom = weight_uom or item.weight_uom
 
-	if flt(item.weight_per_unit):
+	if item_weight:
 		if weight_uom and weight_uom != item.weight_uom:
-			return flt(item.weight_per_unit) * flt(get_uom_conv_factor(item.weight_uom, weight_uom))
+			return item_weight * flt(get_uom_conv_factor(item.weight_uom, weight_uom))
 		else:
-			return flt(item.weight_per_unit)
+			return item_weight
 
-	elif weight_uom:
+	elif weight_uom and weight_field == "net_weight_per_unit":
 		weight_conversion_factor = get_conversion_factor(item.name, weight_uom)
 		if not weight_conversion_factor.get("not_convertible"):
 			return 1 / flt(weight_conversion_factor.get("conversion_factor"))

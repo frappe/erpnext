@@ -87,31 +87,36 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 
 	calculate_totals() {
 		this.frm.doc.total_net_weight = 0;
-		if (!this.frm.doc.manual_tare_weight) {
-			this.frm.doc.total_tare_weight = 0;
-		}
+		this.frm.doc.total_tare_weight = 0;
 
 		for (const field of this.item_table_fields) {
 			for (let item of this.frm.doc[field] || []) {
-				frappe.model.round_floats_in(item, null, ['weight_per_unit']);
-				item.stock_qty = item.qty * item.conversion_factor;
-				item.total_weight = flt(item.weight_per_unit * item.stock_qty, precision("total_weight", item));
+				frappe.model.round_floats_in(item, null,
+					['net_weight_per_unit', 'tare_weight_per_unit', 'gross_weight_per_unit']);
 
-				if (item.doctype == "Packing Slip Item") {
-					this.frm.doc.total_net_weight += item.total_weight;
-				} else if (item.doctype == "Packing Slip Packaging Material") {
-					if (!this.frm.doc.manual_tare_weight) {
-						this.frm.doc.total_tare_weight += item.total_weight;
+				item.stock_qty = item.qty * item.conversion_factor;
+
+				if (frappe.meta.has_field(item.doctype, "net_weight_per_unit")) {
+					item.net_weight = flt(item.net_weight_per_unit * item.stock_qty, precision("net_weight", item));
+				}
+				if (frappe.meta.has_field(item.doctype, "tare_weight_per_unit")) {
+					item.tare_weight = flt(item.tare_weight_per_unit * item.stock_qty, precision("tare_weight", item));
+				}
+				if (frappe.meta.has_field(item.doctype, "gross_weight")) {
+					item.gross_weight = flt(item.net_weight + item.tare_weight, precision("gross_weight", item));
+					if (item.stock_qty && frappe.meta.has_field(item.doctype, "gross_weight_per_unit")) {
+						item.gross_weight_per_unit = item.gross_weight / item.stock_qty;
 					}
 				}
+
+				this.frm.doc.total_net_weight += flt(item.net_weight);
+				this.frm.doc.total_tare_weight += flt(item.tare_weight);
 			}
 		}
 
 		for (let item of this.frm.doc.packing_slips || []) {
 			this.frm.doc.total_net_weight += item.net_weight;
-			if (!this.frm.doc.manual_tare_weight) {
-				this.frm.doc.total_tare_weight += item.tare_weight;
-			}
+			this.frm.doc.total_tare_weight += item.tare_weight;
 		}
 
 		frappe.model.round_floats_in(this.frm.doc, ['total_net_weight', 'total_tare_weight']);
@@ -155,11 +160,6 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 									for (let d of r.message.packaging_items) {
 										me.frm.add_child("packaging_items", d);
 									}
-								}
-
-								me.frm.doc.manual_tare_weight = cint(r.message.manual_tare_weight);
-								if (r.message.manual_tare_weight && flt(r.message.total_tare_weight)) {
-									me.frm.doc.total_tare_weight = flt(r.message.total_tare_weight);
 								}
 
 								me.calculate_totals();

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-24 19:29:06",
  "doctype": "DocType",
@@ -35,8 +36,8 @@
   "alt_uom_qty",
   "alt_uom",
   "column_break_44",
-  "weight_per_unit",
-  "total_weight",
+  "net_weight_per_unit",
+  "net_weight",
   "weight_uom",
   "sec_break1",
   "price_list_rate",
@@ -432,12 +433,12 @@
    "read_only": 1
   },
   {
-   "fieldname": "weight_per_unit",
+   "fieldname": "net_weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit"
   },
   {
-   "fieldname": "total_weight",
+   "fieldname": "net_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
    "print_hide": 1,
@@ -1121,7 +1122,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-12-05 12:53:25.166050",
+ "links": [],
+ "modified": "2023-01-12 01:06:01.411828",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
@@ -1131,5 +1133,6 @@
  "search_fields": "item_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

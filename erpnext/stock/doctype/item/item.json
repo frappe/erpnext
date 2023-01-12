@@ -43,12 +43,13 @@
   "is_sales_item",
   "is_purchase_item",
   "cb_37",
-  "include_in_vehicle_booking",
   "include_item_in_manufacturing",
+  "is_packaging_material",
   "column_break_40",
   "allow_alternative_item",
   "hide_in_price_list",
   "column_break_104",
+  "include_in_vehicle_booking",
   "is_customer_provided_item",
   "customer",
   "vehicle_details_section",
@@ -71,17 +72,23 @@
   "variant_based_on",
   "attributes",
   "units_of_measure_section",
-  "weight_uom",
-  "weight_per_unit",
+  "sales_uom",
   "col_break_37",
   "purchase_uom",
-  "sales_uom",
   "column_break_41",
   "manufacture_uom",
   "unit_of_measure_conversion",
   "uom_conversion_graph",
   "uoms",
-  "description_tab",
+  "weight_section",
+  "weight_uom",
+  "column_break_61",
+  "net_weight_per_unit",
+  "column_break_63",
+  "tare_weight_per_unit",
+  "column_break_65",
+  "gross_weight_per_unit",
+  "description_section",
   "show_item_code",
   "description",
   "inventory_tab",
@@ -372,6 +379,7 @@
   {
    "fieldname": "barcodes",
    "fieldtype": "Table",
+   "hidden": 1,
    "label": "Barcodes",
    "options": "Item Barcode"
   },
@@ -420,13 +428,13 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "is_stock_item",
-   "fieldname": "weight_per_unit",
+   "depends_on": "eval:doc.is_stock_item && !doc.is_packaging_material",
+   "fieldname": "net_weight_per_unit",
    "fieldtype": "Float",
    "label": "Net Weight Per Unit"
   },
   {
-   "depends_on": "eval:doc.is_stock_item",
+   "depends_on": "is_stock_item",
    "fieldname": "weight_uom",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -448,10 +456,11 @@
    "options": "Item Reorder"
   },
   {
+   "collapsible": 1,
    "collapsible_depends_on": "uom_conversion_graph",
    "fieldname": "unit_of_measure_conversion",
    "fieldtype": "Section Break",
-   "label": "Units of Measure Conversion"
+   "label": "Unit of Measure Conversion"
   },
   {
    "description": "Will also apply for variants",
@@ -1096,6 +1105,7 @@
    "default": "0",
    "fieldname": "is_vehicle",
    "fieldtype": "Check",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Is Vehicle"
   },
@@ -1310,9 +1320,46 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "description_tab",
-   "fieldtype": "Tab Break",
+   "depends_on": "is_stock_item",
+   "fieldname": "tare_weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Tare Weight Per Unit"
+  },
+  {
+   "depends_on": "is_stock_item",
+   "fieldname": "weight_section",
+   "fieldtype": "Section Break",
+   "label": "Weight"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_63",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_65",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.is_stock_item && !doc.is_packaging_material",
+   "fieldname": "gross_weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Gross Weight Per Unit"
+  },
+  {
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
    "label": "Description"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_stock_item",
+   "fieldname": "is_packaging_material",
+   "fieldtype": "Check",
+   "label": "Is Packaging Material"
   }
  ],
  "has_web_view": 1,
@@ -1320,7 +1367,7 @@
  "idx": 2,
  "image_field": "image",
  "links": [],
- "modified": "2022-12-22 14:39:31.695687",
+ "modified": "2023-01-12 14:22:29.722134",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

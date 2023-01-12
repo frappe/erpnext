@@ -14,7 +14,6 @@
   "packaging_items",
   "tare_weight_section",
   "total_tare_weight",
-  "manual_tare_weight",
   "column_break_7",
   "weight_uom",
   "column_break_8",
@@ -49,7 +48,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Total Tare Weight",
-   "read_only_depends_on": "eval:!doc.manual_tare_weight"
+   "read_only": 1
   },
   {
    "fieldname": "column_break_8",
@@ -122,12 +121,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "manual_tare_weight",
-   "fieldtype": "Check",
-   "label": "Set Tare Weight Manually"
-  },
-  {
    "fieldname": "default_packaging_material_section",
    "fieldtype": "Section Break",
    "label": "Default Packaging Material"
@@ -147,7 +140,7 @@
    "link_fieldname": "package_type"
   }
  ],
- "modified": "2023-01-09 23:40:22.584501",
+ "modified": "2023-01-12 01:04:37.138698",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Package Type",

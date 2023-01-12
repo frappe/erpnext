@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:28:02",
  "doctype": "DocType",
  "document_type": "Document",
@@ -15,7 +16,7 @@
   "col_break2",
   "qty",
   "uom",
-  "weight",
+  "net_weight",
   "rate",
   "amount",
   "applicable_charges",
@@ -130,7 +131,7 @@
   },
   {
    "columns": 1,
-   "fieldname": "weight",
+   "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Weight",
@@ -192,12 +193,14 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-12-07 00:08:37.507823",
+ "links": [],
+ "modified": "2023-01-12 01:06:01.242310",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",
  "owner": "wasim@webnotestech.com",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

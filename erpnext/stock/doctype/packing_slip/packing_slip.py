@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.utils import flt, cint
-from frappe.model.mapper import get_mapped_doc, map_child_doc
+from frappe.model.mapper import map_child_doc
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
 	get_default_expense_account, get_default_cost_center, get_item_default_values, get_force_default_warehouse,\
@@ -13,11 +13,11 @@ from erpnext.accounts.party import validate_party_frozen_disabled
 import json
 
 
-force_item_fields = ['stock_uom', 'has_batch_no', 'has_serial_no']
+force_item_fields = ["stock_uom", "has_batch_no", "has_serial_no", "force_default_warehouse"]
 
 
 class PackingSlip(StockController):
-	item_table_fields = ['items', 'packaging_items']
+	item_table_fields = ["items", "packaging_items"]
 
 	def get_feed(self):
 		return _("Packed {0}").format(self.get("package_type"))
@@ -128,10 +128,13 @@ class PackingSlip(StockController):
 		})
 
 	def validate_weights(self):
-		for field in self.item_table_fields:
-			for d in self.get(field):
-				if flt(d.total_weight) < 0:
-					frappe.throw(_("Row #{0}: {1} cannot be negative").format(d.idx, d.meta.get_label('total_weight')))
+		weight_fields = ["net_weight", "tare_weight", "gross_weight"]
+
+		for table_field in self.item_table_fields:
+			for d in self.get(table_field):
+				for weight_field in weight_fields:
+					if d.meta.has_field(weight_field) and flt(d.get(weight_field)) < 0:
+						frappe.throw(_("Row #{0}: {1} cannot be negative").format(d.idx, d.meta.get_label(weight_field)))
 
 		if flt(self.total_tare_weight) < 0:
 			frappe.throw(_("Total Tare Weight cannot be negative"))
@@ -214,25 +217,30 @@ class PackingSlip(StockController):
 
 	def calculate_totals(self):
 		self.total_net_weight = 0
-		if not self.manual_tare_weight:
-			self.total_tare_weight = 0
+		self.total_tare_weight = 0
 
 		for field in self.item_table_fields:
 			for item in self.get(field):
-				self.round_floats_in(item, excluding=['weight_per_unit'])
-				item.stock_qty = item.qty * item.conversion_factor
-				item.total_weight = flt(item.weight_per_unit * item.stock_qty, item.precision("total_weight"))
+				self.round_floats_in(item,
+					excluding=['net_weight_per_unit', 'tare_weight_per_unit', 'gross_weight_per_unit'])
 
-				if item.doctype == "Packing Slip Item":
-					self.total_net_weight += item.total_weight
-				elif item.doctype == "Packing Slip Packaging Material":
-					if not self.manual_tare_weight:
-						self.total_tare_weight += item.total_weight
+				item.stock_qty = item.qty * item.conversion_factor
+
+				if item.meta.has_field("net_weight_per_unit"):
+					item.net_weight = flt(item.net_weight_per_unit * item.stock_qty, item.precision("net_weight"))
+				if item.meta.has_field("tare_weight_per_unit"):
+					item.tare_weight = flt(item.tare_weight_per_unit * item.stock_qty, item.precision("tare_weight"))
+				if item.meta.has_field("gross_weight"):
+					item.gross_weight = flt(item.net_weight + item.tare_weight, item.precision("gross_weight"))
+					if item.stock_qty and item.meta.has_field("gross_weight_per_unit"):
+						item.gross_weight_per_unit = item.gross_weight / item.stock_qty
+
+				self.total_net_weight += flt(item.get("net_weight"))
+				self.total_tare_weight += flt(item.get("tare_weight"))
 
 		for item in self.get("packing_slips"):
 			self.total_net_weight += item.net_weight
-			if not self.manual_tare_weight:
-				self.total_tare_weight += item.tare_weight
+			self.total_tare_weight += item.tare_weight
 
 		self.round_floats_in(self, ['total_net_weight', 'total_tare_weight'])
 		self.total_gross_weight = flt(self.total_net_weight + self.total_tare_weight, self.precision("total_gross_weight"))
@@ -376,7 +384,7 @@ def get_package_type_details(package_type, args):
 	packaging_items_copy_fields = [
 		"item_code", "item_name", "description",
 		"qty", "uom", "conversion_factor", "stock_qty",
-		"weight_per_unit"
+		"tare_weight_per_unit"
 	]
 
 	package_type_doc = frappe.get_cached_doc("Package Type", package_type)
@@ -400,8 +408,6 @@ def get_package_type_details(package_type, args):
 
 	return {
 		"packaging_items": packaging_items,
-		"manual_tare_weight": cint(package_type_doc.manual_tare_weight),
-		"total_tare_weight": flt(package_type_doc.total_tare_weight),
 		"weight_uom": package_type_doc.weight_uom,
 	}
 
@@ -446,9 +452,11 @@ def get_item_details(args):
 
 	out.stock_qty = out.qty * out.conversion_factor
 
-	# Net Weight
-	out.weight_per_unit = flt(args.weight_per_unit) or get_weight_per_unit(item.name,
+	# Weight Per Unit
+	out.net_weight_per_unit = flt(args.net_weight_per_unit) or get_weight_per_unit(item.name,
 		weight_uom=args.weight_uom or item.weight_uom)
+	out.tare_weight_per_unit = flt(args.tare_weight_per_unit) or get_weight_per_unit(item.name,
+		weight_uom=args.weight_uom or item.weight_uom, weight_field="tare_weight_per_unit")
 
 	# Warehouse
 	out.source_warehouse = get_default_source_warehouse(item, args)
@@ -499,7 +507,11 @@ def get_item_weights_per_unit(item_codes, weight_uom=None):
 	out = {}
 	for item_code in item_codes:
 		item_weight_uom = frappe.get_cached_value("Item", item_code, "weight_uom")
-		out[item_code] = get_weight_per_unit(item_code, weight_uom=weight_uom or item_weight_uom)
+		out[item_code] = {
+			"net_weight_per_unit": get_weight_per_unit(item_code, weight_uom=weight_uom or item_weight_uom),
+			"tare_weight_per_unit": get_weight_per_unit(item_code, weight_uom=weight_uom or item_weight_uom,
+				weight_field="tare_weight_per_unit"),
+		}
 
 	return out
 
@@ -623,7 +635,7 @@ def update_mapped_item(target, packing_slip, ps_item):
 	target.uom = ps_item.uom
 	target.conversion_factor = ps_item.conversion_factor
 
-	target.weight_per_unit = ps_item.weight_per_unit
+	target.net_weight_per_unit = ps_item.net_weight_per_unit
 	target.weight_uom = packing_slip.weight_uom
 
 	target.warehouse = packing_slip.warehouse

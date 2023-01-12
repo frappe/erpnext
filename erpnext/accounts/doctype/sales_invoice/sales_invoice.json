@@ -204,7 +204,6 @@
   "base_in_words",
   "column_break_155",
   "outstanding_amount",
-  "sec_fbr_pos_transaction_details",
   "address_and_contact_tab",
   "sec_address",
   "customer_address",
@@ -231,6 +230,8 @@
   "sec_terms_and_conditions",
   "tc_name",
   "terms",
+  "fbr_pos_details_tab",
+  "sec_fbr_pos_transaction_details",
   "settings_tab",
   "print_settings_section",
   "letter_head",
@@ -2085,7 +2086,6 @@
    "label": "Default Depreciation (%)"
   },
   {
-   "collapsible": 1,
    "depends_on": "eval:doc.has_stin && doc.is_fbr_pos_invoice",
    "fieldname": "sec_fbr_pos_transaction_details",
    "fieldtype": "Section Break",
@@ -2216,13 +2216,19 @@
    "fieldtype": "Link",
    "label": "Applies to Serial No",
    "options": "Serial No"
+  },
+  {
+   "depends_on": "eval:doc.has_stin && doc.is_fbr_pos_invoice",
+   "fieldname": "fbr_pos_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "FBR POS Details"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-08 16:59:00.546143",
+ "modified": "2023-01-11 17:43:48.663734",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

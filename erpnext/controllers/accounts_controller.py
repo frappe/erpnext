@@ -38,14 +38,14 @@ force_party_fields = ("customer_name", "bill_to_name", "supplier_name",
 force_applies_to_fields = ("vehicle_chassis_no", "vehicle_engine_no", "vehicle_license_plate", "vehicle_unregistered",
 	"vehicle_color", "vehicle_last_odometer", "applies_to_item", "vehicle_owner_name", "vehicle_warranty_no")
 
-merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
+merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'net_weight',
 	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
 	'item_taxes_and_charges', 'tax_inclusive_amount',
 	'amount_before_depreciation', 'depreciation_amount']
 
 merge_items_rate_fields = [('rate', 'amount'), ('taxable_rate', 'taxable_amount'), ('net_rate', 'net_amount'),
 	('discount_amount', 'total_discount'), ('price_list_rate', 'amount_before_discount'),
-	('tax_inclusive_rate', 'tax_inclusive_amount'), ('weight_per_unit', 'total_weight')]
+	('tax_inclusive_rate', 'tax_inclusive_amount'), ('net_weight_per_unit', 'net_weight')]
 
 print_total_fields_from_items = [
 	('total_qty', 'qty'),
@@ -69,7 +69,7 @@ print_total_fields_from_items = [
 	('grand_total', 'tax_inclusive_amount'),
 	('total_taxes_and_charges', 'item_taxes_and_charges'),
 
-	('total_net_weight', 'total_weight')
+	('total_net_weight', 'net_weight')
 ]
 
 

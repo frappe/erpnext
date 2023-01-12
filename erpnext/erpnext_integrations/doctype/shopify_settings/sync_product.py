@@ -106,7 +106,7 @@ def create_item(shopify_item, warehouse, has_variant=0, attributes=None,variant_
 		"default_warehouse": warehouse,
 		"image": get_item_image(shopify_item),
 		"weight_uom": shopify_item.get("weight_unit"),
-		"weight_per_unit": shopify_item.get("weight"),
+		"net_weight_per_unit": shopify_item.get("weight"),
 		"default_supplier": get_supplier(shopify_item),
 		"item_defaults": [
 			{

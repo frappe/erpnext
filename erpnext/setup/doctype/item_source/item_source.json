@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_source_name",
@@ -17,6 +18,12 @@
   "column_break_9",
   "has_serial_no",
   "has_batch_no",
+  "column_break_11",
+  "is_sales_item",
+  "is_purchase_item",
+  "column_break_14",
+  "is_packaging_material",
+  "is_customer_provided_item",
   "column_break_12",
   "is_vehicle",
   "has_variants"
@@ -98,13 +105,47 @@
    "fieldtype": "Select",
    "label": "Has Variants",
    "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_sales_item",
+   "fieldtype": "Select",
+   "label": "Is Sales Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_purchase_item",
+   "fieldtype": "Select",
+   "label": "Is Purchase Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_packaging_material",
+   "fieldtype": "Select",
+   "label": "Is Packaging Material",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_customer_provided_item",
+   "fieldtype": "Select",
+   "label": "Is Customer Provided Item",
+   "options": "\nNo\nYes"
   }
  ],
  "icon": "fa fa-certificate",
- "modified": "2022-06-14 14:32:13.446005",
+ "links": [],
+ "modified": "2023-01-12 14:42:26.527330",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Source",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -161,5 +202,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

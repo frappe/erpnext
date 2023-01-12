@@ -33,7 +33,7 @@
   "items",
   "sec_totals",
   "total_qty",
-  "total_weight",
+  "total_net_weight",
   "column_break_17",
   "total_amount",
   "sec_break1",
@@ -235,8 +235,8 @@
    "read_only": 1
   },
   {
-   "depends_on": "total_weight",
-   "fieldname": "total_weight",
+   "depends_on": "total_net_weight",
+   "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
    "read_only": 1

@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_group_name",
  "creation": "2013-03-28 10:35:29",
+ "default_view": "Tree",
  "description": "Item Classification",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -25,6 +27,12 @@
   "has_serial_no",
   "has_batch_no",
   "column_break_18",
+  "is_sales_item",
+  "is_purchase_item",
+  "column_break_22",
+  "is_packaging_material",
+  "is_customer_provided_item",
+  "column_break_23",
   "is_vehicle",
   "has_variants",
   "sb9",
@@ -238,18 +246,52 @@
    "fieldname": "is_print_heading",
    "fieldtype": "Check",
    "label": "Is Print Heading"
+  },
+  {
+   "fieldname": "is_packaging_material",
+   "fieldtype": "Select",
+   "label": "Is Packaging Material",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_sales_item",
+   "fieldtype": "Select",
+   "label": "Is Sales Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_purchase_item",
+   "fieldtype": "Select",
+   "label": "Is Purchase Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_customer_provided_item",
+   "fieldtype": "Select",
+   "label": "Is Customer Provided Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,
+ "links": [],
  "max_attachments": 3,
- "modified": "2022-06-14 14:31:58.184265",
+ "modified": "2023-01-12 14:35:13.118085",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
  "name_case": "Title Case",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_item_group",
  "owner": "Administrator",
  "permissions": [
@@ -315,5 +357,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
