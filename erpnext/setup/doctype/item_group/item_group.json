@@ -27,6 +27,12 @@
   "has_serial_no",
   "has_batch_no",
   "column_break_18",
+  "is_sales_item",
+  "is_purchase_item",
+  "column_break_22",
+  "is_packaging_material",
+  "is_customer_provided_item",
+  "column_break_23",
   "is_vehicle",
   "has_variants",
   "sb9",
@@ -240,6 +246,38 @@
    "fieldname": "is_print_heading",
    "fieldtype": "Check",
    "label": "Is Print Heading"
+  },
+  {
+   "fieldname": "is_packaging_material",
+   "fieldtype": "Select",
+   "label": "Is Packaging Material",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_sales_item",
+   "fieldtype": "Select",
+   "label": "Is Sales Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_purchase_item",
+   "fieldtype": "Select",
+   "label": "Is Purchase Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_customer_provided_item",
+   "fieldtype": "Select",
+   "label": "Is Customer Provided Item",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -248,7 +286,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-01-12 13:27:48.003064",
+ "modified": "2023-01-12 14:35:13.118085",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

@@ -1328,7 +1328,11 @@ def get_item_override_values(args, validate=False):
 		'has_serial_no': 'YesNo',
 		'has_batch_no': 'YesNo',
 		'is_vehicle': 'YesNo',
-		'has_variants': 'YesNo'
+		'has_variants': 'YesNo',
+		'is_sales_item': 'YesNo',
+		'is_purchase_item': 'YesNo',
+		'is_packaging_material': 'YesNo',
+		'is_customer_provided_item': 'YesNo',
 	}
 
 	def throw_override_must_be(doc, target_fieldname, source_value):

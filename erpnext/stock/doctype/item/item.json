@@ -1105,6 +1105,7 @@
    "default": "0",
    "fieldname": "is_vehicle",
    "fieldtype": "Check",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Is Vehicle"
   },
@@ -1366,7 +1367,7 @@
  "idx": 2,
  "image_field": "image",
  "links": [],
- "modified": "2023-01-12 12:24:15.955342",
+ "modified": "2023-01-12 14:22:29.722134",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
