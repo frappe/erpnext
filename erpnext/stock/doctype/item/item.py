@@ -895,8 +895,9 @@ class Item(WebsiteGenerator):
 		if self.variant_of:
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
-				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'")
-									.format(self.stock_uom, template_uom))
+				frappe.throw(_("Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'").format(
+					self.stock_uom, template_uom
+				))
 
 		if self.alt_uom == self.stock_uom:
 			self.alt_uom = ""
@@ -1189,7 +1190,6 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, tra
 		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
-	
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
@@ -1236,8 +1236,7 @@ def check_stock_uom_with_bin(item, stock_uom):
 		return
 
 	matched = True
-	ref_uom = frappe.db.get_value("Stock Ledger Entry",
-							   {"item_code": item}, "stock_uom")
+	ref_uom = frappe.db.get_value("Stock Ledger Entry", {"item_code": item}, "stock_uom")
 
 	if ref_uom:
 		if cstr(ref_uom) != cstr(stock_uom):
@@ -1309,8 +1308,8 @@ def get_item_attribute(parent, attribute_value=''):
 	if not frappe.has_permission("Item"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
-		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+	return frappe.get_all("Item Attribute Value", fields=["attribute_value"],
+		filters={'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
 
 
 @frappe.whitelist()
@@ -1502,14 +1501,15 @@ def change_uom(item_code, stock_uom=None, alt_uom=None, alt_uom_size=None):
 
 
 def update_variants(variants, template, publish_progress=True):
-	count=0
+	count = 0
 	for d in variants:
 		variant = frappe.get_doc("Item", d)
 		copy_attributes_to_variant(template, variant)
 		variant.save()
-		count+=1
+
+		count += 1
 		if publish_progress:
-				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
+			frappe.publish_progress(count*100/len(variants), title=_("Updating Variants..."))
 
 
 def on_doctype_update():
