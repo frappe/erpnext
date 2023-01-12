@@ -3,7 +3,7 @@
 
 import frappe
 
-from erpnext.regional.saudi_arabia.setup import add_print_formats
+from ksa.install import add_print_formats
 
 
 def execute():

@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.regional.saudi_arabia.setup import make_custom_fields
+from ksa.install import make_custom_fields
 
 
 def execute():
