@@ -7,7 +7,7 @@ import erpnext
 from frappe import _
 from email_reply_parser import EmailReplyParser
 from frappe.utils import flt, cint, get_url, cstr, nowtime, get_time, today, get_datetime, add_days, ceil, getdate,\
-	clean_whitespace
+	clean_whitespace, combine_datetime
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -2161,6 +2161,7 @@ def submit_feedback(project, customer_feedback):
 		frappe.throw(_("Repair Order {0} does not exist".format(project)))
 
 	target_doc = frappe.get_doc('Project', project)
+	target_doc.check_permission("read")
 
 	cur_dt = get_datetime()
 	cur_date = getdate(cur_dt)
@@ -2177,5 +2178,7 @@ def submit_feedback(project, customer_feedback):
 
 	target_doc.db_set(feedback_info)
 	target_doc.notify_update()
+
+	feedback_info['feedback_dt'] = combine_datetime(cur_date, cur_time)
 
 	return feedback_info
