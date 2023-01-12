@@ -1501,6 +1501,49 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		self.assertTrue(return_pi.docstatus == 1)
 
+	def test_disable_last_purchase_rate(self):
+		from erpnext.stock.get_item_details import get_item_details
+
+		item = make_item(
+			"_Test Disable Last Purchase Rate",
+			{"is_purchase_item": 1, "is_stock_item": 1},
+		)
+
+		frappe.db.set_single_value("Buying Settings", "disable_last_purchase_rate", 1)
+
+		pr = make_purchase_receipt(
+			qty=1,
+			rate=100,
+			item_code=item.name,
+		)
+
+		args = pr.items[0].as_dict()
+		args.update(
+			{
+				"supplier": pr.supplier,
+				"doctype": pr.doctype,
+				"conversion_rate": pr.conversion_rate,
+				"currency": pr.currency,
+				"company": pr.company,
+				"posting_date": pr.posting_date,
+				"posting_time": pr.posting_time,
+			}
+		)
+
+		res = get_item_details(args)
+		self.assertEqual(res.get("last_purchase_rate"), 0)
+
+		frappe.db.set_single_value("Buying Settings", "disable_last_purchase_rate", 0)
+
+		pr = make_purchase_receipt(
+			qty=1,
+			rate=100,
+			item_code=item.name,
+		)
+
+		res = get_item_details(args)
+		self.assertEqual(res.get("last_purchase_rate"), 100)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

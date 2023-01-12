@@ -83,8 +83,8 @@ def reset_packing_list(doc):
 		# 1. items were deleted
 		# 2. if bundle item replaced by another item (same no. of items but different items)
 		# we maintain list to track recurring item rows as well
-		items_before_save = [item.item_code for item in doc_before_save.get("items")]
-		items_after_save = [item.item_code for item in doc.get("items")]
+		items_before_save = [(item.name, item.item_code) for item in doc_before_save.get("items")]
+		items_after_save = [(item.name, item.item_code) for item in doc.get("items")]
 		reset_table = items_before_save != items_after_save
 	else:
 		# reset: if via Update Items OR
