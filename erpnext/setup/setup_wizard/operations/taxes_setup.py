@@ -110,9 +110,14 @@ def update_regional_tax_settings(country, company):
 	path = frappe.get_app_path("erpnext", "regional", frappe.scrub(country))
 	if os.path.exists(path.encode("utf-8")):
 		try:
-			module_name = "erpnext.regional.{0}.setup.update_regional_tax_settings".format(
-				frappe.scrub(country)
-			)
+			if frappe.scrub(country) == 'saudi_arabia':
+				if not 'Ksa' in frappe.get_installed_apps():
+					frappe.throw("Please Install KSA app for you Country!")
+				module_name = "ksa.install.create_ksa_vat_setting"
+			else:
+				module_name = "erpnext.regional.{0}.setup.update_regional_tax_settings".format(
+					frappe.scrub(country)
+				)
 			frappe.get_attr(module_name)(country, company)
 		except Exception as e:
 			# Log error and ignore if failed to setup regional tax settings
