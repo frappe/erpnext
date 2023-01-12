@@ -230,7 +230,8 @@ class PickList(Document):
 			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
 	def before_print(self, settings=None):
-		self.group_similar_items()
+		if self.group_same_items:
+			self.group_similar_items()
 
 	def group_similar_items(self):
 		group_item_qty = defaultdict(float)
