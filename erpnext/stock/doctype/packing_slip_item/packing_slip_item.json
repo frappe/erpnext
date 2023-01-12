@@ -42,7 +42,8 @@
   "accounting_dimensions_section",
   "expense_account",
   "dimension_col_break",
-  "cost_center"
+  "cost_center",
+  "cost_percentage"
  ],
  "fields": [
   {
@@ -298,12 +299,18 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Gross Weight"
+  },
+  {
+   "fieldname": "cost_percentage",
+   "fieldtype": "Percent",
+   "label": "Cost Percentage",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-12 01:05:59.567110",
+ "modified": "2023-01-12 20:41:30.530375",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",

@@ -9,6 +9,7 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
 	get_default_expense_account, get_default_cost_center, get_item_default_values, get_force_default_warehouse,\
 	get_global_default_warehouse
+from erpnext.stock.utils import get_incoming_rate
 from erpnext.accounts.party import validate_party_frozen_disabled
 import json
 
@@ -36,6 +37,7 @@ class PackingSlip(StockController):
 		self.validate_with_previous_doc()
 		self.calculate_totals()
 		self.validate_weights()
+		self.set_cost_percentage()
 		self.set_title()
 		self.set_delivery_status(validate_delivery=False)
 		self.set_status()
@@ -245,6 +247,39 @@ class PackingSlip(StockController):
 		self.round_floats_in(self, ['total_net_weight', 'total_tare_weight'])
 		self.total_gross_weight = flt(self.total_net_weight + self.total_tare_weight, self.precision("total_gross_weight"))
 
+	def set_cost_percentage(self):
+		total_cost = 0
+		total_stock_qty = 0
+
+		for d in self.get("items"):
+			args = self.get_args_for_incoming_rate(d)
+			d.valuation_rate = get_incoming_rate(args, raise_error_if_no_rate=False)
+			d.valuation_amount = flt(d.valuation_rate) * flt(d.stock_qty)
+
+			total_cost += d.valuation_amount
+			total_stock_qty += flt(d.stock_qty)
+
+		for d in self.get("items"):
+			if total_cost:
+				d.cost_percentage = d.valuation_amount / total_cost * 100
+			else:
+				d.cost_percentage = flt(d.stock_qty) / total_stock_qty * 100 if total_stock_qty else 0
+
+	def get_args_for_incoming_rate(self, item):
+		return frappe._dict({
+			"item_code": item.item_code,
+			"warehouse": item.source_warehouse,
+			"batch_no": item.batch_no,
+			"posting_date": self.posting_date,
+			"posting_time": self.posting_time,
+			"qty": -1 * flt(item.stock_qty),
+			"serial_no": item.get("serial_no"),
+			"voucher_type": self.doctype,
+			"voucher_no": self.name,
+			"company": self.company,
+			"allow_zero_valuation": cint(item.get("allow_zero_valuation_rate")),
+		})
+
 	def update_previous_doc_status(self):
 		sales_orders = set()
 		sales_order_row_names = set()
@@ -263,6 +298,14 @@ class PackingSlip(StockController):
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		sl_entries = []
+
+		# SLE for packaging material
+		for d in self.get('packaging_items'):
+			sl_entries.append(self.get_sl_entries(d, {
+				"warehouse": d.source_warehouse,
+				"actual_qty": -flt(d.stock_qty),
+				"incoming_rate": 0
+			}))
 
 		# SLE for items contents source warehouse
 		for d in self.get('items'):
@@ -290,15 +333,17 @@ class PackingSlip(StockController):
 					"dependency_type": "Amount",
 				}]
 
-			sl_entries.append(sle)
+				for dep_row in self.get("packaging_items"):
+					if flt(dep_row.stock_qty):
+						sle.dependencies.append({
+							"dependent_voucher_type": self.doctype,
+							"dependent_voucher_no": self.name,
+							"dependent_voucher_detail_no": dep_row.name,
+							"dependency_type": "Amount",
+							"dependency_percentage": d.cost_percentage
+						})
 
-		# SLE for packaging material
-		for d in self.get('packaging_items'):
-			sl_entries.append(self.get_sl_entries(d, {
-				"warehouse": d.source_warehouse,
-				"actual_qty": -flt(d.stock_qty),
-				"incoming_rate": 0
-			}))
+			sl_entries.append(sle)
 
 		# Reverse for cancellation
 		if self.docstatus == 2:
@@ -465,12 +510,7 @@ def get_item_details(args):
 	# Accounting
 	if args.company:
 		stock_adjustment_account = frappe.get_cached_value('Company', args.company, 'stock_adjustment_account')
-		default_expense_account = get_default_expense_account(args.item_code, args)
-		if args.child_doctype == "Packing Slip Item":
-			out.expense_account = stock_adjustment_account or default_expense_account
-		elif args.child_doctype == "Packing Slip Packaging Material":
-			out.expense_account = default_expense_account
-
+		out.expense_account = stock_adjustment_account or get_default_expense_account(args.item_code, args)
 		out.cost_center = get_default_cost_center(args.item_code, args)
 
 	return out
