@@ -169,7 +169,8 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			me.frm.toggle_display(field, me.frm.doc.conversion_document == "Order");
 		}
 
-		var vehicle_info_fields = [
+		var vehicle_maintenance_fields = [
+			"due_date",
 			"applies_to_vehicle",
 			"vehicle_license_plate",
 			"vehicle_unregistered",
@@ -178,7 +179,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			"vehicle_last_odometer",
 		]
 
-		$.each(vehicle_info_fields, function (i, f) {
+		$.each(vehicle_maintenance_fields, function (i, f) {
 			if (me.frm.fields_dict[f]) {
 				me.frm.set_df_property(f, "hidden", me.frm.doc.conversion_document == "Order" ? 1 : 0);
 			}

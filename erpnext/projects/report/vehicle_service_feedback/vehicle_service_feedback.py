@@ -4,7 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, today, add_days, cint
+from frappe.utils import getdate, today, add_days, cint, combine_datetime
+
 
 def execute(filters=None):
 	return VehicleServiceFeedback(filters).run()
@@ -21,15 +22,20 @@ class VehicleServiceFeedback:
 
 	def run(self):
 		self.get_data()
+		self.process_data()
 		self.get_columns()
 		return self.columns, self.data
 
 	def get_data(self):
 		conditions = self.get_conditions()
 
-		feedback_valid_after_service_days = cint(frappe.db.get_value("CRM Settings", None, "feedback_valid_after_service_days"))
-		self.filters.from_date = add_days(self.filters.from_date, -1 * feedback_valid_after_service_days)
-		self.filters.to_days = add_days(self.filters.to_days, -1 * feedback_valid_after_service_days)
+		if self.filters.date_type == "Feedback Due Date":
+			self.filters.date_field = "vgp.posting_date"
+			feedback_valid_after_service_days = cint(frappe.db.get_value("Vehicles Settings", None, "feedback_valid_after_service_days"))
+			self.filters.from_date = add_days(self.filters.from_date, -1 * feedback_valid_after_service_days)
+			self.filters.to_date = add_days(self.filters.to_date, -1 * feedback_valid_after_service_days)
+		else:
+			self.filters.date_field = "ro.feedback_date"
 
 		self.data = frappe.db.sql("""
 			SELECT
@@ -42,10 +48,15 @@ class VehicleServiceFeedback:
 			LEFT JOIN `tabItem` im ON im.name = ro.applies_to_item
 			LEFT JOIN `tabCustomer` c ON c.name = ro.customer
 			WHERE
-				vgp.posting_date BETWEEN %(from_date)s AND %(to_date)s
+				{date_field} BETWEEN %(from_date)s AND %(to_date)s
 				AND vgp.docstatus = 1
 				AND {conditions}
-		""".format(conditions=conditions), self.filters, as_dict=1)
+		""".format(conditions=conditions, date_field=self.filters.date_field), self.filters, as_dict=1)
+
+	def process_data(self):
+		for d in self.data:
+			if d.feedback_date:
+				d.feedback_dt = combine_datetime(d.feedback_date, d.feedback_time)
 
 	def get_conditions(self):
 		conditions = []
@@ -78,10 +89,21 @@ class VehicleServiceFeedback:
 		if self.filters.get("project_workshop"):
 			conditions.append("ro.project_workshop = %(project_workshop)s")
 
+		if self.filters.feedback_filter == "Submitted Feedback":
+			conditions.append("ifnull(ro.customer_feedback, '') != ''")
+		elif self.filters.feedback_filter == "Pending Feedback":
+			conditions.append("ifnull(ro.customer_feedback, '') = ''")
+
 		return " AND ".join(conditions) if conditions else ""
 
 	def get_columns(self):
 		columns = [
+			{
+				"label": _("Delivery Date"),
+				"fieldname": "delivery_date",
+				"fieldtype": "Date",
+				"width": 85
+			},
 			{
 				'label': _("Project"),
 				'fieldname': 'project',
@@ -108,18 +130,6 @@ class VehicleServiceFeedback:
 				'fieldname': 'project_name',
 				'fieldtype': 'Data',
 				'width': 130
-			},
-			{
-				"label": _("Delivery Date"),
-				"fieldname": "delivery_date",
-				"fieldtype": "Date",
-				"width": 100
-			},
-			{
-				"label": _("Delivery Time"),
-				"fieldname": "delivery_time",
-				"fieldtype": "Time",
-				"width": 100
 			},
 			{
 				"label": _("Vehicle"),
@@ -155,37 +165,19 @@ class VehicleServiceFeedback:
 				"width": 150
 			},
 			{
-				"label": _("Delivery Date"),
-				"fieldname": "delivery_date",
-				"fieldtype": "Date",
-				"width": 100
-			},
-			{
-				"label": _("Delivery Time"),
-				"fieldname": "delivery_time",
-				"fieldtype": "Time",
-				"width": 100
-			},
-			{
 				"label": _("Contact No"),
 				"fieldname": "contact_mobile",
 				"fieldtype": "Data",
 				"width": 100
 			},
 			{
-				"label": _("Feedback Date"),
-				"fieldname": "feedback_date",
-				"fieldtype": "Date",
-				"width": 110
+				"label": _("Feedback Date/Time"),
+				"fieldname": "feedback_dt",
+				"fieldtype": "Datetime",
+				"width": 150
 			},
 			{
-				"label": _("Feedback Time"),
-				"fieldname": "feedback_time",
-				"fieldtype": "Time",
-				"width": 110
-			},
-			{
-				"label": _("Remarks"),
+				"label": _("Customer Feedback"),
 				"fieldname": "customer_feedback",
 				"fieldtype": "Data",
 				"width": 200,
