@@ -122,6 +122,16 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Vehicle Sales Opportunities",
+   "link_count": 0,
+   "link_to": "Vehicle Sales Opportunities",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Stock",
    "link_count": 0,
@@ -628,7 +638,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-01-11 17:32:46.995599",
+ "modified": "2023-01-12 12:22:44.298129",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles",
