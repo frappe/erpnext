@@ -50,6 +50,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Opportunity",
 				},
+				{
+					"type": "report",
+					"name": "Vehicle Sales Opportunities",
+					"is_query_report": True,
+					"doctype": "Opportunity",
+					"dependencies": ["Opportunity"],
+				},
 			]
 		},
 		{
