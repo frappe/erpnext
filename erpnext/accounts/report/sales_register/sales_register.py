@@ -6,6 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.meta import get_field_precision
 from frappe.utils import flt
+from frappe.desk.reportview import get_match_cond
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -413,8 +414,9 @@ def get_invoices(filters, additional_query_columns):
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount,
 		is_internal_customer, represents_company, company {0}
 		from `tabSales Invoice`
-		where docstatus = 1 %s order by posting_date desc, name desc""".format(
-			additional_query_columns or ""
+		where docstatus = 1 {1} %s order by posting_date desc, name desc""".format(
+			additional_query_columns or "",
+			get_match_cond("Sales Invoice")
 		)
 		% conditions,
 		filters,
