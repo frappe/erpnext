@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Vehicle Maintenance Schedule"] = {
+frappe.query_reports["Vehicle Service Feedback"] = {
 	"filters": [
 		{
 			fieldname: "company",
@@ -10,33 +10,35 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
+			reqd: 1,
 		},
 		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
-			"reqd": 1
+			fieldname: "date_type",
+			label: __("Date Type"),
+			fieldtype: "Select",
+			options: ["Feedback Due Date", "Feedback Date"],
+			default: "Feedback Due Date",
+			reqd: 1,
 		},
 		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
-			"reqd": 1
+			fieldname: "from_date",
+			label: __("From Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
+			reqd: 1,
 		},
 		{
-			"fieldname":"project_template",
-			"label": __("Project Template"),
-			"fieldtype": "Link",
-			"options": "Project Template"
+			fieldname: "to_date",
+			label: __("To Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.get_today(),
+			reqd: 1,
 		},
 		{
-			"fieldname":"project_template_category",
-			"label": __("Project Template Category"),
-			"fieldtype": "Link",
-			"options": "Project Template Category"
+			fieldname: "feedback_filter",
+			label: __("Feedback Filter"),
+			fieldtype: "Select",
+			options: ["", "Submitted Feedback", "Pending Feedback"],
 		},
 		{
 			fieldname: "customer",
@@ -90,36 +92,42 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			fieldtype: "Link",
 			options: "Item Group"
 		},
+		{
+			fieldname: "project_type",
+			label: __("Project Type"),
+			fieldtype: "Link",
+			options: "Project Type"
+		},
+		{
+			fieldname: "project_workshop",
+			label: __("Project Workshop"),
+			fieldtype: "Link",
+			options: "Project Workshop"
+		},
 	],
 
 	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "remarks") {
-			if (cstr(data['remarks']) === cstr(new_value)) {
+		if (column.fieldname == "customer_feedback") {
+			if (cstr(data['customer_feedback']) === cstr(new_value)) {
 				return
 			}
 
-			if (!data.opportunity) {
-				setTimeout(() => {
-					erpnext.utils.query_report_local_refresh();
-					frappe.msgprint(__("Opportunity does not exist"));
-				});
-				return;
-			}
-
 			return frappe.call({
-				method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
+				method: "erpnext.projects.doctype.project.project.submit_feedback",
 				args: {
-					remarks: new_value,
-					name: data.opportunity,
-					contact_date: frappe.datetime.get_today()
+					project: data.project,
+					customer_feedback: new_value,
 				},
-				callback: function() {
-					frappe.query_report.datatable.datamanager.data[rowIndex].contact_date = frappe.datetime.get_today();
-					frappe.query_report.datatable.datamanager.data[rowIndex].remarks = new_value;
-					erpnext.utils.query_report_local_refresh()
-				},
-				error: function() {
-					erpnext.utils.query_report_local_refresh()
+				callback: function(r) {
+					if (!r.exc) {
+						let row = frappe.query_report.datatable.datamanager.data[rowIndex];
+						row.feedback_date = r.message.feedback_date;
+						row.feedback_time = r.message.feedback_time;
+						row.feedback_dt = r.message.feedback_dt;
+						row.customer_feedback = r.message.customer_feedback;
+
+						erpnext.utils.query_report_local_refresh()
+					}
 				},
 			});
 		}

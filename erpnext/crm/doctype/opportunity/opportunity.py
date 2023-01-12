@@ -60,6 +60,8 @@ class Opportunity(TransactionBase):
 
 	def set_title(self):
 		self.title = self.customer_name
+		if self.contact_display and self.contact_display != self.customer_name:
+			self.title += " ({0})".format(self.contact_display)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		previous_status = self.status
@@ -68,7 +70,6 @@ class Opportunity(TransactionBase):
 			self.status = status
 
 		has_active_quotation = self.has_active_quotation()
-		next_follow_up = self.get_next_follow_up()
 
 		if self.is_converted():
 			self.status = "Converted"
@@ -76,7 +77,7 @@ class Opportunity(TransactionBase):
 			self.status = "Closed"
 		elif self.status == "Lost" or (not has_active_quotation and self.has_lost_quotation()):
 			self.status = "Lost"
-		elif next_follow_up and getdate(next_follow_up.schedule_date) >= getdate():
+		elif self.get("next_follow_up") and getdate(self.next_follow_up) >= getdate():
 			self.status = "To Follow Up"
 		elif has_active_quotation:
 			self.status = "Quotation"
@@ -132,8 +133,7 @@ class Opportunity(TransactionBase):
 			self.finance_type = None
 
 	def validate_follow_up(self):
-		if not self.get('contact_schedule'):
-			return
+		self.next_follow_up = self.get_next_follow_up_date()
 
 		for d in self.get('contact_schedule'):
 			if not d.get('contact_date') and not d.get('schedule_date'):
@@ -142,11 +142,19 @@ class Opportunity(TransactionBase):
 			if d.is_new() and not d.get('contact_date') and getdate(d.get('schedule_date')) < getdate(today()):
 				frappe.throw(_("Row #{0}: Can't schedule a follow up for past dates".format(d.idx)))
 
-	def get_next_follow_up(self):
-		follow_up = [f for f in self.contact_schedule
-			if f.schedule_date and not f.contact_date and getdate(f.schedule_date) >= getdate()]
-		if follow_up:
-			return follow_up[0]
+	def get_next_follow_up_date(self):
+		pending_follow_ups = [d for d in self.get("contact_schedule") if d.schedule_date and not d.contact_date]
+		pending_follow_ups = sorted(pending_follow_ups, key=lambda d: (getdate(d.schedule_date), d.idx))
+
+		future_follow_ups = [d for d in pending_follow_ups if getdate(d.schedule_date) >= getdate()]
+
+		next_follow_up = None
+		if future_follow_ups:
+			next_follow_up = future_follow_ups[0]
+		elif pending_follow_ups:
+			next_follow_up = pending_follow_ups[-1]
+
+		return getdate(next_follow_up.schedule_date) if next_follow_up else None
 
 	def validate_maintenance_schedule(self):
 		if not self.maintenance_schedule:
@@ -172,19 +180,16 @@ class Opportunity(TransactionBase):
 
 		if is_lost:
 			self.set_status(update=True, status="Lost")
-
-			if detailed_reason:
-				self.db_set("order_lost_reason", detailed_reason)
-
+			self.db_set("order_lost_reason", detailed_reason)
+			self.lost_reasons = []
 			for reason in lost_reasons_list:
-				row = self.append('lost_reasons', reason)
-				row.db_insert()
+				self.append('lost_reasons', reason)
 		else:
 			self.set_status(update=True, status="Open")
 			self.db_set('order_lost_reason', None)
 			self.lost_reasons = []
-			self.update_child_table("lost_reasons")
 
+		self.update_child_table("lost_reasons")
 		self.notify_update()
 
 	def update_lead_status(self):
@@ -541,10 +546,7 @@ def auto_close_opportunity():
 
 	for opportunity in opportunities:
 		doc = frappe.get_doc("Opportunity", opportunity.get("name"))
-		doc.status = "Closed"
-		doc.flags.ignore_permissions = True
-		doc.flags.ignore_mandatory = True
-		doc.save()
+		doc.set_status(status="Closed")
 
 
 @frappe.whitelist()

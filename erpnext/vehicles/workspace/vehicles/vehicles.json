@@ -122,6 +122,16 @@
   },
   {
    "hidden": 0,
+   "is_query_report": 1,
+   "label": "Vehicle Sales Opportunities",
+   "link_count": 0,
+   "link_to": "Vehicle Sales Opportunities",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
    "is_query_report": 0,
    "label": "Stock",
    "link_count": 0,
@@ -607,6 +617,16 @@
    "type": "Link"
   },
   {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Vehicle Service Feedback",
+   "link_count": 0,
+   "link_to": "Vehicle Service Feedback",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Vehicle",
    "hidden": 0,
    "is_query_report": 0,
@@ -618,7 +638,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-01-02 18:07:43.975070",
+ "modified": "2023-01-12 12:22:44.298129",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles",

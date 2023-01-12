@@ -172,7 +172,6 @@
    "default": "0",
    "fieldname": "expired",
    "fieldtype": "Check",
-   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Expired",
    "read_only": 1
@@ -214,7 +213,7 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 16:15:07.364809",
+ "modified": "2022-12-29 18:40:57.188397",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Allocation",
