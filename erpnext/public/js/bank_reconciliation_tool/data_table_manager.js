@@ -8,7 +8,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			this.bank_account,
 			this.bank_statement_from_date,
 			this.bank_statement_to_date,
-			this.filtered_by_reference_date,
+			this.filter_by_reference_date,
 			this.from_reference_date,
 			this.to_reference_date
 		);

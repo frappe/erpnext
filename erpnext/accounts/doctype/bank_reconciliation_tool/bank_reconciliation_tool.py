@@ -271,7 +271,7 @@ def auto_reconcile_vouchers(
 	bank_account,
 	from_date=None,
 	to_date=None,
-	filtered_by_reference_date=None,
+	filter_by_reference_date=None,
 	from_reference_date=None,
 	to_reference_date=None,
 ):
@@ -285,7 +285,7 @@ def auto_reconcile_vouchers(
 			document_types,
 			from_date,
 			to_date,
-			filtered_by_reference_date,
+			filter_by_reference_date,
 			from_reference_date,
 			to_reference_date,
 		)
@@ -407,7 +407,7 @@ def get_linked_payments(
 	document_types=None,
 	from_date=None,
 	to_date=None,
-	filtered_by_reference_date=None,
+	filter_by_reference_date=None,
 	from_reference_date=None,
 	to_reference_date=None,
 ):
@@ -424,7 +424,7 @@ def get_linked_payments(
 		document_types,
 		from_date,
 		to_date,
-		filtered_by_reference_date,
+		filter_by_reference_date,
 		from_reference_date,
 		to_reference_date,
 	)
@@ -438,7 +438,7 @@ def check_matching(
 	document_types,
 	from_date,
 	to_date,
-	filtered_by_reference_date,
+	filter_by_reference_date,
 	from_reference_date,
 	to_reference_date,
 ):
@@ -450,7 +450,7 @@ def check_matching(
 		document_types,
 		from_date,
 		to_date,
-		filtered_by_reference_date,
+		filter_by_reference_date,
 		from_reference_date,
 		to_reference_date,
 	)
@@ -484,7 +484,7 @@ def get_queries(
 	document_types,
 	from_date,
 	to_date,
-	filtered_by_reference_date,
+	filter_by_reference_date,
 	from_reference_date,
 	to_reference_date,
 ):
@@ -505,7 +505,7 @@ def get_queries(
 				account_from_to,
 				from_date,
 				to_date,
-				filtered_by_reference_date,
+				filter_by_reference_date,
 				from_reference_date,
 				to_reference_date,
 			)
@@ -524,7 +524,7 @@ def get_matching_queries(
 	account_from_to,
 	from_date,
 	to_date,
-	filtered_by_reference_date,
+	filter_by_reference_date,
 	from_reference_date,
 	to_reference_date,
 ):
@@ -536,7 +536,7 @@ def get_matching_queries(
 			transaction,
 			from_date,
 			to_date,
-			filtered_by_reference_date,
+			filter_by_reference_date,
 			from_reference_date,
 			to_reference_date,
 		)
@@ -548,7 +548,7 @@ def get_matching_queries(
 			transaction,
 			from_date,
 			to_date,
-			filtered_by_reference_date,
+			filter_by_reference_date,
 			from_reference_date,
 			to_reference_date,
 		)
@@ -664,7 +664,7 @@ def get_pe_matching_query(
 	transaction,
 	from_date,
 	to_date,
-	filtered_by_reference_date,
+	filter_by_reference_date,
 	from_reference_date,
 	to_reference_date,
 ):
@@ -676,7 +676,7 @@ def get_pe_matching_query(
 	filter_by_date = f"AND posting_date between '{from_date}' and '{to_date}'"
 	order_by = " posting_date"
 	filter_by_reference_no = ""
-	if cint(filtered_by_reference_date):
+	if cint(filter_by_reference_date):
 		filter_by_date = f"AND reference_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " reference_date"
 	if frappe.flags.auto_reconcile_vouchers == True:
@@ -715,7 +715,7 @@ def get_je_matching_query(
 	transaction,
 	from_date,
 	to_date,
-	filtered_by_reference_date,
+	filter_by_reference_date,
 	from_reference_date,
 	to_reference_date,
 ):
@@ -727,7 +727,7 @@ def get_je_matching_query(
 	filter_by_date = f"AND je.posting_date between '{from_date}' and '{to_date}'"
 	order_by = " je.posting_date"
 	filter_by_reference_no = ""
-	if cint(filtered_by_reference_date):
+	if cint(filter_by_reference_date):
 		filter_by_date = f"AND je.cheque_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " je.cheque_date"
 	if frappe.flags.auto_reconcile_vouchers == True:
