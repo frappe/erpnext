@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:territory_name",
  "creation": "2013-01-10 16:34:24",
+ "default_view": "Tree",
  "description": "Classification of Customers by region",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -121,11 +123,13 @@
  "icon": "fa fa-map-marker",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-11-19 14:33:25.677152",
+ "links": [],
+ "modified": "2023-01-12 13:28:04.613985",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
  "name_case": "Title Case",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_territory",
  "owner": "Administrator",
  "permissions": [
@@ -176,5 +180,6 @@
  "search_fields": "parent_territory,territory_manager",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

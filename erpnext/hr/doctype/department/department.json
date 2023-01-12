@@ -1,7 +1,9 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2013-02-05 11:48:26",
+ "default_view": "Tree",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -142,7 +144,8 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
- "modified": "2022-12-05 11:25:51.180504",
+ "links": [],
+ "modified": "2023-01-12 13:27:31.857407",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Department",
@@ -190,5 +193,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

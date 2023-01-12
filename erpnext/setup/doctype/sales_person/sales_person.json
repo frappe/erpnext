@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sales_person_name",
  "creation": "2013-01-10 16:34:24",
+ "default_view": "Tree",
  "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -155,10 +157,12 @@
  "icon": "icon-user",
  "idx": 1,
  "is_tree": 1,
- "modified": "2022-06-15 13:41:23.144873",
+ "links": [],
+ "modified": "2023-01-12 13:27:40.304385",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_sales_person",
  "owner": "Administrator",
  "permissions": [
@@ -215,5 +219,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

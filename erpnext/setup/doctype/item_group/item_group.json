@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_group_name",
  "creation": "2013-03-28 10:35:29",
+ "default_view": "Tree",
  "description": "Item Classification",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -244,12 +246,14 @@
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,
+ "links": [],
  "max_attachments": 3,
- "modified": "2022-06-14 14:31:58.184265",
+ "modified": "2023-01-12 13:27:48.003064",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
  "name_case": "Title Case",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_item_group",
  "owner": "Administrator",
  "permissions": [
@@ -315,5 +319,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

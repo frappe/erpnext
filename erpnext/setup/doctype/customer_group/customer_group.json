@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:customer_group_name",
  "creation": "2013-01-10 16:34:23",
+ "default_view": "Tree",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -137,10 +139,12 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
- "modified": "2021-03-12 15:02:24.629469",
+ "links": [],
+ "modified": "2023-01-12 13:28:01.335185",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_customer_group",
  "owner": "Administrator",
  "permissions": [
@@ -224,5 +228,6 @@
  "search_fields": "parent_customer_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

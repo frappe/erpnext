@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:supplier_group_name",
  "creation": "2013-01-10 16:34:24",
+ "default_view": "Tree",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -105,10 +107,12 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-08-15 13:08:47.800451",
+ "links": [],
+ "modified": "2023-01-12 13:28:09.633502",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_supplier_group",
  "owner": "Administrator",
  "permissions": [
@@ -167,5 +171,6 @@
  ],
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }
