@@ -199,7 +199,7 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in self.items:
 			if not (item.qty or item.rejected_qty):
 				frappe.throw(
-					_(f"Row {item.idx}: Accepted Qty and Rejected Qty can't be zero at the same time.")
+					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(item.idx)
 				)
 
 	def set_items_bom(self):
