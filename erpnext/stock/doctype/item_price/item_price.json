@@ -91,7 +91,7 @@
   {
    "fieldname": "item_description",
    "fieldtype": "Text",
-   "label": "Item Description",
+   "label": "Product Description",
    "read_only": 1
   },
   {

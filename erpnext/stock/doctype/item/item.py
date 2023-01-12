@@ -434,7 +434,7 @@ class Item(Document):
 			""",
 			dict(
 				item_name=self.item_name,
-				item_description=self.description,
+				item_description=self.item_name,
 				brand=self.brand,
 				item_code=self.name,
 			),
