@@ -33,7 +33,7 @@ frappe.listview_settings['Issue'] = {
 		} else if (doc.status === 'In Progress') {
 			return [__(doc.status) + priority_text, "purple", "status,=," + doc.status];
 		} else if (doc.status === 'To Update') {
-			return [__(doc.status) + priority_text, "lightblue", "status,=," + doc.status];
+			return [__(doc.status) + priority_text, "light-blue", "status,=," + doc.status];
 		} else if (doc.status === 'Closed') {
 			return [__(doc.status) + priority_text, "green", "status,=," + doc.status];
 		} else if (doc.status === 'Replied') {
