@@ -73,7 +73,7 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			fieldtype: "Link",
 			options: "Item",
 			get_query: function() {
-				var variant_of = frappe.query_report.get_filter_value('applies_to_variant_of');
+				var variant_of = frappe.query_report.get_filter_value('variant_of');
 				var filters = {"is_vehicle": 1, "include_disabled": 1};
 				if (variant_of) {
 					filters['variant_of'] = variant_of;

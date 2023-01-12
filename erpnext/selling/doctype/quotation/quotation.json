@@ -21,6 +21,10 @@
   "quotation_validity_days",
   "valid_till",
   "amended_from",
+  "section_break_15",
+  "lost_reasons",
+  "column_break4",
+  "order_lost_reason",
   "more_info",
   "transaction_type",
   "order_type",
@@ -165,9 +169,6 @@
   "group_same_items",
   "status_section",
   "status",
-  "lost_reasons",
-  "column_break4",
-  "order_lost_reason",
   "subscription_section",
   "auto_repeat",
   "update_auto_repeat_reference"
@@ -983,7 +984,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Quotation Lost Reason Detail",
+   "options": "Lost Reason Detail",
    "read_only": 1
   },
   {
@@ -1424,13 +1425,18 @@
    "fieldtype": "Link",
    "label": "Applies to Serial No",
    "options": "Serial No"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break",
+   "label": "Lost Reason"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2022-12-28 13:24:22.369454",
+ "modified": "2023-01-10 18:22:54.338928",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

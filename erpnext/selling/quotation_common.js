@@ -40,7 +40,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 					"fieldtype": "Table MultiSelect",
 					"label": __("Lost Reasons"),
 					"fieldname": "lost_reason",
-					"options": frm.doctype === 'Opportunity' ? 'Opportunity Lost Reason Detail': 'Quotation Lost Reason Detail',
+					"options": 'Lost Reason Detail',
 					"reqd": 1
 				},
 				{
