@@ -5,6 +5,7 @@ import json
 import unittest
 
 import frappe
+from frappe import utils
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
@@ -40,7 +41,12 @@ class TestBankTransaction(FrappeTestCase):
 			"Bank Transaction",
 			dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"),
 		)
-		linked_payments = get_linked_payments(bank_transaction.name, ["payment_entry", "exact_match"])
+		linked_payments = get_linked_payments(
+			bank_transaction.name,
+			["payment_entry", "exact_match"],
+			from_date=bank_transaction.date,
+			to_date=utils.today(),
+		)
 		self.assertTrue(linked_payments[0][6] == "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
@@ -81,7 +87,12 @@ class TestBankTransaction(FrappeTestCase):
 			"Bank Transaction",
 			dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"),
 		)
-		linked_payments = get_linked_payments(bank_transaction.name, ["payment_entry", "exact_match"])
+		linked_payments = get_linked_payments(
+			bank_transaction.name,
+			["payment_entry", "exact_match"],
+			from_date=bank_transaction.date,
+			to_date=utils.today(),
+		)
 		self.assertTrue(linked_payments[0][3])
 
 	# Check error if already reconciled

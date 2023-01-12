@@ -57,6 +57,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def before_validate(self):
 		super(SubcontractingReceipt, self).before_validate()
+		self.validate_items_qty()
 		self.set_items_bom()
 		self.set_items_cost_center()
 		self.set_items_expense_account()
@@ -157,7 +158,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.items:
-			if item.name in rm_supp_cost:
+			if item.qty and item.name in rm_supp_cost:
 				item.rm_supp_cost = rm_supp_cost[item.name]
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
@@ -192,6 +193,13 @@ class SubcontractingReceipt(SubcontractingController):
 					_(
 						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
 					).format(item.idx)
+				)
+
+	def validate_items_qty(self):
+		for item in self.items:
+			if not (item.qty or item.rejected_qty):
+				frappe.throw(
+					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(item.idx)
 				)
 
 	def set_items_bom(self):
