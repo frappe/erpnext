@@ -22,7 +22,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 		let me = this;
 
 		me.frm.set_query("item_code", "items", function() {
-			return erpnext.queries.item({is_stock_item: 1});
+			return erpnext.queries.item({is_stock_item: 1, is_packaging_material: 0});
 		});
 
 		me.frm.set_query("item_code", "packaging_items", function() {
