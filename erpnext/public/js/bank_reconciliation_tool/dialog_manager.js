@@ -7,7 +7,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		this.make_dialog();
 		this.bank_statement_from_date = bank_statement_from_date;
 		this.bank_statement_to_date = bank_statement_to_date;
-		this.filtered_by_reference_date = filtered_by_reference_date;
+		this.filter_by_reference_date = filter_by_reference_date;
 		this.from_reference_date = from_reference_date;
 		this.to_reference_date = to_reference_date;
 	}
@@ -55,7 +55,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				document_types: document_types,
 				from_date: this.bank_statement_from_date,
 				to_date: this.bank_statement_to_date,
-				filtered_by_reference_date: this.filtered_by_reference_date,
+				filter_by_reference_date: this.filter_by_reference_date,
 				from_reference_date:this.from_reference_date,
 				to_reference_date:this.to_reference_date
 			},
