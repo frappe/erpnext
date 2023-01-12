@@ -167,29 +167,31 @@ class VehicleSalesOpportunities:
 	def get_columns(self):
 		columns = [
 			{
+				"label": _("Date"),
+				"fieldname": "transaction_date",
+				"fieldtype": "Date",
+				"width": 80
+			},
+			{
 				"label": _("Opportunity"),
 				"fieldname": "opportunity",
 				"fieldtype": "Link",
 				"options": "Opportunity",
-				"width": 110
-			},
-			{
-				"label": _("Opportunity Date"),
-				"fieldname": "transaction_date",
-				"fieldtype": "Date",
-				"width": 130
+				"width": 95
 			},
 			{
 				"label": _("Sales Person"),
 				"fieldname": "sales_person",
-				"fieldtype": "Data",
-				"width": 120
+				"fieldtype": "Link",
+				"options": "Sales Person",
+				"width": 110
 			},
 			{
-				"label": _("Source of Lead"),
+				"label": _("Lead Source"),
 				"fieldname": "lead_source",
-				"fieldtype": "Data",
-				"width": 110
+				"fieldtype": "Link",
+				"options": "Lead Source",
+				"width": 100
 			},
 			{
 				"label": _("Party"),
@@ -214,66 +216,68 @@ class VehicleSalesOpportunities:
 				"label": _("City"),
 				"fieldname": "city",
 				"fieldtype": "Data",
-				"width": 80
+				"width": 75
 			},
 		]
 
 		for i in range(2):
 			columns += [{
-				"label": _("Existing Vehicle # " + str(i+1)),
+				"label": _("Ex Vehicle #" + str(i+1)),
 				"fieldname": "existing_vehicle_" + str(i+1),
 				"fieldtype": "Data",
-				"width": 135
+				"width": 100
 		}]
 
 		columns += [
 			{
-				"label": _("Variant Interested In"),
+				"label": _("Variant"),
 				"fieldname": "variant_interested_in",
-				"fieldtype": "Data",
-				"width": 145
+				"fieldtype": "Link",
+				"options": "Item",
+				"width": 100
 			},
 			{
-				"label": _("Source of Information"),
+				"label": _("Information Source"),
 				"fieldname": "information_source",
-				"fieldtype": "Data",
-				"width": 160
+				"fieldtype": "Link",
+				"options": "Lead Information Source",
+				"width": 100
 			},
 			{
 				"label": _("1st/Additional/Replacement"),
 				"fieldname": "first_additional",
 				"fieldtype": "Data",
-				"width": 190
+				"width": 90
 			},
 			{
 				"label": _("Interior"),
 				"fieldname": "rating_interior",
 				"fieldtype": "Int",
-				"width": 70
+				"width": 65
 			},
 			{
 				"label": _("Exterior"),
 				"fieldname": "rating_exterior",
 				"fieldtype": "Int",
-				"width": 70
+				"width": 65
 			},
 			{
 				"label": _("Specs"),
 				"fieldname": "rating_specifications",
 				"fieldtype": "Int",
-				"width": 70
+				"width": 65
 			},
 			{
 				"label": _("Price"),
 				"fieldname": "rating_price",
 				"fieldtype": "Int",
-				"width": 70
+				"width": 65
 			},
 			{
-				"label": _("Key Features You Like"),
+				"label": _("Liked Key Features"),
 				"fieldname": "liked_features",
 				"fieldtype": "Data",
-				"width": 150
+				"width": 100
 			},
 			{
 				"label": _("Feedback Remark"),
@@ -285,27 +289,39 @@ class VehicleSalesOpportunities:
 				"label": _("Hot/Warm/Cold"),
 				"fieldname": "lead_classification",
 				"fieldtype": "Data",
-				"width": 120
+				"width": 80
 			},
 			{
-				"label": _("Sales Done"),
+				"label": _("Sold"),
 				"fieldname": "sales_done",
 				"fieldtype": "Data",
-				"width": 00
+				"width": 60
 			},
 			{
-				"label": _("PBO"),
+				"label": _("Booking"),
 				"fieldname": "vehicle_booking_order",
 				"fieldtype": "Link",
 				"options": "Vehicle Booking Order",
 				"width": 120
 			},
 			{
-				"label": _("Delivery Month"),
+				"label": _("Delivery Period"),
 				"fieldname": "delivery_month",
-				"fieldtype": "Data",
+				"fieldtype": "Link",
+				"options": "Vehicle Allocation Period",
 				"width": 110
 			},
+		]
+
+		for i in range(self.no_of_communications):
+			columns += [{
+				"label": _("Follow Up #" + str(i+1)),
+				"fieldname": "comm_" + str(i+1),
+				"fieldtype": "Data",
+				"width": 100
+			}]
+
+		columns += [
 			{
 				"label": _("Lost Reason"),
 				"fieldname": "lost_reason",
@@ -313,13 +329,5 @@ class VehicleSalesOpportunities:
 				"width": 120
 			},
 		]
-
-		for i in range(self.no_of_communications):
-			columns += [{
-				"label": _("Comm " + str(i+1)),
-				"fieldname": "comm_" + str(i+1),
-				"fieldtype": "Data",
-				"width": 120
-			}]
 
 		self.columns = columns
