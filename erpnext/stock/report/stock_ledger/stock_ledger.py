@@ -115,7 +115,7 @@ def get_columns(filters, item_details, show_amounts=True, show_item_name=True):
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100, "is_batch": 1},
 		{"label": _("Batch Qty"), "fieldname": "batch_qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty", "is_batch": 1},
-		{"label": _("Packing Slip"), "fieldname": "packing_slip", "fieldtype": "Link", "options": "Packing Slip", "width": 90, "is_packing_slip": 1},
+		{"label": _("Package"), "fieldname": "packing_slip", "fieldtype": "Link", "options": "Packing Slip", "width": 95, "is_packing_slip": 1},
 		# {"label": _("Packed Qty"), "fieldname": "packed_qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty", "is_packing_slip": 1},
 	]
 

@@ -41,7 +41,7 @@
    "fieldname": "child_packing_slip",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Packing Slip",
+   "label": "Package",
    "options": "Packing Slip",
    "reqd": 1
   }
@@ -49,7 +49,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-07 15:30:05.057313",
+ "modified": "2023-01-12 21:51:48.055130",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Package",

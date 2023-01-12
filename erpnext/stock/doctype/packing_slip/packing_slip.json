@@ -73,7 +73,7 @@
   {
    "fieldname": "package_item_details",
    "fieldtype": "Section Break",
-   "label": "Packed Items"
+   "label": "Packed Contents"
   },
   {
    "fieldname": "items",
@@ -83,8 +83,7 @@
   },
   {
    "fieldname": "package_weight_details",
-   "fieldtype": "Section Break",
-   "label": "Package Weight"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break4",
@@ -340,7 +339,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-12 01:04:37.966320",
+ "modified": "2023-01-12 20:29:43.611155",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
