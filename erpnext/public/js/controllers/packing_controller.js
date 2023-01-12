@@ -71,14 +71,6 @@ erpnext.stock.PackingController = class PackingController extends erpnext.stock.
 		this.calculate_totals();
 	}
 
-	weight_uom() {
-		return this.get_item_weights_per_unit();
-	}
-
-	weight_per_unit() {
-		this.calculate_totals();
-	}
-
 	items_remove() {
 		this.calculate_totals();
 	}
@@ -87,6 +79,50 @@ erpnext.stock.PackingController = class PackingController extends erpnext.stock.
 	}
 	packing_slips_remove() {
 		this.calculate_totals();
+	}
+
+	net_weight_per_unit() {
+		this.calculate_totals();
+	}
+
+	net_weight(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		if (flt(item.stock_qty)) {
+			item.net_weight_per_unit = flt(item.net_weight) / flt(item.stock_qty);
+		}
+		this.calculate_totals();
+	}
+
+	tare_weight_per_unit() {
+		this.calculate_totals();
+	}
+
+	tare_weight(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		if (flt(item.stock_qty)) {
+			item.tare_weight_per_unit = flt(item.tare_weight) / flt(item.stock_qty);
+		}
+		this.calculate_totals();
+	}
+
+	gross_weight_per_unit(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		item.net_weight_per_unit = flt(item.gross_weight_per_unit) - flt(item.tare_weight_per_unit);
+		this.calculate_totals();
+	}
+
+	gross_weight(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		if (flt(item.stock_qty)) {
+			let new_gross_weight = flt(item.gross_weight) / flt(item.stock_qty);
+			frappe.model.set_value(item.doctype, item.name, "gross_weight_per_unit", new_gross_weight);
+		} else {
+			this.calculate_totals();
+		}
+	}
+
+	weight_uom() {
+		return this.get_item_weights_per_unit();
 	}
 
 	get_item_weights_per_unit() {
@@ -113,7 +149,8 @@ erpnext.stock.PackingController = class PackingController extends erpnext.stock.
 						for (const table_field of me.item_table_fields) {
 							for (let item of me.frm.doc[table_field] || []) {
 								if (item.item_code) {
-									item.weight_per_unit = flt(r.message[item.item_code]);
+									item.net_weight_per_unit = flt(r.message[item.item_code].net_weight_per_unit);
+									item.tare_weight_per_unit = flt(r.message[item.item_code].tare_weight_per_unit);
 								}
 							}
 						}
@@ -122,31 +159,6 @@ erpnext.stock.PackingController = class PackingController extends erpnext.stock.
 				}
 			});
 		}
-	}
-
-	total_weight(doc, cdt, cdn) {
-		let item = frappe.get_doc(cdt, cdn);
-		if (flt(item.stock_qty)) {
-			item.weight_per_unit = flt(item.total_weight) / flt(item.stock_qty);
-		}
-		this.calculate_totals();
-	}
-
-	total_tare_weight() {
-		this.calculate_totals();
-	}
-
-	total_gross_weight() {
-		if (this.frm.doc.manual_tare_weight) {
-			this.frm.doc.total_tare_weight = flt(flt(this.frm.doc.total_gross_weight) - flt(this.frm.doc.total_net_weight),
-				precision("total_tare_weight"));
-		}
-
-		this.calculate_totals();
-	}
-
-	manual_tare_weight() {
-		this.calculate_totals();
 	}
 
 	calculate_totals() {

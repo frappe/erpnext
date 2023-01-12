@@ -39,7 +39,7 @@ def execute():
 	""")
 
 	# Landed Cost Item table
-	# weight, item_name, po, po_item, pr, pr_item, pi, pi_item, manual_distribution
+	# net_weight, item_name, po, po_item, pr, pr_item, pi, pi_item, manual_distribution
 	lcv_items = frappe.db.sql("""select name, item_code, receipt_document_type, receipt_document, purchase_receipt_item
 		from `tabLanded Cost Item`""", as_dict=1)
 
@@ -59,7 +59,7 @@ def execute():
 		pr_item = None
 		if d.purchase_receipt_item:
 			pr_item = frappe.db.sql("""
-				select item_name, purchase_order, {po_detail_field} as po_detail, total_weight
+				select item_name, purchase_order, {po_detail_field} as po_detail, net_weight
 				from `tab{dt} Item`
 				where name = %s
 			""".format(  # nosec
@@ -72,13 +72,13 @@ def execute():
 			changes.item_name = pr_item.item_name
 			changes.purchase_order = pr_item.purchase_order
 			changes.purchase_order_item = pr_item.po_detail
-			changes.weight = pr_item.total_weight
+			changes.net_weight = pr_item.net_weight
 
 		frappe.db.set_value("Landed Cost Item", d.name, changes, None, update_modified=False)
 
 	# Landed Cost Voucher item totals
 	item_totals = frappe.db.sql("""
-		SELECT parent, SUM(qty) as total_qty, SUM(amount) as total_amount, SUM(weight) as total_weight
+		SELECT parent, SUM(qty) as total_qty, SUM(amount) as total_amount, SUM(net_weight) as net_weight
 		FROM `tabLanded Cost Item`
 		GROUP BY parent
 	""", as_dict=True)
@@ -89,10 +89,10 @@ def execute():
 		batch_transactions = item_totals[i:i + batch_size]
 		values = []
 		for d in batch_transactions:
-			values.append("('{}', {}, {}, {})".format(d.parent, d.total_qty, d.total_amount, d.total_weight))
+			values.append("('{}', {}, {}, {})".format(d.parent, d.total_qty, d.total_amount, d.net_weight))
 		conditions = ",".join(values)
 		frappe.db.sql("""
-			INSERT INTO `tabLanded Cost Voucher` (name, total_qty, total_amount, total_weight) VALUES {}
+			INSERT INTO `tabLanded Cost Voucher` (name, total_qty, total_amount, total_net_weight) VALUES {}
 			ON DUPLICATE KEY UPDATE name = VALUES(name), total_qty = VALUES(total_qty), total_amount = VALUES(total_amount),
-				total_weight = VALUES(total_weight)
+				total_net_weight = VALUES(total_net_weight)
 		""".format(conditions))

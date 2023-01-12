@@ -218,8 +218,41 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
-	set_meta_tags(frm) {
+	set_meta_tags: function (frm) {
 		frappe.utils.set_meta_tag(frm.doc.route);
+	},
+
+	net_weight_per_unit: function (frm) {
+		frm.events.calculate_gross_weight(frm);
+	},
+	tare_weight_per_unit: function (frm) {
+		frm.events.calculate_gross_weight(frm);
+	},
+	gross_weight_per_unit: function (frm) {
+		if (flt(frm.doc.net_weight_per_unit)) {
+			let new_tare_weight = flt(flt(frm.doc.gross_weight_per_unit) - flt(frm.doc.net_weight_per_unit),
+				precision("tare_weight_per_unit"));
+			frm.set_value("tare_weight_per_unit", new_tare_weight);
+		}
+	},
+
+	calculate_gross_weight: function (frm) {
+		let weight_fields = ["net_weight_per_unit", "tare_weight_per_unit", "gross_weight_per_unit"];
+		frappe.model.round_floats_in(frm.doc, weight_fields);
+
+		if (!frm.doc.is_packaging_material) {
+			if (flt(frm.doc.net_weight_per_unit)) {
+				frm.doc.gross_weight_per_unit = flt(flt(frm.doc.net_weight_per_unit) + flt(frm.doc.tare_weight_per_unit),
+					precision("gross_weight_per_unit"));
+
+				frm.refresh_field("gross_weight_per_unit");
+			} else if (flt(frm.doc.gross_weight_per_unit) && flt(frm.doc.tare_weight_per_unit)) {
+				frm.doc.net_weight_per_unit = flt(flt(frm.doc.gross_weight_per_unit) - flt(frm.doc.tare_weight_per_unit),
+					precision("gross_weight_per_unit"));
+
+				frm.refresh_field("net_weight_per_unit");
+			}
+		}
 	}
 });
 

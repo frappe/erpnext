@@ -67,7 +67,7 @@ class calculate_taxes_and_totals(object):
 				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
 				exclude_round_fieldnames = ['rate', 'price_list_rate', 'discount_percentage', 'discount_amount',
-					'margin_rate_or_amount', 'rate_with_margin', 'weight_per_unit']
+					'margin_rate_or_amount', 'rate_with_margin', 'net_weight_per_unit']
 				self.doc.round_floats_in(item, excluding=exclude_round_fieldnames)
 
 				if item.discount_percentage == 100:
@@ -160,9 +160,9 @@ class calculate_taxes_and_totals(object):
 				if item.meta.has_field("stock_qty") and item.meta.has_field("conversion_factor"):
 					item.stock_qty = item.qty * flt(item.conversion_factor)
 
-				if item.meta.has_field("total_weight") and item.meta.has_field("weight_per_unit"):
+				if item.meta.has_field("net_weight") and item.meta.has_field("net_weight_per_unit"):
 					stock_qty = item.stock_qty if item.meta.has_field("stock_qty") else item.qty
-					item.total_weight = flt(flt(item.weight_per_unit) * flt(stock_qty), item.precision("total_weight"))
+					item.net_weight = flt(flt(item.net_weight_per_unit) * flt(stock_qty), item.precision("net_weight"))
 
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "amount",
 					"taxable_rate", "taxable_amount", "net_rate", "net_amount",
@@ -332,8 +332,8 @@ class calculate_taxes_and_totals(object):
 			self.doc.total_qty += item.qty
 			self.doc.total_alt_uom_qty += item.alt_uom_qty
 
-			if self.doc.meta.has_field('total_net_weight') and item.meta.has_field('total_weight'):
-				self.doc.total_net_weight += item.total_weight
+			if self.doc.meta.has_field('total_net_weight') and item.meta.has_field('net_weight'):
+				self.doc.total_net_weight += item.net_weight
 
 			self.doc.total += item.amount
 			self.doc.base_total += item.base_amount

@@ -114,7 +114,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 
 				var exclude_round_fieldnames = ['rate', 'price_list_rate', 'discount_percentage', 'discount_amount',
-					'margin_rate_or_amount', 'rate_with_margin', 'weight_per_unit'];
+					'margin_rate_or_amount', 'rate_with_margin', 'net_weight_per_unit'];
 				frappe.model.round_floats_in(item, null, exclude_round_fieldnames);
 
 				var rate_before_discount;
@@ -197,9 +197,9 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 					item.stock_qty = item.qty * flt(item.conversion_factor);
 				}
 
-				if (frappe.meta.has_field(item.doctype, "total_weight") && frappe.meta.has_field(item.doctype, "weight_per_unit")) {
+				if (frappe.meta.has_field(item.doctype, "net_weight") && frappe.meta.has_field(item.doctype, "net_weight_per_unit")) {
 					let stock_qty = frappe.meta.has_field(item.doctype, "stock_qty") ? item.stock_qty : item.qty
-					item.total_weight = flt(flt(item.weight_per_unit) * flt(stock_qty), precision("total_weight", item));
+					item.net_weight = flt(flt(item.net_weight_per_unit) * flt(stock_qty), precision("net_weight", item));
 				}
 
 				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount",
@@ -398,8 +398,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			me.frm.doc.total_qty += item.qty;
 			me.frm.doc.total_alt_uom_qty += item.alt_uom_qty;
 
-			if (frappe.meta.has_field(me.frm.doc.doctype, 'total_net_weight') && frappe.meta.has_field(item.doctype, 'total_weight')) {
-				me.frm.doc.total_net_weight += item.total_weight;
+			if (frappe.meta.has_field(me.frm.doc.doctype, 'total_net_weight') && frappe.meta.has_field(item.doctype, 'net_weight')) {
+				me.frm.doc.total_net_weight += item.net_weight;
 			}
 
 			me.frm.doc.total += item.amount;

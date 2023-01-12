@@ -40,7 +40,6 @@
   "total_net_weight",
   "column_break4",
   "total_tare_weight",
-  "manual_tare_weight",
   "column_break_24",
   "total_gross_weight",
   "column_break_32",
@@ -164,8 +163,7 @@
   },
   {
    "fieldname": "packing_details_section",
-   "fieldtype": "Section Break",
-   "label": "Packing Details"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_9",
@@ -200,7 +198,8 @@
    "fieldname": "total_tare_weight",
    "fieldtype": "Float",
    "label": "Total Tare Weight",
-   "read_only_depends_on": "eval:!doc.manual_tare_weight"
+   "no_copy": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_24",
@@ -213,7 +212,7 @@
    "in_list_view": 1,
    "label": "Total Gross Weight",
    "no_copy": 1,
-   "read_only_depends_on": "eval:!doc.manual_tare_weight"
+   "read_only": 1
   },
   {
    "fieldname": "column_break_15",
@@ -228,12 +227,6 @@
    "fieldtype": "Link",
    "label": "Weight UOM",
    "options": "UOM"
-  },
-  {
-   "default": "0",
-   "fieldname": "manual_tare_weight",
-   "fieldtype": "Check",
-   "label": "Set Tare Weight Manually"
   },
   {
    "collapsible": 1,
@@ -302,7 +295,8 @@
    "fieldtype": "Table",
    "label": "Packed Packages",
    "no_copy": 1,
-   "options": "Packing Slip Package"
+   "options": "Packing Slip Package",
+   "read_only": 1
   },
   {
    "fieldname": "packaging_material_section",
@@ -346,7 +340,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-08 17:51:07.254598",
+ "modified": "2023-01-12 01:04:37.966320",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

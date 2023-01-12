@@ -22,18 +22,14 @@ erpnext.stock.PackageTypeController = class PackageTypeController extends erpnex
 	}
 
 	calculate_totals() {
-		if (!this.frm.doc.manual_tare_weight) {
-			this.frm.doc.total_tare_weight = 0;
-		}
+		this.frm.doc.total_tare_weight = 0;
 
 		for (let item of this.frm.doc.packaging_items || []) {
-			frappe.model.round_floats_in(item, null, ['weight_per_unit']);
+			frappe.model.round_floats_in(item, null, ['tare_weight_per_unit']);
 			item.stock_qty = item.qty * item.conversion_factor;
-			item.total_weight = flt(item.weight_per_unit * item.stock_qty, precision("total_weight", item));
+			item.tare_weight = flt(item.tare_weight_per_unit * item.stock_qty, precision("tare_weight", item));
 
-			if (!this.frm.doc.manual_tare_weight) {
-				this.frm.doc.total_tare_weight += item.total_weight;
-			}
+			this.frm.doc.total_tare_weight += item.tare_weight;
 		}
 
 		frappe.model.round_floats_in(this.frm.doc, ['total_tare_weight']);

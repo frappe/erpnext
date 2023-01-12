@@ -34,8 +34,8 @@
   "alt_uom_qty",
   "alt_uom",
   "column_break_25",
-  "weight_per_unit",
-  "total_weight",
+  "net_weight_per_unit",
+  "net_weight",
   "weight_uom",
   "section_break_17",
   "price_list_rate",
@@ -579,13 +579,13 @@
    "no_copy": 1
   },
   {
-   "fieldname": "weight_per_unit",
+   "fieldname": "net_weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit",
    "print_hide": 1
   },
   {
-   "fieldname": "total_weight",
+   "fieldname": "net_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
    "print_hide": 1,
@@ -1454,7 +1454,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-08 16:53:32.843271",
+ "modified": "2023-01-12 01:05:59.774576",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

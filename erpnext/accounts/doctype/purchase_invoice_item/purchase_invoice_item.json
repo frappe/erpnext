@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -37,8 +38,8 @@
   "alt_uom_qty",
   "alt_uom",
   "column_break_32",
-  "weight_per_unit",
-  "total_weight",
+  "net_weight_per_unit",
+  "net_weight",
   "weight_uom",
   "sec_break1",
   "price_list_rate",
@@ -414,12 +415,12 @@
    "read_only": 1
   },
   {
-   "fieldname": "weight_per_unit",
+   "fieldname": "net_weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit"
   },
   {
-   "fieldname": "total_weight",
+   "fieldname": "net_weight",
    "fieldtype": "Float",
    "label": "Total Weight",
    "read_only": 1
@@ -1236,12 +1237,14 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2022-10-12 21:56:00.645093",
+ "links": [],
+ "modified": "2023-01-12 01:06:01.776457",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

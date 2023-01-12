@@ -1381,7 +1381,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 
 			if(doc.doctype != "Material Request") {
-				this.frm.trigger("weight_per_unit");
+				this.frm.trigger("net_weight_per_unit");
 			} else {
 				this.calculate_total_qty();
 			}
@@ -1404,17 +1404,17 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						frappe.model.set_value(cdt, cdn, "weight_per_unit", flt(r.message));
+						frappe.model.set_value(cdt, cdn, "net_weight_per_unit", flt(r.message));
 					}
 				}
 			});
 		}
 	}
 
-	weight_per_unit(doc, cdt, cdn) {
+	net_weight_per_unit(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-		item.total_weight = flt(item.weight_per_unit * flt(item.stock_qty), );
-		refresh_field("total_weight", item.name, item.parentfield);
+		item.net_weight = flt(item.net_weight_per_unit * flt(item.stock_qty), precision("net_weight", item));
+		refresh_field("net_weight", item.name, item.parentfield);
 		this.calculate_taxes_and_totals();
 		this.shipping_rule();
 	}
@@ -1851,8 +1851,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"stock_qty": d.stock_qty,
 					"uom": d.uom,
 					"stock_uom": d.stock_uom,
-					"weight_per_unit": d.weight_per_unit,
-					"total_weight": d.total_weight,
+					"net_weight_per_unit": d.net_weight_per_unit,
+					"net_weight": d.net_weight,
 					"weight_uom": d.weight_uom,
 					"parenttype": d.parenttype,
 					"parent": d.parent,

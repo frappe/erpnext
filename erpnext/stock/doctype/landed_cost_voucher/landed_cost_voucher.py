@@ -118,7 +118,7 @@ class LandedCostVoucher(AccountsController):
 				pr_items = frappe.db.sql("""
 					select
 						pr_item.name, pr_item.item_code, pr_item.item_name,
-						pr_item.qty, pr_item.uom, pr_item.total_weight,
+						pr_item.qty, pr_item.uom, pr_item.net_weight,
 						pr_item.base_rate, pr_item.base_amount, pr_item.amount,
 						pr_item.purchase_order_item, pr_item.purchase_order,
 						pr_item.cost_center, pr_item.is_fixed_asset
@@ -133,7 +133,7 @@ class LandedCostVoucher(AccountsController):
 					item.item_name = d.item_name
 					item.qty = d.qty
 					item.uom = d.uom
-					item.weight = d.total_weight
+					item.net_weight = d.net_weight
 					item.rate = d.base_rate
 					item.cost_center = d.cost_center
 					item.amount = d.base_amount
@@ -274,7 +274,7 @@ class LandedCostVoucher(AccountsController):
 				frappe.throw(_("Credit To Account does not belong to Company {0}").format(self.company))
 
 	def calculate_taxes_and_totals(self):
-		item_total_fields = ['qty', 'amount', 'weight']
+		item_total_fields = ['qty', 'amount', 'net_weight']
 		for f in item_total_fields:
 			self.set('total_' + f, flt(sum([flt(d.get(f)) for d in self.get("items")]), self.precision('total_' + f)))
 
@@ -307,7 +307,7 @@ class LandedCostVoucher(AccountsController):
 
 	def distribute_applicable_charges_for_item(self):
 		totals = {}
-		item_total_fields = ['qty', 'amount', 'weight']
+		item_total_fields = ['qty', 'amount', 'net_weight']
 		for f in item_total_fields:
 			totals[f] = flt(sum([flt(d.get(f)) for d in self.items]))
 

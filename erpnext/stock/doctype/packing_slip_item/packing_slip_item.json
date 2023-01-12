@@ -27,9 +27,15 @@
   "conversion_factor",
   "stock_qty",
   "stock_uom",
-  "column_break_10",
-  "weight_per_unit",
-  "total_weight",
+  "weight_section",
+  "net_weight_per_unit",
+  "net_weight",
+  "column_break_24",
+  "tare_weight_per_unit",
+  "tare_weight",
+  "column_break_27",
+  "gross_weight_per_unit",
+  "gross_weight",
   "reference_section",
   "sales_order",
   "sales_order_item",
@@ -41,7 +47,6 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 4,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -99,10 +104,6 @@
    "print_width": "100px",
    "reqd": 1,
    "width": "100px"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "stock_uom",
@@ -176,21 +177,6 @@
    "width": "100px"
   },
   {
-   "columns": 1,
-   "fieldname": "weight_per_unit",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Unit Weight"
-  },
-  {
-   "bold": 1,
-   "columns": 1,
-   "fieldname": "total_weight",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Net Weight"
-  },
-  {
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -258,12 +244,66 @@
    "hidden": 1,
    "label": "Force Default Warehouse",
    "read_only": 1
+  },
+  {
+   "fieldname": "weight_section",
+   "fieldtype": "Section Break",
+   "label": "Weight"
+  },
+  {
+   "columns": 1,
+   "fieldname": "net_weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Net Weight Per Unit"
+  },
+  {
+   "bold": 1,
+   "columns": 1,
+   "fieldname": "net_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Net Weight"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tare_weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Tare Weight Per Unit"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tare_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Tare Weight"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "gross_weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Gross Weight Per Unit"
+  },
+  {
+   "bold": 1,
+   "columns": 1,
+   "fieldname": "gross_weight",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Gross Weight"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-07 17:53:06.627642",
+ "modified": "2023-01-12 01:05:59.567110",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",
