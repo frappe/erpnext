@@ -150,15 +150,21 @@ class CustomWorkflow:
 				if not department:
 					frappe.throw("Set department for {}".format(self.doc.employee))
 
-				employee_unit = frappe.db.get_value("Employee", self.doc.employee, "unit")
-				if employee_unit:
-					employee_section = frappe.db.get_value("Employee", self.doc.employee, "section")
-					if not employee_section:
-						frappe.throw("Set section for {}".format(self.doc.employee))
-					else:
-						self.imprest_approver = frappe.db.get_value("Employee",{"name":frappe.db.get_value("Department", employee_section ,"approver")},self.field_list)
-					if not self.imprest_verifier:
-						frappe.throw("Set expense approver for CORPORATE SERVICES DEPARTMENT - SMCL department")
+				# employee_unit = frappe.db.get_value("Employee", self.doc.employee, "unit")
+				# if employee_unit:
+				# 	employee_section = frappe.db.get_value("Employee", self.doc.employee, "section")
+				# 	if not employee_section:
+				# 		frappe.throw("Set section for {}".format(self.doc.employee))
+				# 	else:
+				# 		self.imprest_approver = frappe.db.get_value("Employee",{"name":frappe.db.get_value("Department", employee_section ,"approver")},self.field_list)
+				# 	if not self.imprest_verifier:
+				# 		frappe.throw("Set expense approver for CORPORATE SERVICES DEPARTMENT - SMCL department")
+
+				employee_section = frappe.db.get_value("Employee", self.doc.employee, "section")
+				if employee_section and employee_section in ("Chunaikhola Dolomite Mines - SMCL", "Samdrup Jongkhar - SMCL"):
+					self.imprest_approver = frappe.db.get_value("Employee", {"name":frappe.db.get_value("Department", employee_section ,"approver")}, self.field_list)
+					if not self.imprest_approver:
+						frappe.throw("Please Set Expense Approver for the Department <b>{}</b>".format(department))
 
 				elif department == "CORPORATE SERVICES DEPARTMENT - SMCL":
 					self.imprest_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
