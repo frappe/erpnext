@@ -628,6 +628,7 @@
    "width": "70px"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "ordered_qty",
    "fieldtype": "Float",
    "label": "Ordered Qty",
@@ -809,7 +810,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-27 03:15:34.366563",
+ "modified": "2023-01-12 13:13:28.691585",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
