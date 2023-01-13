@@ -1,8 +1,7 @@
 import frappe, requests
 from frappe import _
 from jinja2 import utils
-from html2text import html2text
-from six import text_type
+from frappe.core.utils import html2text
 from frappe.utils import sanitize_html
 from frappe.utils.global_search import search
 from six import text_type
