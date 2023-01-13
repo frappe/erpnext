@@ -234,14 +234,14 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_previous_docstatus(self):
 		for d in self.get('items'):
-			if d.purchase_order:
-				submitted = frappe.db.sql("select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order)
-				if not submitted:
-					frappe.throw(_("Purchase Order {0} is not submitted").format(d.purchase_order))
-			if d.purchase_receipt:
-				submitted = frappe.db.sql("select name from `tabPurchase Receipt` where docstatus = 1 and name = %s", d.purchase_receipt)
-				if not submitted:
-					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
+			if d.purchase_order and frappe.db.get_value("Purchase Order", d.purchase_order, "docstatus", cache=1) != 1:
+				frappe.throw(_("Row #{0}: Purchase Order {1} is not submitted").format(d.idx, d.purchase_order))
+
+			if d.purchase_receipt and frappe.db.get_value("Purchase Receipt", d.purchase_receipt, "docstatus", cache=1) != 1:
+				frappe.throw(_("Row #{0}: Purchase Receipt {1} is not submitted").format(d.idx, d.purchase_receipt))
+
+		if self.return_against and frappe.db.get_value("Purchase Invoice", self.return_against, "docstatus", cache=1) != 1:
+			frappe.throw(_("Return Against Purchase Invoice {0} is not submitted").format(self.return_against))
 
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc({

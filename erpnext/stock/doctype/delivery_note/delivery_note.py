@@ -125,8 +125,8 @@ class DeliveryNote(SellingController):
 			if d.sales_invoice and frappe.db.get_value("Sales Invoice", d.sales_invoice, "docstatus", cache=1) != 1:
 				frappe.throw(_("Row #{0}: Sales Invoice {1} is not submitted").format(d.idx, d.delivery_note))
 
-			if self.return_against and frappe.db.get_value("Delivery Note", self.return_against, "docstatus", cache=1) != 1:
-				frappe.throw(_("Return Against Delivery Note {0} is not submitted").format(self.return_against))
+		if self.return_against and frappe.db.get_value("Delivery Note", self.return_against, "docstatus", cache=1) != 1:
+			frappe.throw(_("Return Against Delivery Note {0} is not submitted").format(self.return_against))
 
 	def update_previous_doc_status(self):
 		sales_orders = set()

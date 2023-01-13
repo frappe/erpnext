@@ -67,6 +67,7 @@ class PurchaseReceipt(BuyingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
+		self.validate_previous_docstatus()
 		self.update_previous_doc_status()
 
 		from erpnext.accounts.doctype.sales_invoice.sales_invoice import update_linked_doc
@@ -235,6 +236,14 @@ class PurchaseReceipt(BuyingController):
 		self.set_status(update=True, status = status)
 		self.notify_update()
 		clear_doctype_notifications(self)
+
+	def validate_previous_docstatus(self):
+		for d in self.get('items'):
+			if d.purchase_order and frappe.db.get_value("Purchase Order", d.purchase_order, "docstatus", cache=1) != 1:
+				frappe.throw(_("Row #{0}: Purchase Order {1} is not submitted").format(d.idx, d.purchase_order))
+
+		if self.return_against and frappe.db.get_value("Purchase Receipt", self.return_against, "docstatus", cache=1) != 1:
+			frappe.throw(_("Return Against Purchase Receipt {0} is not submitted").format(self.return_against))
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
