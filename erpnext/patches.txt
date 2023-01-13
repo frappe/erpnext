@@ -788,7 +788,7 @@ erpnext.patches.v12_0.merge_lost_reason_doctypes
 erpnext.patches.v14_0.delete_datev_doctypes
 erpnext.patches.v14_0.update_uom_category_and_disabled
 erpnext.patches.v14_0.set_default_weight_uom
-erpnext.patches.v14_0.set_packed_qty_after_transaction
+erpnext.patches.v14_0.set_packed_qty_after_transaction #13-01-2023
 erpnext.patches.v14_0.rename_weight_fields
 
 [post_model_sync]

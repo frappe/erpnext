@@ -290,6 +290,7 @@ class update_entries_after(object):
 
 		# update SLE and Serial Nos
 		sle.doctype = "Stock Ledger Entry"
+		sle.is_processed = 1
 		frappe.get_doc(sle).db_update()
 
 		for serial_no in serial_nos:
@@ -645,17 +646,17 @@ class update_entries_after(object):
 			date_condition = """ and (posting_date, posting_time, creation) >= (%(posting_date)s, %(posting_time)s, %(creation)s)
 				and name != %(name)s"""
 
-		# exclude cancelled entries
 		# future entries only
 		# cannot be same (item_code, warehouse) since it'll already be in the SLEs to fix list
 		# must be referenced by SLE Dependency Key
 		# filter by qty positive or negative
+		# exclude cancelled entries
+		# exclude incompletely posted entries
 		dependent_entries = frappe.db.sql("""
 			select sle.name, sle.item_code, sle.warehouse, sle.batch_no, sle.posting_date, sle.posting_time, sle.creation,
 				sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
-			where ifnull(is_cancelled, 'No')='No'
-				and (sle.item_code, sle.warehouse) != (%(item_code)s, %(warehouse)s)
+			where (sle.item_code, sle.warehouse) != (%(item_code)s, %(warehouse)s)
 				and exists(select dep.name from `tabStock Ledger Entry Dependency` dep where dep.parent = sle.name
 					and (dep.dependent_voucher_type, dep.dependent_voucher_no, dep.dependent_voucher_detail_no) in %(dependency_keys)s
 					and CASE
@@ -663,6 +664,8 @@ class update_entries_after(object):
 						WHEN dep.dependency_qty_filter = 'Negative' then sle.actual_qty < 0
 						ELSE true
 					END)
+				and ifnull(is_cancelled, 'No')='No'
+				and is_processed = 1
 				{0}
 			order by timestamp(sle.posting_date, sle.posting_time), sle.creation
 			for update
@@ -730,14 +733,14 @@ class update_entries_after(object):
 			self.batch_data.prev_batch_stock_value = self.batch_data.batch_stock_value or 0.0
 
 	def get_previous_packing_slip_sle(self, sle):
-		self.packing_slip_data = self.previous_packing_slip_sle_dict.get(cstr(sle.packing_slip))
+		self.packing_slip_data = self.previous_packing_slip_sle_dict.get((cstr(sle.batch_no), cstr(sle.packing_slip)))
 
 		if not self.packing_slip_data:
 			previous_packing_slip_sle = get_stock_ledger_entries(sle, "<=", "desc", "limit 1",
-				for_update=True, packing_slip_sle=True, batch_sle=self.batch_wise_valuation)
+				for_update=True, packing_slip_sle=True, batch_sle=bool(sle.batch_no))
 			previous_packing_slip_sle = previous_packing_slip_sle[0] if previous_packing_slip_sle else frappe._dict()
 
-			self.packing_slip_data = self.previous_packing_slip_sle_dict[cstr(sle.packing_slip)] = frappe._dict()
+			self.packing_slip_data = self.previous_packing_slip_sle_dict[(cstr(sle.batch_no), cstr(sle.packing_slip))] = frappe._dict()
 			for key in ("packed_qty_after_transaction",):
 				self.packing_slip_data[key] = flt(previous_packing_slip_sle.get(key))
 

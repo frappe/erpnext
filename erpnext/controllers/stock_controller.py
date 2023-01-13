@@ -371,7 +371,7 @@ class StockController(AccountsController):
 					d.serial_no = d.vehicle
 
 
-def update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers=None, only_if_value_changed=True):
+def update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers=None, only_if_value_changed=True, verbose=False):
 	if frappe.flags.stock_ledger_vouchers_reposted:
 		stock_ledger_vouchers_reposted_sorted = sorted(frappe.flags.stock_ledger_vouchers_reposted,
 			key=lambda d: (d.posting_date, d.posting_time))
@@ -380,7 +380,7 @@ def update_gl_entries_for_reposted_stock_vouchers(excluded_vouchers=None, only_i
 		if only_if_value_changed:
 			vouchers = [d for d in vouchers if d in frappe.flags.stock_ledger_vouchers_value_changed]
 
-		update_gl_entries_for_stock_voucher(vouchers, excluded_vouchers=excluded_vouchers)
+		update_gl_entries_for_stock_voucher(vouchers, excluded_vouchers=excluded_vouchers, verbose=verbose)
 
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None, item_warehouse_list=None):
@@ -389,7 +389,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	update_gl_entries_for_stock_voucher(future_stock_vouchers)
 
 
-def update_gl_entries_for_stock_voucher(stock_vouchers, excluded_vouchers=None):
+def update_gl_entries_for_stock_voucher(stock_vouchers, excluded_vouchers=None, verbose=False):
 	gle = get_voucherwise_gl_entries(stock_vouchers)
 
 	if excluded_vouchers and isinstance(excluded_vouchers, tuple):
@@ -404,9 +404,13 @@ def update_gl_entries_for_stock_voucher(stock_vouchers, excluded_vouchers=None):
 		expected_gle = voucher_obj.get_gl_entries()
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				if verbose:
+					print("Reposting GLEs for {0} {1}".format(voucher_type, voucher_no))
+
 				delete_voucher_gl_entries(voucher_type, voucher_no)
 				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
-		else:
+		elif existing_gle:
+			print("Deleting GLEs for {0} {1} because expected GLEs is empty".format(voucher_type, voucher_no))
 			delete_voucher_gl_entries(voucher_type, voucher_no)
 
 
