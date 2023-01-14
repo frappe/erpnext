@@ -63,6 +63,11 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_items_expense_account()
 
 	def validate(self):
+		if (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "BOM"
+		):
+			self.supplied_items = []
 		super(SubcontractingReceipt, self).validate()
 		self.set_missing_values()
 		self.validate_posting_time()
