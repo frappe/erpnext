@@ -63,10 +63,6 @@ class POLIssue(StockController):
 		received_till = get_pol_till("Stock", self.tanker, self.posting_date, self.pol_type, self.posting_time)
 		issue_till = get_pol_till("Issue", self.tanker, self.posting_date, self.pol_type)
 		balance = flt(received_till) - flt(issue_till)
-		if flt(self.total_quantity) > flt(balance):
-			frappe.throw("Not enough balance in tanker to issue. The balance is " + str(balance))	
-
-	def make_pol_entry(self):
 		if self.tanker:
 			con = frappe.new_doc("POL Entry")
 			con.flags.ignore_permissions = 1

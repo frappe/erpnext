@@ -1,0 +1,219 @@
+{
+ "actions": [],
+ "creation": "2023-01-11 21:41:36.217598",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "equipment",
+  "supplier",
+  "reference",
+  "total_trip",
+  "column_break_3",
+  "equipment_category",
+  "equipment_type",
+  "pol_amount",
+  "total_payable_amount",
+  "tds_section",
+  "tds",
+  "security_percent",
+  "column_break_8",
+  "tds_amount",
+  "security_deposit_amount",
+  "weighbridge_chargetrip_section",
+  "clearing_charge_amount",
+  "column_break_14",
+  "weighbridge_charge_amount",
+  "other_charges_section",
+  "amount",
+  "column_break_20",
+  "account",
+  "section_break_21",
+  "creation_status",
+  "column_break_23",
+  "submission_status",
+  "section_break_25",
+  "error_msg"
+ ],
+ "fields": [
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment",
+   "options": "Equipment",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_category",
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "equipment.equipment_type",
+   "fieldname": "equipment_type",
+   "fieldtype": "Link",
+   "label": "Equipment Type",
+   "options": "Equipment Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tds_section",
+   "fieldtype": "Section Break",
+   "label": "Deduction(%)"
+  },
+  {
+   "fieldname": "tds",
+   "fieldtype": "Select",
+   "label": "TDS(%)",
+   "options": "\n2\n3\n5\n20"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.tds",
+   "fieldname": "tds_amount",
+   "fieldtype": "Currency",
+   "label": "TDS Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "security_percent",
+   "fieldtype": "Select",
+   "label": "Security(%)",
+   "options": "\n2\n3\n5\n10"
+  },
+  {
+   "depends_on": "eval:doc.security_percent",
+   "fieldname": "security_deposit_amount",
+   "fieldtype": "Currency",
+   "label": "Security Deposit Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "clearing_charge_amount",
+   "fieldtype": "Currency",
+   "label": "Clearing Charge Amount"
+  },
+  {
+   "fieldname": "weighbridge_chargetrip_section",
+   "fieldtype": "Section Break",
+   "label": "Charge/Trip"
+  },
+  {
+   "fieldname": "weighbridge_charge_amount",
+   "fieldtype": "Currency",
+   "label": "Weighbridge Charge Amount"
+  },
+  {
+   "fieldname": "other_charges_section",
+   "fieldtype": "Section Break",
+   "label": "Other Charges"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "equipment.supplier",
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Owner",
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference",
+   "fieldtype": "Data",
+   "label": "Reference ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "creation_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Creation Status",
+   "options": "\nSuccess\nFailed"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "submission_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Submission Status",
+   "options": "\nSubmitted\nFailed\nCancelled"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "error_msg",
+   "fieldtype": "Text",
+   "label": "Error Msg",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_trip",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Total Trip",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_payable_amount",
+   "fieldtype": "Currency",
+   "label": "Total Payable Amount"
+  },
+  {
+   "fieldname": "pol_amount",
+   "fieldtype": "Currency",
+   "label": "POL Amount",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-01-14 15:48:56.933183",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Transporter Invoice Entry Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

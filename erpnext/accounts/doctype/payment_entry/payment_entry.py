@@ -146,10 +146,10 @@ class PaymentEntry(AccountsController):
 		reference_names = []
 		for d in self.get("references"):
 			if (d.reference_doctype, d.reference_name, d.payment_term) in reference_names:
-				frappe.throw(
+				frappe.msgprint(
 					_("Row #{0}: Duplicate entry in References {1} {2}").format(
 						d.idx, d.reference_doctype, d.reference_name
-					)
+					), raise_exception=True
 				)
 			reference_names.append((d.reference_doctype, d.reference_name, d.payment_term))
 
@@ -207,10 +207,10 @@ class PaymentEntry(AccountsController):
 			self.references = []
 		else:
 			if not self.party_type:
-				frappe.throw(_("Party Type is mandatory"))
+				frappe.msgprint(_("Party Type is mandatory"), raise_exception=True)
 
 			if not self.party:
-				frappe.throw(_("Party is mandatory"))
+				frappe.msgprint(_("Party is mandatory"), raise_exception)
 
 			_party_name = "title" if self.party_type == "Shareholder" else self.party_type.lower() + "_name"
 
@@ -268,12 +268,12 @@ class PaymentEntry(AccountsController):
 
 	def validate_payment_type(self):
 		if self.payment_type not in ("Receive", "Pay", "Internal Transfer"):
-			frappe.throw(_("Payment Type must be one of Receive, Pay and Internal Transfer"))
+			frappe.msgprint(_("Payment Type must be one of Receive, Pay and Internal Transfer"), raise_exception=True)
 
 	def validate_party_details(self):
 		if self.party:
 			if not frappe.db.exists(self.party_type, self.party):
-				frappe.throw(_("Invalid {0}: {1}").format(self.party_type, self.party))
+				frappe.msgprint(_("Invalid {0}: {1}").format(self.party_type, self.party), raise_exception=True)
 
 			if self.party_account and self.party_type in ("Customer", "Supplier"):
 				if frappe.db.get_value('Account',self.party_account,'is_an_advance_account'):
@@ -293,7 +293,7 @@ class PaymentEntry(AccountsController):
 	def validate_account_type(self, account, account_types):
 		account_type = frappe.db.get_value("Account", account, "account_type")
 		if account_type not in account_types:
-			frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
+			frappe.msgprint(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)),raise_exception=True)
 
 	def set_exchange_rate(self, ref_doc=None):
 		self.set_source_exchange_rate(ref_doc)
@@ -329,7 +329,7 @@ class PaymentEntry(AccountsController):
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
 			if not self.get(field):
-				frappe.throw(_("{0} is mandatory").format(self.meta.get_label(field)))
+				frappe.msgprint(_("{0} is mandatory").format(self.meta.get_label(field)), raise_exception)
 
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
@@ -340,8 +340,8 @@ class PaymentEntry(AccountsController):
 			if not d.allocated_amount:
 				continue
 			if d.reference_doctype not in valid_reference_doctypes:
-				frappe.throw(
-					_("Reference Doctype must be one of {0}").format(comma_or(valid_reference_doctypes))
+				frappe.msgprint(
+					_("Reference Doctype must be one of {0}").format(comma_or(valid_reference_doctypes)), raise_exception=True
 				)
 
 			elif d.reference_name:
@@ -1680,7 +1680,7 @@ def get_payment_entry(
 		is_advance = True
 	doc = frappe.get_doc(dt, dn)
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
-		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
+		frappe.msgprint(_("Can only make payment against unbilled {0}").format(dt), raise_exception=True)
 
 	if not party_type:
 		party_type = set_party_type(dt)
@@ -1795,7 +1795,6 @@ def get_payment_entry(
 						"allocated_amount": outstanding_amount,
 					},
 				)
-	# frappe.throw(str(pe.references[0].outstanding_amount))
 	pe.setup_party_account_field()
 	pe.set_missing_values()
 

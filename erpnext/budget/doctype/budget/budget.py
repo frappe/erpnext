@@ -29,7 +29,7 @@ class Budget(Document):
 
 	def validate(self):
 		if not self.get(frappe.scrub(self.budget_against)):
-			frappe.throw(_("{0} is mandatory").format(self.budget_against))
+			frappe.msgprint(_("{0} is mandatory").format(self.budget_against), raise_exception=True)
 		self.validate_duplicate()
 		self.validate_accounts()
 		self.set_null_value()
@@ -55,11 +55,11 @@ class Budget(Document):
 		)
 
 		for d in existing_budget:
-			frappe.throw(
+			frappe.msgprint(
 				_(
 					"Another Budget record '{0}' already exists against {1} '{2}' and account '{3}' for fiscal year {4}"
 				).format(d.name, self.budget_against, budget_against, d.account, self.fiscal_year),
-				DuplicateBudgetError,
+				DuplicateBudgetError,raise_exception=True
 			)
 
 	def validate_accounts(self):
@@ -71,9 +71,9 @@ class Budget(Document):
 				)
 
 				if account_details.is_group:
-					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
+					frappe.msgprint(_("Budget cannot be assigned against Group Account {0}").format(d.account), raise_exception=True)
 				elif account_details.company != self.company:
-					frappe.throw(_("Account {0} does not belongs to company {1}").format(d.account, self.company))
+					frappe.msgprint(_("Account {0} does not belongs to company {1}").format(d.account, self.company), raise_exception=True)
 				'''
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(
@@ -84,7 +84,7 @@ class Budget(Document):
 				'''
 
 				if d.account in account_list:
-					frappe.throw(_("Account {0} has been entered multiple times").format(d.account))
+					frappe.msgprint(_("Account {0} has been entered multiple times").format(d.account), raise_exception=True)
 				else:
 					account_list.append(d.account)
 
@@ -98,12 +98,12 @@ class Budget(Document):
 		if self.applicable_on_material_request and not (
 			self.applicable_on_purchase_order and self.applicable_on_booking_actual_expenses
 		):
-			frappe.throw(
-				_("Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses")
+			frappe.msgprint(
+				_("Please enable Applicable on Purchase Order and Applicable on Booking Actual Expenses"), raise_exception=True
 			)
 
 		elif self.applicable_on_purchase_order and not (self.applicable_on_booking_actual_expenses):
-			frappe.throw(_("Please enable Applicable on Booking Actual Expenses"))
+			frappe.msgprint(_("Please enable Applicable on Booking Actual Expenses"), raise_exception=True)
 
 		elif not (
 			self.applicable_on_material_request
@@ -198,7 +198,7 @@ def validate_expense_against_budget(args):
 		args.cost_center, args.account = get_item_details(args)
 
 	if not args.account:
-		frappe.throw("Budget Head/Account is missing. Please provide account to check budget")
+		frappe.msgprint("Budget Head/Account is missing. Please provide account to check budget", raise_exception=True)
 
 	account_dtl = frappe.get_doc("Account", args.account)
 	account_type = account_dtl.account_type
@@ -259,9 +259,9 @@ def validate_expense_against_budget(args):
 			if budget_records:
 				validate_budget_records(args, budget_records)
 			else:
-				frappe.throw(_("Budget allocation not available for <b>%s </b> in %s <b>%s</b>" % (
+				frappe.msgprint(_("Budget allocation not available for <b>%s </b> in %s <b>%s</b>" % (
 								args.account, budget_against, frappe.db.escape(args.get(budget_against))
-							))
+							)), raise_exception=True
 						)
 	commit_budget(args)
 
@@ -342,7 +342,7 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			action = "Warn"
 
 		if action == "Stop":
-			frappe.throw(msg, BudgetError)
+			frappe.msgprint(msg, BudgetError, raise_exception=True)
 		else:
 			frappe.msgprint(msg, indicator="orange")
 

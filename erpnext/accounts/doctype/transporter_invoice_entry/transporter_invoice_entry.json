@@ -1,0 +1,233 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:TIE-{YY}-{MM}-{###}",
+ "creation": "2023-01-11 21:35:36.600241",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "equipment_category",
+  "from_date",
+  "column_break_4",
+  "cost_center",
+  "posting_date",
+  "to_date",
+  "section_break_8",
+  "get_equipment",
+  "items",
+  "section_break_11",
+  "invoice_created",
+  "column_break_13",
+  "invoice_submitted",
+  "column_break_15",
+  "posted_to_account",
+  "section_break_17",
+  "successful",
+  "submission_successful",
+  "company",
+  "column_break_21",
+  "failed",
+  "submission_failed",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "equipment_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment Category",
+   "options": "Equipment Category",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "branch.cost_center",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Transporter Invoice Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "options": "Transporter Invoice Entry Item"
+  },
+  {
+   "depends_on": "eval:doc.branch && doc.equipment_category",
+   "fieldname": "get_equipment",
+   "fieldtype": "Button",
+   "label": "Get Equipment"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "successful",
+   "fieldtype": "Int",
+   "label": "Creation Successful",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "failed",
+   "fieldtype": "Int",
+   "label": "Creation Failed",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoice_created",
+   "fieldtype": "Check",
+   "label": "Invoice Created",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoice_submitted",
+   "fieldtype": "Check",
+   "label": "Invoice Submitted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "submission_successful",
+   "fieldtype": "Int",
+   "label": "Submission Successful",
+   "read_only": 1
+  },
+  {
+   "fieldname": "submission_failed",
+   "fieldtype": "Int",
+   "label": "Submission Failed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "posted_to_account",
+   "fieldtype": "Check",
+   "label": "Posted To Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-01-15 14:47:00.727564",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Transporter Invoice Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

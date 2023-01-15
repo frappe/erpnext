@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Cast_
 from frappe.utils import getdate
+from frappe import bold
 
 class ItemPriceDuplicateItem(frappe.ValidationError):
 	pass
@@ -74,7 +75,7 @@ class COPRate(Document):
 def get_cop_rate(item_code,posting_date,cop_list,uom=None):
 	if not cop_list:
 		frappe.throw('COP List is mandatory')
-	return frappe.db.sql('''select rate
+	data = frappe.db.sql('''select rate
 					from `tabCOP Rate` where disabled=0 
 					and item_code = '{item_code}'
 					and valid_from <= '{posting_date}' 
@@ -84,3 +85,6 @@ def get_cop_rate(item_code,posting_date,cop_list,uom=None):
 					order by valid_from desc
 					limit 1
 					'''.format(item_code = item_code, posting_date = posting_date, uom=uom, cop_list=cop_list),as_dict=1)
+	if not data:
+		frappe.msgprint(_("No cop rate found for Item {} under COP List {} for date {}".format(bold(item_code), bold(cop_list), bold(posting_date))), raise_exception=True)
+	return data

@@ -18,6 +18,13 @@ frappe.ui.form.on('POL Issue', {
 	},
 	branch:function(frm){
 		set_equipment_filter(frm)
+		frm.set_query('equipment', 'items', function (doc, cdt, cdn) {
+			return {
+				filters: {
+					"branch": frm.doc.branch
+				}
+			}
+		});
 	},
 });
 
@@ -40,3 +47,16 @@ var set_equipment_filter=function(frm){
 		};
 	});
 }
+
+frappe.ui.form.on('POL Issue Items', {
+	"equipment":function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		frm.set_query('fuelbook', 'items', function (doc, cdt, cdn) {
+			return {
+				filters: {
+					"equipment": row.equipment
+				}
+			}
+		});
+	}
+})

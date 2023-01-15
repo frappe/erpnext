@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 import frappe
 from frappe.model.document import Document
-from frappe import _, qb, throw
+from frappe import _, qb, throw, msgprint
 from erpnext.custom_utils import check_future_date
 from erpnext.controllers.accounts_controller import AccountsController
 from pypika import Case, functions as fn
@@ -33,7 +33,7 @@ class TransporterInvoice(AccountsController):
 
 	def validate_dates(self):
 		if self.from_date > self.to_date:
-			throw("From Date cannot be grater than To Date",title="Invalid Dates")
+			msgprint("From Date cannot be grater than To Date",title="Invalid Dates", raise_exception=True)
 		if not self.remarks:
 			self.remarks = "Payment for {0}".format(self.equipment)
 		
@@ -196,12 +196,11 @@ class TransporterInvoice(AccountsController):
 
 		# get Trips from production location based
 		production_location = self.get_production_transportation("Location")
-
 		# get Trips from production warehouse based
 		production_warehouse = self.get_production_transportation("Warehouse")
 		entries = stock_transfer + delivery_note + production_warehouse
 		if not entries and not within_warehouse_trips and not production_location:
-			frappe.throw("No Transportation Detail(s) for Equipment <b>{0} </b> ".format(self.equipment))
+			msgprint("No Transportation Detail(s) for Equipment <b>{0} </b> ".format(self.equipment), raise_exception= True)
 		self.total_trip = len(entries)
 		trans_amount    = unload_amount = pol_amount = 0
 
@@ -319,28 +318,28 @@ class TransporterInvoice(AccountsController):
 		if self.unloading_amount:
 			self.unloading_account = frappe.db.get_value("Company", self.company, "default_unloading_account")
 			if not self.unloading_account:
-				frappe.throw(_("GL for {} is not set under {}")\
-					.format(frappe.bold("Default Unloading Account"), frappe.bold("Company's Production Account Settings")))
+				msgprint(_("GL for {} is not set under {}")\
+					.format(frappe.bold("Default Unloading Account"), frappe.bold("Company's Production Account Settings")), raise_exception=True)
 
 		self.tds_amount = self.security_deposit_amount = self.weighbridge_amount = self.clearing_amount = other_deductions = 0
 		for d in self.get("deductions"):
 			# tds and security deposite
 			if d.deduction_type in ["Security Deposit","TDS Deduction"]:
 				if flt(d.percent) < 1:
-					throw("Deduction Percent is required at row {} for deduction type {}".format(bold(d.idx),bold(d.deduction_type)))
+					msgprint("Deduction Percent is required at row {} for deduction type {}".format(bold(d.idx),bold(d.deduction_type)), raise_exception=True)
 				d.amount = flt(self.gross_amount) * flt(d.percent) / 100
 				if d.deduction_type == "TDS Deduction":
 					self.tds_amount += flt(d.amount)
 					d.account = get_tds_account(d.percent, self.company)
 					if not d.account:
-						frappe.throw(_("GL for {} is not set under {}")\
-						.format(frappe.bold("TDS Account"), frappe.bold("Company's Accounts Settings")))
+						msgprint(_("GL for {} is not set under {}")\
+						.format(frappe.bold("TDS Account"), frappe.bold("Company's Accounts Settings")), raise_exception=True)
 				elif d.deduction_type == "Security Deposit":
 					d.account = frappe.db.get_value("Company", self.company, "security_deposit_account")
 					self.security_deposit_amount += flt(d.amount)
 					if not d.account:
-						frappe.throw(_("GL for {} is not set under {}")\
-							.format(frappe.bold("Security Deposit Received"), frappe.bold("Company's Accounts Settings")))
+						msgprint(_("GL for {} is not set under {}")\
+							.format(frappe.bold("Security Deposit Received"), frappe.bold("Company's Accounts Settings")),raise_exception=True)
 							
 			elif d.deduction_type in ["Weighbridge Charge/Trip","Clearing Charge/Trip"]:
 				d.account = frappe.db.get_value("Company", self.company, "weighbridge_account")
@@ -348,19 +347,19 @@ class TransporterInvoice(AccountsController):
 				if d.deduction_type == "Weighbridge Charge/Trip":
 					self.weighbridge_amount += flt(d.amount)
 					if not d.account:
-						frappe.throw(_("GL for {} is not set under {}")\
-						.format(frappe.bold("Income from Weighbridge Account"), frappe.bold("Company's Accounts Settings")))
+						msgprint(_("GL for {} is not set under {}")\
+						.format(frappe.bold("Income from Weighbridge Account"), frappe.bold("Company's Accounts Settings")), raise_exception=True)
 				elif d.deduction_type == "Clearing Charge/Trip":
 					self.clearing_amount += flt(d.amount)
 					if not d.account:
-						frappe.throw(_("GL for {} is not set under {}")\
-							.format(frappe.bold("Income from Clearing Account"), frappe.bold("Company's Accounts Settings")))
+						msgprint(_("GL for {} is not set under {}")\
+							.format(frappe.bold("Income from Clearing Account"), frappe.bold("Company's Accounts Settings")), raise_exception=True)
 			else:
 				other_deductions += flt(d.amount)
 		self.total_trip = len(self.get("items"))
 		self.other_deductions 	= flt(other_deductions) + flt(self.tds_amount) + flt(self.security_deposit_amount) + flt(self.weighbridge_amount) + flt(self.clearing_amount)	
-		self.net_payable 	= flt(self.gross_amount) - flt(self.pol_amount) - flt(self.other_deductions)
-		self.amount_payable = self.outstanding_amount 	= flt(self.net_payable)		
+		self.net_payable 		= flt(self.gross_amount) - flt(self.pol_amount) - flt(self.other_deductions)
+		self.amount_payable 	= self.outstanding_amount 	= flt(self.net_payable)		
 		self.grand_total 		= self.gross_amount
 
 	def get_production_transportation(self, rate_base_on):
@@ -388,7 +387,7 @@ class TransporterInvoice(AccountsController):
 					where a.docstatus = 1 
 						and a.posting_date between "{0}" and "{1}" 
 						and b.equipment = "{2}" 
-						and a.branch = '{3}' 
+						and a.cost_center = '{3}' 
 						and b.transporter_payment_eligible = 1 
 						and a.transporter_rate_base_on = '{4}' 
 						and NOT EXISTS
@@ -399,7 +398,8 @@ class TransporterInvoice(AccountsController):
 							and i.reference_name = a.name
 							and p.docstatus != 2
 							and p.name != '{5}'
-						)""".format(self.from_date, self.to_date, self.equipment, self.branch, rate_base_on, self.name), as_dict = True)
+							and p.equipment = '{2}'
+						)""".format(self.from_date, self.to_date, self.equipment, self.cost_center, rate_base_on, self.name), as_dict = True)
 
 	def get_delivery_notes(self):
 		return frappe.db.sql("""
@@ -423,6 +423,7 @@ class TransporterInvoice(AccountsController):
 					and i.reference_name = a.name
 					and p.docstatus != 2
 					and p.name != '{4}'
+					and p.equipment = '{2}'
 				)
 				""".format(self.from_date, self.to_date, self.equipment, self.cost_center,self.name), as_dict = True)
 
@@ -436,7 +437,7 @@ class TransporterInvoice(AccountsController):
 				b.unloading_by
 				FROM `tabStock Entry` a INNER JOIN `tabStock Entry Detail` b ON b.parent = a.name 
 				WHERE a.docstatus = 1  
-				AND a.purpose = 'Material Transfer' 
+				AND a.stock_entry_type = 'Material Transfer' 
 				AND a.posting_date between "{0}" and "{1}" 
 				AND b.equipment = "{2}"
 				AND b.cost_center = "{3}"
@@ -447,6 +448,7 @@ class TransporterInvoice(AccountsController):
 					and p.docstatus != 2 
 					and p.name != '{4}'
 					and i.reference_name = a.name
+					and p.equipment = '{2}'
 				)
 				""".format(self.from_date, self.to_date, self.equipment, self.cost_center,self.name), as_dict = True)
 
@@ -470,7 +472,8 @@ class TransporterInvoice(AccountsController):
 					where p.name = i.parent 
 					and p.docstatus != 2
 					and i.reference_row = b.name
-					and p.name != '{4}')
+					and p.name != '{4}'
+					and p.equipment = '{2}')
 				""".format(self.from_date, self.to_date, self.equipment, self.cost_center, self.name), as_dict = True)
 # query permission
 def get_permission_query_conditions(user):

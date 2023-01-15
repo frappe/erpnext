@@ -77,29 +77,29 @@ class GLEntry(Document):
 		mandatory = ["account", "voucher_type", "voucher_no", "company"]
 		for k in mandatory:
 			if not self.get(k):
-				frappe.throw(_("{0} is required").format(_(self.meta.get_label(k))))
+				frappe.msgprint(_("{0} is required").format(_(self.meta.get_label(k))), raise_exception=True)
 
 		if not (self.party_type and self.party):
 			account_type = frappe.get_cached_value("Account", self.account, "account_type")
 			if account_type == "Receivable":
-				frappe.throw(
+				frappe.msgprint(
 					_("{0} {1}: Customer is required against Receivable account {2}").format(
 						self.voucher_type, self.voucher_no, self.account
-					)
+					), raise_exception=True
 				)
 			elif account_type == "Payable":
-				frappe.throw(
+				frappe.msgprint(
 					_("{0} {1}: Supplier is required against Payable account {2}").format(
 						self.voucher_type, self.voucher_no, self.account
-					)
+					), raise_exception=True
 				)
 
 		# Zero value transaction is not allowed
 		if not (flt(self.debit, self.precision("debit")) or flt(self.credit, self.precision("credit"))):
-			frappe.throw(
+			frappe.msgprint(
 				_("{0} {1}: Either debit or credit amount is required for {2}").format(
 					self.voucher_type, self.voucher_no, self.account
-				)
+				), raise_exception=True
 			)
 
 	def pl_must_have_cost_center(self):
@@ -117,7 +117,7 @@ class GLEntry(Document):
 				"Please set the cost center field in {0} or setup a default Cost Center for the Company."
 			).format(self.voucher_type)
 
-			frappe.throw(msg, title=_("Missing Cost Center"))
+			frappe.msgprint(msg, title=_("Missing Cost Center"), raise_exception=True)
 
 	def validate_dimensions_for_pl_and_bs(self):
 		account_type = frappe.db.get_value("Account", self.account, "report_type")
@@ -130,10 +130,10 @@ class GLEntry(Document):
 				and not dimension.disabled
 			):
 				if not self.get(dimension.fieldname):
-					frappe.throw(
+					frappe.msgprint(
 						_("Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.").format(
 							dimension.label, self.account
-						)
+						), raise_exception=True
 					)
 
 			if (
@@ -143,10 +143,10 @@ class GLEntry(Document):
 				and not dimension.disabled
 			):
 				if not self.get(dimension.fieldname):
-					frappe.throw(
+					frappe.msgprint(
 						_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.").format(
 							dimension.label, self.account
-						)
+						), raise_exception=True
 					)
 
 	def validate_allowed_dimensions(self):
@@ -157,32 +157,32 @@ class GLEntry(Document):
 
 			if self.account == account:
 				if value["is_mandatory"] and not self.get(dimension):
-					frappe.throw(
+					frappe.msgprint(
 						_("{0} is mandatory for account {1}").format(
 							frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)
 						),
-						MandatoryAccountDimensionError,
+						MandatoryAccountDimensionError, raise_exception=True
 					)
 
 				if value["allow_or_restrict"] == "Allow":
 					if self.get(dimension) and self.get(dimension) not in value["allowed_dimensions"]:
-						frappe.throw(
+						frappe.msgprint(
 							_("Invalid value {0} for {1} against account {2}").format(
 								frappe.bold(self.get(dimension)),
 								frappe.bold(frappe.unscrub(dimension)),
 								frappe.bold(self.account),
 							),
-							InvalidAccountDimensionError,
+							InvalidAccountDimensionError,raise_exception=True
 						)
 				else:
 					if self.get(dimension) and self.get(dimension) in value["allowed_dimensions"]:
-						frappe.throw(
+						frappe.msgprint(
 							_("Invalid value {0} for {1} against account {2}").format(
 								frappe.bold(self.get(dimension)),
 								frappe.bold(frappe.unscrub(dimension)),
 								frappe.bold(self.account),
 							),
-							InvalidAccountDimensionError,
+							InvalidAccountDimensionError, raise_exception=True
 						)
 
 	def check_pl_account(self):

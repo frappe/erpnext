@@ -18,11 +18,11 @@
   "equipment",
   "registration_no",
   "equipment_category",
+  "supplier",
   "column_break_12",
+  "get_details",
   "equipment_type",
   "equipment_model",
-  "supplier",
-  "get_details",
   "section_break_17",
   "total_trip",
   "gross_amount",
@@ -80,7 +80,9 @@
   "remarks",
   "column_break_75",
   "total_html",
-  "status"
+  "status",
+  "section_break_75",
+  "transporter_invoice_entry"
  ],
  "fields": [
   {
@@ -528,12 +530,23 @@
    "label": "Status",
    "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_75",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "transporter_invoice_entry",
+   "fieldtype": "Link",
+   "label": "Transporter Invoice Entry",
+   "options": "Transporter Invoice Entry",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-30 11:24:30.665758",
+ "modified": "2023-01-12 16:34:45.572876",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice",
