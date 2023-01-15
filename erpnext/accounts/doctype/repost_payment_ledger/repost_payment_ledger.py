@@ -7,7 +7,6 @@ import frappe
 from frappe import _, qb
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils.background_jobs import is_job_queued
 
 from erpnext.accounts.utils import _delete_pl_entries, create_payment_ledger_entry
 
@@ -102,10 +101,9 @@ def execute_repost_payment_ledger(docname):
 
 	job_name = "payment_ledger_repost_" + docname
 
-	if not is_job_queued(job_name):
-		frappe.enqueue(
-			method="erpnext.accounts.doctype.repost_payment_ledger.repost_payment_ledger.start_payment_ledger_repost",
-			docname=docname,
-			is_async=True,
-			job_name=job_name,
-		)
+	frappe.enqueue(
+		method="erpnext.accounts.doctype.repost_payment_ledger.repost_payment_ledger.start_payment_ledger_repost",
+		docname=docname,
+		is_async=True,
+		job_name=job_name,
+	)
