@@ -37,7 +37,7 @@ def validate_return_against(doc):
 		if (
 			ref_doc.company == doc.company
 			and ref_doc.get(party_type) == doc.get(party_type)
-			and ref_doc.docstatus == 1
+			and ref_doc.docstatus.is_submitted()
 		):
 			# validate posting date time
 			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
