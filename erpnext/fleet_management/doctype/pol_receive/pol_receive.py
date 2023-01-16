@@ -37,8 +37,8 @@ class POLReceive(StockController):
 		if self.docstatus == 2 :
 			for item in self.items:
 				doc = frappe.get_doc("POL Expense", {'name':item.pol_expense,'equipment':self.equipment})
-				doc.balance_amount  = flt(doc.balance_amount) + flt(item.allocated_amount)
 				doc.adjusted_amount = flt(doc.adjusted_amount) - flt(item.allocated_amount)
+				doc.balance_amount  = flt(doc.amount) - flt(doc.adjusted_amount)
 				doc.save(ignore_permissions=True)
 			return
 		for item in self.items:
