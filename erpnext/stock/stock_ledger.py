@@ -1062,7 +1062,7 @@ def get_previous_sle_of_current_voucher(args, exclude_current_voucher=False):
 	voucher_condition = ""
 	if exclude_current_voucher:
 		voucher_no = args.get("voucher_no")
-		voucher_condition = f"and voucher_no != '{voucher_no}'"
+		voucher_condition = f"and voucher_no != '{voucher_no!r}'"
 
 	sle = frappe.db.sql(
 		"""
@@ -1419,10 +1419,10 @@ def get_next_stock_reco(args):
 def get_datetime_limit_condition(detail):
 	return f"""
 		and
-		(timestamp(posting_date, posting_time) < timestamp('{detail.posting_date}', '{detail.posting_time}')
+		(timestamp(posting_date, posting_time) < timestamp('{detail.posting_date!r}', '{detail.posting_time!r}')
 			or (
-				timestamp(posting_date, posting_time) = timestamp('{detail.posting_date}', '{detail.posting_time}')
-				and creation < '{detail.creation}'
+				timestamp(posting_date, posting_time) = timestamp('{detail.posting_date!r}', '{detail.posting_time!r}')
+				and creation < '{detail.creation!r}'
 			)
 		)"""
 

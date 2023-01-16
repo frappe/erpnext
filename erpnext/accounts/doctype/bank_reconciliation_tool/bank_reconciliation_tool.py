@@ -673,14 +673,16 @@ def get_pe_matching_query(
 		currency_field = "paid_to_account_currency as currency"
 	else:
 		currency_field = "paid_from_account_currency as currency"
-	filter_by_date = f"AND posting_date between '{from_date}' and '{to_date}'"
+	filter_by_date = f"AND posting_date between '{from_date!r}' and '{to_date!r}'"
 	order_by = " posting_date"
 	filter_by_reference_no = ""
 	if cint(filter_by_reference_date):
-		filter_by_date = f"AND reference_date between '{from_reference_date}' and '{to_reference_date}'"
+		filter_by_date = (
+			f"AND reference_date between '{from_reference_date!r}' and '{to_reference_date!r}'"
+		)
 		order_by = " reference_date"
 	if frappe.flags.auto_reconcile_vouchers == True:
-		filter_by_reference_no = f"AND reference_no = '{transaction.reference_number}'"
+		filter_by_reference_no = f"AND reference_no = '{transaction.reference_number!r}'"
 	return f"""
 		SELECT
 			(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
@@ -724,14 +726,16 @@ def get_je_matching_query(
 	# So one bank could have both types of bank accounts like asset and liability
 	# So cr_or_dr should be judged only on basis of withdrawal and deposit and not account type
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
-	filter_by_date = f"AND je.posting_date between '{from_date}' and '{to_date}'"
+	filter_by_date = f"AND je.posting_date between '{from_date!r}' and '{to_date!r}'"
 	order_by = " je.posting_date"
 	filter_by_reference_no = ""
 	if cint(filter_by_reference_date):
-		filter_by_date = f"AND je.cheque_date between '{from_reference_date}' and '{to_reference_date}'"
+		filter_by_date = (
+			f"AND je.cheque_date between '{from_reference_date!r}' and '{to_reference_date!r}'"
+		)
 		order_by = " je.cheque_date"
 	if frappe.flags.auto_reconcile_vouchers == True:
-		filter_by_reference_no = f"AND je.cheque_no = '{transaction.reference_number}'"
+		filter_by_reference_no = f"AND je.cheque_no = '{transaction.reference_number!r}'"
 	return f"""
 		SELECT
 			(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END

@@ -104,7 +104,7 @@ def product_search(query, limit=10, fuzzy_search=True):
 	query_string = query
 
 	for s in suggestions:
-		query_string += f"|('{clean_up_query(s.string)}')"
+		query_string += f"|('{clean_up_query(s.string)!r}')"
 
 	q = Query(query_string)
 	results = redisearch.search(q)

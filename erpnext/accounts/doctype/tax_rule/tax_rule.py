@@ -163,8 +163,8 @@ def get_tax_template(posting_date, args):
 
 	if posting_date:
 		conditions.append(
-			f"""(from_date is null or from_date <= '{posting_date}')
-			and (to_date is null or to_date >= '{posting_date}')"""
+			f"""(from_date is null or from_date <= '{posting_date!r}')
+			and (to_date is null or to_date >= '{posting_date!r}')"""
 		)
 	else:
 		conditions.append("(from_date is null) and (to_date is null)")
