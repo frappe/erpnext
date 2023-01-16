@@ -56,8 +56,11 @@ class AssetRepair(AccountsController):
 			):
 				self.modify_depreciation_schedule()
 
-		notes = _("This schedule was created when Asset {0} was repaired through Asset Repair {1}.").format(
-			get_link_to_form(self.asset_doc.doctype, self.asset_doc.name), get_link_to_form(self.doctype, self.name)
+		notes = _(
+			"This schedule was created when Asset {0} was repaired through Asset Repair {1}."
+		).format(
+			get_link_to_form(self.asset_doc.doctype, self.asset_doc.name),
+			get_link_to_form(self.doctype, self.name),
 		)
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
@@ -81,7 +84,8 @@ class AssetRepair(AccountsController):
 				self.revert_depreciation_schedule_on_cancellation()
 
 		notes = _("This schedule was created when Asset {0}'s Asset Repair {1} was cancelled.").format(
-			get_link_to_form(self.asset_doc.doctype, self.asset_doc.name), get_link_to_form(self.doctype, self.name)
+			get_link_to_form(self.asset_doc.doctype, self.asset_doc.name),
+			get_link_to_form(self.doctype, self.name),
 		)
 		self.asset_doc.flags.ignore_validate_update_after_submit = True
 		make_new_active_asset_depr_schedules_and_cancel_current_ones(self.asset_doc, notes)
