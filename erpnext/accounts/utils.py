@@ -439,8 +439,7 @@ def reconcile_against_document(args):  # nosemgrep
 		# cancel advance entry
 		doc = frappe.get_doc(voucher_type, voucher_no)
 		frappe.flags.ignore_party_validation = True
-		gl_map = doc.build_gl_map()
-		create_payment_ledger_entry(gl_map, cancel=1, adv_adj=1)
+		_delete_pl_entries(voucher_type, voucher_no)
 
 		for entry in entries:
 			check_if_advance_entry_modified(entry)
@@ -452,11 +451,23 @@ def reconcile_against_document(args):  # nosemgrep
 			else:
 				update_reference_in_payment_entry(entry, doc, do_not_save=True)
 
+		if doc.doctype == "Journal Entry":
+			try:
+				doc.validate_total_debit_and_credit()
+			except Exception as validation_exception:
+				raise frappe.ValidationError(_(f"Validation Error for {doc.name}")) from validation_exception
+
 		doc.save(ignore_permissions=True)
 		# re-submit advance entry
 		doc = frappe.get_doc(entry.voucher_type, entry.voucher_no)
 		gl_map = doc.build_gl_map()
-		create_payment_ledger_entry(gl_map, cancel=0, adv_adj=1)
+		create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
+
+		# Only update outstanding for newly linked vouchers
+		for entry in entries:
+			update_voucher_outstanding(
+				entry.against_voucher_type, entry.against_voucher, entry.account, entry.party_type, entry.party
+			)
 
 		frappe.flags.ignore_party_validation = False
 
