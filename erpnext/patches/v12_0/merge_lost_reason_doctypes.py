@@ -7,7 +7,7 @@ def execute():
 	opp_lost_reason_detail = frappe.db.sql("select * from `tabOpportunity Lost Reason Detail`", as_dict=1)
 
 	frappe.reload_doc("crm", "doctype", "lost_reason_detail")
-	frappe.reload_doc("crm", "doctype", "quotation")
+	frappe.reload_doc("selling", "doctype", "quotation")
 	frappe.reload_doc("vehicles", "doctype", "vehicle_quotation")
 	frappe.reload_doc("crm", "doctype", "opportunity")
 
