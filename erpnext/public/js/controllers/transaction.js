@@ -1636,7 +1636,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_currency_labels(["operating_cost", "hour_rate"], this.frm.doc.currency, "operations");
 			this.frm.set_currency_labels(["base_operating_cost", "base_hour_rate"], company_currency, "operations");
 
-			var item_grid = this.frm.fields_dict["operations"].grid;
+			let item_grid = this.frm.fields_dict["operations"].grid;
 			$.each(["base_operating_cost", "base_hour_rate"], function(i, fname) {
 				if(frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency, true);
@@ -1647,7 +1647,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
 			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
 
-			var item_grid = this.frm.fields_dict["scrap_items"].grid;
+			let item_grid = this.frm.fields_dict["scrap_items"].grid;
 			$.each(["base_rate", "base_amount"], function(i, fname) {
 				if(frappe.meta.get_docfield(item_grid.doctype, fname))
 					item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency, true);
@@ -1688,7 +1688,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
-		var item_grid = this.frm.fields_dict["items"].grid;
+		let item_grid = this.frm.fields_dict["items"].grid;
 		$.each(["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin",
 		"base_amount_before_discount", "base_total_discount", "base_depreciation_amount", "base_amount_before_depreciation",
 		"base_item_taxes_and_charges", "base_tax_inclusive_amount", "base_tax_inclusive_rate"], function(i, fname) {
