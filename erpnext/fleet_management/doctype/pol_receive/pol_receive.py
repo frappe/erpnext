@@ -48,6 +48,8 @@ class POLReceive(StockController):
 			doc.save(ignore_permissions=True)
 
 	def calculate_km_diff(self):
+		if cint(self.hired_equipment) == 1 :
+			return
 		if cint(self.direct_consumption) == 0:
 			return
 		pol_rev = qb.DocType("POL Receive")

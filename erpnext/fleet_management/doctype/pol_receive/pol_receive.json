@@ -17,26 +17,29 @@
   "direct_consumption",
   "section_break_6",
   "equipment",
-  "own_fb",
   "equipment_type",
+  "uom",
   "fuelbook",
   "section_break_15",
   "equipment_category",
   "fuelbook_branch",
   "supplier",
+  "hired_equipment",
   "section_break_4",
   "pol_type",
   "item_name",
-  "uom",
-  "previous_km",
   "column_break_6",
   "qty",
   "stock_uom",
-  "cur_km_reading",
   "column_break_8",
   "rate",
-  "mileage",
+  "mileage_details",
+  "cur_km_reading",
   "km_difference",
+  "column_break_31",
+  "previous_km",
+  "column_break_33",
+  "mileage",
   "advance_details_section",
   "get_pol_expense",
   "items",
@@ -109,12 +112,6 @@
    "label": "Equipment Details"
   },
   {
-   "fieldname": "own_fb",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Own FB"
-  },
-  {
    "fieldname": "section_break_15",
    "fieldtype": "Column Break"
   },
@@ -160,8 +157,9 @@
   {
    "fetch_from": "pol_type.stock_uom",
    "fieldname": "stock_uom",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Stock UOM",
+   "options": "UOM",
    "read_only": 1
   },
   {
@@ -209,7 +207,7 @@
    "fieldname": "cur_km_reading",
    "fieldtype": "Float",
    "label": "Current KM/HR Reading",
-   "mandatory_depends_on": "eval:doc.direct_consumption"
+   "mandatory_depends_on": "eval:doc.direct_consumption && !doc.hired_equipment"
   },
   {
    "fieldname": "km_difference",
@@ -302,12 +300,34 @@
    "fieldtype": "Float",
    "label": "Previous KM",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.hired_equipment",
+   "fieldname": "mileage_details",
+   "fieldtype": "Section Break",
+   "label": "Mileage Details"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "equipment.hired_equipment",
+   "fieldname": "hired_equipment",
+   "fieldtype": "Check",
+   "label": "Hired Equipment",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-10 15:33:38.987139",
+ "modified": "2023-01-16 15:06:46.751506",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Receive",
