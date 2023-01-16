@@ -30,9 +30,9 @@ class TransporterInvoiceEntry(Document):
 			"posting_date":self.posting_date,
 			"company":self.company
 		})
-		# frappe.enqueue(crate_invoice_entries, timeout=600, args=args)
 		if cint(self.invoice_created) == 0 :
-			crate_invoice_entries(args=args)
+			frappe.enqueue(crate_invoice_entries, timeout=600, args=args)
+			# crate_invoice_entries(args=args)
 	
 	@frappe.whitelist()
 	def submit_transporter_invoice(self):
@@ -41,7 +41,8 @@ class TransporterInvoiceEntry(Document):
 			args = frappe._dict({
 				"transporter_invoice_entry":self.name
 				})
-			submit_invoice_entries(args=args)
+			frappe.enqueue(submit_invoice_entries, timeout=600, args = args)
+			# submit_invoice_entries(args=args)
 
 	@frappe.whitelist()
 	def get_equipment(self):
@@ -64,7 +65,9 @@ class TransporterInvoiceEntry(Document):
 			args = frappe._dict({
 				"transporter_invoice_entry":self.name
 				})
-			cancel_invoice_entries(args=args)
+			frappe.enqueue(cancel_invoice_entries, timeout=600, args = args)
+			
+			# cancel_invoice_entries(args=args)
 
 	@frappe.whitelist()
 	def post_to_account(self):
@@ -73,7 +76,9 @@ class TransporterInvoiceEntry(Document):
 			args = frappe._dict({
 				"transporter_invoice_entry":self.name
 				})
-			post_accounting_entries(args=args)
+			# post_accounting_entries(args=args)
+			frappe.enqueue(post_accounting_entries, timeout=600, args = args)
+			
 
 @frappe.whitelist()
 def crate_invoice_entries(args, publish_progress=True):
