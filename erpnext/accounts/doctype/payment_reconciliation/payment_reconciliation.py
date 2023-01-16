@@ -471,6 +471,7 @@ class PaymentReconciliation(Document):
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()
+		self.accounting_dimension_filter_conditions.clear()
 		self.ple_posting_date_filter.clear()
 		ple = qb.DocType("Payment Ledger Entry")
 
