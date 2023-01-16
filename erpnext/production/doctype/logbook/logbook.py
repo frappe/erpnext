@@ -20,7 +20,7 @@ class Logbook(Document):
 		lb = qb.DocType("Logbook")
 		dup_entry = (qb.from_(lb)
 						.select(lb.name,lb.equipment,lb.posting_date)
-						.where((lb.name != self.name) & (lb.equipment == self.equipment) & (lb.posting_date == self.posting_date))
+						.where((lb.name != self.name) & (lb.equipment == self.equipment) & (lb.posting_date == self.posting_date) & (lb.docstatus != 2))
 						).run()
 		if dup_entry:
 			throw("Only one record per equipment per day is allowed. {0} already exists for {1} on {2}".format(frappe.bold(frappe.get_desk_link("Logbook", dup_entry[0][0])), dup_entry[0][1], dup_entry[0][2]))
