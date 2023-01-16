@@ -481,7 +481,7 @@
    "hidden": 1,
    "label": "Depreciation Entry Posting Status",
    "no_copy": 1,
-   "options": "Successful\nFailed",
+   "options": "\nSuccessful\nFailed",
    "print_hide": 1,
    "read_only": 1
   }
@@ -511,7 +511,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2023-01-16 21:16:54.435493",
+ "modified": "2023-01-17 00:25:30.387242",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
