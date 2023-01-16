@@ -11,7 +11,7 @@ class website_maker(object):
 	def __init__(self, args):
 		self.args = args
 		self.company = args.company_name
-		self.tagline = args.company_tagline
+		self.tagline = args.get("company_tagline") or "This is your company tagline"
 		self.user = args.get("email")
 		self.make_web_page()
 		self.make_website_settings()
