@@ -366,27 +366,16 @@ class DeliveryNote(SellingController):
 				"ref_dn_field": "quotation",
 				"compare_fields": [["company", "="]]
 			},
-			"Packing Slip": {
-				"ref_dn_field": "packing_slip",
-				"compare_fields": [["warehouse", "="], ["weight_uom", "="]],
-				"is_child_table": True,
-				"allow_duplicate_prev_row_id": True
-			},
 			"Packing Slip Item": {
 				"ref_dn_field": "packing_slip_item",
 				"compare_fields": [["item_code", "="], ["qty", "="], ["uom", "="], ["conversion_factor", "="],
-					["batch_no", "="], ["serial_no", "="], ["net_weight_per_unit", "="]],
+					["batch_no", "="], ["serial_no", "="], ["net_weight", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},
 		})
 
-		super(DeliveryNote, self).validate_with_previous_doc({
-			"Packing Slip": {
-				"ref_dn_field": "packing_slip",
-				"compare_fields": [["company", "="], ["project", "="], ["customer", "="]],
-			},
-		})
+		self.validate_packing_slip()
 
 		if cint(frappe.get_cached_value('Selling Settings', None, 'maintain_same_sales_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([["Sales Order", "sales_order", "sales_order_item"],
