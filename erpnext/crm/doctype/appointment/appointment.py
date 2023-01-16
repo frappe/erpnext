@@ -876,7 +876,7 @@ def get_appointments_for_reminder_notification(reminder_date=None, appointments=
 	appointments_to_remind = frappe.db.sql_list("""
 		select a.name
 		from `tabAppointment` a
-		left join `tabNotification Count` n on n.parenttype = 'Appointment' and n.parent = a.name
+		left join `tabNotification Count` n on n.reference_doctype = 'Appointment' and n.reference_name = a.name
 			and n.notification_type = 'Appointment Reminder' and n.notification_medium = 'SMS'
 		where a.docstatus = 1
 			and a.status = 'Open'

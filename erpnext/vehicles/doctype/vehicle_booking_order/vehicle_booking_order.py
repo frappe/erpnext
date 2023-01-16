@@ -984,7 +984,7 @@ def send_payment_overdue_notifications():
 	overdue_bookings_to_notify = frappe.db.sql_list("""
 		select vbo.name
 		from `tabVehicle Booking Order` vbo
-		left join `tabNotification Count` n on n.parenttype = 'Vehicle Booking Order' and n.parent = vbo.name
+		left join `tabNotification Count` n on n.reference_doctype = 'Vehicle Booking Order' and n.reference_name = vbo.name
 			and n.notification_type = 'Balance Payment Due' and n.notification_medium = 'SMS'
 		where vbo.docstatus = 1
 			and vbo.status != 'Cancelled Booking'
