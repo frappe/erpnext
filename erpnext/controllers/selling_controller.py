@@ -42,6 +42,10 @@ class SellingController(StockController):
 					else:
 						item.actual_batch_qty = 0
 
+		if self.docstatus == 0:
+			if self.doctype in ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice"):
+				self.calculate_taxes_and_totals()
+
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_bill_to()

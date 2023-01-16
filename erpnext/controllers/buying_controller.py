@@ -41,6 +41,9 @@ class BuyingController(StockController):
 			if self.get('supplier'):
 				self.update(get_fetch_values(self.doctype, 'supplier', self.supplier))
 
+			if self.doctype in ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"):
+				self.calculate_taxes_and_totals()
+
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
