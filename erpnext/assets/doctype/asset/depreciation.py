@@ -295,12 +295,12 @@ def reset_depreciation_schedule(asset_doc, date, notes):
 		asset_doc, notes, date_of_return=date
 	)
 
-	modify_depreciation_schedule_for_asset_repairs(asset_doc)
+	modify_depreciation_schedule_for_asset_repairs(asset_doc, notes)
 
 	asset_doc.save()
 
 
-def modify_depreciation_schedule_for_asset_repairs(asset):
+def modify_depreciation_schedule_for_asset_repairs(asset, notes):
 	asset_repairs = frappe.get_all(
 		"Asset Repair", filters={"asset": asset.name}, fields=["name", "increase_in_asset_life"]
 	)
@@ -309,10 +309,6 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 		if repair.increase_in_asset_life:
 			asset_repair = frappe.get_doc("Asset Repair", repair.name)
 			asset_repair.modify_depreciation_schedule()
-			notes = _("This schedule was created when Asset {0} went through Asset Repair {1}.").format(
-				get_link_to_form(asset.doctype, asset.name),
-				get_link_to_form(asset_repair.doctype, asset_repair.name),
-			)
 			make_new_active_asset_depr_schedules_and_cancel_current_ones(asset, notes)
 
 
