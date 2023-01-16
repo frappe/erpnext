@@ -80,6 +80,7 @@ class Supplier(TransactionBase):
 					self.inr_purpose_code =  a.inr_purpose_code
 					self.account_number = a.account_number
 					self.bank = frappe.db.get_value("Financial Institution", a.bank_name, "bank_name")
+					self.ifs_code = a.ifs_code
 			if default_bank_account == 0:
 				frappe.throw("Please set a default bank account under Bank Information")
 			elif default_bank_account > 1:

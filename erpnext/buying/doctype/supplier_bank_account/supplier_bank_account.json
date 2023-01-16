@@ -13,7 +13,8 @@
   "column_break_5",
   "bank_account_type",
   "account_number",
-  "default"
+  "default",
+  "ifs_code"
  ],
  "fields": [
   {
@@ -67,12 +68,17 @@
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Default Bank Account"
+  },
+  {
+   "fieldname": "ifs_code",
+   "fieldtype": "Data",
+   "label": "IFS Code"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-04 14:58:31.277853",
+ "modified": "2023-01-16 10:23:57.323866",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Bank Account",

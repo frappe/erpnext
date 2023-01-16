@@ -42,7 +42,7 @@ frappe.ui.form.on('POL Receive', {
 		frm.set_query("fuelbook",function(){
 			return {
 				filters:{
-					"equipment":frm.doc.equipment
+					"equipment":["in",[frm.doc.equipment,""]]
 				}
 			}
 		})

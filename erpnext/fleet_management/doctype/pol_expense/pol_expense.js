@@ -27,6 +27,13 @@ frappe.ui.form.on('POL Expense', {
 	},
 	equipment:function(frm){
 		frm.events.get_previous(frm)
+		frm.set_query("fuel_book",function(){
+			return {
+				filters:{
+					"equipment":["in",[frm.doc.equipment,""]]
+				}
+			}
+		})
 	},
 	fuel_book:function(frm){
 		frm.events.get_previous(frm)
