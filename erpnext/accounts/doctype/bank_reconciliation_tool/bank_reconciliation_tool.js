@@ -21,13 +21,22 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 		frm.trigger('bank_account');
 	},
 
+	filter_by_reference_date: function (frm) {
+		if (frm.doc.filter_by_reference_date) {
+			frm.set_value("bank_statement_from_date", "");
+			frm.set_value("bank_statement_to_date", "");
+		} else {
+			frm.set_value("from_reference_date", "");
+			frm.set_value("to_reference_date", "");
+		}
+	},
+
 	refresh: function (frm) {
 		frappe.require("bank-reconciliation-tool.bundle.js", () =>
 			frm.trigger("make_reconciliation_tool")
 		);
-		frm.upload_statement_button = frm.page.set_secondary_action(
-			__("Upload Bank Statement"),
-			() =>
+
+		frm.add_custom_button(__("Upload Bank Statement"), () =>
 				frappe.call({
 					method:
 						"erpnext.accounts.doctype.bank_statement_import.bank_statement_import.upload_bank_statement",
@@ -49,6 +58,20 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					},
 				})
 		);
+
+		frm.add_custom_button(__('Auto Reconcile'), function() {
+			frappe.call({
+				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.auto_reconcile_vouchers",
+				args: {
+					bank_account: frm.doc.bank_account,
+					from_date: frm.doc.bank_statement_from_date,
+					to_date: frm.doc.bank_statement_to_date,
+					filter_by_reference_date: frm.doc.filter_by_reference_date,
+					from_reference_date: frm.doc.from_reference_date,
+					to_reference_date: frm.doc.to_reference_date,
+				},
+			})
+		});
 	},
 
 	after_save: function (frm) {
@@ -160,6 +183,9 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					).$wrapper,
 					bank_statement_from_date: frm.doc.bank_statement_from_date,
 					bank_statement_to_date: frm.doc.bank_statement_to_date,
+					filter_by_reference_date: frm.doc.filter_by_reference_date,
+					from_reference_date: frm.doc.from_reference_date,
+					to_reference_date: frm.doc.to_reference_date,
 					bank_statement_closing_balance:
 						frm.doc.bank_statement_closing_balance,
 					cards_manager: frm.cards_manager,

@@ -106,7 +106,6 @@ class TestItem(FrappeTestCase):
 			"conversion_factor": 1.0,
 			"reserved_qty": 1,
 			"actual_qty": 5,
-			"ordered_qty": 10,
 			"projected_qty": 14,
 		}
 

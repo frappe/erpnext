@@ -74,24 +74,25 @@ class SubcontractingController(StockController):
 			)
 
 			if not is_stock_item:
-				msg = f"Item {item.item_name} must be a stock item."
-				frappe.throw(_(msg))
+				frappe.throw(_("Row {0}: Item {1} must be a stock item.").format(item.idx, item.item_name))
 
 			if not is_sub_contracted_item:
-				msg = f"Item {item.item_name} must be a subcontracted item."
-				frappe.throw(_(msg))
+				frappe.throw(
+					_("Row {0}: Item {1} must be a subcontracted item.").format(item.idx, item.item_name)
+				)
 
 			if item.bom:
 				bom = frappe.get_doc("BOM", item.bom)
 				if not bom.is_active:
-					msg = f"Please select an active BOM for Item {item.item_name}."
-					frappe.throw(_(msg))
+					frappe.throw(
+						_("Row {0}: Please select an active BOM for Item {1}.").format(item.idx, item.item_name)
+					)
 				if bom.item != item.item_code:
-					msg = f"Please select an valid BOM for Item {item.item_name}."
-					frappe.throw(_(msg))
+					frappe.throw(
+						_("Row {0}: Please select an valid BOM for Item {1}.").format(item.idx, item.item_name)
+					)
 			else:
-				msg = f"Please select a BOM for Item {item.item_name}."
-				frappe.throw(_(msg))
+				frappe.throw(_("Row {0}: Please select a BOM for Item {1}.").format(item.idx, item.item_name))
 
 	def __get_data_before_save(self):
 		item_dict = {}

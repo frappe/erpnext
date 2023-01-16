@@ -743,9 +743,9 @@ class TestPurchaseOrder(FrappeTestCase):
 		pe = get_payment_entry("Purchase Order", po_doc.name)
 		pe.mode_of_payment = "Cash"
 		pe.paid_from = "Cash - _TC"
-		pe.source_exchange_rate = 80
-		pe.target_exchange_rate = 1
-		pe.paid_amount = po_doc.grand_total
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 80
+		pe.paid_amount = po_doc.base_grand_total
 		pe.save(ignore_permissions=True)
 		pe.submit()
 
