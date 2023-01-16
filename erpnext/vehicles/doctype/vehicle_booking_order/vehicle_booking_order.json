@@ -139,7 +139,6 @@
   "registration_status",
   "pdi_status",
   "pdi_requested",
-  "notification_count",
   "terms_section_break",
   "tc_name",
   "terms",
@@ -974,15 +973,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "notification_count",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Notification Count",
-   "no_copy": 1,
-   "options": "Notification Count",
-   "read_only": 1
-  },
-  {
    "fetch_from": "item_code.variant_of",
    "fieldname": "variant_of",
    "fieldtype": "Link",
@@ -1188,7 +1178,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2022-11-09 13:18:52.265935",
+ "modified": "2023-01-16 14:55:48.004963",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

@@ -21,7 +21,7 @@ from erpnext.crm.doctype.lead.lead import get_customer_from_lead
 from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.vehicles.doctype.vehicle_log.vehicle_log import get_customer_vehicle_selector_data
 from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
-from frappe.core.doctype.notification_count.notification_count import clear_notification_count
+from frappe.core.doctype.notification_count.notification_count import get_all_notification_count
 from frappe.model.mapper import get_mapped_doc
 import json
 
@@ -47,6 +47,7 @@ class Appointment(StatusUpdater):
 		self.set_onload('appointment_timeslots_data', get_appointment_timeslots(self.scheduled_date, self.appointment_type,
 			company=self.company))
 		self.set_onload('contact_nos', get_all_contact_nos(self.appointment_for, self.party_name))
+		self.set_onload('notification_count', get_all_notification_count(self.doctype, self.name))
 
 		self.set_can_notify_onload()
 		self.set_scheduled_reminder_onload()
@@ -62,9 +63,6 @@ class Appointment(StatusUpdater):
 		self.validate_timeslot_availability()
 		self.clean_remarks()
 		self.set_status()
-
-	def before_insert(self):
-		clear_notification_count(self)
 
 	def before_update_after_submit(self):
 		if self.status not in ["Closed", "Rescheduled"]:
