@@ -3,7 +3,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, cstr
 from frappe.model.mapper import map_child_doc
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
@@ -23,19 +23,23 @@ class PackingSlip(StockController):
 	def get_feed(self):
 		return _("Packed {0}").format(self.get("package_type"))
 
+	def onload(self):
+		super().onload()
+		if self.docstatus == 0:
+			self.calculate_totals()
+
 	def validate(self):
 		self.validate_posting_time()
 		super(PackingSlip, self).validate()
-		self.validate_contents_mandatory()
 		self.validate_items()
-		self.validate_children_packing_slips()
+		self.validate_source_packing_slips()
 		self.validate_sales_orders()
 		self.validate_customer()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_with_previous_doc()
 		self.calculate_totals()
+		self.validate_with_previous_doc()
 		self.validate_weights()
 		self.set_cost_percentage()
 		self.set_title()
@@ -60,6 +64,7 @@ class PackingSlip(StockController):
 
 	def set_missing_values(self, for_validate=False):
 		self.set_missing_item_details(for_validate)
+		self.set_source_packing_slips()
 
 	def set_missing_item_details(self, for_validate=False):
 		parent_args = self.as_dict()
@@ -74,15 +79,54 @@ class PackingSlip(StockController):
 
 					item_details = get_item_details(args)
 					for f in item_details:
-						if f in force_item_fields or not item.get(f):
+						if f in force_item_fields or item.get(f) in ("", None):
 							item.set(f, item_details.get(f))
 
-	def validate_children_packing_slips(self):
-		pass
+	def set_source_packing_slips(self):
+		# Packing Slips from items table
+		contents_packing_slips = []
+		for d in self.get("items"):
+			if d.get("source_packing_slip") and d.source_packing_slip not in contents_packing_slips:
+				contents_packing_slips.append(d.source_packing_slip)
 
-	def validate_contents_mandatory(self):
-		if not self.get("items") and not self.get("packing_slips"):
-			frappe.throw(_("Please enter Packed Items or Packed Packaged"))
+		# Remove
+		packing_slips_visited = set()
+		to_remove = []
+		for d in self.get("packing_slips"):
+			# remove if not in items
+			if not d.source_packing_slip or d.source_packing_slip not in contents_packing_slips:
+				to_remove.append(d)
+				continue
+
+			# remove if duplicate
+			if d.source_packing_slip in packing_slips_visited:
+				to_remove.append(d)
+
+			packing_slips_visited.add(d.source_packing_slip)
+
+		for d in to_remove:
+			self.remove(d)
+
+		# Add missing Packing Slips
+		packages_packing_slips = [d.source_packing_slip for d in self.get("packing_slips") if d.get("source_packing_slip")]
+		for source_packing_slips in contents_packing_slips:
+			if source_packing_slips not in packages_packing_slips:
+				new_row = self.append("packing_slips")
+				new_row.source_packing_slip = source_packing_slips
+
+		# Set details
+		self.set_packing_slip_values()
+
+	def set_packing_slip_values(self):
+		for d in self.get("packing_slips"):
+			details = frappe.db.get_value("Packing Slip", d.source_packing_slip,
+				["package_type", "total_net_weight", "total_tare_weight", "total_gross_weight"], as_dict=1)
+
+			if details:
+				d.source_package_type = details.package_type
+				d.net_weight = details.total_net_weight
+				d.tare_weight = details.total_tare_weight
+				d.gross_weight = details.total_gross_weight
 
 	def validate_items(self):
 		from erpnext.stock.doctype.item.item import validate_end_of_life
@@ -117,13 +161,20 @@ class PackingSlip(StockController):
 
 	def validate_with_previous_doc(self):
 		super(PackingSlip, self).validate_with_previous_doc({
-			"Sales Order": {
-				"ref_dn_field": "sales_order",
-				"compare_fields": [["customer", "="], ["company", "="], ["project", "="]]
-			},
 			"Sales Order Item": {
 				"ref_dn_field": "sales_order_item",
 				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+				"allow_duplicate_prev_row_id": True
+			},
+			"Packing Slip Item": {
+				"ref_dn_field": "packing_slip_item",
+				"compare_fields": [
+					["item_code", "="],
+					["qty", "="], ["uom", "="], ["conversion_factor", "="],
+					["batch_no", "="], ["serial_no", "="],
+					["net_weight", "="], ["tare_weight", "="], ["gross_weight", "="]
+				],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},
@@ -167,12 +218,52 @@ class PackingSlip(StockController):
 			if warehouses and len(warehouses) == 1 and warehouses[0]:
 				self.warehouse = warehouses[0]
 
+	def validate_source_packing_slips(self):
+		# Validate Packing Slips
+		for d in self.get("packing_slips"):
+			if d.source_packing_slip == self.name:
+				frappe.throw(_("Row #{0}: Source Packing Slip cannot be the same as the Target Packing Slip"))
+
+			packing_slip = frappe.db.get_value("Packing Slip", d.source_packing_slip,
+				["name", "docstatus", "status", "company", "customer", "project"], as_dict=1)
+			if not packing_slip:
+				frappe.throw(_("Row #{0}: Packing Slip {1} does not exist").format(d.source_packing_slip))
+
+			if packing_slip.docstatus == 0:
+				frappe.throw(_("Row #{0}: Source {1} is in draft").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
+				))
+			if packing_slip.docstatus == 2:
+				frappe.throw(_("Row #{0}: Source {1} is cancelled").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
+				))
+
+			if packing_slip.status != "In Stock":
+				frappe.throw(_("Row #{0}: Cannot select Source {1} because its status is {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.status)
+				))
+
+			if self.company != packing_slip.company:
+				frappe.throw(_("Row #{0}: Company does not match with Source {1}. Company must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.company
+				))
+
+			if cstr(self.project) != cstr(packing_slip.project):
+				frappe.throw(_("Row #{0}: Project does not match with Source {1}. Project must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.project
+				))
+
+			if packing_slip.customer and self.customer != packing_slip.customer:
+				frappe.throw(_("Row #{0}: Customer does not match with Source {1}. Customer must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.customer
+				))
+
 	def validate_sales_orders(self):
 		sales_orders = list(set([d.sales_order for d in self.get("items") if d.get("sales_order")]))
 		sales_order_map = {}
 		for sales_order in sales_orders:
 			details = frappe.db.get_value("Sales Order", sales_order,
-				["name", "docstatus", "status", "customer", "customer_name"], as_dict=1)
+				["name", "docstatus", "status", "company", "customer", "customer_name", "project"], as_dict=1)
 			sales_order_map[sales_order] = details
 
 		customer_details = frappe._dict({})
@@ -190,6 +281,16 @@ class PackingSlip(StockController):
 			if order_details.status in ("Closed", "On Hold"):
 				frappe.throw(_("Row #{0}: {1} status is {2}").format(
 					d.idx, frappe.get_desk_link("Sales Order", order_details.name), frappe.bold(order_details.status)))
+
+			if self.company != order_details.company:
+				frappe.throw(_("Row #{0}: {1} Company {2} does not match with Packing Slip").format(
+					d.idx, frappe.get_desk_link("Sales Order", order_details.name), frappe.bold(order_details.company)
+				))
+
+			if cstr(self.project) != cstr(order_details.project):
+				frappe.throw(_("Row #{0}: {1} Project {2} does not match with Packing Slip").format(
+					d.idx, frappe.get_desk_link("Sales Order", order_details.name), frappe.bold(order_details.project)
+				))
 
 			if customer_details and customer_details.customer != order_details.customer:
 				frappe.throw(_("Row #{0}: {1} Customer {2} does not match with Row #{3} {4} Customer {5}").format(
@@ -237,8 +338,9 @@ class PackingSlip(StockController):
 					if item.stock_qty and item.meta.has_field("gross_weight_per_unit"):
 						item.gross_weight_per_unit = item.gross_weight / item.stock_qty
 
-				self.total_net_weight += flt(item.get("net_weight"))
-				self.total_tare_weight += flt(item.get("tare_weight"))
+				if not item.get("source_packing_slip"):
+					self.total_net_weight += flt(item.get("net_weight"))
+					self.total_tare_weight += flt(item.get("tare_weight"))
 
 		for item in self.get("packing_slips"):
 			self.total_net_weight += item.net_weight
@@ -283,17 +385,30 @@ class PackingSlip(StockController):
 	def update_previous_doc_status(self):
 		sales_orders = set()
 		sales_order_row_names = set()
+		source_packing_slips = set()
 
 		for d in self.items:
-			if d.sales_order:
-				sales_orders.add(d.sales_order)
-			if d.sales_order_item:
-				sales_order_row_names.add(d.sales_order_item)
+			# Get non nested sales orders from items
+			if not d.get("source_packing_slip"):
+				if d.sales_order:
+					sales_orders.add(d.sales_order)
+				if d.sales_order_item:
+					sales_order_row_names.add(d.sales_order_item)
+
+			# Get nested from
+			if d.source_packing_slip:
+				source_packing_slips.add(d.source_packing_slip)
 
 		for name in sales_orders:
 			doc = frappe.get_doc("Sales Order", name)
 			doc.set_packing_status(update=True)
 			doc.validate_packed_qty(from_doctype=self.doctype, row_names=sales_order_row_names)
+			doc.notify_update()
+
+		for name in source_packing_slips:
+			doc = frappe.get_doc("Packing Slip", name)
+			doc.set_nesting_status(update=True)
+			doc.set_status(update=True)
 			doc.notify_update()
 
 	def update_stock_ledger(self, allow_negative_stock=False):
@@ -312,6 +427,7 @@ class PackingSlip(StockController):
 			sl_entries.append(self.get_sl_entries(d, {
 				"warehouse": d.source_warehouse,
 				"actual_qty": -flt(d.stock_qty),
+				"packing_slip": d.get("source_packing_slip"),
 				"incoming_rate": 0
 			}))
 
@@ -321,7 +437,6 @@ class PackingSlip(StockController):
 				"warehouse": self.warehouse,
 				"actual_qty": flt(d.stock_qty),
 				"packing_slip": self.name,
-				# "incoming_rate": flt(d.valuation_rate)
 			})
 
 			# SLE Dependency
@@ -369,7 +484,7 @@ class PackingSlip(StockController):
 			if validate_delivery and delivered_qty_map:
 				frappe.throw(_(
 					"Some items from {0} are were not completely delivered. "
-					"Partial delivery of Packing Slip is not allowed. "
+					"Partial delivery of Package is not allowed. "
 					"Please select all items of Packing Slip."
 				).format(frappe.get_desk_link("Packing Slip", self.name)))
 
@@ -402,16 +517,54 @@ class PackingSlip(StockController):
 
 		return delivered_qty_map
 
+	def set_nesting_status(self, update=False, update_modified=True, validate_packing=True):
+		packed_qty_map = {}
+		for d in self.get("items"):
+			packed_qty_map[d.name] = flt(d.qty)
+
+		nested_qty_map = self.get_nested_qty_map()
+
+		if nested_qty_map == packed_qty_map:
+			self.is_nested = 1
+		else:
+			self.is_nested = 0
+
+			if validate_packing and nested_qty_map:
+				frappe.throw(_(
+					"Some items from {0} are were not completely nested. "
+					"Partial nesting of Package is not allowed. "
+					"Please select all items of Packing Slip."
+				).format(frappe.get_desk_link("Packing Slip", self.name)))
+
+		if update:
+			self.db_set('is_nested', self.is_nested, update_modified=update_modified)
+
+	def get_nested_qty_map(self):
+		if self.is_new():
+			return {}
+
+		nested_qty_map = dict(frappe.db.sql("""
+			select i.packing_slip_item, sum(i.qty) as nested_qty
+			from `tabPacking Slip Item` i
+			inner join `tabPacking Slip` s on s.name = i.parent
+			where i.source_packing_slip = %s and s.docstatus = 1
+			group by i.packing_slip_item
+		""", self.name))
+
+		return nested_qty_map
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		previous_status = self.status
 
 		if self.docstatus == 0:
 			self.status = "Draft"
 		elif self.docstatus == 1:
-			if not cint(self.is_delivered):
-				self.status = "In Stock"
-			else:
+			if cint(self.is_nested):
+				self.status = "Nested"
+			elif cint(self.is_delivered):
 				self.status = "Delivered"
+			else:
+				self.status = "In Stock"
 		else:
 			self.status = "Cancelled"
 
@@ -557,6 +710,41 @@ def get_item_weights_per_unit(item_codes, weight_uom=None):
 
 
 @frappe.whitelist()
+def make_target_packing_slip(source_name, target_doc=None):
+	source_packing_slip = frappe.get_doc("Packing Slip", source_name)
+	target_doc = map_target_document("Packing Slip", target_doc, source_packing_slip)
+
+	packing_slip_item_mapper = {
+		"doctype": "Packing Slip Item",
+		"field_map": {
+			"parent": "source_packing_slip",
+			"name": "packing_slip_item",
+			"sales_order": "sales_order",
+			"sales_order_item": "sales_order_item",
+			"batch_no": "batch_no",
+			"serial_no": "serial_no",
+		},
+		"field_no_map": [
+			"source_warehouse",
+			"expense_account",
+			"cost_center",
+		]
+	}
+
+	# Map Packing Slip Items
+	for ps_item in source_packing_slip.get("items"):
+		if not mapper_item_condition(ps_item, target_doc):
+			continue
+
+		target_row = map_child_doc(ps_item, target_doc, packing_slip_item_mapper, source_packing_slip)
+		target_row.source_warehouse = source_packing_slip.warehouse
+
+	target_doc.run_method('set_missing_values')
+	target_doc.run_method('calculate_totals')
+	return target_doc
+
+
+@frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as make_delivery_note_from_sales_order,\
 		get_item_mapper_for_delivery
@@ -589,9 +777,9 @@ def make_delivery_note(source_name, target_doc=None):
 			mapper = packing_slip_item_mapper
 
 		dn_item = map_child_doc(source_row, target_doc, mapper, source_parent)
-		update_mapped_item(dn_item, packing_slip, ps_item)
+		update_mapped_delivery_item(dn_item, packing_slip, ps_item)
 
-	postprocess_mapped_document(target_doc)
+	postprocess_mapped_delivery_document(target_doc)
 	return target_doc
 
 
@@ -629,9 +817,9 @@ def make_sales_invoice(source_name, target_doc=None):
 			mapper = packing_slip_item_mapper
 
 		sinv_item = map_child_doc(source_row, target_doc, mapper, source_parent)
-		update_mapped_item(sinv_item, packing_slip, ps_item)
+		update_mapped_delivery_item(sinv_item, packing_slip, ps_item)
 
-	postprocess_mapped_document(target_doc)
+	postprocess_mapped_delivery_document(target_doc)
 	target_doc.update_stock = 1
 
 	return target_doc
@@ -650,6 +838,13 @@ def map_target_document(target_doctype, target_doc, packing_slip):
 	return target_doc
 
 
+def mapper_item_condition(ps_item, target_doc):
+	if ps_item.name in [d.packing_slip_item for d in target_doc.get("items") if d.get("packing_slip_item")]:
+		return False
+
+	return True
+
+
 def get_packing_slip_item_mapper(target_doctype):
 	return {
 		"doctype": target_doctype,
@@ -660,16 +855,12 @@ def get_packing_slip_item_mapper(target_doctype):
 	}
 
 
-def mapper_item_condition(ps_item, target_doc):
-	if ps_item.name in [d.packing_slip_item for d in target_doc.get("items") if d.get("packing_slip_item")]:
-		return False
-
-	return True
-
-
-def update_mapped_item(target, packing_slip, ps_item):
+def update_mapped_delivery_item(target, packing_slip, ps_item):
 	target.packing_slip = packing_slip.name
 	target.packing_slip_item = ps_item.name
+
+	target.sales_order = ps_item.sales_order
+	target.sales_order_item = ps_item.sales_order_item
 
 	target.qty = ps_item.qty
 	target.uom = ps_item.uom
@@ -683,7 +874,7 @@ def update_mapped_item(target, packing_slip, ps_item):
 	target.serial_no = ps_item.serial_no
 
 
-def postprocess_mapped_document(target):
+def postprocess_mapped_delivery_document(target):
 	target.run_method('set_missing_values')
 	target.run_method('set_po_nos')
 	target.run_method('calculate_taxes_and_totals')

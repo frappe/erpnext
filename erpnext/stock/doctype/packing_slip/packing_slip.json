@@ -30,10 +30,10 @@
   "column_break_9",
   "packed_by",
   "packed_by_name",
-  "package_item_details",
-  "items",
   "packed_packages_section",
   "packing_slips",
+  "package_item_details",
+  "items",
   "packaging_material_section",
   "packaging_items",
   "package_weight_details",
@@ -50,7 +50,8 @@
   "status_section",
   "status",
   "column_break_42",
-  "is_delivered"
+  "is_delivered",
+  "is_nested"
  ],
  "fields": [
   {
@@ -283,19 +284,19 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nIn Stock\nRepacked\nDelivered\nCancelled",
+   "options": "Draft\nIn Stock\nNested\nDelivered\nCancelled",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
   {
+   "depends_on": "packing_slips",
    "fieldname": "packing_slips",
    "fieldtype": "Table",
    "label": "Packed Packages",
    "no_copy": 1,
-   "options": "Packing Slip Package",
-   "read_only": 1
+   "options": "Packing Slip Package"
   },
   {
    "fieldname": "packaging_material_section",
@@ -329,8 +330,15 @@
    "default": "0",
    "fieldname": "is_delivered",
    "fieldtype": "Check",
-   "in_standard_filter": 1,
    "label": "Is Delivered",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_nested",
+   "fieldtype": "Check",
+   "label": "Is Nested",
    "no_copy": 1,
    "read_only": 1
   }
@@ -339,7 +347,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-12 20:29:43.611155",
+ "modified": "2023-01-13 18:39:20.812758",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",

@@ -298,6 +298,8 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 			method = "erpnext.stock.doctype.packing_slip.packing_slip.make_delivery_note";
 		} else if (target_doctype == "Sales Invoice") {
 			method = "erpnext.stock.doctype.packing_slip.packing_slip.make_sales_invoice";
+		} else if (target_doctype == "Packing Slip") {
+			method = "erpnext.stock.doctype.packing_slip.packing_slip.make_target_packing_slip";
 		} else {
 			frappe.throw(__("Invalid Target DocType"))
 		}

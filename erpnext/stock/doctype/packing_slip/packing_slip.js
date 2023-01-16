@@ -73,6 +73,10 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			this.frm.add_custom_button(__('Sales Order'), () => {
 				this.get_items_from_sales_order();
 			}, __("Get Items From"));
+
+			this.frm.add_custom_button(__('Packing Slip'), () => {
+				this.get_items_from_packing_slip("Packing Slip");
+			}, __("Get Items From"));
 		}
 
 		if (this.frm.doc.docstatus == 1) {
@@ -109,8 +113,10 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 					}
 				}
 
-				this.frm.doc.total_net_weight += flt(item.net_weight);
-				this.frm.doc.total_tare_weight += flt(item.tare_weight);
+				if (!item.source_packing_slip) {
+					this.frm.doc.total_net_weight += flt(item.net_weight);
+					this.frm.doc.total_tare_weight += flt(item.tare_weight);
+				}
 			}
 		}
 
@@ -169,6 +175,47 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 				}
 			});
 		}
+	}
+
+	items_remove(doc, cdt, cdn) {
+		this.remove_packing_slips_without_items();
+		super.items_remove(doc, cdt, cdn);
+	}
+
+	packing_slips_remove(doc, cdt, cdn) {
+		this.remove_items_without_packing_slips();
+		super.packing_slips_remove(doc, cdt, cdn);
+	}
+
+	remove_packing_slips_without_items() {
+		let contents_packing_slips = (this.frm.doc.items || []).map(d => d.source_packing_slip).filter(d => d);
+		contents_packing_slips = [...new Set(contents_packing_slips)];
+
+		let to_remove = [];
+		for (let row of this.frm.doc.packing_slips || []) {
+			if (!contents_packing_slips.includes(row.source_packing_slip)) {
+				to_remove.push(row.source_packing_slip);
+			}
+		}
+
+		this.frm.doc.packing_slips = (this.frm.doc.packing_slips || []).filter(d => !to_remove.includes(d.source_packing_slip));
+		this.frm.doc.packing_slips.forEach((row, index) => (row.idx = index + 1));
+		this.frm.refresh_field("packing_slips");
+	}
+
+	remove_items_without_packing_slips() {
+		let packing_slips = (this.frm.doc.packing_slips || []).map(d => d.source_packing_slip).filter(d => d);
+
+		let to_remove = [];
+		for (let row of this.frm.doc.items || []) {
+			if (!packing_slips.includes(row.source_packing_slip)) {
+				to_remove.push(row.source_packing_slip);
+			}
+		}
+
+		this.frm.doc.items = (this.frm.doc.items || []).filter(d => !d.source_packing_slip || !to_remove.includes(d.source_packing_slip));
+		this.frm.doc.items.forEach((row, index) => (row.idx = index + 1));
+		this.frm.refresh_field("items");
 	}
 
 	get_items_from_sales_order() {

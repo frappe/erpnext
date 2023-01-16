@@ -6,14 +6,16 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "child_packing_slip",
+  "source_packing_slip",
+  "source_package_type",
   "net_weight",
   "tare_weight",
   "gross_weight"
  ],
  "fields": [
   {
-   "columns": 2,
+   "bold": 1,
+   "columns": 1,
    "fieldname": "net_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -21,7 +23,8 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "bold": 1,
+   "columns": 1,
    "fieldname": "gross_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -29,7 +32,7 @@
    "read_only": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "tare_weight",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -37,19 +40,28 @@
    "read_only": 1
   },
   {
-   "columns": 2,
-   "fieldname": "child_packing_slip",
+   "fieldname": "source_packing_slip",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Package",
+   "label": "Source Package",
    "options": "Packing Slip",
+   "read_only": 1,
    "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "source_package_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Package Type",
+   "options": "Package Type",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-12 21:51:48.055130",
+ "modified": "2023-01-13 18:36:59.686103",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Package",

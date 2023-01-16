@@ -375,7 +375,7 @@ class SalesOrder(SellingController):
 					select i.sales_order_item, i.qty
 					from `tabPacking Slip Item` i
 					inner join `tabPacking Slip` p on p.name = i.parent
-					where p.docstatus = 1 and i.sales_order_item in %s
+					where p.docstatus = 1 and i.sales_order_item in %s and ifnull(i.source_packing_slip, '') = ''
 				""", [packable_row_names], as_dict=1)
 
 				for d in packed_by_packing_slip:

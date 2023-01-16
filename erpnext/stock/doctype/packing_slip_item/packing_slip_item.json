@@ -39,6 +39,9 @@
   "reference_section",
   "sales_order",
   "sales_order_item",
+  "column_break_33",
+  "source_packing_slip",
+  "packing_slip_item",
   "accounting_dimensions_section",
   "expense_account",
   "dimension_col_break",
@@ -214,7 +217,8 @@
    "label": "Sales Order",
    "no_copy": 1,
    "options": "Sales Order",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "sales_order_item",
@@ -222,7 +226,8 @@
    "hidden": 1,
    "label": "Sales Order Item",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "warehouse_section",
@@ -305,12 +310,34 @@
    "fieldtype": "Percent",
    "label": "Cost Percentage",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "source_packing_slip",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Source Package",
+   "no_copy": 1,
+   "options": "Packing Slip",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "packing_slip_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Packing Slip Item",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-12 20:41:30.530375",
+ "modified": "2023-01-14 20:23:13.913759",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Item",
