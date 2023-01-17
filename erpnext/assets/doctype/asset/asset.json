@@ -513,7 +513,7 @@
   {
    "group": "Repair",
    "link_doctype": "Asset Repair",
-   "link_fieldname": "asset_name"
+   "link_fieldname": "asset"
   },
   {
    "group": "Value",
@@ -521,7 +521,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-12-05 16:21:30.024060",
+ "modified": "2023-01-16 23:35:37.423100",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
