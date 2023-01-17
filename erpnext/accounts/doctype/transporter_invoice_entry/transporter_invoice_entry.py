@@ -41,7 +41,6 @@ class TransporterInvoiceEntry(Document):
 			args = frappe._dict({
 				"transporter_invoice_entry":self.name
 				})
-			# frappe.throw("here")
 			frappe.enqueue(submit_invoice_entries, timeout=600, args = args)
 			# submit_invoice_entries(args=args)
 
@@ -89,8 +88,7 @@ class TransporterInvoiceEntry(Document):
 					"payable_amount":self.payable_amount,
 					"remarks":self.remarks
 				})
-			post_accounting_entries(args=args)
-			# frappe.enqueue(post_accounting_entries, timeout=600, args = args)
+			frappe.enqueue(post_accounting_entries, timeout=600, args = args)
 			
 
 @frappe.whitelist()
