@@ -69,8 +69,7 @@
   "column_break_41",
   "status",
   "is_closed",
-  "is_missed",
-  "notification_count"
+  "is_missed"
  ],
  "fields": [
   {
@@ -460,15 +459,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "notification_count",
-   "fieldtype": "Table",
-   "hidden": 1,
-   "label": "Notification Count",
-   "no_copy": 1,
-   "options": "Notification Count",
-   "read_only": 1
-  },
-  {
    "collapsible": 1,
    "collapsible_depends_on": "secondary_contact_person",
    "fieldname": "secondary_contact_section",
@@ -518,6 +508,7 @@
    "no_copy": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "applies_to_serial_no",
    "fieldtype": "Link",
    "label": "Applies to Serial No",
@@ -534,8 +525,7 @@
  ],
  "is_calendar_and_gantt": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2023-01-02 15:18:27.290996",
+ "modified": "2023-01-13 18:44:46.185437",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",

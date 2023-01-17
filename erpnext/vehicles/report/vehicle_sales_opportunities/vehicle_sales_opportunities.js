@@ -13,36 +13,36 @@ frappe.query_reports["Vehicle Sales Opportunities"] = {
 			reqd: 1
 		},
 		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
-			"reqd": 1
+			fieldname: "from_date",
+			label: __("From Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.month_start(),
+			reqd: 1
 		},
 		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today(),
-			"reqd": 1
+			fieldname: "to_date",
+			label: __("To Date"),
+			fieldtype: "Date",
+			default: frappe.datetime.month_end(),
+			reqd: 1
 		},
 		{
-			"fieldname":"sales_person",
-			"label": __("Sales Person"),
-			"fieldtype": "Link",
-			"options": "Sales Person"
+			fieldname: "sales_person",
+			label: __("Sales Person"),
+			fieldtype: "Link",
+			options: "Sales Person"
 		},
 		{
-			"fieldname":"lead_source",
-			"label": __("Source of Lead"),
-			"fieldtype": "Link",
-			"options": "Lead Source"
+			fieldname: "lead_source",
+			label: __("Source of Lead"),
+			fieldtype: "Link",
+			options: "Lead Source"
 		},
 		{
-			"fieldname":"information_source",
-			"label": __("Source of Information"),
-			"fieldtype": "Link",
-			"options": "Lead Information Source"
+			fieldname: "information_source",
+			label: __("Source of Information"),
+			fieldtype: "Link",
+			options: "Lead Information Source"
 		},
 		{
 			fieldname: "variant_of",
@@ -72,12 +72,6 @@ frappe.query_reports["Vehicle Sales Opportunities"] = {
 					filters: filters
 				};
 			}
-		},
-		{
-			fieldname: "first_additional",
-			label: __("1st/Additional/Replacement"),
-			fieldtype: "Select",
-			options: "\nFirst\nAdditional\nReplacement"
 		},
 		{
 			fieldname: "lead_classification",
