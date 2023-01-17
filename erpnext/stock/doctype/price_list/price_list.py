@@ -70,9 +70,7 @@ class PriceList(Document):
 
 
 def get_price_list_details(price_list):
-	price_list_details = frappe.cache().hget("price_list_details", price_list)
-
-	if not price_list_details:
+	def get_price_list():
 		price_list_details = frappe.get_cached_value(
 			"Price List", price_list, ["currency", "price_not_uom_dependent", "enabled"], as_dict=1
 		)
@@ -80,6 +78,6 @@ def get_price_list_details(price_list):
 		if not price_list_details or not price_list_details.get("enabled"):
 			throw(_("Price List {0} is disabled or does not exist").format(price_list))
 
-		frappe.cache().hset("price_list_details", price_list, price_list_details)
+		return price_list_details
 
-	return price_list_details or {}
+	return frappe.cache().hget("price_list_details", price_list, get_price_list)
