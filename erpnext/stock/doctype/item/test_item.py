@@ -140,7 +140,7 @@ class TestItem(FrappeTestCase):
 				"order_type": "Sales",
 				"customer": "_Test Customer",
 				"conversion_factor": 1,
-				"price_list_uom_dependant": 1,
+				"price_list_uom_dependent": 1,
 				"ignore_pricing_rule": 1,
 			}
 		)
@@ -240,7 +240,7 @@ class TestItem(FrappeTestCase):
 					"order_type": "Sales",
 					"customer": "_Test Customer",
 					"conversion_factor": 1,
-					"price_list_uom_dependant": 1,
+					"price_list_uom_dependent": 1,
 					"ignore_pricing_rule": 1,
 				}
 			)

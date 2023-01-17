@@ -258,7 +258,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	                "conversion_rate": 1.0,
 	                "selling_price_list": None,
 	                "price_list_currency": None,
-	                "price_list_uom_dependant": None,
+	                "price_list_uom_dependent": None,
 	                "plc_conversion_rate": 1.0,
 	                "doctype": "",
 	                "name": "",
@@ -957,7 +957,7 @@ def get_price_list_rate_for(args, item_code):
 	if item_price_data:
 		if item_price_data[0][2] == args.get("uom"):
 			return item_price_data[0][1]
-		elif not args.get("price_list_uom_dependant"):
+		elif not args.get("price_list_uom_dependent"):
 			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
 		else:
 			return item_price_data[0][1]
@@ -1281,7 +1281,7 @@ def apply_price_list(args, as_doc=False):
 	                "conversion_rate": 1.0,
 	                "selling_price_list": None,
 	                "price_list_currency": None,
-	                "price_list_uom_dependant": None,
+	                "price_list_uom_dependent": None,
 	                "plc_conversion_rate": 1.0,
 	                "doctype": "",
 	                "name": "",
@@ -1345,7 +1345,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_details = get_price_list_details(args.price_list)
 
 	price_list_currency = price_list_details.get("currency")
-	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+	price_list_uom_dependent = not price_list_details.get("price_not_uom_dependent")
 
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)
@@ -1366,7 +1366,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	return frappe._dict(
 		{
 			"price_list_currency": price_list_currency,
-			"price_list_uom_dependant": price_list_uom_dependant,
+			"price_list_uom_dependent": price_list_uom_dependent,
 			"plc_conversion_rate": plc_conversion_rate or 1,
 		}
 	)
