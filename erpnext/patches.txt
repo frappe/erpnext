@@ -259,8 +259,11 @@ erpnext.patches.v13_0.convert_qi_parameter_to_link_field
 erpnext.patches.v13_0.setup_patient_history_settings_for_standard_doctypes
 erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
 erpnext.patches.v13_0.update_payment_terms_outstanding
+<<<<<<< HEAD
 erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
+=======
+>>>>>>> dbde3a3421 (fix: patch item_reposting_for_incorrect_sl_and_gl)
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v13_0.update_vehicle_no_reqd_condition
 erpnext.patches.v12_0.add_einvoice_status_field #2021-03-17
@@ -352,6 +355,14 @@ erpnext.patches.v13_0.amazon_mws_deprecation_warning
 erpnext.patches.v13_0.datev_deprecation_warning
 erpnext.patches.v13_0.set_work_order_qty_in_so_from_mr
 erpnext.patches.v13_0.update_accounts_in_loan_docs
+<<<<<<< HEAD
+=======
+erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
+erpnext.patches.v14_0.update_batch_valuation_flag
+erpnext.patches.v14_0.delete_non_profit_doctypes
+erpnext.patches.v13_0.add_cost_center_in_loans
+erpnext.patches.v13_0.set_return_against_in_pos_invoice_references
+>>>>>>> dbde3a3421 (fix: patch item_reposting_for_incorrect_sl_and_gl)
 erpnext.patches.v13_0.remove_unknown_links_to_prod_plan_items # 24-03-2022
 erpnext.patches.v13_0.rename_non_profit_fields
 erpnext.patches.v13_0.enable_ksa_vat_docs #1
