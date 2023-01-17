@@ -221,13 +221,14 @@ class BankPayment(Document):
     def validate_mandatory(self):
         if not self.payment_type:
             frappe.throw(_("<b>Payment Type</b> is mandatory"))
-
+        '''
         if frappe.db.get_value('Bank Payment Settings', self.bank_name, 'enable_one_to_one'):
             if not flt(self.bank_balance) or (flt(self.total_amount) > flt(self.bank_balance)):
                 frappe.throw(_("Insufficient Bank Balance to proceed"))
         else:
             if self.payment_type == 'One-One Payment':
                 frappe.throw(_("One-One Payment is disabled"))
+        '''
 
         # validate transactions
         for rec in self.items:
@@ -1164,14 +1165,33 @@ def get_paid_from(doctype, txt, searchfield, start, page_len, filters):
         frappe.msgprint(_("Please select <b>Paid From Branch</b> first"))
     data = []
     data = frappe.db.sql("""select a.name, a.bank_name, a.bank_branch, a.bank_account_type, a.bank_account_no
-        from `tabBranch` b, `tabAccount` a
-        where b.name = "{}"
-        and a.name = b.expense_bank_account
-        and a.bank_name is not null
+        from `tabAccount` a
+        where a.bank_name is not null
         and a.bank_branch is not null
         and a.bank_account_type is not null
         and a.bank_account_no is not null
+            and ( exists (select 1
+            from `tabBranch` b 
+            inner join `tabBranch Bank Account` ba 
+            on b.name = ba.parent
+            where b.name = '{0}'
+            and ba.account = a.name)
+        or 
+        exists (select 1
+            from `tabBranch` 
+            where name = "{0}"
+            and expense_bank_account = a.name)
+    )
     """.format(filters.get("branch")))
+    # data = frappe.db.sql("""select a.name, a.bank_name, a.bank_branch, a.bank_account_type, a.bank_account_no
+    #     from `tabBranch` b, `tabAccount` a
+    #     where b.name = "{}"
+    #     and a.name = b.expense_bank_account
+    #     and a.bank_name is not null
+    #     and a.bank_branch is not null
+    #     and a.bank_account_type is not null
+    #     and a.bank_account_no is not null
+    # """.format(filters.get("branch")))
 
     if filters.get("branch") and not data:
         expense_bank_account = frappe.db.get_value("Branch", filters.get("branch"), "expense_bank_account")
