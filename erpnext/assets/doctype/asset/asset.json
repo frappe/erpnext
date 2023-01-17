@@ -68,6 +68,7 @@
   "column_break_51",
   "purchase_receipt_amount",
   "default_finance_book",
+  "depr_entry_posting_status",
   "amended_from"
  ],
  "fields": [
@@ -473,6 +474,16 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
+  },
+  {
+   "fieldname": "depr_entry_posting_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Depreciation Entry Posting Status",
+   "no_copy": 1,
+   "options": "\nSuccessful\nFailed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -487,7 +498,7 @@
   {
    "group": "Repair",
    "link_doctype": "Asset Repair",
-   "link_fieldname": "asset_name"
+   "link_fieldname": "asset"
   },
   {
    "group": "Value",
@@ -495,7 +506,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2022-07-20 16:22:44.437579",
+ "modified": "2023-01-17 00:28:37.789345",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
