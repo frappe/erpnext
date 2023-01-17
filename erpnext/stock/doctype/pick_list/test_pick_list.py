@@ -445,10 +445,10 @@ class TestPickList(FrappeTestCase):
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 4)
 
-		# grouping should halve the number of items
+		# grouping should not happen if group_same_items is False
 		pl = frappe.get_doc(
 			doctype="Pick List",
-			group_same_items=True,
+			group_same_items=False,
 			locations=[
 				_dict(item_code="A", warehouse="X", qty=5, picked_qty=1),
 				_dict(item_code="B", warehouse="Y", qty=4, picked_qty=2),
@@ -456,6 +456,11 @@ class TestPickList(FrappeTestCase):
 				_dict(item_code="B", warehouse="Y", qty=2, picked_qty=2),
 			],
 		)
+		pl.before_print()
+		self.assertEqual(len(pl.locations), 4)
+
+		# grouping should halve the number of items
+		pl.group_same_items = True
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 2)
 

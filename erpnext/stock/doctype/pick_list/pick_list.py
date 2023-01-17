@@ -4,7 +4,7 @@
 import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
-from typing import Dict, List, Set
+from typing import Dict, List
 
 import frappe
 from frappe import _
@@ -41,7 +41,9 @@ class PickList(Document):
 				)
 
 	def before_submit(self):
-		update_sales_orders = set()
+		self.validate_picked_items()
+
+	def validate_picked_items(self):
 		for item in self.locations:
 			if self.scan_mode and item.picked_qty < item.stock_qty:
 				frappe.throw(
@@ -50,17 +52,14 @@ class PickList(Document):
 					).format(item.idx, item.stock_qty - item.picked_qty, item.stock_uom),
 					title=_("Pick List Incomplete"),
 				)
-			elif not self.scan_mode and item.picked_qty == 0:
+
+			if not self.scan_mode and item.picked_qty == 0:
 				# if the user has not entered any picked qty, set it to stock_qty, before submit
 				item.picked_qty = item.stock_qty
 
-			if item.sales_order_item:
-				# update the picked_qty in SO Item
-				self.update_sales_order_item(item, item.picked_qty, item.item_code)
-				update_sales_orders.add(item.sales_order)
-
 			if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 				continue
+
 			if not item.serial_no:
 				frappe.throw(
 					_("Row #{0}: {1} does not have any available serial numbers in {2}").format(
@@ -68,58 +67,96 @@ class PickList(Document):
 					),
 					title=_("Serial Nos Required"),
 				)
-			if len(item.serial_no.split("\n")) == item.picked_qty:
-				continue
-			frappe.throw(
-				_(
-					"For item {0} at row {1}, count of serial numbers does not match with the picked quantity"
-				).format(frappe.bold(item.item_code), frappe.bold(item.idx)),
-				title=_("Quantity Mismatch"),
-			)
 
-		self.update_bundle_picked_qty()
-		self.update_sales_order_picking_status(update_sales_orders)
-
-	def before_cancel(self):
-		"""Deduct picked qty on cancelling pick list"""
-		updated_sales_orders = set()
-
-		for item in self.get("locations"):
-			if item.sales_order_item:
-				self.update_sales_order_item(item, -1 * item.picked_qty, item.item_code)
-				updated_sales_orders.add(item.sales_order)
-
-		self.update_bundle_picked_qty()
-		self.update_sales_order_picking_status(updated_sales_orders)
-
-	def update_sales_order_item(self, item, picked_qty, item_code):
-		item_table = "Sales Order Item" if not item.product_bundle_item else "Packed Item"
-		stock_qty_field = "stock_qty" if not item.product_bundle_item else "qty"
-
-		already_picked, actual_qty = frappe.db.get_value(
-			item_table,
-			item.sales_order_item,
-			["picked_qty", stock_qty_field],
-			for_update=True,
-		)
-
-		if self.docstatus == 1:
-			if (((already_picked + picked_qty) / actual_qty) * 100) > (
-				100 + flt(frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance"))
-			):
+			if len(item.serial_no.split("\n")) != item.picked_qty:
 				frappe.throw(
 					_(
-						"You are picking more than required quantity for {}. Check if there is any other pick list created for {}"
-					).format(item_code, item.sales_order)
+						"For item {0} at row {1}, count of serial numbers does not match with the picked quantity"
+					).format(frappe.bold(item.item_code), frappe.bold(item.idx)),
+					title=_("Quantity Mismatch"),
 				)
 
-		frappe.db.set_value(item_table, item.sales_order_item, "picked_qty", already_picked + picked_qty)
+	def on_submit(self):
+		self.update_bundle_picked_qty()
+		self.update_reference_qty()
+		self.update_sales_order_picking_status()
 
-	@staticmethod
-	def update_sales_order_picking_status(sales_orders: Set[str]) -> None:
+	def on_cancel(self):
+		self.update_bundle_picked_qty()
+		self.update_reference_qty()
+		self.update_sales_order_picking_status()
+
+	def update_reference_qty(self):
+		packed_items = []
+		so_items = []
+
+		for item in self.locations:
+			if item.product_bundle_item:
+				packed_items.append(item.sales_order_item)
+			elif item.sales_order_item:
+				so_items.append(item.sales_order_item)
+
+		if packed_items:
+			self.update_packed_items_qty(packed_items)
+
+		if so_items:
+			self.update_sales_order_item_qty(so_items)
+
+	def update_packed_items_qty(self, packed_items):
+		picked_items = get_picked_items_qty(packed_items)
+		self.validate_picked_qty(picked_items)
+
+		picked_qty = frappe._dict()
+		for d in picked_items:
+			picked_qty[d.sales_order_item] = d.picked_qty
+
+		for packed_item in packed_items:
+			frappe.db.set_value(
+				"Packed Item",
+				packed_item,
+				"picked_qty",
+				flt(picked_qty.get(packed_item)),
+				update_modified=False,
+			)
+
+	def update_sales_order_item_qty(self, so_items):
+		picked_items = get_picked_items_qty(so_items)
+		self.validate_picked_qty(picked_items)
+
+		picked_qty = frappe._dict()
+		for d in picked_items:
+			picked_qty[d.sales_order_item] = d.picked_qty
+
+		for so_item in so_items:
+			frappe.db.set_value(
+				"Sales Order Item",
+				so_item,
+				"picked_qty",
+				flt(picked_qty.get(so_item)),
+				update_modified=False,
+			)
+
+	def update_sales_order_picking_status(self) -> None:
+		sales_orders = []
+		for row in self.locations:
+			if row.sales_order and row.sales_order not in sales_orders:
+				sales_orders.append(row.sales_order)
+
 		for sales_order in sales_orders:
-			if sales_order:
-				frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
+			frappe.get_doc("Sales Order", sales_order, for_update=True).update_picking_status()
+
+	def validate_picked_qty(self, data):
+		over_delivery_receipt_allowance = 100 + flt(
+			frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
+		)
+
+		for row in data:
+			if (row.picked_qty / row.stock_qty) * 100 > over_delivery_receipt_allowance:
+				frappe.throw(
+					_(
+						f"You are picking more than required quantity for the item {row.item_code}. Check if there is any other pick list created for the sales order {row.sales_order}."
+					)
+				)
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
@@ -230,7 +267,8 @@ class PickList(Document):
 			frappe.throw(_("Qty of Finished Goods Item should be greater than 0."))
 
 	def before_print(self, settings=None):
-		self.group_similar_items()
+		if self.group_same_items:
+			self.group_similar_items()
 
 	def group_similar_items(self):
 		group_item_qty = defaultdict(float)
@@ -306,6 +344,31 @@ class PickList(Document):
 			else:
 				possible_bundles.append(0)
 		return int(flt(min(possible_bundles), precision or 6))
+
+
+def get_picked_items_qty(items) -> List[Dict]:
+	return frappe.db.sql(
+		f"""
+		SELECT
+			sales_order_item,
+			item_code,
+			sales_order,
+			SUM(stock_qty) AS stock_qty,
+			SUM(picked_qty) AS picked_qty
+		FROM
+			`tabPick List Item`
+		WHERE
+			sales_order_item IN (
+				{", ".join(frappe.db.escape(d) for d in items)}
+			)
+			AND docstatus = 1
+		GROUP BY
+			sales_order_item,
+			sales_order
+		FOR UPDATE
+	""",
+		as_dict=1,
+	)
 
 
 def validate_item_locations(pick_list):
