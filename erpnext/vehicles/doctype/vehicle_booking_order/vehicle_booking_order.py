@@ -11,6 +11,7 @@ from frappe.model.naming import set_name_by_naming_series
 from erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
 from erpnext.vehicles.vehicle_booking_controller import VehicleBookingController
 from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
+from frappe.core.doctype.notification_count.notification_count import get_all_notification_count
 
 
 class VehicleBookingOrder(VehicleBookingController):
@@ -65,6 +66,8 @@ class VehicleBookingOrder(VehicleBookingController):
 
 	def onload(self):
 		super(VehicleBookingOrder, self).onload()
+
+		self.set_onload('notification_count', get_all_notification_count(self.doctype, self.name))
 
 		if self.docstatus == 1:
 			from erpnext.vehicles.doctype.vehicle_booking_order.change_booking import set_can_change_onload
@@ -981,7 +984,7 @@ def send_payment_overdue_notifications():
 	overdue_bookings_to_notify = frappe.db.sql_list("""
 		select vbo.name
 		from `tabVehicle Booking Order` vbo
-		left join `tabNotification Count` n on n.parenttype = 'Vehicle Booking Order' and n.parent = vbo.name
+		left join `tabNotification Count` n on n.reference_doctype = 'Vehicle Booking Order' and n.reference_name = vbo.name
 			and n.notification_type = 'Balance Payment Due' and n.notification_medium = 'SMS'
 		where vbo.docstatus = 1
 			and vbo.status != 'Cancelled Booking'
