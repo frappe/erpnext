@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "api_details_section",
+  "disabled",
   "service_provider",
   "api_endpoint",
   "url",
@@ -77,12 +78,18 @@
    "label": "Service Provider",
    "options": "frankfurter.app\nexchangerate.host\nCustom",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-01-10 15:51:14.521174",
+ "modified": "2023-01-09 12:19:03.955906",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
