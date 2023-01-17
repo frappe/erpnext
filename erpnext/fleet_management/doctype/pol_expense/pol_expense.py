@@ -187,7 +187,7 @@ def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user
 	user_roles = frappe.get_roles(user)
 
-	if user == "Administrator" or "System Manager" in user_roles or "Accounts User" in user_roles: 
+	if user == "Administrator" or "System Manager" in user_roles: 
 		return
 
 	return """(
@@ -195,7 +195,7 @@ def get_permission_query_conditions(user):
 		or
 		exists(select 1
 			from `tabEmployee` as e
-			where e.branch = `tabPOL Expense`.branch
+			where e.branch = `tabPOL Expense`.fuelbook_branch
 			and e.user_id = '{user}')
 		or
 		exists(select 1
@@ -203,7 +203,7 @@ def get_permission_query_conditions(user):
 			where e.user_id = '{user}'
 			and ab.employee = e.name
 			and bi.parent = ab.name
-			and bi.branch = `tabPOL Expense`.branch)
+			and bi.branch = `tabPOL Expense`.fuelbook_branch)
 		or
 		(`tabPOL Expense`.approver = '{user}' and `tabPOL Expense`.workflow_state not in  ('Draft','Approved','Rejected','Cancelled'))
 	)""".format(user=user)
