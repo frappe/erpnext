@@ -7,7 +7,7 @@ from erpnext.custom_utils import check_future_date
 from erpnext.controllers.accounts_controller import AccountsController
 from pypika import Case, functions as fn
 from erpnext.production.doctype.transporter_rate.transporter_rate import get_transporter_rate
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, money_in_words
 from erpnext.accounts.utils import get_tds_account,get_account_type
 from erpnext.accounts.general_ledger import (
 	get_round_off_account_and_cost_center,
@@ -31,6 +31,12 @@ class TransporterInvoice(AccountsController):
 	def on_cancel(self):
 		self.make_gl_entries()
 
+	def before_cancel(self):
+		if self.journal_entry and frappe.db.exists("Journal Entry",self.journal_entry):
+			doc = frappe.get_doc("Journal Entry", self.journal_entry)
+			if doc.docstatus != 2:
+				frappe.throw("Journal Entry exists for this transaction {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry)))
+			
 	def validate_dates(self):
 		if self.from_date > self.to_date:
 			msgprint("From Date cannot be grater than To Date",title="Invalid Dates", raise_exception=True)
@@ -263,6 +269,62 @@ class TransporterInvoice(AccountsController):
 			row = self.append('pols', {})
 			row.update(a)
 		self.calculate_total()
+
+	@frappe.whitelist()
+	def post_journal_entry(self):
+		if self.journal_entry and frappe.db.exists("Journal Entry",{"name":self.journal_entry,"docstatus":("!=",2)}):
+			frappe.msgprint(_("Journal Entry Already Exists {}".format(frappe.get_desk_link("Journal Entry",je.name))))
+		if not self.amount_payable:
+			frappe.throw(_("Payable Amount should be greater than zero"))
+			
+		# default_ba = get_default_ba()
+
+		credit_account = self.credit_account
+	
+		if not credit_account:
+			frappe.throw("Expense Account is mandatory")
+		r = []
+		if self.remarks:
+			r.append(_("Note: {0}").format(self.remarks))
+
+		remarks = ("").join(r) #User Remarks is not mandatory
+		bank_account = frappe.db.get_value("Company",self.company, "default_bank_account")
+		if not bank_account:
+			frappe.throw(_("Default bank account is not set in company {}".format(frappe.bold(self.company))))
+		# Posting Journal Entry
+		je = frappe.new_doc("Journal Entry")
+		je.flags.ignore_permissions=1
+		je.update({
+			"doctype": "Journal Entry",
+			"voucher_type": "Bank Entry",
+			"naming_series": "Bank Payment Voucher",
+			"title": "Transporter Payment "+ self.supplier,
+			"user_remark": "Note: " + "Transporter Payment - " + self.supplier,
+			"posting_date": self.posting_date,
+			"company": self.company,
+			"total_amount_in_words": money_in_words(self.amount_payable),
+			"branch": self.branch,
+		})
+		je.append("accounts",{
+			"account": self.credit_account,
+			"debit_in_account_currency": self.amount_payable,
+			"cost_center": self.cost_center,
+			"party_check": 1,
+			"party_type": "Supplier",
+			"party": self.supplier,
+			"reference_type": "Transporter Invoice",
+			"reference_name": self.name
+		})
+		je.append("accounts",{
+			"account": bank_account,
+			"credit_in_account_currency": self.amount_payable,
+			"cost_center": self.cost_center
+		})
+
+		je.insert()
+		#Set a reference to the claim journal entry
+		self.db_set("journal_entry",je.name)
+		frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
 	
 	@frappe.whitelist()
 	def calculate_total(self):
@@ -325,16 +387,20 @@ class TransporterInvoice(AccountsController):
 		for d in self.get("deductions"):
 			# tds and security deposite
 			if d.deduction_type in ["Security Deposit","TDS Deduction"]:
-				if flt(d.percent) < 1:
-					msgprint("Deduction Percent is required at row {} for deduction type {}".format(bold(d.idx),bold(d.deduction_type)), raise_exception=True)
-				d.amount = flt(self.gross_amount) * flt(d.percent) / 100
 				if d.deduction_type == "TDS Deduction":
+					if flt(d.percent) < 1:
+						msgprint("Deduction Percent is required at row {} for deduction type {}".format(bold(d.idx),bold(d.deduction_type)), raise_exception=True)
+					d.amount = flt(self.gross_amount) * flt(d.percent) / 100
 					self.tds_amount += flt(d.amount)
 					d.account = get_tds_account(d.percent, self.company)
 					if not d.account:
 						msgprint(_("GL for {} is not set under {}")\
 						.format(frappe.bold("TDS Account"), frappe.bold("Company's Accounts Settings")), raise_exception=True)
 				elif d.deduction_type == "Security Deposit":
+					if flt(d.percent) > 0:
+						d.amount = flt(self.gross_amount) * flt(d.percent) / 100
+					else:
+						d.amount = d.charge_amount
 					d.account = frappe.db.get_value("Company", self.company, "security_deposit_account")
 					self.security_deposit_amount += flt(d.amount)
 					if not d.account:

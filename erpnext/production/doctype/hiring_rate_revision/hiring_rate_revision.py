@@ -5,7 +5,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, add_days
 from frappe import _
-
+from erpnext.production.doctype.fuel_price.fuel_price import get_previous_price
+from frappe import qb
 class HiringRateRevision(Document):
 	def validate(self):
 		self.check_duplicates()
@@ -81,6 +82,18 @@ class HiringRateRevision(Document):
 				row.revised_rate = (flt((flt(self.current_price) - flt(self.previous_price))/ flt(self.previous_price)) * (flt(self.hiring_rate_revision)/100 * flt( base_rate[0][0]))) + flt( base_rate[0][0])
 				row.revised_rate = flt(row.revised_rate,2)
 			row.update(d)
+	@frappe.whitelist()
+	def get_previous_rate(self):
+		data = frappe.db.sql('''select current_price from `tabHiring Rate Revision`
+							where item_code = '{}' and branch = '{}' and fuel_price_list = '{}'
+							and equipment_category = '{}' and fuel_type = '{}' 
+							and rate_applicable ='Applicable' and name != '{}'
+							order by valid_from desc limit 1
+							'''.format(self.item_code, self.branch, self.fuel_price_list, self.equipment_category, self.fuel_type, self.name), as_dict=True)
+		if data:
+			self.previous_price = data[0].current_price
+		else:
+			self.previous_price = get_previous_price(item_code=self.item_code, valid_from = self.valid_from, fuel_price_list = self.fuel_price_list, uom = self.uom)[0].rate
 @frappe.whitelist()
 def filter_fuel_price_list(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("branch"):

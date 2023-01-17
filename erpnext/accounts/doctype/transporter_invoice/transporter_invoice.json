@@ -82,7 +82,8 @@
   "total_html",
   "status",
   "section_break_75",
-  "transporter_invoice_entry"
+  "transporter_invoice_entry",
+  "journal_entry"
  ],
  "fields": [
   {
@@ -541,12 +542,19 @@
    "label": "Transporter Invoice Entry",
    "options": "Transporter Invoice Entry",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "journal_entry",
+   "fieldtype": "Data",
+   "label": "Journal Entry",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-12 16:34:45.572876",
+ "modified": "2023-01-17 13:15:38.636698",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice",

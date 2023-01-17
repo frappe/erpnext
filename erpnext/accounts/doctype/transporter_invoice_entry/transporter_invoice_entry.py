@@ -3,9 +3,9 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, cint, nowdate
+from frappe.utils import flt, cint, nowdate, money_in_words
 from frappe import _, bold
-
+from erpnext.accounts.party import get_party_account
 class TransporterInvoiceEntry(Document):
 	def validate(self):
 		self.valid_account_for_other_charges()
@@ -41,6 +41,7 @@ class TransporterInvoiceEntry(Document):
 			args = frappe._dict({
 				"transporter_invoice_entry":self.name
 				})
+			# frappe.throw("here")
 			frappe.enqueue(submit_invoice_entries, timeout=600, args = args)
 			# submit_invoice_entries(args=args)
 
@@ -48,15 +49,18 @@ class TransporterInvoiceEntry(Document):
 	def get_equipment(self):
 		self.set("items",[])
 		for d in frappe.db.sql('''
-			select name, equipment_category, equipment_type, supplier 
-				from `tabEquipment` 
+			select name, equipment_category, equipment_type, supplier, company
+				from `tabEquipment` e
 				where hired_equipment = 1 and branch = '{}' and equipment_category = '{}' and enabled = 1
-			'''.format(self.branch, self.equipment_category), as_dict= True):
+				and exists(select 1 from `tabSupplier` where name = e.supplier and supplier_type ='{}')
+			'''.format(self.branch, self.equipment_category, self.supplier_type), as_dict= True):
+			credit_account = get_party_account("Supplier",d.supplier, d.company)
 			self.append("items",{
 				"equipment": d.name,
 				"equipment_category": d.equipment_category,
 				"equipment_type": d.equipment_type,
-				"supplier":d.supplier
+				"supplier":d.supplier,
+				"credit_account":credit_account
 			})
 	@frappe.whitelist()
 	def cancel_transporter_invoice(self):
@@ -74,10 +78,19 @@ class TransporterInvoiceEntry(Document):
 		self.check_permission('write')
 		if cint(self.invoice_submitted) == 1 and cint(self.invoice_created) == 1 and cint(self.posted_to_account) == 0:
 			args = frappe._dict({
-				"transporter_invoice_entry":self.name
+					"transporter_invoice_entry":self.name,
+					"doctype":"Transporter Invoice",
+					"branch":self.branch,
+					"cost_center":self.cost_center,
+					"from_date":self.from_date,
+					"to_date":self.to_date,
+					"posting_date":self.posting_date,
+					"company":self.company,
+					"payable_amount":self.payable_amount,
+					"remarks":self.remarks
 				})
-			# post_accounting_entries(args=args)
-			frappe.enqueue(post_accounting_entries, timeout=600, args = args)
+			post_accounting_entries(args=args)
+			# frappe.enqueue(post_accounting_entries, timeout=600, args = args)
 			
 
 @frappe.whitelist()
@@ -88,6 +101,7 @@ def crate_invoice_entries(args, publish_progress=True):
 	invoice_entry = frappe.get_doc("Transporter Invoice Entry", args.get("transporter_invoice_entry"))
 	invoice_entry.set("failed_transaction",[])
 	refresh_interval = 25
+	total_payable_amount = other_deductions = 0
 	total_count = len(invoice_entry.items)
 	for e in invoice_entry.items:
 		args.update({
@@ -111,6 +125,11 @@ def crate_invoice_entries(args, publish_progress=True):
 				transporter_invoice.append("deductions",{
 					"deduction_type":"Security Deposit",
 					"percent":e.security_percent
+				})
+			elif flt(e.security_deposit_amount) > 0:
+				transporter_invoice.append("deductions",{
+					"deduction_type":"Security Deposit",
+					"charge_amount":e.security_deposit_amount
 				})
 			if flt(e.weighbridge_charge_amount) > 0:
 				transporter_invoice.append("deductions",{
@@ -148,7 +167,8 @@ def crate_invoice_entries(args, publish_progress=True):
 			invoice_entry_item.db_set("total_trip",transporter_invoice.total_trip)
 			invoice_entry_item.db_set("total_payable_amount", transporter_invoice.amount_payable)
 			invoice_entry_item.db_set("pol_amount", transporter_invoice.pol_amount)
-			
+			total_payable_amount += flt(transporter_invoice.amount_payable)
+			other_deductions += flt(transporter_invoice.other_deductions)
 		if publish_progress:
 				show_progress = 0
 				if count <= refresh_interval:
@@ -174,6 +194,8 @@ def crate_invoice_entries(args, publish_progress=True):
 	elif successful == 0 and failed > 0:
 		invoice_entry.db_set("invoice_created",0)
 
+	invoice_entry.db_set("payable_amount",total_payable_amount)
+	invoice_entry.db_set("total_deduction",other_deductions)
 	invoice_entry.db_set("successful",successful)
 	invoice_entry.db_set("failed",failed)
 	invoice_entry.reload()
@@ -293,15 +315,52 @@ def post_accounting_entries(args,publish_progress=True):
 	invoice_entry = frappe.get_doc("Transporter Invoice Entry", args.get("transporter_invoice_entry"))
 	refresh_interval = 25
 	total_count = cint(invoice_entry.successful)
+	if not args.get("payable_amount"):
+		frappe.throw(_("Payable Amount should be greater than zero"))
+	r = []
+	if args.get("remarks"):
+		r.append(_("Note: {0}").format(args.get("remarks")))
+
+	remarks = ("").join(r) #User Remarks is not mandatory
+	bank_account = frappe.db.get_value("Company",args.get("company"), "default_bank_account")
+	if not bank_account:
+		frappe.throw(_("Default bank account is not set in company {}".format(frappe.bold(self.company))))
+	# Posting Journal Entry
+	je = frappe.new_doc("Journal Entry")
+	je.flags.ignore_permissions=1
+	je.update({
+		"doctype": "Journal Entry",
+		"voucher_type": "Bank Entry",
+		"naming_series": "Bank Payment Voucher",
+		"title": "Transporter Payment "+ str(args.get("branch")),
+		"user_remark": "Note: " + "Transporter Payment - " + str(args.get("remarks")),
+		"posting_date": args.get("posting_date"),
+		"company": args.get("company"),
+		"total_amount_in_words": money_in_words(args.get("payable_amount")),
+		"branch": args.get("branch"),
+	})
 	for e in invoice_entry.items:
 		if e.reference:
 			equipment = e.equipment
 			error = None
 			transporter_invoice = frappe.get_doc("Transporter Invoice",e.reference)
-			
-			try:
-				pe = get_payment_entry(dt= "Transporter Invoice", dn= e.reference)
-				pe.insert(ignore_mandatory=True)
+			credit_account = e.credit_account
+			if not credit_account:
+				credit_account = get_party_account("Supplier", e.supplier, args.get("company"))
+			try:				
+				je.append("accounts",{
+					"account": credit_account,
+					"debit_in_account_currency": e.total_payable_amount,
+					"cost_center": args.get("cost_center"),
+					"party_check": 1,
+					"party_type": "Supplier",
+					"party": e.supplier,
+					"reference_type": "Transporter Invoice",
+					"reference_name": e.reference
+				})
+				
+				#Set a reference to the claim journal entry
+				transporter_invoice.db_set("journal_entry",je.name)
 				successful += 1
 			except Exception as e:
 				error = str(e)
@@ -309,10 +368,7 @@ def post_accounting_entries(args,publish_progress=True):
 			count+=1
 			invoice_entry_item = frappe.get_doc("Transporter Invoice Entry Item",{"parent":args.get("transporter_invoice_entry"), "equipment": equipment})
 			if error:
-				invoice_entry_item.db_set("error_msg", error)
-			# else:
-			# 	invoice_entry_item.db_set("submission_status", "Submitted")
-				
+				invoice_entry_item.db_set("error_msg", error)	
 			if publish_progress:
 					show_progress = 0
 					if count <= refresh_interval:
@@ -329,6 +385,12 @@ def post_accounting_entries(args,publish_progress=True):
 						frappe.publish_progress(count*100/total_count,
 							title = _("Posting Accounting Entry..."),
 							description = description)
-		# 				pass
+	je.append("accounts",{
+					"account": bank_account,
+					"credit_in_account_currency": args.get("payable_amount"),
+					"cost_center": args.get("cost_center")
+				})
+	je.insert()
 	invoice_entry.db_set("posted_to_account", 1 if successful > 0 else 0)
+	frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
 	invoice_entry.reload()

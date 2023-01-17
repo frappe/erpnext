@@ -35,7 +35,7 @@ frappe.ui.form.on('Transporter Invoice Entry', {
 		frm.refresh_field("items")
 	},
 	get_equipment:function(frm){
-		if (frm.doc.branch && frm.doc.equipment_category){
+		if (frm.doc.branch && frm.doc.equipment_category && frm.doc.supplier_type){
 			frappe.call({
 				method:"get_equipment",
 				doc:frm.doc,

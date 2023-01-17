@@ -218,7 +218,7 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nPBVA\nBonus\nLeave Travel Concession\nFull and Final Statement\nPOL Expense\nCoal Raising Invoice\nEmployee Benefit Claim\nInsurance and Registration"
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nPBVA\nBonus\nLeave Travel Concession\nFull and Final Statement\nPOL Expense\nCoal Raising Invoice\nEmployee Benefit Claim\nInsurance and Registration\nTransporter Invoice"
   },
   {
    "fieldname": "reference_name",
@@ -396,7 +396,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-04 14:44:04.270891",
+ "modified": "2023-01-17 11:33:16.392357",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

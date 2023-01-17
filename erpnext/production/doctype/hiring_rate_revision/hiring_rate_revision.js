@@ -59,21 +59,10 @@ var get_hired_equipment = function(frm){
 var fetch_previous_price = function(frm){
 	if (frm.doc.valid_from && frm.doc.fuel_price_list && frm.doc.item_code){
 		frappe.call({
-			method:"erpnext.production.doctype.fuel_price.fuel_price.get_previous_price",
-			args:{
-				"item_code":frm.doc.item_code,
-				"valid_from":frm.doc.valid_from,
-				"fuel_price_list":frm.doc.fuel_price_list,
-				"uom":frm.doc.uom
-			},
+			method:"get_previous_rate",
+			doc : frm.doc,
 			callback:function(r){
-				if ( r.message.length > 0){
-					frm.set_value("previous_price",r.message[0].rate)
-					frm.refresh_field("previous_price")
-				}else{
-					frm.set_value("previous_price",0)
-					frm.refresh_field("previous_price")
-				}
+				frm.refresh_field("previous_price")
 			}
 		})
 	}

@@ -15,6 +15,12 @@
   "posting_date",
   "to_date",
   "section_break_8",
+  "supplier_type",
+  "column_break_10",
+  "payable_amount",
+  "column_break_12",
+  "total_deduction",
+  "section_break_12",
   "get_equipment",
   "items",
   "section_break_11",
@@ -30,7 +36,9 @@
   "column_break_21",
   "failed",
   "submission_failed",
-  "amended_from"
+  "amended_from",
+  "section_break_26",
+  "remarks"
  ],
  "fields": [
   {
@@ -101,7 +109,7 @@
    "options": "Transporter Invoice Entry Item"
   },
   {
-   "depends_on": "eval:doc.branch && doc.equipment_category",
+   "depends_on": "eval:doc.branch && doc.equipment_category && doc.supplier_type",
    "fieldname": "get_equipment",
    "fieldtype": "Button",
    "label": "Get Equipment"
@@ -178,12 +186,56 @@
   {
    "fieldname": "column_break_21",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier_type",
+   "fieldtype": "Select",
+   "label": "Transporter Type",
+   "options": "\nDomestic Vendor\nInternational Vendor",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks",
+   "read_only_depends_on": "eval:doc.invoice_created"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "payable_amount",
+   "fieldtype": "Currency",
+   "label": "Payable Amount(Total)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_deduction",
+   "fieldtype": "Currency",
+   "label": "Total Deduction",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-15 14:47:00.727564",
+ "modified": "2023-01-17 12:51:56.104193",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice Entry",

@@ -14,9 +14,11 @@ frappe.ui.form.on('Transporter Invoice', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			},__('View'));
-			cur_frm.add_custom_button(__('Make Payment'), function(doc) {
-				frm.events.make_payment_entry(frm)
-			},__('Create'))
+			if (frm.doc.journal_entry){
+				cur_frm.add_custom_button(__('Make Journal Entry'), function(doc) {
+					frm.events.make_journal_entry(frm)
+				},__('Create'))
+			}
 			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			cur_frm.page.set_inner_btn_group_as_primary(__('View'));
 		}
@@ -33,6 +35,15 @@ frappe.ui.form.on('Transporter Invoice', {
 			callback: function (r) {
 				var doc = frappe.model.sync(r.message);
 				frappe.set_route("Form", doc[0].doctype, doc[0].name);
+			},
+		});
+	},
+	make_journal_entry:function(frm){
+		frappe.call({
+			method:"post_journal_entry",
+			doc : frm.doc,
+			callback: function (r) {
+				
 			},
 		});
 	},
