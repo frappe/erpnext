@@ -408,14 +408,15 @@ class TransporterInvoice(AccountsController):
 							.format(frappe.bold("Security Deposit Received"), frappe.bold("Company's Accounts Settings")),raise_exception=True)
 							
 			elif d.deduction_type in ["Weighbridge Charge/Trip","Clearing Charge/Trip"]:
-				d.account = frappe.db.get_value("Company", self.company, "weighbridge_account")
 				d.amount = flt(self.total_trip) * flt(d.charge_amount)
 				if d.deduction_type == "Weighbridge Charge/Trip":
+					d.account = frappe.db.get_value("Company", self.company, "weighbridge_account")
 					self.weighbridge_amount += flt(d.amount)
 					if not d.account:
 						msgprint(_("GL for {} is not set under {}")\
 						.format(frappe.bold("Income from Weighbridge Account"), frappe.bold("Company's Accounts Settings")), raise_exception=True)
 				elif d.deduction_type == "Clearing Charge/Trip":
+					d.account = frappe.db.get_value("Company", self.company, "clearing_account")
 					self.clearing_amount += flt(d.amount)
 					if not d.account:
 						msgprint(_("GL for {} is not set under {}")\

@@ -95,3 +95,10 @@ frappe.ui.form.on('Transporter Invoice Entry', {
 		})
 	}
 });
+
+frappe.ui.form.on('Transporter Invoice Entry Item', {
+	view_transaction:function(frm, cdt, cdn){
+		let row = locals[cdt][cdn]
+		frappe.set_route("Form", "Transporter Invoice", row.reference);	
+	}
+})
