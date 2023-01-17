@@ -10,22 +10,34 @@
   "fiscal_year",
   "branch",
   "from_date",
+  "successful",
   "column_break_5",
   "posting_date",
   "cost_center",
   "to_date",
+  "failed",
   "tds_details_section",
   "tds_percent",
+  "payable_amount",
   "column_break_10",
   "tds_account",
+  "total_deduction",
   "section_break_10",
   "get_supplier",
   "items",
-  "deduction_details_section",
-  "deduct_items",
-  "amended_from",
+  "deductions",
+  "section_break_19",
   "company",
-  "currency"
+  "currency",
+  "column_break_22",
+  "invoice_created",
+  "posted_to_account",
+  "section_break_21",
+  "remarks",
+  "amended_from",
+  "transaction_status_tab",
+  "successful_transaction",
+  "failed_transaction"
  ],
  "fields": [
   {
@@ -97,16 +109,6 @@
    "options": "EME Invoice Entry Item"
   },
   {
-   "fieldname": "deduction_details_section",
-   "fieldtype": "Section Break",
-   "label": "Deduction Details"
-  },
-  {
-   "fieldname": "deduct_items",
-   "fieldtype": "Table",
-   "options": "EME Deduction Item"
-  },
-  {
    "fieldname": "get_supplier",
    "fieldtype": "Button",
    "label": "Get Supplier"
@@ -139,12 +141,98 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "failed",
+   "fieldtype": "Data",
+   "label": "Failed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "failed_transaction",
+   "fieldtype": "Table",
+   "label": "Failed Transaction",
+   "options": "EME Invoice Entry Error",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "successful",
+   "fieldtype": "Data",
+   "label": "Successful",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deductions",
+   "fieldtype": "Table",
+   "label": "Deductions",
+   "options": "EME Invoice Entry Deduction"
+  },
+  {
+   "fieldname": "transaction_status_tab",
+   "fieldtype": "Tab Break",
+   "label": "Transaction Status"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "successful_transaction",
+   "fieldtype": "Table",
+   "label": "Successful Transaction",
+   "options": "EME Invoice Success",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "invoice_created",
+   "fieldtype": "Check",
+   "label": "Invoice Created",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "posted_to_account",
+   "fieldtype": "Check",
+   "label": "Posted To Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payable_amount",
+   "fieldtype": "Currency",
+   "label": "Payable Amount(Total)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_deduction",
+   "fieldtype": "Currency",
+   "label": "Total Deduction",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-20 15:38:03.761667",
+ "modified": "2023-01-17 21:16:16.814650",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice Entry",

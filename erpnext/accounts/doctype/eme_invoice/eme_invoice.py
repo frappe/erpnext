@@ -7,7 +7,7 @@ from erpnext.custom_utils import check_future_date
 from erpnext.controllers.accounts_controller import AccountsController
 from pypika import Case, functions as fn
 from erpnext.production.doctype.transporter_rate.transporter_rate import get_transporter_rate
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, money_in_words
 from erpnext.accounts.utils import get_tds_account,get_account_type
 from erpnext.accounts.general_ledger import (
 	get_round_off_account_and_cost_center,
@@ -97,7 +97,7 @@ class EMEInvoice(AccountsController):
 		
 		for a in self.items:
 			total += flt(a.amount)
-			if not a.expense_account:
+			if not a.expense_account and a.expense_head:
 				a.expense_account = frappe.db.get_value("Expense Head",a.expense_head,"expense_account")
 				if not a.expense_account:
 					throw("Expense Account not defined in Expense Head {}".format(bold(a.expense_head)),title="Expense Account Not Found")
@@ -244,7 +244,7 @@ class EMEInvoice(AccountsController):
 					).run(as_dict=True)
 		self.set('items', [])
 		if len(entries) == 0:
-			frappe.msgprint("No valid logbooks found for owner {} between {} and {}.You must have pulled in other EME Invoices(including draft invoices)".format(frappe.bold(self.supplier), frappe.bold(self.from_date),frappe.bold(self.to_date)))
+			frappe.msgprint("No valid logbooks found for owner {} between {} and {}.You must have pulled in other EME Invoices(including draft invoices)".format(frappe.bold(self.supplier), frappe.bold(self.from_date),frappe.bold(self.to_date)), raise_exception=True)
 
 		total = 0
 		exist_list = {}
@@ -254,6 +254,60 @@ class EMEInvoice(AccountsController):
 			row = self.append('items', {})
 			row.update(d)
 		# self.calculate_totals()
+
+	@frappe.whitelist()
+	def post_journal_entry(self):
+		if self.journal_entry and frappe.db.exists("Journal Entry",{"name":self.journal_entry,"docstatus":("!=",2)}):
+			frappe.msgprint(_("Journal Entry Already Exists {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry))))
+		if not self.payable_amount:
+			frappe.throw(_("Payable Amount should be greater than zero"))
+			
+		credit_account = self.credit_account
+	
+		if not credit_account:
+			frappe.throw("Expense Account is mandatory")
+		r = []
+		if self.remarks:
+			r.append(_("Note: {0}").format(self.remarks))
+
+		remarks = ("").join(r) #User Remarks is not mandatory
+		bank_account = frappe.db.get_value("Company",self.company, "default_bank_account")
+		if not bank_account:
+			frappe.throw(_("Default bank account is not set in company {}".format(frappe.bold(self.company))))
+		# Posting Journal Entry
+		je = frappe.new_doc("Journal Entry")
+		je.flags.ignore_permissions=1
+		je.update({
+			"doctype": "Journal Entry",
+			"voucher_type": "Bank Entry",
+			"naming_series": "Bank Payment Voucher",
+			"title": "EME Payment "+ self.supplier,
+			"user_remark": "Note: " + "Transporter Payment - " + self.supplier,
+			"posting_date": self.posting_date,
+			"company": self.company,
+			"total_amount_in_words": money_in_words(self.payable_amount),
+			"branch": self.branch,
+		})
+		je.append("accounts",{
+			"account": credit_account,
+			"debit_in_account_currency": self.payable_amount,
+			"cost_center": self.cost_center,
+			"party_check": 1,
+			"party_type": "Supplier",
+			"party": self.supplier,
+			"reference_type": "EME Invoice",
+			"reference_name": self.name
+		})
+		je.append("accounts",{
+			"account": bank_account,
+			"credit_in_account_currency": self.payable_amount,
+			"cost_center": self.cost_center
+		})
+
+		je.insert()
+		#Set a reference to the claim journal entry
+		self.db_set("journal_entry",je.name)
+		frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
 
 def set_missing_values(source, target):
 	target.run_method("set_missing_values")

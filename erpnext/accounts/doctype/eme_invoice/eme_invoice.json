@@ -41,7 +41,8 @@
   "amended_from",
   "column_break_32",
   "currency",
-  "eme_invoice_entry"
+  "eme_invoice_entry",
+  "journal_entry"
  ],
  "fields": [
   {
@@ -176,6 +177,7 @@
    "label": "Get Logbooks"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "options": "EME Invoice Item",
@@ -263,11 +265,18 @@
    "label": "EME Invoice Entry",
    "options": "EME Invoice Entry",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "journal_entry",
+   "fieldtype": "Data",
+   "label": "Journal Entry",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-04 15:59:16.544495",
+ "modified": "2023-01-17 16:47:03.956003",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice",

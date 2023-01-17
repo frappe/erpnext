@@ -27,10 +27,11 @@ frappe.ui.form.on('EME Invoice', {
 				};
 				frappe.set_route("query-report", "EME Invoice Details");
 		}, __("View"));
-		
-			cur_frm.add_custom_button(__('Make Payment'), function(doc) {
-				frm.events.make_payment_entry(frm)
-			},__("Create"))
+			if ( !frm.doc.post_journal_entry){
+				cur_frm.add_custom_button(__('Make Journal Entry'), function(doc) {
+					frm.events.post_journal_entry(frm)
+				},__("Create"))
+			}
 		}
 
 		frm.add_custom_button("Make Arrear Invoice", function() {
@@ -42,17 +43,11 @@ frappe.ui.form.on('EME Invoice', {
 		cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 		cur_frm.page.set_inner_btn_group_as_primary(__('View'));
 	},
-	make_payment_entry:function(frm){
+	post_journal_entry:function(frm){
 		frappe.call({
-			method:"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
-			args: {
-				dt: frm.doc.doctype,
-				dn: frm.doc.name,
-			},
-			callback: function (r) {
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route("Form", doc[0].doctype, doc[0].name);
-			},
+			method:"post_journal_entry",
+			doc:frm.doc,
+			callback: function (r) {},
 		});
 	},
 	onload:function(frm){

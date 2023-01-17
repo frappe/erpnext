@@ -273,7 +273,7 @@ class TransporterInvoice(AccountsController):
 	@frappe.whitelist()
 	def post_journal_entry(self):
 		if self.journal_entry and frappe.db.exists("Journal Entry",{"name":self.journal_entry,"docstatus":("!=",2)}):
-			frappe.msgprint(_("Journal Entry Already Exists {}".format(frappe.get_desk_link("Journal Entry",je.name))))
+			frappe.msgprint(_("Journal Entry Already Exists {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry))))
 		if not self.amount_payable:
 			frappe.throw(_("Payable Amount should be greater than zero"))
 			
@@ -306,7 +306,7 @@ class TransporterInvoice(AccountsController):
 			"branch": self.branch,
 		})
 		je.append("accounts",{
-			"account": self.credit_account,
+			"account": credit_account,
 			"debit_in_account_currency": self.amount_payable,
 			"cost_center": self.cost_center,
 			"party_check": 1,

@@ -306,7 +306,6 @@ def cancel_invoice_entries(args,publish_progress=True):
 
 @frappe.whitelist()
 def post_accounting_entries(args,publish_progress=True):
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 	count=0
 	successful = 0
 	failed = 0
