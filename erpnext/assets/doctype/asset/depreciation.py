@@ -4,7 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, today
+from frappe.utils import cint, flt, get_link_to_form, getdate, today
+from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
@@ -20,9 +21,22 @@ def post_depreciation_entries(date=None):
 
 	if not date:
 		date = today()
-	for asset in get_depreciable_assets(date):
-		make_depreciation_entry(asset, date)
-		frappe.db.commit()
+
+	failed_asset_names = []
+
+	for asset_name in get_depreciable_assets(date):
+		try:
+			make_depreciation_entry(asset_name, date)
+			frappe.db.commit()
+		except Exception as e:
+			frappe.db.rollback()
+			failed_asset_names.append(asset_name)
+
+	if failed_asset_names:
+		set_depr_entry_posting_status_for_failed_assets(failed_asset_names)
+		notify_depr_entry_posting_error(failed_asset_names)
+
+	frappe.db.commit()
 
 
 def get_depreciable_assets(date):
@@ -121,6 +135,8 @@ def make_depreciation_entry(asset_name, date=None):
 			finance_books.value_after_depreciation -= d.depreciation_amount
 			finance_books.db_update()
 
+	frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Successful")
+
 	asset.set_status()
 
 	return asset
@@ -182,6 +198,42 @@ def get_credit_and_debit_accounts(accumulated_depreciation_account, depreciation
 		frappe.throw(_("Depreciation Expense Account should be an Income or Expense Account."))
 
 	return credit_account, debit_account
+
+
+def set_depr_entry_posting_status_for_failed_assets(failed_asset_names):
+	for asset_name in failed_asset_names:
+		frappe.db.set_value("Asset", asset_name, "depr_entry_posting_status", "Failed")
+
+
+def notify_depr_entry_posting_error(failed_asset_names):
+	recipients = get_users_with_role("Accounts Manager")
+
+	if not recipients:
+		recipients = get_users_with_role("System Manager")
+
+	subject = _("Error while posting depreciation entries")
+
+	asset_links = get_comma_separated_asset_links(failed_asset_names)
+
+	message = (
+		_("Hi,")
+		+ "<br>"
+		+ _("The following assets have failed to post depreciation entries: {0}").format(asset_links)
+		+ "."
+	)
+
+	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+
+
+def get_comma_separated_asset_links(asset_names):
+	asset_links = []
+
+	for asset_name in asset_names:
+		asset_links.append(get_link_to_form("Asset", asset_name))
+
+	asset_links = ", ".join(asset_links)
+
+	return asset_links
 
 
 @frappe.whitelist()

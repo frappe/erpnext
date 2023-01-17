@@ -132,6 +132,10 @@ frappe.ui.form.on('Asset', {
 				}, __("Manage"));
 			}
 
+			if (frm.doc.depr_entry_posting_status === "Failed") {
+				frm.trigger("set_depr_posting_failure_alert");
+			}
+
 			frm.trigger("setup_chart");
 		}
 
@@ -140,6 +144,19 @@ frappe.ui.form.on('Asset', {
 		if (frm.doc.docstatus == 0) {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 		}
+	},
+
+	set_depr_posting_failure_alert: function (frm) {
+		const alert = `
+			<div class="row">
+				<div class="col-xs-12 col-sm-6">
+					<span class="indicator whitespace-nowrap red">
+						<span>Failed to post depreciation entries</span>
+					</span>
+				</div>
+			</div>`;
+
+		frm.dashboard.set_headline_alert(alert);
 	},
 
 	toggle_reference_doc: function(frm) {
