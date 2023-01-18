@@ -19,7 +19,6 @@ class PriceList(Document):
 	def on_update(self):
 		self.set_default_if_missing()
 		self.update_item_price()
-		self.delete_price_list_details_key()
 
 	def set_default_if_missing(self):
 		if cint(self.selling):
@@ -51,8 +50,6 @@ class PriceList(Document):
 			validate_cart_settings()
 
 	def on_trash(self):
-		self.delete_price_list_details_key()
-
 		def _update_default_price_list(module):
 			b = frappe.get_doc(module + " Settings")
 			price_list_fieldname = module.lower() + "_price_list"
@@ -65,19 +62,13 @@ class PriceList(Document):
 		for module in ["Selling", "Buying"]:
 			_update_default_price_list(module)
 
-	def delete_price_list_details_key(self):
-		frappe.cache().hdel("price_list_details", self.name)
-
 
 def get_price_list_details(price_list):
-	def get_price_list():
-		price_list_details = frappe.get_cached_value(
-			"Price List", price_list, ["currency", "price_not_uom_dependent", "enabled"], as_dict=1
-		)
+	price_list_details = frappe.get_cached_value(
+		"Price List", price_list, ["currency", "price_not_uom_dependent", "enabled"], as_dict=1
+	)
 
-		if not price_list_details or not price_list_details.get("enabled"):
-			throw(_("Price List {0} is disabled or does not exist").format(price_list))
+	if not price_list_details or not price_list_details.get("enabled"):
+		throw(_("Price List {0} is disabled or does not exist").format(price_list))
 
-		return price_list_details
-
-	return frappe.cache().hget("price_list_details", price_list, get_price_list)
+	return price_list_details
