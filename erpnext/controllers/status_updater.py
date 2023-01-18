@@ -226,7 +226,8 @@ class StatusUpdater(Document):
 				continue
 
 			# get unique transactions to update
-			for d in self.get_all_children():
+			children = self.get_all_children()
+			for d in children:
 				if hasattr(d, "qty") and d.qty < 0 and not self.get("is_return"):
 					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
 
