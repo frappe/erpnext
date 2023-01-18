@@ -393,8 +393,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.sales_order_item = source_doc.sales_order_item
 			target_doc.sales_invoice = source_doc.sales_invoice
 			target_doc.sales_invoice_item = source_doc.sales_invoice_item
-			# target_doc.packing_slip = source_doc.packing_slip
-			# target_doc.packing_slip_item = source_doc.packing_slip_item
+			target_doc.packing_slip = source_doc.packing_slip
+			target_doc.packing_slip_item = source_doc.packing_slip_item
 
 			target_doc.target_warehouse = source_doc.target_warehouse
 			target_doc.expense_account = source_doc.expense_account
@@ -407,8 +407,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.sales_order_item = source_doc.sales_order_item
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.delivery_note_item = source_doc.delivery_note_item
-			# target_doc.packing_slip = source_doc.packing_slip
-			# target_doc.packing_slip_item = source_doc.packing_slip_item
+			target_doc.packing_slip = source_doc.packing_slip
+			target_doc.packing_slip_item = source_doc.packing_slip_item
 
 			target_doc.target_warehouse = source_doc.target_warehouse
 			target_doc.expense_account = source_doc.expense_account

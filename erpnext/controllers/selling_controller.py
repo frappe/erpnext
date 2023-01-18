@@ -566,10 +566,20 @@ class SellingController(StockController):
 						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
 					))
 
-				if packing_slip.status != "In Stock":
-					frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.status)
-					))
+				if self.get("is_return"):
+					if packing_slip.status != "Delivered":
+						frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
+							d.idx,
+							frappe.get_desk_link("Packing Slip", packing_slip.name),
+							frappe.bold(packing_slip.status)
+						))
+				else:
+					if packing_slip.status != "In Stock":
+						frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
+							d.idx,
+							frappe.get_desk_link("Packing Slip", packing_slip.name),
+							frappe.bold(packing_slip.status)
+						))
 
 				if self.company != packing_slip.company:
 					frappe.throw(_("Row #{0}: Company does not match with {1}. Company must be {2}").format(
@@ -595,6 +605,18 @@ class SellingController(StockController):
 					frappe.throw(_("Row #{0}: Warehouse does not match with {1}. Warehouse must be {2}").format(
 						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.warehouse
 					))
+
+				if self.doctype != "Sales Invoice" or self.get("update_stock"):
+					packing_slip_qty = flt(frappe.db.get_value("Packing Slip Item", d.packing_slip_item, 'qty'))
+					if self.get("is_return"):
+						packing_slip_qty *= -1
+
+					if flt(d.qty) != packing_slip_qty:
+						frappe.throw(_("Row #{0}: Qty does not match with {1}. Qty must be {2}").format(
+							d.idx,
+							frappe.get_desk_link("Packing Slip", packing_slip.name),
+							frappe.bold(frappe.format(packing_slip_qty))
+						))
 
 	def update_project_billing_and_sales(self):
 		projects = []

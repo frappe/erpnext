@@ -814,6 +814,7 @@ class PackingSlip(StockController):
 			from `tabDelivery Note Item`
 			where packing_slip = %s and docstatus = 1
 			group by packing_slip_item
+			having delivered_qty != 0
 		""", self.name, as_dict=1)
 
 		delivered_by_sinv = frappe.db.sql("""
@@ -822,6 +823,7 @@ class PackingSlip(StockController):
 			inner join `tabSales Invoice` s on s.name = i.parent
 			where i.packing_slip = %s and s.docstatus = 1 and s.update_stock = 1
 			group by i.packing_slip_item
+			having delivered_qty != 0
 		""", self.name, as_dict=1)
 
 		delivered_qty_map = {}
