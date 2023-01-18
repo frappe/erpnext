@@ -8,13 +8,36 @@ from frappe import _, bold
 from erpnext.accounts.party import get_party_account
 class TransporterInvoiceEntry(Document):
 	def validate(self):
+		self.allocate_deductions()
 		self.valid_account_for_other_charges()
+
+	def on_update_after_submit(self):
+		self.allocate_deductions()
+
 	def valid_account_for_other_charges(self):
 		if len(self.items) == 0:
 			frappe.msgprint(_("No equipments pulled"), raise_exception = True)
 		for a in self.items:
 			if flt(a.amount) > 0 and not a.account:
 				frappe.msgprint(_("Select account for other charge at row {}".format(bold(a.idx))), raise_exception = True)
+	def allocate_deductions(self):
+		for i in self.items:
+			if flt(self.tds):
+				i.tds = self.tds
+			if flt(self.security_percent) :
+				i.security_percent = self.security_percent
+				i.security_deposit_amount = 0
+			elif flt(self.security_deposit_amount) > 0:
+				i.security_deposit_amount = self.security_deposit_amount
+			if flt(self.clearing_charge_amount) > 0:
+				i.clearing_charge_amount = self.clearing_charge_amount
+			if flt(self.weighbridge_charge_amount) > 0:
+				i.weighbridge_charge_amount = self.weighbridge_charge_amount
+			if flt(self.amount) > 0 :
+				if not self.account :
+					frappe.throw(_("You need to select account for other deductions"))
+				i.amount = self.amount
+				i.account = self.account
 
 	@frappe.whitelist()
 	def create_transporter_invoice(self):
@@ -31,7 +54,7 @@ class TransporterInvoiceEntry(Document):
 			"company":self.company
 		})
 		if cint(self.invoice_created) == 0 :
-			frappe.enqueue(crate_invoice_entries, timeout=600, args=args)
+			frappe.enqueue(crate_invoice_entries,invoice_entry= self, timeout=600, args=args)
 			# crate_invoice_entries(args=args)
 	
 	@frappe.whitelist()
@@ -92,11 +115,10 @@ class TransporterInvoiceEntry(Document):
 			
 
 @frappe.whitelist()
-def crate_invoice_entries(args, publish_progress=True):
+def crate_invoice_entries( invoice_entry, args, publish_progress=True):
 	count=0
 	successful = 0
 	failed = 0
-	invoice_entry = frappe.get_doc("Transporter Invoice Entry", args.get("transporter_invoice_entry"))
 	invoice_entry.set("failed_transaction",[])
 	refresh_interval = 25
 	total_payable_amount = other_deductions = 0
@@ -151,7 +173,7 @@ def crate_invoice_entries(args, publish_progress=True):
 			error = str(e)
 			failed += 1
 		count+=1
-		invoice_entry_item = frappe.get_doc("Transporter Invoice Entry Item",{"parent":args.get("transporter_invoice_entry"), "equipment":transporter_invoice.equipment})
+		invoice_entry_item = frappe.get_doc("Transporter Invoice Entry Item",{"parent":invoice_entry.name, "equipment":transporter_invoice.equipment})
 		invoice_entry_item.db_set("reference",transporter_invoice.name)
 		if error:
 			invoice_entry_item.db_set("creation_status", "Failed")
@@ -309,6 +331,7 @@ def post_accounting_entries(args,publish_progress=True):
 	count=0
 	successful = 0
 	failed = 0
+	payable_amount = 0
 	invoice_entry = frappe.get_doc("Transporter Invoice Entry", args.get("transporter_invoice_entry"))
 	refresh_interval = 25
 	total_count = cint(invoice_entry.successful)
@@ -341,21 +364,21 @@ def post_accounting_entries(args,publish_progress=True):
 			equipment = e.equipment
 			error = None
 			transporter_invoice = frappe.get_doc("Transporter Invoice",e.reference)
-			credit_account = e.credit_account
+			credit_account = transporter_invoice.credit_account
 			if not credit_account:
-				credit_account = get_party_account("Supplier", e.supplier, args.get("company"))
+				credit_account = get_party_account("Supplier", transporter_invoice.supplier, transporter_invoice.company)
 			try:				
 				je.append("accounts",{
 					"account": credit_account,
-					"debit_in_account_currency": e.total_payable_amount,
-					"cost_center": args.get("cost_center"),
+					"debit_in_account_currency": flt(transporter_invoice.amount_payable,2),
+					"cost_center": transporter_invoice.cost_center,
 					"party_check": 1,
 					"party_type": "Supplier",
-					"party": e.supplier,
+					"party": transporter_invoice.supplier,
 					"reference_type": "Transporter Invoice",
-					"reference_name": e.reference
+					"reference_name": transporter_invoice.name
 				})
-				
+				payable_amount += flt(transporter_invoice.amount_payable,2)
 				#Set a reference to the claim journal entry
 				transporter_invoice.db_set("journal_entry",je.name)
 				successful += 1
@@ -384,9 +407,12 @@ def post_accounting_entries(args,publish_progress=True):
 							description = description)
 	je.append("accounts",{
 					"account": bank_account,
-					"credit_in_account_currency": args.get("payable_amount"),
+					"credit_in_account_currency": payable_amount,
 					"cost_center": args.get("cost_center")
 				})
+	je.update({
+		"total_amount_in_words": money_in_words(payable_amount),
+	})
 	je.insert()
 	invoice_entry.db_set("posted_to_account", 1 if successful > 0 else 0)
 	frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))

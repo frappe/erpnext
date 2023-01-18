@@ -23,6 +23,7 @@
   "grand_total",
   "outstanding_amount",
   "column_break_16",
+  "total_hours",
   "total_deduction",
   "payable_amount",
   "column_break_18",
@@ -272,11 +273,17 @@
    "fieldtype": "Data",
    "label": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_hours",
+   "fieldtype": "Float",
+   "label": "Total Hours",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-17 16:47:03.956003",
+ "modified": "2023-01-18 11:56:14.169229",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "EME Invoice",

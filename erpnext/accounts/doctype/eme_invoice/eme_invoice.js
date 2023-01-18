@@ -14,25 +14,25 @@ frappe.ui.form.on('EME Invoice', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
-			frm.add_custom_button(__('EME Bill Report'), function () {
-				frappe.route_options = {
-						name: frm.doc.name
-				};
-				frappe.set_route("query-report", "EME Bill Report");
-			}, __("View"));
-
-			frm.add_custom_button(__('EME Invoice Details'), function () {
-				frappe.route_options = {
-						name: frm.doc.name
-				};
-				frappe.set_route("query-report", "EME Invoice Details");
-		}, __("View"));
 			if ( !frm.doc.post_journal_entry){
 				cur_frm.add_custom_button(__('Make Journal Entry'), function(doc) {
 					frm.events.post_journal_entry(frm)
 				},__("Create"))
 			}
 		}
+		frm.add_custom_button(__('EME Bill Report'), function () {
+			frappe.route_options = {
+					name: frm.doc.name
+			};
+			frappe.set_route("query-report", "EME Bill Report");
+		}, __("View"));
+
+		frm.add_custom_button(__('EME Invoice Details'), function () {
+			frappe.route_options = {
+					name: frm.doc.name
+			};
+			frappe.set_route("query-report", "EME Invoice Details");
+			}, __("View"));
 
 		frm.add_custom_button("Make Arrear Invoice", function() {
 			frappe.model.open_mapped_doc({

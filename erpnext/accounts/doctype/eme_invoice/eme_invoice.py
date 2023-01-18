@@ -93,10 +93,11 @@ class EMEInvoice(AccountsController):
 	# calculate total
 	@frappe.whitelist()
 	def calculate_totals(self):
-		total = 0
+		total = total_hrs = 0
 		
 		for a in self.items:
 			total += flt(a.amount)
+			total_hrs += flt(a.total_hours)
 			if not a.expense_account and a.expense_head:
 				a.expense_account = frappe.db.get_value("Expense Head",a.expense_head,"expense_account")
 				if not a.expense_account:
@@ -120,6 +121,8 @@ class EMEInvoice(AccountsController):
 			total_deductions += flt(d.amount, 2)
 		self.total_deduction = total_deductions + flt(self.tds_amount)
 		self.payable_amount = self.outstanding_amount = flt(self.grand_total, 2) - flt(self.total_deduction, 2)
+		self.total_hours = total_hrs
+		
 	def make_gl_entries(self):
 		gl_entries = []
 		self.make_supplier_gl_entry(gl_entries)

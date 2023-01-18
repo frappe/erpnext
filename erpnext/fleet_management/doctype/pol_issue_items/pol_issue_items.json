@@ -57,6 +57,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "equipment.fuelbook",
    "fieldname": "fuelbook",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -170,7 +171,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-13 12:55:34.972830",
+ "modified": "2023-01-18 12:21:23.423374",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Issue Items",

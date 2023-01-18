@@ -1,0 +1,45 @@
+{
+ "actions": [],
+ "creation": "2023-01-12 13:38:24.036284",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "equipment",
+  "creation_error",
+  "submission_error"
+ ],
+ "fields": [
+  {
+   "fieldname": "equipment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Equipment",
+   "options": "Equipment"
+  },
+  {
+   "fieldname": "creation_error",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Creation Error"
+  },
+  {
+   "fieldname": "submission_error",
+   "fieldtype": "Text",
+   "in_list_view": 1,
+   "label": "Submission Error"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-01-12 13:38:55.462718",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Transporter Invoice Entry Error",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

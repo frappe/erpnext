@@ -22,11 +22,11 @@ frappe.ui.form.on('EME Invoice Entry', {
 			frm.set_value('from_date', frappe.datetime.month_start());
 			frm.set_value('to_date', frappe.datetime.month_end());
 		}
-		frm.fields_dict['deductions'].grid.get_field('supplier').get_query = function(){
+		frm.fields_dict['deductions'].grid.get_field('equipment').get_query = function(){
 			return {
 				filters: {
-					supplier_group:"Transporter",
-					disabled:0
+					enabled: 1,
+					hired_equipment : 1
 				}
 			}
 		}

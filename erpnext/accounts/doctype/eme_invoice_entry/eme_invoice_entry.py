@@ -35,8 +35,8 @@ class EMEInvoiceEntry(Document):
 				"company":self.company,
 				"currency":self.currency
 			})
-			frappe.enqueue(create_eme_invoice_for_owner, owner_list = owner_list, args = args)
-			# create_eme_invoice_for_owner(owner_list = owner_list, args = args)
+			# frappe.enqueue(create_eme_invoice_for_owner, owner_list = owner_list, args = args)
+			create_eme_invoice_for_owner(owner_list = owner_list, args = args)
 	def get_owner_list(self):
 		owner = []
 		for item in self.items:
@@ -54,13 +54,14 @@ class EMEInvoiceEntry(Document):
 			data = frappe.db.sql("""
 					select supplier, equipment, name as equipment_hiring_form, start_date, end_date
 					from 
-						`tabEquipment Hiring Form`
+						`tabEquipment Hiring Form` ehf
 					where 
 					'{0}' between start_date and end_date
 					and '{1}' between start_date and end_date
 					and docstatus = 1
 					and cost_center = '{2}'
-			""".format(self.from_date, self.to_date, self.cost_center), as_dict=True)
+					and exists(select 1 from `tabSupplier` where name = ehf.supplier and supplier_group = '{3}')
+			""".format(self.from_date, self.to_date, self.cost_center, self.supplier_group), as_dict=True)
 			if data:
 				self.set("items",[])
 				for x in data:
@@ -211,20 +212,20 @@ def apply_eme_invice_entries(doc, publish_progress = True):
 					pass
 	doc.reload()
 def create_eme_invoice_for_owner(owner_list, args, publish_progress = True):
-	payable_amount = total_deduction = 0
+	payable_amount = total_deduction = total_hours = 0
 	count=0
 	successful = 0
 	failed = 0
 	refresh_interval = 25
 	total_count = len(set(owner_list))
-	existing_eme_invoice = get_existing_eme_invoice(owner_list, args)
 	doc = frappe.get_doc("EME Invoice Entry", args.get("eme_invoice_entry"))
 	doc.set("failed_transaction",[])
 	doc.set("successful_transaction",[])
+	emi 	= None
 	for owner in owner_list:
 		credit_account = get_party_account("Supplier", owner, args.get("company"))
-		if owner not in existing_eme_invoice:
-			error = None
+		if owner:
+			error 	= None
 			args.update({
 				"doctype": "EME Invoice",
 				"supplier": owner,
@@ -258,9 +259,11 @@ def create_eme_invoice_for_owner(owner_list, args, publish_progress = True):
 					"credit_account": emi.credit_account,
 					"total_payable": emi.payable_amount,
 					"total_deduction": emi.total_deduction,
+					"total_hours":emi.total_hours
 				})
-				payable_amount += flt(emi.payable_amount)
+				payable_amount 	+= flt(emi.payable_amount)
 				total_deduction += flt(emi.total_deduction)
+				total_hours		+= flt(emi.total_hours)
 		count+=1
 		if publish_progress:
 				show_progress = 0
@@ -284,7 +287,6 @@ def create_eme_invoice_for_owner(owner_list, args, publish_progress = True):
 	doc.db_set("payable_amount", payable_amount)
 	doc.db_set("total_deduction", total_deduction)
 	doc.db_set("invoice_created", 1 if successful > 0 else 0)
-
 	doc.save()
 	doc.reload()
 

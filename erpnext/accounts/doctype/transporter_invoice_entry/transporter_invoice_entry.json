@@ -10,13 +10,21 @@
   "branch",
   "equipment_category",
   "from_date",
+  "supplier_type",
   "column_break_4",
   "cost_center",
   "posting_date",
   "to_date",
+  "deductions_section",
+  "tds",
+  "security_percent",
+  "security_deposit_amount",
+  "clearing_charge_amount",
+  "column_break_13",
+  "weighbridge_charge_amount",
+  "amount",
+  "account",
   "section_break_8",
-  "supplier_type",
-  "column_break_10",
   "payable_amount",
   "column_break_12",
   "total_deduction",
@@ -25,7 +33,7 @@
   "items",
   "section_break_11",
   "invoice_created",
-  "column_break_13",
+  "column_break_28",
   "invoice_submitted",
   "column_break_15",
   "posted_to_account",
@@ -206,10 +214,6 @@
    "read_only_depends_on": "eval:doc.invoice_created"
   },
   {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "payable_amount",
    "fieldtype": "Currency",
@@ -230,12 +234,73 @@
    "fieldtype": "Currency",
    "label": "Total Deduction",
    "read_only": 1
+  },
+  {
+   "fieldname": "deductions_section",
+   "fieldtype": "Section Break",
+   "label": "Deductions"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "tds",
+   "fieldtype": "Select",
+   "label": "TDS(%)",
+   "options": "\n2\n3\n5\n10",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "security_percent",
+   "fieldtype": "Select",
+   "label": "Security(%)",
+   "options": "\n2\n3\n5\n10",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "security_deposit_amount",
+   "fieldtype": "Currency",
+   "label": "Security Deposit Amount",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "clearing_charge_amount",
+   "fieldtype": "Currency",
+   "label": "Clearing Charge Amount",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "weighbridge_charge_amount",
+   "fieldtype": "Currency",
+   "label": "Weighbridge Charge Amount",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Other Charges Amount",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account(Other Charges)",
+   "options": "Account",
+   "read_only_depends_on": "eval:doc.invoice_created == 1"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-17 12:51:56.104193",
+ "modified": "2023-01-18 13:20:34.368161",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice Entry",
