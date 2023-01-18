@@ -434,7 +434,6 @@ class SellingController(StockController):
 		packing_slips = list(set([d.packing_slip for d in self.get("items") if d.get("packing_slip")]))
 		for name in packing_slips:
 			doc = frappe.get_doc("Packing Slip", name)
-			doc.set_delivery_status(update=True)
 			doc.set_status(update=True)
 			doc.notify_update()
 

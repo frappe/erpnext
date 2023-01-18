@@ -78,7 +78,7 @@ class TransactionBase(StatusUpdater):
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
 
-	def validate_with_previous_doc(self, ref):
+	def validate_with_previous_doc(self, ref, table_doctype=None):
 		self.exclude_fields = ["conversion_factor", "uom"] if self.get('is_return') else []
 
 		for prev_doctype, validator in ref.items():
@@ -86,7 +86,7 @@ class TransactionBase(StatusUpdater):
 			prev_parent_docs = []
 			item_prev_docname_visited = []
 
-			for row in self.get_all_children(self.doctype + " Item"):
+			for row in self.get_all_children(table_doctype or self.doctype + " Item"):
 				prev_docname = row.get(validator["ref_dn_field"])
 				if prev_docname:
 					if prev_is_child:

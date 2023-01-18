@@ -7,7 +7,9 @@ def get_data():
 		'fieldname': 'packing_slip',
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order'],
-			'Packing Slip': ['items', 'source_packing_slip'],
+		},
+		'non_standard_fieldnames': {
+			'Packing Slip': 'source_packing_slip',
 		},
 		'transactions': [
 			{
@@ -16,7 +18,11 @@ def get_data():
 			},
 			{
 				'label': _('Previous Documents'),
-				'items': ['Sales Order', 'Packing Slip']
+				'items': ['Sales Order']
+			},
+			{
+				'label': _('Nested Into'),
+				'items': ['Packing Slip']
 			},
 		]
 	}

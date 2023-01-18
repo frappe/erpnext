@@ -3,8 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, cstr
-from frappe.model.mapper import map_child_doc
+from frappe.utils import flt, cint, cstr, combine_datetime
+from frappe.model.mapper import map_child_doc, get_mapped_doc
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_conversion_factor, get_hide_item_code, get_weight_per_unit,\
 	get_default_expense_account, get_default_cost_center, get_item_default_values, get_force_default_warehouse,\
@@ -34,17 +34,17 @@ class PackingSlip(StockController):
 		self.validate_items()
 		self.validate_source_packing_slips()
 		self.validate_sales_orders()
+		self.validate_unpack_against()
+		self.validate_with_previous_doc()
 		self.validate_customer()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.calculate_totals()
-		self.validate_with_previous_doc()
 		self.validate_weights()
 		self.set_cost_percentage()
 		self.set_title()
-		self.set_delivery_status(validate_delivery=False)
-		self.set_status()
+		self.set_status(validate=False)
 
 	def on_submit(self):
 		self.update_previous_doc_status()
@@ -155,30 +155,14 @@ class PackingSlip(StockController):
 					if not flt(d.qty):
 						frappe.throw(_("Row #{0}: Item {1}, Quantity cannot be 0").format(d.idx, frappe.bold(d.item_code)))
 
-					if flt(d.qty) < 0:
-						frappe.throw(_("Row #{0}: Item {1}, quantity must be positive number")
+					if self.is_unpack:
+						if flt(d.qty) > 0:
+							frappe.throw(_("Row #{0}: Item {1}, quantity must be negative number for unpacking")
 							.format(d.idx, frappe.bold(d.item_code)))
-
-	def validate_with_previous_doc(self):
-		super(PackingSlip, self).validate_with_previous_doc({
-			"Sales Order Item": {
-				"ref_dn_field": "sales_order_item",
-				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
-				"is_child_table": True,
-				"allow_duplicate_prev_row_id": True
-			},
-			"Packing Slip Item": {
-				"ref_dn_field": "packing_slip_item",
-				"compare_fields": [
-					["item_code", "="],
-					["qty", "="], ["uom", "="], ["conversion_factor", "="],
-					["batch_no", "="], ["serial_no", "="],
-					["net_weight", "="], ["tare_weight", "="], ["gross_weight", "="]
-				],
-				"is_child_table": True,
-				"allow_duplicate_prev_row_id": True
-			},
-		})
+					else:
+						if flt(d.qty) < 0:
+							frappe.throw(_("Row #{0}: Item {1}, quantity must be positive number")
+								.format(d.idx, frappe.bold(d.item_code)))
 
 	def validate_weights(self):
 		weight_fields = ["net_weight", "tare_weight", "gross_weight"]
@@ -186,14 +170,27 @@ class PackingSlip(StockController):
 		for table_field in self.item_table_fields:
 			for d in self.get(table_field):
 				for weight_field in weight_fields:
-					if d.meta.has_field(weight_field) and flt(d.get(weight_field)) < 0:
-						frappe.throw(_("Row #{0}: {1} cannot be negative").format(d.idx, d.meta.get_label(weight_field)))
+					if self.is_unpack:
+						if d.meta.has_field(weight_field) and flt(d.get(weight_field)) > 0:
+							frappe.throw(_("Row #{0}: {1} must be negative for unpacking").format(
+								d.idx, d.meta.get_label(weight_field)
+							))
+					else:
+						if d.meta.has_field(weight_field) and flt(d.get(weight_field)) < 0:
+							frappe.throw(_("Row #{0}: {1} cannot be negative").format(
+								d.idx, d.meta.get_label(weight_field)
+							))
 
-		if flt(self.total_tare_weight) < 0:
-			frappe.throw(_("Total Tare Weight cannot be negative"))
-
-		if flt(self.total_gross_weight) < 0:
-			frappe.throw(_("Total Gross Weight cannot be negative"))
+		if self.is_unpack:
+			if flt(self.total_tare_weight) > 0:
+				frappe.throw(_("Total Tare Weight must be negative for unpacking"))
+			if flt(self.total_gross_weight) > 0:
+				frappe.throw(_("Total Gross Weight must be negative for unpacking"))
+		else:
+			if flt(self.total_tare_weight) < 0:
+				frappe.throw(_("Total Tare Weight cannot be negative"))
+			if flt(self.total_gross_weight) < 0:
+				frappe.throw(_("Total Gross Weight cannot be negative"))
 
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
@@ -218,45 +215,152 @@ class PackingSlip(StockController):
 			if warehouses and len(warehouses) == 1 and warehouses[0]:
 				self.warehouse = warehouses[0]
 
+	def validate_with_previous_doc(self):
+		super(PackingSlip, self).validate_with_previous_doc({
+			"Sales Order Item": {
+				"ref_dn_field": "sales_order_item",
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"is_child_table": True,
+			},
+			"Packing Slip Item": {
+				"ref_dn_field": "packing_slip_item",
+				"compare_fields": [
+					["item_code", "="], ["uom", "="], ["conversion_factor", "="],
+					["batch_no", "="], ["serial_no", "="],
+				],
+				"is_child_table": True,
+			},
+		})
+
+		if self.get("is_unpack"):
+			super(PackingSlip, self).validate_with_previous_doc({
+				"Packing Slip Item": {
+					"ref_dn_field": "unpack_against_row",
+					"compare_fields": [
+						["item_code", "="], ["uom", "="], ["conversion_factor", "="],
+						["batch_no", "="], ["serial_no", "="],
+					],
+					"is_child_table": True,
+				},
+			})
+
+			super(PackingSlip, self).validate_with_previous_doc({
+				"Packing Slip Packaging Material": {
+					"ref_dn_field": "unpack_against_row",
+					"compare_fields": [
+						["item_code", "="], ["batch_no", "="],
+					],
+					"is_child_table": True,
+				},
+			}, table_doctype="Packing Slip Packaging Material")
+
 	def validate_source_packing_slips(self):
+		def get_packing_slip_details(name):
+			if not packing_slip_map.get(name):
+				packing_slip_map[name] = frappe.db.get_value("Packing Slip", name, [
+					"name", "docstatus", "status",
+					"company", "customer", "project", "weight_uom",
+					"posting_date", "posting_time"
+				], as_dict=1)
+
+			return packing_slip_map[name]
+
+		packing_slip_map = {}
+
 		# Validate Packing Slips
-		for d in self.get("packing_slips"):
-			if d.source_packing_slip == self.name:
-				frappe.throw(_("Row #{0}: Source Packing Slip cannot be the same as the Target Packing Slip"))
+		for d in self.get("items"):
+			if d.get("source_packing_slip"):
+				if d.source_packing_slip == self.name:
+					frappe.throw(_("Row #{0}: Source Packing Slip cannot be the same as the Target Packing Slip"))
 
-			packing_slip = frappe.db.get_value("Packing Slip", d.source_packing_slip,
-				["name", "docstatus", "status", "company", "customer", "project"], as_dict=1)
-			if not packing_slip:
-				frappe.throw(_("Row #{0}: Packing Slip {1} does not exist").format(d.source_packing_slip))
+				packing_slip = get_packing_slip_details(d.source_packing_slip)
+				if not packing_slip:
+					frappe.throw(_("Row #{0}: Packing Slip {1} does not exist").format(d.source_packing_slip))
 
-			if packing_slip.docstatus == 0:
-				frappe.throw(_("Row #{0}: Source {1} is in draft").format(
-					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
-				))
-			if packing_slip.docstatus == 2:
-				frappe.throw(_("Row #{0}: Source {1} is cancelled").format(
-					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
-				))
+				if packing_slip.docstatus == 0:
+					frappe.throw(_("Row #{0}: Source {1} is in draft").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
+					))
+				if packing_slip.docstatus == 2:
+					frappe.throw(_("Row #{0}: Source {1} is cancelled").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
+					))
 
-			if packing_slip.status != "In Stock":
-				frappe.throw(_("Row #{0}: Cannot select Source {1} because its status is {2}").format(
-					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.status)
-				))
+				if (packing_slip.status != "In Stock" and not self.is_unpack) or (packing_slip.status != "Nested" and self.is_unpack):
+					frappe.throw(_("Row #{0}: Cannot select Source {1} because its status is {2}").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.status)
+					))
 
-			if self.company != packing_slip.company:
-				frappe.throw(_("Row #{0}: Company does not match with Source {1}. Company must be {2}").format(
-					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.company
-				))
+				if self.company != packing_slip.company:
+					frappe.throw(_("Row #{0}: Company does not match with Source {1}. Company must be {2}").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.company)
+					))
 
-			if cstr(self.project) != cstr(packing_slip.project):
-				frappe.throw(_("Row #{0}: Project does not match with Source {1}. Project must be {2}").format(
-					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.project
-				))
+				if cstr(self.project) != cstr(packing_slip.project):
+					frappe.throw(_("Row #{0}: Project does not match with Source {1}. Project must be {2}").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.project)
+					))
 
-			if packing_slip.customer and self.customer != packing_slip.customer:
-				frappe.throw(_("Row #{0}: Customer does not match with Source {1}. Customer must be {2}").format(
-					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.customer
-				))
+				if packing_slip.customer and self.customer != packing_slip.customer:
+					frappe.throw(_("Row #{0}: Customer does not match with Source {1}. Customer must be {2}").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.customer)
+					))
+
+				if self.weight_uom != packing_slip.weight_uom:
+					frappe.throw(_("Row #{0}: Weight UOM does not match with Source {1}. Weight UOM must be {2}").format(
+						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), frappe.bold(packing_slip.weight_uom)
+					))
+
+				source_packing_dt = combine_datetime(packing_slip.posting_date, packing_slip.posting_time)
+				nested_packing_dt = combine_datetime(self.posting_date, self.posting_time)
+				if nested_packing_dt < source_packing_dt:
+					frappe.throw(_("Row #{0}: Nested Packing Date/Time cannot be before Source {1} Date/Time {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(frappe.format(source_packing_dt))
+					))
+
+				# Validate Packing Slip Item
+				if not d.packing_slip_item:
+					frappe.throw(_("Row #{0}: Missing Source Packing Slip Row Reference").format(d.idx))
+
+				packing_slip_item = frappe.db.get_value("Packing Slip Item", d.packing_slip_item,
+					['qty', 'net_weight', 'tare_weight', 'gross_weight'], as_dict=1)
+
+				if not packing_slip_item:
+					frappe.throw(_("Row #{0}: Invalid Source Packing Slip Row Reference").format(d.idx))
+
+				if self.is_unpack:
+					packing_slip_item.qty *= -1
+					packing_slip_item.net_weight *= -1
+					packing_slip_item.tare_weight *= -1
+					packing_slip_item.gross_weight *= -1
+
+				if flt(d.qty) != packing_slip_item.qty:
+					frappe.throw(_("Row #{0}: Qty does not match with Source {1}. Qty must be {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(frappe.format(packing_slip_item.qty))
+					))
+
+				if flt(d.net_weight) != packing_slip_item.net_weight:
+					frappe.throw(_("Row #{0}: Net Weight does not match with Source {1}. Net Weight must be {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(frappe.format(packing_slip_item.net_weight))
+					))
+				if flt(d.tare_weight) != packing_slip_item.tare_weight:
+					frappe.throw(_("Row #{0}: Tare Weight does not match with Source {1}. Tare Weight must be {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(frappe.format(packing_slip_item.tare_weight))
+					))
+				if flt(d.gross_weight) != packing_slip_item.gross_weight:
+					frappe.throw(_("Row #{0}: Gross Weight does not match with Source {1}. Gross Weight must be {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(frappe.format(packing_slip_item.gross_weight))
+					))
 
 	def validate_sales_orders(self):
 		sales_orders = list(set([d.sales_order for d in self.get("items") if d.get("sales_order")]))
@@ -311,6 +415,98 @@ class PackingSlip(StockController):
 			self.customer = customer_details.customer
 			self.customer_name = customer_details.customer_name
 
+	def validate_unpack_against(self):
+		if not self.get("is_unpack"):
+			return
+
+		if not self.get("unpack_against"):
+			frappe.throw(_("Missing Unpack Against Packing Slip"))
+
+		unpack_against = frappe.db.get_value("Packing Slip", self.unpack_against, [
+			"name", "docstatus", "status",
+			"company", "customer", "package_type", "warehouse",
+			"posting_date", "posting_time"
+		], as_dict=1)
+
+		if not unpack_against:
+			frappe.throw(_("Unpack Against Packing Slip {0} does not exist").format(frappe.bold(self.unpack_against)))
+
+		if unpack_against.docstatus != 1:
+			frappe.throw(_("Unpack Against {0} is not submitted").format(
+				frappe.get_desk_link("Packing Slip", unpack_against.name)
+			))
+
+		if unpack_against.status != "In Stock":
+			frappe.throw(_("Cannot Unpack Against {0} because its status is {1}").format(
+				frappe.get_desk_link("Packing Slip", unpack_against.name), frappe.bold(unpack_against.status)
+			))
+
+		if self.company != unpack_against.company:
+			frappe.throw(_("Company does not match with Unpack Against {0}. Company must be {1}").format(
+				frappe.get_desk_link("Packing Slip", unpack_against.name), frappe.bold(unpack_against.company)
+			))
+
+		if unpack_against.customer and self.customer != unpack_against.customer:
+			frappe.throw(_("Customer does not match with Unpack Against {0}. Customer must be {1}").format(
+				frappe.get_desk_link("Packing Slip", unpack_against.name), frappe.bold(unpack_against.customer)
+			))
+
+		if self.package_type != unpack_against.package_type:
+			frappe.throw(_("Package Type does not match with Unpack Against {0}. Package Type must be {1}").format(
+				frappe.get_desk_link("Packing Slip", unpack_against.name), frappe.bold(unpack_against.package_type)
+			))
+
+		if self.warehouse != unpack_against.warehouse:
+			frappe.throw(_("Target Warehouse does not match with Unpack Against {0}. Target Warehouse must be {1}").format(
+				frappe.get_desk_link("Packing Slip", unpack_against.name), frappe.bold(unpack_against.warehouse)
+			))
+
+		unpack_against_dt = combine_datetime(unpack_against.posting_date, unpack_against.posting_time)
+		self_dt = combine_datetime(self.posting_date, self.posting_time)
+		if self_dt < unpack_against_dt:
+			frappe.throw(_("Unpacking Date/Time cannot be before Packing Date/Time {0}").format(frappe.format(self_dt)))
+
+		for d in self.get("items"):
+			if not d.get("unpack_against_row"):
+				frappe.throw(_("Row #{0}: Missing Unpack Against Row Reference").format(d.idx))
+
+			unpacked_against_row = frappe.db.get_value("Packing Slip Item", d.unpack_against_row,
+				['qty', 'net_weight', 'tare_weight', 'gross_weight'], as_dict=1)
+
+			if not unpacked_against_row:
+				frappe.throw(_("Row #{0}: Invalid Unpack Against Row Reference").format(d.idx))
+
+			unpacked_against_row.qty *= -1
+			unpacked_against_row.net_weight *= -1
+			unpacked_against_row.tare_weight *= -1
+			unpacked_against_row.gross_weight *= -1
+
+			if flt(d.qty) != unpacked_against_row.qty:
+				frappe.throw(_("Row #{0}: Qty does not match with Unpack Against {1}. Qty must be {2}").format(
+					d.idx,
+					frappe.get_desk_link("Packing Slip", unpack_against.name),
+					frappe.bold(frappe.format(unpacked_against_row.qty))
+				))
+
+			if flt(d.net_weight) != unpacked_against_row.net_weight:
+				frappe.throw(_("Row #{0}: Net Weight does not match with Unpack Against {1}. Net Weight must be {2}").format(
+					d.idx,
+					frappe.get_desk_link("Packing Slip", unpack_against.name),
+					frappe.bold(frappe.format(unpacked_against_row.net_weight))
+				))
+			if flt(d.tare_weight) != unpacked_against_row.tare_weight:
+				frappe.throw(_("Row #{0}: Tare Weight does not match with Unpack Against {1}. Tare Weight must be {2}").format(
+					d.idx,
+					frappe.get_desk_link("Packing Slip", unpack_against.name),
+					frappe.bold(frappe.format(unpacked_against_row.tare_weight))
+				))
+			if flt(d.gross_weight) != unpacked_against_row.gross_weight:
+				frappe.throw(_("Row #{0}: Gross Weight does not match with Unpack Against {1}. Gross Weight must be {2}").format(
+					d.idx,
+					frappe.get_desk_link("Packing Slip", unpack_against.name),
+					frappe.bold(frappe.format(unpacked_against_row.gross_weight))
+				))
+
 	def validate_customer(self):
 		if self.get("customer"):
 			validate_party_frozen_disabled("Customer", self.customer)
@@ -342,9 +538,13 @@ class PackingSlip(StockController):
 					self.total_net_weight += flt(item.get("net_weight"))
 					self.total_tare_weight += flt(item.get("tare_weight"))
 
-		for item in self.get("packing_slips"):
-			self.total_net_weight += item.net_weight
-			self.total_tare_weight += item.tare_weight
+		for d in self.get("packing_slips"):
+			if self.is_unpack:
+				self.total_net_weight -= d.net_weight
+				self.total_tare_weight -= d.tare_weight
+			else:
+				self.total_net_weight += d.net_weight
+				self.total_tare_weight += d.tare_weight
 
 		self.round_floats_in(self, ['total_net_weight', 'total_tare_weight'])
 		self.total_gross_weight = flt(self.total_net_weight + self.total_tare_weight, self.precision("total_gross_weight"))
@@ -385,7 +585,7 @@ class PackingSlip(StockController):
 	def update_previous_doc_status(self):
 		sales_orders = set()
 		sales_order_row_names = set()
-		source_packing_slips = set()
+		packing_slips = set()
 
 		for d in self.items:
 			# Get non nested sales orders from items
@@ -397,7 +597,7 @@ class PackingSlip(StockController):
 
 			# Get nested from
 			if d.source_packing_slip:
-				source_packing_slips.add(d.source_packing_slip)
+				packing_slips.add(d.source_packing_slip)
 
 		for name in sales_orders:
 			doc = frappe.get_doc("Sales Order", name)
@@ -405,60 +605,25 @@ class PackingSlip(StockController):
 			doc.validate_packed_qty(from_doctype=self.doctype, row_names=sales_order_row_names)
 			doc.notify_update()
 
-		for name in source_packing_slips:
+		if self.is_unpack and self.unpack_against:
+			packing_slips.add(self.unpack_against)
+
+		for name in packing_slips:
 			doc = frappe.get_doc("Packing Slip", name)
-			doc.set_nesting_status(update=True)
 			doc.set_status(update=True)
 			doc.notify_update()
 
 	def update_stock_ledger(self, allow_negative_stock=False):
 		sl_entries = []
 
-		# SLE for packaging material
-		for d in self.get('packaging_items'):
-			sl_entries.append(self.get_sl_entries(d, {
-				"warehouse": d.source_warehouse,
-				"actual_qty": -flt(d.stock_qty),
-				"incoming_rate": 0
-			}))
+		# Packaging Material
+		self.get_packaging_material_sles(sl_entries)
 
-		# SLE for items contents source warehouse
-		for d in self.get('items'):
-			sl_entries.append(self.get_sl_entries(d, {
-				"warehouse": d.source_warehouse,
-				"actual_qty": -flt(d.stock_qty),
-				"packing_slip": d.get("source_packing_slip"),
-				"incoming_rate": 0
-			}))
-
-		# SLE for item contents target warehouse
-		for d in self.get('items'):
-			sle = self.get_sl_entries(d, {
-				"warehouse": self.warehouse,
-				"actual_qty": flt(d.stock_qty),
-				"packing_slip": self.name,
-			})
-
-			# SLE Dependency
-			if self.docstatus == 1:
-				sle.dependencies = [{
-					"dependent_voucher_type": self.doctype,
-					"dependent_voucher_no": self.name,
-					"dependent_voucher_detail_no": d.name,
-					"dependency_type": "Amount",
-				}]
-
-				for dep_row in self.get("packaging_items"):
-					if flt(dep_row.stock_qty):
-						sle.dependencies.append({
-							"dependent_voucher_type": self.doctype,
-							"dependent_voucher_no": self.name,
-							"dependent_voucher_detail_no": dep_row.name,
-							"dependency_type": "Amount",
-							"dependency_percentage": d.cost_percentage
-						})
-
-			sl_entries.append(sle)
+		# Package Contents Transfer between Packing Slip
+		if not self.is_unpack:
+			self.get_packing_transfer_sles(sl_entries)
+		else:
+			self.get_unpack_transfer_sles(sl_entries)
 
 		# Reverse for cancellation
 		if self.docstatus == 2:
@@ -466,30 +631,179 @@ class PackingSlip(StockController):
 
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No', allow_negative_stock=allow_negative_stock)
 
+	def get_packaging_material_sles(self, sl_entries):
+		for d in self.get("packaging_items"):
+			# OUT SLE for packaging material (or IN for Unpack)
+			sle_material = self.get_sl_entries(d, {
+				"warehouse": d.source_warehouse,
+				"actual_qty": -flt(d.stock_qty),
+			})
+
+			# Unpack IN at same rate
+			if self.is_unpack and d.unpack_against_row and self.docstatus == 1:
+				sle_material.dependencies = [{
+					"dependent_voucher_type": self.doctype,
+					"dependent_voucher_no": self.unpack_against,
+					"dependent_voucher_detail_no": d.unpack_against_row,
+					"dependency_type": "Amount",
+				}]
+
+			sl_entries.append(sle_material)
+
+	def get_packing_transfer_sles(self, sl_entries):
+		for d in self.get("items"):
+			# OUT SLE for items contents source warehouse
+			sle_out = self.get_sl_entries(d, {
+				"warehouse": d.source_warehouse,
+				"actual_qty": -flt(d.stock_qty),
+				"packing_slip": d.get("source_packing_slip"),
+			})
+
+			if d.get("source_packing_slip") and d.get("packing_slip_item") and self.docstatus == 1:
+				# Transfer Dependency
+				sle_out.dependencies = [{
+					"dependent_voucher_type": self.doctype,
+					"dependent_voucher_no": d.source_packing_slip,
+					"dependent_voucher_detail_no": d.packing_slip_item,
+					"dependency_type": "Amount",
+					"dependency_qty_filter": "Positive",
+				}]
+
+			sl_entries.append(sle_out)
+
+			# IN SLE for item contents target warehouse
+			sle_in = self.get_sl_entries(d, {
+				"warehouse": self.warehouse,
+				"actual_qty": flt(d.stock_qty),
+				"packing_slip": self.name,
+			})
+
+			if self.docstatus == 1:
+				# Transfer Dependency
+				sle_in.dependencies = [{
+					"dependent_voucher_type": self.doctype,
+					"dependent_voucher_no": self.name,
+					"dependent_voucher_detail_no": d.name,
+					"dependency_type": "Amount",
+				}]
+
+				# Include Consumed Packaging Material in Valaution
+				for dep_row in self.get("packaging_items"):
+					if flt(dep_row.stock_qty):
+						sle_in.dependencies.append({
+							"dependent_voucher_type": self.doctype,
+							"dependent_voucher_no": self.name,
+							"dependent_voucher_detail_no": dep_row.name,
+							"dependency_type": "Amount",
+							"dependency_percentage": d.cost_percentage
+						})
+
+			sl_entries.append(sle_in)
+
+	def get_unpack_transfer_sles(self, sl_entries):
+		for d in self.get("items"):
+			# Unpack OUT SLE for items contents target warehouse
+			sle_out = self.get_sl_entries(d, {
+				"warehouse": self.warehouse,
+				"actual_qty": flt(d.stock_qty),
+				"packing_slip": self.unpack_against,
+			})
+
+			# Unpack OUT at same rate
+			if self.docstatus == 1 and d.unpack_against_row:
+				sle_out.dependencies = [{
+					"dependent_voucher_type": self.doctype,
+					"dependent_voucher_no": self.unpack_against,
+					"dependent_voucher_detail_no": d.unpack_against_row,
+					"dependency_type": "Amount",
+					"dependency_qty_filter": "Positive",
+				}]
+
+			sl_entries.append(sle_out)
+
+			# Unpack IN SLE for item contents source warehouse
+			sle_in = self.get_sl_entries(d, {
+				"warehouse": d.source_warehouse,
+				"actual_qty": -flt(d.stock_qty),
+				"packing_slip": d.get("source_packing_slip"),
+			})
+
+			if self.docstatus == 1:
+				# Transfer Dependency
+				sle_in.dependencies = [{
+					"dependent_voucher_type": self.doctype,
+					"dependent_voucher_no": self.name,
+					"dependent_voucher_detail_no": d.name,
+					"dependency_type": "Amount",
+				}]
+
+				# Include Packaging Material in Cost
+				for dep_row in self.get("packaging_items"):
+					if flt(dep_row.stock_qty):
+						sle_in.dependencies.append({
+							"dependent_voucher_type": self.doctype,
+							"dependent_voucher_no": self.name,
+							"dependent_voucher_detail_no": dep_row.name,
+							"dependency_type": "Amount",
+							"dependency_percentage": d.cost_percentage
+						})
+
+			sl_entries.append(sle_in)
+
 	def get_stock_voucher_items(self, sle_map):
 		return self.get("items") + self.get("packaging_items")
 
-	def set_delivery_status(self, update=False, update_modified=True, validate_delivery=True):
+	def set_status(self, update=False, status=None, update_modified=True, validate=True):
+		previous_status = self.status
+
+		is_nested = 0
+		is_unpacked = 0
+		is_delivered = 0
+
+		# Packed
 		packed_qty_map = {}
 		for d in self.get("items"):
 			packed_qty_map[d.name] = flt(d.qty)
 
+		# Nested
+		nested_qty_map = self.get_nested_qty_map()
+		if nested_qty_map == packed_qty_map:
+			is_nested = 1
+		elif validate and nested_qty_map:
+			self.raise_incomplete_fulfilment("nested", "nesting")
+
+		# Unpacked
+		unpacked_qty_map = self.get_unpacked_qty_map()
+		if unpacked_qty_map == packed_qty_map:
+			is_unpacked = 1
+		elif validate and unpacked_qty_map:
+			self.raise_incomplete_fulfilment("unpacked", "unpacking")
+
+		# Delivered
 		delivered_qty_map = self.get_delivered_qty_map()
-
 		if delivered_qty_map == packed_qty_map:
-			self.is_delivered = 1
-		else:
-			self.is_delivered = 0
+			is_delivered = 1
+		elif validate and delivered_qty_map:
+			self.raise_incomplete_fulfilment("delivered", "delivery")
 
-			if validate_delivery and delivered_qty_map:
-				frappe.throw(_(
-					"Some items from {0} are were not completely delivered. "
-					"Partial delivery of Package is not allowed. "
-					"Please select all items of Packing Slip."
-				).format(frappe.get_desk_link("Packing Slip", self.name)))
+		if self.docstatus == 0:
+			self.status = "Draft"
+		elif self.docstatus == 1:
+			if is_delivered:
+				self.status = "Delivered"
+			elif is_unpacked or cint(self.is_unpack):
+				self.status = "Unpacked"
+			elif is_nested:
+				self.status = "Nested"
+			else:
+				self.status = "In Stock"
+		else:
+			self.status = "Cancelled"
+
+		self.add_status_comment(previous_status)
 
 		if update:
-			self.db_set('is_delivered', self.is_delivered, update_modified=update_modified)
+			self.db_set("status", self.status, update_modified=update_modified)
 
 	def get_delivered_qty_map(self):
 		if self.is_new():
@@ -517,28 +831,6 @@ class PackingSlip(StockController):
 
 		return delivered_qty_map
 
-	def set_nesting_status(self, update=False, update_modified=True, validate_packing=True):
-		packed_qty_map = {}
-		for d in self.get("items"):
-			packed_qty_map[d.name] = flt(d.qty)
-
-		nested_qty_map = self.get_nested_qty_map()
-
-		if nested_qty_map == packed_qty_map:
-			self.is_nested = 1
-		else:
-			self.is_nested = 0
-
-			if validate_packing and nested_qty_map:
-				frappe.throw(_(
-					"Some items from {0} are were not completely nested. "
-					"Partial nesting of Package is not allowed. "
-					"Please select all items of Packing Slip."
-				).format(frappe.get_desk_link("Packing Slip", self.name)))
-
-		if update:
-			self.db_set('is_nested', self.is_nested, update_modified=update_modified)
-
 	def get_nested_qty_map(self):
 		if self.is_new():
 			return {}
@@ -549,29 +841,35 @@ class PackingSlip(StockController):
 			inner join `tabPacking Slip` s on s.name = i.parent
 			where i.source_packing_slip = %s and s.docstatus = 1
 			group by i.packing_slip_item
+			having nested_qty != 0
 		""", self.name))
 
 		return nested_qty_map
 
-	def set_status(self, update=False, status=None, update_modified=True):
-		previous_status = self.status
+	def get_unpacked_qty_map(self):
+		if self.is_new():
+			return {}
 
-		if self.docstatus == 0:
-			self.status = "Draft"
-		elif self.docstatus == 1:
-			if cint(self.is_nested):
-				self.status = "Nested"
-			elif cint(self.is_delivered):
-				self.status = "Delivered"
-			else:
-				self.status = "In Stock"
-		else:
-			self.status = "Cancelled"
+		unpacked_qty_map = dict(frappe.db.sql("""
+			select i.unpack_against_row, sum(-i.qty) as unpacked_qty
+			from `tabPacking Slip Item` i
+			inner join `tabPacking Slip` s on s.name = i.parent
+			where s.unpack_against = %s and s.docstatus = 1
+			group by i.unpack_against_row
+		""", self.name))
 
-		self.add_status_comment(previous_status)
+		return unpacked_qty_map
 
-		if update:
-			self.db_set("status", self.status, update_modified=update_modified)
+	def raise_incomplete_fulfilment(self, past, present):
+		frappe.throw(_(
+			"Some items from {packing_slip} are were not completely {past}. "
+			"Partial {present} of Package is not allowed. "
+			"Please select all items of Packing Slip."
+		).format(
+			packing_slip=frappe.get_desk_link("Packing Slip", self.name),
+			past=_(past),
+			present=_(present),
+		))
 
 
 @frappe.whitelist()
@@ -742,6 +1040,60 @@ def make_target_packing_slip(source_name, target_doc=None):
 	target_doc.run_method('set_missing_values')
 	target_doc.run_method('calculate_totals')
 	return target_doc
+
+
+@frappe.whitelist()
+def make_unpack_packing_slip(source_name, target_doc=None):
+	def update_item(source_doc, target_doc, source_parent, target_parent):
+		target_doc.qty = -1 * source_doc.qty
+
+	def update_material(source_doc, target_doc, source_parent, target_parent):
+		target_doc.qty = -1 * source_doc.qty
+
+	def postprocess(source, target):
+		target.is_unpack = 1
+		target.run_method('set_missing_values')
+		target.run_method('calculate_totals')
+
+	unpack_packing_slip = get_mapped_doc("Packing Slip", source_name, {
+		"Packing Slip": {
+			"doctype": "Packing Slip",
+			"validation": {
+				"docstatus": ["=", 1],
+			},
+			"field_map": {
+				"name": "unpack_against",
+				"warehouse": "warehouse",
+				"package_type": "package_type",
+			}
+		},
+		"Packing Slip Item": {
+			"doctype": "Packing Slip Item",
+			"field_map": {
+				"name": "unpack_against_row",
+				"source_packing_slip": "source_packing_slip",
+				"packing_slip_item": "packing_slip_item",
+				"sales_order": "sales_order",
+				"sales_order_item": "sales_order_item",
+				"batch_no": "batch_no",
+				"serial_no": "serial_no",
+				"source_warehouse": "source_warehouse",
+			},
+			"postprocess": update_item
+		},
+		"Packing Slip Packaging Material": {
+			"doctype": "Packing Slip Packaging Material",
+			"field_map": {
+				"name": "unpack_against_row",
+				"batch_no": "batch_no",
+				"serial_no": "serial_no",
+				"source_warehouse": "source_warehouse",
+			},
+			"postprocess": update_material
+		}
+	}, target_doc, postprocess)
+
+	return unpack_packing_slip
 
 
 @frappe.whitelist()

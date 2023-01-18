@@ -29,6 +29,7 @@
   "column_break_10",
   "tare_weight_per_unit",
   "tare_weight",
+  "unpack_against_row",
   "accounting_dimensions_section",
   "expense_account",
   "dimension_col_break",
@@ -213,11 +214,19 @@
    "label": "Tare Weight",
    "print_width": "100px",
    "width": "100px"
+  },
+  {
+   "fieldname": "unpack_against_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Unpack Against Row",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-01-12 01:04:37.851315",
+ "modified": "2023-01-16 18:40:34.186044",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip Packaging Material",

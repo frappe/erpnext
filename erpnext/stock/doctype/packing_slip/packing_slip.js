@@ -83,6 +83,7 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			if (this.frm.doc.status == "In Stock") {
 				this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note(), __('Create'));
 				this.frm.add_custom_button(__('Sales Invoice'), () => this.make_sales_invoice(), __('Create'));
+				this.frm.add_custom_button(__('Unpack'), () => this.make_unpack_packing_slip(), __('Create'));
 
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
@@ -120,9 +121,14 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 			}
 		}
 
-		for (let item of this.frm.doc.packing_slips || []) {
-			this.frm.doc.total_net_weight += item.net_weight;
-			this.frm.doc.total_tare_weight += item.tare_weight;
+		for (let d of this.frm.doc.packing_slips || []) {
+			if (this.frm.doc.is_unpack) {
+				this.frm.doc.total_net_weight -= d.net_weight;
+				this.frm.doc.total_tare_weight -= d.tare_weight;
+			} else {
+				this.frm.doc.total_net_weight += d.net_weight;
+				this.frm.doc.total_tare_weight += d.tare_weight;
+			}
 		}
 
 		frappe.model.round_floats_in(this.frm.doc, ['total_net_weight', 'total_tare_weight']);
@@ -248,6 +254,13 @@ erpnext.stock.PackingSlipController = class PackingSlipController extends erpnex
 	make_sales_invoice() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.packing_slip.packing_slip.make_sales_invoice",
+			frm: this.frm,
+		})
+	}
+
+	make_unpack_packing_slip() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.packing_slip.packing_slip.make_unpack_packing_slip",
 			frm: this.frm,
 		})
 	}

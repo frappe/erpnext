@@ -369,7 +369,7 @@ class DeliveryNote(SellingController):
 			"Packing Slip Item": {
 				"ref_dn_field": "packing_slip_item",
 				"compare_fields": [["item_code", "="], ["qty", "="], ["uom", "="], ["conversion_factor", "="],
-					["batch_no", "="], ["serial_no", "="], ["net_weight", "="]],
+					["batch_no", "="], ["serial_no", "="], ["net_weight_per_unit", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},

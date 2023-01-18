@@ -8,6 +8,8 @@ frappe.listview_settings["Packing Slip"] = {
 			color = "blue";
 		} else if (doc.status == "Nested") {
 			color = "light-blue";
+		} else if (doc.status == "Unpacked") {
+			color = "grey";
 		}
 
 		if (color) {
