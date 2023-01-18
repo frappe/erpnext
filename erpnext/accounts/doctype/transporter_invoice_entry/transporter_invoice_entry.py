@@ -51,7 +51,8 @@ class TransporterInvoiceEntry(Document):
 			"from_date":self.from_date,
 			"to_date":self.to_date,
 			"posting_date":self.posting_date,
-			"company":self.company
+			"company":self.company,
+			"status":"Draft",
 		})
 		if cint(self.invoice_created) == 0 :
 			frappe.enqueue(crate_invoice_entries,invoice_entry= self, timeout=600, args=args)

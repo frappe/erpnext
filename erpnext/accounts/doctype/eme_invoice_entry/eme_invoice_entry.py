@@ -33,7 +33,8 @@ class EMEInvoiceEntry(Document):
 				"tds_percent":self.tds_percent,
 				"tds_account":self.tds_account,
 				"company":self.company,
-				"currency":self.currency
+				"currency":self.currency,
+				"status":"Draft"
 			})
 			# frappe.enqueue(create_eme_invoice_for_owner, owner_list = owner_list, args = args)
 			create_eme_invoice_for_owner(owner_list = owner_list, args = args)
