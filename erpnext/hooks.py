@@ -330,8 +330,6 @@ scheduler_events = {
 	]
 }
 
-email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
-
 default_mail_footer = ""
 
 get_translated_dict = {
