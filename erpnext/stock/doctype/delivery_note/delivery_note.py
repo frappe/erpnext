@@ -56,6 +56,9 @@ class DeliveryNote(SellingController):
 
 		self.update_current_stock()
 
+	def before_submit(self):
+		self.remove_partial_packing_slip_for_return()
+
 	def on_submit(self):
 		self.validate_packed_qty()
 

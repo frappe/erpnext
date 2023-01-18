@@ -430,6 +430,113 @@ class SellingController(StockController):
 						}))
 		self.make_sl_entries(sl_entries)
 
+	def validate_packing_slip(self):
+		def get_packing_slip_details(name):
+			if not packing_slip_map.get(name):
+				packing_slip_map[name] = frappe.db.get_value("Packing Slip", name,
+					["name", "docstatus", "status", "company", "customer", "project", "warehouse", "weight_uom"], as_dict=1)
+
+			return packing_slip_map[name]
+
+		# Validate Packing Slips
+		packing_slip_map = {}
+		for d in self.get("items"):
+			if not d.get("packing_slip"):
+				continue
+
+			packing_slip = get_packing_slip_details(d.packing_slip)
+			if not packing_slip:
+				frappe.throw(_("Row #{0}: Packing Slip {1} does not exist").format(d.packing_slip))
+
+			if packing_slip.docstatus == 0:
+				frappe.throw(_("Row #{0}: {1} is in draft").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
+				))
+			if packing_slip.docstatus == 2:
+				frappe.throw(_("Row #{0}: {1} is cancelled").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
+				))
+
+			if self.get("is_return"):
+				if packing_slip.status != "Delivered":
+					frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(packing_slip.status)
+					))
+			else:
+				if packing_slip.status != "In Stock":
+					frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(packing_slip.status)
+					))
+
+			if self.company != packing_slip.company:
+				frappe.throw(_("Row #{0}: Company does not match with {1}. Company must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.company
+				))
+
+			if cstr(self.project) != cstr(packing_slip.project):
+				frappe.throw(_("Row #{0}: Project does not match with {1}. Project must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.project
+				))
+
+			if packing_slip.customer and self.customer != packing_slip.customer:
+				frappe.throw(_("Row #{0}: Customer does not match with {1}. Customer must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.customer
+				))
+
+			if d.weight_uom != packing_slip.weight_uom:
+				frappe.throw(_("Row #{0}: Weight UOM does not match with {1}. Weight UOM must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.weight_uom
+				))
+
+			if d.warehouse != packing_slip.warehouse:
+				frappe.throw(_("Row #{0}: Warehouse does not match with {1}. Warehouse must be {2}").format(
+					d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.warehouse
+				))
+
+			if not d.get("packing_slip_item"):
+				frappe.throw(_("Row #{0}: Missing Packing Slip Row Reference").format(d.idx))
+
+			if (self.doctype != "Sales Invoice" or self.get("update_stock")) and not self.get("is_return"):
+				packing_slip_qty = flt(frappe.db.get_value("Packing Slip Item", d.packing_slip_item, 'qty'))
+
+				if flt(d.qty) != packing_slip_qty:
+					frappe.throw(_("Row #{0}: Qty does not match with {1}. Qty must be {2}").format(
+						d.idx,
+						frappe.get_desk_link("Packing Slip", packing_slip.name),
+						frappe.bold(frappe.format(packing_slip_qty))
+					))
+
+	def remove_partial_packing_slip_for_return(self):
+		if not self.get("is_return"):
+			return
+
+		packing_slip_map = {}
+		for d in self.get("items"):
+			if d.get("packing_slip") and d.get("packing_slip_item"):
+				packing_slip_map.setdefault(d.packing_slip, {}).setdefault(d.packing_slip_item, 0)
+				packing_slip_map[d.packing_slip][d.packing_slip_item] += -1 * d.qty
+
+		to_remove = []
+		for packing_slip, returned_qty_map in packing_slip_map.items():
+			packed_qty_map = dict(frappe.db.sql("""
+				select name, qty
+				from `tabPacking Slip Item`
+				where parent = %s and docstatus = 1
+			""", packing_slip))
+
+			if returned_qty_map != packed_qty_map:
+				to_remove.append(packing_slip)
+
+		if to_remove:
+			for d in self.get("items"):
+				if d.get("packing_slip") and d.packing_slip in to_remove:
+					d.packing_slip = None
+					d.packing_slip_item = None
+
 	def update_packing_slips(self):
 		packing_slips = list(set([d.packing_slip for d in self.get("items") if d.get("packing_slip")]))
 		for name in packing_slips:
@@ -540,83 +647,6 @@ class SellingController(StockController):
 			""", (self.project, self.customer))
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
-
-	def validate_packing_slip(self):
-		def get_packing_slip_details(name):
-			if not packing_slip_map.get(name):
-				packing_slip_map[name] = frappe.db.get_value("Packing Slip", name,
-					["name", "docstatus", "status", "company", "customer", "project", "warehouse", "weight_uom"], as_dict=1)
-
-			return packing_slip_map[name]
-
-		# Validate Packing Slips
-		packing_slip_map = {}
-		for d in self.get("items"):
-			if d.get("packing_slip"):
-				packing_slip = get_packing_slip_details(d.packing_slip)
-				if not packing_slip:
-					frappe.throw(_("Row #{0}: Packing Slip {1} does not exist").format(d.packing_slip))
-
-				if packing_slip.docstatus == 0:
-					frappe.throw(_("Row #{0}: {1} is in draft").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
-					))
-				if packing_slip.docstatus == 2:
-					frappe.throw(_("Row #{0}: {1} is cancelled").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name)
-					))
-
-				if self.get("is_return"):
-					if packing_slip.status != "Delivered":
-						frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
-							d.idx,
-							frappe.get_desk_link("Packing Slip", packing_slip.name),
-							frappe.bold(packing_slip.status)
-						))
-				else:
-					if packing_slip.status != "In Stock":
-						frappe.throw(_("Row #{0}: Cannot select {1} because its status is {2}").format(
-							d.idx,
-							frappe.get_desk_link("Packing Slip", packing_slip.name),
-							frappe.bold(packing_slip.status)
-						))
-
-				if self.company != packing_slip.company:
-					frappe.throw(_("Row #{0}: Company does not match with {1}. Company must be {2}").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.company
-					))
-
-				if cstr(self.project) != cstr(packing_slip.project):
-					frappe.throw(_("Row #{0}: Project does not match with {1}. Project must be {2}").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.project
-					))
-
-				if packing_slip.customer and self.customer != packing_slip.customer:
-					frappe.throw(_("Row #{0}: Customer does not match with {1}. Customer must be {2}").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.customer
-					))
-
-				if d.weight_uom != packing_slip.weight_uom:
-					frappe.throw(_("Row #{0}: Weight UOM does not match with {1}. Weight UOM must be {2}").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.weight_uom
-					))
-
-				if d.warehouse != packing_slip.warehouse:
-					frappe.throw(_("Row #{0}: Warehouse does not match with {1}. Warehouse must be {2}").format(
-						d.idx, frappe.get_desk_link("Packing Slip", packing_slip.name), packing_slip.warehouse
-					))
-
-				if self.doctype != "Sales Invoice" or self.get("update_stock"):
-					packing_slip_qty = flt(frappe.db.get_value("Packing Slip Item", d.packing_slip_item, 'qty'))
-					if self.get("is_return"):
-						packing_slip_qty *= -1
-
-					if flt(d.qty) != packing_slip_qty:
-						frappe.throw(_("Row #{0}: Qty does not match with {1}. Qty must be {2}").format(
-							d.idx,
-							frappe.get_desk_link("Packing Slip", packing_slip.name),
-							frappe.bold(frappe.format(packing_slip_qty))
-						))
 
 	def update_project_billing_and_sales(self):
 		projects = []
