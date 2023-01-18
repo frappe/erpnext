@@ -108,10 +108,9 @@ def post_accounting_entries(doc,  publish_progress = True):
 		"voucher_type": "Bank Entry",
 		"naming_series": "Bank Payment Voucher",
 		"title": "EME Payment "+ str(doc.branch),
-		"user_remark": "Note: " + "EME Payment - " + str(doc.remarks),
+		"user_remark": "Note: " + "EME Payment - " + str(remarks),
 		"posting_date": doc.posting_date,
 		"company":doc.company,
-		"total_amount_in_words": money_in_words(doc.payable_amount),
 		"branch": doc.branch,
 	})
 	for e in doc.successful_transaction:

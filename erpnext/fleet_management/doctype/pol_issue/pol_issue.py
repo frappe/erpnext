@@ -63,38 +63,42 @@ class POLIssue(StockController):
 		received_till = get_pol_till("Stock", self.tanker, self.posting_date, self.pol_type, self.posting_time)
 		issue_till = get_pol_till("Issue", self.tanker, self.posting_date, self.pol_type)
 		balance = flt(received_till) - flt(issue_till)
+		if flt(self.total_quantity) > flt(balance):
+			frappe.throw("Not enough balance in tanker to issue. The balance is " + str(balance))	
+
+	def make_pol_entry(self):
 		if self.tanker:
+			con1 = frappe.new_doc("POL Entry")
+			con1.flags.ignore_permissions = 1	
+			con1.equipment = self.tanker
+			con1.pol_type = self.pol_type
+			con1.branch = self.branch
+			con1.posting_date = self.posting_date
+			con1.posting_time = self.posting_time
+			con1.qty = self.total_quantity
+			con1.reference_type = self.doctype
+			con1.reference = self.name
+			con1.type = "Issue"
+			con1.is_opening = 0
+			con1.cost_center = self.cost_center
+			con1.submit()
+		for item in self.items:
 			con = frappe.new_doc("POL Entry")
-			con.flags.ignore_permissions = 1
-			con.equipment = self.tanker
+			con.flags.ignore_permissions = 1	
+			con.equipment = item.equipment
 			con.pol_type = self.pol_type
 			con.branch = self.branch
 			con.posting_date = self.posting_date
 			con.posting_time = self.posting_time
-			con.qty = self.total_quantity
+			con.qty = item.qty
 			con.reference_type = self.doctype
 			con.reference = self.name
-			con.type = "Issue"
 			con.is_opening = 0
-			con.submit()
-
-		for a in self.items:
-			con = frappe.new_doc("POL Entry")
-			con.flags.ignore_permissions = 1
-			con.equipment = a.equipment
-			con.pol_type = self.pol_type
-			con.branch = a.fuel_book_branch
-			con.posting_date = self.posting_date
-			con.posting_time = self.posting_time
-			con.qty = a.qty
-			con.reference_type = self.doctype
-			con.reference = self.name
-			con.cost_center = a.cost_center
-			# if self.purpose == "Issue":
+			con.uom = item.uom
+			con.cost_center = self.cost_center
+			con1.current_km = item.cur_km_reading
+			con1.mileage = item.mileage
 			con.type = "Receive"
-			# else:
-			# 	con.type = "Stock"
-			con.is_opening = 0
 			con.submit()
 
 	def delete_pol_entry(self):

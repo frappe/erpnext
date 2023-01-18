@@ -354,7 +354,7 @@ def post_accounting_entries(args,publish_progress=True):
 		"voucher_type": "Bank Entry",
 		"naming_series": "Bank Payment Voucher",
 		"title": "Transporter Payment "+ str(args.get("branch")),
-		"user_remark": "Note: " + "Transporter Payment - " + str(args.get("remarks")),
+		"user_remark": "Note: " + "Transporter Payment - " + str(remarks),
 		"posting_date": args.get("posting_date"),
 		"company": args.get("company"),
 		"total_amount_in_words": money_in_words(args.get("payable_amount")),
