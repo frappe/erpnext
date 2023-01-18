@@ -25,7 +25,7 @@ def get_data(filters):
 			(SELECT e.account_number FROM `tabEquipment` e WHERE e.name= epi.equipment) AS account_number 
 			FROM `tabEME Invoice` ep, `tabEME Invoice Item` epi  
 			WHERE epi.parent = ep.name AND ep.name = '{name}' 
-			GROUP BY  epi.equipment_no
+			GROUP BY  epi.equipment
 		""".format(name=filters.get("name"),as_dict=True))
 	return query
 
