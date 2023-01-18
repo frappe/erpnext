@@ -65,7 +65,7 @@ class PriceList(Document):
 
 def get_price_list_details(price_list):
 	price_list_details = frappe.get_cached_value(
-		"Price List", price_list, ["currency", "price_not_uom_dependent", "enabled"], as_dict=1
+		"Price List", price_list, ("currency", "price_not_uom_dependent", "enabled"), as_dict=True
 	)
 
 	if not price_list_details or not price_list_details.get("enabled"):
