@@ -259,9 +259,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		if tax_deducted:
 			net_total = inv.tax_withholding_net_total
 			if ldc:
-				tax_amount = get_tds_amount_from_ldc(
-					ldc, parties, pan_no, tax_details, posting_date, net_total
-				)
+				tax_amount = get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total)
 			else:
 				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
 
@@ -538,7 +536,7 @@ def get_invoice_total_without_tcs(inv, tax_details):
 	return inv.grand_total - tcs_tax_row_amount
 
 
-def get_tds_amount_from_ldc(ldc, parties, pan_no, tax_details, posting_date, net_total):
+def get_tds_amount_from_ldc(ldc, parties, tax_details, posting_date, net_total):
 	tds_amount = 0
 	limit_consumed = frappe.db.get_value(
 		"Purchase Invoice",

@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 
 def execute(filters=None):
@@ -64,6 +65,12 @@ def get_result(
 				total_amount_credited = invoice_net_total_map.get(name)
 			else:
 				total_amount_credited += entry.credit
+
+		## Check if ldc is applied and show rate as per ldc
+		actual_rate = (tds_deducted / total_amount_credited) * 100
+
+		if flt(actual_rate) < flt(rate):
+			rate = actual_rate
 
 		if tds_deducted:
 			row = {
