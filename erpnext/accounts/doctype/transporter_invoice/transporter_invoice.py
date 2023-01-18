@@ -49,12 +49,12 @@ class TransporterInvoice(AccountsController):
 				self.status = "Draft"
 			return
 
-		outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
+		outstanding_amount = flt(self.outstanding_amount,2)
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and self.amount_payable > outstanding_amount:
+				if outstanding_amount > 0 and flt(self.amount_payable) > outstanding_amount:
 					self.status = "Partly Paid"
 				elif outstanding_amount > 0 :
 					self.status = "Unpaid"
