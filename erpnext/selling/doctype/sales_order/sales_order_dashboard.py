@@ -14,7 +14,6 @@ def get_data():
 		},
 		"internal_links": {
 			"Quotation": ["items", "prevdoc_docname"],
-			"Material Request": ["items", "material_request"],
 		},
 		"transactions": [
 			{

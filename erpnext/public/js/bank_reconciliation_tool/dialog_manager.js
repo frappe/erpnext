@@ -1,12 +1,16 @@
 frappe.provide("erpnext.accounts.bank_reconciliation");
 
 erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
-	constructor(company, bank_account) {
+	constructor(company, bank_account, bank_statement_from_date, bank_statement_to_date, filter_by_reference_date, from_reference_date, to_reference_date) {
 		this.bank_account = bank_account;
 		this.company = company;
 		this.make_dialog();
+		this.bank_statement_from_date = bank_statement_from_date;
+		this.bank_statement_to_date = bank_statement_to_date;
+		this.filter_by_reference_date = filter_by_reference_date;
+		this.from_reference_date = from_reference_date;
+		this.to_reference_date = to_reference_date;
 	}
-
 	show_dialog(bank_transaction_name, update_dt_cards) {
 		this.bank_transaction_name = bank_transaction_name;
 		this.update_dt_cards = update_dt_cards;
@@ -35,13 +39,13 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				if (r.message) {
 					this.bank_transaction = r.message;
 					r.message.payment_entry = 1;
+					r.message.journal_entry = 1;
 					this.dialog.set_values(r.message);
 					this.dialog.show();
 				}
 			},
 		});
 	}
-
 	get_linked_vouchers(document_types) {
 		frappe.call({
 			method:
@@ -49,6 +53,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			args: {
 				bank_transaction_name: this.bank_transaction_name,
 				document_types: document_types,
+				from_date: this.bank_statement_from_date,
+				to_date: this.bank_statement_to_date,
+				filter_by_reference_date: this.filter_by_reference_date,
+				from_reference_date:this.from_reference_date,
+				to_reference_date:this.to_reference_date
 			},
 
 			callback: (result) => {
@@ -66,6 +75,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 							row[1],
 							row[2],
 							reference_date,
+							row[8],
 							format_currency(row[3], row[9]),
 							row[6],
 							row[4],
@@ -98,6 +108,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			},
 			{
 				name: __("Reference Date"),
+				editable: false,
+				width: 120,
+			},
+			{
+				name: "Posting Date",
 				editable: false,
 				width: 120,
 			},

@@ -127,12 +127,20 @@ class AssetValueAdjustment(Document):
 			current_asset_depr_schedule_doc.flags.should_not_cancel_depreciation_entries = True
 			current_asset_depr_schedule_doc.cancel()
 
-			notes = _(
-				"This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
-			).format(
-				get_link_to_form(asset.doctype, asset.name),
-				get_link_to_form(self.get("doctype"), self.get("name")),
-			)
+			if self.docstatus == 1:
+				notes = _(
+					"This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
+				).format(
+					get_link_to_form(asset.doctype, asset.name),
+					get_link_to_form(self.get("doctype"), self.get("name")),
+				)
+			elif self.docstatus == 2:
+				notes = _(
+					"This schedule was created when Asset {0}'s Asset Value Adjustment {1} was cancelled."
+				).format(
+					get_link_to_form(asset.doctype, asset.name),
+					get_link_to_form(self.get("doctype"), self.get("name")),
+				)
 			new_asset_depr_schedule_doc.notes = notes
 
 			new_asset_depr_schedule_doc.insert()

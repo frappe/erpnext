@@ -219,20 +219,16 @@ class PurchaseOrder(BuyingController):
 					else:
 						if not frappe.get_value("Item", item.fg_item, "is_sub_contracted_item"):
 							frappe.throw(
-								_(
-									"Row #{0}: Finished Good Item {1} must be a sub-contracted item for service item {2}"
-								).format(item.idx, item.fg_item, item.item_code)
+								_("Row #{0}: Finished Good Item {1} must be a sub-contracted item").format(
+									item.idx, item.fg_item
+								)
 							)
 						elif not frappe.get_value("Item", item.fg_item, "default_bom"):
 							frappe.throw(
 								_("Row #{0}: Default BOM not found for FG Item {1}").format(item.idx, item.fg_item)
 							)
 					if not item.fg_item_qty:
-						frappe.throw(
-							_("Row #{0}: Finished Good Item Qty is not specified for service item {0}").format(
-								item.idx, item.item_code
-							)
-						)
+						frappe.throw(_("Row #{0}: Finished Good Item Qty can not be zero").format(item.idx))
 		else:
 			for item in self.items:
 				item.set("fg_item", None)

@@ -334,7 +334,7 @@ class PaymentReconciliation(Document):
 		)
 
 		# Account Currency has balance
-		dr_or_cr = "debit" if self.party_type == "Customer" else "debit"
+		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 		journal_account = frappe._dict(
@@ -471,6 +471,7 @@ class PaymentReconciliation(Document):
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()
+		self.accounting_dimension_filter_conditions.clear()
 		self.ple_posting_date_filter.clear()
 		ple = qb.DocType("Payment Ledger Entry")
 
