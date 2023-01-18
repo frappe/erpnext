@@ -20,7 +20,7 @@ def get_data(filters):
 						ep.tds_percent,
 						ep.tds_amount,
 						ep.grand_total,
-						ep.deduction_amount,
+						ep.total_deduction,
 						ep.payable_amount,
 						epi.rate,
 						epi.equipment_type,
