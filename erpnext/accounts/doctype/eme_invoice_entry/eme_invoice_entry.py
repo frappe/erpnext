@@ -35,8 +35,8 @@ class EMEInvoiceEntry(Document):
 				"company":self.company,
 				"currency":self.currency
 			})
-			frappe.enqueue(create_eme_invoice_for_owner, owner_list = owner_list, args = args)
-		
+			# frappe.enqueue(create_eme_invoice_for_owner, owner_list = owner_list, args = args)
+			create_eme_invoice_for_owner(owner_list = owner_list, args = args)
 	def get_owner_list(self):
 		owner = []
 		for item in self.items:
@@ -100,6 +100,7 @@ def post_accounting_entries(doc,  publish_progress = True):
 	# Posting Journal Entry
 	je = frappe.new_doc("Journal Entry")
 	je.flags.ignore_permissions=1
+	payable_amount = 0
 	je.update({
 		"doctype": "Journal Entry",
 		"voucher_type": "Bank Entry",
@@ -121,15 +122,15 @@ def post_accounting_entries(doc,  publish_progress = True):
 			try:				
 				je.append("accounts",{
 					"account": credit_account,
-					"debit_in_account_currency": eme_invoice.payable_amount,
+					"debit_in_account_currency": flt(eme_invoice.payable_amount,2),
 					"cost_center": doc.cost_center,
 					"party_check": 1,
 					"party_type": "Supplier",
 					"party": eme_invoice.supplier,
 					"reference_type": "EME Invoice",
-					"reference_name": eme_invoice.name
+					"reference_name": eme_invoice.name,
 				})
-				
+				payable_amount += flt(eme_invoice.payable_amount,2)
 				#Set a reference to the claim journal entry
 				eme_invoice.db_set("journal_entry",je.name)
 				successful += 1
@@ -160,9 +161,12 @@ def post_accounting_entries(doc,  publish_progress = True):
 							description = description)
 	je.append("accounts",{
 				"account": bank_account,
-				"credit_in_account_currency": doc.payable_amount,
+				"credit_in_account_currency": payable_amount,
 				"cost_center": doc.cost_center
 				})
+	je.update({
+		"total_amount_in_words": money_in_words(payable_amount)
+	})
 	je.insert()
 	doc.db_set("posted_to_account",1 if successful else 0)
 	doc.save()
