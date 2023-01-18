@@ -255,7 +255,8 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 	"""Returns first email from Contact Email table as a Billing email
 	when Is Billing Contact checked
 	and Primary email- email with Is Primary checked"""
-
+	
+	# FIXME: is_billing_contact
 	billing_email = frappe.db.sql(
 		"""
 		SELECT

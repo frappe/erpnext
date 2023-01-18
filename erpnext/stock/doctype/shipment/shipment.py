@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.contacts.doctype.contact.contact import get_contact
 from frappe.model.document import Document
 from frappe.utils import flt, get_time
 
@@ -54,7 +54,7 @@ def get_address_name(ref_doctype, docname):
 @frappe.whitelist()
 def get_contact_name(ref_doctype, docname):
 	# Return address name
-	return get_default_contact(ref_doctype, docname)
+	return get_contact(ref_doctype, docname)
 
 
 @frappe.whitelist()

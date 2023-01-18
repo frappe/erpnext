@@ -6,7 +6,8 @@ import datetime
 
 import frappe
 from frappe import _
-from frappe.contacts.doctype.address.address import get_address_display
+from frappe.contacts.doctype.address.address import get_address_display, get_shipping_address
+from frappe.contacts.doctype.contact.contact import get_shipping_contact
 from frappe.model.document import Document
 from frappe.utils import cint, get_datetime, get_link_to_form
 
@@ -245,84 +246,11 @@ class DeliveryTrip(Document):
 
 
 @frappe.whitelist()
-def get_contact_and_address(name):
-	out = frappe._dict()
-
-	get_default_contact(out, name)
-	get_default_address(out, name)
-
-	return out
-
-
-def get_default_contact(out, name):
-	contact_persons = frappe.db.sql(
-		"""
-			SELECT parent,
-				(SELECT is_primary_contact FROM tabContact c WHERE c.name = dl.parent) AS is_primary_contact
-			FROM
-				`tabDynamic Link` dl
-			WHERE
-				dl.link_doctype='Customer'
-				AND dl.link_name=%s
-				AND dl.parenttype = 'Contact'
-		""",
-		(name),
-		as_dict=1,
-	)
-
-	if contact_persons:
-		for out.contact_person in contact_persons:
-			if out.contact_person.is_primary_contact:
-				return out.contact_person
-
-		out.contact_person = contact_persons[0]
-
-		return out.contact_person
-
-
-def get_default_address(out, name):
-	shipping_addresses = frappe.db.sql(
-		"""
-			SELECT parent,
-				(SELECT is_shipping_address FROM tabAddress a WHERE a.name=dl.parent) AS is_shipping_address
-			FROM
-				`tabDynamic Link` dl
-			WHERE
-				dl.link_doctype='Customer'
-				AND dl.link_name=%s
-				AND dl.parenttype = 'Address'
-		""",
-		(name),
-		as_dict=1,
-	)
-
-	if shipping_addresses:
-		for out.shipping_address in shipping_addresses:
-			if out.shipping_address.is_shipping_address:
-				return out.shipping_address
-
-		out.shipping_address = shipping_addresses[0]
-
-		return out.shipping_address
-
-
-@frappe.whitelist()
-def get_contact_display(contact):
-	contact_info = frappe.db.get_value(
-		"Contact", contact, ["first_name", "last_name", "phone", "mobile_no"], as_dict=1
-	)
-
-	contact_info.html = (
-		""" <b>%(first_name)s %(last_name)s</b> <br> %(phone)s <br> %(mobile_no)s"""
-		% {
-			"first_name": contact_info.first_name,
-			"last_name": contact_info.last_name or "",
-			"phone": contact_info.phone or "",
-			"mobile_no": contact_info.mobile_no or "",
-		}
-	)
-
-	return contact_info.html
+def get_shipping_contact_and_address(customer):
+	return {
+		"shipping_contact": get_shipping_contact("Customer", customer),
+		"shipping_address": get_shipping_address("Customer", customer),
+	}
 
 
 def sanitize_address(address):

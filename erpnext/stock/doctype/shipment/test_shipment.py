@@ -158,7 +158,7 @@ def create_customer_contact(fname, lname):
 	customer.first_name = fname
 	customer.last_name = lname
 	customer.is_primary_contact = 1
-	customer.is_billing_contact = 1
+	customer.is_billing_contact = 1 # FIXME
 	customer.append("email_ids", {"email_id": "randomme@email.com", "is_primary": 1})
 	customer.append(
 		"phone_nos", {"phone": "123123123", "is_primary_phone": 1, "is_primary_mobile_no": 1}

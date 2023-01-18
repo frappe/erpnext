@@ -114,7 +114,7 @@ def create_contact(data, customer):
 	contact.first_name = data.get("first_name")
 	contact.last_name = data.get("last_name")
 	contact.is_primary_contact = 1
-	contact.is_billing_contact = 1
+	contact.is_billing_contact = 1 # FIXME
 
 	if phone:
 		contact.add_phone(phone, is_primary_mobile_no=1, is_primary_phone=1)

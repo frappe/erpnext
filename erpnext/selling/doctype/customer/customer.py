@@ -724,20 +724,3 @@ def make_address(args, is_primary_address=1):
 
 	return address
 
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
-	customer = filters.get("customer")
-
-	con = qb.DocType("Contact")
-	dlink = qb.DocType("Dynamic Link")
-
-	return (
-		qb.from_(con)
-		.join(dlink)
-		.on(con.name == dlink.parent)
-		.select(con.name, con.email_id)
-		.where((dlink.link_name == customer) & (con.name.like(f"%{txt}%")))
-		.run()
-	)

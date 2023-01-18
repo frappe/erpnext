@@ -47,6 +47,18 @@
   "address_html",
   "column_break1",
   "contact_html",
+  "billing_defaults_section",
+  "billing_address",
+  "billing_address_display",
+  "column_break_3ohu",
+  "billing_contact",
+  "billing_contact_display",
+  "shipping_defaults_section",
+  "shipping_address",
+  "shipping_address_display",
+  "column_break_5gjp",
+  "shipping_contact",
+  "shipping_contact_display",
   "primary_address_and_contact_detail",
   "customer_primary_contact",
   "mobile_no",
@@ -555,6 +567,72 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Text",
+   "label": "Billing Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3ohu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_contact",
+   "fieldtype": "Link",
+   "label": "Billing Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "billing_contact_display",
+   "fieldtype": "Text",
+   "label": "Billing Contact",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Billing Defaults"
+  },
+  {
+   "fieldname": "shipping_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Defaults"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Shipping Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "column_break_5gjp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_contact",
+   "fieldtype": "Link",
+   "label": "Shipping Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Text",
+   "label": "Shipping Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipping_contact_display",
+   "fieldtype": "Text",
+   "label": "Shipping Contact",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-user",
@@ -568,11 +646,10 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-08 15:52:34.462657",
+ "modified": "2023-01-17 17:33:09.110846",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

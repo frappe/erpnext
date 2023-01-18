@@ -150,27 +150,11 @@ frappe.ui.form.on('Delivery Stop', {
 		var row = locals[cdt][cdn];
 		if (row.customer) {
 			frappe.call({
-				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_and_address",
-				args: { "name": row.customer },
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_shipping_contact_and_address",
+				args: { "customer": row.customer },
 				callback: function (r) {
-					if (r.message) {
-						if (r.message["shipping_address"]) {
-							frappe.model.set_value(cdt, cdn, "address", r.message["shipping_address"].parent);
-						}
-						else {
-							frappe.model.set_value(cdt, cdn, "address", '');
-						}
-						if (r.message["contact_person"]) {
-							frappe.model.set_value(cdt, cdn, "contact", r.message["contact_person"].parent);
-						}
-						else {
-							frappe.model.set_value(cdt, cdn, "contact", '');
-						}
-					}
-					else {
-						frappe.model.set_value(cdt, cdn, "address", '');
-						frappe.model.set_value(cdt, cdn, "contact", '');
-					}
+					frappe.model.set_value(cdt, cdn, "contact", r.message["shipping_contact"]);
+					frappe.model.set_value(cdt, cdn, "address", r.message["shipping_address"]);
 				}
 			});
 		}
@@ -197,7 +181,7 @@ frappe.ui.form.on('Delivery Stop', {
 		var row = locals[cdt][cdn];
 		if (row.contact) {
 			frappe.call({
-				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_contact_display",
+				method: "frappe.contacts.doctype.contact.contact.get_contact_display",
 				args: { "contact": row.contact },
 				callback: function (r) {
 					if (r.message) {

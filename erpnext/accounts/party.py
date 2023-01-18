@@ -9,7 +9,7 @@ from frappe.contacts.doctype.address.address import (
 	get_company_address,
 	get_default_address,
 )
-from frappe.contacts.doctype.contact.contact import get_contact_details
+from frappe.contacts.doctype.contact.contact import get_contact_details, get_contact
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
 from frappe.utils import (
@@ -255,7 +255,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 
 def set_contact_details(party_details, party, party_type):
-	party_details.contact_person = get_default_contact(party_type, party.name)
+	party_details.contact_person = get_contact(party_type, party.name)
 
 	if not party_details.contact_person:
 		party_details.update(
@@ -889,33 +889,6 @@ def get_partywise_advanced_payment_amount(
 
 	if data:
 		return frappe._dict(data)
-
-
-def get_default_contact(doctype, name):
-	"""
-	Returns default contact for the given doctype and name.
-	Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
-	"""
-	out = frappe.db.sql(
-		"""
-			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
-			FROM `tabDynamic Link` dl
-			INNER JOIN `tabContact` c ON c.name = dl.parent
-			WHERE
-				dl.link_doctype=%s AND
-				dl.link_name=%s AND
-				dl.parenttype = 'Contact'
-			ORDER BY is_primary_contact DESC, is_billing_contact DESC
-		""",
-		(doctype, name),
-	)
-	if out:
-		try:
-			return out[0][0]
-		except Exception:
-			return None
-	else:
-		return None
 
 
 def add_party_account(party_type, party, company, account):

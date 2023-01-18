@@ -39,22 +39,10 @@ frappe.ui.form.on("Customer", {
 			frm.set_value("represents_company", "");
 		}
 
-		frm.set_query('customer_primary_contact', function(doc) {
-			return {
-				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
-				filters: {
-					'customer': doc.name
-				}
-			}
-		})
-		frm.set_query('customer_primary_address', function(doc) {
-			return {
-				filters: {
-					'link_doctype': 'Customer',
-					'link_name': doc.name
-				}
-			}
-		})
+		frm.set_query("billing_contact", erpnext.queries.contact_query);
+		frm.set_query("billing_address", erpnext.queries.address_query);
+		frm.set_query("shipping_contact", erpnext.queries.contact_query);
+		frm.set_query("shipping_address", erpnext.queries.address_query);
 
 		frm.set_query('default_bank_account', function() {
 			return {
@@ -64,36 +52,24 @@ frappe.ui.form.on("Customer", {
 			}
 		});
 	},
-	customer_primary_address: function(frm){
-		if(frm.doc.customer_primary_address){
-			frappe.call({
-				method: 'frappe.contacts.doctype.address.address.get_address_display',
-				args: {
-					"address_dict": frm.doc.customer_primary_address
-				},
-				callback: function(r) {
-					frm.set_value("primary_address", r.message);
-				}
-			});
-		}
-		if(!frm.doc.customer_primary_address){
-			frm.set_value("primary_address", "");
-		}
+	billing_address: function(frm){
+		update_address_or_contact_display(frm, "billing_address");
 	},
-
+	billing_contact: function(frm){
+		update_address_or_contact_display(frm, "billing_contact");
+	},
+	shipping_address: function(frm){
+		update_address_or_contact_display(frm, "shipping_address");
+	},
+	shipping_contact: function(frm){
+		update_address_or_contact_display(frm, "shipping_contact");
+	},
 	is_internal_customer: function(frm) {
 		if (frm.doc.is_internal_customer == 1) {
 			frm.toggle_reqd("represents_company", true);
 		}
 		else {
 			frm.toggle_reqd("represents_company", false);
-		}
-	},
-
-	customer_primary_contact: function(frm){
-		if(!frm.doc.customer_primary_contact){
-			frm.set_value("mobile_no", "");
-			frm.set_value("email_id", "");
 		}
 	},
 
@@ -203,3 +179,25 @@ frappe.ui.form.on("Customer", {
 		dialog.show();
 	}
 });
+
+
+function update_address_or_contact_display(frm, field) {
+	if (frm.doc[field]) {
+		let method = field.endsWith("contact")
+			? "frappe.contacts.doctype.contact.contact.get_contact_display"
+			: "frappe.contacts.doctype.address.address.get_address_display";
+		let key = field.endsWith("contact") ? "contact" : "address_dict";
+		let args = {};
+		args[key] = frm.doc[field];
+
+		frappe.call({
+			method: method,
+			args: args,
+			callback: function (r) {
+				frm.set_value(`${field}_display`, r.message);
+			},
+		});
+	} else {
+		frm.set_value(`${field}_display`, "");
+	}
+}
