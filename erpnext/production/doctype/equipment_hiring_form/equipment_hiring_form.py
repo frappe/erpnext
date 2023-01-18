@@ -27,7 +27,7 @@ class EquipmentHiringForm(Document):
 			select 1 from `tabEquipment Hiring Form` where name != '{0}' and ('{1}' between start_date and end_date
 			or '{2}' between start_date and end_date)
 			and docstatus = 1 
-			and equipment ='{3}'
+			and equipment ='{3}' and disabled = 0
 			'''.format(self.name,self.start_date,self.end_date,self.equipment)):
 			frappe.throw("Equipment Hiring Form Already exists for Equipment {}".format(self.equipment))
 	def validate_date(self):

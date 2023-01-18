@@ -9,7 +9,9 @@ frappe.ui.form.on('Logbook', {
 		frm.set_query("equipment_hiring_form", function() {
 			return {
 				filters: {
-					branch : frm.doc.branch
+					branch : frm.doc.branch,
+					disabled:0,
+					docstatus :1
 				}
 			}
 		})

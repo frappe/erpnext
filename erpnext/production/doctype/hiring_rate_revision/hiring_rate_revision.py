@@ -71,6 +71,7 @@ class HiringRateRevision(Document):
 			from `tabEquipment Hiring Form` where branch = '{branch}' and equipment_category = '{equipment_category}'
 			and '{valid_from}' between start_date and end_date
 			and fuel_type = '{fuel_type}'
+			and disabled = 0
 			'''.format(branch = self.branch, equipment_category = self.equipment_category, valid_from = self.valid_from, fuel_type = self.fuel_type), as_dict=1):
 			base_rate = frappe.db.sql('''
 					select hiring_rate, name from `tabEHF Rate` where parent = '{}' order by idx desc limit 1 

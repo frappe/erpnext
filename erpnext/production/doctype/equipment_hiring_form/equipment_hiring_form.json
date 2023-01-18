@@ -7,9 +7,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "section_break_1",
   "branch",
   "cost_center",
+  "disabled",
   "col_break_3",
   "request_date",
   "contact_number",
@@ -42,10 +42,6 @@
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "section_break_1",
-   "fieldtype": "Section Break"
-  },
   {
    "fieldname": "branch",
    "fieldtype": "Link",
@@ -247,11 +243,18 @@
    "label": "Fuel Type",
    "options": "Fuel Type",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-04 15:58:28.345098",
+ "modified": "2023-01-18 16:28:11.517378",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Equipment Hiring Form",

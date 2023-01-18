@@ -10,9 +10,11 @@ frappe.ui.form.on('Equipment Hiring Form', {
 				};
 				frappe.set_route("List", "Logbook");
 			}, __("View"));
-			cur_frm.add_custom_button(__('Create Logbooks'), function() {
-				frm.events.make_logbook(frm)
-			}, __("Create"));
+			if (frm.doc.disabled == 0){
+				cur_frm.add_custom_button(__('Create Logbooks'), function() {
+					frm.events.make_logbook(frm)
+				}, __("Create"));
+			}
 		}
 	},
 	onload:function(frm){
