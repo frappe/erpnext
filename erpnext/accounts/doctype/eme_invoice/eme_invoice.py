@@ -103,16 +103,16 @@ class EMEInvoice(AccountsController):
 		
 		for a in self.items:
 			total += flt(a.amount)
-			total_hrs += flt(a.total_hours)
+			total_hrs += flt(a.total_hours,2)
 			if not a.expense_account and a.expense_head:
 				a.expense_account = frappe.db.get_value("Expense Head",a.expense_head,"expense_account")
 				if not a.expense_account:
 					throw("Expense Account not defined in Expense Head {}".format(bold(a.expense_head)),title="Expense Account Not Found")
-		self.grand_total = total
+		self.grand_total = flt(total,2)
 
 		# tds
 		if self.tds_percent:
-			self.tds_amount  = flt(self.grand_total) * flt(self.tds_percent) / 100.0
+			self.tds_amount  = flt(flt(self.grand_total,2) * flt(self.tds_percent,2) / 100.0,2)
 			self.tds_account = get_tds_account(self.tds_percent,self.company)
 		else:
 			self.tds_amount  = 0
@@ -125,8 +125,8 @@ class EMEInvoice(AccountsController):
 			if not d.account:
 				frappe.throw("Account is mandatory for deductions")
 			total_deductions += flt(d.amount, 2)
-		self.total_deduction = total_deductions + flt(self.tds_amount)
-		self.payable_amount = self.outstanding_amount = flt(self.grand_total, 2) - flt(self.total_deduction, 2)
+		self.total_deduction = flt(total_deductions + self.tds_amount,2)
+		self.payable_amount = self.outstanding_amount = flt(self.grand_total - self.total_deduction, 2)
 		self.total_hours = total_hrs
 		
 	def make_gl_entries(self):
@@ -147,8 +147,8 @@ class EMEInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account":  d.account,
-					"credit": d.amount,
-					"credit_in_account_currency": d.amount,
+					"credit": flt(d.amount,2),
+					"credit_in_account_currency": flt(d.amount,2),
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 					"party_type": party_type,
@@ -168,8 +168,8 @@ class EMEInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 						"account":  item.expense_account,
-						"debit": flt(item.amount),
-						"debit_in_account_currency": flt(item.amount),
+						"debit": flt(item.amount,2),
+						"debit_in_account_currency": flt(item.amount,2),
 						"against_voucher": self.name,
 						"against_voucher_type": self.doctype,
 						"party_type": party_type,
@@ -189,8 +189,8 @@ class EMEInvoice(AccountsController):
 			gl_entries.append(
 					self.get_gl_dict({
 							"account":  self.tds_account,
-							"credit": flt(self.tds_amount),
-							"credit_in_account_currency": flt(self.tds_amount),
+							"credit": flt(self.tds_amount,2),
+							"credit_in_account_currency": flt(self.tds_amount,2),
 							"against_voucher": self.name,
 							"against_voucher_type": self.doctype,
 							"party_type": party_type,
@@ -207,8 +207,8 @@ class EMEInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_account,
-					"credit": self.payable_amount,
-					"credit_in_account_currency": self.payable_amount,
+					"credit": flt(self.payable_amount,2),
+					"credit_in_account_currency": flt(self.payable_amount,2),
 					"against_voucher": self.name,
 					"party_type": "Supplier",
 					"party": self.supplier,
@@ -299,7 +299,7 @@ class EMEInvoice(AccountsController):
 		})
 		je.append("accounts",{
 			"account": credit_account,
-			"debit_in_account_currency": self.payable_amount,
+			"debit_in_account_currency": flt(self.payable_amount,2),
 			"cost_center": self.cost_center,
 			"party_check": 1,
 			"party_type": "Supplier",
@@ -309,7 +309,7 @@ class EMEInvoice(AccountsController):
 		})
 		je.append("accounts",{
 			"account": bank_account,
-			"credit_in_account_currency": self.payable_amount,
+			"credit_in_account_currency": flt(self.payable_amount,2),
 			"cost_center": self.cost_center
 		})
 
