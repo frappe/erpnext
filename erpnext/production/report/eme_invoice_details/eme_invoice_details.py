@@ -9,25 +9,29 @@ def execute(filters=None):
 	return columns, data
 
 def get_data(filters):
-	query = frappe.db.sql("""
-	SELECT 
-			ep.branch,  
-			ep.supplier, 
-			ep.from_date, 
-			ep.to_date, 
-			epi.equipment_type, 
-			epi.equipment, 
-			SUM(IFNULL(epi.total_hours,0)) as total_hours, 
-			epi.rate, 
-			SUM(IFNULL(epi.amount,0)) as amount, 
-			(SELECT e.supplier FROM `tabEquipment` e WHERE e.name= epi.equipment) AS owner_name, 
-			(SELECT e.bank FROM `tabEquipment` e WHERE e.name= epi.equipment) AS bank_name, 
-			(SELECT e.account_number FROM `tabEquipment` e WHERE e.name= epi.equipment) AS account_number 
-			FROM `tabEME Invoice` ep, `tabEME Invoice Item` epi  
-			WHERE epi.parent = ep.name AND ep.name = '{name}' 
-			GROUP BY  epi.equipment
-		""".format(name=filters.get("name"),as_dict=True))
-	return query
+	data = []
+	for d in frappe.db.sql("""SELECT 
+								ep.branch,  
+								ep.supplier, 
+								ep.from_date, 
+								ep.to_date, 
+								epi.equipment_type, 
+								epi.equipment, 
+								SUM(IFNULL(epi.total_hours,0)) as total_hours, 
+								epi.rate, 
+								SUM(IFNULL(epi.amount,0)) as amount
+							FROM `tabEME Invoice` ep, `tabEME Invoice Item` epi  
+							WHERE epi.parent = ep.name AND ep.name = '{name}' 
+							GROUP BY  epi.equipment
+						""".format(name=filters.get("name")),as_dict=True):
+		supplier = frappe.get_doc("Supplier",d.supplier)
+		d["bank_name"] = supplier.bank_name
+		d["account_number"] = supplier.account_number
+		d["ifs_code"]		= supplier.ifs_code
+		d["bank"]		= supplier.bank
+		d["bank_branch"]		= supplier.bank_branch
+		data.append(d)
+	return data
 
 def get_columns():
 	return [
@@ -90,21 +94,41 @@ def get_columns():
 			"width":120
 		},
 		{
-			"fieldname":"owner_name",
+			"fieldname":"supplier",
 			"label":_("Owner Name"),
-			"fieldtype":"Data",
+			"fieldtype":"Link",
+			"options":"Supplier",
 			"width":120
 		},
 		{
 			"fieldname":"bank_name",
-			"label":_("Bank Name"),
+			"label":_("Bank"),
 			"fieldtype":"Link",
 			"options":"Financial Institution",
 			"width":120
 		},
 		{
+			"fieldname":"bank",
+			"label":_("Bank Name"),
+			"fieldtype":"Data",
+			"width":150
+		},
+		{
+			"fieldname":"bank_branch",
+			"label":_("Bank Branch"),
+			"fieldtype":"Link",
+			"options":"Financial Institution Branch",
+			"width":150
+		},
+		{
 			"fieldname":"account_number",
 			"label":_("Account Number"),
+			"fieldtype":"Data",
+			"width":120
+		},
+		{
+			"fieldname":"ifs_code",
+			"label":_("IFS Code"),
 			"fieldtype":"Data",
 			"width":120
 		}

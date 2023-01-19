@@ -45,6 +45,7 @@
   "items",
   "section_break_10",
   "total_amount",
+  "pol_slip_no",
   "column_break_12",
   "memo_number",
   "section_break_8",
@@ -322,12 +323,17 @@
    "fieldtype": "Check",
    "label": "Hired Equipment",
    "read_only": 1
+  },
+  {
+   "fieldname": "pol_slip_no",
+   "fieldtype": "Data",
+   "label": "POL Slip No."
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-16 15:06:46.751506",
+ "modified": "2023-01-19 14:23:16.331992",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Receive",

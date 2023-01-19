@@ -19,7 +19,7 @@ def get_data(filters):
 	"""
 
 	if filters.cost_center:
-		query += " and branch = '{0}'".format(filters.get("cost_center"))
+		query += " and cost_center = '{0}'".format(filters.get("cost_center"))
 	if filters.get("from_date") and filters.get("to_date"):
 		query += " and ((from_date between '{0}' and '{1}') or (to_date between '{0}' and '{1}'))".format(filters.get("from_date"), filters.get("to_date"))
 	data = []
@@ -42,15 +42,15 @@ def get_data(filters):
 	return data
 def get_columns():
 	return [
-		{"fieldname":"transporter_invoice", "label": ("Transporter Invoice"), "fieldtype": "Link",	"options": "Transporter Invoice", "width": 100},
+		{"fieldname":"transporter_invoice", "label": ("Transporter Invoice"), "fieldtype": "Link",	"options": "Transporter Invoice", "width": 130},
 		{"fieldname":"branch", "label": ("Branch"), "fieldtype": "Link","options": "Branch", "width": 150},
 		{"fieldname":"cost_center", "label": ("Cost Center"), "fieldtype": "Link",	"options": "Cost Center", "width": 150},
 		{"fieldname":"posting_date", "label": ("Posting Date"), "fieldtype": "Date", "width": 100},
 		{"fieldname":"equipment", "label": ("Equipment"), "fieldtype": "Link",	"options": "Equipment", "width": 100},
 		{"fieldname":"equipment_category", "label": ("Equipment Category"), "fieldtype": "Link","options": "Equipment Category", "width": 130},
 		{"fieldname":"total_trip", "label": ("Total Trip"), "fieldtype": "Float","width": 100},
-		{"fieldname":"gross_amount", "label": ("Gross Amount"), "fieldtype": "Currency","width": 100},
-		{"fieldname":"pol_amount", "label": ("POL Amount"), "fieldtype": "Currency","width": 100},
+		{"fieldname":"gross_amount", "label": ("Gross Amount"), "fieldtype": "Currency","width": 120},
+		{"fieldname":"pol_amount", "label": ("POL Amount"), "fieldtype": "Currency","width": 120},
 		{"fieldname":"other_deductions", "label": ("Other Deductions"), "fieldtype": "Currency","width": 100},
 		{"fieldname":"amount_payable", "label": ("Amount Payable"), "fieldtype": "Currency","width": 100},
 		{"fieldname":"mode_of_payment", "label": ("Mode Of Payment"), "fieldtype": "Link", "options":"Mode Of Payment","width": 120},
@@ -58,8 +58,8 @@ def get_columns():
 		{"fieldname":"cheque_date", "label": ("Cheque Date"), "fieldtype": "Date","width": 100},
 		{"fieldname":"supplier", "label": ("Equipment Owner"), "fieldtype": "Link", "options":"Supplier","width": 150},
 		{"fieldname":"bank", "label": ("Bank"), "fieldtype": "Link", "options":"Financial Institution","width": 80},
-		{"fieldname":"bank_name", "label": ("Bank Name"), "fieldtype": "Data","width": 80},
-		{"fieldname":"bank_branch", "label": ("Bank Branch"), "fieldtype": "Link", "options":"Financial Institution Branch","width": 100},
+		{"fieldname":"bank_name", "label": ("Bank Name"), "fieldtype": "Data","width": 130},
+		{"fieldname":"bank_branch", "label": ("Bank Branch"), "fieldtype": "Link", "options":"Financial Institution Branch","width": 150},
 		{"fieldname":"account_number", "label": ("Account Number"), "fieldtype": "Data", "width": 120},
 		{"fieldname":"ifs_code", "label": ("IFS Code"), "fieldtype": "Data","width": 100},
 		{"fieldname":"status", "label": ("Status"), "fieldtype": "Data","width": 80},
