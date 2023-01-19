@@ -213,7 +213,7 @@ class PurchaseReceipt(BuyingController):
 	def before_submit(self):
 		# Create Batch before submit
 		for d in self.get("items"):	
-			d.batch_no = d.get("batch_number")
+			d.batch_no = d.get("batch_number").strip()
 			batch_data = frappe.new_doc("Batch")
 			batch_data.item = d.get("item_code")
 			batch_data.batch_id = d.get("batch_number")
