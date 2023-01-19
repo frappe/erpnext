@@ -109,18 +109,18 @@ def get_opening_balances(filters):
 
 	if filters.cost_center:
 		cost_center_filter = " and cost_center = %s" %(frappe.db.escape(filters.get("cost_center")))
-	
+	account_type = " and exists(select 1 from `tabAccount` where name = e.account and account_type in ('Payable','Receivable'))"
 	gle = frappe.db.sql(
 		"""
 		select party, sum(debit) as opening_debit, sum(credit) as opening_credit, cost_center
-		from `tabGL Entry`
+		from `tabGL Entry` e
 		where company=%(company)s
 			and is_cancelled=0
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
-			{account_filter} {cost_center_filter}
+			{account_filter} {cost_center_filter} {account_type}
 		group by party, cost_center""".format(
-			account_filter=account_filter, cost_center_filter = cost_center_filter
+			account_filter=account_filter, cost_center_filter = cost_center_filter, account_type = account_type
 		),
 		{"company": filters.company, "from_date": filters.from_date, "party_type": filters.party_type},
 		as_dict=True,
@@ -143,18 +143,19 @@ def get_balances_within_period(filters):
 	if filters.get("cost_center"):
 		cost_center_filter = " and cost_center = %s" %(frappe.db.escape(filters.get("cost_center")))
 
+	account_type = " and exists(select 1 from `tabAccount` where name = e.account and account_type in ('Payable','Receivable'))"
 	gle = frappe.db.sql(
 		"""
 		select party, sum(debit) as debit, sum(credit) as credit, cost_center
-		from `tabGL Entry`
+		from `tabGL Entry` e
 		where company=%(company)s
 			and is_cancelled = 0
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
 			and posting_date >= %(from_date)s and posting_date <= %(to_date)s
 			and ifnull(is_opening, 'No') = 'No'
-			{account_filter} {cost_center_filter}
+			{account_filter} {cost_center_filter} {account_type}
 		group by party, cost_center""".format(
-			account_filter=account_filter, cost_center_filter = cost_center_filter
+			account_filter=account_filter, cost_center_filter = cost_center_filter, account_type = account_type
 		),
 		{
 			"company": filters.company,

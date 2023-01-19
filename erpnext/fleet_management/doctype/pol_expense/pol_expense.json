@@ -21,6 +21,7 @@
   "party",
   "credit_account",
   "expense_limit",
+  "outstanding_amount",
   "column_break_11",
   "currency",
   "amount",
@@ -72,7 +73,8 @@
   "journal_entry",
   "user_remark",
   "amended_from",
-  "workflow_state"
+  "workflow_state",
+  "status"
  ],
  "fields": [
   {
@@ -200,7 +202,8 @@
    "fieldname": "credit_account",
    "fieldtype": "Link",
    "label": "Credit Account",
-   "options": "Account"
+   "options": "Account",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -478,12 +481,25 @@
    "label": "Equipment Category",
    "options": "Equipment Category",
    "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-10 13:39:12.113455",
+ "modified": "2023-01-19 16:43:18.482468",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",

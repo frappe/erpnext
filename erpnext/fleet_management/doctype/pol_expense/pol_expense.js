@@ -35,17 +35,49 @@ frappe.ui.form.on('POL Expense', {
 			}
 		})
 	},
+	party:function(frm){
+		if (frm.doc.party){
+			frappe.call({
+				method: "erpnext.accounts.party.get_party_account",
+				args: {
+					party_type:"Supplier",
+					party:frm.doc.party,
+					company: frm.doc.company,
+				},
+				callback: function(r) {
+					if(r.message) {
+						frm.set_value("credit_account",r.message)
+						frm.refresh_fields("credit_account")
+					}
+				}
+			});
+		}
+	},
 	fuel_book:function(frm){
 		frm.events.get_previous(frm)
 	},
 	refresh: function(frm){
 		enable_disable(frm);
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(
+			  __("Ledger"),
+			  function () {
+				frappe.route_options = {
+				  voucher_no: frm.doc.name,
+				  from_date: frm.doc.entry_date,
+				  to_date: frm.doc.entry_date,
+				  company: frm.doc.company,
+				  group_by_voucher: false,
+				};
+				frappe.set_route("query-report", "General Ledger");
+			  },
+			  __("View")
+			);
+		}
+		open_ledger(frm);
 	},
 	paty_type: (frm)=>{
 		set_party_type(frm);
-	},
-	refresh: (frm)=>{
-		open_ledger(frm);
 	},
 	amount:(frm)=>{
 		calculate_balance(frm);
@@ -157,24 +189,6 @@ var calculate_balance=(frm)=>{
 	if (frm.doc.amount > 0 ){
 		cur_frm.set_value("balance_amount",frm.doc.amount)
 		cur_frm.set_value("adjusted_amount",0)
-	}
-}
-var open_ledger = (frm)=>{
-	if (frm.doc.docstatus === 1) {
-		frm.add_custom_button(
-		  __("Journal Entry"),
-		  function () {
-			frappe.route_options = {
-			  voucher_no: frm.doc.name,
-			  from_date: frm.doc.entry_date,
-			  to_date: frm.doc.entry_date,
-			  company: frm.doc.company,
-			  group_by_voucher: false,
-			};
-			frappe.set_route("query-report", "General Ledger");
-		  },
-		  __("View")
-		);
 	}
 }
 var open_ledger = (frm)=>{

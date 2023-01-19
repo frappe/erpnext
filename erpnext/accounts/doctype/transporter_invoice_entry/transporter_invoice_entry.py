@@ -235,7 +235,8 @@ def submit_invoice_entries(args,publish_progress=True):
 			error = None
 			try:
 				transporter_invoice = frappe.get_doc("Transporter Invoice",e.reference)
-				transporter_invoice.submit()
+				if transporter_invoice.docstatus != 2:
+					transporter_invoice.submit()
 				successful += 1
 			except Exception as e:
 				error = str(e)
@@ -291,7 +292,8 @@ def cancel_invoice_entries(args,publish_progress=True):
 			error = None
 			try:
 				transporter_invoice = frappe.get_doc("Transporter Invoice",e.reference)
-				transporter_invoice.cancel()
+				if transporter_invoice.docstatus == 1:
+					transporter_invoice.cancel()
 				successful += 1
 			except Exception as e:
 				error = str(e)

@@ -8,17 +8,80 @@ from erpnext.accounts.doctype.business_activity.business_activity import get_def
 from frappe.utils import money_in_words, flt
 from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 from frappe import _, qb, throw, bold
+from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.accounts.general_ledger import (
+	get_round_off_account_and_cost_center,
+	make_gl_entries,
+	make_reverse_gl_entries,
+	merge_similar_entries,
+)
 
-class POLExpense(Document):
+class POLExpense(AccountsController):
 	def validate(self):
 		validate_workflow_states(self)
-
+		self.posting_date = self.entry_date
 		self.validate_amount()
 		self.calculate_pol()
-		if not self.credit_account:
-			self.credit_account = frappe.db.get_value("Company",self.company,"default_bank_account")
 		if self.workflow_state != "Approved":
 			notify_workflow_states(self)
+		self.set_status()
+
+	
+	def on_submit(self):
+		self.make_gl_entries()
+		self.post_journal_entry()
+		notify_workflow_states(self)
+
+	def before_cancel(self):
+		if self.is_opening:
+			return
+		if frappe.db.exists("Journal Entry",self.journal_entry):
+			doc = frappe.get_doc("Journal Entry", self.journal_entry)
+			if doc.docstatus != 2:
+				frappe.throw("Journal Entry exists for this transaction {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry)))
+				
+	def on_cancel(self):
+		self.make_gl_entries()
+	
+	def make_gl_entries(self):
+		gl_entries = []
+		self.make_supplier_gl_entry(gl_entries)
+		self.make_expense_gl_entry(gl_entries)
+		gl_entries = merge_similar_entries(gl_entries)
+		make_gl_entries(gl_entries,update_outstanding="No",cancel=self.docstatus == 2)
+
+	def make_supplier_gl_entry(self, gl_entries):
+		if flt(self.amount) > 0:
+			# Did not use base_grand_total to book rounding loss gle
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.credit_account,
+					"credit": self.amount,
+					"credit_in_account_currency": self.amount,
+					"against_voucher": self.name,
+					"party_type": self.party_type,
+					"party": self.party,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center,
+					"voucher_type":self.doctype,
+					"voucher_no":self.name
+				}, self.currency))
+	def make_expense_gl_entry(self, gl_entries):
+		if flt(self.amount) > 0:
+			expense_account = frappe.db.get_value("Equipment Category", self.equipment_category,'pol_expense_account')
+			gl_entries.append(
+					self.get_gl_dict({
+						"account": expense_account,
+						"debit": self.amount,
+						"debit_in_account_currency": self.amount,
+						"against_voucher": self.name,
+						"party_type": self.party_type,
+						"party": self.party,
+						"against_voucher_type": self.doctype,
+						"cost_center": self.cost_center,
+						"voucher_type":self.doctype,
+						"voucher_no":self.name
+					}, self.currency))
 
 	def calculate_pol(self):
 		if self.opening_pol_tank_balance and self.pol_issue_during_the_period and self.closing_pol_tank_balance :
@@ -36,16 +99,6 @@ class POLExpense(Document):
 	def validate_km_diff(self):
 		if flt(self.previous_km_reading) >= flt(self.present_km_reading):
 			throw("Previous reading({}) cannot be greater than current km {}".format(bold(self.previous_km_reading),bold(self.present_km_reading)))
-	def on_submit(self):
-		self.post_journal_entry()
-		notify_workflow_states(self)
-	def before_cancel(self):
-		if self.is_opening:
-			return
-		if frappe.db.exists("Journal Entry",self.journal_entry):
-			doc = frappe.get_doc("Journal Entry", self.journal_entry)
-			if doc.docstatus != 2:
-				frappe.throw("Journal Entry exists for this transaction {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry)))
 			
 	def calculate_km_diff(self):
 		pol_exp = qb.DocType("POL Expense")
@@ -74,19 +127,15 @@ class POLExpense(Document):
 		if not self.amount:
 			frappe.throw(_("Amount should be greater than zero"))
 			
-		self.posting_date = self.entry_date
 		default_ba = get_default_ba()
 
 		credit_account = self.credit_account
-		advance_account = frappe.db.get_value("Equipment Category", self.equipment_category,'pol_expense_account')
-		if not advance_account:
-			advance_account = frappe.db.get_value("Company", self.company,'pol_advance_account')
-			
+		expense_account = frappe.db.get_value("Branch",self.fuelbook_branch,"expense_bank_account")
+		if not expense_account:
+			expense_account = frappe.db.get_value("Company",self.company,"default_bank_account")
 		if not credit_account:
-			frappe.throw("Expense Account is mandatory")
-		if not advance_account:
-			frappe.throw("Setup POL Expense Account in Equipment Category {}".format(self.equipment_category))
-
+			frappe.throw("Credit Account is mandatory")
+		
 		r = []
 		if self.cheque_no:
 			if self.cheque_date:
@@ -114,8 +163,8 @@ class POLExpense(Document):
 			"branch": self.fuelbook_branch,
 		})
 		je.append("accounts",{
-			"account": advance_account,
-			"debit_in_account_currency": self.amount,
+			"account": self.credit_account,
+			"debit_in_account_currency": flt(self.amount,2),
 			"cost_center": frappe.db.get_value('Branch',self.fuelbook_branch,'cost_center'),
 			"party_check": 0,
 			"party_type": "Supplier",
@@ -125,8 +174,8 @@ class POLExpense(Document):
 			"business_activity": default_ba
 		})
 		je.append("accounts",{
-			"account": credit_account,
-			"credit_in_account_currency": self.amount,
+			"account": expense_account,
+			"credit_in_account_currency": flt(self.amount,2),
 			"cost_center": frappe.db.get_value('Branch',self.fuelbook_branch,'cost_center'),
 			"business_activity": default_ba
 		})
@@ -157,9 +206,37 @@ class POLExpense(Document):
 		self.pol_issue_during_the_period = total_qty
 		if not self.pol_received_item:
 			frappe.msgprint("No pol receive found within Date {} to {}".format(self.from_date, self.to_date))
+
 	def validate_amount(self):
 		if flt(self.amount) > flt(self.expense_limit):
 			frappe.throw("Amount cannot be greater than expense limit")
+		self.outstanding_amount = self.amount
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get("amended_from"):
+				self.status = "Draft"
+			return
+
+		outstanding_amount = flt(self.outstanding_amount,2)
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if outstanding_amount > 0 and flt(self.amount) > outstanding_amount:
+					self.status = "Partly Paid"
+				elif outstanding_amount > 0 :
+					self.status = "Unpaid"
+				elif outstanding_amount <= 0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set("status", self.status, update_modified=update_modified)
+
 	@frappe.whitelist()
 	def pull_previous_expense(self):
 		if not self.equipment or not self.fuel_book:
