@@ -577,7 +577,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 	return out
 
 
-def get_item_tax_template(args, item, out):
+def get_item_tax_template(args, item, out=None):
 	"""
 	args = {
 	        "tax_category": None
@@ -594,6 +594,7 @@ def get_item_tax_template(args, item, out):
 			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
+			return item_tax_template
 
 
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):
