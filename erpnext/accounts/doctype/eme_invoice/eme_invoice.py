@@ -38,6 +38,12 @@ class EMEInvoice(AccountsController):
 				value = 0
 			logbook = frappe.get_doc("Logbook", a.logbook)
 			logbook.db_set("paid", value)
+	def before_cancel(self):
+		if self.journal_entry and frappe.db.exists("Journal Entry",self.journal_entry):
+			doc = frappe.get_doc("Journal Entry", self.journal_entry)
+			if doc.docstatus != 2:
+				frappe.throw("Journal Entry exists for this transaction {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry)))
+			
 	#Function to pay arrear base on change in rate
 	def update_rate_amount(self):
 		for a in self.get("items"):
