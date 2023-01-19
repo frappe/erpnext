@@ -380,8 +380,6 @@ def post_accounting_entries(args,publish_progress=True):
 					"reference_name": transporter_invoice.name
 				})
 				payable_amount += flt(transporter_invoice.amount_payable,2)
-				#Set a reference to the claim journal entry
-				transporter_invoice.db_set("journal_entry",je.name)
 				successful += 1
 			except Exception as e:
 				error = str(e)
@@ -415,6 +413,13 @@ def post_accounting_entries(args,publish_progress=True):
 		"total_amount_in_words": money_in_words(payable_amount),
 	})
 	je.insert()
+
+	for e in invoice_entry.items:
+		if e.reference:
+			transporter_invoice = frappe.get_doc("Transporter Invoice",e.reference)
+			#Set a reference to the claim journal entry
+			transporter_invoice.db_setc("journal_entry",je.name)
+			
 	invoice_entry.db_set("posted_to_account", 1 if successful > 0 else 0)
 	frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
 	invoice_entry.reload()

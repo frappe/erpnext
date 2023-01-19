@@ -14,7 +14,7 @@ frappe.ui.form.on('Transporter Invoice', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			},__('View'));
-			if (frm.doc.journal_entry){
+			if (!frm.doc.journal_entry){
 				cur_frm.add_custom_button(__('Make Journal Entry'), function(doc) {
 					frm.events.make_journal_entry(frm)
 				},__('Create'))

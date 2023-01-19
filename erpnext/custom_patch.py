@@ -1,7 +1,15 @@
 import frappe
 from erpnext.setup.doctype.employee.employee import create_user
 import pandas as pd
-
+def assign_je_in_invoice():
+    print('<------------------------------------------------------------------------------------------------>')
+    for d in frappe.db.sql('''
+                select reference_name, reference_type, parent from `tabJournal Entry Account` where reference_type in ('Transporter Invoice','EME Invoice')
+                ''', as_dict=True):
+        if d.reference_type and d.reference_name and frappe.db.exists(d.reference_type, d.reference_name):
+            doc = frappe.get_doc(str(d.reference_type),str(d.reference_name))
+            doc.db_set("journal_entry",d.parent)
+    print('Done')
 def assign_ess_role():
     users = frappe.db.sql("""
         select name from `tabUser` where name not in ('Guest', 'Administrator')
@@ -79,13 +87,13 @@ def update_user_pwd():
     c = 1
     non_employee = []
     for i in user_list:
-        # print("NAME '{}':  '{}'".format(c,str(i.name)))
+        print("NAME '{}':  '{}'".format(c,str(i.name)))
         if not frappe.db.exists("Employee", {"user_id":i.name}):
             non_employee.append({"User ID":i.name, "User Name":frappe.db.get_value("User",i.name,"full_name")})
-        # ds = frappe.get_doc("User", i.name)
-        # ds.new_password = 'smcl@2022'
-        # ds.save(ignore_permissions=1)
-        # c += 1
-    df = pd.DataFrame(data = non_employee) # convert dict to dataframe
-    df.to_excel("Users Without Employee Data.xlsx", index=False)
-    print("Dictionery Converted in to Excel")
+        ds = frappe.get_doc("User", i.name)
+        ds.new_password = 'smcl@2022'
+        ds.save(ignore_permissions=1)
+        c += 1
+    # df = pd.DataFrame(data = non_employee) # convert dict to dataframe
+    # df.to_excel("Users Without Employee Data.xlsx", index=False)
+    # print("Dictionery Converted in to Excel")
