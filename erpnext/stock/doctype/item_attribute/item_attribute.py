@@ -74,11 +74,10 @@ class ItemAttribute(Document):
 	def validate_duplication(self):
 		values, abbrs = [], []
 		for d in self.item_attribute_values:
-			d.abbr = d.abbr.upper()
-			if d.attribute_value in values:
-				frappe.throw(_("{0} must appear only once").format(d.attribute_value))
+			if d.attribute_value.lower() in map(str.lower, values):
+				frappe.throw(_("Attribute value: {0} must appear only once").format(d.attribute_value.title()))
 			values.append(d.attribute_value)
 
-			if d.abbr in abbrs:
-				frappe.throw(_("{0} must appear only once").format(d.abbr))
+			if d.abbr.lower() in map(str.lower, abbrs):
+				frappe.throw(_("Abbreviation: {0} must appear only once").format(d.abbr.title()))
 			abbrs.append(d.abbr)
