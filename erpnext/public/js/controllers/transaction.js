@@ -1855,17 +1855,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				doc: this.frm.doc,
 				callback: function(r, rt) {
 					refresh_field("advances");
-					// let total_advance = 0
-					// if( this.frm.doc.advances.length > 0){
-					// 	this.frm.doc.advances.map(v=>{
-					// 		total_advance += flt(v.allocated_amount)
-					// 	})
-					// }
-					// console.log(total_advance)
-					// this.frm.set_value("total_advance",total_advance)
 					refresh_field("total_advance")
-					// this.dirty()
-					// this.frm.dirty();
 				}
 			})
 		}

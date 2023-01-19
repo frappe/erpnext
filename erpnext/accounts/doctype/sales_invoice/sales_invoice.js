@@ -1189,6 +1189,7 @@ frappe.ui.form.on("Sales Invoice Item","loss_method",function(frm, cdt, cdn){
 // 		console.log('here')
 // 	}
 // })
+
 frappe.ui.form.on("Sales Invoice","items_on_form_rendered", function(frm, grid_row) {
    cur_frm.call({
 	   method: "erpnext.accounts.accounts_custom_functions.get_loss_tolerance",
