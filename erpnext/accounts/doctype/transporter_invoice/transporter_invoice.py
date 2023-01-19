@@ -82,8 +82,8 @@ class TransporterInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_account,
-					"credit": self.amount_payable,
-					"credit_in_account_currency": self.amount_payable,
+					"credit": flt(self.amount_payable,2),
+					"credit_in_account_currency": flt(self.amount_payable,2),
 					"against_voucher": self.name,
 					"party_type": "Supplier",
 					"party": self.supplier,
@@ -105,8 +105,8 @@ class TransporterInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 						"account":  k,
-						"debit": flt(v),
-						"debit_in_account_currency": flt(v),
+						"debit": flt(v,2),
+						"debit_in_account_currency": flt(v,2),
 						"against_voucher": self.name,
 						"against_voucher_type": self.doctype,
 						"party_type": party_type,
@@ -128,8 +128,8 @@ class TransporterInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account":  self.unloading_account,
-					"debit": self.unloading_amount,
-					"debit_in_account_currency": self.unloading_amount,
+					"debit": flt(self.unloading_amount,2),
+					"debit_in_account_currency": flt(self.unloading_amount,2),
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 					"party_type": party_type,
@@ -149,8 +149,8 @@ class TransporterInvoice(AccountsController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account":  d.account,
-					"credit": d.amount,
-					"credit_in_account_currency": d.amount,
+					"credit": flt(d.amount,2),
+					"credit_in_account_currency": flt(d.amount,2),
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 					"party_type": party_type,
@@ -166,10 +166,10 @@ class TransporterInvoice(AccountsController):
 		total_transportation_amount = 0
 		for i in self.get("items"): 
 			if str(i.expense_account) in items:
-				items[str(i.expense_account)] = flt(items[str(i.expense_account)]) + flt(i.transportation_amount)
+				items[str(i.expense_account)] = flt(items[str(i.expense_account)],2) + flt(i.transportation_amount,2)
 			else:
-				items.setdefault(str(i.expense_account),flt(i.transportation_amount))
-			total_transportation_amount += flt(i.transportation_amount)
+				items.setdefault(str(i.expense_account),flt(i.transportation_amount,2))
+			total_transportation_amount += flt(i.transportation_amount,2)
 
 		# pro-rate POL expenses against each expense GL
 		if flt(total_transportation_amount) and flt(self.pol_amount):
@@ -182,11 +182,11 @@ class TransporterInvoice(AccountsController):
 					if counter == len(items):
 						deduct_amt = balance_amt
 					else:
-						deduct_pct = math.floor((flt(v)/flt(total_transportation_amount))*0.01)
+						deduct_pct = math.floor((flt(v,2)/flt(total_transportation_amount,2))*0.01)
 						deduct_amt = math.floor(flt(self.pol_amount)*deduct_pct*0.01)
 						balance_amt= balance_amt - deduct_amt
 
-					items[k] -= flt(deduct_amt)
+					items[k] -= flt(deduct_amt,2)
 		return items
 
 	@frappe.whitelist()
@@ -357,24 +357,24 @@ class TransporterInvoice(AccountsController):
 			total_transporter_amount += flt(i.transportation_amount)
 			unloading_amount += flt(i.unloading_amount)
 			
-		self.transfer_charges 	= flt(transfer_charges)
-		self.delivery_charges  	= flt(delivery_charges)
-		self.transportation_amount = flt(total_transporter_amount)
+		self.transfer_charges 	= flt(transfer_charges,2)
+		self.delivery_charges  	= flt(delivery_charges,2)
+		self.transportation_amount = flt(total_transporter_amount,2)
 		self.within_warehouse_trip = within_trip_count
 		self.production_trip_count = production_trip_count
-		self.within_warehouse_amount = flt(trip_log_charges)
-		self.unloading_amount 	= flt(unloading_amount)
-		self.production_transport_amount = flt(production_transport_charges)
-		self.gross_amount 	= flt(self.transportation_amount) + flt(self.unloading_amount)
+		self.within_warehouse_amount = flt(trip_log_charges,2)
+		self.unloading_amount 	= flt(unloading_amount,2)
+		self.production_transport_amount = flt(production_transport_charges,2)
+		self.gross_amount 	= flt(self.transportation_amount + self.unloading_amount,2)
 
 		# pol
 		pol_amount = 0
 		for j in self.pols:
 			if not flt(j.allocated_amount):
-				j.allocated_amount = flt(j.amount)
-			pol_amount += flt(j.allocated_amount)
+				j.allocated_amount = flt(j.amount,2)
+			pol_amount += flt(j.allocated_amount,2)
 
-		self.pol_amount  	= flt(pol_amount)
+		self.pol_amount  	= flt(pol_amount,2)
 
 		# unloading
 		if self.unloading_amount:
@@ -424,10 +424,10 @@ class TransporterInvoice(AccountsController):
 			else:
 				other_deductions += flt(d.amount)
 		self.total_trip = len(self.get("items"))
-		self.other_deductions 	= flt(other_deductions) + flt(self.tds_amount) + flt(self.security_deposit_amount) + flt(self.weighbridge_amount) + flt(self.clearing_amount)	
-		self.net_payable 		= flt(self.gross_amount) - flt(self.pol_amount) - flt(self.other_deductions)
-		self.amount_payable 	= self.outstanding_amount 	= flt(self.net_payable)		
-		self.grand_total 		= self.gross_amount
+		self.other_deductions 	= flt(other_deductions + self.tds_amount + self.security_deposit_amount + self.weighbridge_amount + self.clearing_amount,2)	
+		self.net_payable 		= flt(self.gross_amount - self.pol_amount - self.other_deductions,2)
+		self.amount_payable 	= self.outstanding_amount 	= flt(self.net_payable,2)		
+		self.grand_total 		= flt(self.gross_amount,2)
 
 	def get_production_transportation(self, rate_base_on):
 		return frappe.db.sql("""

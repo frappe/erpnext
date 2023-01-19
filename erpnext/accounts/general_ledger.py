@@ -497,10 +497,10 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no):
 			round_off_cost_center = parent_cost_center
 
 	if not round_off_account:
-		frappe.throw(_("Please mention Round Off Account in Company"))
+		frappe.msgprint(_("Please mention Round Off Account in Company"),raise_exception=True)
 
 	if not round_off_cost_center:
-		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+		frappe.msgprint(_("Please mention Round Off Cost Center in Company"), raise_exception=True)
 
 	return round_off_account, round_off_cost_center
 

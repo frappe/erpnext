@@ -406,7 +406,7 @@ def post_accounting_entries(args,publish_progress=True):
 							description = description)
 	je.append("accounts",{
 					"account": bank_account,
-					"credit_in_account_currency": payable_amount,
+					"credit_in_account_currency": flt(payable_amount,2),
 					"cost_center": args.get("cost_center")
 				})
 	je.update({

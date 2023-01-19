@@ -24,20 +24,6 @@ frappe.ui.form.on('Transporter Invoice', {
 		}
 		total_html(frm);
 	},
-	make_payment_entry:function(frm){
-		frappe.call({
-			method:
-			"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
-			args: {
-				dt: frm.doc.doctype,
-				dn: frm.doc.name,
-			},
-			callback: function (r) {
-				var doc = frappe.model.sync(r.message);
-				frappe.set_route("Form", doc[0].doctype, doc[0].name);
-			},
-		});
-	},
 	make_journal_entry:function(frm){
 		frappe.call({
 			method:"post_journal_entry",
