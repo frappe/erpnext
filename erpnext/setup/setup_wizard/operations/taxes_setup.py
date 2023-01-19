@@ -108,12 +108,12 @@ def from_detailed_data(company_name, data):
 
 def update_regional_tax_settings(country, company):
 	path = frappe.get_app_path("erpnext", "regional", frappe.scrub(country))
-	if os.path.exists(path.encode("utf-8")):
+	if os.path.exists(path.encode("utf-8")) or frappe.scrub(country) == 'saudi_arabia':
 		try:
 			if frappe.scrub(country) == 'saudi_arabia':
-				if not 'Ksa' in frappe.get_installed_apps():
+				if 'ksa' not in frappe.get_installed_apps():
 					frappe.throw("Please Install KSA app for you Country!")
-				module_name = "ksa.ksa.install.create_ksa_vat_setting"
+				module_name = "ksa.install.create_ksa_vat_setting"
 			else:
 				module_name = "erpnext.regional.{0}.setup.update_regional_tax_settings".format(
 					frappe.scrub(country)
