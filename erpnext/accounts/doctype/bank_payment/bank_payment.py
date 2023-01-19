@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, now, get_bench_path,get_site_path, touch_file, getdate, get_datetime
+from frappe.utils import cint, cstr, flt, now, get_bench_path,get_site_path, touch_file, getdate, get_datetime
 from frappe.model.document import Document
 from erpnext.integrations.bps import SftpClient
 from erpnext.integrations.bank_api import intra_payment, inter_payment, inr_remittance, fetch_balance
@@ -360,6 +360,7 @@ class BankPayment(Document):
             data = self.get_loan_detail()
         elif self.transaction_type == "PBVA":
             data = self.get_pbva()
+        data = merge_similar_entries(data)
         return data
     
     """
@@ -1234,3 +1235,32 @@ def get_child_cost_centers(current_cs=None):
                             allchilds.append(c['name'])
 
     return allchilds
+
+def merge_similar_entries(data):
+	merged_data = []
+	for entry in data:
+		# if there is already an entry in this account then just add it
+		# to that entry
+		same_head = check_if_in_list(
+			entry, merged_data)
+		if same_head:
+			same_head.amount = flt(same_head.amount) + flt(entry.amount)
+		else:
+			merged_data.append(entry)
+	merged_data = list(merged_data)
+
+	return merged_data
+
+def check_if_in_list(entry, data):
+	transaction_fieldnames = ['bank_name', 'bank_branch', 'bank_account_no', 'employee', 'supplier']
+	for e in data:
+		same_head = True
+		if e.transaction_id != entry.transaction_id:
+			same_head = False
+
+		for fieldname in transaction_fieldnames:
+			if cstr(e.get(fieldname)) != cstr(entry.get(fieldname)):
+				same_head = False
+
+		if same_head:
+			return e
