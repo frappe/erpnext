@@ -136,17 +136,20 @@ class TestQuotation(FrappeTestCase):
 			sales_order.payment_schedule[1].due_date, getdate(add_days(quotation.transaction_date, 30))
 		)
 
-	def test_valid_till(self):
-		from erpnext.selling.doctype.quotation.quotation import make_sales_order
-
+	def test_valid_till_before_transaction_date(self):
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.valid_till = add_days(quotation.transaction_date, -1)
 		self.assertRaises(frappe.ValidationError, quotation.validate)
 
+	def test_so_from_expired_quotation(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+
+		quotation = frappe.copy_doc(test_records[0])
 		quotation.valid_till = add_days(nowdate(), -1)
 		quotation.insert()
 		quotation.submit()
-		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
+
+		make_sales_order(quotation.name)
 
 	def test_shopping_cart_without_website_item(self):
 		if frappe.db.exists("Website Item", {"item_code": "_Test Item Home Desktop 100"}):
