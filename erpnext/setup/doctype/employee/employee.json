@@ -831,7 +831,7 @@
    "fieldname": "increment_cycle",
    "fieldtype": "Select",
    "label": "Increment Cycle",
-   "options": "\nJanuary\nJuly"
+   "options": "\nJanuary\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember"
   },
   {
    "fieldname": "promotion_cycle",
@@ -948,7 +948,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2023-01-09 15:37:58.398430",
+ "modified": "2023-01-20 16:51:49.969094",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
