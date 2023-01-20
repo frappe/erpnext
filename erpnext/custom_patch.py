@@ -1,6 +1,19 @@
 import frappe
 from erpnext.setup.doctype.employee.employee import create_user
 import pandas as pd
+
+def post_payment_je_leave_encashment()
+    le = frappe.db.sql("""
+        select expense_claim from `tabLeave Encashment` where
+        docstatus = 1
+    """,as_dict=1)
+    for a in le:
+        expense_claim = frappe.get_doc("Expense Claim", a.expense_claim)
+        if expense_claim.docstatus = 1:
+            expense_claim.post_accounts_entry()
+            print(expense_claim.name)
+    frappe.db.commit()
+
 def assign_je_in_invoice():
     print('<------------------------------------------------------------------------------------------------>')
     for d in frappe.db.sql('''
