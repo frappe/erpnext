@@ -362,7 +362,7 @@ def post_accounting_entries(args,publish_progress=True):
 		"total_amount_in_words": money_in_words(args.get("payable_amount")),
 		"branch": args.get("branch"),
 	})
-	for e in invoice_entry.items:
+	for e in frappe.db.sql("select name as reference from `tabTransporter Invoice` where docstatus = 1 and status = 'Unpaid' and transporter_invoice_entry = '{}'".format(args.get("transporter_invoice_entry"))):
 		if e.reference:
 			equipment = e.equipment
 			error = None
