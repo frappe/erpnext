@@ -812,6 +812,7 @@ class AccountsController(TransactionBase):
 				"reference_name": d.reference_name,
 				"reference_row": d.reference_row,
 				"remarks": d.remarks,
+				"cost_center":d.cost_center,
 				"advance_amount": flt(d.amount),
 				"advance_account":d.advance_account,
 				"allocated_amount": allocated_amount,
