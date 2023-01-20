@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 from frappe import _, qb, throw, bold
-from frappe.utils import flt, cint, cstr,getdate, nowtime
+from frappe.utils import flt, cint, cstr,getdate, nowtime, add_to_date, nowtime
 from erpnext.custom_utils import check_future_date
 from erpnext.production.doctype.cop_rate.cop_rate import get_cop_rate
 from erpnext.controllers.stock_controller import StockController
@@ -13,6 +13,7 @@ class Production(StockController):
 		super(Production, self).__init__(*args, **kwargs)
 	def validate(self):
 		check_future_date(self.posting_date)
+		self.posting_time = nowtime()
 		self.check_cop()
 		self.validate_data()
 		self.validate_items()
