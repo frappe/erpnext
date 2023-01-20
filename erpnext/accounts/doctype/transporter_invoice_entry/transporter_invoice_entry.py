@@ -112,8 +112,7 @@ class TransporterInvoiceEntry(Document):
 					"payable_amount":self.payable_amount,
 					"remarks":self.remarks
 				})
-			# frappe.enqueue(post_accounting_entries, timeout=600, args = args)
-			post_accounting_entries(args=args)
+			frappe.enqueue(post_accounting_entries, timeout=600, args = args)
 			
 
 @frappe.whitelist()
@@ -421,7 +420,7 @@ def post_accounting_entries(args,publish_progress=True):
 		if e.reference:
 			transporter_invoice = frappe.get_doc("Transporter Invoice",e.reference)
 			#Set a reference to the claim journal entry
-			transporter_invoice.db_setc("journal_entry",je.name)
+			transporter_invoice.db_set("journal_entry",je.name)
 			
 	invoice_entry.db_set("posted_to_account", 1 if successful > 0 else 0)
 	frappe.msgprint(_('Journal Entry {0} posted to accounts').format(frappe.get_desk_link("Journal Entry",je.name)))
