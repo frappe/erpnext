@@ -88,6 +88,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		this.calculate_item_values();
 		this.initialize_taxes();
 		this.determine_exclusive_rate();
+		// this.calculate_charges();
 		this.calculate_net_total();
 		this.calculate_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
@@ -111,6 +112,16 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			}
 		}
 	}
+	
+	calculate_charges(){
+		total_charges = 0
+		if (this.frm.doc.doctype == "Sales Invoice"){
+			this.frm.doc.other_charges.map(d=>{
+				total_charges += flt(d.amount)
+			})
+			this.frm.doc.total_charges = total_charges
+			}
+		}
 
 	calculate_item_values() {
 		var me = this;
@@ -276,6 +287,11 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
+		if (me.frm.doc.doctype == "Sales Invoice"){
+			me.frm.doc.net_total += flt(me.frm.doc.total_charges)
+			me.frm.doc.base_net_total += flt(me.frm.doc.total_charges)
+			me.frm.doc.base_total += flt(me.frm.doc.total_charges)
+		}
 	}
 
 	calculate_shipping_charges() {

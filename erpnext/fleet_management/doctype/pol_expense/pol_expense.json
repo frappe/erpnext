@@ -74,7 +74,7 @@
   "user_remark",
   "amended_from",
   "workflow_state",
-  "status"
+  "payment_status"
  ],
  "fields": [
   {
@@ -489,17 +489,18 @@
    "read_only": 1
   },
   {
-   "fieldname": "status",
+   "fieldname": "payment_status",
    "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Status",
-   "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled"
+   "in_list_view": 1,
+   "label": "Payment Status",
+   "options": "\nPaid\nUnpaid\nSubmitted\nPartly Paid\nDraft\nCancelled",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-19 16:43:18.482468",
+ "modified": "2023-01-20 07:52:32.871469",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",
@@ -548,5 +549,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "equipment",
  "track_changes": 1
 }

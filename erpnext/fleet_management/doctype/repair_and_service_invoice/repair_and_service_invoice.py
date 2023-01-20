@@ -35,8 +35,7 @@ class RepairAndServiceInvoice(AccountsController):
 	
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
-			if self.get("amended_from"):
-				self.status = "Draft"
+			self.status = "Draft"
 			return
 
 		outstanding_amount = flt(self.outstanding_amount, 2)

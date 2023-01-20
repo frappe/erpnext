@@ -214,28 +214,27 @@ class POLExpense(AccountsController):
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
-			if self.get("amended_from"):
-				self.status = "Draft"
+			self.payment_status = "Draft"
 			return
 
 		outstanding_amount = flt(self.outstanding_amount,2)
 		if not status:
 			if self.docstatus == 2:
-				status = "Cancelled"
+				self.payment_status = "Cancelled"
 			elif self.docstatus == 1:
 				if outstanding_amount > 0 and flt(self.amount) > outstanding_amount:
-					self.status = "Partly Paid"
+					self.payment_status = "Partly Paid"
 				elif outstanding_amount > 0 :
-					self.status = "Unpaid"
+					self.payment_status = "Unpaid"
 				elif outstanding_amount <= 0:
-					self.status = "Paid"
+					self.payment_status = "Paid"
 				else:
-					self.status = "Submitted"
+					self.payment_status = "Submitted"
 			else:
-				self.status = "Draft"
+				self.payment_status = "Draft"
 
 		if update:
-			self.db_set("status", self.status, update_modified=update_modified)
+			self.db_set("payment_status", self.payment_status, update_modified=update_modified)
 
 	@frappe.whitelist()
 	def pull_previous_expense(self):

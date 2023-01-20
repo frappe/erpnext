@@ -175,7 +175,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 		});
 	}
-
+	other_charges(doc, dt, dn){
+		this.calculate_taxes_and_totals();
+		if(this.frm.doc.advances){ 
+			this.calculate_total_advance()
+		}
+	}
 	set_default_print_format() {
 		// set default print format to POS type or Credit Note
 		if(cur_frm.doc.is_pos) {
@@ -511,6 +516,13 @@ frappe.ui.form.on("Other Charge Entry", {
 			row.amount = flt(row.rate) * flt(frm.doc.total_qty)
 			frm.refresh_field('other_charges')
 		}
+		let total_charges = 0
+		frm.doc.other_charges.map(v=>{
+			total_charges += flt(v.amount)
+		})
+		frm.set_value("total_charges",total_charges)
+		frm.refresh_field("total_charges")
+		frm.trigger("other_charges")
 	},
 	other_charges_add:function(frm,cdt,cdn){
 		let row = locals[cdt][cdn]
@@ -761,11 +773,6 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			}
 		};
-	},
-	before_save:function(frm){
-		// if (frm.doc.__islocal){
-			// frm.trigger("get_advances")
-		// }
 	},
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function(frm){

@@ -747,7 +747,6 @@ class calculate_taxes_and_totals(object):
 		# total_advance is only for non POS Invoice
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
-
 		if (
 			self.doc.is_return
 			and self.doc.return_against

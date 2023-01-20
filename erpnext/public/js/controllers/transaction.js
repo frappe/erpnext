@@ -1856,6 +1856,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function(r, rt) {
 					refresh_field("advances");
 					refresh_field("total_advance")
+					cur_frm.dirty()
 				}
 			})
 		}
