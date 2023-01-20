@@ -631,7 +631,7 @@ class BankPayment(Document):
                 (CASE WHEN dpi.party_type = 'Supplier' THEN dpi.party ELSE NULL END) as supplier, 
                 (CASE WHEN dpi.party_type = 'Employee' THEN dpi.party ELSE NULL END) as employee, 
                 (CASE WHEN dpi.party_type = 'Supplier' THEN s.supplier_name ELSE e.employee_name END) as beneficiary_name,
-                (CASE WHEN dpi.party_type = 'Supplier' THEN s.bank_name_new ELSE e.bank_name END) as bank_name, 
+                (CASE WHEN dpi.party_type = 'Supplier' THEN s.bank_name ELSE e.bank_name END) as bank_name, 
                 (CASE WHEN dpi.party_type = 'Supplier' THEN s.bank_branch ELSE e.bank_branch END) as bank_branch, 
                 (CASE WHEN dpi.party_type = 'Supplier' THEN s.bank_account_type ELSE e.bank_account_type END) as bank_account_type, 
                 (CASE WHEN dpi.party_type = 'Supplier' THEN s.account_number ELSE e.bank_ac_no END) as bank_account_no,
@@ -678,14 +678,14 @@ class BankPayment(Document):
         return frappe.db.sql("""SELECT "Payment Entry" transaction_type, pe.name transaction_id, 
                         pe.name transaction_reference, pe.posting_date transaction_date, 
                         pe.party as supplier, pe.party as beneficiary_name, 
-                        s.bank_name_new as bank_name, s.bank_branch, fib.financial_system_code, s.bank_account_type, s.account_number as bank_account_no,
+                        s.bank_name as bank_name, s.bank_branch, fib.financial_system_code, s.bank_account_type, s.account_number as bank_account_no,
                         round((pe.paid_amount + (select ifnull(sum(ped.amount),0)
                                             from `tabPayment Entry Deduction` ped
                                             where ped.parent = pe.name
                                             )
                         ),2) amount,
-                        (CASE WHEN s.bank_name_new = "INR" THEN s.inr_bank_code ELSE NULL END) inr_bank_code,
-                        (CASE WHEN s.bank_name_new = "INR" THEN s.inr_purpose_code ELSE NULL END) inr_purpose_code,
+                        (CASE WHEN s.bank_name = "INR" THEN s.inr_bank_code ELSE NULL END) inr_bank_code,
+                        (CASE WHEN s.bank_name = "INR" THEN s.inr_purpose_code ELSE NULL END) inr_purpose_code,
                         "Draft" status
                     FROM `tabPayment Entry` pe
                     JOIN `tabSupplier` s ON s.name = pe.party
