@@ -362,7 +362,7 @@ def post_accounting_entries(args,publish_progress=True):
 		"total_amount_in_words": money_in_words(args.get("payable_amount")),
 		"branch": args.get("branch"),
 	})
-	for e in frappe.db.sql("select name as reference from `tabTransporter Invoice` where docstatus = 1 and status = 'Unpaid' and transporter_invoice_entry = '{}'".format(args.get("transporter_invoice_entry")),as_dict=True):
+	for e in frappe.db.sql("select name as reference, equipment from `tabTransporter Invoice` where docstatus = 1 and status = 'Unpaid' and transporter_invoice_entry = '{}'".format(args.get("transporter_invoice_entry")),as_dict=True):
 		if e.reference:
 			equipment = e.equipment
 			error = None
@@ -383,8 +383,8 @@ def post_accounting_entries(args,publish_progress=True):
 				})
 				payable_amount += flt(transporter_invoice.amount_payable,2)
 				successful += 1
-			except Exception as e:
-				error = str(e)
+			except Exception as er:
+				error = str(er)
 				failed += 1
 			count+=1
 			invoice_entry_item = frappe.get_doc("Transporter Invoice Entry Item",{"parent":args.get("transporter_invoice_entry"), "equipment": equipment})
