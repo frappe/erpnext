@@ -1149,9 +1149,13 @@ def update_existing_asset(asset, remaining_qty):
 			expected_value_after_useful_life,
 		)
 
-	accumulated_depreciation = 0
+	processed_finance_books = []
 
 	for term in asset.get("schedules"):
+		if int(term.finance_book_id) not in processed_finance_books:
+			accumulated_depreciation = 0
+			processed_finance_books.append(int(term.finance_book_id))
+
 		depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
 		frappe.db.set_value(
 			"Depreciation Schedule", term.name, "depreciation_amount", depreciation_amount
@@ -1173,7 +1177,6 @@ def create_new_asset_after_split(asset, split_qty):
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name
-	accumulated_depreciation = 0
 
 	for finance_book in new_asset.get("finance_books"):
 		finance_book.value_after_depreciation = flt(
@@ -1183,7 +1186,13 @@ def create_new_asset_after_split(asset, split_qty):
 			(finance_book.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
 
+	processed_finance_books = []
+
 	for term in new_asset.get("schedules"):
+		if int(term.finance_book_id) not in processed_finance_books:
+			accumulated_depreciation = 0
+			processed_finance_books.append(int(term.finance_book_id))
+
 		depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)
 		term.depreciation_amount = depreciation_amount
 		accumulated_depreciation += depreciation_amount
