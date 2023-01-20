@@ -256,7 +256,11 @@ class Opportunity(TransactionBase):
 			return True
 
 	def has_communication(self):
-		return frappe.get_value("Communication", filters={'reference_doctype': self.doctype, 'reference_name': self.name})
+		return frappe.db.get_value("Communication", filters={
+			'reference_doctype': self.doctype,
+			'reference_name': self.name,
+			'communication_type': ['!=', 'Automated Message']
+		})
 
 
 @frappe.whitelist()
