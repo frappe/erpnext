@@ -112,8 +112,8 @@ class TransporterInvoiceEntry(Document):
 					"payable_amount":self.payable_amount,
 					"remarks":self.remarks
 				})
-			frappe.enqueue(post_accounting_entries, timeout=600, args = args)
-			
+			# frappe.enqueue(post_accounting_entries, timeout=600, args = args)
+			post_accounting_entries(args=args)
 
 @frappe.whitelist()
 def crate_invoice_entries( invoice_entry, args, publish_progress=True):
@@ -287,7 +287,7 @@ def cancel_invoice_entries(args,publish_progress=True):
 	invoice_entry.set("failed_transaction",[])
 	refresh_interval = 25
 	total_count = cint(invoice_entry.submission_successful)
-	for e in invoice_entry.items:
+	for e in frappe.db.sql("select name as reference from `tabTransporter Invoice` where docstatus = 1 and status = 'Unpaid' and transporter_invoice_entry = '{}'".format(args.get("transporter_invoice_entry")),as_dict=True):
 		if e.reference:
 			error = None
 			try:
