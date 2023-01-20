@@ -687,12 +687,12 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args):
 	if pricing_rule_args:
-		args = {(d['item_code'], d['pricing_rules']): d for d in pricing_rule_args}
-		
+		args = {(d["item_code"], d["pricing_rules"]): d for d in pricing_rule_args}
+
 		for item in doc.items:
 			if not item.is_free_item:
 				continue
-			
+
 			free_item_data = args.get((item.item_code, item.pricing_rules))
 			if free_item_data:
 				free_item_data.pop("item_name")
