@@ -594,7 +594,7 @@ def make_material_request(source_name, target_doc=None):
 		args.update(
 			{
 				"company": source_parent.get("company"),
-				"price_list": frappe.db.get_value("Buying Settings", None, "buying_price_list"),
+				"price_list": frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 				"currency": source_parent.get("currency"),
 				"conversion_rate": source_parent.get("conversion_rate"),
 			}
