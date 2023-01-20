@@ -13,12 +13,12 @@ frappe.ui.form.on('Transporter Invoice Entry', {
 				frm.events.submit_transporter_invoice(frm)
 			},__("Create"))
 		}
-		if(frm.doc.docstatus == 1 && frm.doc.invoice_created == 1 && frm.doc.invoice_submitted == 1 && frm.doc.posted_to_account == 0){
+		if(frm.doc.docstatus == 1 && frm.doc.invoice_created == 1 && frm.doc.invoice_submitted == 1 ){
 			cur_frm.add_custom_button(__('Cancel Transporter Invoice'), function(doc) {
 				frm.events.cancel_transporter_invoice(frm)
 			},__("Create"))
 		}
-		if(frm.doc.docstatus == 1 && frm.doc.invoice_submitted == 1 && frm.doc.posted_to_account == 0){
+		if(frm.doc.docstatus == 1 && frm.doc.invoice_submitted == 1 ){
 			cur_frm.add_custom_button(__('Post To Account'), function(doc) {
 				frm.events.post_to_account(frm)
 			},__("Create"))

@@ -99,7 +99,7 @@ class TransporterInvoiceEntry(Document):
 	@frappe.whitelist()
 	def post_to_account(self):
 		self.check_permission('write')
-		if cint(self.invoice_submitted) == 1 and cint(self.invoice_created) == 1 and cint(self.posted_to_account) == 0:
+		if cint(self.invoice_submitted) == 1 and cint(self.invoice_created) == 1 :
 			args = frappe._dict({
 					"transporter_invoice_entry":self.name,
 					"doctype":"Transporter Invoice",
