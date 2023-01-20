@@ -360,6 +360,7 @@
    "label": "Other Deductions"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "deductions",
    "fieldtype": "Table",
    "options": "Transporter Invoice Deduction"
@@ -403,6 +404,7 @@
    "label": "Transportation Details"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
    "options": "Transporter Invoice Item",
@@ -415,6 +417,7 @@
    "label": "POL Details"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "pols",
    "fieldtype": "Table",
    "options": "Transporter Invoice Pol",
@@ -555,7 +558,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-18 15:33:02.571711",
+ "modified": "2023-01-20 13:57:15.272725",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transporter Invoice",
