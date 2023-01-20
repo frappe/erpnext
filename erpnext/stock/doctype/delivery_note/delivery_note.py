@@ -626,6 +626,7 @@ def make_sales_invoice(source_name, target_doc=None, only_items=None, skip_postp
 
 	def postprocess(source, target):
 		target.ignore_pricing_rule = 1
+		target.update_stock = 0
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
