@@ -236,8 +236,10 @@ def validate_item_details(args, item):
 
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.transaction_type == "selling" and cint(item.has_variants):
-		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+	if cint(item.has_variants):
+		msg = f"Item {item.name} is a template, please select one of its variants"
+
+		throw(_(msg), title=_("Template Item Selected"))
 
 	elif args.transaction_type == "buying" and args.doctype != "Material Request":
 		if args.get("is_subcontracted"):
@@ -411,7 +413,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	args.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
-	if args.get("doctype") in purchase_doctypes:
+	if args.get("doctype") in purchase_doctypes and not frappe.db.get_single_value(
+		"Buying Settings", "disable_last_purchase_rate"
+	):
 		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 
 		out.last_purchase_rate = item_last_purchase_rate(
@@ -813,6 +817,9 @@ def get_price_list_rate(args, item_doc, out=None):
 			flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 		)
 
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return out
+
 		if not out.price_list_rate and args.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
@@ -1176,7 +1183,7 @@ def get_projected_qty(item_code, warehouse):
 
 @frappe.whitelist()
 def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
-	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0, "ordered_qty": 0}
+	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
 
 	if warehouse:
 		from frappe.query_builder.functions import Coalesce, Sum
@@ -1192,7 +1199,6 @@ def get_bin_details(item_code, warehouse, company=None, include_child_warehouses
 				Coalesce(Sum(bin.projected_qty), 0).as_("projected_qty"),
 				Coalesce(Sum(bin.actual_qty), 0).as_("actual_qty"),
 				Coalesce(Sum(bin.reserved_qty), 0).as_("reserved_qty"),
-				Coalesce(Sum(bin.ordered_qty), 0).as_("ordered_qty"),
 			)
 			.where((bin.item_code == item_code) & (bin.warehouse.isin(warehouses)))
 		).run(as_dict=True)[0]

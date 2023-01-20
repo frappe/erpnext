@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.utils import cint, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -22,6 +22,9 @@ from erpnext.accounts.utils import (
 	get_balance_on,
 	get_stock_accounts,
 	get_stock_and_account_balance,
+)
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_depr_schedule,
 )
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -283,16 +286,17 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if d.reference_type == "Asset" and d.reference_name:
 				asset = frappe.get_doc("Asset", d.reference_name)
-				for s in asset.get("schedules"):
-					if s.journal_entry == self.name:
-						s.db_set("journal_entry", None)
+				for row in asset.get("finance_books"):
+					depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
 
-						idx = cint(s.finance_book_id) or 1
-						finance_books = asset.get("finance_books")[idx - 1]
-						finance_books.value_after_depreciation += s.depreciation_amount
-						finance_books.db_update()
+					for s in depr_schedule or []:
+						if s.journal_entry == self.name:
+							s.db_set("journal_entry", None)
 
-						asset.set_status()
+							row.value_after_depreciation += s.depreciation_amount
+							row.db_update()
+
+							asset.set_status()
 
 	def unlink_inter_company_jv(self):
 		if (

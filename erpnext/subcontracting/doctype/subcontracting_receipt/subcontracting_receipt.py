@@ -57,11 +57,17 @@ class SubcontractingReceipt(SubcontractingController):
 
 	def before_validate(self):
 		super(SubcontractingReceipt, self).before_validate()
+		self.validate_items_qty()
 		self.set_items_bom()
 		self.set_items_cost_center()
 		self.set_items_expense_account()
 
 	def validate(self):
+		if (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "BOM"
+		):
+			self.supplied_items = []
 		super(SubcontractingReceipt, self).validate()
 		self.set_missing_values()
 		self.validate_posting_time()
@@ -157,7 +163,7 @@ class SubcontractingReceipt(SubcontractingController):
 
 		total_qty = total_amount = 0
 		for item in self.items:
-			if item.name in rm_supp_cost:
+			if item.qty and item.name in rm_supp_cost:
 				item.rm_supp_cost = rm_supp_cost[item.name]
 				item.rm_cost_per_qty = item.rm_supp_cost / item.qty
 				rm_supp_cost.pop(item.name)
@@ -192,6 +198,13 @@ class SubcontractingReceipt(SubcontractingController):
 					_(
 						"Row {0}: Consumed Qty must be less than or equal to Available Qty For Consumption in Consumed Items Table."
 					).format(item.idx)
+				)
+
+	def validate_items_qty(self):
+		for item in self.items:
+			if not (item.qty or item.rejected_qty):
+				frappe.throw(
+					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(item.idx)
 				)
 
 	def set_items_bom(self):
@@ -249,15 +262,17 @@ class SubcontractingReceipt(SubcontractingController):
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
+		if not erpnext.is_perpetual_inventory_enabled(self.company):
+			return []
+
 		gl_entries = []
 		self.make_item_gl_entries(gl_entries, warehouse_account)
 
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-		if erpnext.is_perpetual_inventory_enabled(self.company):
-			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		warehouse_with_no_account = []
 

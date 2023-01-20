@@ -5,7 +5,12 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 		Object.assign(this, opts);
 		this.dialog_manager = new erpnext.accounts.bank_reconciliation.DialogManager(
 			this.company,
-			this.bank_account
+			this.bank_account,
+			this.bank_statement_from_date,
+			this.bank_statement_to_date,
+			this.filter_by_reference_date,
+			this.from_reference_date,
+			this.to_reference_date
 		);
 		this.make_dt();
 	}
@@ -17,6 +22,8 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions",
 			args: {
 				bank_account: this.bank_account,
+				from_date: this.bank_statement_from_date,
+				to_date: this.bank_statement_to_date
 			},
 			callback: function (response) {
 				me.format_data(response.message);
