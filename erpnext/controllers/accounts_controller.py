@@ -881,8 +881,7 @@ class AccountsController(TransactionBase):
 							"Payment Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice."
 						).format(d.reference_name, d.against_order)
 					)
-		elif self.doctype == "Sales Invoice" and not self.get("advances"):
-			frappe.msgprint(title=_("Advance Reminder"),msg=_("Pull advances if there is any received from customer {}".format(frappe.bold(self.customer))),indicator="red")
+		
 	def set_advance_gain_or_loss(self):
 		if self.get("conversion_rate") == 1 or not self.get("advances"):
 			return
