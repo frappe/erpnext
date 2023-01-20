@@ -790,7 +790,7 @@ class AccountsController(TransactionBase):
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 
-		res = self.get_advance_entries()
+		res = self.get_advance_entries(include_unallocated=False)
 
 		self.set("advances", [])
 		advance_allocated = total_advance = 0
@@ -821,7 +821,7 @@ class AccountsController(TransactionBase):
 
 			self.append("advances", advance_row)
 		self.total_advance = total_advance
-	def get_advance_entries(self, include_unallocated=True):
+	def get_advance_entries(self, include_unallocated=False):
 		# is advance intorduced as advance account is different 
 		is_advance = True
 		if self.doctype == "Sales Invoice":
