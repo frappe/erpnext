@@ -139,7 +139,7 @@ class PaymentLedgerEntry(Document):
 			validate_frozen_account(self.account, adv_adj)
 		# update outstanding amount
 		if (
-			self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice","Coal Raising Invoice"]
+			self.against_voucher_type in ["Journal Entry", "Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice","Coal Raising Invoice","POL Expense"]
 			and self.flags.update_outstanding == "Yes"
 			and not frappe.flags.is_reverse_depr_entry
 		):
