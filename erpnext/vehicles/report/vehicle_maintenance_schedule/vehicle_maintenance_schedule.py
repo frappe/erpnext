@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, today
+from frappe.utils import cint, getdate, today, add_days
 from dateutil.relativedelta import relativedelta
 from frappe.contacts.doctype.contact.contact import get_default_contact
 
@@ -30,6 +30,12 @@ class VehicleMaintenanceSchedule:
 
 	def get_data(self):
 		conditions = self.get_conditions()
+
+		if self.filters.date_type == "Reminder Date":
+			self.maintenance_reminder_days = cint(frappe.db.get_value("CRM Settings", None, "maintenance_opportunity_reminder_days"))
+			self.filters.from_date = add_days(self.filters.from_date, self.maintenance_reminder_days)
+			self.filters.to_date = add_days(self.filters.to_date, self.maintenance_reminder_days)
+
 		self.data = frappe.db.sql("""
 			SELECT
 				msd.scheduled_date as due_date, msd.project_template, ms.name as schedule,
@@ -101,6 +107,7 @@ class VehicleMaintenanceSchedule:
 				d.contact_no = frappe.db.get_value("Contact", contact_id, "mobile_no", cache=1)
 
 			d.age = self.get_formatted_duration(getdate(), d.delivery_date)
+			d.reminder_date = add_days(d.due_date, -1 * self.maintenance_reminder_days)
 
 			if not d.license_plate and d.unregistered:
 				d.license_plate = 'Unreg'
@@ -117,7 +124,6 @@ class VehicleMaintenanceSchedule:
 				if communication:
 					d.remarks = communication[0].content
 					d.contact_date = communication[0].contact_date
-
 
 		self.data = sorted(self.data, key=lambda d: (getdate(d.due_date), getdate(d.delivery_date)))
 
@@ -137,6 +143,12 @@ class VehicleMaintenanceSchedule:
 				"fieldname": "due_date",
 				"fieldtype": "Date",
 				"width": 80
+			},
+			{
+				"label": _("Reminder Date"),
+				"fieldname": "reminder_date",
+				"fieldtype": "Date",
+				"width": 90
 			},
 			{
 				"label": _("Template"),
@@ -249,4 +261,8 @@ class VehicleMaintenanceSchedule:
 				"editable": 1
 			},
 		]
+
+		if self.filters.date_type != "Reminder Date":
+			columns = [d for d in columns if d.get('fieldname') != 'reminder_date']
+
 		self.columns = columns

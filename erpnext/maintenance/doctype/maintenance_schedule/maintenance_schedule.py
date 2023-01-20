@@ -211,7 +211,7 @@ def create_opportunity_from_schedule(for_date=None):
 	if not frappe.db.get_single_value("CRM Settings", "auto_create_opportunity_from_schedule"):
 		return
 
-	days_in_advance = frappe.get_cached_value("CRM Settings", None, "auto_create_opportunity_before_days")
+	days_in_advance = frappe.get_cached_value("CRM Settings", None, "maintenance_opportunity_reminder_days")
 
 	for_date = getdate(for_date)
 	target_date = getdate(add_days(for_date, days_in_advance))
