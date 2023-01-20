@@ -650,6 +650,11 @@ class TestDeliveryNote(FrappeTestCase):
 		update_delivery_note_status(dn.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
 
+		# Check cancelling closed delivery note
+		dn.load_from_db()
+		dn.cancel()
+		self.assertEqual(dn.status, "Cancelled")
+
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
 		so = make_sales_order()
