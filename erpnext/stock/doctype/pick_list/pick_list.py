@@ -555,23 +555,22 @@ def get_available_item_locations_for_serial_and_batched_item(
 
 
 def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company):
-	# gets all items available in different warehouses
-	warehouses = [x.get("name") for x in frappe.get_list("Warehouse", {"company": company}, "name")]
-
-	filters = frappe._dict(
-		{"item_code": item_code, "warehouse": ["in", warehouses], "actual_qty": [">", 0]}
+	bin = frappe.qb.DocType("Bin")
+	query = (
+		frappe.qb.from_(bin)
+		.select(bin.warehouse, bin.actual_qty.as_("qty"))
+		.where((bin.item_code == item_code) & (bin.actual_qty > 0))
+		.orderby(bin.creation)
+		.limit(cint(required_qty))
 	)
 
 	if from_warehouses:
-		filters.warehouse = ["in", from_warehouses]
+		query = query.where(bin.warehouse.isin(from_warehouses))
+	else:
+		wh = frappe.qb.DocType("Warehouse")
+		query = query.from_(wh).where((bin.warehouse == wh.name) & (wh.company == company))
 
-	item_locations = frappe.get_all(
-		"Bin",
-		fields=["warehouse", "actual_qty as qty"],
-		filters=filters,
-		limit=required_qty,
-		order_by="creation",
-	)
+	item_locations = query.run(as_dict=True)
 
 	return item_locations
 
