@@ -11,7 +11,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import IfNull, Locate, Sum
+from frappe.query_builder.functions import Coalesce, IfNull, Locate, Sum
 from frappe.utils import cint, floor, flt, today
 from frappe.utils.nestedset import get_descendants_of
 
@@ -470,19 +470,21 @@ def get_available_item_locations(
 def get_available_item_locations_for_serialized_item(
 	item_code, from_warehouses, required_qty, company
 ):
-	filters = frappe._dict({"item_code": item_code, "company": company, "warehouse": ["!=", ""]})
+	sn = frappe.qb.DocType("Serial No")
+	query = (
+		frappe.qb.from_(sn)
+		.select(sn.name, sn.warehouse)
+		.where((sn.item_code == item_code) & (sn.company == company))
+		.orderby(sn.purchase_date)
+		.limit(cint(required_qty))
+	)
 
 	if from_warehouses:
-		filters.warehouse = ["in", from_warehouses]
+		query = query.where(sn.warehouse.isin(from_warehouses))
+	else:
+		query = query.where(Coalesce(sn.warehouse, "") != "")
 
-	serial_nos = frappe.get_all(
-		"Serial No",
-		fields=["name", "warehouse"],
-		filters=filters,
-		limit=required_qty,
-		order_by="purchase_date",
-		as_list=1,
-	)
+	serial_nos = query.run(as_list=True)
 
 	warehouse_serial_nos_map = frappe._dict()
 	for serial_no, warehouse in serial_nos:
