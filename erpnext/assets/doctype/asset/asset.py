@@ -553,7 +553,7 @@ class Asset(AccountsController):
 			return True
 
 	def set_accumulated_depreciation(
-		self, date_of_sale=None, date_of_return=None, ignore_booked_entry=False
+		self, date_of_disposal=None, date_of_return=None, ignore_booked_entry=False
 	):
 		straight_line_idx = [
 			d.idx for d in self.get("schedules") if d.depreciation_method == "Straight Line"
@@ -576,7 +576,7 @@ class Asset(AccountsController):
 			if (
 				straight_line_idx
 				and i == max(straight_line_idx) - 1
-				and not date_of_sale
+				and not date_of_disposal
 				and not date_of_return
 			):
 				book = self.get("finance_books")[cint(d.finance_book_id) - 1]
