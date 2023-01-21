@@ -7,6 +7,7 @@ from erpnext.stock.stock_ledger import update_entries_after
 
 def execute():
 	doctypes_to_reload = [
+		("setup", "company"),
 		("stock", "repost_item_valuation"),
 		("stock", "stock_entry_detail"),
 		("stock", "purchase_receipt_item"),
