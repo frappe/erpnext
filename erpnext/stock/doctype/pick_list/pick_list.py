@@ -162,6 +162,7 @@ class PickList(Document):
 	def set_item_locations(self, save=False):
 		self.validate_for_qty()
 		items = self.aggregate_item_qty()
+		picked_items_details = self.get_picked_items_details(items)
 		self.item_location_map = frappe._dict()
 
 		from_warehouses = None
@@ -308,6 +309,49 @@ class PickList(Document):
 				"picked_qty",
 				already_picked + (picked_qty * (1 if self.docstatus == 1 else -1)),
 			)
+
+	def get_picked_items_details(self, items):
+		picked_items = frappe._dict()
+
+		pi_item = frappe.qb.DocType("Pick List Item")
+		query = (
+			frappe.qb.from_(pi_item)
+			.select(
+				pi_item.item_code,
+				pi_item.warehouse,
+				pi_item.batch_no,
+				pi_item.serial_no,
+				Sum(pi_item.picked_qty).as_("picked_qty"),
+			)
+			.where(
+				(pi_item.item_code.isin([x.item_code for x in items]))
+				& (pi_item.docstatus != 2)
+				& (pi_item.picked_qty > 0)
+			)
+			.groupby(
+				pi_item.item_code,
+				pi_item.warehouse,
+				pi_item.batch_no,
+			)
+		)
+
+		if self.name:
+			query = query.where(pi_item.parent != self.name)
+
+		items_data = query.run(as_dict=True)
+
+		for item_data in items_data:
+			key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
+			serial_no = [x for x in item_data.serial_no.split("\n") if x] if item_data.serial_no else None
+			data = {"picked_qty": item_data.picked_qty}
+			if serial_no:
+				data["serial_no"] = serial_no
+			if item_data.item_code not in picked_items:
+				picked_items[item_data.item_code] = {key: data}
+			else:
+				picked_items[item_data.item_code][key] = data
+
+		return picked_items
 
 	def _get_product_bundles(self) -> Dict[str, str]:
 		# Dict[so_item_row: item_code]
