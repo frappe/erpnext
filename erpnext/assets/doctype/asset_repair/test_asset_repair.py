@@ -12,6 +12,9 @@ from erpnext.assets.doctype.asset.test_asset import (
 	create_asset_data,
 	set_depreciation_settings_in_company,
 )
+from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+	get_asset_depr_schedule_doc,
+)
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -232,13 +235,23 @@ class TestAssetRepair(unittest.TestCase):
 
 	def test_increase_in_asset_life(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
+
+		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Active")
+
 		initial_num_of_depreciations = num_of_depreciations(asset)
 		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
+
 		asset.reload()
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
 
 		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(asset))
 		self.assertEqual(
-			asset.schedules[-1].accumulated_depreciation_amount,
+			second_asset_depr_schedule.get("depreciation_schedule")[-1].accumulated_depreciation_amount,
 			asset.finance_books[0].value_after_depreciation,
 		)
 

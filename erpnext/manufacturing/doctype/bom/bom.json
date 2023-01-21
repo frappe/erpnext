@@ -6,6 +6,7 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "production_item_tab",
   "item",
   "company",
   "item_name",
@@ -19,28 +20,33 @@
   "quantity",
   "image",
   "currency_detail",
-  "currency",
-  "conversion_rate",
-  "column_break_12",
   "rm_cost_as_per",
   "buying_price_list",
   "price_list_currency",
   "plc_conversion_rate",
+  "column_break_ivyw",
+  "currency",
+  "conversion_rate",
   "section_break_21",
+  "operations_section_section",
   "with_operations",
   "column_break_23",
   "transfer_material_against",
   "routing",
+  "fg_based_operating_cost",
+  "fg_based_section_section",
+  "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
   "materials_section",
-  "inspection_required",
-  "quality_inspection_template",
-  "column_break_31",
-  "section_break_33",
   "items",
   "scrap_section",
+  "scrap_items_section",
   "scrap_items",
+  "process_loss_section",
+  "process_loss_percentage",
+  "column_break_ssj2",
+  "process_loss_qty",
   "costing",
   "operating_cost",
   "raw_material_cost",
@@ -52,10 +58,14 @@
   "column_break_26",
   "total_cost",
   "base_total_cost",
-  "section_break_25",
+  "more_info_tab",
   "description",
   "column_break_27",
   "has_variants",
+  "quality_inspection_section_break",
+  "inspection_required",
+  "column_break_dxp7",
+  "quality_inspection_template",
   "section_break0",
   "exploded_items",
   "website_section",
@@ -68,7 +78,8 @@
   "show_items",
   "show_operations",
   "web_long_description",
-  "amended_from"
+  "amended_from",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -183,7 +194,7 @@
   {
    "fieldname": "currency_detail",
    "fieldtype": "Section Break",
-   "label": "Currency and Price List"
+   "label": "Cost Configuration"
   },
   {
    "fieldname": "company",
@@ -207,10 +218,6 @@
    "label": "Conversion Rate",
    "precision": "9",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "currency",
@@ -261,7 +268,7 @@
   {
    "fieldname": "materials_section",
    "fieldtype": "Section Break",
-   "label": "Materials",
+   "label": "Raw Materials",
    "oldfieldtype": "Section Break"
   },
   {
@@ -276,18 +283,18 @@
   {
    "collapsible": 1,
    "fieldname": "scrap_section",
-   "fieldtype": "Section Break",
-   "label": "Scrap"
+   "fieldtype": "Tab Break",
+   "label": "Scrap & Process Loss"
   },
   {
    "fieldname": "scrap_items",
    "fieldtype": "Table",
-   "label": "Scrap Items",
+   "label": "Items",
    "options": "BOM Scrap Item"
   },
   {
    "fieldname": "costing",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Costing",
    "oldfieldtype": "Section Break"
   },
@@ -378,10 +385,6 @@
    "options": "BOM",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "section_break_25",
-   "fieldtype": "Section Break"
   },
   {
    "fetch_from": "item.description",
@@ -478,8 +481,8 @@
   },
   {
    "fieldname": "section_break_21",
-   "fieldtype": "Section Break",
-   "label": "Operations"
+   "fieldtype": "Tab Break",
+   "label": "Operations & Materials"
   },
   {
    "fieldname": "column_break_23",
@@ -511,6 +514,7 @@
    "fetch_from": "item.has_variants",
    "fieldname": "has_variants",
    "fieldtype": "Check",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Has Variants",
    "no_copy": 1,
@@ -518,13 +522,82 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_31",
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "operations_section_section",
+   "fieldtype": "Section Break",
+   "label": "Operations"
+  },
+  {
+   "fieldname": "process_loss_section",
+   "fieldtype": "Section Break",
+   "label": "Process Loss"
+  },
+  {
+   "fieldname": "process_loss_percentage",
+   "fieldtype": "Percent",
+   "label": "% Process Loss"
+  },
+  {
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_ssj2",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_33",
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "column_break_dxp7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quality_inspection_section_break",
    "fieldtype": "Section Break",
-   "hide_border": 1
+   "label": "Quality Inspection"
+  },
+  {
+   "fieldname": "production_item_tab",
+   "fieldtype": "Tab Break",
+   "label": "Production Item"
+  },
+  {
+   "fieldname": "column_break_ivyw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "scrap_items_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Scrap Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "fg_based_operating_cost",
+   "fieldtype": "Check",
+   "label": "FG based Operating Cost"
+  },
+  {
+   "depends_on": "fg_based_operating_cost",
+   "fieldname": "fg_based_section_section",
+   "fieldtype": "Section Break",
+   "label": "FG Based Operating Cost Section"
+  },
+  {
+   "depends_on": "fg_based_operating_cost",
+   "fieldname": "operating_cost_per_bom_quantity",
+   "fieldtype": "Currency",
+   "label": "Operating Cost Per BOM Quantity"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -532,7 +605,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-30 21:27:54.727298",
+ "modified": "2023-01-10 07:47:08.652616",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

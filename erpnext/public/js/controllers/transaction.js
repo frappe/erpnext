@@ -1473,6 +1473,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rules": d.pricing_rules,
+					"is_free_item": d.is_free_item,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
 					"batch_no": d.batch_no,
@@ -1691,7 +1692,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var valid = true;
 
 		$.each(["company", "customer"], function(i, fieldname) {
-			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) && me.frm.doc.doctype != "Purchase Order") {
+			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) &&  !["Purchase Order","Purchase Invoice"].includes(me.frm.doc.doctype)) {
 				if (!me.frm.doc[fieldname]) {
 					frappe.msgprint(__("Please specify") + ": " +
 						frappe.meta.get_label(me.frm.doc.doctype, fieldname, me.frm.doc.name) +

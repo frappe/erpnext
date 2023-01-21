@@ -37,14 +37,11 @@ frappe.ui.form.on("Bank Clearance", {
 
 	refresh: function(frm) {
 		frm.disable_save();
+		frm.add_custom_button(__('Get Payment Entries'), () =>
+			frm.trigger("get_payment_entries")
+		);
 
-		if (frm.doc.account && frm.doc.from_date && frm.doc.to_date) {
-			frm.add_custom_button(__('Get Payment Entries'), () =>
-				frm.trigger("get_payment_entries")
-			);
-
-			frm.change_custom_button_type('Get Payment Entries', null, 'primary');
-		}
+		frm.change_custom_button_type('Get Payment Entries', null, 'primary');
 	},
 
 	update_clearance_date: function(frm) {

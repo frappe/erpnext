@@ -202,6 +202,33 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(bom.items[0].rate, 20)
 
+	def test_bom_cost_with_fg_based_operating_cost(self):
+		bom = frappe.copy_doc(test_records[4])
+		bom.insert()
+
+		raw_material_cost = 0.0
+		op_cost = 0.0
+
+		op_cost = bom.quantity * bom.operating_cost_per_bom_quantity
+
+		for row in bom.items:
+			raw_material_cost += row.amount
+
+		base_raw_material_cost = raw_material_cost * flt(
+			bom.conversion_rate, bom.precision("conversion_rate")
+		)
+		base_op_cost = op_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
+
+		# test amounts in selected currency, almostEqual checks for 7 digits by default
+		self.assertAlmostEqual(bom.operating_cost, op_cost)
+		self.assertAlmostEqual(bom.raw_material_cost, raw_material_cost)
+		self.assertAlmostEqual(bom.total_cost, raw_material_cost + op_cost)
+
+		# test amounts in selected currency
+		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
+		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
+		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+
 	def test_subcontractor_sourced_item(self):
 		item_code = "_Test Subcontracted FG Item 1"
 		set_backflush_based_on("Material Transferred for Subcontract")
@@ -384,34 +411,14 @@ class TestBOM(FrappeTestCase):
 	def test_bom_with_process_loss_item(self):
 		fg_item_non_whole, fg_item_whole, bom_item = create_process_loss_bom_items()
 
-		if not frappe.db.exists("BOM", f"BOM-{fg_item_non_whole.item_code}-001"):
-			bom_doc = create_bom_with_process_loss_item(
-				fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, fg_qty=1
-			)
-			bom_doc.submit()
-
 		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0
+			fg_item_non_whole, bom_item, scrap_qty=2, scrap_rate=0, process_loss_percentage=110
 		)
-		#  PL Item qty can't be >= FG Item qty
+		#  PL can't be > 100
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
-		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=1, scrap_rate=100
-		)
-		# PL Item rate has to be 0
-		self.assertRaises(frappe.ValidationError, bom_doc.submit)
-
-		bom_doc = create_bom_with_process_loss_item(
-			fg_item_whole, bom_item, scrap_qty=0.25, scrap_rate=0
-		)
+		bom_doc = create_bom_with_process_loss_item(fg_item_whole, bom_item, process_loss_percentage=20)
 		#  Items with whole UOMs can't be PL Items
-		self.assertRaises(frappe.ValidationError, bom_doc.submit)
-
-		bom_doc = create_bom_with_process_loss_item(
-			fg_item_non_whole, bom_item, scrap_qty=0.25, scrap_rate=0, is_process_loss=0
-		)
-		# FG Items in Scrap/Loss Table should have Is Process Loss set
 		self.assertRaises(frappe.ValidationError, bom_doc.submit)
 
 	def test_bom_item_query(self):
@@ -744,7 +751,7 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 
 
 def create_bom_with_process_loss_item(
-	fg_item, bom_item, scrap_qty, scrap_rate, fg_qty=2, is_process_loss=1
+	fg_item, bom_item, scrap_qty=0, scrap_rate=0, fg_qty=2, process_loss_percentage=0
 ):
 	bom_doc = frappe.new_doc("BOM")
 	bom_doc.item = fg_item.item_code
@@ -759,19 +766,22 @@ def create_bom_with_process_loss_item(
 			"rate": 100.0,
 		},
 	)
-	bom_doc.append(
-		"scrap_items",
-		{
-			"item_code": fg_item.item_code,
-			"qty": scrap_qty,
-			"stock_qty": scrap_qty,
-			"uom": fg_item.stock_uom,
-			"stock_uom": fg_item.stock_uom,
-			"rate": scrap_rate,
-			"is_process_loss": is_process_loss,
-		},
-	)
+
+	if scrap_qty:
+		bom_doc.append(
+			"scrap_items",
+			{
+				"item_code": fg_item.item_code,
+				"qty": scrap_qty,
+				"stock_qty": scrap_qty,
+				"uom": fg_item.stock_uom,
+				"stock_uom": fg_item.stock_uom,
+				"rate": scrap_rate,
+			},
+		)
+
 	bom_doc.currency = "INR"
+	bom_doc.process_loss_percentage = process_loss_percentage
 	return bom_doc
 
 
