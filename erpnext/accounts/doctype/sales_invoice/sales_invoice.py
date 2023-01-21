@@ -7,17 +7,7 @@ from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import (
-	add_days,
-	add_months,
-	cint,
-	cstr,
-	flt,
-	formatdate,
-	get_link_to_form,
-	getdate,
-	nowdate,
-)
+from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 from six import iteritems
 
 import erpnext
@@ -33,10 +23,12 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.party import get_due_date, get_party_account, get_party_details
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
+	depreciate_asset,
 	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
-	make_depreciation_entry,
+	reset_depreciation_schedule,
+	reverse_depreciation_entry_made_after_disposal,
 )
 from erpnext.controllers.accounts_controller import validate_account_head
 from erpnext.controllers.selling_controller import SellingController
@@ -1114,18 +1106,20 @@ class SalesInvoice(SellingController):
 					asset = self.get_asset(item)
 
 					if self.is_return:
-						if asset.calculate_depreciation:
-							self.reverse_depreciation_entry_made_after_sale(asset)
-							self.reset_depreciation_schedule(asset)
-
 						fixed_asset_gl_entries = get_gl_entries_on_asset_regain(
 							asset, item.base_net_amount, item.finance_book
 						)
 						asset.db_set("disposal_date", None)
 
+						if asset.calculate_depreciation:
+							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
+							reset_depreciation_schedule(asset, self.posting_date)
+
 					else:
 						if asset.calculate_depreciation:
-							self.depreciate_asset(asset)
+							depreciate_asset(asset, self.posting_date)
+							asset.reload()
 
 						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(
 							asset, item.base_net_amount, item.finance_book
@@ -1192,95 +1186,6 @@ class SalesInvoice(SellingController):
 			frappe.throw(
 				_("Select finance book for the item {0} at row {1}").format(item.item_code, item.idx)
 			)
-
-	def depreciate_asset(self, asset):
-		asset.flags.ignore_validate_update_after_submit = True
-		asset.prepare_depreciation_data(date_of_sale=self.posting_date)
-		asset.save()
-
-		make_depreciation_entry(asset.name, self.posting_date)
-		asset.load_from_db()
-
-	def reset_depreciation_schedule(self, asset):
-		asset.flags.ignore_validate_update_after_submit = True
-
-		# recreate original depreciation schedule of the asset
-		asset.prepare_depreciation_data(date_of_return=self.posting_date)
-
-		self.modify_depreciation_schedule_for_asset_repairs(asset)
-		asset.save()
-		asset.load_from_db()
-
-	def modify_depreciation_schedule_for_asset_repairs(self, asset):
-		asset_repairs = frappe.get_all(
-			"Asset Repair", filters={"asset": asset.name}, fields=["name", "increase_in_asset_life"]
-		)
-
-		for repair in asset_repairs:
-			if repair.increase_in_asset_life:
-				asset_repair = frappe.get_doc("Asset Repair", repair.name)
-				asset_repair.modify_depreciation_schedule()
-				asset.prepare_depreciation_data()
-
-	def reverse_depreciation_entry_made_after_sale(self, asset):
-		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
-
-		posting_date_of_original_invoice = self.get_posting_date_of_sales_invoice()
-
-		row = -1
-		finance_book = asset.get("schedules")[0].get("finance_book")
-		for schedule in asset.get("schedules"):
-			if schedule.finance_book != finance_book:
-				row = 0
-				finance_book = schedule.finance_book
-			else:
-				row += 1
-
-			if schedule.schedule_date == posting_date_of_original_invoice:
-				if not self.sale_was_made_on_original_schedule_date(
-					asset, schedule, row, posting_date_of_original_invoice
-				) or self.sale_happens_in_the_future(posting_date_of_original_invoice):
-
-					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
-					reverse_journal_entry.posting_date = nowdate()
-					frappe.flags.is_reverse_depr_entry = True
-					reverse_journal_entry.submit()
-
-					frappe.flags.is_reverse_depr_entry = False
-					asset.flags.ignore_validate_update_after_submit = True
-					schedule.journal_entry = None
-					depreciation_amount = self.get_depreciation_amount_in_je(reverse_journal_entry)
-					asset.finance_books[0].value_after_depreciation += depreciation_amount
-					asset.save()
-
-	def get_posting_date_of_sales_invoice(self):
-		return frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
-
-	# if the invoice had been posted on the date the depreciation was initially supposed to happen, the depreciation shouldn't be undone
-	def sale_was_made_on_original_schedule_date(
-		self, asset, schedule, row, posting_date_of_original_invoice
-	):
-		for finance_book in asset.get("finance_books"):
-			if schedule.finance_book == finance_book.finance_book:
-				orginal_schedule_date = add_months(
-					finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
-				)
-
-				if orginal_schedule_date == posting_date_of_original_invoice:
-					return True
-		return False
-
-	def sale_happens_in_the_future(self, posting_date_of_original_invoice):
-		if posting_date_of_original_invoice > getdate():
-			return True
-
-		return False
-
-	def get_depreciation_amount_in_je(self, journal_entry):
-		if journal_entry.accounts[0].debit_in_account_currency:
-			return journal_entry.accounts[0].debit_in_account_currency
-		else:
-			return journal_entry.accounts[0].credit_in_account_currency
 
 	@property
 	def enable_discount_accounting(self):
