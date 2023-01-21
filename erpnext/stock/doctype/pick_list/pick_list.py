@@ -534,24 +534,27 @@ def get_available_item_locations_for_serial_and_batched_item(
 		item_code, from_warehouses, required_qty, company
 	)
 
-	filters = frappe._dict(
-		{"item_code": item_code, "company": company, "warehouse": ["!=", ""], "batch_no": ""}
-	)
+	if locations:
+		sn = frappe.qb.DocType("Serial No")
+		conditions = (sn.item_code == item_code) & (sn.company == company)
 
-	# Get Serial Nos by FIFO for Batch No
-	for location in locations:
-		filters.batch_no = location.batch_no
-		filters.warehouse = location.warehouse
-		location.qty = (
-			required_qty if location.qty > required_qty else location.qty
-		)  # if extra qty in batch
+		for location in locations:
+			location.qty = (
+				required_qty if location.qty > required_qty else location.qty
+			)  # if extra qty in batch
 
-		serial_nos = frappe.get_list(
-			"Serial No", fields=["name"], filters=filters, limit=location.qty, order_by="purchase_date"
-		)
+			serial_nos = (
+				frappe.qb.from_(sn)
+				.select(sn.name)
+				.where(
+					(conditions) & (sn.batch_no == location.batch_no) & (sn.warehouse == location.warehouse)
+				)
+				.orderby(sn.purchase_date)
+				.limit(cint(location.qty))
+			).run(as_dict=True)
 
-		serial_nos = [sn.name for sn in serial_nos]
-		location.serial_no = serial_nos
+			serial_nos = [sn.name for sn in serial_nos]
+			location.serial_no = serial_nos
 
 	return locations
 
