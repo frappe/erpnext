@@ -237,6 +237,9 @@ class Asset(AccountsController):
 		for finance_book in self.get("finance_books"):
 			self._make_depreciation_schedule(finance_book, start, date_of_disposal)
 
+		if len(self.get("finance_books")) > 1 and any(start):
+			self.sort_depreciation_schedule()
+
 	def _make_depreciation_schedule(self, finance_book, start, date_of_disposal):
 		self.validate_asset_finance_books(finance_book)
 
@@ -364,6 +367,14 @@ class Asset(AccountsController):
 				"finance_book_id": finance_book_id,
 			},
 		)
+
+	def sort_depreciation_schedule(self):
+		self.schedules = sorted(
+			self.schedules, key=lambda s: (int(s.finance_book_id), getdate(s.schedule_date))
+		)
+
+		for idx, s in enumerate(self.schedules, 1):
+			s.idx = idx
 
 	def _get_value_after_depreciation(self, finance_book):
 		# value_after_depreciation - current Asset value
