@@ -347,28 +347,23 @@ class PickList(Document):
 
 
 def get_picked_items_qty(items) -> List[Dict]:
-	return frappe.db.sql(
-		f"""
-		SELECT
-			sales_order_item,
-			item_code,
-			sales_order,
-			SUM(stock_qty) AS stock_qty,
-			SUM(picked_qty) AS picked_qty
-		FROM
-			`tabPick List Item`
-		WHERE
-			sales_order_item IN (
-				{", ".join(frappe.db.escape(d) for d in items)}
-			)
-			AND docstatus = 1
-		GROUP BY
-			sales_order_item,
-			sales_order
-		FOR UPDATE
-	""",
-		as_dict=1,
-	)
+	pi_item = frappe.qb.DocType("Pick List Item")
+	return (
+		frappe.qb.from_(pi_item)
+		.select(
+			pi_item.sales_order_item,
+			pi_item.item_code,
+			pi_item.sales_order,
+			Sum(pi_item.stock_qty).as_("stock_qty"),
+			Sum(pi_item.picked_qty).as_("picked_qty"),
+		)
+		.where((pi_item.docstatus == 1) & (pi_item.sales_order_item.isin(items)))
+		.groupby(
+			pi_item.sales_order_item,
+			pi_item.sales_order,
+		)
+		.for_update()
+	).run(as_dict=True)
 
 
 def validate_item_locations(pick_list):
