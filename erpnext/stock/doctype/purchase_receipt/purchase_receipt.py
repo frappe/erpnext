@@ -556,7 +556,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
 
-	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
+	doclist = get_mapped_doc("Purchase Receipt", source_name, {
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
