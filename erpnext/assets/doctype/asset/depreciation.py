@@ -10,7 +10,6 @@ from frappe.utils.user import get_users_with_role
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 
 
 def post_depreciation_entries(date=None):
@@ -326,6 +325,8 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
+	from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+
 	row = -1
 	finance_book = asset.get("schedules")[0].get("finance_book")
 	for schedule in asset.get("schedules"):
