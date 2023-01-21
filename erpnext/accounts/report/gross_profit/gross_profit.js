@@ -54,7 +54,15 @@ frappe.query_reports["Gross Profit"] = {
 			"fieldname": "warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
-			"options": "Warehouse"
+			"options": "Warehouse",
+			"get_query": function () {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: [
+						["Warehouse", "company", "=", company]
+					]
+				};
+			},
 		},
 	],
 	"tree": true,
