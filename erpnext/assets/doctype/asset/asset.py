@@ -364,6 +364,9 @@ class Asset(AccountsController):
 						},
 					)
 
+		if len(self.get("finance_books")) > 1 and any(start):
+			self.sort_depreciation_schedule()
+
 	# depreciation schedules need to be cleared before modification due to increase in asset life/asset sales
 	# JE: Journal Entry, FB: Finance Book
 	def clear_depreciation_schedule(self):
@@ -398,6 +401,14 @@ class Asset(AccountsController):
 			self.schedules = depr_schedule
 
 		return start
+
+	def sort_depreciation_schedule(self):
+		self.schedules = sorted(
+			self.schedules, key=lambda s: (int(s.finance_book_id), getdate(s.schedule_date))
+		)
+
+		for idx, s in enumerate(self.schedules, 1):
+			s.idx = idx
 
 	def get_from_date(self, finance_book):
 		if not self.get("schedules"):
