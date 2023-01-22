@@ -115,7 +115,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	calculate_item_values: function() {
 		let me = this;
 		if (!this.discount_amount_applied) {
-			for (item of this.frm.doc.items || []) {
+			for (const item of this.frm.doc.items || []) {
 				frappe.model.round_floats_in(item);
 				item.net_rate = item.rate;
 				item.qty = item.qty === undefined ? (me.frm.doc.is_return ? -1 : 1) : item.qty;
