@@ -44,6 +44,7 @@ from erpnext.controllers.print_settings import (
 	set_print_templates_for_taxes,
 )
 from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.controllers.tax_controller import TaxController
 from erpnext.exceptions import InvalidCurrency
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
@@ -1967,29 +1968,13 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 		)
 
 
-def validate_taxes_and_charges(tax):
-	if tax.charge_type in ["Actual", "On Net Total", "On Paid Amount"] and tax.row_id:
-		frappe.throw(
-			_("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'")
-		)
-	elif tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"]:
-		if cint(tax.idx) == 1:
-			frappe.throw(
-				_(
-					"Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
-				)
-			)
-		elif not tax.row_id:
-			frappe.throw(
-				_("Please specify a valid Row ID for row {0} in table {1}").format(tax.idx, _(tax.doctype))
-			)
-		elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
-			frappe.throw(
-				_("Cannot refer row number greater than or equal to current row number for this Charge type")
-			)
+def validate_taxes_and_charges(tax: TaxController) -> None:
+	from frappe.utils.deprecations import deprecation_warning
 
-	if tax.charge_type == "Actual":
-		tax.rate = None
+	deprecation_warning(
+		"Calling `validate_taxes_and_charges(tax)` is deprecated. This will be removed in version 15. Use `tax.validate_taxes_and_charges()` instead."
+	)
+	tax.validate_taxes_and_charges()
 
 
 def validate_account_head(idx, account, company, context=""):
@@ -2004,49 +1989,22 @@ def validate_account_head(idx, account, company, context=""):
 		)
 
 
-def validate_cost_center(tax, doc):
-	if not tax.cost_center:
-		return
+def validate_cost_center(tax: TaxController, doc: AccountsController) -> None:
+	from frappe.utils.deprecations import deprecation_warning
 
-	company = frappe.get_cached_value("Cost Center", tax.cost_center, "company")
-
-	if company != doc.company:
-		frappe.throw(
-			_("Row {0}: Cost Center {1} does not belong to Company {2}").format(
-				tax.idx, frappe.bold(tax.cost_center), frappe.bold(doc.company)
-			),
-			title=_("Invalid Cost Center"),
-		)
+	deprecation_warning(
+		"Calling `validate_cost_center(tax, doc)` is deprecated. This will be removed in version 15. Use `tax.validate_cost_center(company)` instead."
+	)
+	tax.validate_cost_center(doc.company)
 
 
-def validate_inclusive_tax(tax, doc):
-	def _on_previous_row_error(row_range):
-		throw(
-			_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(
-				tax.idx, row_range
-			)
-		)
+def validate_inclusive_tax(tax: TaxController, doc: AccountsController) -> None:
+	from frappe.utils.deprecations import deprecation_warning
 
-	if cint(getattr(tax, "included_in_print_rate", None)):
-		if tax.charge_type == "Actual":
-			# inclusive tax cannot be of type Actual
-			throw(
-				_("Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount").format(
-					tax.idx
-				)
-			)
-		elif tax.charge_type == "On Previous Row Amount" and not cint(
-			doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate
-		):
-			# referred row should also be inclusive
-			_on_previous_row_error(tax.row_id)
-		elif tax.charge_type == "On Previous Row Total" and not all(
-			[cint(t.included_in_print_rate) for t in doc.get("taxes")[: cint(tax.row_id) - 1]]
-		):
-			# all rows about the referred tax should be inclusive
-			_on_previous_row_error("1 - %d" % (tax.row_id,))
-		elif tax.get("category") == "Valuation":
-			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
+	deprecation_warning(
+		"Calling `validate_inclusive_tax(tax, doc)` is deprecated. This will be removed in version 15. Use `tax.validate_inclusive_tax(doc.get('taxes'))` instead."
+	)
+	tax.validate_inclusive_tax(doc.get("taxes"))
 
 
 def set_balance_in_account_currency(

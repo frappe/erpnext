@@ -2,8 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from frappe.model.document import Document
+from erpnext.controllers.tax_controller import TaxController
 
 
-class SalesTaxesandCharges(Document):
+class SalesTaxesandCharges(TaxController):
 	pass

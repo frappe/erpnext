@@ -6,7 +6,7 @@ import json
 from functools import reduce
 
 import frappe
-from frappe import ValidationError, _, qb, scrub, throw
+from frappe import ValidationError, _, qb, scrub
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 
 import erpnext
@@ -24,11 +24,8 @@ from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category 
 from erpnext.accounts.general_ledger import make_gl_entries, process_gl_map
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency, get_balance_on, get_outstanding_invoices
-from erpnext.controllers.accounts_controller import (
-	AccountsController,
-	get_supplier_block_status,
-	validate_taxes_and_charges,
-)
+from erpnext.controllers.accounts_controller import AccountsController, get_supplier_block_status
+from erpnext.controllers.tax_controller import TaxController
 from erpnext.setup.utils import get_exchange_rate
 
 
@@ -1011,9 +1008,10 @@ class PaymentEntry(AccountsController):
 		return self.source_exchange_rate if self.payment_type == "Receive" else self.target_exchange_rate
 
 	def initialize_taxes(self):
-		for tax in self.get("taxes"):
-			validate_taxes_and_charges(tax)
-			validate_inclusive_tax(tax, self)
+		all_taxes: list["TaxController"] = self.get("taxes")
+		for tax in all_taxes:
+			tax.validate_taxes_and_charges()
+			tax.validate_inclusive_tax(all_taxes)
 
 			tax_fields = ["total", "tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
@@ -1026,18 +1024,18 @@ class PaymentEntry(AccountsController):
 		self.paid_amount_after_tax = self.base_paid_amount
 
 	def determine_exclusive_rate(self):
-		if not any(cint(tax.included_in_paid_amount) for tax in self.get("taxes")):
+		all_taxes: list["TaxController"] = self.get("taxes")
+		if not any(cint(tax.included_in_paid_amount) for tax in all_taxes):
 			return
 
 		cumulated_tax_fraction = 0
-		for i, tax in enumerate(self.get("taxes")):
-			tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax)
+		for i, tax in enumerate(all_taxes):
+			tax.set_current_tax_fraction(all_taxes, tax.rate)
 			if i == 0:
 				tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
 			else:
 				tax.grand_total_fraction_for_current_item = (
-					self.get("taxes")[i - 1].grand_total_fraction_for_current_item
-					+ tax.tax_fraction_for_current_item
+					all_taxes[i - 1].grand_total_fraction_for_current_item + tax.tax_fraction_for_current_item
 				)
 
 			cumulated_tax_fraction += tax.tax_fraction_for_current_item
@@ -1123,58 +1121,6 @@ class PaymentEntry(AccountsController):
 			current_tax_amount = (tax_rate / 100.0) * self.get("taxes")[cint(tax.row_id) - 1].total
 
 		return current_tax_amount
-
-	def get_current_tax_fraction(self, tax):
-		current_tax_fraction = 0
-
-		if cint(tax.included_in_paid_amount):
-			tax_rate = tax.rate
-
-			if tax.charge_type == "On Paid Amount":
-				current_tax_fraction = tax_rate / 100.0
-			elif tax.charge_type == "On Previous Row Amount":
-				current_tax_fraction = (tax_rate / 100.0) * self.get("taxes")[
-					cint(tax.row_id) - 1
-				].tax_fraction_for_current_item
-			elif tax.charge_type == "On Previous Row Total":
-				current_tax_fraction = (tax_rate / 100.0) * self.get("taxes")[
-					cint(tax.row_id) - 1
-				].grand_total_fraction_for_current_item
-
-		if getattr(tax, "add_deduct_tax", None) and tax.add_deduct_tax == "Deduct":
-			current_tax_fraction *= -1.0
-
-		return current_tax_fraction
-
-
-def validate_inclusive_tax(tax, doc):
-	def _on_previous_row_error(row_range):
-		throw(
-			_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(
-				tax.idx, row_range
-			)
-		)
-
-	if cint(getattr(tax, "included_in_paid_amount", None)):
-		if tax.charge_type == "Actual":
-			# inclusive tax cannot be of type Actual
-			throw(
-				_("Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount").format(
-					tax.idx
-				)
-			)
-		elif tax.charge_type == "On Previous Row Amount" and not cint(
-			doc.get("taxes")[cint(tax.row_id) - 1].included_in_paid_amount
-		):
-			# referred row should also be inclusive
-			_on_previous_row_error(tax.row_id)
-		elif tax.charge_type == "On Previous Row Total" and not all(
-			[cint(t.included_in_paid_amount for t in doc.get("taxes")[: cint(tax.row_id) - 1])]
-		):
-			# all rows about the referred tax should be inclusive
-			_on_previous_row_error("1 - %d" % (cint(tax.row_id),))
-		elif tax.get("category") == "Valuation":
-			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
 @frappe.whitelist()
