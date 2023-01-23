@@ -107,7 +107,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
         if(doc.docstatus == 1) {
 			frappe.db.get_value('Selling Settings', undefined, 'allow_against_multiple_quotations').then(({r}) => {
 				if(r && r.allow_against_multiple_quotations == '1') {
-					cur_frm.add_custom_button(__('Sales Order'), cur_frm.cscript['Make Sales Order'], __('Create'));
+					frm.add_custom_button(__('Sales Order'), cur_frm.cscript['Make Sales Order'], __('Create'));
 				}
 			});
 		}
