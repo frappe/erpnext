@@ -3,27 +3,13 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, today
+from frappe.utils import flt, cint, getdate, today, cstr, combine_datetime, get_datetime
 from erpnext.stock.utils import update_included_uom_in_dict_report, has_valuation_read_permission
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.reportview import build_match_conditions
+from collections import OrderedDict
 
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
-
-
-template = frappe._dict({
-	"opening_qty": 0.0, "opening_val": 0.0,
-	"in_qty": 0.0, "in_val": 0.0,
-	"purchase_qty": 0.0, "purchase_val": 0.0,
-	"purchase_return_qty": 0.0, "purchase_return_val": 0.0,
-	"out_qty": 0.0, "out_val": 0.0,
-	"sales_qty": 0.0, "sales_val": 0.0,
-	"sales_return_qty": 0.0, "sales_return_val": 0.0,
-	"reconcile_qty": 0.0, "reconcile_val": 0.0,
-	"bal_qty": 0.0, "bal_val": 0.0,
-	"ordered_qty": 0.0, "projected_qty": 0.0,
-	"val_rate": 0.0
-})
 
 
 def execute(filters=None):
@@ -40,33 +26,41 @@ class StockBalanceReport:
 		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
 		if self.filters.from_date > self.filters.to_date:
-			frappe.throw(_("Date Range is incorrect"))
+			frappe.throw(_("From Date cannot be after To Date"))
 
 	def run(self):
-		columns = self.get_columns()
+		self.validate_filters()
+		self.get_columns()
 
 		self.get_items()
 		if not self.items and self.items is not None:
-			return columns, []
+			return self.columns, []
 
 		self.get_stock_ledger_entries()
 		if not self.sles:
-			return columns, []
-
-		if self.filters.get('show_stock_ageing_data'):
-			self.filters['show_warehouse_wise_stock'] = True
-			self.item_wise_fifo_queue = get_fifo_queue(self.filters, self.sles)
+			return self.columns, []
 
 		self.get_item_details_map()
 		self.get_item_reorder_map()
 		self.get_purchase_order_map()
-		self.get_item_warehouse_map()
+		self.get_ageing_fifo_queue()
+		self.get_stock_balance_map()
+		self.clean_stock_balance_map()
+		self.get_packing_slip_map()
 
-		rows = self.get_rows()
+		self.get_rows()
+		self.get_columns()
 
-		update_included_uom_in_dict_report(columns, rows, self.filters.get("include_uom"), self.conversion_factors)
+		update_included_uom_in_dict_report(self.columns, self.rows, self.filters.get("include_uom"), self.conversion_factors)
 
-		return columns, self.rows
+		return self.columns, self.rows
+
+	def validate_filters(self):
+		if self.filters.get("show_projected_qty"):
+			if self.include_batch():
+				frappe.throw(_("Cannot get Projected Qty for Batch Wise Stock"))
+			if self.include_package():
+				frappe.throw(_("Cannot get Projected Qty for Package Wise Stock"))
 
 	def get_items(self):
 		conditions = []
@@ -105,10 +99,9 @@ class StockBalanceReport:
 
 		self.sles = frappe.db.sql("""
 			select
-				item_code, warehouse, item_code as name,
-				posting_date, actual_qty, valuation_rate,
-				company, voucher_type, qty_after_transaction, stock_value_difference,
-				voucher_no
+				item_code as name, item_code, warehouse, company, batch_no, packing_slip,
+				actual_qty, valuation_rate, qty_after_transaction, stock_value_difference,
+				posting_date, posting_time, voucher_type, voucher_no
 			from `tabStock Ledger Entry` force index (posting_sort_index)
 			where docstatus < 2 {0} {1}
 			order by posting_date, posting_time, creation, actual_qty
@@ -130,9 +123,20 @@ class StockBalanceReport:
 			""".format(warehouse_details.lft, warehouse_details.rgt))
 
 		elif self.filters.get("warehouse_type"):
-			conditions.append(""" and exists (select name from `tabWarehouse` wh \
+			conditions.append("""exists (select name from `tabWarehouse` wh \
 				where wh.warehouse_type = {0} and `tabStock Ledger Entry`.warehouse = wh.name)
 			""".format(frappe.db.escape(self.filters.get("warehouse_type"))))
+
+		if self.filters.get("batch_no"):
+			conditions.append("batch_no = {0}".format(frappe.db.escape(self.filters.get("batch_no"))))
+
+		if self.filters.get("packing_slip"):
+			conditions.append("packing_slip = {0}".format(frappe.db.escape(self.filters.get("packing_slip"))))
+
+		if self.filters.get("package_wise_stock") == "Packed Stock":
+			conditions.append("(packing_slip != '' and packing_slip is not null)")
+		elif self.filters.get("package_wise_stock") == "Unpacked Stock":
+			conditions.append("(packing_slip = '' or packing_slip is null)")
 
 		match_conditions = build_match_conditions("Stock Ledger Entry")
 		if match_conditions:
@@ -143,22 +147,29 @@ class StockBalanceReport:
 	def get_purchase_order_map(self):
 		self.purchase_order_map = {}
 
-		if self.filters.get("show_projected_qty"):
+		if self.include_purchase_order_details():
 			po_data = frappe.db.sql("""
-				select po.company, po_item.item_code, po_item.warehouse,
+				select po_item.item_code, po_item.warehouse, po.company,
 					sum((po_item.qty - po_item.received_qty)*po_item.conversion_factor) as ordered_qty
 				from `tabPurchase Order` po
 				inner join `tabPurchase Order Item` po_item on po.name = po_item.parent
 				where po.docstatus = 1 and po.status not in ('Closed', 'Delivered')
 					and po_item.qty > po_item.received_qty and po_item.delivered_by_supplier = 0
 					and po.transaction_date <= %s
-				group by company, item_code, warehouse
+				group by item_code, warehouse, company
 			""", [self.filters.to_date], as_dict=1)
 
 			for d in po_data:
-				self.purchase_order_map[(d.company, d.item_code, d.warehouse)] = d.ordered_qty
+				key = self.get_balance_key(d)
+				self.purchase_order_map.setdefault(key, 0)
+				self.purchase_order_map[key] += d.ordered_qty
 
 		return self.purchase_order_map
+
+	def get_ageing_fifo_queue(self):
+		if self.include_stock_ageing_data():
+			self.filters['show_warehouse_wise_stock'] = True
+			self.item_wise_fifo_queue = get_fifo_queue(self.filters, self.sles)
 
 	def get_item_details_map(self):
 		self.item_map = {}
@@ -193,7 +204,7 @@ class StockBalanceReport:
 	def get_item_reorder_map(self):
 		self.item_reorder_map = frappe._dict()
 
-		if self.items:
+		if self.include_reorder_details() and self.items:
 			item_reorder_details = frappe.db.sql("""
 				select parent as item_code, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 				from `tabItem Reorder`
@@ -205,21 +216,39 @@ class StockBalanceReport:
 
 		return self.item_reorder_map
 
-	def get_item_warehouse_map(self):
-		self.iwb_map = {}
+	def get_packing_slip_map(self):
+		self.packing_slip_map = {}
+		if not self.include_package():
+			return self.packing_slip_map
+
+		packing_slips = list(set([d.get("packing_slip") for d in self.stock_balance_map.values() if d.get("packing_slip")]))
+
+		packing_slip_data = []
+		if packing_slips:
+			packing_slip_data = frappe.db.sql("""
+				select name, package_type
+				from `tabPacking Slip`
+				where name in %s
+			""", [packing_slips], as_dict=1)
+
+		self.packing_slip_map = {}
+		for d in packing_slip_data:
+			self.packing_slip_map[d.name] = d
+
+		return self.packing_slip_map
+
+	def get_stock_balance_map(self):
+		self.stock_balance_map = OrderedDict()
+		precision = self.get_precision()
 
 		for sle in self.sles:
-			key = (sle.company, sle.item_code, sle.warehouse)
-			if key not in self.iwb_map:
-				self.iwb_map[key] = frappe._dict(template.copy())
+			key = self.get_balance_key(sle)
+			stock_balance = self.get_balance_dict(key)
 
-			stock_balance = self.iwb_map[(sle.company, sle.item_code, sle.warehouse)]
+			if not stock_balance.received_date:
+				stock_balance.received_dt = combine_datetime(sle.posting_date, sle.posting_time)
 
-			if sle.voucher_type == "Stock Reconciliation":
-				qty_diff = flt(sle.qty_after_transaction) - stock_balance.bal_qty
-			else:
-				qty_diff = flt(sle.actual_qty)
-
+			qty_diff = flt(sle.actual_qty)
 			value_diff = flt(sle.stock_value_difference)
 
 			if sle.posting_date < self.filters.from_date:
@@ -254,92 +283,85 @@ class StockBalanceReport:
 					stock_balance.reconcile_qty += qty_diff
 					stock_balance.reconcile_val += value_diff
 
-			stock_balance.val_rate = sle.valuation_rate
 			stock_balance.bal_qty += qty_diff
 			stock_balance.bal_val += value_diff
 
+			if flt(stock_balance.bal_qty, precision):
+				stock_balance.val_rate = stock_balance.bal_val / flt(stock_balance.bal_qty, precision)
+				stock_balance.val_rate = flt(stock_balance.val_rate, precision)
+
 		if self.purchase_order_map:
 			for key, ordered_qty in self.purchase_order_map.items():
-				if key not in self.iwb_map:
-					self.iwb_map[key] = frappe._dict(template.copy())
-
-				stock_balance = self.iwb_map[key]
+				stock_balance = self.get_balance_dict(key)
 				stock_balance.ordered_qty = ordered_qty
 
-		self.iwb_map = self.filter_items_with_no_transactions()
+		return self.stock_balance_map
 
-		if cint(self.filters.get("consolidated")):
-			self.iwb_map = self.consolidate_values()
-
-		return self.iwb_map
-
-	def filter_items_with_no_transactions(self):
+	def clean_stock_balance_map(self):
 		precision = self.get_precision()
 		to_remove = []
 
-		for (company, item, warehouse) in self.iwb_map:
-			item_dict = self.item_map.get(item, {})
+		for key in self.stock_balance_map:
+			stock_balance = self.stock_balance_map[key]
+			item_details = self.item_map.get(stock_balance.item_code) or {}
 
-			if cint(self.filters.get("filter_item_without_transactions")) or item_dict.get('disabled'):
-				stock_balance = self.iwb_map[(company, item, warehouse)]
-				no_transactions = True
+			is_empty_balance = True
+			for field in self.balance_value_fields:
+				val = flt(stock_balance.get(field), precision)
+				stock_balance[field] = val
+				if field != "val_rate" and val:
+					is_empty_balance = False
 
-				for key, val in stock_balance.items():
-					val = flt(val, precision)
-					stock_balance[key] = val
-					if key != "val_rate" and val:
-						no_transactions = False
-
-				if no_transactions:
-					to_remove.append((company, item, warehouse))
+			if is_empty_balance and (not self.filters.get("show_zero_qty_rows") or item_details.get('disabled')):
+				to_remove.append(key)
 
 		for d in to_remove:
-			self.iwb_map.pop(d)
+			self.stock_balance_map.pop(d)
 
-		return self.iwb_map
+		sorted_stock_balance = sorted(list(self.stock_balance_map.items()), key=lambda d: (
+			not d[1].packing_slip,
+			cstr(d[1].packing_slip),
+			d[1].item_code,
+			cstr(d[1].warehouse)
+		))
+		self.stock_balance_map = OrderedDict(sorted_stock_balance)
 
-	def consolidate_values(self):
-		item_map = frappe._dict()
-
-		for (company, item, warehouse), stock_balance in self.iwb_map.items():
-			key = ("", item, "")
-			if key not in item_map:
-				item_map[key] = frappe._dict(template.copy())
-
-			for k, value in stock_balance.items():
-				item_map[key][k] += value
-
-		for k, stock_balance in item_map.items():
-			stock_balance.val_rate = stock_balance.bal_val / stock_balance.bal_qty if stock_balance.bal_qty else 0.0
-
-		return item_map
+		return self.stock_balance_map
 
 	def get_rows(self):
 		self.rows = []
 		self.conversion_factors = []
 
-		for (company, item_code, warehouse) in sorted(self.iwb_map):
-			if self.item_map.get(item_code):
-				stock_balance = self.iwb_map[(company, item_code, warehouse)]
-				item_details = self.item_map[item_code]
+		for key, stock_balance in self.stock_balance_map.items():
+			item_details = self.item_map.get(stock_balance.item_code)
+			if item_details:
+				use_alt_uom = self.filters.qty_field == "Contents Qty" and item_details["alt_uom"]
+				alt_uom_size = item_details["alt_uom_size"] if use_alt_uom else 1.0
 
-				use_alt_uom = self.filters.qty_field == "Contents Qty" and self.item_map[item_code]["alt_uom"]
-				alt_uom_size = self.item_map[item_code]["alt_uom_size"] if use_alt_uom else 1.0
+				package_type = self.packing_slip_map.get(stock_balance.packing_slip, {}).get("package_type")\
+					if stock_balance.packing_slip else None
 
-				reorder_details = self.item_reorder_map.get((item_code, warehouse)) or {}
+				reorder_details = self.item_reorder_map.get((stock_balance.item_code, stock_balance.warehouse)) or {}\
+					if self.include_reorder_details() else {}
+
 				item_reorder_level = flt(reorder_details.get("warehouse_reorder_level"))
 				item_reorder_qty = flt(reorder_details.get("warehouse_reorder_qty"))
 
 				row = {
-					"item_code": item_code,
+					"item_code": stock_balance.item_code,
+					"warehouse": stock_balance.warehouse,
+					"company": stock_balance.company,
+					"batch_no": stock_balance.batch_no,
+					"packing_slip": stock_balance.packing_slip,
+
 					"item_name": item_details["item_name"],
 					"disable_item_formatter": cint(self.show_item_name),
 					"item_group": item_details["item_group"],
 					"brand": item_details["brand"],
 					"description": item_details["description"],
 
-					"warehouse": warehouse,
-					"company": company,
+					"package_type": package_type,
+
 					"uom": item_details["alt_uom"] if use_alt_uom else item_details["stock_uom"],
 					"alt_uom_size": item_details["alt_uom_size"] if item_details["alt_uom"] else None,
 
@@ -375,24 +397,92 @@ class StockBalanceReport:
 				if self.filters.get("include_uom"):
 					self.conversion_factors.append(flt(item_details.conversion_factor) * alt_uom_size)
 
-				if self.filters.get('show_stock_ageing_data'):
-					fifo_queue = self.item_wise_fifo_queue[(item_code, warehouse)].get('fifo_queue')
+				if self.include_stock_ageing_data():
+					fifo_queue = self.item_wise_fifo_queue[(stock_balance.item_code, stock_balance.warehouse)].get('fifo_queue')
 
 				self.rows.append(row)
 
 		return self.rows
 
+	def get_balance_dict(self, key):
+		if key not in self.stock_balance_map:
+			balance_key_fields = self.get_balance_fields()
+			balance_key_dict = dict(zip(balance_key_fields, key))
+
+			empty_balance = {f: 0 for f in self.balance_value_fields}
+			self.stock_balance_map[key] = frappe._dict(empty_balance)
+			self.stock_balance_map[key].update(balance_key_dict)
+
+		return self.stock_balance_map[key]
+
+	balance_value_fields = [
+		"opening_qty", "opening_val",
+		"in_qty", "in_val",
+		"purchase_qty", "purchase_val",
+		"purchase_return_qty", "purchase_return_val",
+		"out_qty", "out_val",
+		"sales_qty", "sales_val",
+		"sales_return_qty", "sales_return_val",
+		"reconcile_qty", "reconcile_val",
+		"bal_qty", "bal_val",
+		"ordered_qty", "projected_qty",
+		"val_rate"
+	]
+
+	def get_balance_key(self, d):
+		fields = self.get_balance_fields()
+		return tuple(d.get(f) or None for f in fields)
+
+	def get_balance_fields(self):
+		include_warehouse = self.include_warehouse()
+		include_batch = self.include_batch()
+		include_package = self.include_package()
+
+		fields = ["item_code"]
+		if include_warehouse:
+			fields += ["warehouse", "company"]
+		if include_batch:
+			fields.append("batch_no")
+		if include_package:
+			fields.append("packing_slip")
+
+		return fields
+
+	def include_reorder_details(self):
+		return self.include_warehouse() and not self.include_batch() and not self.include_package()
+
+	def include_purchase_order_details(self):
+		return self.filters.get("show_projected_qty") and not self.include_batch() and not self.include_package()
+
+	def include_stock_ageing_data(self):
+		return self.filters.get('show_stock_ageing_data') and self.include_warehouse()
+
+	def include_warehouse(self):
+		return not cint(self.filters.get("consolidate_warehouse"))
+
+	def include_batch(self):
+		return cint(self.filters.get("batch_wise_stock"))
+
+	def include_package(self):
+		return self.filters.get("package_wise_stock")
+
 	def get_precision(self):
 		return 6 if cint(frappe.db.get_default("float_precision")) <= 6 else 9
 
 	def get_columns(self):
-		columns = [
+		self.columns = [
 			{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item",
 				"width": 100 if self.show_item_name else 150},
 			{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data",
 				"width": 150},
-			{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse",
+			{"label": _("Package"), "fieldname": "packing_slip", "fieldtype": "Link", "options": "Packing Slip",
+				"width": 120},
+			{"label": _("Package Type"), "fieldname": "package_type", "fieldtype": "Link", "options": "Package Type",
 				"width": 100},
+			{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse",
+				"width": 120},
+			{"label": _("Batch No"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch",
+				"width": 140},
 			{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM",
 				"width": 50},
 			{"label": _("Per Unit"), "fieldname": "alt_uom_size", "fieldtype": "Float",
@@ -440,9 +530,9 @@ class StockBalanceReport:
 			{"label": _("Reconciled Value"), "fieldname": "reconcile_val", "fieldtype": "Currency",
 				"width": 110, "is_value": True},
 			{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float",
-				"width": 90, "convertible": "qty"},
+				"width": 90, "convertible": "qty", "is_reorder": True},
 			{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float",
-				"width": 85, "convertible": "qty"},
+				"width": 85, "convertible": "qty", "is_reorder": True},
 			{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group",
 				"width": 100},
 			{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand",
@@ -457,22 +547,33 @@ class StockBalanceReport:
 				'width': 80, "is_ageing": True},
 		]
 
+		if not self.include_warehouse():
+			self.columns = [c for c in self.columns if c.get("fieldname") not in ("warehouse", "company")]
+		if not self.include_batch():
+			self.columns = [c for c in self.columns if c.get("fieldname") != "batch_no"]
+		if not self.include_package():
+			self.columns = [c for c in self.columns if c.get("fieldname") not in ("packing_slip", "package_type")]
+
 		if not self.show_item_name:
-			columns = [c for c in columns if c.get("fieldname") != "item_name"]
+			self.columns = [c for c in self.columns if c.get("fieldname") != "item_name"]
 
 		if not self.show_amounts:
-			columns = [c for c in columns if not c.get("is_value")]
+			self.columns = [c for c in self.columns if not c.get("is_value")]
 
-		if cint(self.filters.consolidated):
-			columns = [c for c in columns if c.get("fieldname") not in ["warehouse", "company"]]
+		if not self.include_purchase_order_details():
+			self.columns = [c for c in self.columns if not c.get("projected_column")]
 
-		if not cint(self.filters.show_projected_qty):
-			columns = [c for c in columns if not c.get("projected_column")]
+		if self.include_reorder_details():
+			self.columns = [c for c in self.columns if not c.get("is_reorder")]
 
-		if not self.filters.get("show_stock_ageing_data"):
-			columns = [c for c in columns if not c.get("is_ageing")]
+		if not self.include_stock_ageing_data():
+			self.columns = [c for c in self.columns if not c.get("is_ageing")]
 
-		if not self.filters.get("separate_returns_qty"):
-			columns = [c for c in columns if not c.get("is_return")]
+		if not self.filters.get("show_returns_separately"):
+			self.columns = [c for c in self.columns if not c.get("is_return")]
+			self.columns = [c for c in self.columns if not c.get("is_return")]
 
-		return columns
+		if not hasattr(self, "rows") or not any(d.get("alt_uom_size") for d in self.rows):
+			self.columns = [c for c in self.columns if c.get("fieldname") != "alt_uom_size"]
+
+		return self.columns

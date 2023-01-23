@@ -13,6 +13,14 @@
 }
 </style>
 
+{%
+	var report_columns = report.get_columns_for_print();
+	var has_warehouse = report_columns.filter(d => d.fieldname == "warehouse").length;
+	var has_batch = report_columns.filter(d => d.fieldname == "batch_no").length;
+	var has_package = report_columns.filter(d => d.fieldname == "packing_slip").length;
+	var has_alt_uom_size = report_columns.filter(d => d.fieldname == "alt_uom_size").length;
+%}
+
 <h2 class="text-center" style="margin-top:0;">{%= __("Stock Balance") %}</h2>
 
 <h5 class="text-center">
@@ -21,45 +29,112 @@
 	{%= frappe.datetime.str_to_user(filters.to_date) %}
 </h5>
 
+<div class="clearfix">
+	<div class="pull-left">
+	{% if (filters.item_code) { %}
+		<strong>{%= __("Item") %}:</strong> {%= filters.item_code %}
+		{% if (filters.item_name && filters.item_name != filters.item_code) { %}
+			- {%= filters.item_name %}
+		{% } %}
+	{% } %}
+	{% if (filters.item_group) { %}
+		<div><strong>{%= __("Item Group") %}:</strong> {%= filters.item_group %}</div>
+	{% } %}
+	{% if (filters.brand) { %}
+		<div><strong>{%= __("Brand") %}:</strong> {%= filters.brand %}</div>
+	{% } %}
+	{% if (filters.item_source) { %}
+		<div><strong>{%= __("Item Source") %}:</strong> {%= filters.item_source %}</div>
+	{% } %}
+	</div>
+
+	<div class="pull-right">
+	{% if (filters.warehouse) { %}
+		<div><strong>{%= __("Warehouse") %}:</strong> {%= filters.warehouse %}</div>
+	{% } %}
+	{% if (filters.batch_no) { %}
+		<div><strong>{%= __("Batch No") %}:</strong> {%= filters.batch_no %}</div>
+	{% } %}
+	{% if (filters.packing_slip) { %}
+		<div><strong>{%= __("Package") %}:</strong> {%= filters.packing_slip %}</div>
+	{% } %}
+	</div>
+</div>
+
 <table class="table table-bordered">
 	<thead>
 		<tr>
 			<th class="text-center">{%= __("Item") %}</th>
-			{% if(!cint(filters.consolidated)) { %}
+
+			{% if (has_warehouse) { %}
 			<th class="text-center">{%= __("Warehouse") %}</th>
 			{% } %}
+
+			{% if (has_batch) { %}
+			<th class="text-center">{%= __("Batch No") %}</th>
+			{% } %}
+
+			{% if (has_package) { %}
+			<th class="text-center">{%= __("Package") %}</th>
+			{% } %}
+
 			<th class="text-center">{%= __("UOM") %}</th>
-			<th class="text-center">{%= __("Size") %}</th>
+
+			{% if (has_alt_uom_size) { %}
+			<th class="text-center">{%= __("Per Unit") %}</th>
+			{% } %}
+
 			<th class="text-center">{%= __("Opening Qty") %}</th>
 			<th class="text-center">{%= __("In Qty") %}</th>
 			<th class="text-center">{%= __("Out Qty") %}</th>
-			<th class="text-center">{%= __("Balance Qty") %}</th>
 			<th class="text-center">{%= __("Purchase Qty") %}</th>
 			<th class="text-center">{%= __("Sales Qty") %}</th>
+			<th class="text-center">{%= __("Balance Qty") %}</th>
 		</tr>
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 				<td>
-                    <a href="#Form/Item/{%= data[i].item_code %}" target="_blank">{%= data[i].item_code %}</a>
-					{% if(data[i].item_name && data[i].item_name != data[i].item_code) { %}
-					<br />{%= data[i].item_name %}
+					{% if (!data[i].is_total_row) { %}
+						<div>
+							<a href="/app/item/{%= encodeURIComponent(data[i].item_code) %}" target="_blank">{%= data[i].item_code %}</a>
+						</div>
+						{% if(data[i].item_name && data[i].item_name != data[i].item_code) { %}
+							<div>{%= data[i].item_name %}</div>
+						{% } %}
+					{% } else { %}
+						<b>Total</b>
 					{% } %}
 				</td>
 
-				{% if(!cint(filters.consolidated)) { %}
-				<td><a href="#Form/Warehouse/{%= data[i].warehouse %}" target="_blank">{%= (data[i].warehouse || " - ").split(" - ")[0] %}</a></td>
+				{% if (has_warehouse) { %}
+				<td><a href="/app/warehouse/{%= encodeURIComponent(data[i].warehouse) %}" target="_blank">{%= (data[i].warehouse || " - ").split(" - ")[0] %}</a></td>
+				{% } %}
+
+				{% if (has_batch) { %}
+				<td><a href="/app/batch/{%= encodeURIComponent(data[i].batch_no) %}" target="_blank">{%= data[i].batch_no %}</a></td>
+				{% } %}
+
+				{% if (has_package) { %}
+				<td>
+					<div><a href="/app/packing-slip/{%= encodeURIComponent(data[i].packing_slip) %}" target="_blank">{%= data[i].packing_slip %}</a></div>
+					<div>{%= data[i].package_type %}</div>
+				</td>
 				{% } %}
 
                 <td class="text-center">{%= data[i].uom %}</td>
+
+				{% if (has_alt_uom_size) { %}
                 <td class="text-right text-nowrap">{% if (data[i].alt_uom_size != null) { %}{%= format_number(data[i].alt_uom_size) %}{% } %}</td>
+				{% } %}
+
                 <td class="text-right text-nowrap">{%= format_number(data[i].opening_qty) %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].in_qty) %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].out_qty) %}</td>
-                <td class="text-right text-nowrap">{%= format_number(data[i].bal_qty) %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].purchase_qty) %}</td>
                 <td class="text-right text-nowrap">{%= format_number(data[i].sales_qty) %}</td>
+                <td class="text-right text-nowrap"><b>{%= format_number(data[i].bal_qty) %}</b></td>
 			</tr>
 		{% } %}
 	</tbody>

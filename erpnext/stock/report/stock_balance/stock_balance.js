@@ -32,9 +32,25 @@ frappe.query_reports["Stock Balance"] = {
 			get_query: function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'include_disabled': 1, 'include_templates': 1}
+					filters: {"include_disabled": 1, "include_templates": 1}
 				};
+			},
+			on_change: function() {
+				var item_code = frappe.query_report.get_filter_value('item_code');
+				if (!item_code) {
+					frappe.query_report.set_filter_value('item_name', "");
+				} else {
+					frappe.db.get_value("Item", item_code, 'item_name', function(value) {
+						frappe.query_report.set_filter_value('item_name', value['item_name']);
+					});
+				}
 			}
+		},
+		{
+			fieldname: "item_name",
+			label: __("Item Name"),
+			fieldtype: "Data",
+			hidden: 1
 		},
 		{
 			fieldname: "warehouse",
@@ -42,11 +58,11 @@ frappe.query_reports["Stock Balance"] = {
 			fieldtype: "Link",
 			options: "Warehouse",
 			get_query: () => {
-				var warehouse_type = frappe.query_report.get_filter_value('warehouse_type');
-				if(warehouse_type){
+				let warehouse_type = frappe.query_report.get_filter_value("warehouse_type");
+				if (warehouse_type) {
 					return {
 						filters: {
-							'warehouse_type': warehouse_type
+							"warehouse_type": warehouse_type
 						}
 					};
 				}
@@ -57,6 +73,18 @@ frappe.query_reports["Stock Balance"] = {
 			label: __("Warehouse Type"),
 			fieldtype: "Link",
 			options: "Warehouse Type"
+		},
+		{
+			fieldname: "batch_no",
+			label: __("Batch No"),
+			fieldtype: "Link",
+			options: "Batch"
+		},
+		{
+			fieldname: "packing_slip",
+			label: __("Package"),
+			fieldtype: "Link",
+			options: "Packing Slip"
 		},
 		{
 			fieldname: "item_group",
@@ -83,19 +111,29 @@ frappe.query_reports["Stock Balance"] = {
 			options: "UOM"
 		},
 		{
-			fieldname: "filter_item_without_transactions",
-			label: __("Filter Items Without Transactons"),
+			fieldname: "package_wise_stock",
+			label: __("Package Wise Stock"),
+			fieldtype: "Select",
+			options: ["", "Packed and Unpacked Stock", "Packed Stock", "Unpacked Stock"],
+		},
+		{
+			fieldname: "consolidate_warehouse",
+			label: __("Consolidate Warehouse"),
 			fieldtype: "Check",
-			default: 1
 		},
 		{
-			fieldname: "consolidated",
-			label: __("Consolidated Values"),
-			fieldtype: "Check"
+			fieldname: "batch_wise_stock",
+			label: __("Batch Wise Stock"),
+			fieldtype: "Check",
 		},
 		{
-			fieldname: "separate_returns_qty",
-			label: __("Separate Returned Qty"),
+			fieldname: "show_zero_qty_rows",
+			label: __("Show Zero Qty Rows"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "show_returns_separately",
+			label: __("Show Returns Separately"),
 			fieldtype: "Check"
 		},
 		{
@@ -104,9 +142,9 @@ frappe.query_reports["Stock Balance"] = {
 			fieldtype: "Check"
 		},
 		{
-			fieldname: 'show_stock_ageing_data',
-			label: __('Show Stock Ageing Data'),
-			fieldtype: 'Check'
+			fieldname: "show_stock_ageing_data",
+			label: __("Show Stock Ageing Data"),
+			fieldtype: "Check"
 		},
 	],
 

@@ -8,6 +8,7 @@
  "hide_custom": 0,
  "icon": "stock",
  "idx": 0,
+ "is_hidden": 0,
  "label": "Stock",
  "links": [
   {
@@ -82,81 +83,6 @@
    "link_count": 0,
    "link_to": "Item Attribute",
    "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock Reports",
-   "link_count": 0,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Stock Ledger",
-   "link_count": 0,
-   "link_to": "Stock Ledger",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Stock Balance",
-   "link_count": 0,
-   "link_to": "Stock Balance",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Stock Projected Qty",
-   "link_count": 0,
-   "link_to": "Stock Projected Qty",
-   "link_type": "Report",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Stock Summary",
-   "link_count": 0,
-   "link_to": "stock-balance",
-   "link_type": "Page",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Stock Ageing",
-   "link_count": 0,
-   "link_to": "Stock Ageing",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Item,Batch",
-   "hidden": 0,
-   "is_query_report": 1,
-   "label": "Batch Balance",
-   "link_count": 0,
-   "link_to": "Batch Balance",
-   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   },
@@ -706,9 +632,72 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Reports",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Ledger",
+   "link_count": 0,
+   "link_to": "Stock Ledger",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Balance",
+   "link_count": 0,
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Projected Qty",
+   "link_count": 0,
+   "link_to": "Stock Projected Qty",
+   "link_type": "Report",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Summary",
+   "link_count": 0,
+   "link_to": "stock-balance",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Item",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Ageing",
+   "link_count": 0,
+   "link_to": "Stock Ageing",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-01-10 00:19:52.092426",
+ "modified": "2023-01-23 12:13:55.006981",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
