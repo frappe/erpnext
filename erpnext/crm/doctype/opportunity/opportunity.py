@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import today, getdate, cint
+from frappe.utils import today, getdate, cint, clean_whitespace
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
@@ -14,6 +14,7 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
 from erpnext.crm.doctype.lead.lead import get_customer_from_lead, add_sales_person_from_source
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import create_maintenance_opportunity
 from six import string_types
 import json
 
@@ -612,14 +613,18 @@ def schedule_follow_up(name, schedule_date, to_discuss):
 
 
 @frappe.whitelist()
-def submit_communication(name, contact_date, remarks, submit_follow_up=False):
+def submit_communication(name, contact_date, remarks, submit_follow_up=False,
+		maintenance_schedule=None, maintenance_schedule_row=None):
 	if not remarks:
 		frappe.throw(_('Remarks are mandatory for Communication'))
 
-	if not frappe.db.exists('Opportunity', name):
-		frappe.throw(_("Opportunity does not exist"))
+	remarks = clean_whitespace(remarks)
 
-	opp = frappe.get_doc('Opportunity', name)
+	if frappe.db.exists('Opportunity', name):
+		opp = frappe.get_doc('Opportunity', name)
+	else:
+		opp = create_maintenance_opportunity(maintenance_schedule, maintenance_schedule_row)
+		opp.save()
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
@@ -646,6 +651,11 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 
 		opp.save()
 
+	return {
+		"opportunity": opp.name,
+		"contact_date": contact_date,
+		"remarks": remarks
+	}
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

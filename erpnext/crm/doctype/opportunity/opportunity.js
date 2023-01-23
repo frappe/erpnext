@@ -320,7 +320,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 					args: {
 						name: me.frm.doc.name,
 						schedule_date: data.schedule_date,
-						to_discuss: data.to_discuss
+						to_discuss: data.to_discuss || ""
 					},
 					callback: function (r) {
 						if (!r.exc) {
