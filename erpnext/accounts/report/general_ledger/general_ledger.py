@@ -331,9 +331,34 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	data.append(totals.total)
 
 	# closing
+	balance = 0
+	if totals.closing['debit'] > totals.closing['credit']:
+		balance = totals.closing['debit'] - totals.closing['credit']
+		totals.closing['debit'] = balance
+		totals.closing['credit'] = 0
+	else:
+		balance = totals.closing['credit'] - totals.closing['debit']
+		totals.closing['credit'] = balance
+		totals.closing['debit'] = 0
+
 	data.append(totals.closing)
 
 	return data
+
+def get_balance_row(label, balance, balance_in_account_currency=None):
+	balance_row = {
+		"account": "'" + label + "'",
+		"debit": balance if balance > 0 else 0,
+		"credit": -1*balance if balance < 0 else 0
+	}
+
+	if balance_in_account_currency != None:
+		balance_row.update({
+			"debit_in_account_currency": balance_in_account_currency if balance_in_account_currency > 0 else 0,
+			"credit_in_account_currency": -1*balance_in_account_currency if balance_in_account_currency < 0 else 0
+		})
+
+	return balance_row
 
 
 def get_totals_dict():
