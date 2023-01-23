@@ -186,8 +186,8 @@ class Employee(NestedSet):
 
 		if enabled is None:
 			frappe.throw(_("User {0} does not exist").format(self.user_id))
-		if enabled == 0:
-			frappe.throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
+		# if enabled == 0:
+		# 		frappe.throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
 
 	def validate_duplicate_user_id(self):
 		employee = frappe.db.sql_list("""select name from `tabEmployee` where
