@@ -49,7 +49,7 @@
             {% endfor %}
             <tr>
                 <td colspan="4">Gross Amount(a)</td>
-                <td>{{ frappe.format(data[0].total_amount, {fieldtype: "Currency"})}}</td>
+                <td>{{ frappe.format(data[0].grand_total, {fieldtype: "Currency"})}}</td>
             </tr>
             <tr>
                 <td colspan="4">TDS(%)</td>
@@ -61,7 +61,7 @@
             </tr>
             <tr>
                 <td colspan="4">Total Deduction Amount(c)</td>
-                <td>{{ frappe.format(data[0].deduction_amount, {fieldtype: "Currency"})}}</td>
+                <td>{{ frappe.format(data[0].total_deduction, {fieldtype: "Currency"})}}</td>
             </tr>
             <tr>
                 <td colspan="4">Payable Amount = a-b-c</td>
