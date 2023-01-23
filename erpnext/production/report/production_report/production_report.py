@@ -51,6 +51,7 @@ def get_data(filters):
 		`tabCost Center` cc
 	where 
 		pe.docstatus = 1 
+	
 	and 
 		cc.name = pe.cost_center {1} {2} {3}""".format(total_qty, conditions, group_by, order_by)
 	

@@ -420,13 +420,13 @@ class Production(StockController):
 			doc.production_type = self.production_type
 			doc.adhoc_production = self.adhoc_production
 			doc.equipment_model = a.equipment_model
+			doc.equipment_number = a.equipment
 			doc.transporter_type = frappe.db.get_value("Equipment", a.equipment, "equipment_category")
 			doc.unloading_by = a.unloading_by
 			doc.transfer_to_warehouse = self.to_warehouse if self.transfer else ''
 			doc.mineral_raising_group = self.mineral_raising_group
 			doc.coal_raising_type = self.coal_raising_type
 			doc.submit()
-
 	def delete_production_entry(self):
 		frappe.db.sql("delete from `tabProduction Entry` where ref_doc = %s", self.name)
 
