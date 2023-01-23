@@ -3537,7 +3537,7 @@ Quality Feedback Template,အရည်အသွေးတုံ့ပြန်ခ
 Rules for applying different promotional schemes.,ကွဲပြားခြားနားသောပရိုမိုးရှင်းအစီအစဉ်များလျှောက်ထားမှုအတွက်စည်းကမ်းများ။,
 Shift,အဆိုင်း,
 Show {0},Show ကို {0},
-"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","မှလွဲ. အထူးဇာတ်ကောင် &quot;-&quot; &quot;။ &quot;, &quot;#&quot;, &quot;/&quot;, &quot;{&quot; နှင့် &quot;}&quot; စီးရီးနာမည်အတွက်ခွင့်မပြု",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","မှလွဲ. အထူးဇာတ်ကောင် &quot;-&quot; &quot;။ &quot;, &quot;#&quot;, &quot;/&quot;, &quot;{{&quot; နှင့် &quot;}}&quot; စီးရီးနာမည်အတွက်ခွင့်မပြု {0}",
 Target Details,ပစ်မှတ်အသေးစိတ်,
 {0} already has a Parent Procedure {1}.,{0} ပြီးသားမိဘလုပ်ထုံးလုပ်နည်း {1} ရှိပါတယ်။,
 API,API ကို,

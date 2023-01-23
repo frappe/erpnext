@@ -3535,7 +3535,7 @@ Quality Feedback Template,Шаблон обратной связи по каче
 Rules for applying different promotional schemes.,Правила применения разных рекламных схем.,
 Shift,Сдвиг,
 Show {0},Показать {0},
-"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","Специальные символы, кроме ""-"", ""#"", ""."", ""/"", ""{"" и ""}"", не допускаются в серийных номерах",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Специальные символы, кроме &quot;-&quot;, &quot;#&quot;, &quot;।&quot;, &quot;/&quot;, &quot;{{&quot; и &quot;}}&quot;, не допускаются в серийных номерах {0}",
 Target Details,Детали цели,
 {0} already has a Parent Procedure {1}.,{0} уже имеет родительскую процедуру {1}.,
 API,API,
