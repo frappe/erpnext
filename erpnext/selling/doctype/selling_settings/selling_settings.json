@@ -32,6 +32,7 @@
   "sales_update_frequency",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
+  "allow_against_multiple_quotations",
   "hide_tax_id"
  ],
  "fields": [
@@ -130,6 +131,12 @@
   },
   {
    "default": "0",
+   "fieldname": "allow_against_multiple_quotations",
+   "fieldtype": "Check",
+   "label": "Allow Multiple Sales Orders Against a Quotation"
+  },
+  {
+   "default": "0",
    "fieldname": "validate_selling_price",
    "fieldtype": "Check",
    "label": "Validate Selling Price for Item Against Purchase Rate or Valuation Rate"
@@ -206,7 +213,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-03-28 12:18:06.768403",
+ "modified": "2023-01-23 12:18:06.768403",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
