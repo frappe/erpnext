@@ -584,6 +584,34 @@ def get_customer_from_opportunity(source):
 
 
 @frappe.whitelist()
+def schedule_follow_up(name, schedule_date, to_discuss):
+	if not schedule_date:
+		frappe.throw(_("Schedule Date is mandatory"))
+
+	schedule_date = getdate(schedule_date)
+
+	if schedule_date < getdate():
+		frappe.throw(_("Can't schedule a follow up for past dates"))
+
+	opp = frappe.get_doc("Opportunity", name)
+	dup = [d for d in opp.get('contact_schedule') if d.get('schedule_date') == schedule_date]
+
+	if dup:
+		dup = dup[0]
+		if (dup.to_discuss and to_discuss != dup.to_discuss) or (not dup.to_discuss and not to_discuss):
+			frappe.throw(_("Row #{0}: Follow Up already scheduled for {1}".format(dup.idx, frappe.format(dup.schedule_date))))
+		else:
+			dup.to_discuss = to_discuss
+	else:
+		opp.append('contact_schedule', {
+			'schedule_date': schedule_date,
+			'to_discuss': to_discuss
+		})
+
+	opp.save()
+
+
+@frappe.whitelist()
 def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 	if not remarks:
 		frappe.throw(_('Remarks are mandatory for Communication'))
