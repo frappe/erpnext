@@ -1,7 +1,7 @@
 frappe.provide("erpnext.accounts.bank_reconciliation");
 
 erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
-	constructor(company, bank_account) {
+	constructor(company, bank_account, bank_statement_from_date, bank_statement_to_date, filter_by_reference_date, from_reference_date, to_reference_date) {
 		this.bank_account = bank_account;
 		this.company = company;
 		this.make_dialog();
