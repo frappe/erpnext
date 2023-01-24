@@ -3,16 +3,19 @@
 
 import frappe
 from frappe import _
-from frappe.utils import today, getdate, cint
+from frappe.utils import today, getdate, cint, clean_whitespace
 from frappe.model.mapper import get_mapped_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
+from frappe.core.doctype.notification_count.notification_count import get_all_notification_count
 from erpnext.stock.get_item_details import get_applies_to_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
 from erpnext.crm.doctype.lead.lead import get_customer_from_lead, add_sales_person_from_source
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import get_maintenance_schedule_opportunity
 from six import string_types
 import json
 
@@ -43,6 +46,9 @@ class Opportunity(TransactionBase):
 		elif self.opportunity_from == "Lead":
 			self.set_onload('customer', get_customer_from_lead(self.party_name))
 
+		self.set_can_notify_onload()
+		self.set_onload('notification_count', get_all_notification_count(self.doctype, self.name))
+
 	def validate(self):
 		self.set_missing_values()
 		self.validate_uom_is_integer("uom", "qty")
@@ -54,6 +60,7 @@ class Opportunity(TransactionBase):
 
 	def after_insert(self):
 		self.update_lead_status()
+		self.send_opportunity_greeting()
 
 	def on_trash(self):
 		self.delete_events()
@@ -156,6 +163,37 @@ class Opportunity(TransactionBase):
 
 		return getdate(next_follow_up.schedule_date) if next_follow_up else None
 
+	def get_sms_args(self, notification_type=None):
+		return frappe._dict({
+			'receiver_list': [self.contact_mobile or self.contact_phone],
+			'party_doctype': self.opportunity_from,
+			'party': self.party_name
+		})
+
+	def set_can_notify_onload(self):
+		notification_types = [
+			'Opportunity Greeting',
+		]
+
+		can_notify = frappe._dict()
+		for notification_type in notification_types:
+			can_notify[notification_type] = self.validate_notification(notification_type, throw=False)
+
+		self.set_onload('can_notify', can_notify)
+
+	def validate_notification(self, notification_type=None, throw=False):
+		if not notification_type:
+			if throw:
+				frappe.throw(_("Notification Type is mandatory"))
+			return False
+
+		if self.status in {"Lost", "Closed"}:
+			if throw:
+				frappe.throw(_("Cannot send {0} notification because Opportunity is {1}").format(notification_type, self.status))
+			return False
+
+		return True
+
 	def validate_maintenance_schedule(self):
 		if not self.maintenance_schedule:
 			return
@@ -197,6 +235,9 @@ class Opportunity(TransactionBase):
 			doc = frappe.get_doc("Lead", self.party_name)
 			doc.set_status(update=True)
 			doc.notify_update()
+
+	def send_opportunity_greeting(self):
+		enqueue_template_sms(self, notification_type="Opportunity Greeting")
 
 	def has_active_quotation(self):
 		vehicle_quotation = get_active_vehicle_quotation(self.name, include_draft=False)
@@ -255,7 +296,11 @@ class Opportunity(TransactionBase):
 			return True
 
 	def has_communication(self):
-		return frappe.get_value("Communication", filters={'reference_doctype': self.doctype, 'reference_name': self.name})
+		return frappe.db.get_value("Communication", filters={
+			'reference_doctype': self.doctype,
+			'reference_name': self.name,
+			'communication_type': ['!=', 'Automated Message']
+		})
 
 
 @frappe.whitelist()
@@ -583,14 +628,47 @@ def get_customer_from_opportunity(source):
 
 
 @frappe.whitelist()
-def submit_communication(name, contact_date, remarks, submit_follow_up=False):
+def schedule_follow_up(name, schedule_date, to_discuss=None):
+	if not schedule_date:
+		frappe.throw(_("Schedule Date is mandatory"))
+
+	schedule_date = getdate(schedule_date)
+
+	if schedule_date < getdate():
+		frappe.throw(_("Can't schedule a follow up for past dates"))
+
+	opp = frappe.get_doc("Opportunity", name)
+	dup = [d for d in opp.get('contact_schedule') if d.get('schedule_date') == schedule_date]
+
+	if dup:
+		dup = dup[0]
+		if (dup.to_discuss and to_discuss != dup.to_discuss) or (not dup.to_discuss and not to_discuss):
+			frappe.throw(_("Row #{0}: Follow Up already scheduled for {1}".format(dup.idx, frappe.format(dup.schedule_date))))
+		else:
+			dup.to_discuss = to_discuss
+	else:
+		opp.append('contact_schedule', {
+			'schedule_date': schedule_date,
+			'to_discuss': to_discuss
+		})
+
+	opp.save()
+
+
+@frappe.whitelist()
+def submit_communication(opportunity, contact_date, remarks, submit_follow_up=False,
+		maintenance_schedule=None, maintenance_schedule_row=None):
 	if not remarks:
 		frappe.throw(_('Remarks are mandatory for Communication'))
 
-	if not frappe.db.exists('Opportunity', name):
-		frappe.throw(_("Opportunity does not exist"))
+	remarks = clean_whitespace(remarks)
 
-	opp = frappe.get_doc('Opportunity', name)
+	if frappe.db.exists('Opportunity', opportunity):
+		opp = frappe.get_doc('Opportunity', opportunity)
+	elif maintenance_schedule and maintenance_schedule_row:
+		opp = get_maintenance_schedule_opportunity(maintenance_schedule, maintenance_schedule_row)
+	else:
+		frappe.throw(_('Opportunity/Maintenance Schedule not provided'))
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
@@ -615,8 +693,14 @@ def submit_communication(name, contact_date, remarks, submit_follow_up=False):
 		if follow_up:
 			follow_up[0].contact_date = getdate(contact_date)
 
+	if opp.is_new() or cint(submit_follow_up):
 		opp.save()
 
+	return {
+		"opportunity": opp.name,
+		"contact_date": contact_date,
+		"remarks": remarks
+	}
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

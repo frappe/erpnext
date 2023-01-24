@@ -32,8 +32,8 @@ class VehicleMaintenanceSchedule:
 		conditions = self.get_conditions()
 		self.data = frappe.db.sql("""
 			SELECT
-				msd.scheduled_date as due_date, msd.project_template, ms.name as schedule,
-				ms.customer, ms.customer_name, ms.contact_mobile, ms.contact_phone,
+				msd.scheduled_date as due_date, msd.project_template, msd.name as schedule_row,
+				ms.name as schedule, ms.customer, ms.customer_name, ms.contact_mobile, ms.contact_phone,
 				v.name as vehicle, v.item_code, v.delivery_date, v.chassis_no,
 				v.engine_no, v.license_plate, v.unregistered, v.variant_of_name,
 				v.customer as vehicle_customer, v.customer_name as vehicle_customer_name,
@@ -117,7 +117,6 @@ class VehicleMaintenanceSchedule:
 				if communication:
 					d.remarks = communication[0].content
 					d.contact_date = communication[0].contact_date
-
 
 		self.data = sorted(self.data, key=lambda d: (getdate(d.due_date), getdate(d.delivery_date)))
 

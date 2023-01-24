@@ -31,6 +31,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		this.update_dynamic_fields();
 		this.set_sales_person_from_user();
 		this.setup_buttons();
+		this.setup_dashboard();
 	}
 
 	onload_post_render() {
@@ -40,6 +41,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 	setup_buttons() {
 		var me = this;
 		me.frm.clear_custom_buttons();
+		me.setup_notification_buttons();
 
 		if (!me.frm.doc.__islocal) {
 			if(me.frm.perm[0].write) {
@@ -104,6 +106,23 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 		}
 	}
 
+	setup_notification_buttons() {
+		if(this.frm.is_new()) {
+			return
+		}
+
+		if (this.can_notify("Opportunity Greeting")) {
+			var confirmation_count = frappe.get_notification_count(this.frm, 'Opportunity Greeting', 'SMS');
+			let label = __("Opportunity Greeting{0}", [confirmation_count ? " (Resend)" : ""]);
+			this.frm.add_custom_button(label, () => this.send_sms('Opportunity Greeting'),
+				__("Notify"));
+		}
+
+		this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
+			__("Notify"));
+	}
+
+
 	setup_queries() {
 		var me = this;
 
@@ -142,6 +161,21 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 				}
 			});
 		}
+	}
+
+	setup_dashboard() {
+		if (this.frm.is_new()) {
+			return
+		}
+
+		this.frm.dashboard.stats_area_row.empty();
+
+		var reminder_count = frappe.get_notification_count(this.frm, 'Opportunity Greeting', 'SMS');
+		var reminder_status = reminder_count ? __("{0} SMS", [reminder_count]) : __("Not Sent");
+		var reminder_color = reminder_count ? "green"
+			: this.can_notify('Opportunity Greeting') ? "yellow" : "grey";
+
+		this.frm.dashboard.add_indicator(__('Opportunity Greeting: {0}', [reminder_status]), reminder_color);
 	}
 
 	update_dynamic_fields() {
@@ -313,8 +347,21 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 				},
 			],
 			primary_action: function() {
-				me.frm.add_child('contact_schedule', dialog.get_values());
-				me.frm.save();
+				var data = dialog.get_values();
+
+				frappe.call({
+					method: "erpnext.crm.doctype.opportunity.opportunity.schedule_follow_up",
+					args: {
+						name: me.frm.doc.name,
+						schedule_date: data.schedule_date,
+						to_discuss: data.to_discuss || ""
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
 				dialog.hide();
 			},
 			primary_action_label: __('Schedule')
@@ -371,7 +418,7 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 				frappe.call({
 					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
 					args: {
-						name: me.frm.doc.name,
+						opportunity: me.frm.doc.name,
 						contact_date: data.contact_date,
 						remarks: data.remarks,
 						submit_follow_up: 1,
@@ -427,6 +474,23 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			frm: this.frm
 		});
 	}
-};
+
+	can_notify(what) {
+		if (this.frm.doc.__onload && this.frm.doc.__onload.can_notify) {
+			return this.frm.doc.__onload.can_notify[what];
+		} else {
+			return false;
+		}
+	}
+
+	send_sms(notification_type) {
+		new frappe.SMSManager(this.frm.doc, {
+			notification_type: notification_type,
+			mobile_no: this.frm.doc.contact_mobile || this.frm.doc.contact_phone,
+			party_doctype: this.frm.doc.opportunity_from,
+			party: this.frm.doc.party_name,
+		});
+	}
+});
 
 extend_cscript(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
