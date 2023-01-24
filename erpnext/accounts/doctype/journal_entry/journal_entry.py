@@ -114,6 +114,9 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def before_submit(self):
+		self.update_transporter_invoice()
+
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
@@ -134,9 +137,21 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.unlink_transporter_invoice()
+
+	def on_trash(self):
+		self.unlink_transporter_invoice()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
+
+	def update_transporter_invoice(self):
+		frappe.db.sql("""update `tabTransporter Invoice` ti
+			inner join `tabJournal Entry Account` jea on jea.reference_name = ti.name
+				and jea.reference_type = 'Transporter Invoice'
+			set ti.journal_entry = jea.parent
+			where jea.parent = %s
+			and ti.journal_entry is null""", self.name)
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
@@ -345,6 +360,13 @@ class JournalEntry(AccountsController):
 				"",
 			)
 			frappe.db.set_value("Journal Entry", self.name, "inter_company_journal_entry_reference", "")
+
+	def unlink_transporter_invoice(self):
+		frappe.db.sql(
+			""" update `tabTransporter Invoice`
+			set journal_entry = null where journal_entry = %s""",
+			self.name,
+		)
 
 	def unlink_asset_adjustment_entry(self):
 		frappe.db.sql(

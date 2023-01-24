@@ -98,6 +98,11 @@ class TransporterInvoiceEntry(Document):
 
 	@frappe.whitelist()
 	def post_to_account(self):
+		je_id = frappe.db.sql("select journal_entry from `tabTransporter Invoice` where transporter_invoice_entry = '{}' and docstatus = 1 limit 1".format(self.name), as_dict=True)
+		if je_id[0].journal_entry:
+			je = frappe.get_doc("Journal Entry", je_id[0].journal_entry)
+			if je.docstatus != 2:
+				frappe.throw("{} already exists against this entry".format(frappe.get_desk_link("Journal Entry",je.name)))
 		self.check_permission('write')
 		if cint(self.invoice_submitted) == 1 and cint(self.invoice_created) == 1 :
 			args = frappe._dict({
@@ -112,12 +117,11 @@ class TransporterInvoiceEntry(Document):
 					"payable_amount":self.payable_amount,
 					"remarks":self.remarks
 				})
-			# frappe.enqueue(post_accounting_entries, timeout=600, args = args)
 			post_accounting_entries(args=args)
 
 @frappe.whitelist()
 def crate_invoice_entries( invoice_entry, args, publish_progress=True):
-	count=0
+	count = 0
 	successful = 0
 	failed = 0
 	invoice_entry.set("failed_transaction",[])
@@ -230,7 +234,7 @@ def submit_invoice_entries(args,publish_progress=True):
 	invoice_entry.set("failed_transaction",[])
 	refresh_interval = 25
 	total_count = cint(invoice_entry.successful)
-	for e in invoice_entry.items:
+	for e in frappe.db.sql("select name as reference, equipment from `tabTransporter Invoice` where docstatus = 0 and transporter_invoice_entry = '{}'".format(args.get("transporter_invoice_entry")),as_dict=True):
 		if e.reference:
 			error = None
 			try:
@@ -238,8 +242,8 @@ def submit_invoice_entries(args,publish_progress=True):
 				if transporter_invoice.docstatus != 2:
 					transporter_invoice.submit()
 				successful += 1
-			except Exception as e:
-				error = str(e)
+			except Exception as er:
+				error = str(er)
 				failed += 1
 			count+=1
 			invoice_entry_item = frappe.get_doc("Transporter Invoice Entry Item",{"parent":args.get("transporter_invoice_entry"), "equipment":transporter_invoice.equipment})
@@ -295,8 +299,8 @@ def cancel_invoice_entries(args,publish_progress=True):
 				if transporter_invoice.docstatus == 1:
 					transporter_invoice.cancel()
 				successful += 1
-			except Exception as e:
-				error = str(e)
+			except Exception as er:
+				error = str(er)
 				failed += 1
 			count+=1
 			invoice_entry_item = frappe.get_doc("Transporter Invoice Entry Item",{"parent":args.get("transporter_invoice_entry"), "equipment":transporter_invoice.equipment})
