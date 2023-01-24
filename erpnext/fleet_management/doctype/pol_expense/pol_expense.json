@@ -250,12 +250,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_opening",
-   "fieldtype": "Select",
-   "ignore_user_permissions": 1,
-   "label": "Is Opening",
-   "options": "No\nYes"
+   "fieldtype": "Check",
+   "label": "Is Opening"
   },
   {
    "fieldname": "section_break_31",
@@ -502,7 +500,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-24 09:46:55.294681",
+ "modified": "2023-01-24 11:07:54.680840",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Expense",
