@@ -102,7 +102,7 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 				method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
 				args: {
 					remarks: new_value,
-					name: data.opportunity,
+					opportunity: data.opportunity,
 					maintenance_schedule: data.schedule,
 					maintenance_schedule_row: data.schedule_row,
 					contact_date: frappe.datetime.get_today()

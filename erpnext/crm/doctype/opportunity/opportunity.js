@@ -418,7 +418,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				frappe.call({
 					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
 					args: {
-						name: me.frm.doc.name,
+						opportunity: me.frm.doc.name,
 						contact_date: data.contact_date,
 						remarks: data.remarks,
 						submit_follow_up: 1,

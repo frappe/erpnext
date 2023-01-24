@@ -629,7 +629,7 @@ def get_customer_from_opportunity(source):
 
 
 @frappe.whitelist()
-def schedule_follow_up(name, schedule_date, to_discuss):
+def schedule_follow_up(name, schedule_date, to_discuss=None):
 	if not schedule_date:
 		frappe.throw(_("Schedule Date is mandatory"))
 
@@ -657,18 +657,20 @@ def schedule_follow_up(name, schedule_date, to_discuss):
 
 
 @frappe.whitelist()
-def submit_communication(name, contact_date, remarks, submit_follow_up=False,
+def submit_communication(opportunity, contact_date, remarks, submit_follow_up=False,
 		maintenance_schedule=None, maintenance_schedule_row=None):
 	if not remarks:
 		frappe.throw(_('Remarks are mandatory for Communication'))
 
 	remarks = clean_whitespace(remarks)
 
-	if frappe.db.exists('Opportunity', name):
-		opp = frappe.get_doc('Opportunity', name)
-	else:
+	if frappe.db.exists('Opportunity', opportunity):
+		opp = frappe.get_doc('Opportunity', opportunity)
+	elif maintenance_schedule and maintenance_schedule_row:
 		opp = create_maintenance_opportunity(maintenance_schedule, maintenance_schedule_row)
 		opp.save()
+	else:
+		frappe.throw(_('Opportunity/Maintenance Schedule not provided'))
 
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
