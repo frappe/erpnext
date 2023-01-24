@@ -190,7 +190,7 @@ class Opportunity(TransactionBase):
 
 		if self.status in {"Lost", "Closed"}:
 			if throw:
-				frappe.throw(_("Cannot send {0} notification because Notification is Lost/Closed").format(notification_type))
+				frappe.throw(_("Cannot send {0} notification because Notification is {1}").format(notification_type, self.status))
 			return False
 
 		return True
