@@ -77,14 +77,31 @@ class PickList(Document):
 				)
 
 	def on_submit(self):
+		self.update_status()
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
 
 	def on_cancel(self):
+		self.update_status()
 		self.update_bundle_picked_qty()
 		self.update_reference_qty()
 		self.update_sales_order_picking_status()
+
+	def update_status(self, status=None, update_modified=True):
+		if not status:
+			if self.docstatus == 0:
+				status = "Draft"
+			elif self.docstatus == 1:
+				if self.status == "Draft":
+					status = "Open"
+				elif target_document_exists(self.name, self.purpose):
+					status = "Completed"
+			elif self.docstatus == 2:
+				status = "Cancelled"
+
+		if status:
+			frappe.db.set_value("Pick List", self.name, "status", status, update_modified=update_modified)
 
 	def update_reference_qty(self):
 		packed_items = []
@@ -392,6 +409,12 @@ class PickList(Document):
 			else:
 				possible_bundles.append(0)
 		return int(flt(min(possible_bundles), precision or 6))
+
+
+def update_pick_list_status(pick_list):
+	if pick_list:
+		doc = frappe.get_doc("Pick List", pick_list)
+		doc.run_method("update_status")
 
 
 def get_picked_items_qty(items) -> List[Dict]:
