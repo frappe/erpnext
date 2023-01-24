@@ -491,6 +491,6 @@ erpnext.crm.Opportunity = class Opportunity extends frappe.ui.form.Controller {
 			party: this.frm.doc.party_name,
 		});
 	}
-});
+};
 
 extend_cscript(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
