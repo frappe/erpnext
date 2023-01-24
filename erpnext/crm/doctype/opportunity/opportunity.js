@@ -31,6 +31,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		this.update_dynamic_fields();
 		this.set_sales_person_from_user();
 		this.setup_buttons();
+		this.setup_dashboard();
 	},
 
 	onload_post_render: function() {
@@ -40,6 +41,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	setup_buttons: function() {
 		var me = this;
 		me.frm.clear_custom_buttons();
+		me.setup_notification_buttons();
 
 		if (!me.frm.doc.__islocal) {
 			if(me.frm.perm[0].write) {
@@ -104,6 +106,23 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	setup_notification_buttons: function() {
+		if(this.frm.is_new()) {
+			return
+		}
+
+		if (this.can_notify("Opportunity Greeting")) {
+			var confirmation_count = frappe.get_notification_count(this.frm, 'Opportunity Greeting', 'SMS');
+			let label = __("Opportunity Greeting{0}", [confirmation_count ? " (Resend)" : ""]);
+			this.frm.add_custom_button(label, () => this.send_sms('Opportunity Greeting'),
+				__("Notify"));
+		}
+
+		this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
+			__("Notify"));
+	},
+
+
 	setup_queries: function() {
 		var me = this;
 
@@ -142,6 +161,21 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
+	},
+
+	setup_dashboard: function() {
+		if (this.frm.is_new()) {
+			return
+		}
+
+		this.frm.dashboard.stats_area_row.empty();
+
+		var reminder_count = frappe.get_notification_count(this.frm, 'Opportunity Greeting', 'SMS');
+		var reminder_status = reminder_count ? __("{0} SMS", [reminder_count]) : __("Not Sent");
+		var reminder_color = reminder_count ? "green"
+			: this.can_notify('Opportunity Greeting') ? "yellow" : "grey";
+
+		this.frm.dashboard.add_indicator(__('Opportunity Greeting: {0}', [reminder_status]), reminder_color);
 	},
 
 	update_dynamic_fields: function() {
@@ -425,6 +459,23 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_supplier_quotation",
 			frm: this.frm
+		});
+	},
+
+	can_notify: function (what) {
+		if (this.frm.doc.__onload && this.frm.doc.__onload.can_notify) {
+			return this.frm.doc.__onload.can_notify[what];
+		} else {
+			return false;
+		}
+	},
+
+	send_sms: function(notification_type) {
+		new frappe.SMSManager(this.frm.doc, {
+			notification_type: notification_type,
+			mobile_no: this.frm.doc.contact_mobile || this.frm.doc.contact_phone,
+			party_doctype: this.frm.doc.opportunity_from,
+			party: this.frm.doc.party_name,
 		});
 	},
 });
