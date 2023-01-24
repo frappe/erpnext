@@ -29,7 +29,7 @@ def get_data(filters):
 			d["mode_of_payment"] = je.mode_of_payment
 			if je.mode_of_payment == "Cheque":
 				d['cheque_no'] 		= je.cheque_no
-				d['cheque_date'] 	= je.check_date
+				d['cheque_date'] 	= je.cheque_date
 			elif je.mode_of_payment == "ePayment":
 				d['cheque_no'] 		= je.bank_payment
 		supplier = frappe.get_doc("Supplier",d.supplier)
