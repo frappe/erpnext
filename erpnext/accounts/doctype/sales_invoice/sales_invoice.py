@@ -444,7 +444,8 @@ class SalesInvoice(SellingController):
 		if pos:
 			return {
 				"print_format": print_format,
-				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
+				# "allow_edit_rate": pos.get("allow_user_to_edit_rate"),
+				"allow_edit_rate": pos.get("allow_rate_change"),
 				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
 				"campaign": pos.get("campaign"),
 				"allow_print_before_pay": pos.get("allow_print_before_pay")
