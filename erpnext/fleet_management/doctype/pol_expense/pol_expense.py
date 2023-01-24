@@ -27,7 +27,7 @@ class POLExpense(AccountsController):
 		self.set_status()
 
 	
-	def on_submit(self):
+	def on_submit(self): 
 		self.make_gl_entries()
 		self.post_journal_entry()
 		notify_workflow_states(self)
@@ -44,12 +44,15 @@ class POLExpense(AccountsController):
 		self.make_gl_entries()
 	
 	def make_gl_entries(self):
+		if self.is_opening:
+			return
+			
 		gl_entries = []
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_expense_gl_entry(gl_entries)
 		gl_entries = merge_similar_entries(gl_entries)
-		# frappe.throw('{}'.format(gl_entries))
 		make_gl_entries(gl_entries,update_outstanding="No",cancel=self.docstatus == 2)
+
 	def make_supplier_gl_entry(self, gl_entries):
 		if flt(self.amount) > 0:
 			# Did not use base_grand_total to book rounding loss gle
@@ -122,7 +125,7 @@ class POLExpense(AccountsController):
 		self.previous_km_reading = pv_km
 		
 	def post_journal_entry(self):
-		if cint(self.is_opening) == 1:
+		if self.is_opening:
 			return
 		if not self.amount:
 			frappe.throw(_("Amount should be greater than zero"))
