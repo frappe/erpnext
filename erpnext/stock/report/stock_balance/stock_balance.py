@@ -563,7 +563,7 @@ class StockBalanceReport:
 		if not self.include_purchase_order_details():
 			self.columns = [c for c in self.columns if not c.get("projected_column")]
 
-		if self.include_reorder_details():
+		if not self.include_reorder_details():
 			self.columns = [c for c in self.columns if not c.get("is_reorder")]
 
 		if not self.include_stock_ageing_data():
