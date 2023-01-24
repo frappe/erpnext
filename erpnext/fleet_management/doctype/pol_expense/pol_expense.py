@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.doctype.business_activity.business_activity import get_default_ba
-from frappe.utils import money_in_words, flt
+from frappe.utils import money_in_words, cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form, now_datetime, get_datetime
 from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 from frappe import _, qb, throw, bold
 from erpnext.controllers.accounts_controller import AccountsController
@@ -48,8 +48,8 @@ class POLExpense(AccountsController):
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_expense_gl_entry(gl_entries)
 		gl_entries = merge_similar_entries(gl_entries)
+		# frappe.throw('{}'.format(gl_entries))
 		make_gl_entries(gl_entries,update_outstanding="No",cancel=self.docstatus == 2)
-
 	def make_supplier_gl_entry(self, gl_entries):
 		if flt(self.amount) > 0:
 			# Did not use base_grand_total to book rounding loss gle
@@ -122,7 +122,7 @@ class POLExpense(AccountsController):
 		self.previous_km_reading = pv_km
 		
 	def post_journal_entry(self):
-		if flt(self.is_opening) == 1:
+		if cint(self.is_opening) == 1:
 			return
 		if not self.amount:
 			frappe.throw(_("Amount should be greater than zero"))

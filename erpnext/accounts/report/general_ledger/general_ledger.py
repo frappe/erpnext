@@ -331,6 +331,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 	data.append(totals.total)
 
 	# closing
+	# added by Dendup Show Closing
 	balance = 0
 	if totals.closing['debit'] > totals.closing['credit']:
 		balance = totals.closing['debit'] - totals.closing['credit']
