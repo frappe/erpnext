@@ -234,13 +234,13 @@ def create_opportunity_from_schedule(for_date=None):
 
 
 def get_maintenance_schedule_opportunity(maintenance_schedule, row):
-	maintenace_opp = frappe.db.get_value("Opportunity", filters={
+	maintenance_opp = frappe.db.get_value("Opportunity", filters={
 		'maintenance_schedule':maintenance_schedule,
 		'maintenance_schedule_row': row
 	})
 
-	if maintenace_opp:
-		return frappe.get_doc('Opportunity', maintenace_opp)
+	if maintenance_opp:
+		return frappe.get_doc('Opportunity', maintenance_opp)
 	else:
 		return create_maintenance_opportunity(maintenance_schedule, row)
 
