@@ -11,7 +11,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
-from frappe.query_builder.functions import Coalesce, IfNull, Locate, Sum
+from frappe.query_builder.custom import GROUP_CONCAT
+from frappe.query_builder.functions import Coalesce, IfNull, Locate, Replace, Sum
 from frappe.utils import cint, floor, flt, today
 from frappe.utils.nestedset import get_descendants_of
 
@@ -334,20 +335,24 @@ class PickList(Document):
 	def get_picked_items_details(self, items):
 		picked_items = frappe._dict()
 
+		pi = frappe.qb.DocType("Pick List")
 		pi_item = frappe.qb.DocType("Pick List Item")
 		query = (
-			frappe.qb.from_(pi_item)
+			frappe.qb.from_(pi)
+			.inner_join(pi_item)
+			.on(pi.name == pi_item.parent)
 			.select(
 				pi_item.item_code,
 				pi_item.warehouse,
 				pi_item.batch_no,
-				pi_item.serial_no,
 				Sum(pi_item.picked_qty).as_("picked_qty"),
+				Replace(GROUP_CONCAT(pi_item.serial_no), ",", "\n").as_("serial_no"),
 			)
 			.where(
 				(pi_item.item_code.isin([x.item_code for x in items]))
 				& (pi_item.docstatus != 2)
 				& (pi_item.picked_qty > 0)
+				& (pi.status != "Completed")
 			)
 			.groupby(
 				pi_item.item_code,
