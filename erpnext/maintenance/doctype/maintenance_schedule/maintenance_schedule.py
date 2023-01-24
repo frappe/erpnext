@@ -233,6 +233,18 @@ def create_opportunity_from_schedule(for_date=None):
 		opportunity_doc.save(ignore_permissions=True)
 
 
+def get_maintenance_schedule_opportunity(maintenance_schedule, row):
+	maintenace_opp = frappe.db.exists("Opportunity", filters={
+		'maintenance_schedule':maintenance_schedule,
+		'maintenance_schedule_row': row
+	})
+
+	if maintenace_opp:
+		return frappe.get_doc('Opportunity', maintenace_opp)
+	else:
+		return create_maintenance_opportunity(maintenance_schedule, row)
+
+
 @frappe.whitelist()
 def create_maintenance_opportunity(maintenance_schedule, row):
 	schedule_doc = frappe.get_doc('Maintenance Schedule', maintenance_schedule)

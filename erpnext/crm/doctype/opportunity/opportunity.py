@@ -16,7 +16,8 @@ from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
 from erpnext.crm.doctype.lead.lead import get_customer_from_lead, add_sales_person_from_source
-from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import create_maintenance_opportunity
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import create_maintenance_opportunity,\
+	get_maintenance_schedule_opportunity
 from six import string_types
 import json
 
@@ -190,7 +191,7 @@ class Opportunity(TransactionBase):
 
 		if self.status in {"Lost", "Closed"}:
 			if throw:
-				frappe.throw(_("Cannot send {0} notification because Notification is {1}").format(notification_type, self.status))
+				frappe.throw(_("Cannot send {0} notification because Opportunity is {1}").format(notification_type, self.status))
 			return False
 
 		return True
@@ -667,8 +668,7 @@ def submit_communication(opportunity, contact_date, remarks, submit_follow_up=Fa
 	if frappe.db.exists('Opportunity', opportunity):
 		opp = frappe.get_doc('Opportunity', opportunity)
 	elif maintenance_schedule and maintenance_schedule_row:
-		opp = create_maintenance_opportunity(maintenance_schedule, maintenance_schedule_row)
-		opp.save()
+		opp = get_maintenance_schedule_opportunity(maintenance_schedule, maintenance_schedule_row)
 	else:
 		frappe.throw(_('Opportunity/Maintenance Schedule not provided'))
 
@@ -695,6 +695,7 @@ def submit_communication(opportunity, contact_date, remarks, submit_follow_up=Fa
 		if follow_up:
 			follow_up[0].contact_date = getdate(contact_date)
 
+	if opp.is_new() or cint(submit_follow_up):
 		opp.save()
 
 	return {
