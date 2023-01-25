@@ -562,11 +562,8 @@ def apply_pricing_rule_on_transaction(doc):
 	conditions = get_other_conditions(conditions, values, doc)
 
 	pricing_rules = frappe.db.sql(
-		""" Select `tabPricing Rule`.* from `tabPricing Rule`
-		where  {conditions} and `tabPricing Rule`.disable = 0
-	""".format(
-			conditions=conditions
-		),
+		"select `tabPricing Rule`.* from `tabPricing Rule`"
+		f" where {conditions} and `tabPricing Rule`.disable = 0",
 		values,
 		as_dict=1,
 	)

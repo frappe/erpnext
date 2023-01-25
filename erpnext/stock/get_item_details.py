@@ -875,7 +875,7 @@ def insert_item_price(args):
 				)
 
 
-def get_item_price(args, item_code, ignore_party=False):
+def get_item_price(args: dict, item_code: str, ignore_party: bool = False) -> tuple[tuple]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
 	        Check if the desired qty is within the increment of the packing list.
@@ -886,31 +886,31 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	args["item_code"] = item_code
 
-	conditions = """where item_code=%(item_code)s
-		and price_list=%(price_list)s
-		and ifnull(uom, '') in ('', %(uom)s)"""
-
-	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
+	conditions_dict = {
+		"item_code": item_code,
+		"price_list": args.get("price_list"),
+		"uom": args.get("uom"),
+		"batch_no": args.get("batch_no"),
+	}
 
 	if not ignore_party:
 		if args.get("customer"):
-			conditions += " and customer=%(customer)s"
+			conditions_dict["customer"] = args["customer"]
 		elif args.get("supplier"):
-			conditions += " and supplier=%(supplier)s"
+			conditions_dict["supplier"] = args["supplier"]
 		else:
-			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions_dict["customer"] = None
+			conditions_dict["supplier"] = None
 
 	if args.get("transaction_date"):
-		conditions += """ and %(transaction_date)s between
-			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+		conditions_dict["valid_from"] = [">=", args["transaction_date"]]
+		conditions_dict["valid_upto"] = ["<=", args["transaction_date"]]
 
-	return frappe.db.sql(
-		""" select name, price_list_rate, uom
-		from `tabItem Price` {conditions}
-		order by valid_from desc, ifnull(batch_no, '') desc, uom desc """.format(
-			conditions=conditions
-		),
-		args,
+	return frappe.get_all(
+		"Item Price",
+		fields=["name", "price_list_rate", "uom"],
+		filters=conditions_dict,
+		order_by="valid_from desc, batch_no desc, uom desc",
 	)
 
 
