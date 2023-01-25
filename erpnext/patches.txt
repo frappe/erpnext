@@ -796,3 +796,4 @@ erpnext.patches.v12_0.resetup_vehicle_domain #12-01-2023
 execute:frappe.delete_doc_if_exists("Report", "Maintenance Schedules")
 erpnext.patches.v14_0.trim_packing_slip_table
 execute:frappe.delete_doc_if_exists("Report", "Batch Balance")
+execute:frappe.delete_doc_if_exists("Report", "Warehouse wise Item Balance Age and Value")

@@ -3,13 +3,11 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, today, cstr, combine_datetime, get_datetime
+from frappe.utils import flt, cint, getdate, today, cstr, combine_datetime
 from erpnext.stock.utils import update_included_uom_in_dict_report, has_valuation_read_permission
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.reportview import build_match_conditions
 from collections import OrderedDict
-
-from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
 
 def execute(filters=None):
@@ -57,92 +55,18 @@ class StockBalanceReport:
 
 	def validate_filters(self):
 		if self.filters.get("show_projected_qty"):
-			if self.include_batch():
+			if self.is_batch_included():
 				frappe.throw(_("Cannot get Projected Qty for Batch Wise Stock"))
-			if self.include_package():
+			if self.is_package_included():
 				frappe.throw(_("Cannot get Projected Qty for Package Wise Stock"))
 
 	def get_items(self):
-		conditions = []
-		if self.filters.get("item_code"):
-			is_template = frappe.db.get_value("Item", self.filters.get('item_code'), 'has_variants')
-			if is_template:
-				conditions.append("item.variant_of = %(item_code)s")
-			else:
-				conditions.append("item.name = %(item_code)s")
-		else:
-			if self.filters.get("brand"):
-				conditions.append("item.brand = %(brand)s")
-			if self.filters.get("item_source"):
-				conditions.append("item.item_source = %(item_source)s")
-			if self.filters.get("item_group"):
-				conditions.append(get_item_group_condition(self.filters.get("item_group")))
-
-		self.items = None
-		if conditions:
-			self.items = frappe.db.sql_list("""
-				select name
-				from `tabItem` item
-				where {0}
-			""".format(" and ".join(conditions)), self.filters)
-
+		self.items = get_items_for_stock_report(self.filters)
 		return self.items
 
 	def get_stock_ledger_entries(self):
-		items_condition = ""
-		if self.items:
-			items_condition = " and item_code in ({})".format(
-				', '.join([frappe.db.escape(i, percent=False) for i in self.items])
-			)
-
-		sle_conditions = self.get_sle_conditions()
-
-		self.sles = frappe.db.sql("""
-			select
-				item_code as name, item_code, warehouse, company, batch_no, packing_slip,
-				actual_qty, valuation_rate, qty_after_transaction, stock_value_difference,
-				posting_date, posting_time, voucher_type, voucher_no
-			from `tabStock Ledger Entry` force index (posting_sort_index)
-			where docstatus < 2 {0} {1}
-			order by posting_date, posting_time, creation, actual_qty
-		""".format(items_condition, sle_conditions), as_dict=1)
-
-	def get_sle_conditions(self):
-		conditions = []
-
-		if self.filters.get("to_date"):
-			conditions.append("posting_date <= {0}".format(frappe.db.escape(self.filters.get("to_date"))))
-
-		if self.filters.get("warehouse"):
-			warehouse_details = frappe.db.get_value("Warehouse", self.filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
-			if not warehouse_details:
-				frappe.throw(_("Warehouse {0} does not exist").format(self.filters.get("warehouse")))
-
-			conditions.append("""exists (select wh.name from `tabWarehouse` wh
-				where wh.lft >= {0} and wh.rgt <= {1} and `tabStock Ledger Entry`.warehouse = wh.name)
-			""".format(warehouse_details.lft, warehouse_details.rgt))
-
-		elif self.filters.get("warehouse_type"):
-			conditions.append("""exists (select name from `tabWarehouse` wh \
-				where wh.warehouse_type = {0} and `tabStock Ledger Entry`.warehouse = wh.name)
-			""".format(frappe.db.escape(self.filters.get("warehouse_type"))))
-
-		if self.filters.get("batch_no"):
-			conditions.append("batch_no = {0}".format(frappe.db.escape(self.filters.get("batch_no"))))
-
-		if self.filters.get("packing_slip"):
-			conditions.append("packing_slip = {0}".format(frappe.db.escape(self.filters.get("packing_slip"))))
-
-		if self.filters.get("package_wise_stock") == "Packed Stock":
-			conditions.append("(packing_slip != '' and packing_slip is not null)")
-		elif self.filters.get("package_wise_stock") == "Unpacked Stock":
-			conditions.append("(packing_slip = '' or packing_slip is null)")
-
-		match_conditions = build_match_conditions("Stock Ledger Entry")
-		if match_conditions:
-			conditions.append(match_conditions)
-
-		return " and {0}".format(" and ".join(conditions)) if conditions else ""
+		self.sles = get_stock_ledger_entries_for_stock_report(self.filters, self.items)
+		return self.sles
 
 	def get_purchase_order_map(self):
 		self.purchase_order_map = {}
@@ -167,9 +91,15 @@ class StockBalanceReport:
 		return self.purchase_order_map
 
 	def get_ageing_fifo_queue(self):
+		from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue
+
 		if self.include_stock_ageing_data():
-			self.filters['show_warehouse_wise_stock'] = True
-			self.item_wise_fifo_queue = get_fifo_queue(self.filters, self.sles)
+			self.fifo_queue_map = get_fifo_queue(self.sles,
+				include_warehouse=self.is_warehouse_included(),
+				include_batch=self.is_batch_included(),
+				include_package=self.is_package_included(),
+			)
+			return self.fifo_queue_map
 
 	def get_item_details_map(self):
 		self.item_map = {}
@@ -197,7 +127,7 @@ class StockBalanceReport:
 		""".format(cf_field=cf_field, cf_join=cf_join), [self.items], as_dict=1)
 
 		for item in item_data:
-			self.item_map.setdefault(item.name, item)
+			self.item_map[item.name] = item
 
 		return self.item_map
 
@@ -218,7 +148,7 @@ class StockBalanceReport:
 
 	def get_packing_slip_map(self):
 		self.packing_slip_map = {}
-		if not self.include_package():
+		if not self.is_package_included():
 			return self.packing_slip_map
 
 		packing_slips = list(set([d.get("packing_slip") for d in self.stock_balance_map.values() if d.get("packing_slip")]))
@@ -329,6 +259,8 @@ class StockBalanceReport:
 		return self.stock_balance_map
 
 	def get_rows(self):
+		from erpnext.stock.report.stock_ageing.stock_ageing import get_ageing_details
+
 		self.rows = []
 		self.conversion_factors = []
 
@@ -398,7 +330,10 @@ class StockBalanceReport:
 					self.conversion_factors.append(flt(item_details.conversion_factor) * alt_uom_size)
 
 				if self.include_stock_ageing_data():
-					fifo_queue = self.item_wise_fifo_queue[(stock_balance.item_code, stock_balance.warehouse)].get('fifo_queue')
+					fifo_queue = self.fifo_queue_map.get(key, {}).get('fifo_queue')
+					if fifo_queue:
+						ageing_details = get_ageing_details(fifo_queue, self.filters.to_date)
+						row.update(ageing_details)
 
 				self.rows.append(row)
 
@@ -430,41 +365,36 @@ class StockBalanceReport:
 	]
 
 	def get_balance_key(self, d):
-		fields = self.get_balance_fields()
-		return tuple(d.get(f) or None for f in fields)
+		return get_key(d,
+			include_warehouse=self.is_warehouse_included(),
+			include_batch=self.is_batch_included(),
+			include_package=self.is_package_included()
+		)
 
 	def get_balance_fields(self):
-		include_warehouse = self.include_warehouse()
-		include_batch = self.include_batch()
-		include_package = self.include_package()
-
-		fields = ["item_code"]
-		if include_warehouse:
-			fields += ["warehouse", "company"]
-		if include_batch:
-			fields.append("batch_no")
-		if include_package:
-			fields.append("packing_slip")
-
-		return fields
+		return get_key_fields(
+			include_warehouse=self.is_warehouse_included(),
+			include_batch=self.is_batch_included(),
+			include_package=self.is_package_included()
+		)
 
 	def include_reorder_details(self):
-		return self.include_warehouse() and not self.include_batch() and not self.include_package()
+		return self.is_warehouse_included() and not self.is_batch_included() and not self.is_package_included()
 
 	def include_purchase_order_details(self):
-		return self.filters.get("show_projected_qty") and not self.include_batch() and not self.include_package()
+		return self.filters.get("show_projected_qty") and not self.is_batch_included() and not self.is_package_included()
 
 	def include_stock_ageing_data(self):
-		return self.filters.get('show_stock_ageing_data') and self.include_warehouse()
+		return self.filters.get('show_stock_ageing_data')
 
-	def include_warehouse(self):
-		return not cint(self.filters.get("consolidate_warehouse"))
+	def is_warehouse_included(self):
+		return is_warehouse_included(self.filters)
 
-	def include_batch(self):
-		return cint(self.filters.get("batch_wise_stock"))
+	def is_batch_included(self):
+		return is_batch_included(self.filters)
 
-	def include_package(self):
-		return self.filters.get("package_wise_stock")
+	def is_package_included(self):
+		return is_package_included(self.filters)
 
 	def get_precision(self):
 		return 6 if cint(frappe.db.get_default("float_precision")) <= 6 else 9
@@ -539,19 +469,19 @@ class StockBalanceReport:
 				"width": 90},
 			{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company",
 				"width": 100},
-			{'label': _('Average Age'), 'fieldname': 'average_age', 'fieldtype': 'Int',
-				'width': 100, "is_ageing": True},
+			{'label': _('Average Age'), 'fieldname': 'average_age', 'fieldtype': 'Float',
+				'width': 90, "is_ageing": True},
 			{'label': _('Earliest Age'), 'fieldname': 'earliest_age', 'fieldtype': 'Int',
 				'width': 80, "is_ageing": True},
 			{'label': _('Latest Age'), 'fieldname': 'latest_age', 'fieldtype': 'Int',
 				'width': 80, "is_ageing": True},
 		]
 
-		if not self.include_warehouse():
+		if not self.is_warehouse_included():
 			self.columns = [c for c in self.columns if c.get("fieldname") not in ("warehouse", "company")]
-		if not self.include_batch():
+		if not self.is_batch_included():
 			self.columns = [c for c in self.columns if c.get("fieldname") != "batch_no"]
-		if not self.include_package():
+		if not self.is_package_included():
 			self.columns = [c for c in self.columns if c.get("fieldname") not in ("packing_slip", "package_type")]
 
 		if not self.show_item_name:
@@ -577,3 +507,121 @@ class StockBalanceReport:
 			self.columns = [c for c in self.columns if c.get("fieldname") != "alt_uom_size"]
 
 		return self.columns
+
+
+def get_items_for_stock_report(filters):
+	conditions = []
+	if filters.get("item_code"):
+		is_template = frappe.db.get_value("Item", filters.get('item_code'), 'has_variants')
+		if is_template:
+			conditions.append("item.variant_of = %(item_code)s")
+		else:
+			conditions.append("item.name = %(item_code)s")
+	else:
+		if filters.get("brand"):
+			conditions.append("item.brand = %(brand)s")
+		if filters.get("item_source"):
+			conditions.append("item.item_source = %(item_source)s")
+		if filters.get("item_group"):
+			conditions.append(get_item_group_condition(filters.get("item_group")))
+
+	items = None
+	if conditions:
+		items = frappe.db.sql_list("""
+			select name
+			from `tabItem` item
+			where {0}
+		""".format(" and ".join(conditions)), filters)
+
+	return items
+
+
+def get_stock_ledger_entries_for_stock_report(filters, item_list=None):
+	item_conditions = ""
+	if item_list:
+		item_conditions = " and item_code in ({0})".format(
+			', '.join([frappe.db.escape(i, percent=False) for i in item_list]))
+
+	sle_conditions = get_sle_conditions(filters)
+
+	sles = frappe.db.sql("""
+		select
+			item_code, warehouse, company, batch_no, packing_slip, serial_no,
+			actual_qty, valuation_rate, qty_after_transaction, stock_value_difference,
+			posting_date, posting_time, voucher_type, voucher_no
+		from `tabStock Ledger Entry` force index (posting_sort_index)
+		where docstatus < 2 {0} {1}
+		order by posting_date, posting_time, creation, actual_qty
+	""".format(item_conditions, sle_conditions), as_dict=1)
+
+	return sles
+
+
+def get_sle_conditions(filters):
+	conditions = []
+
+	if filters.get("company"):
+		conditions.append("company = {0}".format(frappe.db.escape(filters.get("company"))))
+
+	if filters.get("to_date"):
+		conditions.append("posting_date <= {0}".format(frappe.db.escape(filters.get("to_date"))))
+
+	if filters.get("warehouse"):
+		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
+		if not warehouse_details:
+			frappe.throw(_("Warehouse {0} does not exist").format(filters.get("warehouse")))
+
+		conditions.append("""exists (select wh.name from `tabWarehouse` wh
+			where wh.lft >= {0} and wh.rgt <= {1} and `tabStock Ledger Entry`.warehouse = wh.name)
+		""".format(warehouse_details.lft, warehouse_details.rgt))
+
+	elif filters.get("warehouse_type"):
+		conditions.append("""exists (select name from `tabWarehouse` wh \
+			where wh.warehouse_type = {0} and `tabStock Ledger Entry`.warehouse = wh.name)
+		""".format(frappe.db.escape(filters.get("warehouse_type"))))
+
+	if filters.get("batch_no"):
+		conditions.append("batch_no = {0}".format(frappe.db.escape(filters.get("batch_no"))))
+
+	if filters.get("packing_slip"):
+		conditions.append("packing_slip = {0}".format(frappe.db.escape(filters.get("packing_slip"))))
+
+	if filters.get("package_wise_stock") == "Packed Stock":
+		conditions.append("(packing_slip != '' and packing_slip is not null)")
+	elif filters.get("package_wise_stock") == "Unpacked Stock":
+		conditions.append("(packing_slip = '' or packing_slip is null)")
+
+	match_conditions = build_match_conditions("Stock Ledger Entry")
+	if match_conditions:
+		conditions.append(match_conditions)
+
+	return " and {0}".format(" and ".join(conditions)) if conditions else ""
+
+
+def is_warehouse_included(filters):
+	return not cint(filters.get("consolidate_warehouse"))
+
+
+def is_batch_included(filters):
+	return cint(filters.get("batch_wise_stock"))
+
+
+def is_package_included(filters):
+	return filters.get("package_wise_stock")
+
+
+def get_key(d, include_warehouse, include_batch, include_package):
+	fields = get_key_fields(include_warehouse, include_batch, include_package)
+	return tuple(d.get(f) or None for f in fields)
+
+
+def get_key_fields(include_warehouse, include_batch, include_package):
+	fields = ["item_code"]
+	if include_warehouse:
+		fields += ["warehouse", "company"]
+	if include_batch:
+		fields.append("batch_no")
+	if include_package:
+		fields.append("packing_slip")
+
+	return fields
