@@ -230,21 +230,27 @@ class JournalEntry(AccountsController):
 		if self.voucher_type != "Depreciation Entry":
 			return
 
+		processed_assets = []
+
 		for d in self.get("accounts"):
-			if d.reference_type == "Asset" and d.reference_name:
+			if (
+				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+			):
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
-					return
+					continue
+
+				depr_value = d.debit or d.credit
 
 				frappe.db.set_value(
 					"Asset",
 					d.reference_name,
 					"value_after_depreciation",
-					asset.value_after_depreciation - self.total_debit,
+					asset.value_after_depreciation - depr_value,
 				)
 
-				return
+				processed_assets.append(d.reference_name)
 
 	def update_inter_company_jv(self):
 		if (
@@ -307,8 +313,12 @@ class JournalEntry(AccountsController):
 		if self.voucher_type != "Depreciation Entry":
 			return
 
+		processed_assets = []
+
 		for d in self.get("accounts"):
-			if d.reference_type == "Asset" and d.reference_name:
+			if (
+				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+			):
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
@@ -323,14 +333,16 @@ class JournalEntry(AccountsController):
 
 							asset.set_status()
 				else:
+					depr_value = d.debit or d.credit
+
 					frappe.db.set_value(
 						"Asset",
 						d.reference_name,
 						"value_after_depreciation",
-						asset.value_after_depreciation + self.total_debit,
+						asset.value_after_depreciation + depr_value,
 					)
 
-				return
+				processed_assets.append(d.reference_name)
 
 	def unlink_inter_company_jv(self):
 		if (

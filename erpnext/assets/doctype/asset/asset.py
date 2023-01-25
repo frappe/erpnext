@@ -646,15 +646,20 @@ class Asset(AccountsController):
 			movement.cancel()
 
 	def delete_depreciation_entries(self):
-		for d in self.get("schedules"):
-			if d.journal_entry:
-				frappe.get_doc("Journal Entry", d.journal_entry).cancel()
-				d.db_set("journal_entry", None)
+		if self.calculate_depreciation:
+			for d in self.get("schedules"):
+				if d.journal_entry:
+					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
+		else:
+			depr_entries = get_manual_depreciation_entries(self.name)
 
-		self.db_set(
-			"value_after_depreciation",
-			(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)),
-		)
+			for depr_entry in depr_entries or []:
+				frappe.get_doc("Journal Entry", depr_entry.voucher_no).cancel()
+
+			self.db_set(
+				"value_after_depreciation",
+				(flt(self.gross_purchase_amount) - flt(self.opening_accumulated_depreciation)),
+			)
 
 	def set_status(self, status=None):
 		"""Get and update status"""
@@ -910,6 +915,22 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 	)
 	si.set_missing_values()
 	return si
+
+
+@frappe.whitelist()
+def get_manual_depreciation_entries(asset_name):
+	gle = frappe.qb.DocType("GL Entry")
+
+	records = (
+		frappe.qb.from_(gle)
+		.select(gle.voucher_no, gle.debit, gle.posting_date)
+		.where(gle.against_voucher == asset_name)
+		.where(gle.against_voucher_type == "Asset")
+		.where(gle.debit != 0)
+		.where(gle.is_cancelled == 0)
+	).run(as_dict=True)
+
+	return records
 
 
 @frappe.whitelist()

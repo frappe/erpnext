@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import Sum
 from frappe.utils import cstr, formatdate, getdate
 
 from erpnext.accounts.report.financial_statements import (
@@ -111,7 +112,7 @@ def get_data(filters):
 			or pi_supplier_map.get(asset.purchase_invoice),
 			"gross_purchase_amount": asset.gross_purchase_amount,
 			"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
-			"depreciated_amount": depreciation_amount_map.get(asset.asset_id) or 0.0,
+			"depreciated_amount": get_depreciation_amount_of_asset(asset, depreciation_amount_map, filters),
 			"available_for_use_date": asset.available_for_use_date,
 			"location": asset.location,
 			"asset_category": asset.asset_category,
@@ -168,6 +169,15 @@ def prepare_chart_data(data, filters):
 	}
 
 
+def get_depreciation_amount_of_asset(asset, depreciation_amount_map, filters):
+	if asset.calculate_depreciation:
+		depr_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
+	else:
+		depr_amount = get_manual_depreciation_amount_of_asset(asset.asset_id, filters)
+
+	return depr_amount
+
+
 def get_finance_book_value_map(filters):
 	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
 
@@ -185,6 +195,29 @@ def get_finance_book_value_map(filters):
 			(date, cstr(filters.finance_book or "")),
 		)
 	)
+
+
+def get_manual_depreciation_amount_of_asset(asset_name, filters):
+	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
+
+	gle = frappe.qb.DocType("GL Entry")
+
+	result = (
+		frappe.qb.from_(gle)
+		.select(Sum(gle.debit))
+		.where(gle.against_voucher == asset_name)
+		.where(gle.against_voucher_type == "Asset")
+		.where(gle.debit != 0)
+		.where(gle.is_cancelled == 0)
+		.where(gle.posting_date <= date)
+	).run()
+
+	if result and result[0]:
+		depr_amount = result[0][0]
+	else:
+		depr_amount = 0
+
+	return depr_amount
 
 
 def get_purchase_receipt_supplier_map():
