@@ -39,7 +39,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 					return {
 						query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
 						filters: {
-							"from": "Supplier Quotation Item",
+							"doctype": "Supplier Quotation Item",
 							"parent": quote
 						}
 					}
