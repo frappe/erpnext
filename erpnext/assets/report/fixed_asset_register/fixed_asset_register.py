@@ -212,7 +212,7 @@ def get_manual_depreciation_amount_of_asset(asset_name, filters):
 		.where(gle.posting_date <= date)
 	).run()
 
-	if result and result[0]:
+	if result and result[0] and result[0][0]:
 		depr_amount = result[0][0]
 	else:
 		depr_amount = 0
