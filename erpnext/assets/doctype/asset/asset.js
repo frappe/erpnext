@@ -202,6 +202,10 @@ frappe.ui.form.on('Asset', {
 	},
 
 	setup_chart: function(frm) {
+		if(frm.doc.finance_books.length > 1) {
+			return
+		}
+
 		var x_intervals = [frm.doc.purchase_date];
 		var asset_values = [frm.doc.gross_purchase_amount];
 		var last_depreciation_date = frm.doc.purchase_date;

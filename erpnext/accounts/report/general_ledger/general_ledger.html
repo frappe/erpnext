@@ -25,8 +25,8 @@
 	<thead>
 		<tr>
 			<th style="width: 12%">{%= __("Date") %}</th>
-			<th style="width: 15%">{%= __("Ref") %}</th>
-			<th style="width: 25%">{%= __("Party") %}</th>
+			<th style="width: 15%">{%= __("Reference") %}</th>
+			<th style="width: 25%">{%= __("Remarks") %}</th>
 			<th style="width: 15%">{%= __("Debit") %}</th>
 			<th style="width: 15%">{%= __("Credit") %}</th>
 			<th style="width: 18%">{%= __("Balance (Dr - Cr)") %}</th>
@@ -45,7 +45,6 @@
 						<br>
 					{% } %}
 
-					{{ __("Against") }}: {%= data[i].against %}
 					<br>{%= __("Remarks") %}: {%= data[i].remarks %}
 					{% if(data[i].bill_no) { %}
 						<br>{%= __("Supplier Invoice No") %}: {%= data[i].bill_no %}

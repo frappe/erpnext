@@ -1239,6 +1239,11 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		automatically_fetch_payment_terms(enable=0)
 
+	def test_variant_item_po(self):
+		po = create_purchase_order(item_code="_Test Variant Item", qty=1, rate=100, do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, po.save)
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
@@ -1342,8 +1347,8 @@ def create_purchase_order(**args):
 			},
 		)
 
-	po.set_missing_values()
 	if not args.do_not_save:
+		po.set_missing_values()
 		po.insert()
 		if not args.do_not_submit:
 			if po.is_subcontracted == "Yes":
