@@ -350,7 +350,10 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 				asset.flags.ignore_validate_update_after_submit = True
 				schedule.journal_entry = None
 				depreciation_amount = get_depreciation_amount_in_je(reverse_journal_entry)
-				asset.finance_books[0].value_after_depreciation += depreciation_amount
+
+				idx = cint(schedule.finance_book_id)
+				asset.finance_books[idx - 1].value_after_depreciation += depreciation_amount
+
 				asset.save()
 
 

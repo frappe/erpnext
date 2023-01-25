@@ -1,6 +1,9 @@
 ## temp utility
 
+from contextlib import contextmanager
+
 import frappe
+from frappe import _
 from frappe.utils import cstr
 
 from erpnext.utilities.activation import get_level
@@ -35,3 +38,16 @@ def get_site_info(site_info):
 		domain = frappe.get_cached_value("Company", cstr(company), "domain")
 
 	return {"company": company, "domain": domain, "activation": get_level()}
+
+
+@contextmanager
+def payment_app_import_guard():
+	marketplace_link = '<a href="https://frappecloud.com/marketplace/apps/payments">Marketplace</a>'
+	github_link = '<a href="https://github.com/frappe/payments/">GitHub</a>'
+	msg = _("payments app is not installed. Please install it from {} or {}").format(
+		marketplace_link, github_link
+	)
+	try:
+		yield
+	except ImportError:
+		frappe.throw(msg, title=_("Missing Payments App"))

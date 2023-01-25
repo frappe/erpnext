@@ -173,7 +173,7 @@
  "issingle": 0,
  "istable": 0,
  "max_attachments": 0,
- "modified": "2018-02-12 14:18:47.209114",
+ "modified": "2022-02-12 14:18:47.209114",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "GoCardless Settings",
@@ -201,7 +201,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "read_only": 0,
  "read_only_onload": 0,
  "show_name_in_global_search": 0,

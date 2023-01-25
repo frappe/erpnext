@@ -237,6 +237,9 @@ class Asset(AccountsController):
 		for finance_book in self.get("finance_books"):
 			self._make_depreciation_schedule(finance_book, start, date_of_disposal)
 
+		if len(self.get("finance_books")) > 1 and any(start):
+			self.sort_depreciation_schedule()
+
 	def _make_depreciation_schedule(self, finance_book, start, date_of_disposal):
 		self.validate_asset_finance_books(finance_book)
 
@@ -364,6 +367,14 @@ class Asset(AccountsController):
 				"finance_book_id": finance_book_id,
 			},
 		)
+
+	def sort_depreciation_schedule(self):
+		self.schedules = sorted(
+			self.schedules, key=lambda s: (int(s.finance_book_id), getdate(s.schedule_date))
+		)
+
+		for idx, s in enumerate(self.schedules, 1):
+			s.idx = idx
 
 	def _get_value_after_depreciation(self, finance_book):
 		# value_after_depreciation - current Asset value
@@ -542,7 +553,7 @@ class Asset(AccountsController):
 			return True
 
 	def set_accumulated_depreciation(
-		self, date_of_sale=None, date_of_return=None, ignore_booked_entry=False
+		self, date_of_disposal=None, date_of_return=None, ignore_booked_entry=False
 	):
 		straight_line_idx = [
 			d.idx for d in self.get("schedules") if d.depreciation_method == "Straight Line"
@@ -565,7 +576,7 @@ class Asset(AccountsController):
 			if (
 				straight_line_idx
 				and i == max(straight_line_idx) - 1
-				and not date_of_sale
+				and not date_of_disposal
 				and not date_of_return
 			):
 				book = self.get("finance_books")[cint(d.finance_book_id) - 1]
@@ -1149,9 +1160,13 @@ def update_existing_asset(asset, remaining_qty):
 			expected_value_after_useful_life,
 		)
 
-	accumulated_depreciation = 0
+	processed_finance_books = []
 
 	for term in asset.get("schedules"):
+		if int(term.finance_book_id) not in processed_finance_books:
+			accumulated_depreciation = 0
+			processed_finance_books.append(int(term.finance_book_id))
+
 		depreciation_amount = flt((term.depreciation_amount * remaining_qty) / asset.asset_quantity)
 		frappe.db.set_value(
 			"Depreciation Schedule", term.name, "depreciation_amount", depreciation_amount
@@ -1173,7 +1188,6 @@ def create_new_asset_after_split(asset, split_qty):
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name
-	accumulated_depreciation = 0
 
 	for finance_book in new_asset.get("finance_books"):
 		finance_book.value_after_depreciation = flt(
@@ -1183,7 +1197,13 @@ def create_new_asset_after_split(asset, split_qty):
 			(finance_book.expected_value_after_useful_life * split_qty) / asset.asset_quantity
 		)
 
+	processed_finance_books = []
+
 	for term in new_asset.get("schedules"):
+		if int(term.finance_book_id) not in processed_finance_books:
+			accumulated_depreciation = 0
+			processed_finance_books.append(int(term.finance_book_id))
+
 		depreciation_amount = flt((term.depreciation_amount * split_qty) / asset.asset_quantity)
 		term.depreciation_amount = depreciation_amount
 		accumulated_depreciation += depreciation_amount
