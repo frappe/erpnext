@@ -60,22 +60,20 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 	else:
 		condition = "parent_department = %(parent)s"
 
-	return frappe.db.sql("""
+	return frappe.db.sql(f"""
 		select
 			name as value,
 			is_group as expandable
 		from `tab{doctype}`
 		where
-			{condition}
-		order by name""".format(doctype=doctype, condition=condition), var_dict, as_dict=1)
+			{condition} and `disabled` = 0 
+		order by name""".format(doctype=doctype, condition=condition), var_dict, as_dict =1)
 
 @frappe.whitelist()
 def add_node():
 	from frappe.desk.treeview import make_tree_args
 	args = frappe.form_dict
 	args = make_tree_args(**args)
-
 	if args.parent_department == args.company:
 		args.parent_department = None
-
 	frappe.get_doc(args).insert()
