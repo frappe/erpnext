@@ -36,7 +36,7 @@ frappe.ui.form.on("Quality Inspection", {
 
 			if (doc.reference_type && doc.reference_name) {
 				let filters = {
-					"doctype": doctype,
+					"from": doctype,
 					"inspection_type": doc.inspection_type
 				};
 
