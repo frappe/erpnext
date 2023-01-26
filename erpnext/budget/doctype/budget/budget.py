@@ -194,8 +194,10 @@ def validate_expense_against_budget(args):
 	if not args.account:
 		args.account = args.get("expense_account")
 
-	if not (args.get("account") and args.get("cost_center")) and args.item_code:
-		args.cost_center, args.account = get_item_details(args)
+	if not args.get("account") and args.item_code:
+		args.account = get_item_details(args)
+	if not args.cost_center:
+		frappe.throw("Cost Center is missing for budget check")
 
 	if not args.account:
 		frappe.msgprint("Budget Head/Account is missing. Please provide account to check budget", raise_exception=True)
@@ -208,7 +210,7 @@ def validate_expense_against_budget(args):
 	if not frappe.db.exists("Budget Settings Account Types", {"parent":"Budget Settings","account_type":account_type}):
 		frappe.throw("Budget check against account <b>{}</b> is not allowed as the Account Type is {}. \
 						Check Budget Settings for allowed account type".format(args.account, account_type))
-	'''		
+	'''
 	for budget_against in ["project", "cost_center"] + get_accounting_dimensions():
 		if (
 			args.get(budget_against)
@@ -248,7 +250,7 @@ def validate_expense_against_budget(args):
 					`tabBudget` b, `tabBudget Account` ba
 				where
 					b.name=ba.parent and b.fiscal_year={fiscal_year}
-					and ba.account='{account}' and b.docstatus=1
+					and ba.account="{account}" and b.docstatus=1
 					{condition}
 			""".format(
 					condition=condition, budget_against_field=budget_against,
@@ -263,6 +265,7 @@ def validate_expense_against_budget(args):
 								args.account, budget_against, frappe.db.escape(args.get(budget_against))
 							)), raise_exception=True
 						)
+	frappe.throw("Hello at end")
 	commit_budget(args)
 
 def validate_budget_records(args, budget_records):
@@ -340,13 +343,13 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			and frappe.flags.exception_approver_role in frappe.get_roles(frappe.session.user)
 		):
 			action = "Warn"
-
 		if action == "Stop":
-			frappe.msgprint(msg, BudgetError, raise_exception=True)
+			frappe.msgprint(msg, raise_exception=True)
 		else:
 			frappe.msgprint(msg, indicator="orange")
 
 def commit_budget(args):
+	frappe.msgprint("{}".format(args), raise_exception=True)
 	amount = args.amount if args.amount else args.debit
 	if frappe.db.get_single_value("Budget Settings", "budget_commit_on") == args.doctype and args.amount > 0:
 		doc = frappe.get_doc(
