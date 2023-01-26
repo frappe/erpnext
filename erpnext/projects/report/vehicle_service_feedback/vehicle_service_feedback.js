@@ -104,32 +104,35 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			fieldtype: "Link",
 			options: "Project Workshop"
 		},
+		{
+			fieldname: "reference_ro",
+			label: __("Reference RO"),
+			fieldtype: "Select",
+			options: "\nHas Reference\nHas No Reference"
+		},
 	],
 
 	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "customer_feedback") {
-			if (cstr(data['customer_feedback']) === cstr(new_value)) {
-				return
-			}
+		if (in_list(["customer_feedback", "contact_remark"], column.fieldname)) {
+			if (cstr(data[column.fieldname]) == cstr(new_value)) return
 
 			return frappe.call({
-				method: "erpnext.projects.doctype.project.project.submit_feedback",
+				method: "erpnext.projects.doctype.project.project.submit_customer_feedback_communication_for_project",
 				args: {
 					project: data.project,
-					customer_feedback: new_value,
+					communication_type: column.fieldname == "customer_feedback" ? "Feedback" : "Communication",
+					communication: new_value,
 				},
 				callback: function(r) {
 					if (!r.exc) {
 						let row = frappe.query_report.datatable.datamanager.data[rowIndex];
-						row.feedback_date = r.message.feedback_date;
-						row.feedback_time = r.message.feedback_time;
-						row.feedback_dt = r.message.feedback_dt;
-						row.customer_feedback = r.message.customer_feedback;
+						row.contact_dt = r.message.contact_dt;
+						row[column.fieldname] = r.message[column.fieldname];
 
-						erpnext.utils.query_report_local_refresh()
+						erpnext.utils.query_report_local_refresh();
 					}
-				},
-			});
+				}
+			})
 		}
 	},
 };

@@ -2153,32 +2153,87 @@ def set_warranty_claim_denied(projects, denied, reason=None):
 
 
 @frappe.whitelist()
-def submit_feedback(project, customer_feedback):
-	if not customer_feedback:
-		frappe.throw(_('Customer feedback cannot be empty'))
+def submit_customer_feedback_communication_for_project(project, communication_type, communication):
+	if not communication:
+		frappe.throw(_('Message cannot be empty'))
 
 	if not frappe.db.exists('Project', project):
 		frappe.throw(_("Repair Order {0} does not exist".format(project)))
 
-	target_doc = frappe.get_doc('Project', project)
-	target_doc.check_permission("read")
+	project_doc = frappe.get_doc('Project', project)
+	project_doc.check_permission("read")
+
+	filters = {
+		'reference_doctype': project_doc.doctype,
+		'reference_name': project_doc.name,
+		'customer': project_doc.customer,
+		'vehicle': project_doc.applies_to_vehicle
+	}
+
+	customer_feedback = frappe.db.get_value("Customer Feedback", filters=filters)
+
+	if customer_feedback:
+		feedback_doc = frappe.get_doc("Customer Feedback", customer_feedback)
+	else:
+		feedback_doc = frappe.get_doc({
+			**filters,
+			"doctype": "Customer Feedback",
+		}).insert(ignore_permissions=True)
 
 	cur_dt = get_datetime()
 	cur_date = getdate(cur_dt)
 	cur_time = get_time(cur_dt)
 
-	feedback_info = {
-		"feedback_date": cur_date,
-		"feedback_time": cur_time,
-		"customer_feedback": customer_feedback
+	if communication_type == "Feedback":
+		feedback_doc.db_set({
+			"feedback_date": cur_date,
+			"feedback_time": cur_time,
+			"customer_feedback": communication
+		})
+	elif feedback_doc.get('customer_feedback'):
+		frappe.throw(_("Can't add remarks after feedback is complete"))
+	else:
+		feedback_doc.db_set({
+			"contact_date": cur_date,
+			"contact_time": cur_time,
+			"contact_remark": communication
+		})
+
+	feedback_doc.notify_update()
+
+	# Add Communication
+	communication_doc = frappe.get_doc({
+		"doctype": "Communication",
+		"reference_doctype": feedback_doc.doctype,
+		"reference_name": feedback_doc.name,
+		"content": communication,
+		"communication_type": communication_type,
+		"sent_or_received": "Received",
+		"subject": "Customer Feedback" + \
+			("" if communication_type=="Feedback" else " Attempt") + \
+			" ({0})".format(project_doc.name),
+		"sender": frappe.session.user
+	})
+
+	communication_doc.append("timeline_links", {
+		"link_doctype": project_doc.doctype,
+		"link_name": project_doc.name,
+	})
+
+	communication_doc.append("timeline_links", {
+		"link_doctype": "Customer",
+		"link_name": project_doc.customer,
+	})
+
+	communication_doc.append("timeline_links", {
+		"link_doctype": "Vehicle",
+		"link_name": project_doc.applies_to_vehicle,
+	})
+
+	communication_doc.insert(ignore_permissions=True)
+
+	return {
+		"contact_remark": feedback_doc.get('contact_remark'),
+		"customer_feedback": feedback_doc.get('customer_feedback'),
+		"contact_dt": combine_datetime(cur_date, cur_time)
 	}
-
-	target_doc.update(feedback_info)
-	target_doc.run_method("validate_feedback")
-
-	target_doc.db_set(feedback_info)
-	target_doc.notify_update()
-
-	feedback_info['feedback_dt'] = combine_datetime(cur_date, cur_time)
-
-	return feedback_info

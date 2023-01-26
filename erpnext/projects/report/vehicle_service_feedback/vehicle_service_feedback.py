@@ -41,12 +41,14 @@ class VehicleServiceFeedback:
 			SELECT
 				ro.name as project, ro.project_type, ro.project_workshop as workshop, ro.project_name, ro.applies_to_vehicle as vehicle,
 				ro.applies_to_item as variant_item_code, ro.applies_to_item_name as variant_item_name, ro.vehicle_license_plate,
-				ro.customer, ro.customer_name, ro.contact_mobile, ro.feedback_date, ro.feedback_time, ro.customer_feedback,
-				vgp.posting_date as delivery_date, vgp.posting_time as delivery_time
+				ro.customer, ro.customer_name, ro.contact_mobile, ro.reference_no as reference_ro,
+				vgp.posting_date as delivery_date, vgp.posting_time as delivery_time,
+				cf.contact_remark, cf.contact_date, cf.contact_time, cf.customer_feedback, cf.feedback_date, cf.feedback_time
 			FROM `tabProject` ro
 			LEFT JOIN `tabVehicle Gate Pass` vgp ON vgp.project = ro.name
 			LEFT JOIN `tabItem` im ON im.name = ro.applies_to_item
 			LEFT JOIN `tabCustomer` c ON c.name = ro.customer
+			LEFT JOIN `tabCustomer Feedback` cf ON cf.reference_doctype = 'Project' AND cf.reference_name = ro.name
 			WHERE
 				{date_field} BETWEEN %(from_date)s AND %(to_date)s
 				AND vgp.docstatus = 1
@@ -56,7 +58,9 @@ class VehicleServiceFeedback:
 	def process_data(self):
 		for d in self.data:
 			if d.feedback_date:
-				d.feedback_dt = combine_datetime(d.feedback_date, d.feedback_time)
+				d.contact_dt = combine_datetime(d.feedback_date, d.feedback_time)
+			elif d.contact_date:
+				d.contact_dt = combine_datetime(d.contact_date, d.contact_time)
 
 	def get_conditions(self):
 		conditions = []
@@ -89,10 +93,15 @@ class VehicleServiceFeedback:
 		if self.filters.get("project_workshop"):
 			conditions.append("ro.project_workshop = %(project_workshop)s")
 
-		if self.filters.feedback_filter == "Submitted Feedback":
+		if self.filters.get('feedback_filter') == "Submitted Feedback":
 			conditions.append("ifnull(ro.customer_feedback, '') != ''")
-		elif self.filters.feedback_filter == "Pending Feedback":
+		elif self.filters.get('feedback_filter') == "Pending Feedback":
 			conditions.append("ifnull(ro.customer_feedback, '') = ''")
+
+		if self.filters.get('reference_ro') == "Has Reference":
+			conditions.append("ifnull(ro.reference_no, '') != ''")
+		elif self.filters.get('reference_ro') == "Has No Reference":
+			conditions.append("ifnull(ro.reference_no, '') = ''")
 
 		return " AND ".join(conditions) if conditions else ""
 
@@ -110,6 +119,12 @@ class VehicleServiceFeedback:
 				'fieldtype': 'Link',
 				'options': 'Project',
 				'width': 100
+			},
+			{
+				'label': _("Reference RO"),
+				'fieldname': 'reference_ro',
+				'fieldtype': 'Data',
+				'width': 130
 			},
 			{
 				'label': _("Project Type"),
@@ -171,14 +186,21 @@ class VehicleServiceFeedback:
 				"width": 100
 			},
 			{
-				"label": _("Feedback Date/Time"),
-				"fieldname": "feedback_dt",
+				"label": _("Contact Date/Time"),
+				"fieldname": "contact_dt",
 				"fieldtype": "Datetime",
 				"width": 150
 			},
 			{
 				"label": _("Customer Feedback"),
 				"fieldname": "customer_feedback",
+				"fieldtype": "Data",
+				"width": 200,
+				"editable": 1
+			},
+			{
+				"label": _("Remark"),
+				"fieldname": "contact_remark",
 				"fieldtype": "Data",
 				"width": 200,
 				"editable": 1
