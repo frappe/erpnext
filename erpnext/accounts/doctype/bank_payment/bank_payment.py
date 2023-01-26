@@ -373,7 +373,7 @@ class BankPayment(Document):
             frappe.throw("Please select Financial Institution")
 
         doc = frappe.get_doc("Financial Institution", self.institution_name)
-        if not doc.employee_loan_payment_in_bob:
+        if not doc.loan_payment_in_bob_account:
             return frappe.db.sql("""SELECT "Salary Slip" transaction_type, t1.name transaction_id, 
                             t2.name transaction_reference, t1.modified transaction_date,
                             t1.employee, t1.employee_name beneficiary_name, 
