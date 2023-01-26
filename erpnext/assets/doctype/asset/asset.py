@@ -651,10 +651,10 @@ class Asset(AccountsController):
 				if d.journal_entry:
 					frappe.get_doc("Journal Entry", d.journal_entry).cancel()
 		else:
-			depr_entries = get_manual_depreciation_entries(self.name)
+			depr_entries = self.get_manual_depreciation_entries()
 
 			for depr_entry in depr_entries or []:
-				frappe.get_doc("Journal Entry", depr_entry.voucher_no).cancel()
+				frappe.get_doc("Journal Entry", depr_entry.name).cancel()
 
 			self.db_set(
 				"value_after_depreciation",
@@ -830,6 +830,24 @@ class Asset(AccountsController):
 			self.db_set("booked_fixed_asset", 1)
 
 	@frappe.whitelist()
+	def get_manual_depreciation_entries(self):
+		(_, _, depreciation_expense_account) = get_depreciation_accounts(self)
+
+		gle = frappe.qb.DocType("GL Entry")
+
+		records = (
+			frappe.qb.from_(gle)
+			.select(gle.voucher_no.as_("name"), gle.debit.as_("value"), gle.posting_date)
+			.where(gle.against_voucher == self.name)
+			.where(gle.against_voucher_type == "Asset")
+			.where(gle.account == depreciation_expense_account)
+			.where(gle.debit != 0)
+			.where(gle.is_cancelled == 0)
+		).run(as_dict=True)
+
+		return records
+
+	@frappe.whitelist()
 	def get_depreciation_rate(self, args, on_validate=False):
 		if isinstance(args, str):
 			args = json.loads(args)
@@ -873,7 +891,6 @@ def update_maintenance_status():
 
 
 def make_post_gl_entry():
-
 	asset_categories = frappe.db.get_all("Asset Category", fields=["name", "enable_cwip_accounting"])
 
 	for asset_category in asset_categories:
@@ -915,22 +932,6 @@ def make_sales_invoice(asset, item_code, company, serial_no=None):
 	)
 	si.set_missing_values()
 	return si
-
-
-@frappe.whitelist()
-def get_manual_depreciation_entries(asset_name):
-	gle = frappe.qb.DocType("GL Entry")
-
-	records = (
-		frappe.qb.from_(gle)
-		.select(gle.voucher_no, gle.debit, gle.posting_date)
-		.where(gle.against_voucher == asset_name)
-		.where(gle.against_voucher_type == "Asset")
-		.where(gle.debit != 0)
-		.where(gle.is_cancelled == 0)
-	).run(as_dict=True)
-
-	return records
 
 
 @frappe.whitelist()

@@ -13,6 +13,7 @@ from erpnext.accounts.report.financial_statements import (
 	validate_fiscal_year,
 )
 from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
+from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 
 
 def execute(filters=None):
@@ -87,6 +88,7 @@ def get_data(filters):
 			"asset_name",
 			"status",
 			"department",
+			"company",
 			"cost_center",
 			"calculate_depreciation",
 			"purchase_receipt",
@@ -173,7 +175,7 @@ def get_depreciation_amount_of_asset(asset, depreciation_amount_map, filters):
 	if asset.calculate_depreciation:
 		depr_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
 	else:
-		depr_amount = get_manual_depreciation_amount_of_asset(asset.asset_id, filters)
+		depr_amount = get_manual_depreciation_amount_of_asset(asset, filters)
 
 	return depr_amount
 
@@ -197,16 +199,19 @@ def get_finance_book_value_map(filters):
 	)
 
 
-def get_manual_depreciation_amount_of_asset(asset_name, filters):
+def get_manual_depreciation_amount_of_asset(asset, filters):
 	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
 
 	gle = frappe.qb.DocType("GL Entry")
 
+	(_, _, depreciation_expense_account) = get_depreciation_accounts(asset)
+
 	result = (
 		frappe.qb.from_(gle)
 		.select(Sum(gle.debit))
-		.where(gle.against_voucher == asset_name)
+		.where(gle.against_voucher == asset.asset_id)
 		.where(gle.against_voucher_type == "Asset")
+		.where(gle.account == depreciation_expense_account)
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)
 		.where(gle.posting_date <= date)

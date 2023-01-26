@@ -239,18 +239,16 @@ frappe.ui.form.on('Asset', {
 				}
 			});
 		} else {
-			let depr_entries = (await frappe.call(
-				"erpnext.assets.doctype.asset.asset.get_manual_depreciation_entries",
-				{
-					asset_name: frm.doc.name,
-				}
-			)).message;
+			let depr_entries = (await frappe.call({
+				method: "get_manual_depreciation_entries",
+				doc: frm.doc,
+			})).message;
 
 			$.each(depr_entries || [], function(i, v) {
 				x_intervals.push(v.posting_date);
 				last_depreciation_date = v.posting_date;
 				let last_asset_value = asset_values[asset_values.length - 1]
-				asset_values.push(last_asset_value - v.debit);
+				asset_values.push(last_asset_value - v.value);
 			});
 		}
 
