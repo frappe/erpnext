@@ -85,6 +85,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		}
 
 		if (doc.docstatus == 1 && !["Lost", "Ordered"].includes(doc.status)) {
+<<<<<<< HEAD
 			if (frappe.boot.sysdefaults.allow_sales_order_creation_for_expired_quotation
 				|| (!doc.valid_till)
 				|| frappe.datetime.get_diff(doc.valid_till, frappe.datetime.get_today()) >= 0) {
@@ -94,6 +95,13 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 						__("Create")
 					);
 				}
+=======
+			this.frm.add_custom_button(
+				__("Sales Order"),
+				() => this.make_sales_order(),
+				__("Create")
+			);
+>>>>>>> cef7dfd0b4 (feat: Dialog to select alternative item before creating Sales order)
 
 			if(doc.status!=="Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
@@ -143,6 +151,20 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 		this.toggle_reqd_lead_customer();
 
+	}
+
+	make_sales_order() {
+		var me = this;
+
+		let has_alternative_item = this.frm.doc.items.some((item) => item.is_alternative);
+		if (has_alternative_item) {
+			this.show_alternative_item_dialog();
+		} else {
+			frappe.model.open_mapped_doc({
+				method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+				frm: me.frm
+			});
+		}
 	}
 
 	set_dynamic_field_label(){
@@ -219,6 +241,69 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				}
 			}
 		})
+	}
+
+	show_alternative_item_dialog() {
+		// Create a `{original item: [alternate items]}` map
+		const item_alt_map = {};
+		this.frm.doc.items.filter(
+			(item) => item.is_alternative
+		).forEach((item) =>
+			(item_alt_map[item.alternative_to] ??= []).push(item.item_code)
+		)
+
+		const fields = [{
+			fieldtype:"Link",
+			fieldname:"original_item",
+			options: "Item",
+			label: __("Original Item"),
+			read_only: 1,
+			in_list_view: 1,
+		},
+		{
+			fieldtype:"Link",
+			fieldname:"alternative_item",
+			options: "Item",
+			label: __("Alternative Item"),
+			in_list_view: 1,
+			get_query: (row, cdt, cdn) => {
+				return {
+					filters: {
+						"item_code": ["in", item_alt_map[row.original_item]]
+					}
+				}
+			},
+		}];
+
+		this.data = Object.keys(item_alt_map).map((item) => {
+			return {"original_item": item}
+		});
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Alternatives for Sales Order"),
+			fields: [
+				{
+					fieldname: "alternative_items",
+					fieldtype: "Table",
+					label: "Items with Alternatives",
+					cannot_add_rows: true,
+					in_place_edit: true,
+					reqd: 1,
+					data: this.data,
+					description: __("Select an alternative to be used in the Sales Order or leave it blank to use the original item."),
+					get_data: () => {
+						return this.data;
+					},
+					fields: fields
+				},
+			],
+			primary_action: function() {
+				this.hide();
+			},
+			primary_action_label: __('Continue')
+		});
+
+		dialog.show();
 	}
 };
 
