@@ -69,6 +69,10 @@ class PaymentReconciliation(Document):
 
 	def get_jv_entries(self):
 		condition = self.get_conditions()
+
+		if self.get("cost_center"):
+			condition += f" and t2.cost_center = '{self.cost_center}' "
+
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"

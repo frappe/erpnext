@@ -747,6 +747,73 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
 
+	def test_cost_center_filter_on_vouchers(self):
+		"""
+		Test Cost Center filter is applied on Invoices, Payment Entries and Journals
+		"""
+		transaction_date = nowdate()
+		rate = 100
+
+		# 'Main - PR' Cost Center
+		si1 = self.create_sales_invoice(
+			qty=1, rate=rate, posting_date=transaction_date, do_not_submit=True
+		)
+		si1.cost_center = self.main_cc.name
+		si1.submit()
+
+		pe1 = self.create_payment_entry(posting_date=transaction_date, amount=rate)
+		pe1.cost_center = self.main_cc.name
+		pe1 = pe1.save().submit()
+
+		je1 = self.create_journal_entry(self.bank, self.debit_to, 100, transaction_date)
+		je1.accounts[0].cost_center = self.main_cc.name
+		je1.accounts[1].cost_center = self.main_cc.name
+		je1.accounts[1].party_type = "Customer"
+		je1.accounts[1].party = self.customer
+		je1 = je1.save().submit()
+
+		# 'Sub - PR' Cost Center
+		si2 = self.create_sales_invoice(
+			qty=1, rate=rate, posting_date=transaction_date, do_not_submit=True
+		)
+		si2.cost_center = self.sub_cc.name
+		si2.submit()
+
+		pe2 = self.create_payment_entry(posting_date=transaction_date, amount=rate)
+		pe2.cost_center = self.sub_cc.name
+		pe2 = pe2.save().submit()
+
+		je2 = self.create_journal_entry(self.bank, self.debit_to, 100, transaction_date)
+		je2.accounts[0].cost_center = self.sub_cc.name
+		je2.accounts[1].cost_center = self.sub_cc.name
+		je2.accounts[1].party_type = "Customer"
+		je2.accounts[1].party = self.customer
+		je2 = je2.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.cost_center = self.main_cc.name
+
+		pr.get_unreconciled_entries()
+
+		# check PR tool output
+		self.assertEqual(len(pr.get("invoices")), 1)
+		self.assertEqual(pr.get("invoices")[0].get("invoice_number"), si1.name)
+		self.assertEqual(len(pr.get("payments")), 2)
+		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
+		self.assertCountEqual(payment_vouchers, [pe1.name, je1.name])
+
+		# Change cost center
+		pr.cost_center = self.sub_cc.name
+
+		pr.get_unreconciled_entries()
+
+		# check PR tool output
+		self.assertEqual(len(pr.get("invoices")), 1)
+		self.assertEqual(pr.get("invoices")[0].get("invoice_number"), si2.name)
+		self.assertEqual(len(pr.get("payments")), 2)
+		payment_vouchers = [x.get("reference_name") for x in pr.get("payments")]
+		self.assertCountEqual(payment_vouchers, [je2.name, pe2.name])
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
