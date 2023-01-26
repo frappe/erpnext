@@ -13,7 +13,7 @@
  "docstatus": 0,
  "doctype": "Workspace",
  "extends_another_page": 0,
- "hide_custom": 1,
+ "hide_custom": 0,
  "icon": "sell",
  "idx": 0,
  "is_standard": 1,
