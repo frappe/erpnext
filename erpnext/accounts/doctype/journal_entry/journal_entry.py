@@ -236,6 +236,8 @@ class JournalEntry(AccountsController):
 			if (
 				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
 			):
+				processed_assets.append(d.reference_name)
+
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
@@ -249,8 +251,6 @@ class JournalEntry(AccountsController):
 					"value_after_depreciation",
 					asset.value_after_depreciation - depr_value,
 				)
-
-				processed_assets.append(d.reference_name)
 
 	def update_inter_company_jv(self):
 		if (
@@ -319,6 +319,8 @@ class JournalEntry(AccountsController):
 			if (
 				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
 			):
+				processed_assets.append(d.reference_name)
+
 				asset = frappe.get_doc("Asset", d.reference_name)
 
 				if asset.calculate_depreciation:
@@ -341,8 +343,6 @@ class JournalEntry(AccountsController):
 						"value_after_depreciation",
 						asset.value_after_depreciation + depr_value,
 					)
-
-				processed_assets.append(d.reference_name)
 
 	def unlink_inter_company_jv(self):
 		if (
