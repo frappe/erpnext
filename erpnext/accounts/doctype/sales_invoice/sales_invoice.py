@@ -233,7 +233,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Overdue")
 		elif cint(self.is_return) == 1:
 			self.indicator_title = _("Return")
-			self.indicator_color = "light-grey"
+			self.indicator_color = "light-gray"
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")

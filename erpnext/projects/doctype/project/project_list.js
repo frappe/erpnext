@@ -10,7 +10,7 @@ frappe.listview_settings['Project'] = {
 			"Open": "orange",
 			"Completed": "green",
 			"Closed": "green",
-			"Cancelled": "light-grey",
+			"Cancelled": "light-gray",
 		}
 
 		var guessed_color = color_map[doc.status] || frappe.utils.guess_colour(doc.status);

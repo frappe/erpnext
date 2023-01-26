@@ -159,13 +159,13 @@ erpnext.crm.AppointmentController = class AppointmentController extends erpnext.
 		// Notification Status
 		var confirmation_count = frappe.get_notification_count(me.frm, 'Appointment Confirmation', 'SMS');
 		var confirmation_color = confirmation_count ? "green"
-			: this.can_notify('Appointment Confirmation') ? "yellow" : "light-grey";
+			: this.can_notify('Appointment Confirmation') ? "yellow" : "light-gray";
 		var confirmation_status = confirmation_count ? __("{0} SMS", [confirmation_count])
 			: __("Not Sent");
 
 		var reminder_count = frappe.get_notification_count(me.frm, 'Appointment Reminder', 'SMS');
 		var reminder_status = __("Not Sent");
-		var reminder_color = "light-grey";
+		var reminder_color = "light-gray";
 
 		if (reminder_count) {
 			reminder_color = "green";
@@ -178,7 +178,7 @@ erpnext.crm.AppointmentController = class AppointmentController extends erpnext.
 
 		var cancellation_count = frappe.get_notification_count(me.frm, 'Appointment Cancellation', 'SMS');
 		var cancellation_color = cancellation_count ? "green"
-			: this.can_notify('Appointment Cancellation') ? "yellow" : "light-grey";
+			: this.can_notify('Appointment Cancellation') ? "yellow" : "light-gray";
 		var cancellation_status = cancellation_count ? __("{0} SMS", [cancellation_count])
 			: __("Not Sent");
 

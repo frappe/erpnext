@@ -69,7 +69,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				if (!completed_qty) {
 					return "orange";
 				} else if (doc.returned_qty >= doc.qty) {
-					return "darkgrey";
+					return "grey";
 				} else if (completed_qty < doc.qty) {
 					return "yellow";
 				} else if (doc.billed_qty < doc.qty) {

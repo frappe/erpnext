@@ -19,11 +19,11 @@ frappe.listview_settings['Purchase Invoice'] = {
 
 			// On Hold Without Release Date
 			if(cint(doc.on_hold) && !doc.release_date) {
-				return [__("On Hold"), "light-grey", "status,=,On Hold"];
+				return [__("On Hold"), "light-gray", "status,=,On Hold"];
 
 			// Temporarily On Hold
 			} else if(cint(doc.on_hold) && doc.release_date && frappe.datetime.get_diff(doc.release_date, frappe.datetime.nowdate()) > 0) {
-				return [__("Temporarily On Hold"), "light-grey", "status,=,On Hold|release_date,is,set"];
+				return [__("Temporarily On Hold"), "light-gray", "status,=,On Hold|release_date,is,set"];
 
 			// Overdue Unpaid
 			} else if(frappe.datetime.get_diff(doc.due_date) < 0) {

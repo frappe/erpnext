@@ -10,7 +10,7 @@ frappe.listview_settings['Production Plan'] = {
 				"In Process": "orange",
 				"Completed": "green",
 				"Material Requested": "light-blue",
-				"Cancelled": "light-grey"
+				"Cancelled": "light-gray"
 			}[doc.status], "status,=," + doc.status];
 		}
 	}

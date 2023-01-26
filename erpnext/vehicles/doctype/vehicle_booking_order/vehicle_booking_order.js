@@ -299,7 +299,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 
 		var payment_adjustment_color;
 		if (!me.frm.doc.payment_adjustment) {
-			payment_adjustment_color = 'light-grey';
+			payment_adjustment_color = 'light-gray';
 		} else if (me.frm.doc.payment_adjustment > 0) {
 			payment_adjustment_color = 'blue';
 		} else {
@@ -334,7 +334,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		} else if (me.frm.doc.delivery_status == "Delivered") {
 			delivery_status_color = "green";
 		} else if (me.frm.doc.delivery_status == "Not Applicable") {
-			delivery_status_color = "light-grey";
+			delivery_status_color = "light-gray";
 		}
 
 		var overdue_warning = ["Not Received", "In Stock"].includes(me.frm.doc.delivery_status) && cint(me.frm.doc.delivery_overdue);
@@ -355,7 +355,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 
 		var registration_status_color;
 		if (me.frm.doc.registration_status == "Not Ordered") {
-			registration_status_color = "light-grey";
+			registration_status_color = "light-gray";
 		} else if (me.frm.doc.registration_status == "Ordered") {
 			registration_status_color = "blue";
 		} else if (me.frm.doc.registration_status == "In Process") {
@@ -366,7 +366,7 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 
 		var pdi_status_color;
 		if (me.frm.doc.pdi_status == "Not Requested") {
-			pdi_status_color = "light-grey";
+			pdi_status_color = "light-gray";
 		} else if (me.frm.doc.pdi_status == "Requested") {
 			pdi_status_color = "blue";
 		} else if (me.frm.doc.pdi_status == "In Process") {
@@ -415,37 +415,37 @@ erpnext.vehicles.VehicleBookingOrder = class VehicleBookingOrder extends erpnext
 		// Notification Status
 		var booking_confirmation_count = frappe.get_notification_count(me.frm, 'Booking Confirmation', 'SMS');
 		var booking_confirmation_color = booking_confirmation_count ? "green"
-			: this.can_notify('Booking Confirmation') ? "yellow" : "light-grey";
+			: this.can_notify('Booking Confirmation') ? "yellow" : "light-gray";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
 
 		var balance_payment_count = frappe.get_notification_count(me.frm, 'Balance Payment Due', 'SMS');
 		var balance_payment_color = balance_payment_count ? "green"
-			: this.can_notify('Balance Payment Due') ? "yellow" : "light-grey";
+			: this.can_notify('Balance Payment Due') ? "yellow" : "light-gray";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
 			: __("Not Sent");
 
 		var payment_confirmation_count = frappe.get_notification_count(me.frm, 'Balance Payment Confirmation', 'SMS');
 		var payment_confirmation_color = payment_confirmation_count ? "green"
-			: this.can_notify('Balance Payment Confirmation') ? "yellow" : "light-grey";
+			: this.can_notify('Balance Payment Confirmation') ? "yellow" : "light-gray";
 		var payment_confirmation_status = payment_confirmation_count ? __("{0} SMS", [payment_confirmation_count])
 			: __("Not Sent");
 
 		var ready_for_delivery_count = frappe.get_notification_count(me.frm, 'Ready For Delivery', 'SMS');
 		var ready_for_delivery_color = ready_for_delivery_count ? "green"
-			: this.can_notify('Ready For Delivery') ? "yellow" : "light-grey";
+			: this.can_notify('Ready For Delivery') ? "yellow" : "light-gray";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
 
 		var congratulations_count = frappe.get_notification_count(me.frm, 'Congratulations', 'SMS');
 		var congratulations_color = congratulations_count ? "green"
-			: this.can_notify('Congratulations') ? "yellow" : "light-grey";
+			: this.can_notify('Congratulations') ? "yellow" : "light-gray";
 		var congratulations_status = congratulations_count ? __("{0} SMS", [congratulations_count])
 			: __("Not Sent");
 
 		var booking_cancellation_count = frappe.get_notification_count(me.frm, 'Booking Cancellation', 'SMS');
 		var booking_cancellation_color = booking_cancellation_count ? "green"
-			: this.can_notify('Booking Cancellation') ? "yellow" : "light-grey";
+			: this.can_notify('Booking Cancellation') ? "yellow" : "light-gray";
 		var booking_cancellation_status = booking_cancellation_count ? __("{0} SMS", [booking_cancellation_count])
 			: __("Not Sent");
 

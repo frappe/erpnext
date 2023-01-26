@@ -9,7 +9,7 @@ frappe.listview_settings['Task'] = {
 			"Pending Review": "light-blue",
 			"Working": "purple",
 			"Completed": "green",
-			"Cancelled": "light-grey"
+			"Cancelled": "light-gray"
 		}
 		return [__(doc.status), colors[doc.status], "status,=," + doc.status];
 	},

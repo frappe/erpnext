@@ -246,7 +246,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		// Work Status
 		var vehicle_status_color;
 		if (me.frm.doc.vehicle_status == "Not Applicable") {
-			vehicle_status_color = "light-grey";
+			vehicle_status_color = "light-gray";
 		} else if (me.frm.doc.vehicle_status == "Not Received") {
 			vehicle_status_color = "red";
 		} else if (me.frm.doc.vehicle_status == "In Workshop") {
@@ -257,7 +257,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 
 		var delivery_status_color;
 		if (me.frm.doc.delivery_status == "Not Applicable") {
-			delivery_status_color = "light-grey";
+			delivery_status_color = "light-gray";
 		} else if (me.frm.doc.delivery_status == "Not Delivered") {
 			delivery_status_color = "orange";
 		} else if (me.frm.doc.delivery_status == "Partly Delivered") {
@@ -290,7 +290,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 		// Billing Status
 		var billing_status_color;
 		if (me.frm.doc.billing_status == "Not Applicable") {
-			billing_status_color = "light-grey";
+			billing_status_color = "light-gray";
 		} else if (me.frm.doc.billing_status == "Not Billed") {
 			billing_status_color = "orange";
 		} else if (me.frm.doc.billing_status == "Partly Billed") {
@@ -299,8 +299,8 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 			billing_status_color = "green";
 		}
 
-		var total_billable_color = me.frm.doc.total_billable_amount ? "blue" : "light-grey";
-		var customer_billable_color = me.frm.doc.customer_billable_amount ? "blue" : "light-grey";
+		var total_billable_color = me.frm.doc.total_billable_amount ? "blue" : "light-gray";
+		var customer_billable_color = me.frm.doc.customer_billable_amount ? "blue" : "light-gray";
 
 		var billed_amount_color;
 		if (me.frm.doc.total_billed_amount) {
@@ -315,7 +315,7 @@ erpnext.projects.ProjectController = class ProjectController extends erpnext.con
 			if (me.frm.doc.total_billable_amount) {
 				billed_amount_color = 'orange';
 			} else {
-				billed_amount_color = 'light-grey';
+				billed_amount_color = 'light-gray';
 			}
 		}
 
