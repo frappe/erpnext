@@ -335,47 +335,48 @@ class PickList(Document):
 	def get_picked_items_details(self, items):
 		picked_items = frappe._dict()
 
-		pi = frappe.qb.DocType("Pick List")
-		pi_item = frappe.qb.DocType("Pick List Item")
-		query = (
-			frappe.qb.from_(pi)
-			.inner_join(pi_item)
-			.on(pi.name == pi_item.parent)
-			.select(
-				pi_item.item_code,
-				pi_item.warehouse,
-				pi_item.batch_no,
-				Sum(pi_item.picked_qty).as_("picked_qty"),
-				Replace(GROUP_CONCAT(pi_item.serial_no), ",", "\n").as_("serial_no"),
+		if items:
+			pi = frappe.qb.DocType("Pick List")
+			pi_item = frappe.qb.DocType("Pick List Item")
+			query = (
+				frappe.qb.from_(pi)
+				.inner_join(pi_item)
+				.on(pi.name == pi_item.parent)
+				.select(
+					pi_item.item_code,
+					pi_item.warehouse,
+					pi_item.batch_no,
+					Sum(pi_item.picked_qty).as_("picked_qty"),
+					Replace(GROUP_CONCAT(pi_item.serial_no), ",", "\n").as_("serial_no"),
+				)
+				.where(
+					(pi_item.item_code.isin([x.item_code for x in items]))
+					& (pi_item.docstatus != 2)
+					& (pi_item.picked_qty > 0)
+					& (pi.status != "Completed")
+				)
+				.groupby(
+					pi_item.item_code,
+					pi_item.warehouse,
+					pi_item.batch_no,
+				)
 			)
-			.where(
-				(pi_item.item_code.isin([x.item_code for x in items]))
-				& (pi_item.docstatus != 2)
-				& (pi_item.picked_qty > 0)
-				& (pi.status != "Completed")
-			)
-			.groupby(
-				pi_item.item_code,
-				pi_item.warehouse,
-				pi_item.batch_no,
-			)
-		)
 
-		if self.name:
-			query = query.where(pi_item.parent != self.name)
+			if self.name:
+				query = query.where(pi_item.parent != self.name)
 
-		items_data = query.run(as_dict=True)
+			items_data = query.run(as_dict=True)
 
-		for item_data in items_data:
-			key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
-			serial_no = [x for x in item_data.serial_no.split("\n") if x] if item_data.serial_no else None
-			data = {"picked_qty": item_data.picked_qty}
-			if serial_no:
-				data["serial_no"] = serial_no
-			if item_data.item_code not in picked_items:
-				picked_items[item_data.item_code] = {key: data}
-			else:
-				picked_items[item_data.item_code][key] = data
+			for item_data in items_data:
+				key = (item_data.warehouse, item_data.batch_no) if item_data.batch_no else item_data.warehouse
+				serial_no = [x for x in item_data.serial_no.split("\n") if x] if item_data.serial_no else None
+				data = {"picked_qty": item_data.picked_qty}
+				if serial_no:
+					data["serial_no"] = serial_no
+				if item_data.item_code not in picked_items:
+					picked_items[item_data.item_code] = {key: data}
+				else:
+					picked_items[item_data.item_code][key] = data
 
 		return picked_items
 
