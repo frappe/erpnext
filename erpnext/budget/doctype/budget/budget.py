@@ -265,7 +265,6 @@ def validate_expense_against_budget(args):
 								args.account, budget_against, frappe.db.escape(args.get(budget_against))
 							)), raise_exception=True
 						)
-	frappe.throw("Hello at end")
 	commit_budget(args)
 
 def validate_budget_records(args, budget_records):
