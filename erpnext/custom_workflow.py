@@ -757,10 +757,10 @@ class CustomWorkflow:
 				frappe.throw("Only {} can Apply this Document".format(self.doc.owner))
 			self.set_approver("POL Approver")
 
-		if self.old_state.lower() in ("Rejected".lower()):
-			if self.doc.owner != frappe.session.user:
-				frappe.throw("Only {} can Re Apply this Document".format(self.doc.owner))
-			self.set_approver("POL Approver")
+		# if self.old_state.lower() in ("Rejected".lower()):
+		# 	if self.doc.owner != frappe.session.user:
+		# 		frappe.throw("Only {} can Re Apply this Document".format(self.doc.owner))
+		# 	self.set_approver("POL Approver")
 		 
 		if self.new_state.lower() in ("Approved".lower()):
 			if self.doc.approver != frappe.session.user:
