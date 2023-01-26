@@ -889,6 +889,6 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	filtered_items() {
-		return this.frm.doc.items.filter(item => !item["is_alternative_item"]);
+		return this.frm.doc.items.filter(item => !item["is_alternative"]);
 	}
 };

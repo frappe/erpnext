@@ -32,7 +32,7 @@ class calculate_taxes_and_totals(object):
 
 	def filter_rows(self):
 		"""Exclude rows, that do not fulfill the filter criteria, from totals computation."""
-		items = list(filter(lambda item: not item.get("is_alternative_item"), self.doc.get("items")))
+		items = list(filter(lambda item: not item.get("is_alternative"), self.doc.get("items")))
 		return items
 
 	def calculate(self):

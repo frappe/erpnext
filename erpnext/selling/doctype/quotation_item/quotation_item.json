@@ -49,7 +49,8 @@
   "pricing_rules",
   "stock_uom_rate",
   "is_free_item",
-  "is_alternative_item",
+  "is_alternative",
+  "alternative_to",
   "section_break_43",
   "valuation_rate",
   "column_break_45",
@@ -647,16 +648,25 @@
   },
   {
    "default": "0",
-   "fieldname": "is_alternative_item",
+   "fieldname": "is_alternative",
    "fieldtype": "Check",
-   "label": "Is Alternative Item",
+   "label": "Is Alternative",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "is_alternative",
+   "fieldname": "alternative_to",
+   "fieldtype": "Link",
+   "label": "Alternative To",
+   "mandatory_depends_on": "is_alternative",
+   "options": "Item",
    "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-24 08:48:06.290335",
+ "modified": "2023-01-26 07:32:02.768197",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",
