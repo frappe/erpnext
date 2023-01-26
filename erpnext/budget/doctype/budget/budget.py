@@ -348,7 +348,6 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			frappe.msgprint(msg, indicator="orange")
 
 def commit_budget(args):
-	frappe.msgprint("{}".format(args), raise_exception=True)
 	amount = args.amount if args.amount else args.debit
 	if frappe.db.get_single_value("Budget Settings", "budget_commit_on") == args.doctype and args.amount > 0:
 		doc = frappe.get_doc(
