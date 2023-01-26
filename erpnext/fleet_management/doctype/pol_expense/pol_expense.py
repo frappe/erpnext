@@ -42,11 +42,11 @@ class POLExpense(AccountsController):
 				
 	def on_cancel(self):
 		self.make_gl_entries()
-	
+
 	def make_gl_entries(self):
 		if self.is_opening:
 			return
-			
+
 		gl_entries = []
 		self.make_supplier_gl_entry(gl_entries)
 		self.make_expense_gl_entry(gl_entries)

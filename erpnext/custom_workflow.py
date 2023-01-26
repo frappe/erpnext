@@ -126,18 +126,34 @@ class CustomWorkflow:
 		
 		if self.doc.doctype == "POL Expense":
 			department = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"department")
-			if department != "PROJECTS & MINES DEPARTMENT - SMCL":
+			section = frappe.db.get_value("Employee", {"user_id":self.doc.owner},"section")
+			if section == "Chunaikhola Dolomite Mines - SMCL":
 				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 					"Department Approver",
-					{"parent": "HUMAN RESOURCE & ADMINISTRATION DIVISION - SMCL", "parentfield": "expense_approvers", "idx": 1},
+					{"parent": "Chunaikhola Dolomite Mines - SMCL", "parentfield": "expense_approvers", "idx": 1},
+					"approver",
+				)},self.field_list)
+
+			elif department == "CORPORATE SERVICES DEPARTMENT - SMCL":
+				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
+					"Department Approver",
+					{"parent": "CORPORATE SERVICES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
+					"approver",
+				)},self.field_list)
+			
+			elif department == "SALES & LOGISTICS DEPARTMENT - SMCL":
+				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
+					"Department Approver",
+					{"parent": "Samdrup Jongkhar - SMCL", "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
 			else:
 				self.pol_approver = frappe.db.get_value("Employee",{"user_id":frappe.db.get_value(
 					"Department Approver",
-					{"parent": frappe.db.get_value("Employee",{"user_id":self.doc.owner},"section"), "parentfield": "expense_approvers", "idx": 1},
+					{"parent": "PROJECTS & MINES DEPARTMENT - SMCL", "parentfield": "expense_approvers", "idx": 1},
 					"approver",
 				)},self.field_list)
+			
 
 		if self.doc.doctype == "Employee Advance":
 			if self.doc.advance_type != "Imprest Advance":
@@ -736,11 +752,24 @@ class CustomWorkflow:
 				self.doc.workflow_state = "Waiting Chief, PCD Approval"
 
 	def pol_expenses(self):
-		if self.new_state.lower() in ("Draft".lower()):
+		if self.new_state.lower() in ("Waiting GM Approval".lower()):
 			if self.doc.owner != frappe.session.user:
 				frappe.throw("Only {} can Apply this Document".format(self.doc.owner))
 			self.set_approver("POL Approver")
-		
+
+		if self.old_state.lower() in ("Rejected".lower()):
+			if self.doc.owner != frappe.session.user:
+				frappe.throw("Only {} can Re Apply this Document".format(self.doc.owner))
+			self.set_approver("POL Approver")
+		 
+		if self.new_state.lower() in ("Approved".lower()):
+			if self.doc.approver != frappe.session.user:
+				frappe.throw("Only {} can Approve this Document".format(self.doc.approver))
+
+		if self.new_state.lower() in ("Rejected".lower()):
+			if self.doc.approver != frappe.session.user:
+				frappe.throw("Only {} can reject this Document".format(self.doc.approver))
+
 	def target_setup_request(self):
 		if self.new_state.lower() in ("Draft".lower()):
 			if self.doc.set_manual_approver == 1:
