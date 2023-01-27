@@ -347,8 +347,21 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				},
 			],
 			primary_action: function() {
-				me.frm.add_child('contact_schedule', dialog.get_values());
-				me.frm.save();
+				var data = dialog.get_values();
+
+				frappe.call({
+					method: "erpnext.crm.doctype.opportunity.opportunity.schedule_follow_up",
+					args: {
+						name: me.frm.doc.name,
+						schedule_date: data.schedule_date,
+						to_discuss: data.to_discuss || ""
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
 				dialog.hide();
 			},
 			primary_action_label: __('Schedule')
@@ -405,7 +418,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 				frappe.call({
 					method: "erpnext.crm.doctype.opportunity.opportunity.submit_communication",
 					args: {
-						name: me.frm.doc.name,
+						opportunity: me.frm.doc.name,
 						contact_date: data.contact_date,
 						remarks: data.remarks,
 						submit_follow_up: 1,
