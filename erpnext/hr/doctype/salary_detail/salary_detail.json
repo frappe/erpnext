@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2016-06-30 15:32:36.385111",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -26,7 +25,8 @@
   "tax_on_flexible_benefit",
   "tax_on_additional_salary",
   "section_break_11",
-  "condition_and_formula_help"
+  "condition_and_formula_help",
+  "impact_on_bank_salary"
  ],
  "fields": [
   {
@@ -200,11 +200,17 @@
    "fieldtype": "Check",
    "label": "Exempted from Income Tax",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "salary_component.impact_on_bank_salary",
+   "fieldname": "impact_on_bank_salary",
+   "fieldtype": "Check",
+   "label": "Impact on Bank Salary"
   }
  ],
  "istable": 1,
- "links": [],
- "modified": "2020-04-24 20:00:16.475295",
+ "modified": "2023-01-26 12:39:01.206098",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Detail",
