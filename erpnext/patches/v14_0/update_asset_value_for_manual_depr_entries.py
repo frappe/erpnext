@@ -8,7 +8,7 @@ def execute():
 	aca = frappe.qb.DocType("Asset Category Account")
 	company = frappe.qb.DocType("Company")
 
-	depr_values = (
+	asset_total_depr_value_map = (
 		frappe.qb.from_(gle)
 		.join(asset)
 		.on(gle.against_voucher == asset.name)
@@ -27,6 +27,12 @@ def execute():
 		.groupby(asset.name)
 	)
 
-	frappe.qb.update(asset).join(depr_values).on(depr_values.asset_name == asset.name).set(
-		asset.value_after_depreciation, asset.value_after_depreciation - depr_values.value
-	).where(asset.docstatus == 1).where(asset.calculate_depreciation == 0).run()
+	frappe.qb.update(asset).join(asset_total_depr_value_map).on(
+		asset_total_depr_value_map.asset_name == asset.name
+	).set(
+		asset.value_after_depreciation, asset.value_after_depreciation - asset_total_depr_value_map.value
+	).where(
+		asset.docstatus == 1
+	).where(
+		asset.calculate_depreciation == 0
+	).run()
