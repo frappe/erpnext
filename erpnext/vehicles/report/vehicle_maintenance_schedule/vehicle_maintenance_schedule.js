@@ -13,6 +13,14 @@ frappe.query_reports["Vehicle Maintenance Schedule"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "date_type",
+			label: __("Date Type"),
+			fieldtype: "Select",
+			options: ["Reminder Date", "Service Due Date"],
+			default: "Reminder Date",
+			reqd: 1,
+		},
+		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
