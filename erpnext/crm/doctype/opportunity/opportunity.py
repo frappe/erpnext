@@ -12,6 +12,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.core.doctype.sms_settings.sms_settings import enqueue_template_sms
 from frappe.core.doctype.notification_count.notification_count import get_all_notification_count
 from erpnext.stock.get_item_details import get_applies_to_details
+from erpnext.setup.doctype.sales_person.sales_person import get_sales_person_from_user
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_contact_details, get_address_display, get_party_account_currency
@@ -56,6 +57,7 @@ class Opportunity(TransactionBase):
 		self.validate_financer()
 		self.validate_follow_up()
 		self.validate_maintenance_schedule()
+		self.set_sales_person()
 		self.set_status()
 		self.set_title()
 
@@ -98,6 +100,10 @@ class Opportunity(TransactionBase):
 
 		if update:
 			self.db_set('status', self.status, update_modified=update_modified)
+
+	def set_sales_person(self):
+		if not self.get('sales_person') and self.is_new():
+			self.sales_person = get_sales_person_from_user()
 
 	def set_missing_values(self):
 		self.set_customer_details()
