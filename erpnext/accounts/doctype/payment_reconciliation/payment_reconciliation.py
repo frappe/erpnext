@@ -69,6 +69,10 @@ class PaymentReconciliation(Document):
 
 	def get_jv_entries(self):
 		condition = self.get_conditions()
+
+		if self.get("cost_center"):
+			condition += f" and t2.cost_center = '{self.cost_center}' "
+
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
@@ -334,7 +338,7 @@ class PaymentReconciliation(Document):
 		)
 
 		# Account Currency has balance
-		dr_or_cr = "debit" if self.party_type == "Customer" else "debit"
+		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 		journal_account = frappe._dict(
@@ -471,6 +475,7 @@ class PaymentReconciliation(Document):
 
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()
+		self.accounting_dimension_filter_conditions.clear()
 		self.ple_posting_date_filter.clear()
 		ple = qb.DocType("Payment Ledger Entry")
 
