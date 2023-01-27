@@ -2185,19 +2185,19 @@ def submit_customer_feedback_communication_for_project(project, communication_ty
 	cur_time = get_time(cur_dt)
 
 	if communication_type == "Feedback":
-		feedback_doc.db_set({
+		feedback_doc.update({
 			"feedback_date": cur_date,
 			"feedback_time": cur_time,
 			"customer_feedback": communication
 		})
 	else:
-		feedback_doc.db_set({
+		feedback_doc.update({
 			"contact_date": cur_date,
 			"contact_time": cur_time,
 			"contact_remark": communication
 		})
 
-	feedback_doc.notify_update()
+	feedback_doc.save()
 
 	# Add Communication
 	communication_doc = frappe.get_doc({
@@ -2233,5 +2233,6 @@ def submit_customer_feedback_communication_for_project(project, communication_ty
 	return {
 		"contact_remark": feedback_doc.get('contact_remark'),
 		"customer_feedback": feedback_doc.get('customer_feedback'),
-		"contact_dt": combine_datetime(cur_date, cur_time)
+		"contact_dt": combine_datetime(feedback_doc.contact_date, feedback_doc.contact_time) if feedback_doc.get('contact_remark') else None,
+		"feedback_dt": combine_datetime(feedback_doc.feedback_date, feedback_doc.feedback_time) if feedback_doc.get('customer_feedback') else None
 	}

@@ -126,8 +126,12 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 				callback: function(r) {
 					if (!r.exc) {
 						let row = frappe.query_report.datatable.datamanager.data[rowIndex];
-						row.contact_dt = r.message.contact_dt;
 						row[column.fieldname] = r.message[column.fieldname];
+						if (column.fieldname == "customer_feedback") {
+							row.feedback_dt = r.message.feedback_dt;
+						} else {
+							row.contact_dt = r.message.contact_dt;
+						}
 
 						erpnext.utils.query_report_local_refresh();
 					}
