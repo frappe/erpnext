@@ -43,7 +43,7 @@ class POLIssue(StockController):
 				frappe.throw("Current KM/Hr Reading cannot be less than Previous KM/Hr Reading({}) for Equipment Number <b>{}</b>".format(pv_km,a.equipment))
 			a.km_difference = flt(a.cur_km_reading) - flt(pv_km)
 			if a.uom == "Hour":
-				a.mileage = a.qty / flt(a.km_difference)
+				a.mileage = flt(a.qty) / flt(a.km_difference)
 			else :
 				a.mileage = flt(a.km_difference) / a.qty
 			a.previous_km = pv_km
