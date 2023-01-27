@@ -677,6 +677,15 @@ def submit_communication(opportunity, contact_date, remarks, submit_follow_up=Fa
 	else:
 		frappe.throw(_('Opportunity/Maintenance Schedule not provided'))
 
+	if cint(submit_follow_up):
+		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
+		if follow_up:
+			follow_up[0].contact_date = getdate(contact_date)
+
+	if opp.is_new() or cint(submit_follow_up):
+		opp.flags.ignore_mandatory = True
+		opp.save()
+
 	comm = frappe.new_doc("Communication")
 	comm.reference_doctype = opp.doctype
 	comm.reference_name = opp.name
@@ -694,14 +703,6 @@ def submit_communication(opportunity, contact_date, remarks, submit_follow_up=Fa
 	})
 
 	comm.insert(ignore_permissions=True)
-
-	if cint(submit_follow_up):
-		follow_up = [f for f in opp.contact_schedule if not f.contact_date]
-		if follow_up:
-			follow_up[0].contact_date = getdate(contact_date)
-
-	if opp.is_new() or cint(submit_follow_up):
-		opp.save()
 
 	return {
 		"opportunity": opp.name,
