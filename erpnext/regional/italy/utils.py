@@ -269,7 +269,7 @@ def sales_invoice_on_submit(doc, method):
 		'Italia', 'Italian Republic', 'Repubblica Italiana']:
 		return
 
-	if not len(doc.payment_schedule):
+	if not len(doc.payment_schedule) and not doc.is_pos:
 		frappe.throw(_("Please set the Payment Schedule"), title=_("E-Invoicing Information Missing"))
 	else:
 		for schedule in doc.payment_schedule:
