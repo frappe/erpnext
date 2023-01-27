@@ -34,8 +34,10 @@ class VehicleServiceFeedback:
 			feedback_valid_after_service_days = cint(frappe.db.get_value("Vehicles Settings", None, "feedback_valid_after_service_days"))
 			self.filters.from_date = add_days(self.filters.from_date, -1 * feedback_valid_after_service_days)
 			self.filters.to_date = add_days(self.filters.to_date, -1 * feedback_valid_after_service_days)
+		elif self.filters.date_type == "Feedback Date":
+			self.filters.date_field = "cf.feedback_date"
 		else:
-			self.filters.date_field = "ro.feedback_date"
+			self.filters.date_field = "cf.contact_date"
 
 		self.data = frappe.db.sql("""
 			SELECT

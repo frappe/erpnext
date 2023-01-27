@@ -16,7 +16,7 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			fieldname: "date_type",
 			label: __("Date Type"),
 			fieldtype: "Select",
-			options: ["Feedback Due Date", "Feedback Date"],
+			options: ["Feedback Due Date", "Feedback Date", "Contact Date"],
 			default: "Feedback Due Date",
 			reqd: 1,
 		},
