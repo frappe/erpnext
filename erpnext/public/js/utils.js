@@ -466,7 +466,20 @@ erpnext.utils.update_child_items = function(opts) {
 	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
 	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
 
-	this.data = [];
+	this.data = frm.doc[opts.child_docname].map((d) => {
+		return {
+			"docname": d.name,
+			"name": d.name,
+			"item_code": d.item_code,
+			"delivery_date": d.delivery_date,
+			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
+			"qty": d.qty,
+			"rate": d.rate,
+			"uom": d.uom
+		}
+	});
+
 	const fields = [{
 		fieldtype:'Data',
 		fieldname:"docname",
@@ -559,7 +572,7 @@ erpnext.utils.update_child_items = function(opts) {
 		})
 	}
 
-	const dialog = new frappe.ui.Dialog({
+	new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
 			{
@@ -595,24 +608,7 @@ erpnext.utils.update_child_items = function(opts) {
 			refresh_field("items");
 		},
 		primary_action_label: __('Update')
-	});
-
-	frm.doc[opts.child_docname].forEach(d => {
-		dialog.fields_dict.trans_items.df.data.push({
-			"docname": d.name,
-			"name": d.name,
-			"item_code": d.item_code,
-			"delivery_date": d.delivery_date,
-			"schedule_date": d.schedule_date,
-			"conversion_factor": d.conversion_factor,
-			"qty": d.qty,
-			"rate": d.rate,
-			"uom": d.uom
-		});
-		this.data = dialog.fields_dict.trans_items.df.data;
-		dialog.fields_dict.trans_items.grid.refresh();
-	})
-	dialog.show();
+	}).show();
 }
 
 erpnext.utils.map_current_doc = function(opts) {
