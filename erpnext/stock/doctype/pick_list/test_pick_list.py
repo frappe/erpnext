@@ -414,6 +414,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 
 		delivery_note = create_delivery_note(pick_list.name)
+		pick_list.load_from_db()
 
 		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
