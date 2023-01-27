@@ -839,7 +839,6 @@ class Asset(AccountsController):
 			frappe.qb.from_(gle)
 			.select(gle.voucher_no.as_("name"), gle.debit.as_("value"), gle.posting_date)
 			.where(gle.against_voucher == self.name)
-			.where(gle.against_voucher_type == "Asset")
 			.where(gle.account == depreciation_expense_account)
 			.where(gle.debit != 0)
 			.where(gle.is_cancelled == 0)

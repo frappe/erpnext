@@ -210,7 +210,6 @@ def get_manual_depreciation_amount_of_asset(asset, filters):
 		frappe.qb.from_(gle)
 		.select(Sum(gle.debit))
 		.where(gle.against_voucher == asset.asset_id)
-		.where(gle.against_voucher_type == "Asset")
 		.where(gle.account == depreciation_expense_account)
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)

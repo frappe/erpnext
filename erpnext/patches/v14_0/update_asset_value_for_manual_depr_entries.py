@@ -1,5 +1,5 @@
 import frappe
-from frappe.query_builder.functions import IfNull, Sum
+from frappe.query_builder.functions import IfNull
 
 
 def execute():
@@ -11,7 +11,7 @@ def execute():
 	frappe.qb.update(asset).join(gle).on(gle.against_voucher == asset.name).join(aca).on(
 		(aca.parent == asset.asset_category) & (aca.company_name == asset.company)
 	).join(company).on(company.name == asset.company).set(
-		asset.value_after_depreciation, asset.value_after_depreciation - Sum(gle.debit)
+		asset.value_after_depreciation, asset.value_after_depreciation - gle.debit
 	).where(
 		asset.docstatus == 1
 	).where(
