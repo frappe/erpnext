@@ -60,8 +60,9 @@ class VehicleServiceFeedback:
 	def process_data(self):
 		for d in self.data:
 			if d.feedback_date:
-				d.contact_dt = combine_datetime(d.feedback_date, d.feedback_time)
-			elif d.contact_date:
+				d.feedback_dt = combine_datetime(d.feedback_date, d.feedback_time)
+
+			if d.contact_date:
 				d.contact_dt = combine_datetime(d.contact_date, d.contact_time)
 
 	def get_conditions(self):
@@ -194,15 +195,21 @@ class VehicleServiceFeedback:
 				"width": 150
 			},
 			{
-				"label": _("Customer Feedback"),
-				"fieldname": "customer_feedback",
+				"label": _("Contact Remark"),
+				"fieldname": "contact_remark",
 				"fieldtype": "Data",
 				"width": 200,
 				"editable": 1
 			},
 			{
-				"label": _("Remark"),
-				"fieldname": "contact_remark",
+				"label": _("Feedback Date/Time"),
+				"fieldname": "feedback_dt",
+				"fieldtype": "Datetime",
+				"width": 150
+			},
+			{
+				"label": _("Customer Feedback"),
+				"fieldname": "customer_feedback",
 				"fieldtype": "Data",
 				"width": 200,
 				"editable": 1

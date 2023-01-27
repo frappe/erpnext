@@ -2190,8 +2190,6 @@ def submit_customer_feedback_communication_for_project(project, communication_ty
 			"feedback_time": cur_time,
 			"customer_feedback": communication
 		})
-	elif feedback_doc.get('customer_feedback'):
-		frappe.throw(_("Can't add remarks after feedback is complete"))
 	else:
 		feedback_doc.db_set({
 			"contact_date": cur_date,
