@@ -2208,7 +2208,7 @@ def submit_customer_feedback_communication_for_project(project, communication_ty
 		"communication_type": communication_type,
 		"sent_or_received": "Received",
 		"subject": "Customer Feedback" + \
-			("" if communication_type=="Feedback" else " Attempt") + \
+			("" if communication_type=="Feedback" else " Contact Remark") + \
 			" ({0})".format(project_doc.name),
 		"sender": frappe.session.user
 	})
