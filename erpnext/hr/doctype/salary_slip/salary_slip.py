@@ -452,7 +452,8 @@ class SalarySlip(TransactionBase):
 					'variable_based_on_taxable_salary': struct_row.variable_based_on_taxable_salary,
 					'deduct_full_tax_on_selected_payroll_date': struct_row.deduct_full_tax_on_selected_payroll_date,
 					'additional_amount': amount if struct_row.get("is_additional_component") else 0,
-					'exempted_from_income_tax': struct_row.exempted_from_income_tax
+					'exempted_from_income_tax': struct_row.exempted_from_income_tax,
+					'impact_on_bank_salary':struct_row.impact_on_bank_salary
 				})
 		else:
 			if struct_row.get("is_additional_component"):
