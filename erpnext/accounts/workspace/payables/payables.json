@@ -5,11 +5,11 @@
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
- "hide_custom": 0,
+ "hide_custom": 1,
  "icon": "accounting",
  "idx": 0,
  "is_hidden": 0,
- "label": "Payable",
+ "label": "Payables",
  "links": [
   {
    "hidden": 0,
@@ -138,16 +138,16 @@
    "type": "Link"
   }
  ],
- "modified": "2023-01-26 20:24:55.030733",
+ "modified": "2023-01-27 15:21:06.920473",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Payable",
+ "name": "Payables",
  "owner": "Administrator",
  "parent_page": "Accounting",
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 31.0,
+ "sequence_id": 4.0,
  "shortcuts": [
   {
    "color": "Grey",
@@ -164,5 +164,5 @@
    "type": "Report"
   }
  ],
- "title": "Payable"
+ "title": "Payables"
 }

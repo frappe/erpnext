@@ -13,6 +13,7 @@
  "hide_custom": 0,
  "icon": "accounting",
  "idx": 0,
+ "is_hidden": 0,
  "label": "Accounting",
  "links": [
   {
@@ -1093,7 +1094,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-06-24 05:41:09.236458",
+ "modified": "2023-01-27 15:21:06.797982",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
