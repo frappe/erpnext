@@ -2888,7 +2888,7 @@ class TestSalesInvoice(unittest.TestCase):
 			make_customer,
 		)
 		from erpnext.accounts.doctype.party_link.party_link import create_party_link
-		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from erpnext.buying.master.supplier.test_supplier import create_supplier
 
 		# create a customer
 		customer = make_customer(customer="_Test Common Supplier")

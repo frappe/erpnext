@@ -10,7 +10,9 @@ from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled
 
 test_dependencies = ["Payment Term", "Payment Terms Template"]
-test_records = frappe.get_test_records("Supplier")
+test_records = frappe.get_file_json(
+	frappe.get_module_path("Buying", "master", "supplier", "test_records.json")
+)
 
 from frappe.tests.utils import FrappeTestCase
 

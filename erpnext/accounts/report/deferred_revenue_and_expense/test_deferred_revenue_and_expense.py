@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.report.deferred_revenue_and_expense.deferred_revenue_and_expense import (
 	Deferred_Revenue_and_Expense_Report,
 )
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.buying.master.supplier.test_supplier import create_supplier
 from erpnext.stock.doctype.item.test_item import create_item
 
 

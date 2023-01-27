@@ -25,9 +25,19 @@ doctype_js = {
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js",
 	"Contact": "public/js/contact.js",
+	"Supplier": "public/js/master/supplier.js",
 }
 
-override_doctype_class = {"Address": "erpnext.accounts.custom.address.ERPNextAddress"}
+doctype_list_js = {"Supplier": "public/js/master/supplier_list.js"}
+
+override_doctype_class = {
+	"Address": "erpnext.accounts.custom.address.ERPNextAddress",
+	"Supplier": "erpnext.buying.master.supplier.supplier.ERPNextSupplier",
+}
+
+override_doctype_dashboards = {
+	"Supplier": "erpnext.buying.master.supplier.supplier_dashboard.get_data"
+}
 
 welcome_email = "erpnext.setup.utils.welcome_email"
 

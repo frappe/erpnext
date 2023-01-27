@@ -27,7 +27,7 @@ frappe.ui.form.on("Supplier", {
 
 		frm.set_query("supplier_primary_contact", function(doc) {
 			return {
-				query: "erpnext.buying.doctype.supplier.supplier.get_supplier_primary_contact",
+				query: "master.master.doctype.supplier.supplier.get_supplier_primary_contact",
 				filters: {
 					"supplier": doc.name
 				}

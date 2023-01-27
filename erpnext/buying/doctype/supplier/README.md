@@ -1,1 +1,0 @@
-Supplier (vendor) master.

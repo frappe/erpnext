@@ -13,7 +13,7 @@ from erpnext.accounts.doctype.account.test_account import create_account, get_in
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.buying.master.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
