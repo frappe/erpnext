@@ -55,7 +55,7 @@ $.each(item_groups || {}, function(item_group, items) {
             {% } else if(filters.customer) { %}
                 {%= filters.customer %} —
             {% } %}
-            Price List: {%= __("From") %} {%= new frappe.datetime.datetime(filters.date).format("ddd, D MMMM, YYYY") %}
+            Price List: {%= __("From") %} {%= moment(frappe.datetime.str_to_obj(filters.date)).format("ddd, D MMMM, YYYY") %}
         </th></tr>
         <tr>
             {% if (alt_uoms.length) { %}

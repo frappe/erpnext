@@ -57,7 +57,7 @@
 <h5 class="text-center">
 	{%= __(filters.ageing_based_on) %}
 	{%= __("Upto") %}
-	{%= new frappe.datetime.datetime(filters.report_date).format("D MMMM, YYYY") %}
+	{%= moment(frappe.datetime.str_to_obj(filters.report_date)).format("D MMMM, YYYY") %}
 </h5>
 
 <div class="clearfix">
