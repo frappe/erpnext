@@ -3537,7 +3537,7 @@ Quality Feedback Template,Шаблон за повратни информаци�
 Rules for applying different promotional schemes.,Правила за примена на различни промотивни шеми.,
 Shift,Смена,
 Show {0},Покажи {0},
-"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","Не се дозволени специјални карактери освен &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{&quot; И &quot;}&quot; во сериите за именување",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","Не се дозволени специјални карактери освен &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; И &quot;}}&quot; во сериите за именување {0}",
 Target Details,Цели детали,
 {0} already has a Parent Procedure {1}.,{0} веќе има Матична постапка {1}.,
 API,API,

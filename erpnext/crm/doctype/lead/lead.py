@@ -390,7 +390,7 @@ def get_lead_details(lead, posting_date=None, company=None):
 		{
 			"territory": lead.territory,
 			"customer_name": lead.company_name or lead.lead_name,
-			"contact_display": " ".join(filter(None, [lead.salutation, lead.lead_name])),
+			"contact_display": " ".join(filter(None, [lead.lead_name])),
 			"contact_email": lead.email_id,
 			"contact_mobile": lead.mobile_no,
 			"contact_phone": lead.phone,

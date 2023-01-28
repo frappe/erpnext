@@ -3537,7 +3537,7 @@ Quality Feedback Template,ગુણવત્તા પ્રતિસાદ Temp
 Rules for applying different promotional schemes.,વિવિધ પ્રમોશનલ યોજનાઓ લાગુ કરવાના નિયમો.,
 Shift,પાળી,
 Show {0},બતાવો {0},
-"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","&quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{&quot; અને &quot;}&quot; સિવાયના વિશેષ અક્ષરો નામકરણ શ્રેણીમાં મંજૂરી નથી",
+"Special Characters except '-', '#', '.', '/', '{{' and '}}' not allowed in naming series {0}","&quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{{&quot; અને &quot;}}&quot; સિવાયના વિશેષ અક્ષરો નામકરણ શ્રેણીમાં મંજૂરી નથી {0}",
 Target Details,લક્ષ્યાંક વિગતો,
 {0} already has a Parent Procedure {1}.,{0} પાસે પહેલેથી જ પિતૃ કાર્યવાહી છે {1}.,
 API,API,
