@@ -743,9 +743,9 @@ class TestPurchaseOrder(FrappeTestCase):
 		pe = get_payment_entry("Purchase Order", po_doc.name)
 		pe.mode_of_payment = "Cash"
 		pe.paid_from = "Cash - _TC"
-		pe.source_exchange_rate = 80
-		pe.target_exchange_rate = 1
-		pe.paid_amount = po_doc.grand_total
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 80
+		pe.paid_amount = po_doc.base_grand_total
 		pe.save(ignore_permissions=True)
 		pe.submit()
 
@@ -889,6 +889,11 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po.status, "Completed")
 		self.assertEqual(mr.status, "Received")
 
+	def test_variant_item_po(self):
+		po = create_purchase_order(item_code="_Test Variant Item", qty=1, rate=100, do_not_save=1)
+
+		self.assertRaises(frappe.ValidationError, po.save)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -994,8 +999,8 @@ def create_purchase_order(**args):
 			},
 		)
 
-	po.set_missing_values()
 	if not args.do_not_save:
+		po.set_missing_values()
 		po.insert()
 		if not args.do_not_submit:
 			if po.is_subcontracted:

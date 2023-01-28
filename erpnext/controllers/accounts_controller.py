@@ -197,7 +197,7 @@ class AccountsController(TransactionBase):
 
 		validate_einvoice_fields(self)
 
-		if self.doctype != "Material Request":
+		if self.doctype != "Material Request" and not self.ignore_pricing_rule:
 			apply_pricing_rule_on_transaction(self)
 
 	def before_cancel(self):
@@ -238,6 +238,14 @@ class AccountsController(TransactionBase):
 						)
 					else:
 						item.set(field_map.get(self.doctype), default_deferred_account)
+
+	def validate_auto_repeat_subscription_dates(self):
+		if (
+			self.get("from_date")
+			and self.get("to_date")
+			and getdate(self.from_date) > getdate(self.to_date)
+		):
+			frappe.throw(_("To Date cannot be before From Date"), title=_("Invalid Auto Repeat Date"))
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -386,7 +394,7 @@ class AccountsController(TransactionBase):
 				self.get("inter_company_reference")
 				or self.get("inter_company_invoice_reference")
 				or self.get("inter_company_order_reference")
-			):
+			) and not self.get("is_return"):
 				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
@@ -576,7 +584,12 @@ class AccountsController(TransactionBase):
 					if bool(uom) != bool(stock_uom):  # xor
 						item.stock_uom = item.uom = uom or stock_uom
 
-					item.conversion_factor = get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+					# UOM cannot be zero so substitute as 1
+					item.conversion_factor = (
+						get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+						or item.get("conversion_factor")
+						or 1
+					)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -2303,7 +2316,7 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 		due_date = add_days(get_last_day(date), term.credit_days)
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
-		due_date = add_months(get_last_day(date), term.credit_months)
+		due_date = get_last_day(add_months(date, term.credit_months))
 	return due_date
 
 
@@ -2315,7 +2328,7 @@ def get_discount_date(term, posting_date=None, bill_date=None):
 	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
 		discount_validity = add_days(get_last_day(date), term.discount_validity)
 	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
-		discount_validity = add_months(get_last_day(date), term.discount_validity)
+		discount_validity = get_last_day(add_months(date, term.discount_validity))
 	return discount_validity
 
 

@@ -6,6 +6,8 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.gross_profit.gross_profit import execute
+from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -14,6 +16,7 @@ class TestGrossProfit(FrappeTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_item()
+		self.create_bundle()
 		self.create_customer()
 		self.create_sales_invoice()
 		self.clear_old_entries()
@@ -42,6 +45,7 @@ class TestGrossProfit(FrappeTestCase):
 		self.company = company.name
 		self.cost_center = company.cost_center
 		self.warehouse = "Stores - " + abbr
+		self.finished_warehouse = "Finished Goods - " + abbr
 		self.income_account = "Sales - " + abbr
 		self.expense_account = "Cost of Goods Sold - " + abbr
 		self.debit_to = "Debtors - " + abbr
@@ -52,6 +56,23 @@ class TestGrossProfit(FrappeTestCase):
 			item_code="_Test GP Item", is_stock_item=1, company=self.company, warehouse=self.warehouse
 		)
 		self.item = item if isinstance(item, str) else item.item_code
+
+	def create_bundle(self):
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		item2 = create_item(
+			item_code="_Test GP Item 2", is_stock_item=1, company=self.company, warehouse=self.warehouse
+		)
+		self.item2 = item2 if isinstance(item2, str) else item2.item_code
+
+		# This will be parent item
+		bundle = create_item(
+			item_code="_Test GP bundle", is_stock_item=0, company=self.company, warehouse=self.warehouse
+		)
+		self.bundle = bundle if isinstance(bundle, str) else bundle.item_code
+
+		# Create Product Bundle
+		self.product_bundle = make_product_bundle(parent=self.bundle, items=[self.item, self.item2])
 
 	def create_customer(self):
 		name = "_Test GP Customer"
@@ -92,6 +113,28 @@ class TestGrossProfit(FrappeTestCase):
 			do_not_submit=do_not_submit,
 		)
 		return sinv
+
+	def create_delivery_note(
+		self, item=None, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+	):
+		"""
+		Helper function to populate default values in Delivery Note
+		"""
+		dnote = create_delivery_note(
+			company=self.company,
+			customer=self.customer,
+			currency="INR",
+			item=item or self.item,
+			qty=qty,
+			rate=rate,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			return_against=None,
+			expense_account=self.expense_account,
+			do_not_save=do_not_save,
+			do_not_submit=do_not_submit,
+		)
+		return dnote
 
 	def clear_old_entries(self):
 		doctype_list = [
@@ -207,3 +250,55 @@ class TestGrossProfit(FrappeTestCase):
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		self.assertDictContainsSubset(expected_entry_with_dn, gp_entry[0])
+
+	def test_bundled_delivery_note_with_different_warehouses(self):
+		"""
+		Test Delivery Note with bundled item. Packed Item from the bundle having different warehouses
+		"""
+		se = make_stock_entry(
+			company=self.company,
+			item_code=self.item,
+			target=self.warehouse,
+			qty=1,
+			basic_rate=100,
+			do_not_submit=True,
+		)
+		item = se.items[0]
+		se.append(
+			"items",
+			{
+				"item_code": self.item2,
+				"s_warehouse": "",
+				"t_warehouse": self.finished_warehouse,
+				"qty": 1,
+				"basic_rate": 100,
+				"conversion_factor": item.conversion_factor or 1.0,
+				"transfer_qty": flt(item.qty) * (flt(item.conversion_factor) or 1.0),
+				"serial_no": item.serial_no,
+				"batch_no": item.batch_no,
+				"cost_center": item.cost_center,
+				"expense_account": item.expense_account,
+			},
+		)
+		se = se.save().submit()
+
+		# Make a Delivery note with Product bundle
+		# Packed Items will have different warehouses
+		dnote = self.create_delivery_note(item=self.bundle, qty=1, rate=200, do_not_submit=True)
+		dnote.packed_items[1].warehouse = self.finished_warehouse
+		dnote = dnote.submit()
+
+		# make Sales Invoice for above delivery note
+		sinv = make_sales_invoice(dnote.name)
+		sinv = sinv.save().submit()
+
+		filters = frappe._dict(
+			company=self.company,
+			from_date=nowdate(),
+			to_date=nowdate(),
+			group_by="Invoice",
+			sales_invoice=sinv.name,
+		)
+
+		columns, data = execute(filters=filters)
+		self.assertGreater(len(data), 0)

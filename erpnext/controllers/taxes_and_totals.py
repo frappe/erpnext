@@ -6,6 +6,7 @@ import json
 
 import frappe
 from frappe import _, scrub
+from frappe.model.document import Document
 from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 
 import erpnext
@@ -20,7 +21,7 @@ from erpnext.stock.get_item_details import _get_item_tax_template
 
 
 class calculate_taxes_and_totals(object):
-	def __init__(self, doc):
+	def __init__(self, doc: Document):
 		self.doc = doc
 		frappe.flags.round_off_applicable_accounts = []
 		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
@@ -677,7 +678,7 @@ class calculate_taxes_and_totals(object):
 			)
 
 	def calculate_total_advance(self):
-		if self.doc.docstatus < 2:
+		if not self.doc.docstatus.is_cancelled():
 			total_allocated_amount = sum(
 				flt(adv.allocated_amount, adv.precision("allocated_amount"))
 				for adv in self.doc.get("advances")
@@ -708,7 +709,7 @@ class calculate_taxes_and_totals(object):
 					)
 				)
 
-			if self.doc.docstatus == 0:
+			if self.doc.docstatus.is_draft():
 				if self.doc.get("write_off_outstanding_amount_automatically"):
 					self.doc.write_off_amount = 0
 

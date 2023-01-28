@@ -16,12 +16,12 @@ on:
   workflow_dispatch:
     inputs:
       user:
-        description: 'user'
+        description: 'Frappe Framework repository user (add your username for forks)'
         required: true
         default: 'frappe'
         type: string
       branch:
-        description: 'Branch name'
+        description: 'Frappe Framework branch'
         default: 'develop'
         required: false
         type: string
@@ -45,9 +45,9 @@ jobs:
 
     services:
       mysql:
-        image: mariadb:10.3
+        image: mariadb:10.6
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: YES
+          MARIADB_ROOT_PASSWORD: 'root'
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3

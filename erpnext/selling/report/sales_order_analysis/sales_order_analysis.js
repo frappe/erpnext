@@ -45,6 +45,12 @@ frappe.query_reports["Sales Order Analysis"] = {
 			}
 		},
 		{
+			"fieldname": "warehouse",
+			"label": __("Warehouse"),
+			"fieldtype": "Link",
+			"options": "Warehouse"
+		},
+		{
 			"fieldname": "status",
 			"label": __("Status"),
 			"fieldtype": "MultiSelectList",

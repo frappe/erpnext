@@ -137,7 +137,7 @@ def get_paid_amount(payment_entry, currency, bank_account):
 				)
 			elif doc.payment_type == "Pay":
 				paid_amount_field = (
-					"paid_amount" if doc.paid_to_account_currency == currency else "base_paid_amount"
+					"paid_amount" if doc.paid_from_account_currency == currency else "base_paid_amount"
 				)
 
 		return frappe.db.get_value(

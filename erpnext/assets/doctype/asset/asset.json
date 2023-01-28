@@ -52,8 +52,6 @@
   "column_break_24",
   "frequency_of_depreciation",
   "next_depreciation_date",
-  "section_break_14",
-  "schedules",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -70,6 +68,7 @@
   "column_break_51",
   "purchase_receipt_amount",
   "default_finance_book",
+  "depr_entry_posting_status",
   "amended_from"
  ],
  "fields": [
@@ -308,19 +307,6 @@
    "no_copy": 1
   },
   {
-   "depends_on": "calculate_depreciation",
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break",
-   "label": "Depreciation Schedule"
-  },
-  {
-   "fieldname": "schedules",
-   "fieldtype": "Table",
-   "label": "Depreciation Schedule",
-   "no_copy": 1,
-   "options": "Depreciation Schedule"
-  },
-  {
    "collapsible": 1,
    "fieldname": "insurance_details",
    "fieldtype": "Section Break",
@@ -488,6 +474,16 @@
    "fieldtype": "Int",
    "label": "Asset Quantity",
    "read_only_depends_on": "eval:!doc.is_existing_asset"
+  },
+  {
+   "fieldname": "depr_entry_posting_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Depreciation Entry Posting Status",
+   "no_copy": 1,
+   "options": "\nSuccessful\nFailed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -502,15 +498,20 @@
   {
    "group": "Repair",
    "link_doctype": "Asset Repair",
-   "link_fieldname": "asset_name"
+   "link_fieldname": "asset"
   },
   {
    "group": "Value",
    "link_doctype": "Asset Value Adjustment",
    "link_fieldname": "asset"
+  },
+  {
+   "group": "Depreciation",
+   "link_doctype": "Asset Depreciation Schedule",
+   "link_fieldname": "asset"
   }
  ],
- "modified": "2022-07-20 10:15:12.887372",
+ "modified": "2023-01-17 00:25:30.387242",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

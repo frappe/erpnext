@@ -4,15 +4,24 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 
 def execute(filters=None):
 	validate_filters(filters)
-	tds_docs, tds_accounts, tax_category_map, journal_entry_party_map = get_tds_docs(filters)
+	(
+		tds_docs,
+		tds_accounts,
+		tax_category_map,
+		journal_entry_party_map,
+		invoice_net_total_map,
+	) = get_tds_docs(filters)
 
 	columns = get_columns(filters)
 
-	res = get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map)
+	res = get_result(
+		filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, invoice_net_total_map
+	)
 	return columns, res
 
 
@@ -22,7 +31,9 @@ def validate_filters(filters):
 		frappe.throw(_("From Date must be before To Date"))
 
 
-def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map):
+def get_result(
+	filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, invoice_net_total_map
+):
 	supplier_map = get_supplier_pan_map()
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
@@ -50,7 +61,16 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 			if entry.account in tds_accounts:
 				tds_deducted += entry.credit - entry.debit
 
-			total_amount_credited += entry.credit
+			if invoice_net_total_map.get(name):
+				total_amount_credited = invoice_net_total_map.get(name)
+			else:
+				total_amount_credited += entry.credit
+
+		## Check if ldc is applied and show rate as per ldc
+		actual_rate = (tds_deducted / total_amount_credited) * 100
+
+		if flt(actual_rate) < flt(rate):
+			rate = actual_rate
 
 		if tds_deducted:
 			row = {
@@ -179,9 +199,10 @@ def get_tds_docs(filters):
 	purchase_invoices = []
 	payment_entries = []
 	journal_entries = []
-	tax_category_map = {}
-	or_filters = {}
-	journal_entry_party_map = {}
+	tax_category_map = frappe._dict()
+	invoice_net_total_map = frappe._dict()
+	or_filters = frappe._dict()
+	journal_entry_party_map = frappe._dict()
 	bank_accounts = frappe.get_all("Account", {"is_group": 0, "account_type": "Bank"}, pluck="name")
 
 	tds_accounts = frappe.get_all(
@@ -218,16 +239,22 @@ def get_tds_docs(filters):
 		tds_documents.append(d.voucher_no)
 
 	if purchase_invoices:
-		get_tax_category_map(purchase_invoices, "Purchase Invoice", tax_category_map)
+		get_doc_info(purchase_invoices, "Purchase Invoice", tax_category_map, invoice_net_total_map)
 
 	if payment_entries:
-		get_tax_category_map(payment_entries, "Payment Entry", tax_category_map)
+		get_doc_info(payment_entries, "Payment Entry", tax_category_map)
 
 	if journal_entries:
 		journal_entry_party_map = get_journal_entry_party_map(journal_entries)
-		get_tax_category_map(journal_entries, "Journal Entry", tax_category_map)
+		get_doc_info(journal_entries, "Journal Entry", tax_category_map)
 
-	return tds_documents, tds_accounts, tax_category_map, journal_entry_party_map
+	return (
+		tds_documents,
+		tds_accounts,
+		tax_category_map,
+		journal_entry_party_map,
+		invoice_net_total_map,
+	)
 
 
 def get_journal_entry_party_map(journal_entries):
@@ -244,17 +271,18 @@ def get_journal_entry_party_map(journal_entries):
 	return journal_entry_party_map
 
 
-def get_tax_category_map(vouchers, doctype, tax_category_map):
-	tax_category_map.update(
-		frappe._dict(
-			frappe.get_all(
-				doctype,
-				filters={"name": ("in", vouchers)},
-				fields=["name", "tax_withholding_category"],
-				as_list=1,
-			)
-		)
-	)
+def get_doc_info(vouchers, doctype, tax_category_map, invoice_net_total_map=None):
+	if doctype == "Purchase Invoice":
+		fields = ["name", "tax_withholding_category", "base_tax_withholding_net_total"]
+	else:
+		fields = ["name", "tax_withholding_category"]
+
+	entries = frappe.get_all(doctype, filters={"name": ("in", vouchers)}, fields=fields)
+
+	for entry in entries:
+		tax_category_map.update({entry.name: entry.tax_withholding_category})
+		if doctype == "Purchase Invoice":
+			invoice_net_total_map.update({entry.name: entry.base_tax_withholding_net_total})
 
 
 def get_tax_rate_map(filters):

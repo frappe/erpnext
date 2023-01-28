@@ -55,6 +55,7 @@
 {% endif %}
 
 <script>
+frappe.boot = {{ boot }}
 frappe.ready(() => {
 	$(document).on('click', '.address-card', (e) => {
 		const $target = $(e.currentTarget);

@@ -193,6 +193,7 @@ class BOM(WebsiteGenerator):
 		self.update_exploded_items(save=False)
 		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, update_hour_rate=False, save=False)
+		self.set_process_loss_qty()
 		self.validate_scrap_items()
 
 	def get_context(self, context):
@@ -233,6 +234,7 @@ class BOM(WebsiteGenerator):
 				"sequence_id",
 				"operation",
 				"workstation",
+				"workstation_type",
 				"description",
 				"time_in_mins",
 				"batch_size",
@@ -612,18 +614,26 @@ class BOM(WebsiteGenerator):
 		"""Update workstation rate and calculates totals"""
 		self.operating_cost = 0
 		self.base_operating_cost = 0
-		for d in self.get("operations"):
-			if d.workstation:
-				self.update_rate_and_time(d, update_hour_rate)
+		if self.get("with_operations"):
+			for d in self.get("operations"):
+				if d.workstation:
+					self.update_rate_and_time(d, update_hour_rate)
 
-			operating_cost = d.operating_cost
-			base_operating_cost = d.base_operating_cost
-			if d.set_cost_based_on_bom_qty:
-				operating_cost = flt(d.cost_per_unit) * flt(self.quantity)
-				base_operating_cost = flt(d.base_cost_per_unit) * flt(self.quantity)
+				operating_cost = d.operating_cost
+				base_operating_cost = d.base_operating_cost
+				if d.set_cost_based_on_bom_qty:
+					operating_cost = flt(d.cost_per_unit) * flt(self.quantity)
+					base_operating_cost = flt(d.base_cost_per_unit) * flt(self.quantity)
 
-			self.operating_cost += flt(operating_cost)
-			self.base_operating_cost += flt(base_operating_cost)
+				self.operating_cost += flt(operating_cost)
+				self.base_operating_cost += flt(base_operating_cost)
+
+		elif self.get("fg_based_operating_cost"):
+			total_operating_cost = flt(self.get("quantity")) * flt(
+				self.get("operating_cost_per_bom_quantity")
+			)
+			self.operating_cost = total_operating_cost
+			self.base_operating_cost = flt(total_operating_cost * self.conversion_rate, 2)
 
 	def update_rate_and_time(self, row, update_hour_rate=False):
 		if not row.hour_rate or update_hour_rate:
@@ -876,36 +886,19 @@ class BOM(WebsiteGenerator):
 		"""Get a complete tree representation preserving order of child items."""
 		return BOMTree(self.name)
 
+	def set_process_loss_qty(self):
+		if self.process_loss_percentage:
+			self.process_loss_qty = flt(self.quantity) * flt(self.process_loss_percentage) / 100
+
 	def validate_scrap_items(self):
-		for item in self.scrap_items:
-			msg = ""
-			if item.item_code == self.item and not item.is_process_loss:
-				msg = _(
-					"Scrap/Loss Item: {0} should have Is Process Loss checked as it is the same as the item to be manufactured or repacked."
-				).format(frappe.bold(item.item_code))
-			elif item.item_code != self.item and item.is_process_loss:
-				msg = _(
-					"Scrap/Loss Item: {0} should not have Is Process Loss checked as it is different from  the item to be manufactured or repacked"
-				).format(frappe.bold(item.item_code))
+		must_be_whole_number = frappe.get_value("UOM", self.uom, "must_be_whole_number")
 
-			must_be_whole_number = frappe.get_value("UOM", item.stock_uom, "must_be_whole_number")
-			if item.is_process_loss and must_be_whole_number:
-				msg = _(
-					"Item: {0} with Stock UOM: {1} cannot be a Scrap/Loss Item as {1} is a whole UOM."
-				).format(frappe.bold(item.item_code), frappe.bold(item.stock_uom))
+		if self.process_loss_percentage and self.process_loss_percentage > 100:
+			frappe.throw(_("Process Loss Percentage cannot be greater than 100"))
 
-			if item.is_process_loss and (item.stock_qty >= self.quantity):
-				msg = _("Scrap/Loss Item: {0} should have Qty less than finished goods Quantity.").format(
-					frappe.bold(item.item_code)
-				)
-
-			if item.is_process_loss and (item.rate > 0):
-				msg = _(
-					"Scrap/Loss Item: {0} should have Rate set to 0 because Is Process Loss is checked."
-				).format(frappe.bold(item.item_code))
-
-			if msg:
-				frappe.throw(msg, title=_("Note"))
+		if self.process_loss_qty and must_be_whole_number and self.process_loss_qty % 1 != 0:
+			msg = f"Item: {frappe.bold(self.item)} with Stock UOM: {frappe.bold(self.uom)} can't have fractional process loss qty as UOM {frappe.bold(self.uom)} is a whole Number."
+			frappe.throw(msg, title=_("Invalid Process Loss Configuration"))
 
 
 def get_bom_item_rate(args, bom_doc):
@@ -1053,7 +1046,7 @@ def get_bom_items_as_dict(
 		query = query.format(
 			table="BOM Scrap Item",
 			where_conditions="",
-			select_columns=", item.description, is_process_loss",
+			select_columns=", item.description",
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 		)

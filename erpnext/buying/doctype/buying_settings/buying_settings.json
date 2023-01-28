@@ -9,8 +9,8 @@
   "supplier_and_price_defaults_section",
   "supp_master_name",
   "supplier_group",
-  "column_break_4",
   "buying_price_list",
+  "column_break_4",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
   "transaction_settings_section",
@@ -20,6 +20,7 @@
   "maintain_same_rate",
   "allow_multiple_items",
   "bill_for_rejected_quantity_in_purchase_invoice",
+  "disable_last_purchase_rate",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
   "column_break_11",
@@ -71,7 +72,7 @@
   },
   {
    "fieldname": "subcontract",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Subcontracting Settings"
   },
   {
@@ -118,8 +119,8 @@
   },
   {
    "fieldname": "supplier_and_price_defaults_section",
-   "fieldtype": "Section Break",
-   "label": "Supplier and Price Defaults"
+   "fieldtype": "Tab Break",
+   "label": "Naming Series and Price Defaults"
   },
   {
    "fieldname": "column_break_4",
@@ -127,12 +128,18 @@
   },
   {
    "fieldname": "transaction_settings_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Transaction Settings"
   },
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_last_purchase_rate",
+   "fieldtype": "Check",
+   "label": "Disable Last Purchase Rate"
   }
  ],
  "icon": "fa fa-cog",
@@ -140,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-09-27 10:50:27.050252",
+ "modified": "2023-01-09 17:08:28.828173",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

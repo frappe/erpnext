@@ -102,9 +102,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	elif out.get("warehouse"):
 		if doc and doc.get("doctype") == "Purchase Order":
 			# calculate company_total_stock only for po
-			bin_details = get_bin_details(args.item_code, out.warehouse, args.company)
+			bin_details = get_bin_details(
+				args.item_code, out.warehouse, args.company, include_child_warehouses=True
+			)
 		else:
-			bin_details = get_bin_details(args.item_code, out.warehouse)
+			bin_details = get_bin_details(args.item_code, out.warehouse, include_child_warehouses=True)
 
 		out.update(bin_details)
 
@@ -113,7 +115,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		if args.get(key) is None:
 			args[key] = value
 
-	data = get_pricing_rule_for_item(args, out.price_list_rate, doc, for_validate=for_validate)
+	data = get_pricing_rule_for_item(args, doc=doc, for_validate=for_validate)
 
 	out.update(data)
 
@@ -234,8 +236,10 @@ def validate_item_details(args, item):
 
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
-	if args.transaction_type == "selling" and cint(item.has_variants):
-		throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+	if cint(item.has_variants):
+		msg = f"Item {item.name} is a template, please select one of its variants"
+
+		throw(_(msg), title=_("Template Item Selected"))
 
 	elif args.transaction_type == "buying" and args.doctype != "Material Request":
 		if args.get("is_subcontracted"):
@@ -409,7 +413,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	args.stock_qty = out.stock_qty
 
 	# calculate last purchase rate
-	if args.get("doctype") in purchase_doctypes:
+	if args.get("doctype") in purchase_doctypes and not frappe.db.get_single_value(
+		"Buying Settings", "disable_last_purchase_rate"
+	):
 		from erpnext.buying.doctype.purchase_order.purchase_order import item_last_purchase_rate
 
 		out.last_purchase_rate = item_last_purchase_rate(
@@ -811,6 +817,9 @@ def get_price_list_rate(args, item_doc, out=None):
 			flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 		)
 
+		if frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
+			return out
+
 		if not out.price_list_rate and args.transaction_type == "buying":
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 
@@ -828,9 +837,9 @@ def insert_item_price(args):
 	):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (
-				(args.rate + args.discount_amount) / args.get("conversion_factor")
+				(flt(args.rate) + flt(args.discount_amount)) / args.get("conversion_factor")
 				if args.get("conversion_factor")
-				else (args.rate + args.discount_amount)
+				else (flt(args.rate) + flt(args.discount_amount))
 			)
 
 			item_price = frappe.db.get_value(
@@ -1060,7 +1069,9 @@ def get_pos_profile_item_details(company, args, pos_profile=None, update_data=Fa
 				res[fieldname] = pos_profile.get(fieldname)
 
 		if res.get("warehouse"):
-			res.actual_qty = get_bin_details(args.item_code, res.warehouse).get("actual_qty")
+			res.actual_qty = get_bin_details(
+				args.item_code, res.warehouse, include_child_warehouses=True
+			).get("actual_qty")
 
 	return res
 
@@ -1171,16 +1182,30 @@ def get_projected_qty(item_code, warehouse):
 
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse, company=None):
-	bin_details = frappe.db.get_value(
-		"Bin",
-		{"item_code": item_code, "warehouse": warehouse},
-		["projected_qty", "actual_qty", "reserved_qty"],
-		as_dict=True,
-		cache=True,
-	) or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+def get_bin_details(item_code, warehouse, company=None, include_child_warehouses=False):
+	bin_details = {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+
+	if warehouse:
+		from frappe.query_builder.functions import Coalesce, Sum
+
+		from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+		warehouses = get_child_warehouses(warehouse) if include_child_warehouses else [warehouse]
+
+		bin = frappe.qb.DocType("Bin")
+		bin_details = (
+			frappe.qb.from_(bin)
+			.select(
+				Coalesce(Sum(bin.projected_qty), 0).as_("projected_qty"),
+				Coalesce(Sum(bin.actual_qty), 0).as_("actual_qty"),
+				Coalesce(Sum(bin.reserved_qty), 0).as_("reserved_qty"),
+			)
+			.where((bin.item_code == item_code) & (bin.warehouse.isin(warehouses)))
+		).run(as_dict=True)[0]
+
 	if company:
 		bin_details["company_total_stock"] = get_company_total_stock(item_code, company)
+
 	return bin_details
 
 
@@ -1305,7 +1330,7 @@ def apply_price_list_on_item(args):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
 
-	item_details.update(get_pricing_rule_for_item(args, item_details.price_list_rate))
+	item_details.update(get_pricing_rule_for_item(args))
 
 	return item_details
 

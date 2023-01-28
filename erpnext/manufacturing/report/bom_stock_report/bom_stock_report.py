@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import Floor, Sum
+from frappe.query_builder.functions import Sum
 from pypika.terms import ExistsCriterion
 
 
@@ -58,9 +58,9 @@ def get_bom_stock(filters):
 			bom_item.description,
 			bom_item.stock_qty,
 			bom_item.stock_uom,
-			bom_item.stock_qty * qty_to_produce / bom.quantity,
-			Sum(bin.actual_qty).as_("actual_qty"),
-			Sum(Floor(bin.actual_qty / (bom_item.stock_qty * qty_to_produce / bom.quantity))),
+			(bom_item.stock_qty / bom.quantity) * qty_to_produce,
+			Sum(bin.actual_qty),
+			Sum(bin.actual_qty) / (bom_item.stock_qty / bom.quantity),
 		)
 		.where((bom_item.parent == filters.get("bom")) & (bom_item.parenttype == "BOM"))
 		.groupby(bom_item.item_code)

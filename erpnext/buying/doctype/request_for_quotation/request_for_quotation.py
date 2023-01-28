@@ -216,6 +216,7 @@ class RequestforQuotation(BuyingController):
 			recipients=data.email_id,
 			sender=sender,
 			attachments=attachments,
+			print_format=self.meta.default_print_format or "Standard",
 			send_email=True,
 			doctype=self.doctype,
 			name=self.name,
@@ -224,9 +225,7 @@ class RequestforQuotation(BuyingController):
 		frappe.msgprint(_("Email Sent to Supplier {0}").format(data.supplier))
 
 	def get_attachments(self):
-		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
-		attachments.append(frappe.attach_print(self.doctype, self.name, doc=self))
-		return attachments
+		return [d.name for d in get_attachments(self.doctype, self.name)]
 
 	def update_rfq_supplier_status(self, sup_name=None):
 		for supplier in self.suppliers:
@@ -389,10 +388,17 @@ def create_rfq_items(sq_doc, supplier, data):
 
 
 @frappe.whitelist()
-def get_pdf(doctype, name, supplier):
-	doc = get_rfq_doc(doctype, name, supplier)
-	if doc:
-		download_pdf(doctype, name, doc=doc)
+def get_pdf(doctype, name, supplier, print_format=None, language=None, letter_head=None):
+	# permissions get checked in `download_pdf`
+	if doc := get_rfq_doc(doctype, name, supplier):
+		download_pdf(
+			doctype,
+			name,
+			print_format,
+			doc=doc,
+			language=language,
+			letter_head=letter_head or None,
+		)
 
 
 def get_rfq_doc(doctype, name, supplier):

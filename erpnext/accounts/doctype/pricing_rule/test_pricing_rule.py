@@ -1123,7 +1123,7 @@ def make_pricing_rule(**args):
 			"apply_on": args.apply_on or "Item Code",
 			"applicable_for": args.applicable_for,
 			"selling": args.selling or 0,
-			"currency": "USD",
+			"currency": "INR",
 			"apply_discount_on_rate": args.apply_discount_on_rate or 0,
 			"buying": args.buying or 0,
 			"min_qty": args.min_qty or 0.0,

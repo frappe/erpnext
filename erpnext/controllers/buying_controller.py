@@ -25,10 +25,6 @@ class BuyingController(SubcontractingController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
-	def get_feed(self):
-		if self.get("supplier_name"):
-			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency, self.grand_total)
-
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
@@ -41,6 +37,7 @@ class BuyingController(SubcontractingController):
 		self.validate_from_warehouse()
 		self.set_supplier_address()
 		self.validate_asset_return()
+		self.validate_auto_repeat_subscription_dates()
 
 		if self.doctype == "Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -277,6 +274,9 @@ class BuyingController(SubcontractingController):
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
 			return
 
+		if not self.is_internal_transfer():
+			return
+
 		ref_doctype_map = {
 			"Purchase Order": "Sales Order Item",
 			"Purchase Receipt": "Delivery Note Item",
@@ -321,17 +321,18 @@ class BuyingController(SubcontractingController):
 					)
 
 				if self.is_internal_transfer():
-					if rate != d.rate:
-						d.rate = rate
-						frappe.msgprint(
-							_(
-								"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-							).format(d.idx),
-							alert=1,
-						)
-					d.discount_percentage = 0.0
-					d.discount_amount = 0.0
-					d.margin_rate_or_amount = 0.0
+					if self.doctype == "Purchase Receipt" or self.get("update_stock"):
+						if rate != d.rate:
+							d.rate = rate
+							frappe.msgprint(
+								_(
+									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+								).format(d.idx),
+								alert=1,
+							)
+						d.discount_percentage = 0.0
+						d.discount_amount = 0.0
+						d.margin_rate_or_amount = 0.0
 
 	def validate_for_subcontracting(self):
 		if self.is_subcontracted and self.get("is_old_subcontracting_flow"):
@@ -546,7 +547,9 @@ class BuyingController(SubcontractingController):
 			self.process_fixed_asset()
 			self.update_fixed_asset(field)
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
+			"Buying Settings", "disable_last_purchase_rate"
+		):
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
@@ -555,7 +558,9 @@ class BuyingController(SubcontractingController):
 		if self.get("is_return"):
 			return
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"]:
+		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
+			"Buying Settings", "disable_last_purchase_rate"
+		):
 			update_last_purchase_rate(self, is_submit=0)
 
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
