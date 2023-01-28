@@ -25,46 +25,56 @@ erpnext.hr.EmployeeController = class EmployeeController extends frappe.ui.form.
 	setup_buttons() {
 		var me = this;
 
-		me.frm.add_custom_button(__('Accounting Ledger'), function() {
-			frappe.set_route('query-report', 'General Ledger', {
-				party_type: 'Employee',
-				party: me.frm.doc.name,
-				from_date: frappe.defaults.get_user_default("year_start_date"),
-				to_date: frappe.defaults.get_user_default("year_end_date")
-			});
-		}, __("View"));
+		if (!me.frm.doc.__islocal) {
+			me.frm.add_custom_button(__('Salary Register'), function () {
+				frappe.set_route('query-report', 'Salary Register', {
+					employee: me.frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date"),
+				});
+			}, __("View"));
 
-		me.frm.add_custom_button(__('Accounting Ledger Summary'), function() {
-			frappe.set_route('query-report', 'Employee Ledger Summary', {
-				party: me.frm.doc.name,
-				from_date: frappe.defaults.get_user_default("year_start_date"),
-				to_date: frappe.defaults.get_user_default("year_end_date")
-			});
-		}, __("View"));
+			me.frm.add_custom_button(__('Attendance Sheet'), function () {
+				frappe.set_route('query-report', 'Monthly Attendance Sheet', {
+					employee: me.frm.doc.name,
+				});
+			}, __("View"));
 
-		me.frm.add_custom_button(__('Attendance Sheet'), function() {
-			frappe.set_route('query-report', 'Monthly Attendance Sheet', {
-				employee: me.frm.doc.name,
-			});
-		}, __("View"));
+			me.frm.add_custom_button(__('Checkin Sheet'), function () {
+				frappe.set_route('query-report', 'Employee Checkin Sheet', {
+					employee: me.frm.doc.name,
+				});
+			}, __("View"));
 
-		me.frm.add_custom_button(__('Checkin Sheet'), function() {
-			frappe.set_route('query-report', 'Employee Checkin Sheet', {
-				employee: me.frm.doc.name,
-			});
-		}, __("View"));
+			me.frm.add_custom_button(__('Leave Balance'), function () {
+				frappe.set_route('query-report', 'Employee Leave Balance', {
+					employee: me.frm.doc.name,
+				});
+			}, __("View"));
 
-		me.frm.add_custom_button(__('Leave Balance'), function() {
-			frappe.set_route('query-report', 'Employee Leave Balance', {
-				employee: me.frm.doc.name,
-			});
-		}, __("View"));
+			me.frm.add_custom_button(__('Leave Balance Summary'), function () {
+				frappe.set_route('query-report', 'Employee Leave Balance Summary', {
+					employee: me.frm.doc.name,
+				});
+			}, __("View"));
 
-		me.frm.add_custom_button(__('Leave Balance Summary'), function() {
-			frappe.set_route('query-report', 'Employee Leave Balance Summary', {
-				employee: me.frm.doc.name,
-			});
-		}, __("View"));
+			me.frm.add_custom_button(__('Accounting Ledger'), function () {
+				frappe.set_route('query-report', 'General Ledger', {
+					party_type: 'Employee',
+					party: me.frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date")
+				});
+			}, __("View"));
+
+			me.frm.add_custom_button(__('Accounting Ledger Summary'), function () {
+				frappe.set_route('query-report', 'Employee Ledger Summary', {
+					party: me.frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date")
+				});
+			}, __("View"));
+		}
 	}
 
 	date_of_birth() {
