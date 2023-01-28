@@ -2,8 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
+from collections.abc import Iterator
 from operator import itemgetter
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 import frappe
 from frappe import _
@@ -19,22 +20,32 @@ from erpnext.stock.utils import add_additional_uom_columns, is_reposting_item_va
 
 
 class StockBalanceFilter(TypedDict):
-	company: Optional[str]
+	company: str | None
 	from_date: str
 	to_date: str
-	item_group: Optional[str]
-	item: Optional[str]
-	warehouse: Optional[str]
-	warehouse_type: Optional[str]
-	include_uom: Optional[str]  # include extra info in converted UOM
+	item_group: str | None
+	item: str | None
+	warehouse: str | None
+	warehouse_type: str | None
+	include_uom: str | None  # include extra info in converted UOM
 	show_stock_ageing_data: bool
 	show_variant_attributes: bool
 
 
-SLEntry = Dict[str, Any]
+SLEntry = dict[str, Any]
 
 
-def execute(filters: Optional[StockBalanceFilter] = None):
+_ITERATORS_SUPPORTED = False
+
+try:
+	from frappe.database.database import SQL_ITERATOR_BATCH_SIZE  # noqa
+
+	_ITERATORS_SUPPORTED = True
+except ImportError:
+	pass
+
+
+def execute(filters: StockBalanceFilter | None = None):
 	is_reposting_item_valuation_in_progress()
 	if not filters:
 		filters = {}
@@ -51,6 +62,7 @@ def execute(filters: Optional[StockBalanceFilter] = None):
 
 	if filters.get("show_stock_ageing_data"):
 		filters["show_warehouse_wise_stock"] = True
+		# XXX: Iterator consumed
 		item_wise_fifo_queue = FIFOSlots(filters, sle).generate()
 
 	# if no stock ledger entry found return
@@ -58,6 +70,7 @@ def execute(filters: Optional[StockBalanceFilter] = None):
 		return columns, []
 
 	iwb_map = get_item_warehouse_map(filters, sle)
+	# XXX: Consumed iterator, compute items from iwb map instead?
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
@@ -282,7 +295,9 @@ def apply_conditions(query, filters):
 	return query
 
 
-def get_stock_ledger_entries(filters: StockBalanceFilter, items: List[str]) -> List[SLEntry]:
+def get_stock_ledger_entries(
+	filters: StockBalanceFilter, items: list[str]
+) -> list[SLEntry] | Iterator[SLEntry]:
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	query = (
@@ -319,6 +334,10 @@ def get_stock_ledger_entries(filters: StockBalanceFilter, items: List[str]) -> L
 		query = query.where(sle.item_code.isin(items))
 
 	query = apply_conditions(query, filters)
+
+	if _ITERATORS_SUPPORTED:
+		return query.run(as_dict=True, as_iterator=True)
+
 	return query.run(as_dict=True)
 
 
@@ -326,7 +345,7 @@ def get_inventory_dimension_fields():
 	return [dimension.fieldname for dimension in get_inventory_dimensions()]
 
 
-def get_item_warehouse_map(filters: StockBalanceFilter, sle: List[SLEntry]):
+def get_item_warehouse_map(filters: StockBalanceFilter, sle: list[SLEntry]):
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
@@ -422,7 +441,7 @@ def filter_items_with_no_transactions(iwb_map, float_precision: float, inventory
 	return iwb_map
 
 
-def get_items(filters: StockBalanceFilter) -> List[str]:
+def get_items(filters: StockBalanceFilter) -> list[str]:
 	"Get items based on item code, item group or brand."
 	if item_code := filters.get("item_code"):
 		return [item_code]
@@ -437,7 +456,7 @@ def get_items(filters: StockBalanceFilter) -> List[str]:
 		return frappe.get_all("Item", filters=item_filters, pluck="name", order_by=None)
 
 
-def get_item_details(items: List[str], sle: List[SLEntry], filters: StockBalanceFilter):
+def get_item_details(items: list[str], sle: list[SLEntry], filters: StockBalanceFilter):
 	item_details = {}
 	if not items:
 		items = list(set(d.item_code for d in sle))
@@ -493,7 +512,7 @@ def get_item_reorder_details(items):
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 
 
-def get_variants_attributes() -> List[str]:
+def get_variants_attributes() -> list[str]:
 	"""Return all item variant attributes."""
 	return frappe.get_all("Item Attribute", pluck="name")
 

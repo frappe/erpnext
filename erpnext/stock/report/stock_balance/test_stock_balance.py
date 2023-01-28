@@ -172,3 +172,5 @@ class TestStockBalance(FrappeTestCase):
 		)
 		self.assertPartialDictEq(attributes, rows[0])
 		self.assertInvariants(rows)
+
+	# TODO: tests that check for iterator behaviours
