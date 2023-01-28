@@ -699,6 +699,54 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pl.status, "Cancelled")
 
 	def test_consider_existing_pick_list(self):
+		def create_items(items_properties):
+			items = []
+
+			for properties in items_properties:
+				properties.update({"maintain_stock": 1})
+				item_code = make_item(properties=properties).name
+				properties.update({"item_code": item_code})
+				items.append(properties)
+
+			return items
+
+		def create_stock_entries(items):
+			warehouses = ["Stores - _TC", "Finished Goods - _TC"]
+
+			for item in items:
+				for warehouse in warehouses:
+					se = make_stock_entry(
+						item=item.get("item_code"),
+						to_warehouse=warehouse,
+						qty=5,
+					)
+
+		def get_item_list(items, qty, warehouse="All Warehouses - _TC"):
+			return [
+				{
+					"item_code": item.get("item_code"),
+					"qty": qty,
+					"warehouse": warehouse,
+				}
+				for item in items
+			]
+
+		def get_picked_items_details(pick_list_doc):
+			items_data = {}
+
+			for location in pick_list_doc.locations:
+				key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
+				serial_no = [x for x in location.serial_no.split("\n") if x] if location.serial_no else None
+				data = {"picked_qty": location.picked_qty}
+				if serial_no:
+					data["serial_no"] = serial_no
+				if location.item_code not in items_data:
+					items_data[location.item_code] = {key: data}
+				else:
+					items_data[location.item_code][key] = data
+
+			return items_data
+
 		# Step - 1: Setup - Create Items and Stock Entries
 		items_properties = [
 			{
@@ -723,70 +771,31 @@ class TestPickList(FrappeTestCase):
 			},
 		]
 
-		items = []
-		for properties in items_properties:
-			properties.update({"maintain_stock": 1})
-			item_code = make_item(properties=properties).name
-			properties.update({"item_code": item_code})
-			items.append(properties)
-
-		warehouses = ["Stores - _TC", "Finished Goods - _TC"]
-		for item in items:
-			for warehouse in warehouses:
-				se = make_stock_entry(
-					item=item.get("item_code"),
-					to_warehouse=warehouse,
-					qty=5,
-				)
+		items = create_items(items_properties)
+		create_stock_entries(items)
 
 		# Step - 2: Create Sales Order [1]
-		item_list = [
-			{
-				"item_code": item.get("item_code"),
-				"qty": 6,
-				"warehouse": "All Warehouses - _TC",
-			}
-			for item in items
-		]
-		so1 = make_sales_order(item_list=item_list)
+		so1 = make_sales_order(item_list=get_item_list(items, qty=6))
 
 		# Step - 3: Create and Submit Pick List [1] for Sales Order [1]
 		pl1 = create_pick_list(so1.name)
 		pl1.submit()
 
 		# Step - 4: Create Sales Order [2] with same Item(s) as Sales Order [1]
-		item_list = [
-			{
-				"item_code": item.get("item_code"),
-				"qty": 4,
-				"warehouse": "All Warehouses - _TC",
-			}
-			for item in items
-		]
-		so2 = make_sales_order(item_list=item_list)
+		so2 = make_sales_order(item_list=get_item_list(items, qty=4))
 
 		# Step - 5: Create Pick List [2] for Sales Order [2]
 		pl2 = create_pick_list(so2.name)
 		pl2.save()
 
 		# Step - 6: Assert
-		items_data = {}
-		for location in pl1.locations:
-			key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
-			serial_no = [x for x in location.serial_no.split("\n") if x] if location.serial_no else None
-			data = {"picked_qty": location.picked_qty}
-			if serial_no:
-				data["serial_no"] = serial_no
-			if location.item_code not in items_data:
-				items_data[location.item_code] = {key: data}
-			else:
-				items_data[location.item_code][key] = data
+		picked_items_details = get_picked_items_details(pl1)
 
 		for location in pl2.locations:
 			key = (location.warehouse, location.batch_no) if location.batch_no else location.warehouse
-			item_data = items_data.get(location.item_code, {}).get(key, {})
+			item_data = picked_items_details.get(location.item_code, {}).get(key, {})
 			picked_qty = item_data.get("picked_qty", 0)
-			picked_serial_no = items_data.get("serial_no", [])
+			picked_serial_no = picked_items_details.get("serial_no", [])
 			bin_actual_qty = frappe.db.get_value(
 				"Bin", {"item_code": location.item_code, "warehouse": location.warehouse}, "actual_qty"
 			)
