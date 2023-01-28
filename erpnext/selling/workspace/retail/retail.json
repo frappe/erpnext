@@ -9,7 +9,7 @@
  "icon": "retail",
  "idx": 0,
  "is_hidden": 0,
- "label": "Point Of Sale",
+ "label": "Retail",
  "links": [
   {
    "hidden": 0,
@@ -102,10 +102,10 @@
    "type": "Link"
   }
  ],
- "modified": "2023-01-27 15:12:49.914228",
+ "modified": "2023-01-27 15:42:47.947000",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "Point Of Sale",
+ "name": "Retail",
  "owner": "Administrator",
  "parent_page": "Accounting",
  "public": 1,
@@ -121,5 +121,5 @@
    "type": "Page"
   }
  ],
- "title": "Point Of Sale"
+ "title": "Retail"
 }
