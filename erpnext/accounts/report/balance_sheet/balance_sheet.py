@@ -152,4 +152,6 @@ def get_chart_data(filters, columns, asset, liability, equity):
 	else:
 		chart["type"] = "line"
 
+	chart["fieldtype"] = "Currency"
+
 	return chart
