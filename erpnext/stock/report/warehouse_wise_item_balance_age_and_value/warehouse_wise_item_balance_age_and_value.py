@@ -62,7 +62,7 @@ def execute(filters=None):
 			continue
 
 		total_stock_value = sum(item_value[(item, item_group)])
-		row = [item, item_group, total_stock_value]
+		row = [item, item_map[item]["item_name"], item_group, total_stock_value]
 
 		fifo_queue = item_ageing[item]["fifo_queue"]
 		average_age = 0.00
@@ -90,6 +90,7 @@ def get_columns(filters):
 
 	columns = [
 		_("Item") + ":Link/Item:150",
+		_("Item Name") + ":Link/Item:150",
 		_("Item Group") + "::120",
 		_("Value") + ":Currency:120",
 		_("Age") + ":Float:120",
