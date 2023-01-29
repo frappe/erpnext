@@ -282,6 +282,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 					"contact_no": "phone_1",
 					"fax": "fax_1",
 				},
+				"field_no_map": ["disabled"],
 			}
 		},
 		target_doc,
