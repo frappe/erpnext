@@ -4,7 +4,12 @@
 
 import frappe
 from frappe import _
+<<<<<<< HEAD
 from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, nowdate, today
+=======
+from frappe.utils import add_months, cint, flt, get_last_day, getdate, nowdate, today
+from frappe.utils.data import get_link_to_form
+>>>>>>> 4586806ed1 (fix: disposal_was_made_on_original_schedule_date)
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -372,6 +377,9 @@ def disposal_was_made_on_original_schedule_date(asset, schedule, row, posting_da
 				finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
 			)
 
+			if is_last_day_of_the_month(finance_book.depreciation_start_date):
+				orginal_schedule_date = get_last_day(orginal_schedule_date)
+
 			if orginal_schedule_date == posting_date_of_disposal:
 				return True
 	return False
@@ -508,3 +516,39 @@ def get_disposal_account_and_cost_center(company):
 		frappe.throw(_("Please set 'Asset Depreciation Cost Center' in Company {0}").format(company))
 
 	return disposal_account, depreciation_cost_center
+<<<<<<< HEAD
+=======
+
+
+@frappe.whitelist()
+def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book=None):
+	asset_doc = frappe.get_doc("Asset", asset)
+
+	if asset_doc.calculate_depreciation:
+		asset_doc.prepare_depreciation_data(getdate(disposal_date))
+
+		finance_book_id = 1
+		if finance_book:
+			for fb in asset_doc.finance_books:
+				if fb.finance_book == finance_book:
+					finance_book_id = fb.idx
+					break
+
+		asset_schedules = [
+			sch for sch in asset_doc.schedules if cint(sch.finance_book_id) == finance_book_id
+		]
+		accumulated_depr_amount = asset_schedules[-1].accumulated_depreciation_amount
+
+		return flt(
+			flt(asset_doc.gross_purchase_amount) - accumulated_depr_amount,
+			asset_doc.precision("gross_purchase_amount"),
+		)
+	else:
+		return flt(asset_doc.value_after_depreciation)
+
+
+def is_last_day_of_the_month(date):
+	last_day_of_the_month = get_last_day(date)
+
+	return getdate(last_day_of_the_month) == getdate(date)
+>>>>>>> 4586806ed1 (fix: disposal_was_made_on_original_schedule_date)
