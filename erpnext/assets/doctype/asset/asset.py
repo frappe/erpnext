@@ -694,15 +694,12 @@ class Asset(AccountsController):
 		if not self.calculate_depreciation:
 			return self.value_after_depreciation
 
-		finance_book_filter = ["finance_book", "is", "not set"]
-		if finance_book:
-			finance_book_filter = ["finance_book", "=", finance_book]
+		if not finance_book:
+			return self.get("finance_books")[0].value_after_depreciation
 
-		return frappe.db.get_value(
-			doctype="Asset Finance Book",
-			filters=[["parent", "=", self.name], finance_book_filter],
-			fieldname="value_after_depreciation",
-		)
+		for row in self.get("finance_books"):
+			if finance_book == row.finance_book:
+				return row.value_after_depreciation
 
 	def get_default_finance_book_idx(self):
 		if not self.get("default_finance_book") and self.company:
