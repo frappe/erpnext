@@ -27,6 +27,7 @@ from erpnext.accounts.general_ledger import make_reverse_gl_entries
 from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
+	is_last_day_of_the_month,
 )
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.controllers.accounts_controller import AccountsController
@@ -1076,12 +1077,6 @@ def get_total_days(date, frequency):
 		period_start_date = get_last_day(period_start_date)
 
 	return date_diff(date, period_start_date)
-
-
-def is_last_day_of_the_month(date):
-	last_day_of_the_month = get_last_day(date)
-
-	return getdate(last_day_of_the_month) == getdate(date)
 
 
 @erpnext.allow_regional
