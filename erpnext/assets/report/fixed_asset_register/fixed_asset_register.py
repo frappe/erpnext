@@ -102,13 +102,13 @@ def get_data(filters):
 		]
 		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
-	finance_book_filter = ["finance_book", "is", "not set"]
+	finance_book_filter = ("is", "not set")
 	if filters.finance_book:
-		finance_book_filter = ["finance_book", "=", filters.finance_book]
+		finance_book_filter = ("=", filters.finance_book)
 
 	assets_linked_to_fb = frappe.db.get_all(
 		doctype="Asset Finance Book",
-		filters=[finance_book_filter],
+		filters={"finance_book": finance_book_filter},
 		pluck="parent",
 	)
 
