@@ -233,7 +233,9 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 
 	show_alternative_item_dialog() {
 		// Create a `{original item: [alternate items]}` map
-		const item_alt_map = {};
+		var me = this;
+		let item_alt_map = {};
+
 		this.frm.doc.items.filter(
 			(item) => item.is_alternative
 		).forEach((item) =>
@@ -286,7 +288,14 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 				},
 			],
 			primary_action: function() {
-				this.hide();
+				frappe.model.open_mapped_doc({
+					method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
+					frm: me.frm,
+					args: {
+						mapping: dialog.get_value("alternative_items")
+					}
+				});
+				dialog.hide();
 			},
 			primary_action_label: __('Continue')
 		});
@@ -296,13 +305,6 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 };
 
 cur_frm.script_manager.make(erpnext.selling.QuotationController);
-
-cur_frm.cscript['Make Sales Order'] = function() {
-	frappe.model.open_mapped_doc({
-		method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
-		frm: cur_frm
-	})
-}
 
 frappe.ui.form.on("Quotation Item", "items_on_form_rendered", "packed_items_on_form_rendered", function(frm, cdt, cdn) {
 	// enable tax_amount field if Actual

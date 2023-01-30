@@ -210,6 +210,10 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		)
 	)
 
+	alternative_map = {
+		x.get("original_item") : x.get("alternative_item") for x in frappe.flags.get("args", {}).get("mapping", [])
+	}
+
 	def set_missing_values(source, target):
 		if customer:
 			target.customer = customer.name
@@ -233,6 +237,29 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			target.blanket_order = obj.blanket_order
 			target.blanket_order_rate = obj.blanket_order_rate
 
+	def can_map_row(item) ->  bool:
+		"""
+		Row mapping from Quotation to Sales order:
+		1. Simple row: Map if adequate qty
+		2. Has Alternative Item: Map if no alternative was selected against original item and #1
+		3. Is Alternative Item: Map if alternative was selected against original item and #1
+		"""
+		has_qty = item.qty > 0
+
+		has_alternative = item.item_code in alternative_map
+		is_alternative = item.is_alternative
+
+		if not alternative_map or not (is_alternative or has_alternative):
+			# No alternative items in doc or current row is a simple item (without alternatives)
+			return has_qty
+
+		if is_alternative:
+			is_selected = alternative_map.get(item.alternative_to) == item.item_code
+		else:
+			is_selected = alternative_map.get(item.item_code) is None
+		return is_selected and has_qty
+
+
 	doclist = get_mapped_doc(
 		"Quotation",
 		source_name,
@@ -242,7 +269,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Order Item",
 				"field_map": {"parent": "prevdoc_docname", "name": "quotation_item"},
 				"postprocess": update_item,
-				"condition": lambda doc: doc.qty > 0,
+				"condition": can_map_row,
 			},
 			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
