@@ -29,11 +29,12 @@ class VehicleServiceFeedback:
 	def get_data(self):
 		conditions = self.get_conditions()
 
+		self.filters.feedback_valid_after_service_days = cint(frappe.db.get_value("Vehicles Settings", None, "feedback_valid_after_service_days"))
+
 		if self.filters.date_type == "Feedback Due Date":
 			self.filters.date_field = "vgp.posting_date"
-			feedback_valid_after_service_days = cint(frappe.db.get_value("Vehicles Settings", None, "feedback_valid_after_service_days"))
-			self.filters.from_date = add_days(self.filters.from_date, -1 * feedback_valid_after_service_days)
-			self.filters.to_date = add_days(self.filters.to_date, -1 * feedback_valid_after_service_days)
+			self.filters.from_date = add_days(self.filters.from_date, -1 * self.filters.feedback_valid_after_service_days)
+			self.filters.to_date = add_days(self.filters.to_date, -1 * self.filters.feedback_valid_after_service_days)
 		elif self.filters.date_type == "Feedback Date":
 			self.filters.date_field = "cf.feedback_date"
 		else:
@@ -55,10 +56,13 @@ class VehicleServiceFeedback:
 				{date_field} BETWEEN %(from_date)s AND %(to_date)s
 				AND vgp.docstatus = 1
 				AND {conditions}
+			ORDER BY {date_field}, vgp.creation
 		""".format(conditions=conditions, date_field=self.filters.date_field), self.filters, as_dict=1)
 
 	def process_data(self):
 		for d in self.data:
+			d.feedback_due_date = add_days(d.delivery_date, self.filters.feedback_valid_after_service_days)
+
 			if d.feedback_date:
 				d.feedback_dt = combine_datetime(d.feedback_date, d.feedback_time)
 
@@ -113,6 +117,12 @@ class VehicleServiceFeedback:
 			{
 				"label": _("Delivery Date"),
 				"fieldname": "delivery_date",
+				"fieldtype": "Date",
+				"width": 85
+			},
+			{
+				"label": _("Due Date"),
+				"fieldname": "feedback_due_date",
 				"fieldtype": "Date",
 				"width": 85
 			},
