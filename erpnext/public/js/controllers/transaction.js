@@ -1691,6 +1691,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var valid = true;
 
+		if (frappe.flags.ignore_company_party_validation) {
+			return valid;
+		}
+
 		$.each(["company", "customer"], function(i, fieldname) {
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname) &&  !["Purchase Order","Purchase Invoice"].includes(me.frm.doc.doctype)) {
 				if (!me.frm.doc[fieldname]) {
