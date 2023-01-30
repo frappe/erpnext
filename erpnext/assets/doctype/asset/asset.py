@@ -840,6 +840,7 @@ class Asset(AccountsController):
 			.where(gle.account == depreciation_expense_account)
 			.where(gle.debit != 0)
 			.where(gle.is_cancelled == 0)
+			.orderby(gle.posting_date)
 		).run(as_dict=True)
 
 		return records
