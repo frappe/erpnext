@@ -117,7 +117,7 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			if (cstr(data[column.fieldname]) == cstr(new_value)) return
 
 			return frappe.call({
-				method: "erpnext.projects.doctype.project.project.submit_customer_feedback_communication_for_project",
+				method: "erpnext.crm.doctype.customer_feedback.customer_feedback.submit_customer_feedback",
 				args: {
 					project: data.project,
 					communication_type: column.fieldname == "customer_feedback" ? "Feedback" : "Communication",
