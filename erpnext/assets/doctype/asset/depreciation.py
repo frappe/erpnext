@@ -4,7 +4,17 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, nowdate, today
+from frappe.utils import (
+	add_months,
+	cint,
+	flt,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	is_last_day_of_the_month,
+	nowdate,
+	today,
+)
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -399,6 +409,9 @@ def disposal_was_made_on_original_schedule_date(schedule_idx, row, posting_date_
 	orginal_schedule_date = add_months(
 		row.depreciation_start_date, schedule_idx * cint(row.frequency_of_depreciation)
 	)
+
+	if is_last_day_of_the_month(row.depreciation_start_date):
+		orginal_schedule_date = get_last_day(orginal_schedule_date)
 
 	if orginal_schedule_date == posting_date_of_disposal:
 		return True
