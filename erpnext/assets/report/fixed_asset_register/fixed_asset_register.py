@@ -102,7 +102,24 @@ def get_data(filters):
 		]
 		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
+	finance_book_filter = ["finance_book", "is", "not set"]
+	if filters.finance_book:
+		finance_book_filter = ["finance_book", "=", filters.finance_book]
+
+	assets_linked_to_fb = frappe.db.get_all(
+		doctype="Asset Finance Book",
+		filters=[finance_book_filter],
+		pluck="parent",
+	)
+
 	for asset in assets_record:
+		if filters.finance_book:
+			if asset.asset_id not in assets_linked_to_fb:
+				continue
+		else:
+			if asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
+				continue
+
 		asset_value = get_asset_value_after_depreciation(asset.asset_id, filters.finance_book)
 		row = {
 			"asset_id": asset.asset_id,
@@ -202,9 +219,9 @@ def get_finance_book_value_map(filters):
 def get_manual_depreciation_amount_of_asset(asset, filters):
 	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
 
-	gle = frappe.qb.DocType("GL Entry")
-
 	(_, _, depreciation_expense_account) = get_depreciation_accounts(asset)
+
+	gle = frappe.qb.DocType("GL Entry")
 
 	result = (
 		frappe.qb.from_(gle)
