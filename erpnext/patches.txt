@@ -250,18 +250,14 @@ erpnext.patches.v13_0.item_naming_series_not_mandatory
 erpnext.patches.v13_0.update_category_in_ltds_certificate
 erpnext.patches.v13_0.fetch_thumbnail_in_website_items
 erpnext.patches.v13_0.update_maintenance_schedule_field_in_visit
-erpnext.patches.v13_0.create_ksa_vat_custom_fields # 07-01-2022
 erpnext.patches.v14_0.migrate_crm_settings
-erpnext.patches.v13_0.rename_ksa_qr_field
 erpnext.patches.v13_0.wipe_serial_no_field_for_0_qty
-erpnext.patches.v13_0.disable_ksa_print_format_for_others # 16-12-2021
 erpnext.patches.v13_0.agriculture_deprecation_warning
 erpnext.patches.v13_0.hospitality_deprecation_warning
 erpnext.patches.v13_0.update_asset_quantity_field
 erpnext.patches.v13_0.delete_bank_reconciliation_detail
 erpnext.patches.v13_0.enable_provisional_accounting
 erpnext.patches.v13_0.non_profit_deprecation_warning
-erpnext.patches.v13_0.enable_ksa_vat_docs #1
 erpnext.patches.v13_0.show_india_localisation_deprecation_warning
 erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.reset_corrupt_defaults
