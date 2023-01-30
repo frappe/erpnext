@@ -4,7 +4,16 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, nowdate, today
+from frappe.utils import (
+	add_months,
+	cint,
+	flt,
+	get_last_day,
+	get_link_to_form,
+	getdate,
+	nowdate,
+	today,
+)
 from frappe.utils.user import get_users_with_role
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -372,6 +381,9 @@ def disposal_was_made_on_original_schedule_date(asset, schedule, row, posting_da
 				finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
 			)
 
+			if is_last_day_of_the_month(finance_book.depreciation_start_date):
+				orginal_schedule_date = get_last_day(orginal_schedule_date)
+
 			if orginal_schedule_date == posting_date_of_disposal:
 				return True
 	return False
@@ -508,3 +520,9 @@ def get_disposal_account_and_cost_center(company):
 		frappe.throw(_("Please set 'Asset Depreciation Cost Center' in Company {0}").format(company))
 
 	return disposal_account, depreciation_cost_center
+
+
+def is_last_day_of_the_month(date):
+	last_day_of_the_month = get_last_day(date)
+
+	return getdate(last_day_of_the_month) == getdate(date)

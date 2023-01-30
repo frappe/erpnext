@@ -18,6 +18,7 @@ from frappe.utils import (
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, update_maintenance_status
 from erpnext.assets.doctype.asset.depreciation import (
+	is_last_day_of_the_month,
 	post_depreciation_entries,
 	restore_asset,
 	scrap_asset,
@@ -1529,9 +1530,3 @@ def set_depreciation_settings_in_company():
 
 def enable_cwip_accounting(asset_category, enable=1):
 	frappe.db.set_value("Asset Category", asset_category, "enable_cwip_accounting", enable)
-
-
-def is_last_day_of_the_month(dt):
-	last_day_of_the_month = get_last_day(dt)
-
-	return getdate(dt) == getdate(last_day_of_the_month)
