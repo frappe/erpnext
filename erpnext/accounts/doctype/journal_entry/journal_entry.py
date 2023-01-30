@@ -238,7 +238,9 @@ class JournalEntry(AccountsController):
 			):
 				processed_assets.append(d.reference_name)
 
-				asset = frappe.get_doc("Asset", d.reference_name)
+				asset = frappe.db.get_value(
+					"Asset", d.reference_name, ["calculate_depreciation", "value_after_depreciation"], as_dict=1
+				)
 
 				if asset.calculate_depreciation:
 					continue
