@@ -375,3 +375,4 @@ erpnext.patches.v13_0.show_hr_payroll_deprecation_warning
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 execute:frappe.db.set_value("Naming Series", "Naming Series", {"select_doc_for_series": "", "set_options": "", "prefix": "", "current_value": 0, "user_must_always_select": 0})
 erpnext.patches.v13_0.update_schedule_type_in_loans
+erpnext.patches.v13_0.update_asset_value_for_manual_depr_entries

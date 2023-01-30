@@ -15,6 +15,7 @@ from frappe.utils import (
 	nowdate,
 )
 
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.assets.doctype.asset.asset import make_sales_invoice, update_maintenance_status
 from erpnext.assets.doctype.asset.depreciation import (
@@ -1409,6 +1410,36 @@ class TestDepreciationBasics(AssetSetup):
 
 		for i, schedule in enumerate(asset.schedules):
 			self.assertEqual(getdate(expected_dates[i]), getdate(schedule.schedule_date))
+
+	def test_manual_depreciation_for_existing_asset(self):
+		asset = create_asset(
+			item_code="Macbook Pro",
+			is_existing_asset=1,
+			purchase_date="2020-01-30",
+			available_for_use_date="2020-01-30",
+			submit=1,
+		)
+
+		self.assertEqual(asset.status, "Submitted")
+		self.assertEqual(asset.get("value_after_depreciation"), 100000)
+
+		jv = make_journal_entry(
+			"_Test Depreciations - _TC", "_Test Accumulated Depreciations - _TC", 100, save=False
+		)
+		for d in jv.accounts:
+			d.reference_type = "Asset"
+			d.reference_name = asset.name
+		jv.voucher_type = "Depreciation Entry"
+		jv.insert()
+		jv.submit()
+
+		asset.reload()
+		self.assertEqual(asset.get("value_after_depreciation"), 99900)
+
+		jv.cancel()
+
+		asset.reload()
+		self.assertEqual(asset.get("value_after_depreciation"), 100000)
 
 
 def create_asset_data():

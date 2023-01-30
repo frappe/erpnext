@@ -87,6 +87,7 @@ class JournalEntry(AccountsController):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
+		self.update_asset_value()
 		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
@@ -235,6 +236,34 @@ class JournalEntry(AccountsController):
 		for d in to_remove:
 			self.remove(d)
 
+	def update_asset_value(self):
+		if self.voucher_type != "Depreciation Entry":
+			return
+
+		processed_assets = []
+
+		for d in self.get("accounts"):
+			if (
+				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+			):
+				processed_assets.append(d.reference_name)
+
+				asset = frappe.db.get_value(
+					"Asset", d.reference_name, ["calculate_depreciation", "value_after_depreciation"], as_dict=1
+				)
+
+				if asset.calculate_depreciation:
+					continue
+
+				depr_value = d.debit or d.credit
+
+				frappe.db.set_value(
+					"Asset",
+					d.reference_name,
+					"value_after_depreciation",
+					asset.value_after_depreciation - depr_value,
+				)
+
 	def update_inter_company_jv(self):
 		if (
 			self.voucher_type == "Inter Company Journal Entry"
@@ -293,19 +322,39 @@ class JournalEntry(AccountsController):
 				d.db_update()
 
 	def unlink_asset_reference(self):
+		if self.voucher_type != "Depreciation Entry":
+			return
+
+		processed_assets = []
+
 		for d in self.get("accounts"):
-			if d.reference_type == "Asset" and d.reference_name:
+			if (
+				d.reference_type == "Asset" and d.reference_name and d.reference_name not in processed_assets
+			):
+				processed_assets.append(d.reference_name)
+
 				asset = frappe.get_doc("Asset", d.reference_name)
-				for s in asset.get("schedules"):
-					if s.journal_entry == self.name:
-						s.db_set("journal_entry", None)
 
-						idx = cint(s.finance_book_id) or 1
-						finance_books = asset.get("finance_books")[idx - 1]
-						finance_books.value_after_depreciation += s.depreciation_amount
-						finance_books.db_update()
+				if asset.calculate_depreciation:
+					for s in asset.get("schedules"):
+						if s.journal_entry == self.name:
+							s.db_set("journal_entry", None)
 
-						asset.set_status()
+							idx = cint(s.finance_book_id) or 1
+							finance_books = asset.get("finance_books")[idx - 1]
+							finance_books.value_after_depreciation += s.depreciation_amount
+							finance_books.db_update()
+
+							asset.set_status()
+				else:
+					depr_value = d.debit or d.credit
+
+					frappe.db.set_value(
+						"Asset",
+						d.reference_name,
+						"value_after_depreciation",
+						asset.value_after_depreciation + depr_value,
+					)
 
 	def unlink_inter_company_jv(self):
 		if (
