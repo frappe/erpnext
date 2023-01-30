@@ -99,7 +99,6 @@ class Project(StatusUpdater):
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
-		self.validate_feedback()
 		self.validate_warranty()
 		self.validate_vehicle_panels()
 
@@ -835,16 +834,6 @@ class Project(StatusUpdater):
 					.format(d.idx, frappe.bold(d.depreciation_item_code)))
 
 			item_codes_visited.add(d.depreciation_item_code)
-
-	def validate_feedback(self):
-		if not self.get("customer_feedback"):
-			self.feedback_date = self.feedback_time = None
-
-		elif not self.get("feedback_date") or not self.get("feedback_time"):
-			cur_dt = get_datetime()
-			self.feedback_date = getdate(cur_dt)
-			self.feedback_time = get_time(cur_dt)
-			self.customer_feedback = clean_whitespace(self.customer_feedback)
 
 	def validate_warranty(self):
 		if self.get('warranty_claim_denied'):
