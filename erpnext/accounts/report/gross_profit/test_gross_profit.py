@@ -304,6 +304,7 @@ class TestGrossProfit(FrappeTestCase):
 
 	def test_order_connected_dn_and_inv(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
 		"""
 			Test gp calculation when invoice and delivery note aren't directly connected.
 			SO -- INV
@@ -347,7 +348,11 @@ class TestGrossProfit(FrappeTestCase):
 			do_not_submit=False,
 		)
 
-		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_delivery_note,
+			make_sales_invoice,
+		)
+
 		make_delivery_note(so.name).submit()
 		sinv = make_sales_invoice(so.name).submit()
 
@@ -356,8 +361,6 @@ class TestGrossProfit(FrappeTestCase):
 		)
 
 		columns, data = execute(filters=filters)
-
-		# Without Delivery Note, buying rate should be 150
 		expected_entry = {
 			"parent_invoice": sinv.name,
 			"currency": "INR",
