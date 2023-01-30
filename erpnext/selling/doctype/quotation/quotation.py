@@ -28,6 +28,7 @@ class Quotation(SellingController):
 		self.validate_valid_till()
 		self.validate_shopping_cart_items()
 		self.set_customer_name()
+		self.validate_alternative_items()
 		if self.items:
 			self.with_items = 1
 
@@ -98,6 +99,21 @@ class Quotation(SellingController):
 				"Lead", self.party_name, ["lead_name", "company_name"]
 			)
 			self.customer_name = company_name or lead_name
+
+	def validate_alternative_items(self):
+		items_with_alternatives = filter(lambda item: not item.is_alternative, self.get("items"))
+		items_with_alternatives = map(lambda item: item.item_code, items_with_alternatives)
+
+		alternative_items = filter(lambda item: item.is_alternative, self.get("items"))
+		for row in alternative_items:
+			if row.alternative_to not in items_with_alternatives:
+				frappe.throw(
+					_("Row #{0}: {1} is not a valid non-alternative Item from the table").format(
+						row.idx, frappe.bold(row.alternative_to)
+					),
+					title=_("Invalid Item"),
+				)
+
 
 	def update_opportunity(self, status):
 		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
