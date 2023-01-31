@@ -143,6 +143,7 @@ def get_bin_details(bin_name):
 			"reserved_qty_for_sub_contract",
 		],
 		as_dict=1,
+		for_update=True,
 	)
 
 
@@ -163,6 +164,7 @@ def update_qty(bin_name, args):
 			.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=Order.desc)
 			.orderby(sle.creation, order=Order.desc)
 			.limit(1)
+			.for_update()
 			.run()
 		)
 

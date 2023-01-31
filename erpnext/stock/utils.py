@@ -252,7 +252,9 @@ def _create_bin(item_code, warehouse):
 		bin_obj.insert()
 	except frappe.UniqueValidationError:
 		frappe.db.rollback(save_point=bin_creation_savepoint)  # preserve transaction in postgres
-		bin_obj = frappe.get_last_doc("Bin", {"item_code": item_code, "warehouse": warehouse})
+		bin_obj = frappe.get_last_doc(
+			"Bin", {"item_code": item_code, "warehouse": warehouse}, for_update=True
+		)
 
 	return bin_obj
 
