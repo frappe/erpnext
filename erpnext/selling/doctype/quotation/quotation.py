@@ -102,7 +102,7 @@ class Quotation(SellingController):
 
 	def validate_alternative_items(self):
 		items_with_alternatives = filter(lambda item: not item.is_alternative, self.get("items"))
-		items_with_alternatives = map(lambda item: item.item_code, items_with_alternatives)
+		items_with_alternatives = list(map(lambda item: item.item_code, items_with_alternatives))
 
 		alternative_items = filter(lambda item: item.is_alternative, self.get("items"))
 		for row in alternative_items:
@@ -113,7 +113,6 @@ class Quotation(SellingController):
 					),
 					title=_("Invalid Item"),
 				)
-
 
 	def update_opportunity(self, status):
 		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
@@ -238,7 +237,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	)
 
 	alternative_map = {
-		x.get("original_item") : x.get("alternative_item") for x in frappe.flags.get("args", {}).get("mapping", [])
+		x.get("original_item"): x.get("alternative_item")
+		for x in frappe.flags.get("args", {}).get("mapping", [])
 	}
 
 	def set_missing_values(source, target):
@@ -264,7 +264,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			target.blanket_order = obj.blanket_order
 			target.blanket_order_rate = obj.blanket_order_rate
 
-	def can_map_row(item) ->  bool:
+	def can_map_row(item) -> bool:
 		"""
 		Row mapping from Quotation to Sales order:
 		1. Simple row: Map if adequate qty
@@ -285,7 +285,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		else:
 			is_selected = alternative_map.get(item.item_code) is None
 		return is_selected and has_qty
-
 
 	doclist = get_mapped_doc(
 		"Quotation",
