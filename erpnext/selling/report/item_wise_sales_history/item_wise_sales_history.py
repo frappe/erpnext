@@ -41,8 +41,20 @@ def get_columns(filters):
 		{"label": _("Description"), "fieldtype": "Data", "fieldname": "description", "width": 150},
 		{"label": _("Quantity"), "fieldtype": "Float", "fieldname": "quantity", "width": 150},
 		{"label": _("UOM"), "fieldtype": "Link", "fieldname": "uom", "options": "UOM", "width": 100},
-		{"label": _("Rate"), "fieldname": "rate", "options": "Currency", "width": 120},
-		{"label": _("Amount"), "fieldname": "amount", "options": "Currency", "width": 120},
+		{
+			"label": _("Rate"),
+			"fieldname": "rate",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120,
+		},
 		{
 			"label": _("Sales Order"),
 			"fieldtype": "Link",
@@ -93,8 +105,9 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Billed Amount"),
-			"fieldtype": "currency",
+			"fieldtype": "Currency",
 			"fieldname": "billed_amount",
+			"options": "currency"
 			"width": 120,
 		},
 		{
@@ -103,6 +116,13 @@ def get_columns(filters):
 			"fieldname": "company",
 			"options": "Company",
 			"width": 100,
+		},
+		{
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"fieldname": "currency",
+			"options": "Currency",
+			"hidden": 1,
 		},
 	]
 
@@ -141,6 +161,7 @@ def get_data(filters):
 			"billed_amount": flt(record.get("billed_amt")),
 			"company": record.get("company"),
 		}
+		row["currency"] = frappe.get_cached_value("Company", row["company"], "default_currency")
 		data.append(row)
 
 	return data
@@ -196,7 +217,8 @@ def get_sales_order_details(company_list, filters):
 			so_item.uom, so_item.base_rate, so_item.base_amount,
 			so.name, so.transaction_date, so.customer,so.territory,
 			so.project, so_item.delivered_qty,
-			so_item.billed_amt, so.company
+			(so_item.billed_amt * so.conversion_rate) AS billed_amt,
+			so.company
 		FROM
 			`tabSales Order` so, `tabSales Order Item` so_item
 		WHERE
