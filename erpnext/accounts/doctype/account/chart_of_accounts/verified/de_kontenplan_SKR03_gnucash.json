@@ -64,48 +64,50 @@
 						"account_number": "1371"
 					},
 					"Abziehbare Vorsteuer": {
-						"account_type": "Tax",
 						"is_group": 1,
 						"Abziehbare Vorsteuer 7%": {
-							"account_number": "1571"
+							"account_number": "1571",
+                            "account_type": "Tax",
+                            "tax_rate": 7.0
 						},
 						"Abziehbare Vorsteuer 19%": {
-							"account_number": "1576"
+							"account_number": "1576",
+                            "account_type": "Tax",
+                            "tax_rate": 19.0
 						},
 						"Abziehbare Vorsteuer nach \u00a713b UStG 19%": {
-							"account_number": "1577"
-						},
-						"Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
-							"account_number": "3120"
+							"account_number": "1577",
+                            "account_type": "Tax",
+                            "tax_rate": 19.0
 						}
 					}
 				},
 				"III. Wertpapiere": {
-					"is_group": 1
+					"is_group": 1,
+                    "Anteile an verbundenen Unternehmen (Umlaufvermögen)": {
+                        "account_number": "1340"
+                    },
+                    "Anteile an herrschender oder mit Mehrheit beteiligter Gesellschaft": {
+                        "account_number": "1344"
+                    },
+                    "Sonstige Wertpapiere": {
+                        "account_number": "1348"
+                    }
 				},
 				"IV. Kassenbestand, Bundesbankguthaben, Guthaben bei Kreditinstituten und Schecks.": {
 					"is_group": 1,
-					"Kasse": {
-						"account_type": "Cash",
-						"is_group": 1,
-						"Kasse": {
-							"is_group": 1,
-							"account_number": "1000",
-							"account_type": "Cash"
-						}
-					},
-					"Bank": {
-						"is_group": 1,
-						"account_type": "Bank",
-						"Postbank": {
-							"account_number": "1100",
-							"account_type": "Bank"
-						},
-						"Bankkonto": {
-							"account_number": "1200",
-							"account_type": "Bank"
-						}
-					}
+                    "Kasse": {
+                        "account_number": "1000",
+                        "account_type": "Cash"
+                    },
+                    "Postbank": {
+                        "account_number": "1100",
+                        "account_type": "Bank"
+                    },
+                    "Bankkonto": {
+                        "account_number": "1200",
+                        "account_type": "Bank"
+                    }
 				}
 			},
 			"C - Rechnungsabgrenzungsposten": {
@@ -200,21 +202,27 @@
 					},
 					"Umsatzsteuer": {
 						"is_group": 1,
-						"account_type": "Tax",
 						"Umsatzsteuer 7%": {
-							"account_number": "1771"
+							"account_number": "1771",
+                            "account_type": "Tax",
+                            "tax_rate": 7.0
 						},
 						"Umsatzsteuer 19%": {
-							"account_number": "1776"
+							"account_number": "1776",
+                            "account_type": "Tax",
+                            "tax_rate": 19.0
 						},
 						"Umsatzsteuer-Vorauszahlung": {
-							"account_number": "1780"
+							"account_number": "1780",
+                            "account_type": "Tax"
 						},
 						"Umsatzsteuer-Vorauszahlung 1/11": {
 							"account_number": "1781"
 						},
 						"Umsatzsteuer \u00a7 13b UStG 19%": {
-							"account_number": "1787"
+							"account_number": "1787",
+                            "account_type": "Tax",
+                            "tax_rate": 19.0
 						},
 						"Umsatzsteuer Vorjahr": {
 							"account_number": "1790"
@@ -272,6 +280,10 @@
         "Aufwendungen 2/4": {
             "is_group": 1,
 			"root_type": "Expense",
+            "Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
+                "account_number": "3120",
+                "account_type": "Expense Account"
+            },
 			"Wareneingang": {
 				"account_number": "3200"
 			},
