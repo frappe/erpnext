@@ -126,15 +126,17 @@ def get_asset_value(asset, finance_book=None):
 	if not asset.calculate_depreciation:
 		return flt(asset.gross_purchase_amount) - flt(asset.opening_accumulated_depreciation)
 
-	finance_book_filter = ["finance_book", "is", "not set"]
-	if finance_book:
-		finance_book_filter = ["finance_book", "=", finance_book]
-
-	return frappe.db.get_value(
+	result = frappe.get_all(
 		doctype="Asset Finance Book",
-		filters=[["parent", "=", asset.asset_id], finance_book_filter],
-		fieldname="value_after_depreciation",
+		filters={
+			"parent": asset.asset_id,
+			"finance_book": finance_book or ("is", "not set"),
+		},
+		pluck="value_after_depreciation",
+		limit=1,
 	)
+
+	return result[0] if result else 0.0
 
 
 def prepare_chart_data(data, filters):

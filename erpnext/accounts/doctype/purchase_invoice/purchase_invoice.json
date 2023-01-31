@@ -1426,6 +1426,7 @@
   },
   {
    "default": "0",
+   "depends_on": "apply_tds",
    "fieldname": "tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -1435,12 +1436,13 @@
    "read_only": 1
   },
   {
+   "depends_on": "apply_tds",
    "fieldname": "base_tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Base Tax Withholding Net Total",
    "no_copy": 1,
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1554,7 +1556,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-12 18:37:38.142688",
+ "modified": "2023-01-28 19:18:56.586321",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

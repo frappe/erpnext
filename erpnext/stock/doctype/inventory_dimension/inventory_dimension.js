@@ -37,7 +37,7 @@ frappe.ui.form.on('Inventory Dimension', {
 		if (frm.doc.__onload && frm.doc.__onload.has_stock_ledger
 			&& frm.doc.__onload.has_stock_ledger.length) {
 			let allow_to_edit_fields = ['disabled', 'fetch_from_parent',
-				'type_of_transaction', 'condition'];
+				'type_of_transaction', 'condition', 'mandatory_depends_on'];
 
 			frm.fields.forEach((field) => {
 				if (!in_list(allow_to_edit_fields, field.df.fieldname)) {
