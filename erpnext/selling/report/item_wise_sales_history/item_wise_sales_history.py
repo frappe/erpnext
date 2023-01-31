@@ -107,7 +107,7 @@ def get_columns(filters):
 			"label": _("Billed Amount"),
 			"fieldtype": "Currency",
 			"fieldname": "billed_amount",
-			"options": "currency"
+			"options": "currency",
 			"width": 120,
 		},
 		{
