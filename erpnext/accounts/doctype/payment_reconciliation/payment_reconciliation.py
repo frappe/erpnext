@@ -211,7 +211,7 @@ class PaymentReconciliation(Document):
 			condition += " and cost_center = '{0}' ".format(self.cost_center)
 
 		non_reconciled_invoices = get_outstanding_invoices(
-			self.party_type, self.party, self.receivable_payable_account, condition=condition
+			self.party_type, self.party, self.receivable_payable_account, self.company, condition=condition
 		)
 
 		if self.invoice_limit:
