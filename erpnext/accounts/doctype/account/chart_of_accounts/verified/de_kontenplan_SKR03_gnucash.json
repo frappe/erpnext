@@ -65,17 +65,17 @@
 					},
 					"Abziehbare Vorsteuer": {
 						"is_group": 1,
-						"Abziehbare Vorsteuer 7%": {
+						"Abziehbare Vorsteuer 7 %": {
 							"account_number": "1571",
 							"account_type": "Tax",
 							"tax_rate": 7.0
 						},
-						"Abziehbare Vorsteuer 19%": {
+						"Abziehbare Vorsteuer 19 %": {
 							"account_number": "1576",
 							"account_type": "Tax",
 							"tax_rate": 19.0
 						},
-						"Abziehbare Vorsteuer nach \u00a713b UStG 19%": {
+						"Abziehbare Vorsteuer nach \u00a713b UStG 19 %": {
 							"account_number": "1577",
 							"account_type": "Tax",
 							"tax_rate": 19.0
@@ -202,12 +202,12 @@
 					},
 					"Umsatzsteuer": {
 						"is_group": 1,
-						"Umsatzsteuer 7%": {
+						"Umsatzsteuer 7 %": {
 							"account_number": "1771",
 							"account_type": "Tax",
 							"tax_rate": 7.0
 						},
-						"Umsatzsteuer 19%": {
+						"Umsatzsteuer 19 %": {
 							"account_number": "1776",
 							"account_type": "Tax",
 							"tax_rate": 19.0
@@ -219,7 +219,7 @@
 						"Umsatzsteuer-Vorauszahlung 1/11": {
 							"account_number": "1781"
 						},
-						"Umsatzsteuer \u00a7 13b UStG 19%": {
+						"Umsatzsteuer \u00a7 13b UStG 19 %": {
 							"account_number": "1787",
 							"account_type": "Tax",
 							"tax_rate": 19.0
@@ -252,11 +252,11 @@
 					"account_number": "8200",
 					"account_type": "Income Account"
 				},
-				"Erl\u00f6se USt. 19%": {
+				"Erl\u00f6se USt. 19 %": {
 					"account_number": "8400",
 					"account_type": "Income Account"
 				},
-				"Erl\u00f6se USt. 7%": {
+				"Erl\u00f6se USt. 7 %": {
 					"account_number": "8300",
 					"account_type": "Income Account"
 				}
@@ -280,7 +280,7 @@
 		"Aufwendungen 2/4": {
 			"is_group": 1,
 			"root_type": "Expense",
-			"Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
+			"Leistungen \u00a713b UStG 19 % Vorsteuer, 19 % Umsatzsteuer": {
 				"account_number": "3120",
 				"account_type": "Expense Account"
 			},
