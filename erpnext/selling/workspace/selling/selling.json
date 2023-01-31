@@ -13,9 +13,10 @@
  "docstatus": 0,
  "doctype": "Workspace",
  "extends_another_page": 0,
- "hide_custom": 1,
+ "hide_custom": 0,
  "icon": "sell",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Selling",
  "links": [
@@ -515,7 +516,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:35.971277",
+ "modified": "2023-01-28 17:10:02.716760",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
