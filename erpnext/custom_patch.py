@@ -2,17 +2,17 @@ import frappe
 from erpnext.setup.doctype.employee.employee import create_user
 import pandas as pd
 
-def post_payment_je_leave_encashment()
-    le = frappe.db.sql("""
-        select expense_claim from `tabLeave Encashment` where
-        docstatus = 1
-    """,as_dict=1)
-    for a in le:
-        expense_claim = frappe.get_doc("Expense Claim", a.expense_claim)
-        if expense_claim.docstatus = 1:
-            expense_claim.post_accounts_entry()
-            print(expense_claim.name)
-    frappe.db.commit()
+# def post_payment_je_leave_encashment():
+#     le = frappe.db.sql("""
+#         select expense_claim from `tabLeave Encashment` where
+#         docstatus = 1
+#     """,as_dict=1)
+#     for a in le:
+#         expense_claim = frappe.get_doc("Expense Claim", a.expense_claim)
+#         if expense_claim.docstatus = 1:
+#             expense_claim.post_accounts_entry()
+#             print(expense_claim.name)
+#     frappe.db.commit()
 
 def assign_je_in_invoice():
     print('<------------------------------------------------------------------------------------------------>')
@@ -110,3 +110,28 @@ def update_user_pwd():
     # df = pd.DataFrame(data = non_employee) # convert dict to dataframe
     # df.to_excel("Users Without Employee Data.xlsx", index=False)
     # print("Dictionery Converted in to Excel")
+
+def update_ref_doc():
+    for a in frappe.db.sql("""
+                            select name 
+                            from 
+                                `tabExpense Claim` 
+                            where 
+                                docstatus != 2
+                            """):
+        print(a[0])
+        reference = frappe.db.sql("""
+                            select expense_type
+                            from 
+                                `tabExpense Claim Detail` 
+                            where 
+                            parent = "{}"
+                            """.format(a[0]))
+        print(reference[0][0])
+        
+        frappe.db.sql("""
+            update 
+                `tabExpense Claim`
+            set ref_doc ="{0}"
+            where name ="{1}"
+        """.format(reference[0][0],a[0]))
