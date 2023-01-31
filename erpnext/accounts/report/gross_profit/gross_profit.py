@@ -655,10 +655,35 @@ class GrossProfitGenerator(object):
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, item_row, item_code
 				)
+			elif row.sales_order and row.so_detail:
+				incoming_amount = self.get_buying_amount_from_so_dn(row.sales_order, row.so_detail, item_code)
+				if incoming_amount:
+					return incoming_amount
 			else:
 				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
-		return 0.0
+		return flt(row.qty) * self.get_average_buying_rate(row, item_code)
+
+	def get_buying_amount_from_so_dn(self, sales_order, so_detail, item_code):
+		from frappe.query_builder.functions import Sum
+
+		delivery_note = frappe.qb.DocType("Delivery Note")
+		delivery_note_item = frappe.qb.DocType("Delivery Note Item")
+
+		query = (
+			frappe.qb.from_(delivery_note)
+			.inner_join(delivery_note_item)
+			.on(delivery_note.name == delivery_note_item.parent)
+			.select(Sum(delivery_note_item.incoming_rate * delivery_note_item.stock_qty))
+			.where(delivery_note.docstatus == 1)
+			.where(delivery_note_item.item_code == item_code)
+			.where(delivery_note_item.against_sales_order == sales_order)
+			.where(delivery_note_item.so_detail == so_detail)
+			.groupby(delivery_note_item.item_code)
+		)
+
+		incoming_amount = query.run()
+		return flt(incoming_amount[0][0]) if incoming_amount else 0
 
 	def get_average_buying_rate(self, row, item_code):
 		args = row
@@ -760,7 +785,8 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice`.territory, `tabSales Invoice Item`.item_code,
 				`tabSales Invoice Item`.item_name, `tabSales Invoice Item`.description,
 				`tabSales Invoice Item`.warehouse, `tabSales Invoice Item`.item_group,
-				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.dn_detail,
+				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.so_detail,
+				`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.dn_detail,
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
