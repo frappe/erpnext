@@ -2047,11 +2047,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2022-09-16 17:44:22.227332",
-=======
  "modified": "2023-01-28 19:45:47.538163",
->>>>>>> b3dc22de29 (fix: Fetch commission rate from sales partner (#33851))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
