@@ -280,7 +280,15 @@
 		"Aufwendungen 2/4": {
 			"is_group": 1,
 			"root_type": "Expense",
-			"Leistungen \u00a713b UStG 19 % Vorsteuer, 19 % Umsatzsteuer": {
+			"Fremdleistungen": {
+				"account_number": "3100",
+				"account_type": "Expense Account"
+			},
+			"Fremdleistungen ohne Vorsteuer": {
+				"account_number": "3109",
+				"account_type": "Expense Account"
+			},
+			"Bauleistungen eines im Inland ansässigen Unternehmers 19 % Vorsteuer und 19 % Umsatzsteuer": {
 				"account_number": "3120",
 				"account_type": "Expense Account"
 			},
