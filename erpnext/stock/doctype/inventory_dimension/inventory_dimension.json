@@ -24,6 +24,9 @@
   "istable",
   "applicable_condition_example_section",
   "condition",
+  "conditional_mandatory_section",
+  "reqd",
+  "mandatory_depends_on",
   "conditional_rule_examples_section",
   "html_19"
  ],
@@ -153,11 +156,28 @@
    "fieldname": "conditional_rule_examples_section",
    "fieldtype": "Section Break",
    "label": "Conditional Rule Examples"
+  },
+  {
+   "description": "To apply condition on parent field use parent.field_name and to apply condition on child table use doc.field_name. Here field_name could be based on the actual column name of the respective field.",
+   "fieldname": "mandatory_depends_on",
+   "fieldtype": "Small Text",
+   "label": "Mandatory Depends On"
+  },
+  {
+   "fieldname": "conditional_mandatory_section",
+   "fieldtype": "Section Break",
+   "label": "Mandatory Section"
+  },
+  {
+   "default": "0",
+   "fieldname": "reqd",
+   "fieldtype": "Check",
+   "label": "Mandatory"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-15 15:50:16.767105",
+ "modified": "2023-01-31 13:44:38.507698",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",
