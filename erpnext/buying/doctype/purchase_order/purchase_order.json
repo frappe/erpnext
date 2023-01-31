@@ -1221,6 +1221,7 @@
   },
   {
    "default": "0",
+   "depends_on": "apply_tds",
    "fieldname": "tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -1230,12 +1231,13 @@
    "read_only": 1
   },
   {
+   "depends_on": "apply_tds",
    "fieldname": "base_tax_withholding_net_total",
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Base Tax Withholding Net Total",
    "no_copy": 1,
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1269,7 +1271,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-12-25 18:08:59.074182",
+ "modified": "2023-01-28 18:59:16.322824",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
