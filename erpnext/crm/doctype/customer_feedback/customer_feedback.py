@@ -4,7 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import getdate, get_time, get_datetime, combine_datetime
 
 
@@ -23,6 +25,30 @@ class CustomerFeedback(Document):
 			self.status = "Pending"
 
 
+def get_customer_feedback_doc(reference_doctype, reference_name):
+	filters = {
+		'reference_doctype': reference_doctype,
+		'reference_name': reference_name
+	}
+
+	customer_feedback = frappe.db.get_value("Customer Feedback", filters=filters)
+
+	if customer_feedback:
+		feedback_doc = frappe.get_doc("Customer Feedback", customer_feedback)
+	else:
+		feedback_doc = get_mapped_doc(reference_doctype, reference_name, {
+			reference_doctype: {
+				"doctype": "Customer Feedback",
+				"field_map": {
+					"doctype": "reference_doctype",
+					"name": "reference_name"
+				}
+			},
+		})
+
+	return feedback_doc
+
+
 @frappe.whitelist()
 def submit_customer_feedback_communication(reference_doctype, reference_name, communication_type, communication):
 	if not communication:
@@ -34,22 +60,7 @@ def submit_customer_feedback_communication(reference_doctype, reference_name, co
 	source_doc = frappe.get_doc(reference_doctype, reference_name)
 	source_doc.check_permission("read")
 
-	filters = {
-		'reference_doctype': reference_doctype,
-		'reference_name': reference_name,
-		'customer': source_doc.customer,
-		'vehicle': source_doc.applies_to_vehicle
-	}
-
-	customer_feedback = frappe.db.get_value("Customer Feedback", filters=filters)
-
-	if customer_feedback:
-		feedback_doc = frappe.get_doc("Customer Feedback", customer_feedback)
-	else:
-		feedback_doc = frappe.get_doc({
-			**filters,
-			"doctype": "Customer Feedback",
-		}).insert(ignore_permissions=True)
+	feedback_doc = get_customer_feedback_doc(reference_doctype, reference_name)
 
 	cur_dt = get_datetime()
 	cur_date = getdate(cur_dt)
@@ -80,7 +91,7 @@ def submit_customer_feedback_communication(reference_doctype, reference_name, co
 		"sent_or_received": "Received",
 		"subject": "Customer Feedback" + \
 			("" if communication_type=="Feedback" else " Contact Remark") + \
-			" ({0}, {1})".format(source_doc.doctype, source_doc.name),
+			" ({0}: {1})".format(source_doc.doctype, source_doc.name),
 		"sender": frappe.session.user
 	})
 
@@ -94,16 +105,19 @@ def submit_customer_feedback_communication(reference_doctype, reference_name, co
 		"link_name": source_doc.customer,
 	})
 
-	communication_doc.append("timeline_links", {
-		"link_doctype": "Vehicle",
-		"link_name": source_doc.applies_to_vehicle,
-	})
+	if 'Vehicles' in frappe.get_active_domains():
+		communication_doc.append("timeline_links", {
+			"link_doctype": "Vehicle",
+			"link_name": source_doc.applies_to_vehicle,
+		})
 
 	communication_doc.insert(ignore_permissions=True)
 
 	return {
 		"contact_remark": feedback_doc.get('contact_remark'),
 		"customer_feedback": feedback_doc.get('customer_feedback'),
-		"contact_dt": combine_datetime(feedback_doc.contact_date, feedback_doc.contact_time) if feedback_doc.get('contact_remark') else None,
-		"feedback_dt": combine_datetime(feedback_doc.feedback_date, feedback_doc.feedback_time) if feedback_doc.get('customer_feedback') else None
+		"contact_dt": combine_datetime(feedback_doc.contact_date, feedback_doc.contact_time)
+			if feedback_doc.get('contact_remark') else None,
+		"feedback_dt": combine_datetime(feedback_doc.feedback_date, feedback_doc.feedback_time)
+			if feedback_doc.get('customer_feedback') else None
 	}

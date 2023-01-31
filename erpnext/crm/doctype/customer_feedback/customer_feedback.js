@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Customer Feedback', {
-	// refresh: function(frm) {
-
-	// }
+	setup: function(frm) {
+		erpnext.setup_applies_to_fields(frm);
+	}
 });
