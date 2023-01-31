@@ -167,26 +167,6 @@ def get_data(filters):
 	return data
 
 
-def get_conditions(filters):
-	conditions = ""
-	if filters.get("item_group"):
-		conditions += "AND so_item.item_group = %s" % frappe.db.escape(filters.item_group)
-
-	if filters.get("from_date"):
-		conditions += "AND so.transaction_date >= '%s'" % filters.from_date
-
-	if filters.get("to_date"):
-		conditions += "AND so.transaction_date <= '%s'" % filters.to_date
-
-	if filters.get("item_code"):
-		conditions += "AND so_item.item_code = %s" % frappe.db.escape(filters.item_code)
-
-	if filters.get("customer"):
-		conditions += "AND so.customer = %s" % frappe.db.escape(filters.customer)
-
-	return conditions
-
-
 def get_customer_details():
 	details = frappe.get_all("Customer", fields=["name", "customer_name", "customer_group"])
 	customer_details = {}
@@ -208,29 +188,49 @@ def get_item_details():
 
 
 def get_sales_order_details(company_list, filters):
-	conditions = get_conditions(filters)
+	db_so = frappe.qb.DocType("Sales Order")
+	db_so_item = frappe.qb.DocType("Sales Order Item")
 
-	return frappe.db.sql(
-		"""
-		SELECT
-			so_item.item_code, so_item.description, so_item.qty,
-			so_item.uom, so_item.base_rate, so_item.base_amount,
-			so.name, so.transaction_date, so.customer,so.territory,
-			so.project, so_item.delivered_qty,
-			(so_item.billed_amt * so.conversion_rate) AS billed_amt,
-			so.company
-		FROM
-			`tabSales Order` so, `tabSales Order Item` so_item
-		WHERE
-			so.name = so_item.parent
-			AND so.company in ({0})
-			AND so.docstatus = 1 {1}
-	""".format(
-			",".join(["%s"] * len(company_list)), conditions
-		),
-		tuple(company_list),
-		as_dict=1,
+	query = (
+		frappe.qb.from_(db_so)
+		.inner_join(db_so_item)
+		.on(db_so_item.parent == db_so.name)
+		.select(
+			db_so.name,
+			db_so.customer,
+			db_so.transaction_date,
+			db_so.territory,
+			db_so.project,
+			db_so.company,
+			db_so_item.item_code,
+			db_so_item.description,
+			db_so_item.qty,
+			db_so_item.uom,
+			db_so_item.base_rate,
+			db_so_item.base_amount,
+			db_so_item.delivered_qty,
+			(db_so_item.billed_amt * db_so.conversion_rate).as_("billed_amt"),
+		)
+		.where(db_so.docstatus == 1)
+		.where(db_so.company.isin(tuple(company_list)))
 	)
+
+	if filters.get("item_group"):
+		query = query.where(db_so_item.item_group == frappe.db.escape(filters.item_group))
+
+	if filters.get("from_date"):
+		query = query.where(db_so.transaction_date >= filters.from_date)
+
+	if filters.get("to_date"):
+		query = query.where(db_so.transaction_date <= filters.to_date)
+
+	if filters.get("item_code"):
+		query = query.where(db_so_item.item_group == frappe.db.escape(filters.item_code))
+
+	if filters.get("customer"):
+		query = query.where(db_so.customer == filters.customer)
+
+	return query.run(as_dict=1)
 
 
 def get_chart_data(data):
