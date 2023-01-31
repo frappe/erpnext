@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import add_months, cint, flt, getdate, nowdate, today
+from frappe.utils import add_months, cint, flt, get_last_day, getdate, nowdate, today
 from frappe.utils.data import get_link_to_form
 from frappe.utils.user import get_users_with_role
 
@@ -372,6 +372,9 @@ def disposal_was_made_on_original_schedule_date(asset, schedule, row, posting_da
 				finance_book.depreciation_start_date, row * cint(finance_book.frequency_of_depreciation)
 			)
 
+			if is_last_day_of_the_month(finance_book.depreciation_start_date):
+				orginal_schedule_date = get_last_day(orginal_schedule_date)
+
 			if orginal_schedule_date == posting_date_of_disposal:
 				return True
 	return False
@@ -491,18 +494,8 @@ def get_asset_details(asset, finance_book=None):
 	disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(asset.company)
 	depreciation_cost_center = asset.cost_center or depreciation_cost_center
 
-	idx = 1
-	if finance_book:
-		for d in asset.finance_books:
-			if d.finance_book == finance_book:
-				idx = d.idx
-				break
+	value_after_depreciation = asset.get_value_after_depreciation(finance_book)
 
-	value_after_depreciation = (
-		asset.finance_books[idx - 1].value_after_depreciation
-		if asset.calculate_depreciation
-		else asset.value_after_depreciation
-	)
 	accumulated_depr_amount = flt(asset.gross_purchase_amount) - flt(value_after_depreciation)
 
 	return (
@@ -575,3 +568,9 @@ def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_
 		)
 	else:
 		return flt(asset_doc.value_after_depreciation)
+
+
+def is_last_day_of_the_month(date):
+	last_day_of_the_month = get_last_day(date)
+
+	return getdate(last_day_of_the_month) == getdate(date)
