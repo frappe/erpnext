@@ -451,15 +451,21 @@ erpnext.utils.select_alternate_items = function(opts) {
 			alternative_items.forEach(d => {
 				let row = frappe.get_doc(opts.child_doctype, d.docname);
 				let qty = null;
+				let uom = row.uom;
 				if (row.doctype === 'Work Order Item') {
 					qty = row.required_qty;
 				} else {
 					qty = row.qty;
 				}
 				row[item_field] = d.alternate_item;
-				frappe.model.set_value(row.doctype, row.name, 'qty', qty);
-				frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code);
-				frm.trigger(item_field, row.doctype, row.name);
+				Promise.all([
+					frappe.model.set_value(row.doctype, row.name, 'qty', qty),
+					frappe.model.set_value(row.doctype, row.name, opts.original_item_field, d.item_code)
+				]).then(s=>{ // Waits for the promises to finish trigger the item code update then set the uom
+					frm.trigger(item_field, row.doctype, row.name).then(a=>{
+						frappe.model.set_value(row.doctype,row.name,'uom',uom).then(t=>{frm.trigger('uom',row.doctype,row.name);})
+					});
+				});
 			});
 
 			refresh_field(opts.child_docname);
