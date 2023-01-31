@@ -346,14 +346,16 @@ class PickList(Document):
 					pi_item.item_code,
 					pi_item.warehouse,
 					pi_item.batch_no,
-					Sum(pi_item.picked_qty).as_("picked_qty"),
+					Sum(Case().when(pi_item.picked_qty > 0, pi_item.picked_qty).else_(pi_item.stock_qty)).as_(
+						"picked_qty"
+					),
 					Replace(GROUP_CONCAT(pi_item.serial_no), ",", "\n").as_("serial_no"),
 				)
 				.where(
 					(pi_item.item_code.isin([x.item_code for x in items]))
-					& (pi_item.docstatus != 2)
-					& (pi_item.picked_qty > 0)
+					& ((pi_item.picked_qty > 0) | (pi_item.stock_qty > 0))
 					& (pi.status != "Completed")
+					& (pi_item.docstatus != 2)
 				)
 				.groupby(
 					pi_item.item_code,
