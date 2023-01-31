@@ -1255,6 +1255,7 @@ def get_outstanding_reference_documents(args):
 		args.get("party_type"),
 		args.get("party"),
 		args.get("party_account"),
+		args.get("company"),
 		filters=args,
 		condition=condition,
 	)
