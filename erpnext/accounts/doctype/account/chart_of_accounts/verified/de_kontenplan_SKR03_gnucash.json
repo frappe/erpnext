@@ -11,11 +11,11 @@
 					"account_number": "0027",
 					"account_type": "Fixed Asset"
 				},
-				"Gesch\u00e4ftsausstattung": {
+				"Geschäftsausstattung": {
 					"account_number": "0410",
 					"account_type": "Fixed Asset"
 				},
-				"B\u00fcroeinrichtung": {
+				"Büroeinrichtung": {
 					"account_number": "0420",
 					"account_type": "Fixed Asset"
 				},
@@ -60,7 +60,7 @@
 					"Durchlaufende Posten": {
 						"account_number": "1590"
 					},
-					"Gewinnermittlung \u00a74/3 nicht Ergebniswirksam": {
+					"Verrechnungskonto Gewinnermittlung § 4 Abs. 3 EStG, nicht ergebniswirksam": {
 						"account_number": "1371"
 					},
 					"Abziehbare Vorsteuer": {
@@ -75,7 +75,7 @@
 							"account_type": "Tax",
 							"tax_rate": 19.0
 						},
-						"Abziehbare Vorsteuer nach \u00a713b UStG 19 %": {
+						"Abziehbare Vorsteuer nach § 13b UStG 19 %": {
 							"account_number": "1577",
 							"account_type": "Tax",
 							"tax_rate": 19.0
@@ -219,7 +219,7 @@
 						"Umsatzsteuer-Vorauszahlung 1/11": {
 							"account_number": "1781"
 						},
-						"Umsatzsteuer \u00a7 13b UStG 19 %": {
+						"Umsatzsteuer nach § 13b UStG 19 %": {
 							"account_number": "1787",
 							"account_type": "Tax",
 							"tax_rate": 19.0
@@ -227,7 +227,7 @@
 						"Umsatzsteuer Vorjahr": {
 							"account_number": "1790"
 						},
-						"Umsatzsteuer fr\u00fchere Jahre": {
+						"Umsatzsteuer frühere Jahre": {
 							"account_number": "1791"
 						}
 					}
@@ -243,35 +243,35 @@
 				"is_group": 1
 			}
 		},
-		"Erl\u00f6se u. Ertr\u00e4ge 2/8": {
+		"Erlöse u. Erträge 2/8": {
 			"is_group": 1,
 			"root_type": "Income",
-			"Erl\u00f6skonten 8": {
+			"Erlöskonten 8": {
 				"is_group": 1,
-				"Erl\u00f6se": {
+				"Erlöse": {
 					"account_number": "8200",
 					"account_type": "Income Account"
 				},
-				"Erl\u00f6se USt. 19 %": {
+				"Erlöse USt. 19 %": {
 					"account_number": "8400",
 					"account_type": "Income Account"
 				},
-				"Erl\u00f6se USt. 7 %": {
+				"Erlöse USt. 7 %": {
 					"account_number": "8300",
 					"account_type": "Income Account"
 				}
 			},
 			"Ertragskonten 2": {
 				"is_group": 1,
-				"sonstige Zinsen und \u00e4hnliche Ertr\u00e4ge": {
+				"sonstige Zinsen und ähnliche Erträge": {
 					"account_number": "2650",
 					"account_type": "Income Account"
 				},
-				"Au\u00dferordentliche Ertr\u00e4ge": {
+				"Außerordentliche Erträge": {
 					"account_number": "2500",
 					"account_type": "Income Account"
 				},
-				"Sonstige Ertr\u00e4ge": {
+				"Sonstige Erträge": {
 					"account_number": "2700",
 					"account_type": "Income Account"
 				}
@@ -366,7 +366,7 @@
 			},
 			"Personalkosten": {
 				"is_group": 1,
-				"Geh\u00e4lter": {
+				"Gehälter": {
 					"account_number": "4120",
 					"account_type": "Expense Account"
 				},
@@ -374,15 +374,15 @@
 					"account_number": "4130",
 					"account_type": "Expense Account"
 				},
-				"Aufwendungen f\u00fcr Altersvorsorge": {
+				"Aufwendungen für Altersvorsorge": {
 					"account_number": "4165",
 					"account_type": "Expense Account"
 				},
-				"Verm\u00f6genswirksame Leistungen": {
+				"Vermögenswirksame Leistungen": {
 					"account_number": "4170",
 					"account_type": "Expense Account"
 				},
-				"Aushilfsl\u00f6hne": {
+				"Aushilfslöhne": {
 					"account_number": "4190",
 					"account_type": "Expense Account"
 				}
@@ -404,18 +404,18 @@
 			},
 			"Reparatur/Instandhaltung": {
 				"is_group": 1,
-				"Reparatur u. Instandh. von Anlagen/Maschinen u. Betriebs- u. Gesch\u00e4ftsausst.": {
+				"Reparaturen und Instandhaltungen von anderen Anlagen und Betriebs- und Geschäftsausstattung": {
 					"account_number": "4805",
 					"account_type": "Expense Account"
 				}
 			},
-			"Versicherungsbeitr\u00e4ge": {
+			"Versicherungsbeiträge": {
 				"is_group": 1,
 				"Versicherungen": {
 					"account_number": "4360",
 					"account_type": "Expense Account"
 				},
-				"Beitr\u00e4ge": {
+				"Beiträge": {
 					"account_number": "4380",
 					"account_type": "Expense Account"
 				},
@@ -423,7 +423,7 @@
 					"account_number": "4390",
 					"account_type": "Expense Account"
 				},
-				"steuerlich abzugsf\u00e4hige Versp\u00e4tungszuschl\u00e4ge und Zwangsgelder": {
+				"steuerlich abzugsfähige Verspätungszuschläge und Zwangsgelder": {
 					"account_number": "4396",
 					"account_type": "Expense Account"
 				}
@@ -438,7 +438,7 @@
 					"account_number": "4653",
 					"account_type": "Expense Account"
 				},
-				"nicht abzugsf\u00e4hige Betriebsausg. aus Werbe-, Repr\u00e4s.- u. Reisekosten": {
+				"nicht abzugsfähige Betriebsausg. aus Werbe-, Repräs.- u. Reisekosten": {
 					"account_number": "4665",
 					"account_type": "Expense Account"
 				},
@@ -465,11 +465,11 @@
 					"account_number": "4922",
 					"account_type": "Expense Account"
 				},
-				"B\u00fcrobedarf": {
+				"Bürobedarf": {
 					"account_number": "4930",
 					"account_type": "Expense Account"
 				},
-				"Zeitschriften, B\u00fccher": {
+				"Zeitschriften, Bücher": {
 					"account_number": "4940",
 					"account_type": "Expense Account"
 				},
@@ -477,11 +477,11 @@
 					"account_number": "4945",
 					"account_type": "Expense Account"
 				},
-				"Buchf\u00fchrungskosten": {
+				"Buchführungskosten": {
 					"account_number": "4955",
 					"account_type": "Expense Account"
 				},
-				"Abschlu\u00df- u. Pr\u00fcfungskosten": {
+				"Abschluß- u. Prüfungskosten": {
 					"account_number": "4957",
 					"account_type": "Expense Account"
 				},
@@ -489,18 +489,18 @@
 					"account_number": "4970",
 					"account_type": "Expense Account"
 				},
-				"Werkzeuge und Kleinger\u00e4te": {
+				"Werkzeuge und Kleingeräte": {
 					"account_number": "4985",
 					"account_type": "Expense Account"
 				}
 			},
 			"Zinsaufwendungen": {
 				"is_group": 1,
-				"Zinsaufwendungen f\u00fcr kurzfristige Verbindlichkeiten": {
+				"Zinsaufwendungen für kurzfristige Verbindlichkeiten": {
 					"account_number": "2110",
 					"account_type": "Expense Account"
 				},
-				"Zinsaufwendungen f\u00fcr KFZ Finanzierung": {
+				"Zinsaufwendungen für KFZ Finanzierung": {
 					"account_number": "2121",
 					"account_type": "Expense Account"
 				}
@@ -514,10 +514,10 @@
 				"Saldenvortrag Sachkonten": {
 					"account_number": "9000"
 				},
-				"Saldenvortr\u00e4ge Debitoren": {
+				"Saldenvorträge Debitoren": {
 					"account_number": "9008"
 				},
-				"Saldenvortr\u00e4ge Kreditoren": {
+				"Saldenvorträge Kreditoren": {
 					"account_number": "9009"
 				}
 			}
@@ -533,13 +533,13 @@
 				"Privatsteuern": {
 					"account_number": "1810"
 				},
-				"Sonderausgaben beschr\u00e4nkt abzugsf\u00e4hig": {
+				"Sonderausgaben beschränkt abzugsfähig": {
 					"account_number": "1820"
 				},
-				"Sonderausgaben unbeschr\u00e4nkt abzugsf\u00e4hig": {
+				"Sonderausgaben unbeschränkt abzugsfähig": {
 					"account_number": "1830"
 				},
-				"Au\u00dfergew\u00f6hnliche Belastungen": {
+				"Außergewöhnliche Belastungen": {
 					"account_number": "1850"
 				},
 				"Privateinlagen": {
