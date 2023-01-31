@@ -85,6 +85,9 @@ class TestInventoryDimension(FrappeTestCase):
 			condition="parent.purpose == 'Material Issue'",
 		)
 
+		inv_dim1.reqd = 0
+		inv_dim1.save()
+
 		create_inventory_dimension(
 			reference_document="Shelf",
 			type_of_transaction="Inward",
@@ -205,6 +208,48 @@ class TestInventoryDimension(FrappeTestCase):
 			)
 		)
 
+	def test_check_mandatory_dimensions(self):
+		doc = create_inventory_dimension(
+			reference_document="Pallet",
+			type_of_transaction="Outward",
+			dimension_name="Pallet",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+		)
+
+		doc.reqd = 1
+		doc.save()
+
+		self.assertTrue(
+			frappe.db.get_value(
+				"Custom Field", {"fieldname": "pallet", "dt": "Stock Entry Detail", "reqd": 1}, "name"
+			)
+		)
+
+		doc.load_from_db
+		doc.reqd = 0
+		doc.save()
+
+	def test_check_mandatory_depends_on_dimensions(self):
+		doc = create_inventory_dimension(
+			reference_document="Pallet",
+			type_of_transaction="Outward",
+			dimension_name="Pallet",
+			apply_to_all_doctypes=0,
+			document_type="Stock Entry Detail",
+		)
+
+		doc.mandatory_depends_on = "t_warehouse"
+		doc.save()
+
+		self.assertTrue(
+			frappe.db.get_value(
+				"Custom Field",
+				{"fieldname": "pallet", "dt": "Stock Entry Detail", "mandatory_depends_on": "t_warehouse"},
+				"name",
+			)
+		)
+
 
 def prepare_test_data():
 	if not frappe.db.exists("DocType", "Shelf"):
@@ -250,6 +295,22 @@ def prepare_test_data():
 			frappe.get_doc({"doctype": "Rack", "rack_name": rack}).insert(ignore_permissions=True)
 
 	create_warehouse("Rack Warehouse")
+
+	if not frappe.db.exists("DocType", "Pallet"):
+		frappe.get_doc(
+			{
+				"doctype": "DocType",
+				"name": "Pallet",
+				"module": "Stock",
+				"custom": 1,
+				"naming_rule": "By fieldname",
+				"autoname": "field:pallet_name",
+				"fields": [{"label": "Pallet Name", "fieldname": "pallet_name", "fieldtype": "Data"}],
+				"permissions": [
+					{"role": "System Manager", "permlevel": 0, "read": 1, "write": 1, "create": 1, "delete": 1}
+				],
+			}
+		).insert(ignore_permissions=True)
 
 
 def create_inventory_dimension(**args):
