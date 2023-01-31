@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:45",
@@ -12,17 +13,13 @@
   "naming_series",
   "supplier",
   "supplier_name",
-  "column_break1",
-  "transaction_date",
-  "amended_from",
   "company",
-  "address_section",
-  "supplier_address",
-  "contact_person",
-  "address_display",
-  "contact_display",
-  "contact_mobile",
-  "contact_email",
+  "column_break1",
+  "status",
+  "transaction_date",
+  "valid_till",
+  "quotation_number",
+  "amended_from",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -33,26 +30,25 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
-  "link_to_mrs",
-  "pricing_rule_details",
-  "pricing_rules",
   "section_break_22",
   "total_qty",
+  "total_net_weight",
+  "column_break_26",
   "base_total",
   "base_net_total",
   "column_break_24",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "tax_category",
-  "column_break_36",
-  "shipping_rule",
-  "section_break_38",
   "taxes_and_charges",
+  "column_break_34",
+  "shipping_rule",
+  "column_break_36",
+  "incoterm",
+  "named_place",
+  "section_break_38",
   "taxes",
-  "tax_breakup",
-  "other_charges_calculation",
   "totals",
   "base_taxes_and_charges_added",
   "base_taxes_and_charges_deducted",
@@ -70,32 +66,44 @@
   "section_break_46",
   "base_grand_total",
   "base_rounding_adjustment",
-  "base_in_words",
   "base_rounded_total",
+  "base_in_words",
   "column_break4",
   "grand_total",
   "rounding_adjustment",
   "rounded_total",
   "in_words",
   "disable_rounded_total",
-  "terms_section_break",
+  "tax_breakup",
+  "other_charges_calculation",
+  "pricing_rule_details",
+  "pricing_rules",
+  "address_and_contact_tab",
+  "supplier_address",
+  "address_display",
+  "column_break_72",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "terms_tab",
   "tc_name",
   "terms",
+  "more_info_tab",
   "printing_settings",
-  "select_print_heading",
-  "group_same_items",
-  "column_break_72",
   "letter_head",
+  "group_same_items",
+  "column_break_85",
+  "select_print_heading",
   "language",
   "subscription_section",
   "auto_repeat",
   "update_auto_repeat_reference",
   "more_info",
-  "status",
-  "column_break_57",
   "is_subcontracted",
-  "reference",
-  "opportunity"
+  "column_break_57",
+  "opportunity",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -144,7 +152,7 @@
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Name",
+   "label": "Supplier Name",
    "read_only": 1
   },
   {
@@ -158,6 +166,7 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
@@ -189,12 +198,6 @@
    "remember_last_selected_value": 1,
    "reqd": 1,
    "search_index": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "address_section",
-   "fieldtype": "Section Break",
-   "label": "Address and Contact"
   },
   {
    "fieldname": "supplier_address",
@@ -306,6 +309,8 @@
   {
    "fieldname": "items_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Items",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -313,17 +318,10 @@
    "allow_bulk_edit": 1,
    "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Items",
    "oldfieldname": "po_details",
    "oldfieldtype": "Table",
    "options": "Supplier Quotation Item",
    "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
-   "fieldname": "link_to_mrs",
-   "fieldtype": "Button",
-   "label": "Link to material requests"
   },
   {
    "fieldname": "pricing_rule_details",
@@ -397,6 +395,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -420,7 +419,8 @@
   },
   {
    "fieldname": "section_break_38",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "fieldname": "taxes_and_charges",
@@ -526,7 +526,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_41",
    "fieldtype": "Section Break",
    "label": "Additional Discount"
@@ -566,7 +565,8 @@
   },
   {
    "fieldname": "section_break_46",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Totals"
   },
   {
    "fieldname": "base_grand_total",
@@ -580,6 +580,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency",
@@ -592,6 +593,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -623,6 +625,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -635,12 +638,14 @@
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "label": "Rounded Total",
+   "options": "currency",
    "read_only": 1
   },
   {
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -653,18 +658,9 @@
    "label": "Disable Rounded Total"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "terms",
-   "fieldname": "terms_section_break",
-   "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-legal"
-  },
-  {
    "fieldname": "tc_name",
    "fieldtype": "Link",
-   "label": "Terms",
+   "label": "Terms Template",
    "oldfieldname": "tc_name",
    "oldfieldtype": "Link",
    "options": "Terms and Conditions",
@@ -727,7 +723,7 @@
   {
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Auto Repeat Section"
+   "label": "Auto Repeat"
   },
   {
    "fieldname": "auto_repeat",
@@ -749,7 +745,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "More Information",
+   "label": "Additional Info",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
   },
@@ -760,7 +756,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nExpired",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -771,17 +767,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
+   "fieldtype": "Check",
    "label": "Is Subcontracted",
-   "options": "\nYes\nNo",
    "print_hide": 1
-  },
-  {
-   "fieldname": "reference",
-   "fieldtype": "Section Break",
-   "label": "Reference"
   },
   {
    "fieldname": "opportunity",
@@ -791,16 +781,74 @@
    "options": "Opportunity",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "valid_till",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Valid Till"
+  },
+  {
+   "fieldname": "quotation_number",
+   "fieldtype": "Data",
+   "label": "Quotation Number"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_85",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:17:28.208693",
+ "modified": "2022-12-12 18:35:39.740974",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -861,6 +909,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "supplier",
  "title_field": "title"
 }

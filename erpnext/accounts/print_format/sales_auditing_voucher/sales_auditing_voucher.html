@@ -8,7 +8,7 @@
         <div class="col-xs-6">
             <table>
             <tr><td><strong>Customer Name: </strong></td><td>{{ doc.customer }}</td></tr>
-            <tr><td><strong>Due Date: </strong></td><td>{{ frappe.utils.formatdate(doc.due_date) }}</td></tr>
+            <tr><td><strong>Due Date: </strong></td><td>{{ frappe.utils.format_date(doc.due_date) }}</td></tr>
             <tr><td><strong>Address: </strong></td><td>{{doc.address_display}}</td></tr>
             <tr><td><strong>Contact: </strong></td><td>{{doc.contact_display}}</td></tr>
             <tr><td><strong>Mobile no: </strong> </td><td>{{doc.contact_mobile}}</td></tr>
@@ -17,7 +17,7 @@
         <div class="col-xs-6">
             <table>
                 <tr><td><strong>Voucher No: </strong></td><td>{{ doc.name }}</td></tr>
-                <tr><td><strong>Date: </strong></td><td>{{ frappe.utils.formatdate(doc.creation) }}</td></tr>
+                <tr><td><strong>Date: </strong></td><td>{{ frappe.utils.format_date(doc.creation) }}</td></tr>
             </table>
         </div>
     </div>

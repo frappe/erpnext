@@ -1,13 +1,16 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:49",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "item_code",
   "item_name",
   "operation",
   "column_break_3",
+  "do_not_explode",
   "bom_no",
   "source_warehouse",
   "allow_alternative_item",
@@ -30,11 +33,13 @@
   "amount",
   "base_amount",
   "section_break_18",
-  "scrap",
   "qty_consumed_per_unit",
   "section_break_27",
+  "has_variants",
   "include_item_in_manufacturing",
-  "original_item"
+  "original_item",
+  "column_break_33",
+  "sourced_by_supplier"
  ],
  "fields": [
   {
@@ -57,6 +62,7 @@
    "label": "Item Name"
   },
   {
+   "depends_on": "eval:parent.with_operations == 1",
    "fieldname": "operation",
    "fieldtype": "Link",
    "label": "Item operation",
@@ -67,6 +73,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.do_not_explode",
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -177,6 +184,7 @@
    "in_list_view": 1,
    "label": "Rate",
    "options": "currency",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -216,15 +224,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "columns": 1,
-   "fieldname": "scrap",
-   "fieldtype": "Float",
-   "label": "Scrap %",
-   "oldfieldname": "scrap",
-   "oldfieldtype": "Currency",
-   "print_hide": 1
-  },
-  {
    "fieldname": "qty_consumed_per_unit",
    "fieldtype": "Float",
    "hidden": 1,
@@ -258,16 +257,45 @@
    "label": "Original Item",
    "options": "Item",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_variants",
+   "fieldname": "has_variants",
+   "fieldtype": "Check",
+   "label": "Has Variants",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "sourced_by_supplier",
+   "fieldtype": "Check",
+   "label": "Sourced by Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_explode",
+   "fieldtype": "Check",
+   "label": "Do Not Explode"
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-11-22 11:38:52.087303",
+ "links": [],
+ "modified": "2022-07-28 10:20:51.559010",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

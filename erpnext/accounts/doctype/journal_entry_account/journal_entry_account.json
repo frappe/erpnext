@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-02-22 01:27:39",
  "doctype": "DocType",
@@ -17,6 +18,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "currency_section",
   "account_currency",
   "column_break_10",
@@ -31,7 +33,7 @@
   "reference_type",
   "reference_name",
   "reference_due_date",
-  "project",
+  "reference_detail_no",
   "col_break3",
   "is_advance",
   "user_remark",
@@ -200,20 +202,23 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees"
+   "no_copy": 1,
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting\nFees\nFull and Final Statement"
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "label": "Reference Name",
+   "no_copy": 1,
    "options": "reference_type"
   },
   {
    "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance'])",
    "fieldname": "reference_due_date",
-   "fieldtype": "Select",
-   "label": "Reference Due Date"
+   "fieldtype": "Date",
+   "label": "Reference Due Date",
+   "no_copy": 1
   },
   {
    "fieldname": "project",
@@ -267,17 +272,27 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "reference_detail_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Detail No",
+   "no_copy": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-01-13 12:41:33.968025",
+ "links": [],
+ "modified": "2022-10-26 20:03:10.906259",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -1,5 +1,5 @@
 {%- from "templates/print_formats/standard_macros.html" import add_header, render_field, print_value, fieldmeta,
-	get_width, get_align_class -%}
+	get_width, get_align_class with context -%}
 
 {%- macro render_currency(df, doc) -%}
 <div class="row {% if df.bold %}important{% endif %} data-field">
@@ -63,14 +63,19 @@
 					<tr>
 						<td class="table-sr">{{ d.idx }}</td>
 						{% for tdf in visible_columns %}
-						{% if not d.flags.compact_item_print or tdf.fieldname in doc.get(df.fieldname)[0].flags.compact_item_fields %}
+						{% if not print_settings.compact_item_print or tdf.fieldname in doc.flags.compact_item_fields %}
 							<td class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
 								{% if tdf.fieldname == 'qty' %}
 									<div class="value">{{ (d[tdf.fieldname])|abs }}</div></td>
 								{% elif tdf.fieldtype == 'Currency' %}
 									<div class="value">{{ frappe.utils.fmt_money((d[tdf.fieldname])|abs, currency=doc.currency) }}</div></td>
 								{% else %}
-									<div class="value">{{ print_value(tdf, d, doc, visible_columns) }}</div></td>
+									{% if doc.child_print_templates %}
+										{%- set child_templates = doc.child_print_templates.get(df.fieldname) -%}
+											<div class="value">{{ print_value(tdf, d, doc, visible_columns, child_templates) }}</div></td>
+										{% else %}
+											<div class="value">{{ print_value(tdf, d, doc, visible_columns) }}</div></td>
+									{% endif %}
 								{% endif %}
 						{% endif %}
 						{% endfor %}

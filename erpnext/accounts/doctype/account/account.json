@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
  "creation": "2013-01-30 12:49:46",
@@ -33,11 +34,15 @@
   {
    "fieldname": "properties",
    "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break"
+   "oldfieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break0",
    "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -48,7 +53,9 @@
    "no_copy": 1,
    "oldfieldname": "account_name",
    "oldfieldtype": "Data",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "account_number",
@@ -56,13 +63,17 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Account Number",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
-   "label": "Is Group"
+   "label": "Is Group",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "company",
@@ -74,7 +85,9 @@
    "options": "Company",
    "read_only": 1,
    "remember_last_selected_value": 1,
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "root_type",
@@ -82,7 +95,9 @@
    "in_standard_filter": 1,
    "label": "Root Type",
    "options": "\nAsset\nLiability\nIncome\nExpense\nEquity",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "report_type",
@@ -90,24 +105,32 @@
    "in_standard_filter": 1,
    "label": "Report Type",
    "options": "\nBalance Sheet\nProfit and Loss",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.is_group==0",
    "fieldname": "account_currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "inter_company_account",
    "fieldtype": "Check",
-   "label": "Inter Company Account"
+   "label": "Inter Company Account",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break1",
    "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -119,7 +142,9 @@
    "oldfieldtype": "Link",
    "options": "Account",
    "reqd": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "description": "Setting Account Type helps in selecting this Account in transactions.",
@@ -129,7 +154,9 @@
    "label": "Account Type",
    "oldfieldname": "account_type",
    "oldfieldtype": "Select",
-   "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nDepreciation\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nPayable\nReceivable\nRound Off\nStock\nStock Adjustment\nStock Received But Not Billed\nTax\nTemporary"
+   "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nDepreciation\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nPayable\nReceivable\nRound Off\nStock\nStock Adjustment\nStock Received But Not Billed\nService Received But Not Billed\nTax\nTemporary",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "description": "Rate at which this tax is applied",
@@ -137,7 +164,9 @@
    "fieldtype": "Float",
    "label": "Rate",
    "oldfieldname": "tax_rate",
-   "oldfieldtype": "Currency"
+   "oldfieldtype": "Currency",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "description": "If the account is frozen, entries are allowed to restricted users.",
@@ -146,13 +175,17 @@
    "label": "Frozen",
    "oldfieldname": "freeze_account",
    "oldfieldtype": "Select",
-   "options": "No\nYes"
+   "options": "No\nYes",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "balance_must_be",
    "fieldtype": "Select",
    "label": "Balance must be",
-   "options": "\nDebit\nCredit"
+   "options": "\nDebit\nCredit",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "lft",
@@ -161,7 +194,9 @@
    "label": "Lft",
    "print_hide": 1,
    "read_only": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "rgt",
@@ -170,7 +205,9 @@
    "label": "Rgt",
    "print_hide": 1,
    "read_only": 1,
-   "search_index": 1
+   "search_index": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "old_parent",
@@ -178,28 +215,37 @@
    "hidden": 1,
    "label": "Old Parent",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "depends_on": "eval:(doc.report_type == 'Profit and Loss' && !doc.is_group)",
    "fieldname": "include_in_gross",
    "fieldtype": "Check",
-   "label": "Include in gross"
+   "label": "Include in gross",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disable"
+   "label": "Disable",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2019-10-10 19:10:02.967554",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-06-11 15:15:54.338622",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
+ "nsm_parent_field": "parent_account",
  "owner": "Administrator",
  "permissions": [
   {

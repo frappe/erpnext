@@ -1,27 +1,34 @@
 {
+ "actions": [],
  "creation": "2013-06-25 10:25:16",
  "description": "Settings for Selling Module",
  "doctype": "DocType",
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "customer_defaults_section",
   "cust_master_name",
-  "campaign_naming_by",
   "customer_group",
+  "column_break_4",
   "territory",
+  "item_price_settings_section",
   "selling_price_list",
-  "close_opportunity_after_days",
-  "default_valid_till",
-  "column_break_5",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
+  "column_break_15",
+  "maintain_same_sales_rate",
+  "editable_price_list_rate",
+  "validate_selling_price",
+  "editable_bundle_item_rates",
+  "sales_transactions_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
-  "maintain_same_sales_rate",
-  "editable_price_list_rate",
+  "column_break_5",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "validate_selling_price",
-  "hide_tax_id"
+  "hide_tax_id",
+  "enable_discount_accounting"
  ],
  "fields": [
   {
@@ -30,14 +37,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Customer Naming By",
-   "options": "Customer Name\nNaming Series"
-  },
-  {
-   "fieldname": "campaign_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Campaign Naming By",
-   "options": "Campaign Name\nNaming Series"
+   "options": "Customer Name\nNaming Series\nAuto Name"
   },
   {
    "fieldname": "customer_group",
@@ -61,39 +61,27 @@
    "options": "Price List"
   },
   {
-   "default": "15",
-   "description": "Auto close Opportunity after 15 days",
-   "fieldname": "close_opportunity_after_days",
-   "fieldtype": "Int",
-   "label": "Close Opportunity After Days"
-  },
-  {
-   "fieldname": "default_valid_till",
-   "fieldtype": "Data",
-   "label": "Default Quotation Validity Days"
-  },
-  {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "so_required",
    "fieldtype": "Select",
-   "label": "Sales Order Required",
+   "label": "Is Sales Order Required for Sales Invoice & Delivery Note Creation?",
    "options": "No\nYes"
   },
   {
    "fieldname": "dn_required",
    "fieldtype": "Select",
-   "label": "Delivery Note Required",
+   "label": "Is Delivery Note Required for Sales Invoice Creation?",
    "options": "No\nYes"
   },
   {
    "default": "Each Transaction",
-   "description": "How often should project and company be updated based on Sales Transactions.",
+   "description": "How often should Project and Company be updated based on Sales Transactions?",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
-   "label": "Sales Update Frequency",
+   "label": "Sales Update Frequency in Company and Project",
    "options": "Each Transaction\nDaily\nMonthly",
    "reqd": 1
   },
@@ -107,37 +95,91 @@
    "default": "0",
    "fieldname": "editable_price_list_rate",
    "fieldtype": "Check",
-   "label": "Allow user to edit Price List Rate in transactions"
+   "label": "Allow User to Edit Price List Rate in Transactions"
   },
   {
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to be added multiple times in a transaction"
+   "label": "Allow Item to be Added Multiple Times in a Transaction"
   },
   {
    "default": "0",
    "fieldname": "allow_against_multiple_purchase_orders",
    "fieldtype": "Check",
-   "label": "Allow multiple Sales Orders against a Customer's Purchase Order"
+   "label": "Allow Multiple Sales Orders Against a Customer's Purchase Order"
   },
   {
    "default": "0",
    "fieldname": "validate_selling_price",
    "fieldtype": "Check",
-   "label": "Validate Selling Price for Item against Purchase Rate or Valuation Rate"
+   "label": "Validate Selling Price for Item Against Purchase Rate or Valuation Rate"
   },
   {
    "default": "0",
    "fieldname": "hide_tax_id",
    "fieldtype": "Check",
-   "label": "Hide Customer's Tax Id from Sales Transactions"
+   "label": "Hide Customer's Tax ID from Sales Transactions"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_sales_rate",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action if Same Rate is Not Maintained Throughout Sales Cycle",
+   "mandatory_depends_on": "maintain_same_sales_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_sales_rate && doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
+  },
+  {
+   "fieldname": "customer_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Defaults"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "editable_bundle_item_rates",
+   "fieldtype": "Check",
+   "label": "Calculate Product Bundle Price based on Child Items' Rates"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, additional ledger entries will be made for discounts in a separate Discount Account",
+   "fieldname": "enable_discount_accounting",
+   "fieldtype": "Check",
+   "label": "Enable Discount Accounting for Selling"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
- "modified": "2019-12-09 13:38:36.486298",
+ "links": [],
+ "modified": "2022-05-31 19:39:48.398738",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -151,8 +193,19 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
 }

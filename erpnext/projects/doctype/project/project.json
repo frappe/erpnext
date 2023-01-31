@@ -1,12 +1,14 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:project_name",
+ "autoname": "naming_series:",
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "project_name",
   "status",
   "project_type",
@@ -36,7 +38,6 @@
   "project_details",
   "estimated_costing",
   "total_costing_amount",
-  "total_expense_claim",
   "total_purchase_cost",
   "company",
   "column_break_28",
@@ -82,7 +83,6 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Open\nCompleted\nCancelled",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -233,14 +233,14 @@
   },
   {
    "fieldname": "actual_start_date",
-   "fieldtype": "Data",
-   "label": "Actual Start Date",
+   "fieldtype": "Date",
+   "label": "Actual Start Date (via Time Sheet)",
    "read_only": 1
   },
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time (in Hours)",
+   "label": "Actual Time (in Hours via Time Sheet)",
    "read_only": 1
   },
   {
@@ -250,7 +250,7 @@
   {
    "fieldname": "actual_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date",
+   "label": "Actual End Date (via Time Sheet)",
    "oldfieldname": "act_completion_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -276,12 +276,6 @@
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
    "label": "Total Costing Amount (via Timesheets)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_expense_claim",
-   "fieldtype": "Currency",
-   "label": "Total Expense Claim (via Expense Claims)",
    "read_only": 1
   },
   {
@@ -435,19 +429,33 @@
   },
   {
    "depends_on": "collect_progress",
-   "description": "Message will sent to users to get their status on the project",
+   "description": "Message will be sent to the users to get their status on the Project",
    "fieldname": "message",
    "fieldtype": "Text",
-   "label": "Message"
+   "label": "Message",
+   "mandatory_depends_on": "collect_progress"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "PROJ-.####",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
+ "index_web_pages_for_search": 1,
+ "links": [],
  "max_attachments": 4,
- "modified": "2019-09-24 15:02:50.208301",
+ "modified": "2022-06-23 16:45:06.108499",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -481,10 +489,12 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer, status, priority, is_active",
+ "search_fields": "project_name,customer, status, priority, is_active",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "timeline_field": "customer",
+ "title_field": "project_name",
  "track_seen": 1
 }

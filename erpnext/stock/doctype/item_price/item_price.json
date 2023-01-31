@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "autoname": "hash",
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
  "doctype": "DocType",
@@ -10,7 +11,6 @@
   "item_code",
   "uom",
   "packing_unit",
-  "min_qty",
   "column_break_17",
   "item_name",
   "brand",
@@ -19,6 +19,7 @@
   "price_list",
   "customer",
   "supplier",
+  "batch_no",
   "column_break_3",
   "buying",
   "selling",
@@ -64,13 +65,6 @@
    "label": "Packing Unit"
   },
   {
-   "default": "1",
-   "fieldname": "min_qty",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Minimum Qty "
-  },
-  {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
   },
@@ -84,9 +78,10 @@
   {
    "fetch_from": "item_code.brand",
    "fieldname": "brand",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Brand",
+   "options": "Brand",
    "read_only": 1
   },
   {
@@ -105,6 +100,7 @@
    "fieldname": "price_list",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List",
@@ -180,7 +176,7 @@
    "default": "Today",
    "fieldname": "valid_from",
    "fieldtype": "Date",
-   "label": "Valid From "
+   "label": "Valid From"
   },
   {
    "default": "0",
@@ -195,7 +191,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto "
+   "label": "Valid Upto"
   },
   {
    "fieldname": "section_break_24",
@@ -210,17 +206,25 @@
    "fieldname": "reference",
    "fieldtype": "Data",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Reference"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2019-12-31 03:11:09.702250",
+ "modified": "2022-11-15 08:26:04.041861",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
- "name_case": "Title Case",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {
@@ -251,7 +255,9 @@
   }
  ],
  "quick_entry": 1,
+ "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "item_name",
  "track_changes": 1
 }

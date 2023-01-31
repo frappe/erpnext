@@ -18,9 +18,9 @@ frappe.ui.form.on("Project", {
 		};
 	},
 	onload: function (frm) {
-		var so = frappe.meta.get_docfield("Project", "sales_order");
-		so.get_route_options_for_new_doc = function (field) {
-			if (frm.is_new()) return;
+		const so = frm.get_docfield("sales_order");
+		so.get_route_options_for_new_doc = () => {
+			if (frm.is_new()) return {};
 			return {
 				"customer": frm.doc.customer,
 				"project_name": frm.doc.name
@@ -59,40 +59,59 @@ frappe.ui.form.on("Project", {
 
 			frm.trigger('show_dashboard');
 		}
-		frm.events.set_buttons(frm);
+		frm.trigger("set_custom_buttons");
 	},
 
-	set_buttons: function(frm) {
+	set_custom_buttons: function(frm) {
 		if (!frm.is_new()) {
 			frm.add_custom_button(__('Duplicate Project with Tasks'), () => {
 				frm.events.create_duplicate(frm);
-			});
+			}, __("Actions"));
 
-			frm.add_custom_button(__('Completed'), () => {
-				frm.events.set_status(frm, 'Completed');
-			}, __('Set Status'));
+			frm.trigger("set_project_status_button");
 
-			frm.add_custom_button(__('Cancelled'), () => {
-				frm.events.set_status(frm, 'Cancelled');
-			}, __('Set Status'));
+
+			if (frappe.model.can_read("Task")) {
+				frm.add_custom_button(__("Gantt Chart"), function () {
+					frappe.route_options = {
+						"project": frm.doc.name
+					};
+					frappe.set_route("List", "Task", "Gantt");
+				}, __("View"));
+
+				frm.add_custom_button(__("Kanban Board"), () => {
+					frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
+						project: frm.doc.name
+					}).then(() => {
+						frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
+					});
+				}, __("View"));
+			}
 		}
 
-		if (frappe.model.can_read("Task")) {
-			frm.add_custom_button(__("Gantt Chart"), function () {
-				frappe.route_options = {
-					"project": frm.doc.name
-				};
-				frappe.set_route("List", "Task", "Gantt");
-			});
 
-			frm.add_custom_button(__("Kanban Board"), () => {
-				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
-					project: frm.doc.project_name
-				}).then(() => {
-					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
-				});
-			});
-		}
+	},
+
+	set_project_status_button: function(frm) {
+		frm.add_custom_button(__('Set Project Status'), () => {
+			let d = new frappe.ui.Dialog({
+				"title": __("Set Project Status"),
+				"fields": [
+					{
+						"fieldname": "status",
+						"fieldtype": "Select",
+						"label": "Status",
+						"reqd": 1,
+						"options": "Completed\nCancelled",
+					},
+				],
+				primary_action: function() {
+					frm.events.set_status(frm, d.get_values().status);
+					d.hide();
+				},
+				primary_action_label: __("Set Project Status")
+			}).show();
+		}, __("Actions"));
 	},
 
 	create_duplicate: function(frm) {
@@ -114,7 +133,9 @@ frappe.ui.form.on("Project", {
 	set_status: function(frm, status) {
 		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
 			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
-				{project: frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+				{project: frm.doc.name, status: status}).then(() => {
+				frm.reload_doc();
+			});
 		});
 	},
 
@@ -131,6 +152,7 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.parentfield = parentfield;
 		new_child_doc.parenttype = doctype;
 		new_doc[parentfield] = [new_child_doc];
+		new_doc.project = frm.doc.name;
 
 		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 	});

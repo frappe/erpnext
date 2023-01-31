@@ -1,1 +1,0 @@
-Detail of expense in parent Expense Claim.

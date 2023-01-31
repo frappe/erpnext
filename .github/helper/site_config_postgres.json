@@ -1,0 +1,18 @@
+{
+ "db_host": "127.0.0.1",
+ "db_port": 5432,
+ "db_name": "test_frappe",
+ "db_password": "test_frappe",
+ "db_type": "postgres",
+ "allow_tests": true,
+ "auto_email_id": "test@example.com",
+ "mail_server": "smtp.example.com",
+ "mail_login": "test@example.com",
+ "mail_password": "test",
+ "admin_password": "admin",
+ "root_login": "postgres",
+ "root_password": "travis",
+ "host_name": "http://test_site:8000",
+ "install_apps": ["erpnext"],
+ "throttle_user_limit": 100
+}

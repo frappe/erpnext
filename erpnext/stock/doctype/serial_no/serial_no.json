@@ -1,11 +1,12 @@
 {
+ "actions": [],
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "field:serial_no",
  "creation": "2013-05-16 10:59:15",
  "description": "Distinct unit of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "details",
   "column_break0",
@@ -40,7 +41,6 @@
   "delivery_document_no",
   "delivery_date",
   "delivery_time",
-  "is_cancelled",
   "column_break5",
   "customer",
   "customer_name",
@@ -55,7 +55,9 @@
   "warranty_period",
   "more_info",
   "serial_no_details",
-  "company"
+  "company",
+  "status",
+  "work_order"
  ],
  "fields": [
   {
@@ -104,10 +106,11 @@
   },
   {
    "fieldname": "batch_no",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Batch No",
+   "options": "Batch",
    "read_only": 1
   },
   {
@@ -305,16 +308,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "is_cancelled",
-   "fieldtype": "Select",
-   "hidden": 1,
-   "label": "Is Cancelled",
-   "oldfieldname": "is_cancelled",
-   "oldfieldtype": "Select",
-   "options": "\nYes\nNo",
-   "report_hide": 1
-  },
-  {
    "fieldname": "column_break5",
    "fieldtype": "Column Break",
    "width": "50%"
@@ -421,14 +414,30 @@
    "remember_last_selected_value": 1,
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive\nDelivered\nExpired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order"
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2019-08-07 17:28:32.243280",
+ "links": [],
+ "modified": "2021-12-23 10:44:30.299450",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -467,5 +476,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

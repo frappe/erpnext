@@ -43,12 +43,12 @@ frappe.ui.form.on('Account', {
 				frm.trigger('add_toolbar_buttons');
 			}
 			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Update Account Name / Number'), function () {
-					frm.trigger("update_account_number");
-				});
 				frm.add_custom_button(__('Merge Account'), function () {
 					frm.trigger("merge_account");
-				});
+				}, __('Actions'));
+				frm.add_custom_button(__('Update Account Name / Number'), function () {
+					frm.trigger("update_account_number");
+				}, __('Actions'));
 			}
 		}
 	},
@@ -59,11 +59,12 @@ frappe.ui.form.on('Account', {
 		}
 	},
 	add_toolbar_buttons: function(frm) {
-		frm.add_custom_button(__('Chart of Accounts'),
-			function () { frappe.set_route("Tree", "Account"); });
+		frm.add_custom_button(__('Chart of Accounts'), () => {
+			frappe.set_route("Tree", "Account");
+		}, __('View'));
 
 		if (frm.doc.is_group == 1) {
-			frm.add_custom_button(__('Group to Non-Group'), function () {
+			frm.add_custom_button(__('Convert to Non-Group'), function () {
 				return frappe.call({
 					doc: frm.doc,
 					method: 'convert_group_to_ledger',
@@ -71,10 +72,11 @@ frappe.ui.form.on('Account', {
 						frm.refresh();
 					}
 				});
-			});
+			}, __('Actions'));
+
 		} else if (cint(frm.doc.is_group) == 0
 			&& frappe.boot.user.can_read.indexOf("GL Entry") !== -1) {
-			cur_frm.add_custom_button(__('Ledger'), function () {
+			frm.add_custom_button(__('General Ledger'), function () {
 				frappe.route_options = {
 					"account": frm.doc.name,
 					"from_date": frappe.sys_defaults.year_start_date,
@@ -82,9 +84,9 @@ frappe.ui.form.on('Account', {
 					"company": frm.doc.company
 				};
 				frappe.set_route("query-report", "General Ledger");
-			});
+			}, __('View'));
 
-			frm.add_custom_button(__('Non-Group to Group'), function () {
+			frm.add_custom_button(__('Convert to Group'), function () {
 				return frappe.call({
 					doc: frm.doc,
 					method: 'convert_ledger_to_group',
@@ -92,7 +94,7 @@ frappe.ui.form.on('Account', {
 						frm.refresh();
 					}
 				});
-			});
+			}, __('Actions'));
 		}
 	},
 

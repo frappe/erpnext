@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-07-11 16:01:22.832885",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -8,6 +9,7 @@
   "item_name",
   "column_break_2",
   "description",
+  "item_group",
   "section_break_5",
   "warehouse",
   "quantity_section",
@@ -25,6 +27,7 @@
   "column_break_15",
   "sales_order",
   "sales_order_item",
+  "product_bundle_item",
   "material_request",
   "material_request_item"
  ],
@@ -34,7 +37,8 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Qty",
+   "reqd": 1
   },
   {
    "fieldname": "picked_qty",
@@ -120,7 +124,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "quantity_section",
@@ -142,6 +147,7 @@
   {
    "fieldname": "sales_order_item",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Sales Order Item",
    "read_only": 1
   },
@@ -166,10 +172,26 @@
    "fieldtype": "Data",
    "label": "Material Request Item",
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Data",
+   "label": "Item Group",
+   "read_only": 1
+  },
+  {
+   "description": "product bundle item row's name in sales order. Also indicates that picked item is to be used for a product bundle",
+   "fieldname": "product_bundle_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Product Bundle Item",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-08-29 21:28:39.539007",
+ "links": [],
+ "modified": "2022-04-22 05:27:38.497997",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
@@ -178,5 +200,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

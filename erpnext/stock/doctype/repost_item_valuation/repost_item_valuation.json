@@ -1,0 +1,252 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2022-01-11 15:03:38.273179",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "based_on",
+  "voucher_type",
+  "voucher_no",
+  "item_code",
+  "warehouse",
+  "posting_date",
+  "posting_time",
+  "column_break_5",
+  "status",
+  "company",
+  "allow_negative_stock",
+  "via_landed_cost_voucher",
+  "allow_zero_rate",
+  "amended_from",
+  "error_section",
+  "error_log",
+  "items_to_be_repost",
+  "affected_transactions",
+  "distinct_item_and_warehouse",
+  "current_index",
+  "gl_reposting_index"
+ ],
+ "fields": [
+  {
+   "depends_on": "eval:doc.based_on=='Item and Warehouse'",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "mandatory_depends_on": "eval:doc.based_on=='Item and Warehouse'",
+   "options": "Item"
+  },
+  {
+   "depends_on": "eval:doc.based_on=='Item and Warehouse'",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "mandatory_depends_on": "eval:doc.based_on=='Item and Warehouse'",
+   "options": "Warehouse"
+  },
+  {
+   "fetch_from": "voucher_no.posting_date",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "read_only_depends_on": "eval: doc.based_on == \"Transaction\"",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "voucher_no.posting_time",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "read_only_depends_on": "eval: doc.based_on == \"Transaction\""
+  },
+  {
+   "default": "Queued",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Queued\nIn Progress\nCompleted\nSkipped\nFailed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Repost Item Valuation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.status=='Failed'",
+   "fieldname": "error_section",
+   "fieldtype": "Section Break",
+   "label": "Error"
+  },
+  {
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "label": "Error Log",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "warehouse.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.based_on=='Transaction'",
+   "fieldname": "voucher_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher Type",
+   "mandatory_depends_on": "eval:doc.based_on=='Transaction'",
+   "options": "DocType"
+  },
+  {
+   "depends_on": "eval:doc.based_on=='Transaction'",
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Voucher No",
+   "mandatory_depends_on": "eval:doc.based_on=='Transaction'",
+   "options": "voucher_type"
+  },
+  {
+   "default": "Transaction",
+   "fieldname": "based_on",
+   "fieldtype": "Select",
+   "label": "Based On",
+   "options": "Transaction\nItem and Warehouse",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_negative_stock",
+   "fieldtype": "Check",
+   "label": "Allow Negative Stock"
+  },
+  {
+   "default": "0",
+   "fieldname": "via_landed_cost_voucher",
+   "fieldtype": "Check",
+   "label": "Via Landed Cost Voucher"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_zero_rate",
+   "fieldtype": "Check",
+   "label": "Allow Zero Rate"
+  },
+  {
+   "fieldname": "items_to_be_repost",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Items to Be Repost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "distinct_item_and_warehouse",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Distinct Item and Warehouse",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_index",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Current Index",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "affected_transactions",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Affected Transactions",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "gl_reposting_index",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "GL reposting index",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-11-28 16:00:05.637440",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Repost Item Valuation",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

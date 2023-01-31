@@ -1,0 +1,89 @@
+{
+ "creation": "2021-08-20 15:20:59.336585",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-08-25 16:19:37.699528",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock Settings",
+ "owner": "Administrator",
+ "reference_doctype": "Stock Settings",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "By default, the Item Name is set as per the Item Code entered. If you want Items to be named by a Naming Series choose the 'Naming Series' option.",
+   "field": "",
+   "fieldname": "item_naming_by",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Item Naming By",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Item Naming By"
+  },
+  {
+   "description": "Set a Default Warehouse for Inventory Transactions. This will be fetched into the Default Warehouse in the Item master.",
+   "field": "",
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Warehouse",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Default Warehouse"
+  },
+  {
+   "description": "Quality inspection is performed on the inward and outward movement of goods. Receipt and delivery transactions will be stopped or the user will be warned if the quality inspection is not performed.",
+   "field": "",
+   "fieldname": "action_if_quality_inspection_is_not_submitted",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Action If Quality Inspection Is Not Submitted",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Action if Quality Inspection Is Not Submitted"
+  },
+  {
+   "description": "Serial numbers for stock will be set automatically based on the Items entered based on first in first out in transactions like Purchase/Sales Invoices, Delivery Notes, etc.",
+   "field": "",
+   "fieldname": "automatically_set_serial_nos_based_on_fifo",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Automatically Set Serial Nos Based on FIFO",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Automatically Set Serial Nos based on FIFO"
+  },
+  {
+   "description": "Show 'Scan Barcode' field above every child table to insert Items with ease.",
+   "field": "",
+   "fieldname": "show_barcode_field",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Show Barcode Field in Stock Transactions",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Show Barcode Field"
+  },
+  {
+   "description": "Choose between FIFO and Moving Average Valuation Methods. Click <a href=\"https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average\" target=\"_blank\">here</a> to know more about them.",
+   "field": "",
+   "fieldname": "valuation_method",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Default Valuation Method",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Default Valuation Method"
+  }
+ ],
+ "title": "Stock Settings"
+}

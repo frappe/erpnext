@@ -8,6 +8,7 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 6
    },
@@ -16,6 +17,7 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 6.36
    }
@@ -114,6 +116,7 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 12
    },
@@ -122,6 +125,7 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 4
    }
@@ -137,6 +141,7 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 12
    },
@@ -145,6 +150,7 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 4
    }
@@ -160,6 +166,7 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 12
    },
@@ -168,6 +175,7 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
+    "cost_center": "Main - _TC",
     "parentfield": "taxes",
     "rate": 4
    }

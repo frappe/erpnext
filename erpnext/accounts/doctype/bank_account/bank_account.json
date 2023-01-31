@@ -23,12 +23,10 @@
   "account_details_section",
   "iban",
   "column_break_12",
-  "bank_account_no",
   "branch_code",
-  "swift_number",
+  "bank_account_no",
   "address_and_contact",
   "address_html",
-  "website",
   "column_break_13",
   "contact_html",
   "integration_details_section",
@@ -66,13 +64,13 @@
    "fieldname": "account_type",
    "fieldtype": "Link",
    "label": "Account Type",
-   "options": "Account Type"
+   "options": "Bank Account Type"
   },
   {
    "fieldname": "account_subtype",
    "fieldtype": "Link",
    "label": "Account Subtype",
-   "options": "Account Subtype"
+   "options": "Bank Account Subtype"
   },
   {
    "fieldname": "column_break_7",
@@ -87,6 +85,7 @@
   },
   {
    "default": "0",
+   "description": "Setting the account as a Company Account is necessary for Bank Reconciliation",
    "fieldname": "is_company_account",
    "fieldtype": "Check",
    "label": "Is Company Account"
@@ -146,17 +145,6 @@
    "length": 30
   },
   {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "swift_number",
-   "fieldtype": "Data",
-   "label": "SWIFT number"
-  },
-  {
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact",
@@ -166,11 +154,6 @@
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address HTML"
-  },
-  {
-   "fieldname": "website",
-   "fieldtype": "Data",
-   "label": "Website"
   },
   {
    "fieldname": "column_break_13",
@@ -210,10 +193,16 @@
    "fieldtype": "Data",
    "label": "Mask",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Branch Code"
   }
  ],
  "links": [],
- "modified": "2020-01-29 20:42:26.458316",
+ "modified": "2022-05-04 15:49:42.620630",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
@@ -248,5 +237,6 @@
  "search_fields": "bank,account",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

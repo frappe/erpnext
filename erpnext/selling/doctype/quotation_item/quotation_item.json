@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-03-07 11:42:57",
  "doctype": "DocType",
  "document_type": "Document",
@@ -46,7 +47,12 @@
   "base_amount",
   "base_net_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
+  "section_break_43",
+  "valuation_rate",
+  "column_break_45",
+  "gross_profit",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -54,6 +60,9 @@
   "weight_uom",
   "reference",
   "warehouse",
+  "against_blanket_order",
+  "blanket_order",
+  "blanket_order_rate",
   "column_break_30",
   "prevdoc_doctype",
   "prevdoc_docname",
@@ -81,7 +90,6 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "print_width": "150px",
-   "reqd": 1,
    "search_index": 1,
    "width": "150px"
   },
@@ -163,6 +171,7 @@
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
    "options": "UOM",
+   "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
    "width": "100px"
@@ -176,7 +185,6 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
    "reqd": 1
   },
   {
@@ -382,6 +390,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_free_item",
    "fieldtype": "Check",
    "label": "Is Free Item",
@@ -517,6 +526,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -570,11 +580,75 @@
    "fieldname": "image_section",
    "fieldtype": "Section Break",
    "label": "Image"
+  },
+  {
+   "depends_on": "eval:doc.against_blanket_order",
+   "fieldname": "blanket_order",
+   "fieldtype": "Link",
+   "label": "Blanket Order",
+   "no_copy": 1,
+   "options": "Blanket Order",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.against_blanket_order",
+   "fieldname": "blanket_order_rate",
+   "fieldtype": "Currency",
+   "label": "Blanket Order Rate",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "against_blanket_order",
+   "fieldtype": "Check",
+   "label": "Against Blanket Order",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_43",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "valuation_rate",
+   "fieldtype": "Currency",
+   "label": "Valuation Rate",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gross_profit",
+   "fieldtype": "Currency",
+   "label": "Gross Profit",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:39:14.228141",
+ "links": [],
+ "modified": "2022-12-25 02:49:53.926625",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

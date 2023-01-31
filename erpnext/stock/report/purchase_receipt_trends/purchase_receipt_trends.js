@@ -6,4 +6,3 @@ frappe.require("assets/erpnext/js/purchase_trends_filters.js", function() {
 		filters: erpnext.get_purchase_trends_filters()
 	}
 });
-

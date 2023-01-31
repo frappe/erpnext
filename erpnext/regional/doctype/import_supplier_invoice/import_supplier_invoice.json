@@ -87,13 +87,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "upload_xml_invoices_section",
    "fieldtype": "Section Break",
    "label": "Upload XML Invoices"
   }
  ],
  "links": [],
- "modified": "2019-12-10 16:37:26.793398",
+ "modified": "2021-04-24 10:33:12.250687",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Import Supplier Invoice",

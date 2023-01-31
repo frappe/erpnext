@@ -1,37 +1,50 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 14:48:38",
  "doctype": "DocType",
  "document_type": "Document",
+ "engine": "InnoDB",
  "field_order": [
   "type_section",
   "naming_series",
   "title",
   "material_request_type",
   "customer",
-  "column_break_2",
-  "schedule_date",
   "company",
-  "amended_from",
-  "items_section",
-  "scan_barcode",
-  "items",
-  "more_info",
-  "requested_by",
+  "column_break_2",
   "transaction_date",
-  "column_break2",
-  "status",
-  "per_ordered",
-  "per_received",
-  "printing_details",
-  "letter_head",
-  "select_print_heading",
+  "schedule_date",
+  "amended_from",
+  "warehouse_section",
+  "scan_barcode",
+  "column_break_13",
+  "set_from_warehouse",
+  "column_break5",
+  "set_warehouse",
+  "items_section",
+  "items",
+  "terms_tab",
   "terms_section_break",
   "tc_name",
   "terms",
+  "more_info_tab",
+  "status_section",
+  "status",
+  "per_ordered",
+  "column_break2",
+  "transfer_status",
+  "per_received",
+  "printing_details",
+  "letter_head",
+  "column_break_31",
+  "select_print_heading",
   "reference",
-  "job_card"
+  "job_card",
+  "column_break_35",
+  "work_order",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -66,7 +79,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Type",
+   "label": "Purpose",
    "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
    "reqd": 1
   },
@@ -75,7 +88,8 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_2",
@@ -85,12 +99,12 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Required Date"
+   "in_list_view": 1,
+   "label": "Required By"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
    "oldfieldname": "company",
@@ -126,7 +140,8 @@
   {
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
-   "label": "Scan Barcode"
+   "label": "Scan Barcode",
+   "options": "Barcode"
   },
   {
    "allow_bulk_edit": 1,
@@ -139,25 +154,9 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text"
-  },
-  {
-   "fieldname": "requested_by",
-   "fieldtype": "Data",
-   "in_standard_filter": 1,
-   "label": "Requested For",
-   "options": "Email"
-  },
-  {
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Transaction Date",
    "no_copy": 1,
    "oldfieldname": "transaction_date",
@@ -190,6 +189,7 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:doc.per_ordered > 0",
    "fieldname": "per_ordered",
    "fieldtype": "Percent",
    "label": "% Ordered",
@@ -200,6 +200,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.per_received > 0",
    "fieldname": "per_received",
    "fieldtype": "Percent",
    "label": "% Received",
@@ -236,7 +237,6 @@
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
    "oldfieldtype": "Section Break",
    "options": "fa fa-legal"
   },
@@ -270,15 +270,96 @@
    "options": "Job Card",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "warehouse_section",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Items"
+  },
+  {
+   "fieldname": "set_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Set Target Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break5",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.add_to_transit == 1",
+   "fieldname": "transfer_status",
+   "fieldtype": "Select",
+   "label": "Transfer Status",
+   "options": "\nNot Started\nIn Transit\nCompleted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2019-04-29 11:45:07.570292",
+ "links": [],
+ "modified": "2022-09-27 17:58:26.366469",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -346,5 +427,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title"
 }

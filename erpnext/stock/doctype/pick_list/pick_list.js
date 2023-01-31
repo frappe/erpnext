@@ -3,6 +3,9 @@
 
 frappe.ui.form.on('Pick List', {
 	setup: (frm) => {
+		frm.set_indicator_formatter('item_code',
+			function(doc) { return (doc.stock_qty === 0) ? "red" : "green"; });
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Stock Entry': 'Stock Entry',
@@ -31,19 +34,37 @@ frappe.ui.form.on('Pick List', {
 			};
 		});
 		frm.set_query('item_code', 'locations', () => {
+			return erpnext.queries.item({ "is_stock_item": 1 });
+		});
+		frm.set_query('batch_no', 'locations', (frm, cdt, cdn) => {
+			const row = locals[cdt][cdn];
 			return {
+				query: 'erpnext.controllers.queries.get_batch_no',
 				filters: {
-					is_stock_item: 1
-				}
+					item_code: row.item_code,
+					warehouse: row.warehouse
+				},
 			};
 		});
 	},
-	get_item_locations: (frm) => {
-		if (!frm.doc.locations || !frm.doc.locations.length) {
-			frappe.msgprint(__('First add items in the Item Locations table'));
+	set_item_locations:(frm, save) => {
+		if (!(frm.doc.locations && frm.doc.locations.length)) {
+			frappe.msgprint(__('Add items in the Item Locations table'));
 		} else {
-			frm.call('set_item_locations');
+			frappe.call({
+				method: "set_item_locations",
+				doc: frm.doc,
+				args: {
+					"save": save,
+				},
+				freeze: 1,
+				freeze_message: __("Setting Item Locations..."),
+			});
 		}
+	},
+	get_item_locations: (frm) => {
+		// Button on the form
+		frm.events.set_item_locations(frm, false);
 	},
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
@@ -52,8 +73,13 @@ frappe.ui.form.on('Pick List', {
 				'pick_list_name': frm.doc.name,
 				'purpose': frm.doc.purpose
 			}).then(target_document_exists => {
+				frm.set_df_property("locations", "allow_on_submit", target_document_exists ? 0 : 1);
+
 				if (target_document_exists) return;
-				if (frm.doc.purpose === 'Delivery against Sales Order') {
+
+				frm.add_custom_button(__('Update Current Stock'), () => frm.trigger('update_pick_list_stock'));
+
+				if (frm.doc.purpose === 'Delivery') {
 					frm.add_custom_button(__('Delivery Note'), () => frm.trigger('create_delivery_note'), __('Create'));
 				} else {
 					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
@@ -105,6 +131,7 @@ frappe.ui.form.on('Pick List', {
 			method: 'erpnext.stock.doctype.pick_list.pick_list.create_delivery_note',
 			frm: frm
 		});
+
 	},
 	create_stock_entry: (frm) => {
 		frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
@@ -114,9 +141,12 @@ frappe.ui.form.on('Pick List', {
 			frappe.set_route("Form", 'Stock Entry', stock_entry.name);
 		});
 	},
+	update_pick_list_stock: (frm) => {
+		frm.events.set_item_locations(frm, true);
+	},
 	add_get_items_button: (frm) => {
 		let purpose = frm.doc.purpose;
-		if (purpose != 'Delivery against Sales Order' || frm.doc.docstatus !== 0) return;
+		if (purpose != 'Delivery' || frm.doc.docstatus !== 0) return;
 		let get_query_filters = {
 			docstatus: 1,
 			per_delivered: ['<', 100],
@@ -124,10 +154,6 @@ frappe.ui.form.on('Pick List', {
 			customer: frm.doc.customer
 		};
 		frm.get_items_btn = frm.add_custom_button(__('Get Items'), () => {
-			if (!frm.doc.customer) {
-				frappe.msgprint(__('Please select Customer first'));
-				return;
-			}
 			erpnext.utils.map_current_doc({
 				method: 'erpnext.selling.doctype.sales_order.sales_order.create_pick_list',
 				source_doctype: 'Sales Order',
@@ -140,6 +166,19 @@ frappe.ui.form.on('Pick List', {
 				get_query_filters: get_query_filters
 			});
 		});
+	},
+	scan_barcode: (frm) => {
+		const opts = {
+			frm,
+			items_table_name: 'locations',
+			qty_field: 'picked_qty',
+			max_qty_field: 'qty',
+			dont_allow_new_row: true,
+			prompt_qty: frm.doc.prompt_qty,
+			serial_no_field: "not_supported",  // doesn't make sense for picklist without a separate field.
+		};
+		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
+		barcode_scanner.process_scan();
 	}
 });
 

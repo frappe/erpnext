@@ -1,0 +1,31 @@
+{
+ "actions": [],
+ "creation": "2021-05-06 16:17:44.329943",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_partner"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_partner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Partner ",
+   "options": "Sales Partner"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-05-07 10:43:37.532095",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Sales Partner Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

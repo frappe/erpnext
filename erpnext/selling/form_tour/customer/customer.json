@@ -1,0 +1,29 @@
+{
+ "creation": "2021-11-23 10:44:13.185982",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-11-23 10:54:09.602358",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Customer",
+ "owner": "Administrator",
+ "reference_doctype": "Customer",
+ "save_on_complete": 1,
+ "steps": [
+  {
+   "description": "Enter the Full Name of the Customer",
+   "field": "",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Full Name",
+   "parent_field": "",
+   "position": "Left",
+   "title": "Full Name"
+  }
+ ],
+ "title": "Customer"
+}

@@ -1,14 +1,17 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.integrations.utils import create_request_log
-import stripe
+
+from erpnext.utilities import payment_app_import_guard
+
 
 def create_stripe_subscription(gateway_controller, data):
+	with payment_app_import_guard():
+		import stripe
+
 	stripe_settings = frappe.get_doc("Stripe Settings", gateway_controller)
 	stripe_settings.data = frappe._dict(data)
 
@@ -17,37 +20,51 @@ def create_stripe_subscription(gateway_controller, data):
 
 	try:
 		stripe_settings.integration_request = create_request_log(stripe_settings.data, "Host", "Stripe")
-		stripe_settings.payment_plans = frappe.get_doc("Payment Request", stripe_settings.data.reference_docname).subscription_plans
+		stripe_settings.payment_plans = frappe.get_doc(
+			"Payment Request", stripe_settings.data.reference_docname
+		).subscription_plans
 		return create_subscription_on_stripe(stripe_settings)
 
 	except Exception:
-		frappe.log_error(frappe.get_traceback())
-		return{
-			"redirect_to": frappe.redirect_to_message(_('Server Error'), _("It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account.")),
-			"status": 401
+		stripe_settings.log_error("Unable to create Stripe subscription")
+		return {
+			"redirect_to": frappe.redirect_to_message(
+				_("Server Error"),
+				_(
+					"It seems that there is an issue with the server's stripe configuration. In case of failure, the amount will get refunded to your account."
+				),
+			),
+			"status": 401,
 		}
 
 
 def create_subscription_on_stripe(stripe_settings):
-		items = []
-		for payment_plan in stripe_settings.payment_plans:
-			plan = frappe.db.get_value("Subscription Plan", payment_plan.plan, "payment_plan_id")
-			items.append({"plan": plan, "quantity": payment_plan.qty})
+	with payment_app_import_guard():
+		import stripe
 
-		try:
-			customer = stripe.Customer.create(description=stripe_settings.data.payer_name, email=stripe_settings.data.payer_email, source=stripe_settings.data.stripe_token_id)
-			subscription = stripe.Subscription.create(customer=customer, items=items)
+	items = []
+	for payment_plan in stripe_settings.payment_plans:
+		plan = frappe.db.get_value("Subscription Plan", payment_plan.plan, "product_price_id")
+		items.append({"price": plan, "quantity": payment_plan.qty})
 
-			if subscription.status == "active":
-				stripe_settings.integration_request.db_set('status', 'Completed', update_modified=False)
-				stripe_settings.flags.status_changed_to = "Completed"
+	try:
+		customer = stripe.Customer.create(
+			source=stripe_settings.data.stripe_token_id,
+			description=stripe_settings.data.payer_name,
+			email=stripe_settings.data.payer_email,
+		)
 
-			else:
-				stripe_settings.integration_request.db_set('status', 'Failed', update_modified=False)
-				frappe.log_error('Subscription N°: ' + subscription.id, 'Stripe Payment not completed')
+		subscription = stripe.Subscription.create(customer=customer, items=items)
 
-		except Exception:
-			stripe_settings.integration_request.db_set('status', 'Failed', update_modified=False)
-			frappe.log_error(frappe.get_traceback())
+		if subscription.status == "active":
+			stripe_settings.integration_request.db_set("status", "Completed", update_modified=False)
+			stripe_settings.flags.status_changed_to = "Completed"
 
-		return stripe_settings.finalize_request()
+		else:
+			stripe_settings.integration_request.db_set("status", "Failed", update_modified=False)
+			frappe.log_error(f"Stripe Subscription ID {subscription.id}: Payment failed")
+	except Exception:
+		stripe_settings.integration_request.db_set("status", "Failed", update_modified=False)
+		stripe_settings.log_error("Unable to create Stripe subscription")
+
+	return stripe_settings.finalize_request()

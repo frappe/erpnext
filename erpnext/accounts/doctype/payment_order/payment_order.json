@@ -59,7 +59,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "references",
    "fieldtype": "Table",
    "label": "Payment Order Reference",
@@ -108,7 +107,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-14 17:12:24.912666",
+ "modified": "2020-04-06 18:00:56.022642",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",

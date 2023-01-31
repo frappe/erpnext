@@ -5,7 +5,11 @@
 {% block content %}
 <main>
 	{% if homepage.hero_section_based_on == 'Default' %}
-	<section class="hero-section border-bottom {%if homepage.hero_image%}hero-image{%endif%}">
+	<section class="hero-section border-bottom {%if homepage.hero_image%}hero-image{%endif%}"
+		{% if homepage.hero_image %}
+		style="background-image: url('{{ homepage.hero_image }}');"
+		{%- endif %}
+	>
 		<div class="container py-5">
 			<h1 class="d-none d-sm-block display-4">{{ homepage.tag_line }}</h1>
 			<h1 class="d-block d-sm-none">{{ homepage.tag_line }}</h1>
@@ -33,7 +37,7 @@
 			{% for item in homepage.products %}
 			<div class="col-md-4 mb-4">
 				<div class="card h-100 justify-content-between">
-					<div class="website-image-lazy" data-class="card-img-top website-image-extra-large" data-src="{{ item.image }}" data-alt="{{ item.item_name }}"></div>
+					<img class="card-img-top website-image-extra-large" src="{{ item.image }}" loading="lazy" alt="{{ item.item_name }}"></img>
 					<div class="card-body flex-grow-0">
 						<h5 class="card-title">{{ item.item_name }}</h5>
 						<a href="{{ item.route }}" class="card-link">{{ _('More details') }}</a>

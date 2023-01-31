@@ -1,45 +1,49 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "creation": "2016-03-01 17:01:27.920130",
+ "creation": "2022-01-18 02:26:55.975005",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
-  "asset_name",
+  "company",
   "item_code",
   "item_name",
-  "asset_category",
   "asset_owner",
   "asset_owner_company",
+  "is_existing_asset",
   "supplier",
   "customer",
   "image",
-  "purchase_invoice",
+  "journal_entry_for_scrap",
   "column_break_3",
-  "company",
+  "naming_series",
+  "asset_name",
+  "asset_category",
   "location",
+  "split_from",
   "custodian",
   "department",
-  "purchase_date",
   "disposal_date",
-  "journal_entry_for_scrap",
-  "purchase_receipt",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
-  "section_break_5",
-  "gross_purchase_amount",
+  "purchase_details_section",
+  "purchase_receipt",
+  "purchase_invoice",
   "available_for_use_date",
-  "column_break_18",
+  "column_break_23",
+  "gross_purchase_amount",
+  "asset_quantity",
+  "purchase_date",
+  "section_break_23",
   "calculate_depreciation",
-  "allow_monthly_depreciation",
-  "is_existing_asset",
+  "column_break_33",
   "opening_accumulated_depreciation",
   "number_of_depreciations_booked",
-  "section_break_23",
+  "section_break_36",
   "finance_books",
   "section_break_33",
   "depreciation_method",
@@ -48,8 +52,6 @@
   "column_break_24",
   "frequency_of_depreciation",
   "next_depreciation_date",
-  "section_break_14",
-  "schedules",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -64,9 +66,9 @@
   "status",
   "booked_fixed_asset",
   "column_break_51",
-
   "purchase_receipt_amount",
   "default_finance_book",
+  "depr_entry_posting_status",
   "amended_from"
  ],
  "fields": [
@@ -92,12 +94,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "item_code",
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Read Only",
    "label": "Item Name"
   },
   {
+   "depends_on": "item_code",
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Link",
@@ -137,6 +141,7 @@
   },
   {
    "allow_on_submit": 1,
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -187,6 +192,8 @@
    "fieldname": "purchase_date",
    "fieldtype": "Date",
    "label": "Purchase Date",
+   "read_only": 1,
+   "read_only_depends_on": "eval:!doc.is_existing_asset",
    "reqd": 1
   },
   {
@@ -205,24 +212,19 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
    "options": "Company:company:default_currency",
+   "read_only": 1,
+   "read_only_depends_on": "eval:!doc.is_existing_asset",
    "reqd": 1
   },
   {
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
-   "label": "Available-for-use Date"
-  },
-  {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
+   "label": "Available-for-use Date",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -252,12 +254,14 @@
    "no_copy": 1
   },
   {
-   "depends_on": "calculate_depreciation",
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.calculate_depreciation || doc.is_existing_asset",
    "fieldname": "section_break_23",
    "fieldtype": "Section Break",
    "label": "Depreciation"
   },
   {
+   "columns": 10,
    "fieldname": "finance_books",
    "fieldtype": "Table",
    "label": "Finance Books",
@@ -301,19 +305,6 @@
    "fieldtype": "Date",
    "label": "Next Depreciation Date",
    "no_copy": 1
-  },
-  {
-   "depends_on": "calculate_depreciation",
-   "fieldname": "section_break_14",
-   "fieldtype": "Section Break",
-   "label": "Depreciation Schedule"
-  },
-  {
-   "fieldname": "schedules",
-   "fieldtype": "Table",
-   "label": "Depreciation Schedules",
-   "no_copy": 1,
-   "options": "Depreciation Schedule"
   },
   {
    "collapsible": 1,
@@ -383,7 +374,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt",
+   "options": "Draft\nSubmitted\nPartially Depreciated\nFully Depreciated\nSold\nScrapped\nIn Maintenance\nOut of Order\nIssue\nReceipt\nCapitalized\nDecapitalized",
    "read_only": 1
   },
   {
@@ -451,20 +442,80 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "collapsible": 1,
+   "collapsible_depends_on": "is_existing_asset",
+   "fieldname": "purchase_details_section",
+   "fieldtype": "Section Break",
+   "label": "Purchase Details"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "calculate_depreciation",
-   "fieldname": "allow_monthly_depreciation",
-   "fieldtype": "Check",
-   "label": "Allow Monthly Depreciation"
+   "fieldname": "section_break_36",
+   "fieldtype": "Section Break",
+   "label": "Finance Books"
+  },
+  {
+   "fieldname": "split_from",
+   "fieldtype": "Link",
+   "label": "Split From",
+   "options": "Asset",
+   "read_only": 1
+  },
+  {
+   "fieldname": "asset_quantity",
+   "fieldtype": "Int",
+   "label": "Asset Quantity",
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
+  },
+  {
+   "fieldname": "depr_entry_posting_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Depreciation Entry Posting Status",
+   "no_copy": 1,
+   "options": "\nSuccessful\nFailed",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-10-22 15:47:36.050828",
+ "links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Asset Maintenance",
+   "link_fieldname": "asset_name"
+  },
+  {
+   "group": "Repair",
+   "link_doctype": "Asset Repair",
+   "link_fieldname": "asset"
+  },
+  {
+   "group": "Value",
+   "link_doctype": "Asset Value Adjustment",
+   "link_fieldname": "asset"
+  },
+  {
+   "group": "Depreciation",
+   "link_doctype": "Asset Depreciation Schedule",
+   "link_fieldname": "asset"
+  }
+ ],
+ "modified": "2023-01-17 00:25:30.387242",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -501,5 +552,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "asset_name"
+ "states": [],
+ "title_field": "asset_name",
+ "track_changes": 1
 }

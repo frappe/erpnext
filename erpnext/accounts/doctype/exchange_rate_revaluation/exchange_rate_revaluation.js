@@ -21,36 +21,25 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 
 	refresh: function(frm) {
 		if(frm.doc.docstatus==1) {
-			frappe.db.get_value("Journal Entry Account", {
-				'reference_type': 'Exchange Rate Revaluation',
-				'reference_name': frm.doc.name,
-				'docstatus': 1
-			}, "sum(debit) as sum", (r) =>{
-				let total_amt = 0;
-				frm.doc.accounts.forEach(d=> {
-					total_amt = total_amt + d['new_balance_in_base_currency'];
-				});
-				if(total_amt === r.sum) {
-					frm.add_custom_button(__("Journal Entry"), function(){
-						frappe.route_options = {
-							'reference_type': 'Exchange Rate Revaluation',
-							'reference_name': frm.doc.name
-						};
-						frappe.set_route("List", "Journal Entry");
-					}, __("View"));
-				} else {
-					frm.add_custom_button(__('Create Journal Entry'), function() {
-						return frm.events.make_jv(frm);
-					});
+			frappe.call({
+				method: 'check_journal_entry_condition',
+				doc: frm.doc,
+				callback: function(r) {
+					if (r.message) {
+						frm.add_custom_button(__('Journal Entries'), function() {
+							return frm.events.make_jv(frm);
+						}, __('Create'));
+					}
 				}
-			}, 'Journal Entry');
+			});
 		}
 	},
 
-	get_entries: function(frm) {
+	get_entries: function(frm, account) {
 		frappe.call({
 			method: "get_accounts_data",
 			doc: cur_frm.doc,
+			account: account,
 			callback: function(r){
 				frappe.model.clear_table(frm.doc, "accounts");
 				if(r.message) {
@@ -69,7 +58,6 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 
 		let total_gain_loss = 0;
 		frm.doc.accounts.forEach((d) => {
-			d.gain_loss = flt(d.new_balance_in_base_currency, precision("new_balance_in_base_currency", d)) - flt(d.balance_in_base_currency, precision("balance_in_base_currency", d));
 			total_gain_loss += flt(d.gain_loss, precision("gain_loss", d));
 		});
 
@@ -78,13 +66,19 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 	},
 
 	make_jv : function(frm) {
+		let revaluation_journal = null;
+		let zero_balance_journal = null;
 		frappe.call({
-			method: "make_jv_entry",
+			method: "make_jv_entries",
 			doc: frm.doc,
+			freeze: true,
+			freeze_message: "Making Journal Entries...",
 			callback: function(r){
 				if (r.message) {
-					var doc = frappe.model.sync(r.message)[0];
-					frappe.set_route("Form", doc.doctype, doc.name);
+					let response = r.message;
+					if(response['revaluation_jv'] || response['zero_balance_jv']) {
+						frappe.msgprint(__("Journals have been created"));
+					}
 				}
 			}
 		});

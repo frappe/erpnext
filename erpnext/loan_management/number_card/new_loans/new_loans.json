@@ -1,0 +1,23 @@
+{
+ "aggregate_function_based_on": "",
+ "creation": "2021-02-06 17:56:34.624031",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Loan",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Loan\",\"docstatus\",\"=\",\"1\",false],[\"Loan\",\"creation\",\"Timespan\",\"today\",false]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 0,
+ "is_standard": 1,
+ "label": "New Loans",
+ "modified": "2021-02-06 17:58:20.209166",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "New Loans",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type"
+}

@@ -29,7 +29,13 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
-			"options": "Warehouse"
+			"options": "Warehouse",
+			"get_query": function() {
+				const company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: { 'company': company }
+				}
+			}
 		},
 		{
 			"fieldname":"item_code",
@@ -80,19 +86,15 @@ frappe.query_reports["Stock Ledger"] = {
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
-		if (column.fieldname == "out_qty" && data.out_qty < 0) {
+		if (column.fieldname == "out_qty" && data && data.out_qty < 0) {
 			value = "<span style='color:red'>" + value + "</span>";
 		}
-		else if (column.fieldname == "in_qty" && data.in_qty > 0) {
+		else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
 			value = "<span style='color:green'>" + value + "</span>";
 		}
 
 		return value;
 	},
-}
+};
 
-// $(function() {
-// 	$(wrapper).bind("show", function() {
-// 		frappe.query_report.load();
-// 	});
-// });
+erpnext.utils.add_inventory_dimensions('Stock Ledger', 10);

@@ -1,7 +1,9 @@
 {
+ "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "creation": "2013-03-25 10:53:52",
+ "creation": "2022-01-25 10:29:58.717206",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
@@ -10,10 +12,15 @@
   "title",
   "voucher_type",
   "naming_series",
-  "column_break1",
-  "posting_date",
-  "company",
   "finance_book",
+  "process_deferred_accounting",
+  "reversal_of",
+  "tax_withholding_category",
+  "column_break1",
+  "from_template",
+  "company",
+  "posting_date",
+  "apply_tds",
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
@@ -81,7 +88,7 @@
    "label": "Entry Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation",
+   "options": "Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation\nExchange Gain Or Loss\nDeferred Revenue\nDeferred Expense",
    "reqd": 1,
    "search_index": 1
   },
@@ -157,6 +164,7 @@
    "in_global_search": 1,
    "in_list_view": 1,
    "label": "Reference Number",
+   "mandatory_depends_on": "eval:doc.voucher_type == \"Bank Entry\"",
    "no_copy": 1,
    "oldfieldname": "cheque_no",
    "oldfieldtype": "Data",
@@ -166,6 +174,7 @@
    "fieldname": "cheque_date",
    "fieldtype": "Date",
    "label": "Reference Date",
+   "mandatory_depends_on": "eval:doc.voucher_type == \"Bank Entry\"",
    "no_copy": 1,
    "oldfieldname": "cheque_date",
    "oldfieldtype": "Date",
@@ -187,6 +196,7 @@
   {
    "fieldname": "total_debit",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Total Debit",
    "no_copy": 1,
    "oldfieldname": "total_debit",
@@ -248,7 +258,6 @@
    "fieldname": "total_amount",
    "fieldtype": "Currency",
    "hidden": 1,
-   "in_list_view": 1,
    "label": "Total Amount",
    "no_copy": 1,
    "options": "total_amount_currency",
@@ -484,15 +493,56 @@
    "options": "Journal Entry",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "from_template",
+   "fieldtype": "Link",
+   "label": "From Template",
+   "no_copy": 1,
+   "options": "Journal Entry Template",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.apply_tds",
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "mandatory_depends_on": "eval:doc.apply_tds",
+   "options": "Tax Withholding Category"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Credit Note', 'Debit Note'].includes(doc.voucher_type)",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "label": "Apply Tax Withholding Amount "
+  },
+  {
+   "depends_on": "eval:doc.docstatus",
+   "fieldname": "reversal_of",
+   "fieldtype": "Link",
+   "label": "Reversal Of",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "process_deferred_accounting",
+   "fieldtype": "Link",
+   "label": "Process Deferred Accounting",
+   "options": "Process Deferred Accounting",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2020-01-16 13:05:30.634226",
+ "links": [],
+ "modified": "2023-01-17 12:53:53.280620",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -536,6 +586,7 @@
  "search_fields": "voucher_type,posting_date, due_date, cheque_no",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title",
  "track_changes": 1
 }

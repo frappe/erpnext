@@ -1,0 +1,113 @@
+{
+ "creation": "2021-06-29 17:00:18.273054",
+ "docstatus": 0,
+ "doctype": "Form Tour",
+ "idx": 0,
+ "is_standard": 1,
+ "modified": "2021-06-29 17:00:26.145996",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Accounts Settings",
+ "owner": "Administrator",
+ "reference_doctype": "Accounts Settings",
+ "save_on_complete": 0,
+ "steps": [
+  {
+   "description": "The percentage by which you can overbill transactions. For example, if the order value is $100 for an Item and percentage here is set as 10% then you are allowed to bill for $110.",
+   "field": "",
+   "fieldname": "over_billing_allowance",
+   "fieldtype": "Currency",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Over Billing Allowance (%)",
+   "parent_field": "",
+   "position": "Right",
+   "title": "Over Billing Allowance Percentage"
+  },
+  {
+   "description": "Select the role that is allowed to overbill a transactions.",
+   "field": "",
+   "fieldname": "role_allowed_to_over_bill",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Role Allowed to Over Bill ",
+   "parent_field": "",
+   "position": "Right",
+   "title": "Role Allowed to Over Bill"
+  },
+  {
+   "description": "If checked, system will unlink the payment against the respective invoice.",
+   "field": "",
+   "fieldname": "unlink_payment_on_cancellation_of_invoice",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Unlink Payment on Cancellation of Invoice",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Unlink Payment on Cancellation of Invoice"
+  },
+  {
+   "description": "Similar to the previous option, this unlinks any advance payments made against Purchase/Sales Orders.",
+   "field": "",
+   "fieldname": "unlink_advance_payment_on_cancelation_of_order",
+   "fieldtype": "Check",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Unlink Advance Payment on Cancellation of Order",
+   "parent_field": "",
+   "position": "Bottom",
+   "title": "Unlink Advance Payment on Cancellation of Order"
+  },
+  {
+   "description": "Tax category can be set on Addresses. An address can be Shipping or Billing address. Set which addres to select when applying Tax Category.",
+   "field": "",
+   "fieldname": "determine_address_tax_category_from",
+   "fieldtype": "Select",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Determine Address Tax Category From",
+   "parent_field": "",
+   "position": "Right",
+   "title": "Determine Address Tax Category From"
+  },
+  {
+   "description": "Freeze accounting transactions up to specified date, nobody can make/modify entry except the specified Role.",
+   "field": "",
+   "fieldname": "acc_frozen_upto",
+   "fieldtype": "Date",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Accounts Frozen Till Date",
+   "parent_field": "",
+   "position": "Right",
+   "title": "Accounts Frozen Upto"
+  },
+  {
+   "description": "Users with this Role are allowed to set frozen accounts and create/modify accounting entries against frozen accounts.",
+   "field": "",
+   "fieldname": "frozen_accounts_modifier",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Role Allowed to Set Frozen Accounts and Edit Frozen Entries",
+   "parent_field": "",
+   "position": "Right",
+   "title": "Role Allowed to Set Frozen Accounts & Edit Frozen Entries"
+  },
+  {
+   "description": "Select the role that is allowed to submit transactions that exceed credit limits set. The credit limit can be set in the Customer form.",
+   "field": "",
+   "fieldname": "credit_controller",
+   "fieldtype": "Link",
+   "has_next_condition": 0,
+   "is_table_field": 0,
+   "label": "Credit Controller",
+   "parent_field": "",
+   "position": "Left",
+   "title": "Credit Controller"
+  }
+ ],
+ "title": "Accounts Settings"
+}

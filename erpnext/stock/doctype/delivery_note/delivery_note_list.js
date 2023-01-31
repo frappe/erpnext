@@ -3,16 +3,18 @@ frappe.listview_settings['Delivery Note'] = {
 		"transporter_name", "grand_total", "is_return", "status", "currency"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_return)==1) {
-			return [__("Return"), "darkgrey", "is_return,=,Yes"];
+			return [__("Return"), "gray", "is_return,=,Yes"];
 		} else if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
+		} else if (doc.status === "Return Issued") {
+			return [__("Return Issued"), "grey", "status,=,Return Issued"];
 		} else if (flt(doc.per_billed, 2) < 100) {
 			return [__("To Bill"), "orange", "per_billed,<,100"];
-		} else if (flt(doc.per_billed, 2) == 100) {
+		} else if (flt(doc.per_billed, 2) === 100) {
 			return [__("Completed"), "green", "per_billed,=,100"];
 		}
 	},
-	onload: function (doclist) {
+	onload: function (listview) {
 		const action = () => {
 			const selected_docs = doclist.get_checked_items();
 			const docnames = doclist.get_checked_items(true);
@@ -52,6 +54,16 @@ frappe.listview_settings['Delivery Note'] = {
 			};
 		};
 
-		doclist.page.add_actions_menu_item(__('Create Delivery Trip'), action, false);
+		// doclist.page.add_actions_menu_item(__('Create Delivery Trip'), action, false);
+
+		listview.page.add_action_item(__('Create Delivery Trip'), action);
+
+		listview.page.add_action_item(__("Sales Invoice"), ()=>{
+			erpnext.bulk_transaction_processing.create(listview, "Delivery Note", "Sales Invoice");
+		});
+
+		listview.page.add_action_item(__("Packaging Slip From Delivery Note"), ()=>{
+			erpnext.bulk_transaction_processing.create(listview, "Delivery Note", "Packing Slip");
+		});
 	}
 };

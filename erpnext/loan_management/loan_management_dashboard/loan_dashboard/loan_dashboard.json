@@ -1,0 +1,70 @@
+{
+ "cards": [
+  {
+   "card": "New Loans"
+  },
+  {
+   "card": "Active Loans"
+  },
+  {
+   "card": "Closed Loans"
+  },
+  {
+   "card": "Total Disbursed"
+  },
+  {
+   "card": "Open Loan Applications"
+  },
+  {
+   "card": "New Loan Applications"
+  },
+  {
+   "card": "Total Sanctioned Amount"
+  },
+  {
+   "card": "Active Securities"
+  },
+  {
+   "card": "Applicants With Unpaid Shortfall"
+  },
+  {
+   "card": "Total Shortfall Amount"
+  },
+  {
+   "card": "Total Repayment"
+  },
+  {
+   "card": "Total Write Off"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "New Loans",
+   "width": "Half"
+  },
+  {
+   "chart": "Loan Disbursements",
+   "width": "Half"
+  },
+  {
+   "chart": "Top 10 Pledged Loan Securities",
+   "width": "Half"
+  },
+  {
+   "chart": "Loan Interest Accrual",
+   "width": "Half"
+  }
+ ],
+ "creation": "2021-02-06 16:52:43.484752",
+ "dashboard_name": "Loan Dashboard",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2021-02-21 20:53:47.531699",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Dashboard",
+ "owner": "Administrator"
+}

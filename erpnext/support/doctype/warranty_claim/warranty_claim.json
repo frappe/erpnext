@@ -256,6 +256,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -361,11 +362,11 @@
  ],
  "icon": "fa fa-bug",
  "idx": 1,
- "modified": "2019-05-24 10:56:30.626200",
+ "modified": "2021-11-09 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

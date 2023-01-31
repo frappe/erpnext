@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
@@ -9,6 +10,7 @@
   "company",
   "purpose",
   "customer",
+  "customer_name",
   "work_order",
   "material_request",
   "for_qty",
@@ -16,8 +18,16 @@
   "parent_warehouse",
   "get_item_locations",
   "section_break_6",
+  "scan_barcode",
+  "column_break_13",
+  "scan_mode",
+  "prompt_qty",
+  "section_break_15",
   "locations",
-  "amended_from"
+  "amended_from",
+  "print_settings_section",
+  "group_same_items",
+  "status"
  ],
  "fields": [
   {
@@ -33,6 +43,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.docstatus",
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
   },
@@ -44,7 +55,7 @@
    "options": "Warehouse"
   },
   {
-   "depends_on": "eval:doc.purpose==='Delivery against Sales Order'",
+   "depends_on": "eval:doc.purpose==='Delivery'",
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -59,6 +70,7 @@
    "options": "Work Order"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "locations",
    "fieldtype": "Table",
    "label": "Item Locations",
@@ -86,7 +98,7 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "Material Transfer for Manufacture\nMaterial Transfer\nDelivery against Sales Order"
+   "options": "Material Transfer for Manufacture\nMaterial Transfer\nDelivery"
   },
   {
    "depends_on": "eval:['Material Transfer', 'Material Issue'].includes(doc.purpose)",
@@ -108,13 +120,79 @@
    "options": "STO-PICK-.YYYY.-",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "print_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Print Settings"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "group_same_items",
+   "fieldtype": "Check",
+   "label": "Group Same Items",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If checked, picked qty won't automatically be fulfilled on submit of pick list.",
+   "fieldname": "scan_mode",
+   "fieldtype": "Check",
+   "label": "Scan Mode"
+  },
+  {
+   "default": "0",
+   "fieldname": "prompt_qty",
+   "fieldtype": "Check",
+   "label": "Prompt Qty"
+  },
+  {
+   "depends_on": "eval:doc.purpose==='Delivery' && doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nOpen\nCompleted\nCancelled",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "reqd": 1,
+   "search_index": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-29 21:10:11.572387",
+ "links": [],
+ "modified": "2023-01-24 10:33:43.244476",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -180,5 +258,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

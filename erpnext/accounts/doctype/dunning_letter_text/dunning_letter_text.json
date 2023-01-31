@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "creation": "2019-12-06 04:25:40.215625",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "language",
+  "is_default_language",
+  "section_break_4",
+  "body_text",
+  "closing_text",
+  "section_break_7",
+  "body_and_closing_text_help"
+ ],
+ "fields": [
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Language",
+   "options": "Language"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default_language",
+   "fieldtype": "Check",
+   "label": "Is Default Language"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Letter or Email Body Text",
+   "fieldname": "body_text",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Body Text"
+  },
+  {
+   "description": "Letter or Email Closing Text",
+   "fieldname": "closing_text",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Closing Text"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "body_and_closing_text_help",
+   "fieldtype": "HTML",
+   "label": "Body and Closing Text Help",
+   "options": "<h4>Body Text and Closing Text Example</h4>\n\n<div>We have noticed that you have not yet paid invoice {{sales_invoice}} for {{frappe.db.get_value(\"Currency\", currency, \"symbol\")}} {{outstanding_amount}}. This is a friendly reminder that the invoice was due on {{due_date}}. Please pay the amount due immediately to avoid any further dunning cost.</div>\n\n<h4>How to get fieldnames</h4>\n\n<p>The fieldnames you can use in your template are the fields in the document. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n\n<h4>Templating</h4>\n\n<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-07-14 18:02:35.988958",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Dunning Letter Text",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

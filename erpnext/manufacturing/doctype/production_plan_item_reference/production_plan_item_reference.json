@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "creation": "2021-04-22 10:32:58.896330",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item_reference",
+  "sales_order",
+  "sales_order_item",
+  "qty"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order Reference",
+   "options": "Sales Order"
+  },
+  {
+   "fieldname": "sales_order_item",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Sales Order Item"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "qty"
+  },
+  {
+   "fieldname": "item_reference",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Reference"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-05-07 17:03:49.707487",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Production Plan Item Reference",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -14,13 +14,21 @@
   "item_name",
   "image",
   "bom_no",
+  "sales_order",
   "column_break1",
   "company",
   "qty",
   "material_transferred_for_manufacturing",
   "produced_qty",
-  "sales_order",
+  "process_loss_qty",
   "project",
+  "serial_no_and_batch_for_finished_good_section",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_17",
+  "serial_no",
+  "batch_size",
+  "work_order_configuration",
   "settings_section",
   "allow_alternative_item",
   "use_multi_level_bom",
@@ -35,22 +43,25 @@
   "fg_warehouse",
   "scrap_warehouse",
   "required_items_section",
+  "materials_and_operations_tab",
   "required_items",
+  "operations_section",
+  "operations",
+  "transfer_material_against",
   "time",
   "planned_start_date",
-  "actual_start_date",
-  "column_break_13",
   "planned_end_date",
-  "actual_end_date",
   "expected_delivery_date",
-  "operations_section",
-  "transfer_material_against",
-  "operations",
+  "column_break_13",
+  "actual_start_date",
+  "actual_end_date",
+  "lead_time",
   "section_break_22",
   "planned_operating_cost",
   "actual_operating_cost",
   "additional_operating_cost",
   "column_break_24",
+  "corrective_operation_cost",
   "total_operating_cost",
   "more_info",
   "description",
@@ -61,13 +72,16 @@
   "sales_order_item",
   "production_plan",
   "production_plan_item",
+  "production_plan_sub_assembly_item",
   "product_bundle_item",
-  "amended_from"
+  "amended_from",
+  "connections_tab"
  ],
  "fields": [
   {
    "fieldname": "item",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
+   "label": "Production Item",
    "options": "fa fa-gift"
   },
   {
@@ -89,7 +103,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nClosed\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -108,6 +122,8 @@
   },
   {
    "depends_on": "eval:doc.production_item",
+   "fetch_from": "production_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
@@ -170,6 +186,7 @@
    "reqd": 1
   },
   {
+   "default": "1.0",
    "fieldname": "qty",
    "fieldtype": "Float",
    "label": "Qty To Manufacture",
@@ -223,7 +240,7 @@
   {
    "fieldname": "warehouses",
    "fieldtype": "Section Break",
-   "label": "Warehouses",
+   "label": "Warehouse",
    "options": "fa fa-building"
   },
   {
@@ -231,6 +248,7 @@
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
+   "mandatory_depends_on": "eval:!doc.skip_transfer || doc.from_wip_warehouse",
    "options": "Warehouse"
   },
   {
@@ -238,7 +256,8 @@
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_12",
@@ -279,27 +298,30 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "actual_start_date",
    "fieldtype": "Datetime",
    "label": "Actual Start Date",
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.operations && doc.operations.length > 0"
   },
   {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "planned_end_date",
    "fieldtype": "Datetime",
    "label": "Planned End Date",
    "no_copy": 1,
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.operations && doc.operations.length > 0"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "actual_end_date",
    "fieldtype": "Datetime",
    "label": "Actual End Date",
-   "read_only": 1
+   "read_only_depends_on": "eval:doc.operations && doc.operations.length > 0"
   },
   {
    "allow_on_submit": 1,
@@ -308,14 +330,16 @@
    "label": "Expected Delivery Date"
   },
   {
+   "collapsible": 1,
    "fieldname": "operations_section",
    "fieldtype": "Section Break",
    "label": "Operations",
    "options": "fa fa-wrench"
   },
   {
-   "default": "Work Order",
    "depends_on": "operations",
+   "fetch_from": "bom_no.transfer_material_against",
+   "fetch_if_empty": 1,
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -325,8 +349,7 @@
    "fieldname": "operations",
    "fieldtype": "Table",
    "label": "Operations",
-   "options": "Work Order Operation",
-   "read_only": 1
+   "options": "Work Order Operation"
   },
   {
    "depends_on": "operations",
@@ -371,8 +394,8 @@
   {
    "collapsible": 1,
    "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
+   "fieldtype": "Tab Break",
+   "label": "More Info",
    "options": "fa fa-file-text"
   },
   {
@@ -455,8 +478,7 @@
   },
   {
    "fieldname": "settings_section",
-   "fieldtype": "Section Break",
-   "label": "Settings"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_18",
@@ -474,6 +496,97 @@
    "fieldtype": "Link",
    "label": "Source Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "description": "In Mins",
+   "fieldname": "lead_time",
+   "fieldtype": "Float",
+   "label": "Lead Time",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "serial_no_and_batch_for_finished_good_section",
+   "fieldtype": "Section Break",
+   "label": "Serial No and Batch for Finished Good"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "production_item.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "label": "Has Serial No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "production_item.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "depends_on": "has_serial_no",
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial Nos",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "has_batch_no",
+   "fieldname": "batch_size",
+   "fieldtype": "Float",
+   "label": "Batch Size"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "From Corrective Job Card",
+   "fieldname": "corrective_operation_cost",
+   "fieldtype": "Currency",
+   "label": "Corrective Operation Cost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "production_plan_sub_assembly_item",
+   "fieldtype": "Data",
+   "label": "Production Plan Sub-assembly Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.process_loss_qty",
+   "fieldname": "process_loss_qty",
+   "fieldtype": "Float",
+   "label": "Process Loss Qty",
+   "no_copy": 1,
+   "non_negative": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "work_order_configuration",
+   "fieldtype": "Tab Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "materials_and_operations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Materials & Operations"
   }
  ],
  "icon": "fa fa-cogs",
@@ -481,10 +594,12 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-31 12:46:23.636033",
+ "modified": "2023-01-03 14:16:35.427731",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
+ "naming_rule": "By \"Naming Series\" field",
+ "nsm_parent_field": "parent_work_order",
  "owner": "Administrator",
  "permissions": [
   {
@@ -512,6 +627,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "ASC",
+ "states": [],
  "title_field": "production_item",
  "track_changes": 1,
  "track_seen": 1

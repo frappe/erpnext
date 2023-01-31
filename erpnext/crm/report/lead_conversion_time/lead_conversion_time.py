@@ -1,13 +1,15 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe import _, msgprint
 from frappe.utils import date_diff, flt
 
+
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	communication_list = get_communication_details(filters)
 	columns = get_columns()
@@ -18,8 +20,12 @@ def execute(filters=None):
 
 	data = []
 	for communication in communication_list:
-		row = [communication.get('customer'), communication.get('interactions'),\
-			communication.get('duration'), communication.get('support_tickets')]
+		row = [
+			communication.get("customer"),
+			communication.get("interactions"),
+			communication.get("duration"),
+			communication.get("support_tickets"),
+		]
 		data.append(row)
 
 	# add the average row
@@ -31,8 +37,16 @@ def execute(filters=None):
 		total_interactions += row[1]
 		total_duration += row[2]
 		total_tickets += row[3]
-	data.append(['Average', total_interactions/len(data), total_duration/len(data), total_tickets/len(data)])
+	data.append(
+		[
+			"Average",
+			total_interactions / len(data),
+			total_duration / len(data),
+			total_tickets / len(data),
+		]
+	)
 	return columns, data
+
 
 def get_columns():
 	return [
@@ -41,36 +55,37 @@ def get_columns():
 			"fieldname": "customer",
 			"fieldtype": "Link",
 			"options": "Customer",
-			"width": 120
+			"width": 120,
 		},
 		{
 			"label": _("No of Interactions"),
 			"fieldname": "interactions",
 			"fieldtype": "Float",
-			"width": 120
+			"width": 120,
 		},
-		{
-			"label": _("Duration in Days"),
-			"fieldname": "duration",
-			"fieldtype": "Float",
-			"width": 120
-		},
+		{"label": _("Duration in Days"), "fieldname": "duration", "fieldtype": "Float", "width": 120},
 		{
 			"label": _("Support Tickets"),
 			"fieldname": "support_tickets",
 			"fieldtype": "Float",
-			"width": 120
-		}
+			"width": 120,
+		},
 	]
+
 
 def get_communication_details(filters):
 	communication_count = None
 	communication_list = []
-	opportunities = frappe.db.get_values('Opportunity', {'opportunity_from': 'Lead'},\
-		['name', 'customer_name', 'contact_email'], as_dict=1)
+	opportunities = frappe.db.get_values(
+		"Opportunity",
+		{"opportunity_from": "Lead"},
+		["name", "customer_name", "contact_email"],
+		as_dict=1,
+	)
 
 	for d in opportunities:
-		invoice = frappe.db.sql('''
+		invoice = frappe.db.sql(
+			"""
 				SELECT
 					date(creation)
 				FROM
@@ -80,22 +95,30 @@ def get_communication_details(filters):
 				ORDER BY
 					creation
 				LIMIT 1
-			''', (d.contact_email, filters.from_date, filters.to_date))
+			""",
+			(d.contact_email, filters.from_date, filters.to_date),
+		)
 
-		if not invoice: continue
+		if not invoice:
+			continue
 
-		communication_count = frappe.db.sql('''
+		communication_count = frappe.db.sql(
+			"""
 				SELECT
 					count(*)
 				FROM
 					`tabCommunication`
 				WHERE
 					sender = %s AND date(communication_date) <= %s
-			''', (d.contact_email, invoice))[0][0]
+			""",
+			(d.contact_email, invoice),
+		)[0][0]
 
-		if not communication_count: continue
+		if not communication_count:
+			continue
 
-		first_contact = frappe.db.sql('''
+		first_contact = frappe.db.sql(
+			"""
 				SELECT
 					date(communication_date)
 				FROM
@@ -105,10 +128,19 @@ def get_communication_details(filters):
 				ORDER BY
 					communication_date
 				LIMIT 1
-			''', (d.contact_email))[0][0]
+			""",
+			(d.contact_email),
+		)[0][0]
 
 		duration = flt(date_diff(invoice[0][0], first_contact))
 
-		support_tickets = len(frappe.db.get_all('Issue', {'raised_by': d.contact_email}))
-		communication_list.append({'customer': d.customer_name, 'interactions': communication_count, 'duration': duration, 'support_tickets': support_tickets})
+		support_tickets = len(frappe.db.get_all("Issue", {"raised_by": d.contact_email}))
+		communication_list.append(
+			{
+				"customer": d.customer_name,
+				"interactions": communication_count,
+				"duration": duration,
+				"support_tickets": support_tickets,
+			}
+		)
 	return communication_list

@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:dunning_type",
+ "creation": "2019-12-04 04:59:08.003664",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dunning_type",
+  "overdue_interval_section",
+  "start_day",
+  "column_break_4",
+  "end_day",
+  "section_break_6",
+  "dunning_fee",
+  "column_break_8",
+  "rate_of_interest",
+  "text_block_section",
+  "dunning_letter_text"
+ ],
+ "fields": [
+  {
+   "fieldname": "dunning_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dunning Type",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "dunning_fee",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Dunning Fee"
+  },
+  {
+   "description": "This section allows the user to set the Body and Closing text of the Dunning Letter for the Dunning Type based on language, which can be used in Print.",
+   "fieldname": "text_block_section",
+   "fieldtype": "Section Break",
+   "label": "Dunning Letter"
+  },
+  {
+   "fieldname": "dunning_letter_text",
+   "fieldtype": "Table",
+   "options": "Dunning Letter Text"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overdue_interval_section",
+   "fieldtype": "Section Break",
+   "label": "Overdue Interval"
+  },
+  {
+   "fieldname": "start_day",
+   "fieldtype": "Int",
+   "label": "Start Day"
+  },
+  {
+   "fieldname": "end_day",
+   "fieldtype": "Int",
+   "label": "End Day"
+  },
+  {
+   "fieldname": "rate_of_interest",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rate of Interest (%) Yearly"
+  }
+ ],
+ "links": [],
+ "modified": "2020-07-15 17:14:17.835074",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Dunning Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

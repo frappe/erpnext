@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-04-22 13:15:44",
  "doctype": "DocType",
@@ -7,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
+  "has_item_scanned",
   "item_code",
   "item_name",
   "col_break1",
@@ -24,7 +26,10 @@
   "col_break2",
   "uom",
   "conversion_factor",
+  "stock_qty_sec_break",
   "stock_qty",
+  "stock_qty_col_break",
+  "returned_qty",
   "section_break_17",
   "price_list_rate",
   "base_price_list_rate",
@@ -43,7 +48,9 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
+  "grant_commission",
   "section_break_25",
   "net_rate",
   "net_amount",
@@ -52,6 +59,7 @@
   "base_net_rate",
   "base_net_amount",
   "billed_amt",
+  "incoming_rate",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -66,6 +74,8 @@
   "so_detail",
   "against_sales_invoice",
   "si_detail",
+  "dn_detail",
+  "pick_list_item",
   "section_break_40",
   "batch_no",
   "serial_no",
@@ -77,9 +87,16 @@
   "expense_account",
   "allow_zero_valuation_rate",
   "column_break_71",
+  "internal_transfer_section",
+  "material_request",
+  "purchase_order",
+  "column_break_82",
+  "purchase_order_item",
+  "material_request_item",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "section_break_72",
   "page_break"
  ],
@@ -174,12 +191,14 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
    "options": "UOM",
+   "print_hide": 1,
    "print_width": "50px",
    "read_only": 1,
    "reqd": 1,
@@ -195,10 +214,10 @@
    "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
@@ -207,9 +226,10 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.uom != doc.stock_uom",
    "fieldname": "stock_qty",
    "fieldtype": "Float",
-   "label": "Qty as per Stock UOM",
+   "label": "Qty in Stock UOM",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -244,6 +264,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -451,7 +472,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "From Warehouse",
+   "label": "Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -460,11 +481,12 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:parent.is_internal_customer || doc.target_warehouse",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
    "ignore_user_permissions": 1,
-   "label": "Customer Warehouse (Optional)",
+   "label": "Target Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
    "print_hide": 1
@@ -698,16 +720,131 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "dn_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Against Delivery Note Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_qty_sec_break",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_qty_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "returned_qty",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "label": "Returned Qty in Stock UOM",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "incoming_rate",
+   "fieldtype": "Currency",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "precision": "6",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.grant_commission",
+   "fieldname": "grant_commission",
+   "fieldtype": "Check",
+   "label": "Grant Commission",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pick_list_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Pick List Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "eval:parent.is_internal_customer == 1",
+   "fieldname": "internal_transfer_section",
+   "fieldtype": "Section Break",
+   "label": "Internal Transfer"
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "label": "Purchase Order",
+   "options": "Purchase Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_82",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "label": "Purchase Order Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Check",
+   "label": "Has Item Scanned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "options": "Material Request"
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item"
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-05-25 22:08:27.452734",
+ "links": [],
+ "modified": "2022-11-09 12:17:50.850142",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

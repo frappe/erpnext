@@ -1,13 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import print_function, unicode_literals
-import unittest
-import frappe
-from frappe.utils.nestedset import NestedSetRecursionError, NestedSetMultipleRootsError, \
-	NestedSetChildExistsError, NestedSetInvalidMergeError, rebuild_tree, get_ancestors_of
 
-test_records = frappe.get_test_records('Item Group')
+import unittest
+
+import frappe
+from frappe.utils.nestedset import (
+	NestedSetChildExistsError,
+	NestedSetInvalidMergeError,
+	NestedSetMultipleRootsError,
+	NestedSetRecursionError,
+	get_ancestors_of,
+	rebuild_tree,
+)
+
+test_records = frappe.get_test_records("Item Group")
+
 
 class TestItem(unittest.TestCase):
 	def test_basic_tree(self, records=None):
@@ -18,12 +26,12 @@ class TestItem(unittest.TestCase):
 			records = test_records[2:]
 
 		for item_group in records:
-			lft, rgt, parent_item_group = frappe.db.get_value("Item Group", item_group["item_group_name"],
-				["lft", "rgt", "parent_item_group"])
+			lft, rgt, parent_item_group = frappe.db.get_value(
+				"Item Group", item_group["item_group_name"], ["lft", "rgt", "parent_item_group"]
+			)
 
 			if parent_item_group:
-				parent_lft, parent_rgt = frappe.db.get_value("Item Group", parent_item_group,
-					["lft", "rgt"])
+				parent_lft, parent_rgt = frappe.db.get_value("Item Group", parent_item_group, ["lft", "rgt"])
 			else:
 				# root
 				parent_lft = min_lft - 1
@@ -48,8 +56,11 @@ class TestItem(unittest.TestCase):
 		def get_no_of_children(item_groups, no_of_children):
 			children = []
 			for ig in item_groups:
-				children += frappe.db.sql_list("""select name from `tabItem Group`
-				where ifnull(parent_item_group, '')=%s""", ig or '')
+				children += frappe.db.sql_list(
+					"""select name from `tabItem Group`
+				where ifnull(parent_item_group, '')=%s""",
+					ig or "",
+				)
 
 			if len(children):
 				return get_no_of_children(children, no_of_children + len(children))
@@ -112,7 +123,10 @@ class TestItem(unittest.TestCase):
 
 	def print_tree(self):
 		import json
-		print(json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1))
+
+		print(
+			json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
+		)
 
 	def test_move_leaf_into_another_group(self):
 		# before move
@@ -142,12 +156,20 @@ class TestItem(unittest.TestCase):
 
 	def test_delete_leaf(self):
 		# for checking later
-		parent_item_group = frappe.db.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
+		parent_item_group = frappe.db.get_value(
+			"Item Group", "_Test Item Group B - 3", "parent_item_group"
+		)
 		rgt = frappe.db.get_value("Item Group", parent_item_group, "rgt")
 
 		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
-		ancestors = frappe.db.sql("""select name, rgt from `tabItem Group`
-			where name in ({})""".format(", ".join(["%s"]*len(ancestors))), tuple(ancestors), as_dict=True)
+		ancestors = frappe.db.sql(
+			"""select name, rgt from `tabItem Group`
+			where name in ({})""".format(
+				", ".join(["%s"] * len(ancestors))
+			),
+			tuple(ancestors),
+			as_dict=True,
+		)
 
 		frappe.delete_doc("Item Group", "_Test Item Group B - 3")
 		records_to_test = test_records[2:]
@@ -166,7 +188,9 @@ class TestItem(unittest.TestCase):
 
 	def test_delete_group(self):
 		# cannot delete group with child, but can delete leaf
-		self.assertRaises(NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B")
+		self.assertRaises(
+			NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B"
+		)
 
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
@@ -179,8 +203,10 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 
 		# move its children back
-		for name in frappe.db.sql_list("""select name from `tabItem Group`
-			where parent_item_group='_Test Item Group C'"""):
+		for name in frappe.db.sql_list(
+			"""select name from `tabItem Group`
+			where parent_item_group='_Test Item Group C'"""
+		):
 
 			doc = frappe.get_doc("Item Group", name)
 			doc.parent_item_group = "_Test Item Group B"
@@ -199,9 +225,21 @@ class TestItem(unittest.TestCase):
 		self.test_basic_tree()
 
 	def test_merge_leaf_into_group(self):
-		self.assertRaises(NestedSetInvalidMergeError, frappe.rename_doc, "Item Group", "_Test Item Group B - 3",
-			"_Test Item Group B", merge=True)
+		self.assertRaises(
+			NestedSetInvalidMergeError,
+			frappe.rename_doc,
+			"Item Group",
+			"_Test Item Group B - 3",
+			"_Test Item Group B",
+			merge=True,
+		)
 
 	def test_merge_group_into_leaf(self):
-		self.assertRaises(NestedSetInvalidMergeError, frappe.rename_doc, "Item Group", "_Test Item Group B",
-			"_Test Item Group B - 3", merge=True)
+		self.assertRaises(
+			NestedSetInvalidMergeError,
+			frappe.rename_doc,
+			"Item Group",
+			"_Test Item Group B",
+			"_Test Item Group B - 3",
+			merge=True,
+		)

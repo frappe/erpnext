@@ -1,0 +1,31 @@
+{
+ "__unsaved": 1,
+ "creation": "2020-11-17 15:28:47.809342",
+ "docstatus": 0,
+ "doctype": "Web Template",
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "reqd": 0
+  },
+  {
+   "fieldname": "featured",
+   "fieldtype": "Check",
+   "label": "Featured",
+   "options": "",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "modified": "2021-02-24 16:05:17.926610",
+ "modified_by": "Administrator",
+ "module": "E-commerce",
+ "name": "Product Card",
+ "owner": "Administrator",
+ "standard": 1,
+ "template": "",
+ "type": "Component"
+}

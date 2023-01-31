@@ -1,4 +1,0 @@
-Disease
-Crop
-Crop Cycle
-Soil Texture

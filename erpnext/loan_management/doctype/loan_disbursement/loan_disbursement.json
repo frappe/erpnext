@@ -1,0 +1,231 @@
+{
+ "actions": [],
+ "autoname": "LM-DIS-.#####",
+ "creation": "2019-09-07 12:44:49.125452",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "against_loan",
+  "posting_date",
+  "applicant_type",
+  "column_break_4",
+  "company",
+  "applicant",
+  "section_break_7",
+  "disbursement_date",
+  "clearance_date",
+  "column_break_8",
+  "disbursed_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "accounting_details",
+  "disbursement_account",
+  "column_break_16",
+  "loan_account",
+  "bank_account",
+  "disbursement_references_section",
+  "reference_date",
+  "column_break_17",
+  "reference_number",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "against_loan",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Against Loan ",
+   "options": "Loan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "disbursement_date",
+   "fieldtype": "Date",
+   "label": "Disbursement Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "disbursed_amount",
+   "fieldtype": "Currency",
+   "label": "Disbursed Amount",
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Disbursement",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "against_loan.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "against_loan.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Applicant",
+   "options": "applicant_type",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break",
+   "label": "Disbursement Details"
+  },
+  {
+   "fetch_from": "against_loan.applicant_type",
+   "fieldname": "applicant_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "disbursement_references_section",
+   "fieldtype": "Section Break",
+   "label": "Disbursement References"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_number",
+   "fieldtype": "Data",
+   "label": "Reference Number"
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "accounting_details",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fetch_from": "against_loan.disbursement_account",
+   "fetch_if_empty": 1,
+   "fieldname": "disbursement_account",
+   "fieldtype": "Link",
+   "label": "Disbursement Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "against_loan.loan_account",
+   "fieldname": "loan_account",
+   "fieldtype": "Link",
+   "label": "Loan Account",
+   "options": "Account",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-08-04 17:16:04.922444",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Disbursement",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

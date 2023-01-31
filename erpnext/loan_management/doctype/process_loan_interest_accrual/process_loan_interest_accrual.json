@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "autoname": "LM-PLA-.#####",
+ "creation": "2019-09-19 06:08:12.363640",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "loan_type",
+  "loan",
+  "process_type",
+  "accrual_type",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Loan Interest Accrual",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_type",
+   "fieldtype": "Link",
+   "label": "Loan Type",
+   "options": "Loan Type"
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan ",
+   "options": "Loan"
+  },
+  {
+   "fieldname": "process_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Process Type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "accrual_type",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Accrual Type",
+   "options": "Regular\nRepayment\nDisbursement\nCredit Adjustment\nDebit Adjustment\nRefund",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2022-06-29 11:19:33.203088",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Process Loan Interest Accrual",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

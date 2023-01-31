@@ -1,0 +1,52 @@
+{
+ "actions": [],
+ "creation": "2020-12-07 15:39:47.488519",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "operation",
+  "time_in_mins",
+  "column_break_5",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Operation",
+   "options": "Operation"
+  },
+  {
+   "default": "0",
+   "description": "Time in mins",
+   "fieldname": "time_in_mins",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Operation Time"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-07-15 16:39:41.635362",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Sub Operation",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

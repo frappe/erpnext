@@ -8,7 +8,7 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldname: "tree_type",
 			label: __("Tree Type"),
 			fieldtype: "Select",
-			options: ["Customer Group","Customer","Item Group","Item","Territory","Order Type"],
+			options: ["Customer Group", "Customer", "Item Group", "Item", "Territory", "Order Type", "Project"],
 			default: "Customer",
 			reqd: 1
 		},
@@ -67,75 +67,51 @@ frappe.query_reports["Sales Analytics"] = {
 			reqd: 1
 		}
 	],
-	after_datatable_render: function(datatable_obj) {
-		$(datatable_obj.wrapper).find(".dt-row-0").find('input[type=checkbox]').click();
-	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
-				onCheckRow: function(data) {
-					row_name = data[2].content;
-					length = data.length;
+				onCheckRow: function (data) {
+					if (!data) return;
+					const data_doctype = $(
+						data[2].html
+					)[0].attributes.getNamedItem("data-doctype").value;
+					const tree_type = frappe.query_report.filters[0].value;
+					if (data_doctype != tree_type) return;
 
-					var tree_type = frappe.query_report.filters[0].value;
-
-					if(tree_type == "Customer") {
-						row_values = data.slice(4,length-1).map(function (column) {
-							return column.content;
-						})
-					} else if (tree_type == "Item") {
-						row_values = data.slice(5,length-1).map(function (column) {
-							return column.content;
-						})
-					}
-					else {
-						row_values = data.slice(3,length-1).map(function (column) {
-							return column.content;
-						})
-					}
-
-					entry = {
-						'name':row_name,
-						'values':row_values
-					}
-
-					let raw_data = frappe.query_report.chart.data;
-					let new_datasets = raw_data.datasets;
-
-					var found = false;
-
-					for(var i=0; i < new_datasets.length;i++){
-						if(new_datasets[i].name == row_name){
-							found = true;
-							new_datasets.splice(i,1);
-							break;
+					const row_name = data[2].content;
+					const raw_data = frappe.query_report.chart.data;
+					const new_datasets = raw_data.datasets;
+					const element_found = new_datasets.some(
+						(element, index, array) => {
+							if (element.name == row_name) {
+								array.splice(index, 1);
+								return true;
+							}
+							return false;
 						}
+					);
+					const slice_at = { Customer: 4, Item: 5 }[tree_type] || 3;
+
+					if (!element_found) {
+						new_datasets.push({
+							name: row_name,
+							values: data
+								.slice(slice_at, data.length - 1)
+								.map(column => column.content),
+						});
 					}
 
-					if(!found){
-						new_datasets.push(entry);
-					}
-
-					let new_data = {
+					const new_data = {
 						labels: raw_data.labels,
-						datasets: new_datasets
-					}
-
-					setTimeout(() => {
-						frappe.query_report.chart.update(new_data)
-					}, 500)
-
-
-					setTimeout(() => {
-						frappe.query_report.chart.draw(true);
-					}, 1000)
+						datasets: new_datasets,
+					};
+					const new_options = Object.assign({}, frappe.query_report.chart_options, {data: new_data});
+					frappe.query_report.render_chart(new_options);
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
-			}
-		})
+			},
+		});
 	},
-}
-
-
+};

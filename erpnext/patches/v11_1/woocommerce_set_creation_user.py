@@ -1,9 +1,9 @@
-from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint
 
+
 def execute():
-	frappe.reload_doc("erpnext_integrations", "doctype","woocommerce_settings")
+	frappe.reload_doc("erpnext_integrations", "doctype", "woocommerce_settings")
 	doc = frappe.get_doc("Woocommerce Settings")
 
 	if cint(doc.enable_sync):

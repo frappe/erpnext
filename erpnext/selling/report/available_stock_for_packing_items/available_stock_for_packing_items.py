@@ -1,12 +1,14 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
+
 import frappe
 from frappe.utils import flt
 
+
 def execute(filters=None):
-	if not filters: filters = {}
+	if not filters:
+		filters = {}
 
 	columns = get_columns()
 	iwq_map = get_item_warehouse_quantity_map()
@@ -19,31 +21,48 @@ def execute(filters=None):
 		for wh, item_qty in warehouse.items():
 			total += 1
 			if item_map.get(sbom):
-				row = [sbom, item_map.get(sbom).item_name, item_map.get(sbom).description,
-						item_map.get(sbom).stock_uom, wh]
+				row = [
+					sbom,
+					item_map.get(sbom).item_name,
+					item_map.get(sbom).description,
+					item_map.get(sbom).stock_uom,
+					wh,
+				]
 				available_qty = item_qty
 				total_qty += flt(available_qty)
 				row += [available_qty]
 
 				if available_qty:
 					data.append(row)
-					if (total == len(warehouse)):
+					if total == len(warehouse):
 						row = ["", "", "Total", "", "", total_qty]
 						data.append(row)
 	return columns, data
 
+
 def get_columns():
-	columns = ["Item Code:Link/Item:100", "Item Name::100", "Description::120", \
-				"UOM:Link/UOM:80", "Warehouse:Link/Warehouse:100", "Quantity::100"]
+	columns = [
+		"Item Code:Link/Item:100",
+		"Item Name::100",
+		"Description::120",
+		"UOM:Link/UOM:80",
+		"Warehouse:Link/Warehouse:100",
+		"Quantity::100",
+	]
 
 	return columns
 
+
 def get_item_details():
 	item_map = {}
-	for item in frappe.db.sql("""SELECT name, item_name, description, stock_uom
-								from `tabItem`""", as_dict=1):
+	for item in frappe.db.sql(
+		"""SELECT name, item_name, description, stock_uom
+								from `tabItem`""",
+		as_dict=1,
+	):
 		item_map.setdefault(item.name, item)
 	return item_map
+
 
 def get_item_warehouse_quantity_map():
 	query = """SELECT parent, warehouse, MIN(qty) AS qty

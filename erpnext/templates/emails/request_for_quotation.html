@@ -1,11 +1,29 @@
-<h3>{{_("Request for Quotation")}}</h3>
+<h4>{{_("Request for Quotation")}}</h4>
+<p>{{ supplier_salutation if supplier_salutation else ''}} {{ supplier_name }},</p>
 <p>{{ message }}</p>
+<p>{{_("The Request for Quotation can be accessed by clicking on the following button")}}:</p>
+<br>
+<a
+	href="{{ rfq_link }}"
+	class="btn btn-default btn-sm"
+	target="_blank">
+	{{ _("Submit your Quotation") }}
+</a>
+<br>
+<br>
 {% if update_password_link %}
-<p>{{_("Please click on the following link to set your new password")}}:</p>
-<p><a href="{{ update_password_link }}">{{ update_password_link }}</a></p>
-{% else %}
-<p>{{_("The request for quotation can be accessed by clicking on the following link")}}:</p>
-<p><a href="{{ rfq_link }}">Submit your Quotation</a></p>
+<br>
+<p>{{_("Please click on the following button to set your new password")}}:</p>
+<a
+	href="{{ update_password_link }}"
+	class="btn btn-default btn-xs"
+	target="_blank">
+	{{_("Set Password") }}
+</a>
+<br>
+<br>
 {% endif %}
-<p>{{_("Thank you")}},<br>
-{{ user_fullname }}</p>
+<p>
+	{{_("Regards")}},<br>
+	{{ user_fullname }}
+</p>

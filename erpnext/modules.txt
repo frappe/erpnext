@@ -4,23 +4,19 @@ Buying
 Projects
 Selling
 Setup
-HR
 Manufacturing
 Stock
 Support
 Utilities
-Shopping Cart
 Assets
 Portal
 Maintenance
-Education
 Regional
-Healthcare
-Restaurant
-Agriculture
 ERPNext Integrations
-Non Profit
-Hotels
-Hub Node
 Quality Management
 Communication
+Loan Management
+Telephony
+Bulk Transaction
+E-commerce
+Subcontracting

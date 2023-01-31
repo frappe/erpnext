@@ -83,6 +83,13 @@ $.extend(erpnext.queries, {
 		};
 	},
 
+	dispatch_address_query: function(doc) {
+		return {
+			query: 'frappe.contacts.doctype.address.address.address_query',
+			filters: { link_doctype: 'Company', link_name: doc.company || '' }
+		};
+	},
+
 	supplier_filter: function(doc) {
 		if(!doc.supplier) {
 			frappe.throw(__("Please set {0}", [__(frappe.meta.get_label(doc.doctype, "supplier", doc.name))]));
@@ -115,7 +122,26 @@ $.extend(erpnext.queries, {
 				["Warehouse", "is_group", "=",0]
 
 			]
-		}
+		};
+	},
+
+	get_filtered_dimensions: function(doc, child_fields, dimension, company) {
+		let account = '';
+
+		child_fields.forEach((field) => {
+			if (!account) {
+				account = doc[field];
+			}
+		});
+
+		return {
+			query: "erpnext.controllers.queries.get_filtered_dimensions",
+			filters: {
+				'dimension': dimension,
+				'account': account,
+				'company': company
+			}
+		};
 	}
 });
 

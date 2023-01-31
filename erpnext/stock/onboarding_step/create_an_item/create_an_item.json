@@ -1,0 +1,22 @@
+{
+ "action": "Create Entry",
+ "action_label": "",
+ "creation": "2021-05-17 13:47:18.515052",
+ "description": "# Create an Item\nThe Stock module deals with the movement of items.\n\nIn this step we will create an  [**Item**](https://docs.erpnext.com/docs/user/manual/en/stock/item).",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "intro_video_url": "",
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-05-18 16:15:20.695028",
+ "modified_by": "Administrator",
+ "name": "Create an Item",
+ "owner": "Administrator",
+ "reference_document": "Item",
+ "show_form_tour": 1,
+ "show_full_form": 1,
+ "title": "Create an Item",
+ "validate_action": 1
+}

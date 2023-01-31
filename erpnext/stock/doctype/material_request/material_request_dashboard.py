@@ -1,18 +1,19 @@
-from __future__ import unicode_literals
 from frappe import _
 
 
 def get_data():
 	return {
-		'fieldname': 'material_request',
-		'transactions': [
+		"fieldname": "material_request",
+		"internal_links": {
+			"Sales Order": ["items", "sales_order"],
+		},
+		"transactions": [
 			{
-				'label': _('Related'),
-				'items': ['Request for Quotation', 'Supplier Quotation', 'Purchase Order', 'Stock Entry', 'Pick List']
+				"label": _("Reference"),
+				"items": ["Sales Order", "Request for Quotation", "Supplier Quotation", "Purchase Order"],
 			},
-			{
-				'label': _('Manufacturing'),
-				'items': ['Work Order']
-			}
-		]
+			{"label": _("Stock"), "items": ["Stock Entry", "Purchase Receipt", "Pick List"]},
+			{"label": _("Manufacturing"), "items": ["Work Order"]},
+			{"label": _("Internal Transfer"), "items": ["Sales Order"]},
+		],
 	}

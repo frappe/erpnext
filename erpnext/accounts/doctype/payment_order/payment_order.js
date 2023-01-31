@@ -10,16 +10,18 @@ frappe.ui.form.on('Payment Order', {
 				}
 			}
 		});
+
+		frm.set_df_property('references', 'cannot_add_rows', true);
 	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 0) {
 			frm.add_custom_button(__('Payment Request'), function() {
 				frm.trigger("get_from_payment_request");
-			}, __("Get from"));
+			}, __("Get Payments from"));
 
 			frm.add_custom_button(__('Payment Entry'), function() {
 				frm.trigger("get_from_payment_entry");
-			}, __("Get from"));
+			}, __("Get Payments from"));
 
 			frm.trigger('remove_button');
 		}

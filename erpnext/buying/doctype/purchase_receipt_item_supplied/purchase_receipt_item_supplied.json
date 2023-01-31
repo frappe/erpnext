@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:42",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -6,19 +7,27 @@
  "field_order": [
   "main_item_code",
   "rm_item_code",
-  "description",
-  "batch_no",
-  "serial_no",
+  "item_name",
+  "bom_detail_no",
   "col_break1",
-  "required_qty",
-  "consumed_qty",
+  "description",
   "stock_uom",
-  "rate",
-  "amount",
   "conversion_factor",
-  "current_stock",
   "reference_name",
-  "bom_detail_no"
+  "secbreak_1",
+  "rate",
+  "col_break2",
+  "amount",
+  "secbreak_2",
+  "required_qty",
+  "col_break3",
+  "consumed_qty",
+  "current_stock",
+  "secbreak_3",
+  "batch_no",
+  "col_break4",
+  "serial_no",
+  "purchase_order"
  ],
  "fields": [
   {
@@ -45,7 +54,6 @@
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_global_search": 1,
-   "in_list_view": 1,
    "label": "Description",
    "oldfieldname": "description",
    "oldfieldtype": "Data",
@@ -74,18 +82,20 @@
    "fieldname": "required_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Required Qty",
+   "label": "Available Qty For Consumption",
    "oldfieldname": "required_qty",
    "oldfieldtype": "Currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "consumed_qty",
    "fieldtype": "Float",
-   "label": "Consumed Qty",
+   "in_list_view": 1,
+   "label": "Qty to Be Consumed",
    "oldfieldname": "consumed_qty",
    "oldfieldtype": "Currency",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -152,15 +162,56 @@
    "oldfieldname": "bom_detail_no",
    "oldfieldtype": "Data",
    "read_only": 1
+  },
+  {
+   "fieldname": "secbreak_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secbreak_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secbreak_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Order",
+   "no_copy": 1,
+   "options": "Purchase Order",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-21 16:25:29.909112",
+ "links": [],
+ "modified": "2021-06-19 19:33:04.431213",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",
- "owner": "wasim@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",

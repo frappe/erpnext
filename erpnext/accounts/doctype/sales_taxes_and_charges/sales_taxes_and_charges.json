@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "creation": "2013-04-24 11:39:32",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "charge_type",
   "row_id",
@@ -10,12 +12,14 @@
   "col_break_1",
   "description",
   "included_in_print_rate",
+  "included_in_paid_amount",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
   "section_break_8",
   "rate",
   "section_break_9",
+  "account_currency",
   "tax_amount",
   "total",
   "tax_amount_after_discount_amount",
@@ -24,7 +28,7 @@
   "base_total",
   "base_tax_amount_after_discount_amount",
   "item_wise_tax_detail",
-  "parenttype"
+  "dont_recompute_tax"
  ],
  "fields": [
   {
@@ -47,6 +51,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
    "fieldname": "account_head",
    "fieldtype": "Link",
@@ -59,6 +64,7 @@
    "search_index": 1
   },
   {
+   "allow_on_submit": 1,
    "default": ":Company",
    "fieldname": "cost_center",
    "fieldtype": "Link",
@@ -174,17 +180,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "parenttype",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_filter": 1,
-   "label": "Parenttype",
-   "oldfieldname": "parenttype",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -192,15 +187,44 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:['Sales Taxes and Charges Template', 'Payment Entry'].includes(parent.doctype)",
+   "description": "If checked, the tax amount will be considered as already included in the Paid Amount in Payment Entry",
+   "fieldname": "included_in_paid_amount",
+   "fieldtype": "Check",
+   "label": "Considered In Paid Amount"
+  },
+  {
+   "default": "0",
+   "fieldname": "dont_recompute_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Dont Recompute tax",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "account_head.account_currency",
+   "fieldname": "account_currency",
+   "fieldtype": "Link",
+   "label": "Account Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-05-25 22:59:38.740883",
+ "links": [],
+ "modified": "2022-10-17 13:08:17.776528",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
- "sort_order": "ASC"
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
 }

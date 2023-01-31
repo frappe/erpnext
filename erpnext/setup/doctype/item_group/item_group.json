@@ -20,12 +20,18 @@
   "sec_break_taxes",
   "taxes",
   "sb9",
-  "show_in_website",
   "route",
+  "website_title",
+  "description",
+  "show_in_website",
+  "include_descendants",
+  "column_break_16",
   "weightage",
   "slideshow",
-  "description",
   "website_specifications",
+  "website_filters_section",
+  "filter_fields",
+  "filter_attributes",
   "lft",
   "rgt",
   "old_parent"
@@ -107,7 +113,7 @@
   },
   {
    "default": "0",
-   "description": "Check this if you want to show in website",
+   "description": "Make Item Group visible in website",
    "fieldname": "show_in_website",
    "fieldtype": "Check",
    "label": "Show in Website"
@@ -117,9 +123,11 @@
    "fieldname": "route",
    "fieldtype": "Data",
    "label": "Route",
+   "no_copy": 1,
    "unique": 1
   },
   {
+   "depends_on": "show_in_website",
    "fieldname": "weightage",
    "fieldtype": "Int",
    "label": "Weightage"
@@ -180,18 +188,57 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "show_in_website",
+   "fieldname": "website_filters_section",
+   "fieldtype": "Section Break",
+   "label": "Website Filters"
+  },
+  {
+   "fieldname": "filter_fields",
+   "fieldtype": "Table",
+   "label": "Item Fields",
+   "options": "Website Filter Field"
+  },
+  {
+   "fieldname": "filter_attributes",
+   "fieldtype": "Table",
+   "label": "Attributes",
+   "options": "Website Attribute"
+  },
+  {
+   "depends_on": "show_in_website",
+   "fieldname": "website_title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "show_in_website",
+   "description": "Include Website Items belonging to child Item Groups",
+   "fieldname": "include_descendants",
+   "fieldtype": "Check",
+   "label": "Include Descendants"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
+ "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-01-28 13:51:05.456014",
+ "modified": "2023-01-05 12:21:30.458628",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
- "name_case": "Title Case",
+ "naming_rule": "By fieldname",
+ "nsm_parent_field": "parent_item_group",
  "owner": "Administrator",
  "permissions": [
   {
@@ -243,10 +290,20 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "All",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

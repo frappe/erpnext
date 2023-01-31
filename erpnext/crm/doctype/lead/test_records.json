@@ -27,7 +27,6 @@
 {
  "doctype": "Lead",
  "email_id": "test_lead4@example.com",
- "organization_lead": 1,
  "lead_name": "_Test Lead 4",
  "company_name": "_Test Lead 4",
  "status": "Open"

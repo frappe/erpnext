@@ -14,6 +14,16 @@ frappe.ui.form.on("Item Group", {
 				]
 			}
 		}
+		frm.fields_dict['item_group_defaults'].grid.get_field("default_discount_account").get_query = function(doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+			return {
+				filters: {
+					'report_type': 'Profit and Loss',
+					'company': row.company,
+					"is_group": 0
+				}
+			};
+		}
 		frm.fields_dict["item_group_defaults"].grid.get_field("expense_account").get_query = function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 			return {
@@ -61,12 +71,26 @@ frappe.ui.form.on("Item Group", {
 				frappe.set_route("List", "Item", {"item_group": frm.doc.name});
 			});
 		}
+
+		frappe.model.with_doctype('Website Item', () => {
+			const web_item_meta = frappe.get_meta('Website Item');
+
+			const valid_fields = web_item_meta.fields.filter(df =>
+				['Link', 'Table MultiSelect'].includes(df.fieldtype) && !df.hidden
+			).map(df =>
+				({ label: df.label, value: df.fieldname })
+			);
+
+			frm.get_field("filter_fields").grid.update_docfield_property(
+				'fieldname', 'options', valid_fields
+			);
+		});
 	},
 
 	set_root_readonly: function(frm) {
 		// read-only for root item group
 		frm.set_intro("");
-		if(!frm.doc.parent_item_group) {
+		if(!frm.doc.parent_item_group && !frm.doc.__islocal) {
 			frm.set_read_only();
 			frm.set_intro(__("This is a root item group and cannot be edited."), true);
 		}

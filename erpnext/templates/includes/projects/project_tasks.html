@@ -1,32 +1,57 @@
+{% macro task_row(task, indent) %}
+<div class="row mt-5 {% if task.children %} font-weight-bold {% endif %}">
+  <div class="col-sm-4">
+    <a class="nav-link " style="color: inherit; {% if task.parent_task %} margin-left: {{ indent }}px {% endif %}"
+      href="/tasks/{{ task.name | urlencode }}">
+      {% if task.parent_task %}
+        <span class="">
+          <i class="fa fa-level-up fa-rotate-90"></i>
+        </span>
+      {% endif %}
+      {{ task.subject }}</a>
+  </div>
+  <div class="col-sm-2">{{ task.status }}</div>
+  <div class="col-sm-2 small text-muted">
+    {% if task.exp_end_date %}
+      {{ task.exp_end_date }}
+    {% else %}
+      --
+    {% endif %}
+  </div>
+  <div class="col-sm-2">
+    {% if task["_assign"] %}
+      {% set assigned_users = json.loads(task["_assign"])%}
+      {% for user in assigned_users %}
+        {% set user_details = frappe.db.get_value("User", user,
+		["full_name", "user_image"],
+		as_dict = True)%}
+        {% if user_details.user_image %}
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+            <img src="{{ user_details.user_image }}">
+          </span>
+        {% else %}
+          <span class="avatar avatar-small" style="width:32px; height:32px;" title="{{ user_details.full_name }}">
+            <div class='standard-image' style='background-color: #F5F4F4; color: #000;'>
+              {{ frappe.utils.get_abbr(user_details.full_name) }}
+            </div>
+          </span>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <div class="col-xs-2 text-right small text-muted">
+    {{ frappe.utils.pretty_date(task.modified) }}
+  </div>
+</div>
+{% if task.children %}
+  {% for child in task.children %}
+    {{ task_row(child, indent + 30) }}
+  {% endfor %}
+{% endif %}
+{% endmacro %}
+
 {% for task in doc.tasks %}
-	<div class='task'>
-		<a class="no-decoration task-link {{ task.css_seen }}" href="/tasks?name={{ task.name }}">
-		<div class='row project-item'>
-			<div class='col-xs-9'>
-				<span class="indicator {{ "red" if task.status=="Open" else "green" if task.status=="Closed" else "darkgrey" }}" title="{{ task.status }}"  > {{ task.subject }}</span> 
-	 				<div class="small text-muted item-timestamp"
-	 					title="{{ frappe.utils.pretty_date(task.modified) }}">
-						{{ _("modified") }} {{ frappe.utils.pretty_date(task.modified) }}
-	 				</div>
-			</div>
-			<div class='col-xs-1'>{% if task.todo %}
-					{% if task.todo.user_image %}
-						<span class="avatar avatar-small" title="{{ task.todo.owner }}">
-							<img src="{{ task.todo.user_image }}">
-						</span>
-					{% else %}
-						<span class="avatar avatar-small standard-image" title="Assigned to {{ task.todo.owner }}">
-							
-						</span>
-					{% endif %}		
-				{% endif %}	 </div>
-			<div class='col-xs-2'>
-				<span class="pull-right list-comment-count small {{ "text-extra-muted" if task.comment_count==0 else "text-muted" }}">
-					<i class="octicon octicon-comment-discussion"></i>
-						{{ task.comment_count }}
-				</span>
-			</div>
-		</div>
-		</a>
-	</div>
+  <div class="web-list-item transaction-list-item">
+      {{ task_row(task, 0) }}
+  </div>
 {% endfor %}

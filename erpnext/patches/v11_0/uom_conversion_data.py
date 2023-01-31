@@ -1,5 +1,5 @@
-from __future__ import unicode_literals
-import frappe, json
+import frappe
+
 
 def execute():
 	from erpnext.setup.setup_wizard.operations.install_fixtures import add_uom_data
@@ -14,8 +14,8 @@ def execute():
 		# delete conversion data and insert again
 		frappe.db.sql("delete from `tabUOM Conversion Factor`")
 		try:
-			frappe.delete_doc('UOM', 'Hundredweight')
-			frappe.delete_doc('UOM', 'Pound Cubic Yard')
+			frappe.delete_doc("UOM", "Hundredweight")
+			frappe.delete_doc("UOM", "Pound Cubic Yard")
 		except frappe.LinkExistsError:
 			pass
 

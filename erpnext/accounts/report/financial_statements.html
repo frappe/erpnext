@@ -44,7 +44,7 @@
 		</tr>
 	</thead>
 	<tbody>
-		{% for(let j=0, k=data.length-1; j<k; j++) { %}
+		{% for(let j=0, k=data.length; j<k; j++) { %}
 			{%
 				var row = data[j];
 				var row_class = data[j].parent_account ? "" : "financial-statements-important";

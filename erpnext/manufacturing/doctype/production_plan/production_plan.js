@@ -2,9 +2,16 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Production Plan', {
-	setup: function(frm) {
+
+	before_save(frm) {
+		// preserve temporary names on production plan item to re-link sub-assembly items
+		frm.doc.po_items.forEach(item => {
+			item.temporary_name = item.name;
+		});
+	},
+	setup(frm) {
 		frm.custom_make_buttons = {
-			'Work Order': 'Work Order',
+			'Work Order': 'Work Order / Subcontract PO',
 			'Material Request': 'Material Request',
 		};
 
@@ -19,9 +26,20 @@ frappe.ui.form.on('Production Plan', {
 		frm.set_query('for_warehouse', function(doc) {
 			return {
 				filters: {
-					company: doc.company
+					company: doc.company,
+					is_group: 0
 				}
 			}
+		});
+
+		frm.set_query('material_request', 'material_requests', function() {
+			return {
+				filters: {
+					material_request_type: "Manufacture",
+					docstatus: 1,
+					status: ["!=", "Stopped"],
+				}
+			};
 		});
 
 		frm.fields_dict['po_items'].grid.get_field('item_code').get_query = function(doc) {
@@ -38,7 +56,7 @@ frappe.ui.form.on('Production Plan', {
 			if (d.item_code) {
 				return {
 					query: "erpnext.controllers.queries.bom",
-					filters:{'item': cstr(d.item_code)}
+					filters:{'item': cstr(d.item_code), 'docstatus': 1}
 				}
 			} else frappe.msgprint(__("Please enter Item first"));
 		}
@@ -52,29 +70,49 @@ frappe.ui.form.on('Production Plan', {
 		}
 	},
 
-	refresh: function(frm) {
+	refresh(frm) {
 		if (frm.doc.docstatus === 1) {
 			frm.trigger("show_progress");
+
+			if (frm.doc.status !== "Completed") {
+				frm.add_custom_button(__("Work Order Tree"), ()=> {
+					frappe.set_route('Tree', 'Work Order', {production_plan: frm.doc.name});
+				}, __('View'));
+
+				frm.add_custom_button(__("Production Plan Summary"), ()=> {
+					frappe.set_route('query-report', 'Production Plan Summary', {production_plan: frm.doc.name});
+				}, __('View'));
+
+				if  (frm.doc.status === "Closed") {
+					frm.add_custom_button(__("Re-open"), function() {
+						frm.events.close_open_production_plan(frm, false);
+					}, __("Status"));
+				} else {
+					frm.add_custom_button(__("Close"), function() {
+						frm.events.close_open_production_plan(frm, true);
+					}, __("Status"));
+				}
+
+				if (frm.doc.po_items && frm.doc.status !== "Closed") {
+					frm.add_custom_button(__("Work Order / Subcontract PO"), ()=> {
+						frm.trigger("make_work_order");
+					}, __('Create'));
+				}
+
+				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
+					frm.add_custom_button(__("Material Request"), ()=> {
+						frm.trigger("make_material_request");
+					}, __('Create'));
+				}
+			}
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.po_items
-			&& frm.doc.status != 'Completed') {
-			frm.add_custom_button(__("Work Order"), ()=> {
-				frm.trigger("make_work_order");
-			}, __('Create'));
+		if (frm.doc.status !== "Closed") {
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-
-		if (frm.doc.docstatus === 1 && frm.doc.mr_items
-			&& !in_list(['Material Requested', 'Completed'], frm.doc.status)) {
-			frm.add_custom_button(__("Material Request"), ()=> {
-				frm.trigger("make_material_request");
-			}, __('Create'));
-		}
-
-		frm.page.set_inner_btn_group_as_primary(__('Create'));
 		frm.trigger("material_requirement");
 
-		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: #f9f9f9;">
+		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 			<tr><td style="padding-left:25px">
 				<div>
 				<h3 style="text-decoration: underline;">
@@ -120,7 +158,19 @@ frappe.ui.form.on('Production Plan', {
 		set_field_options("projected_qty_formula", projected_qty_formula);
 	},
 
-	make_work_order: function(frm) {
+	close_open_production_plan(frm, close=false) {
+		frappe.call({
+			method: "set_status",
+			freeze: true,
+			doc: frm.doc,
+			args: {close : close},
+			callback: function() {
+				frm.reload_doc();
+			}
+		});
+	},
+
+	make_work_order(frm) {
 		frappe.call({
 			method: "make_work_order",
 			freeze: true,
@@ -131,7 +181,7 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	make_material_request: function(frm) {
+	make_material_request(frm) {
 
 		frappe.confirm(__("Do you want to submit the material request"),
 			function() {
@@ -143,7 +193,7 @@ frappe.ui.form.on('Production Plan', {
 		);
 	},
 
-	create_material_request: function(frm, submit) {
+	create_material_request(frm, submit) {
 		frm.doc.submit_material_request = submit;
 
 		frappe.call({
@@ -156,7 +206,7 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	get_sales_orders: function(frm) {
+	get_sales_orders(frm) {
 		frappe.call({
 			method: "get_open_sales_orders",
 			doc: frm.doc,
@@ -166,7 +216,7 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	get_material_request: function(frm) {
+	get_material_request(frm) {
 		frappe.call({
 			method: "get_pending_material_requests",
 			doc: frm.doc,
@@ -176,34 +226,137 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	get_items: function(frm) {
+	get_items(frm) {
+		frm.clear_table('prod_plan_references');
+
+		frappe.call({
+			method: "get_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function () {
+				refresh_field('po_items');
+			}
+		});
+	},
+	combine_items(frm) {
+		frm.clear_table("prod_plan_references");
+
 		frappe.call({
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
 			callback: function() {
-				refresh_field('po_items');
+				frm.refresh_field("po_items");
+				if (frm.doc.sub_assembly_items.length > 0) {
+					frm.trigger("get_sub_assembly_items");
+				}
 			}
 		});
 	},
 
-	get_items_for_mr: function(frm) {
-		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 
-			'min_order_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'material_request_type'];
+	combine_sub_items(frm) {
+		if (frm.doc.sub_assembly_items.length > 0) {
+			frm.clear_table("sub_assembly_items");
+			frm.trigger("get_sub_assembly_items");
+		}
+	},
+
+	get_sub_assembly_items(frm) {
+		frm.dirty();
+
+		frappe.call({
+			method: "get_sub_assembly_items",
+			freeze: true,
+			doc: frm.doc,
+			callback: function() {
+				refresh_field("sub_assembly_items");
+			}
+		});
+	},
+
+	toggle_for_warehouse(frm) {
+		frm.toggle_reqd("for_warehouse", true);
+	},
+
+	get_items_for_mr(frm) {
+		if (!frm.doc.for_warehouse) {
+			frm.trigger("toggle_for_warehouse");
+			frappe.throw(__("Select the Warehouse"));
+		}
+
+		frm.events.get_items_for_material_requests(frm, [{
+			warehouse: frm.doc.for_warehouse
+		}]);
+	},
+
+	transfer_materials(frm) {
+		if (!frm.doc.for_warehouse) {
+			frm.trigger("toggle_for_warehouse");
+			frappe.throw(__("Select the Warehouse"));
+		}
+
+		if (frm.doc.ignore_existing_ordered_qty) {
+			frm.events.get_items_for_material_requests(frm);
+		} else {
+			const title = __("Transfer Materials For Warehouse {0}", [frm.doc.for_warehouse]);
+			var dialog = new frappe.ui.Dialog({
+				title: title,
+				fields: [
+					{
+						'label': __('Transfer From Warehouses'),
+						'fieldtype': 'Table MultiSelect',
+						'fieldname': 'warehouses',
+						'options': 'Production Plan Material Request Warehouse',
+						get_query: function () {
+							return {
+								filters: {
+									company: frm.doc.company
+								}
+							};
+						},
+					},
+					{
+						'label': __('For Warehouse'),
+						'fieldtype': 'Link',
+						'fieldname': 'target_warehouse',
+						'read_only': true,
+						'default': frm.doc.for_warehouse
+					}
+				]
+			});
+
+			dialog.show();
+
+			dialog.set_primary_action(__("Get Items"), () => {
+				let warehouses = dialog.get_values().warehouses;
+				frm.events.get_items_for_material_requests(frm, warehouses);
+				dialog.hide();
+			});
+		}
+	},
+
+	get_items_for_material_requests(frm, warehouses) {
+		let set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 'from_warehouse',
+			'min_order_qty', 'required_bom_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'ordered_qty',
+			'reserved_qty_for_production', 'material_request_type'];
+
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
 			freeze: true,
-			args: {doc: frm.doc},
+			args: {
+				doc: frm.doc,
+				warehouses: warehouses || []
+			},
 			callback: function(r) {
 				if(r.message) {
 					frm.set_value('mr_items', []);
-					$.each(r.message, function(i, d) {
-						var item = frm.add_child('mr_items');
-						for (let key in d) {
-							if (d[key] && in_list(set_fields, key)) {
-								item[key] = d[key];
+					r.message.forEach(row => {
+						let d = frm.add_child('mr_items');
+						set_fields.forEach(field => {
+							if (row[field]) {
+								d[field] = row[field];
 							}
-						}
+						});
 					});
 				}
 				refresh_field('mr_items');
@@ -211,18 +364,33 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 
-	for_warehouse: function(frm) {
-		if (frm.doc.mr_items) {
-			frm.trigger("get_items_for_mr");
-		}
+	download_materials_required(frm) {
+		const fields = [{
+			fieldname: 'warehouses',
+			fieldtype: 'Table MultiSelect',
+			label: __('Warehouses'),
+			default: frm.doc.from_warehouse,
+			options: "Production Plan Material Request Warehouse",
+			get_query: function () {
+				return {
+					filters: {
+						company: frm.doc.company
+					}
+				};
+			},
+		}];
+
+		frappe.prompt(fields, (row) => {
+			let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
+			open_url_post(frappe.request.url, {
+				cmd: get_template_url,
+				doc: frm.doc,
+				warehouses: row.warehouses
+			});
+		}, __('Select Warehouses to get Stock for Materials Planning'), __('Get Stock'));
 	},
 
-	download_materials_required: function(frm) {
-		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
-		open_url_post(frappe.request.url, { cmd: get_template_url, production_plan: frm.doc.name });
-	},
-
-	show_progress: function(frm) {
+	show_progress(frm) {
 		var bars = [];
 		var message = '';
 		var title = '';
@@ -257,7 +425,7 @@ frappe.ui.form.on('Production Plan', {
 });
 
 frappe.ui.form.on("Production Plan Item", {
-	item_code: function(frm, cdt, cdn) {
+	item_code(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		if (row.item_code) {
 			frappe.call({
@@ -276,7 +444,7 @@ frappe.ui.form.on("Production Plan Item", {
 });
 
 frappe.ui.form.on("Material Request Plan Item", {
-	warehouse: function(frm, cdt, cdn) {
+	warehouse(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		if (row.warehouse && row.item_code && frm.doc.company) {
 			frappe.call({
@@ -296,3 +464,63 @@ frappe.ui.form.on("Material Request Plan Item", {
 		}
 	}
 });
+
+frappe.ui.form.on("Production Plan Sales Order", {
+	sales_order(frm, cdt, cdn) {
+		const { sales_order } = locals[cdt][cdn];
+		if (!sales_order) {
+			return;
+		}
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_so_details",
+			args: { sales_order },
+			callback(r) {
+				const {transaction_date, customer, grand_total} = r.message;
+				frappe.model.set_value(cdt, cdn, 'sales_order_date', transaction_date);
+				frappe.model.set_value(cdt, cdn, 'customer', customer);
+				frappe.model.set_value(cdt, cdn, 'grand_total', grand_total);
+			}
+		});
+	}
+});
+
+cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = function() {
+	return{
+		filters: [
+			['Sales Order','docstatus', '=' ,1]
+		]
+	}
+};
+
+frappe.tour['Production Plan'] = [
+	{
+		fieldname: "get_items_from",
+		title: "Get Items From",
+		description: __("Select whether to get items from a Sales Order or a Material Request. For now select <b>Sales Order</b>.\n A Production Plan can also be created manually where you can select the Items to manufacture.")
+	},
+	{
+		fieldname: "get_sales_orders",
+		title: "Get Sales Orders",
+		description: __("Click on Get Sales Orders to fetch sales orders based on the above filters.")
+	},
+	{
+		fieldname: "get_items",
+		title: "Get Finished Goods for Manufacture",
+		description: __("Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched.")
+	},
+	{
+		fieldname: "po_items",
+		title: "Finished Goods",
+		description: __("On expanding a row in the Items to Manufacture table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process.")
+	},
+	{
+		fieldname: "include_non_stock_items",
+		title: "Include Non Stock Items",
+		description: __("To include non-stock items in the material request planning. i.e. Items for which 'Maintain Stock' checkbox is unticked.")
+	},
+	{
+		fieldname: "include_subcontracted_items",
+		title: "Include Subcontracted Items",
+		description: __("To add subcontracted Item's raw materials if include exploded items is disabled.")
+	}
+];

@@ -3,9 +3,9 @@
 
 frappe.ui.form.on('Homepage', {
 	setup: function(frm) {
-		frm.fields_dict["products"].grid.get_field("item_code").get_query = function(){
+		frm.fields_dict["products"].grid.get_field("item").get_query = function() {
 			return {
-				filters: {'show_in_website': 1}
+				filters: {'published': 1}
 			}
 		}
 	},
@@ -21,39 +21,10 @@ frappe.ui.form.on('Homepage', {
 });
 
 frappe.ui.form.on('Homepage Featured Product', {
-	item_code: function(frm, cdt, cdn) {
-		var featured_product = frappe.model.get_doc(cdt, cdn);
-		if (featured_product.item_code) {
-			frappe.call({
-				method: 'frappe.client.get_value',
-				args: {
-					'doctype': 'Item',
-					'filters': {'name': featured_product.item_code},
-					'fieldname': [
-						'item_name',
-						'web_long_description',
-						'description',
-						'image',
-						'thumbnail'
-					]
-				},
-				callback: function(r) {
-					if (!r.exc) {
-						$.extend(featured_product, r.message);
-						if (r.message.web_long_description) {
-							featured_product.description = r.message.web_long_description;
-						}
-						frm.refresh_field('products');
-					}
-				}
-			});
-		}
-	},
-
-	view: function(frm, cdt, cdn){
-		var child= locals[cdt][cdn]
-		if(child.item_code && frm.doc.products_url){
-			window.location.href = frm.doc.products_url + '/' + encodeURIComponent(child.item_code);
+	view: function(frm, cdt, cdn) {
+		var child= locals[cdt][cdn];
+		if (child.item_code && child.route) {
+			window.open('/' + child.route, '_blank');
 		}
 	}
 });

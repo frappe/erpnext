@@ -1,0 +1,130 @@
+{
+ "actions": [],
+ "autoname": "format:{account_name} merger on {creation}",
+ "creation": "2021-12-09 15:38:04.556584",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1",
+  "root_type",
+  "account",
+  "account_name",
+  "column_break_3",
+  "company",
+  "status",
+  "is_group",
+  "section_break_5",
+  "merge_accounts"
+ ],
+ "fields": [
+  {
+   "depends_on": "root_type",
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "merge_accounts",
+   "fieldtype": "Table",
+   "label": "Accounts to Merge",
+   "options": "Ledger Merge Accounts",
+   "reqd": 1
+  },
+  {
+   "depends_on": "account",
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Pending\nSuccess\nPartial Success\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "root_type",
+   "fieldtype": "Select",
+   "label": "Root Type",
+   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "depends_on": "account",
+   "fetch_from": "account.account_name",
+   "fetch_if_empty": 1,
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "label": "Account Name",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "account",
+   "fetch_from": "account.is_group",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group",
+   "read_only": 1
+  }
+ ],
+ "hide_toolbar": 1,
+ "links": [],
+ "modified": "2021-12-12 21:34:55.155146",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Ledger Merge",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,23 +1,8 @@
-from __future__ import unicode_literals
+from frappe import _
+
 
 def get_data():
 	return {
-		'fieldname': 'asset_name',
-		'non_standard_fieldnames': {
-			'Asset Movement': 'asset'
-		},
-		'transactions': [
-			{
-				'label': ['Maintenance'],
-				'items': ['Asset Maintenance', 'Asset Maintenance Log']
-			},
-			{
-				'label': ['Repair'],
-				'items': ['Asset Repair']
-			},
-			{
-				'label': ['Movement'],
-				'items': ['Asset Movement']
-			}
-		]
+		"non_standard_fieldnames": {"Asset Movement": "asset"},
+		"transactions": [{"label": _("Movement"), "items": ["Asset Movement"]}],
 	}

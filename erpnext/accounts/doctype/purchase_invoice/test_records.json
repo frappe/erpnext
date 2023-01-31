@@ -18,7 +18,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
-    "item_tax_template": "_Test Account Excise Duty @ 10",
+    "item_tax_template": "_Test Account Excise Duty @ 10 - _TC",
     "parentfield": "items",
     "qty": 10,
     "rate": 50,
@@ -43,7 +43,7 @@
    }
   ],
   "grand_total": 0,
-  "naming_series": "_T-BILL",
+  "naming_series": "T-PINV-",
   "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
@@ -138,13 +138,12 @@
     "row_id": 7
    }
   ],
-  "posting_date": "2013-02-03",
   "supplier": "_Test Supplier",
   "supplier_name": "_Test Supplier"
  },
- 
- 
- 
+
+
+
  {
   "bill_no": "NA",
   "buying_price_list": "_Test Price List",
@@ -168,7 +167,7 @@
    }
   ],
   "grand_total": 0,
-  "naming_series": "_T-Purchase Invoice-",
+  "naming_series": "T-PINV-",
   "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
@@ -204,7 +203,6 @@
     "tax_amount": 150.0
    }
   ],
-  "posting_date": "2013-02-03",
   "supplier": "_Test Supplier",
   "supplier_name": "_Test Supplier"
  }

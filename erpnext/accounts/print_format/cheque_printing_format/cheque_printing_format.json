@@ -10,6 +10,6 @@
  "modified_by": "Administrator", 
  "name": "Cheque Printing Format", 
  "owner": "Administrator", 
- "print_format_type": "Server", 
+ "print_format_type": "Jinja", 
  "standard": "Yes"
 }
