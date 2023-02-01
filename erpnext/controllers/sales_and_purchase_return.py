@@ -305,7 +305,7 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 			fields += ["sum(abs(`tab{0}`.received_stock_qty)) as received_stock_qty".format(child_doctype)]
 
 	# Used retrun against and supplier and is_retrun because there is an index added for it
-	data = frappe.db.get_list(
+	data = frappe.get_all(
 		doctype,
 		fields=fields,
 		filters=[
