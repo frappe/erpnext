@@ -117,7 +117,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.eligible_for_transporter_payment",
    "fieldname": "transporter_details_section",
    "fieldtype": "Section Break",
    "label": "Transporter Details"
@@ -166,7 +165,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-10-31 15:59:44.469679",
+ "modified": "2023-02-01 15:17:28.146804",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Trip Log Item",

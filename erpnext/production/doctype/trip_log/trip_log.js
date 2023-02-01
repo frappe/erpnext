@@ -8,7 +8,7 @@ frappe.ui.form.on('Trip Log', {
 	onload:function(frm){
 		frm.fields_dict['items'].grid.get_field('equipment').get_query = function(){
 			return {
-				filters: {hired_equipment:1}
+				filters: {enabled:1}
 			}
 		}
 	}
