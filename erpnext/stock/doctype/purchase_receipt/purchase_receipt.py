@@ -903,7 +903,20 @@ def get_billed_amount_against_po(po_items):
 def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate=False):
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
+<<<<<<< HEAD
 	item_wise_returned_qty = get_item_wise_returned_qty(pr_doc)
+=======
+	for item in pr_doc.items:
+		return_data = frappe.get_all(
+			"Purchase Receipt",
+			fields=["sum(abs(`tabPurchase Receipt Item`.qty)) as qty"],
+			filters=[
+				["Purchase Receipt", "docstatus", "=", 1],
+				["Purchase Receipt", "is_return", "=", 1],
+				["Purchase Receipt Item", "purchase_receipt_item", "=", item.name],
+			],
+		)
+>>>>>>> 3518d4be1d (fix(update_billing_percentage): Remove permlevel checks on aggregated)
 
 	for item in pr_doc.items:
 		returned_qty = flt(item_wise_returned_qty.get(item.name))
