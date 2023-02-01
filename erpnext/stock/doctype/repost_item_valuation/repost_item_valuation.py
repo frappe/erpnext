@@ -83,6 +83,17 @@ class RepostItemValuation(Document):
 		if write:
 			self.db_set("status", self.status)
 
+	def on_cancel(self):
+		self.validate_repost_cancelled()
+
+	def validate_repost_cancelled(self):
+		if self.status != "Completed":
+			frappe.throw(
+				_(
+					"User can't cancel the non completed Repost Item Valuation. Please try after completion of reposting."
+				)
+			)
+
 	def on_submit(self):
 		"""During tests reposts are executed immediately.
 

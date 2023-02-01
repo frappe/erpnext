@@ -376,3 +376,17 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		accounts_settings.acc_frozen_upto = ""
 		accounts_settings.save()
+
+	def test_validate_repost_cancelled(self):
+		riv = frappe.get_doc(
+			doctype="Repost Item Valuation",
+			item_code="_Test Item",
+			warehouse="_Test Warehouse - _TC",
+			based_on="Item and Warehouse",
+			posting_date=today(),
+			posting_time="00:01:00",
+		)
+		riv.flags.dont_run_in_test = True  # keep it queued
+		riv.submit()
+
+		self.assertRaises(frappe.ValidationError, riv.cancel)
