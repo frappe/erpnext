@@ -61,6 +61,7 @@ class Quotation(SellingController):
 				)
 
 	def get_ordered_status(self):
+		status = "Open"
 		ordered_items = frappe._dict(
 			frappe.db.get_all(
 				"Sales Order Item",
@@ -71,15 +72,34 @@ class Quotation(SellingController):
 			)
 		)
 
-		status = "Open"
-		if ordered_items:
+		if not ordered_items:
+			return status
+
+		alternative_items = list(filter(lambda row: row.is_alternative, self.get("items")))
+		self._items = self.get_valid_items(alternative_items) if alternative_items else self.get("items")
+
+		if any(row.qty > ordered_items.get(row.item_code, 0.0) for row in self._items):
+			status = "Partially Ordered"
+		else:
 			status = "Ordered"
 
-			for item in self.get("items"):
-				if item.qty > ordered_items.get(item.item_code, 0.0):
-					status = "Partially Ordered"
-
 		return status
+
+	def get_valid_items(self, alternative_items):
+		"""
+		Filters out unordered alternative items/original item from table.
+		"""
+		alternatives_map = self.get_alternative_item_map(alternative_items)
+
+		def can_map(row) -> bool:
+			if row.is_alternative:
+				return alternatives_map[row.alternative_to][row.item_code]
+			elif row.item_code in alternatives_map:
+				return alternatives_map[row.item_code][row.item_code]
+			else:
+				return True
+
+		return list(filter(can_map, self.get("items")))
 
 	def is_fully_ordered(self):
 		return self.get_ordered_status() == "Ordered"
@@ -113,6 +133,42 @@ class Quotation(SellingController):
 					),
 					title=_("Invalid Item"),
 				)
+
+	def get_alternative_item_map(self, alternative_items):
+		"""
+		Returns a map of alternatives & the original item with which one was selected by the Customer.
+		This is to identify sets of alternative-original items from the table.
+		Structure:
+		        {
+		                'Original Item': {'Original Item': False, 'Alt-1': True, 'Alt-2': False}
+		        }
+		"""
+		alternatives_map = {}
+
+		def add_to_map(row):
+			in_sales_order = frappe.db.exists(
+				"Sales Order Item", {"quotation_item": row.name, "item_code": row.item_code}
+			)
+			alternatives_map[row.alternative_to][row.item_code] = bool(in_sales_order)
+
+		for row in alternative_items:
+			if not alternatives_map.get(row.alternative_to):
+				alternatives_map.setdefault(row.alternative_to, {})
+				add_to_map(row)
+
+				original_item_row = frappe._dict(
+					name=frappe.get_value(
+						"Quotation Item", {"item_code": row.alternative_to, "is_alternative": 0}
+					),
+					item_code=row.alternative_to,
+					alternative_to=row.alternative_to,
+				)
+				add_to_map(original_item_row)
+				continue
+
+			add_to_map(row)
+
+		return alternatives_map
 
 	def update_opportunity(self, status):
 		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
