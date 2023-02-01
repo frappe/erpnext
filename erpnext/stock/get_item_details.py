@@ -587,6 +587,8 @@ def get_item_tax_template(args, item, out=None):
 	item_tax_template = None
 	if item.taxes:
 		item_tax_template = _get_item_tax_template(args, item.taxes, out)
+		if item_tax_template:
+			return item_tax_template
 
 	if not item_tax_template:
 		item_group = item.item_group
