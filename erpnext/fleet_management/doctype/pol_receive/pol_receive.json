@@ -16,6 +16,7 @@
   "posting_time",
   "direct_consumption",
   "section_break_6",
+  "use_common_fuelbook",
   "equipment",
   "equipment_type",
   "uom",
@@ -50,7 +51,8 @@
   "memo_number",
   "section_break_8",
   "remarks",
-  "amended_from"
+  "amended_from",
+  "currency"
  ],
  "fields": [
   {
@@ -328,12 +330,25 @@
    "fieldname": "pol_slip_no",
    "fieldtype": "Data",
    "label": "POL Slip No."
+  },
+  {
+   "default": "0",
+   "fieldname": "use_common_fuelbook",
+   "fieldtype": "Check",
+   "label": "Use Common Fuelbook"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-19 14:23:16.331992",
+ "modified": "2023-02-02 13:59:28.926579",
  "modified_by": "Administrator",
  "module": "Fleet Management",
  "name": "POL Receive",

@@ -27,13 +27,29 @@ frappe.ui.form.on('POL Expense', {
 	},
 	equipment:function(frm){
 		frm.events.get_previous(frm)
-		frm.set_query("fuel_book",function(){
-			return {
-				filters:{
-					"equipment":["in",[frm.doc.equipment,""]]
+		frm.events.set_fuelbook_filter(frm)
+	},
+	use_common_fuelbook:function(frm){
+		frm.events.set_fuelbook_filter(frm)
+	},
+	set_fuelbook_filter:function(frm){
+		if (frm.doc.use_common_fuelbook){
+			frm.set_query("fuel_book",function(){
+				return {
+					filters:{
+						"type":"Common"
+					}
 				}
-			}
-		})
+			})
+		}else{
+			frm.set_query("fuel_book",function(){
+				return {
+					filters:{
+						"equipment":frm.doc.equipment
+					}
+				}
+			})
+		}
 	},
 	party:function(frm){
 		if (frm.doc.party){
@@ -43,6 +59,7 @@ frappe.ui.form.on('POL Expense', {
 					party_type:"Supplier",
 					party:frm.doc.party,
 					company: frm.doc.company,
+					is_advance: frm.doc.use_common_fuelbook
 				},
 				callback: function(r) {
 					if(r.message) {
@@ -58,7 +75,7 @@ frappe.ui.form.on('POL Expense', {
 	},
 	refresh: function(frm){
 		enable_disable(frm);
-		if (frm.doc.docstatus === 1) {
+		if (frm.doc.docstatus === 1 && frm.doc.use_common_fuelbook == 0 && frm.doc.is_opening == 0) {
 			frm.add_custom_button(
 			  __("Ledger"),
 			  function () {
@@ -192,7 +209,7 @@ var calculate_balance=(frm)=>{
 	}
 }
 var open_ledger = (frm)=>{
-	if (frm.doc.docstatus === 1) {
+	if (frm.doc.docstatus === 1  && frm.doc.is_opening == 0) {
 		frm.add_custom_button(
 		  __("Journal Entry"),
 		  function () {

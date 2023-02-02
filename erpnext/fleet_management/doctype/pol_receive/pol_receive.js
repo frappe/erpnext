@@ -3,26 +3,34 @@
 
 frappe.ui.form.on('POL Receive', {
 	refresh: function(frm) {
-		// if (frm.doc.docstatus === 1) {
-		// 	frm.add_custom_button(__('Stock Ledger'), function () {
-		// 		frappe.route_options = {
-		// 				voucher_no: frm.doc.name,
-		// 				from_date: frm.doc.posting_date,
-		// 				to_date: frm.doc.posting_date,
-		// 				company: frm.doc.company,
-		// 				group_by_voucher: false
-		// 		};
-		// 		frappe.set_route("query-report", "Stock Ledger");
-		// 	}, __("View"));
-		// }
+		if (frm.doc.docstatus === 1 && frm.doc.use_common_fuelbook == 1) {
+			frm.add_custom_button(
+				__("Ledger"),
+				function () {
+				  frappe.route_options = {
+					voucher_no: frm.doc.name,
+					from_date: frm.doc.entry_date,
+					to_date: frm.doc.entry_date,
+					company: frm.doc.company,
+					group_by_voucher: false,
+				  };
+				  frappe.set_route("query-report", "General Ledger");
+				},
+				__("View")
+			  );
+		}
 	},
 	qty: function(frm) {
 		calculate_total(frm)
+		frm.events.reset_items()
+		frm.refresh_fields("items")
 	},
 	direct_consumption:function(frm){
 		set_equipment_filter(frm)
 	},
 	rate: function(frm) {
+		frm.events.reset_items()
+		frm.refresh_fields("items")
 		calculate_total(frm)
 	},
 	get_pol_expense:function(frm){
@@ -42,11 +50,45 @@ frappe.ui.form.on('POL Receive', {
 		frm.set_query("fuelbook",function(){
 			return {
 				filters:{
-					"equipment":["in",[frm.doc.equipment,""]]
+					"equipment":frm.doc.equipment
 				}
 			}
 		})
-	}
+	},
+	use_common_fuelbook:function(frm){
+		frm.set_query("fuelbook",function(){
+			return {
+				filters:{
+					"type":"Common",
+					"branch":frm.doc.branch
+				}
+			}
+		})
+		if(frm.doc.use_common_fuelbook){
+			frm.set_query("equipment",function(){
+				return {
+					filters:{
+						"branch":frm.doc.branch,
+						"enabled":1,
+						"hired_equipment":1
+					}
+				}
+			})
+		}
+		else{
+			frm.set_query("equipment",function(){
+				return {
+					filters:{
+						"branch":frm.doc.branch,
+						"enabled":1
+					}
+				}
+			})
+		}
+	},
+	reset_items:function(frm){
+		cur_frm.clear_table("items");
+	},
 });
 cur_frm.set_query("pol_type", function() {
 	return {

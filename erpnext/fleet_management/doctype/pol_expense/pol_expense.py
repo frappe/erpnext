@@ -8,6 +8,7 @@ from erpnext.accounts.doctype.business_activity.business_activity import get_def
 from frappe.utils import money_in_words, cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form, now_datetime, get_datetime
 from erpnext.custom_workflow import validate_workflow_states, notify_workflow_states
 from frappe import _, qb, throw, bold
+from erpnext.accounts.party import get_party_account
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import (
 	get_round_off_account_and_cost_center,
@@ -18,19 +19,20 @@ from erpnext.accounts.general_ledger import (
 
 class POLExpense(AccountsController):
 	def validate(self):
-		validate_workflow_states(self)
+		# validate_workflow_states(self)
 		self.posting_date = self.entry_date
 		self.validate_amount()
 		self.calculate_pol()
-		if self.workflow_state != "Approved":
-			notify_workflow_states(self)
+		# if self.workflow_state != "Approved":
+		# 	notify_workflow_states(self)
 		self.set_status()
 
 	
 	def on_submit(self): 
-		self.make_gl_entries()
+		if cint(self.use_common_fuelbook) == 0:
+			self.make_gl_entries()
 		self.post_journal_entry()
-		notify_workflow_states(self)
+		# notify_workflow_states(self)
 
 	def before_cancel(self):
 		if self.is_opening:
@@ -131,7 +133,8 @@ class POLExpense(AccountsController):
 			frappe.throw(_("Amount should be greater than zero"))
 			
 		default_ba = get_default_ba()
-
+		if not self.credit_account:
+			self.credit_account = get_party_account(self.party_type, self.party, self.company, is_advance = self.use_common_fuelbook)
 		credit_account = self.credit_account
 		expense_account = frappe.db.get_value("Branch",self.fuelbook_branch,"expense_bank_account")
 		if not expense_account:
@@ -158,8 +161,8 @@ class POLExpense(AccountsController):
 			"doctype": "Journal Entry",
 			"voucher_type": "Bank Entry",
 			"naming_series": "Bank Payment Voucher",
-			"title": "POL Expense - " + self.equipment,
-			"user_remark": "Note: " + "POL Expense - " + self.equipment,
+			"title": "POL Expense - " + self.equipment if cint(self.use_common_fuelbook) == 0 else self.fuel_book,
+			"user_remark": "Note: " + "POL Expense - " + self.equipment if cint(self.use_common_fuelbook) == 0 else self.fuel_book,
 			"posting_date": self.posting_date,
 			"company": self.company,
 			"total_amount_in_words": money_in_words(self.amount),
@@ -211,11 +214,15 @@ class POLExpense(AccountsController):
 			frappe.msgprint("No pol receive found within Date {} to {}".format(self.from_date, self.to_date))
 
 	def validate_amount(self):
-		if flt(self.amount) > flt(self.expense_limit):
+		if cint(self.use_common_fuelbook) == 0 and flt(self.amount) > flt(self.expense_limit):
 			frappe.throw("Amount cannot be greater than expense limit")
-		self.outstanding_amount = self.amount
+		if cint(self.is_opening) == 0 :
+			self.outstanding_amount = self.amount
 
 	def set_status(self, update=False, status=None, update_modified=True):
+		if cint(self.is_opening) == 1 :
+			self.payment_status = "Paid"
+
 		if self.is_new():
 			self.payment_status = "Draft"
 			return
@@ -241,26 +248,36 @@ class POLExpense(AccountsController):
 
 	@frappe.whitelist()
 	def pull_previous_expense(self):
-		if not self.equipment or not self.fuel_book:
-			frappe.throw("Equipment or Fuel book is missing")
-		pol_exp = qb.DocType(self.doctype)
-		self.set('items',[])
-
-		if flt(self.expense_limit) <= 0 and self.equipment_type:
-			self.expense_limit = frappe.db.get_value("Equipment Type",self.equipment_type,"pol_expense_limit")
-			
-		total_amount = 0
-		for d in (qb.from_(pol_exp).select(pol_exp.name.as_("reference"), pol_exp.amount,pol_exp.adjusted_amount, pol_exp.balance_amount)
-						.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) 
+		if cint(self.use_common_fuelbook) == 1:
+			for d in (qb.from_(pol_exp).select(pol_exp.name.as_("reference"), pol_exp.amount,pol_exp.adjusted_amount, pol_exp.balance_amount)
+						.where( (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) 
 							& (pol_exp.name != self.name) & (pol_exp.fuel_book == self.fuel_book))
 						).run(as_dict= True):
-			total_amount += flt(d.balance_amount)
-			self.append("items", d)
-		self.previous_balance_amount = total_amount
+				total_amount += flt(d.balance_amount)
+				self.append("items", d)
+				self.previous_balance_amount = total_amount
+		else:
+			if not self.equipment or not self.fuel_book:
+				frappe.throw("Equipment or Fuel book is missing")
+			pol_exp = qb.DocType(self.doctype)
+			self.set('items',[])
+
+			if flt(self.expense_limit) <= 0 and self.equipment_type:
+				self.expense_limit = frappe.db.get_value("Equipment Type",self.equipment_type,"pol_expense_limit")
+				
+			total_amount = 0
+			for d in (qb.from_(pol_exp).select(pol_exp.name.as_("reference"), pol_exp.amount,pol_exp.adjusted_amount, pol_exp.balance_amount)
+							.where((pol_exp.equipment == self.equipment) & (pol_exp.docstatus == 1 ) & ( pol_exp.balance_amount > 0 ) 
+								& (pol_exp.name != self.name) & (pol_exp.fuel_book == self.fuel_book))
+							).run(as_dict= True):
+				total_amount += flt(d.balance_amount)
+				self.append("items", d)
+			self.previous_balance_amount = total_amount
+			self.calculate_km_diff()
+
 		if flt(self.expense_limit) > 0 :
 			self.amount = flt(self.expense_limit) - flt(self.previous_balance_amount)
 			self.balance_amount = self.amount
-		self.calculate_km_diff()
 
 def get_permission_query_conditions(user):
 	if not user: user = frappe.session.user

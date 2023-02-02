@@ -8,6 +8,13 @@ from frappe.utils import flt, cint
 from erpnext.custom_utils import check_future_date
 from erpnext.controllers.stock_controller import StockController
 from erpnext.fleet_management.fleet_utils import get_pol_till, get_pol_till, get_previous_km
+from erpnext.accounts.general_ledger import (
+	get_round_off_account_and_cost_center,
+	make_gl_entries,
+	make_reverse_gl_entries,
+	merge_similar_entries,
+)
+from erpnext.accounts.party import get_party_account
 
 class POLReceive(StockController):
 	def validate(self):
@@ -19,30 +26,74 @@ class POLReceive(StockController):
 	def on_submit(self):
 		self.update_pol_expense()
 		self.make_pol_entry()
-	
+		self.make_gl_entries()
 	def before_cancel(self):
 		self.delete_pol_entry()
 
 	def on_cancel(self):
 		self.update_pol_expense()
-
+		self.make_pol_entry()
+		self.make_gl_entries()
 	def balance_check(self):
 		total_balance = 0
 		for row in self.items:
 			total_balance = flt(total_balance) + flt(row.balance_amount)
 		if total_balance < self.total_amount :
 			frappe.throw("<b>Payable Amount</b> cannot be greater than <b>Total Advance Balance</b>")
+	def make_gl_entries(self):
+		if cint(self.use_common_fuelbook) == 0:
+			return
+
+		gl_entries = []
+		self.make_supplier_gl_entry(gl_entries)
+		self.make_expense_gl_entry(gl_entries)
+		gl_entries = merge_similar_entries(gl_entries)
+		make_gl_entries(gl_entries,update_outstanding="No",cancel=self.docstatus == 2)
+
+	def make_supplier_gl_entry(self, gl_entries):
+		if flt(self.total_amount) > 0:
+			credit_account = get_party_account("Supplier", self.supplier, self.company, is_advance = self.use_common_fuelbook)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": credit_account,
+					"credit": self.total_amount,
+					"credit_in_account_currency": self.total_amount,
+					"against_voucher": self.name,
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center,
+					"voucher_type":self.doctype,
+					"voucher_no":self.name
+				}, self.currency))
+	
+	def make_expense_gl_entry(self, gl_entries):
+		if flt(self.total_amount) > 0:
+			expense_account = frappe.db.get_value("Company", self.company,'pol_expense_account')
+			gl_entries.append(
+					self.get_gl_dict({
+						"account": expense_account,
+						"debit": self.total_amount,
+						"debit_in_account_currency": self.total_amount,
+						"against_voucher": self.name,
+						"party_type": "Supplier",
+						"party": frappe.db.get_value("Equipment", self.equipment,"supplier"),
+						"against_voucher_type": self.doctype,
+						"cost_center": self.cost_center,
+						"voucher_type":self.doctype,
+						"voucher_no":self.name
+					}, self.currency))
 
 	def update_pol_expense(self):
 		if self.docstatus == 2 :
 			for item in self.items:
-				doc = frappe.get_doc("POL Expense", {'name':item.pol_expense,'equipment':self.equipment})
+				doc = frappe.get_doc("POL Expense", {'name':item.pol_expense})
 				doc.adjusted_amount = flt(doc.adjusted_amount) - flt(item.allocated_amount)
 				doc.balance_amount  = flt(doc.amount) - flt(doc.adjusted_amount)
 				doc.save(ignore_permissions=True)
 			return
 		for item in self.items:
-			doc = frappe.get_doc("POL Expense", {'name':item.pol_expense,'equipment':self.equipment})
+			doc = frappe.get_doc("POL Expense", {'name':item.pol_expense})
 			doc.balance_amount  = flt(item.balance_amount) - flt(item.allocated_amount)
 			doc.adjusted_amount = flt(doc.adjusted_amount) + flt(item.allocated_amount)
 			doc.save(ignore_permissions=True)
@@ -98,23 +149,45 @@ class POLReceive(StockController):
 		data = []
 		if not self.equipment or not self.supplier:
 			frappe.throw("Either equipment or Supplier is missing")
-		data = (
-				qb.from_(pol_exp)
-				.inner_join(je)
-				.on(pol_exp.journal_entry == je.name)
-				.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-				.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) 
-					& (pol_exp.equipment == self.equipment) & (pol_exp.party == self.supplier)
-					& (pol_exp.fuel_book == self.fuelbook))
-				.orderby( pol_exp.entry_date,order=qb.desc)
-				).run(as_dict=True)
-		data += (
-				qb.from_(pol_exp)
-				.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-				.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1) 
-					& ( pol_exp.party == self.supplier) & (pol_exp.fuel_book == self.fuelbook))
-				.orderby( pol_exp.entry_date,order=qb.desc)
-				).run(as_dict=True)
+
+		if cint(self.use_common_fuelbook) == 0:
+			data = (
+					qb.from_(pol_exp)
+					.inner_join(je)
+					.on(pol_exp.journal_entry == je.name)
+					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
+					.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) 
+						& (pol_exp.equipment == self.equipment) & (pol_exp.party == self.supplier)
+						& (pol_exp.fuel_book == self.fuelbook))
+					.orderby( pol_exp.entry_date,order=qb.desc)
+					).run(as_dict=True)
+			data += (
+					qb.from_(pol_exp)
+					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
+					.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1) 
+						& ( pol_exp.party == self.supplier) & (pol_exp.fuel_book == self.fuelbook))
+					.orderby( pol_exp.entry_date,order=qb.desc)
+					).run(as_dict=True)
+		else:
+			data = (
+					qb.from_(pol_exp)
+					.inner_join(je)
+					.on(pol_exp.journal_entry == je.name)
+					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
+					.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) 
+						& (pol_exp.party == self.supplier)
+						& (pol_exp.fuel_book == self.fuelbook) 
+						& (pol_exp.use_common_fuelbook == 1))
+					.orderby( pol_exp.entry_date,order=qb.desc)
+					).run(as_dict=True)
+			data += (
+					qb.from_(pol_exp)
+					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
+					.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) & (pol_exp.equipment == self.equipment) & (pol_exp.is_opening == 1) 
+						& (pol_exp.fuel_book == self.fuelbook)
+						& (pol_exp.use_common_fuelbook == 1))
+					.orderby( pol_exp.entry_date,order=qb.desc)
+					).run(as_dict=True)
 		if not data:
 			frappe.throw("NO POL Expense Found against Equipment {}.Make sure Journal  Entry are submitted".format(self.equipment))
 		self.set('items',[])

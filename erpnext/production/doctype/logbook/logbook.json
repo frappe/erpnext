@@ -43,6 +43,8 @@
    "fetch_from": "equipment_hiring_form.branch",
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch"
   },
@@ -55,6 +57,7 @@
    "fieldname": "equipment",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Equipment",
    "options": "Equipment",
    "read_only": 1,
@@ -104,6 +107,7 @@
    "depends_on": "eval:doc.branch",
    "fieldname": "equipment_hiring_form",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Equipment Hiring Form",
    "options": "Equipment Hiring Form",
    "reqd": 1
@@ -237,7 +241,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-04 15:58:59.443312",
+ "modified": "2023-02-02 16:19:20.103267",
  "modified_by": "Administrator",
  "module": "Production",
  "name": "Logbook",
