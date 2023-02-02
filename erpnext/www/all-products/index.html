@@ -34,7 +34,30 @@
 	<div class="col-12 order-2 col-md-8 order-md-1 products-list">
 		{% if items %}
 			{% for item in items %}
-				{% include "erpnext/www/all-products/item_row.html" %}
+				<div class="card mb-3">
+					<div class="row no-gutters">
+						<div class="col-md-3">
+							<div class="card-body">
+								<a class="no-underline" href="/{{ item.route }}">
+									<img class="website-image" src="{{ item.website_image or item.image or 'no-image.jpg' }}" alt="{{ item.item_name }}">
+								</a>
+							</div>
+						</div>
+						<div class="col-md-9">
+							<div class="card-body">
+								<h5 class="card-title">
+									<a class="text-dark" href="/{{ item.route }}">
+										{{ item.item_name or item.name }}
+									</a>
+								</h5>
+								<p class="card-text">
+									{{ item.website_description or item.description or '<i class="text-muted">No description</i>' }}
+								</p>
+								<a href="/{{ item.route }}" class="btn btn-sm btn-light">{{ _('More details') }}</a>
+							</div>
+						</div>
+					</div>
+				</div>
 			{% endfor %}
 		{% else %}
 			{% include "erpnext/www/all-products/not_found.html" %}
