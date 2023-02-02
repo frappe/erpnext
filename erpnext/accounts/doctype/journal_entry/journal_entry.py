@@ -46,7 +46,9 @@ class JournalEntry(AccountsController):
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
-		self.make_gl_entries()
+		#self.make_gl_entries()
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
+
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.update_loan()

@@ -33,7 +33,8 @@ class Asset(AccountsController):
 		self.set_status()
 		self.make_asset_movement()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
-			self.make_gl_entries()
+			#self.make_gl_entries()
+			frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 
 	def before_cancel(self):
 		self.cancel_auto_gen_movement()

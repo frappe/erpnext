@@ -174,7 +174,8 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		# this sequence because outstanding may get -ve
-		self.make_gl_entries()
+		#self.make_gl_entries()
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")

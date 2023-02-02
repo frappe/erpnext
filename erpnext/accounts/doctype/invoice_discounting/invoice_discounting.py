@@ -46,8 +46,8 @@ class InvoiceDiscounting(AccountsController):
 
 	def on_submit(self):
 		self.update_sales_invoice()
-		self.make_gl_entries()
-
+		#self.make_gl_entries()
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 	def on_cancel(self):
 		self.set_status()
 		self.update_sales_invoice()

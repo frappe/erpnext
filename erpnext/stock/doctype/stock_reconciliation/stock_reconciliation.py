@@ -39,7 +39,8 @@ class StockReconciliation(StockController):
 
 	def on_submit(self):
 		self.update_stock_ledger()
-		self.make_gl_entries()
+		#self.make_gl_entries()
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")

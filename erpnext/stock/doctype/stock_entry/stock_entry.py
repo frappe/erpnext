@@ -121,17 +121,12 @@ class StockEntry(StockController):
 		self.update_quality_inspection()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
-		stock_gl = frappe.new_doc('Stock GL Queue')
-		stock_gl.stock_entry = self.name
-		stock_gl.save(ignore_permissions=True)
-		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",stock_entry_name=stock_gl.stock_entry,queue="gl",enqueue_after_commit=True)
+		# stock_gl = frappe.new_doc('Stock GL Queue')
+		# stock_gl.stock_entry = self.name
+		# stock_gl.save(ignore_permissions=True)
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 		# #enqueue(StockEntry.make_gl_entries, self=self, queue='short')
 		# self.make_gl_entries()
-		# update slu
-		# sles = frappe.db.sql(f'''SELECT * from `tabStock Ledger Entry` WHERE voucher_no = '{self.name}' ''', as_dict=True)
-		# for sle in sles:
-		# 	frappe.enqueue("nrp_manufacturing.modules.gourmet.stock_ledger_entry.stock_ledger_entry.stock_ledger_entry_qty_stock_queue_and_value",sle_name=sle.name,warehouse=sle.warehouse,item_code=sle.item_code,created_on=sle.creation,queue="slu_primary",enqueue_after_commit=True)
-
 		frappe.db.sql("UPDATE `tabStock Entry` SET queue_status='Completed' WHERE `name`='{docname}';".format(docname=self.name))
 
 
