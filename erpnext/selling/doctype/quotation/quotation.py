@@ -75,8 +75,8 @@ class Quotation(SellingController):
 		if not ordered_items:
 			return status
 
-		alternative_items = list(filter(lambda row: row.is_alternative, self.get("items")))
-		self._items = self.get_valid_items(alternative_items) if alternative_items else self.get("items")
+		has_alternatives = any(row.is_alternative for row in self.get("items"))
+		self._items = self.get_valid_items() if has_alternatives else self.get("items")
 
 		if any(row.qty > ordered_items.get(row.item_code, 0.0) for row in self._items):
 			status = "Partially Ordered"
@@ -85,19 +85,26 @@ class Quotation(SellingController):
 
 		return status
 
-	def get_valid_items(self, alternative_items):
+	def get_valid_items(self):
 		"""
-		Filters out unordered alternative items/original item from table.
+		Filters out items in an alternatives set that were not ordered.
 		"""
-		alternatives_map = self.get_alternative_item_map(alternative_items)
+
+		def is_in_sales_order(row):
+			in_sales_order = bool(
+				frappe.db.exists(
+					"Sales Order Item", {"quotation_item": row.name, "item_code": row.item_code, "docstatus": 1}
+				)
+			)
+			return in_sales_order
+
+		items_with_alternatives = self.get_items_having_alternatives()
 
 		def can_map(row) -> bool:
-			if row.is_alternative:
-				return alternatives_map[row.alternative_to][row.item_code]
-			elif row.item_code in alternatives_map:
-				return alternatives_map[row.item_code][row.item_code]
-			else:
-				return True
+			if row.is_alternative or (row.item_code in items_with_alternatives):
+				return is_in_sales_order(row)
+
+			return True
 
 		return list(filter(can_map, self.get("items")))
 
@@ -121,54 +128,22 @@ class Quotation(SellingController):
 			self.customer_name = company_name or lead_name
 
 	def validate_alternative_items(self):
-		items_with_alternatives = filter(lambda item: not item.is_alternative, self.get("items"))
-		items_with_alternatives = list(map(lambda item: item.item_code, items_with_alternatives))
+		if not any(row.is_alternative for row in self.get("items")):
+			return
+
+		non_alternative_items = filter(lambda item: not item.is_alternative, self.get("items"))
+		non_alternative_items = list(map(lambda item: item.item_code, non_alternative_items))
 
 		alternative_items = filter(lambda item: item.is_alternative, self.get("items"))
+
 		for row in alternative_items:
-			if row.alternative_to not in items_with_alternatives:
+			if row.alternative_to not in non_alternative_items:
 				frappe.throw(
 					_("Row #{0}: {1} is not a valid non-alternative Item from the table").format(
 						row.idx, frappe.bold(row.alternative_to)
 					),
 					title=_("Invalid Item"),
 				)
-
-	def get_alternative_item_map(self, alternative_items):
-		"""
-		Returns a map of alternatives & the original item with which one was selected by the Customer.
-		This is to identify sets of alternative-original items from the table.
-		Structure:
-		        {
-		                'Original Item': {'Original Item': False, 'Alt-1': True, 'Alt-2': False}
-		        }
-		"""
-		alternatives_map = {}
-
-		def add_to_map(row):
-			in_sales_order = frappe.db.exists(
-				"Sales Order Item", {"quotation_item": row.name, "item_code": row.item_code}
-			)
-			alternatives_map[row.alternative_to][row.item_code] = bool(in_sales_order)
-
-		for row in alternative_items:
-			if not alternatives_map.get(row.alternative_to):
-				alternatives_map.setdefault(row.alternative_to, {})
-				add_to_map(row)
-
-				original_item_row = frappe._dict(
-					name=frappe.get_value(
-						"Quotation Item", {"item_code": row.alternative_to, "is_alternative": 0}
-					),
-					item_code=row.alternative_to,
-					alternative_to=row.alternative_to,
-				)
-				add_to_map(original_item_row)
-				continue
-
-			add_to_map(row)
-
-		return alternatives_map
 
 	def update_opportunity(self, status):
 		for opportunity in set(d.prevdoc_docname for d in self.get("items")):
@@ -246,6 +221,11 @@ class Quotation(SellingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.valid_till = None
+
+	def get_items_having_alternatives(self):
+		alternative_items = filter(lambda item: item.is_alternative, self.get("items"))
+		items_with_alternatives = set((map(lambda item: item.alternative_to, alternative_items)))
+		return items_with_alternatives
 
 
 def get_list_context(context=None):
