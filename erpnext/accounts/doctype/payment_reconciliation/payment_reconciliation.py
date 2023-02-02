@@ -369,7 +369,7 @@ class PaymentReconciliation(Document):
 		)
 
 		journal_entry.append("accounts", journal_account)
-
+		journal_entry.flags.ignore_mandatory = True
 		journal_entry.save()
 		journal_entry.submit()
 
