@@ -1381,7 +1381,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			}
 
 			if(doc.doctype != "Material Request") {
-				this.frm.trigger("net_weight_per_unit");
+				this.frm.trigger("net_weight_per_unit", cdt, cdn);
 			} else {
 				this.calculate_total_qty();
 			}
@@ -1413,7 +1413,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	net_weight_per_unit(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-		item.net_weight = flt(item.net_weight_per_unit * flt(item.stock_qty), precision("net_weight", item));
+		item.net_weight = flt(flt(item.net_weight_per_unit) * flt(item.stock_qty), precision("net_weight", item));
 		refresh_field("net_weight", item.name, item.parentfield);
 		this.calculate_taxes_and_totals();
 		this.shipping_rule();
