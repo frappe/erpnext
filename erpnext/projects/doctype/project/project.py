@@ -98,7 +98,6 @@ class Project(StatusUpdater):
 		self.validate_applies_to()
 		self.validate_readings()
 		self.validate_depreciation()
-		self.validate_feedback()
 		self.validate_warranty()
 		self.validate_vehicle_panels()
 
@@ -834,16 +833,6 @@ class Project(StatusUpdater):
 					.format(d.idx, frappe.bold(d.depreciation_item_code)))
 
 			item_codes_visited.add(d.depreciation_item_code)
-
-	def validate_feedback(self):
-		if not self.get("customer_feedback"):
-			self.feedback_date = self.feedback_time = None
-
-		elif not self.get("feedback_date") or not self.get("feedback_time"):
-			cur_dt = get_datetime()
-			self.feedback_date = getdate(cur_dt)
-			self.feedback_time = get_time(cur_dt)
-			self.customer_feedback = clean_whitespace(self.customer_feedback)
 
 	def validate_warranty(self):
 		if self.get('warranty_claim_denied'):
@@ -2149,35 +2138,3 @@ def set_warranty_claim_denied(projects, denied, reason=None):
 		doc.warranty_claim_denied = denied
 		doc.warranty_claim_denied_reason = reason
 		doc.save()
-
-
-@frappe.whitelist()
-def submit_feedback(project, customer_feedback):
-	if not customer_feedback:
-		frappe.throw(_('Customer feedback cannot be empty'))
-
-	if not frappe.db.exists('Project', project):
-		frappe.throw(_("Repair Order {0} does not exist".format(project)))
-
-	target_doc = frappe.get_doc('Project', project)
-	target_doc.check_permission("read")
-
-	cur_dt = get_datetime()
-	cur_date = getdate(cur_dt)
-	cur_time = get_time(cur_dt)
-
-	feedback_info = {
-		"feedback_date": cur_date,
-		"feedback_time": cur_time,
-		"customer_feedback": customer_feedback
-	}
-
-	target_doc.update(feedback_info)
-	target_doc.run_method("validate_feedback")
-
-	target_doc.db_set(feedback_info)
-	target_doc.notify_update()
-
-	feedback_info['feedback_dt'] = combine_datetime(cur_date, cur_time)
-
-	return feedback_info

@@ -425,6 +425,7 @@ data = {
 		"Project Template Detail": project_template_detail_fields,
 		"Customer": customer_customer_vehicle_selector,
 		"Opportunity": opportunity_fields + applies_to_opportunity_fields,
+		"Customer Feedback": applies_to_transaction_fields,
 	},
 	'default_portal_role': 'Customer'
 }

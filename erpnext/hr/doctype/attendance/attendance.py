@@ -100,8 +100,9 @@ class Attendance(Document):
 			if self.status != 'On Leave' and not self.leave_application and not self.attendance_request:
 				frappe.throw(_("Attendance can not be marked for future dates"))
 
-		if date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
-			frappe.throw(_("Attendance date can not be before Employee's Joining Date"))
+		if not self.flags.from_auto_attendance:
+			if date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
+				frappe.throw(_("Attendance Date can not be before Joining Date for Employee {0}").format(self.employee))
 
 
 @frappe.whitelist()

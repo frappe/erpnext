@@ -375,7 +375,9 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "TASK-"
+   "no_copy": 1,
+   "options": "TASK-",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_5",
@@ -453,7 +455,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2022-12-20 15:41:02.621188",
+ "modified": "2023-02-02 17:33:57.424287",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

@@ -31,8 +31,9 @@ class VehicleMaintenanceSchedule:
 	def get_data(self):
 		conditions = self.get_conditions()
 
+		self.maintenance_reminder_days = cint(frappe.db.get_value("CRM Settings", None, "maintenance_opportunity_reminder_days"))
+
 		if self.filters.date_type == "Reminder Date":
-			self.maintenance_reminder_days = cint(frappe.db.get_value("CRM Settings", None, "maintenance_opportunity_reminder_days"))
 			self.filters.from_date = add_days(self.filters.from_date, self.maintenance_reminder_days)
 			self.filters.to_date = add_days(self.filters.to_date, self.maintenance_reminder_days)
 
@@ -117,6 +118,7 @@ class VehicleMaintenanceSchedule:
 					SELECT content, CAST(communication_date AS date) AS contact_date
 					FROM tabCommunication
 					WHERE reference_doctype = "Opportunity" AND reference_name = %s
+						AND communication_type != "Automated Message" and sent_or_received = "Received"
 					ORDER BY communication_date DESC, creation DESC
 					LIMIT 1
 				""", d.opportunity, as_dict=1)
