@@ -538,7 +538,9 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "PROJ-"
+   "no_copy": 1,
+   "options": "PROJ-",
+   "set_only_once": 1
   },
   {
    "fieldname": "title",
@@ -1274,7 +1276,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "image_field": "image",
- "modified": "2023-01-30 13:36:58.852482",
+ "modified": "2023-02-02 17:32:58.210015",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -1,9 +1,12 @@
 {
- "autoname": "hash",
+ "autoname": "naming_series:",
  "creation": "2023-01-24 12:52:53.011595",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
+  "title",
+  "status",
   "reference_doctype",
   "column_break_1",
   "reference_name",
@@ -19,7 +22,7 @@
   "column_break_13",
   "applies_to_item_name",
   "section_break_9",
-  "contact_remark",
+  "contact_remarks",
   "column_break_11",
   "contact_date",
   "contact_time",
@@ -27,9 +30,7 @@
   "customer_feedback",
   "column_break_3",
   "feedback_date",
-  "feedback_time",
-  "title",
-  "status"
+  "feedback_time"
  ],
  "fields": [
   {
@@ -65,6 +66,7 @@
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer",
+   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -116,11 +118,6 @@
   {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "contact_remark",
-   "fieldtype": "Small Text",
-   "label": "Contact Remark"
   },
   {
    "fieldname": "column_break_11",
@@ -187,9 +184,24 @@
    "fieldname": "applies_to_item_name",
    "fieldtype": "Data",
    "label": "Applies to Item Name"
+  },
+  {
+   "default": "C-FDBK-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "options": "C-FDBK-",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "contact_remarks",
+   "fieldtype": "Small Text",
+   "label": "Contact Remarks"
   }
  ],
- "modified": "2023-01-30 18:28:13.133615",
+ "modified": "2023-02-02 17:48:15.868871",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Customer Feedback",

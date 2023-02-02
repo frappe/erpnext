@@ -108,21 +108,21 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			fieldname: "reference_ro",
 			label: __("Reference RO"),
 			fieldtype: "Select",
-			options: "\nHas Reference\nHas No Reference"
+			options: "\nHas Reference RO #\nHas No Reference RO #"
 		},
 	],
 
 	onChange: function(new_value, column, data, rowIndex) {
-		if (in_list(["customer_feedback", "contact_remark"], column.fieldname)) {
+		if (in_list(["customer_feedback", "contact_remarks"], column.fieldname)) {
 			if (cstr(data[column.fieldname]) == cstr(new_value)) return
 
 			return frappe.call({
-				method: "erpnext.crm.doctype.customer_feedback.customer_feedback.submit_customer_feedback_communication",
+				method: "erpnext.crm.doctype.customer_feedback.customer_feedback.submit_customer_feedback",
 				args: {
 					reference_doctype: "Project",
 					reference_name: data.project,
-					communication_type: column.fieldname == "customer_feedback" ? "Feedback" : "Communication",
-					communication: new_value,
+					feedback_or_remark: column.fieldname == "customer_feedback" ? "Feedback": "Remarks",
+					message: new_value,
 				},
 				callback: function(r) {
 					if (!r.exc) {

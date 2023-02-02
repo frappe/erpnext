@@ -77,7 +77,8 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "[Select]"
+   "options": "[Select]",
+   "set_only_once": 1
   },
   {
    "fieldname": "customer",
@@ -393,7 +394,7 @@
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2021-11-27 11:14:44.958703",
+ "modified": "2023-02-02 17:34:04.877279",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

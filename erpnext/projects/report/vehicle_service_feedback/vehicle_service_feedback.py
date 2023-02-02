@@ -46,7 +46,7 @@ class VehicleServiceFeedback:
 				ro.applies_to_item as variant_item_code, ro.applies_to_item_name as variant_item_name, ro.vehicle_license_plate,
 				ro.customer, ro.customer_name, ro.contact_mobile, ro.reference_no as reference_ro,
 				vgp.posting_date as delivery_date, vgp.posting_time as delivery_time,
-				cf.contact_remark, cf.contact_date, cf.contact_time, cf.customer_feedback, cf.feedback_date, cf.feedback_time
+				cf.contact_remarks, cf.contact_date, cf.contact_time, cf.customer_feedback, cf.feedback_date, cf.feedback_time
 			FROM `tabProject` ro
 			LEFT JOIN `tabVehicle Gate Pass` vgp ON vgp.project = ro.name
 			LEFT JOIN `tabItem` im ON im.name = ro.applies_to_item
@@ -205,8 +205,8 @@ class VehicleServiceFeedback:
 				"width": 150
 			},
 			{
-				"label": _("Contact Remark"),
-				"fieldname": "contact_remark",
+				"label": _("Contact Remarks"),
+				"fieldname": "contact_remarks",
 				"fieldtype": "Data",
 				"width": 200,
 				"editable": 1
