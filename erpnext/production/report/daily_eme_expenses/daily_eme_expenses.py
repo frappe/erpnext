@@ -12,7 +12,6 @@ from erpnext.accounts.report.financial_statements import (
 
 def execute(filters=None):
 	period_list = get_daily_period_list(filters.from_date, filters.to_date)
-	frappe.msgprint(str(period_list))
 	columns = get_columns(filters, period_list)
 	data = get_data(filters, period_list)
 	return columns, data
