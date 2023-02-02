@@ -12,6 +12,7 @@ from erpnext.accounts.report.financial_statements import (
 
 def execute(filters=None):
 	period_list = get_daily_period_list(filters.from_date, filters.to_date)
+	frappe.msgprint(str(period_list))
 	columns = get_columns(filters, period_list)
 	data = get_data(filters, period_list)
 	return columns, data
@@ -88,9 +89,9 @@ def get_data(filters, period_list):
 			data.append(ach)
 			data.append(trip_hour)
 			data.append(total_hr)
-	data.append([])
+	data.append({})
 	data.append(total_actual_hours)
-	data.append([])
+	data.append({})
 
 	data.append(frappe._dict({"expense_head":"Performance Record"}))
 	schedule_hr 	= frappe._dict({"expense_head":"Scheduled Hour"})
@@ -132,7 +133,7 @@ def get_data(filters, period_list):
 		availability[str(p.key)] = flt(schedule_hr[str(p.key)]) - flt(total_downtime_ava[str(p.key)])
 
 	data.append(availability)
-	data.append([])
+	data.append({})
 	# for downtime type utilization
 	for d in get_downtime_reason("Utilization"):
 		downtime_uti	= frappe._dict({"reading":d.downtime_reason})

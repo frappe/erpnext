@@ -53,7 +53,7 @@ def get_data(filters):
 				"hour":flt(total_hr,2),
 				"trip":flt(trip,2)
 			})
-	data.append([])
+	data.append({})
 	data.append({
 				"expense_head":"Performance Record"
 			})
@@ -111,7 +111,7 @@ def get_data(filters):
 		"expense_head":"Availability, Hours",
 		"hour":flt(flt(scheduled_working_hour) - flt(performance),2)
 	})
-	data.append([])
+	data.append({})
 
 	for p in frappe.db.sql("select name from `tabDowntime Reason` where type = 'Utilization'", as_dict=1):
 		hrs = frappe.db.sql("""
@@ -144,7 +144,7 @@ def get_data(filters):
 				"hour":flt(flt(scheduled_working_hour) - flt(performance) - flt(availability),2)
 			})
 	
-	data.append([])
+	data.append({})
 	for p in frappe.db.sql("select name from `tabOffence`", as_dict=1):
 		hrs = frappe.db.sql("""
 		SELECT count(1) as no 

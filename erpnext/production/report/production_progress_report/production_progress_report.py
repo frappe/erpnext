@@ -51,11 +51,11 @@ def get_data(filters):
 				cond = " and cost_center = '{0}'".format(a.cost_center)
 	
 		total = 0
-		for b in get_production_groups(filters.production_group):
-			qty = frappe.db.sql("select sum(pe.qty) from `tabProduction Entry` pe where 1 = 1 {0} and pe.item_code = '{1}' {2}".format(conditions, str(b), cond))
-			qty = qty and qty[0][0] or 0
-			row.append(rounded(qty, 2))
-			total += flt(qty)
+		# for b in get_production_groups(filters.production_group):
+		qty = frappe.db.sql("select sum(pe.qty) from `tabProduction Entry` pe where 1 = 1 {0} and pe.item_code = '{1}' {2}".format(conditions, filters.production_group, cond))
+		qty = qty and qty[0][0] or 0
+		row.append(rounded(qty, 2))
+		total += flt(qty)
 		row.insert(2, rounded(total, 2))
 		if target == 0:
 			target = 1
@@ -107,8 +107,8 @@ def get_columns(filters):
 		else:
 			columns = ["Branch:Link/Branch:150", "Target Qty:Float:120", "Achieved Qty:Float:120", "Ach. Percent:Percent:100"]
 
-	for a in get_production_groups(filters.production_group):
-		columns.append(str(str(frappe.db.get_value("Item", a, "item_name")) + ":Float:100"))
+	if filters.production_group:
+		columns.append(str(str(frappe.db.get_value("Item", filters.production_group, "item_name")) + ":Float:100"))
 	
 	return columns
 
