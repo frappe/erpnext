@@ -232,10 +232,10 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 
 	show_alternative_item_dialog() {
-		// Create a `{original item: [alternate items]}` map
 		var me = this;
 		let item_alt_map = {};
 
+		// Create a `{original item: [alternate items]}` map
 		this.frm.doc.items.filter(
 			(item) => item.is_alternative
 		).forEach((item) =>
