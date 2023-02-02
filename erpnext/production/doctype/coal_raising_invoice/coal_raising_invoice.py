@@ -63,13 +63,13 @@ class CoalRaisingInvoice(AccountsController):
 				WHERE branch = '{0}' AND docstatus = 1
 				AND posting_date BETWEEN '{1}' AND '{2}'
 				AND mineral_raising_group = '{3}' AND tier = '{4}'
-				AND NOT EXISTS (SELECT crp.name,crp.branch FROM `tabCoal Raising Payment` crp
+				AND NOT EXISTS (SELECT crp.name,crp.branch FROM `tabCoal Raising Invoice` crp
 					INNER JOIN `tabCoal Raising Payment Items` cri
 					ON crp.name = cri.parent
 					WHERE crp.branch = '{0}' AND crp.docstatus = 1
 					AND crp.from_date BETWEEN '{1}' AND '{2}'
 					AND crp.to_date BETWEEN '{1}' AND '{2}'
-					AND cri.group_name = '{3}' AND cri.tier = '{4}')
+					AND cri.mineral_raising_group = '{3}' AND cri.tier = '{4}')
 				AND warehouse = '{5}'
 			""".format(self.branch,self.from_date,self.to_date,self.mineral_raising_group,self.tier, self.warehouse),as_dict=True)
 		if data1:
