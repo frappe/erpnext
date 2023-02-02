@@ -115,8 +115,7 @@ def get_data(filters, period_list):
 					FROM `tabLogbook` l INNER JOIN `tabDowntime Item` di ON l.name = di.parent
 					WHERE l.docstatus = 1 AND l.posting_date = '{}'
 					AND l.equipment = '{}' AND di.downtime_reason = '{}'
-			'''.format(getdate(p.key), filters.equipment, d.downtime_reason))
-
+			'''.format(getdate(p.key), filters.equipment, d.offence))
 			if hrs:
 				if hrs[0][0]:
 					flg = True
@@ -143,7 +142,7 @@ def get_data(filters, period_list):
 					FROM `tabLogbook` l INNER JOIN `tabDowntime Item` di ON l.name = di.parent
 					WHERE l.docstatus = 1 AND l.posting_date = '{}'
 					AND l.equipment = '{}' AND di.downtime_reason = '{}'
-			'''.format(getdate(p.key), filters.equipment, d.downtime_reason))
+			'''.format(getdate(p.key), filters.equipment, d.offence))
 
 			if hrs:
 				if hrs[0][0]:
