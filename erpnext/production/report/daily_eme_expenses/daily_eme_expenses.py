@@ -48,7 +48,7 @@ def get_data(filters, period_list):
 									AND l.docstatus = 1 AND l.posting_date = %(posting_date)s 
 									AND li.expense_head = %(expense_head)s 
 									AND l.equipment = %(eqp)s 
-									GROUP BY li.uom""", {"posting_date": p.key, "expense_head": exp.name, "eqp": filters.equipment}, as_dict=1)
+									GROUP BY li.uom""", {"posting_date": getdate(p.key), "expense_head": exp.name, "eqp": filters.equipment}, as_dict=1)
 			total_hour = 0
 			if res:
 				flg = True
@@ -100,7 +100,7 @@ def get_data(filters, period_list):
 			SELECT MAX(scheduled_working_hour) as swh FROM `tabLogbook` 
 			WHERE docstatus = 1 AND posting_date = '{}'
 				AND equipment = '{}'
-			'''.format(p.key, filters.equipment))
+			'''.format(getdate(p.key), filters.equipment))
 
 		if scheduled_working_hour:
 			schedule_hr[str(p.key)] = scheduled_working_hour[0][0] if scheduled_working_hour[0][0] else 0
@@ -115,7 +115,7 @@ def get_data(filters, period_list):
 					FROM `tabLogbook` l INNER JOIN `tabDowntime Item` di ON l.name = di.parent
 					WHERE l.docstatus = 1 AND l.posting_date = '{}'
 					AND l.equipment = '{}' AND di.downtime_reason = '{}'
-			'''.format(p.key, filters.equipment, d.downtime_reason))
+			'''.format(getdate(p.key), filters.equipment, d.downtime_reason))
 
 			if hrs:
 				if hrs[0][0]:
@@ -143,7 +143,7 @@ def get_data(filters, period_list):
 					FROM `tabLogbook` l INNER JOIN `tabDowntime Item` di ON l.name = di.parent
 					WHERE l.docstatus = 1 AND l.posting_date = '{}'
 					AND l.equipment = '{}' AND di.downtime_reason = '{}'
-			'''.format(p.key, filters.equipment, d.downtime_reason))
+			'''.format(getdate(p.key), filters.equipment, d.downtime_reason))
 
 			if hrs:
 				if hrs[0][0]:
@@ -168,7 +168,7 @@ def get_data(filters, period_list):
 		for p in period_list:
 			offence_count = frappe.db.sql('''
 				select count(1) from `tabIncident Report` where equipment = '{}' and  docstatus = 1 and offence_date = '{}' and offence = '{}'
-			'''.format(filters.equipment,p.key, d.offence))
+			'''.format(filters.equipment,getdate(p.key), d.offence))
 			if offence_count:
 				if offence_count[0][0]:
 					flg = True
