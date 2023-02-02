@@ -21,7 +21,7 @@ class TripLog(Document):
 			rate = 0
 			expense_account = 0
 			if flt(a.qty) <= 0:
-				throw('Qty must greate than 0 at row {}'.format(a.idx),title="Invalid Qty")
+				throw('Qty must greater than 0 at row {}'.format(a.idx),title="Invalid Qty")
 			total_qty = flt(total_qty) + flt(a.qty)
 			if cint(a.eligible_for_transporter_payment) == 1:
 				if not a.equipment:
@@ -53,7 +53,6 @@ class TripLog(Document):
 				a.rate = 0
 				a.amount = 0
 				a.expense_account = ''
-				a.equipment = ''
 		self.total_qty = total_qty
 		self.total_amount = total_amount
 # query permission
