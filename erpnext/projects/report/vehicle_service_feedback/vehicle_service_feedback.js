@@ -16,7 +16,7 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			fieldname: "date_type",
 			label: __("Date Type"),
 			fieldtype: "Select",
-			options: ["Feedback Due Date", "Feedback Date"],
+			options: ["Feedback Due Date", "Feedback Date", "Contact Date"],
 			default: "Feedback Due Date",
 			reqd: 1,
 		},
@@ -104,32 +104,40 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			fieldtype: "Link",
 			options: "Project Workshop"
 		},
+		{
+			fieldname: "reference_ro",
+			label: __("Reference RO"),
+			fieldtype: "Select",
+			options: "\nHas Reference RO #\nHas No Reference RO #"
+		},
 	],
 
 	onChange: function(new_value, column, data, rowIndex) {
-		if (column.fieldname == "customer_feedback") {
-			if (cstr(data['customer_feedback']) === cstr(new_value)) {
-				return
-			}
+		if (in_list(["customer_feedback", "contact_remarks"], column.fieldname)) {
+			if (cstr(data[column.fieldname]) == cstr(new_value)) return
 
 			return frappe.call({
-				method: "erpnext.projects.doctype.project.project.submit_feedback",
+				method: "erpnext.crm.doctype.customer_feedback.customer_feedback.submit_customer_feedback",
 				args: {
-					project: data.project,
-					customer_feedback: new_value,
+					reference_doctype: "Project",
+					reference_name: data.project,
+					feedback_or_remark: column.fieldname == "customer_feedback" ? "Feedback": "Remarks",
+					message: new_value,
 				},
 				callback: function(r) {
 					if (!r.exc) {
 						let row = frappe.query_report.datatable.datamanager.data[rowIndex];
-						row.feedback_date = r.message.feedback_date;
-						row.feedback_time = r.message.feedback_time;
-						row.feedback_dt = r.message.feedback_dt;
-						row.customer_feedback = r.message.customer_feedback;
+						row[column.fieldname] = r.message[column.fieldname];
+						if (column.fieldname == "customer_feedback") {
+							row.feedback_dt = r.message.feedback_dt;
+						} else {
+							row.contact_dt = r.message.contact_dt;
+						}
 
-						erpnext.utils.query_report_local_refresh()
+						erpnext.utils.query_report_local_refresh();
 					}
-				},
-			});
+				}
+			})
 		}
 	},
 };
