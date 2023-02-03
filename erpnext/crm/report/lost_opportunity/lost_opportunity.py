@@ -4,12 +4,12 @@
 
 import frappe
 from frappe import _
+from frappe.utils import get_datetime
 
 
 def execute(filters=None):
 	columns, data = get_columns(), get_data(filters)
 	return columns, data
-
 
 def get_columns():
 	columns = [
@@ -66,6 +66,10 @@ def get_columns():
 
 
 def get_data(filters):
+	if filters.get("from_date") and filters.get("to_date"):
+		filters.from_date = get_datetime(filters.get("from_date") + " 00:00:00")
+		filters.to_date = get_datetime(filters.get("to_date") + " 23:59:59")
+
 	return frappe.db.sql(
 		"""
 		SELECT
