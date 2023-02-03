@@ -135,6 +135,8 @@
   "fleet_setting_section",
   "pol_advance_account",
   "repair_and_service_expense_account",
+  "column_break_127",
+  "pol_expense_account",
   "production_account_settings_section",
   "default_production_account",
   "column_break_124",
@@ -1017,6 +1019,17 @@
    "fieldtype": "Link",
    "label": "Abnormal Loss Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "column_break_127",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pol_expense_account",
+   "fieldtype": "Link",
+   "label": "POL Expense Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-building",
@@ -1024,7 +1037,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-12 13:52:18.976432",
+ "modified": "2023-02-02 14:05:35.977624",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
