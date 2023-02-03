@@ -687,7 +687,7 @@ class TestPurchaseOrder(FrappeTestCase):
 				raise Exception
 
 	def test_default_payment_terms(self):
-		due_date = get_due_date_from_template("_Test Payment Term Template 1", "2023-02-03", None)
+		due_date = get_due_date_from_template("_Test Payment Term Template 1", "2023-02-03", None).strftime("%Y-%m-%d")
 		self.assertEqual(due_date, "2023-03-31")
 
 	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
