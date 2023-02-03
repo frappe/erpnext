@@ -212,7 +212,7 @@ class ExchangeRateRevaluation(Document):
 			for d in [x for x in account_details if x.zero_balance]:
 
 				# TODO: Set new balance in Base/Account currency
-				if d.balance > 0:
+				if d.balance != 0:
 					current_exchange_rate = new_exchange_rate = 0
 
 					new_balance_in_account_currency = 0  # this will be '0'
