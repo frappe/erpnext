@@ -8,7 +8,6 @@ frappe.ui.form.on('Budget', {
 			return {
 				filters: {
 					company: frm.doc.company,
-					report_type: "Profit and Loss",
 					is_group: 0
 				}
 			};
