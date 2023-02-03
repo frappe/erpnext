@@ -399,6 +399,9 @@ class ExchangeRateRevaluation(Document):
 
 		journal_entry_accounts = []
 		for d in accounts:
+			if not flt(d.get("balance_in_account_currency"), d.precision("balance_in_account_currency")):
+				continue
+
 			dr_or_cr = (
 				"debit_in_account_currency"
 				if d.get("balance_in_account_currency") > 0
