@@ -1369,7 +1369,6 @@ def check_and_delete_linked_reports(report):
 def create_payment_ledger_entry(
 	gl_entries, cancel=0, adv_adj=0, update_outstanding="Yes", from_repost=0
 ):
-	# frappe.throw("here")
 	if gl_entries:
 		ple = None
 
@@ -1453,6 +1452,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 	ple = frappe.qb.DocType("Payment Ledger Entry")
 	vouchers = [frappe._dict({"voucher_type": voucher_type, "voucher_no": voucher_no})]
 	common_filter = []
+		
 	if account:
 		common_filter.append(ple.account == account)
 
@@ -1462,20 +1462,31 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 	if party:
 		common_filter.append(ple.party == party)
 	ple_query = QueryPaymentLedger()
-	# frappe.throw(str(ple_query))
 	# on cancellation outstanding can be an empty list
 	voucher_outstanding = ple_query.get_voucher_outstandings(vouchers, common_filter=common_filter)
+
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees","EME Invoice","Transporter Invoice","Repair And Service Invoice", "POL Expense"] and voucher_outstanding:
 		outstanding = voucher_outstanding[0]
 		ref_doc = frappe.get_doc(voucher_type, voucher_no)
 		# Didn't use db_set for optimisation purpose
-		# frappe.throw('here')
 		ref_doc.outstanding_amount = outstanding["outstanding_in_account_currency"]
 		frappe.db.set_value(
 			voucher_type, voucher_no, "outstanding_amount", outstanding["outstanding_in_account_currency"]
 		)
 		ref_doc.set_status(update=True)
-	# frappe.throw('Biren Working here')
+	elif voucher_type == "POL Expense" and len(voucher_outstanding) == 0:
+		# outstanding amount taken care
+		pol_exp = frappe.get_doc("POL Expense", voucher_no)
+		if cint(pol_exp.use_common_fuelbook) == 1:
+			total_debit = frappe.db.get_value("Journal Entry", pol_exp.journal_entry, "total_debit")
+			ref_doc = frappe.get_doc(voucher_type, voucher_no)
+			# Didn't use db_set for optimisation purpose
+			outstanding = flt(ref_doc.outstanding_amount) - flt(total_debit)
+			ref_doc.outstanding_amount = outstanding
+			frappe.db.set_value(
+				voucher_type, voucher_no, "outstanding_amount", outstanding
+			)
+			ref_doc.set_status(update=True)
 
 def delink_original_entry(pl_entry):
 	if pl_entry:
@@ -1693,4 +1704,5 @@ class QueryPaymentLedger(object):
 		self.get_payments = get_payments
 		self.get_invoices = get_invoices
 		self.query_for_outstanding()
+
 		return self.voucher_outstandings

@@ -10,7 +10,7 @@ from erpnext.custom_workflow import validate_workflow_states, notify_workflow_st
 class BudgetReappropiation(Document):
 	def validate(self):
 		self.validate_budget()
-		validate_workflow_states(self)
+		# validate_workflow_states(self)
 	def on_submit(self):
 		self.budget_check()
 		self.budget_appropriate(cancel=False)
