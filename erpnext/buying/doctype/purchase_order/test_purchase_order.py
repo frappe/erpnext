@@ -23,6 +23,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_pi_from_pr,
 )
+from erpnext.accounts.party import get_due_date_from_template
 
 
 class TestPurchaseOrder(FrappeTestCase):
@@ -684,6 +685,10 @@ class TestPurchaseOrder(FrappeTestCase):
 				pass
 			else:
 				raise Exception
+
+	def test_default_payment_terms(self):
+		due_date = get_due_date_from_template("_Test Payment Term Template 1", "2023-02-03")
+		self.assertEqual(due_date, "2023-03-31")
 
 	def test_terms_are_not_copied_if_automatically_fetch_payment_terms_is_unchecked(self):
 		po = create_purchase_order(do_not_save=1)
