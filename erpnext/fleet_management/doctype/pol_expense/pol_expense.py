@@ -19,12 +19,17 @@ from erpnext.accounts.general_ledger import (
 
 class POLExpense(AccountsController):
 	def validate(self):
-		# validate_workflow_states(self)
+		validate_workflow_states(self)
 		self.posting_date = self.entry_date
 		self.validate_amount()
 		self.calculate_pol()
-		# if self.workflow_state != "Approved":
-		# 	notify_workflow_states(self)
+		if not self.credit_account and cint(self.use_common_fuelbook) == 1:
+			self.credit_account = get_party_account(self.party_type, self.party, self.company, is_advance = True)
+		else:
+			self.credit_account = get_party_account(self.party_type, self.party, self.company)
+
+		if self.workflow_state != "Approved":
+			notify_workflow_states(self)
 		self.set_status()
 
 	
@@ -32,7 +37,7 @@ class POLExpense(AccountsController):
 		if cint(self.use_common_fuelbook) == 0:
 			self.make_gl_entries()
 		self.post_journal_entry()
-		# notify_workflow_states(self)
+		notify_workflow_states(self)
 
 	def before_cancel(self):
 		if self.is_opening:
@@ -43,7 +48,8 @@ class POLExpense(AccountsController):
 				frappe.throw("Journal Entry exists for this transaction {}".format(frappe.get_desk_link("Journal Entry",self.journal_entry)))
 				
 	def on_cancel(self):
-		self.make_gl_entries()
+		if cint(self.use_common_fuelbook) == 0:
+			self.make_gl_entries()
 
 	def make_gl_entries(self):
 		if self.is_opening:
@@ -133,8 +139,7 @@ class POLExpense(AccountsController):
 			frappe.throw(_("Amount should be greater than zero"))
 			
 		default_ba = get_default_ba()
-		if not self.credit_account:
-			self.credit_account = get_party_account(self.party_type, self.party, self.company, is_advance = self.use_common_fuelbook)
+		
 		credit_account = self.credit_account
 		expense_account = frappe.db.get_value("Branch",self.fuelbook_branch,"expense_bank_account")
 		if not expense_account:

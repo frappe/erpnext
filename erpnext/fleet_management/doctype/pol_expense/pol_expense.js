@@ -53,21 +53,38 @@ frappe.ui.form.on('POL Expense', {
 	},
 	party:function(frm){
 		if (frm.doc.party){
-			frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
-				args: {
-					party_type:"Supplier",
-					party:frm.doc.party,
-					company: frm.doc.company,
-					is_advance: frm.doc.use_common_fuelbook
-				},
-				callback: function(r) {
-					if(r.message) {
-						frm.set_value("credit_account",r.message)
-						frm.refresh_fields("credit_account")
+			if (cint(frm.doc.use_common_fuelbook) == 1){
+				frappe.call({
+					method: "erpnext.accounts.party.get_party_account",
+					args: {
+						party_type:"Supplier",
+						party:frm.doc.party,
+						company: frm.doc.company,
+						is_advance: frm.doc.use_common_fuelbook
+					},
+					callback: function(r) {
+						if(r.message) {
+							frm.set_value("credit_account",r.message)
+							frm.refresh_fields("credit_account")
+						}
 					}
-				}
-			});
+				});
+			}else{
+				frappe.call({
+					method: "erpnext.accounts.party.get_party_account",
+					args: {
+						party_type:"Supplier",
+						party:frm.doc.party,
+						company: frm.doc.company,
+					},
+					callback: function(r) {
+						if(r.message) {
+							frm.set_value("credit_account",r.message)
+							frm.refresh_fields("credit_account")
+						}
+					}
+				});
+			}
 		}
 	},
 	fuel_book:function(frm){
