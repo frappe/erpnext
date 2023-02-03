@@ -23,7 +23,7 @@ class POLExpense(AccountsController):
 		self.posting_date = self.entry_date
 		self.validate_amount()
 		self.calculate_pol()
-		if not self.credit_account and cint(self.use_common_fuelbook) == 1:
+		if cint(self.use_common_fuelbook) == 1:
 			self.credit_account = get_party_account(self.party_type, self.party, self.company, is_advance = True)
 		else:
 			self.credit_account = get_party_account(self.party_type, self.party, self.company)
@@ -225,9 +225,6 @@ class POLExpense(AccountsController):
 			self.outstanding_amount = self.amount
 
 	def set_status(self, update=False, status=None, update_modified=True):
-		if cint(self.is_opening) == 1 :
-			self.payment_status = "Paid"
-
 		if self.is_new():
 			self.payment_status = "Draft"
 			return
@@ -237,7 +234,9 @@ class POLExpense(AccountsController):
 			if self.docstatus == 2:
 				self.payment_status = "Cancelled"
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and flt(self.amount) > outstanding_amount:
+				if cint(self.is_opening) == 1 :
+					self.payment_status = "Paid"
+				elif outstanding_amount > 0 and flt(self.amount) > outstanding_amount:
 					self.payment_status = "Partly Paid"
 				elif outstanding_amount > 0 :
 					self.payment_status = "Unpaid"
