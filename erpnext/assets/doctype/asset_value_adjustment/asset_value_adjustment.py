@@ -10,6 +10,7 @@ from frappe.utils import date_diff, flt, formatdate, get_link_to_form, getdate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
+from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -46,7 +47,7 @@ class AssetValueAdjustment(Document):
 
 	def set_current_asset_value(self):
 		if not self.current_asset_value and self.asset:
-			self.current_asset_value = get_current_asset_value(self.asset, self.finance_book)
+			self.current_asset_value = get_asset_value_after_depreciation(self.asset, self.finance_book)
 
 	def make_depreciation_entry(self):
 		asset = frappe.get_doc("Asset", self.asset)
@@ -177,12 +178,3 @@ class AssetValueAdjustment(Document):
 					asset_data.db_update()
 
 			new_asset_depr_schedule_doc.submit()
-
-
-@frappe.whitelist()
-def get_current_asset_value(asset, finance_book=None):
-	cond = {"parent": asset, "parenttype": "Asset"}
-	if finance_book:
-		cond.update({"finance_book": finance_book})
-
-	return frappe.db.get_value("Asset Finance Book", cond, "value_after_depreciation")

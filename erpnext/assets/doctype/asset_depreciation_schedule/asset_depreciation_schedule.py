@@ -220,21 +220,6 @@ def get_temp_asset_depr_schedule_doc(
 	return asset_depr_schedule_doc
 
 
-def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
-	finance_book_filter = ["finance_book", "is", "not set"]
-	if finance_book:
-		finance_book_filter = ["finance_book", "=", finance_book]
-
-	return frappe.db.get_value(
-		doctype="Asset Depreciation Schedule",
-		filters=[
-			["asset", "=", asset_name],
-			finance_book_filter,
-			["status", "=", status],
-		],
-	)
-
-
 @frappe.whitelist()
 def get_depr_schedule(asset_name, status, finance_book=None):
 	asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_name, status, finance_book)
@@ -254,6 +239,21 @@ def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
 	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
 
 	return asset_depr_schedule_doc
+
+
+def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
+	finance_book_filter = ["finance_book", "is", "not set"]
+	if finance_book:
+		finance_book_filter = ["finance_book", "=", finance_book]
+
+	return frappe.db.get_value(
+		doctype="Asset Depreciation Schedule",
+		filters=[
+			["asset", "=", asset_name],
+			finance_book_filter,
+			["status", "=", status],
+		],
+	)
 
 
 def make_depr_schedule(
@@ -297,7 +297,7 @@ def _make_depr_schedule(
 ):
 	asset_doc.validate_asset_finance_books(row)
 
-	value_after_depreciation = asset_doc._get_value_after_depreciation(row)
+	value_after_depreciation = _get_value_after_depreciation_for_making_schedule(asset_doc, row)
 	row.value_after_depreciation = value_after_depreciation
 
 	if update_asset_finance_book_row:
@@ -412,6 +412,18 @@ def _make_depr_schedule(
 				depreciation_amount,
 				row.depreciation_method,
 			)
+
+
+def _get_value_after_depreciation_for_making_schedule(asset_doc, row):
+	# value_after_depreciation - current Asset value
+	if asset_doc.docstatus == 1 and row.value_after_depreciation:
+		value_after_depreciation = flt(row.value_after_depreciation)
+	else:
+		value_after_depreciation = flt(asset_doc.gross_purchase_amount) - flt(
+			asset_doc.opening_accumulated_depreciation
+		)
+
+	return value_after_depreciation
 
 
 # to ensure that final accumulated depreciation amount is accurate
