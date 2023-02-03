@@ -108,7 +108,11 @@ frappe.query_reports["Vehicle Service Feedback"] = {
 			fieldname: "reference_ro",
 			label: __("Reference RO"),
 			fieldtype: "Select",
-			options: "\nHas Reference RO #\nHas No Reference RO #"
+			options: [
+				"",
+				{ "value": "has_reference", "label": __("Has Reference RO #") },
+				{ "value": "has_no_reference", "label": __("Has No Reference RO #") }
+			],
 		},
 	],
 
