@@ -113,8 +113,12 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				'late_entry': late_entry,
 				'early_exit': early_exit
 			}
-			attendance = frappe.get_doc(doc_dict).insert()
+
+			attendance = frappe.get_doc(doc_dict)
+			attendance.flags.from_auto_attendance = True
+			attendance.insert()
 			attendance.submit()
+
 			frappe.db.sql("""update `tabEmployee Checkin`
 				set attendance = %s
 				where name in %s""", (attendance.name, log_names))

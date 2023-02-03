@@ -31,8 +31,9 @@ class VehicleMaintenanceSchedule:
 	def get_data(self):
 		conditions = self.get_conditions()
 
+		self.maintenance_reminder_days = cint(frappe.db.get_value("CRM Settings", None, "maintenance_opportunity_reminder_days"))
+
 		if self.filters.date_type == "Reminder Date":
-			self.maintenance_reminder_days = cint(frappe.db.get_value("CRM Settings", None, "maintenance_opportunity_reminder_days"))
 			self.filters.from_date = add_days(self.filters.from_date, self.maintenance_reminder_days)
 			self.filters.to_date = add_days(self.filters.to_date, self.maintenance_reminder_days)
 
