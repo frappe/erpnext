@@ -370,7 +370,8 @@ class PurchaseInvoice(BuyingController):
 			update_serial_nos_after_submit(self, "items")
 
 		# this sequence because outstanding may get -negative
-		self.make_gl_entries()
+		#self.make_gl_entries()
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)

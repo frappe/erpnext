@@ -66,7 +66,8 @@ class ExpenseClaim(AccountsController):
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
 		self.update_task_and_project()
-		self.make_gl_entries()
+		#self.make_gl_entries()
+		frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=self.name,doc_type=self.doc_type,queue="gl",enqueue_after_commit=True)
 
 		if self.is_paid:
 			update_reimbursed_amount(self)

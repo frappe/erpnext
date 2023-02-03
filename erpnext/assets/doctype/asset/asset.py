@@ -600,7 +600,8 @@ def make_post_gl_entry():
 
 			for asset in assets:
 				doc = frappe.get_doc('Asset', asset)
-				doc.make_gl_entries()
+				#doc.make_gl_entries()
+				frappe.enqueue("nrp_manufacturing.nrp_manufacturing.doctype.stock_gl_queue.stock_gl_queue.process_single_stock_gl_queue",doc_name=doc.name,doc_type=doc.doc_type,queue="gl",enqueue_after_commit=True)
 
 def get_asset_naming_series():
 	meta = frappe.get_meta('Asset')
