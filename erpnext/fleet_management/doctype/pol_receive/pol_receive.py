@@ -153,10 +153,8 @@ class POLReceive(StockController):
 		if cint(self.use_common_fuelbook) == 0:
 			data = (
 					qb.from_(pol_exp)
-					.inner_join(je)
-					.on(pol_exp.journal_entry == je.name)
 					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-					.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) 
+					.where((pol_exp.docstatus == 1) & (pol_exp.balance_amount > 0) 
 						& (pol_exp.equipment == self.equipment) & (pol_exp.party == self.supplier)
 						& (pol_exp.fuel_book == self.fuelbook))
 					.orderby( pol_exp.entry_date,order=qb.desc)
@@ -171,10 +169,8 @@ class POLReceive(StockController):
 		else:
 			data = (
 					qb.from_(pol_exp)
-					.inner_join(je)
-					.on(pol_exp.journal_entry == je.name)
 					.select(pol_exp.name,pol_exp.amount,pol_exp.balance_amount)
-					.where((pol_exp.docstatus == 1) & (je.docstatus == 1) & (pol_exp.balance_amount > 0) 
+					.where((pol_exp.docstatus == 1)  & (pol_exp.balance_amount > 0) 
 						& (pol_exp.party == self.supplier)
 						& (pol_exp.fuel_book == self.fuelbook) 
 						& (pol_exp.use_common_fuelbook == 1))
