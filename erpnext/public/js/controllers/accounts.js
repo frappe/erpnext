@@ -403,7 +403,7 @@ erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(grid_row) {
 	if(grid_row) {
 		let doc = grid_row.doc
 		let amount_editable = doc.charge_type === "Actual" || doc.charge_type === "Weighted Distribution";
-		let rate_editable = !amount_editable && doc.charge_type !== "Manual"
+		let rate_editable = doc.charge_type !== "Actual" && doc.charge_type !== "Manual"
 
 		grid_row.toggle_editable("tax_amount", amount_editable);
 		grid_row.toggle_editable("base_tax_amount", amount_editable);
