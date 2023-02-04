@@ -51,7 +51,7 @@ class PaymentRequest(Document):
 
 		if existing_payment_request_amount:
 			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-			if hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") != "Shopping Cart":
+			if not hasattr(ref_doc, "order_type") or getattr(ref_doc, "order_type") != "Shopping Cart":
 				ref_amount = get_amount(ref_doc, self.payment_account)
 
 				if existing_payment_request_amount + flt(self.grand_total) > ref_amount:

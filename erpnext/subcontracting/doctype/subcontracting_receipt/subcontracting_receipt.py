@@ -262,15 +262,17 @@ class SubcontractingReceipt(SubcontractingController):
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
 
+		if not erpnext.is_perpetual_inventory_enabled(self.company):
+			return []
+
 		gl_entries = []
 		self.make_item_gl_entries(gl_entries, warehouse_account)
 
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-		if erpnext.is_perpetual_inventory_enabled(self.company):
-			stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		warehouse_with_no_account = []
 

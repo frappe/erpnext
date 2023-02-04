@@ -33,6 +33,9 @@
   "column_break_23",
   "transfer_material_against",
   "routing",
+  "fg_based_operating_cost",
+  "fg_based_section_section",
+  "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
   "materials_section",
@@ -575,7 +578,26 @@
   {
    "fieldname": "scrap_items_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Scrap Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "fg_based_operating_cost",
+   "fieldtype": "Check",
+   "label": "FG based Operating Cost"
+  },
+  {
+   "depends_on": "fg_based_operating_cost",
+   "fieldname": "fg_based_section_section",
+   "fieldtype": "Section Break",
+   "label": "FG Based Operating Cost Section"
+  },
+  {
+   "depends_on": "fg_based_operating_cost",
+   "fieldname": "operating_cost_per_bom_quantity",
+   "fieldtype": "Currency",
+   "label": "Operating Cost Per BOM Quantity"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -583,7 +605,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-03 18:42:27.732107",
+ "modified": "2023-01-10 07:47:08.652616",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
