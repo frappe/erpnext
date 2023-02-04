@@ -252,39 +252,37 @@ def set_batch_nos(doc, warehouse_field, throw=False):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, qty))
 
 
-def auto_select_and_split_batches(doc, warehouse_field):
-	iuw_qty_map = {}
-	iuw_boxes_map = {}
-	iw_qty_map = {}
+def auto_select_and_split_batches(doc, warehouse_field, additional_group_fields=None):
+	def get_key(data):
+		key_fieldnames = ["item_code", "uom", warehouse_field]
+		if additional_group_fields:
+			if isinstance(additional_group_fields, list):
+				key_fieldnames += additional_group_fields
+			else:
+				key_fieldnames.append(additional_group_fields)
+
+		return tuple(cstr(data.get(f)) for f in key_fieldnames)
+
+	group_qty_map = {}
 	for d in doc.items:
+		has_batch_no = d.get("item_code") and frappe.get_cached_value("Item", d.item_code, "has_batch_no")
 		warehouse = d.get(warehouse_field)
-		if warehouse and frappe.get_cached_value("Item", d.item_code, "has_batch_no"):
-			iuw_key = (d.item_code, cstr(d.get('uom')), warehouse)
-			iw_key = (d.item_code, warehouse)
-
-			iuw_qty_map.setdefault(iuw_key, 0)
-			iuw_qty_map[iuw_key] += flt(d.get('qty'))
-
-			if d.meta.get_field('boxes'):
-				iuw_boxes_map.setdefault(iuw_key, 0)
-				iuw_boxes_map[iuw_key] += flt(d.get('boxes'))
-
-			iw_qty_map.setdefault(iw_key, 0)
-			iw_qty_map[iw_key] += flt(d.get('qty'))
+		if has_batch_no and warehouse and not d.get("packing_slip"):
+			key = get_key(d)
+			group_qty_map.setdefault(key, 0)
+			group_qty_map[key] += flt(d.get('qty'))
 
 	visited = set()
 	to_remove = []
 	for d in doc.items:
+		has_batch_no = d.get("item_code") and frappe.get_cached_value("Item", d.item_code, "has_batch_no")
 		warehouse = d.get(warehouse_field)
-		if warehouse and frappe.get_cached_value("Item", d.item_code, "has_batch_no"):
-			iuw_key = (d.item_code, cstr(d.get('uom')), warehouse)
-			if iuw_key not in visited:
-				visited.add(iuw_key)
+		if has_batch_no and warehouse and not d.get("packing_slip"):
+			key = get_key(d)
+			if key not in visited:
+				visited.add(key)
 				d.batch_no = None
-				d.qty = flt(iuw_qty_map.get(iuw_key))
-
-				if d.meta.get_field('boxes'):
-					d.boxes = flt(iuw_boxes_map.get(iuw_key))
+				d.qty = flt(group_qty_map.get(key))
 			else:
 				to_remove.append(d)
 
@@ -295,14 +293,15 @@ def auto_select_and_split_batches(doc, warehouse_field):
 	batches_used = {}
 	for d in doc.items:
 		updated_rows.append(d)
+
+		has_batch_no = d.get("item_code") and frappe.get_cached_value("Item", d.item_code, "has_batch_no")
 		warehouse = d.get(warehouse_field)
-		if warehouse and frappe.get_cached_value("Item", d.item_code, "has_batch_no"):
+
+		if has_batch_no and warehouse and not d.get("packing_slip"):
 			batches = get_sufficient_batch_or_fifo(d.item_code, warehouse, flt(d.qty), flt(d.conversion_factor),
 				batches_used=batches_used, include_empty_batch=True, precision=d.precision('qty'))
 
 			rows = [d]
-			total_qty = flt(d.qty)
-			total_boxes = flt(d.boxes) if d.meta.get_field('boxes') else 0
 
 			for i in range(1, len(batches)):
 				new_row = frappe.copy_doc(d)
@@ -312,9 +311,6 @@ def auto_select_and_split_batches(doc, warehouse_field):
 			for row, batch in zip(rows, batches):
 				row.qty = batch.selected_qty
 				row.batch_no = batch.batch_no
-
-				if row.meta.get_field('boxes'):
-					row.boxes = total_boxes * row.qty / total_qty if total_qty else 0
 
 	# Replace with updated list
 	for i, row in enumerate(updated_rows):
@@ -363,7 +359,7 @@ def round_down(value, decimals):
 
 
 @frappe.whitelist()
-def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, batches_used=None,
+def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1.0, conversion_factor=1.0, batches_used=None,
 		include_empty_batch=False, precision=None):
 	if not warehouse or not qty:
 		return []

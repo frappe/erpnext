@@ -23,6 +23,14 @@ frappe.ui.form.on('Batch', {
 				};
 				frappe.set_route("query-report", "Stock Ledger");
 			});
+			frm.add_custom_button(__("View Balance"), () => {
+				frappe.route_options = {
+					batch_no: frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date")
+				};
+				frappe.set_route("query-report", "Stock Balance");
+			});
 			frm.trigger('make_dashboard');
 		}
 	},

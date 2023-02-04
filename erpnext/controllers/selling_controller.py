@@ -263,7 +263,12 @@ class SellingController(StockController):
 	@frappe.whitelist()
 	def auto_select_batches(self):
 		if (self.doctype == "Delivery Note" or self.get('update_stock')) and not self.get('is_return'):
-			auto_select_and_split_batches(self, 'warehouse')
+			auto_select_and_split_batches(self, 'warehouse', additional_group_fields=[
+				"sales_order", "sales_order_item",
+				"delivery_note", "delivery_note_item",
+				"sales_invoice", "sales_invoice_item",
+				"quotation",
+			])
 
 	def has_product_bundle(self, item_code):
 		return frappe.db.sql("""select name from `tabProduct Bundle`
