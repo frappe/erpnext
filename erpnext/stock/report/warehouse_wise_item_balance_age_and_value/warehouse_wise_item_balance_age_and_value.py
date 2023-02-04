@@ -89,18 +89,11 @@ def get_columns(filters):
 	"""return columns"""
 
 	columns = [
-<<<<<<< HEAD
-		_("Item") + ":Link/Item:180",
-		_("Item Group") + "::100",
-		_("Value") + ":Currency:100",
-		_("Age") + ":Float:60",
-=======
 		_("Item") + ":Link/Item:150",
 		_("Item Name") + ":Link/Item:150",
 		_("Item Group") + "::120",
 		_("Value") + ":Currency:120",
 		_("Age") + ":Float:120",
->>>>>>> d7a665cb84 (chore: column width in `Warehouse wise Item Balance Age and Value` report)
 	]
 	return columns
 
@@ -140,14 +133,7 @@ def get_warehouse_list(filters):
 
 def add_warehouse_column(columns, warehouse_list):
 	if len(warehouse_list) > 1:
-<<<<<<< HEAD
-		columns += [_("Total Qty") + ":Int:50"]
-
-	for wh in warehouse_list:
-		columns += [_(wh.name) + ":Int:54"]
-=======
 		columns += [_("Total Qty") + ":Int:120"]
 
 	for wh in warehouse_list:
 		columns += [_(wh.name) + ":Int:100"]
->>>>>>> d7a665cb84 (chore: column width in `Warehouse wise Item Balance Age and Value` report)
