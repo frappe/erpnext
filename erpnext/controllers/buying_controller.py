@@ -717,7 +717,7 @@ class BuyingController(SubcontractingController):
 						asset.supplier = self.supplier
 					elif self.docstatus == 2:
 						if asset.docstatus == 2:
-							break
+							continue
 						if asset.docstatus == 0:
 							asset.set(field, None)
 							asset.supplier = None
