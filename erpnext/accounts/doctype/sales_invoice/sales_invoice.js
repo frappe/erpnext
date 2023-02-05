@@ -86,8 +86,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		this.show_general_ledger();
+		if(doc.update_stock) {
+			this.show_stock_ledger();
+		}
 
-		if(doc.update_stock) this.show_stock_ledger();
+		this.add_view_gross_profit_button();
 
 		if (me.frm.doc.docstatus == 0) {
 			me.add_get_latest_price_button();
@@ -237,6 +240,20 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_maintenance_schedule",
 			frm: cur_frm
 		})
+	},
+
+	add_view_gross_profit_button: function () {
+		if (this.frm.doc.docstatus === 1) {
+			this.frm.add_custom_button(__("Gross Profit"), () => {
+				frappe.route_options = {
+					sales_invoice: this.frm.doc.name,
+					from_date: this.frm.doc.posting_date,
+					to_date: this.frm.doc.posting_date,
+					company: this.frm.doc.company,
+				};
+				frappe.set_route("query-report", "Gross Profit");
+			}, __("View"));
+		}
 	},
 
 	on_submit: function(doc, dt, dn) {
