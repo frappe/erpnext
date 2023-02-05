@@ -185,6 +185,10 @@ frappe.query_reports["Gross Profit"] = {
 			}
 		}
 
+		if (['gross_profit'].includes(column.fieldname)) {
+			style['font-weight'] = 'bold';
+		}
+
 		return default_formatter(value, row, column, data, {css: style});
 	},
 	get_datatable_options(options) {
