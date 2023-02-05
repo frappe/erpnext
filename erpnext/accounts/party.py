@@ -550,7 +550,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 		elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 			due_date = max(due_date, add_days(get_last_day(due_date), term.credit_days))
 		else:
-			due_date = max(due_date, add_months(get_last_day(due_date), term.credit_months))
+			due_date = max(due_date, get_last_day(add_months(due_date, term.credit_months)))
 	return due_date
 
 
