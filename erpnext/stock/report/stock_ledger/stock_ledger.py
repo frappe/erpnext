@@ -171,8 +171,7 @@ def get_stock_ledger_entries(filters, items):
 			batch_qty_after_transaction, batch_stock_value, batch_valuation_rate,
 			packing_slip, packed_qty_after_transaction
 		from `tabStock Ledger Entry`
-		where company = %(company)s and
-			posting_date between %(from_date)s and %(to_date)s
+		where posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
 			{item_conditions_sql}
 			order by posting_date asc, posting_time asc, creation asc"""\
@@ -238,6 +237,10 @@ def get_item_details(items, sl_entries, include_uom):
 
 def get_sle_conditions(filters):
 	conditions = []
+
+	if filters.get("company"):
+		conditions.append("company = %(company)s")
+
 	if filters.get("warehouse"):
 		warehouse_condition = get_warehouse_condition(filters.get("warehouse"))
 		if warehouse_condition:
