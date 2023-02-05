@@ -92,7 +92,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if (me.frm.doc.docstatus == 0) {
 			me.add_get_latest_price_button();
 			if (erpnext.utils.has_valuation_read_permission()) {
-				me.add_set_cost_as_rate_button();
+				me.add_set_rate_as_cost_button();
 			}
 		}
 		if (me.frm.doc.docstatus == 1) {
