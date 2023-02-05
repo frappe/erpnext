@@ -634,10 +634,10 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		}
 	}
 
-	add_set_cost_as_rate_button() {
+	add_set_rate_as_cost_button() {
 		var me = this;
-		me.frm.add_custom_button(__("Set Rate as Cost"), function() {
-			me.set_cost_as_rate();
+		me.frm.add_custom_button(__("Set Rate As Cost"), function() {
+			me.set_rate_as_cost();
 		}, __("Prices"));
 	}
 
@@ -646,6 +646,8 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		frappe.call({
 			method: "set_rate_as_cost",
 			doc: me.frm.doc,
+			freeze: 1,
+			freeze_message: __("Setting rate as cost ..."),
 			callback: function() {
 				me.frm.refresh_fields();
 			}

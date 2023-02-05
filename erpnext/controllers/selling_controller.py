@@ -672,31 +672,33 @@ class SellingController(StockController):
 	@frappe.whitelist()
 	def set_rate_as_cost(self):
 		if not has_valuation_read_permission():
-			frappe.throw(_("You do not have permission to get cost as rate"))
+			frappe.throw(_("You do not have permission to set rate as cost"))
 
 		for item in self.items:
-			if item.item_code:
-				cost_rate = self.get_rate_as_cost(item)
-				item.rate = cost_rate
+			if item.get("item_code"):
+				item.rate = self.get_item_cost_rate(item)
 				item.discount_percentage = 0
 				item.margin_rate_or_amount = 0
 
 		self.calculate_taxes_and_totals()
 
-	def get_rate_as_cost(self, item):
-		qty = -1 * flt(item.qty)
+	def get_item_cost_rate(self, item):
+		transaction_qty = flt(item.qty)
+
 		if item.delivery_note and item.delivery_note_item:
-			sum_of_stock_value_diff = frappe.db.sql("""
-				SELECT SUM(stock_value_difference)
+			sle_totals = frappe.db.sql("""
+				SELECT SUM(stock_value_difference) as stock_value_difference, SUM(actual_qty) as actual_qty
 				FROM `tabStock Ledger Entry` 
 				WHERE voucher_type = 'Delivery Note' AND voucher_no = %s AND voucher_detail_no = %s
-			""", (item.delivery_note, item.delivery_note_item))
+			""", (item.delivery_note, item.delivery_note_item), as_dict=1)
 
-			sum_of_stock_value_diff = flt(sum_of_stock_value_diff[0][0]) if sum_of_stock_value_diff[0][0] else 0
-			if qty:
-				cost_rate = sum_of_stock_value_diff / qty
+			sle_totals = sle_totals[0] if sle_totals else None
+
+			if sle_totals:
+				qty = flt(sle_totals.actual_qty) or transaction_qty or 1
+				cost_rate = flt(sle_totals.stock_value_difference) / qty
 			else:
-				cost_rate = sum_of_stock_value_diff
+				cost_rate = 0
 
 		else:
 			from erpnext.stock.utils import get_incoming_rate
