@@ -49,12 +49,15 @@ def execute(filters=None):
 
 			if sle.voucher_type == "Stock Reconciliation" and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
-				stock_value = sle.stock_value
-
+				stock_value = sle.stock_value				
 			sle.update({"qty_after_transaction": actual_qty, "stock_value": stock_value})
-
+			
 		sle.update({"in_qty": max(sle.actual_qty, 0), "out_qty": min(sle.actual_qty, 0)})
-
+		if sle.voucher_type == "Delivery Note":
+			sle.update({"customer":frappe.db.get_value(sle.voucher_type,sle.voucher_no,"customer"),
+						"equipment":frappe.db.get_value("Delivery Note Item",{"parent":sle.voucher_no,"item_code":sle.item_code},"equipment")})
+			if not sle.equipment:
+				sle.update({"equipment":frappe.db.get_value("Delivery Note Item",{"parent":sle.voucher_no,"item_code":sle.item_code},"vehicle_number")})
 		if sle.serial_no:
 			update_available_serial_nos(available_serial_nos, sle)
 
@@ -227,6 +230,20 @@ def get_columns(filters):
 				"fieldname": "voucher_no",
 				"fieldtype": "Dynamic Link",
 				"options": "voucher_type",
+				"width": 100,
+			},
+			{
+				"label": _("Customer"),
+				"fieldname": "customer",
+				"fieldtype": "Link",
+				"options": "Customer",
+				"width": 100,
+			},
+			{
+				"label": _("Equipment"),
+				"fieldname": "equipment",
+				"fieldtype": "Link",
+				"options": "Equipment",
 				"width": 100,
 			},
 			# {
