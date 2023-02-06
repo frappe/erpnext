@@ -32,7 +32,9 @@ def get_columns(filters):
 		("Quantity") + ":Data:100",
 		("Rate Per Unit") + ":Data:100",
 		("Amount") + ":Currency:120",
-		("Mileage") + ":Data:100"
+		("Mileage") + ":Data:100",
+		("Cash Memo Number") + ":Data:120",
+		("POL Slip No.") + ":Data:120",
 	]
 
 def get_data(filters):
@@ -63,7 +65,9 @@ def get_data(filters):
 						p.qty,  
 						p.rate, 
 						ifnull(p.total_amount,0),
-						p.mileage
+						p.mileage,
+						p.memo_number,
+						p.pol_slip_no
 					from 
 						`tabPOL Receive` p 
 					where docstatus = 1 {} 
