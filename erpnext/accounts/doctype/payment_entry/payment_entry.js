@@ -658,7 +658,9 @@ frappe.ui.form.on('Payment Entry', {
 		frappe.prompt(fields, function(filters){
 			frappe.flags.allocate_payment_amount = true;
 			frm.events.validate_filters_data(frm, filters);
-			frm.doc.cost_center = filters.cost_center;
+			if (filters.cost_center){
+				frm.doc.cost_center = filters.cost_center;
+			}
 			frm.events.get_outstanding_documents(frm, filters);
 		}, __("Filters"), __("Get Outstanding Documents"));
 	},
@@ -692,7 +694,6 @@ frappe.ui.form.on('Payment Entry', {
 		if(!frm.doc.party) {
 			return;
 		}
-
 		frm.events.check_mandatory_to_fetch(frm);
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 
@@ -705,7 +706,6 @@ frappe.ui.form.on('Payment Entry', {
 			"party_account": frm.doc.payment_type=="Receive" ? frm.doc.paid_from : frm.doc.paid_to,
 			"cost_center": frm.doc.cost_center
 		}
-
 		for (let key in filters) {
 			args[key] = filters[key];
 		}

@@ -1250,12 +1250,10 @@ def get_outstanding_reference_documents(args):
 		)
 		common_filter.append(ple.voucher_type == args["voucher_type"])
 		common_filter.append(ple.voucher_no == args["voucher_no"])
-
 	# Add cost center condition
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
 		common_filter.append(ple.cost_center == args.get("cost_center"))
-
 	date_fields_dict = {
 		"posting_date": ["from_posting_date", "to_posting_date"],
 		"due_date": ["from_due_date", "to_due_date"],
@@ -1271,7 +1269,7 @@ def get_outstanding_reference_documents(args):
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
 		common_filter.append(ple.company == args.get("company"))
-
+	
 	outstanding_invoices = get_outstanding_invoices(
 		args.get("party_type"),
 		args.get("party"),
