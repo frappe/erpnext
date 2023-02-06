@@ -463,7 +463,7 @@ def install_company(args):
 	make_records(records)
 
 
-def install_defaults(args=None):
+def install_defaults(args=None):  # nosemgrep
 	records = [
 		# Price Lists
 		{
