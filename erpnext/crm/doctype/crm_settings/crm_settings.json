@@ -7,7 +7,7 @@
   "campaign_naming_by",
   "column_break_2",
   "close_opportunity_after_days",
-  "opportunity_contact_no_required",
+  "opportunity_contact_no_mandatory",
   "column_break_3",
   "default_opportunity_type_for_schedule",
   "column_break_5",
@@ -58,13 +58,13 @@
   },
   {
    "default": "0",
-   "fieldname": "opportunity_contact_no_required",
+   "fieldname": "opportunity_contact_no_mandatory",
    "fieldtype": "Check",
-   "label": "Contact No Required In Opportunity"
+   "label": "Contact No Mandatory In Opportunity"
   }
  ],
  "issingle": 1,
- "modified": "2023-02-06 13:44:28.739431",
+ "modified": "2023-02-06 14:36:11.814508",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",

@@ -148,9 +148,9 @@ class Opportunity(TransactionBase):
 			self.finance_type = None
 
 	def validate_contact_no(self):
-		contact_no_required = cint(frappe.db.get_value("CRM Settings", None, "opportunity_contact_no_required"))
-		if contact_no_required and not (self.contact_phone or self.contact_mobile):
-			frappe.throw(_("Contact No is required"))
+		contact_no_mandotory = cint(frappe.db.get_value("CRM Settings", None, "opportunity_contact_no_mandatory"))
+		if contact_no_mandotory and not (self.contact_phone or self.contact_mobile):
+			frappe.throw(_("Contact No is mandatory"))
 
 	def validate_follow_up(self):
 		self.next_follow_up = self.get_next_follow_up_date()
